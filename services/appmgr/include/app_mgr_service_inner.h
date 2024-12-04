@@ -1853,7 +1853,7 @@ private:
      * @return
      */
     void NotifyAppStatusByCallerUid(const std::string &bundleName, const int32_t tokenId, const int32_t userId,
-        const int32_t callerUid, const std::string &eventData);
+        const int32_t callerUid, const int32_t targetUid, const std::string &eventData);
     void UpdateAllProviderConfig(const std::shared_ptr<AppRunningRecord> &appRecord);
     void SendHiSysEvent(int32_t innerEventId, std::shared_ptr<AppRunningRecord> appRecord);
     int FinishUserTestLocked(
