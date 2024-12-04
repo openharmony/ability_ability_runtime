@@ -54,6 +54,8 @@ ErrCode AbilityJumpInterceptor::DoProcess(AbilityInterceptorParam param)
         StartAbilityUtils::startAbilityInfo->abilityInfo.name == param.want.GetElement().GetAbilityName()) {
         targetAbilityInfo = StartAbilityUtils::startAbilityInfo->abilityInfo;
     } else {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "abilityName: %{public}s, userId: %{public}d",
+            param.want.GetElement().GetAbilityName().c_str(), param.userId);
         IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->QueryAbilityInfo(param.want,
             AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, param.userId, targetAbilityInfo));
     }
