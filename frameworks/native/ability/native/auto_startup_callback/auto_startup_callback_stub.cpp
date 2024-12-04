@@ -61,7 +61,7 @@ int32_t AutoStartupCallBackStub::OnAutoStartupOnInner(MessageParcel &data, Messa
 {
     sptr<AutoStartupInfo> info = data.ReadParcelable<AutoStartupInfo>();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Read info failed");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null info");
         return ERR_INVALID_VALUE;
     }
 
@@ -84,7 +84,7 @@ int32_t AutoStartupCallBackStub::OnAutoStartupOffInner(MessageParcel &data, Mess
 {
     sptr<AutoStartupInfo> info = data.ReadParcelable<AutoStartupInfo>();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Read info failed");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null info");
         return ERR_INVALID_VALUE;
     }
 

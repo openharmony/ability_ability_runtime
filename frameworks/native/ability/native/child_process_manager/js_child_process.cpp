@@ -79,7 +79,7 @@ void JsChildProcess::OnStart(std::shared_ptr<AppExecFwk::ChildProcessArgs> args)
 {
     TAG_LOGI(AAFwkTag::PROCESSMGR, "JsChildProcess OnStart called");
     if (!args) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "args is nullptr");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null args");
         return;
     }
     ChildProcess::OnStart(args);

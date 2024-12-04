@@ -36,12 +36,12 @@ bool NativeArgsChildProcess::Init(const std::shared_ptr<ChildProcessStartInfo> &
 {
     TAG_LOGD(AAFwkTag::PROCESSMGR, "NativeArgsChildProcess init called.");
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "info is nullptr.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null info");
         return false;
     }
 
     if (!ChildProcess::Init(info)) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Base class init failed.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "base class init failed");
         return false;
     }
 
@@ -51,7 +51,7 @@ bool NativeArgsChildProcess::Init(const std::shared_ptr<ChildProcessStartInfo> &
 void NativeArgsChildProcess::OnStart(std::shared_ptr<AppExecFwk::ChildProcessArgs> args)
 {
     if (args == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "args is nullptr.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null args");
         return;
     }
     ChildProcess::OnStart(args);
@@ -60,7 +60,7 @@ void NativeArgsChildProcess::OnStart(std::shared_ptr<AppExecFwk::ChildProcessArg
     auto nativeArgs = ParseToNativeArgs(args->entryParams, args->fds);
 
     if (!entryFunc_) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "entryFunc nullptr.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null entryFunc");
         return;
     }
     entryFunc_(nativeArgs);
@@ -74,13 +74,13 @@ NativeChildProcess_Args NativeArgsChildProcess::ParseToNativeArgs(const std::str
     args.fdList.head = nullptr;
     args.entryParams = new(std::nothrow) char[entryParams.size() + 1];
     if (!args.entryParams) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "entryParams nullptr.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null entryParams");
         return args;
     }
     if (strcpy_s(args.entryParams, entryParams.size() + 1, entryParams.c_str()) != ERR_OK) {
         delete[] args.entryParams;
         args.entryParams = nullptr;
-        TAG_LOGE(AAFwkTag::APPKIT, "strcpy_s failed.");
+        TAG_LOGE(AAFwkTag::APPKIT, "strcpy_s failed");
         return args;
     }
     NativeChildProcess_Fd *tail = nullptr;
@@ -90,7 +90,7 @@ NativeChildProcess_Args NativeArgsChildProcess::ParseToNativeArgs(const std::str
 
         NativeChildProcess_Fd *node = new(std::nothrow) NativeChildProcess_Fd;
         if (!node) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "fd node nullptr.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "null node");
             return args;
         }
         node->next = nullptr;
@@ -100,7 +100,7 @@ NativeChildProcess_Args NativeArgsChildProcess::ParseToNativeArgs(const std::str
             node->fdName = nullptr;
             delete node;
             node = nullptr;
-            TAG_LOGE(AAFwkTag::APPKIT, "strcpy_s failed.");
+            TAG_LOGE(AAFwkTag::APPKIT, "strcpy_s failed");
             return args;
         }
         node->fd = fdValue;
@@ -118,18 +118,18 @@ NativeChildProcess_Args NativeArgsChildProcess::ParseToNativeArgs(const std::str
 bool NativeArgsChildProcess::LoadNativeLib(const std::shared_ptr<ChildProcessStartInfo> &info)
 {
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "info is nullptr.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null info");
         return false;
     }
     TAG_LOGI(AAFwkTag::PROCESSMGR, "LoadNativeLib, moduleName:%{public}s, srcEntry:%{public}s, entryFunc:%{public}s",
         info->moduleName.c_str(), info->srcEntry.c_str(), info->entryFunc.c_str());
     if (nativeLibHandle_ != nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Native lib already loaded.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null nativeLibHandle_");
         return false;
     }
 
     if (info->moduleName.empty()) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "ModuleName is empty");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "moduleName empty");
         return false;
     }
 
@@ -151,7 +151,7 @@ bool NativeArgsChildProcess::LoadNativeLib(const std::shared_ptr<ChildProcessSta
 
     auto entryFunc = reinterpret_cast<NativeArgsChildProcess_EntryFunc>(dlsym(libHandle, info->entryFunc.c_str()));
     if (entryFunc == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Get entryFunc address failed, err %{public}s", dlerror());
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null entryFunc, err %{public}s", dlerror());
         dlclose(libHandle);
         return false;
     }

@@ -36,7 +36,7 @@ void RegisterCJAbilityFuncs(void (*registerFunc)(CJAbilityFuncs*))
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (g_cjAbilityFuncs != nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "repeated registration for cj functions");
+        TAG_LOGE(AAFwkTag::UIABILITY, "repeated registration");
         return;
     }
 
@@ -60,8 +60,7 @@ std::shared_ptr<CJAbilityObject> CJAbilityObject::LoadModule(const std::string& 
     }
     auto id = g_cjAbilityFuncs->cjAbilityCreate(name.c_str());
     if (id == 0) {
-        TAG_LOGE(AAFwkTag::UIABILITY,
-            "failed to invoke , ability: %{public}s is not registered", name.c_str());
+        TAG_LOGE(AAFwkTag::UIABILITY, "not registered %{public}s", name.c_str());
         return nullptr;
     }
     return std::make_shared<CJAbilityObject>(id);
