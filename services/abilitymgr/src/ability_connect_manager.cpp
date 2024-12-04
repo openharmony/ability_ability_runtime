@@ -665,32 +665,13 @@ void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &
     if (targetService->GetConnectedListSize() >= 1) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "connected");
         targetService->RemoveSignatureInfo();
-        if (taskHandler_ == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "taskHandler null");
-            return;
-        }
-        auto task = [weak = weak_from_this(), connectRecord]() {
-            auto manager = weak.lock();
-            if (manager == nullptr) {
-                TAG_LOGE(AAFwkTag::APPKIT, "manager null");
-                return;
-            }
-            manager->CompleteConnectTask(connectRecord);
-        };
-        taskHandler_->SubmitTask(task, TaskQoS::USER_INTERACTIVE);
+        CHECK_POINTER(connectRecord);
+        connectRecord->CompleteConnect();
     } else if (targetService->GetConnectingListSize() <= 1) {
         ConnectAbility(targetService);
     } else {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "connecting");
     }
-}
-
-void AbilityConnectManager::CompleteConnectTask(std::shared_ptr<ConnectionRecord> connectRecord)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    CHECK_POINTER(connectRecord);
-    std::lock_guard guard(serialMutex_);
-    connectRecord->CompleteConnect(ERR_OK);
 }
 
 int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection> &connect)
