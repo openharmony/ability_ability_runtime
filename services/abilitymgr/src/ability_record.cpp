@@ -106,6 +106,7 @@ const int HALF_TIMEOUT = 2;
 const int MAX_URI_COUNT = 500;
 const int RESTART_SCENEBOARD_DELAY = 500;
 constexpr int32_t DMS_UID = 5522;
+constexpr int32_t SCHEDULER_DIED_TIMEOUT = 60000;
 
 auto g_addLifecycleEventTask = [](sptr<Token> token, std::string &methodName) {
     CHECK_POINTER_LOG(token, "token is nullptr");
@@ -2559,7 +2560,10 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
     auto task = [ability = shared_from_this()]() {
         DelayedSingleton<AbilityManagerService>::GetInstance()->OnAbilityDied(ability);
     };
-    handler->SubmitTask(task);
+    handler->SubmitTask(task, AAFwk::TaskAttribute{
+        .taskName_ = "OnSchedulerDied",
+        .timeoutMillis_ = SCHEDULER_DIED_TIMEOUT
+    });
     auto uriTask = [want = GetWant(), ability = shared_from_this()]() {
         ability->SaveResultToCallers(-1, &want);
         ability->SendResultToCallers(true);
