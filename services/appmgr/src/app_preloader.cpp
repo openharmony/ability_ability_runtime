@@ -98,6 +98,7 @@ bool AppPreloader::GetLaunchWant(const std::string &bundleName, int32_t userId, 
         return false;
     }
 
+    TAG_LOGD(AAFwkTag::APPMGR, "userId: %{public}d, bundleName: %{public}s", userId, bundleName.c_str());
     auto errCode = IN_PROCESS_CALL(bundleMgrHelper->GetLaunchWantForBundle(bundleName, launchWant, userId));
     if (errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "errCode: %{public}d", errCode);
@@ -115,6 +116,7 @@ bool AppPreloader::GetLaunchAbilityInfo(const AAFwk::Want &want, int32_t userId,
         return false;
     }
 
+    TAG_LOGD(AAFwkTag::APPMGR, "userId: %{public}d", userId);
     auto abilityInfoFlag = AbilityRuntime::StartupUtil::BuildAbilityInfoFlag();
     if (!IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(want, abilityInfoFlag, userId, abilityInfo))) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetLaunchAbilityInfo failed");
@@ -134,6 +136,7 @@ bool AppPreloader::GetBundleAndHapInfo(const std::string &bundleName, int32_t us
         return false;
     }
 
+    TAG_LOGD(AAFwkTag::APPMGR, "userId: %{public}d, bundleName: %{public}s", userId, bundleName.c_str());
     auto flags = BundleFlag::GET_BUNDLE_DEFAULT | BundleFlag::GET_BUNDLE_WITH_REQUESTED_PERMISSION;
     if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(bundleName,
         static_cast<BundleFlag>(flags),
