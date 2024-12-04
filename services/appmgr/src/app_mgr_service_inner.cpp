@@ -274,6 +274,8 @@ constexpr int32_t MAX_SPECIFIED_PROCESS_NAME_LENGTH = 255;
 
 constexpr int32_t NWEB_PRELOAD_DELAY = 3000;
 
+constexpr const char* APP_INSTANCE_KEY_0 = "app_instance_0";
+
 int32_t GetUserIdByUid(int32_t uid)
 {
     return uid / BASE_USER_RANGE;
@@ -7144,8 +7146,9 @@ void AppMgrServiceInner::ClearNonResidentKeepAliveAppRunningData(const std::shar
     }
 
     auto userId = GetUserIdByUid(appRecord->GetUid());
+    bool isDefaultInstance = (appRecord->GetInstanceKey() == APP_INSTANCE_KEY_0);
     if (!appRecord->GetRestartAppFlag() && appRecord->IsKeepAliveDkv() &&
-        (userId == 0 || userId == currentUserId_) &&
+        isDefaultInstance && (userId == 0 || userId == currentUserId_) &&
         appRecord->GetBundleName() != SCENE_BOARD_BUNDLE_NAME) {
         if (ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(appRecord->GetBundleName())) {
             TAG_LOGI(AAFwkTag::APPMGR, "is killed for upgrade web");
