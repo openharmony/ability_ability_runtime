@@ -3747,21 +3747,16 @@ int AbilityManagerService::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionI
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "close session: %{public}d, resultCode: %{public}d, isClearSession: %{public}d",
         sessionInfo->persistentId, sessionInfo->resultCode, sessionInfo->isClearSession);
+    if (sessionInfo->isClearSession) {
+        (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+            DeleteAbilityRecoverInfoBySessionId(sessionInfo->persistentId);
+    }
     auto abilityRecord = uiAbilityManager->GetUIAbilityRecordBySessionInfo(sessionInfo);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     if (!IsAbilityControllerForeground(abilityRecord->GetAbilityInfo().bundleName)) {
         return ERR_WOULD_BLOCK;
     }
 
-    if (sessionInfo->isClearSession) {
-        const auto &abilityInfo = abilityRecord->GetAbilityInfo();
-        std::string abilityName = abilityInfo.name;
-        if (abilityInfo.launchMode == AppExecFwk::LaunchMode::STANDARD) {
-            abilityName += std::to_string(sessionInfo->persistentId);
-        }
-        (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
-            DeleteAbilityRecoverInfo(abilityInfo.applicationInfo.accessTokenId, abilityInfo.moduleName, abilityName);
-    }
     EventInfo eventInfo;
     eventInfo.bundleName = abilityRecord->GetAbilityInfo().bundleName;
     eventInfo.abilityName = abilityRecord->GetAbilityInfo().name;
