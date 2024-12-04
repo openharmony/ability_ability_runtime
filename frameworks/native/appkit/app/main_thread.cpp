@@ -558,13 +558,13 @@ void MainThread::ScheduleMemoryLevel(const int level)
 void MainThread::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo)
 {
     struct mallinfo mi = mallinfo();
-    int usmblks = mi.usmblks; // 当前从分配器中分配的总的堆内存大小
-    int uordblks = mi.uordblks; // 当前已释放给分配器，分配缓存了未释放给系统的内存大小
-    int fordblks = mi.fordblks; // 当前未释放的大小
-    int hblkhd = mi.hblkhd; // 堆内存的总共占用大小
+    uint64_t usmblks = mi.usmblks; // 当前从分配器中分配的总的堆内存大小
+    uint64_t uordblks = mi.uordblks; // 当前已释放给分配器，分配缓存了未释放给系统的内存大小
+    uint64_t fordblks = mi.fordblks; // 当前未释放的大小
+    uint64_t hblkhd = mi.hblkhd; // 堆内存的总共占用大小
     TAG_LOGD(AAFwkTag::APPKIT, "The pid of the app we want to dump memory allocation information is: %{public}i", pid);
-    TAG_LOGD(AAFwkTag::APPKIT, "usmblks: %{public}i, uordblks: %{public}i, fordblks: %{public}i, hblkhd: %{public}i",
-        usmblks, uordblks, fordblks, hblkhd);
+    TAG_LOGD(AAFwkTag::APPKIT, "usmblks: %{public}" PRIu64 ", uordblks: %{public}" PRIu64 ", "
+        "fordblks: %{public}" PRIu64 ", hblkhd: %{public}" PRIu64 "", usmblks, uordblks, fordblks, hblkhd);
     mallocInfo.usmblks = usmblks;
     mallocInfo.uordblks = uordblks;
     mallocInfo.fordblks = fordblks;
