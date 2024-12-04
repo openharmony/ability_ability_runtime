@@ -25,14 +25,14 @@ void DialogUIExtensionCallback::OnRelease()
     TAG_LOGD(AAFwkTag::DIALOG, "Call");
     auto abilityCallback = abilityCallback_.lock();
     if (abilityCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback null");
+        TAG_LOGE(AAFwkTag::DIALOG, "null abilityCallback");
         return;
     }
 #ifdef SUPPORT_SCREEN
     abilityCallback->EraseUIExtension(sessionId_);
 
     if (uiContent_ == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "uiContent_ null");
+        TAG_LOGE(AAFwkTag::DIALOG, "null uiContent_");
         return;
     }
     uiContent_->CloseModalUIExtension(sessionId_);
@@ -44,13 +44,13 @@ void DialogUIExtensionCallback::OnError()
     TAG_LOGD(AAFwkTag::DIALOG, "Call");
     auto abilityCallback = abilityCallback_.lock();
     if (abilityCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback null");
+        TAG_LOGE(AAFwkTag::DIALOG, "null abilityCallback");
         return;
     }
 #ifdef SUPPORT_SCREEN
     abilityCallback->EraseUIExtension(sessionId_);
     if (uiContent_ == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "uiContent_ null");
+        TAG_LOGE(AAFwkTag::DIALOG, "null uiContent_");
         return;
     }
     uiContent_->CloseModalUIExtension(sessionId_);
@@ -62,7 +62,7 @@ void DialogUIExtensionCallback::OnDestroy()
     TAG_LOGD(AAFwkTag::DIALOG, "Call");
     auto abilityCallback = abilityCallback_.lock();
     if (abilityCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback null");
+        TAG_LOGE(AAFwkTag::DIALOG, "null abilityCallback");
         return;
     }
 #ifdef SUPPORT_SCREEN

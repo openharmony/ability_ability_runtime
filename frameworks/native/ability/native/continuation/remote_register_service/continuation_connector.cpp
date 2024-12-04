@@ -63,13 +63,12 @@ void ContinuationConnector::OnAbilityConnectDone(
 {
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     if (remoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "remote is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remote");
         return;
     }
     remoteRegisterService_ = iface_cast<RemoteRegisterServiceProxy>(remoteObject);
     if (remoteRegisterService_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "remoteRegisterService_ is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteRegisterService_");
         return;
     }
     isConnected_.store(true);
@@ -107,12 +106,11 @@ void ContinuationConnector::BindRemoteRegisterAbility(const std::shared_ptr<AppE
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     std::shared_ptr tmpcontext = context_.lock();
     if (tmpcontext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "tmpcontext is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null tmpcontext");
         return;
     }
     if (request == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "request is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null request");
         return;
     }
     if (IsAbilityConnected()) {
@@ -136,7 +134,7 @@ void ContinuationConnector::UnbindRemoteRegisterAbility()
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     std::shared_ptr tmpcontext = context_.lock();
     if (tmpcontext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "tmpcontext is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null tmpcontext");
         return;
     }
 
@@ -166,7 +164,7 @@ bool ContinuationConnector::Unregister(int token)
 {
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     if (remoteRegisterService_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "remoteRegisterService_ is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteRegisterService_");
         return false;
     }
 
@@ -186,8 +184,7 @@ bool ContinuationConnector::UpdateConnectStatus(int token, const std::string &de
 {
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     if (remoteRegisterService_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "remoteRegisterService_ is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteRegisterService_");
         return false;
     }
 
@@ -205,8 +202,7 @@ bool ContinuationConnector::ShowDeviceList(int token, const AppExecFwk::ExtraPar
 {
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     if (remoteRegisterService_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "remoteRegisterService_ is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteRegisterService_");
         return false;
     }
     return remoteRegisterService_->ShowDeviceList(token, parameter);
@@ -228,16 +224,16 @@ int ContinuationConnector::Register(std::weak_ptr<Context> &context, std::string
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     std::shared_ptr pcontext = context.lock();
     if (pcontext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "pcontext is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null pcontext");
         return -1;
     }
     if (remoteRegisterService_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "remoteRegisterService_ is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteRegisterService_");
         return -1;
     }
     sptr<IRemoteObject> token = pcontext->GetToken();
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "token is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null token");
         return -1;
     }
 
@@ -254,8 +250,7 @@ void ContinuationConnector::BindRemoteRegisterAbility()
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     std::shared_ptr tmpcontext = context_.lock();
     if (tmpcontext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "tmpcontext is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null tmpcontext");
         return;
     }
     Want want;

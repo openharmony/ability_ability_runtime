@@ -66,7 +66,7 @@ void AbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& e
     mutex_.lock();
     SetConnectionState(CONNECTION_STATE_DISCONNECTED);
     if (abilityConnectCallbackList_.empty()) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "empty abilityConnectCallback");
+        TAG_LOGE(AAFwkTag::CONNECTION, "empty callbackList");
         mutex_.unlock();
         return;
     }

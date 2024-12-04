@@ -56,7 +56,7 @@ int64_t InsertUIServiceAbilityConnection(sptr<JSUIServiceExtAbilityConnection> c
 {
     std::lock_guard<std::recursive_mutex> lock(g_uiServiceExtensionConnectsLock_);
     if (connection == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "connection null");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null connection");
         return -1;
     }
     int64_t connectId = g_uiServiceExtensionSerialNumber;
@@ -219,7 +219,7 @@ int32_t JSUIServiceExtAbilityConnection::OnSendData(OHOS::AAFwk::WantParams &dat
         ([connection, wantParams = data](napi_env env, NapiAsyncTask &task, int32_t status) {
             sptr<JSUIServiceExtAbilityConnection> connectionSptr = connection.promote();
             if (!connectionSptr) {
-                TAG_LOGE(AAFwkTag::UISERVC_EXT, "connectionSptr nullptr");
+                TAG_LOGE(AAFwkTag::UISERVC_EXT, "null connectionSptr");
                 return;
             }
             connectionSptr->HandleOnSendData(wantParams);
@@ -253,12 +253,12 @@ bool JSUIServiceExtAbilityConnection::IsJsCallbackObjectEquals(napi_env env,
     }
     auto object = callback->GetNapiValue();
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "Failed to get object.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null object");
         return false;
     }
     bool result = false;
     if (napi_strict_equals(env, object, value, &result) != napi_ok) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "Object does not match value.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "object does not match value");
         return false;
     }
     return result;

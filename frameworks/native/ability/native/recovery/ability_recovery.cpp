@@ -109,14 +109,14 @@ bool AbilityRecovery::SaveAbilityState()
     auto ability = ability_.lock();
     auto abilityInfo = abilityInfo_.lock();
     if (ability == nullptr || abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null ability");
         return false;
     }
 
     AAFwk::WantParams wantParams;
     int32_t status = ability->OnSaveState(AppExecFwk::StateType::APP_RECOVERY, wantParams);
     if (!(status == AppExecFwk::OnSaveResult::ALL_AGREE || status == AppExecFwk::OnSaveResult::RECOVERY_AGREE)) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "Failed save params");
+        TAG_LOGE(AAFwkTag::RECOVERY, "save params failed");
         return false;
     }
 
@@ -126,7 +126,7 @@ bool AbilityRecovery::SaveAbilityState()
     if (!pageStack.empty()) {
         wantParams.SetParam("pageStack", AAFwk::String::Box(pageStack));
     } else {
-        TAG_LOGE(AAFwkTag::RECOVERY, "Failed to get page stack");
+        TAG_LOGE(AAFwkTag::RECOVERY, "get page stack failed");
     }
     TAG_LOGD(AAFwkTag::RECOVERY, "pageStack size: %{public}zu", pageStack.size());
 #endif
@@ -143,23 +143,23 @@ bool AbilityRecovery::SerializeDataToFile(int32_t savedStateId, WantParams& para
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string file = GetSaveAppCachePath(savedStateId);
     if (file.empty()) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "failed to persisted file path");
+        TAG_LOGE(AAFwkTag::RECOVERY, "persisted file path failed");
         return false;
     }
     Parcel parcel;
     if (!params.Marshalling(parcel)) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "failed to Marshalling want param");
+        TAG_LOGE(AAFwkTag::RECOVERY, "Marshalling want param failed");
         return false;
     }
     int fd = open(file.c_str(), O_RDWR | O_CREAT, (mode_t)0600);
     if (fd <= 0) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "failed to open %{public}s", file.c_str());
+        TAG_LOGE(AAFwkTag::RECOVERY, "open failed %{public}s", file.c_str());
         return false;
     }
     size_t sz = parcel.GetDataSize();
     uintptr_t buf = parcel.GetData();
     if (sz == 0 || buf == 0) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "failed to get parcel data");
+        TAG_LOGE(AAFwkTag::RECOVERY, "get parcel data failed");
         close(fd);
         return false;
     }
@@ -172,7 +172,7 @@ bool AbilityRecovery::SerializeDataToFile(int32_t savedStateId, WantParams& para
 
     ssize_t nwrite = write(fd, reinterpret_cast<uint8_t*>(buf), sz);
     if (nwrite <= 0) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "failed to persist parcel data %{public}d", errno);
+        TAG_LOGE(AAFwkTag::RECOVERY, "persist parcel data failed %{public}d", errno);
     }
     TAG_LOGD(AAFwkTag::RECOVERY, "file size: %{public}zu", sz);
     close(fd);
@@ -184,7 +184,7 @@ bool AbilityRecovery::ReadSerializeDataFromFile(int32_t savedStateId, WantParams
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string file = GetSaveAppCachePath(savedStateId);
     if (file.empty()) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "failed to persisted file path");
+        TAG_LOGE(AAFwkTag::RECOVERY, "persisted file path failed");
         return false;
     }
 
@@ -250,7 +250,7 @@ bool AbilityRecovery::ScheduleSaveAbilityState(StateReason reason)
     }
 
     if (missionId_ <= 0) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "not save ability missionId_ is invalid");
+        TAG_LOGE(AAFwkTag::RECOVERY, "invalid missionId_");
         return false;
     }
 
@@ -263,13 +263,13 @@ bool AbilityRecovery::ScheduleSaveAbilityState(StateReason reason)
     if (ret) {
         auto token = token_.promote();
         if (token == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "token is nullptr");
+            TAG_LOGE(AAFwkTag::RECOVERY, "null token");
             return false;
         }
 
         std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
         if (abilityMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "abilityMgr client is not exist");
+            TAG_LOGE(AAFwkTag::RECOVERY, "null abilityMgr");
             return false;
         }
         abilityMgr->EnableRecoverAbility(token);
@@ -291,7 +291,7 @@ bool AbilityRecovery::ScheduleRecoverAbility(StateReason reason, const Want *wan
 
     std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "abilityMgr client is not exist");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null abilityMgr");
         return false;
     }
 
@@ -307,11 +307,11 @@ bool AbilityRecovery::PersistState()
 {
     auto abilityInfo = abilityInfo_.lock();
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null abilityInfo");
         return false;
     }
     if (missionId_ <= 0) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "missionId is Invalid");
+        TAG_LOGE(AAFwkTag::RECOVERY, "invalid missionId");
         return false;
     }
     if (!params_.IsEmpty()) {
@@ -339,7 +339,7 @@ bool AbilityRecovery::LoadSavedState(StateReason reason)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abilityInfo = abilityInfo_.lock();
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "abilityInfo is nullptr");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null abilityInfo");
         return false;
     }
 
@@ -347,14 +347,14 @@ bool AbilityRecovery::LoadSavedState(StateReason reason)
         return hasLoaded_;
     }
     if (missionId_ <= 0) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "missionId_ is invalid");
+        TAG_LOGE(AAFwkTag::RECOVERY, "invalid missionId_");
         return false;
     }
     hasTryLoad_ = true;
 
     TAG_LOGD(AAFwkTag::RECOVERY, "missionId_:%{public}d", missionId_);
     if (!ReadSerializeDataFromFile(missionId_, params_)) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "failed to find record for id:%{public}d", missionId_);
+        TAG_LOGE(AAFwkTag::RECOVERY, "find record for id:%{public}d failed", missionId_);
         hasLoaded_ = false;
         return hasLoaded_;
     }
@@ -397,12 +397,12 @@ std::string AbilityRecovery::GetSavedPageStack(StateReason reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!LoadSavedState(reason)) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "no saved state ");
+        TAG_LOGE(AAFwkTag::RECOVERY, "no saved state");
         return "";
     }
 
     if (pageStack_.empty()) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "pageStack_ is empty");
+        TAG_LOGE(AAFwkTag::RECOVERY, "empty pageStack_");
     }
     return pageStack_;
 }
