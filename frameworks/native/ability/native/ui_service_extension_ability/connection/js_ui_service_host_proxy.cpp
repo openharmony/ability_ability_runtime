@@ -38,7 +38,7 @@ napi_ref JsUIServiceHostProxy::CreateJsUIServiceHostProxy(napi_env env, const sp
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "napi_create_object, object is null");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null object");
         return nullptr;
     }
 
@@ -66,7 +66,7 @@ JsUIServiceHostProxy::JsUIServiceHostProxy(const sptr<IRemoteObject>& impl)
         proxy_ = iface_cast<OHOS::AAFwk::IUIServiceHost>(impl);
     }
     if (proxy_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "iface_cast return null");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null proxy");
     }
 }
 
@@ -80,7 +80,7 @@ bool JsUIServiceHostProxy::CheckCallerIsSystemApp()
 {
     auto selfToken = IPCSkeleton::GetSelfTokenID();
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "Current app is not system app, not allow.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "not allow");
         return false;
     }
     return true;
@@ -99,7 +99,7 @@ napi_value JsUIServiceHostProxy::OnSendData(napi_env env, NapiCallbackInfo& info
         return CreateJsUndefined(env);
     }
     if (proxy_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "proxy_ is null");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null proxy_");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }

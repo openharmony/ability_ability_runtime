@@ -34,7 +34,7 @@ StartupTaskManager::~StartupTaskManager()
 int32_t StartupTaskManager::AddTask(const std::shared_ptr<StartupTask> &task)
 {
     if (task == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "Invalid task");
+        TAG_LOGE(AAFwkTag::STARTUP, "null task");
         return ERR_STARTUP_INVALID_VALUE;
     }
     std::string name = task->GetName();
@@ -61,7 +61,7 @@ int32_t StartupTaskManager::Prepare()
         return result;
     }
     if (startupSortResult == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "startupSortResult null");
+        TAG_LOGE(AAFwkTag::STARTUP, "null startupSortResult");
         CallListenerOnCompleted(ERR_STARTUP_INTERNAL_ERROR);
         return ERR_STARTUP_INTERNAL_ERROR;
     }
@@ -77,7 +77,7 @@ int32_t StartupTaskManager::Run(const std::shared_ptr<OnCompletedCallback> &main
 {
     TAG_LOGD(AAFwkTag::STARTUP, "id: %{public}u, task number: %{public}zu", startupTaskManagerId_, tasks_.size());
     if (dispatcher_ == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "dispatcher null");
+        TAG_LOGE(AAFwkTag::STARTUP, "null dispatcher");
         CallListenerOnCompleted(ERR_STARTUP_INTERNAL_ERROR);
         return ERR_STARTUP_INTERNAL_ERROR;
     }
@@ -86,12 +86,12 @@ int32_t StartupTaskManager::Run(const std::shared_ptr<OnCompletedCallback> &main
         [weak = weak_from_this()](const std::shared_ptr<StartupTaskResult> &result) {
             auto startupTaskManager = weak.lock();
             if (startupTaskManager == nullptr) {
-                TAG_LOGE(AAFwkTag::STARTUP, "startupTaskManager null");
+                TAG_LOGE(AAFwkTag::STARTUP, "null startupTaskManager");
                 return;
             }
             startupTaskManager->CancelAsyncTimeoutTimer();
             if (result == nullptr) {
-                TAG_LOGE(AAFwkTag::STARTUP, "result null");
+                TAG_LOGE(AAFwkTag::STARTUP, "null result");
                 return;
             }
             startupTaskManager->CallListenerOnCompleted(result->GetResultCode(), result->GetResultMessage());
@@ -111,8 +111,7 @@ int32_t StartupTaskManager::Run(const std::shared_ptr<OnCompletedCallback> &main
 void StartupTaskManager::CallListenerOnCompleted(int32_t result, const std::string &resultMessage)
 {
     if (config_ == nullptr) {
-        TAG_LOGI(AAFwkTag::STARTUP,
-            "id: %{public}u, config is null, result: %{public}d", startupTaskManagerId_, result);
+        TAG_LOGI(AAFwkTag::STARTUP, "id: %{public}u, null config, result: %{public}d", startupTaskManagerId_, result);
         return;
     }
     TAG_LOGD(AAFwkTag::STARTUP, "id: %{public}u, complete, result: %{public}d", startupTaskManagerId_, result);
@@ -130,7 +129,7 @@ void StartupTaskManager::AddAsyncTimeoutTimer()
 {
     mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "get mainHandler failed");
+        TAG_LOGE(AAFwkTag::STARTUP, "null mainHandler");
         return;
     }
     int32_t timeoutMs = StartupConfig::DEFAULT_AWAIT_TIMEOUT_MS;
@@ -141,7 +140,7 @@ void StartupTaskManager::AddAsyncTimeoutTimer()
     auto callback = [weak = weak_from_this()]() {
         auto startupTaskManager = weak.lock();
         if (startupTaskManager == nullptr) {
-            TAG_LOGE(AAFwkTag::STARTUP, "startupTaskManager null");
+            TAG_LOGE(AAFwkTag::STARTUP, "null startupTaskManager");
             return;
         }
         startupTaskManager->OnTimeout();
@@ -152,7 +151,7 @@ void StartupTaskManager::AddAsyncTimeoutTimer()
 void StartupTaskManager::CancelAsyncTimeoutTimer()
 {
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "get mainHandler failed");
+        TAG_LOGE(AAFwkTag::STARTUP, "null mainHandler");
         return;
     }
     TAG_LOGD(AAFwkTag::STARTUP, "id: %{public}d, cancel timeout timer", startupTaskManagerId_);

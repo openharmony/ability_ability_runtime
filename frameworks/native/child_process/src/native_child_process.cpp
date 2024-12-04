@@ -61,7 +61,7 @@ void OnNativeChildProcessStartedWapper(int errCode, OHIPCRemoteProxy *ipcProxy)
         g_Callback(CvtChildProcessManagerErrCode(static_cast<ChildProcessManagerErrorCode>(errCode)), ipcProxy);
         g_Callback = nullptr;
     } else {
-        TAG_LOGW(AAFwkTag::PROCESSMGR, "Remote call twice?");
+        TAG_LOGW(AAFwkTag::PROCESSMGR, "remote call twice");
     }
 
     g_CallbackStub.clear();
@@ -72,7 +72,7 @@ void OnNativeChildProcessStartedWapper(int errCode, OHIPCRemoteProxy *ipcProxy)
 int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNativeChildProcessStarted onProcessStarted)
 {
     if (libName == nullptr || *libName == '\0' || onProcessStarted == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Invalid libname or callback");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null libname or callback");
         return NCP_ERR_INVALID_PARAM;
     }
 
@@ -90,7 +90,7 @@ int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNative
 
     sptr<IRemoteObject> callbackStub(new (std::nothrow) NativeChildCallback(OnNativeChildProcessStartedWapper));
     if (!callbackStub) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Alloc callbackStub obj faild");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null callbackStub");
         return NCP_ERR_INTERNAL;
     }
 

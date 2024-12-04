@@ -142,8 +142,7 @@ void Watchdog::Timer()
     }
     if (!needReport_) {
         watchdogReportCount_++;
-        TAG_LOGE(AAFwkTag::APPDFR, "timeout, wait to recover, wait count: %{public}d",
-            watchdogReportCount_.load());
+        TAG_LOGE(AAFwkTag::APPDFR, "wait count: %{public}d", watchdogReportCount_.load());
         if (watchdogReportCount_.load() >= WATCHDOG_REPORT_COUNT_MAX) {
 #ifndef APP_NO_RESPONSE_DIALOG
             AppExecFwk::AppfreezeInner::GetInstance()->AppfreezeHandleOverReportCount(true);

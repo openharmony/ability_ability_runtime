@@ -43,7 +43,7 @@ std::shared_ptr<AppExecFwk::HapModuleInfo> CJAbilityStageContext::GetHapModuleIn
 {
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "context is null, getHapModuleInfo failed. ");
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return nullptr;
     }
     return context->GetHapModuleInfo();

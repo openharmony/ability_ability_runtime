@@ -31,7 +31,7 @@ AbilityStageContext::AbilityStageContext()
 void AbilityStageContext::SetParentContext(const std::shared_ptr<Context> &context)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return;
     }
 
@@ -41,7 +41,7 @@ void AbilityStageContext::SetParentContext(const std::shared_ptr<Context> &conte
 void AbilityStageContext::InitHapModuleInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return;
     }
 
@@ -51,7 +51,7 @@ void AbilityStageContext::InitHapModuleInfo(const std::shared_ptr<AppExecFwk::Ab
 void AbilityStageContext::InitHapModuleInfo(const AppExecFwk::HapModuleInfo &hapModuleInfo)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return;
     }
 
@@ -61,7 +61,7 @@ void AbilityStageContext::InitHapModuleInfo(const AppExecFwk::HapModuleInfo &hap
 std::shared_ptr<AppExecFwk::HapModuleInfo> AbilityStageContext::GetHapModuleInfo() const
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return nullptr;
     }
 
@@ -71,7 +71,7 @@ std::shared_ptr<AppExecFwk::HapModuleInfo> AbilityStageContext::GetHapModuleInfo
 void AbilityStageContext::SetConfiguration(const std::shared_ptr<AppExecFwk::Configuration> &config)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return;
     }
 
@@ -81,7 +81,7 @@ void AbilityStageContext::SetConfiguration(const std::shared_ptr<AppExecFwk::Con
 std::shared_ptr<AppExecFwk::Configuration> AbilityStageContext::GetConfiguration() const
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return nullptr;
     }
 
@@ -91,7 +91,7 @@ std::shared_ptr<AppExecFwk::Configuration> AbilityStageContext::GetConfiguration
 void AbilityStageContext::SetResourceManager(const std::shared_ptr<Global::Resource::ResourceManager> &resourceManager)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return;
     }
 
@@ -101,7 +101,7 @@ void AbilityStageContext::SetResourceManager(const std::shared_ptr<Global::Resou
 std::shared_ptr<Global::Resource::ResourceManager> AbilityStageContext::GetResourceManager() const
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return nullptr;
     }
 
@@ -111,7 +111,7 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityStageContext::GetResou
 std::string AbilityStageContext::GetBundleName() const
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -121,7 +121,7 @@ std::string AbilityStageContext::GetBundleName() const
 std::shared_ptr<AppExecFwk::ApplicationInfo> AbilityStageContext::GetApplicationInfo() const
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return nullptr;
     }
 
@@ -131,7 +131,7 @@ std::shared_ptr<AppExecFwk::ApplicationInfo> AbilityStageContext::GetApplication
 std::shared_ptr<Context> AbilityStageContext::CreateBundleContext(const std::string &bundleName)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return nullptr;
     }
 
@@ -141,7 +141,7 @@ std::shared_ptr<Context> AbilityStageContext::CreateBundleContext(const std::str
 std::shared_ptr<Context> AbilityStageContext::CreateModuleContext(const std::string &moduleName)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return nullptr;
     }
 
@@ -152,7 +152,7 @@ std::shared_ptr<Context> AbilityStageContext::CreateModuleContext(const std::str
     const std::string &moduleName)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return nullptr;
     }
 
@@ -163,7 +163,7 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityStageContext::CreateMo
     const std::string &bundleName, const std::string &moduleName)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return nullptr;
     }
 
@@ -174,7 +174,7 @@ int32_t AbilityStageContext::CreateSystemHspModuleResourceManager(const std::str
     const std::string &moduleName, std::shared_ptr<Global::Resource::ResourceManager> &resourceManager)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return ERR_INVALID_VALUE;
     }
 
@@ -184,7 +184,7 @@ int32_t AbilityStageContext::CreateSystemHspModuleResourceManager(const std::str
 std::string AbilityStageContext::GetBundleCodePath() const
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -194,7 +194,7 @@ std::string AbilityStageContext::GetBundleCodePath() const
 std::string AbilityStageContext::GetBundleCodeDir()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -204,7 +204,7 @@ std::string AbilityStageContext::GetBundleCodeDir()
 std::string AbilityStageContext::GetCacheDir()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -214,7 +214,7 @@ std::string AbilityStageContext::GetCacheDir()
 std::string AbilityStageContext::GetTempDir()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -224,7 +224,7 @@ std::string AbilityStageContext::GetTempDir()
 std::string AbilityStageContext::GetFilesDir()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -234,7 +234,7 @@ std::string AbilityStageContext::GetFilesDir()
 std::string AbilityStageContext::GetResourceDir()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -244,7 +244,7 @@ std::string AbilityStageContext::GetResourceDir()
 std::string AbilityStageContext::GetDatabaseDir()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -254,7 +254,7 @@ std::string AbilityStageContext::GetDatabaseDir()
 std::string AbilityStageContext::GetPreferencesDir()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -264,7 +264,7 @@ std::string AbilityStageContext::GetPreferencesDir()
 std::string AbilityStageContext::GetGroupDir(std::string groupId)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -274,7 +274,7 @@ std::string AbilityStageContext::GetGroupDir(std::string groupId)
 int32_t AbilityStageContext::GetSystemDatabaseDir(const std::string &groupId, bool checkExist, std::string &databaseDir)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return ERR_INVALID_VALUE;
     }
 
@@ -285,7 +285,7 @@ int32_t AbilityStageContext::GetSystemPreferencesDir(const std::string &groupId,
     std::string &preferencesDir)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return ERR_INVALID_VALUE;
     }
 
@@ -295,7 +295,7 @@ int32_t AbilityStageContext::GetSystemPreferencesDir(const std::string &groupId,
 std::string AbilityStageContext::GetDistributedFilesDir()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -305,7 +305,7 @@ std::string AbilityStageContext::GetDistributedFilesDir()
 std::string AbilityStageContext::GetCloudFileDir()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -315,7 +315,7 @@ std::string AbilityStageContext::GetCloudFileDir()
 std::string AbilityStageContext::GetBaseDir() const
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
@@ -325,7 +325,7 @@ std::string AbilityStageContext::GetBaseDir() const
 bool AbilityStageContext::IsUpdatingConfigurations()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return false;
     }
 
@@ -335,7 +335,7 @@ bool AbilityStageContext::IsUpdatingConfigurations()
 bool AbilityStageContext::PrintDrawnCompleted()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return false;
     }
 
@@ -345,7 +345,7 @@ bool AbilityStageContext::PrintDrawnCompleted()
 sptr<IRemoteObject> AbilityStageContext::GetToken()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return nullptr;
     }
 
@@ -355,7 +355,7 @@ sptr<IRemoteObject> AbilityStageContext::GetToken()
 void AbilityStageContext::SetToken(const sptr<IRemoteObject> &token)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return;
     }
 
@@ -365,7 +365,7 @@ void AbilityStageContext::SetToken(const sptr<IRemoteObject> &token)
 void AbilityStageContext::SwitchArea(int mode)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return;
     }
 
@@ -375,7 +375,7 @@ void AbilityStageContext::SwitchArea(int mode)
 int AbilityStageContext::GetArea()
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return ContextImpl::EL_DEFAULT;
     }
 
@@ -385,7 +385,7 @@ int AbilityStageContext::GetArea()
 Global::Resource::DeviceType AbilityStageContext::GetDeviceType() const
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return Global::Resource::DeviceType::DEVICE_PHONE;
     }
 

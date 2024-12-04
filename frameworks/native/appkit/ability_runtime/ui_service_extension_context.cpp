@@ -40,7 +40,7 @@ ErrCode UIServiceExtensionContext::StartAbility(const AAFwk::Want &want, const A
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, token_,
         ILLEGAL_REQUEST_CODE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "StartAbility is failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "failed %{public}d", err);
     }
     return err;
 }
@@ -49,7 +49,7 @@ ErrCode UIServiceExtensionContext::TerminateSelf()
 {
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, nullptr);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "TerminateAbility is failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "failed %{public}d", err);
     }
     return err;
 }
@@ -68,7 +68,7 @@ Ace::UIContent* UIServiceExtensionContext::GetUIContent()
 {
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "called");
     if (window_ == nullptr) {
-        TAG_LOGD(AAFwkTag::UISERVC_EXT, "window_ is nullptr");
+        TAG_LOGD(AAFwkTag::UISERVC_EXT, "null window_");
         return nullptr;
     }
     return window_->GetUIContent();
@@ -79,12 +79,12 @@ ErrCode UIServiceExtensionContext::StartAbilityByType(const std::string &type,
 {
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "StartAbilityByType begin.");
     if (uiExtensionCallbacks == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "uiExtensionCallbacks is nullptr");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null uiExtensionCallbacks");
         return ERR_INVALID_VALUE;
     }
     auto uiContent = GetUIContent();
     if (uiContent == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "uiContent is nullptr");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null uiContent");
         return ERR_INVALID_VALUE;
     }
     wantParam.SetParam(UIEXTENSION_TARGET_TYPE_KEY, AAFwk::String::Box(type));
@@ -110,7 +110,7 @@ ErrCode UIServiceExtensionContext::StartAbilityByType(const std::string &type,
 
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "CreateModalUIExtension is failed");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "sessionId zero");
         return ERR_INVALID_VALUE;
     }
     uiExtensionCallbacks->SetUIContent(uiContent);
@@ -136,7 +136,7 @@ ErrCode UIServiceExtensionContext::DisConnectServiceExtensionAbility(const AAFwk
         ErrCode ret =
             ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback, accountId);
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::UISERVC_EXT, "DisconnectAbility error, ret=%{public}d", ret);
+            TAG_LOGE(AAFwkTag::UISERVC_EXT, "ret=%{public}d", ret);
         }
         TAG_LOGI(AAFwkTag::UISERVC_EXT, "end");
         return ret;
