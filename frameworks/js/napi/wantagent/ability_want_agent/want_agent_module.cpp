@@ -39,11 +39,11 @@ napi_value JsNapiWantAgentInit(napi_env env, napi_value exportObj)
     TAG_LOGD(AAFwkTag::WANTAGENT, "called");
 
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env or exportObj nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env or exportObj");
         return nullptr;
     }
     if (!CheckTypeForNapiValue(env, exportObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "object nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null object");
         return nullptr;
     }
 

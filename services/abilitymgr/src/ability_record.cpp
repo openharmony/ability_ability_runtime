@@ -129,7 +129,7 @@ std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemote
 
     std::string descriptor = Str16ToStr8(token->GetObjectDescriptor());
     if (descriptor != "ohos.aafwk.AbilityToken") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not AbilityToken, descriptor:%{public}s",
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "descriptor:%{public}s",
             descriptor.c_str());
         return nullptr;
     }
@@ -1499,7 +1499,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         HandleDlpAttached();
 #endif // WITH_DLP
     } else {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "scheduler is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null scheduler");
         isReady_ = false;
         isWindowAttached_ = false;
         SetIsNewWant(false);
@@ -3299,7 +3299,7 @@ void AbilityRecord::NotifyRemoveShellProcess(int32_t type)
     if (abilityInfo_.bundleName == AppUtils::GetInstance().GetBrokerDelegateBundleName()) {
         auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(type);
         if (collaborator == nullptr) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "collaborator is nullptr");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null collaborator");
             return;
         }
         int ret = collaborator->NotifyRemoveShellProcess(pid_, SHELL_ASSISTANT_DIETYPE, SHELL_ASSISTANT_DIEREASON);
@@ -3317,7 +3317,7 @@ void AbilityRecord::NotifyMissionBindPid()
     }
     auto sessionInfo = GetSessionInfo();
     if (sessionInfo == nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "sessionInfo is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null sessionInfo");
         return;
     }
     int32_t persistentId = sessionInfo->persistentId;
@@ -3325,7 +3325,7 @@ void AbilityRecord::NotifyMissionBindPid()
         auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(
             CollaboratorType::RESERVE_TYPE);
         if (collaborator == nullptr) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "collaborator is nullptr");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null collaborator");
             return;
         }
         collaborator->NotifyMissionBindPid(persistentId, pid_);
