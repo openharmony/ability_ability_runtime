@@ -827,6 +827,11 @@ enum NativeFreeInstallError {
      */
     ERR_NOT_ATTACHED_TO_STATUS_BAR = 29360137,
 
+    /**
+     * Result(29360138) for Connect State: An error of the BMS not connect.
+     */
+    BMS_NOT_CONNECTED = 29360138,
+
     /*
      * Result(29360205) for continue freeinstall failed.
      */

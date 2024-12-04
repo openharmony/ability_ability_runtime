@@ -6279,11 +6279,11 @@ int32_t AbilityManagerService::GetUserId() const
     return U0_USER_ID;
 }
 
-void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery)
+int AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
     auto bms = AbilityUtil::GetBundleManagerHelper();
-    CHECK_POINTER(bms);
+    CHECK_POINTER_AND_RETURN(bms, BMS_NOT_CONNECTED);
 
     /* Query the highest priority ability or extension ability, and start it. usually, it is OOBE or launcher */
     Want want;
@@ -6302,7 +6302,7 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
         ++attemptNums;
         if (!isBoot && attemptNums > SWITCH_ACCOUNT_TRY) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "query highest priority ability failed");
-            return;
+            return RESOLVE_ABILITY_ERR;
         }
         AbilityRequest abilityRequest;
         usleep(REPOLL_TIME_MICRO_SECONDS);
@@ -6310,7 +6310,7 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
 
     if (abilityInfo.name.empty() && extensionAbilityInfo.name.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "query highest priority ability failed");
-        return;
+        return RESOLVE_ABILITY_ERR;
     }
 
     Want abilityWant; // donot use 'want' here, because the entity of 'want' is not empty
@@ -6336,7 +6336,7 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
         abilityWant.SetParam("ohos.app.logout_recovery", true);
     }
     /* note: OOBE APP need disable itself, otherwise, it will be started when restart system everytime */
-    (void)StartAbility(abilityWant, userId, DEFAULT_INVAL_VALUE);
+    return StartAbility(abilityWant, userId, DEFAULT_INVAL_VALUE);
 }
 
 int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestCode, AbilityRequest &request,
@@ -7611,7 +7611,7 @@ int AbilityManagerService::StartUser(int userId, sptr<IUserCallback> callback, b
     }
 
     if (userController_) {
-        userController_->StartUser(userId, callback, isAppRecovery);
+        return userController_->StartUser(userId, callback, isAppRecovery);
     }
     return 0;
 }
@@ -8225,7 +8225,7 @@ void AbilityManagerService::UserStarted(int32_t userId)
     subManagersHelper_->InitSubManagers(userId, false);
 }
 
-void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr<IUserCallback> callback,
+int AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr<IUserCallback> callback,
     bool isAppRecovery)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR,
@@ -8239,8 +8239,11 @@ void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr
     }
     callback->OnStartUserDone(userId, ERR_OK);
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
-    StartHighestPriorityAbility(userId, isBoot, isAppRecovery);
-     if (taskHandler_) {
+    auto ret = StartHighestPriorityAbility(userId, isBoot, isAppRecovery);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartHighestPriorityAbility failed: %{public}d", ret);
+    }
+    if (taskHandler_) {
         taskHandler_->SubmitTask([abilityMs = shared_from_this(), userId]() {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "StartResidentApps userId:%{public}d", userId);
             abilityMs->StartResidentApps(userId);
@@ -8255,9 +8258,10 @@ void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
         AmsConfigurationParameter::GetInstance().MultiUserType() != 0) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "no need terminate old scb");
-        return;
+        return ret;
     }
     PauseOldConnectManager(oldUserId);
+    return ret;
 }
 
 void AbilityManagerService::SwitchManagers(int32_t userId, bool switchUser)
