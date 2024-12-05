@@ -20,6 +20,7 @@
 #include "auto_startup_info.h"
 #include "iremote_proxy.h"
 #include "mission_info.h"
+#include "intent_exemption_info.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -1544,6 +1545,13 @@ public:
      */
     virtual int32_t QueryKeepAliveApplicationsByEDM(int32_t appType, int32_t userId,
         std::vector<KeepAliveInfo> &list) override;
+
+    /**
+     * Get intent exemption info.
+     * @param list List of intent exemption info.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetAllIntentExemptionInfo(std::vector<AppExecFwk::IntentExemptionInfo> &info) override;
 
 private:
     template <typename T>

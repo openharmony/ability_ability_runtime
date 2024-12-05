@@ -59,6 +59,7 @@ config("abilityms_config") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_utils_path}/global/constant",
+    "${ability_runtime_path}/utils/global/time/include",
     "${ability_runtime_utils_path}/server/constant",
   ]
 
