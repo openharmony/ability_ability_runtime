@@ -1044,7 +1044,7 @@ public:
     void SetIsUnSetPermission(bool isUnSetPermission);
 
     bool IsUnSetPermission();
-    
+
     void UnSetPolicy();
 private:
     /**
@@ -1081,6 +1081,7 @@ private:
     void RemoveEvent(uint32_t msg);
 
     void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record, bool isExtensionDebug = false);
+    uint32_t GetAddStageTimeout() const;
 
 private:
     class RemoteObjHash {
