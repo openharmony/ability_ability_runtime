@@ -64,24 +64,24 @@ ohos_unittest("context_deal_interface_test") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "${global_path}/resource_management/frameworks/resmgr:global_resmgr",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "resource_management:global_resmgr",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
-    deps += [ "${multimodalinput_path}/frameworks/proxy:libmmi-client" ]
+    external_deps += [ "input:libmmi-client" ]
   }
 }
 
@@ -91,7 +91,6 @@ ohos_unittest("application_test") {
   include_dirs = [
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_test_path}/mock/common/include",
-    "${resource_management_path}/frameworks/resmgr/include",
   ]
 
   sources = [
@@ -118,8 +117,6 @@ ohos_unittest("application_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -134,12 +131,15 @@ ohos_unittest("application_test") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "resource_management:librawfile",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -153,7 +153,6 @@ ohos_unittest("context_impl_test") {
   include_dirs = [
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_test_path}/mock/common/include",
-    "${resource_management_path}/frameworks/resmgr/include",
   ]
 
   sources = [
@@ -178,8 +177,6 @@ ohos_unittest("context_impl_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -194,12 +191,15 @@ ohos_unittest("context_impl_test") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "resource_management:librawfile",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -288,8 +288,6 @@ ohos_unittest("context_container_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -303,11 +301,13 @@ ohos_unittest("context_container_test") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -352,8 +352,6 @@ ohos_unittest("overlay_event_subscriber_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -366,11 +364,13 @@ ohos_unittest("overlay_event_subscriber_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -420,8 +420,6 @@ ohos_unittest("dump_ffrt_helper_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -434,11 +432,13 @@ ohos_unittest("dump_ffrt_helper_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -486,9 +486,6 @@ ohos_unittest("context_deal_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -502,12 +499,15 @@ ohos_unittest("context_deal_test") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -544,8 +544,6 @@ ohos_unittest("application_impl_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -558,11 +556,13 @@ ohos_unittest("application_impl_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -579,7 +579,6 @@ config("ability_start_setting_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
-    "${c_utils_base_path}/include",
     "${ability_runtime_innerkits_path}/ability_manager/include",
   ]
 }
@@ -597,12 +596,12 @@ ohos_unittest("ability_start_setting_test") {
     "ability_start_setting_test.cpp",
   ]
 
-  deps = [ "//third_party/googletest:gtest_main" ]
-
   external_deps = [
     "c_utils:utils",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "samgr:samgr_proxy",
   ]
 }
 
@@ -636,8 +635,6 @@ ohos_unittest("ability_stage_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -652,12 +649,14 @@ ohos_unittest("ability_stage_test") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -687,8 +686,6 @@ ohos_unittest("form_extension_context_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -703,6 +700,8 @@ ohos_unittest("form_extension_context_test") {
     "ffrt:libffrt",
     "form_fwk:fmskit_native",
     "form_fwk:form_manager",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
@@ -727,7 +726,6 @@ ohos_unittest("bms_context_impl_test") {
   branch_protector_ret = "pac_ret"
   include_dirs = [
     "${ability_runtime_services_path}/common/include",
-    "${resource_management_path}/frameworks/resmgr/include",
     "${ability_runtime_test_path}/mock/common/include",
   ]
 
@@ -743,9 +741,6 @@ ohos_unittest("bms_context_impl_test") {
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -759,12 +754,16 @@ ohos_unittest("bms_context_impl_test") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "resource_management:librawfile",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -785,9 +784,6 @@ ohos_unittest("context_container_by_mock_bms_test") {
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -799,11 +795,14 @@ ohos_unittest("context_container_by_mock_bms_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 }
 
@@ -824,7 +823,6 @@ ohos_unittest("assert_fault_test") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -835,6 +833,7 @@ ohos_unittest("assert_fault_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
@@ -858,14 +857,12 @@ ohos_unittest("dump_ipc_helper_test") {
 
   configs = [ ":module_context_config" ]
 
-  deps = [
-    "${ability_runtime_native_path}/appkit:appkit_native",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_native_path}/appkit:appkit_native" ]
 
   external_deps = [
     "ability_runtime:runtime",
     "c_utils:utils",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
@@ -886,13 +883,13 @@ ohos_unittest("dump_runtime_helper_test") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_runtime:runtime",
     "c_utils:utils",
     "faultloggerd:libfaultloggerd",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
@@ -919,13 +916,13 @@ ohos_unittest("extension_plugin_info_test") {
   deps = [
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:string_utils",
     "ability_runtime:runtime",
     "c_utils:utils",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
@@ -942,15 +939,13 @@ ohos_unittest("idle_time_test") {
 
   configs = [ ":module_context_config" ]
 
-  deps = [
-    "${ability_runtime_native_path}/appkit:appkit_native",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_native_path}/appkit:appkit_native" ]
 
   external_deps = [
     "ability_runtime:runtime",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
@@ -979,7 +974,6 @@ ohos_unittest("dump_runtime_helper_second_test") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -987,6 +981,7 @@ ohos_unittest("dump_runtime_helper_second_test") {
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
     "faultloggerd:libfaultloggerd",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
@@ -1015,7 +1010,6 @@ ohos_unittest("native_lib_util_test") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1023,6 +1017,7 @@ ohos_unittest("native_lib_util_test") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "faultloggerd:libfaultloggerd",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",

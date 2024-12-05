@@ -26,7 +26,6 @@ ohos_unittest("js_service_extension_test") {
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
-    "//third_party/jsoncpp/include",
   ]
 
   sources = [
@@ -38,9 +37,6 @@ ohos_unittest("js_service_extension_test") {
   deps = [
     "${ability_runtime_native_path}/ability/native:insight_intent_executor",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-    "//third_party/icu/icu4c:shared_icuuc",
   ]
 
   external_deps = [
@@ -58,8 +54,11 @@ ohos_unittest("js_service_extension_test") {
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "i18n:intl_util",
+    "icu:shared_icuuc",
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:ipc_napi",

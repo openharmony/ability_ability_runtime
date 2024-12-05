@@ -29,8 +29,6 @@ config("appmgr_test_config") {
   include_dirs = [
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include",
-    "${distributeddatamgr_path}/kv_store/interfaces/innerkits/distributeddata/include",
-    "${global_path}/i18n/frameworks/intl/include",
   ]
 }
 
@@ -59,12 +57,6 @@ ohos_source_set("appmgr_test_source") {
 
   public_configs = [ ":appmgr_test_config" ]
 
-  public_deps = [
-    "${c_utils_base_path}:utils",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
-
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -72,12 +64,7 @@ ohos_source_set("appmgr_test_source") {
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
-
-  if (ability_runtime_graphics) {
-    deps += [ "${global_path}/i18n/frameworks/intl:intl_util" ]
-  }
 
   external_deps = [
     "ability_base:base",
@@ -89,16 +76,23 @@ ohos_source_set("appmgr_test_source") {
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "i18n:intl_util",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
+    "kv_store:distributeddata_inner",
     "kv_store:distributeddata_mgr",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_child_process) {
     defines = [ "SUPPORT_CHILD_PROCESS" ]
   }
 
-  public_external_deps = [ "c_utils:utils" ]
+  public_external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
 
   subsystem_name = "ability"
   part_name = "ability_runtime"
@@ -298,12 +292,12 @@ ohos_source_set("abilityms_test_source") {
       "${ability_runtime_services_path}/abilitymgr/src/system_dialog_scheduler.cpp",
       "${ability_runtime_services_path}/appdfr/src/application_anr_listener.cpp",
     ]
-    deps += [ "//third_party/libjpeg-turbo:turbojpeg_static" ]
     external_deps += [
       "i18n:intl_util",
       "icu:shared_icuuc",
       "image_framework:image_native",
       "input:libmmi-client",
+      "libjpeg-turbo:turbojpeg_static",
       "window_manager:libdm",
       "window_manager:libmodal_system_ui_extension_client",
       "window_manager:libwm",

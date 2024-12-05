@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,7 +35,6 @@ config("unittest_include_dir") {
     "${ability_runtime_path}/tools/aa/include",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/ability_delegator",
     "${ability_runtime_innerkits_path}/ability_manager/include",
-    "//third_party/googletest/googlemock/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
 
@@ -56,14 +55,13 @@ ohos_unittest("shell_cmd_result_unittest") {
   configs = [ ":unittest_include_dir" ]
   configs += [ "${ability_runtime_services_path}/common:common_config" ]
 
-  deps = [
-    "${ability_runtime_native_path}/appkit:appkit_delegator",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_native_path}/appkit:appkit_delegator" ]
 
   external_deps = [
     "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
   ]
 }
@@ -75,14 +73,13 @@ ohos_unittest("ability_delegator_args_unittest") {
   configs = [ ":unittest_include_dir" ]
   configs += [ "${ability_runtime_services_path}/common:common_config" ]
 
-  deps = [
-    "${ability_runtime_native_path}/appkit:appkit_delegator",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_native_path}/appkit:appkit_delegator" ]
 
   external_deps = [
     "ability_base:want",
+    "googletest:gmock",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
   ]
 }
@@ -100,8 +97,6 @@ ohos_unittest("iability_monitor_unittest") {
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -109,6 +104,9 @@ ohos_unittest("iability_monitor_unittest") {
     "ability_runtime:ability_manager",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
@@ -130,8 +128,6 @@ ohos_unittest("ability_delegator_unittest") {
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -142,6 +138,9 @@ ohos_unittest("ability_delegator_unittest") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
@@ -164,14 +163,13 @@ ohos_unittest("delegator_thread_unittest") {
   configs = [ ":unittest_include_dir" ]
   configs += [ "${ability_runtime_services_path}/common:common_config" ]
 
-  deps = [
-    "${ability_runtime_native_path}/appkit:appkit_delegator",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_native_path}/appkit:appkit_delegator" ]
 
   external_deps = [
     "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -193,8 +191,6 @@ ohos_unittest("ability_delegator_registry_unittest") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -205,6 +201,9 @@ ohos_unittest("ability_delegator_registry_unittest") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
@@ -228,8 +227,6 @@ ohos_unittest("js_test_runner_unittest") {
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -243,6 +240,9 @@ ohos_unittest("js_test_runner_unittest") {
     "common_event_service:cesfwk_innerkits",
     "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",

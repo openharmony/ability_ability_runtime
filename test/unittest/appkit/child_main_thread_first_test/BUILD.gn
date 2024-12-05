@@ -48,8 +48,6 @@ ohos_unittest("child_main_thread_first_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_path}/interfaces/inner_api/child_process_manager:child_process_manager",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -59,6 +57,8 @@ ohos_unittest("child_main_thread_first_test") {
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",

@@ -24,10 +24,7 @@ ohos_fuzztest("AppStateObserverManagerFuzzTest") {
 
   fuzz_config_file =
       "${ability_runtime_test_path}/fuzztest/appstateobservermanager_fuzzer"
-  include_dirs = [
-    "${ability_runtime_services_path}/appmgr/include",
-    "${appspawn_path}/interfaces/innerkits_new/include",
-  ]
+  include_dirs = [ "${ability_runtime_services_path}/appmgr/include" ]
   cflags = [
     "-g",
     "-O0",

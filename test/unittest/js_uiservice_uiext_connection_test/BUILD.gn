@@ -41,8 +41,6 @@ ohos_unittest("js_uiservice_uiext_connection_test") {
   deps = [
     "${ability_runtime_native_path}/ability/native:ui_extension",
     "${ability_runtime_native_path}/ability/native:ui_service_extension_connection",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -51,6 +49,8 @@ ohos_unittest("js_uiservice_uiext_connection_test") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",

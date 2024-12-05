@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,10 +19,7 @@ module_output_path = "ability_runtime/abilitymgr"
 ohos_unittest("mission_list_test") {
   module_out_path = module_output_path
 
-  include_dirs = [
-    "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
-  ]
+  include_dirs = [ "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock" ]
 
   sources = [
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
@@ -45,7 +42,6 @@ ohos_unittest("mission_list_test") {
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit:aakit_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_appmgr_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_bundlemgr_mock",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -54,9 +50,11 @@ ohos_unittest("mission_list_test") {
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   if (background_task_mgr_continuous_task_enable) {
@@ -89,7 +87,6 @@ ohos_unittest("mission_list_test_call") {
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/abilitymgr:mission_list",
     "${ability_runtime_services_path}/common:perm_verification",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -99,6 +96,7 @@ ohos_unittest("mission_list_test_call") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "napi:ace_napi",
   ]

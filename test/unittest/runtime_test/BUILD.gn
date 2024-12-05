@@ -46,9 +46,6 @@ ohos_unittest("runtime_test") {
   include_dirs = [
     "${ability_runtime_native_path}/runtime",
     "${ability_runtime_native_path}/runtime/utils/include",
-    "${ability_base_kits_path}/extractortool/include",
-    "//third_party/zlib/contrib/minizip",
-    "//third_party/zlib",
   ]
 
   sources = [
@@ -63,6 +60,8 @@ ohos_unittest("runtime_test") {
     "ability_base:extractortool",
     "ability_runtime:runtime",
     "c_utils:utils",
+    "zlib:libz",
+    "zlib:shared_libz",
   ]
 }
 
@@ -79,8 +78,6 @@ ohos_unittest("js_runtime_test") {
   include_dirs = [
     "${ability_runtime_native_path}/runtime",
     "${ability_runtime_native_path}/runtime/utils/include",
-    "//third_party/zlib/contrib/minizip",
-    "//third_party/zlib",
   ]
 
   sources = [
@@ -90,10 +87,6 @@ ohos_unittest("js_runtime_test") {
   ]
 
   configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
-  deps = [
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
 
   external_deps = [
     "ability_runtime:js_environment",
@@ -104,9 +97,13 @@ ohos_unittest("js_runtime_test") {
     "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "zlib:libz",
+    "zlib:shared_libz",
   ]
 }
 
@@ -123,8 +120,6 @@ ohos_unittest("js_runtime_first_test") {
   include_dirs = [
     "${ability_runtime_native_path}/runtime",
     "${ability_runtime_native_path}/runtime/utils/include",
-    "//third_party/zlib/contrib/minizip",
-    "//third_party/zlib",
   ]
 
   sources = [
@@ -134,10 +129,6 @@ ohos_unittest("js_runtime_first_test") {
   ]
 
   configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
-  deps = [
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
 
   external_deps = [
     "ability_runtime:js_environment",
@@ -148,9 +139,13 @@ ohos_unittest("js_runtime_first_test") {
     "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "zlib:libz",
+    "zlib:shared_libz",
   ]
 }
 
@@ -160,8 +155,6 @@ ohos_unittest("hdc_register_test") {
   include_dirs = [
     "${ability_runtime_native_path}/runtime",
     "${ability_runtime_native_path}/runtime/utils/include",
-    "//third_party/zlib/contrib/minizip",
-    "//third_party/zlib",
   ]
 
   sources = [
@@ -171,16 +164,16 @@ ohos_unittest("hdc_register_test") {
   ]
 
   configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
-  deps = [
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
 
   external_deps = [
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "zlib:libz",
+    "zlib:shared_libz",
   ]
 }
 
@@ -193,17 +186,14 @@ ohos_unittest("ohos_js_environment_test") {
 
   configs = []
 
-  deps = [
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
-
   external_deps = [
     "ability_runtime:js_environment",
     "ability_runtime:runtime",
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "napi:ace_napi",
   ]
@@ -215,9 +205,6 @@ ohos_unittest("js_worker_test") {
   include_dirs = [
     "${ability_runtime_native_path}/runtime",
     "${ability_runtime_native_path}/runtime/utils/include",
-    "${ability_base_kits_path}/extractortool/include",
-    "//third_party/zlib/contrib/minizip",
-    "//third_party/zlib",
   ]
 
   sources = [
@@ -240,6 +227,8 @@ ohos_unittest("js_worker_test") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "zlib:libz",
+    "zlib:shared_libz",
   ]
 }
 

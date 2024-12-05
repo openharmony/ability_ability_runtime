@@ -49,7 +49,6 @@ ohos_unittest("file_permission_manager_test") {
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_services_path}/common:event_report",
     "${ability_runtime_services_path}/uripermmgr:libupms_static",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -58,6 +57,7 @@ ohos_unittest("file_permission_manager_test") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",

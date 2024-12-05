@@ -35,7 +35,6 @@ ohos_moduletest("app_mgr_client_test") {
   deps = [
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:perm_verification",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -51,6 +50,7 @@ ohos_moduletest("app_mgr_client_test") {
     "cJSON:cjson",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "selinux_adapter:librestorecon",

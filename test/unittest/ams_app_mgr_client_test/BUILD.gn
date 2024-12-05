@@ -35,11 +35,7 @@ ohos_unittest("AmsAppMgrClientTest") {
     "ams_app_mgr_client_test.cpp",
   ]
 
-  include_dirs = [
-    "${ability_runtime_test_path}/mock/common/include",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include/",
-    "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
-  ]
+  include_dirs = [ "${ability_runtime_test_path}/mock/common/include" ]
 
   configs =
       [ "${ability_runtime_innerkits_path}/app_manager:appmgr_sdk_config" ]
@@ -52,7 +48,6 @@ ohos_unittest("AmsAppMgrClientTest") {
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/common:perm_verification",
     "${ability_runtime_test_path}/unittest:appmgr_test_source",
-    "${distributedschedule_path}/safwk/interfaces/innerkits/safwk:system_ability_fwk",
   ]
 
   external_deps = [
@@ -70,6 +65,8 @@ ohos_unittest("AmsAppMgrClientTest") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
   ]
 

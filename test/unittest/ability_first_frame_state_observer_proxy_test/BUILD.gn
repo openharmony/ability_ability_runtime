@@ -33,16 +33,14 @@ ohos_unittest("ability_first_frame_state_observer_proxy_test") {
     "${ability_runtime_test_path}/unittest/ability_first_frame_state_observer_stub_test/",
   ]
 
-  deps = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_innerkits_path}/ability_manager:ability_manager" ]
 
   external_deps = [
     "ability_base:configuration",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]

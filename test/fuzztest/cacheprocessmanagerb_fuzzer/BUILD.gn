@@ -28,7 +28,6 @@ ohos_fuzztest("CacheProcessManagerbFuzzTest") {
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/appmgr/include",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
-    "${multimodalinput_path}/interfaces/native/innerkits/event/include",
   ]
   cflags = [
     "-g",
@@ -57,7 +56,6 @@ ohos_fuzztest("CacheProcessManagerbFuzzTest") {
     "${ability_runtime_services_path}/appmgr:libappms",
     "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:res_sched_util",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -75,7 +73,9 @@ ohos_fuzztest("CacheProcessManagerbFuzzTest") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
+    "input:libmmi-client",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "kv_store:distributeddata_inner",
     "napi:ace_napi",
     "os_account:os_account_innerkits",

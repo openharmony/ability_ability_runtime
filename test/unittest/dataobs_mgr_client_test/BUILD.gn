@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,10 +26,7 @@ ohos_unittest("dataobs_mgr_client_test") {
   }
   module_out_path = module_output_path
 
-  include_dirs = [
-    "${ability_runtime_services_path}/dataobsmgr/include",
-    "${distributedschedule_path}/safwk/services/safwk/include",
-  ]
+  include_dirs = [ "${ability_runtime_services_path}/dataobsmgr/include" ]
 
   sources = [ "dataobs_mgr_client_test.cpp" ]
 
@@ -41,8 +38,6 @@ ohos_unittest("dataobs_mgr_client_test") {
   deps = [
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
     "${ability_runtime_services_path}/dataobsmgr:dataobsms_static",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -50,8 +45,11 @@ ohos_unittest("dataobs_mgr_client_test") {
     "ability_base:zuri",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "safwk:system_ability_fwk",
   ]
 }
 

@@ -25,10 +25,7 @@ ohos_unittest("AppSpawnClientSecondTest") {
 
   configs = [ "${ability_runtime_services_path}/appmgr:appmgr_config" ]
 
-  deps = [
-    "${ability_runtime_services_path}/appmgr:libappms",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_services_path}/appmgr:libappms" ]
 
   external_deps = [
     "ability_base:configuration",
@@ -41,6 +38,7 @@ ohos_unittest("AppSpawnClientSecondTest") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbeget_proxy",
     "init:libbegetutil",
