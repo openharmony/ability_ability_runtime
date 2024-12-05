@@ -52,7 +52,6 @@ ohos_unittest("uri_perm_mgr_test") {
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_services_path}/common:event_report",
     "${ability_runtime_services_path}/uripermmgr:libupms_static",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -60,6 +59,7 @@ ohos_unittest("uri_perm_mgr_test") {
     "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "safwk:api_cache_manager",
     "storage_service:storage_manager_sa_proxy",

@@ -28,10 +28,7 @@ ohos_unittest("quick_fix_manager_service_ability_test") {
     "quick_fix_manager_service_ability_test.cpp",
   ]
 
-  deps = [
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = []
 
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
@@ -42,6 +39,8 @@ ohos_unittest("quick_fix_manager_service_ability_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",

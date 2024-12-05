@@ -29,8 +29,6 @@ ohos_unittest("AppRunningProcessesInfoTest") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_test_path}/mock/common/include",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
-    "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
   ]
 
   sources = [
@@ -95,6 +93,7 @@ ohos_unittest("AppRunningProcessesInfoTest") {
     "memmgr:memmgrclient",
     "memory_utils:libmeminfo",
     "resource_schedule_service:ressched_client",
+    "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
   ]
 

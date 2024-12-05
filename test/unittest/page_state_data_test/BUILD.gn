@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,11 +25,6 @@ ohos_unittest("page_state_data_test") {
     "page_state_data_test.cpp",
   ]
 
-  deps = [
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
-
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
   external_deps = [
@@ -40,6 +35,8 @@ ohos_unittest("page_state_data_test") {
     "faultloggerd:libdfx_dumpcatcher",
     "faultloggerd:libfaultloggerd",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",

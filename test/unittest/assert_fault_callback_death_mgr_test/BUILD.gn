@@ -30,7 +30,6 @@ ohos_unittest("assert_fault_callback_death_mgr_test") {
     "${ability_runtime_services_path}/abilitymgr/include",
 
     "${ability_runtime_test_path}/unittest/app_debug_listener_proxy_test",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
 
   sources = [
@@ -63,8 +62,6 @@ ohos_unittest("assert_fault_callback_death_mgr_test") {
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit:aakit_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_appmgr_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_bundlemgr_mock",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -79,6 +76,8 @@ ohos_unittest("assert_fault_callback_death_mgr_test") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
@@ -86,6 +85,7 @@ ohos_unittest("assert_fault_callback_death_mgr_test") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:api_cache_manager",
+    "samgr:samgr_proxy",
     "window_manager:libwsutils",
   ]
 }

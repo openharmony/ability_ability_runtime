@@ -44,10 +44,6 @@ ohos_unittest("AppRecoveryUnitTest") {
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:event_report",
-    "${multimedia_path}/interfaces/innerkits:image_native",
-    "${windowmanager_path}/dm:libdm",
-    "${windowmanager_path}/interfaces/kits/napi/window_runtime:windowstage_kit",
-    "${windowmanager_path}/wm:libwm",
   ]
 
   external_deps = [
@@ -73,8 +69,12 @@ ohos_unittest("AppRecoveryUnitTest") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:windowstage_kit",
   ]
   if (hichecker_enabled) {
     external_deps += [ "hichecker:libhichecker" ]
@@ -106,10 +106,6 @@ ohos_unittest("AbilityRecoveryUnitTest") {
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_services_path}/common:event_report",
-    "${multimedia_path}/interfaces/innerkits:image_native",
-    "${windowmanager_path}/dm:libdm",
-    "${windowmanager_path}/interfaces/kits/napi/window_runtime:windowstage_kit",
-    "${windowmanager_path}/wm:libwm",
   ]
 
   external_deps = [
@@ -135,9 +131,13 @@ ohos_unittest("AbilityRecoveryUnitTest") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:windowstage_kit",
   ]
   if (hichecker_enabled) {
     external_deps += [ "hichecker:libhichecker" ]

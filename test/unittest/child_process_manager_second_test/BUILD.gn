@@ -44,8 +44,6 @@ ohos_unittest("child_process_manager_second_test") {
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_path}/interfaces/inner_api/child_process_manager:child_process_manager",
     "${ability_runtime_services_path}/common:app_util",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -53,6 +51,10 @@ ohos_unittest("child_process_manager_second_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_capi",
     "ipc:ipc_core",

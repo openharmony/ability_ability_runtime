@@ -27,7 +27,6 @@ ohos_fuzztest("AbilityCacheManageraFuzzTest") {
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
-    "${multimodalinput_path}/interfaces/native/innerkits/event/include",
   ]
   cflags = [
     "-g",
@@ -52,7 +51,6 @@ ohos_fuzztest("AbilityCacheManageraFuzzTest") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -66,7 +64,9 @@ ohos_fuzztest("AbilityCacheManageraFuzzTest") {
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "input:libmmi-client",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "kv_store:distributeddata_inner",
     "napi:ace_napi",
     "os_account:os_account_innerkits",

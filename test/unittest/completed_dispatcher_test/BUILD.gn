@@ -30,8 +30,6 @@ ohos_unittest("completed_dispatcher_test") {
   deps = [
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/abilitymgr:wantagent_manager",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -46,6 +44,8 @@ ohos_unittest("completed_dispatcher_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_core",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",

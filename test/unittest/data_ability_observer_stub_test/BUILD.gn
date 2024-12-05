@@ -35,17 +35,15 @@ ohos_unittest("data_ability_observer_stub_test") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-  deps = [
-    "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager" ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]

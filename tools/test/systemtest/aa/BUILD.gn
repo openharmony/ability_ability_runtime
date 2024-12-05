@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,8 +23,6 @@ config("tools_aa_test_config") {
 ohos_systemtest("aa_command_start_system_test") {
   module_out_path = module_output_path
 
-  include_dirs = [ "//third_party/jsoncpp/include" ]
-
   sources = [
     "aa_command_start_system_test.cpp",
     "tool_system_test.cpp",
@@ -42,16 +40,16 @@ ohos_systemtest("aa_command_start_system_test") {
     "${ability_runtime_path}/tools/test/resource/aa/pageAbilityBundleForStart:pageAbilityBundleForStart",
     "${ability_runtime_path}/tools/test/resource/aa/serviceAbilityBundleForStart:serviceAbilityBundleForStart",
     "${ability_runtime_path}/tools/test/resource/ohos_test:copy_ohos_test",
-    "//third_party/googletest:gtest_main",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
     "ability_base:base",
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
   ]
 }
 
@@ -74,23 +72,21 @@ ohos_systemtest("aa_command_stop_service_system_test") {
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_path}/tools/test/resource/aa/serviceAbilityBundleForStop:serviceAbilityBundleForStop",
     "${ability_runtime_path}/tools/test/resource/ohos_test:copy_ohos_test",
-    "//third_party/googletest:gtest_main",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
     "ability_base:base",
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
   ]
 }
 
 ohos_systemtest("aa_command_dump_system_test") {
   module_out_path = module_output_path
-
-  include_dirs = [ "//third_party/jsoncpp/include" ]
 
   sources = [
     "aa_command_dump_system_test.cpp",
@@ -110,16 +106,16 @@ ohos_systemtest("aa_command_dump_system_test") {
     "${ability_runtime_path}/tools/test/resource/aa/pageAbilityBundleForDump:pageAbilityBundleForDump",
     "${ability_runtime_path}/tools/test/resource/aa/serviceAbilityBundleForStart:serviceAbilityBundleForStart",
     "${ability_runtime_path}/tools/test/resource/ohos_test:copy_ohos_test",
-    "//third_party/googletest:gtest_main",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
     "ability_base:base",
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
   ]
 }
 

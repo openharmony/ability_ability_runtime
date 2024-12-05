@@ -35,12 +35,12 @@ ohos_unittest("capi_ability_runtime_application_context_test") {
   deps = [
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_path}/frameworks/c/ability_runtime:ability_runtime",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_capi",
   ]
