@@ -60,6 +60,7 @@ public:
     static constexpr uint32_t TERMINATE_APPLICATION_TIMEOUT = 10000; // ms
     static constexpr uint32_t BACKGROUND_APPLICATION_TIMEOUT = 3000; // ms
     static constexpr uint32_t ADD_ABILITY_STAGE_INFO_TIMEOUT = 3000; // ms
+    static constexpr uint32_t ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT = 20000; // ms
     static constexpr uint32_t START_SPECIFIED_ABILITY_TIMEOUT = 3000; // ms
     static constexpr uint32_t START_PROCESS_SPECIFIED_ABILITY_TIMEOUT = 5000; // ms
     static constexpr uint32_t START_SPECIFIED_PROCESS_TIMEOUT = 2000; // ms
