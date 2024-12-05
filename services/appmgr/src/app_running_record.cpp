@@ -540,7 +540,7 @@ void AppRunningRecord::AddAbilityStage()
     }
     HapModuleInfo abilityStage;
     if (GetTheModuleInfoNeedToUpdated(mainBundleName_, abilityStage)) {
-        auto timeout = AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT;
+        auto timeout = GetAddStageTimeout();
         SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
         SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, timeout);
         TAG_LOGI(AAFwkTag::APPMGR, "Current module : [%{public}s] | bundle : [%{public}s]",
@@ -566,7 +566,7 @@ bool AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bund
             AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG)) {
             TAG_LOGI(
                 AAFwkTag::APPMGR, "ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG not exist");
-            auto timeout = AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT;
+            auto timeout = GetAddStageTimeout();
             SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
             SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, timeout);
         }
@@ -590,7 +590,7 @@ void AppRunningRecord::AddAbilityStageBySpecifiedProcess(const std::string &bund
 
     HapModuleInfo hapModuleInfo;
     if (GetTheModuleInfoNeedToUpdated(bundleName, hapModuleInfo)) {
-        auto timeout = AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT;
+        auto timeout = GetAddStageTimeout();
         SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
         SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, timeout);
         if (appLifeCycleDeal_ == nullptr) {
@@ -2653,6 +2653,14 @@ void AppRunningRecord::UnSetPolicy()
     }
     SetIsUnSetPermission(true);
     AAFwk::UriPermissionManagerClient::GetInstance().ClearPermissionTokenByMap(appInfo->accessTokenId);
+}
+
+uint32_t AppRunningRecord::GetAddStageTimeout() const
+{
+    if (IsEmptyKeepAliveApp()) {
+        return AMSEventHandler::ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT;
+    }
+    return AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
