@@ -170,7 +170,7 @@ void Watchdog::Timer()
     }
     int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
-    if ((now - lastWatchTime_) >= (CHECK_INTERVAL_TIME / RESET_RATIO)) {
+    if ((now - lastWatchTime_) < 0 || (now - lastWatchTime_) >= (CHECK_INTERVAL_TIME / RESET_RATIO)) {
         lastWatchTime_ = now;
     }
 }
