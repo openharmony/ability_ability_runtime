@@ -90,7 +90,7 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connec
         } else if (abilityConnection->GetConnectionState() == CONNECTION_STATE_CONNECTING) {
             return ERR_OK;
         } else {
-            TAG_LOGE(AAFwkTag::CONNECTION, "AbilityConnection disconnected, erase it and reconnect");
+            TAG_LOGE(AAFwkTag::CONNECTION, "abilityConnection disconnected");
             abilityConnections_.erase(connectionIter);
             return CreateConnection(connectCaller, want, accountId, connectCallback, isUIService);
         }
@@ -140,7 +140,7 @@ ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCa
     TAG_LOGD(AAFwkTag::CONNECTION, "called");
     sptr<AbilityConnection> abilityConnection = new AbilityConnection();
     if (abilityConnection == nullptr) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "create connection failed");
+        TAG_LOGE(AAFwkTag::CONNECTION, "null abilityConnection");
         return AAFwk::ERR_INVALID_CALLER;
     }
     abilityConnection->AddConnectCallback(connectCallback);
@@ -162,7 +162,7 @@ ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCa
         callbacks.push_back(connectCallback);
         abilityConnections_[connectionInfo] = callbacks;
     } else {
-        TAG_LOGE(AAFwkTag::CONNECTION, "AMS ConnectAbility error:%{public}d", ret);
+        TAG_LOGE(AAFwkTag::CONNECTION, "error:%{public}d", ret);
     }
     return ret;
 }
@@ -242,7 +242,7 @@ bool ConnectionManager::DisconnectCaller(const sptr<IRemoteObject>& connectCalle
             ErrCode ret =
                 AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(connectionInfo.abilityConnection);
             if (ret != ERR_OK) {
-                TAG_LOGE(AAFwkTag::CONNECTION, "AMS DisconnectAbility error, ret:%{public}d", ret);
+                TAG_LOGE(AAFwkTag::CONNECTION, "error:%{public}d", ret);
             }
             iter = abilityConnections_.erase(iter);
             isDisconnect = true;

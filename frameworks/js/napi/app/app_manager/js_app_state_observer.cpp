@@ -33,7 +33,7 @@ void JSAppStateObserver::OnForegroundApplicationChanged(const AppStateData &appS
         ([jsObserver, appStateData](napi_env env, NapiAsyncTask &task, int32_t status) {
             sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
             if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr null");
+                TAG_LOGW(AAFwkTag::APPMGR, "null jsObserverSptr");
                 return;
             }
             jsObserverSptr->HandleOnForegroundApplicationChanged(appStateData);
@@ -63,7 +63,7 @@ void JSAppStateObserver::OnAbilityStateChanged(const AbilityStateData &abilitySt
         ([jsObserver, abilityStateData](napi_env env, NapiAsyncTask &task, int32_t status) {
             sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
             if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr null");
+                TAG_LOGW(AAFwkTag::APPMGR, "null jsObserverSptr");
                 return;
             }
             jsObserverSptr->HandleOnAbilityStateChanged(abilityStateData);
@@ -150,7 +150,7 @@ void JSAppStateObserver::OnProcessStateChanged(const ProcessData &processData)
         ([jsObserver, processData](napi_env env, NapiAsyncTask &task, int32_t status) {
             sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
             if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr");
+                TAG_LOGW(AAFwkTag::APPMGR, "null jsObserverSptr");
                 return;
             }
             jsObserverSptr->HandleOnProcessStateChanged(processData);
@@ -179,7 +179,7 @@ void JSAppStateObserver::OnProcessDied(const ProcessData &processData)
         ([jsObserver, processData](napi_env env, NapiAsyncTask &task, int32_t status) {
             sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
             if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr null");
+                TAG_LOGW(AAFwkTag::APPMGR, "null jsObserverSptr");
                 return;
             }
             jsObserverSptr->HandleOnProcessDied(processData);

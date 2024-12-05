@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -631,6 +631,7 @@ ohos_unittest("form_extension_context_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "form_fwk:fmskit_native",
     "form_fwk:form_manager",
@@ -729,6 +730,7 @@ ohos_unittest("context_container_by_mock_bms_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
@@ -767,6 +769,7 @@ ohos_unittest("assert_fault_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
@@ -816,7 +819,6 @@ ohos_unittest("dump_runtime_helper_test") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "//third_party/googletest:gtest_main",
-    "//third_party/jsoncpp",
   ]
 
   external_deps = [
@@ -825,6 +827,7 @@ ohos_unittest("dump_runtime_helper_test") {
     "faultloggerd:libfaultloggerd",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "napi:ace_napi",
   ]
 }
@@ -857,6 +860,7 @@ ohos_unittest("extension_plugin_info_test") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "napi:ace_napi",
   ]
 }
@@ -879,6 +883,7 @@ ohos_unittest("idle_time_test") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -907,7 +912,6 @@ ohos_unittest("dump_runtime_helper_second_test") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "//third_party/googletest:gtest_main",
-    "//third_party/jsoncpp",
   ]
 
   external_deps = [
@@ -917,6 +921,7 @@ ohos_unittest("dump_runtime_helper_second_test") {
     "faultloggerd:libfaultloggerd",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "napi:ace_napi",
   ]
 }
@@ -943,7 +948,6 @@ ohos_unittest("native_lib_util_test") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "//third_party/googletest:gtest_main",
-    "//third_party/jsoncpp",
   ]
 
   external_deps = [
@@ -953,6 +957,7 @@ ohos_unittest("native_lib_util_test") {
     "faultloggerd:libfaultloggerd",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "napi:ace_napi",
   ]
 }

@@ -29,7 +29,7 @@ void JSAppForegroundStateObserver::OnAppStateChanged(const AppStateData &appStat
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!valid_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "invalid appmgr");
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid appMgr");
         return;
     }
     wptr<JSAppForegroundStateObserver> self = this;
@@ -76,7 +76,7 @@ void JSAppForegroundStateObserver::CallJsFunction(
     napi_value callResult = nullptr;
     napi_status status = napi_call_function(env_, value, method, argc, argv, &callResult);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::APPMGR, "call js func failed %{public}d.", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "call failed %{public}d", status);
     }
     TAG_LOGD(AAFwkTag::APPMGR, "end");
 }

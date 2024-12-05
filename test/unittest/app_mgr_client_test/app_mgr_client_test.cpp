@@ -1469,5 +1469,18 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessDependedOnWeb_001, TestSize.L
     appMgrClient->KillProcessDependedOnWeb();
     EXPECT_NE(appMgrClient->GetRemoteObject(), nullptr);
 }
+
+/**
+ * @tc.name: AppMgrClient_SendAppSpawnUninstallDebugHapMsg_001
+ * @tc.desc: SendAppSpawnUninstallDebugHapMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_SendAppSpawnUninstallDebugHapMsg_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+    int ret = appMgrClient->SendAppSpawnUninstallDebugHapMsg(ERROR_USER_ID);
+    EXPECT_EQ(ret, AppMgrResultCode::RESULT_OK);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

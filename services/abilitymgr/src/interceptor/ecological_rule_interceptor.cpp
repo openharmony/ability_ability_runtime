@@ -28,16 +28,11 @@ namespace {
 constexpr const char* ABILITY_SUPPORT_ECOLOGICAL_RULEMGRSERVICE =
     "persist.sys.abilityms.support.ecologicalrulemgrservice";
 constexpr const char* BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
-constexpr const char* START_ABILITY_AS_CALLER_SKIP_ERMS = "ability.params.skipErms";
 constexpr int32_t ERMS_ISALLOW_RESULTCODE = 10;
 }
 ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (param.isStartAsCaller && param.want.GetBoolParam(START_ABILITY_AS_CALLER_SKIP_ERMS, false)) {
-        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "start as caller, skip erms");
-        return ERR_OK;
-    }
     if (StartAbilityUtils::skipErms) {
         StartAbilityUtils::skipErms = false;
         return ERR_OK;
@@ -51,6 +46,10 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
     ExperienceRule rule;
     AAFwk::Want newWant = param.want;
     newWant.RemoveAllFd();
+    if (param.isStartAsCaller) {
+        TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "isAsCaller");
+        callerInfo.isAsCaller = true;
+    }
     InitErmsCallerInfo(newWant, param.abilityInfo, callerInfo, param.userId, param.callerToken);
 
     int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
@@ -106,15 +105,16 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
     want.SetElement(launchWant.GetElement());
 
     int32_t appIndex = 0;
-    StartAbilityUtils::startAbilityInfo = StartAbilityInfo::CreateStartAbilityInfo(want,
+    auto startAbilityInfo = StartAbilityInfo::CreateStartAbilityInfo(want,
         userId, appIndex);
-    if (StartAbilityUtils::startAbilityInfo->status != ERR_OK) {
+    if (startAbilityInfo == nullptr || startAbilityInfo->status != ERR_OK) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "Get targetApplicationInfo failed");
         return false;
     }
 
     ErmsCallerInfo callerInfo;
-    InitErmsCallerInfo(want, nullptr, callerInfo, userId);
+    InitErmsCallerInfo(want, std::make_shared<AppExecFwk::AbilityInfo>(startAbilityInfo->abilityInfo),
+        callerInfo, userId);
 
     ExperienceRule rule;
     auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(want,

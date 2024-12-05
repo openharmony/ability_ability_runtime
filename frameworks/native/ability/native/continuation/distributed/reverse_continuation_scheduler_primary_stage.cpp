@@ -33,14 +33,14 @@ void ReverseContinuationSchedulerPrimaryStage::NotifyReplicaTerminated()
     auto task = [weak]() {
         auto reverseContinuationSchedulerPrimary = weak.promote();
         if (reverseContinuationSchedulerPrimary == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTINUATION, "reverseContinuationSchedulerPrimary is nullptr");
+            TAG_LOGE(AAFwkTag::CONTINUATION, "null reverseContinuationSchedulerPrimary");
             return;
         }
         reverseContinuationSchedulerPrimary->HandlerNotifyReplicaTerminated();
     };
 
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "mainHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null mainHandler_");
         return;
     }
 
@@ -58,14 +58,14 @@ bool ReverseContinuationSchedulerPrimaryStage::ContinuationBack(const AAFwk::Wan
     auto task = [weak, want]() {
         auto reverseContinuationSchedulerPrimary = weak.promote();
         if (reverseContinuationSchedulerPrimary == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTINUATION, "reverseContinuationSchedulerPrimary is nullptr.");
+            TAG_LOGE(AAFwkTag::CONTINUATION, "null reverseContinuationSchedulerPrimary");
             return;
         }
         reverseContinuationSchedulerPrimary->HandlerContinuationBack(want);
     };
 
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "mainHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null mainHandler_ ");
         return false;
     }
 
@@ -82,7 +82,7 @@ void ReverseContinuationSchedulerPrimaryStage::HandlerNotifyReplicaTerminated()
     TAG_LOGD(AAFwkTag::CONTINUATION, "Begin");
     std::shared_ptr<IReverseContinuationSchedulerPrimaryHandler> continuationHandler = continuationHandler_.lock();
     if (continuationHandler == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationHandler is nullptr.");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationHandler");
         return;
     }
     continuationHandler->NotifyReplicaTerminated();
@@ -93,7 +93,7 @@ void ReverseContinuationSchedulerPrimaryStage::HandlerContinuationBack(const AAF
     TAG_LOGD(AAFwkTag::CONTINUATION, "Begin");
     std::shared_ptr<IReverseContinuationSchedulerPrimaryHandler> continuationHandler = continuationHandler_.lock();
     if (continuationHandler == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationHandler is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationHandler");
         return;
     }
     continuationHandler->ContinuationBack(want);

@@ -80,11 +80,13 @@ struct AbilityCallerInfo : public Parcelable {
     AppExecFwk::ExtensionAbilityType targetExtensionAbilityType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
     int32_t userId = 0;
     int32_t targetApplicationReservedFlag = 0;
+    bool isAsCaller = false;
 
     bool ReadFromParcel(Parcel &parcel);
 
     bool Marshalling(Parcel &parcel) const override;
     bool DoMarshallingOne(Parcel& parcel) const;
+    bool DoMarshallingTwo(Parcel &parcel) const;
 
     static AbilityCallerInfo *Unmarshalling(Parcel &parcel);
 

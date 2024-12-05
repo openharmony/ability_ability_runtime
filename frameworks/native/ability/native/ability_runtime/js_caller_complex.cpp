@@ -309,7 +309,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::DEFAULT, "begin");
         if (jsReleaseCallBackObj_ == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "null jsreleaseObj");
+            TAG_LOGE(AAFwkTag::DEFAULT, "null jsReleaseObj");
             return;
         }
 
@@ -436,13 +436,13 @@ private:
         }
 
         if (callerCallBackObj_ == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "CallBacker null");
+            TAG_LOGE(AAFwkTag::DEFAULT, "null callBacker");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         }
 
         auto param1 = info.argv[0];
         if (param1 == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "param1 null");
+            TAG_LOGE(AAFwkTag::DEFAULT, "null param1");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         }
 
@@ -501,7 +501,7 @@ napi_value CreateJsCallerComplex(
     auto jsCaller = std::make_unique<JsCallerComplex>(env, releaseCallFunc, callee, callerCallBack);
     auto remoteObj = jsCaller->GetRemoteObject();
     if (remoteObj == nullptr) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "remoteObj null");
+        TAG_LOGE(AAFwkTag::DEFAULT, "null remoteObj");
         return CreateJsUndefined(env);
     }
 
@@ -521,12 +521,12 @@ napi_value CreateJsCallerComplex(
 napi_value CreateJsCalleeRemoteObject(napi_env env, sptr<IRemoteObject> callee)
 {
     if (callee == nullptr) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "null data");
+        TAG_LOGE(AAFwkTag::DEFAULT, "null callee");
         return CreateJsUndefined(env);
     }
     napi_value napiRemoteObject = NAPI_ohos_rpc_CreateJsRemoteObject(env, callee);
     if (napiRemoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "remoteObj null");
+        TAG_LOGE(AAFwkTag::DEFAULT, "null remoteObj");
     }
     return napiRemoteObject;
 }

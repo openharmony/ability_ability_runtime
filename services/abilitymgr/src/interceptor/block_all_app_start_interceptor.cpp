@@ -25,7 +25,11 @@ ErrCode BlockAllAppStartInterceptor::DoProcess(AbilityInterceptorParam param)
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "shouldBlockAllAppStartFunc_ is nullptr");
         return ERR_INVALID_VALUE;
     }
-    return param.shouldBlockAllAppStartFunc_() ? ERR_ALL_APP_START_BLOCKED : ERR_OK;
+    if (param.shouldBlockAllAppStartFunc_()) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "blocking app start due to low memory");
+        return ERR_ALL_APP_START_BLOCKED;
+    }
+    return ERR_OK;
 }
 } // namespace AAFwk
 } // namespace OHOS

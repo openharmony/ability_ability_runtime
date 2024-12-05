@@ -38,10 +38,8 @@ ohos_unittest("cj_application_context_test") {
     "cj_application_context_test.cpp",
   ]
 
-  configs = [
-    "${c_utils_base_path}:utils_config",
-    "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_public_config",
-  ]
+  configs =
+      [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_public_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]

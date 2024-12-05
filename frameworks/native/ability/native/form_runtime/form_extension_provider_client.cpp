@@ -37,7 +37,7 @@ int FormExtensionProviderClient::AcquireProviderFormInfo(const AppExecFwk::FormJ
     TAG_LOGI(AAFwkTag::FORM_EXT, "formId:%{public}" PRId64, formJsInfo.formId);
     sptr<IFormSupply> formSupplyClient = iface_cast<IFormSupply>(callerToken);
     if (formSupplyClient == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "IFormSupply null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null IFormSupply");
         return ERR_APPEXECFWK_FORM_BIND_PROVIDER_FAILED;
     }
 
@@ -78,7 +78,7 @@ void FormExtensionProviderClient::AcquireFormExtensionProviderInfo(const AppExec
     FormProviderInfo formProviderInfo;
     std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
     if (ownerFormExtension == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Owner null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
         connectWant.SetParam(Constants::PROVIDER_FLAG, ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY);
     } else {
         Want createWant(want);
@@ -150,7 +150,7 @@ void FormExtensionProviderClient::NotifyFormExtensionDelete(const int64_t formId
     }
     std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
     if (ownerFormExtension == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Owner null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
         errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
     } else {
         ownerFormExtension->OnDestroy(formId);
@@ -185,7 +185,7 @@ void FormExtensionProviderClient::NotifyFormExtensionsDelete(const std::vector<i
     int errorCode = ERR_OK;
     std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
     if (ownerFormExtension == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Owner null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
         errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
     } else {
         for (int64_t formId : formIds) {
@@ -222,7 +222,7 @@ void FormExtensionProviderClient::NotifyFormExtensionUpdate(const int64_t formId
     int errorCode = ERR_OK;
     std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
     if (ownerFormExtension == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Owner null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
         errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
     } else {
         ownerFormExtension->OnUpdate(formId, want.GetParams());
@@ -259,7 +259,7 @@ void FormExtensionProviderClient::EventNotifyExtension(const std::vector<int64_t
     int errorCode = ERR_OK;
     std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
     if (ownerFormExtension == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Owner null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
         errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
     } else {
         std::map<int64_t, int32_t> formEventsMap;
@@ -299,7 +299,7 @@ void FormExtensionProviderClient::NotifyFormExtensionCastTempForm(const int64_t 
     int errorCode = ERR_OK;
     std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
     if (ownerFormExtension == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Owner null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
         errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
     } else {
         ownerFormExtension->OnCastToNormal(formId);
@@ -334,7 +334,7 @@ void FormExtensionProviderClient::FireFormExtensionEvent(const int64_t formId, c
     int errorCode = ERR_OK;
     std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
     if (ownerFormExtension == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Owner null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
         errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
     } else {
         ownerFormExtension->OnEvent(formId, message);
@@ -372,7 +372,7 @@ void FormExtensionProviderClient::NotifyFormExtensionAcquireState(const Want &wa
     FormState state = FormState::UNKNOWN;
     std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
     if (ownerFormExtension == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Owner null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
     } else {
         state = ownerFormExtension->OnAcquireFormState(wantArg);
     }
@@ -382,7 +382,7 @@ void FormExtensionProviderClient::NotifyFormExtensionAcquireState(const Want &wa
 void FormExtensionProviderClient::SetOwner(const std::shared_ptr<FormExtension> formExtension)
 {
     if (formExtension == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "FormExtension null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null formExtension");
         return;
     }
 
@@ -393,7 +393,7 @@ void FormExtensionProviderClient::SetOwner(const std::shared_ptr<FormExtension> 
 void FormExtensionProviderClient::ClearOwner(const std::shared_ptr<FormExtension> formExtension)
 {
     if (formExtension == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "FormExtension null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null formExtension");
         return;
     }
 
@@ -436,7 +436,7 @@ std::pair<ErrCode, ErrCode> FormExtensionProviderClient::CheckParam(const Want &
     }
     sptr<IFormSupply> formSupplyClient = iface_cast<IFormSupply>(callerToken);
     if (formSupplyClient == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "IFormSupply null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null formSupplyClient");
         return std::pair<ErrCode, ErrCode>(ERR_APPEXECFWK_FORM_BIND_PROVIDER_FAILED,
             ERR_APPEXECFWK_FORM_BIND_PROVIDER_FAILED);
     }
@@ -462,7 +462,7 @@ int32_t FormExtensionProviderClient::AcquireShareFormData(int64_t formId, const 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
     auto formCall = iface_cast<IFormSupply>(formSupplyCallback);
     if (formCall == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "IFormSupply null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null formCall");
         return ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
     }
 
@@ -483,7 +483,7 @@ bool FormExtensionProviderClient::AcquireFormExtensionProviderShareFormInfo(
     TAG_LOGD(AAFwkTag::FORM_EXT, "called");
     std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
     if (ownerFormExtension == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Owner null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
         return false;
     }
 
@@ -503,7 +503,7 @@ int32_t FormExtensionProviderClient::AcquireFormData(int64_t formId, const sptr<
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
     auto formCall = iface_cast<IFormSupply>(formSupplyCallback);
     if (formCall == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Callback null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null formCall");
         return ERR_APPEXECFWK_FORM_INVALID_PARAM;
     }
 

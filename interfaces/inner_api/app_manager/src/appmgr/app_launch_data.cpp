@@ -237,7 +237,7 @@ bool UserTestRecord::ReadFromParcel(Parcel &parcel)
     AAFwk::Want *wantPtr = parcel.ReadParcelable<AAFwk::Want>();
     if (wantPtr == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "wantPtr is nullptr");
-        return ERR_INVALID_VALUE;
+        return false;
     }
     want = *wantPtr;
     delete wantPtr;

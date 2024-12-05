@@ -234,7 +234,7 @@ void UIAbilityImpl::ExecuteInsightIntentDone(uint64_t intentId, const InsightInt
     TAG_LOGI(AAFwkTag::UIABILITY, "intentId %{public}" PRIu64"", intentId);
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token_, intentId, result);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "notify execute done faild");
+        TAG_LOGE(AAFwkTag::UIABILITY, "notify execute done failed");
     }
 }
 #ifdef SUPPORT_SCREEN
@@ -413,7 +413,7 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
 void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:Call");
+    TAG_LOGI(AAFwkTag::UIABILITY, "wnd call, AfterForeground");
     auto owner = owner_.lock();
     if (owner == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null owner");
@@ -435,7 +435,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
     }
 
     if (needNotifyAMS) {
-        TAG_LOGI(AAFwkTag::UIABILITY, "notify ability manager service");
+        TAG_LOGI(AAFwkTag::UIABILITY, "wnd call, notify ability manager service");
         entry = "AbilityManagerClient::AbilityTransitionDone";
         FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
         owner->lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND_NEW;
@@ -452,7 +452,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 void UIAbilityImpl::WindowLifeCycleImpl::AfterBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:call");
+    TAG_LOGI(AAFwkTag::UIABILITY, "wnd call, AfterBackground");
     std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::AfterBackground";
     FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
 
@@ -487,7 +487,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterUnfocused()
 
 void UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed(int32_t type)
 {
-    TAG_LOGE(AAFwkTag::UIABILITY, "scb call, ForegroundFailed");
+    TAG_LOGE(AAFwkTag::UIABILITY, "wnd call, ForegroundFailed");
     std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed; GoForeground failed";
     FreezeUtil::GetInstance().AppendLifecycleEvent(token_, entry);
     AppExecFwk::PacMap restoreData;
@@ -542,7 +542,7 @@ void UIAbilityImpl::Foreground(const AAFwk::Want &want)
 
 void UIAbilityImpl::WindowLifeCycleImpl::BackgroundFailed(int32_t type)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGE(AAFwkTag::UIABILITY, "wnd call, BackgroundFailed");
     if (type == static_cast<int32_t>(OHOS::Rosen::WMError::WM_DO_NOTHING)) {
         AppExecFwk::PacMap restoreData;
         AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
@@ -655,7 +655,7 @@ void UIAbilityImpl::HandleExecuteInsightIntentForeground(const AAFwk::Want &want
     auto executeParam = std::make_shared<InsightIntentExecuteParam>();
     auto ret = InsightIntentExecuteParam::GenerateFromWant(want, *executeParam);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "invalid  params");
+        TAG_LOGE(AAFwkTag::UIABILITY, "invalid params");
         HandleForegroundNewState(want, bflag);
         return;
     }
@@ -668,7 +668,7 @@ void UIAbilityImpl::HandleExecuteInsightIntentForeground(const AAFwk::Want &want
     auto intentCb = std::make_unique<InsightIntentExecutorAsyncCallback>();
     intentCb.reset(InsightIntentExecutorAsyncCallback::Create());
     if (intentCb == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "create async callback failed");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null intentCb");
         HandleForegroundNewState(want, bflag);
         return;
     }
@@ -736,7 +736,7 @@ void UIAbilityImpl::PostForegroundInsightIntent()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (ability_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "invalid params ");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return;
     }
 
@@ -782,7 +782,7 @@ bool UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want
     auto intentCb = std::make_unique<InsightIntentExecutorAsyncCallback>();
     intentCb.reset(InsightIntentExecutorAsyncCallback::Create());
     if (intentCb == nullptr && !onlyExecuteIntent) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "create async callback failed");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null intentCb");
         Background();
         return true;
     }

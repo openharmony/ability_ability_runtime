@@ -91,9 +91,11 @@ ohos_fuzztest("AbilityFrameworksNativeOhosJsEnvLoggerFuzzTest") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "safwk:api_cache_manager",
   ]
 
   if (background_task_mgr_continuous_task_enable) {

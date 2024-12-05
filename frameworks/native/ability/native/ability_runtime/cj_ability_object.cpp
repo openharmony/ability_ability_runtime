@@ -15,7 +15,9 @@
 
 #include "ability_runtime/cj_ability_object.h"
 
+#include "cj_utils_ffi.h"
 #include "hilog_tag_wrapper.h"
+#include "want_params_wrapper.h"
 
 using namespace OHOS;
 using namespace OHOS::AppExecFwk;
@@ -34,7 +36,7 @@ void RegisterCJAbilityFuncs(void (*registerFunc)(CJAbilityFuncs*))
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (g_cjAbilityFuncs != nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "repeated registration for cj functions");
+        TAG_LOGE(AAFwkTag::UIABILITY, "repeated registration");
         return;
     }
 
@@ -58,8 +60,7 @@ std::shared_ptr<CJAbilityObject> CJAbilityObject::LoadModule(const std::string& 
     }
     auto id = g_cjAbilityFuncs->cjAbilityCreate(name.c_str());
     if (id == 0) {
-        TAG_LOGE(AAFwkTag::UIABILITY,
-            "failed to invoke , ability: %{public}s is not registered", name.c_str());
+        TAG_LOGE(AAFwkTag::UIABILITY, "not registered %{public}s", name.c_str());
         return nullptr;
     }
     return std::make_shared<CJAbilityObject>(id);
@@ -83,7 +84,9 @@ void CJAbilityObject::OnStart(const AAFwk::Want& want, const AAFwk::LaunchParam&
     CJLaunchParam param;
     param.launchReason = launchParam.launchReason;
     param.lastExitReason = launchParam.lastExitReason;
+    param.lastExitMessage = CreateCStringFromString(launchParam.lastExitMessage);
     g_cjAbilityFuncs->cjAbilityOnStart(id_, wantHandle, param);
+    free(param.lastExitMessage);
 }
 
 void CJAbilityObject::OnStop() const
@@ -162,12 +165,32 @@ bool CJAbilityObject::OnBackPress(bool defaultRet) const
     return g_cjAbilityFuncs->cjAbilityOnBackPress(id_);
 }
 
+bool CJAbilityObject::OnPrepareTerminate() const
+{
+    if (g_cjAbilityFuncs == nullptr || g_cjAbilityFuncs->cjAbilityOnPrepareTerminate == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
+        return false;
+    }
+    return g_cjAbilityFuncs->cjAbilityOnPrepareTerminate(id_);
+}
+
 void CJAbilityObject::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration) const
 {
-    if (g_cjAbilityFuncs == nullptr) {
+    if (g_cjAbilityFuncs == nullptr || g_cjAbilityFuncs->cjAbilityOnConfigurationUpdate == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
         return;
     }
+    auto cfg = CreateCConfiguration(*configuration);
+    return g_cjAbilityFuncs->cjAbilityOnConfigurationUpdate(id_, cfg);
+}
+
+void CJAbilityObject::OnMemoryLevel(int32_t level) const
+{
+    if (g_cjAbilityFuncs == nullptr || g_cjAbilityFuncs->cjAbilityOnMemoryLevel == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
+        return;
+    }
+    g_cjAbilityFuncs->cjAbilityOnMemoryLevel(id_, level);
 }
 
 void CJAbilityObject::OnNewWant(const AAFwk::Want& want, const AAFwk::LaunchParam& launchParam) const
@@ -180,7 +203,9 @@ void CJAbilityObject::OnNewWant(const AAFwk::Want& want, const AAFwk::LaunchPara
     CJLaunchParam param;
     param.launchReason = launchParam.launchReason;
     param.lastExitReason = launchParam.lastExitReason;
+    param.lastExitMessage = CreateCStringFromString(launchParam.lastExitMessage);
     g_cjAbilityFuncs->cjAbilityOnNewWant(id_, wantHandle, param);
+    free(param.lastExitMessage);
 }
 
 void CJAbilityObject::Dump(const std::vector<std::string>& params, std::vector<std::string>& info) const
@@ -208,11 +233,48 @@ void CJAbilityObject::Dump(const std::vector<std::string>& params, std::vector<s
 
 int32_t CJAbilityObject::OnContinue(AAFwk::WantParams& wantParams) const
 {
-    if (g_cjAbilityFuncs == nullptr) {
+    if (g_cjAbilityFuncs == nullptr ||
+        g_cjAbilityFuncs->cjAbilityOnContinueWithParams == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
         return ContinuationManager::OnContinueResult::ON_CONTINUE_ERR;
     }
-    return 0;
+    auto params = CreateCStringFromString(OHOS::AAFwk::WantParamWrapper(wantParams).ToString());
+    auto cjNumberParmas = g_cjAbilityFuncs->cjAbilityOnContinueWithParams(id_, params);
+    auto returnParams = std::string(cjNumberParmas.params);
+    free(params);
+    free(cjNumberParmas.params);
+    wantParams = OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(returnParams);
+    return cjNumberParmas.numberResult;
+}
+
+int32_t CJAbilityObject::OnSaveState(int32_t reason, WantParams &wantParams) const
+{
+    if (g_cjAbilityFuncs == nullptr || g_cjAbilityFuncs->cjAbilityOnSaveState == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
+        return -1;
+    }
+    auto params = CreateCStringFromString(OHOS::AAFwk::WantParamWrapper(wantParams).ToString());
+    auto cjNumberParmas = g_cjAbilityFuncs->cjAbilityOnSaveState(id_, reason, params);
+    auto returnParams = std::string(cjNumberParmas.params);
+    free(params);
+    free(cjNumberParmas.params);
+    wantParams = OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(returnParams);
+    return cjNumberParmas.numberResult;
+}
+
+int32_t CJAbilityObject::OnShare(WantParams &wantParams) const
+{
+    if (g_cjAbilityFuncs == nullptr || g_cjAbilityFuncs->cjAbilityOnShare == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
+        return -1;
+    }
+    auto params = CreateCStringFromString(OHOS::AAFwk::WantParamWrapper(wantParams).ToString());
+    auto cJReturnParams = g_cjAbilityFuncs->cjAbilityOnShare(id_, params);
+    auto returnParams = std::string(cJReturnParams);
+    free(params);
+    free(cJReturnParams);
+    wantParams = OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(returnParams);
+    return ERR_OK;
 }
 
 void CJAbilityObject::Init(AbilityHandle ability) const

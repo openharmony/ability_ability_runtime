@@ -33,6 +33,7 @@ struct KeepAliveAbilityInfo {
     std::string moduleName;
     std::string abilityName;
     int32_t userId = 0;
+    int32_t appCloneIndex = 0;
 };
 
 /**
@@ -100,32 +101,20 @@ public:
      */
     bool GetKeepAliveBundleInfosForUser(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
 
-    /**
-     * Start failed keep-alive abilities.
-     *
-     */
-    void StartFailedKeepAliveAbilities();
-
 private:
     KeepAliveProcessManager();
     ~KeepAliveProcessManager();
 
     int32_t CheckPermission();
     int32_t CheckPermissionForEDM();
-    void AddFailedKeepAliveAbility(const std::string &bundleName, const std::string &moduleName,
-        const std::string &abilityName, int32_t userId);
     void StartKeepAliveProcessWithMainElementPerBundle(const AppExecFwk::BundleInfo &bundleInfo,
         int32_t userId);
-    int32_t StartAbility(const std::string &bundleName, const std::string &moduleName,
-        const std::string &abilityName, int32_t userId);
+    int32_t StartAbility(const KeepAliveAbilityInfo &info);
     void AfterStartKeepAliveApp(const AppExecFwk::BundleInfo &bundleInfo,
         const std::string &mainElementName, int32_t userId);
     bool IsRunningAppInStatusBar(std::shared_ptr<AbilityManagerService> abilityMgr,
         const AppExecFwk::BundleInfo &bundleInfo);
 
-    std::mutex failedKeepAliveAbilityInfoMutex_;
-    std::list<KeepAliveAbilityInfo> failedKeepAliveAbilityInfos_;
-    std::atomic_bool unlockedAfterBoot_ = false;
     DISALLOW_COPY_AND_MOVE(KeepAliveProcessManager);
 };
 }  // namespace AAFwk

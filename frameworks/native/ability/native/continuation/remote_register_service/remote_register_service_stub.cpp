@@ -27,7 +27,7 @@ int RemoteRegisterServiceStub::OnRemoteRequest(
     std::u16string descriptor = IRemoteRegisterService::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "descriptor is not equal to remote");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "descriptor not remote");
         return ERR_INVALID_STATE;
     }
     switch (code) {
@@ -54,7 +54,7 @@ int RemoteRegisterServiceStub::RegisterInner(MessageParcel &data, MessageParcel 
     }
     if (pExtras == nullptr) {
         reply.WriteInt32(ERR_INVALID_DATA);
-        TAG_LOGE(AAFwkTag::CONTINUATION, "error to read ExtraParams");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null pExtras");
         return ERR_INVALID_DATA;
     }
 
@@ -63,7 +63,7 @@ int RemoteRegisterServiceStub::RegisterInner(MessageParcel &data, MessageParcel 
         delete pExtras;
         pExtras = nullptr;
         reply.WriteInt32(ERR_NULL_OBJECT);
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to read IConnectCallback");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null object");
         return ERR_NULL_OBJECT;
     }
 
@@ -103,7 +103,7 @@ int RemoteRegisterServiceStub::ShowDeviceListInner(MessageParcel &data, MessageP
     }
     if (pExtras == nullptr) {
         reply.WriteInt32(ERR_INVALID_DATA);
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to read ExtraParams");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null pExtras");
         return ERR_INVALID_DATA;
     }
 

@@ -69,6 +69,13 @@ constexpr int32_t DECIMAL_BASE = 10;
     }
     return std::string(buffer) + "." + milliStr;
 }
+
+[[maybe_unused]] static int64_t CurrentTimeMillis()
+{
+    auto now = std::chrono::steady_clock::now();
+    auto milliSecs = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    return milliSecs.count();
+}
 }  // namespace TimeUtil
 }  // namespace OHOS::AbilityRuntime
 #endif  // OHOS_ABILITY_RUNTIME_TIME_UTIL_H

@@ -66,7 +66,7 @@ napi_value JsAutoFillExtensionContext::OnReloadInModal(napi_env env, NapiCallbac
             return;
         }
         if (ret == nullptr) {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "invalid param");
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null ret");
             return;
         }
         *ret = context->ReloadInModal(customData);
@@ -74,12 +74,12 @@ napi_value JsAutoFillExtensionContext::OnReloadInModal(napi_env env, NapiCallbac
 
     NapiAsyncTask::CompleteCallback complete = [ret = retVal](napi_env env, NapiAsyncTask &task, int32_t status) {
         if (ret == nullptr) {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "invalid param");
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null ret");
             task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
             return;
         }
         if (*ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed error %{public}d", *ret);
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "error %{public}d", *ret);
             task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*ret)));
             return;
         }

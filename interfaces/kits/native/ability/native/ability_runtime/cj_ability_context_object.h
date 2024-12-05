@@ -19,13 +19,7 @@
 #include "cj_want_ffi.h"
 #include "cj_ability_context_broker.h"
 
-
 extern "C" {
-struct CJAbilityResult {
-    int32_t resultCode;
-    WantHandle wantHandle;
-};
-
 struct CJPermissionRequestResult {
     VectorStringHandle permissions;
     VectorInt32Handle authResults;

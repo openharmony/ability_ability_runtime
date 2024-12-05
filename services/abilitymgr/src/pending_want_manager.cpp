@@ -221,7 +221,7 @@ int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target, const Sende
     return record->SenderInner(info);
 }
 
-void PendingWantManager::CancelWantSender(const bool isSystemApp, const sptr<IWantSender> &sender)
+void PendingWantManager::CancelWantSender(const bool isSystemAppCall, const sptr<IWantSender> &sender)
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "begin");
 
@@ -231,7 +231,7 @@ void PendingWantManager::CancelWantSender(const bool isSystemApp, const sptr<IWa
     }
 
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall && !isSystemApp) {
+    if (!isSaCall && !isSystemAppCall) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "cannot send");
         return;
     }

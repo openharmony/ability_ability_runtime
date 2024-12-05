@@ -27,7 +27,6 @@ ohos_unittest("cj_ability_object_test") {
 
   sources = [ "cj_ability_object_test.cpp" ]
 
-  configs = [ "${c_utils_base_path}:utils_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -44,6 +43,7 @@ ohos_unittest("cj_ability_object_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
+    "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:event_report",
     "//third_party/googletest:gmock_main",

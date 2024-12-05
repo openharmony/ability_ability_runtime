@@ -48,6 +48,7 @@ ohos_unittest("uri_permission_utils_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "storage_service:storage_manager_sa_proxy",

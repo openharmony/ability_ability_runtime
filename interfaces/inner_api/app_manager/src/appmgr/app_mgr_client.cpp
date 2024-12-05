@@ -949,7 +949,7 @@ bool AppMgrClient::SetAppFreezeFilter(int32_t pid)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+        return false;
     }
     return service->SetAppFreezeFilter(pid);
 }
@@ -1412,14 +1412,34 @@ bool AppMgrClient::IsCallerKilling(const std::string& callerKey) const
     return amsService->IsCallerKilling(callerKey);
 }
 
-AppMgrResultCode AppMgrClient::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+AppMgrResultCode AppMgrClient::IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
     bool &isRunning)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
-        return AppMgrResultCode(service->IsAppRunning(bundleName, appCloneIndex, isRunning));
+        return AppMgrResultCode(service->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning));
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+AppMgrResultCode AppMgrClient::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
+{
+    if (mgrHolder_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null mgrHolder_");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null service");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null amsService");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    amsService->SendAppSpawnUninstallDebugHapMsg(userId);
+    return AppMgrResultCode::RESULT_OK;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

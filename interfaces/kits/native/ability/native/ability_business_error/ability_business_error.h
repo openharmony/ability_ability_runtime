@@ -180,6 +180,9 @@ enum class AbilityErrorCode {
     // Target application not found.
     ERROR_CODE_GET_BUNFLE_INFO_FAILED = 16000081,
 
+    // UIAbility is in starting state.
+    ERROR_CODE_UI_ABILITY_IS_STARTING = 16000082,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 

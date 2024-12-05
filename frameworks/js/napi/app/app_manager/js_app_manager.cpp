@@ -125,7 +125,7 @@ private:
             return CreateJsUndefined(env);
         }
         if (appManager_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "null appManager");
+            TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
             return CreateJsUndefined(env);
         }
         static int64_t serialNumber = 0;
@@ -185,7 +185,7 @@ private:
                     return;
                 }
                 if (observer == nullptr || appManager == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPMGR, "observer or appManager nullptr");
+                    TAG_LOGE(AAFwkTag::APPMGR, "null observer or appMgr");
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "observer or appManager nullptr"));
                     return;
                 }
@@ -194,7 +194,7 @@ private:
                     task.Resolve(env, CreateJsUndefined(env));
                     TAG_LOGD(AAFwkTag::APPMGR, "success size:%{public}zu", observer->GetJsObserverMapSize());
                 } else {
-                    TAG_LOGE(AAFwkTag::APPMGR, "failed error:%{public}d", ret);
+                    TAG_LOGE(AAFwkTag::APPMGR, "error:%{public}d", ret);
                     task.Reject(env, CreateJsError(env, ret, "UnregisterApplicationStateObserver failed"));
                 }
             };
@@ -223,7 +223,7 @@ private:
                     return;
                 }
                 if (appManager == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPMGR, "appManager nullptr");
+                    TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "appManager nullptr"));
                     return;
                 }
@@ -233,7 +233,7 @@ private:
                     TAG_LOGD(AAFwkTag::APPMGR, "success.");
                     task.Resolve(env, CreateJsAppStateDataArray(env, list));
                 } else {
-                    TAG_LOGE(AAFwkTag::APPMGR, "failed error:%{public}d", ret);
+                    TAG_LOGE(AAFwkTag::APPMGR, "error:%{public}d", ret);
                     task.Reject(env, CreateJsError(env, ret, "OnGetForegroundApplications failed"));
                 }
             };
@@ -294,7 +294,7 @@ private:
                     return;
                 }
                 if (abilityManager == nullptr) {
-                    TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                    TAG_LOGW(AAFwkTag::APPMGR, "null abilityMgr");
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
                     return;
                 }
@@ -334,7 +334,7 @@ private:
                 return;
             }
             if (abilityManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager null");
+                TAG_LOGW(AAFwkTag::APPMGR, "null abilityMgr");
                 task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
                 return;
             }
@@ -379,7 +379,7 @@ private:
                 return;
             }
             if (appManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "null appManager");
+                TAG_LOGW(AAFwkTag::APPMGR, "null appMgr");
                 task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "appManager nullptr"));
                 return;
             }
@@ -460,7 +460,7 @@ private:
                     return;
                 }
                 if (abilityManager == nullptr) {
-                    TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                    TAG_LOGW(AAFwkTag::APPMGR, "null abilityMgr");
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
                     return;
                 }
@@ -492,7 +492,7 @@ private:
                     return;
                 }
                 if (abilityManager == nullptr) {
-                    TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                    TAG_LOGW(AAFwkTag::APPMGR, "null abilityMgr");
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
                     return;
                 }

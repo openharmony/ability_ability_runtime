@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -92,12 +92,15 @@ ohos_unittest("ability_manager_service_fourth_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
+    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "relational_store:native_dataability",
+    "safwk:api_cache_manager",
     "samgr:samgr_proxy",
   ]
 

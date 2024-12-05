@@ -992,7 +992,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_001, TestSize.Level
     abilityRecord->Init();
     auto token = abilityRecord->token_;
     sptr<SessionInfo> sessionInfo = nullptr;
-    AppExecFwk::ExtensionAbilityType extensionType = ExtensionAbilityType::SERVICE;
+    AppExecFwk::ExtensionAbilityType extensionType = ExtensionAbilityType::FORM;
     sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr;
     auto ret = abilityMs->ConnectLocalAbility(want, INT_MAX, impl, token, extensionType, sessionInfo,
         true, connectInfo);

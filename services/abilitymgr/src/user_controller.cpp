@@ -26,6 +26,7 @@ namespace AAFwk {
 using namespace OHOS::AppExecFwk;
 namespace {
 const int64_t USER_SWITCH_TIMEOUT = 3 * 1000; // 3s
+constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 }
 
 UserItem::UserItem(int32_t id) : userId_(id)
@@ -81,31 +82,31 @@ void UserController::ClearAbilityUserItems(int32_t userId)
     }
 }
 
-void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, bool isAppRecovery)
+int UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, bool isAppRecovery)
 {
     if (userId < 0 || userId == USER_ID_NO_HEAD) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUserId invalid:%{public}d", userId);
         callback->OnStartUserDone(userId, INVALID_USERID_VALUE);
-        return;
+        return INVALID_USERID_VALUE;
     }
 
     if (IsCurrentUser(userId)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "StartUser current:%{public}d", userId);
         callback->OnStartUserDone(userId, ERR_OK);
-        return;
+        return ERR_OK;
     }
 
     auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
     if (!appScheduler) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null appScheduler");
-        return;
+        return ABILITY_SERVICE_NOT_CONNECTED;
     }
     appScheduler->SetEnableStartProcessFlagByUserId(userId, true);
 
     if (!IsExistOsAccount(userId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null StartUser account:%{public}d", userId);
         callback->OnStartUserDone(userId, INVALID_USERID_VALUE);
-        return;
+        return INVALID_USERID_VALUE;
     }
 
     if (GetCurrentUserId() != USER_ID_NO_HEAD && !Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -120,7 +121,7 @@ void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, boo
     if (state == STATE_STOPPING || state == STATE_SHUTDOWN) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUser user stop, userId:%{public}d", userId);
         callback->OnStartUserDone(userId, ERR_DEAD_OBJECT);
-        return;
+        return ERR_DEAD_OBJECT;
     }
 
     SetCurrentUserId(userId);
@@ -142,7 +143,7 @@ void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, boo
     }
 
     UserBootDone(userItem);
-    MoveUserToForeground(oldUserId, userId, callback, isAppRecovery);
+    return MoveUserToForeground(oldUserId, userId, callback, isAppRecovery);
 }
 
 int32_t UserController::StopUser(int32_t userId)
@@ -223,6 +224,10 @@ int32_t UserController::LogoutUser(int32_t userId)
         SetCurrentUserId(0);
     }
     appScheduler->KillProcessesByUserId(userId);
+    if (system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
+        appScheduler->SendAppSpawnUninstallDebugHapMsg(userId);
+    }
     ClearAbilityUserItems(userId);
     return 0;
 }
@@ -285,16 +290,20 @@ void UserController::SetCurrentUserId(int32_t userId)
     DelayedSingleton<AppScheduler>::GetInstance()->SetCurrentUserId(userId);
 }
 
-void UserController::MoveUserToForeground(int32_t oldUserId, int32_t newUserId, sptr<IUserCallback> callback,
+int UserController::MoveUserToForeground(int32_t oldUserId, int32_t newUserId, sptr<IUserCallback> callback,
     bool isAppRecovery)
 {
     auto manager = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (!manager) {
-        return;
+        return ABILITY_SERVICE_NOT_CONNECTED;
     }
-    manager->SwitchToUser(oldUserId, newUserId, callback, isAppRecovery);
+    auto ret = manager->SwitchToUser(oldUserId, newUserId, callback, isAppRecovery);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SwitchToUser failed: %{public}d", ret);
+    }
     BroadcastUserBackground(oldUserId);
     BroadcastUserForeground(newUserId);
+    return ret;
 }
 
 void UserController::UserBootDone(std::shared_ptr<UserItem> &item)
@@ -306,7 +315,7 @@ void UserController::UserBootDone(std::shared_ptr<UserItem> &item)
 
     std::lock_guard<ffrt::mutex> guard(userLock_);
     auto it = userItems_.find(userId);
-    if (it != userItems_.end()) {
+    if (it == userItems_.end()) {
         return;
     }
 

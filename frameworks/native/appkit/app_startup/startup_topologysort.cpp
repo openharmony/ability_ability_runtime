@@ -23,7 +23,7 @@ int32_t StartupTopologySort::Sort(const std::map<std::string, std::shared_ptr<St
 {
     startupSortResult = std::make_shared<StartupSortResult>();
     if (startupSortResult == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "Create result obj fail");
+        TAG_LOGE(AAFwkTag::STARTUP, "null startupSortResult");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     std::deque<std::string> zeroDeque;

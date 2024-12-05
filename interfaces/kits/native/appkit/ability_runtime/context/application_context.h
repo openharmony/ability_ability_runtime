@@ -152,6 +152,7 @@ public:
 
     using SelfType = ApplicationContext;
     static const size_t CONTEXT_TYPE_ID;
+    std::string GetDataDir();
 
 protected:
     bool IsContext(size_t contextTypeId) override
@@ -175,6 +176,8 @@ private:
     int32_t appIndex_ = 0;
     int32_t appMode_ = 0;
     std::string instanceKey_;
+    std::string dataDir_;
+    std::mutex dataDirMutex_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

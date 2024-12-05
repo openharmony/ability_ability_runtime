@@ -35,7 +35,6 @@ ohos_unittest("cj_ability_ffi_mock_test") {
 
   sources = [ "cj_ability_ffi_mock_test.cpp" ]
 
-  configs = [ "${c_utils_base_path}:utils_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -69,6 +68,7 @@ ohos_unittest("cj_ability_ffi_mock_test") {
     "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",

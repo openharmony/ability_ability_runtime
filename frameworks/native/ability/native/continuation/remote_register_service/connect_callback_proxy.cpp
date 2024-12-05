@@ -31,7 +31,7 @@ void ConnectCallbackProxy::Connect(const string &deviceId, const string &deviceT
     MessageParcel data;
     if (!data.WriteInterfaceToken(IConnectCallback::GetDescriptor()) || !data.WriteString(deviceId) ||
         !data.WriteString(deviceType)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "params is wrong");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "params wrong");
         return;
     }
     RemoteRequest(data, COMMAND_CONNECT);
@@ -45,7 +45,7 @@ void ConnectCallbackProxy::Disconnect(const string &deviceId)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(IConnectCallback::GetDescriptor()) || !data.WriteString(deviceId)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "params is wrong");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "params wrong");
         return;
     }
     RemoteRequest(data, COMMAND_DISCONNECT);
@@ -56,7 +56,7 @@ void ConnectCallbackProxy::RemoteRequest(MessageParcel &data, int commandDisconn
     MessageOption option;
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "object is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remote");
         return;
     }
     remote->SendRequest(commandDisconnect, data, reply, option);

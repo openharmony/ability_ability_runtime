@@ -46,7 +46,6 @@ public:
         const std::string &callerBundleName = "", const std::string &targetBundleName = "");
 
     void SetContentUriCheckResult(const std::vector<bool> &contentUriResult);
-    
     void SetMediaUriCheckResult(const std::vector<bool> &mediaUriResult);
 
     void SetOtherUriCheckResult(const std::vector<bool> &otherUriResult);
@@ -66,7 +65,8 @@ public:
 
     int32_t GetPermissionedUriCount();
     
-    std::string targetAppName;
+    // media
+    int32_t GetMediaUriToGrant(std::vector<std::string> &uriVec);
 
     // media uri
     std::vector<Uri> mediaUris;

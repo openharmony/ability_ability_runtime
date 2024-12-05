@@ -1430,10 +1430,9 @@ public:
 
     /**
      * Upgrade app completed event.
-     * @param bundleName.
      * @param uid.
      */
-    void AppUpgradeCompleted(const std::string &bundleName, int32_t uid);
+    void AppUpgradeCompleted(int32_t uid);
 
     /**
      * Record app exit reason.
@@ -1828,7 +1827,7 @@ public:
     int32_t UpdateKeepAliveEnableState(const std::string &bundleName, const std::string &moduleName,
         const std::string &mainElement, bool updateEnable, int32_t userId);
 
-    bool IsInStatusBar(uint32_t accessTokenId);
+    bool IsInStatusBar(uint32_t accessTokenId, int32_t uid);
 
     /**
      * Set keep-alive flag for application under a specific user.
@@ -1934,7 +1933,7 @@ private:
      * start highest priority ability.
      *
      */
-    void StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery = false);
+    int StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery = false);
     /**
      * connect bms.
      *
@@ -2039,8 +2038,7 @@ private:
     void StartFreezingScreen();
     void StopFreezingScreen();
     void UserStarted(int32_t userId);
-    void SwitchToUser(int32_t userId);
-    void SwitchToUser(int32_t oldUserId, int32_t userId, sptr<IUserCallback> callback,
+    int SwitchToUser(int32_t oldUserId, int32_t userId, sptr<IUserCallback> callback,
         bool isAppRecovery = false);
     void SwitchManagers(int32_t userId, bool switchUser = true);
     void StartUserApps();

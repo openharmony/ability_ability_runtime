@@ -53,7 +53,7 @@ ExtensionModuleLoader& GetExtensionModuleLoader(const char* sharedLibrary)
 
     void* handle = dlopen(sharedLibrary, RTLD_LAZY);
     if (handle == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "Failed to open extension library %{public}s, reason: %{public}sn", sharedLibrary,
+        TAG_LOGE(AAFwkTag::EXT, "open extension library %{public}s failed, reason: %{public}sn", sharedLibrary,
             dlerror());
         return DummyExtensionModuleLoader::GetInstance();
     }
@@ -61,7 +61,7 @@ ExtensionModuleLoader& GetExtensionModuleLoader(const char* sharedLibrary)
     auto entry = reinterpret_cast<DynamicEntry>(dlsym(handle, EXTENSION_MODULE_ENTRY));
     if (entry == nullptr) {
         dlclose(handle);
-        TAG_LOGE(AAFwkTag::EXT, "Failed to get extension symbol %{public}s in %{public}s", EXTENSION_MODULE_ENTRY,
+        TAG_LOGE(AAFwkTag::EXT, "get extension symbol %{public}s in %{public}s failed", EXTENSION_MODULE_ENTRY,
             sharedLibrary);
         return DummyExtensionModuleLoader::GetInstance();
     }
@@ -69,7 +69,7 @@ ExtensionModuleLoader& GetExtensionModuleLoader(const char* sharedLibrary)
     auto loader = reinterpret_cast<ExtensionModuleLoader*>(entry());
     if (loader == nullptr) {
         dlclose(handle);
-        TAG_LOGE(AAFwkTag::EXT, "Failed to get extension module loader in %{public}s", sharedLibrary);
+        TAG_LOGE(AAFwkTag::EXT, "get extension module loader in %{public}s failed", sharedLibrary);
         return DummyExtensionModuleLoader::GetInstance();
     }
 

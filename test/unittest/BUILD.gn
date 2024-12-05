@@ -57,10 +57,7 @@ ohos_source_set("appmgr_test_source") {
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/running_process_info.cpp",
   ]
 
-  public_configs = [
-    ":appmgr_test_config",
-    "${c_utils_base_path}:utils_config",
-  ]
+  public_configs = [ ":appmgr_test_config" ]
 
   public_deps = [
     "${c_utils_base_path}:utils",
@@ -96,6 +93,8 @@ ohos_source_set("appmgr_test_source") {
     "json:nlohmann_json_static",
     "kv_store:distributeddata_mgr",
   ]
+
+  public_external_deps = [ "c_utils:utils" ]
 
   subsystem_name = "ability"
   part_name = "ability_runtime"
@@ -376,6 +375,7 @@ group("unittest") {
       "ability_service_log_test:unittest",
       "ability_service_start_test:unittest",
       "ability_stage_context_test:unittest",
+      "ability_start_window_option_test:unittest",
       "ability_timeout_test:unittest",
       "ability_token_proxy_test:unittest",
       "ability_token_stub_test:unittest",
@@ -445,6 +445,7 @@ group("unittest") {
       "auto_fill_extension_context_test:unittest",
       "auto_fill_manager_test:unittest",
       "auto_fill_manager_util_test:unittest",
+      "auto_fill_request_callback_interface_test:unittest",
       "auto_startup_callback_proxy_test:unittest",
       "auto_startup_callback_stub_test:unittest",
       "auto_startup_info_test:unittest",
@@ -460,6 +461,7 @@ group("unittest") {
       "cj_ability_context_object_test:unittest",
       "cj_ability_delegator_test:unittest",
       "cj_ability_ffi_mock_test:unittest",
+      "cj_ability_lifecycle_callback_Impl_test:unittest",
       "cj_ability_object_test:unittest",
       "cj_ability_stage_object_test:unittest",
       "cj_ability_stage_test:unittest",

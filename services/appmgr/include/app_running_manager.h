@@ -43,7 +43,7 @@ class WindowVisibilityInfo;
 }
 namespace AppExecFwk {
 
-class AppRunningManager {
+class AppRunningManager : public std::enable_shared_from_this<AppRunningManager> {
 public:
     AppRunningManager();
     virtual ~AppRunningManager();
@@ -73,7 +73,8 @@ public:
      */
     std::shared_ptr<AppRunningRecord> CheckAppRunningRecordIsExist(const std::string &appName,
         const std::string &processName, const int uid, const BundleInfo &bundleInfo,
-        const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr, const std::string &instanceKey = "");
+        const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr, const std::string &instanceKey = "",
+        const std::string &customProcessFlag = "");
 
 #ifdef APP_NO_RESPONSE_DIALOG
     /**
@@ -88,13 +89,12 @@ public:
 #endif
 
     /**
-     * CheckAppRunningRecordIsExistByBundleName, Check whether the process of the application exists.
+     * Check whether the process of the application exists.
      *
-     * @param bundleName, the bundle name.
-     *
+     * @param accessTokenId, the accessTokenId.
      * @return, Return true if exist.
      */
-    bool CheckAppRunningRecordIsExistByBundleName(const std::string &bundleName);
+    bool IsAppExist(uint32_t accessTokenId);
 
     /**
      * CheckAppRunningRecordIsExistByUid, check app exist when concurrent.
@@ -105,15 +105,26 @@ public:
     bool CheckAppRunningRecordIsExistByUid(int32_t uid);
 
     /**
-     * CheckAppRunningRecordIsExistByBundleName, Check whether the process of the application exists.
+     * Check whether the process of the application exists.
      *
      * @param bundleName Indicates the bundle name of the bundle.
-     * @param appCloneIndex the appindex of the bundle.
+     * @param appCloneIndex the app index of the bundle.
      * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
      * @return, Return ERR_OK if success, others fail.
      */
     int32_t CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName,
         int32_t appCloneIndex, bool &isRunning);
+
+    /**
+     * Check whether the process of the application under the specified user exists.
+     *
+     * @param bundleName Indicates the bundle name of the bundle.
+     * @param userId the userId of the bundle.
+     * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
+     * @return, Return ERR_OK if success, others fail.
+     */
+    int32_t IsAppRunningByBundleNameAndUserId(const std::string &bundleName,
+        int32_t userId, bool &isRunning);
 
     /**
      * GetAppRunningRecordByPid, Get process record by application pid.
@@ -356,8 +367,6 @@ public:
     int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 
     bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
-
-    void UnSetPolicy(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
 

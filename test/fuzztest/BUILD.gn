@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,6 @@ group("fuzztest") {
     "abilityappdebugmanager_fuzzer:fuzztest",
     "abilityappdfrapplicationanrlistener_fuzzer:fuzztest",
     "abilityappfreezemanager_fuzzer:fuzztest",
-    "abilityappjsheapmeminfo_fuzzer:fuzztest",
     "abilityappmgrapprunningmanager_fuzzer:fuzztest",
     "abilityappmgrevent_fuzzer:fuzztest",
     "abilityappmgrpagestatedata_fuzzer:fuzztest",
@@ -38,7 +37,6 @@ group("fuzztest") {
     "abilitycachemanagera_fuzzer:fuzztest",
     "abilitychildprocessinfo_fuzzer:fuzztest",
     "abilitychildprocessinfo_fuzzer:fuzztest",
-    "abilitychildprocessrecord_fuzzer:fuzztest",
     "abilitychildprocessrecord_fuzzer:fuzztest",
     "abilityconnectionstub_fuzzer:fuzztest",
     "abilitycontext_fuzzer:fuzztest",
@@ -60,7 +58,6 @@ group("fuzztest") {
     "abilityinterfacesappmgrnativechildnotifyproxy_fuzzer:fuzztest",
     "abilityinterfacesappmgrnativechildnotifystub_fuzzer:fuzztest",
     "abilityinterfacesappmgrrenderstateobserverstub_fuzzer:fuzztest",
-    "abilitymanagereventsubscriber_fuzzer:fuzztest",
     "abilitymanagerserviceb_fuzzer:fuzztest",
     "abilitymanagerservicec_fuzzer:fuzztest",
     "abilitymanagerserviced_fuzzer:fuzztest",
@@ -249,7 +246,6 @@ group("fuzztest") {
     "completefirstframedrawing_fuzzer:fuzztest",
     "connectability_fuzzer:fuzztest",
     "connectionobserverclient_fuzzer:fuzztest",
-    "connectionobserverclientimpl_fuzzer:fuzztest",
     "connectionstatemanager_fuzzer:fuzztest",
     "continueability_fuzzer:fuzztest",
     "continuemission_fuzzer:fuzztest",
@@ -272,13 +268,11 @@ group("fuzztest") {
     "faultdata_fuzzer:fuzztest",
     "forcetimeoutfortest_fuzzer:fuzztest",
     "freeinstallabilityfromremote_fuzzer:fuzztest",
-    "getabilityrunninginfos_fuzzer:fuzztest",
     "getapplicationinfobyprocessid_fuzzer:fuzztest",
     "getappmemorysize_fuzzer:fuzztest",
     "getconfiguration_fuzzer:fuzztest",
     "getmissionidbytoken_fuzzer:fuzztest",
     "getmissioninfos_fuzzer:fuzztest",
-    "getprocessrunninginfos_fuzzer:fuzztest",
     "getprocessrunninginfosbyuserid_fuzzer:fuzztest",
     "getrunningprocessinfobytoken_fuzzer:fuzztest",
     "getwantsender_fuzzer:fuzztest",
@@ -340,7 +334,6 @@ group("fuzztest") {
     "startserviceextensionability_fuzzer:fuzztest",
     "startspecifiedability_fuzzer:fuzztest",
     "startsyncremotemissions_fuzzer:fuzztest",
-    "startupresidentprocess_fuzzer:fuzztest",
     "startuser_fuzzer:fuzztest",
     "startusertestprocess_fuzzer:fuzztest",
     "stopserviceability_fuzzer:fuzztest",

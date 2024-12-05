@@ -18,6 +18,7 @@
 #include "ability_lifecycle.h"
 #include "ability_recovery.h"
 #include "configuration_convertor.h"
+#include "display_util.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -78,7 +79,7 @@ void UIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null localRecord");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null record");
         return;
     }
     application_ = application;
@@ -770,7 +771,7 @@ ErrCode UIAbility::SetMissionLabel(const std::string &label)
     }
     auto window = scene_->GetMainWindow();
     if (window == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "get window scene failed");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null window");
         return ERR_INVALID_VALUE;
     }
 
@@ -785,7 +786,7 @@ ErrCode UIAbility::SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (!abilityInfo_ || abilityInfo_->type != AppExecFwk::AbilityType::PAGE) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityInfo_ is nullptr or not page type");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_ or not page type");
         return ERR_INVALID_VALUE;
     }
 
@@ -1049,7 +1050,7 @@ void UIAbility::ContinuationRestore(const AAFwk::Want &want)
 void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
 {
     if (abilityInfo_->type == AppExecFwk::AbilityType::PAGE) {
-        int32_t defualtDisplayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
+        int32_t defualtDisplayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
         int32_t displayId = want.GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
         TAG_LOGD(AAFwkTag::UIABILITY, "abilityName: %{public}s, displayId: %{public}d",
             abilityInfo_->name.c_str(), displayId);
@@ -1216,7 +1217,7 @@ bool UIAbility::CheckRecoveryEnabled()
 bool UIAbility::CheckDefaultRecoveryEnabled()
 {
     if (abilityContext_ == nullptr) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "context invalid");
+        TAG_LOGW(AAFwkTag::UIABILITY, "null context");
         return false;
     }
 

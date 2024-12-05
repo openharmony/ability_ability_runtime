@@ -27,7 +27,7 @@ ErrCode InsightIntentContext::StartAbilityByInsightIntent(const AAFwk::Want &wan
     TAG_LOGD(AAFwkTag::INTENT, "called");
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbilityByInsightIntent(want, token_, intentId_);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "failed to startAbility. ret=%{public}d", err);
+        TAG_LOGE(AAFwkTag::INTENT, "ret=%{public}d", err);
     }
     TAG_LOGD(AAFwkTag::INTENT, "end");
     return err;

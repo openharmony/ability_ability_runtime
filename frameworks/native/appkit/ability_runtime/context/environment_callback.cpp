@@ -35,21 +35,20 @@ void JsEnvironmentCallback::CallConfigurationUpdatedInner(const std::string &met
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = %{public}s", methodName.c_str());
     for (auto &callback : callbacks) {
         if (!callback.second) {
-            TAG_LOGE(AAFwkTag::APPKIT, " Invalid jsCallback");
+            TAG_LOGE(AAFwkTag::APPKIT, "invalid jsCallback");
             return;
         }
 
         auto obj = callback.second->GetNapiValue();
         if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
+            TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
             return;
         }
 
         napi_value method = nullptr;
         napi_get_named_property(env_, obj, methodName.data(), &method);
         if (method == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get %{public}s from object",
-                methodName.data());
+            TAG_LOGE(AAFwkTag::APPKIT, "null method %{public}s", methodName.data());
             return;
         }
 
@@ -89,14 +88,14 @@ void JsEnvironmentCallback::CallMemoryLevelInner(const std::string &methodName, 
 
         auto obj = callback.second->GetNapiValue();
         if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
+            TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
             return;
         }
 
         napi_value method = nullptr;
         napi_get_named_property(env_, obj, methodName.data(), &method);
         if (method == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get %{public}s from object", methodName.data());
+            TAG_LOGE(AAFwkTag::APPKIT, "null method %{public}s", methodName.data());
             return;
         }
 
@@ -151,7 +150,7 @@ bool JsEnvironmentCallback::UnRegister(int32_t callbackId, bool isSync)
     if (isSync) {
         auto it = callbacksSync_.find(callbackId);
         if (it == callbacksSync_.end()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d is not in callbacksSync_", callbackId);
+            TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d not in callbacksSync_", callbackId);
             return false;
         }
         TAG_LOGD(AAFwkTag::APPKIT, "callbacksSync_.callbackId : %{public}d", it->first);
@@ -159,7 +158,7 @@ bool JsEnvironmentCallback::UnRegister(int32_t callbackId, bool isSync)
     }
     auto it = callbacks_.find(callbackId);
     if (it == callbacks_.end()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d is not in callbacks_", callbackId);
+        TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d not in callbacks_", callbackId);
         return false;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "callbacks_.callbackId : %{public}d", it->first);

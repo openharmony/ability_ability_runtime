@@ -598,10 +598,6 @@ public:
     void SetColdStartFlag(bool isColdStart);
 #endif
 
-    bool GrantUriPermissionForServiceExtension();
-
-    bool GrantUriPermissionForUIExtension();
-
     /**
      * check whether the ability is launcher.
      *
@@ -942,6 +938,11 @@ public:
      */
     sptr<IRemoteObject> GetConnRemoteObject() const;
 
+    /**
+     * check whether the ability is never started.
+     */
+    bool IsNeverStarted() const;
+
     void AddStartId();
     int GetStartId() const;
 
@@ -980,6 +981,8 @@ public:
     void SetRestartTime(const int64_t restartTime);
     void SetAppIndex(const int32_t appIndex);
     int32_t GetAppIndex() const;
+    void SetWantAppIndex(const int32_t appIndex);
+    int32_t GetWantAppIndex() const;
     bool IsRestarting() const;
     void SetAppState(const AppState &state);
     AppState GetAppState() const;
@@ -1045,7 +1048,6 @@ public:
     void SetNeedBackToOtherMissionStack(bool isNeedBackToOtherMissionStack);
     std::shared_ptr<AbilityRecord> GetOtherMissionStackAbilityRecord() const;
     void SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void RevokeUriPermission();
     void RemoveAbilityDeathRecipient() const;
     bool IsExistConnection(const sptr<IAbilityConnection> &connect);
 
@@ -1082,6 +1084,10 @@ public:
     void SetProcessName(const std::string &process);
 
     std::string GetProcessName() const;
+
+    void SetCustomProcessFlag(const std::string &process);
+
+    std::string GetCustomProcessFlag() const;
 
     void SetURI(const std::string &uri);
     std::string GetURI() const;
@@ -1144,8 +1150,6 @@ private:
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
     void GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId);
-    void GrantDmsUriPermission(Want &want, std::string targetBundleName);
-    bool IsDmsCall(Want &want);
     int32_t GetCurrentAccountId() const;
 
     /**
@@ -1170,13 +1174,6 @@ private:
         callerAccessTokenId_ = callerAccessTokenId;
     }
 
-    bool GrantPermissionToShell(const std::vector<std::string> &uriVec, uint32_t flag, std::string targetPkg);
-
-    void GrantUriPermissionInner(Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName,
-         uint32_t tokenId);
-    void GrantUriPermissionFor2In1Inner(
-        Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName, uint32_t tokenId);
-
     LastExitReason CovertAppExitReasonToLastReason(const Reason exitReason);
 
     void NotifyMissionBindPid();
@@ -1184,8 +1181,6 @@ private:
     void DumpUIExtensionRootHostInfo(std::vector<std::string> &info) const;
 
     void DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const;
-
-    void PublishFileOpenEvent(const Want &want);
 
     void SetDebugAppByWaitingDebugFlag();
     void AfterLoaded();
@@ -1298,6 +1293,7 @@ private:
     bool isStartToBackground_ = false;
     bool isStartToForeground_ = false;
     std::atomic_bool isCallerSetProcess_ = false;
+    std::string customProcessFlag_ = "";
     int32_t appIndex_ = 0;
     bool minimizeReason_ = false;
 
@@ -1332,7 +1328,6 @@ private:
     bool coldStart_ = false;
 #endif
 
-    bool isGrantedUriPermission_ = false;
     uint32_t callerAccessTokenId_ = -1;
     bool isNeedBackToOtherMissionStack_ = false;
     std::weak_ptr<AbilityRecord> otherMissionStackAbilityRecord_; // who starts this ability record by SA

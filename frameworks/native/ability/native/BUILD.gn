@@ -388,7 +388,10 @@ ohos_shared_library("abilitykit_native") {
       "${ability_runtime_path}/frameworks/cj/ffi",
       "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
     ]
+    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
     external_deps += [
+      "ace_engine:ace_uicontent",
+      "bundle_framework:cj_bundle_manager_ffi",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
     ]
@@ -554,6 +557,7 @@ ohos_shared_library("insight_intent_executor") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
@@ -656,6 +660,7 @@ ohos_shared_library("uiabilitykit_native") {
     "napi:ace_napi",
     "node:node_header_notice",
     "window_manager:libwm",
+    "window_manager:libwsutils",
   ]
 
   cflags_cc = []
@@ -677,6 +682,7 @@ ohos_shared_library("uiabilitykit_native") {
     deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
     defines = [ "CJ_FRONTEND" ]
     external_deps += [
+      "bundle_framework:cj_bundle_manager_ffi",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
       "window_manager:cj_window_ffi",
@@ -898,6 +904,7 @@ ohos_shared_library("service_extension") {
       "image_framework:image",
       "window_manager:libdm",
       "window_manager:libwm",
+      "window_manager:libwsutils",
     ]
   }
 
@@ -1428,6 +1435,7 @@ ohos_shared_library("ui_extension") {
     "napi:ace_napi",
     "window_manager:embeddablewindowstage_kit",
     "window_manager:extensionwindow_napi",
+    "window_manager:windowstage_kit",
   ]
 
   if (ability_runtime_graphics) {

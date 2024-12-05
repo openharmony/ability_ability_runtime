@@ -36,19 +36,18 @@ void ReverseContinuationSchedulerReplicaProxy::PassPrimary(const sptr<IRemoteObj
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(ReverseContinuationSchedulerReplicaProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "write interface token failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "write interface token failed");
         return;
     }
     if (primary) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(primary)) {
-            TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write flag and primary");
+            TAG_LOGE(AAFwkTag::CONTINUATION, "write flag and primary failed");
             return;
         }
     } else {
         TAG_LOGD(AAFwkTag::CONTINUATION, "primary is nullptr");
         if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write flag");
+            TAG_LOGE(AAFwkTag::CONTINUATION, "write flag failed");
             return;
         }
     }
@@ -56,8 +55,7 @@ void ReverseContinuationSchedulerReplicaProxy::PassPrimary(const sptr<IRemoteObj
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IReverseContinuationSchedulerReplica::Message::PASS_PRIMARY), data, reply, option);
     if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "SendRequest failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "SendRequest failed");
     }
 }
 
@@ -67,8 +65,7 @@ bool ReverseContinuationSchedulerReplicaProxy::ReverseContinuation()
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(ReverseContinuationSchedulerReplicaProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "write interface token failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "write interface token failed");
         return false;
     }
 
@@ -77,8 +74,7 @@ bool ReverseContinuationSchedulerReplicaProxy::ReverseContinuation()
         data,
         reply,
         option) != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "SendRequest failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "SendRequest failed");
         return false;
     }
     return true;
@@ -90,13 +86,11 @@ void ReverseContinuationSchedulerReplicaProxy::NotifyReverseResult(int reverseRe
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(ReverseContinuationSchedulerReplicaProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "write interface token failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "write interface token failed");
         return;
     }
     if (!data.WriteInt32(reverseResult)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "write parcel flags failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "write parcel flags failed");
         return;
     }
     if (SendTransactCmd(
@@ -104,8 +98,7 @@ void ReverseContinuationSchedulerReplicaProxy::NotifyReverseResult(int reverseRe
         data,
         reply,
         option) != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "SendRequest failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "SendRequest failed");
     }
 }
 
@@ -114,7 +107,7 @@ int32_t ReverseContinuationSchedulerReplicaProxy::SendTransactCmd(uint32_t code,
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Remote is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remote");
         return ERR_NULL_OBJECT;
     }
 
