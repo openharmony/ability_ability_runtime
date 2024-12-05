@@ -10596,7 +10596,8 @@ int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const Start
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (startOptions.processOptions == nullptr ||
-        !ProcessOptions::IsValidProcessMode(startOptions.processOptions->processMode)) {
+        (!ProcessOptions::IsValidProcessMode(startOptions.processOptions->processMode) &&
+        !startOptions.processOptions->isRestartKeepAlive)) {
         return ERR_OK;
     }
 
@@ -10623,29 +10624,21 @@ int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const Start
         VerifyStartUIAbilityToHiddenPermission();
     bool canStartupHide = (ProcessOptions::IsNoAttachmentMode(startOptions.processOptions->processMode) &&
         isStartupVisibilityHide && hasStartBackgroundAbilityPermission);
-    if (!CheckCallingTokenId(element.GetBundleName(), userId, appIndex) &&
-        !canStartupHide) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not self application and has no start background ability permission");
-        return ERR_NOT_SELF_APPLICATION;
-    }
+    CHECK_TRUE_RETURN_RET(!CheckCallingTokenId(element.GetBundleName(), userId, appIndex) &&
+        !canStartupHide, ERR_NOT_SELF_APPLICATION, "not self application no start hidden permission");
 
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
 
-    if ((ProcessOptions::IsAttachToStatusBarMode(startOptions.processOptions->processMode) &&
-        !uiAbilityManager->IsCallerInStatusBar()) && !canStartupHide) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not in status bar in attch status bar mode and "
-            "has no start background ability permission");
-        return ERR_START_OPTIONS_CHECK_FAILED;
-    }
+    CHECK_TRUE_RETURN_RET((ProcessOptions::IsAttachToStatusBarMode(startOptions.processOptions->processMode) &&
+        !uiAbilityManager->IsCallerInStatusBar()) && !canStartupHide, ERR_START_OPTIONS_CHECK_FAILED,
+        "not in status bar no start hidden permission");
 
     auto abilityRecords = uiAbilityManager->GetAbilityRecordsByName(element);
-    if (!abilityRecords.empty() && abilityRecords[0] &&
+    CHECK_TRUE_RETURN_RET(!abilityRecords.empty() && abilityRecords[0] &&
         abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::STANDARD &&
-        abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::SPECIFIED) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "if not STANDARD or SPECIFIED mode, repeated starts not allowed");
-        return ERR_ABILITY_ALREADY_RUNNING;
-    }
+        abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::SPECIFIED,
+        ERR_ABILITY_ALREADY_RUNNING, "if not STANDARD or SPECIFIED mode, repeated starts not allowed");
 
     return ERR_OK;
 }
