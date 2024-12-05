@@ -186,11 +186,11 @@ void DialogSessionManager::GenerateJumpTargetAbilityInfos(AbilityRequest &abilit
 }
 
 void DialogSessionManager::GenerateDialogCallerInfo(AbilityRequest &abilityRequest, int32_t userId,
-    std::shared_ptr<DialogCallerInfo> dialogCallerInfo, bool isSelector)
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo, SelectorType type)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER(dialogCallerInfo);
-    dialogCallerInfo->isSelector = isSelector;
+    dialogCallerInfo->type = type;
     dialogCallerInfo->callerToken = abilityRequest.callerToken;
     dialogCallerInfo->requestCode = abilityRequest.requestCode;
     dialogCallerInfo->targetWant = abilityRequest.want;
@@ -216,7 +216,7 @@ int DialogSessionManager::SendDialogResult(const Want &want, const std::string &
     }
     auto targetWant = dialogCallerInfo->targetWant;
     targetWant.SetElement(want.GetElement());
-    targetWant.SetParam("isSelector", dialogCallerInfo->isSelector);
+    targetWant.SetParam("isSelector", dialogCallerInfo->type != SelectorType::WITHOUT_SELECTOR);
     targetWant.SetParam(DIALOG_SESSION_ID, dialogSessionId);
     if (want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY)) {
         int32_t appIndex = want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
@@ -235,8 +235,8 @@ int DialogSessionManager::SendDialogResult(const Want &want, const std::string &
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr null");
         return INNER_ERR;
     }
-    int ret = abilityMgr->StartAbilityAsCaller(targetWant, callerToken, callerToken, dialogCallerInfo->userId,
-        dialogCallerInfo->requestCode);
+    int ret = abilityMgr->StartAbilityAsCallerDetails(targetWant, callerToken, callerToken, dialogCallerInfo->userId,
+        dialogCallerInfo->requestCode, false, dialogCallerInfo->type == SelectorType::APP_CLONE_SELECTOR);
     if (ret == ERR_OK) {
         ClearDialogContext(dialogSessionId);
         abilityMgr->RemoveSelectorIdentity(dialogCallerInfo->targetWant.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
@@ -260,14 +260,14 @@ int32_t DialogSessionManager::NotifySCBToRecoveryAfterInterception(const std::st
 }
 
 std::string DialogSessionManager::GenerateDialogSessionRecordCommon(AbilityRequest &abilityRequest, int32_t userId,
-    const AAFwk::WantParams &parameters, std::vector<DialogAppInfo> &dialogAppInfos, bool isSelector)
+    const AAFwk::WantParams &parameters, std::vector<DialogAppInfo> &dialogAppInfos, SelectorType type)
 {
     auto dialogSessionInfo = sptr<DialogSessionInfo>::MakeSptr();
     CHECK_POINTER_AND_RETURN(dialogSessionInfo, "");
 
     GenerateCallerAbilityInfo(abilityRequest, dialogSessionInfo->callerAbilityInfo);
 
-    if (isSelector) {
+    if (type != SelectorType::WITHOUT_SELECTOR) {
         GenerateSelectorTargetAbilityInfos(dialogAppInfos, dialogSessionInfo->targetAbilityInfos);
     } else {
         GenerateJumpTargetAbilityInfos(abilityRequest, dialogSessionInfo->targetAbilityInfos);
@@ -276,7 +276,7 @@ std::string DialogSessionManager::GenerateDialogSessionRecordCommon(AbilityReque
     dialogSessionInfo->parameters = parameters;
 
     std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
-    GenerateDialogCallerInfo(abilityRequest, userId, dialogCallerInfo, isSelector);
+    GenerateDialogCallerInfo(abilityRequest, userId, dialogCallerInfo, type);
 
     std::string dialogSessionId = GenerateDialogSessionId();
     SetDialogSessionInfo(dialogSessionId, dialogSessionInfo, dialogCallerInfo);
@@ -296,7 +296,7 @@ int DialogSessionManager::CreateJumpModalDialog(AbilityRequest &abilityRequest, 
 
     std::vector<DialogAppInfo> dialogAppInfos;
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, parameters,
-        dialogAppInfos, false);
+        dialogAppInfos, SelectorType::WITHOUT_SELECTOR);
     if (dialogSessionId == "") {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "generation failed");
         return ERR_INVALID_VALUE;
@@ -325,7 +325,7 @@ int DialogSessionManager::CreateImplicitSelectorModalDialog(AbilityRequest &abil
         abilityRequest.want.GetBoolParam("ohos.ability.params.showDefaultPicker", false));
 
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, sessionWant.GetParams(),
-        dialogAppInfos, true);
+        dialogAppInfos, SelectorType::IMPLICIT_START_SELECTOR);
     if (dialogSessionId == "") {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "generation failed");
         return ERR_INVALID_VALUE;
@@ -343,13 +343,13 @@ int DialogSessionManager::CreateCloneSelectorModalDialog(AbilityRequest &ability
     parameters.SetParam("deviceType", AAFwk::String::Box(OHOS::system::GetDeviceType()));
     parameters.SetParam("userId", AAFwk::Integer::Box(userId));
     parameters.SetParam("appselector.selectorType",
-        AAFwk::Integer::Box(static_cast<int>(SelectorType::APP_CLONR_SELECTOR)));
+        AAFwk::Integer::Box(static_cast<int>(SelectorType::APP_CLONE_SELECTOR)));
     if (replaceWant !=  "") {
         parameters.SetParam("ecological.replaceWant", AAFwk::String::Box(replaceWant));
     }
 
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, parameters,
-        dialogAppInfos, true);
+        dialogAppInfos, SelectorType::APP_CLONE_SELECTOR);
     if (dialogSessionId == "") {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "generation failed");
         return ERR_INVALID_VALUE;

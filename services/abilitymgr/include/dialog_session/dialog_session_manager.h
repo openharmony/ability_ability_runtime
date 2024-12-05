@@ -30,17 +30,18 @@
 
 namespace OHOS {
 namespace AAFwk {
+enum class SelectorType {
+    WITHOUT_SELECTOR = -1,
+    IMPLICIT_START_SELECTOR = 0,
+    APP_CLONE_SELECTOR = 1
+};
+
 struct DialogCallerInfo {
     int32_t userId = -1;
     int requestCode = -1;
     sptr<IRemoteObject> callerToken;
     Want targetWant;
-    bool isSelector = false;
-};
-
-enum class SelectorType {
-    IMPLICIT_START_SELECTOR = 0,
-    APP_CLONR_SELECTOR = 1
+    SelectorType type = SelectorType::WITHOUT_SELECTOR;
 };
 
 struct StartupSessionInfo {
@@ -91,7 +92,7 @@ private:
     void ClearAllDialogContexts();
 
     std::string GenerateDialogSessionRecordCommon(AbilityRequest &abilityRequest, int32_t userId,
-        const AAFwk::WantParams &parameters, std::vector<DialogAppInfo> &dialogAppInfos, bool isSelector);
+        const AAFwk::WantParams &parameters, std::vector<DialogAppInfo> &dialogAppInfos, SelectorType type);
 
     void GenerateCallerAbilityInfo(AbilityRequest &abilityRequest, DialogAbilityInfo &callerAbilityInfo);
 
@@ -102,7 +103,7 @@ private:
         std::vector<DialogAbilityInfo> &targetAbilityInfos);
 
     void GenerateDialogCallerInfo(AbilityRequest &abilityRequest, int32_t userId,
-        std::shared_ptr<DialogCallerInfo> dialogCallerInfo, bool isSelector);
+        std::shared_ptr<DialogCallerInfo> dialogCallerInfo, SelectorType type);
 
     int CreateModalDialogCommon(const Want &replaceWant, sptr<IRemoteObject> callerToken,
         const std::string &dialogSessionId);
