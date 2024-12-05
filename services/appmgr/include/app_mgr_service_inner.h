@@ -520,6 +520,17 @@ public:
     int32_t IsAppRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning);
 
     /**
+     * Check whether the process of the application under the specified user exists.
+     *
+     * @param bundleName Indicates the bundle name of the bundle.
+     * @param userId the userId of the bundle.
+     * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
+     * @return Return ERR_OK if success, others fail.
+     */
+    virtual int32_t IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
+        bool &isRunning);
+
+    /**
      * start native process for debugger.
      *
      * @param want param to start a process.
@@ -855,7 +866,7 @@ public:
 
     int VerifyRequestPermission() const;
 
-    void ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord, bool containsApp);
+    void ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     void TerminateApplication(const std::shared_ptr<AppRunningRecord> &appRecord);
 
@@ -1416,6 +1427,13 @@ public:
 
     void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
 
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     */
+    void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);
@@ -1772,6 +1790,8 @@ private:
 
     void HandlePreloadApplication(const PreloadRequest &request);
 
+    void reportpreLoadTask(const std::shared_ptr<AppRunningRecord> appRecord);
+
     std::string GetSpecifiedProcessFlag(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want);
 
     void LoadAbilityNoAppRecord(const std::shared_ptr<AppRunningRecord> appRecord,
@@ -1780,7 +1800,7 @@ private:
         const std::string &specifiedProcessFlag, const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want,
         bool appExistFlag, bool isPreload, AppExecFwk::PreloadMode preloadMode,
-        sptr<IRemoteObject> token = nullptr);
+        sptr<IRemoteObject> token = nullptr, const std::string &customProcessFlag = "");
 
     int32_t CreatNewStartMsg(const Want &want, const AbilityInfo &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName,
@@ -1833,7 +1853,7 @@ private:
      * @return
      */
     void NotifyAppStatusByCallerUid(const std::string &bundleName, const int32_t tokenId, const int32_t userId,
-        const int32_t callerUid, const std::string &eventData);
+        const int32_t callerUid, const int32_t targetUid, const std::string &eventData);
     void UpdateAllProviderConfig(const std::shared_ptr<AppRunningRecord> &appRecord);
     void SendHiSysEvent(int32_t innerEventId, std::shared_ptr<AppRunningRecord> appRecord);
     int FinishUserTestLocked(

@@ -180,6 +180,16 @@ StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId
         StartAbilityUtils::isWantWithAppCloneIndex = true;
     }
 }
+StartAbilityInfoWrap::StartAbilityInfoWrap()
+{
+    StartAbilityUtils::startAbilityInfo.reset();
+    StartAbilityUtils::callerAbilityInfo.reset();
+    StartAbilityUtils::skipCrowTest = false;
+    StartAbilityUtils::skipStartOther = false;
+    StartAbilityUtils::skipErms = false;
+    StartAbilityUtils::ermsResultCode = ERMS_ISALLOW_RESULTCODE;
+    StartAbilityUtils::isWantWithAppCloneIndex = false;
+}
 
 StartAbilityInfoWrap::~StartAbilityInfoWrap()
 {
@@ -190,6 +200,15 @@ StartAbilityInfoWrap::~StartAbilityInfoWrap()
     StartAbilityUtils::skipErms = false;
     StartAbilityUtils::ermsResultCode = ERMS_ISALLOW_RESULTCODE;
     StartAbilityUtils::isWantWithAppCloneIndex = false;
+}
+
+void StartAbilityInfoWrap::SetStartAbilityInfo(const AppExecFwk::AbilityInfo& abilityInfo)
+{
+    if (StartAbilityUtils::startAbilityInfo != nullptr) {
+        return;
+    }
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::startAbilityInfo->abilityInfo = abilityInfo;
 }
 
 std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const Want &want, int32_t userId,
@@ -204,6 +223,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const
     if (appIndex > 0 && appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneAbilityInfo(want.GetElement(), abilityInfoFlag, appIndex,
             request->abilityInfo, userId));
+        request->customProcess = request->abilityInfo.process;
         if (request->abilityInfo.name.empty() || request->abilityInfo.bundleName.empty()) {
             FindExtensionInfo(want, abilityInfoFlag, userId, appIndex, request);
         }
@@ -215,6 +235,8 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const
         IN_PROCESS_CALL_WITHOUT_RET(bms->GetSandboxAbilityInfo(want, appIndex,
             abilityInfoFlag, userId, request->abilityInfo));
     }
+    request->customProcess = request->abilityInfo.process;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "abilityInfo customProcess: %{public}s", request->customProcess.c_str());
     if (request->abilityInfo.name.empty() || request->abilityInfo.bundleName.empty()) {
         // try to find extension
         std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
@@ -300,6 +322,7 @@ void StartAbilityInfo::FindExtensionInfo(const Want &want, int32_t flags, int32_
         abilityInfo->status = RESOLVE_ABILITY_ERR;
         return;
     }
+    abilityInfo->customProcess = extensionInfo.customProcess;
     if (AbilityRuntime::StartupUtil::IsSupportAppClone(extensionInfo.type)) {
         abilityInfo->extensionProcessMode = extensionInfo.extensionProcessMode;
         // For compatibility translates to AbilityInfo

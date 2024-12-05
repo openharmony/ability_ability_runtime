@@ -61,10 +61,13 @@ ohos_unittest("extension_control_interceptor_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "safwk:api_cache_manager",
   ]
 }
 

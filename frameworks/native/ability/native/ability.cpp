@@ -31,6 +31,7 @@
 #include "data_ability_predicates.h"
 #include "data_ability_result.h"
 #include "data_uri_utils.h"
+#include "display_util.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -119,7 +120,7 @@ void Ability::Init(const std::shared_ptr<AbilityInfo> &abilityInfo, const std::s
             sptr<ReverseContinuationSchedulerPrimary> primary = sptr<ReverseContinuationSchedulerPrimary>(
                 new (std::nothrow) ReverseContinuationSchedulerPrimary(continuationHandler, handler_));
             if (primary == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITY, "create primary failed");
+                TAG_LOGE(AAFwkTag::ABILITY, "null primary");
             } else {
                 continuationHandler_->SetPrimaryStub(primary);
                 continuationHandler_->SetAbilityInfo(abilityInfo_);
@@ -176,7 +177,7 @@ void Ability::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
     }
     TAG_LOGD(AAFwkTag::ABILITY, "ability:%{public}s", abilityInfo_->name.c_str());
     if (abilityInfo_->type == AppExecFwk::AbilityType::PAGE) {
-        int32_t defualtDisplayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
+        int32_t defualtDisplayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
         int32_t displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
         TAG_LOGD(AAFwkTag::ABILITY, "abilityName:%{public}s, displayId:%{public}d",
             abilityInfo_->name.c_str(), displayId);
@@ -1022,7 +1023,7 @@ int Ability::StartBackgroundRunning(const AbilityRuntime::WantAgent::WantAgent &
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "bundleMgrHelper failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "null bundleMgrHelper");
         return ERR_NULL_OBJECT;
     }
     if (abilityInfo_ == nullptr) {
@@ -1176,8 +1177,7 @@ std::shared_ptr<NativeRdb::DataAbilityPredicates> Ability::ParsePredictionArgsRe
     }
 
     if (strPredicatesList.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITY, "GetWhereArgs()"
-                "error strList empty");
+        TAG_LOGE(AAFwkTag::ABILITY, "strList empty");
     }
 
     for (auto iterMap : predicatesBackReferencesMap) {
@@ -1349,12 +1349,12 @@ bool Ability::CheckAssertQueryResult(std::shared_ptr<NativeRdb::AbsSharedResultS
     std::shared_ptr<NativeRdb::ValuesBucket> &&valuesBucket)
 {
     if (queryResult == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "intput queryResult");
+        TAG_LOGE(AAFwkTag::ABILITY, "null queryResult");
         return true;
     }
 
     if (valuesBucket == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "intput valuesBucket");
+        TAG_LOGE(AAFwkTag::ABILITY, "null valuesBucket");
         return true;
     }
 
@@ -2097,7 +2097,7 @@ int Ability::CreateModalUIExtension(const Want &want)
     TAG_LOGD(AAFwkTag::ABILITY, "call");
     auto abilityContextImpl = GetAbilityContext();
     if (abilityContextImpl == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null abilitycontext");
+        TAG_LOGE(AAFwkTag::ABILITY, "null abilityContext");
         return ERR_INVALID_VALUE;
     }
     return abilityContextImpl->CreateModalUIExtensionWithApp(want);
@@ -2162,7 +2162,7 @@ bool Ability::UpdateResMgrAndConfiguration(int32_t displayId)
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     if (resConfig == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "create resConfig failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "null resConfig");
         return false;
     }
     auto resourceManager = GetResourceManager();

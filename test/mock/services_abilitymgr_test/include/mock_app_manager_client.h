@@ -39,6 +39,7 @@ public:
     MOCK_METHOD3(KillApplication, AppMgrResultCode(const std::string&, const bool clearPageStack, int32_t));
     MOCK_METHOD1(KillProcessByAbilityToken, AppMgrResultCode(const sptr<IRemoteObject>& token));
     MOCK_METHOD1(KillProcessesByUserId, AppMgrResultCode(int32_t userId));
+    MOCK_METHOD1(SendAppSpawnUninstallDebugHapMsg, AppMgrResultCode(int32_t userId));
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

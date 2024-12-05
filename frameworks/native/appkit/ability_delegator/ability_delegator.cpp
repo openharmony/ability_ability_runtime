@@ -41,7 +41,7 @@ void AbilityDelegator::AddAbilityMonitor(const std::shared_ptr<IAbilityMonitor> 
     std::unique_lock<std::mutex> lck(mutexMonitor_);
     auto pos = std::find(abilityMonitors_.begin(), abilityMonitors_.end(), monitor);
     if (pos != abilityMonitors_.end()) {
-        TAG_LOGW(AAFwkTag::DELEGATOR, "monitor has been added");
+        TAG_LOGW(AAFwkTag::DELEGATOR, "monitor added");
         return;
     }
 
@@ -297,7 +297,7 @@ bool AbilityDelegator::DoAbilityForeground(const sptr<IRemoteObject> &token)
 
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->DelegatorDoAbilityForeground(token);
     if (ret) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "call DelegatorDoAbilityForeground failed, reson: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "ret: %{public}d", ret);
         return false;
     }
 
@@ -315,7 +315,7 @@ bool AbilityDelegator::DoAbilityBackground(const sptr<IRemoteObject> &token)
 
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->DelegatorDoAbilityBackground(token);
     if (ret) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "call doAbilityBackground failed, reson: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "ret: %{public}d", ret);
         return false;
     }
 
@@ -356,7 +356,7 @@ void AbilityDelegator::Print(const std::string &msg)
         TAG_LOGW(AAFwkTag::DELEGATOR, "too long message");
         realMsg.resize(DELEGATOR_PRINT_MAX_LENGTH);
     }
-    TAG_LOGI(AAFwkTag::DELEGATOR, "message to print : %{public}s", realMsg.data());
+    TAG_LOGI(AAFwkTag::DELEGATOR, "message: %{public}s", realMsg.data());
 
     testObserver->TestStatus(realMsg, 0);
 }

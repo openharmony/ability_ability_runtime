@@ -97,7 +97,7 @@ napi_value JsFeatureAbility::OnStartAbility(napi_env env, NapiCallbackInfo& info
 
     Ability* ability = GetAbility(env);
     if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ability null");
+        TAG_LOGE(AAFwkTag::FA, "null ability");
         return CreateJsUndefined(env);
     }
 
@@ -130,7 +130,7 @@ napi_value JsFeatureAbility::OnStartAbilityForResult(napi_env env, NapiCallbackI
     }
     Ability* ability = GetAbility(env);
     if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ability null");
+        TAG_LOGE(AAFwkTag::FA, "null ability");
         return CreateJsUndefined(env);
     }
 
@@ -146,7 +146,7 @@ napi_value JsFeatureAbility::OnStartAbilityForResult(napi_env env, NapiCallbackI
 
     std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
     FeatureAbilityTask task = [env, asyncTask](int resultCode, const AAFwk::Want& want) {
-        TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+        TAG_LOGI(AAFwkTag::FA, "asyncCallback start");
         std::string data = want.GetStringParam(RESULT_DATA_TAG);
         napi_value abilityResult = JsFeatureAbility::CreateJsResult(env, resultCode, data);
         if (abilityResult == nullptr) {
@@ -495,7 +495,7 @@ napi_value JsFeatureAbilityInit(napi_env env, napi_value exports)
     napi_value global = nullptr;
     napi_get_global(env, &global);
     if (!CheckTypeForNapiValue(env, global, napi_object)) {
-        TAG_LOGE(AAFwkTag::FA, "global is not NativeObject");
+        TAG_LOGE(AAFwkTag::FA, "not NativeObject");
         return nullptr;
     }
 

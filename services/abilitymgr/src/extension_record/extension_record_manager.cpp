@@ -259,6 +259,7 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
         case PROCESS_MODE_CUSTOM: {
             std::string process = abilityRequest.abilityInfo.bundleName + abilityRequest.customProcess;
             abilityRecord->SetProcessName(process);
+            abilityRecord->SetCustomProcessFlag(abilityRequest.customProcess);
             break;
         }
         case PROCESS_MODE_HOST_SPECIFIED: {
@@ -627,6 +628,8 @@ int32_t ExtensionRecordManager::GetUIExtensionSessionInfo(
     uiExtensionSessionInfo.persistentId = sessionInfo->persistentId;
     uiExtensionSessionInfo.hostWindowId = sessionInfo->hostWindowId;
     uiExtensionSessionInfo.uiExtensionUsage = sessionInfo->uiExtensionUsage;
+    uiExtensionSessionInfo.elementName = abilityRecord->GetElementName();
+    uiExtensionSessionInfo.extensionAbilityType = abilityRecord->GetAbilityInfo().extensionAbilityType;
     return ERR_OK;
 }
 

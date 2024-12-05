@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,6 +24,7 @@ ohos_unittest("auto_fill_extension_context_test") {
     "./",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/auto_fill_extension_ability",
   ]
 
@@ -49,6 +50,7 @@ ohos_unittest("auto_fill_extension_context_test") {
     "ability_base:view_data",
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_napi",
     "napi:ace_napi",
   ]
 }

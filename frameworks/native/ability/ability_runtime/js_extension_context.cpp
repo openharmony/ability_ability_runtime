@@ -33,14 +33,14 @@ void JsExtensionContext::ConfigurationUpdated(napi_env env, const std::shared_pt
 
     napi_value object = jsContext->GetNapiValue();
     if (!CheckTypeForNapiValue(env, object, napi_object)) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "object is not object");
+        TAG_LOGE(AAFwkTag::CONTEXT, "not object");
         return;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, object, "onUpdateConfiguration", &method);
     if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "failed to get onUpdateConfiguration from object");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null method");
         return;
     }
 

@@ -187,7 +187,7 @@ int32_t StartupManager::IsInitialized(const std::string &name, bool &isInitializ
 int32_t StartupManager::PostMainThreadTask(const std::function<void()> &task)
 {
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "get mainHandler failed");
+        TAG_LOGE(AAFwkTag::STARTUP, "null mainHandler");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     mainHandler_->PostTask(task);

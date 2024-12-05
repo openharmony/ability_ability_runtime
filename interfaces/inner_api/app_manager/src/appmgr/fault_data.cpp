@@ -60,6 +60,7 @@ bool FaultData::ReadFromParcel(Parcel &parcel)
     forceExit = parcel.ReadBool();
     state = parcel.ReadUint32();
     eventId = parcel.ReadInt32();
+    tid = parcel.ReadInt32();
     if (parcel.ReadBool()) {
         token = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
     }
@@ -125,6 +126,11 @@ bool FaultData::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteInt32(eventId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "EventId [%{public}u] write int32 failed.", eventId);
+        return false;
+    }
+
+    if (!parcel.WriteInt32(tid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Tid [%{public}u] write int32 failed.", tid);
         return false;
     }
 

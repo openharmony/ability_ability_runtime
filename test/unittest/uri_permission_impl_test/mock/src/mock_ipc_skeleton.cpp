@@ -27,6 +27,11 @@ uint32_t IPCSkeleton::GetCallingPid()
     return IPCSkeleton::callerPId;
 }
 
+uint32_t IPCSkeleton::GetCallingUid()
+{
+    return IPCSkeleton::callerUId;
+}
+
 void IPCSkeleton::SetCallingTokenId(uint32_t tokenId)
 {
     IPCSkeleton::callerTokenId = tokenId;
@@ -35,6 +40,11 @@ void IPCSkeleton::SetCallingTokenId(uint32_t tokenId)
 void IPCSkeleton::SetCallingPid(uint32_t pid)
 {
     IPCSkeleton::callerPId = pid;
+}
+
+void IPCSkeleton::SetCallingUid(uint32_t Uid)
+{
+    IPCSkeleton::callerUId = Uid;
 }
 
 void IPCSkeleton::ResetTokenId()
@@ -53,4 +63,5 @@ void IPCSkeleton::Reset()
 
 uint32_t IPCSkeleton::callerTokenId = 0;
 uint32_t IPCSkeleton::callerPId = 0;
+uint32_t IPCSkeleton::callerUId = 0;
 }  // namespace OHOS

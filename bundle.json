@@ -48,10 +48,12 @@
             "app_file_service",
             "appspawn",
             "background_task_mgr",
+            "bounds_checking_function",
             "bundle_framework",
             "common_event_service",
             "config_policy",
             "c_utils",
+            "cJSON",
             "data_share",
             "dlp_permission_service",
             "dsoftbus",
@@ -71,6 +73,7 @@
             "hiview",
             "i18n",
             "icu",
+            "idl_tool",
             "image_framework",
             "init",
             "input",
@@ -79,6 +82,7 @@
             "jsoncpp",
             "kv_store",
             "libuv",
+            "libxml2",
             "media_library",
             "memmgr",
             "memory_utils",
@@ -93,10 +97,12 @@
             "relational_store",
             "resource_management",
             "resource_schedule_service",
+            "runtime_core",
             "safwk",
             "samgr",
             "sandbox_manager",
             "screenlock_mgr",
+            "selinux_adapter",
             "storage_service",
             "toolchain",
             "webview",
@@ -124,6 +130,7 @@
           "//foundation/ability/ability_runtime/cj_environment/frameworks/cj_environment:cj_environment",
           "//foundation/ability/ability_runtime/js_environment/frameworks/js_environment:js_environment",
           "//foundation/ability/ability_runtime/services/abilitymgr/etc:appfwk_etc",
+          "//foundation/ability/ability_runtime/services/dialog_ui/ams_system_dialog:dialog_hap",
           "//foundation/ability/ability_runtime/service_router_framework:srms_target",
           "//foundation/ability/ability_runtime/service_router_framework:jsapi_target"
         ],
@@ -525,6 +532,15 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/frameworks/cj/ffi:cj_ability_ffi"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/app_manager/include",
+              "header_files": [
+                "appmgr/app_state_data.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/app_manager:app_state_data"
           }
         ],
         "test": [

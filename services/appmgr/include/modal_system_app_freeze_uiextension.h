@@ -21,6 +21,7 @@
 #include <iremote_broker.h>
 #include <semaphore.h>
 #include <functional>
+#include <stdint.h>
 
 #include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
@@ -69,6 +70,8 @@ private:
     std::mutex appFreezeResultMutex_;
     std::mutex dialogConnectionMutex_;
     std::string lastFreezePid;
+    bool lastFocusStatus = false;
+    uint64_t lastFreezeTime = 0;
     sptr<AppFreezeDialogConnection> dialogConnectionCallback_;
 };
 } // namespace AppExecFwk

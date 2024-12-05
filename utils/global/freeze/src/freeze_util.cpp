@@ -32,9 +32,9 @@ std::string ConcatStr(const std::list<std::string> &strList, const std::string &
 
     int32_t reserveSize = 0;
     for (const auto &item : strList) {
-        reserveSize += split.size() + item.size();
+        reserveSize += static_cast<int32_t>(split.size() + item.size());
     }
-    reserveSize -= split.size();
+    reserveSize -= static_cast<int32_t>(split.size());
     std::string result;
     if (reserveSize > 0) {
         result.reserve(reserveSize);

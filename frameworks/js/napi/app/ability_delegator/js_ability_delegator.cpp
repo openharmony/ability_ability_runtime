@@ -1212,7 +1212,7 @@ napi_value JSAbilityDelegator::ParseWaitAbilityStageMonitorPara(napi_env env, Na
         return nullptr;
     }
     if (!ParseTimeoutCallbackPara(env, info, opt, timeout)) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "invalid calback");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "invalid callback");
         return nullptr;
     }
     if (!isExisted) {
@@ -1315,7 +1315,7 @@ napi_value JSAbilityDelegator::ParseAbilityCommonPara(
 
     if (info.argc > ARGC_ONE) {
         if (!AppExecFwk::IsTypeForNapiValue(env, info.argv[INDEX_ONE], napi_function)) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "invalid callbacl");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "invalid callback");
             return nullptr;
         }
     }

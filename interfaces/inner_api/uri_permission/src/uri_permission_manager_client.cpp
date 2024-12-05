@@ -35,18 +35,18 @@ UriPermissionManagerClient& UriPermissionManagerClient::GetInstance()
 }
 
 int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int flag,
-    const std::string targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t abilityId)
+    const std::string targetBundleName, int32_t appIndex, uint32_t initiatorTokenId)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s", targetBundleName.c_str());
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->GrantUriPermission(uri, flag, targetBundleName, appIndex, initiatorTokenId, abilityId);
+        return uriPermMgr->GrantUriPermission(uri, flag, targetBundleName, appIndex, initiatorTokenId);
     }
     return INNER_ERR;
 }
 
 int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
-    const std::string targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t abilityId)
+    const std::string targetBundleName, int32_t appIndex, uint32_t initiatorTokenId)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu", targetBundleName.c_str(),
         uriVec.size());
@@ -56,13 +56,13 @@ int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVe
     }
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId, abilityId);
+        return uriPermMgr->GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId);
     }
     return INNER_ERR;
 }
 
 int32_t UriPermissionManagerClient::GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
-    const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t abilityId)
+    const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu",
         targetBundleName.c_str(), uriVec.size());
@@ -73,19 +73,9 @@ int32_t UriPermissionManagerClient::GrantUriPermissionPrivileged(const std::vect
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
         return uriPermMgr->GrantUriPermissionPrivileged(uriVec, flag, targetBundleName, appIndex,
-            initiatorTokenId, abilityId);
+            initiatorTokenId, hideSensitiveType);
     }
     return INNER_ERR;
-}
-
-
-void UriPermissionManagerClient::RevokeUriPermission(const uint32_t tokenId, int32_t abilityId)
-{
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
-    auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        return uriPermMgr->RevokeUriPermission(tokenId, abilityId);
-    }
 }
 
 int UriPermissionManagerClient::RevokeAllUriPermissions(const uint32_t tokenId)

@@ -91,6 +91,8 @@ bool AbilityPermissionUtil::IsDominateScreen(const Want &want, bool isPendingWan
             }
             auto userId = callerUid / BASE_USER_RANGE;
             AppExecFwk::BundleInfo info;
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "callerBundleName: %{public}s, userId: %{public}d",
+                callerBundleName.c_str(), userId);
             if (!IN_PROCESS_CALL(
                 bms->GetBundleInfo(callerBundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, info, userId))) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to get bundle info.");
@@ -228,6 +230,23 @@ int32_t AbilityPermissionUtil::CheckMultiInstanceKeyForExtension(const AbilityRe
     if (!MultiInstanceUtils::IsInstanceKeyExist(abilityRequest.want.GetBundle(), instanceKey)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "key not found");
         return ERR_INVALID_APP_INSTANCE_KEY;
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityPermissionUtil::CheckStartRecentAbility(const Want &want, AbilityRequest &request)
+{
+    bool startRecent = want.GetBoolParam(Want::PARAM_RESV_START_RECENT, false);
+    if (!startRecent) {
+        return ERR_OK;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller no system-app, can not use system-api");
+        return ERR_NOT_SYSTEM_APP;
+    }
+    if (AAFwk::PermissionVerification::GetInstance()->VerifyStartRecentAbilityPermission()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Set start recent.");
+        request.startRecent = true;
     }
     return ERR_OK;
 }

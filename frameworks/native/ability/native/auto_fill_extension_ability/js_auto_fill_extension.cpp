@@ -58,24 +58,24 @@ napi_value AttachAutoFillExtensionContext(napi_env env, void *value, void *)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
     if (value == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Invalid param");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null value");
         return nullptr;
     }
 
     auto ptr = reinterpret_cast<std::weak_ptr<AutoFillExtensionContext> *>(value)->lock();
     if (ptr == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Invalid context");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null ptr");
         return nullptr;
     }
     napi_value object = JsAutoFillExtensionContext::CreateJsAutoFillExtensionContext(env, ptr);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.AutoFillExtensionContext", &object, 1);
     if (systemModule == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Load system module failed");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null systemModule");
         return nullptr;
     }
     auto contextObj = systemModule->GetNapiValue();
     if (contextObj == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Load context error");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null contextObj");
         return nullptr;
     }
     napi_coerce_to_native_binding_object(
@@ -136,7 +136,7 @@ void JsAutoFillExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
     AutoFillExtension::Init(record, application, handler, token);
     if (abilityInfo_ == nullptr || abilityInfo_->srcEntrance.empty()) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Init ability info failed");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null abilityInfo");
         return;
     }
     std::string srcPath(abilityInfo_->moduleName + "/");
@@ -175,21 +175,21 @@ void JsAutoFillExtension::BindContext(napi_env env, napi_value obj)
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "get context failed");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null context");
         return;
     }
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "Create js auto fill extension context");
     context->SetAutoFillExtensionCallback(std::static_pointer_cast<JsAutoFillExtension>(shared_from_this()));
     napi_value contextObj = JsAutoFillExtensionContext::CreateJsAutoFillExtensionContext(env, context);
     if (contextObj == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Create js ui extension context failed");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null contextObj");
         return;
     }
 
     shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(
         env, "application.AutoFillExtensionContext", &contextObj, ARGC_ONE);
     if (shellContextRef_ == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "LoadSystemModuleByEngine failed");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null shellContextRef");
         return;
     }
     contextObj = shellContextRef_->GetNapiValue();
@@ -278,7 +278,7 @@ void JsAutoFillExtension::OnStopCallBack()
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "get context failed");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null context");
         return;
     }
 
@@ -331,13 +331,13 @@ bool JsAutoFillExtension::CallPromise(napi_value result, AppExecFwk::AbilityTran
 {
     auto env = jsRuntime_.GetNapiEnv();
     if (!CheckTypeForNapiValue(env, result, napi_object)) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to convert native value to NativeObject");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "convert value failed");
         return false;
     }
     napi_value then = nullptr;
     napi_get_named_property(env, result, "then", &then);
     if (then == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to get property: then");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null then");
         return false;
     }
     bool isCallable = false;
@@ -388,7 +388,7 @@ void JsAutoFillExtension::OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &se
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to get context");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null context");
         return;
     }
     AAFwk::AbilityCommand abilityCmd;
@@ -479,7 +479,7 @@ void JsAutoFillExtension::UpdateRequest(const AAFwk::WantParams &wantParams)
     napi_env env = jsRuntime_.GetNapiEnv();
     napi_value request = JsAutoFillExtensionUtil::WrapUpdateRequest(wantParams, env);
     if (request == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to create update request");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null request");
         return;
     }
     napi_value argv[] = { request };
@@ -498,7 +498,7 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
         sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
         auto context = GetContext();
         if (context == nullptr || context->GetAbilityInfo() == nullptr) {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to get context");
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null context");
             return false;
         }
         option->SetWindowName(context->GetBundleName() + context->GetAbilityInfo()->name);
@@ -508,13 +508,15 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
         option->SetRealParentId(sessionInfo->realHostWindowId);
         option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
         option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
+        option->SetDensity(sessionInfo->density);
+        option->SetIsDensityFollowHost(sessionInfo->isDensityFollowHost);
         sptr<Rosen::Window> uiWindow;
         {
             HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
             uiWindow = Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
         }
         if (uiWindow == nullptr) {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Create uiWindow error");
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null uiWindow");
             return false;
         }
         HandleScope handleScope(jsRuntime_);
@@ -545,7 +547,7 @@ void JsAutoFillExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<A
 
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to get context");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null context");
         return;
     }
 
@@ -584,7 +586,7 @@ void JsAutoFillExtension::BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessi
     }
     auto obj = sessionInfo->sessionToken;
     if (uiWindowMap_.find(obj) == uiWindowMap_.end()) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Fail to find ui window");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "find ui window failed");
         return;
     }
     auto& uiWindow = uiWindowMap_[obj];
@@ -671,7 +673,7 @@ void JsAutoFillExtension::CallJsOnRequest(
     napi_value nativeContentSession =
         JsUIExtensionContentSession::CreateJsUIExtensionContentSession(env, sessionInfo, uiWindow);
     if (nativeContentSession == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to create session");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null session");
         return;
     }
     napi_ref ref = nullptr;
@@ -681,7 +683,7 @@ void JsAutoFillExtension::CallJsOnRequest(
 
     napi_value request = JsAutoFillExtensionUtil::WrapFillRequest(want, env);
     if (request == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null fill request");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null request");
         return;
     }
 
@@ -710,13 +712,13 @@ void JsAutoFillExtension::RegisterTransferComponentDataListener(const sptr<Rosen
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
     if (uiWindow == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Invalid ui window obj");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null uiWindow");
         return;
     }
 
     auto handler = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     if (handler == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to create event handler");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null handler");
         return;
     }
     uiWindow->RegisterTransferComponentDataListener([this, handler](

@@ -55,6 +55,7 @@ using AAFwk::FdGuard;
 class AbilityRunningRecord;
 class AppMgrServiceInner;
 class AppRunningRecord;
+class AppRunningManager;
 
 class MultiUserConfigurationMgr {
 public:
@@ -226,6 +227,20 @@ public:
      * @param flag, the the flag of specified process.
      */
     void SetSpecifiedProcessFlag(const std::string &flag);
+
+    /**
+     * @brief Obtains the the flag of custom process.
+     *
+     * @return Returns the the flag of custom process.
+     */
+    const std::string &GetCustomProcessFlag() const;
+
+    /**
+     * @brief Setting the the flag of custom process.
+     *
+     * @param flag, the the flag of custom process.
+     */
+    void SetCustomProcessFlag(const std::string &flag);
 
     /**
      * @brief Obtains the sign code.
@@ -577,7 +592,7 @@ public:
      * @brief indicates one process will go dying.
      * Then the process won't be reused.
      */
-    void SetTerminating();
+    void SetTerminating(std::shared_ptr<AppRunningManager> appRunningMgr);
 
     /**
      * @brief Whether the process is dying.
@@ -846,9 +861,9 @@ public:
      *
      * @return Is the status change completed.
      */
-    int32_t ChangeAppGcState(const int32_t state);
+    int32_t ChangeAppGcState(int32_t state);
 
-    void SetAttachDebug(const bool &isAttachDebug);
+    void SetAttachDebug(bool isAttachDebug);
     bool isAttachDebug() const;
 
     void SetApplicationPendingState(ApplicationPendingState pendingState);
@@ -859,9 +874,9 @@ public:
 
     void GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool &isFloatingWindowMode);
 
-    void AddChildProcessRecord(pid_t pid, const std::shared_ptr<ChildProcessRecord> record);
-    void RemoveChildProcessRecord(const std::shared_ptr<ChildProcessRecord> record);
-    std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(const pid_t pid);
+    void AddChildProcessRecord(pid_t pid, std::shared_ptr<ChildProcessRecord> record);
+    void RemoveChildProcessRecord(std::shared_ptr<ChildProcessRecord> record);
+    std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(pid_t pid);
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
     int32_t GetChildProcessCount();
 
@@ -967,6 +982,8 @@ public:
     bool IsCaching();
     void SetNeedPreloadModule(bool isNeedPreloadModule);
     bool GetNeedPreloadModule();
+    void SetNeedLimitPrio(bool isNeedLimitPrio);
+    bool GetNeedLimitPrio();
 
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
@@ -1027,6 +1044,8 @@ public:
     void SetIsUnSetPermission(bool isUnSetPermission);
 
     bool IsUnSetPermission();
+    
+    void UnSetPolicy();
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1094,6 +1113,7 @@ private:
     int32_t appRecordId_ = 0;
     std::string processName_;  // the name of this process
     std::string specifiedProcessFlag_; // the flag of specified Process
+    std::string customProcessFlag_; // the flag of custom process
     std::unordered_set<sptr<IRemoteObject>, RemoteObjHash> foregroundingAbilityTokens_;
     std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
     sptr<AppDeathRecipient> appDeathRecipient_ = nullptr;
@@ -1186,6 +1206,7 @@ private:
     bool hasUIAbilityLaunched_ = false;
     bool isKia_ = false;
     bool isNeedPreloadModule_ = false;
+    bool isNeedLimitPrio_ = false;
     std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;

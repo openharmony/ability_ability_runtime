@@ -129,7 +129,7 @@ int AbilityConnectionStub::OnRemoteRequest(
         return ERR_INVALID_VALUE;
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call callback");
-    auto abilityName = element->GetAbilityName().c_str();
+    auto abilityName = element->GetAbilityName();
     switch (code) {
         case IAbilityConnection::ON_ABILITY_CONNECT_DONE: {
             auto remoteObject = data.ReadRemoteObject();
@@ -141,7 +141,7 @@ int AbilityConnectionStub::OnRemoteRequest(
             TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityConnectionStub ON_ABILITY_CONNECT_DONE");
             OnAbilityConnectDone(*element, remoteObject, resultCode);
             TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilityConnectionStub ON_ABILITY_CONNECT_DONE end,%{public}s",
-                abilityName);
+                abilityName.c_str());
             return NO_ERROR;
         }
         case IAbilityConnection::ON_ABILITY_DISCONNECT_DONE: {
@@ -149,7 +149,7 @@ int AbilityConnectionStub::OnRemoteRequest(
             TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityConnectionStub ON_ABILITY_DISCONNECT_DONE");
             OnAbilityDisconnectDone(*element, resultCode);
             TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilityConnectionStub ON_ABILITY_DISCONNECT_DONE end,%{public}s",
-                abilityName);
+                abilityName.c_str());
             return NO_ERROR;
         }
         case IAbilityConnection::ON_REMOTE_STATE_CHANGED: {

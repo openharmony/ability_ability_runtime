@@ -170,7 +170,7 @@ private:
             return CreateJsUndefined(env);
         }
         if (argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "Not enough params.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "not enough params");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -178,12 +178,12 @@ private:
         AppExecFwk::ChildProcessArgs args;
         AppExecFwk::ChildProcessOptions options;
         if (!ConvertFromJsValue(env, argv[PARAM0], srcEntry)) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "Parse param srcEntry failed, must be a valid string.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "parse param srcEntry failed");
             ThrowInvalidParamError(env, "Parse param srcEntry failed, must be a valid string.");
             return CreateJsUndefined(env);
         }
         if (srcEntry.empty()) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "Param srcEntry cannot be empty.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "param srcEntry cannot be empty");
             ThrowInvalidParamError(env, "Param srcEntry cannot be empty.");
             return CreateJsUndefined(env);
         }
@@ -202,14 +202,14 @@ private:
 
     napi_value OnStartNativeChildProcess(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGI(AAFwkTag::PROCESSMGR, "called.");
+        TAG_LOGI(AAFwkTag::PROCESSMGR, "called");
         if (ChildProcessManager::GetInstance().IsChildProcessBySelfFork()) {
             TAG_LOGE(AAFwkTag::PROCESSMGR, "Already in child process");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED);
             return CreateJsUndefined(env);
         }
         if (argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "Not enough params.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "not enough params");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -217,12 +217,12 @@ private:
         AppExecFwk::ChildProcessArgs args;
         AppExecFwk::ChildProcessOptions options;
         if (!ConvertFromJsValue(env, argv[PARAM0], entryPoint)) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "Parse param entryPoint failed, must be a valid string.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "parse param entryPoint failed");
             ThrowInvalidParamError(env, "Parse param entryPoint failed, must be a valid string.");
             return CreateJsUndefined(env);
         }
         if (entryPoint.empty()) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "entryPoint empty.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "entryPoint empty");
             ThrowInvalidParamError(env, "Param entryPoint cannot be empty.");
             return CreateJsUndefined(env);
         }
@@ -251,12 +251,12 @@ private:
     {
         std::string errorMsg;
         if (!UnwrapChildProcessArgs(env, argv[PARAM1], args, errorMsg)) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "Parse param args failed.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "parse param args failed");
             ThrowInvalidParamError(env, errorMsg);
             return false;
         }
         if (argc > ARGS_TWO && !UnwrapChildProcessOptions(env, argv[PARAM2], options, errorMsg)) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "Parse param options failed.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "parse param options failed");
             ThrowInvalidParamError(env, errorMsg);
             return false;
         }
@@ -276,7 +276,7 @@ private:
         auto pid = std::make_shared<pid_t>(0);
         NapiAsyncTask::ExecuteCallback execute = [srcEntry, args, options, childProcessType, pid, innerErrorCode]() {
             if (!pid || !innerErrorCode) {
-                TAG_LOGE(AAFwkTag::PROCESSMGR, "innerErrorCode or pid is nullptr");
+                TAG_LOGE(AAFwkTag::PROCESSMGR, "null pid or innerErrorCode");
                 return;
             }
             *innerErrorCode = ChildProcessManager::GetInstance().StartChildProcessWithArgs(srcEntry, *pid,
@@ -285,7 +285,7 @@ private:
         NapiAsyncTask::CompleteCallback complete =
             [pid, innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
             if (!pid || !innerErrorCode) {
-                TAG_LOGE(AAFwkTag::PROCESSMGR, "innerErrorCode or pid is nullptr");
+                TAG_LOGE(AAFwkTag::PROCESSMGR, "null pid or innerErrorCode");
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 return;
             }
@@ -305,7 +305,7 @@ napi_value JsChildProcessManagerInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGI(AAFwkTag::PROCESSMGR, "called");
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Invalid input params");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "invalid params");
         return nullptr;
     }
 

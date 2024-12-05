@@ -35,7 +35,7 @@ void JSAbilityFirstFrameStateObserver::OnAbilityFirstFrameState(
         [self, abilityFirstFrameStateData](napi_env env, NapiAsyncTask &task, int32_t status) {
             sptr<JSAbilityFirstFrameStateObserver> jsObserver = self.promote();
             if (jsObserver == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "null js observer");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "null jsObserver");
                 return;
             }
             jsObserver->HandleOnAbilityFirstFrameState(abilityFirstFrameStateData);
@@ -72,7 +72,7 @@ void JSAbilityFirstFrameStateObserver::CallJsFunction(
     napi_value callResult = nullptr;
     napi_status status = napi_call_function(env_, value, method, argc, argv, &callResult);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "call js func failed %{public}d", status);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "call failed %{public}d", status);
     }
 }
 
@@ -130,7 +130,7 @@ void JSAbilityFirstFrameStateObserverManager::RemoveAllJsObserverObjects(
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (abilityManager == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityManager");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityMgr");
         return;
     }
     std::lock_guard<std::mutex> lock(observerListLock_);
@@ -146,7 +146,7 @@ void JSAbilityFirstFrameStateObserverManager::RemoveJsObserverObject(
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (abilityManager == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityManager");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityMgr");
         return;
     }
     std::lock_guard<std::mutex> lock(observerListLock_);

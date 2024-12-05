@@ -309,6 +309,7 @@ bool ResidentProcessManager::GetResidentBundleInfosForUser(std::vector<AppExecFw
 
     const auto &residentWhiteList = AmsConfigurationParameter::GetInstance().GetResidentWhiteList();
     if (userId == 0 || residentWhiteList.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "userId: %{public}d", userId);
         return IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfos(OHOS::AppExecFwk::GET_BUNDLE_DEFAULT,
             bundleInfos, userId));
     }

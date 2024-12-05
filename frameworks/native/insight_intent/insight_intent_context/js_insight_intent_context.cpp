@@ -55,7 +55,7 @@ napi_value JsInsightIntentContext::OnStartAbility(napi_env env, NapiCallbackInfo
 
     auto context = context_.lock();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "invalid context");
+        TAG_LOGE(AAFwkTag::INTENT, "null context");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }
@@ -63,7 +63,7 @@ napi_value JsInsightIntentContext::OnStartAbility(napi_env env, NapiCallbackInfo
     // verify if bundleName is empty or invalid
     auto bundleNameFromWant = want.GetElement().GetBundleName();
     if (bundleNameFromWant.empty() || bundleNameFromWant != context->GetBundleName()) {
-        TAG_LOGE(AAFwkTag::INTENT, "bundleName is empty or invalid");
+        TAG_LOGE(AAFwkTag::INTENT, "bundleName empty or invalid");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED);
         return CreateJsUndefined(env);
     }
@@ -79,7 +79,7 @@ napi_value JsInsightIntentContext::OnStartAbility(napi_env env, NapiCallbackInfo
     NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, innerErrCode]() {
         auto context = weak.lock();
         if (!context) {
-            TAG_LOGE(AAFwkTag::INTENT, "context is released");
+            TAG_LOGE(AAFwkTag::INTENT, "null context");
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }

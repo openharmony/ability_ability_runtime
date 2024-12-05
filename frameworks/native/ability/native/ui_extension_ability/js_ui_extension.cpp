@@ -63,19 +63,19 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *extValue)
 
     auto ptr = reinterpret_cast<std::weak_ptr<UIExtensionContext> *>(value)->lock();
     if (ptr == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "invalid context");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null ptr");
         return nullptr;
     }
     napi_value object = JsUIExtensionContext::CreateJsUIExtensionContext(env, ptr);
     auto contextRef = JsRuntime::LoadSystemModuleByEngine(env, "application.UIExtensionContext",
         &object, 1);
     if (contextRef == nullptr) {
-        TAG_LOGD(AAFwkTag::UI_EXT, "Failed to load module");
+        TAG_LOGD(AAFwkTag::UI_EXT, "null contextRef");
         return nullptr;
     }
     auto contextObj = contextRef->GetNapiValue();
     if (contextObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "load context error");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null contextObj");
         return nullptr;
     }
     napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc,
@@ -151,13 +151,13 @@ void JsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     jsObj_ = jsRuntime_.LoadModule(
         moduleName, srcPath, abilityInfo_->hapPath, abilityInfo_->compileMode == CompileMode::ES_MODULE);
     if (jsObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get jsObj_");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null jsObj_");
         return;
     }
 
     napi_value obj = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get JsUIExtension object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "get object failed");
         return;
     }
 
@@ -190,31 +190,35 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
 {
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         return;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "BindContext CreateJsUIExtensionContext");
     if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Want info is null.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null want");
         return;
     }
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
     napi_value contextObj = nullptr;
     CreateJSContext(env, contextObj, context, screenMode);
     if (shellContextRef_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get LoadSystemModuleByEngine");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null shellContextRef");
         return;
     }
     contextObj = shellContextRef_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context native object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "get object failed");
         return;
     }
     auto workContext = new (std::nothrow) std::weak_ptr<UIExtensionContext>(context);
     CHECK_POINTER(workContext);
     screenModePtr_ = std::make_shared<int32_t>(screenMode);
     auto workScreenMode = new (std::nothrow) std::weak_ptr<int32_t>(screenModePtr_);
-    CHECK_POINTER(workScreenMode);
+    if (workScreenMode == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "workScreenMode is null");
+        delete workContext;
+        return;
+    }
     napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachUIExtensionContext, workContext, workScreenMode);
     context->Bind(jsRuntime_, shellContextRef_.get());
@@ -308,7 +312,7 @@ void JsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbac
     auto asyncCallback = [extensionWeakPtr = weakPtr]() {
         auto jsUIExtension = extensionWeakPtr.lock();
         if (jsUIExtension == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "extension is nullptr");
+            TAG_LOGE(AAFwkTag::UI_EXT, "null extension");
             return;
         }
         jsUIExtension->OnStopCallBack();
@@ -316,7 +320,7 @@ void JsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbac
     callbackInfo->Push(asyncCallback);
     isAsyncCallback = CallPromise(result, callbackInfo);
     if (!isAsyncCallback) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call promise");
+        TAG_LOGE(AAFwkTag::UI_EXT, "call promise failed");
         OnStopCallBack();
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
@@ -326,7 +330,7 @@ void JsUIExtension::OnStopCallBack()
 {
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         return;
     }
     bool ret = ConnectionManager::GetInstance().DisconnectCaller(context->GetToken());
@@ -378,19 +382,19 @@ bool JsUIExtension::CallPromise(napi_value result, AppExecFwk::AbilityTransactio
 {
     auto env = jsRuntime_.GetNapiEnv();
     if (!CheckTypeForNapiValue(env, result, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to convert native value to NativeObject");
+        TAG_LOGE(AAFwkTag::UI_EXT, "convert value failed");
         return false;
     }
     napi_value then = nullptr;
     napi_get_named_property(env, result, "then", &then);
     if (then == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get property: then");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null then");
         return false;
     }
     bool isCallable = false;
     napi_is_callable(env, then, &isCallable);
     if (!isCallable) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "property then is not callable");
+        TAG_LOGE(AAFwkTag::UI_EXT, "not callable property then");
         return false;
     }
     HandleScope handleScope(jsRuntime_);
@@ -410,7 +414,7 @@ sptr<IRemoteObject> JsUIExtension::OnConnect(const AAFwk::Want &want)
     napi_env env = jsRuntime_.GetNapiEnv();
     auto remoteObj = NAPI_ohos_rpc_getNativeRemoteObject(env, result);
     if (remoteObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "remoteObj is nullptr");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null remoteObj");
     }
     return remoteObj;
 }
@@ -430,7 +434,7 @@ void JsUIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::S
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "sessionInfo is nullptr");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null sessionInfo");
         return;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "begin. persistentId: %{private}d, winCmd: %{public}d",
@@ -471,7 +475,7 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> executorCallback = nullptr;
     executorCallback.reset(InsightIntentExecutorAsyncCallback::Create());
     if (executorCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Create async callback failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null executorCallback");
         return false;
     }
 
@@ -479,7 +483,7 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     executorCallback->Push([uiExtension, sessionInfo, needForeground](AppExecFwk::InsightIntentExecuteResult result) {
         TAG_LOGI(AAFwkTag::UI_EXT, "Execute post insightintent");
         if (uiExtension == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "UI extension is nullptr");
+            TAG_LOGE(AAFwkTag::UI_EXT, "null uiExtension");
             return;
         }
 
@@ -488,7 +492,7 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
 
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         return false;
     }
     InsightIntentExecutorInfo executorInfo;
@@ -546,7 +550,7 @@ void JsUIExtension::OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionI
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         return;
     }
     AAFwk::AbilityCommand abilityCmd;
@@ -666,7 +670,7 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
         auto context = GetContext();
         auto uiWindow = CreateUIWindow(context, sessionInfo);
         if (uiWindow == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "create ui window error");
+            TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
             return false;
         }
         HandleScope handleScope(jsRuntime_);
@@ -682,7 +686,7 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
             screenMode_ = AAFwk::EMBEDDED_FULL_SCREEN_MODE;
             auto jsAppWindowStage = CreateAppWindowStage(uiWindow, sessionInfo);
             if (jsAppWindowStage == nullptr) {
-                TAG_LOGE(AAFwkTag::UI_EXT, "JsAppWindowStage is nullptr");
+                TAG_LOGE(AAFwkTag::UI_EXT, "null JsAppWindowStage");
                 return false;
             }
             napi_value argv[] = {jsAppWindowStage->GetNapiValue()};
@@ -705,12 +709,12 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
     const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     if (context == nullptr || context->GetAbilityInfo() == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         return nullptr;
     }
     auto option = sptr<Rosen::WindowOption>::MakeSptr();
     if (option == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "make option failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null option");
         return nullptr;
     }
     option->SetWindowName(context->GetBundleName() + context->GetAbilityInfo()->name);
@@ -720,6 +724,8 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
     option->SetRealParentId(sessionInfo->realHostWindowId);
     option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
     option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
+    option->SetDensity(sessionInfo->density);
+    option->SetIsDensityFollowHost(sessionInfo->isDensityFollowHost);
     HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
 }
@@ -731,7 +737,7 @@ std::unique_ptr<NativeReference> JsUIExtension::CreateAppWindowStage(sptr<Rosen:
     napi_value jsWindowStage = Rosen::JsEmbeddableWindowStage::CreateJsEmbeddableWindowStage(
         env, uiWindow, sessionInfo);
     if (jsWindowStage == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to create jsWindowSatge object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null jsWindowStage");
         return nullptr;
     }
     return JsRuntime::LoadSystemModuleByEngine(env, "application.embeddablewindowstage", &jsWindowStage, 1);
@@ -767,7 +773,7 @@ void JsUIExtension::BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
     auto componentId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Fail to find uiWindow");
+        TAG_LOGE(AAFwkTag::UI_EXT, "find uiWindow failed");
         return;
     }
     auto& uiWindow = uiWindowMap_[componentId];
@@ -790,7 +796,7 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
     auto componentId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Wrong to find uiWindow");
+        TAG_LOGE(AAFwkTag::UI_EXT, "find uiWindow wrong");
         return;
     }
     if (contentSessions_.find(componentId) != contentSessions_.end() && contentSessions_[componentId] != nullptr) {
@@ -842,14 +848,14 @@ napi_value JsUIExtension::CallObjectMethod(const char *name, napi_value const *a
 
     napi_value obj = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get UIExtension object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "get object failed");
         return nullptr;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, obj, name, &method);
     if (!CheckTypeForNapiValue(env, method, napi_function)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get '%{public}s' from UIExtension object", name);
+        TAG_LOGE(AAFwkTag::UI_EXT, "get '%{public}s' from UIExtension object failed", name);
         return nullptr;
     }
     if (withResult) {
@@ -878,20 +884,20 @@ napi_value JsUIExtension::CallOnConnect(const AAFwk::Want &want)
 
     napi_value obj = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get UIExtension object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "get object failed");
         return nullptr;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, obj, "onConnect", &method);
     if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get onConnect from UIExtension object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null method");
         return nullptr;
     }
     napi_value remoteNative = nullptr;
     napi_call_function(env, obj, method, ARGC_ONE, argv, &remoteNative);
     if (remoteNative == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "remoteNative is nullptr");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null remoteNative");
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return remoteNative;
@@ -910,14 +916,14 @@ napi_value JsUIExtension::CallOnDisconnect(const AAFwk::Want &want, bool withRes
 
     napi_value obj = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get UIExtension object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "get object failed");
         return nullptr;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, obj, "onDisconnect", &method);
     if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get onDisconnect from UIExtension object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null method");
         return nullptr;
     }
 
@@ -940,7 +946,7 @@ void JsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& conf
     // Notify extension context
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         return;
     }
 
@@ -966,7 +972,7 @@ void JsUIExtension::Dump(const std::vector<std::string> &params, std::vector<std
 
     napi_value obj = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get UIExtension object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "get object failed");
         return;
     }
 
@@ -976,14 +982,14 @@ void JsUIExtension::Dump(const std::vector<std::string> &params, std::vector<std
         method = nullptr;
         napi_get_named_property(env, obj, "dump", &method);
         if (!CheckTypeForNapiValue(env, method, napi_function)) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get onDump from UIExtension object");
+            TAG_LOGE(AAFwkTag::UI_EXT, "get object failed");
             return;
         }
     }
     napi_value dumpInfo = nullptr;
     napi_call_function(env, obj, method, ARGC_ONE, argv, &dumpInfo);
     if (dumpInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "dumpInfo is nullptr");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null dumpInfo");
         return;
     }
     uint32_t len = 0;
@@ -1007,12 +1013,12 @@ void JsUIExtension::OnAbilityResult(int requestCode, int resultCode, const Want 
     Extension::OnAbilityResult(requestCode, resultCode, resultData);
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGW(AAFwkTag::UI_EXT, "not attached to any runtime context");
+        TAG_LOGW(AAFwkTag::UI_EXT, "null context");
         return;
     }
     context->OnAbilityResult(requestCode, resultCode, resultData);
     if (abilityResultListeners_ == nullptr) {
-        TAG_LOGW(AAFwkTag::UI_EXT, "abilityResultListensers is nullptr");
+        TAG_LOGW(AAFwkTag::UI_EXT, "null abilityResultListeners");
         return;
     }
     abilityResultListeners_->OnAbilityResult(requestCode, resultCode, resultData);
@@ -1028,13 +1034,13 @@ void JsUIExtension::ConfigurationUpdated()
     // Notify extension context
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         return;
     }
 
     auto fullConfig = context->GetConfiguration();
     if (fullConfig == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Configuration is nullptr");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null Configuration");
         return;
     }
     JsExtensionContext::ConfigurationUpdated(env, shellContextRef_, fullConfig);
@@ -1050,13 +1056,13 @@ void JsUIExtension::OnDisplayInfoChange(
     TAG_LOGI(AAFwkTag::UI_EXT, "displayId: %{public}" PRIu64 "", displayId);
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Context is invalid");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         return;
     }
 
     auto contextConfig = context->GetConfiguration();
     if (contextConfig == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Configuration is invalid");
+        TAG_LOGE(AAFwkTag::UI_EXT, "invalid Configuration");
         return;
     }
 
@@ -1084,12 +1090,12 @@ void JsUIExtension::RegisterDisplayInfoChangedListener()
     auto jsUiExtension = std::static_pointer_cast<JsUIExtension>(shared_from_this());
     jsUiExtensionAbilityDisplayListener_ = sptr<JsUIExtensionAbilityDisplayListener>::MakeSptr(jsUiExtension);
     if (jsUiExtensionAbilityDisplayListener_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "jsUiExtensionAbilityDisplayListener is nullptr");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null jsUiExtensionAbilityDisplayListener");
         return;
     }
     auto context = GetContext();
     if (context == nullptr || context->GetToken() == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Param is invalid");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         return;
     }
     TAG_LOGI(AAFwkTag::UI_EXT, "RegisterDisplayInfoChangedListener");
@@ -1101,7 +1107,7 @@ void JsUIExtension::UnregisterDisplayInfoChangedListener()
 {
     auto context = GetContext();
     if (context == nullptr || context->GetToken() == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Param is invalid");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         return;
     }
     Rosen::WindowManager::GetInstance().UnregisterDisplayInfoChangedListener(

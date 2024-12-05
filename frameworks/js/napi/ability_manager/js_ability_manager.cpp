@@ -268,7 +268,7 @@ private:
             }
             auto ret = amsClient->NotifyDebugAssertResult(assertSessionId, static_cast<AAFwk::UserStatus>(userStatus));
             if (ret != ERR_OK) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "notify assert ret failed, ret: %{public}d", ret);
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "failed %{public}d", ret);
                 task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
                 return;
             }
@@ -604,7 +604,7 @@ private:
 
         NapiAsyncTask::CompleteCallback complete = [innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
             if (*innerErrorCode != ERR_OK) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "set resident process result failed, error: %{public}d",
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "error: %{public}d",
                     *innerErrorCode);
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
                 return;

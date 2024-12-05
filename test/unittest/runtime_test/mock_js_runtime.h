@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,21 +27,21 @@ public:
     MockJsRuntime() = default;
     ~MockJsRuntime() = default;
 
-    void StartDebugMode(const DebugOption debugOption)
+    void StartDebugMode(const DebugOption debugOption) override
     {}
-    void FinishPreload()
+    void FinishPreload() override
     {
         GTEST_LOG_(INFO) << "MockJsRuntime::FinishPreload called";
     }
-    bool LoadRepairPatch(const std::string& patchFile, const std::string& baseFile)
+    bool LoadRepairPatch(const std::string& patchFile, const std::string& baseFile) override
     {
         return true;
     }
-    bool NotifyHotReloadPage()
+    bool NotifyHotReloadPage() override
     {
         return true;
     }
-    bool UnLoadRepairPatch(const std::string& patchFile)
+    bool UnLoadRepairPatch(const std::string& patchFile) override
     {
         return true;
     }
@@ -67,7 +67,7 @@ public:
         GTEST_LOG_(INFO) << "MockJsRuntime::LoadJsModule called";
         return nullptr;
     }
-    void PreloadSystemModule(const std::string& moduleName)
+    void PreloadSystemModule(const std::string& moduleName) override
     {
         GTEST_LOG_(INFO) << "MockJsRuntime::PreloadSystemModule called";
     }
@@ -98,7 +98,7 @@ public:
         GTEST_LOG_(INFO) << "MockJsRuntime::GetFileBuffer called";
         return true;
     }
-    void DumpHeapSnapshot(bool isPrivate)
+    void DumpHeapSnapshot(bool isPrivate) override
     {}
 };
 }  // namespace AbilityRuntime

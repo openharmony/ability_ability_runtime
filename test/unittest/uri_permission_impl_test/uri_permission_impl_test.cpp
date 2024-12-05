@@ -150,8 +150,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_005, TestSize.Level1)
     uint32_t fromTokenId = 2;
     uint32_t targetTokenId = 3;
     std::string targetBundleName = "name2";
-    int autoremove = 1;
-    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId, autoremove };
+    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId };
     std::list<GrantInfo> infoList = { info };
     auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
     upms->uriMap_.emplace(uriStr, infoList);
@@ -176,8 +175,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_006, TestSize.Level1)
     uint32_t fromTokenId = 2;
     uint32_t targetTokenId = 3;
     std::string targetBundleName = "name2";
-    int autoremove = 1;
-    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId, autoremove };
+    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId };
     std::list<GrantInfo> infoList = { info };
     auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
     upms->uriMap_.emplace(uriStr, infoList);
@@ -203,8 +201,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_007, TestSize.Level1)
     uint32_t fromTokenId = 2;
     uint32_t targetTokenId = 3;
     std::string targetBundleName = "name2";
-    int autoremove = 1;
-    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId, autoremove };
+    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId };
     std::list<GrantInfo> infoList = { info };
     auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
     upms->uriMap_.emplace(uriStr, infoList);
@@ -232,49 +229,6 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_008, TestSize.Level1)
     std::string targetBundleName = "name1001";
     auto ret = upms->GrantUriPermission(uri, flag, targetBundleName);
     EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
-}
-
-/*
- * Feature: URIPermissionManagerService
- * Function: RevokeUriPermission
- * SubFunction: NA
- * FunctionPoints: URIPermissionManagerService RevokeUriPermission
- */
-HWTEST_F(UriPermissionImplTest, Upms_RevokeUriPermission_001, TestSize.Level1)
-{
-    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
-    ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
-    unsigned int tmpFlag = 1;
-    uint32_t fromTokenId = 2;
-    uint32_t targetTokenId = 3;
-    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId };
-    std::list<GrantInfo> infoList = { info };
-    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
-    upms->uriMap_.emplace(uriStr, infoList);
-    upms->RevokeUriPermission(targetTokenId);
-}
-
-/*
- * Feature: URIPermissionManagerService
- * Function: RevokeUriPermission
- * SubFunction: NA
- * FunctionPoints: URIPermissionManagerService RevokeUriPermission
- */
-HWTEST_F(UriPermissionImplTest, Upms_RevokeUriPermission_002, TestSize.Level1)
-{
-    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
-    ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
-    unsigned int tmpFlag = 1;
-    uint32_t fromTokenId = 2;
-    uint32_t targetTokenId = 3;
-    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId };
-    std::list<GrantInfo> infoList = { info };
-    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
-    upms->uriMap_.emplace(uriStr, infoList);
-    uint32_t tokenId = 4;
-    upms->RevokeUriPermission(tokenId);
 }
 
 /*
@@ -418,7 +372,7 @@ HWTEST_F(UriPermissionImplTest, Upms_VerifyUriPermission_001, TestSize.Level1)
 
     // read
     upms->uriMap_.clear();
-    upms->AddTempUriPermission(uri, flagRead, callerTokenId, targetTokenId, 0);
+    upms->AddTempUriPermission(uri, flagRead, callerTokenId, targetTokenId);
     auto ret = upms->VerifyUriPermission(Uri(uri), flagRead, targetTokenId);
     ASSERT_EQ(ret, true);
     ret = upms->VerifyUriPermission(Uri(uri), flagWrite, targetTokenId);
@@ -428,7 +382,7 @@ HWTEST_F(UriPermissionImplTest, Upms_VerifyUriPermission_001, TestSize.Level1)
     
     // write
     upms->uriMap_.clear();
-    upms->AddTempUriPermission(uri, flagWrite, callerTokenId, targetTokenId, 0);
+    upms->AddTempUriPermission(uri, flagWrite, callerTokenId, targetTokenId);
     ret = upms->VerifyUriPermission(Uri(uri), flagRead, targetTokenId);
     ASSERT_EQ(ret, true);
     ret = upms->VerifyUriPermission(Uri(uri), flagWrite, targetTokenId);
@@ -438,7 +392,7 @@ HWTEST_F(UriPermissionImplTest, Upms_VerifyUriPermission_001, TestSize.Level1)
 
     // flagReadWrite
     upms->uriMap_.clear();
-    upms->AddTempUriPermission(uri, flagReadWrite, callerTokenId, targetTokenId, 0);
+    upms->AddTempUriPermission(uri, flagReadWrite, callerTokenId, targetTokenId);
     ret = upms->VerifyUriPermission(Uri(uri), flagRead, targetTokenId);
     ASSERT_EQ(ret, true);
     ret = upms->VerifyUriPermission(Uri(uri), flagWrite, targetTokenId);
@@ -459,8 +413,8 @@ HWTEST_F(UriPermissionImplTest, Upms_VerifyUriPermission_001, TestSize.Level1)
  */
 HWTEST_F(UriPermissionImplTest, Upms_SendSystemAppGrantUriPermissionEvent_001, TestSize.Level1)
 {
-    std::vector<std::string> uriVec = { "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt" };
-    const std::vector<int32_t> resVec = { ERR_OK };
+    std::vector<Uri> uriVec = { Uri("file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt") };
+    const std::vector<bool> resVec = { true };
     auto ret = UPMSUtils::SendSystemAppGrantUriPermissionEvent(1001, 1002, uriVec, resVec);
     ASSERT_EQ(ret, false);
 }
@@ -557,14 +511,14 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_003, TestSize.Level1)
     ASSERT_EQ(ret, false);
 
     // read
-    upms->AddTempUriPermission(docsUri[0].ToString(), flagRead, callerTokenId, targetTokenId, 0);
+    upms->AddTempUriPermission(docsUri[0].ToString(), flagRead, callerTokenId, targetTokenId);
     ret = upms->CheckUriPermission(tokenIdPermission, docsUri, flagRead)[0];
     ASSERT_EQ(ret, true);
     ret = upms->CheckUriPermission(tokenIdPermission, docsUri, flagWrite)[0];
     ASSERT_EQ(ret, false);
     
     // write
-    upms->AddTempUriPermission(docsUri[0].ToString(), flagWrite, callerTokenId, targetTokenId, 0);
+    upms->AddTempUriPermission(docsUri[0].ToString(), flagWrite, callerTokenId, targetTokenId);
     ret = upms->CheckUriPermission(tokenIdPermission, docsUri, flagWrite)[0];
     ASSERT_EQ(ret, true);
     MyFlag::permissionProxyAuthorization_ = false;
@@ -609,14 +563,14 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_004, TestSize.Level1)
     ASSERT_EQ(ret, false);
     
     // read
-    upms->AddTempUriPermission(uri1[0].ToString(), flagRead, callerTokenId, targetTokenId, 0);
+    upms->AddTempUriPermission(uri1[0].ToString(), flagRead, callerTokenId, targetTokenId);
     ret = upms->CheckUriPermission(tokenIdPermission, uri1, flagRead)[0];
     ASSERT_EQ(ret, true);
     ret = upms->CheckUriPermission(tokenIdPermission, uri1, flagWrite)[0];
     ASSERT_EQ(ret, false);
     
     // write
-    upms->AddTempUriPermission(uri1[0].ToString(), flagWrite, callerTokenId, targetTokenId, 0);
+    upms->AddTempUriPermission(uri1[0].ToString(), flagWrite, callerTokenId, targetTokenId);
     ret = upms->CheckUriPermission(tokenIdPermission, uri1, flagRead)[0];
     ASSERT_EQ(ret, true);
     ret = upms->CheckUriPermission(tokenIdPermission, uri1, flagWrite)[0];
@@ -643,7 +597,7 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_005, TestSize.Level1)
     MyFlag::tokenInfos[callerTokenId1] = TokenInfo(callerTokenId1, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
     TokenIdPermission tokenIdPermission1(callerTokenId1);
     auto ret = upms->CheckUriPermission(tokenIdPermission1, uri, flagRead)[0];
-    ASSERT_EQ(ret, true);
+    ASSERT_EQ(ret, false);
 
     uint32_t callerTokenId2 = 1002;
     IPCSkeleton::callerTokenId = callerTokenId2;
@@ -663,9 +617,10 @@ HWTEST_F(UriPermissionImplTest, RevokeAllUriPermission_001, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
-    IPCSkeleton::callerTokenId = 1001;
+    // mock foundation call
+    IPCSkeleton::callerUId = 5523;
     auto ret = upms->RevokeAllUriPermissions(1002);
+    IPCSkeleton::callerUId = 0;
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -679,9 +634,7 @@ HWTEST_F(UriPermissionImplTest, RevokeAllUriPermission_002, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ &= (~MyFlag::IS_SA_CALL);
-    MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "tempProcess");
-    IPCSkeleton::callerTokenId = 1001;
+    IPCSkeleton::callerUId = 0;
     auto ret = upms->RevokeAllUriPermissions(1002);
     EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
 }
@@ -705,7 +658,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_001, TestSize.Level
     std::string targetBundleName = "com.example.app1002";
     uint32_t flag = 1;
     const std::vector<Uri> uris = { uri1 };
-    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
+    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, 0);
     EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
 }
 
@@ -728,7 +681,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_002, TestSize.Level
     std::string targetBundleName = "com.example.app1002";
     uint32_t flag = 0;
     const std::vector<Uri> uris = { uri1 };
-    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
+    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, 0);
     MyFlag::permissionPrivileged_ = false;
     EXPECT_EQ(ret, ERR_CODE_INVALID_URI_FLAG);
 }
@@ -752,7 +705,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_003, TestSize.Level
     std::string targetBundleName = "com.example.invalid";
     uint32_t flag = 1;
     const std::vector<Uri> uris = { uri1 };
-    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
+    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, 0);
     MyFlag::permissionPrivileged_ = false;
     EXPECT_EQ(ret, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
 }
@@ -776,7 +729,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_004, TestSize.Level
     std::string targetBundleName = "com.example.app1002";
     uint32_t flag = 1;
     const std::vector<Uri> uris = { uri1 };
-    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
+    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, 0);
     MyFlag::permissionPrivileged_ = false;
     EXPECT_EQ(ret, ERR_CODE_INVALID_URI_TYPE);
 }

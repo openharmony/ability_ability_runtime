@@ -121,7 +121,7 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     // 1.new AbilityHandler
     std::string abilityName = CreateAbilityName(abilityRecord);
     if (abilityName.empty()) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "empty AabilityName");
+        TAG_LOGE(AAFwkTag::UIABILITY, "empty abilityName");
         return;
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", abilityRecord->GetAbilityInfo()->name.c_str());
@@ -578,7 +578,7 @@ void UIAbilityThread::DumpOtherInfo(std::vector<std::string> &info)
     if (currentAbility_ != nullptr) {
         const auto ablityContext = currentAbility_->GetAbilityContext();
         if (ablityContext == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null Ablitycontext");
+            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
             return;
         }
         const auto localCallContainer = ablityContext->GetLocalCallContainer();

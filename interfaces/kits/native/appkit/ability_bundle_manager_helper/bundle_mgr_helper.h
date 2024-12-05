@@ -110,6 +110,7 @@ public:
     ErrCode GetSignatureInfoByBundleName(const std::string &bundleName, SignatureInfo &signatureInfo);
     std::string GetStringById(
         const std::string &bundleName, const std::string &moduleName, uint32_t resId, int32_t userId);
+    std::string GetDataDir(const std::string &bundleName, const int32_t appIndex);
 
 private:
     sptr<IBundleMgr> Connect();

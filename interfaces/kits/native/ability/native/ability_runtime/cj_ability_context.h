@@ -18,10 +18,30 @@
 
 #include "ability.h"
 #include "ability_context_impl.h"
+#include "cj_ability_context_utils.h"
 #include "ffi_remote_data.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+class CjUIExtensionCallback : public std::enable_shared_from_this<CjUIExtensionCallback> {
+public:
+    explicit CjUIExtensionCallback() {}
+    void OnError(int32_t number);
+    void OnRelease(int32_t code);
+    void OnResult(int32_t resultCode, const AAFwk::Want &want);
+    void CallCjResult(int32_t resultCode, const AAFwk::Want &want);
+    void SetCjCallbackOnResult(std::function<void(CJAbilityResult)> onResultCallback);
+    void SetCjCallbackOnError(std::function<void(int32_t, char*, char*)> onErrorCallback);
+    void CallCjError(int32_t number);
+    void SetSessionId(int32_t sessionId);
+    void SetUIContent(Ace::UIContent* uiContent);
+private:
+    std::function<void(CJAbilityResult)> onResultCallback_;
+    std::function<void(int32_t, char*, char*)> onErrorCallback_;
+    int32_t sessionId_ = 0;
+    Ace::UIContent* uiContent_ = nullptr;
+};
+
 class CJAbilityContext : public FFI::FFIData {
 public:
     explicit CJAbilityContext(const std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext)
@@ -63,6 +83,17 @@ public:
         AppExecFwk::Ability* ability, std::vector<std::string>& permissions, PermissionRequestTask&& task);
     void InheritWindowMode(AAFwk::Want& want);
     int32_t RequestDialogService(AAFwk::Want& want, RequestDialogResultTask&& task);
+    int32_t SetRestoreEnabled(bool enabled);
+    int32_t BackToCallerAbilityWithResult(const AAFwk::Want &want, int resultCode, int64_t requestCode);
+    int32_t SetMissionContinueState(const AAFwk::ContinueState &state);
+    int32_t StartAbilityByType(const std::string &type, AAFwk::WantParams &wantParams,
+        const std::shared_ptr<CjUIExtensionCallback> &uiExtensionCallbacks);
+    int32_t MoveUIAbilityToBackground();
+    int32_t ReportDrawnCompleted();
+    int32_t OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options,
+        int requestCode, RuntimeTask &&task);
+    bool CreateOpenLinkTask(RuntimeTask &&task, int32_t requestCode, AAFwk::Want &want, int &nativeRequestCode);
+    int32_t OpenLink(const AAFwk::Want& want, int requestCode);
 
 #ifdef SUPPORT_GRAPHICS
     int32_t SetMissionLabel(const std::string& label);

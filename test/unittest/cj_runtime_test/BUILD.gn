@@ -29,7 +29,6 @@ ohos_unittest("cj_runtime_test") {
   ]
 
   sources = [ "cj_runtime_test.cpp" ]
-  configs = [ "${c_utils_base_path}:utils_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -40,7 +39,11 @@ ohos_unittest("cj_runtime_test") {
     "//third_party/googletest:gtest_main",
   ]
 
-  external_deps = [ "eventhandler:libeventhandler" ]
+  external_deps = [
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "runtime_core:libarkbase_static",
+  ]
 }
 
 group("unittest") {

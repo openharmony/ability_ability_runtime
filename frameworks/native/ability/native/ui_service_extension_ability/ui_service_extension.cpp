@@ -69,7 +69,7 @@ std::shared_ptr<UIServiceExtensionContext> UIServiceExtension::CreateAndInitCont
     std::shared_ptr<UIServiceExtensionContext> context =
         ExtensionBase<UIServiceExtensionContext>::CreateAndInitContext(record, application, handler, token);
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "UIServiceExtension CreateAndInitContext context is nullptr");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null context");
         return context;
     }
     return context;
@@ -81,12 +81,12 @@ sptr<Rosen::WindowOption> UIServiceExtension::GetWindowOption(
 {
     auto option = sptr<Rosen::WindowOption>::MakeSptr();
     if (option == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "Option is nullptr");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null option");
         return nullptr;
     }
     if (extensionWindowConfig->windowAttribute == Rosen::ExtensionWindowAttribute::SUB_WINDOW) {
         if (hostWindowId == 0) {
-            TAG_LOGE(AAFwkTag::UISERVC_EXT, "create SUB_WINDOW, but hostWindowId = 0");
+            TAG_LOGE(AAFwkTag::UISERVC_EXT, "hostWindowId = 0");
             return nullptr;
         }
         option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);

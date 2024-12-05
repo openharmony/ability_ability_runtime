@@ -49,7 +49,8 @@ int32_t StatusBarDelegateProxy::CheckIfStatusBarItemExists(uint32_t accessTokenI
     return ret;
 }
 
-int32_t StatusBarDelegateProxy::AttachPidToStatusBarItem(uint32_t accessTokenId, int32_t pid)
+int32_t StatusBarDelegateProxy::AttachPidToStatusBarItem(uint32_t accessTokenId, int32_t pid,
+    const std::string &instanceKey)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     MessageParcel data;
@@ -65,6 +66,10 @@ int32_t StatusBarDelegateProxy::AttachPidToStatusBarItem(uint32_t accessTokenId,
     }
     if (!data.WriteInt32(pid)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write pid failed");
+        return AAFwk::ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+    if (!data.WriteString(instanceKey)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "instanceKey write failed");
         return AAFwk::ERR_NATIVE_IPC_PARCEL_FAILED;
     }
     auto ret = SendRequest(StatusBarDelegateCmd::ATTACH_PID_TO_STATUS_BAR_ITEM, data, reply, option);

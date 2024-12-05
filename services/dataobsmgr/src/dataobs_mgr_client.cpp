@@ -16,6 +16,8 @@
 #include <thread>
 #include "dataobs_mgr_client.h"
 
+#include "common_utils.h"
+#include "datashare_log.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -25,6 +27,7 @@
 namespace OHOS {
 namespace AAFwk {
 std::mutex DataObsMgrClient::mutex_;
+using namespace DataShare;
 
 class DataObsMgrClient::SystemAbilityStatusChangeListener
     : public SystemAbilityStatusChangeStub {
@@ -75,6 +78,7 @@ ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, sptr<IDataAbilityObse
 {
     auto [errCode, dataObsManger] = GetObsMgr();
     if (errCode != SUCCESS) {
+        LOG_ERROR("Failed to get ObsMgr, errCode: %{public}d.", errCode);
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
     auto status = dataObsManger->RegisterObserver(uri, dataObserver);
@@ -255,7 +259,11 @@ void DataObsMgrClient::ReRegister()
     observers_.Clear();
     observers.ForEach([this](const auto &key, const auto &value) {
         for (const auto &uri : value) {
-            RegisterObserver(uri, key);
+            auto ret = RegisterObserver(uri, key);
+            if (ret != SUCCESS) {
+                LOG_ERROR("RegisterObserver failed, uri:%{public}s, ret:%{public}d",
+                    CommonUtils::Anonymous(uri.ToString()).c_str(), ret);
+            }
         }
         return false;
     });
@@ -264,7 +272,13 @@ void DataObsMgrClient::ReRegister()
     observerExts_.Clear();
     observerExts.ForEach([this](const auto &key, const auto &value) {
         for (const auto &param : value) {
-            RegisterObserverExt(param.uri, key, param.isDescendants);
+            auto ret = RegisterObserverExt(param.uri, key, param.isDescendants);
+            if (ret != SUCCESS) {
+                LOG_ERROR(
+                    "RegisterObserverExt failed, param.uri:%{public}s, ret:%{public}d, param.isDescendants:%{public}d",
+                    CommonUtils::Anonymous(param.uri.ToString()).c_str(), ret, param.isDescendants
+                );
+            }
         }
         return false;
     });

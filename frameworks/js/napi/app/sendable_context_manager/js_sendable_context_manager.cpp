@@ -62,13 +62,13 @@ napi_value CreateSendableContextObject(napi_env env, std::shared_ptr<Context> co
     // Sendable context has no property for now.
     status = napi_create_sendable_object_with_properties(env, 0, nullptr, &objValue);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "create sendable context failed:%{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed:%{public}d", status);
         return nullptr;
     }
 
     status = napi_wrap_sendable(env, objValue, jsContext.release(), JsContext::Finalizer, nullptr);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "wrap sendable failed:%{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap failed:%{public}d", status);
         return nullptr;
     }
 
@@ -125,7 +125,7 @@ napi_value CreateJsBaseContextFromSendable(napi_env env, void* wrapped)
             delete static_cast<std::weak_ptr<Context> *>(data);
         }, nullptr, nullptr);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "wrap context failed: %{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap failed: %{public}d", status);
         delete workContext;
         return nullptr;
     }
@@ -183,7 +183,7 @@ napi_value CreateJsApplicationContextFromSendable(napi_env env, void* wrapped)
             delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
         }, nullptr, nullptr);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "wrap application context failed: %{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap failed: %{public}d", status);
         delete workContext;
         return nullptr;
     }
@@ -241,7 +241,7 @@ napi_value CreateJsAbilityStageContextFromSendable(napi_env env, void* wrapped)
             delete static_cast<std::weak_ptr<AbilityStageContext> *>(data);
         }, nullptr, nullptr);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "wrap ability stage context failed: %{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap failed: %{public}d", status);
         delete workContext;
         return nullptr;
     }
@@ -299,7 +299,7 @@ napi_value CreateJsUIAbilityContextFromSendable(napi_env env, void* wrapped)
             delete static_cast<std::weak_ptr<AbilityContext> *>(data);
         }, nullptr, nullptr);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "wrap ui ability context failed: %{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap failed: %{public}d", status);
         delete workContext;
         return nullptr;
     }
@@ -361,7 +361,7 @@ private:
         bool stageMode = false;
         napi_status status = IsStageContext(env, info.argv[0], stageMode);
         if (status != napi_ok || !stageMode) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "context isn't stageMode, status is %{public}d", status);
+            TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
             ThrowInvalidParamError(env, "Parse param context failed, must be a context of stageMode.");
             return CreateJsUndefined(env);
         }
@@ -397,7 +397,7 @@ private:
         void *wrapped = nullptr;
         auto status = napi_unwrap_sendable(env, info.argv[0], &wrapped);
         if (status != napi_ok) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "unwrap sendable failed:%{public}d", status);
+            TAG_LOGE(AAFwkTag::CONTEXT, "unwrap failed:%{public}d", status);
             ThrowInvalidParamError(env, "Parameter error: Input parameter is invalid.");
             return CreateJsUndefined(env);
         }
@@ -405,7 +405,7 @@ private:
         // Create normal context
         auto object = CreateJsBaseContextFromSendable(env, wrapped);
         if (object == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "create base context failed");
+            TAG_LOGE(AAFwkTag::CONTEXT, "create failed");
             ThrowInvalidParamError(env, "Parameter error: Create context failed.");
             return CreateJsUndefined(env);
         }
@@ -426,7 +426,7 @@ private:
         void *wrapped = nullptr;
         auto status = napi_unwrap_sendable(env, info.argv[0], &wrapped);
         if (status != napi_ok) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "unwrap sendable failed: %{public}d", status);
+            TAG_LOGE(AAFwkTag::CONTEXT, "unwrap failed: %{public}d", status);
             ThrowInvalidParamError(env, "Parameter error: Input parameter is invalid.");
             return CreateJsUndefined(env);
         }
@@ -434,7 +434,7 @@ private:
         // Create normal context
         auto object = CreateJsApplicationContextFromSendable(env, wrapped);
         if (object == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "create base context failed");
+            TAG_LOGE(AAFwkTag::CONTEXT, "create failed");
             ThrowInvalidParamError(env, "Parameter error: Create application context failed.");
             return CreateJsUndefined(env);
         }
@@ -455,7 +455,7 @@ private:
         void *wrapped = nullptr;
         auto status = napi_unwrap_sendable(env, info.argv[0], &wrapped);
         if (status != napi_ok) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "unwrap sendable object failed with %{public}d", status);
+            TAG_LOGE(AAFwkTag::CONTEXT, "unwrap failed %{public}d", status);
             ThrowInvalidParamError(env, "Parameter error: Input parameter is invalid.");
             return CreateJsUndefined(env);
         }
@@ -463,7 +463,7 @@ private:
         // Create normal context
         auto object = CreateJsAbilityStageContextFromSendable(env, wrapped);
         if (object == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "null context object");
+            TAG_LOGE(AAFwkTag::CONTEXT, "null object");
             ThrowInvalidParamError(env, "Parameter error: Create ability stage context failed.");
             return CreateJsUndefined(env);
         }
@@ -492,7 +492,7 @@ private:
         // Create uiability context
         auto object = CreateJsUIAbilityContextFromSendable(env, wrapped);
         if (object == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "null uiability context");
+            TAG_LOGE(AAFwkTag::CONTEXT, "null object");
             ThrowInvalidParamError(env, "Parameter error: Create uiability context failed.");
             return CreateJsUndefined(env);
         }

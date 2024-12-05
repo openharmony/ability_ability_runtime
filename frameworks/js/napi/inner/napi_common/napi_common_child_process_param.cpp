@@ -24,14 +24,14 @@ bool UnwrapChildProcessArgs(napi_env env, napi_value jsValue, AppExecFwk::ChildP
     std::string &errorMsg)
 {
     if (!IsTypeForNapiValue(env, jsValue, napi_object)) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Parameter error. The type of args must be ProcessArgs.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "parameter error");
         errorMsg =  "Parameter error. The type of args must be ProcessArgs.";
         return false;
     }
 
     if (IsExistsByPropertyName(env, jsValue, "entryParams") &&
         !UnwrapStringByPropertyName(env, jsValue, "entryParams", args.entryParams)) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Parameter error. The type of args.entryParams must be string.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "parameter error");
         errorMsg = "Parameter error. The type of args.entryParams must be string.";
         return false;
     }
@@ -39,7 +39,7 @@ bool UnwrapChildProcessArgs(napi_env env, napi_value jsValue, AppExecFwk::ChildP
     if (IsExistsByPropertyName(env, jsValue, "fds")) {
         napi_value jsFds = GetPropertyValueByPropertyName(env, jsValue, "fds", napi_object);
         if (jsFds == nullptr) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "The type of args.fds must be Record<string, number>.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "fds must be Record<string, number>");
             errorMsg = "The type of args.fds must be Record<string, number>.";
             return false;
         }
@@ -58,7 +58,7 @@ bool UnwrapChildProcessFds(napi_env env, napi_value param, std::map<std::string,
     NAPI_CALL_BASE(env, napi_get_property_names(env, param, &jsKeyList), false);
     NAPI_CALL_BASE(env, napi_get_array_length(env, jsKeyList, &keyCount), false);
     if (keyCount > CHILD_PROCESS_ARGS_FDS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "fds count must <= %{public}d.", CHILD_PROCESS_ARGS_FDS_MAX_COUNT);
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "fds count must <= %{public}d", CHILD_PROCESS_ARGS_FDS_MAX_COUNT);
         errorMsg = "fds count must <= " + std::to_string(CHILD_PROCESS_ARGS_FDS_MAX_COUNT);
         return false;
     }
@@ -68,7 +68,7 @@ bool UnwrapChildProcessFds(napi_env env, napi_value param, std::map<std::string,
         NAPI_CALL_BASE(env, napi_get_element(env, jsKeyList, index, &jsKey), false);
         std::string key;
         if (!UnwrapStringFromJS2(env, jsKey, key)) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "The type of args.fds must be Record<string, number>.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "fds must be Record<string, number>");
             errorMsg = "The type of args.fds must be Record<string, number>.";
             return false;
         }
@@ -79,7 +79,7 @@ bool UnwrapChildProcessFds(napi_env env, napi_value param, std::map<std::string,
 
         int32_t value;
         if (!UnwrapInt32ByPropertyName(env, param, key.c_str(), value)) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "The type of args.fds must be Record<string, number>.");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "fds must be Record<string, number>");
             errorMsg = "The type of args.fds must be Record<string, number>.";
             return false;
         }
@@ -92,14 +92,14 @@ bool UnwrapChildProcessOptions(napi_env env, napi_value jsValue, AppExecFwk::Chi
     std::string &errorMsg)
 {
     if (!IsTypeForNapiValue(env, jsValue, napi_object)) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Parameter error. The type of options must be ProcessOptions.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "parameter error");
         errorMsg =  "Parameter error. The type of options must be ProcessOptions.";
         return false;
     }
 
     if (IsExistsByPropertyName(env, jsValue, "isolationMode") &&
         !UnwrapBooleanByPropertyName(env, jsValue, "isolationMode", options.isolationMode)) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Parameter error. The type of options.isolationMode must be boolean.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "parameter error");
         errorMsg = "Parameter error. The type of options.isolationMode must be boolean.";
         return false;
     }

@@ -21,12 +21,14 @@
 #include "insight_intent_utils.h"
 #include "permission_verification.h"
 #include "want_params_wrapper.h"
+#include "time_util.h"
 
 namespace OHOS {
 namespace AAFwk {
 namespace {
 constexpr size_t INSIGHT_INTENT_EXECUTE_RECORDS_MAX_SIZE = 256;
 constexpr char EXECUTE_INSIGHT_INTENT_PERMISSION[] = "ohos.permission.EXECUTE_INSIGHT_INTENT";
+constexpr int32_t OPERATION_DURATION = 10000;
 }
 using namespace AppExecFwk;
 
@@ -279,6 +281,30 @@ int32_t InsightIntentExecuteManager::CheckCallerPermission()
         return ERR_PERMISSION_DENIED;
     }
     return ERR_OK;
+}
+
+void InsightIntentExecuteManager::SetIntentExemptionInfo(int32_t uid)
+{
+    std::lock_guard<ffrt::mutex> guard(intentExemptionLock_);
+    std::map<int32_t, int64_t>::iterator iter = intentExemptionDeadlineTime_.find(uid);
+    if (iter == intentExemptionDeadlineTime_.end()) {
+        intentExemptionDeadlineTime_[uid] = AbilityRuntime::TimeUtil::CurrentTimeMillis();
+    }
+}
+
+bool InsightIntentExecuteManager::CheckIntentIsExemption(int32_t uid)
+{
+    std::lock_guard<ffrt::mutex> guard(intentExemptionLock_);
+    if (intentExemptionDeadlineTime_.find(uid) != intentExemptionDeadlineTime_.end()) {
+        if (AbilityRuntime::TimeUtil::CurrentTimeMillis() - OPERATION_DURATION <= intentExemptionDeadlineTime_[uid]) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "exemption check uid:%{public}d", uid);
+            return true;
+        } else {
+            intentExemptionDeadlineTime_.erase(uid);
+            return false;
+        }
+    }
+    return false;
 }
 } // namespace AAFwk
 } // namespace OHOS

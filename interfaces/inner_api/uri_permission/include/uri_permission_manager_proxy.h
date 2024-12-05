@@ -28,17 +28,15 @@ public:
     virtual ~UriPermissionManagerProxy() = default;
 
     virtual int GrantUriPermission(const Uri &uri, unsigned int flag,
-        const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0,
-        int32_t abilityId = -1) override;
+        const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0) override;
 
     virtual int GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
-        const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0,
-        int32_t abilityId = -1) override;
+        const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0) override;
 
     virtual int32_t GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
         const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId,
-        int32_t abilityId) override;
-    virtual void RevokeUriPermission(const uint32_t tokenId, int32_t abilityId) override;
+        int32_t hideSensitiveType) override;
+
     virtual int RevokeAllUriPermissions(const uint32_t tokenId) override;
     virtual int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName,
         int32_t appIndex = 0) override;

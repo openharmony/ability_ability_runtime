@@ -650,11 +650,16 @@ enum {
      * Result (2097278) for replying failed while executing insight intent.
      */
     ERR_INSIGHT_INTENT_EXECUTE_REPLY_FAILED = 2097278,
-    
+
     /*
-     * Result (2097278) for get target bundle info failed.
+     * Result (2097279) for get target bundle info failed.
      */
     ERR_GET_TARGET_BUNDLE_INFO_FAILED = 2097279,
+
+    /*
+     * Result (2097280) for UIAbility in starting state.
+     */
+    ERR_UI_ABILITY_IS_STARTING = 2097280,
 
     /**
      * Native error(3000000) for target bundle not exist.
@@ -821,6 +826,11 @@ enum NativeFreeInstallError {
      * Native error(29360137) for target app is not attached to a status bar.
      */
     ERR_NOT_ATTACHED_TO_STATUS_BAR = 29360137,
+
+    /**
+     * Result(29360138) for Connect State: An error of the BMS not connect.
+     */
+    BMS_NOT_CONNECTED = 29360138,
 
     /*
      * Result(29360205) for continue freeinstall failed.

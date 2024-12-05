@@ -22,10 +22,10 @@
 namespace OHOS {
 namespace AppExecFwk {
 struct MallocInfo : public Parcelable {
-    int32_t usmblks;
-    int32_t uordblks;
-    int32_t fordblks;
-    int32_t hblkhd;
+    uint64_t usmblks;
+    uint64_t uordblks;
+    uint64_t fordblks;
+    uint64_t hblkhd;
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static MallocInfo *Unmarshalling(Parcel &parcel);

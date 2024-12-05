@@ -20,6 +20,7 @@
 #include "auto_fill_error.h"
 #include "auto_fill_extension_callback.h"
 #include "extension_ability_info.h"
+#include "hilog_tag_wrapper.h"
 #include "mock_ui_content.h"
 #undef private
 
@@ -234,6 +235,36 @@ HWTEST_F(AutoFillManagerTest, BindModalUIExtensionCallback_0100, TestSize.Level1
     auto &manager = AbilityRuntime::AutoFillManager::GetInstance();
     EXPECT_EQ(manager.extensionCallbacks_.size(), 0);
     manager.BindModalUIExtensionCallback(extensionCallback, callback);
+}
+
+/*
+ * Feature: AutoFillManager
+ * Function: RemoveTask、SetTimeOutEvent、RemoveEvent and RemoveAutoFillExtensionCallback
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: test RemoveTask、SetTimeOutEvent、RemoveEvent and RemoveAutoFillExtensionCallback.
+ */
+HWTEST_F(AutoFillManagerTest, AutoFillManager_RemoveTaskAndExtensionCallback_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RemoveTaskAndSetTimeOutEvent_0100 start");
+
+    auto& manager = AbilityRuntime::AutoFillManager::GetInstance();
+    EXPECT_EQ(manager.extensionCallbacks_.size(), 0);
+    uint32_t autoFillSessionId = 0;
+    auto extensionCallback = std::make_shared<AbilityRuntime::AutoFillExtensionCallback>();
+    ASSERT_NE(extensionCallback, nullptr);
+    manager.extensionCallbacks_.emplace(autoFillSessionId, extensionCallback);
+    uint32_t eventId = 0;
+    manager.SetTimeOutEvent(eventId);
+    EXPECT_EQ(manager.taskHandles_.size(), 1);
+    manager.RemoveEvent(eventId);
+    EXPECT_EQ(manager.taskHandles_.size(), 0);
+    EXPECT_EQ(manager.extensionCallbacks_.size(), 1);
+    manager.RemoveAutoFillExtensionCallback(eventId);
+    EXPECT_EQ(manager.extensionCallbacks_.size(), 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "AutoFillManager_RemoveTaskAndExtensionCallback_Test end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

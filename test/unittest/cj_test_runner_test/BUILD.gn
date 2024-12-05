@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
@@ -52,7 +51,6 @@ ohos_unittest("cj_test_runner_test") {
     "${ability_runtime_path}/tools/aa/src/test_observer_proxy.cpp",
     "cj_test_runner_test.cpp",
   ]
-  configs = [ "${c_utils_base_path}:utils_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -90,6 +88,7 @@ ohos_unittest("cj_test_runner_test") {
     "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
