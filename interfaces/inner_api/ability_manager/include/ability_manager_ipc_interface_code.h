@@ -576,6 +576,8 @@ enum class AbilityManagerInterfaceCode {
 
     // get keep-alive applications by EDM
     GET_APPLICATIONS_KEEP_ALIVE_BY_EDM = 6124,
+
+    GET_INTENT_EXEMPTION_INFO = 6125,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
