@@ -780,7 +780,7 @@ void AbilityConnectManager::DisconnectRecordForce(ConnectListType &list,
     list.emplace_back(connectRecord);
     bool isUIService = (abilityRecord->GetAbilityInfo().extensionAbilityType ==
         AppExecFwk::ExtensionAbilityType::UI_SERVICE);
-    if (abilityRecord->IsConnectListEmpty() && abilityRecord->GetStartId() == 0 && !isUIService) {
+    if (abilityRecord->IsConnectListEmpty() && abilityRecord->IsNeverStarted() && !isUIService) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "force terminate ability record state: %{public}d",
             abilityRecord->GetAbilityState());
         TerminateRecord(abilityRecord);
@@ -1122,7 +1122,7 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
     // complete disconnect and remove record from conn map
     connect->ScheduleDisconnectAbilityDone();
     abilityRecord->RemoveConnectRecordFromList(connect);
-    if (abilityRecord->IsConnectListEmpty() && abilityRecord->GetStartId() == 0) {
+    if (abilityRecord->IsConnectListEmpty() && abilityRecord->IsNeverStarted()) {
         if (IsUIExtensionAbility(abilityRecord) && CheckUIExtensionAbilitySessionExist(abilityRecord)) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "exist ui extension component, don't terminate when disconnect");
         } else if (abilityRecord->GetAbilityInfo().extensionAbilityType ==
