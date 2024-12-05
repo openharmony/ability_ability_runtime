@@ -29,6 +29,7 @@
 #include "system_memory_attr.h"
 #include "ui_extension_window_command.h"
 #include "want.h"
+#include "intent_exemption_info.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -1614,6 +1615,8 @@ public:
      */
     ErrCode UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
         const std::list<std::string>& exportConfigs, int32_t flag);
+
+    ErrCode GetAllIntentExemptionInfo(std::vector<AppExecFwk::IntentExemptionInfo>& info);
 
 private:
     AbilityManagerClient();

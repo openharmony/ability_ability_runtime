@@ -172,6 +172,7 @@ private:
     int GetAbilityRunningInfosInner(MessageParcel &data, MessageParcel &reply);
     int GetExtensionRunningInfosInner(MessageParcel &data, MessageParcel &reply);
     int GetProcessRunningInfosInner(MessageParcel &data, MessageParcel &reply);
+    int GetAllIntentExemptionInfoInner(MessageParcel &data, MessageParcel &reply);
 
     int StartSyncRemoteMissionsInner(MessageParcel &data, MessageParcel &reply);
     int StopSyncRemoteMissionsInner(MessageParcel &data, MessageParcel &reply);

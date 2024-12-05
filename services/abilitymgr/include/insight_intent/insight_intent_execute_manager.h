@@ -87,6 +87,8 @@ public:
 
     static int32_t GenerateWant(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, Want &want);
 
+    std::map<int32_t, int64_t> GetAllIntentExemptionInfo() const;
+
     void SetIntentExemptionInfo(int32_t uid);
 
     bool CheckIntentIsExemption(int32_t uid);
