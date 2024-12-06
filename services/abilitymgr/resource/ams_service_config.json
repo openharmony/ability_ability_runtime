@@ -15,5 +15,8 @@
         "system_orientation": "vertical"
     },
     "supportBackToCaller": true,
-    "supportSCBCrashReboot": true
+    "supportSCBCrashReboot": true,
+    "normal_resident_apps": [
+        "com.huawei.hmos.wearwalletservice"
+    ]
 }
