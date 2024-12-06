@@ -5904,5 +5904,85 @@ int32_t AbilityManagerProxy::QueryKeepAliveApplicationsByEDM(int32_t appType, in
 
     return reply.ReadInt32();
 }
+
+int32_t AbilityManagerProxy::AddQueryERMSObserver(sptr<IRemoteObject> callerToken,
+    sptr<AbilityRuntime::IQueryERMSObserver> observer)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (observer == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null observer");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteRemoteObject(callerToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteRemoteObject(observer->AsObject())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer write fail");
+        return INNER_ERR;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::ADD_QUERY_ERMS_OBSERVER, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::QueryAtomicServiceStartupRule(sptr<IRemoteObject> callerToken,
+    const std::string &appId, const std::string &startTime, AtomicServiceStartupRule &rule)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteRemoteObject(callerToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteString(appId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write appId fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteString(startTime)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write startTime fail");
+        return INNER_ERR;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::QUERY_ATOMIC_SERVICE_STARTUP_RULE, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    rule.isOpenAllowed = reply.ReadBool();
+    rule.isEmbeddedAllowed = reply.ReadBool();
+    return reply.ReadInt32();
+}
 } // namespace AAFwk
 } // namespace OHOS
