@@ -90,9 +90,39 @@ void Watchdog::SetAppMainThreadState(const bool appMainThreadState)
     appMainThreadIsAlive_.store(appMainThreadState);
 }
 
+#ifdef APP_NO_RESPONSE_DIALOG
+bool isDeviceType2in1()
+{
+    const int bufferLen = 128;
+    char paramOutBuf[bufferLen] = {0};
+    const char *devicetype2in1 = "2in1";
+    int ret = GetParameter("const.product.devicetype", "", paramOutBuf, bufferLen);
+    return ret > 0 && strncmp(paramOutBuf, devicetype2in1, strlen(devicetype2in1)) == 0;
+}
+#endif
+
+#ifdef APP_NO_RESPONSE_DIALOG
+void Watchdog::ChangeTimeOut(const std::string& bundleName)
+{
+    constexpr char SCENEBOARD_SERVICE_ABILITY[] = "com.ohos.sceneboard";
+    constexpr int TIMEOUT = 5000;
+    if (bundleName == SCENEBOARD_SERVICE_ABILITY) {
+        OHOS::HiviewDFX::Watchdog::GetInstance().RemovePeriodicalTask("AppkitWatchdog");
+        auto watchdogTask = [this] { this->Timer(); };
+        OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask("AppkitWatchdog", watchdogTask, TIMEOUT,
+            INI_TIMER_FIRST_SECOND);
+    }
+}
+#endif
+
 void Watchdog::SetBundleInfo(const std::string& bundleName, const std::string& bundleVersion)
 {
     OHOS::HiviewDFX::Watchdog::GetInstance().SetBundleInfo(bundleName, bundleVersion);
+#ifdef APP_NO_RESPONSE_DIALOG
+    if (isDeviceType2in1()) {
+        ChangeTimeOut(bundleName);
+    }
+#endif
 }
 
 void Watchdog::SetBackgroundStatus(const bool isInBackground)
