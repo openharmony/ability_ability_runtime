@@ -1137,6 +1137,13 @@ ErrCode AbilityManagerClient::GetProcessRunningInfos(std::vector<AppExecFwk::Run
     return abms->GetProcessRunningInfos(info);
 }
 
+ErrCode AbilityManagerClient::GetAllIntentExemptionInfo(std::vector<AppExecFwk::IntentExemptionInfo> &info)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetAllIntentExemptionInfo(info);
+}
+
 ErrCode AbilityManagerClient::RequestDialogService(
     const Want &want, sptr<IRemoteObject> callerToken)
 {

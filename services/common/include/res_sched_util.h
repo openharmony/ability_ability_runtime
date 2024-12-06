@@ -25,6 +25,9 @@ namespace AppExecFwk {
 struct AbilityInfo;
 }
 namespace AAFwk {
+namespace {
+constexpr int32_t INTENT_EXEMPTION_DURATION = 10000;
+}
 using AbilityInfo = AppExecFwk::AbilityInfo;
 constexpr int64_t RES_TYPE_SCB_START_ABILITY = 0;
 constexpr int64_t RES_TYPE_EXTENSION_START_ABILITY = 1;
@@ -55,6 +58,7 @@ public:
     void ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid,
         int64_t timeDuration = 0, int64_t abilityRecordId = -1);
     std::unordered_set<std::string> GetNWebPreloadSet() const;
+    void ReportAbilityIntentExemptionInfoToRSS(int32_t callerUid, int32_t callerPid);
 private:
     ResSchedUtil() = default;
     ~ResSchedUtil() = default;

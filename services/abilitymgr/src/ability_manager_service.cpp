@@ -89,6 +89,7 @@
 #include "utils/update_caller_info_util.h"
 #include "utils/want_utils.h"
 #include "utils/window_options_utils.h"
+#include "insight_intent_execute_manager.h"
 #ifdef SUPPORT_GRAPHICS
 #include "dialog_session_manager.h"
 #include "application_anr_listener.h"
@@ -7792,6 +7793,19 @@ int AbilityManagerService::GetProcessRunningInfos(std::vector<AppExecFwk::Runnin
     return DelayedSingleton<AppScheduler>::GetInstance()->GetProcessRunningInfos(info);
 }
 
+int32_t AbilityManagerService::GetAllIntentExemptionInfo(std::vector<AppExecFwk::IntentExemptionInfo> &info) 
+{
+    const auto exemptionData =
+        DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GetAllIntentExemptionInfo();
+    for (auto& data : exemptionData) {
+        AppExecFwk::IntentExemptionInfo tmpInfo;
+        tmpInfo.uid_ = data.first;
+        tmpInfo.duration_ = INTENT_EXEMPTION_DURATION;
+        info.push_back(tmpInfo);
+    }
+    return ERR_OK;
+}
+
 int AbilityManagerService::GetProcessRunningInfosByUserId(
     std::vector<AppExecFwk::RunningProcessInfo> &info, int32_t userId)
 {
@@ -10881,8 +10895,11 @@ int32_t AbilityManagerService::StartAbilityByCallWithInsightIntent(const Want &w
     }  else {
         result = StartAbilityByCall(want, connect, callerToken);
     }
-
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "startAbilityByCallWithInsightIntent %{public}d", result);
+    ResSchedUtil::GetInstance().ReportAbilityIntentExemptionInfoToRSS(abilityRequest.uid, 0);
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->SetIntentExemptionInfo(
+        abilityRequest.uid);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "startAbilityByCallWithInsightIntent %{public}d uid:%{public}d",
+        result, abilityRequest.uid);
     return result;
 }
 
@@ -11707,6 +11724,11 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
     }
     if (callerAbilityInfo.type != AppExecFwk::AbilityType::PAGE) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Is not UI Ability Pass");
+        return false;
+    }
+    if (DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckIntentIsExemption(
+        abilityRecord->GetUid())) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Is Exemption Pass");
         return false;
     }
     if (!CheckProcessIsBackground(abilityRecord->GetPid(), abilityRecord->GetAbilityState())) {

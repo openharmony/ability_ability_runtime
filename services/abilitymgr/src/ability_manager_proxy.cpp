@@ -3466,6 +3466,29 @@ int AbilityManagerProxy::GetProcessRunningInfos(std::vector<AppExecFwk::RunningP
     return reply.ReadInt32();
 }
 
+int AbilityManagerProxy::GetAllIntentExemptionInfo(std::vector<AppExecFwk::IntentExemptionInfo> &info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::GET_INTENT_EXEMPTION_INFO, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request, error:%{public}d", error);
+        return error;
+    }
+    error = GetParcelableInfos<AppExecFwk::IntentExemptionInfo>(reply, info);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getParcelable error:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
 int AbilityManagerProxy::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "called");

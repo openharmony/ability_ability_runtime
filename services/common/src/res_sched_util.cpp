@@ -100,6 +100,20 @@ std::string ResSchedUtil::GetThawReasonByAbilityType(const AbilityInfo &abilityI
     return reason;
 }
 
+void ResSchedUtil::ReportAbilityIntentExemptionInfoToRSS(int32_t callerUid, int32_t callerPid)
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    std::unordered_map<std::string, std::string> eventParams {
+        {"uid", std::to_string(callerUid)},
+        {"duration", std::to_string(INTENT_EXEMPTION_DURATION)}
+    };
+
+    TAG_LOGD(AAFwkTag::DEFAULT, "report Intent ExemptionInfo Uid:%{public}d", callerUid);
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(
+        ResourceSchedule::ResType::RES_TYPE_INTENT_CTRL_APP, 0, eventParams);
+#endif
+}
+
 void ResSchedUtil::ReportEventToRSS(const int32_t uid, const std::string &bundleName, const std::string &reason,
     const int32_t pid, const int32_t callerPid)
 {
