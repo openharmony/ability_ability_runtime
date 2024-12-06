@@ -1640,9 +1640,9 @@ void AppRunningRecord::SetProcessAndExtensionType(
         processType_ = ProcessType::NORMAL;
         return;
     }
-    
-    if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType_)
-            && extensionProcessMode == PROCESS_MODE_RUN_WITH_MAIN_PROCESS) {
+
+    if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType_) &&
+         extensionProcessMode == PROCESS_MODE_RUN_WITH_MAIN_PROCESS) {
         processType_ = ProcessType::NORMAL;
     } else {
         processType_ = ProcessType::EXTENSION;
