@@ -807,8 +807,8 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
     if (taskHandler_) {
         taskHandler_->SubmitTask(reportLoadTask, "reportLoadTask");
     }
-    if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->extensionAbilityType)) {
-        UpdateExtensionState(loadParam->token, ExtensionState::Extension_STATE_CREATE);
+    if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+        UpdateExtensionState(loadParam->token, ExtensionState::EXTENSION_STATE_CREATE);
     } else {
         appRecord->UpdateAbilityState(loadParam->token, AbilityState::ABILITY_STATE_CREATE);
     }

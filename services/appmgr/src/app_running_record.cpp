@@ -982,8 +982,8 @@ void AppRunningRecord::UpdateAbilityState(const sptr<IRemoteObject> &token, cons
         TAG_LOGE(AAFwkTag::APPMGR, "can not find ability record");
         return;
     }
-    if (state == AbilityState::ABILITY_STATE_CREATE && 
-        !AAFwk::UIExtensionUtils::IsUIExtension(ability->GetAbilityInfo()->extensionAbilityType)) {
+    if (state == AbilityState::ABILITY_STATE_CREATE &&
+        !AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->extensionAbilityType)) {
         StateChangedNotifyObserver(
             abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_CREATE), true, false);
         return;
@@ -1210,7 +1210,7 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
     if (abilityRecord) {
         TAG_LOGI(AAFwkTag::APPMGR, "TerminateAbility:%{public}s", abilityRecord->GetName().c_str());
     }
-    if (!isTimeout && !AAFwk::UIExtensionUtils::IsUIExtension(ability->GetAbilityInfo()->extensionAbilityType)) {
+    if (!isTimeout && !AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->extensionAbilityType)) {
         StateChangedNotifyObserver(
             abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
@@ -1616,7 +1616,8 @@ std::shared_ptr<UserTestRecord> AppRunningRecord::GetUserTestInfo()
     return userTestRecord_;
 }
 
-void AppRunningRecord::SetProcessAndExtensionType(const std::shared_ptr<AbilityInfo> &abilityInfo, uint32_t extensionProcessMode)
+void AppRunningRecord::SetProcessAndExtensionType(
+    const std::shared_ptr<AbilityInfo> &abilityInfo, uint32_t extensionProcessMode)
 {
     if (abilityInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null abilityInfo");
@@ -1640,7 +1641,7 @@ void AppRunningRecord::SetProcessAndExtensionType(const std::shared_ptr<AbilityI
         return;
     }
     
-    if (AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->extensionAbilityType) 
+    if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType_)
             && extensionProcessMode == PROCESS_MODE_RUN_WITH_MAIN_PROCESS) {
         processType_ = ProcessType::NORMAL;
     } else {
