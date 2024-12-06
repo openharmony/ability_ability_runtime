@@ -391,5 +391,13 @@ HWTEST_F(UIExtensionContextTest, AbilityRuntime_UIExtensionContext_0106, TestSiz
     GTEST_LOG_(INFO) << "AbilityRuntime_UIExtensionContext_0106 end";
 }
 
+HWTEST_F(UIExtensionContextTest, AbilityRuntime_UIExtensionContext_0107, TestSize.Level1)
+{
+    AAFwk::Want want;
+    want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, 0);
+    jsUIExtensionContext_->InitDisplayId(want);
+    auto displayId = want.GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, 0);
+    EXPECT_EQ(displayId, 0);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
