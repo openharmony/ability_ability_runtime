@@ -63,6 +63,7 @@
 #include "want_sender_interface.h"
 #include "dialog_session_info.h"
 #include "window_config.h"
+#include "intent_exemption_info.h"
 #ifdef SUPPORT_SCREEN
 #include "window_manager_service_handler.h"
 #include "ability_first_frame_state_observer_interface.h"
@@ -1953,6 +1954,11 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t QueryKeepAliveApplicationsByEDM(int32_t appType, int32_t userId, std::vector<KeepAliveInfo> &list)
+    {
+        return 0;
+    }
+
+    virtual int32_t GetAllIntentExemptionInfo(std::vector<AppExecFwk::IntentExemptionInfo> &info)
     {
         return 0;
     }
