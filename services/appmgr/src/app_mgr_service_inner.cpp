@@ -5361,6 +5361,7 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
 
 void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRenderScheduler> &scheduler)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPMGR, "attachRenderProcess start");
     if (pid <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid render process pid:%{public}d", pid);
@@ -5376,7 +5377,6 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
         return;
     }
 
-    TAG_LOGI(AAFwkTag::APPMGR, "attachRenderProcess pid:%{public}d", pid);
     auto appRecord = appRunningManager_->GetAppRunningRecordByRenderPid(pid);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "no appRecord, pid:%{public}d", pid);
@@ -5397,7 +5397,7 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
     renderRecord->SetDeathRecipient(appDeathRecipient);
     renderRecord->RegisterDeathRecipient();
 
-    TAG_LOGI(AAFwkTag::APPMGR, "to NotifyBrowserFd");
+    TAG_LOGI(AAFwkTag::APPMGR, "attachRenderProcess_%{public}d, notify fd", pid);
     // notify fd to render process
     if (appRecord->GetBrowserHost() != nullptr && appRecord->GetIsGPU()) {
         TAG_LOGD(AAFwkTag::APPMGR, "GPU has host remote object");
