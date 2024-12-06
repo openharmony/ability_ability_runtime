@@ -18,6 +18,8 @@
 
 #include "ability_interceptor_interface.h"
 
+#include "query_erms_observer_interface.h"
+
 namespace OHOS {
 namespace EcologicalRuleMgrService {
 struct AbilityCallerInfo;
@@ -27,6 +29,7 @@ namespace AAFwk {
 using namespace OHOS::EcologicalRuleMgrService;
 using ErmsCallerInfo = OHOS::EcologicalRuleMgrService::AbilityCallerInfo;
 using ExperienceRule = OHOS::EcologicalRuleMgrService::AbilityExperienceRule;
+using AtomicServiceStartupRule = OHOS::AbilityRuntime::AtomicServiceStartupRule;
 
 class EcologicalRuleInterceptor : public IAbilityInterceptor {
 public:
@@ -38,6 +41,8 @@ public:
     {
         return;
     };
+    ErrCode QueryAtomicServiceStartupRule(Want &want, sptr<IRemoteObject> callerToken,
+        int32_t userId, AtomicServiceStartupRule &rule, sptr<Want> &replaceWant);
 
 private:
     void GetEcologicalTargetInfo(const Want &want, const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
