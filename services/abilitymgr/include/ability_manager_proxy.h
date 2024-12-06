@@ -1553,6 +1553,28 @@ public:
      */
     virtual int32_t GetAllIntentExemptionInfo(std::vector<AppExecFwk::IntentExemptionInfo> &info) override;
 
+    /**
+     * Add query ERMS observer.
+     *
+     * @param callerToken, The caller ability token.
+     * @param observer, The observer of the ability to query ERMS.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t AddQueryERMSObserver(sptr<IRemoteObject> callerToken,
+        sptr<AbilityRuntime::IQueryERMSObserver> observer) override;
+
+    /**
+     * Query atomic service ERMS rule.
+     *
+     * @param callerToken, The caller ability token.
+     * @param appId, The appId of the atomic service.
+     * @param startTime, The startTime of the query.
+     * @param rule, The returned ERMS rule.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryAtomicServiceStartupRule(sptr<IRemoteObject> callerToken,
+        const std::string &appId, const std::string &startTime, AtomicServiceStartupRule &rule) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
