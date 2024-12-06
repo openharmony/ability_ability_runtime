@@ -43,6 +43,9 @@ void OHOSJsEnvironmentImpl::PostTaskToHandler(void* handler, uv_io_cb func, void
 
     AppExecFwk::EventQueue::Priority prio = AppExecFwk::EventQueue::Priority::IMMEDIATE;
     switch (priority) {
+        case uv_qos_t::uv_qos_user_interactive:
+            prio = AppExecFwk::EventQueue::Priority::VIP;
+            break;
         case uv_qos_t::uv_qos_user_initiated:
             prio = AppExecFwk::EventQueue::Priority::IMMEDIATE;
             break;
