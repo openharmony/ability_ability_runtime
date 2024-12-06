@@ -251,6 +251,16 @@ void UIExtensionContext::OnAbilityResultInner(int requestCode, int resultCode, c
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
+int32_t UIExtensionContext::GetScreenMode()
+{
+    return screenMode_;
+}
+
+void UIExtensionContext::SetScreenMode(int32_t screenMode)
+{
+    screenMode_ = screenMode;
+}
+
 int UIExtensionContext::GenerateCurRequestCode()
 {
     std::lock_guard lock(requestCodeMutex_);
