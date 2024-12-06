@@ -800,8 +800,9 @@ void AppRunningRecord::AddModule(std::shared_ptr<ApplicationInfo> appInfo,
 
     std::shared_ptr<ModuleRunningRecord> moduleRecord;
 
-    auto initModuleRecord = [=](const std::shared_ptr<ModuleRunningRecord> &moduleRecord) {
+    auto initModuleRecord = [&](const std::shared_ptr<ModuleRunningRecord> &moduleRecord) {
         moduleRecord->Init(hapModuleInfo);
+        moduleRecord->SetAppIndex(appIndex_);
         moduleRecord->SetAppMgrServiceInner(appMgrServiceInner_);
         moduleRecord->SetApplicationClient(appLifeCycleDeal_);
     };
