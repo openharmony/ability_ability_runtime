@@ -63,7 +63,7 @@ std::vector<ExtensionPluginItem> ExtensionPluginInfo::GetExtensionPlugins()
 void ExtensionPluginInfo::ParseExtensions(const std::vector<std::string>& extensionFiles)
 {
     if (extensionFiles.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "no extension files.");
+        TAG_LOGE(AAFwkTag::APPKIT, "no extension files");
         return;
     }
 
@@ -72,13 +72,13 @@ void ExtensionPluginInfo::ParseExtensions(const std::vector<std::string>& extens
         std::map<std::string, std::string> params =
             AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str()).GetParams();
         if (params.empty()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "no extension params.");
+            TAG_LOGE(AAFwkTag::APPKIT, "no extension params");
             continue;
         }
         // get extension name and type
         std::map<std::string, std::string>::iterator it = params.find(EXTENSION_PARAMS_TYPE);
         if (it == params.end()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "no extension type.");
+            TAG_LOGE(AAFwkTag::APPKIT, "no extension type");
             continue;
         }
         int32_t type = -1;
@@ -91,7 +91,7 @@ void ExtensionPluginInfo::ParseExtensions(const std::vector<std::string>& extens
 
         it = params.find(EXTENSION_PARAMS_NAME);
         if (it == params.end()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "no extension name.");
+            TAG_LOGE(AAFwkTag::APPKIT, "no extension name");
             continue;
         }
         std::string extensionName = it->second;
@@ -151,13 +151,13 @@ bool ExtensionPluginInfo::CheckFileType(const std::string& fileName, const std::
         extensionName.c_str());
 
     if (fileName.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "the file name is empty.");
+        TAG_LOGE(AAFwkTag::APPKIT, "file name empty");
         return false;
     }
 
     auto position = fileName.rfind('.');
     if (position == std::string::npos) {
-        TAG_LOGW(AAFwkTag::APPKIT, "filename no extension name.");
+        TAG_LOGW(AAFwkTag::APPKIT, "filename no extension name");
         return false;
     }
 

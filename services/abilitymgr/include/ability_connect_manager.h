@@ -333,8 +333,6 @@ public:
     int32_t UpdateKeepAliveEnableState(const std::string &bundleName, const std::string &moduleName,
         const std::string &mainElement, bool updateEnable);
 
-    void CompleteConnectTask(std::shared_ptr<ConnectionRecord> connectRecord);
-
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t CONNECT_TIMEOUT_MSG = 1;
 

@@ -278,23 +278,25 @@ int AppfreezeManager::AcquireStack(const FaultData& faultData,
     std::string binderPidsStr;
     std::set<int> asyncPids;
     std::set<int> syncPids = GetBinderPeerPids(binderInfo, pid, asyncPids);
-    std::set<int> pids;
-    pids.insert(syncPids.begin(), syncPids.end());
-    pids.insert(asyncPids.begin(), asyncPids.end());
-    for (auto& pidTemp : pids) {
-        TAG_LOGI(AAFwkTag::APPDFR, "pidTemp pids:%{public}d", pidTemp);
+    if (syncPids.empty()) {
+        binderInfo +="PeerBinder pids is empty\n";
+    }
+    for (auto& pidTemp : syncPids) {
+        TAG_LOGI(AAFwkTag::APPDFR, "PeerBinder pidTemp pids:%{public}d", pidTemp);
         if (pidTemp != pid) {
             std::string content = "PeerBinder catcher stacktrace for pid : " + std::to_string(pidTemp) + "\n";
             content += CatcherStacktrace(pidTemp);
             binderInfo += content;
-            if (syncPids.find(pidTemp) != syncPids.end()) {
-                binderPidsStr += " " + std::to_string(pidTemp);
-            }
+            binderPidsStr += " " + std::to_string(pidTemp);
         }
     }
-
-    if (pids.empty()) {
-        binderInfo +="PeerBinder pids is empty\n";
+    for (auto& pidTemp : asyncPids) {
+        TAG_LOGI(AAFwkTag::APPDFR, "AsyncBinder pidTemp pids:%{public}d", pidTemp);
+        if (pidTemp != pid && syncPids.find(pidTemp) == syncPids.end()) {
+            std::string content = "AsyncBinder catcher stacktrace for pid : " + std::to_string(pidTemp) + "\n";
+            content += CatcherStacktrace(pidTemp);
+            binderInfo += content;
+        }
     }
 
     std::string fileName = faultData.errorObject.name + "_" +
@@ -353,10 +355,10 @@ std::map<int, std::set<int>> AppfreezeManager::BinderParser(std::ifstream& fin, 
     int asyncBinderSize = asyncBinderPairs.size();
     int individualMaxSize = 2;
     for (int i = 0; i < individualMaxSize; i++) {
-        if (freeAsyncSpaceSize > 0 && i < freeAsyncSpaceSize) {
+        if (i < freeAsyncSpaceSize) {
             asyncPids.insert(freeAsyncSpacePairs[i].first);
         }
-        if (asyncBinderSize > 0 && i < asyncBinderSize) {
+        if (i < asyncBinderSize) {
             asyncPids.insert(asyncBinderPairs[i].first);
         }
     }

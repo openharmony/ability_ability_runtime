@@ -53,17 +53,17 @@ int32_t UIServiceStub::OnSendData(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> hostProxy = data.ReadRemoteObject();
     if (hostProxy == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "UIServiceStub::OnSendData, read hostProxy failed");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null hostProxy");
         return ERR_INVALID_VALUE;
     }
     std::unique_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
     if (wantParams == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "UIServiceStub::OnSendData, read WantParams failed");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null wantParams");
         return ERR_INVALID_VALUE;
     }
     int32_t result = SendData(hostProxy, *wantParams);
     if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "UIServiceStub::OnSendData, write result failed.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "write result failed");
         return IPC_STUB_ERR;
     }
     return NO_ERROR;

@@ -34,7 +34,7 @@ void ReverseContinuationSchedulerReplica::PassPrimary(const sptr<IRemoteObject> 
     };
 
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "mainHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null mainHandler_");
         return;
     }
 
@@ -52,8 +52,7 @@ bool ReverseContinuationSchedulerReplica::ReverseContinuation()
     };
 
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "mainHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null mainHandler_");
         return false;
     }
 
@@ -72,8 +71,7 @@ void ReverseContinuationSchedulerReplica::NotifyReverseResult(int reverseResult)
     };
 
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "mainHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null mainHandler_");
         return;
     }
 
@@ -89,8 +87,7 @@ void ReverseContinuationSchedulerReplica::HandlerPassPrimary(const sptr<IRemoteO
     std::shared_ptr<IReverseContinuationSchedulerReplicaHandler> replicaHandlerTmp = nullptr;
     replicaHandlerTmp = replicaHandler_.lock();
     if (replicaHandlerTmp == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "replicaHandlerTmp is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null replicaHandlerTmp");
         return;
     }
     replicaHandlerTmp->PassPrimary(primary);
@@ -102,8 +99,7 @@ bool ReverseContinuationSchedulerReplica::HandlerReverseContinuation()
     std::shared_ptr<IReverseContinuationSchedulerReplicaHandler> replicaHandlerTmp = nullptr;
     replicaHandlerTmp = replicaHandler_.lock();
     if (replicaHandlerTmp == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "replicaHandlerTmp is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null replicaHandlerTmp");
         return false;
     }
     return replicaHandlerTmp->ReverseContinuation();
@@ -115,8 +111,7 @@ void ReverseContinuationSchedulerReplica::HandlerNotifyReverseResult(int reverse
     std::shared_ptr<IReverseContinuationSchedulerReplicaHandler> replicaHandlerTmp = nullptr;
     replicaHandlerTmp = replicaHandler_.lock();
     if (replicaHandlerTmp == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "replicaHandlerTmp is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null replicaHandlerTmp");
         return;
     }
     replicaHandlerTmp->NotifyReverseResult(reverseResult);

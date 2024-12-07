@@ -100,14 +100,14 @@ napi_value CreateJsDialogRequestCallback(napi_env env, const sptr<IDialogRequest
 {
     TAG_LOGI(AAFwkTag::DIALOG, "call");
     if (!remoteObj) {
-        TAG_LOGE(AAFwkTag::DIALOG, "remoteObj invalid.");
+        TAG_LOGE(AAFwkTag::DIALOG, "remoteObj invalid");
         return CreateJsUndefined(env);
     }
 
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "object invalid.");
+        TAG_LOGE(AAFwkTag::DIALOG, "object invalid");
         return CreateJsUndefined(env);
     }
 

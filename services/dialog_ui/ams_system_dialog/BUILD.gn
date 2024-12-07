@@ -23,8 +23,8 @@ ohos_hap("ams_system_dialog_hap") {
 
   certificate_profile = "signature/openharmony_sx.p7b"
   hap_name = "ams_system_dialog"
-  subsystem_name = "application"
-  part_name = "prebuilt_hap"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
   module_install_dir = "app/com.ohos.amsdialog"
   publicity_file = "publicity.xml"
 }

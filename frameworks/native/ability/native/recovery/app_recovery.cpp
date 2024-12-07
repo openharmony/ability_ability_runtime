@@ -73,12 +73,12 @@ static bool BlockMainThreadLocked()
     action.sa_handler = SigQuitHandler;
     action.sa_flags = 0;
     if (sigaction(SIGQUIT, &action, nullptr) != 0) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "Failed to register signal");
+        TAG_LOGE(AAFwkTag::RECOVERY, "register signal failed");
         return false;
     }
 
     if (syscall(SYS_tgkill, getpid(), getpid(), SIGQUIT) != 0) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "Failed to send SIGQUIT to main thread, errno(%d)", errno);
+        TAG_LOGE(AAFwkTag::RECOVERY, "send SIGQUIT failed, errno(%d)", errno);
         return false;
     }
     int left = 1000000; // 1s
@@ -116,7 +116,7 @@ bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
     const std::shared_ptr<AbilityInfo>& abilityInfo, const sptr<IRemoteObject>& token)
 {
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "AbilityInfo invalid");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null abilityInfo");
         return false;
     }
 
@@ -145,7 +145,7 @@ bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
 bool AppRecovery::RemoveAbility(const sptr<IRemoteObject>& tokenId)
 {
     if (!tokenId) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "tokenId is null");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null tokenId");
         return false;
     }
     TAG_LOGD(AAFwkTag::RECOVERY, "start");
@@ -175,12 +175,12 @@ bool AppRecovery::ScheduleSaveAppState(StateReason reason, uintptr_t ability)
     if (reason == StateReason::APP_FREEZE) {
         auto abilityPtr = ability_.lock();
         if (!abilityPtr || !abilityPtr->GetAbilityContext()) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "ability or context is nullptr");
+            TAG_LOGE(AAFwkTag::RECOVERY, "null ability or context");
             return false;
         }
         std::lock_guard<std::mutex> lock(g_mutex);
         if (!BlockMainThreadLocked()) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "Failed to block main thread");
+            TAG_LOGE(AAFwkTag::RECOVERY, "block main thread failed");
             return false;
         }
 #ifdef SUPPORT_SCREEN
@@ -195,7 +195,7 @@ bool AppRecovery::ScheduleSaveAppState(StateReason reason, uintptr_t ability)
 
     auto handler = mainHandler_.lock();
     if (handler == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "handler is not exist");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null handler");
         return false;
     }
 
@@ -203,7 +203,7 @@ bool AppRecovery::ScheduleSaveAppState(StateReason reason, uintptr_t ability)
         AppRecovery::GetInstance().DoSaveAppState(reason, ability);
     };
     if (!handler->PostTask(task, "AppRecovery:SaveAppState")) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "Failed to schedule save app state");
+        TAG_LOGE(AAFwkTag::RECOVERY, "schedule save app state failed");
         return false;
     }
 
@@ -233,7 +233,7 @@ bool AppRecovery::ScheduleRecoverApp(StateReason reason)
     }
 
     if (abilityRecoverys_.empty()) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null ability");
         return false;
     }
 
@@ -244,7 +244,7 @@ bool AppRecovery::ScheduleRecoverApp(StateReason reason)
 
     auto handler = mainHandler_.lock();
     if (handler == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "handler is not exist");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null handler");
         return false;
     }
 
@@ -257,7 +257,7 @@ bool AppRecovery::ScheduleRecoverApp(StateReason reason)
         AppRecovery::GetInstance().DoRecoverApp(reason);
     };
     if (!handler->PostTask(task, "AppRecovery:RecoverApp")) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "Failed to schedule save app state");
+        TAG_LOGE(AAFwkTag::RECOVERY, "schedule save app state failed");
     }
 
     return true;
@@ -306,7 +306,7 @@ void AppRecovery::DoSaveAppState(StateReason reason, uintptr_t ability)
     TAG_LOGD(AAFwkTag::RECOVERY, "begin");
     auto appInfo = applicationInfo_.lock();
     if (appInfo == nullptr || abilityRecoverys_.empty()) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "Application or ability info is not exist.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "not exist application or ability info");
         return;
     }
 
@@ -415,7 +415,7 @@ void AppRecovery::DeleteInValidMissionFiles()
     std::string fileDir = context->GetFilesDir();
     TAG_LOGI(AAFwkTag::RECOVERY, "fileDir: %{public}s", fileDir.c_str());
     if (fileDir.empty() || !OHOS::FileExists(fileDir)) {
-        TAG_LOGD(AAFwkTag::RECOVERY, "empty fileDir or fileDir not exist");
+        TAG_LOGD(AAFwkTag::RECOVERY, "empty fileDir or not exist fileDir");
         return;
     }
     std::vector<int32_t> missionIds;
@@ -436,7 +436,7 @@ void AppRecovery::DeleteInValidMissionFiles()
     }
     abilityMgr->IsValidMissionIds(missionIds, results);
     if (results.empty()) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "results is empty");
+        TAG_LOGE(AAFwkTag::RECOVERY, "empty results");
         return;
     }
     for (auto& item : results) {
@@ -463,7 +463,7 @@ void AppRecovery::ClearPageStack(std::string bundleName)
     DeleteInValidMissionFiles();
     std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "abilityMgr not exist.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null abilityMgr");
         return;
     }
     abilityMgr->ScheduleClearRecoveryPageStack();
@@ -473,13 +473,14 @@ bool AppRecovery::GetMissionIds(std::string path, std::vector<int32_t> &missionI
 {
     DIR *dir = opendir(path.c_str());
     if (dir == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "open dir error.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null dir");
         return false;
     }
     struct dirent *ptr;
     while ((ptr = readdir(dir)) != nullptr) {
         if (ptr == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "read dir error.");
+            TAG_LOGE(AAFwkTag::RECOVERY, "null ptr");
+            closedir(dir);
             return false;
         }
         if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {

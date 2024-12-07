@@ -50,7 +50,7 @@ int32_t JsStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallback> ca
     callback->Push([weak = weak_from_this()](const std::shared_ptr<StartupTaskResult> &result) {
         auto startupTask = weak.lock();
         if (startupTask == nullptr) {
-            TAG_LOGE(AAFwkTag::STARTUP, "startupTask null");
+            TAG_LOGE(AAFwkTag::STARTUP, "null startupTask");
             return;
         }
         startupTask->SaveResult(result);
@@ -87,7 +87,7 @@ int32_t JsStartupTask::LoadJsAsyncTaskExcutor()
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "Object null");
+        TAG_LOGE(AAFwkTag::STARTUP, "null object");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
@@ -140,14 +140,13 @@ int32_t JsStartupTask::RunTaskOnDependencyCompleted(const std::string &dependenc
     }
     napi_value startupValue = startupJsRef_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, startupValue, napi_object)) {
-        TAG_LOGE(AAFwkTag::STARTUP, "%{public}s, startup task is not napi object", name_.c_str());
+        TAG_LOGE(AAFwkTag::STARTUP, "%{public}s, not napi object", name_.c_str());
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     napi_value startupOnDepCompleted = nullptr;
     napi_get_named_property(env, startupValue, "onDependencyCompleted", &startupOnDepCompleted);
     if (startupOnDepCompleted == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP,
-            "%{public}s, get onDependencyCompleted failed", name_.c_str());
+        TAG_LOGE(AAFwkTag::STARTUP, "%{public}s, get onDependencyCompleted failed", name_.c_str());
         return ERR_STARTUP_FAILED_TO_EXECUTE_STARTUP;
     }
     bool isCallable = false;

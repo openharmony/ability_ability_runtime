@@ -130,7 +130,7 @@ private:
 
         sptr<IRemoteObject> remoteObj = want.GetRemoteObject(RequestConstants::REQUEST_CALLBACK_KEY);
         if (!remoteObj) {
-            TAG_LOGE(AAFwkTag::DIALOG, "Wrap Param requestCallback failed, must be a RequestCallback");
+            TAG_LOGE(AAFwkTag::DIALOG, "wrap requestCallback failed");
             ThrowInvalidParamError(env, "Wrap Param requestCallback failed, must be a RequestCallback.");
             return CreateJsUndefined(env);
         }
@@ -150,7 +150,7 @@ napi_value JsDialogRequestInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::DIALOG, "call");
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGI(AAFwkTag::DIALOG, "Invalid input");
+        TAG_LOGI(AAFwkTag::DIALOG, "null env or exportObj");
         return nullptr;
     }
 

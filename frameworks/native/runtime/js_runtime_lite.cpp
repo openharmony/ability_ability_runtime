@@ -75,7 +75,7 @@ napi_status CreateNapiEnv(napi_env *env)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "Called");
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid arg");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
         return napi_status::napi_invalid_arg;
     }
     auto options = JsRuntimeLite::GetInstance().GetChildOptions();
@@ -101,7 +101,7 @@ napi_status DestroyNapiEnv(napi_env *env)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "Called");
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid arg");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
         return napi_status::napi_invalid_arg;
     }
     auto errCode = JsRuntimeLite::GetInstance().RemoveJsEnv(*env);
@@ -135,7 +135,7 @@ napi_status JsRuntimeLite::CreateJsEnv(const Options& options, std::shared_ptr<J
     pandaOption.SetMemConfigProperty(memConfigProperty);
     pandaOption.SetGcThreadNum(gcThreadNum);
     pandaOption.SetLongPauseTime(longPauseTime);
-    TAG_LOGI(AAFwkTag::JSRUNTIME, "ark properties = %{public}d bundlename = %{public}s",
+    TAG_LOGI(AAFwkTag::JSRUNTIME, "ark properties = %{public}d bundleName = %{public}s",
         arkProperties, bundleName.c_str());
     pandaOption.SetGcType(panda::RuntimeOption::GC_TYPE::GEN_GC);
     pandaOption.SetGcPoolSize(DEFAULT_GC_POOL_SIZE);
@@ -336,7 +336,7 @@ void JsRuntimeLite::SetRequestAotCallback(const std::shared_ptr<JsEnv::JsEnviron
     auto callback = [](const std::string& bundleName, const std::string& moduleName, int32_t triggerMode) -> int32_t {
         auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (systemAbilityMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "get Samgr failed");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null SaMgr");
             return ERR_INVALID_VALUE;
         }
 
@@ -348,7 +348,7 @@ void JsRuntimeLite::SetRequestAotCallback(const std::shared_ptr<JsEnv::JsEnviron
 
         auto bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObj);
         if (bundleMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "get bms failed");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null bms");
             return ERR_INVALID_VALUE;
         }
 
