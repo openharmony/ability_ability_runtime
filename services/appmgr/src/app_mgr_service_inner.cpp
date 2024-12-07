@@ -273,6 +273,9 @@ constexpr int32_t MAX_SPECIFIED_PROCESS_NAME_LENGTH = 255;
 
 constexpr int32_t NWEB_PRELOAD_DELAY = 3000;
 
+// Max child process number limitation for pc device.
+constexpr int PC_MAX_CHILD_PROCESS_NUM = 50;
+
 int32_t GetUserIdByUid(int32_t uid)
 {
     return uid / BASE_USER_RANGE;
@@ -8205,13 +8208,13 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     }
 
     auto childRecordMap = appRecord->GetChildProcessRecordMap();
-    auto itNativeChildInfo = find_if(childRecordMap.begin(), childRecordMap.end(), [] (const auto &pair) -> bool {
+    auto count = count_if(childRecordMap.begin(), childRecordMap.end(), [] (const auto &pair) -> bool {
         return pair.second->GetChildProcessType() == CHILD_PROCESS_TYPE_NATIVE;
     });
 
-    if (itNativeChildInfo != childRecordMap.end()) {
-        TAG_LOGI(AAFwkTag::APPMGR, "native child process still alive(hostPid:%{public}d childPid:%{public}d)",
-            hostPid, itNativeChildInfo->second->GetPid());
+    if (count >= PC_MAX_CHILD_PROCESS_NUM) {
+        TAG_LOGI(AAFwkTag::APPMGR, "The number of native child process reached the limit (hostPid:%{public}d)",
+            hostPid);
         return ERR_OVERFLOW;
     }
 
