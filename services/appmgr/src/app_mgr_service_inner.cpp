@@ -171,6 +171,7 @@ constexpr const char* PERMISSION_INTERNET = "ohos.permission.INTERNET";
 constexpr const char* PERMISSION_MANAGE_VPN = "ohos.permission.MANAGE_VPN";
 constexpr const char* PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_DIR";
 constexpr const char* PERMISSION_TEMP_JIT_ALLOW = "TEMPJITALLOW";
+constexpr const char* TARGET_UID_KEY = "ohos.aafwk.param.targetUid";
 constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
 constexpr const int32_t KILL_PROCESS_BY_USER_DELAY_BASE = 500;
 constexpr const int64_t PRELOAD_FREEZE_TIMEOUT = 11000;
@@ -1095,7 +1096,8 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
     }
 
     auto userId = GetUserIdByUid(appInfo->uid);
-    TAG_LOGD(AAFwkTag::APPMGR, "UserId:%{public}d.", userId);
+    TAG_LOGD(AAFwkTag::APPMGR, "userId: %{public}d, bundleName: %{public}s, appIndex: %{public}d", userId,
+        appInfo->bundleName.c_str(), appIndex);
     int32_t bundleMgrResult;
     if (appIndex == 0) {
         bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfoV9(appInfo->bundleName,
@@ -1509,6 +1511,7 @@ int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bu
         return ERR_NO_INIT;
     }
     auto userId = GetUserIdByUid(uid);
+    TAG_LOGD(AAFwkTag::APPMGR, "userId: %{public}d, bundleName: %{public}s", userId, bundleName.c_str());
     ApplicationInfo appInfo;
     HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetApplicationInfo");
     bool bundleMgrResult = bundleMgrHelper->GetApplicationInfo(bundleName,
@@ -1847,7 +1850,8 @@ int32_t AppMgrServiceInner::KillApplicationByUserIdLocked(
         return ERR_NO_INIT;
     }
 
-    TAG_LOGI(AAFwkTag::APPMGR, "uId value: %{public}d", userId);
+    TAG_LOGD(AAFwkTag::APPMGR, "userId: %{public}d, bundleName: %{public}s, appCloneIndex: %{public}d",
+        userId, bundleName.c_str(), appCloneIndex);
     int uid = IN_PROCESS_CALL(bundleMgrHelper->GetUidByBundleName(bundleName, userId, appCloneIndex));
     TAG_LOGI(AAFwkTag::APPMGR, "uID value: %{public}d", uid);
     if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, uid, pids, config)) {
@@ -1880,7 +1884,8 @@ int32_t AppMgrServiceInner::ClearUpApplicationData(const std::string &bundleName
             newUserId = currentUserId_;
         }
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "uId:%{public}d, appIndex:%{public}d", newUserId, appCloneIndex);
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName: %{public}s, uId: %{public}d, appIndex: %{public}d", bundleName.c_str(),
+        newUserId, appCloneIndex);
     return ClearUpApplicationDataByUserId(bundleName, callerUid, callerPid, appCloneIndex, newUserId,
         false, "ClearUpApplicationData");
 }
@@ -1924,6 +1929,8 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
     }
 
     // request to clear user information permission.
+    TAG_LOGD(AAFwkTag::APPMGR, "userId: %{public}d, bundleName: %{public}s, appCloneIndex: %{public}d",
+        userId, bundleName.c_str(), appCloneIndex);
     auto tokenId = AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, appCloneIndex);
     int32_t result = AccessToken::AccessTokenKit::ClearUserGrantedPermissionState(tokenId);
     if (result) {
@@ -1955,7 +1962,8 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
         TAG_LOGW(
             AAFwkTag::APPMGR, "fail, bundleName:%{public}s", bundleName.c_str());
     }
-    NotifyAppStatusByCallerUid(bundleName, tokenId, userId, callerUid,
+    int targetUid = IN_PROCESS_CALL(bundleMgrHelper->GetUidByBundleName(bundleName, userId, appCloneIndex));
+    NotifyAppStatusByCallerUid(bundleName, tokenId, userId, callerUid, targetUid,
         EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
     TAG_LOGI(AAFwkTag::APPMGR, "clear");
     return ERR_OK;
@@ -2030,6 +2038,7 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
         return ERR_INVALID_VALUE;
     }
     ApplicationInfo appInfo;
+    TAG_LOGD(AAFwkTag::APPMGR, "userId: %{public}d, bundleName: %{public}s", currentUserId_, bundleName.c_str());
     auto queryRet = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName,
         ApplicationFlag::GET_BASIC_APPLICATION_INFO, currentUserId_, appInfo));
     if (!queryRet) {
@@ -2112,6 +2121,7 @@ int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleNameInner(const std
         return ERR_INVALID_VALUE;
     }
     ApplicationInfo appInfo;
+    TAG_LOGD(AAFwkTag::APPMGR, "userId: %{public}d, bundleName: %{public}s", userId, bundleName.c_str());
     auto queryRet = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName,
         ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo));
     if (!queryRet) {
@@ -3541,8 +3551,8 @@ int32_t AppMgrServiceInner::CreateStartMsg(const std::string &processName, uint3
     SetOverlayInfo(bundleInfo.name, userId, startMsg);
     SetAppInfo(bundleInfo, startMsg);
     AppspawnUtil::SetJITPermissions(bundleInfo.applicationInfo.accessTokenId, startMsg.jitPermissionsList);
-    TAG_LOGI(AAFwkTag::APPMGR, "apl: %{public}s, bundleName: %{public}s, startFlags: %{public}d",
-        startMsg.apl.c_str(), bundleInfo.name.c_str(), startFlags);
+    TAG_LOGI(AAFwkTag::APPMGR, "apl: %{public}s, bundleName: %{public}s, startFlags: %{public}d, userId: %{public}d",
+        startMsg.apl.c_str(), bundleInfo.name.c_str(), startFlags, userId);
 
     autoSync.Sync();
     return ERR_OK;
@@ -4355,7 +4365,7 @@ void AppMgrServiceInner::NotifyAppStatus(const std::string &bundleName, int32_t 
 }
 
 void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleName, const int32_t tokenId,
-    const int32_t userId, const int32_t callerUid, const std::string &eventData)
+    const int32_t userId, const int32_t callerUid, const int32_t targetUid, const std::string &eventData)
 {
     TAG_LOGI(AAFwkTag::APPMGR,
         "%{public}s call, bundle name: %{public}s, userId: %{public}d, event: %{public}s", __func__,
@@ -4368,6 +4378,8 @@ void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleNam
     want.SetParam(TOKEN_ID, tokenId);
     want.SetParam(Constants::USER_ID, userId);
     want.SetParam(Constants::UID, callerUid);
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, callerUid);
+    want.SetParam(TARGET_UID_KEY, targetUid);
     EventFwk::CommonEventData commonData {want};
     EventFwk::CommonEventManager::PublishCommonEvent(commonData);
 }
@@ -5352,6 +5364,7 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
 
 void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRenderScheduler> &scheduler)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPMGR, "attachRenderProcess start");
     if (pid <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid render process pid:%{public}d", pid);
@@ -5367,7 +5380,6 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
         return;
     }
 
-    TAG_LOGI(AAFwkTag::APPMGR, "attachRenderProcess pid:%{public}d", pid);
     auto appRecord = appRunningManager_->GetAppRunningRecordByRenderPid(pid);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "no appRecord, pid:%{public}d", pid);
@@ -5388,7 +5400,7 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
     renderRecord->SetDeathRecipient(appDeathRecipient);
     renderRecord->RegisterDeathRecipient();
 
-    TAG_LOGI(AAFwkTag::APPMGR, "to NotifyBrowserFd");
+    TAG_LOGI(AAFwkTag::APPMGR, "attachRenderProcess_%{public}d, notify fd", pid);
     // notify fd to render process
     if (appRecord->GetBrowserHost() != nullptr && appRecord->GetIsGPU()) {
         TAG_LOGD(AAFwkTag::APPMGR, "GPU has host remote object");
@@ -7137,8 +7149,9 @@ void AppMgrServiceInner::ClearNonResidentKeepAliveAppRunningData(const std::shar
     }
 
     auto userId = GetUserIdByUid(appRecord->GetUid());
+    bool isDefaultInstance = (appRecord->GetInstanceKey() == APP_INSTANCE_KEY_0);
     if (!appRecord->GetRestartAppFlag() && appRecord->IsKeepAliveDkv() &&
-        (userId == 0 || userId == currentUserId_) &&
+        isDefaultInstance && (userId == 0 || userId == currentUserId_) &&
         appRecord->GetBundleName() != SCENE_BOARD_BUNDLE_NAME) {
         if (ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(appRecord->GetBundleName())) {
             TAG_LOGI(AAFwkTag::APPMGR, "is killed for upgrade web");
