@@ -273,6 +273,8 @@ constexpr int32_t MAX_SPECIFIED_PROCESS_NAME_LENGTH = 255;
 
 constexpr int32_t NWEB_PRELOAD_DELAY = 3000;
 
+constexpr const char* APP_INSTANCE_KEY_0 = "app_instance_0";
+
 // Max child process number limitation for pc device.
 constexpr int PC_MAX_CHILD_PROCESS_NUM = 50;
 
