@@ -33,7 +33,7 @@ void ContinuationDeviceCallbackProxy::Connect(const std::string &deviceId, const
     std::shared_ptr<IContinuationDeviceCallback> callback = nullptr;
     callback = callback_.lock();
     if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "callback is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null callback");
         return;
     }
     callback->OnDeviceConnectDone(deviceId, deviceType);
@@ -44,7 +44,7 @@ void ContinuationDeviceCallbackProxy::Disconnect(const std::string &deviceId)
     std::shared_ptr<IContinuationDeviceCallback> callback = nullptr;
     callback = callback_.lock();
     if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "callback is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null callback");
         return;
     }
     callback->OnDeviceDisconnectDone(deviceId);

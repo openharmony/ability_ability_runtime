@@ -43,7 +43,7 @@ std::unique_ptr<TestRunner> JsTestRunner::Create(const std::unique_ptr<Runtime> 
     auto pTestRunner = new (std::nothrow) JsTestRunner(static_cast<JsRuntime &>(*runtime), args, bundleInfo,
         isFaJsModel);
     if (!pTestRunner) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "create testrunner failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null testRunner");
         return nullptr;
     }
 
@@ -111,7 +111,7 @@ bool JsTestRunner::Initialize()
 {
     if (isFaJsModel_) {
         if (!jsRuntime_.RunScript("/system/etc/strip.native.min.abc", "")) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "runscript err");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "runScript err");
             return false;
         }
 
@@ -129,19 +129,19 @@ bool JsTestRunner::Initialize()
         napi_value object = nullptr;
         napi_get_global(env, &object);
         if (object == nullptr) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "get globalobject get");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "null object");
             return false;
         }
         napi_value mainEntryFunc = nullptr;
         napi_get_named_property(env, object, "___mainEntry___", &mainEntryFunc);
         if (mainEntryFunc == nullptr) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "get mainEntryFunc failed");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "null mainEntryFunc");
             return false;
         }
         napi_value value = nullptr;
         napi_get_global(env, &value);
         if (value == nullptr) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "get global failed");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "null value");
             return false;
         }
         napi_call_function(env, value, mainEntryFunc, 1, &value, nullptr);

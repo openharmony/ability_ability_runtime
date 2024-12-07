@@ -37,7 +37,7 @@ bool NativeChildIpcProcess::Init(const std::shared_ptr<ChildProcessStartInfo> &i
 {
     TAG_LOGD(AAFwkTag::PROCESSMGR, "init");
     if (info == nullptr || info->ipcObj == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "info or ipc callback is null");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null info or ipc callback");
         return false;
     }
 
@@ -71,7 +71,7 @@ void NativeChildIpcProcess::OnStart()
     ChildProcess::OnStart();
     OHIPCRemoteStub *ipcStub = funcNativeLibOnConnect_();
     if (ipcStub == nullptr || ipcStub->remote == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "null ipctub");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null ipcStub");
         mainProcessCb_->OnError(static_cast<int32_t>(ChildProcessManagerErrorCode::ERR_CONNECTION_FAILED));
         return;
     }
@@ -95,7 +95,7 @@ void NativeChildIpcProcess::OnStart()
 bool NativeChildIpcProcess::LoadNativeLib(const std::shared_ptr<ChildProcessStartInfo> &info)
 {
     if (nativeLibHandle_ != nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Native lib already loaded");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null nativeLibHandle");
         return false;
     }
 

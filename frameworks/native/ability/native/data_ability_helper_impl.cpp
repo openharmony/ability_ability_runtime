@@ -604,12 +604,12 @@ bool DataAbilityHelperImpl::CheckOhosUri(const Uri &checkUri)
     std::vector<std::string> segments;
     uri.GetPathSegments(segments);
     if (segments.empty()) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "no segments in uri: %{public}s", uri.ToString().c_str());
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "segments empty");
         return false;
     }
 
     if (uri.GetPath() == "") {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "path empty in uri: %{public}s", uri.ToString().c_str());
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "path empty");
         return false;
     }
 
@@ -745,7 +745,7 @@ Uri DataAbilityHelperImpl::NormalizeUri(Uri &uri)
     Uri urivalue("");
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
     if (dataAbilityProxy == nullptr) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "GetDataAbilityProxy failed");
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "null dataAbilityProxy");
         return urivalue;
     }
 
@@ -842,7 +842,7 @@ bool DataAbilityHelperImpl::CheckUri(const std::shared_ptr<Uri> &uri)
     }
 
     if (uri->GetScheme() != SchemeOhos) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "invalid param, uri not dataability, Scheme: %{private}s",
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "uri not data ability, Scheme: %{private}s",
             uri->GetScheme().c_str());
         return false;
     }

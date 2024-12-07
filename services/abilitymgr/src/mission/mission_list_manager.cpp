@@ -204,6 +204,8 @@ int MissionListManager::StartAbility(const std::shared_ptr<AbilityRecord> &curre
 {
     auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ability launch mode:%{public}d",
+            static_cast<int32_t>(abilityRequest.abilityInfo.launchMode));
         EnqueueWaitingAbilityToFront(abilityRequest);
         DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(
             abilityRequest.want, abilityRequest.abilityInfo);
@@ -1520,6 +1522,7 @@ int MissionListManager::MoveAbilityToBackgroundLocked(const std::shared_ptr<Abil
         TAG_LOGD(AAFwkTag::ABILITYMGR, "current ability is active");
         auto nextAbilityRecord = specifiedNextRecord ? specifiedNextRecord : abilityRecord->GetNextAbilityRecord();
         if (nextAbilityRecord) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "have next ability");
             nextAbilityRecord->SetPreAbilityRecord(abilityRecord);
 #ifdef SUPPORT_SCREEN
             if (nextAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
@@ -1669,7 +1672,7 @@ int MissionListManager::TerminateAbilityInner(const std::shared_ptr<AbilityRecor
 int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag)
 {
     std::string element = abilityRecord->GetElementName().GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Terminate ability locked, ability is %{public}s.", element.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "terminate ability locked, ability is %{public}s.", element.c_str());
     // remove AbilityRecord out of list
     RemoveTerminatingAbility(abilityRecord, flag);
     abilityRecord->SendResultToCallers();
@@ -1679,6 +1682,7 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
         TAG_LOGD(AAFwkTag::ABILITYMGR, "current ability is active");
         auto nextAbilityRecord = abilityRecord->GetNextAbilityRecord();
         if (nextAbilityRecord) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "have next ability");
             nextAbilityRecord->SetPreAbilityRecord(abilityRecord);
 #ifdef SUPPORT_SCREEN
             if (nextAbilityRecord->GetPendingState() != AbilityState::INITIAL) {

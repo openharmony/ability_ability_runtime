@@ -976,7 +976,7 @@ bool CreateAsyncCallback(napi_env env, napi_value param, AsyncJSCallbackInfo *ca
 
     callback->cbInfo.callback = CreateCallbackRefFromJS(env, param);
     if (callback->cbInfo.callback == nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "create ref failed");
+        TAG_LOGI(AAFwkTag::JSNAPI, "null callback");
         return false;
     }
 
@@ -1228,7 +1228,7 @@ std::vector<std::string> ConvertStringVector(napi_env env, napi_value jsValue)
     bool isTypedArray = false;
     napi_status status = napi_is_typedarray(env, jsValue, &isTypedArray);
     if (status != napi_ok || !isTypedArray) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "napi_is_typedarray error");
+        TAG_LOGE(AAFwkTag::JSNAPI, "isTypedArray error");
         return {};
     }
 

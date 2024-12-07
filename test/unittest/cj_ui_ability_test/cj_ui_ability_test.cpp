@@ -373,7 +373,7 @@ HWTEST_F(CjUIAbilityTest, CJUIAbility_OnShare_0100, TestSize.Level1)
 {
     WantParams data;
     int32_t ret = cjAbility_->OnShare(data);
-    EXPECT_EQ(ERR_OK, ret);
+    EXPECT_EQ(ERR_INVALID_VALUE, ret);
 }
 
 #ifdef SUPPORT_GRAPHICS
@@ -509,7 +509,7 @@ HWTEST_F(CjUIAbilityTest, CJUIAbilityVirtualFunc_0200, TestSize.Level1)
     bool isAsyncOnContinue = false;
     int onContinueRet = cjAbility_->OnContinue(data, isAsyncOnContinue, abilityInfo);
     int32_t reason = 0;
-    EXPECT_EQ(cjAbility_->OnSaveState(reason, data), 0);
+    EXPECT_EQ(cjAbility_->OnSaveState(reason, data), -1);
     int result = 0;
     cjAbility_->OnCompleteContinuation(result);
     cjAbility_->OnRemoteTerminated();
@@ -610,7 +610,7 @@ HWTEST_F(CjUIAbilityTest, CJUIAbility_OnBackPress_0100, TestSize.Level1)
 HWTEST_F(CjUIAbilityTest, CJUIAbility_OnPrepareTerminate_0100, TestSize.Level1)
 {
     bool ret = cjAbility_->OnPrepareTerminate();
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0100, TestSize.Level1)

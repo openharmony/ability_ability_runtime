@@ -33,7 +33,7 @@ napi_value JsUIServiceProxy::CreateJsUIServiceProxy(napi_env env, const sptr<IRe
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "napi_create_object, object is null");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null object");
         return CreateJsUndefined(env);
     }
 
@@ -58,7 +58,7 @@ JsUIServiceProxy::JsUIServiceProxy(const sptr<IRemoteObject>& impl, const sptr<I
     proxy_ = iface_cast<OHOS::AAFwk::IUIService>(impl);
     hostProxy_ = hostProxy;
     if (proxy_ == nullptr) {
-        TAG_LOGI(AAFwkTag::UISERVC_EXT, "iface_cast return null");
+        TAG_LOGI(AAFwkTag::UISERVC_EXT, "null proxy");
     }
 }
 
@@ -77,7 +77,7 @@ napi_value JsUIServiceProxy::SendData(napi_env env, napi_callback_info info)
 napi_value JsUIServiceProxy::OnSendData(napi_env env, NapiCallbackInfo& info)
 {
     if (proxy_ == nullptr || hostProxy_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "proxy_ or hostProxy_ is null");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null proxy_ or hostProxy_");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }

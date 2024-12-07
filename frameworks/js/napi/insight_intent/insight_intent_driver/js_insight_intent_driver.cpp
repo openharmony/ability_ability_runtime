@@ -103,7 +103,7 @@ private:
 
         InsightIntentExecuteParam param;
         if (!UnwrapExecuteParam(env, info.argv[INDEX_ZERO], param)) {
-            TAG_LOGE(AAFwkTag::INTENT, "CheckOnOffType, Parse on off type failed");
+            TAG_LOGE(AAFwkTag::INTENT, "parse on off type failed");
             ThrowInvalidParamError(env, "Parameter error: Parse param failed, param must be a ExecuteParam.");
             return CreateJsUndefined(env);
         }
@@ -126,7 +126,7 @@ private:
         }
 
         if (asyncTask == nullptr) {
-            TAG_LOGE(AAFwkTag::INTENT, "asyncTask is nullptr");
+            TAG_LOGE(AAFwkTag::INTENT, "null asyncTask");
             return CreateJsUndefined(env);
         }
         auto client = std::make_shared<JsInsightIntentExecuteCallbackClient>(env, nativeDeferred, callbackRef);
@@ -145,7 +145,7 @@ napi_value JsInsightIntentDriverInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Invalid input parameters");
+        TAG_LOGE(AAFwkTag::INTENT, "null env or exportObj");
         return nullptr;
     }
 

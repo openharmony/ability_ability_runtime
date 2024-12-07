@@ -53,12 +53,12 @@ int32_t UIServiceHostStub::OnSendData(MessageParcel& data, MessageParcel& reply)
 {
     std::unique_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
     if (wantParams == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "UIServiceHostStub::OnSendData, read WantParams failed");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null wantParams");
         return ERR_INVALID_VALUE;
     }
     int32_t result = SendData(*wantParams);
     if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "UIServiceHostStub::OnSendData, write result failed.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "write result failed");
         return IPC_STUB_ERR;
     }
     return NO_ERROR;

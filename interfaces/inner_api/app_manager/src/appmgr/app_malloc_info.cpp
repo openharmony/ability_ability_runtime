@@ -19,8 +19,8 @@ namespace OHOS {
 namespace AppExecFwk {
 bool MallocInfo::Marshalling(Parcel &parcel) const
 {
-    return (parcel.WriteInt32(usmblks) && parcel.WriteInt32(uordblks)
-        && parcel.WriteInt32(fordblks) && parcel.WriteInt32(hblkhd));
+    return (parcel.WriteUint64(usmblks) && parcel.WriteUint64(uordblks)
+        && parcel.WriteUint64(fordblks) && parcel.WriteUint64(hblkhd));
 }
 
 MallocInfo *MallocInfo::Unmarshalling(Parcel &parcel)
@@ -29,10 +29,10 @@ MallocInfo *MallocInfo::Unmarshalling(Parcel &parcel)
     if (mallocInfo == nullptr) {
         return nullptr;
     }
-    mallocInfo->usmblks = parcel.ReadInt32();
-    mallocInfo->uordblks = parcel.ReadInt32();
-    mallocInfo->fordblks = parcel.ReadInt32();
-    mallocInfo->hblkhd = parcel.ReadInt32();
+    mallocInfo->usmblks = parcel.ReadUint64();
+    mallocInfo->uordblks = parcel.ReadUint64();
+    mallocInfo->fordblks = parcel.ReadUint64();
+    mallocInfo->hblkhd = parcel.ReadUint64();
     return mallocInfo;
 }
 }  // namespace AppExecFwk

@@ -1028,7 +1028,8 @@ public:
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
         bool isImplicit = false,
-        bool isUIAbilityOnly = false);
+        bool isUIAbilityOnly = false,
+        bool isAppCloneSelector = false);
 
     int StartAbilityInner(
         const Want &want,
@@ -1040,7 +1041,8 @@ public:
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
         bool isImplicit = false,
-        bool isUIAbilityOnly = false);
+        bool isUIAbilityOnly = false,
+        bool isAppCloneSelector = false);
 
     int32_t StartExtensionAbilityInner(
         const Want &want,
@@ -1115,7 +1117,8 @@ public:
         sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
-        bool isImplicit = false);
+        bool isImplicit = false,
+        bool isAppCloneSelector = false);
 
     int ImplicitStartAbilityAsCaller(
         const Want &want,
@@ -1933,7 +1936,7 @@ private:
      * start highest priority ability.
      *
      */
-    void StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery = false);
+    int StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery = false);
     /**
      * connect bms.
      *
@@ -2038,8 +2041,7 @@ private:
     void StartFreezingScreen();
     void StopFreezingScreen();
     void UserStarted(int32_t userId);
-    void SwitchToUser(int32_t userId);
-    void SwitchToUser(int32_t oldUserId, int32_t userId, sptr<IUserCallback> callback,
+    int SwitchToUser(int32_t oldUserId, int32_t userId, sptr<IUserCallback> callback,
         bool isAppRecovery = false);
     void SwitchManagers(int32_t userId, bool switchUser = true);
     void StartUserApps();

@@ -90,9 +90,39 @@ void Watchdog::SetAppMainThreadState(const bool appMainThreadState)
     appMainThreadIsAlive_.store(appMainThreadState);
 }
 
+#ifdef APP_NO_RESPONSE_DIALOG
+bool isDeviceType2in1()
+{
+    const int bufferLen = 128;
+    char paramOutBuf[bufferLen] = {0};
+    const char *devicetype2in1 = "2in1";
+    int ret = GetParameter("const.product.devicetype", "", paramOutBuf, bufferLen);
+    return ret > 0 && strncmp(paramOutBuf, devicetype2in1, strlen(devicetype2in1)) == 0;
+}
+#endif
+
+#ifdef APP_NO_RESPONSE_DIALOG
+void Watchdog::ChangeTimeOut(const std::string& bundleName)
+{
+    constexpr char SCENEBOARD_SERVICE_ABILITY[] = "com.ohos.sceneboard";
+    constexpr int TIMEOUT = 5000;
+    if (bundleName == SCENEBOARD_SERVICE_ABILITY) {
+        OHOS::HiviewDFX::Watchdog::GetInstance().RemovePeriodicalTask("AppkitWatchdog");
+        auto watchdogTask = [this] { this->Timer(); };
+        OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask("AppkitWatchdog", watchdogTask, TIMEOUT,
+            INI_TIMER_FIRST_SECOND);
+    }
+}
+#endif
+
 void Watchdog::SetBundleInfo(const std::string& bundleName, const std::string& bundleVersion)
 {
     OHOS::HiviewDFX::Watchdog::GetInstance().SetBundleInfo(bundleName, bundleVersion);
+#ifdef APP_NO_RESPONSE_DIALOG
+    if (isDeviceType2in1()) {
+        ChangeTimeOut(bundleName);
+    }
+#endif
 }
 
 void Watchdog::SetBackgroundStatus(const bool isInBackground)
@@ -142,8 +172,7 @@ void Watchdog::Timer()
     }
     if (!needReport_) {
         watchdogReportCount_++;
-        TAG_LOGE(AAFwkTag::APPDFR, "timeout, wait to recover, wait count: %{public}d",
-            watchdogReportCount_.load());
+        TAG_LOGE(AAFwkTag::APPDFR, "wait count: %{public}d", watchdogReportCount_.load());
         if (watchdogReportCount_.load() >= WATCHDOG_REPORT_COUNT_MAX) {
 #ifndef APP_NO_RESPONSE_DIALOG
             AppExecFwk::AppfreezeInner::GetInstance()->AppfreezeHandleOverReportCount(true);
@@ -171,7 +200,7 @@ void Watchdog::Timer()
     }
     int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
-    if ((now - lastWatchTime_) >= (CHECK_INTERVAL_TIME / RESET_RATIO)) {
+    if ((now - lastWatchTime_) < 0 || (now - lastWatchTime_) >= (CHECK_INTERVAL_TIME / RESET_RATIO)) {
         lastWatchTime_ = now;
     }
 }

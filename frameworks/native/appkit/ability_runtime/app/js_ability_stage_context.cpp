@@ -30,20 +30,20 @@ void JsAbilityStageContext::ConfigurationUpdated(napi_env env, std::shared_ptr<N
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!jsContext || !config) {
-        TAG_LOGE(AAFwkTag::APPKIT, "jsContext or config is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null jsContext or config");
         return;
     }
 
     napi_value object = jsContext->GetNapiValue();
     if (!CheckTypeForNapiValue(env, object, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "object is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null object");
         return;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, object, "onUpdateConfiguration", &method);
     if (!method) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get onUpdateConfiguration from object");
+        TAG_LOGE(AAFwkTag::APPKIT, "null method");
         return;
     }
 
@@ -76,18 +76,18 @@ napi_value AttachAbilityStageContext(napi_env env, void *value, void *hint)
     }
     auto ptr = reinterpret_cast<std::weak_ptr<AbilityStageContext> *>(value)->lock();
     if (ptr == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid context");
+        TAG_LOGW(AAFwkTag::APPKIT, "null ptr");
         return nullptr;
     }
 
     auto object = CreateJsAbilityStageContext(env, ptr);
     if (object == nullptr) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "null ability stage object");
+        TAG_LOGW(AAFwkTag::CONTEXT, "null object");
         return nullptr;
     }
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.AbilityStageContext", &object, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "load ability stage context failed");
+        TAG_LOGW(AAFwkTag::APPKIT, "null systemModule");
         return nullptr;
     }
     auto contextObj = systemModule->GetNapiValue();

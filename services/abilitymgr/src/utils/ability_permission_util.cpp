@@ -91,6 +91,8 @@ bool AbilityPermissionUtil::IsDominateScreen(const Want &want, bool isPendingWan
             }
             auto userId = callerUid / BASE_USER_RANGE;
             AppExecFwk::BundleInfo info;
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "callerBundleName: %{public}s, userId: %{public}d",
+                callerBundleName.c_str(), userId);
             if (!IN_PROCESS_CALL(
                 bms->GetBundleInfo(callerBundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, info, userId))) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to get bundle info.");

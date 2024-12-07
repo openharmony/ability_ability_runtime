@@ -41,21 +41,21 @@ int32_t UIServiceHostProxy::SendData(OHOS::AAFwk::WantParams &data)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!parcelData.WriteInterfaceToken(UIServiceHostProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "Write interface token failed.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "write interface token failed");
         return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
     }
     if (!parcelData.WriteParcelable(&data)) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "Write data failed.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "write data failed");
         return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
     }
     sptr<IRemoteObject> remoteObject = Remote();
     if (remoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "remoteObject null");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null remoteObject");
         return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
     }
     auto error = remoteObject->SendRequest(static_cast<uint32_t>(IUIServiceHost::SEND_DATA), parcelData, reply, option);
     if (error != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "SendRequest failed, error %{public}d", error);
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "error %{public}d", error);
         return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
     }
     return ERR_OK;

@@ -106,6 +106,7 @@ const int HALF_TIMEOUT = 2;
 const int MAX_URI_COUNT = 500;
 const int RESTART_SCENEBOARD_DELAY = 500;
 constexpr int32_t DMS_UID = 5522;
+constexpr int32_t SCHEDULER_DIED_TIMEOUT = 60000;
 
 auto g_addLifecycleEventTask = [](sptr<Token> token, std::string &methodName) {
     CHECK_POINTER_LOG(token, "token is nullptr");
@@ -128,7 +129,7 @@ std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemote
 
     std::string descriptor = Str16ToStr8(token->GetObjectDescriptor());
     if (descriptor != "ohos.aafwk.AbilityToken") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not AbilityToken, descriptor:%{public}s",
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "descriptor:%{public}s",
             descriptor.c_str());
         return nullptr;
     }
@@ -1498,7 +1499,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         HandleDlpAttached();
 #endif // WITH_DLP
     } else {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "scheduler is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null scheduler");
         isReady_ = false;
         isWindowAttached_ = false;
         SetIsNewWant(false);
@@ -2559,7 +2560,10 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
     auto task = [ability = shared_from_this()]() {
         DelayedSingleton<AbilityManagerService>::GetInstance()->OnAbilityDied(ability);
     };
-    handler->SubmitTask(task);
+    handler->SubmitTask(task, AAFwk::TaskAttribute{
+        .taskName_ = "OnSchedulerDied",
+        .timeoutMillis_ = SCHEDULER_DIED_TIMEOUT
+    });
     auto uriTask = [want = GetWant(), ability = shared_from_this()]() {
         ability->SaveResultToCallers(-1, &want);
         ability->SendResultToCallers(true);
@@ -2637,6 +2641,11 @@ void AbilityRecord::SetConnRemoteObject(const sptr<IRemoteObject> &remoteObject)
 sptr<IRemoteObject> AbilityRecord::GetConnRemoteObject() const
 {
     return connRemoteObject_;
+}
+
+bool AbilityRecord::IsNeverStarted() const
+{
+    return GetStartId() == 0 && IsCreateByConnect();
 }
 
 void AbilityRecord::AddStartId()
@@ -3295,7 +3304,7 @@ void AbilityRecord::NotifyRemoveShellProcess(int32_t type)
     if (abilityInfo_.bundleName == AppUtils::GetInstance().GetBrokerDelegateBundleName()) {
         auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(type);
         if (collaborator == nullptr) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "collaborator is nullptr");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null collaborator");
             return;
         }
         int ret = collaborator->NotifyRemoveShellProcess(pid_, SHELL_ASSISTANT_DIETYPE, SHELL_ASSISTANT_DIEREASON);
@@ -3313,7 +3322,7 @@ void AbilityRecord::NotifyMissionBindPid()
     }
     auto sessionInfo = GetSessionInfo();
     if (sessionInfo == nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "sessionInfo is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null sessionInfo");
         return;
     }
     int32_t persistentId = sessionInfo->persistentId;
@@ -3321,7 +3330,7 @@ void AbilityRecord::NotifyMissionBindPid()
         auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(
             CollaboratorType::RESERVE_TYPE);
         if (collaborator == nullptr) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "collaborator is nullptr");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null collaborator");
             return;
         }
         collaborator->NotifyMissionBindPid(persistentId, pid_);

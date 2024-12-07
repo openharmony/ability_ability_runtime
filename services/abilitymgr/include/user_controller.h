@@ -74,7 +74,7 @@ public:
      * @param isForeground whether user should brout to foreground.
      * @return 0 if the user has been successfully started.
      */
-    void StartUser(int32_t userId, sptr<IUserCallback> callback, bool isAppRecovery = false);
+    int StartUser(int32_t userId, sptr<IUserCallback> callback, bool isAppRecovery = false);
 
     /**
      * Stop user, if it is running..
@@ -110,7 +110,7 @@ private:
     std::shared_ptr<UserItem> GetOrCreateUserItem(int32_t userId);
     void SetCurrentUserId(int32_t userId);
     void BroadcastUserStarted(int32_t userId);
-    void MoveUserToForeground(int32_t oldUserId, int32_t newUserId, sptr<IUserCallback> callback,
+    int MoveUserToForeground(int32_t oldUserId, int32_t newUserId, sptr<IUserCallback> callback,
         bool isAppRecovery = false);
     void UserBootDone(std::shared_ptr<UserItem> &item);
     void BroadcastUserBackground(int32_t userId);

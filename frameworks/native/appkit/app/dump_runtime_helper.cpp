@@ -36,18 +36,18 @@ DumpRuntimeHelper::DumpRuntimeHelper(const std::shared_ptr<OHOSApplication> &app
 void DumpRuntimeHelper::SetAppFreezeFilterCallback()
 {
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "OHOSApplication is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application");
         return;
     }
     auto& runtime = application_->GetRuntime();
     if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Runtime is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
     auto appfreezeFilterCallback = [] (const int32_t pid) -> bool {
         auto client = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
         if (client == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "client is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null client");
             return false;
         }
         return client->SetAppFreezeFilter(pid);
@@ -85,7 +85,7 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
 void DumpRuntimeHelper::GetCheckList(const std::unique_ptr<AbilityRuntime::Runtime> &runtime, std::string &checkList)
 {
     if (runtime->GetLanguage() != AbilityRuntime::Runtime::Language::JS) {
-        TAG_LOGE(AAFwkTag::APPKIT, "current language is not js");
+        TAG_LOGE(AAFwkTag::APPKIT, "current language not js");
         return;
     }
     AbilityRuntime::JsRuntime &jsruntime = static_cast<AbilityRuntime::JsRuntime&>(*runtime);
@@ -96,12 +96,12 @@ void DumpRuntimeHelper::GetCheckList(const std::unique_ptr<AbilityRuntime::Runti
     napi_get_global(env, &global);
     napi_value requireValue = GetJsLeakModule(env, global);
     if (requireValue == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get jsLeak module fail");
+        TAG_LOGE(AAFwkTag::APPKIT, "null requireValue");
         return;
     }
     napi_value result = GetMethodCheck(env, requireValue, global);
     if (result == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get method check fail");
+        TAG_LOGE(AAFwkTag::APPKIT, "null result");
         return;
     }
 
@@ -116,7 +116,7 @@ napi_value DumpRuntimeHelper::GetJsLeakModule(napi_env env, napi_value global)
     napi_value napiFunc = nullptr;
     napi_status status = napi_get_named_property(env, global, REQUIRE_NAPI, &napiFunc);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::APPKIT, "napi get requireNapi fail, %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPKIT, "fail, %{public}d", status);
         return nullptr;
     }
     napi_value moduleName = nullptr;
@@ -125,7 +125,7 @@ napi_value DumpRuntimeHelper::GetJsLeakModule(napi_env env, napi_value global)
     napi_value requireValue = nullptr;
     status = napi_call_function(env, global, napiFunc, 1, &param[0], &requireValue);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::APPKIT, "call jsLeak fail, %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPKIT, "fail, %{public}d", status);
         return nullptr;
     }
     return requireValue;
@@ -136,19 +136,19 @@ napi_value DumpRuntimeHelper::GetMethodCheck(napi_env env, napi_value requireVal
     napi_value methodCheck = nullptr;
     napi_status status = napi_get_named_property(env, requireValue, CHECK, &methodCheck);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::APPKIT, "napi get check fail, %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPKIT, "fail, %{public}d", status);
         return nullptr;
     }
     napi_valuetype valuetype = napi_undefined;
     status = napi_typeof(env, methodCheck, &valuetype);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::APPKIT, "napi_typeof failed, %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed, %{public}d", status);
         return nullptr;
     }
     napi_value result = nullptr;
     status = napi_call_function(env, global, methodCheck, 0, nullptr, &result);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::APPKIT, "napi call check fail, %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPKIT, "fail, %{public}d", status);
         return nullptr;
     }
     return result;
@@ -159,11 +159,11 @@ void DumpRuntimeHelper::WriteCheckList(const std::string &checkList)
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     int32_t fd = RequestFileDescriptor(static_cast<int32_t>(FaultLoggerType::JS_HEAP_LEAK_LIST));
     if (fd < 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "request fd failed, fd:%{public}d.\n", fd);
+        TAG_LOGE(AAFwkTag::APPKIT, "fd:%{public}d.\n", fd);
         return;
     }
     if (write(fd, checkList.c_str(), strlen(checkList.c_str())) == -1) {
-        TAG_LOGE(AAFwkTag::APPKIT, "write failed, fd:%{public}d, errno:%{public}d.\n", fd, errno);
+        TAG_LOGE(AAFwkTag::APPKIT, "fd:%{public}d, errno:%{public}d.\n", fd, errno);
         close(fd);
         return;
     }

@@ -83,6 +83,13 @@ public:
      */
     bool IsReportEvent();
 
+      /**
+     *
+     * @brief Change TimeOut.
+     *
+     */
+    void ChangeTimeOut(const std::string& bundleName);
+
     /**
      *
      * @brief Set bundle info.
