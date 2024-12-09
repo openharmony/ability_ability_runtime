@@ -216,6 +216,7 @@ ohos_shared_library("appkit_native") {
       "graphic_2d:librender_service_client",
       "i18n:intl_util",
       "icu:shared_icuuc",
+      "window_manager:libdm",
       "window_manager:libwm",
       "window_manager:libwsutils",
     ]

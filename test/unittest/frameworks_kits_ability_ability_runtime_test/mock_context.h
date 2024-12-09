@@ -111,6 +111,10 @@ public:
 
     std::shared_ptr<Context> CreateAreaModeContext(int areaMode) override;
 
+#ifdef SUPPORT_GRAPHICS
+    std::shared_ptr<Context> CreateDisplayContext(uint64_t displayId) override;
+#endif
+
     int32_t mode_ = 0;
 };
 }  // namespace AbilityRuntime

@@ -421,5 +421,17 @@ std::shared_ptr<Context> AbilityStageContext::CreateAreaModeContext(int areaMode
 
     return contextImpl_->CreateAreaModeContext(areaMode);
 }
+
+#ifdef SUPPORT_GRAPHICS
+std::shared_ptr<Context> AbilityStageContext::CreateDisplayContext(uint64_t displayId)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid contextImpl");
+        return nullptr;
+    }
+
+    return contextImpl_->CreateDisplayContext(displayId);
+}
+#endif
 } // namespace AbilityRuntime
 } // namespace OHOS

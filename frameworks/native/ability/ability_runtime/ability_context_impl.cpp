@@ -1102,5 +1102,12 @@ std::shared_ptr<Context> AbilityContextImpl::CreateAreaModeContext(int areaMode)
 {
     return stageContext_ ? stageContext_->CreateAreaModeContext(areaMode) : nullptr;
 }
+
+#ifdef SUPPORT_GRAPHICS
+std::shared_ptr<Context> AbilityContextImpl::CreateDisplayContext(uint64_t displayId)
+{
+    return stageContext_ ? stageContext_->CreateDisplayContext(displayId) : nullptr;
+}
+#endif
 } // namespace AbilityRuntime
 } // namespace OHOS

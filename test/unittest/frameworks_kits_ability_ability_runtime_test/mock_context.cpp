@@ -206,5 +206,12 @@ std::shared_ptr<Context> MockContext::CreateAreaModeContext(int areaMode)
 {
     return nullptr;
 }
+
+#ifdef SUPPORT_GRAPHICS
+std::shared_ptr<Context> MockContext::CreateDisplayContext(uint64_t displayId)
+{
+    return nullptr;
+}
+#endif
 }  // namespace AbilityRuntime
 }  // namespace OHOS
