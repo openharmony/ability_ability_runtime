@@ -39,6 +39,30 @@ void JsApplication::Finalizer(napi_env env, void *data, void *hint)
     std::unique_ptr<JsApplication>(static_cast<JsApplication *>(data));
 }
 
+napi_value JsApplication::GetApplicationContext(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsApplication, OnGetApplicationContext);
+}
+
+napi_value JsApplication::OnGetApplicationContext(napi_env env, NapiCallbackInfo &info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    napi_value value = JsApplicationContextUtils::CreateJsApplicationContext(env);
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
+    if (systemModule == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Invalid systemModule.");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
+        return CreateJsUndefined(env);
+    }
+    napi_value object = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, object, napi_object)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get context native object.");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
+        return CreateJsUndefined(env);
+    }
+    return object;
+}
+
 napi_value JsApplication::CreateModuleContext(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsApplication, OnCreateModuleContext);
@@ -318,6 +342,8 @@ napi_value ApplicationInit(napi_env env, napi_value exportObj)
     napi_wrap(env, exportObj, jsApplication.release(), JsApplication::Finalizer, nullptr, nullptr);
 
     const char *moduleName = "application";
+    BindNativeFunction(env, exportObj, "getApplicationContext", moduleName,
+        JsApplication::GetApplicationContext);
 
     BindNativeFunction(env, exportObj, "createModuleContext", moduleName,
         JsApplication::CreateModuleContext);
