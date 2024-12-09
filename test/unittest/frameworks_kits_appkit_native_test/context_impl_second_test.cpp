@@ -25,14 +25,12 @@
 #include "ability_local_record.h"
 #include "application_context.h"
 #include "ability_stage_context.h"
-
 #include "context.h"
 #include "hap_module_info.h"
 #include "hilog_tag_wrapper.h"
 #include "iremote_object.h"
 #include "system_ability_definition.h"
 #include "sys_mgr_client.h"
-//#include "res_config_impl.h"
 
 namespace OHOS {
 namespace AppExecFwk {
