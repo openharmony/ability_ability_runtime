@@ -2645,7 +2645,10 @@ sptr<IRemoteObject> AbilityRecord::GetConnRemoteObject() const
 
 bool AbilityRecord::IsNeverStarted() const
 {
-    return GetStartId() == 0 && IsCreateByConnect();
+    if (UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
+        return startId_ == 0;
+    }
+    return startId_ == 0 && IsCreateByConnect();
 }
 
 void AbilityRecord::AddStartId()
