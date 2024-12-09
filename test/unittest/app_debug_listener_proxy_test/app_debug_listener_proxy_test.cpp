@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include<gtest/gtest.h>
+#include <gtest/gtest.h>
 
 #define private public
 #include "app_debug_info.h"
