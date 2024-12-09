@@ -83,7 +83,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_001, TestSize.Leve
     AppMgrClient::isAppRunningReturnCode = ERR_OK;
     AppMgrClient::isAppRunningReturnValue = false;
     AbilityKeepAliveService::callSetResult = ERR_OK;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_001 end";
 }
@@ -105,7 +106,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_002, TestSize.Leve
     bool isByEDM = false;
     system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false);
     EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), false);
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_002 end";
 }
@@ -128,7 +130,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_003, TestSize.Leve
     system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
     EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
     MyFlag::isAllowedToUseSystemAPIFlag_ = false;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_NOT_SYSTEM_APP);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_003 end";
 }
@@ -152,7 +155,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_004, TestSize.Leve
     EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
     MyFlag::isAllowedToUseSystemAPIFlag_ = true;
     MyFlag::verifyCallingPermissionFlag_ = false;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_004 end";
 }
@@ -178,7 +182,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_005, TestSize.Leve
     MyFlag::verifyCallingPermissionFlag_ = true;
     AbilityManagerService::userId_ = 100;
     BundleMgrHelper::getBundleInfoResult = false;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_TARGET_BUNDLE_NOT_EXIST);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_005 end";
 }
@@ -206,7 +211,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_006, TestSize.Leve
     BundleMgrHelper::getBundleInfoResult = true;
     AbilityKeepAliveService::callIsKeepAliveResult = false;
     MainElementUtils::checkMainUIAbilityResult = false;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_NO_MAIN_ABILITY);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_006 end";
 }
@@ -235,7 +241,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_007, TestSize.Leve
     AbilityKeepAliveService::callIsKeepAliveResult = false;
     MainElementUtils::checkMainUIAbilityResult = true;
     MainElementUtils::checkStatusBarAbilityResult = false;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_NO_STATUS_BAR_ABILITY);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_007 end";
 }
@@ -266,7 +273,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_008, TestSize.Leve
     MainElementUtils::checkStatusBarAbilityResult = true;
     AppMgrClient::isAppRunningReturnCode = ERR_OK;
     AppMgrClient::isAppRunningReturnValue = true;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_NOT_ATTACHED_TO_STATUS_BAR);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_008 end";
 }
@@ -298,7 +306,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_009, TestSize.Leve
     AppMgrClient::isAppRunningReturnCode = ERR_OK;
     AppMgrClient::isAppRunningReturnValue = true;
     AbilityManagerService::isInStatusBarResult = false;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_NOT_ATTACHED_TO_STATUS_BAR);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_009 end";
 }
@@ -331,7 +340,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_010, TestSize.Leve
     AppMgrClient::isAppRunningReturnValue = true;
     AbilityManagerService::isInStatusBarResult = true;
     AbilityKeepAliveService::callSetResult = INNER_ERR;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, INNER_ERR);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_010 end";
 }
@@ -364,7 +374,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_011, TestSize.Leve
     AppMgrClient::isAppRunningReturnValue = true;
     AbilityManagerService::isInStatusBarResult = true;
     AbilityKeepAliveService::callSetResult = ERR_OK;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_011 end";
 }
@@ -392,7 +403,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_012, TestSize.Leve
     BundleMgrHelper::getBundleInfoResult = true;
     AbilityKeepAliveService::callIsKeepAliveResult = false;
     AbilityKeepAliveService::callSetResult = ERR_OK;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_012 end";
 }
@@ -420,7 +432,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_013, TestSize.Leve
     BundleMgrHelper::getBundleInfoResult = true;
     AbilityKeepAliveService::callIsKeepAliveResult = false;
     AbilityKeepAliveService::callSetResult = INNER_ERR;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, INNER_ERR);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_013 end";
 }
@@ -452,7 +465,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_014, TestSize.Leve
     AppMgrClient::isAppRunningReturnValue = true;
     AbilityManagerService::isInStatusBarResult = true;
     AbilityKeepAliveService::callSetResult = ERR_OK;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_014 end";
 }
@@ -483,7 +497,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_015, TestSize.Leve
     AppMgrClient::isAppRunningReturnCode = ERR_OK;
     AppMgrClient::isAppRunningReturnValue = false;
     AbilityKeepAliveService::callSetResult = ERR_OK;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_015 end";
 }
@@ -505,7 +520,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_016, TestSize.Leve
     bool isByEDM = true;
     system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false);
     EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), false);
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_016 end";
 }
@@ -539,7 +555,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_017, TestSize.Leve
     AppMgrClient::isAppRunningReturnValue = true;
     AbilityManagerService::isInStatusBarResult = true;
     AbilityKeepAliveService::callSetResult = ERR_OK;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_017 end";
 }
@@ -564,7 +581,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_018, TestSize.Leve
     MyFlag::checkSpecificFlag_ = false;
     AbilityManagerService::userId_ = 100;
     MyFlag::flag_ = 0;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_018 end";
 }
@@ -590,7 +608,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_019, TestSize.Leve
     AbilityManagerService::userId_ = 100;
     MyFlag::flag_ = MyFlag::FLAG::IS_SA_CALL;
     MyFlag::verifyCallingPermissionFlag_ = false;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_019 end";
 }
@@ -617,7 +636,8 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_020, TestSize.Leve
     MyFlag::flag_ = MyFlag::FLAG::IS_SA_CALL;
     MyFlag::verifyCallingPermissionFlag_ = true;
     BundleMgrHelper::getBundleInfoResult = false;
-    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
+    auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId,
+        updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_TARGET_BUNDLE_NOT_EXIST);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_020 end";
 }
