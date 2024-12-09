@@ -200,12 +200,16 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
         if (IsUIExtensionAbility(targetService)) {
             targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
         }
+#ifdef SUPPORT_UPMS
         targetService->GrantUriPermissionForServiceExtension();
+#endif // SUPPORT_UPMS
         LoadAbility(targetService);
     } else if (targetService->IsAbilityState(AbilityState::ACTIVE) && !IsUIExtensionAbility(targetService)) {
         // It may have been started through connect
         targetService->SetWant(abilityRequest.want);
+#ifdef SUPPORT_UPMS
         targetService->GrantUriPermissionForServiceExtension();
+#endif // SUPPORT_UPMS
         CommandAbility(targetService);
     } else if (IsUIExtensionAbility(targetService)) {
         DoForegroundUIExtension(targetService, abilityRequest);
@@ -869,7 +873,9 @@ void AbilityConnectManager::OnAbilityRequestDone(const sptr<IRemoteObject> &toke
         }
         std::string element = abilityRecord->GetURI();
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability is %{public}s, start to foreground.", element.c_str());
+#ifdef SUPPORT_UPMS
         abilityRecord->GrantUriPermissionForUIExtension();
+#endif // SUPPORT_UPMS
         abilityRecord->ForegroundUIExtensionAbility();
     }
 }
@@ -1908,7 +1914,9 @@ void AbilityConnectManager::TerminateDone(const std::shared_ptr<AbilityRecord> &
             "error. expect %{public}s, actual %{public}s", expect.c_str(), actual.c_str());
         return;
     }
+#ifdef SUPPORT_UPMS
     IN_PROCESS_CALL_WITHOUT_RET(abilityRecord->RevokeUriPermission());
+#endif // SUPPORT_UPMS
     abilityRecord->RemoveAbilityDeathRecipient();
     if (abilityRecord->IsSceneBoard()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "scb exit, kill processes");

@@ -40,7 +40,6 @@ ohos_unittest("ability_bundle_event_callback_test") {
 
   deps = [
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/ability/native:auto_startup_callback",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
@@ -70,6 +69,12 @@ ohos_unittest("ability_bundle_event_callback_test") {
     "window_manager:libwsutils",
     "window_manager:sms",
   ]
+
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    ]
+  }
 
   cflags_cc = []
   if (os_dlp_part_enabled) {
