@@ -2575,6 +2575,11 @@ sptr<IRemoteObject> AbilityRecord::GetConnRemoteObject() const
     return connRemoteObject_;
 }
 
+bool AbilityRecord::IsNeverStarted() const
+{
+    return GetStartId() == 0 && IsCreatedByConnect();
+}
+
 void AbilityRecord::AddStartId()
 {
     startId_++;
