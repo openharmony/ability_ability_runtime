@@ -904,6 +904,11 @@ public:
      */
     sptr<IRemoteObject> GetConnRemoteObject() const;
 
+    /**
+     * check whether the ability is never started.
+     */
+    bool IsNeverStarted() const;
+
     void AddStartId();
     int GetStartId() const;
 

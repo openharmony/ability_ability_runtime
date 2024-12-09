@@ -747,7 +747,8 @@ void AbilityConnectManager::DisconnectRecordForce(ConnectListType &list,
     abilityRecord->RemoveConnectRecordFromList(connectRecord);
     connectRecord->CompleteDisconnect(ERR_OK, true);
     list.emplace_back(connectRecord);
-    if (abilityRecord->IsConnectListEmpty() && abilityRecord->GetStartId() == 0) {
+    if (abilityRecord->IsConnectListEmpty() &&
+        (IsUIExtensionAbility(abilityRecord) || abilityRecord->IsNeverStarted() == 0)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "Force terminate ability record state: %{public}d.",
             abilityRecord->GetAbilityState());
         TerminateRecord(abilityRecord);
