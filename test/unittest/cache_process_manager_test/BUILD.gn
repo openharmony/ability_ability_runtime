@@ -41,7 +41,6 @@ ohos_unittest("cache_process_manager_test") {
   configs = [ "${ability_runtime_services_path}/appmgr:appmgr_config" ]
 
   deps = [
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/appmgr:libappms",
@@ -85,6 +84,11 @@ ohos_unittest("cache_process_manager_test") {
     external_deps += [
       "window_manager:libwm",
       "window_manager:libwsutils",
+    ]
+  }
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     ]
   }
 }
