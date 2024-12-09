@@ -159,6 +159,8 @@ public:
 
     void RemoveResultCallbackTask(int requestCode);
 
+    int32_t GetScreenMode();
+    void SetScreenMode(int32_t screenMode);
     using SelfType = UIExtensionContext;
     static const size_t CONTEXT_TYPE_ID;
 #ifdef SUPPORT_SCREEN
@@ -176,6 +178,7 @@ private:
     static int32_t curRequestCode_;
     static std::mutex requestCodeMutex_;
     std::mutex mutexlock_;
+    int32_t screenMode_ = AAFwk::IDLE_SCREEN_MODE;
     /**
      * @brief Get Current Ability Type
      *

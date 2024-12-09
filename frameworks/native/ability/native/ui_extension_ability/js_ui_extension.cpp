@@ -51,6 +51,12 @@ using namespace OHOS::AppExecFwk;
 namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
+
+bool IsEmbeddableStart(int32_t screenMode)
+{
+    return screenMode == AAFwk::EMBEDDED_FULL_SCREEN_MODE ||
+        screenMode == AAFwk::EMBEDDED_HALF_SCREEN_MODE;
+}
 }
 
 napi_value AttachUIExtensionContext(napi_env env, void *value, void *extValue)
@@ -199,6 +205,7 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
         return;
     }
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
+    context->SetScreenMode(screenMode);
     napi_value contextObj = nullptr;
     CreateJSContext(env, contextObj, context, screenMode);
     if (shellContextRef_ == nullptr) {
@@ -264,7 +271,7 @@ void JsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> se
         launchParam.launchReason = AAFwk::LaunchReason::LAUNCHREASON_INSIGHT_INTENT;
     }
     int32_t screenMode = want.GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
-    if (screenMode == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
+    if (IsEmbeddableStart(screenMode)) {
         napi_value argv[] = {napiWant, CreateJsLaunchParam(env, launchParam) };
         CallObjectMethod("onCreate", argv, ARGC_TWO);
     } else {
@@ -682,8 +689,8 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
         napi_create_reference(env, nativeContentSession, 1, &ref);
         contentSessions_.emplace(compId, std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref)));
         int32_t screenMode = want.GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
-        if (screenMode == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
-            screenMode_ = AAFwk::EMBEDDED_FULL_SCREEN_MODE;
+        if (IsEmbeddableStart(screenMode)) {
+            screenMode_ = screenMode;
             auto jsAppWindowStage = CreateAppWindowStage(uiWindow, sessionInfo);
             if (jsAppWindowStage == nullptr) {
                 TAG_LOGE(AAFwkTag::UI_EXT, "null JsAppWindowStage");
@@ -801,7 +808,7 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
     }
     if (contentSessions_.find(componentId) != contentSessions_.end() && contentSessions_[componentId] != nullptr) {
         HandleScope handleScope(jsRuntime_);
-        if (screenMode_ == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
+        if (IsEmbeddableStart(screenMode_)) {
             screenMode_ = AAFwk::IDLE_SCREEN_MODE;
             CallObjectMethod("onWindowStageDestroy");
         } else {
