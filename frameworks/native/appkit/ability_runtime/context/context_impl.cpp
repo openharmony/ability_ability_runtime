@@ -1515,5 +1515,48 @@ std::shared_ptr<Context> ContextImpl::CreateAreaModeContext(int areaMode)
     contextImpl->SwitchArea(areaMode);
     return contextImpl;
 }
+
+int32_t ContextImpl::CreateHspModuleResourceManager(const std::string &bundleName,
+    const std::string &moduleName, std::shared_ptr<Global::Resource::ResourceManager> &resourceManager)
+{
+    if (bundleName.empty() || moduleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "bundleName is %{public}s, moduleName is %{public}s",
+            bundleName.c_str(), moduleName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    
+    int errCode = GetBundleManager();
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "The bundleMgr_ is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    ErrCode ret = bundleMgr_->GetDependentBundleInfo(bundleName, bundleInfo,
+        AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GetDependentBundleInfo failed:%{public}d", ret);
+        return ERR_INVALID_VALUE;
+    }
+    
+    std::string selfBundleName = GetBundleName();
+    if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE) ||
+        bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
+        resourceManager = InitOthersResourceManagerInner(bundleInfo, selfBundleName == bundleName, moduleName);
+        if (resourceManager == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "InitOthersResourceManagerInner create resourceManager failed");
+        }
+        return ERR_INVALID_VALUE;
+    }
+
+    resourceManager = InitResourceManagerInner(bundleInfo, selfBundleName == bundleName, moduleName);
+    if (resourceManager == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "InitResourceManagerInner create resourceManager failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    UpdateResConfig(GetResourceManager(), resourceManager);
+    return ERR_OK;
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
