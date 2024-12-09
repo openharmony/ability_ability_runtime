@@ -819,6 +819,17 @@ void ApplicationContext::RegisterProcessSecurityExit(AppProcessExitCallback appP
     appProcessExitCallback_ = appProcessExitCallback;
 }
 
+#ifdef SUPPORT_GRAPHICS
+void ApplicationContext::RegisterGetDisplayConfig(GetDisplayConfigCallback getDisplayConfigCallback)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl_");
+        return;
+    }
+    contextImpl_->RegisterGetDisplayConfig(getDisplayConfigCallback);
+}
+#endif
+
 std::string ApplicationContext::GetAppRunningUniqueId() const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "GetAppRunningUniqueId is %{public}s", appRunningUniqueId_.c_str());
@@ -906,5 +917,12 @@ std::shared_ptr<Context> ApplicationContext::CreateAreaModeContext(int areaMode)
 {
     return contextImpl_ ? contextImpl_->CreateAreaModeContext(areaMode) : nullptr;
 }
+
+#ifdef SUPPORT_GRAPHICS
+std::shared_ptr<Context> ApplicationContext::CreateDisplayContext(uint64_t displayId)
+{
+    return contextImpl_ ? contextImpl_->CreateDisplayContext(displayId) : nullptr;
+}
+#endif
 }  // namespace AbilityRuntime
 }  // namespace OHOS
