@@ -56,10 +56,13 @@ using SetSwitchCallBack = void (*)(const std::function<void(bool)> &setStatus,
 using SetConnectCallback = void (*)(const std::function<void(bool)>);
 using RemoveMessage = void (*)(int32_t);
 using WaitForConnection = bool (*)();
+using SetRecordCallBack = void (*)(const std::function<void(void)> &startRecordFunc,
+    const std::function<void(void)> &stopRecordFunc);
 
 std::mutex g_debuggerMutex;
 std::mutex g_loadsoMutex;
 std::mutex ConnectServerManager::instanceMutex_;
+std::mutex ConnectServerManager::callbackMutex_;
 std::unordered_map<int, std::pair<void*, const DebuggerPostTask>> g_debuggerInfo;
 
 ConnectServerManager::~ConnectServerManager()
@@ -108,6 +111,13 @@ void ConnectServerManager::StartConnectServer(const std::string& bundleName, int
         return;
     }
     startServerForSocketPair(socketFd);
+
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    for (const auto &callback : connectServerCallbacks_) {
+        if (callback != nullptr) {
+            callback();
+        }
+    }
 }
 
 void ConnectServerManager::StopConnectServer(bool isCloseSo)
@@ -412,4 +422,52 @@ DebuggerPostTask ConnectServerManager::GetDebuggerPostTask(int32_t tid)
     }
     return it->second.second;
 }
+
+bool ConnectServerManager::SetRecordCallback(const std::function<void(void)> &startRecordFunc,
+    const std::function<void(void)> &stopRecordFunc)
+{
+    if (handlerConnectServerSo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "No connected server");
+        return false;
+    }
+    auto setRecordCallback = reinterpret_cast<SetRecordCallBack>(dlsym(handlerConnectServerSo_, "SetRecordCallback"));
+    if (setRecordCallback == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to find SetRecordCallback");
+        return false;
+    }
+    setRecordCallback(startRecordFunc, stopRecordFunc);
+    return true;
+}
+
+void ConnectServerManager::SetRecordResults(const std::string &jsonArrayStr)
+{
+    if (handlerConnectServerSo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "No connected server");
+        return;
+    }
+    auto sendLayoutMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendLayoutMessage"));
+    if (sendLayoutMessage == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to find sendLayoutMessage");
+        return;
+    }
+    sendLayoutMessage(jsonArrayStr);
+}
+
+void ConnectServerManager::RegistConnectServerCallback(const ServerConnectCallback &connectServerCallback)
+{
+    if (connectServerCallback == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null callback");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    for (const auto &callback : connectServerCallbacks_) {
+        if (callback == connectServerCallback) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "callback exist");
+            return;
+        }
+    }
+    connectServerCallbacks_.emplace_back(connectServerCallback);
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "regist succeed");
+}
+
 } // namespace OHOS::AbilityRuntime
