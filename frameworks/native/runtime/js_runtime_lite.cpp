@@ -36,7 +36,6 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
-constexpr size_t MAX_ENV_COUNT = 16;
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
 const std::string PACKAGE_NAME = "packageName";
 const std::string BUNDLE_NAME = "bundleName";
@@ -234,10 +233,6 @@ napi_status JsRuntimeLite::AddEnv(napi_env env, std::shared_ptr<JsEnv::JsEnviron
     if (threadIds_.find(threadId) != threadIds_.end()) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "already created");
         return napi_status::napi_create_ark_runtime_only_one_env_per_thread;
-    }
-    if (envMap_.size() >= MAX_ENV_COUNT) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "envMap size exceed upperLimits");
-        return napi_status::napi_create_ark_runtime_too_many_envs;
     }
     threadIds_.insert(threadId);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "add threadId %{public}d", threadId);
