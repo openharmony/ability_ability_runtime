@@ -940,9 +940,17 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
         }
         case AbilityState::FOREGROUND: {
             abilityRecord->RemoveSignatureInfo();
+            if (IsUIExtensionAbility(abilityRecord)) {
+                DelayedSingleton<AppScheduler>::GetInstance()->UpdateExtensionState(
+                    token, AppExecFwk::ExtensionState::EXTENSION_STATE_FOREGROUND);
+            }
             return DispatchForeground(abilityRecord);
         }
         case AbilityState::BACKGROUND: {
+            if (IsUIExtensionAbility(abilityRecord)) {
+                DelayedSingleton<AppScheduler>::GetInstance()->UpdateExtensionState(
+                    token, AppExecFwk::ExtensionState::EXTENSION_STATE_BACKGROUND);
+            }
             return DispatchBackground(abilityRecord);
         }
         case AbilityState::INITIAL: {
@@ -1443,6 +1451,7 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
     loadParam.instanceKey = abilityRecord->GetInstanceKey();
     loadParam.isCallerSetProcess = abilityRecord->IsCallerSetProcess();
     loadParam.customProcessFlag = abilityRecord->GetCustomProcessFlag();
+    loadParam.extensionProcessMode = abilityRecord->GetExtensionProcessMode();
     DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         loadParam, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(), abilityRecord->GetWant());
 }

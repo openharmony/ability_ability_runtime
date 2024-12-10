@@ -807,8 +807,11 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
     if (taskHandler_) {
         taskHandler_->SubmitTask(reportLoadTask, "reportLoadTask");
     }
-
-    appRecord->UpdateAbilityState(loadParam->token, AbilityState::ABILITY_STATE_CREATE);
+    if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+        UpdateExtensionState(loadParam->token, ExtensionState::EXTENSION_STATE_CREATE);
+    } else {
+        appRecord->UpdateAbilityState(loadParam->token, AbilityState::ABILITY_STATE_CREATE);
+    }
 }
 
 void AppMgrServiceInner::AddUIExtensionLauncherItem(std::shared_ptr<AAFwk::Want> want,
@@ -2658,7 +2661,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
         return nullptr;
     }
 
-    appRecord->SetProcessAndExtensionType(abilityInfo);
+    appRecord->SetProcessAndExtensionType(abilityInfo, loadParam->extensionProcessMode);
     appRecord->SetKeepAliveEnableState(bundleInfo.isKeepAlive);
     appRecord->SetKeepAliveDkv(loadParam->isKeepAlive);
     appRecord->SetEmptyKeepAliveAppState(false);
