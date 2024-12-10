@@ -158,14 +158,14 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateHspResourceManager_0
     ASSERT_NE(resConfig, nullptr);
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager = nullptr;
     resourceManager = contextImpl_->GetResourceManager();
-    uint32_t mcc, mnc,thrmeid;
-    bool ThemeIcon;
+    uint32_t mcc, mnc, thrmeid;
+    bool themeIcon;
     if (resourceManager != nullptr) {
         resourceManager->GetResConfig(*resConfig);
         mcc = resConfig->GetMcc();
         mnc =resConfig->GetMnc();
         thrmeid = resConfig->GetThemeId();
-        ThemeIcon = resConfig->GetThemeIcon();
+        themeIcon = resConfig->GetThemeIcon();
     }
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig2(Global::Resource::CreateResConfig());
@@ -178,7 +178,7 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateHspResourceManager_0
         EXPECT_EQ(resConfig2->GetMcc(), mcc);
         EXPECT_EQ(resConfig2->GetMnc(), mnc);
         EXPECT_EQ(resConfig2->GetThemeId(), thrmeid);
-        EXPECT_TRUE(resConfig2->GetThemeIcon() == ThemeIcon);
+        EXPECT_TRUE(resConfig2->GetThemeIcon() == themeIcon);
         GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateHspResourceManager_002 create resourceManager successfully";
     }
 
