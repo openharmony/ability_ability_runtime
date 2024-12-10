@@ -3515,6 +3515,16 @@ std::string AbilityRecord::GetCustomProcessFlag() const
     return customProcessFlag_;
 }
 
+void AbilityRecord::SetExtensionProcessMode(const uint32_t &extensionProcessMode)
+{
+    extensionProcessMode_ = extensionProcessMode;
+}
+
+uint32_t AbilityRecord::GetExtensionProcessMode() const
+{
+    return extensionProcessMode_;
+}
+
 void AbilityRecord::SetUIExtensionAbilityId(const int32_t uiExtensionAbilityId)
 {
     uiExtensionAbilityId_ = uiExtensionAbilityId;
