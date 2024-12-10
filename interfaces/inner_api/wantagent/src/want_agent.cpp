@@ -17,6 +17,8 @@
 #include "want_agent.h"
 
 namespace OHOS::AbilityRuntime::WantAgent {
+bool WantAgent::isMultithreadingSupported_ = false;
+
 WantAgent::WantAgent(const std::shared_ptr<PendingWant> &pendingWant)
 {
     pendingWant_ = pendingWant;
@@ -54,4 +56,15 @@ WantAgent *WantAgent::Unmarshalling(Parcel &parcel)
 
     return agent;
 }
+
+bool WantAgent::GetIsMultithreadingSupported()
+{
+    return isMultithreadingSupported_;
+}
+
+void WantAgent::SetIsMultithreadingSupported(bool isMultithreadingSupported)
+{
+    isMultithreadingSupported_ = isMultithreadingSupported;
+}
+
 }  // namespace OHOS::AbilityRuntime::WantAgent

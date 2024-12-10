@@ -65,8 +65,23 @@ public:
      */
     static WantAgent *Unmarshalling(Parcel &parcel);
 
+    /**
+     * Get isMultithreadingSupported_
+     *
+     * @return Return isMultithreadingSupported_
+     */
+    static bool GetIsMultithreadingSupported();
+
+    /**
+     * Set isMultithreadingSupported_
+     *
+     * @param isMultithreadingSupported Indicates the WantAgent support multithreading or not.
+     */
+    static void SetIsMultithreadingSupported(bool isMultithreadingSupported);
+
 private:
     std::shared_ptr<PendingWant> pendingWant_;
+    static bool isMultithreadingSupported_;
 };
 }  // namespace OHOS::AbilityRuntime::WantAgent
 #endif  // OHOS_ABILITY_RUNTIME_WANT_AGENT_H
