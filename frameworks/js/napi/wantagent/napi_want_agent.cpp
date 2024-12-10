@@ -301,6 +301,12 @@ napi_value JsWantAgent::NapiGetOperationType(napi_env env, napi_callback_info in
     return (me != nullptr) ? me->OnNapiGetOperationType(env, info) : nullptr;
 };
 
+napi_value JsWantAgent::NapiSetWantAgentMultithreading(napi_env env, napi_callback_info info)
+{
+    JsWantAgent* me = CheckParamsAndGetThis<JsWantAgent>(env, info);
+    return (me != nullptr) ? me->OnNapiSetWantAgentMultithreading(env, info) : nullptr;
+};
+
 napi_value JsWantAgent::HandleInvalidParam(napi_env env, napi_value lastParam, const std::string &errorMessage)
 {
     #ifdef ENABLE_ERRCODE
@@ -1013,6 +1019,74 @@ int32_t JsWantAgent::GetWantAgentParam(napi_env env, napi_callback_info info, Wa
     return BUSINESS_ERROR_CODE_OK;
 }
 
+inline void *DetachCallbackFunc(napi_env env, void *value, void *)
+{
+    return value;
+}
+
+napi_value AttachWantAgentFunc(napi_env env, void *value, void *)
+{
+    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
+    if (value == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null value");
+        return nullptr;
+    }
+
+    napi_value jsObject = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &jsObject));
+
+    if (!WantAgent::GetIsMultithreadingSupported()) {
+        TAG_LOGI(AAFwkTag::WANTAGENT, "wantAgent not support multi thread current");
+        return jsObject;
+    }
+
+    auto wantAgent = new WantAgent(reinterpret_cast<WantAgent*>(value)->GetPendingWant());
+
+    napi_value wantAgentClass = nullptr;
+    napi_define_class(
+        env,
+        "WantAgentClass",
+        NAPI_AUTO_LENGTH,
+        [](napi_env env, napi_callback_info info) -> napi_value {
+            napi_value thisVar = nullptr;
+            napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+
+            return thisVar;
+        },
+        nullptr,
+        0,
+        nullptr,
+        &wantAgentClass);
+    napi_value result = nullptr;
+    napi_new_instance(env, wantAgentClass, 0, nullptr, &result);
+    if (result == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "create instance failed");
+        delete wantAgent;
+        wantAgent = nullptr;
+        return jsObject;
+    }
+
+    napi_coerce_to_native_binding_object(env, result, DetachCallbackFunc, AttachWantAgentFunc, value, nullptr);
+    auto res = napi_wrap(env,
+        result,
+        reinterpret_cast<void*>(wantAgent),
+        [](napi_env env, void* data, void* hint) {
+            TAG_LOGD(AAFwkTag::WANTAGENT, "delete wantAgent");
+            auto agent = static_cast<WantAgent*>(data);
+            delete agent;
+            agent = nullptr;
+        },
+        nullptr,
+        nullptr);
+    if (res != napi_ok && wantAgent != nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "napi_wrap failed:%{public}d", res);
+        delete wantAgent;
+        wantAgent = nullptr;
+        return jsObject;
+    }
+    return result;
+}
+
 napi_value JsWantAgent::WrapWantAgent(napi_env env, WantAgent* wantAgent)
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "called");
@@ -1039,6 +1113,7 @@ napi_value JsWantAgent::WrapWantAgent(napi_env env, WantAgent* wantAgent)
         return nullptr;
     }
 
+    napi_coerce_to_native_binding_object(env, result, DetachCallbackFunc, AttachWantAgentFunc, wantAgent, nullptr);
     auto res = napi_wrap(env,
         result,
         reinterpret_cast<void*>(wantAgent),
@@ -1326,6 +1401,44 @@ napi_value JsWantAgent::OnNapiGetOperationType(napi_env env, napi_callback_info 
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnNapiGetOperationType",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
+}
+
+napi_value JsWantAgent::OnNapiSetWantAgentMultithreading(napi_env env, napi_callback_info info)
+{
+    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
+    bool isMultithreadingSupported = false;
+    size_t argc = ARGS_MAX_COUNT;
+    napi_value argv[ARGS_MAX_COUNT] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid argc");
+        ThrowInvalidNumParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    if (!CheckTypeForNapiValue(env, argv[0], napi_boolean)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Type not boolean");
+        ThrowInvalidParamError(env, "Parameter error! isMultithreadingSupported must be a boolean.");
+        return CreateJsUndefined(env);
+    }
+
+    if (!ConvertFromJsValue(env, argv[0], isMultithreadingSupported)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Convert isMultithreadingSupported failed");
+        ThrowInvalidParamError(env,
+            "Convert isMultithreadingSupported failed! isMultithreadingSupported must be a boolean.");
+        return CreateJsUndefined(env);
+    }
+
+    auto execute = [isMultithreadingSupported] () {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+        WantAgent::SetIsMultithreadingSupported(isMultithreadingSupported);
+    };
+
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnNapiSetWantAgentMultithreading",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), nullptr, &result));
+
+    return CreateJsNull(env);
 }
 
 napi_value WantAgentFlagsInit(napi_env env)
