@@ -120,6 +120,7 @@ enum class AppMgrInterfaceCode {
     KILL_APP_SELF_WITH_INSTANCE_KEY = 94,
     IS_TERMINATING_BY_PID = 95,
     UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID = 96,
+    HAS_APP_RECORD = 97,
 };
 } // AppExecFwk
 } // OHOS
