@@ -53,7 +53,6 @@ ohos_unittest("window_focus_changed_listener_test") {
     "${ability_runtime_services_path}/abilitymgr:abilityms_config",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test:aafwk_mock_config",
     "${ability_runtime_services_path}/uripermmgr:upms_config",
-    "${ability_runtime_innerkits_path}/uri_permission:uripermkit_public_config",
   ]
 
   if (target_cpu == "arm") {
@@ -65,7 +64,6 @@ ohos_unittest("window_focus_changed_listener_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/ability_manager:mission_info",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:auto_startup_callback",
     "${ability_runtime_native_path}/ability/native:ui_extension",
@@ -74,7 +72,6 @@ ohos_unittest("window_focus_changed_listener_test") {
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/abilitymgr:mission_list",
     "${ability_runtime_services_path}/common:perm_verification",
-    "${ability_runtime_services_path}/uripermmgr:libupms_static",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit:aakit_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_appmgr_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_bundlemgr_mock",
@@ -102,6 +99,14 @@ ohos_unittest("window_focus_changed_listener_test") {
     "resource_management:global_resmgr",
     "storage_service:storage_manager_sa_proxy",
   ]
+
+  if (ability_runtime_upms) {
+    configs += [ "${ability_runtime_innerkits_path}/uri_permission:uripermkit_public_config" ]
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+      "${ability_runtime_services_path}/uripermmgr:libupms_static",
+    ]
+  }
 }
 
 group("unittest") {

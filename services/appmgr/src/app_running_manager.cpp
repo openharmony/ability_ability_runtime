@@ -41,7 +41,9 @@
 #include "cache_process_manager.h"
 #include "res_sched_util.h"
 #include "ui_extension_utils.h"
+#ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
+#endif //SUPPORT_UPMS
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -1836,7 +1838,9 @@ void AppRunningManager::UnSetPolicy(const std::shared_ptr<AppRunningRecord> &app
         return;
     }
     appRecord->SetIsUnSetPermission(true);
+#ifdef SUPPORT_UPMS
     AAFwk::UriPermissionManagerClient::GetInstance().ClearPermissionTokenByMap(appInfo->accessTokenId);
+#endif // SUPPORT_UPMS
 }
 
 void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)

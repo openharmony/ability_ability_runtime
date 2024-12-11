@@ -597,11 +597,11 @@ public:
     bool GetColdStartFlag();
     void SetColdStartFlag(bool isColdStart);
 #endif
-
+#ifdef SUPPORT_UPMS
     bool GrantUriPermissionForServiceExtension();
 
     bool GrantUriPermissionForUIExtension();
-
+#endif // SUPPORT_UPMS
     /**
      * check whether the ability is launcher.
      *
@@ -1045,7 +1045,9 @@ public:
     void SetNeedBackToOtherMissionStack(bool isNeedBackToOtherMissionStack);
     std::shared_ptr<AbilityRecord> GetOtherMissionStackAbilityRecord() const;
     void SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
+#ifdef SUPPORT_UPMS
     void RevokeUriPermission();
+#endif // SUPPORT_UPMS
     void RemoveAbilityDeathRecipient() const;
     bool IsExistConnection(const sptr<IAbilityConnection> &connect);
 
@@ -1153,8 +1155,10 @@ private:
      */
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
+#ifdef SUPPORT_UPMS
     void GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId);
     void GrantDmsUriPermission(Want &want, std::string targetBundleName);
+#endif // SUPPORT_UPMS
     bool IsDmsCall(Want &want);
     int32_t GetCurrentAccountId() const;
 
@@ -1179,11 +1183,12 @@ private:
     {
         callerAccessTokenId_ = callerAccessTokenId;
     }
-
+#ifdef SUPPORT_UPMS
     bool GrantPermissionToShell(const std::vector<std::string> &uriVec, uint32_t flag, std::string targetPkg);
 
     void GrantUriPermissionInner(Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName,
          uint32_t tokenId);
+#endif // SUPPORT_UPMS
     void GrantUriPermissionFor2In1Inner(
         Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName, uint32_t tokenId);
 

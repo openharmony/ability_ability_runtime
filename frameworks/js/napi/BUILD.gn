@@ -90,7 +90,6 @@ group("napi_packages") {
     "${ability_runtime_napi_path}/ui_service_extension_ability:uiserviceextensionability",
     "${ability_runtime_napi_path}/ui_service_extension_ability:uiserviceextensionability_napi",
     "${ability_runtime_napi_path}/ui_service_extension_context:uiserviceextensioncontext_napi",
-    "${ability_runtime_napi_path}/uri_permission:uripermissionmanager_napi",
     "${ability_runtime_napi_path}/wantConstant:wantconstant",
     "${ability_runtime_napi_path}/wantConstant:wantconstant_napi",
     "${ability_runtime_napi_path}/wantagent:napi_wantAgent",
@@ -101,6 +100,11 @@ group("napi_packages") {
       "${ability_runtime_napi_path}/auto_fill_extension_ability:autofillextensionability_napi",
       "${ability_runtime_napi_path}/auto_fill_extension_context:autofillextensioncontext_napi",
       "${ability_runtime_napi_path}/auto_fill_manager:autofillmanager_napi",
+    ]
+  }
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_napi_path}/uri_permission:uripermissionmanager_napi",
     ]
   }
 }
