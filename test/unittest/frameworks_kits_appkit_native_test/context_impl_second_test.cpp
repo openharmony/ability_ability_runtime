@@ -96,7 +96,6 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateHspResourceManager_0
         resourceManager->GetResConfig(*resConfig);
         resConfig->SetMcc(11);
         resConfig->SetMnc(22);
-        resConfig->SetThemeId(33);
         resourceManager->UpdateResConfig(*resConfig);
     }
 
@@ -109,7 +108,6 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateHspResourceManager_0
         resourceManager2->GetResConfig(*resConfig2);
         EXPECT_EQ(resConfig2->GetMcc(), 11);
         EXPECT_EQ(resConfig2->GetMnc(), 22);
-        EXPECT_EQ(resConfig2->GetThemeId(), 33);
         GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateHspResourceManager_001 create resourceManager successfully";
     }
     ret = contextImpl_->CreateHspModuleResourceManager(
