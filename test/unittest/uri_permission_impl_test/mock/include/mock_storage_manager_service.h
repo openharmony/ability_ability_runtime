@@ -225,11 +225,6 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetFileEncryptStatus(uint32_t userId, bool &isEncrypted, bool needCheckDirMount) override
-    {
-        return E_OK;
-    }
-
     virtual int32_t GetLockScreenStatus(uint32_t userId, bool &lockScreenStatus) override
     {
         return E_OK;
@@ -241,6 +236,11 @@ public:
     }
 
     virtual int32_t DeleteAppkey(const std::string keyId) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t GetFileEncryptStatus(uint32_t userId, bool &isEncrypted, bool needCheckDirMount) override
     {
         return E_OK;
     }

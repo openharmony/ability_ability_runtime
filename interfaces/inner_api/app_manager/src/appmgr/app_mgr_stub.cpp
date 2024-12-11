@@ -850,6 +850,7 @@ int32_t AppMgrStub::HandleStartRenderProcess(MessageParcel &data, MessageParcel 
 
 int32_t AppMgrStub::HandleAttachRenderProcess(MessageParcel &data, MessageParcel &reply)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     sptr<IRemoteObject> scheduler = data.ReadRemoteObject();
     AttachRenderProcess(scheduler);
     return NO_ERROR;

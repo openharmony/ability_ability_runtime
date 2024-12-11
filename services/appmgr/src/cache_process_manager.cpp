@@ -45,13 +45,12 @@ CacheProcessManager::CacheProcessManager()
     shouldCheckApi = OHOS::system::GetBoolParameter(PROCESS_CACHE_API_CHECK_CONFIG, true);
     shouldCheckSupport = OHOS::system::GetBoolParameter(PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG, true);
     warmStartProcesEnable_ = OHOS::system::GetBoolParameter(RESOURCE_WARM_START_PROCESS_ENABLE, false);
-    TAG_LOGW(AAFwkTag::APPMGR, "maxProcCacheNum is =%{public}d", maxProcCacheNum_);
     allowedCacheNum_ = OHOS::system::GetIntParameter<int>(MAX_ALLOWED_CACHE_NUM, DEFAULT_ALLOWED_CACHE_NUM);
     if (maxProcCacheNum_ > 0) {
         allowedCacheNum_ = maxProcCacheNum_;
     }
     TAG_LOGW(AAFwkTag::APPMGR,
-        "maxProcCacheNum %{public}d, allowedCacheNum_ %{public}d", maxProcCacheNum_, allowedCacheNum_);
+        "maxProcCacheNum_ %{public}d, allowedCacheNum_ %{public}d", maxProcCacheNum_, allowedCacheNum_);
 }
 
 CacheProcessManager::~CacheProcessManager()
@@ -68,7 +67,7 @@ void CacheProcessManager::RefreshCacheNum()
 {
     maxProcCacheNum_ = OHOS::system::GetIntParameter<int>(MAX_PROC_CACHE_NUM, 0);
     allowedCacheNum_ = maxProcCacheNum_;
-    TAG_LOGW(AAFwkTag::APPMGR, "maxProcCacheNum is =%{public}d", maxProcCacheNum_);
+    TAG_LOGW(AAFwkTag::APPMGR, "maxProcCacheNum %{public}d", maxProcCacheNum_);
 }
 
 bool CacheProcessManager::QueryEnableProcessCache()
@@ -267,7 +266,7 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
         return false;
     }
     if (IsAppContainsSrvExt(appRecord)) {
-        TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s is service, not support cache",
+        TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s is service, not support cache.",
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
         return false;
     }
@@ -343,6 +342,7 @@ bool CacheProcessManager::IsAppSupportProcessCacheInnerFirst(const std::shared_p
             return false;
         }
     }
+
     auto supportState = appRecord->GetSupportProcessCacheState();
     switch (supportState) {
         case SupportProcessCacheState::UNSPECIFIED:
