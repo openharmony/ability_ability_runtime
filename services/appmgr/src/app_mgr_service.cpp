@@ -1585,7 +1585,7 @@ int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_OPERATION;
     }
- 
+
     return appMgrServiceInner_->StartNativeChildProcess(
         IPCSkeleton::GetCallingPid(), libName, childProcessCount, callback);
 }
@@ -1703,6 +1703,25 @@ int32_t AppMgrService::GetSupportedProcessCachePids(const std::string &bundleNam
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
     return appMgrServiceInner_->GetSupportedProcessCachePids(bundleName, pidList);
+}
+
+int32_t AppMgrService::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t pid = getprocpid();
+    if (callingPid != pid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "other process");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    result = appMgrServiceInner_->HasAppRecord(want, abilityInfo);
+    return ERR_OK;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

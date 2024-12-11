@@ -685,6 +685,8 @@ public:
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName,
         std::vector<int32_t> &pidList) override;
+
+    int32_t HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result) override;
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);

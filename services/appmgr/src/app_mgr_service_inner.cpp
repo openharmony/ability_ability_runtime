@@ -868,12 +868,17 @@ std::string AppMgrServiceInner::GetSpecifiedProcessFlag(std::shared_ptr<AbilityI
         TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr.");
         return "";
     }
-    std::string specifiedProcessFlag = "";
-    bool isUIAbility = (abilityInfo->type == AppExecFwk::AbilityType::PAGE && abilityInfo->isStageBasedModel);
-    bool isSpecifiedProcess = abilityInfo->isolationProcess &&
+    return GetSpecifiedProcessFlag(*abilityInfo, *want);
+}
+
+std::string AppMgrServiceInner::GetSpecifiedProcessFlag(const AbilityInfo &abilityInfo, const AAFwk::Want &want)
+{
+    std::string specifiedProcessFlag;
+    bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
+    bool isSpecifiedProcess = abilityInfo.isolationProcess &&
         AAFwk::AppUtils::GetInstance().IsStartSpecifiedProcess() && isUIAbility;
     if (isSpecifiedProcess) {
-        specifiedProcessFlag = want->GetStringParam(PARAM_SPECIFIED_PROCESS_FLAG);
+        specifiedProcessFlag = want.GetStringParam(PARAM_SPECIFIED_PROCESS_FLAG);
         TAG_LOGI(AAFwkTag::APPMGR, "specifiedProcessFlag = %{public}s", specifiedProcessFlag.c_str());
     }
     return specifiedProcessFlag;
@@ -8075,6 +8080,34 @@ int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bund
         }
     }
     return ERR_OK;
+}
+
+bool AppMgrServiceInner::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo)
+{
+    if (!CheckRemoteClient() || !appRunningManager_) {
+        return false;
+    }
+    auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(appInfo->uid))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return false;
+    }
+    int32_t appIndex = 0;
+    (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
+    BundleInfo bundleInfo;
+    HapModuleInfo hapModuleInfo;
+    if (!GetBundleAndHapInfo(abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
+        return false;
+    }
+
+    auto abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
+    std::string processName;
+    MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, "", processName);
+
+    auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
+    auto appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid,
+        bundleInfo, "");
+    return appRecord != nullptr;
 }
 } // namespace AppExecFwk
 }  // namespace OHOS
