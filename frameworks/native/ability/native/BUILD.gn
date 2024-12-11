@@ -742,9 +742,13 @@ ohos_shared_library("ability_thread") {
     "napi:ace_napi",
   ]
 
+  defines = []
   if (ability_runtime_graphics) {
-    defines = [ "SUPPORT_SCREEN" ]
+    defines += [ "SUPPORT_SCREEN" ]
     external_deps += [ "window_manager:libwm" ]
+  }
+  if (ability_runtime_auto_fill) {
+    defines += [ "SUPPORT_AUTO_FILL" ]
   }
 
   cflags_cc = []
