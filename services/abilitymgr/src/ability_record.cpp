@@ -107,6 +107,7 @@ const int HALF_TIMEOUT = 2;
 const int MAX_URI_COUNT = 500;
 const int RESTART_SCENEBOARD_DELAY = 500;
 constexpr int32_t DMS_UID = 5522;
+constexpr int32_t U0_USER_ID = 0;
 
 auto g_addLifecycleEventTask = [](sptr<Token> token, FreezeUtil::TimeoutState state, std::string &methodName) {
     CHECK_POINTER_LOG(token, "token is nullptr");
@@ -254,7 +255,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->missionAffinity_ = abilityRequest.want.GetStringParam(PARAM_MISSION_AFFINITY_KEY);
 
     auto userId = abilityRequest.appInfo.uid / BASE_USER_RANGE;
-    if ((userId == 0 ||
+    if ((userId == U0_USER_ID ||
         AmsConfigurationParameter::GetInstance().InResidentWhiteList(abilityRequest.abilityInfo.bundleName)) &&
         DelayedSingleton<ResidentProcessManager>::GetInstance()->IsResidentAbility(
             abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name, userId)) {
@@ -1707,7 +1708,10 @@ void AbilityRecord::ConnectAbilityWithWant(const Want &want)
     if (isConnected) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "state err");
     }
-    GrantUriPermissionForServiceExtension();
+    auto userId = GetUid() / BASE_USER_RANGE;
+    if (userId == DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId()) {
+        GrantUriPermissionForServiceExtension();
+    }
     lifecycleDeal_->ConnectAbility(want);
     isConnected = true;
 }
