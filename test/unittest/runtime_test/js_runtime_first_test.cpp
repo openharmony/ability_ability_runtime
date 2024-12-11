@@ -124,10 +124,10 @@ HWTEST_F(JsRuntimeTest, GetSafeData_0100, TestSize.Level1)
     options.preload = true;
     auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
     ASSERT_NE(jsRuntime, nullptr);
-    std::string Path = "";
+    std::string path = "";
     std::string fileFullName = "";
     jsRuntime->jsEnv_->vm_ = nullptr;
-    auto result = jsRuntime->GetSafeData(Path, fileFullName);
+    auto result = jsRuntime->GetSafeData(path, fileFullName);
     EXPECT_EQ(result, nullptr);
     jsRuntime.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
