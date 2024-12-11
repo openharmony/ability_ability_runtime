@@ -1736,5 +1736,24 @@ void AppMgrService::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::str
     }
     appMgrServiceInner_->UpdateInstanceKeyBySpecifiedId(specifiedId, instanceKey);
 }
+
+int32_t AppMgrService::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t pid = getprocpid();
+    if (callingPid != pid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "other process");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    result = appMgrServiceInner_->HasAppRecord(want, abilityInfo);
+    return ERR_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

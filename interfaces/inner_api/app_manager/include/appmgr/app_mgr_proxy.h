@@ -766,6 +766,8 @@ public:
         const std::string& reason) override;
 
     virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) override;
+
+    int32_t HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result) override;
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);
