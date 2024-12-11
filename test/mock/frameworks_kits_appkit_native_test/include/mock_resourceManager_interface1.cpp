@@ -52,7 +52,7 @@ public:
         outValue = iter->second;
         return SUCCESS;
     };
-    virtual void SetStringById(uint32_t id, std::string& inValue)
+    void SetStringById(uint32_t id, std::string& inValue) override
     {
         if (!StringById_.empty()) {
             StringById_.clear();
@@ -223,7 +223,7 @@ public:
         outValue = iter->second;
         return SUCCESS;
     };
-    virtual void SetColorById(uint32_t id, uint32_t& inValue)
+    void SetColorById(uint32_t id, uint32_t& inValue) override
     {
         if (!ColorById_.empty()) {
             ColorById_.clear();
