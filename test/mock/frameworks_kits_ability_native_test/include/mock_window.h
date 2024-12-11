@@ -119,9 +119,9 @@ public:
     virtual WMError UnregisterWindowChangeListener(
         const sptr<IWindowChangeListener>& listener) {return WMError::WM_ERROR_NULLPTR;}
     virtual WMError RegisterAvoidAreaChangeListener(
-        sptr<IAvoidAreaChangedListener>& listener) {return WMError::WM_ERROR_NULLPTR;}
+        const sptr<IAvoidAreaChangedListener>& listener) {return WMError::WM_ERROR_NULLPTR;}
     virtual WMError UnregisterAvoidAreaChangeListener(
-        sptr<IAvoidAreaChangedListener>& listener) {return WMError::WM_ERROR_NULLPTR;}
+        const sptr<IAvoidAreaChangedListener>& listener) {return WMError::WM_ERROR_NULLPTR;}
     virtual WMError RegisterDragListener(
         const sptr<IWindowDragListener>& listener) {return WMError::WM_ERROR_NULLPTR;}
     virtual WMError UnregisterDragListener(
