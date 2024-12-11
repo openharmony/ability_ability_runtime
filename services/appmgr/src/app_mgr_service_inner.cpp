@@ -1537,7 +1537,9 @@ int32_t AppMgrServiceInner::KillApplicationByUserId(
 {
     CHECK_CALLER_IS_SYSTEM_APP;
     if (VerifyAccountPermission(
-        AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES, userId) == ERR_PERMISSION_DENIED) {
+        AAFwk::PermissionConstants::PERMISSION_KILL_APP_PROCESSES, userId) == ERR_PERMISSION_DENIED &&
+        VerifyAccountPermission(
+            AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES, userId) == ERR_PERMISSION_DENIED) {
         TAG_LOGE(AAFwkTag::APPMGR, "Permission verify failed");
         return ERR_PERMISSION_DENIED;
     }
