@@ -262,6 +262,7 @@ struct AbilityRequest {
 
     std::shared_ptr<AbilityStartSetting> startSetting = nullptr;
     std::shared_ptr<ProcessOptions> processOptions = nullptr;
+    std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
     std::string specifiedFlag;
     int32_t userId = -1;
     bool callSpecifiedFlagTimeout = false;
