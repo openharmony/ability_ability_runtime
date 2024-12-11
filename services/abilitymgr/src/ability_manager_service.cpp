@@ -6235,7 +6235,6 @@ void AbilityManagerService::ReleaseAbilityTokenMap(const sptr<IRemoteObject> &to
 int AbilityManagerService::KillProcess(const std::string &bundleName)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process, bundleName: %{public}s", bundleName.c_str());
-    CHECK_CALLER_IS_SYSTEM_APP;
     auto bms = GetBundleManager();
     CHECK_POINTER_AND_RETURN(bms, KILL_PROCESS_FAILED);
     int32_t userId = GetUserId();
@@ -7327,7 +7326,6 @@ int AbilityManagerService::GetAbilityRunningInfos(std::vector<AbilityRunningInfo
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Get running ability infos.");
-    CHECK_CALLER_IS_SYSTEM_APP;
     auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
