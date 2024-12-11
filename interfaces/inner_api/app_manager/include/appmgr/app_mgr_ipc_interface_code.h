@@ -121,6 +121,7 @@ enum class AppMgrInterfaceCode {
     IS_TERMINATING_BY_PID = 95,
     UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID = 96,
     IS_APP_RUNNING_BY_BUNDLE_NAME_AND_USER_ID = 97,
+    HAS_APP_RECORD = 98,
 };
 } // AppExecFwk
 } // OHOS

@@ -34,27 +34,23 @@ class StatusBarDelegateManager;
 struct AbilityRunningInfo;
 struct MissionValidResult;
 
+struct SpecifiedRequest {
+    int32_t requestId = 0;
+    AbilityRequest abilityRequest;
+    bool preCreateProcessName = false;
+    bool isCold = false;
+    int32_t persistentId = 0;
+    uint32_t sceneFlag = 0;
+    uint32_t callingTokenId = 0;
+
+    SpecifiedRequest(int32_t requestId, AbilityRequest request) : requestId(requestId), abilityRequest(request) {}
+};
+
 class UIAbilityLifecycleManager : public std::enable_shared_from_this<UIAbilityLifecycleManager> {
 public:
     UIAbilityLifecycleManager() = default;
     explicit UIAbilityLifecycleManager(int32_t userId);
     virtual ~UIAbilityLifecycleManager() = default;
-
-    struct SpecifiedInfo {
-        std::string abilityName = "";
-        std::string bundleName = "";
-        std::string flag = "";
-    };
-    struct key_compare {
-        bool operator()(const SpecifiedInfo &info1, const SpecifiedInfo &info2) const
-        {
-            if (info1.abilityName < info2.abilityName || info1.bundleName < info2.bundleName ||
-                info1.flag < info2.flag) {
-                return true;
-            }
-            return false;
-        }
-    };
 
     void SignRestartAppFlag(int32_t uid, const std::string &instanceKey, bool isAppRecovery = false);
 
@@ -163,7 +159,6 @@ public:
     void SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession);
 
     int NotifySCBToStartUIAbility(AbilityRequest &abilityRequest);
-    void CancelSameAbilityTimeoutTask(const AppExecFwk::AbilityInfo &abilityInfo);
 
     int NotifySCBToPreStartUIAbility(const AbilityRequest &abilityRequest,
         sptr<SessionInfo> &sessionInfo);
@@ -427,8 +422,6 @@ private:
     int SendSessionInfoToSCB(std::shared_ptr<AbilityRecord> &callerAbility, sptr<SessionInfo> &sessionInfo);
     int StartAbilityBySpecifed(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &callerAbility,
         int32_t requestId);
-    std::shared_ptr<AbilityRecord> GetReusedSpecifiedAbility(const AAFwk::Want &want, const std::string &flag);
-    void EraseSpecifiedAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void SetReceiverInfo(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord) const;
@@ -441,8 +434,8 @@ private:
         sptr<SessionInfo> sessionInfo) const;
     void AddCallerRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         std::shared_ptr<AbilityRecord> uiAbilityRecord) const;
-    void CheckSpecified(AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> uiAbilityRecord);
-    void SendKeyEvent(AbilityRequest &abilityRequest) const;
+    void CheckSpecified(int32_t requestId, std::shared_ptr<AbilityRecord> uiAbilityRecord);
+    void SendKeyEvent(const AbilityRequest &abilityRequest) const;
     bool CheckPid(const std::shared_ptr<AbilityRecord> abilityRecord, const int32_t pid) const;
     std::shared_ptr<StatusBarDelegateManager> GetStatusBarDelegateManager();
     int32_t DoProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord);
@@ -461,6 +454,16 @@ private:
     void AddAbilityRequest(const AbilityRequest &abilityRequest);
     void RemoveAbilityRequest(const AbilityRequest &abilityRequest);
 
+    void AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request);
+    void StartSpecifiedRequest(SpecifiedRequest &specifiedRequest);
+    std::shared_ptr<SpecifiedRequest> PopAndGetNextSpecified(int32_t requestId);
+    bool HasAppRecord(const AbilityRequest &abilityRequest);
+    bool HandleStartSpecifiedCold(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag);
+    bool HandleColdAcceptWantDone(const AAFwk::Want &want, const std::string &flag,
+        const SpecifiedRequest &specifiedRequest);
+    std::shared_ptr<SpecifiedRequest> GetSpecifiedRequest(int32_t requestId);
+    void PutSpecifiedFlag(int32_t requestId, const std::string &flag);
+
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
     std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
@@ -468,10 +471,8 @@ private:
     std::unordered_map<std::shared_ptr<AbilityRecord>, std::list<AbilityRequest>> callRequestCache_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<IRemoteObject> rootSceneSession_;
-    std::map<SpecifiedInfo, std::shared_ptr<AbilityRecord>, key_compare> specifiedAbilityMap_;
     int32_t specifiedRequestId_ = 0;
     std::map<int32_t, AbilityRequest> specifiedRequestMap_;
-    std::queue<SpecifiedInfo> specifiedInfoQueue_;
     sptr<ISessionHandler> handler_;
     ffrt::mutex statusBarDelegateManagerLock_;
     std::shared_ptr<StatusBarDelegateManager> statusBarDelegateManager_;
@@ -481,6 +482,9 @@ private:
     ffrt::mutex startUIAbilityCallerTimestampsLock_;
     std::map<int32_t, std::vector<int64_t>> startUIAbilityCallerTimestamps_;
     std::list<std::shared_ptr<AbilityRequest>> startAbilityCheckList_;
+
+    std::map<std::string, std::list<std::shared_ptr<SpecifiedRequest>>> specifiedRequestList_;
+    std::map<int32_t, std::string> specifiedFlagMap_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
