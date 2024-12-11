@@ -185,6 +185,7 @@ private:
     std::map<sptr<IRemoteObject>, std::unique_ptr<NativeReference>> hostProxyMap_;
     bool firstRequest_ = true;
 #ifdef SUPPORT_GRAPHICS
+    void InitDisplayId(AAFwk::Want &want, AAFwk::StartOptions &startOptions, napi_env &env, NapiCallbackInfo& info);
     void OnSceneWillCreated(std::shared_ptr<Rosen::ExtensionWindowConfig> extensionWindowConfig);
     void OnSceneDidCreated(sptr<Rosen::Window>& window);
 protected:
