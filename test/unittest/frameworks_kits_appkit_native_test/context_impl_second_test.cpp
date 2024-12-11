@@ -149,7 +149,7 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateHspResourceManager_0
     hapModuleInfo.moduleName = "com.test.moduleName";
 
     std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
-    applicationInfo->bundleName = "com.example.myapplication";
+    applicationInfo->bundleName = "com.test.myapplication";
     contextImpl_->SetApplicationInfo(applicationInfo);
     contextImpl_->InitHapModuleInfo(hapModuleInfo);
     contextImpl_->InitResourceManager(bundleInfo, contextImpl_, true, "com.test.moduleName");
@@ -187,6 +187,47 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateHspResourceManager_0
     EXPECT_EQ(ret, 0);
 
     GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateHspResourceManager_002 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_CreateHspResourceManager_003
+ * @tc.name: CreateHspResourceManager
+ * @tc.desc: Test whether CreateHspResourceManager is called normally.
+ * @tc.type: FUNC
+ * @tc.require: issueI5HQEM
+ */
+HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateHspResourceManager_003, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateHspResourceManager_003 start";
+
+    std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    auto config = std::make_shared<AppExecFwk::Configuration>();
+    contextImpl_->SetConfiguration(config);
+    AppExecFwk::BundleInfo bundleInfo;
+
+    bundleInfo.name = "com.example.myapplication";
+    bundleInfo.applicationInfo.name = "applicationName";
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    hapModuleInfo.moduleName = "com.test.moduleName";
+
+    std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
+    applicationInfo->bundleName = "com.test.myapplication";
+    contextImpl_->SetApplicationInfo(applicationInfo);
+    contextImpl_->InitHapModuleInfo(hapModuleInfo);
+    contextImpl_->InitResourceManager(bundleInfo, contextImpl_, true, "com.test.moduleName");
+
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager3 = nullptr;
+    auto ret = contextImpl_->CreateHspModuleResourceManager("com.example.myapplication", "", resourceManager3);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    ret = contextImpl_->CreateHspModuleResourceManager("", "com.test.moduleName", resourceManager3);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    ret = contextImpl_->CreateHspModuleResourceManager(
+        "com.test.myapplication", "com.test.moduleName", resourceManager3);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateHspResourceManager_003 end";
 }
 }  // namespace AppExecFwk
 }
