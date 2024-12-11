@@ -27,7 +27,8 @@
         "ability_runtime_graphics",
         "ability_runtime_power",
         "ability_runtime_app_no_response_dialog",
-        "ability_runtime_app_no_response_bundlename"
+        "ability_runtime_app_no_response_bundlename",
+        "ability_runtime_start_window_options_with_pixelmap"
       ],
       "adapted_system_type": [
           "standard"
@@ -477,6 +478,15 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:dialog_request_callback"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager/include",
+              "header_files": [
+                "start_window_option.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager:start_window_option"
           }
         ],
         "test": [
