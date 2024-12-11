@@ -108,11 +108,16 @@ napi_value AttachAppContext(napi_env env, void *value, void *)
     napi_value object = CreateJsBaseContext(env, ptr, true);
     napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachAppContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::Context>(ptr);
-    napi_wrap(env, object, workContext,
+    napi_status status = napi_wrap(env, object, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGI(AAFwkTag::DELEGATOR, "finalizer called");
             delete static_cast<std::weak_ptr<AbilityRuntime::Context> *>(data);
         }, nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
     return object;
 }
 
@@ -730,11 +735,16 @@ napi_value JSAbilityDelegator::OnGetAppContext(napi_env env, NapiCallbackInfo& i
         return CreateJsNull(env);
     }
     napi_coerce_to_native_binding_object(env, value, DetachCallbackFunc, AttachAppContext, workContext, nullptr);
-    napi_wrap(env, value, workContext,
+    napi_status status = napi_wrap(env, value, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGI(AAFwkTag::DELEGATOR, "finalizer called");
             delete static_cast<std::weak_ptr<AbilityRuntime::Context> *>(data);
         }, nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return CreateJsNull(env);
+    }
     return value;
 }
 
