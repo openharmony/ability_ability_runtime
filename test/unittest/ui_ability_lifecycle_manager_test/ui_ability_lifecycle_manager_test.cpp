@@ -2239,43 +2239,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, DumpMissionListByRecordId_002, TestSize.
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_EraseSpecifiedAbilityRecord_0100
- * @tc.desc: EraseSpecifiedAbilityRecord
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, EraseSpecifiedAbilityRecord_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    std::shared_ptr<AbilityRecord> abilityRecord1 = InitAbilityRecord();
-    std::shared_ptr<AbilityRecord> abilityRecord2 = InitAbilityRecord();
-    UIAbilityLifecycleManager::SpecifiedInfo specifiedInfo1;
-    UIAbilityLifecycleManager::SpecifiedInfo specifiedInfo2;
-    UIAbilityLifecycleManager::SpecifiedInfo specifiedInfo3;
-    UIAbilityLifecycleManager::SpecifiedInfo specifiedInfo4;
-    specifiedInfo1.abilityName = "MainAbility";
-    specifiedInfo1.bundleName = "com.example.unittest";
-    specifiedInfo1.flag = "flag";
-    specifiedInfo2.abilityName = "MainAbility2";
-    specifiedInfo2.bundleName = "com.example.unittest";
-    specifiedInfo2.flag = "flag";
-    specifiedInfo3.abilityName = "MainAbility";
-    specifiedInfo3.bundleName = "com.example.unittest2";
-    specifiedInfo3.flag = "flag";
-    specifiedInfo4.abilityName = "MainAbility";
-    specifiedInfo4.bundleName = "com.example.unittest2";
-    specifiedInfo4.flag = "flag2";
-    uiAbilityLifecycleManager->specifiedAbilityMap_.emplace(specifiedInfo1, abilityRecord1);
-    uiAbilityLifecycleManager->specifiedAbilityMap_.emplace(specifiedInfo1, nullptr);
-    uiAbilityLifecycleManager->specifiedAbilityMap_.emplace(specifiedInfo1, abilityRecord2);
-    uiAbilityLifecycleManager->specifiedAbilityMap_.emplace(specifiedInfo2, abilityRecord1);
-    uiAbilityLifecycleManager->specifiedAbilityMap_.emplace(specifiedInfo3, abilityRecord1);
-    uiAbilityLifecycleManager->specifiedAbilityMap_.emplace(specifiedInfo4, abilityRecord1);
-    uiAbilityLifecycleManager->EraseSpecifiedAbilityRecord(abilityRecord1);
-    uiAbilityLifecycleManager.reset();
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_OnAcceptWantResponse_0100
  * @tc.desc: OnAcceptWantResponse
  * @tc.type: FUNC
@@ -2327,13 +2290,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAcceptWantResponse_002, TestSize.Level
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
     uiAbilityLifecycleManager->OnAcceptWantResponse(want, flag);
 
-    UIAbilityLifecycleManager::SpecifiedInfo specifiedInfo;
-    specifiedInfo.abilityName = "MainAbility";
-    specifiedInfo.bundleName = "com.example.unittest";
-    specifiedInfo.flag = "flag";
-    uiAbilityLifecycleManager->specifiedAbilityMap_.emplace(specifiedInfo, abilityRecord);
-    uiAbilityLifecycleManager->OnAcceptWantResponse(want, flag);
-
     std::shared_ptr<AbilityRecord> callerAbility = InitAbilityRecord();
     abilityRequest.callerToken = callerAbility->GetToken()->AsObject();
     uiAbilityLifecycleManager->OnAcceptWantResponse(want, flag);
@@ -2352,32 +2308,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedAbilityBySCB_001, TestSize
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     Want want;
     uiAbilityLifecycleManager->StartSpecifiedAbilityBySCB(want);
-    uiAbilityLifecycleManager.reset();
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_GetReusedSpecifiedAbility_0100
- * @tc.desc: GetReusedSpecifiedAbility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, GetReusedSpecifiedAbility_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    Want want;
-    std::string flag = "flag";
-    UIAbilityLifecycleManager::SpecifiedInfo specifiedInfo;
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
-    specifiedInfo.flag = "flag2";
-    want.SetElementName(specifiedInfo.abilityName, specifiedInfo.bundleName);
-    uiAbilityLifecycleManager->specifiedAbilityMap_.emplace(specifiedInfo, abilityRecord);
-    specifiedInfo.abilityName = "MainAbility2";
-    specifiedInfo.flag = "flag";
-    uiAbilityLifecycleManager->specifiedAbilityMap_.emplace(specifiedInfo, abilityRecord);
-    specifiedInfo.abilityName = "MainAbility";
-    specifiedInfo.bundleName = "com.example.unittest2";
-    uiAbilityLifecycleManager->specifiedAbilityMap_.emplace(specifiedInfo, abilityRecord);
-    uiAbilityLifecycleManager->GetReusedSpecifiedAbility(want, flag);
     uiAbilityLifecycleManager.reset();
 }
 
@@ -4244,7 +4174,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_001, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    
+
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4266,7 +4196,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_002, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    
+
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4288,7 +4218,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_003, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    
+
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4320,7 +4250,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_004, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    
+
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4351,7 +4281,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_005, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    
+
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4359,7 +4289,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_005, TestS
     int32_t pid = 1;
     bool backFlag = true;
     int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
-    
+
     std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
     callerAbilityRecord->pid_ = pid;
     auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
@@ -4386,7 +4316,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_006, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    
+
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4394,7 +4324,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_006, TestS
     int32_t pid = 1;
     bool backFlag = true;
     int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
-    
+
     std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
     callerAbilityRecord->pid_ = pid;
     auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);

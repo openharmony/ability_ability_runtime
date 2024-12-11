@@ -2147,5 +2147,22 @@ void AppMgrProxy::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::strin
     MessageOption option(MessageOption::TF_SYNC);
     PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID, data, reply, option);
 }
+
+int32_t AppMgrProxy::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &want);
+    PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &abilityInfo);
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID, data, reply, option);
+    result = reply.ReadBool();
+    return ERR_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
