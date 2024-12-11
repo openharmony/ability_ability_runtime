@@ -2394,6 +2394,8 @@ private:
      */
     void ShowDeveloperModeDialog(const std::string &bundleName, const std::string &abilityName);
 
+    void StartKeepAliveAppsInner(int32_t userId);
+
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
