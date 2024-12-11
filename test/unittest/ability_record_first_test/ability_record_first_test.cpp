@@ -174,6 +174,7 @@ HWTEST_F(AbilityRecordFirstTest, AbilityRecord_CovertAppExitReasonToLastReason_0
         AAFwk::LastExitReason::LASTEXITREASON_UNKNOWN);
 }
 
+#ifdef SUPPORT_UPMS
 /*
  * Feature: AbilityRecord
  * Function: GrantPermissionToShell
@@ -212,6 +213,7 @@ HWTEST_F(AbilityRecordFirstTest, AbilityRecord_GrantPermissionToShell_002, TestS
     bool ret = abilityRecord_->GrantPermissionToShell(uriVec, flag, targetPkg);
     EXPECT_TRUE(ret);
 }
+#endif // SUPPORT_UPMS
 
 /*
  * Feature: AbilityRecord
