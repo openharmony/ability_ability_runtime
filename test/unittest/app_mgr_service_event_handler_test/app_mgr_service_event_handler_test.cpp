@@ -63,8 +63,8 @@ static void WaitUntilTaskFinished(std::shared_ptr<AAFwk::TaskHandlerWrap> handle
         return;
     }
 
-    const uint32_t MAX_RETRY_COUNT = 1000;
-    const uint32_t SLEEP_TIME = 1000;
+    const uint32_t maxRetryCount = 1000;
+    const uint32_t sleepTime = 1000;
     uint32_t count = 0;
     std::atomic<bool> taskCalled(false);
     auto f = [&taskCalled]() { taskCalled.store(true); };
@@ -72,11 +72,11 @@ static void WaitUntilTaskFinished(std::shared_ptr<AAFwk::TaskHandlerWrap> handle
         while (!taskCalled.load()) {
             ++count;
             // if delay more than 1 second, break
-            if (count >= MAX_RETRY_COUNT) {
+            if (count >= maxRetryCount) {
                 break;
             }
 
-            usleep(SLEEP_TIME);
+            usleep(sleepTime);
         }
     }
 }
