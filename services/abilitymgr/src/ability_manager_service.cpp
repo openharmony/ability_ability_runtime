@@ -8257,13 +8257,8 @@ int AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr<
             TAG_LOGI(AAFwkTag::ABILITYMGR, "StartResidentApps userId:%{public}d", userId);
             abilityMs->StartResidentApps(userId);
         });
-        if (system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
-            taskHandler_->SubmitTask([abilityMs = shared_from_this(), userId]() {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "StartKeepAliveApps userId:%{public}d", userId);
-                abilityMs->StartKeepAliveApps(userId);
-            });
-        }
     }
+    StartKeepAliveAppsInner(userId);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
         AmsConfigurationParameter::GetInstance().MultiUserType() != 0) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "no need terminate old scb");
@@ -8271,6 +8266,31 @@ int AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr<
     }
     PauseOldConnectManager(oldUserId);
     return ret;
+}
+
+void AbilityManagerService::StartKeepAliveAppsInner(int32_t userId)
+{
+    if (!system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not supported");
+        return;
+    }
+    if (taskHandler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskHandler nullptr");
+        return;
+    }
+    taskHandler_->SubmitTask([abilityMs = shared_from_this(),
+        connectManager = GetConnectManagerByUserId(userId), userId]() {
+        if (connectManager == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager is nullptr");
+            return;
+        }
+        if (connectManager->GetSceneBoardTokenId() == 0) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "SCB not ready, do not start keep-alive apps");
+            return;
+        }
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "StartKeepAliveApps userId:%{public}d", userId);
+        abilityMs->StartKeepAliveApps(userId);
+    });
 }
 
 void AbilityManagerService::SwitchManagers(int32_t userId, bool switchUser)
@@ -11057,7 +11077,7 @@ void AbilityManagerService::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::
         }
     }
 
-    if (bundleInfos.size() == 0) {
+    if (bundleInfosForCurrentUser.size() == 0) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "no app to restart");
         return;
     }
