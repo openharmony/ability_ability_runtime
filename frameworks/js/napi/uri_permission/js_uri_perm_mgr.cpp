@@ -47,7 +47,7 @@ static void ResolveGrantUriPermissionTask(napi_env env, NapiAsyncTask &task, int
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveGrantUriPermissionTask");
     if (errCode == ERR_OK) {
-        task.ResolveWithNoError(env, CreateJsNumber(env, 0));
+        task.Resolve(env, CreateJsNumber(env, 0));
         return;
     }
     if (errCode == AAFwk::CHECK_PERMISSION_FAILED || errCode == AAFwk::ERR_CODE_INVALID_URI_FLAG ||
@@ -63,7 +63,7 @@ static void ResolveGrantUriPermissionWithAppIndexTask(napi_env env, NapiAsyncTas
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveGrantUriPermissionWithAppIndexTask");
     if (errCode == ERR_OK) {
-        task.ResolveWithNoError(env, CreateJsUndefined(env));
+        task.Resolve(env, CreateJsUndefined(env));
         return;
     }
     if (errCode == AAFwk::CHECK_PERMISSION_FAILED || errCode == AAFwk::ERR_CODE_INVALID_URI_FLAG ||
@@ -80,7 +80,7 @@ static void ResolveRevokeUriPermissionTask(napi_env env, NapiAsyncTask &task, in
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveRevokeUriPermissionTask");
     if (errCode == ERR_OK) {
-        task.ResolveWithNoError(env, CreateJsUndefined(env));
+        task.Resolve(env, CreateJsNumber(env, 0));
         return;
     }
     if (errCode == AAFwk::ERR_CODE_INVALID_URI_TYPE || errCode == AAFwk::ERR_CODE_GRANT_URI_PERMISSION) {
@@ -95,7 +95,7 @@ static void ResolveRevokeUriPermissionWithAppIndexTask(napi_env env, NapiAsyncTa
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveRevokeUriPermissionWithAppIndexTask");
     if (errCode == ERR_OK) {
-        task.ResolveWithNoError(env, CreateJsUndefined(env));
+        task.Resolve(env, CreateJsUndefined(env));
         return;
     }
     if (errCode == AAFwk::ERR_CODE_INVALID_URI_TYPE || errCode == AAFwk::ERR_CODE_GRANT_URI_PERMISSION ||
@@ -110,7 +110,7 @@ static void ResolveRevokeUriPermissionWithAppIndexTask(napi_env env, NapiAsyncTa
 static bool ParseGrantUriPermissionParams(napi_env env, NapiCallbackInfo &info, UriPermissionParam &param)
 {
     // only support 3 or 4 params
-    if (info.argc != argCountThree && info.argc != argCountFour) {
+    if (info.argc < argCountThree) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "param number invalid");
         ThrowTooFewParametersError(env);
         return false;
@@ -130,7 +130,8 @@ static bool ParseGrantUriPermissionParams(napi_env env, NapiCallbackInfo &info, 
         ThrowInvalidParamError(env, "Parse param targetBundleName failed, targetBundleName must be string.");
         return false;
     }
-    if (info.argc == argCountFour) {
+    if (info.argc >= argCountFour) {
+        // process param index or callback
         if (CheckTypeForNapiValue(env, info.argv[argCountThree], napi_function)) {
             return true;
         }
@@ -152,7 +153,7 @@ static bool ParseGrantUriPermissionParams(napi_env env, NapiCallbackInfo &info, 
 static bool ParseRevokeUriPermissionParams(napi_env env, NapiCallbackInfo &info, UriPermissionParam &param)
 {
     // only support 2 or 3 params
-    if (info.argc != argCountThree && info.argc != argCountTwo) {
+    if (info.argc < argCountTwo) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Invalid args");
         ThrowTooFewParametersError(env);
         return false;
@@ -167,7 +168,8 @@ static bool ParseRevokeUriPermissionParams(napi_env env, NapiCallbackInfo &info,
         ThrowInvalidParamError(env, "Parse param bundleName failed, bundleName must be string.");
         return false;
     }
-    if (info.argc == argCountThree) {
+    if (info.argc >= argCountThree) {
+        // process param index or callback
         if (CheckTypeForNapiValue(env, info.argv[argCountTwo], napi_function)) {
             return true;
         }
@@ -232,7 +234,7 @@ private:
             }
             return ResolveGrantUriPermissionTask(env, task, errCode);
         };
-        napi_value lastParam = (info.argc == argCountFour && !param.hasAppIndex) ? info.argv[argCountThree] : nullptr;
+        napi_value lastParam = (info.argc >= argCountFour && !param.hasAppIndex) ? info.argv[argCountThree] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JsUriPermMgr::OnGrantUriPermission",
             env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
@@ -263,7 +265,7 @@ private:
             }
             return ResolveRevokeUriPermissionTask(env, task, errCode);
         };
-        napi_value lastParam = (info.argc == argCountThree && !param.hasAppIndex) ? info.argv[argCountTwo] : nullptr;
+        napi_value lastParam = (info.argc >= argCountThree && !param.hasAppIndex) ? info.argv[argCountTwo] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JsUriPermMgr::OnRevokeUriPermission",
             env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
