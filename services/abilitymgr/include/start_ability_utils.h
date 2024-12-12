@@ -72,7 +72,9 @@ struct StartAbilityUtils {
 struct StartAbilityInfoWrap {
     StartAbilityInfoWrap(const Want &want, int32_t validUserId, int32_t appIndex,
         const sptr<IRemoteObject> &callerToken, bool isExtension = false);
+    StartAbilityInfoWrap();
     ~StartAbilityInfoWrap();
+    void SetStartAbilityInfo(const AppExecFwk::AbilityInfo& abilityInfo);
 };
 }
 }

@@ -191,6 +191,16 @@ StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId
         StartAbilityUtils::isWantWithAppCloneIndex = true;
     }
 }
+StartAbilityInfoWrap::StartAbilityInfoWrap()
+{
+    StartAbilityUtils::startAbilityInfo.reset();
+    StartAbilityUtils::callerAbilityInfo.reset();
+    StartAbilityUtils::skipCrowTest = false;
+    StartAbilityUtils::skipStartOther = false;
+    StartAbilityUtils::skipErms = false;
+    StartAbilityUtils::ermsResultCode = ERMS_ISALLOW_RESULTCODE;
+    StartAbilityUtils::isWantWithAppCloneIndex = false;
+}
 
 StartAbilityInfoWrap::~StartAbilityInfoWrap()
 {
@@ -201,6 +211,15 @@ StartAbilityInfoWrap::~StartAbilityInfoWrap()
     StartAbilityUtils::skipErms = false;
     StartAbilityUtils::ermsResultCode = ERMS_ISALLOW_RESULTCODE;
     StartAbilityUtils::isWantWithAppCloneIndex = false;
+}
+
+void StartAbilityInfoWrap::SetStartAbilityInfo(const AppExecFwk::AbilityInfo& abilityInfo)
+{
+    if (StartAbilityUtils::startAbilityInfo != nullptr) {
+        return;
+    }
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::startAbilityInfo->abilityInfo = abilityInfo;
 }
 
 std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const Want &want, int32_t userId,
