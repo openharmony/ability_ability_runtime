@@ -50,8 +50,7 @@ void NativeChildCallback::OnNativeChildStarted(const sptr<IRemoteObject> &native
     callback_(static_cast<int32_t>(ChildProcessManagerErrorCode::ERR_OK), ipcProxy);
     callback_ = nullptr;
 
-    ChildCallbackManager *fun1 = ChildCallbackManager::GetInstance();
-    fun1->RemoveRemoteObject(this);
+    ChildCallbackManager::GetInstance().RemoveRemoteObject(this);
 }
 
 void NativeChildCallback::OnError(int32_t errCode)

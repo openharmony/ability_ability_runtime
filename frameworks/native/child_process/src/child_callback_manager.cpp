@@ -18,27 +18,22 @@
 namespace OHOS {
 namespace AbilityRuntime {
 
-ChildCallbackManager* ChildCallbackManager::instance = nullptr;
-
-ChildCallbackManager::ChildCallbackManager() {}
-
-ChildCallbackManager* ChildCallbackManager::GetInstance()
+ChildCallbackManager &ChildCallbackManager::GetInstance()
 {
-    if (instance == nullptr) {
-        instance = new ChildCallbackManager();
-    }
-
+    static ChildCallbackManager instance;
     return instance;
 }
 
 void ChildCallbackManager::AddRemoteObject(sptr<IRemoteObject> nativeCallback)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     callbackStubs.emplace_back(nativeCallback);
 }
 
 void ChildCallbackManager::RemoveRemoteObject(sptr<IRemoteObject> nativeCallback)
 {
     if (nativeCallback) {
+        std::lock_guard<std::mutex> lock(mutex_);
         auto iter = callbackStubs.begin();
         while (iter != callbackStubs.end()) {
             if (*iter == nativeCallback) {
