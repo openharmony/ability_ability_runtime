@@ -117,12 +117,13 @@ private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> handler_;
     int32_t dummyCode_ = 0;
     ffrt::mutex observerLock_;
-    std::map<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> recipientMap_;
     AppStateObserverMap appStateObserverMap_;
     ffrt::mutex appForegroundObserverLock_;
     AppForegroundStateObserverSet appForegroundStateObserverSet_;
     ffrt::mutex abilityforegroundObserverLock_;
     AbilityforegroundObserverSet abilityforegroundObserverSet_;
+    ffrt::mutex recipientMapMutex_;
+    std::map<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> recipientMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
