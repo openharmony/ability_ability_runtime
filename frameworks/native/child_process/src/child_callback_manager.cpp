@@ -27,7 +27,7 @@ ChildCallbackManager::ChildCallbackManager()
 
 ChildCallbackManager* ChildCallbackManager::GetInstance()
 {
-    if(insatnce == nullptr){
+    if(instance == nullptr){
         instance = new ChildCallbackManager()
     }
 
