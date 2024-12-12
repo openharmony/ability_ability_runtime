@@ -1579,9 +1579,9 @@ bool AbilityRecord::IsCreateByConnect() const
     return isCreateByConnect_;
 }
 
-void AbilityRecord::SetCreateByConnectMode(bool isCreatedByConnect)
+void AbilityRecord::SetCreateByConnectMode(bool isCreateByConnect)
 {
-    isCreateByConnect_ = isCreatedByConnect;
+    isCreateByConnect_ = isCreateByConnect;
 }
 
 void AbilityRecord::Activate()
