@@ -19,6 +19,7 @@
 #include <sys/types.h>
 
 #include <fstream>
+#include <list>
 #include <map>
 #include <memory>
 #include <set>
@@ -89,12 +90,31 @@ public:
     bool IsValidFreezeFilter(int32_t pid, const std::string& bundleName);
 
 private:
+    struct PeerBinderInfo {
+        int32_t clientPid;
+        int32_t clientTid;
+        int32_t serverPid;
+        int32_t serverTid;
+    };
+
+    struct TerminalBinder {
+        bool firstLayerInit;
+        int32_t pid;
+        int32_t tid;
+    };
+
     AppfreezeManager& operator=(const AppfreezeManager&) = delete;
     AppfreezeManager(const AppfreezeManager&) = delete;
     uint64_t GetMilliseconds();
-    std::map<int, std::set<int>> BinderParser(std::ifstream& fin, std::string& stack) const;
-    void ParseBinderPids(const std::map<int, std::set<int>>& binderInfo, std::set<int>& pids, int pid, int layer) const;
-    std::set<int> GetBinderPeerPids(std::string& stack, int pid) const;
+    std::map<int, std::list<AppfreezeManager::PeerBinderInfo>> BinderParser(std::ifstream& fin, std::string& stack)
+        const;
+    std::map<int, std::list<AppfreezeManager::PeerBinderInfo>> BinderLineParser(std::ifstream& fin, std::string& stack)
+        const;
+    std::vector<std::string> GetFileToList(std::string line) const;
+    void ParseBinderPids(const std::map<int, std::list<AppfreezeManager::PeerBinderInfo>>& binderInfos,
+        std::set<int>& pids, int pid, int layer, AppfreezeManager::TerminalBinder& terminalBinder) const;
+    std::set<int> GetBinderPeerPids(std::string& stack, int pid, AppfreezeManager::TerminalBinder& terminalBinder)
+        const;
     void FindStackByPid(std::string& ret, int pid) const;
     std::string CatchJsonStacktrace(int pid, const std::string& faultType) const;
     std::string CatcherStacktrace(int pid) const;
