@@ -25,7 +25,7 @@ namespace AbilityRuntime {
 
 class ChildCallbackManager {
 public:
-    static ChildCallbackManager &GetInstance()
+    static ChildCallbackManager &GetInstance();
     ~ChildCallbackManager() = default;
 
     void AddRemoteObject(sptr<IRemoteObject> nativeCallback);
