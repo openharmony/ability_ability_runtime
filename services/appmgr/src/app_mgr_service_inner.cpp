@@ -7154,7 +7154,7 @@ void AppMgrServiceInner::ClearNonResidentKeepAliveAppRunningData(const std::shar
     }
 
     auto userId = GetUserIdByUid(appRecord->GetUid());
-    bool isDefaultInstance = (appRecord->GetInstanceKey() == APP_INSTANCE_KEY_0);
+    bool isDefaultInstance = appRecord->GetInstanceKey().empty() || appRecord->GetInstanceKey() == APP_INSTANCE_KEY_0;
     if (!appRecord->GetRestartAppFlag() && appRecord->IsKeepAliveDkv() &&
         isDefaultInstance && (userId == 0 || userId == currentUserId_) &&
         appRecord->GetBundleName() != SCENE_BOARD_BUNDLE_NAME) {
