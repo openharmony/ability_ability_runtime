@@ -1092,6 +1092,30 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SwitchArea_0100, Function 
 }
 
 /**
+ * @tc.number: Ability_Context_Impl_GetProcessName_0100
+ * @tc.name: GetProcessName
+ * @tc.desc: Get process name sucess
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_GetProcessName_0100, Function | MediumTest | Level1)
+{
+    context_->SetStageContext(mock_);
+    auto ret = context_->GetProcessName();
+    EXPECT_EQ(ret, "processName");
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_GetProcessName_0200
+ * @tc.name: GetProcessName
+ * @tc.desc: Get process name failed
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_GetProcessName_0200, Function | MediumTest | Level1)
+{
+    context_->SetStageContext(nullptr);
+    auto ret = context_->GetProcessName();
+    EXPECT_EQ(ret, "");
+}
+
+/**
  * @tc.number: Ability_Context_Impl_GetBundleName_0100
  * @tc.name: GetBundleName
  * @tc.desc: Get BundleName sucess

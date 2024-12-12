@@ -442,6 +442,7 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
     }
 
     appContext->SetConfiguration(config_);
+    appContext->SetProcessName(processName_);
     bool self = false;
     if (inputContext) {
         self = (bundleName == inputContext->GetBundleName());
@@ -646,6 +647,11 @@ int ContextImpl::GetArea()
     return mode;
 }
 
+std::string ContextImpl::GetProcessName()
+{
+    return processName_;
+}
+
 std::string ContextImpl::GetBaseDir() const
 {
     std::string baseDir;
@@ -733,6 +739,7 @@ int32_t ContextImpl::CreateBundleContext(std::shared_ptr<Context> &context, cons
     std::shared_ptr<ContextImpl> appContext = std::make_shared<ContextImpl>();
     appContext->SetFlags(CONTEXT_CREATE_BY_SYSTEM_APP);
     appContext->SetConfiguration(config_);
+    appContext->SetProcessName(processName_);
 
     // init resourceManager.
     InitResourceManager(bundleInfo, appContext, false, "", inputContext);
@@ -779,6 +786,7 @@ std::shared_ptr<Context> ContextImpl::CreateBundleContext(const std::string &bun
     std::shared_ptr<ContextImpl> appContext = std::make_shared<ContextImpl>();
     appContext->SetFlags(CONTEXT_CREATE_BY_SYSTEM_APP);
     appContext->SetConfiguration(config_);
+    appContext->SetProcessName(processName_);
 
     // init resourceManager.
     InitResourceManager(bundleInfo, appContext);
@@ -1219,6 +1227,11 @@ void ContextImpl::AppHasDarkRes(bool &darkRes)
     currentResMgr->GetResConfig(*resConfig);
     darkRes = resConfig->GetAppDarkRes();
     TAG_LOGD(AAFwkTag::APPKIT, "darkRes %{public}d", darkRes);
+}
+
+void ContextImpl::SetProcessName(const std::string &processName)
+{
+    processName_ = processName;
 }
 
 void ContextImpl::KillProcessBySelf(const bool clearPageStack)
