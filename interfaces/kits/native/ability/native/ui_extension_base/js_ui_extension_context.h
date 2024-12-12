@@ -87,6 +87,10 @@ private:
     napi_value OnOpenLink(napi_env env, NapiCallbackInfo& info);
     napi_value OnOpenLinkInner(napi_env env, const AAFwk::Want& want,
         int requestCode, const std::string& startTime, const std::string& url);
+#ifdef SUPPORT_SCREEN
+    void InitDisplayId(AAFwk::Want &want);
+    void InitDisplayId(AAFwk::Want &want, AAFwk::StartOptions &startOptions, napi_env &env, NapiCallbackInfo& info);
+#endif
 };
 
 class JSUIExtensionConnection : public AbilityConnectCallback {
