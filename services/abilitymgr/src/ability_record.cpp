@@ -1579,9 +1579,9 @@ bool AbilityRecord::IsCreateByConnect() const
     return isCreateByConnect_;
 }
 
-void AbilityRecord::SetCreateByConnectMode(bool isCreateByConnect)
+void AbilityRecord::SetCreateByConnectMode(bool isCreatedByConnect)
 {
-    isCreateByConnect_ = isCreateByConnect;
+    isCreateByConnect_ = isCreatedByConnect;
 }
 
 void AbilityRecord::Activate()
@@ -2577,7 +2577,7 @@ sptr<IRemoteObject> AbilityRecord::GetConnRemoteObject() const
 
 bool AbilityRecord::IsNeverStarted() const
 {
-    return GetStartId() == 0 && IsCreatedByConnect();
+    return GetStartId() == 0 && IsCreateByConnect();
 }
 
 void AbilityRecord::AddStartId()
