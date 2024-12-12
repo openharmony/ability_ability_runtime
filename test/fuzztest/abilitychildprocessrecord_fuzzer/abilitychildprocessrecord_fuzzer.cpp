@@ -51,8 +51,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     bool flag = *data % ENABLE;
     ChildProcessRecord::CreateNativeChildProcessRecord(hostPid, stringParam, hostRecord, mP, cd, flag);
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
-    int32_t RECORD_ID = static_cast<int32_t>(GetU32Data(data));
-    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, stringParam);
+    int32_t recordId = static_cast<int32_t>(GetU32Data(data));
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, stringParam);
     auto childRecord = std::make_shared<ChildProcessRecord>(hostPid, request, appRecord);
     childRecord->SetPid(hostPid);
     childRecord->GetPid();
