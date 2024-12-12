@@ -41,6 +41,7 @@ ohos_shared_library("child_process") {
   public_configs = [ ":child_process_ndk_config" ]
 
   sources = [
+    "${ability_runtime_native_path}/child_process/src/child_callback_manager.cpp",
     "${ability_runtime_native_path}/child_process/src/native_child_callback.cpp",
     "${ability_runtime_native_path}/child_process/src/native_child_process.cpp",
   ]
