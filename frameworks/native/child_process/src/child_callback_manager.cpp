@@ -20,14 +20,11 @@ namespace AbilityRuntime {
 
 ChildCallbackManager* ChildCallbackManager::instance = nullptr;
 
-ChildCallbackManager::ChildCallbackManager()
-{
-
-}
+ChildCallbackManager::ChildCallbackManager() {}
 
 ChildCallbackManager* ChildCallbackManager::GetInstance()
 {
-    if(instance == nullptr){
+    if (instance == nullptr) {
         instance = new ChildCallbackManager();
     }
 
@@ -41,10 +38,10 @@ void ChildCallbackManager::AddRemoteObject(sptr<IRemoteObject> nativeCallback)
 
 void ChildCallbackManager::RemoveRemoteObject(sptr<IRemoteObject> nativeCallback)
 {
-    if(nativeCallback) {
+    if (nativeCallback) {
         auto iter = callbackStubs.begin();
         while (iter != callbackStubs.end()) {
-            if(*iter == nativeCallback) {
+            if (*iter == nativeCallback) {
                 iter = callbackStubs.erase(iter);
                 break;
             } else {
