@@ -645,8 +645,7 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return false;
     }
-    auto componentId = sessionInfo->uiExtensionComponentId;
-    if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
+    if (uiWindowMap_.find(sessionInfo->uiExtensionComponentId) == uiWindowMap_.end()) {
         if (context_ == nullptr || context_->GetAbilityInfo() == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
             return false;
@@ -663,6 +662,7 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         option->SetRealParentId(sessionInfo->realHostWindowId);
         option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
         option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
+        option->SetDisplayId(sessionInfo->displayId);
         sptr<Rosen::Window> uiWindow;
         {
             HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
@@ -672,10 +672,10 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
             TAG_LOGE(AAFwkTag::UI_EXT, "create ui window error");
             return false;
         }
-        if (!CallJsOnSessionCreate(want, sessionInfo, uiWindow, componentId)) {
+        if (!CallJsOnSessionCreate(want, sessionInfo, uiWindow, sessionInfo->uiExtensionComponentId)) {
             return false;
         }
-        uiWindowMap_[componentId] = uiWindow;
+        uiWindowMap_[sessionInfo->uiExtensionComponentId] = uiWindow;
 #ifdef SUPPORT_GRAPHICS
         if (context_->GetWindow() == nullptr) {
             context_->SetWindow(uiWindow);
