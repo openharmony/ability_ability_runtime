@@ -2485,6 +2485,14 @@ bool AppRunningRecord::IsProcessAttached() const
     return appLifeCycleDeal_->GetApplicationClient() != nullptr;
 }
 
+void AppRunningRecord::AddAppLifecycleEvent(const std::string &msg)
+{
+    auto prioObject = GetPriorityObject();
+    if (prioObject && prioObject->GetPid() != 0) {
+        FreezeUtil::GetInstance().AddAppLifecycleEvent(prioObject->GetPid(), msg);
+    }
+}
+
 void AppRunningRecord::SetUIAbilityLaunched(bool hasLaunched)
 {
     hasUIAbilityLaunched_ = hasLaunched;
@@ -2503,14 +2511,6 @@ void AppRunningRecord::SetProcessCaching(bool isCaching)
 bool AppRunningRecord::IsCaching()
 {
     return isCaching_;
-}
-
-void AppRunningRecord::AddAppLifecycleEvent(const std::string &msg)
-{
-    auto prioObject = GetPriorityObject();
-    if (prioObject && prioObject->GetPid() != 0) {
-        FreezeUtil::GetInstance().AddAppLifecycleEvent(prioObject->GetPid(), msg);
-    }
 }
 
 void AppRunningRecord::SetNWebPreload(const bool isAllowedNWebPreload)

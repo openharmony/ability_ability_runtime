@@ -851,11 +851,11 @@ public:
     bool IsAllAbilityReadyToCleanedByUserRequest();
     bool IsProcessAttached() const;
 
+    void AddAppLifecycleEvent(const std::string &msg);
 	// reocrds whehter uiability has launched before
     void SetUIAbilityLaunched(bool hasLaunched);
     bool HasUIAbilityLaunched();
 
-    void AddAppLifecycleEvent(const std::string &msg);
     void SetNWebPreload(const bool isAllowedNWebPreload);
 private:
     /**
@@ -935,7 +935,7 @@ private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AMSEventHandler> eventHandler_;
     bool isTerminating = false;
-    bool isCaching_  = false;
+    bool isCaching_ = false;
     std::string signCode_;  // the sign of this hap
     std::string jointUserId_;
     std::map<std::string, std::shared_ptr<ApplicationInfo>> appInfos_;
