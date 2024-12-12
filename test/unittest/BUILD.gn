@@ -532,6 +532,7 @@ group("unittest") {
       "js_photo_editor_extension_context_test:unittest",
       "js_photo_editor_extension_impl_test:unittest",
       "js_service_extension_test:unittest",
+      "js_ui_extension_content_session_test:unittest",
       "js_ui_extension_context_test:unittest",
       "js_ui_service_extension_connection_test:unittest",
       "js_ui_service_extension_context_first_test:unittest",
