@@ -80,8 +80,7 @@ int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNative
         return CvtChildProcessManagerErrCode(cpmErr);
     }
 
-    ChildCallbackManager *fun2 = ChildCallbackManager::GetInstance();
-    fun2->AddRemoteObject(callbackStub);
+    ChildCallbackManager::GetInstance().AddRemoteObject(callbackStub);
     return NCP_NO_ERROR;
 }
 

@@ -17,22 +17,26 @@
 #define OHOS_ABILITY_RUNTIME_CHILD_CALLBACK_MANAGER_H
 
 #include "iremote_stub.h"
+#include "nocopyable.h"
+#include <mutex>
 
 namespace OHOS {
 namespace AbilityRuntime {
 
 class ChildCallbackManager {
 public:
-    ChildCallbackManager();
-    ChildCallbackManager(const ChildCallbackManager &);
+    static ChildCallbackManager &GetInstance()
+    ~ChildCallbackManager() = default;
 
-    static ChildCallbackManager* GetInstance();
     void AddRemoteObject(sptr<IRemoteObject> nativeCallback);
     void RemoveRemoteObject(sptr<IRemoteObject> nativeCallback);
 
 private:
-    static ChildCallbackManager* instance;
+    std::mutex mutex_;
     std::vector<sptr<IRemoteObject>> callbackStubs;
+
+    ChildCallbackManager() = default;
+    DISALLOW_COPY_AND_MOVE(ChildCallbackManager);
 };
 
 } // namespace AbilityRuntime
