@@ -1719,6 +1719,8 @@ void AbilityRecord::ConnectAbilityWithWant(const Want &want)
     auto userId = GetUid() / BASE_USER_RANGE;
     if (userId == DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId()) {
         GrantUriPermissionForServiceExtension();
+    } else {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "cross user, without grantUriPermission");
     }
 #endif // SUPPORT_UPMS
     lifecycleDeal_->ConnectAbility(want);
