@@ -167,16 +167,16 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_004, TestSize.Level1)
  */
 HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_005, TestSize.Level1)
 {
-    std::map<int, std::set<int>> binderInfo;
-    std::set<int> ids;
-    ids.insert(1);
-    binderInfo.insert(std::pair<int, std::set<int>>(0, ids));
-    ids.insert(0);
-    binderInfo.insert(std::pair<int, std::set<int>>(1, ids));
+    std::map<int, std::list<AppfreezeManager::PeerBinderInfo>> binderInfos;
+    AppfreezeManager::PeerBinderInfo infoOne= {3, 0, 0, 0};
+    binderInfos[1].push_back(infoOne);
+    AppfreezeManager::PeerBinderInfo infoTwo= {4, 0, 0, 0};
+    binderInfos[1].push_back(infoTwo);
     std::set<int> pids;
-    appfreezeManager->ParseBinderPids(binderInfo, pids, 2, 8);
+    AppfreezeManager::TerminalBinder terminalBinder = {0, 0, false};
+    appfreezeManager->ParseBinderPids(binderInfos, pids, 2, 8, terminalBinder);
     EXPECT_EQ(pids.size(), 0);
-    appfreezeManager->ParseBinderPids(binderInfo, pids, 1, 0);
+    appfreezeManager->ParseBinderPids(binderInfos, pids, 1, 0, terminalBinder);
     EXPECT_EQ(pids.size(), 2);
 }
 
