@@ -41,6 +41,7 @@ public:
 private:
     AbilityKeepAliveDataManager();
     ~AbilityKeepAliveDataManager();
+    DistributedKv::Status RestoreKvStore(DistributedKv::Status status);
     DistributedKv::Status GetKvStore();
     bool CheckKvStore();
     DistributedKv::Value ConvertKeepAliveStatusToValue(KeepAliveSetter setter);
