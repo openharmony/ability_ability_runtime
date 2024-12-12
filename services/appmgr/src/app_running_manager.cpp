@@ -34,10 +34,10 @@
 #include "scene_board_judgement.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
+#include "window_visibility_info.h"
 #include "cache_process_manager.h"
 #include "res_sched_util.h"
 #include "ui_extension_utils.h"
-#include "window_visibility_info.h"
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
@@ -534,7 +534,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecord(const i
 void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token,
     std::shared_ptr<AppMgrServiceInner> serviceInner)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "token is nullptr.");
         return;
@@ -1614,9 +1614,10 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
         return false;
     }
     if (appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT) {
-        TAG_LOGI(AAFwkTag::APPMGR, "support porcess cache should not force clean");
+        TAG_LOGI(AAFwkTag::APPMGR, "support process cache should not force clean");
         return false;
     }
+
     auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(abilityToken);
     if (!abilityRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed to get abilityRecord.");
