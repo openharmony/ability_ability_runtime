@@ -2907,8 +2907,6 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
     result = CheckDlpForExtension(want, callerToken, userId, eventInfo, EventName::START_EXTENSION_ERROR);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckDlpForExtension error");
-        eventInfo.errCode = result;
-        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
     }
 #endif // WITH_DLP
@@ -4081,8 +4079,6 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
     result = CheckDlpForExtension(want, callerToken, userId, eventInfo, EventName::CONNECT_SERVICE_ERROR);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "checkDlpForExtension error");
-        eventInfo.errCode = result;
-        EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
     }
 #endif // WITH_DLP
@@ -4195,8 +4191,6 @@ int AbilityManagerService::ConnectUIExtensionAbility(const Want &want, const spt
     result = CheckDlpForExtension(want, callerToken, userId, eventInfo, EventName::CONNECT_SERVICE_ERROR);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "checkDlpForExtension error");
-        eventInfo.errCode = result;
-        EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
     }
 #endif // WITH_DLP
@@ -10600,26 +10594,6 @@ int AbilityManagerService::RegisterSessionHandler(const sptr<IRemoteObject> &obj
     sptr<ISessionHandler> handler = iface_cast<ISessionHandler>(object);
     uiAbilityManager->SetSessionHandler(handler);
     return ERR_OK;
-}
-
-bool AbilityManagerService::CheckUserIdActive(int32_t userId)
-{
-    std::vector<int32_t> osActiveAccountIds;
-    auto ret = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
-        QueryActiveOsAccountIds(osActiveAccountIds);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "queryActiveOsAccountIds failed");
-        return false;
-    }
-    if (osActiveAccountIds.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "queryActiveOsAccountIds empty");
-        return false;
-    }
-    auto iter = std::find(osActiveAccountIds.begin(), osActiveAccountIds.end(), userId);
-    if (iter == osActiveAccountIds.end()) {
-        return false;
-    }
-    return true;
 }
 
 int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const StartOptions &startOptions, int32_t userId)

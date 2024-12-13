@@ -44,9 +44,9 @@ public:
 };
 
 struct AutoStartupStatus {
-    int32_t code;
-    bool isAutoStartup;
-    bool isEdmForce;
+    int32_t code = -1;
+    bool isAutoStartup = false;
+    bool isEdmForce = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -907,19 +907,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckCollaboratorType_001, TestSize.Lev
 
 /*
  * Feature: AbilityManagerService
- * Function: CheckUserIdActive
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CheckUserIdActive
- */
-HWTEST_F(AbilityManagerServiceThirdTest, CheckUserIdActive_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->CheckUserIdActive(USER_ID_U100);
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: RegisterSessionHandler
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService RegisterSessionHandler

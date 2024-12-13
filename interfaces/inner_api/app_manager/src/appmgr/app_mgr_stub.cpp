@@ -1154,7 +1154,7 @@ int32_t AppMgrStub::HandleGetRunningProcessInfoByPid(MessageParcel &data, Messag
     RunningProcessInfo processInfo;
     auto pid = static_cast<pid_t>(data.ReadInt32());
     auto result = GetRunningProcessInfoByPid(pid, processInfo);
-    if (reply.WriteParcelable(&processInfo)) {
+    if (!reply.WriteParcelable(&processInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed");
         return ERR_INVALID_VALUE;
     }

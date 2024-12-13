@@ -271,8 +271,8 @@ bool PermissionVerification::VerifyStartRecentAbilityPermission() const
 int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInfo &verificationInfo, bool isShell) const
 {
     if ((verificationInfo.apiTargetVersion > API8 || isShell) &&
-        !JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall, verificationInfo.withContinuousTask)) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "start DataAbility fail");
+        !JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "caller START_ABILITIES_FROM_BACKGROUND permission invalid");
         return CHECK_PERMISSION_FAILED;
     }
     if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
@@ -295,8 +295,8 @@ int PermissionVerification::CheckCallServiceAbilityPermission(const Verification
         return ERR_OK;
     }
     if ((verificationInfo.apiTargetVersion > API8 || IsShellCall()) &&
-        !JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall, verificationInfo.withContinuousTask)) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Start ServiceAbility failed");
+        !JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "caller START_ABILITIES_FROM_BACKGROUND permission invalid");
         return CHECK_PERMISSION_FAILED;
     }
     if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
@@ -334,9 +334,11 @@ int PermissionVerification::CheckStartByCallPermission(const VerificationInfo &v
         return CHECK_PERMISSION_FAILED;
     }
     if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "caller INVISIBLE permission invalid");
         return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
     }
-    if (!JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall, verificationInfo.withContinuousTask)) {
+    if (!JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "caller START_ABILITIES_FROM_BACKGROUND permission invalid");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -373,8 +375,7 @@ bool PermissionVerification::JudgeStartInvisibleAbility(const uint32_t accessTok
     return false;
 }
 
-bool PermissionVerification::JudgeStartAbilityFromBackground(
-    const bool isBackgroundCall, bool withContinuousTask) const
+bool PermissionVerification::JudgeStartAbilityFromBackground(const bool isBackgroundCall) const
 {
     if (!isBackgroundCall) {
         TAG_LOGD(AAFwkTag::DEFAULT, "Caller not background");
@@ -420,9 +421,11 @@ int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &
     if (!isCallByShortcut &&
         !JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible,
         specifyTokenId)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "caller INVISIBLE permission invalid");
         return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
     }
-    if (!JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall, verificationInfo.withContinuousTask)) {
+    if (!JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "caller START_ABILITIES_FROM_BACKGROUND permission invalid");
         return CHECK_PERMISSION_FAILED;
     }
 
