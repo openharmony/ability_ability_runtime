@@ -33,7 +33,7 @@ public:
 
 private:
     std::mutex mutex_;
-    std::vector<sptr<IRemoteObject>> callbackStubs;
+    std::vector<sptr<IRemoteObject>> callbackStubs_;
 
     ChildCallbackManager() = default;
     DISALLOW_COPY_AND_MOVE(ChildCallbackManager);
