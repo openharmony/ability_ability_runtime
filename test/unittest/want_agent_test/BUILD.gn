@@ -23,6 +23,7 @@ ohos_unittest("want_agent_test") {
 
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/process_options.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/start_window_option.cpp",
     "want_agent_test.cpp",
   ]
 
@@ -49,7 +50,9 @@ ohos_unittest("want_agent_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_core",
     "ffrt:libffrt",
+    "graphic_2d:color_manager",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",

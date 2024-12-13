@@ -205,7 +205,7 @@ bool UPMSUtils::GetDirByBundleNameAndAppIndex(const std::string &bundleName, int
         TAG_LOGE(AAFwkTag::URIPERMMGR, "bundleMgrClient is nullptr.");
         return false;
     }
-    auto bmsRet = bmsClient->GetDirByBundleNameAndAppIndex(bundleName, appIndex, dirName);
+    auto bmsRet = IN_PROCESS_CALL(bmsClient->GetDirByBundleNameAndAppIndex(bundleName, appIndex, dirName));
     if (bmsRet != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "GetDirByBundleNameAndAppIndex failed, ret:%{public}d", bmsRet);
         return false;
@@ -263,10 +263,10 @@ int32_t UPMSUtils::GetAppIdByBundleName(const std::string &bundleName, std::stri
 
 int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t appIndex, uint32_t &tokenId)
 {
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "BundleName is %{public}s, appIndex is %{public}d.", bundleName.c_str(), appIndex);
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "BundleName:%{public}s, appIndex:%{public}d", bundleName.c_str(), appIndex);
     auto bms = ConnectManagerHelper();
     if (bms == nullptr) {
-        TAG_LOGW(AAFwkTag::URIPERMMGR, "The bundleMgrHelper is nullptr.");
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "null bms");
         return GET_BUNDLE_MANAGER_SERVICE_FAILED;
     }
     AppExecFwk::BundleInfo bundleInfo;
@@ -274,8 +274,8 @@ int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t
     if (appIndex == 0) {
         auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
         if (!IN_PROCESS_CALL(bms->GetBundleInfo(bundleName, bundleFlag, bundleInfo, userId))) {
-            TAG_LOGW(AAFwkTag::URIPERMMGR, "Failed to get bundle info.");
-            return GET_BUNDLE_INFO_FAILED;
+            TAG_LOGW(AAFwkTag::URIPERMMGR, "Failed GetBundleInfo");
+            return ERR_GET_TARGET_BUNDLE_INFO_FAILED;
         }
         tokenId = bundleInfo.applicationInfo.accessTokenId;
         return ERR_OK;
@@ -283,15 +283,15 @@ int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t
     if (appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         auto bundleFlag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
         if (IN_PROCESS_CALL(bms->GetCloneBundleInfo(bundleName, bundleFlag, appIndex, bundleInfo, userId)) != ERR_OK) {
-            TAG_LOGW(AAFwkTag::URIPERMMGR, "Failed to get clone bundle info.");
-            return GET_BUNDLE_INFO_FAILED;
+            TAG_LOGW(AAFwkTag::URIPERMMGR, "Failed GetCloneBundleInfo");
+            return ERR_GET_TARGET_BUNDLE_INFO_FAILED;
         }
         tokenId = bundleInfo.applicationInfo.accessTokenId;
         return ERR_OK;
     }
     if (IN_PROCESS_CALL(bms->GetSandboxBundleInfo(bundleName, appIndex, userId, bundleInfo) != ERR_OK)) {
-        TAG_LOGW(AAFwkTag::URIPERMMGR, "Failed to get sandbox bundle info.");
-        return GET_BUNDLE_INFO_FAILED;
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "Failed GetSandboxBundleInfo");
+        return ERR_GET_TARGET_BUNDLE_INFO_FAILED;
     }
     tokenId = bundleInfo.applicationInfo.accessTokenId;
     return ERR_OK;

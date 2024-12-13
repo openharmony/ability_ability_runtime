@@ -24,6 +24,7 @@
 namespace OHOS {
 namespace AAFwk {
 class ProcessOptions;
+class StartWindowOption;
 
 class StartOptions final : public Parcelable, public std::enable_shared_from_this<StartOptions> {
 public:
@@ -33,6 +34,7 @@ public:
     bool windowWidthUsed_ = false;
     bool windowHeightUsed_ = false;
     std::shared_ptr<ProcessOptions> processOptions = nullptr;
+    std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
 
     StartOptions() = default;
     ~StartOptions() = default;

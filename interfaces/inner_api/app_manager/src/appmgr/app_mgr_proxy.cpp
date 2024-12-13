@@ -798,6 +798,7 @@ int AppMgrProxy::StartRenderProcess(const std::string &renderParam,
 
 void AppMgrProxy::AttachRenderProcess(const sptr<IRemoteObject> &renderScheduler)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!renderScheduler) {
         TAG_LOGE(AAFwkTag::APPMGR, "renderScheduler is null");
         return;
