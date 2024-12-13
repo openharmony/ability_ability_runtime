@@ -709,6 +709,10 @@ void AppfreezeManager::ResetAppfreezeState(int32_t pid, const std::string& bundl
 
 bool AppfreezeManager::IsValidFreezeFilter(int32_t pid, const std::string& bundleName)
 {
+    if (g_betaVersion || g_developMode) {
+        TAG_LOGI(AAFwkTag::APPDFR, "current device is beta or development do not report appfreeze");
+        return true;
+    }
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
     if (appfreezeFilterMap_.find(bundleName) != appfreezeFilterMap_.end()) {
         return false;
