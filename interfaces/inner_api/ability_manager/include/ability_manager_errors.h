@@ -606,6 +606,11 @@ enum {
      */
     ERR_INSIGHT_INTENT_EXECUTE_REPLY_FAILED = 2097278,
 
+    /*
+     * Result (2097279) for get target bundle info failed.
+     */
+    ERR_GET_TARGET_BUNDLE_INFO_FAILED = 2097279,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
