@@ -27,17 +27,17 @@ ChildCallbackManager &ChildCallbackManager::GetInstance()
 void ChildCallbackManager::AddRemoteObject(sptr<IRemoteObject> nativeCallback)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    callbackStubs.emplace_back(nativeCallback);
+    callbackStubs_.emplace_back(nativeCallback);
 }
 
 void ChildCallbackManager::RemoveRemoteObject(sptr<IRemoteObject> nativeCallback)
 {
     if (nativeCallback) {
         std::lock_guard<std::mutex> lock(mutex_);
-        auto iter = callbackStubs.begin();
-        while (iter != callbackStubs.end()) {
+        auto iter = callbackStubs_.begin();
+        while (iter != callbackStubs_.end()) {
             if (*iter == nativeCallback) {
-                iter = callbackStubs.erase(iter);
+                iter = callbackStubs_.erase(iter);
                 break;
             } else {
                 iter++;
