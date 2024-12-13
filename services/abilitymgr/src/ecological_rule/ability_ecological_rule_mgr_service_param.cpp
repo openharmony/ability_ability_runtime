@@ -253,6 +253,11 @@ bool AbilityCallerInfo::DoMarshallingTwo(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteString(targetBundleName)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetBundleName failed");
+        return false;
+    }
+
     return true;
 }
 
