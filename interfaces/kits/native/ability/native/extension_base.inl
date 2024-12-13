@@ -49,6 +49,7 @@ std::shared_ptr<C> ExtensionBase<C>::CreateAndInitContext(const std::shared_ptr<
     context->SetResourceManager(appContext->GetResourceManager());
     context->SetParentContext(appContext);
     context->SetToken(token);
+    context->SetProcessName(appContext->GetProcessName());
     if (record == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null record");
         return context;
