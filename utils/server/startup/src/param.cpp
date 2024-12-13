@@ -54,6 +54,9 @@ bool LoadParam::Marshalling(Parcel &parcel) const
     if (!parcel.WriteBool(isKeepAlive)) {
         return false;
     }
+    if (!parcel.WriteUint32(extensionProcessMode)) {
+        return false;
+    }
     return true;
 }
 
@@ -75,6 +78,7 @@ bool LoadParam::ReadFromParcel(Parcel &parcel)
         }
     }
     isKeepAlive = parcel.ReadBool();
+    extensionProcessMode = parcel.ReadUint32();
     return true;
 }
 

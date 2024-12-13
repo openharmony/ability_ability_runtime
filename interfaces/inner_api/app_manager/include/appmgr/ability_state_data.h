@@ -63,6 +63,8 @@ struct AbilityStateData : public Parcelable {
     bool isAtomicService = false;
     int32_t abilityRecordId = 0;
     int32_t appCloneIndex = -1;
+    int32_t extensionAbilityType = -1;
+    int32_t processType = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

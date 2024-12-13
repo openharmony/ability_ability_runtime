@@ -682,7 +682,7 @@ public:
     void SetUserTestInfo(const std::shared_ptr<UserTestRecord> &record);
     std::shared_ptr<UserTestRecord> GetUserTestInfo();
 
-    void SetProcessAndExtensionType(const std::shared_ptr<AbilityInfo> &abilityInfo);
+    void SetProcessAndExtensionType(const std::shared_ptr<AbilityInfo> &abilityInfo, uint32_t extensionProcessMode = 0);
     void SetSpecifiedAbilityFlagAndWant(int requestId, const AAFwk::Want &want, const std::string &moduleName);
     void SetScheduleNewProcessRequestState(int32_t requestId, const AAFwk::Want &want, const std::string &moduleName);
     /**
