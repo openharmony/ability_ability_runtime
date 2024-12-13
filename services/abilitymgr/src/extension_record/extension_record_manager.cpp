@@ -543,8 +543,7 @@ int32_t ExtensionRecordManager::CreateExtensionRecord(const AAFwk::AbilityReques
     extensionRecord->hostBundleName_ = hostBundleName;
     abilityRecord->SetOwnerMissionUserId(userId_);
     abilityRecord->SetUIExtensionAbilityId(extensionRecordId);
-    pid_t hostPid = IPCSkeleton::GetCallingPid();
-    extensionRecord->hostPid_ = hostPid;
+    extensionRecord->hostPid_ = IPCSkeleton::GetCallingPid();
     //add uiextension record register state observer object.
     if (abilityRecord->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
         auto ret = extensionRecord->RegisterStateObserver(hostBundleName);
