@@ -256,7 +256,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->missionAffinity_ = abilityRequest.want.GetStringParam(PARAM_MISSION_AFFINITY_KEY);
 
     auto userId = abilityRequest.appInfo.uid / BASE_USER_RANGE;
-    if ((userId == 0 ||
+    if ((userId == U0_USER_ID ||
         AmsConfigurationParameter::GetInstance().InResidentWhiteList(abilityRequest.abilityInfo.bundleName)) &&
         DelayedSingleton<ResidentProcessManager>::GetInstance()->IsResidentAbility(
             abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name, userId)) {
@@ -1716,7 +1716,12 @@ void AbilityRecord::ConnectAbilityWithWant(const Want &want)
         TAG_LOGW(AAFwkTag::ABILITYMGR, "state err");
     }
 #ifdef SUPPORT_UPMS
-    GrantUriPermissionForServiceExtension();
+    auto userId = GetUid() / BASE_USER_RANGE;
+    if (userId == DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId()) {
+        GrantUriPermissionForServiceExtension();
+    } else {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "cross user, without grantUriPermission");
+    }
 #endif // SUPPORT_UPMS
     lifecycleDeal_->ConnectAbility(want);
     isConnected = true;
