@@ -1317,7 +1317,7 @@ private:
     bool isStartToBackground_ = false;
     bool isStartToForeground_ = false;
     std::atomic_bool isCallerSetProcess_ = false;
-    uint32_t extensionProcessMode_ = 0;    
+    uint32_t extensionProcessMode_ = 0;
     int32_t appIndex_ = 0;
     bool minimizeReason_ = false;
 
