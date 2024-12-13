@@ -77,6 +77,12 @@ bool AbilityStateData::MarshallingOne(Parcel &parcel) const
     if (!parcel.WriteInt32(appCloneIndex)) {
         return false;
     }
+    if (!parcel.WriteInt32(extensionAbilityType)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(processType)) {
+        return false;
+    }
     return true;
 }
 
@@ -108,6 +114,8 @@ bool AbilityStateData::ReadFromParcel(Parcel &parcel)
     isAtomicService = parcel.ReadBool();
     abilityRecordId = parcel.ReadInt32();
     appCloneIndex = parcel.ReadInt32();
+    extensionAbilityType = parcel.ReadInt32();
+    processType = parcel.ReadInt32();
     return true;
 }
 

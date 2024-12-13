@@ -3698,6 +3698,16 @@ std::string AbilityRecord::GetProcessName() const
     return abilityInfo_.process;
 }
 
+void AbilityRecord::SetExtensionProcessMode(const uint32_t &extensionProcessMode)
+{
+    extensionProcessMode_ = extensionProcessMode;
+}
+
+uint32_t AbilityRecord::GetExtensionProcessMode() const
+{
+    return extensionProcessMode_;
+}
+
 void AbilityRecord::SetUIExtensionAbilityId(const int32_t uiExtensionAbilityId)
 {
     uiExtensionAbilityId_ = uiExtensionAbilityId;
