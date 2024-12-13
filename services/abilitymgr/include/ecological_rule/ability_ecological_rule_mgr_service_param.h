@@ -81,6 +81,7 @@ struct AbilityCallerInfo : public Parcelable {
     int32_t userId = 0;
     int32_t targetApplicationReservedFlag = 0;
     bool isAsCaller = false;
+    std::string targetBundleName;
 
     bool ReadFromParcel(Parcel &parcel);
 
