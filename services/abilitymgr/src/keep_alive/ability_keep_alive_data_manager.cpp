@@ -44,9 +44,32 @@ AbilityKeepAliveDataManager::AbilityKeepAliveDataManager() {}
 
 AbilityKeepAliveDataManager::~AbilityKeepAliveDataManager()
 {
+    std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
     if (kvStorePtr_ != nullptr) {
         dataManager_.CloseKvStore(APP_ID, kvStorePtr_);
     }
+}
+
+DistributedKv::Status AbilityKeepAliveDataManager::RestoreKvStore(DistributedKv::Status status)
+{
+    if (status == DistributedKv::Status::DATA_CORRUPTED) {
+        DistributedKv::Options options = {
+            .createIfMissing = true,
+            .encrypt = false,
+            .autoSync = false,
+            .syncable = false,
+            .securityLevel = DistributedKv::SecurityLevel::S2,
+            .area = DistributedKv::EL1,
+            .kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION,
+            .baseDir = KEEP_ALIVE_STORAGE_DIR,
+        };
+        TAG_LOGI(AAFwkTag::KEEP_ALIVE, "corrupted, deleting db");
+        dataManager_.DeleteKvStore(APP_ID, STORE_ID, options.baseDir);
+        TAG_LOGI(AAFwkTag::KEEP_ALIVE, "deleted corrupted db, recreating db");
+        status = dataManager_.GetSingleKvStore(options, APP_ID, STORE_ID, kvStorePtr_);
+        TAG_LOGI(AAFwkTag::KEEP_ALIVE, "recreate db result:%{public}d", status);
+    }
+    return status;
 }
 
 DistributedKv::Status AbilityKeepAliveDataManager::GetKvStore()
@@ -65,6 +88,7 @@ DistributedKv::Status AbilityKeepAliveDataManager::GetKvStore()
     DistributedKv::Status status = dataManager_.GetSingleKvStore(options, APP_ID, STORE_ID, kvStorePtr_);
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "Error: %{public}d", status);
+        status = RestoreKvStore(status);
         return status;
     }
 
@@ -120,6 +144,10 @@ int32_t AbilityKeepAliveDataManager::InsertKeepAliveData(const KeepAliveInfo &in
 
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "kvStore insert error: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         return ERR_INVALID_OPERATION;
     }
     return ERR_OK;
@@ -144,9 +172,17 @@ int32_t AbilityKeepAliveDataManager::DeleteKeepAliveData(const KeepAliveInfo &in
     }
 
     std::vector<DistributedKv::Entry> allEntries;
-    DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    DistributedKv::Status status = DistributedKv::Status::SUCCESS;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    }
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "GetEntries error: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         return ERR_INVALID_OPERATION;
     }
 
@@ -158,6 +194,10 @@ int32_t AbilityKeepAliveDataManager::DeleteKeepAliveData(const KeepAliveInfo &in
             }
             if (status != DistributedKv::Status::SUCCESS) {
                 TAG_LOGE(AAFwkTag::KEEP_ALIVE, "kvStore delete error: %{public}d", status);
+                {
+                    std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+                    status = RestoreKvStore(status);
+                }
                 return ERR_INVALID_OPERATION;
             }
         }
@@ -187,9 +227,17 @@ KeepAliveStatus AbilityKeepAliveDataManager::QueryKeepAliveData(const KeepAliveI
     }
 
     std::vector<DistributedKv::Entry> allEntries;
-    DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    DistributedKv::Status status = DistributedKv::Status::SUCCESS;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    }
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "GetEntries error: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         kaStatus.code = ERR_INVALID_OPERATION;
         return kaStatus;
     }
@@ -226,9 +274,17 @@ int32_t AbilityKeepAliveDataManager::QueryKeepAliveApplications(
     }
 
     std::vector<DistributedKv::Entry> allEntries;
-    DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    DistributedKv::Status status = DistributedKv::Status::SUCCESS;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    }
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "GetEntries: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         return ERR_INVALID_OPERATION;
     }
 
