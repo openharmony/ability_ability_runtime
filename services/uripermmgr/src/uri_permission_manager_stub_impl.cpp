@@ -423,7 +423,7 @@ std::vector<bool> UriPermissionManagerStubImpl::CheckUriAuthorization(const std:
     uint32_t flag, uint32_t tokenId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "tokenId:%{public}u, flag:%{public}u, uris:%{public}zu",
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "tokenId:%{private}u, flag:%{public}u, uris:%{public}zu",
         tokenId, flag, uriStrVec.size());
     if (!UPMSUtils::IsSAOrSystemAppCall()) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "not SA/SystemApp");
