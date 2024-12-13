@@ -316,6 +316,8 @@ int DialogSessionManager::CreateImplicitSelectorModalDialog(AbilityRequest &abil
     sessionWant.SetParam("appselector.selectorType", static_cast<int>(SelectorType::IMPLICIT_START_SELECTOR));
     bool showCaller = abilityRequest.want.GetBoolParam("showCaller", false);
     sessionWant.SetParam("showCaller", showCaller);
+    sessionWant.SetParam("ohos.ability.param.showDefaultPicker",
+        abilityRequest.want.GetBoolParam("ohos.ability.params.showDefaultPicker", false));
 
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, sessionWant.GetParams(),
         dialogAppInfos, true);
