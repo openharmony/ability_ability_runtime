@@ -49,6 +49,26 @@ AbilityAutoStartupDataManager::~AbilityAutoStartupDataManager()
     }
 }
 
+DistributedKv::Status AbilityAutoStartupDataManager::RestoreKvStore(DistributedKv::Status status)
+{
+    if (status == DistributedKv::Status::DATA_CORRUPTED) {
+        DistributedKv::Options options = { .createIfMissing = true,
+            .encrypt = false,
+            .autoSync = false,
+            .syncable = false,
+            .securityLevel = DistributedKv::SecurityLevel::S2,
+            .area = DistributedKv::EL1,
+            .kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION,
+            .baseDir = AUTO_STARTUP_STORAGE_DIR };
+        TAG_LOGI(AAFwkTag::AUTO_STARTUP, "corrupted, deleting db");
+        dataManager_.DeleteKvStore(APP_ID, STORE_ID, options.baseDir);
+        TAG_LOGI(AAFwkTag::AUTO_STARTUP, "deleted corrupted db, recreating db");
+        status = dataManager_.GetSingleKvStore(options, APP_ID, STORE_ID, kvStorePtr_);
+        TAG_LOGI(AAFwkTag::AUTO_STARTUP, "recreate db result:%{public}d", status);
+    }
+    return status;
+}
+
 DistributedKv::Status AbilityAutoStartupDataManager::GetKvStore()
 {
     DistributedKv::Options options = { .createIfMissing = true,
@@ -63,6 +83,7 @@ DistributedKv::Status AbilityAutoStartupDataManager::GetKvStore()
     DistributedKv::Status status = dataManager_.GetSingleKvStore(options, APP_ID, STORE_ID, kvStorePtr_);
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Error: %{public}d", status);
+        status = RestoreKvStore(status);
         return status;
     }
 
@@ -119,6 +140,10 @@ int32_t AbilityAutoStartupDataManager::InsertAutoStartupData(
 
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore insert error: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         return ERR_INVALID_OPERATION;
     }
     return ERR_OK;
@@ -153,6 +178,10 @@ int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
     }
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore delete error: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         return ERR_INVALID_OPERATION;
     }
     DistributedKv::Value value = ConvertAutoStartupStatusToValue(isAutoStartup, isEdmForce, info.abilityTypeName);
@@ -162,6 +191,10 @@ int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
     }
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore insert error: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         return ERR_INVALID_OPERATION;
     }
 
@@ -197,6 +230,10 @@ int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const AutoStartupIn
 
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore delete error: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         return ERR_INVALID_OPERATION;
     }
     return ERR_OK;
@@ -221,9 +258,17 @@ int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const std::string &
     }
 
     std::vector<DistributedKv::Entry> allEntries;
-    DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    DistributedKv::Status status = DistributedKv::Status::SUCCESS;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    }
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "GetEntries error: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         return ERR_INVALID_OPERATION;
     }
 
@@ -235,6 +280,10 @@ int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const std::string &
             }
             if (status != DistributedKv::Status::SUCCESS) {
                 TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore delete error: %{public}d", status);
+                {
+                    std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+                    status = RestoreKvStore(status);
+                }
                 return ERR_INVALID_OPERATION;
             }
         }
@@ -267,9 +316,17 @@ AutoStartupStatus AbilityAutoStartupDataManager::QueryAutoStartupData(const Auto
     }
 
     std::vector<DistributedKv::Entry> allEntries;
-    DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    DistributedKv::Status status = DistributedKv::Status::SUCCESS;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    }
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "GetEntries error: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         asustatus.code = ERR_INVALID_OPERATION;
         return asustatus;
     }
@@ -298,9 +355,17 @@ int32_t AbilityAutoStartupDataManager::QueryAllAutoStartupApplications(std::vect
     }
 
     std::vector<DistributedKv::Entry> allEntries;
-    DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    DistributedKv::Status status = DistributedKv::Status::SUCCESS;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    }
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "GetEntries: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         return ERR_INVALID_OPERATION;
     }
 
@@ -331,9 +396,17 @@ int32_t AbilityAutoStartupDataManager::GetCurrentAppAutoStartupData(
     }
 
     std::vector<DistributedKv::Entry> allEntries;
-    DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    DistributedKv::Status status = DistributedKv::Status::SUCCESS;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    }
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "GetEntries error: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
         return ERR_INVALID_OPERATION;
     }
 
