@@ -1038,7 +1038,38 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Notify scb's abilityId is %{public}" PRIu64 ".", sessionInfo->uiAbilityId);
     tmpAbilityMap_.emplace(uiAbilityRecord->GetAbilityRecordId(), uiAbilityRecord);
+    PostCallTimeoutTask(uiAbilityRecord);
     return NotifySCBPendingActivation(sessionInfo, abilityRequest);
+}
+
+void UIAbilityLifecycleManager::PostCallTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    CHECK_POINTER(abilityRecord);
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    CHECK_POINTER(handler);
+
+    std::weak_ptr<AbilityRecord> weakRecord(abilityRecord);
+    auto timeoutTask = [self = shared_from_this(), weakRecord]() {
+        auto abilityRecord = weakRecord.lock();
+        if (!abilityRecord) {
+            return;
+        }
+
+        std::lock_guard guard(self->sessionLock_);
+        for (auto it = self->tmpAbilityMap_.begin(); it != self->tmpAbilityMap_.end(); ++it) {
+            if (abilityRecord == it->second) {
+                TAG_LOGW(AAFwkTag::ABILITYMGR, "CallUIAbilityBySCB timeout: %{public}s",
+                    abilityRecord->GetURI().c_str());
+                self->tmpAbilityMap_.erase(it);
+                self->callRequestCache_.erase(abilityRecord);
+                return;
+            }
+        }
+    };
+
+    int timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+        GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE;
+    handler->SubmitTaskJust(timeoutTask, "CallTimeout", timeout);
 }
 
 void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)

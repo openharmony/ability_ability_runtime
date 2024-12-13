@@ -454,6 +454,7 @@ private:
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         bool &isColdStart);
     std::shared_ptr<AbilityRecord> FindRecordFromTmpMap(const AbilityRequest &abilityRequest);
+    void PostCallTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
