@@ -474,7 +474,7 @@ public:
      *
      * @return
      */
-    void TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce, bool isTimeout = false);
+    void TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce);
 
     /**
      * AbilityTerminated, terminate the ability.
