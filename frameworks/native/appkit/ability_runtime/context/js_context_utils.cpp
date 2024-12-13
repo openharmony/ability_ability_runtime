@@ -63,6 +63,7 @@ public:
     napi_value OnGetGroupDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetBundleCodeDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetCloudFileDir(napi_env env, NapiCallbackInfo& info);
+    napi_value OnGetProcessName(napi_env env, NapiCallbackInfo &info);
 
     static napi_value GetCacheDir(napi_env env, napi_callback_info info);
     static napi_value GetTempDir(napi_env env, napi_callback_info info);
@@ -74,6 +75,7 @@ public:
     static napi_value GetGroupDir(napi_env env, napi_callback_info info);
     static napi_value GetBundleCodeDir(napi_env env, napi_callback_info info);
     static napi_value GetCloudFileDir(napi_env env, napi_callback_info info);
+    static napi_value GetProcessName(napi_env env, napi_callback_info info);
 
 protected:
     std::weak_ptr<Context> context_;
@@ -521,6 +523,22 @@ napi_value JsBaseContext::OnGetCloudFileDir(napi_env env, NapiCallbackInfo& info
     return CreateJsValue(env, path);
 }
 
+napi_value JsBaseContext::GetProcessName(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetProcessName, BASE_CONTEXT_NAME);
+}
+
+napi_value JsBaseContext::OnGetProcessName(napi_env env, NapiCallbackInfo &info)
+{
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "context is already released");
+        return CreateJsUndefined(env);
+    }
+    std::string name = context->GetProcessName();
+    return CreateJsValue(env, name);
+}
+
 napi_value JsBaseContext::OnCreateBundleContext(napi_env env, NapiCallbackInfo& info)
 {
     if (!CheckCallerIsSystemApp()) {
@@ -758,6 +776,7 @@ void BindPropertyAndFunction(napi_env env, napi_value object, const char* module
     BindNativeProperty(env, object, "bundleCodeDir", JsBaseContext::GetBundleCodeDir);
     BindNativeProperty(env, object, "cloudFileDir", JsBaseContext::GetCloudFileDir);
     BindNativeProperty(env, object, "area", JsBaseContext::GetArea);
+    BindNativeProperty(env, object, "processName", JsBaseContext::GetProcessName);
 
     BindNativeFunction(env, object, "createBundleContext", moduleName, JsBaseContext::CreateBundleContext);
     BindNativeFunction(env, object, "getApplicationContext", moduleName, JsBaseContext::GetApplicationContext);
