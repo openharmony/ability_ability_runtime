@@ -1000,7 +1000,8 @@ int32_t AppMgrService::StartRenderProcess(const std::string &renderParam, int32_
 
 void AppMgrService::AttachRenderProcess(const sptr<IRemoteObject> &scheduler)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::APPMGR, "AttachRenderProcess");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AttachRenderProcess failed, not ready.");
         return;

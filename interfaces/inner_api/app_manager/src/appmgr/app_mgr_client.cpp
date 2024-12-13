@@ -831,6 +831,7 @@ int AppMgrClient::StartRenderProcess(const std::string &renderParam,
 
 void AppMgrClient::AttachRenderProcess(const sptr<IRenderScheduler> &renderScheduler)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!renderScheduler) {
         TAG_LOGI(AAFwkTag::APPMGR, "renderScheduler is nullptr");
         return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_APP_MALLOC_INFO_H
-#define OHOS_ABILITY_RUNTIME_APP_MALLOC_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_START_WINDOW_OPTION_H
+#define OHOS_ABILITY_RUNTIME_START_WINDOW_OPTION_H
 
 #include "parcel.h"
-#include "iremote_object.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-struct MallocInfo : public Parcelable {
-    uint64_t usmblks;
-    uint64_t uordblks;
-    uint64_t fordblks;
-    uint64_t hblkhd;
+namespace Media {
+class PixelMap;
+}
+namespace AAFwk {
+class StartWindowOption final : public Parcelable {
+public:
+    StartWindowOption() = default;
+    ~StartWindowOption() = default;
 
+    bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
-    static MallocInfo *Unmarshalling(Parcel &parcel);
-};
-}  // namespace AppExecFwk
-}  // namespace OHOS
+    static StartWindowOption *Unmarshalling(Parcel &parcel);
 
-#endif  // OHOS_ABILITY_RUNTIME_APP_MALLOC_INFO_H
+    bool hasStartWindow = false;
+    std::string startWindowBackgroundColor;
+    std::shared_ptr<Media::PixelMap> startWindowIcon = nullptr;
+};
+}  // namespace AAFwk
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_START_WINDOW_OPTION_H

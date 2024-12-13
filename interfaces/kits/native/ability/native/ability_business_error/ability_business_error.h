@@ -162,6 +162,9 @@ enum class AbilityErrorCode {
     // Not support back to caller.
     ERROR_CODE_NOT_SUPPROT_BACK_TO_CALLER = 16000075,
 
+    // Target application not found.
+    ERROR_CODE_GET_BUNFLE_INFO_FAILED = 16000081,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 

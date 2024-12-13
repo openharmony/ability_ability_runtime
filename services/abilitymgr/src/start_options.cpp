@@ -17,6 +17,7 @@
 
 #include "hilog_tag_wrapper.h"
 #include "process_options.h"
+#include "start_window_option.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -35,6 +36,7 @@ StartOptions::StartOptions(const StartOptions &other)
     windowHeightUsed_ = other.windowHeightUsed_;
     processOptions = other.processOptions;
     windowFocused_ = other.windowFocused_;
+    startWindowOption = other.startWindowOption;
 }
 
 StartOptions &StartOptions::operator=(const StartOptions &other)
@@ -53,6 +55,7 @@ StartOptions &StartOptions::operator=(const StartOptions &other)
         windowHeightUsed_ = other.windowHeightUsed_;
         processOptions = other.processOptions;
         windowFocused_ = other.windowFocused_;
+        startWindowOption = other.startWindowOption;
     }
     return *this;
 }
@@ -72,6 +75,7 @@ bool StartOptions::ReadFromParcel(Parcel &parcel)
     windowWidthUsed_ = parcel.ReadBool();
     windowHeightUsed_ = parcel.ReadBool();
     processOptions.reset(parcel.ReadParcelable<ProcessOptions>());
+    startWindowOption.reset(parcel.ReadParcelable<StartWindowOption>());
     return true;
 }
 
@@ -106,6 +110,10 @@ bool StartOptions::Marshalling(Parcel &parcel) const
     parcel.WriteBool(windowHeightUsed_);
     if (!parcel.WriteParcelable(processOptions.get())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Write processOptions failed.");
+        return false;
+    }
+    if (!parcel.WriteParcelable(startWindowOption.get())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write startWindowOption failed");
         return false;
     }
     return true;

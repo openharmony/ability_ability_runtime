@@ -741,7 +741,7 @@ int AbilityManagerService::ImplicitStartAbilityAsCaller(const Want &want, const 
 }
 
 int AbilityManagerService::StartAbilityAsCallerDetails(const Want &want, const sptr<IRemoteObject> &callerToken,
-    sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode, bool isImplicit)
+    sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode, bool isImplicit, bool isAppCloneSelector)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_CALLER_IS_SYSTEM_APP;
@@ -769,7 +769,7 @@ int AbilityManagerService::StartAbilityAsCallerDetails(const Want &want, const s
         AbilityUtil::AddAbilityJumpRuleToBms(callerPkg, targetPkg, GetUserId());
     }
     int32_t ret = StartAbilityWrap(newWant, callerToken, requestCode, false, userId, true,
-        0, false, isImplicit);
+        0, false, isImplicit, false, isAppCloneSelector);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
@@ -844,7 +844,7 @@ bool AbilityManagerService::StartAbilityInChain(StartAbilityParams &params, int 
 
 int AbilityManagerService::StartAbilityWrap(const Want &want, const sptr<IRemoteObject> &callerToken,
     int requestCode, bool isPendingWantCaller, int32_t userId, bool isStartAsCaller, uint32_t specifyToken,
-    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly)
+    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly, bool isAppCloneSelector)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     StartAbilityParams startParams(const_cast<Want &>(want));
@@ -859,9 +859,8 @@ int AbilityManagerService::StartAbilityWrap(const Want &want, const sptr<IRemote
         return result;
     }
 
-    return StartAbilityInner(want, callerToken,
-        requestCode, isPendingWantCaller, userId, isStartAsCaller, specifyToken, isForegroundToRestartApp, isImplicit,
-        isUIAbilityOnly);
+    return StartAbilityInner(want, callerToken, requestCode, isPendingWantCaller, userId, isStartAsCaller, specifyToken,
+        isForegroundToRestartApp, isImplicit, isUIAbilityOnly, isAppCloneSelector);
 }
 
 void AbilityManagerService::SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest)
@@ -974,7 +973,7 @@ int AbilityManagerService::CheckCallPermission(const Want& want, const AppExecFw
 
 int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
     int requestCode, bool isPendingWantCaller, int32_t userId, bool isStartAsCaller, uint32_t specifyTokenId,
-    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly)
+    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly, bool isAppCloneSelector)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string dialogSessionId = want.GetStringParam("dialogSessionId");
@@ -1133,35 +1132,37 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         return ERR_STATIC_CFG_PERMISSION;
     }
 
-    result = CheckCallPermission(want, abilityInfo, abilityRequest, isForegroundToRestartApp,
-        isSendDialogResult, specifyTokenId, callerBundleName);
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckCallPermission error, result is %{public}d.", result);
-        return result;
-    }
+    if (!isAppCloneSelector) {
+        result = CheckCallPermission(want, abilityInfo, abilityRequest, isForegroundToRestartApp,
+            isSendDialogResult, specifyTokenId, callerBundleName);
+        if (result != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckCallPermission error, result is %{public}d.", result);
+            return result;
+        }
 
-    Want newWant = abilityRequest.want;
-    AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, requestCode, GetUserId(),
-        true, callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo), isStartAsCaller, appIndex);
-    result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        afterCheckExecuter_->DoProcess(afterCheckParam);
-    bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
-    newWant.RemoveParam("queryWantFromErms");
-    if (result != ERR_OK && isReplaceWantExist == false) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "DoProcess failed or replaceWant not exist");
-        return result;
+        Want newWant = abilityRequest.want;
+        AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, requestCode, GetUserId(),
+            true, callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo), isStartAsCaller, appIndex);
+        result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
+            afterCheckExecuter_->DoProcess(afterCheckParam);
+        bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
+        newWant.RemoveParam("queryWantFromErms");
+        if (result != ERR_OK && isReplaceWantExist == false) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "DoProcess failed or replaceWant not exist");
+            return result;
+        }
+    #ifdef SUPPORT_SCREEN
+        if (result != ERR_OK && isReplaceWantExist && !isSendDialogResult &&
+            callerBundleName != BUNDLE_NAME_DIALOG) {
+            return DialogSessionManager::GetInstance().HandleErmsResult(abilityRequest, GetUserId(), newWant);
+        }
+        if (result == ERR_OK &&
+            DialogSessionManager::GetInstance().IsCreateCloneSelectorDialog(abilityInfo.bundleName, GetUserId())) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "create clone selector dialog");
+            return CreateCloneSelectorDialog(abilityRequest, GetUserId());
+        }
+    #endif
     }
-#ifdef SUPPORT_SCREEN
-    if (result != ERR_OK && isReplaceWantExist && !isSendDialogResult &&
-        callerBundleName != BUNDLE_NAME_DIALOG) {
-        return DialogSessionManager::GetInstance().HandleErmsResult(abilityRequest, GetUserId(), newWant);
-    }
-    if (result == ERR_OK &&
-        DialogSessionManager::GetInstance().IsCreateCloneSelectorDialog(abilityInfo.bundleName, GetUserId())) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "create clone selector dialog");
-        return CreateCloneSelectorDialog(abilityRequest, GetUserId());
-    }
-#endif
     if (!AbilityUtil::IsSystemDialogAbility(abilityInfo.bundleName, abilityInfo.name)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "PreLoadAppDataAbilities:%{public}s.", abilityInfo.bundleName.c_str());
         result = PreLoadAppDataAbilities(abilityInfo.bundleName, validUserId);
@@ -1811,6 +1812,9 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         abilityRequest.userId = oriValidUserId;
         abilityRequest.want.SetParam(IS_CALL_BY_SCB, false);
         abilityRequest.processOptions = startOptions.processOptions;
+        if (IPCSkeleton::GetCallingTokenID() == abilityRequest.appInfo.accessTokenId) {
+            abilityRequest.startWindowOption = startOptions.startWindowOption;
+        }
         auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         return uiAbilityManager->NotifySCBToStartUIAbility(abilityRequest);
@@ -8115,6 +8119,9 @@ void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObjec
     want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
     want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
     want.RemoveParam(IS_SHELL_CALL);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
 
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!abilityRecord) {
@@ -8133,18 +8140,16 @@ void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObjec
             want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
             want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, nativeName);
         }
-        want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
         want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, bundleName);
-        want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
         want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, std::string(""));
+        want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, 0);
         return;
     }
     std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
-    want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
-    want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, abilityRecord->GetAppIndex());
     UpdateSignatureInfo(callerBundleName, want);
 }
 
@@ -8174,6 +8179,8 @@ void AbilityManagerService::UpdateCallerInfoFromToken(Want& want, const sptr<IRe
     std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
     want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
+    want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, abilityRecord->GetAppIndex());
     UpdateSignatureInfo(callerBundleName, want);
 }
 
@@ -8323,6 +8330,8 @@ void AbilityManagerService::UpdateAsCallerInfoFromToken(Want& want, sptr<IRemote
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
+    want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, abilityRecord->GetAppIndex());
     UpdateSignatureInfo(callerBundleName, want);
 }
 
@@ -8351,6 +8360,8 @@ void AbilityManagerService::UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<
     want.SetParam(Want::PARAM_RESV_CALLER_PID, sourceInfo->callerPid);
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, sourceInfo->callerAbilityName);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
+    want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, sourceInfo->callerAppCloneIndex);
     if (callerBundleName == "") {
         want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, sourceInfo->callerNativeName);
         return;
@@ -8372,11 +8383,13 @@ bool AbilityManagerService::UpdateAsCallerInfoFromDialog(Want& want)
     int32_t pid = dialogCallerWant.GetIntParam(Want::PARAM_RESV_CALLER_PID, 0);
     std::string callerBundleName = dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     std::string callerAbilityName = dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    int32_t callerAppCloneIndex = dialogCallerWant.GetIntParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, 0);
     want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
     want.SetParam(Want::PARAM_RESV_CALLER_UID, uid);
     want.SetParam(Want::PARAM_RESV_CALLER_PID, pid);
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, callerAppCloneIndex);
     want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
     want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
     want.RemoveParam(IS_SHELL_CALL);

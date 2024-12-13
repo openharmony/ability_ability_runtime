@@ -34,10 +34,10 @@
 #include "scene_board_judgement.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
+#include "window_visibility_info.h"
 #include "cache_process_manager.h"
 #include "res_sched_util.h"
 #include "ui_extension_utils.h"
-#include "window_visibility_info.h"
 #include "uri_permission_manager_client.h"
 namespace OHOS {
 namespace AppExecFwk {
@@ -535,7 +535,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecord(const i
 void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token,
     std::shared_ptr<AppMgrServiceInner> serviceInner)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "token is nullptr.");
         return;
@@ -556,8 +556,6 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
             pid_t pid = appRecord->GetPriorityObject()->GetPid();
             (void)serviceInner->KillProcessByPid(pid, "AttachTimeoutKillSCB");
         }
-        appRecord->StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(
-            AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
 
     if ((isSCB || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
@@ -565,14 +563,10 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
         appRecord->SetTerminating(shared_from_this());
     }
 
-    std::weak_ptr<AppRunningRecord> appRecordWptr(appRecord);
-    auto timeoutTask = [appRecordWptr, token]() {
-        auto appRecord = appRecordWptr.lock();
-        if (appRecord == nullptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "null appRecord");
-            return;
+    auto timeoutTask = [appRecord, token]() {
+        if (appRecord) {
+            appRecord->TerminateAbility(token, true);
         }
-        appRecord->TerminateAbility(token, true, true);
     };
     appRecord->PostTask("DELAY_KILL_ABILITY", AMSEventHandler::KILL_PROCESS_TIMEOUT, timeoutTask);
 }
@@ -1615,9 +1609,10 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
         return false;
     }
     if (appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT) {
-        TAG_LOGI(AAFwkTag::APPMGR, "support porcess cache should not force clean");
+        TAG_LOGI(AAFwkTag::APPMGR, "support process cache should not force clean");
         return false;
     }
+
     auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(abilityToken);
     if (!abilityRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed to get abilityRecord.");
