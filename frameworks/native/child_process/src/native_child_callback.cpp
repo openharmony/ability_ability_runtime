@@ -62,6 +62,9 @@ void NativeChildCallback::OnError(int32_t errCode)
 
     TAG_LOGI(AAFwkTag::PROCESSMGR, "Native child process start err %{public}d", errCode);
     callback_(errCode, nullptr);
+    
+    callback_ = nullptr;
+    ChildCallbackManager::GetInstance().RemoveRemoteObject(this);
 }
 
 } // namespace AbilityRuntime
