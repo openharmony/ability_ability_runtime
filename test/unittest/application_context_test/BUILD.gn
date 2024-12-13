@@ -24,6 +24,7 @@ ohos_unittest("application_context_test") {
   ]
 
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/exit_reason.cpp",
     "${ability_runtime_test_path}/unittest/application_context_test/mock_context_impl.cpp",
     "application_context_test.cpp",
   ]
