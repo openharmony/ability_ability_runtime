@@ -360,10 +360,10 @@ std::map<int, std::list<AppfreezeManager::PeerBinderInfo>> AppfreezeManager::Bin
     std::sort(asyncBinderPairs.begin(), asyncBinderPairs.end(),
         [] (const auto& pairOne, const auto& pairTwo) { return pairOne.second > pairTwo.second; });
 
-    int freeAsyncSpaceSize = freeAsyncSpacePairs.size();
-    int asyncBinderSize = asyncBinderPairs.size();
-    int individualMaxSize = 2;
-    for (int i = 0; i < individualMaxSize; i++) {
+    size_t freeAsyncSpaceSize = freeAsyncSpacePairs.size();
+    size_t asyncBinderSize = asyncBinderPairs.size();
+    size_t individualMaxSize = 2;
+    for (size_t i = 0; i < individualMaxSize; i++) {
         if (i < freeAsyncSpaceSize) {
             asyncPids.insert(freeAsyncSpacePairs[i].first);
         }
