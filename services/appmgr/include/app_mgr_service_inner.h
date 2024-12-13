@@ -1423,6 +1423,8 @@ public:
      */
     void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
 
+    bool HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);
@@ -1780,6 +1782,7 @@ private:
     void HandlePreloadApplication(const PreloadRequest &request);
 
     std::string GetSpecifiedProcessFlag(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want);
+    std::string GetSpecifiedProcessFlag(const AbilityInfo &abilityInfo, const AAFwk::Want &want);
 
     void LoadAbilityNoAppRecord(const std::shared_ptr<AppRunningRecord> appRecord,
         bool isShellCall, std::shared_ptr<ApplicationInfo> appInfo,
