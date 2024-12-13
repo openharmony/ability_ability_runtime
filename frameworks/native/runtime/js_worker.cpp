@@ -103,7 +103,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
         std::string instanceName = "workerThread_" + std::to_string(instanceId);
         bool needBreakPoint = ConnectServerManager::Get().AddInstance(instanceId, instanceId, instanceName);
         if (g_nativeStart) {
-            TAG_LOGD(AAFwkTag::APPMGR, "native: true, set needBreakPoint: false");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "native: true, set needBreakPoint: false");
             needBreakPoint = false;
         }
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
