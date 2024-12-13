@@ -277,7 +277,7 @@ constexpr int32_t NWEB_PRELOAD_DELAY = 3000;
 constexpr const char* APP_INSTANCE_KEY_0 = "app_instance_0";
 
 // Max child process number limitation for pc device.
-constexpr int32 PC_MAX_CHILD_PROCESS_NUM = 50;
+constexpr int32_t PC_MAX_CHILD_PROCESS_NUM = 50;
 
 int32_t GetUserIdByUid(int32_t uid)
 {
