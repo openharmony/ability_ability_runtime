@@ -86,6 +86,7 @@ ohos_unittest("cj_application_context_test") {
     "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
+    "window_manager:cj_window_ffi",
     "window_manager:libwsutils",
     "window_manager:scene_session",
   ]
