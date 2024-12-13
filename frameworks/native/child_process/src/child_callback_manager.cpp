@@ -27,7 +27,7 @@ ChildCallbackManager &ChildCallbackManager::GetInstance()
 void ChildCallbackManager::AddRemoteObject(sptr<IRemoteObject> nativeCallback)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    callbackStubs_.emplace_back(nativeCallback);
+    callbackStubs_.emplace(nativeCallback);
 }
 
 void ChildCallbackManager::RemoveRemoteObject(sptr<IRemoteObject> nativeCallback)

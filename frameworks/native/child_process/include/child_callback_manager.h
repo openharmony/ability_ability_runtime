@@ -19,6 +19,7 @@
 #include "iremote_stub.h"
 #include "nocopyable.h"
 #include <mutex>
+#include <set>
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -38,6 +39,7 @@ private:
     ChildCallbackManager() = default;
     DISALLOW_COPY_AND_MOVE(ChildCallbackManager);
 };
+
 
 } // namespace AbilityRuntime
 } // namespace OHOS
