@@ -8222,6 +8222,7 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
         return AAFwk::ERR_NOT_SUPPORT_NATIVE_CHILD_PROCESS;
     }
 
+    std::lock_guard<std::mutex> lock(childProcessRecordMapMutex_);
     auto childRecordMap = appRecord->GetChildProcessRecordMap();
     auto count = count_if(childRecordMap.begin(), childRecordMap.end(), [] (const auto &pair) -> bool {
         return pair.second->GetChildProcessType() == CHILD_PROCESS_TYPE_NATIVE;

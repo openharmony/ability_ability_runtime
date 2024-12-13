@@ -1951,6 +1951,8 @@ private:
     std::atomic<int32_t> willKillPidsNum_ = 0;
     std::shared_ptr<AAFwk::TaskHandlerWrap> delayKillTaskHandler_;
     std::unordered_set<std::string> nwebPreloadSet_ {};
+
+    std::mutex childProcessRecordMapMutex_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
