@@ -467,7 +467,7 @@ ErrCode WantAgentHelper::GetType(const std::shared_ptr<WantAgent> &agent, int32_
 ErrCode WantAgentHelper::GetWant(const std::shared_ptr<WantAgent> &agent, std::shared_ptr<AAFwk::Want> &want)
 {
     if ((agent == nullptr) || (agent->GetPendingWant() == nullptr)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "WantAgent or PendingWant invalid input param.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param.");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
     }
 
