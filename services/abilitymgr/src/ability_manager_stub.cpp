@@ -407,6 +407,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTenth(uint32_t code, MessageParcel &
     if (interfaceCode == AbilityManagerInterfaceCode::GET_PROCESS_RUNNING_INFO) {
         return GetProcessRunningInfosInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_INTENT_EXEMPTION_INFO) {
+        return GetAllIntentExemptionInfoInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::SET_ABILITY_CONTROLLER) {
         return SetAbilityControllerInner(data, reply);
     }
@@ -2436,6 +2439,22 @@ int AbilityManagerStub::GetProcessRunningInfosInner(MessageParcel &data, Message
 {
     std::vector<AppExecFwk::RunningProcessInfo> infos;
     auto result = GetProcessRunningInfos(infos);
+    reply.WriteInt32(infos.size());
+    for (auto &it : infos) {
+        if (!reply.WriteParcelable(&it)) {
+            return ERR_INVALID_VALUE;
+        }
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::GetAllIntentExemptionInfoInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<AppExecFwk::IntentExemptionInfo> infos;
+    auto result = GetAllIntentExemptionInfo(infos);
     reply.WriteInt32(infos.size());
     for (auto &it : infos) {
         if (!reply.WriteParcelable(&it)) {
