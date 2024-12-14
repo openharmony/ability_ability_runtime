@@ -342,6 +342,7 @@ public:
      */
     int32_t ScheduleDumpIpcStat(std::string& result) override;
 
+    void ScheduleClearPageStack() override;
     void ScheduleCacheProcess() override;
     /**
      * ScheduleDumpFfrt, call ScheduleDumpFfrt(std::string& result) through proxy project,

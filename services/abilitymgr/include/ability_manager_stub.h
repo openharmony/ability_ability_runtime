@@ -220,7 +220,9 @@ private:
     int AddFreeInstallObserverInner(MessageParcel &data, MessageParcel &reply);
 
     int EnableRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int SubmitSaveRecoveryInfoInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int ScheduleClearRecoveryPageStackInner(MessageParcel &data, MessageParcel &reply);
     int GetTopAbilityInner(MessageParcel &data, MessageParcel &reply);
     int GetElementNameByTokenInner(MessageParcel &data, MessageParcel &reply);
     int DumpAbilityInfoDoneInner(MessageParcel &data, MessageParcel &reply);

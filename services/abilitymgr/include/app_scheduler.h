@@ -234,7 +234,7 @@ public:
      *
      * @param bundleName.
      */
-    int KillApplication(const std::string &bundleName);
+    int KillApplication(const std::string &bundleName, const bool clearPageStack = true);
 
     /**
      * ForceKillApplication, force kill the application.

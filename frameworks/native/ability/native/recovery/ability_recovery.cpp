@@ -25,6 +25,7 @@
 #include "context/application_context.h"
 #include "file_ex.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "napi/native_api.h"
@@ -38,6 +39,8 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
+constexpr size_t DEFAULT_RECOVERY_MAX_RESTORE_SIZE = 10 * 1024;
+
 static std::string GetSaveAppCachePath(int32_t savedStateId)
 {
     auto context = AbilityRuntime::Context::GetApplicationContext();
@@ -80,11 +83,13 @@ bool AbilityRecovery::InitAbilityInfo(const std::shared_ptr<AbilityRuntime::UIAb
     return true;
 }
 
-void AbilityRecovery::EnableAbilityRecovery(uint16_t restartFlag, uint16_t saveFlag, uint16_t saveMode)
+void AbilityRecovery::EnableAbilityRecovery(bool useAppSettedValue, uint16_t restartFlag, uint16_t saveFlag,
+    uint16_t saveMode)
 {
     isEnable_ = true;
     restartFlag_ = restartFlag;
-    saveOccasion_ = saveFlag;
+    useAppSettedValue_.store(useAppSettedValue);
+    saveOccasion_ = useAppSettedValue ? saveFlag : SaveOccasionFlag::SAVE_WHEN_BACKGROUND;
     saveMode_ = saveMode;
 }
 
@@ -100,7 +105,7 @@ void AbilityRecovery::SetJsAbility(uintptr_t ability)
 
 bool AbilityRecovery::SaveAbilityState()
 {
-    TAG_LOGD(AAFwkTag::RECOVERY, "begin");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto ability = ability_.lock();
     auto abilityInfo = abilityInfo_.lock();
     if (ability == nullptr || abilityInfo == nullptr) {
@@ -116,12 +121,14 @@ bool AbilityRecovery::SaveAbilityState()
     }
 
 #ifdef SUPPORT_GRAPHICS
-    std::string pageStack = ability->GetContentInfo();
+    std::string pageStack = DefaultRecovery() ? ability->GetContentInfoForDefaultRecovery() :
+        ability->GetContentInfoForRecovery();
     if (!pageStack.empty()) {
         wantParams.SetParam("pageStack", AAFwk::String::Box(pageStack));
     } else {
         TAG_LOGE(AAFwkTag::RECOVERY, "Failed to get page stack");
     }
+    TAG_LOGD(AAFwkTag::RECOVERY, "pageStack size: %{public}zu", pageStack.size());
 #endif
     if (saveMode_ == SaveModeFlag::SAVE_WITH_FILE) {
         SerializeDataToFile(missionId_, wantParams);
@@ -133,6 +140,7 @@ bool AbilityRecovery::SaveAbilityState()
 
 bool AbilityRecovery::SerializeDataToFile(int32_t savedStateId, WantParams& params)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string file = GetSaveAppCachePath(savedStateId);
     if (file.empty()) {
         TAG_LOGE(AAFwkTag::RECOVERY, "failed to persisted file path");
@@ -155,22 +163,32 @@ bool AbilityRecovery::SerializeDataToFile(int32_t savedStateId, WantParams& para
         close(fd);
         return false;
     }
+
+    if (DefaultRecovery() && (sz > DEFAULT_RECOVERY_MAX_RESTORE_SIZE)) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "data is too large, size: %{public}zu", sz);
+        close(fd);
+        return false;
+    }
+
     ssize_t nwrite = write(fd, reinterpret_cast<uint8_t*>(buf), sz);
     if (nwrite <= 0) {
         TAG_LOGE(AAFwkTag::RECOVERY, "failed to persist parcel data %{public}d", errno);
     }
+    TAG_LOGD(AAFwkTag::RECOVERY, "file size: %{public}zu", sz);
     close(fd);
     return true;
 }
 
 bool AbilityRecovery::ReadSerializeDataFromFile(int32_t savedStateId, WantParams& params)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string file = GetSaveAppCachePath(savedStateId);
     if (file.empty()) {
         TAG_LOGE(AAFwkTag::RECOVERY, "failed to persisted file path");
         return false;
     }
 
+    TAG_LOGD(AAFwkTag::RECOVERY, "file path %{public}s", file.c_str());
     char path[PATH_MAX] = {0};
     if (realpath(file.c_str(), path) == nullptr) {
         TAG_LOGE(AAFwkTag::RECOVERY, "errno is %{public}d.", errno);
@@ -225,6 +243,7 @@ bool AbilityRecovery::ReadSerializeDataFromFile(int32_t savedStateId, WantParams
 
 bool AbilityRecovery::ScheduleSaveAbilityState(StateReason reason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!isEnable_) {
         TAG_LOGE(AAFwkTag::RECOVERY, "not enable");
         return false;
@@ -254,12 +273,17 @@ bool AbilityRecovery::ScheduleSaveAbilityState(StateReason reason)
             return false;
         }
         abilityMgr->EnableRecoverAbility(token);
+        if (reason == StateReason::LIFECYCLE && DefaultRecovery()) {
+            TAG_LOGD(AAFwkTag::RECOVERY, "AppRecovery ScheduleSaveAbilityState SubmitSaveRecoveryInfo");
+            abilityMgr->SubmitSaveRecoveryInfo(token);
+        }
     }
     return ret;
 }
 
 bool AbilityRecovery::ScheduleRecoverAbility(StateReason reason, const Want *want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!isEnable_) {
         TAG_LOGE(AAFwkTag::RECOVERY, "not enable");
         return false;
@@ -312,6 +336,7 @@ bool AbilityRecovery::IsOnForeground()
 
 bool AbilityRecovery::LoadSavedState(StateReason reason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abilityInfo = abilityInfo_.lock();
     if (abilityInfo == nullptr) {
         TAG_LOGE(AAFwkTag::RECOVERY, "abilityInfo is nullptr");
@@ -344,6 +369,7 @@ bool AbilityRecovery::LoadSavedState(StateReason reason)
 
 bool AbilityRecovery::ScheduleRestoreAbilityState(StateReason reason, const Want &want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!isEnable_) {
         TAG_LOGE(AAFwkTag::RECOVERY, "not enable");
         return false;
@@ -369,6 +395,7 @@ bool AbilityRecovery::ScheduleRestoreAbilityState(StateReason reason, const Want
 
 std::string AbilityRecovery::GetSavedPageStack(StateReason reason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!LoadSavedState(reason)) {
         TAG_LOGE(AAFwkTag::RECOVERY, "no saved state ");
         return "";
@@ -424,6 +451,11 @@ uint16_t AbilityRecovery::GetSaveOccasionFlag() const
 uint16_t AbilityRecovery::GetSaveModeFlag() const
 {
     return saveMode_;
+}
+
+bool AbilityRecovery::DefaultRecovery() const
+{
+    return !(useAppSettedValue_.load());
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
