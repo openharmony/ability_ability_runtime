@@ -411,5 +411,15 @@ Global::Resource::DeviceType AbilityStageContext::GetDeviceType() const
 
     return contextImpl_->GetDeviceType();
 }
+
+std::shared_ptr<Context> AbilityStageContext::CreateAreaModeContext(int areaMode)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid contextImpl");
+        return nullptr;
+    }
+
+    return contextImpl_->CreateAreaModeContext(areaMode);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

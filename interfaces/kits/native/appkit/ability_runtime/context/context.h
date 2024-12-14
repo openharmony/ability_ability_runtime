@@ -276,6 +276,15 @@ public:
     virtual Global::Resource::DeviceType GetDeviceType() const = 0;
 
     /**
+     * @brief Create a area mode context.
+     *
+     * @param areaMode Indicates the area mode.
+     *
+     * @return Returns the context with the specified area mode.
+     */
+    virtual std::shared_ptr<Context> CreateAreaModeContext(int areaMode) = 0;
+
+    /**
      * @brief Getting derived class
      *
      * @tparam T template

@@ -66,6 +66,7 @@ public:
     std::string GetProcessName() override;
     int32_t GetSystemDatabaseDir(const std::string &groupId, bool checkExist, std::string &databaseDir) override;
     int32_t GetSystemPreferencesDir(const std::string &groupId, bool checkExist, std::string &preferencesDir) override;
+    std::shared_ptr<Context> CreateAreaModeContext(int areaMode) override;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
