@@ -187,5 +187,10 @@ int32_t MockAbilityRuntimeContext::GetSystemPreferencesDir(const std::string &gr
 {
     return 0;
 }
+
+std::shared_ptr<Context> MockAbilityRuntimeContext::CreateAreaModeContext(int areaMode)
+{
+    return {};
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

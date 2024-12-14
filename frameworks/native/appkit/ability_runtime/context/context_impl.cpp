@@ -1487,5 +1487,33 @@ void ContextImpl::PrintTokenInfo() const
             tokenProxyObject->GetHandle(), remoteDescriptor.c_str());
     }
 }
+
+std::shared_ptr<Context> ContextImpl::CreateAreaModeContext(int areaMode)
+{
+    std::shared_ptr<ContextImpl> contextImpl = std::make_shared<ContextImpl>();
+    contextImpl->token_ = token_;
+    contextImpl->applicationInfo_ = applicationInfo_;
+    contextImpl->parentContext_ = parentContext_;
+    contextImpl->resourceManager_ = resourceManager_;
+    contextImpl->hapModuleInfo_ = hapModuleInfo_;
+    contextImpl->config_ = config_;
+    contextImpl->overlayModuleInfos_ = overlayModuleInfos_;
+    {
+        std::lock_guard<std::mutex> lock(checkedDirSetLock_);
+        contextImpl->checkedDirSet_ = checkedDirSet_;
+    }
+    {
+        std::lock_guard<std::mutex> lock(bundleManagerMutex_);
+        contextImpl->bundleMgr_ = bundleMgr_;
+    }
+    {
+        std::lock_guard<std::mutex> lock(overlayMgrProxyMutex_);
+        contextImpl->overlayMgrProxy_ = overlayMgrProxy_;
+    }
+    contextImpl->resetFlag_ = resetFlag_;
+    contextImpl->processName_ = processName_;
+    contextImpl->SwitchArea(areaMode);
+    return contextImpl;
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

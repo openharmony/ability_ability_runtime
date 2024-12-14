@@ -901,5 +901,10 @@ std::string ApplicationContext::GetDataDir()
     TAG_LOGD(AAFwkTag::APPKIT, "GetDataDir is %{public}s", dataDir_.c_str());
     return dataDir_;
 }
+
+std::shared_ptr<Context> ApplicationContext::CreateAreaModeContext(int areaMode)
+{
+    return contextImpl_ ? contextImpl_->CreateAreaModeContext(areaMode) : nullptr;
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
