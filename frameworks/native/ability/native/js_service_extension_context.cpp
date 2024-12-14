@@ -52,6 +52,7 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
+constexpr const char* ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 
 class StartAbilityByCallParameters {
 public:
@@ -179,6 +180,11 @@ public:
     static napi_value PreStartMission(napi_env env, napi_callback_info info)
     {
         GET_NAPI_INFO_AND_CALL(env, info, JsServiceExtensionContext, OnPreStartMission);
+    }
+
+    static napi_value OpenAtomicService(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsServiceExtensionContext, OnOpenAtomicService);
     }
 
 private:
@@ -380,6 +386,74 @@ private:
         NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnOpenLink", env,
             CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), nullptr));
         
+        return result;
+    }
+    napi_value OnOpenAtomicService(napi_env env, NapiCallbackInfo &info)
+    {
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "OpenAtomicService");
+        if (info.argc == ARGC_ZERO) {
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+
+        std::string appId;
+        if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], appId)) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "parse appId failed");
+            ThrowInvalidParamError(env, "Parse param appId failed, appId must be string.");
+            return CreateJsUndefined(env);
+        }
+
+        AAFwk::Want want;
+        AAFwk::StartOptions startOptions;
+        if (info.argc > ARGC_ONE && CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
+            TAG_LOGD(AAFwkTag::SERVICE_EXT, "atomic service options is used");
+            if (!AppExecFwk::UnwrapStartOptionsAndWant(env, info.argv[INDEX_ONE], startOptions, want)) {
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid atomic service options");
+                ThrowInvalidParamError(env, "Parse param startOptions failed, startOptions must be StartOption.");
+                return CreateJsUndefined(env);
+            }
+        }
+
+        std::string bundleName = ATOMIC_SERVICE_PREFIX + appId;
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "bundleName: %{public}s", bundleName.c_str());
+        want.SetBundle(bundleName);
+        want.AddFlags(Want::FLAG_INSTALL_ON_DEMAND);
+        std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count());
+        want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
+        return OpenAtomicServiceInner(env, want, startOptions, startTime);
+    }
+
+    napi_value OpenAtomicServiceInner(napi_env env, const AAFwk::Want &want, const AAFwk::StartOptions &options,
+        std::string startTime)
+    {
+        auto innerErrorCode = std::make_shared<int>(ERR_OK);
+        NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, options, innerErrorCode]() {
+            auto context = weak.lock();
+            if (!context) {
+                TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
+                *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+                return;
+            }
+            *innerErrorCode = context->OpenAtomicService(want, options);
+        };
+        NapiAsyncTask::CompleteCallback complete = [innerErrorCode, startTime, want, observer = freeInstallObserver_](
+            napi_env env, NapiAsyncTask &task, int32_t status) {
+            if (*innerErrorCode == 0) {
+                TAG_LOGI(AAFwkTag::SERVICE_EXT, "OpenAtomicService success");
+                return;
+            }
+            TAG_LOGI(AAFwkTag::SERVICE_EXT, "OpenAtomicService failed");
+            if (observer != nullptr) {
+                std::string bundleName = want.GetElement().GetBundleName();
+                std::string abilityName = want.GetElement().GetAbilityName();
+                observer->OnInstallFinished(bundleName, abilityName, startTime, *innerErrorCode);
+            }
+        };
+        napi_value result = nullptr;
+        AddFreeInstallObserver(env, want, nullptr, &result);
+        NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnOpenAtomicService", env,
+            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), nullptr));
         return result;
     }
 
@@ -1353,6 +1427,8 @@ napi_value CreateJsServiceExtensionContext(napi_env env, std::shared_ptr<Service
         JsServiceExtensionContext::RequestModalUIExtension);
     BindNativeFunction(env, object, "preStartMission", moduleName,
         JsServiceExtensionContext::PreStartMission);
+    BindNativeFunction(env, object, "openAtomicService", moduleName,
+        JsServiceExtensionContext::OpenAtomicService);
     return object;
 }
 
