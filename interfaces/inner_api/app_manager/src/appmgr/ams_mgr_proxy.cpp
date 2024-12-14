@@ -350,7 +350,8 @@ void AmsMgrProxy::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr
     TAG_LOGD(AAFwkTag::APPMGR, "end");
 }
 
-int32_t AmsMgrProxy::KillProcessWithAccount(const std::string &bundleName, const int accountId)
+int32_t AmsMgrProxy::KillProcessWithAccount(
+    const std::string &bundleName, const int accountId, const bool clearPageStack)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
 
@@ -371,6 +372,11 @@ int32_t AmsMgrProxy::KillProcessWithAccount(const std::string &bundleName, const
         return ERR_FLATTEN_OBJECT;
     }
 
+    if (!data.WriteBool(clearPageStack)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESS_WITH_ACCOUNT), data, reply, option);
     if (ret != NO_ERROR) {
@@ -383,7 +389,7 @@ int32_t AmsMgrProxy::KillProcessWithAccount(const std::string &bundleName, const
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::KillApplication(const std::string &bundleName)
+int32_t AmsMgrProxy::KillApplication(const std::string &bundleName, const bool clearPageStack)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -396,6 +402,12 @@ int32_t AmsMgrProxy::KillApplication(const std::string &bundleName)
         TAG_LOGE(AAFwkTag::APPMGR, "WriteString failed");
         return ERR_FLATTEN_OBJECT;
     }
+
+    if (!data.WriteBool(clearPageStack)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_APPLICATION), data, reply, option);
     if (ret != NO_ERROR) {
@@ -523,7 +535,7 @@ int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const i
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::KillApplicationSelf(const std::string& reason)
+int32_t AmsMgrProxy::KillApplicationSelf(const bool clearPageStack, const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
     MessageParcel data;
@@ -533,8 +545,8 @@ int32_t AmsMgrProxy::KillApplicationSelf(const std::string& reason)
         return ERR_INVALID_DATA;
     }
 
-    if (!data.WriteString(reason)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "failed to write reason");
+    if (!data.WriteBool(clearPageStack)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel bool failed");
         return ERR_FLATTEN_OBJECT;
     }
 

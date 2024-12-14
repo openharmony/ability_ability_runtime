@@ -127,8 +127,8 @@ bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
     ability_ = ability;
     std::shared_ptr<AbilityRecovery> abilityRecovery = std::make_shared<AbilityRecovery>();
     abilityRecovery->InitAbilityInfo(ability, abilityInfo, token);
-    abilityRecovery->EnableAbilityRecovery(restartFlag_, saveOccasion_, saveMode_);
-    ability->EnableAbilityRecovery(abilityRecovery);
+    abilityRecovery->EnableAbilityRecovery(useAppSettedValue_.load(), restartFlag_, saveOccasion_, saveMode_);
+    ability->EnableAbilityRecovery(abilityRecovery, useAppSettedValue_.load());
     abilityRecoverys_.push_back(abilityRecovery);
     auto handler = mainHandler_.lock();
     if (handler != nullptr) {
@@ -334,6 +334,7 @@ void AppRecovery::EnableAppRecovery(uint16_t restartFlag, uint16_t saveFlag, uin
     restartFlag_ = restartFlag;
     saveOccasion_ = saveFlag;
     saveMode_ = saveMode;
+    useAppSettedValue_.store(true);
 }
 
 bool AppRecovery::ShouldSaveAppState(StateReason reason)
@@ -458,6 +459,17 @@ void AppRecovery::DeleteInValidMissionFileById(std::string fileDir, int32_t miss
     if (!ret) {
         TAG_LOGE(AAFwkTag::RECOVERY, "file: %{public}s failed", file.c_str());
     }
+}
+
+void AppRecovery::ClearPageStack(std::string bundleName)
+{
+    DeleteInValidMissionFiles();
+    std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "abilityMgr not exist.");
+        return;
+    }
+    abilityMgr->ScheduleClearRecoveryPageStack();
 }
 
 bool AppRecovery::GetMissionIds(std::string path, std::vector<int32_t> &missionIds)

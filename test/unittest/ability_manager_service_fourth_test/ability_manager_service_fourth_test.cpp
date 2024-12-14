@@ -196,6 +196,18 @@ HWTEST_F(AbilityManagerServiceFourthTest, NotifySaveAsResult_001, TestSize.Level
 
 /*
  * Feature: AbilityManagerService
+ * Function: InitDefaultRecoveryList
+ * FunctionPoints: AbilityManagerService InitDefaultRecoveryList
+ */
+HWTEST_F(AbilityManagerServiceFourthTest, InitDefaultRecoveryList_001, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    abilityMs->InitDefaultRecoveryList();
+    EXPECT_NE(abilityMs, nullptr);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: OnStop
  * FunctionPoints: AbilityManagerService OnStop
  */

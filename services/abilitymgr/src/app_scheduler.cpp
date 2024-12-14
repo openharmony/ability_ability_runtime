@@ -238,11 +238,18 @@ void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
     callback->NotifyAppPreCache(pid, userId);
 }
 
-int AppScheduler::KillApplication(const std::string &bundleName)
+void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
+{
+    auto callback = callback_.lock();
+    CHECK_POINTER(callback);
+    callback->NotifyAppPreCache(pid, userId);
+}
+
+int AppScheduler::KillApplication(const std::string &bundleName, const bool clearPageStack)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    int ret = (int)appMgrClient_->KillApplication(bundleName);
+    int ret = (int)appMgrClient_->KillApplication(bundleName, clearPageStack);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to kill application.");
         return INNER_ERR;

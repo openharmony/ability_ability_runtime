@@ -154,6 +154,18 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_RegisterStatusBarDelegat
 }
 
 /**
+ * @tc.name: AbilityManagerClient_ScheduleClearRecoveryPageStack_0100
+ * @tc.desc: ScheduleClearRecoveryPageStack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_ScheduleClearRecoveryPageStack_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_ScheduleClearRecoveryPageStack_001 start");
+    AbilityManagerClient::GetInstance()->ScheduleClearRecoveryPageStack();
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_ScheduleClearRecoveryPageStack_001 end");
+}
+
+/**
  * @tc.name: AbilityManagerClient_IsValidMissionIds_0100
  * @tc.desc: IsValidMissionIds
  * @tc.type: FUNC

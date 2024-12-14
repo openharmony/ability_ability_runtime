@@ -149,7 +149,7 @@ const std::string HELP_MSG_APPDEBUG_APP_DEBUG =
     "  -c, --cancel                                let application cancel wait debug\n"
     "  -g, --get                                   get wait debug mode application bundle name and persist flag\n";
 
-const std::string HELP_MSG_FORCE_STOP = "usage: aa force-stop <bundle-name>\n";
+const std::string HELP_MSG_FORCE_STOP = "usage: aa force-stop <bundle-name> [-p pid] [-r kill-reason]\n";
 const std::string HELP_MSG_FORCE_TIMEOUT =
     "usage: aa force-timeout <ability-name> <INITIAL|INACTIVE|COMMAND|FOREGROUND|BACKGROUND|TERMINATING>\n"
     "usage: aa force-timeout clean.";
@@ -236,6 +236,9 @@ private:
     void SetParams(const ParametersInteger& pi, Want& want);
     void SetParams(const ParametersString& ps, Want& want);
     void SetParams(const ParametersBool& pb, Want& want);
+    Reason CovertExitReason(std::string& reasonStr);
+    pid_t ConvertPid(std::string& inputPid);
+
 #ifdef ABILITY_COMMAND_FOR_TEST
     ErrCode RunForceTimeoutForTest();
     ErrCode RunAsSendAppNotRespondingProcessID();

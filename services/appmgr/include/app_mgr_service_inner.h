@@ -271,7 +271,7 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName);
+    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = true);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -303,7 +303,7 @@ public:
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid,
         const std::string& reason = "KillApplicationByUid");
 
-    virtual int32_t KillApplicationSelf(const std::string& reason = "KillApplicationSelf");
+    virtual int32_t KillApplicationSelf(const bool clearPageStack = true, const std::string& reason = "KillApplicationSelf");
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -316,7 +316,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId,
-        const std::string& reason = "KillApplicationByUserId");
+        const bool clearPageStack = true, const std::string& reason = "KillApplicationByUserId");
 
     /**
      * ClearUpApplicationData, clear the application data.
@@ -1287,7 +1287,7 @@ private:
      * @return ERR_OK, return back success, others fail.
      */
     int32_t KillApplicationByUserIdLocked(const std::string &bundleName, int32_t appCloneIndex, int32_t userId,
-        const std::string& reason = "KillApplicationByUserIdLocked");
+        const bool clearPageStack = true, const std::string& reason = "KillApplicationByUserIdLocked");
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
@@ -1428,9 +1428,10 @@ private:
     /**
      * kill all processes of a bundleName
      * @param bundleName bundleName of which to be killed
+     * @param clearPageStack clear Page Stack
      * @param reason caller function name
      */
-    int32_t KillApplicationByBundleName(const std::string &bundleName,
+    int32_t KillApplicationByBundleName(const std::string &bundleName, const bool clearPageStack = true,
         const std::string& reason = "KillApplicationByBundleName");
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);

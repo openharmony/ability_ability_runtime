@@ -378,9 +378,24 @@ napi_value JsAbilityContext::MoveAbilityToBackground(napi_env env, napi_callback
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnMoveAbilityToBackground);
 }
 
-napi_value JsAbilityContext::OpenAtomicService(napi_env env, napi_callback_info info)
+napi_value JsAbilityContext::SetRestoreEnabled(napi_env env, napi_callback_info info)
 {
-    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnOpenAtomicService);
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnSetRestoreEnabled);
+}
+
+napi_value JsAbilityContext::StartUIServiceExtension(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnStartUIServiceExtension);
+}
+
+napi_value JsAbilityContext::ConnectUIServiceExtension(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnConnectUIServiceExtension);
+}
+
+napi_value JsAbilityContext::DisconnectUIServiceExtension(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnDisconnectUIServiceExtension);
 }
 
 void JsAbilityContext::ClearFailedCallConnection(
@@ -1732,6 +1747,7 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
     BindNativeFunction(env, object, "hideAbility", moduleName,
         JsAbilityContext::HideAbility);
     BindNativeFunction(env, object, "moveAbilityToBackground", moduleName, JsAbilityContext::MoveAbilityToBackground);
+    BindNativeFunction(env, object, "setRestoreEnabled", moduleName, JsAbilityContext::SetRestoreEnabled);
     BindNativeFunction(env, object, "openAtomicService", moduleName, JsAbilityContext::OpenAtomicService);
 
 #ifdef SUPPORT_GRAPHICS
