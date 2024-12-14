@@ -19,6 +19,7 @@
 #include "hilog_tag_wrapper.h"
 #include "native_child_callback.h"
 #include "child_process_manager.h"
+#include "child_callback_manager.h"
 
 using namespace OHOS;
 using namespace OHOS::AbilityRuntime;
@@ -26,8 +27,6 @@ using namespace OHOS::AbilityRuntime;
 namespace {
 
 std::mutex g_mutexCallBackObj;
-sptr<IRemoteObject> g_CallbackStub;
-OH_Ability_OnNativeChildProcessStarted g_Callback = nullptr;
 constexpr size_t MAX_KEY_SIZE = 20;
 constexpr size_t MAX_FD_SIZE = 16;
 
@@ -54,19 +53,6 @@ Ability_NativeChildProcess_ErrCode CvtChildProcessManagerErrCode(ChildProcessMan
     return it->second;
 }
 
-void OnNativeChildProcessStartedWapper(int errCode, OHIPCRemoteProxy *ipcProxy)
-{
-    std::unique_lock autoLock(g_mutexCallBackObj);
-    if (g_Callback != nullptr) {
-        g_Callback(CvtChildProcessManagerErrCode(static_cast<ChildProcessManagerErrorCode>(errCode)), ipcProxy);
-        g_Callback = nullptr;
-    } else {
-        TAG_LOGW(AAFwkTag::PROCESSMGR, "remote call twice");
-    }
-
-    g_CallbackStub.clear();
-}
-
 } // Anonymous namespace
 
 int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNativeChildProcessStarted onProcessStarted)
@@ -82,13 +68,7 @@ int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNative
         return NCP_ERR_INVALID_PARAM;
     }
 
-    std::unique_lock autoLock(g_mutexCallBackObj);
-    if (g_Callback != nullptr || g_CallbackStub != nullptr) {
-        TAG_LOGW(AAFwkTag::PROCESSMGR, "Another native process starting");
-        return NCP_ERR_BUSY;
-    }
-
-    sptr<IRemoteObject> callbackStub(new (std::nothrow) NativeChildCallback(OnNativeChildProcessStartedWapper));
+    sptr<IRemoteObject> callbackStub(new (std::nothrow) NativeChildCallback(onProcessStarted));
     if (!callbackStub) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "null callbackStub");
         return NCP_ERR_INTERNAL;
@@ -100,8 +80,7 @@ int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNative
         return CvtChildProcessManagerErrCode(cpmErr);
     }
 
-    g_Callback = onProcessStarted;
-    g_CallbackStub = callbackStub;
+    ChildCallbackManager::GetInstance().AddRemoteObject(callbackStub);
     return NCP_NO_ERROR;
 }
 
