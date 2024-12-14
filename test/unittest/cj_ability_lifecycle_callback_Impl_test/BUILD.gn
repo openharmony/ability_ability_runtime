@@ -25,7 +25,7 @@ ohos_unittest("cj_ability_lifecycle_callback_Impl_test") {
 
   cflags = [
     "-Dprivate = public",
-    "-Dproctected = public",
+    "-Dprotected = public",
   ]
 
   configs = []
