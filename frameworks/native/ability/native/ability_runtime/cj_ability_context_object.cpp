@@ -27,6 +27,7 @@
 #include "cj_utils_ffi.h"
 #include "ffi_remote_data.h"
 #include "hilog_tag_wrapper.h"
+#include "js_native_api.h"
 #include "napi_common_start_options.h"
 #include "napi_common_util.h"
 #include "open_link_options.h"
@@ -894,6 +895,60 @@ EXPORT napi_value FFICreateNapiValueJsAbilityContext(void *env, void *context)
     BindJsAbilityContextStartStop((napi_env)env, result);
     BindJsAbilityContextOther((napi_env)env, result);
     return result;
+}
+
+EXPORT napi_value FfiConvertUIAbilityContext2Napi(napi_env env, int64_t id)
+{
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
+    auto cjContext = FFIData::GetData<CJAbilityContext>(id);
+    if (cjContext == nullptr || cjContext->GetAbilityContext() == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "cj context null ptr");
+        return undefined;
+    }
+
+    napi_value result = CreateJsAbilityContext(env, cjContext->GetAbilityContext());
+    if (result == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null object");
+        return undefined;
+    }
+
+    napi_value falseValue = nullptr;
+    napi_get_boolean((napi_env)env, true, &falseValue);
+    napi_set_named_property((napi_env)env, result, "stageMode", falseValue);
+
+    return result;
+}
+
+EXPORT int64_t FfiCreateUIAbilityContextFromNapi(napi_env env, napi_value uiAbilityContext)
+{
+    if (env == nullptr || uiAbilityContext == nullptr) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    napi_valuetype type;
+    if (napi_typeof(env, uiAbilityContext, &type) || type != napi_object) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    JsAbilityContext *jsAbilityContext = nullptr;
+    napi_status status = napi_unwrap(env, uiAbilityContext, reinterpret_cast<void **>(&jsAbilityContext));
+    if (status != napi_ok) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    auto context = jsAbilityContext->GetAbilityContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    auto cjContext = FFI::FFIData::Create<CJAbilityContext>(context);
+    if (cjContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cjContext");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    return cjContext->GetID();
 }
 
 #undef EXPORT
