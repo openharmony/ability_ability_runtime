@@ -22,6 +22,7 @@
 #include "permission_verification.h"
 #include "want_params_wrapper.h"
 #include "time_util.h"
+#include "res_sched_util.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -287,16 +288,15 @@ void InsightIntentExecuteManager::SetIntentExemptionInfo(int32_t uid)
 {
     std::lock_guard<ffrt::mutex> guard(intentExemptionLock_);
     std::map<int32_t, int64_t>::iterator iter = intentExemptionDeadlineTime_.find(uid);
-    if (iter == intentExemptionDeadlineTime_.end()) {
-        intentExemptionDeadlineTime_[uid] = AbilityRuntime::TimeUtil::CurrentTimeMillis();
-    }
+    intentExemptionDeadlineTime_[uid] = AbilityRuntime::TimeUtil::CurrentTimeMillis();
 }
 
 bool InsightIntentExecuteManager::CheckIntentIsExemption(int32_t uid)
 {
     std::lock_guard<ffrt::mutex> guard(intentExemptionLock_);
     if (intentExemptionDeadlineTime_.find(uid) != intentExemptionDeadlineTime_.end()) {
-        if (AbilityRuntime::TimeUtil::CurrentTimeMillis() - OPERATION_DURATION <= intentExemptionDeadlineTime_[uid]) {
+        if (AbilityRuntime::TimeUtil::CurrentTimeMillis() - INTENT_EXEMPTION_DURATION <=
+            intentExemptionDeadlineTime_[uid]) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "exemption check uid:%{public}d", uid);
             return true;
         } else {
@@ -305,6 +305,12 @@ bool InsightIntentExecuteManager::CheckIntentIsExemption(int32_t uid)
         }
     }
     return false;
+}
+
+std::map<int32_t, int64_t> InsightIntentExecuteManager::GetAllIntentExemptionInfo() const
+{
+    std::lock_guard<ffrt::mutex> guard(intentExemptionLock_);
+    return intentExemptionDeadlineTime_;
 }
 } // namespace AAFwk
 } // namespace OHOS
