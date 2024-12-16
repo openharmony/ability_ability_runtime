@@ -82,6 +82,7 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent_execute_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent_execute_param.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent_execute_result.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/keep_alive/keep_alive_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/lifecycle_state_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/mission_listener_stub.cpp",
