@@ -61,7 +61,9 @@ int32_t UIExtensionRecordFactory::CreateRecord(
     }
     CreateDebugRecord(abilityRequest, abilityRecord);
     extensionRecord = std::make_shared<UIExtensionRecord>(abilityRecord);
-    extensionRecord->processMode_ = GetExtensionProcessMode(abilityRequest, extensionRecord->isHostSpecified_);
+    uint32_t processMode = GetExtensionProcessMode(abilityRequest, extensionRecord->isHostSpecified_);
+    extensionRecord->processMode_ = processMode;
+    abilityRecord->SetExtensionProcessMode(processMode);
     return ERR_OK;
 }
 
