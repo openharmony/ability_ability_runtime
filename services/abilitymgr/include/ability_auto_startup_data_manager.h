@@ -48,6 +48,7 @@ public:
         std::vector<AutoStartupInfo> &infoList, const std::string &accessTokenId);
 
 private:
+    DistributedKv::Status RestoreKvStore(DistributedKv::Status status);
     DistributedKv::Status GetKvStore();
     bool CheckKvStore();
     DistributedKv::Value ConvertAutoStartupStatusToValue(
