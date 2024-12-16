@@ -46,16 +46,11 @@ void AbilityManagerEventSubscriberTest::SetUp() {}
 HWTEST_F(AbilityManagerEventSubscriberTest, OnReceiveEvent_0001, TestSize.Level1)
 {
     EventFwk::CommonEventSubscribeInfo subscribeInfo;
-    std::function<void()> callback = []() {};
     std::function<void()> userScreenUnlockCallback = []() {};
-    EXPECT_NE(callback, nullptr);
     EXPECT_NE(userScreenUnlockCallback, nullptr);
     auto subscriber = std::make_shared<AbilityManagerEventSubscriber>(
-        subscribeInfo, callback, userScreenUnlockCallback);
+        subscribeInfo, userScreenUnlockCallback);
     EventFwk::CommonEventData data;
-    data.want_.operation_.action_ = EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED;
-    subscriber->OnReceiveEvent(data);
-    EXPECT_NE(subscriber->callback_, nullptr);
     data.want_.operation_.action_ = EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED;
     subscriber->OnReceiveEvent(data);
     EXPECT_NE(subscriber->userScreenUnlockCallback_, nullptr);
