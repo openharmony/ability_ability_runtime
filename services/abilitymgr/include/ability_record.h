@@ -1085,6 +1085,10 @@ public:
 
     std::string GetProcessName() const;
 
+    void SetExtensionProcessMode(const uint32_t &extensionProcessMode);
+
+    uint32_t GetExtensionProcessMode() const;
+
     void SetURI(const std::string &uri);
     std::string GetURI() const;
 
@@ -1313,6 +1317,7 @@ private:
     bool isStartToBackground_ = false;
     bool isStartToForeground_ = false;
     std::atomic_bool isCallerSetProcess_ = false;
+    uint32_t extensionProcessMode_ = 0;
     int32_t appIndex_ = 0;
     bool minimizeReason_ = false;
 

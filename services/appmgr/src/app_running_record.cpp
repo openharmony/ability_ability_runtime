@@ -43,6 +43,8 @@ constexpr const char *EVENT_KEY_VERSION_NAME = "VERSION_NAME";
 constexpr const char *EVENT_KEY_VERSION_CODE = "VERSION_CODE";
 constexpr const char *EVENT_KEY_BUNDLE_NAME = "BUNDLE_NAME";
 constexpr const char *EVENT_KEY_SUPPORT_STATE = "SUPPORT_STATE";
+constexpr uint32_t PROCESS_MODE_RUN_WITH_MAIN_PROCESS =
+    1 << static_cast<uint32_t>(AppExecFwk::ExtensionProcessMode::RUN_WITH_MAIN_PROCESS);
 }
 
 int64_t AppRunningRecord::appEventId_ = 0;
@@ -864,11 +866,10 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
     if (applicationInfo && applicationInfo->bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
         abilityStateData.isAtomicService = true;
     }
-    if (isAbility && abilityInfo->type == AbilityType::EXTENSION &&
-        abilityInfo->extensionAbilityType != ExtensionAbilityType::UI) {
-        TAG_LOGD(AAFwkTag::APPMGR, "extensionType:%{public}d, not notify", abilityInfo->extensionAbilityType);
-        return;
+    if (abilityInfo->type == AbilityType::EXTENSION) {
+        abilityStateData.extensionAbilityType = static_cast<int32_t>(abilityInfo->extensionAbilityType);
     }
+    abilityStateData.processType = static_cast<int32_t>(processType_);
     auto serviceInner = appMgrServiceInner_.lock();
     if (serviceInner) {
         serviceInner->StateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged);
@@ -1007,7 +1008,10 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         }
 
         moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_FOREGROUND);
-        StateChangedNotifyObserver(ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND), true, false);
+        if (!AAFwk::UIExtensionUtils::IsUIExtension(ability->GetAbilityInfo()->extensionAbilityType)) {
+            StateChangedNotifyObserver(
+                ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND), true, false);
+        }
         auto serviceInner = appMgrServiceInner_.lock();
         if (serviceInner) {
             serviceInner->OnAppStateChanged(shared_from_this(), curState_, false, false);
@@ -1057,7 +1061,10 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
         return;
     }
     moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_BACKGROUND);
-    StateChangedNotifyObserver(ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_BACKGROUND), true, false);
+    if (!AAFwk::UIExtensionUtils::IsUIExtension(ability->GetAbilityInfo()->extensionAbilityType)) {
+        StateChangedNotifyObserver(
+            ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_BACKGROUND), true, false);
+    }
     if (curState_ == ApplicationState::APP_STATE_FOREGROUND || curState_ == ApplicationState::APP_STATE_CACHED) {
         int32_t foregroundSize = 0;
         auto abilitiesMap = GetAbilities();
@@ -1158,8 +1165,10 @@ void AppRunningRecord::PopForegroundingAbilityTokens()
         auto moduleRecord = GetModuleRunningRecordByToken(*iter);
         if (moduleRecord != nullptr) {
             moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_FOREGROUND);
-            StateChangedNotifyObserver(ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND),
-                true, false);
+            if (!AAFwk::UIExtensionUtils::IsUIExtension(ability->GetAbilityInfo()->extensionAbilityType)) {
+                StateChangedNotifyObserver(
+                    ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND), true, false);
+            }
         } else {
             TAG_LOGW(AAFwkTag::APPMGR, "null moduleRecord");
         }
@@ -1182,7 +1191,7 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
     if (abilityRecord) {
         TAG_LOGI(AAFwkTag::APPMGR, "TerminateAbility:%{public}s", abilityRecord->GetName().c_str());
     }
-    if (!isTimeout) {
+    if (!isTimeout && !AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->extensionAbilityType)) {
         StateChangedNotifyObserver(
             abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
@@ -1581,7 +1590,8 @@ std::shared_ptr<UserTestRecord> AppRunningRecord::GetUserTestInfo()
     return userTestRecord_;
 }
 
-void AppRunningRecord::SetProcessAndExtensionType(const std::shared_ptr<AbilityInfo> &abilityInfo)
+void AppRunningRecord::SetProcessAndExtensionType(
+    const std::shared_ptr<AbilityInfo> &abilityInfo, uint32_t extensionProcessMode)
 {
     if (abilityInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null abilityInfo");
@@ -1604,7 +1614,13 @@ void AppRunningRecord::SetProcessAndExtensionType(const std::shared_ptr<AbilityI
         processType_ = ProcessType::NORMAL;
         return;
     }
-    processType_ = ProcessType::EXTENSION;
+
+    if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType_) &&
+         extensionProcessMode == PROCESS_MODE_RUN_WITH_MAIN_PROCESS) {
+        processType_ = ProcessType::NORMAL;
+    } else {
+        processType_ = ProcessType::EXTENSION;
+    }
     return;
 }
 
