@@ -21,9 +21,9 @@
 namespace OHOS {
 namespace AbilityRuntime {
 AbilityManagerEventSubscriber::AbilityManagerEventSubscriber(
-    const EventFwk::CommonEventSubscribeInfo &subscribeInfo, const std::function<void()> &callback,
+    const EventFwk::CommonEventSubscribeInfo &subscribeInfo,
     const std::function<void()> &userScreenUnlockCallback)
-    : EventFwk::CommonEventSubscriber(subscribeInfo), callback_(callback),
+    : EventFwk::CommonEventSubscriber(subscribeInfo),
     userScreenUnlockCallback_(userScreenUnlockCallback)
 {}
 
@@ -32,13 +32,26 @@ void AbilityManagerEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventDa
     const AAFwk::Want &want = data.GetWant();
     std::string action = want.GetAction();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "The action: %{public}s.", action.c_str());
-    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
-        if (callback_ != nullptr) {
-            callback_();
-        }
-    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
-        if (userScreenUnlockCallback_ != nullptr) {
+    if (userScreenUnlockCallback_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "nullptr callback");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
+        if (eventSet_.find(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) != eventSet_.end()) {
             userScreenUnlockCallback_();
+            eventSet_.clear();
+        } else {
+            eventSet_.insert(action);
+        }
+        return;
+    }
+    if ((action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED)) {
+        if (eventSet_.find(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) != eventSet_.end()) {
+            userScreenUnlockCallback_();
+            eventSet_.clear();
+        } else {
+            eventSet_.insert(action);
         }
     }
 }
