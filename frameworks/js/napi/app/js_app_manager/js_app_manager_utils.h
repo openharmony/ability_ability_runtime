@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_JS_APP_MANAGER_UTILS_H
 
 #include "application_state_observer_stub.h"
+#include "keep_alive_info.h"
 #include "native_engine/native_engine.h"
 #include "running_process_info.h"
 #include "running_multi_info.h"
@@ -62,6 +63,8 @@ napi_value CreateJsRunningProcessInfo(napi_env env, const RunningProcessInfo &in
 napi_value ApplicationStateInit(napi_env env);
 napi_value ProcessStateInit(napi_env env);
 napi_value PreloadModeInit(napi_env env);
+napi_value KeepAliveAppTypeInit(napi_env env);
+napi_value KeepAliveSetterInit(napi_env env);
 bool ConvertPreloadApplicationParam(napi_env env, size_t argc, napi_value *argv, PreloadApplicationParam &param,
     std::string &errorMsg);
 JsAppProcessState ConvertToJsAppProcessState(
@@ -69,6 +72,8 @@ JsAppProcessState ConvertToJsAppProcessState(
 napi_value CreateJsRunningMultiAppInfo(napi_env env, const RunningMultiAppInfo &info);
 napi_value CreateJsRunningAppCloneArray(napi_env env, const std::vector<RunningAppClone>& data);
 napi_value CreateJsRunningAppClone(napi_env env, const RunningAppClone &info);
+napi_value CreateJsKeepAliveBundleInfo(napi_env env, const KeepAliveInfo &info);
+napi_value CreateJsKeepAliveBundleInfoArray(napi_env env, const std::vector<KeepAliveInfo>& data);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_JS_APP_MANAGER_UTILS_H
