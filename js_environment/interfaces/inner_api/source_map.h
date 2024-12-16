@@ -52,7 +52,8 @@ public:
     ~SourceMapData() = default;
 
     SourceMapInfo nowPos_;
-    std::vector<std::string> files_;
+    std::vector<std::string> entryPackageInfo_;
+    std::vector<std::string> packageInfo_;
     std::vector<std::string> sources_;
     std::vector<std::string> names_;
     std::vector<std::string> mappings_;
@@ -94,6 +95,7 @@ private:
     std::string GetRelativePath(const std::string& sources);
     std::string GetSourceInfo(const std::string& line, const std::string& column,
                               const SourceMapData& targetMap, const std::string& key);
+    void SetSourceMapData();
 
 private:
     bool isModular_ = true;
@@ -105,6 +107,8 @@ private:
     static GetHapPathCallback getHapPathFunc_;
     std::unordered_map<std::string, std::string> sources_;
     std::unordered_map<std::string, std::string> mappings_;
+    std::unordered_map<std::string, std::string> entryPackageInfo_;
+    std::unordered_map<std::string, std::string> packageInfo_;
 };
 } // namespace JsEnv
 } // namespace OHOS
