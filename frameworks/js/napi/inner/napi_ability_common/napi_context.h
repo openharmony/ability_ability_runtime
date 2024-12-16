@@ -57,16 +57,6 @@ EXTERN_C_END
 napi_value ContextConstructor(napi_env env, napi_callback_info info);
 
 /**
- * @brief Set lock screen Permit list.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param info The callback info passed into the callback function.
- *
- * @return The return value from NAPI C++ to JS for the module.
- */
-napi_value NAPI_SetShowOnLockScreen(napi_env env, napi_callback_info info);
-
-/**
  * @brief Obtains information about the current application.
  *
  * @param env The environment that the Node-API call is invoked under.
@@ -116,46 +106,6 @@ napi_value NAPI_GetProcessName(napi_env env, napi_callback_info info);
  */
 napi_value NAPI_GetCallingBundle(napi_env env, napi_callback_info info);
 
-napi_value NAPI_GetOrCreateDistributedDir(napi_env env, napi_callback_info info);
-
-napi_value NAPI_GetFilesDir(napi_env env, napi_callback_info info);
-
-napi_value NAPI_GetCacheDir(napi_env env, napi_callback_info info);
-
-/**
- * @brief Obtains the type of this application.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param info The callback info passed into the callback function.
- *
- * @return The return value from NAPI C++ to JS for the module.
- */
-napi_value NAPI_GetCtxAppType(napi_env env, napi_callback_info info);
-
-/**
- * @brief Obtains the HapModuleInfo object of the application.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param info The callback info passed into the callback function.
- *
- * @return The return value from NAPI C++ to JS for the module.
- */
-napi_value NAPI_GetCtxHapModuleInfo(napi_env env, napi_callback_info info);
-
-napi_value NAPI_GetAppVersionInfo(napi_env env, napi_callback_info info);
-
-napi_value NAPI_GetApplicationContext(napi_env env, napi_callback_info info);
-
-/**
- * @brief Obtains information about the current ability.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param info The callback info passed into the callback function.
- *
- * @return The return value from NAPI C++ to JS for the module.
- */
-napi_value NAPI_GetCtxAbilityInfo(napi_env env, napi_callback_info info);
-
 /**
  * @brief Set wake up screen screen Permit list.
  *
@@ -176,10 +126,7 @@ napi_value NAPI_SetWakeUpScreen(napi_env env, napi_callback_info info);
  */
 napi_value NAPI_SetDisplayOrientation(napi_env env, napi_callback_info info);
 #ifdef SUPPORT_GRAPHICS
-napi_value NAPI_SetDisplayOrientationWrap(napi_env env, napi_callback_info info,
-    AsyncJSCallbackInfo *asyncCallbackInfo);
 bool UnwrapSetDisplayOrientation(napi_env env, size_t argc, napi_value *argv, AsyncJSCallbackInfo *asyncCallbackInfo);
-void SetDisplayOrientationExecuteCallbackWork(napi_env env, void *data);
 #endif
 
 /**
