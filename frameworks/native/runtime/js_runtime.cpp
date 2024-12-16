@@ -552,10 +552,18 @@ bool JsRuntime::LoadScript(const std::string& path, std::vector<uint8_t>* buffer
     return jsEnv_->LoadScript(path, buffer, isBundle);
 }
 
-bool JsRuntime::LoadScript(const std::string& path, uint8_t* buffer, size_t len, bool isBundle)
+bool JsRuntime::LoadScript(const std::string& path, uint8_t* buffer, size_t len, bool isBundle,
+    const std::string& srcEntrance)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "path: %{private}s", path.c_str());
     CHECK_POINTER_AND_RETURN(jsEnv_, false);
+    if (isOhmUrl_ && !moduleName_.empty()) {
+        auto vm = GetEcmaVm();
+        CHECK_POINTER_AND_RETURN(vm, false);
+        std::string srcFilename = "";
+        srcFilename = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
+        return panda::JSNApi::ExecuteSecureWithOhmUrl(vm, buffer, len, srcFilename, srcEntrance);
+    }
     return jsEnv_->LoadScript(path, buffer, len, isBundle);
 }
 
@@ -958,17 +966,23 @@ napi_value JsRuntime::LoadJsBundle(const std::string& path, const std::string& h
     return exportObj;
 }
 
-napi_value JsRuntime::LoadJsModule(const std::string& path, const std::string& hapPath)
+napi_value JsRuntime::LoadJsModule(const std::string& path, const std::string& hapPath, const std::string& srcEntrance)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (!RunScript(path, hapPath, false)) {
+    if (!RunScript(path, hapPath, false, srcEntrance)) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to run script: %{private}s", path.c_str());
         return nullptr;
     }
 
     auto vm = GetEcmaVm();
     CHECK_POINTER_AND_RETURN(vm, nullptr);
-    panda::Local<panda::ObjectRef> exportObj = panda::JSNApi::GetExportObject(vm, path, "default");
+    panda::Local<panda::ObjectRef> exportObj;
+    if (isOhmUrl_) {
+        exportObj = panda::JSNApi::GetExportObjectFromOhmUrl(vm, srcEntrance, "default");
+    } else {
+        exportObj = panda::JSNApi::GetExportObject(vm, path, "default");
+    }
+
     if (exportObj->IsNull()) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Get export object failed");
         return nullptr;
@@ -980,7 +994,7 @@ napi_value JsRuntime::LoadJsModule(const std::string& path, const std::string& h
 }
 
 std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& moduleName, const std::string& modulePath,
-    const std::string& hapPath, bool esmodule, bool useCommonChunk)
+    const std::string& hapPath, bool esmodule, bool useCommonChunk, const std::string& srcEntrance)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "Load module(%{public}s, %{private}s, %{private}s, %{public}s)",
@@ -991,6 +1005,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& module
     panda::JSNApi::NotifyLoadModule(vm);
     auto env = GetNapiEnv();
     CHECK_POINTER_AND_RETURN(env, std::unique_ptr<NativeReference>());
+    isOhmUrl_ = panda::JSNApi::IsOhmUrl(srcEntrance);
 
     HandleScope handleScope(*this);
 
@@ -1018,7 +1033,8 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& module
                 return std::unique_ptr<NativeReference>();
             }
         }
-        classValue = esmodule ? LoadJsModule(fileName, hapPath) : LoadJsBundle(fileName, hapPath, useCommonChunk);
+        classValue = esmodule ? LoadJsModule(fileName, hapPath, srcEntrance)
+            : LoadJsBundle(fileName, hapPath, useCommonChunk);
         if (classValue == nullptr) {
             return std::unique_ptr<NativeReference>();
         }
@@ -1069,7 +1085,8 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModule(
     return std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(resultRef));
 }
 
-bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath, bool useCommonChunk)
+bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath, bool useCommonChunk,
+    const std::string& srcEntrance)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto vm = GetEcmaVm();
@@ -1107,7 +1124,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
                 TAG_LOGE(AAFwkTag::JSRUNTIME, "Get safeData abc file failed");
                 return false;
             }
-            return LoadScript(abcPath, safeData->GetDataPtr(), safeData->GetDataLen(), isBundle_);
+            return LoadScript(abcPath, safeData->GetDataPtr(), safeData->GetDataLen(), isBundle_, srcEntrance);
         } else {
             std::ostringstream outStream;
             if (!extractor->GetFileBuffer(modulePath, outStream)) {
