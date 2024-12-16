@@ -4026,8 +4026,9 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
             return ERR_WRONG_INTERFACE_CALL;
         }
         // not allow app to connect other extension by using connectServiceExtensionAbility
-        if (callerToken && extensionType == AppExecFwk::ExtensionAbilityType::SERVICE && !isService) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Connect service extension ability, but target type is not Service.");
+        bool isVpn = abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::VPN;
+        if (callerToken && extensionType == AppExecFwk::ExtensionAbilityType::SERVICE && !isService && !isVpn) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "ability, type not service");
             return TARGET_ABILITY_NOT_SERVICE;
         }
     }
