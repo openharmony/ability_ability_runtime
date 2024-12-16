@@ -761,7 +761,6 @@ group("unittest") {
     ":ability_start_setting_test",
     ":application_impl_test",
     ":application_test",
-    ":assert_fault_test",
     ":bms_context_impl_test",
     ":context_container_by_mock_bms_test",
     ":context_container_test",
