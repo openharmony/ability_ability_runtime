@@ -1828,7 +1828,16 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     auto request = GetSpecifiedRequest(requestId);
-    CHECK_POINTER_LOG(request, "no request");
+    if (request == nullptr) {
+        auto it = specifiedRequestMap_.find(requestId);
+        if (it == specifiedRequestMap_.end()) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "no request");
+            return;
+        }
+        HandleLegacyAcceptWantDone(it->second, requestId, flag, want);
+        specifiedRequestMap_.erase(it);
+        return;
+    }
     auto nextRequest = PopAndGetNextSpecified(requestId);
     if (nextRequest) {
         TaskHandlerWrap::GetFfrtHandler()->SubmitTask([nextRequest, pThis = shared_from_this()]() {
@@ -1845,8 +1854,13 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
         return;
     }
 
+    HandleLegacyAcceptWantDone(request->abilityRequest, requestId, flag, want);
+}
+
+void UIAbilityLifecycleManager::HandleLegacyAcceptWantDone(AbilityRequest &abilityRequest, int32_t requestId,
+    const std::string &flag, const AAFwk::Want &want)
+{
     TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s", want.GetElement().GetURI().c_str());
-    auto &abilityRequest = request->abilityRequest;
     auto callerAbility = GetAbilityRecordByToken(abilityRequest.callerToken);
     if (!flag.empty()) {
         abilityRequest.specifiedFlag = flag;
@@ -1948,7 +1962,7 @@ void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want)
     AddSpecifiedRequest(std::make_shared<SpecifiedRequest>(specifiedRequestId_++, abilityRequest));
 }
 
-void UIAbilityLifecycleManager::NotifyRestartSpecifiedAbility(AbilityRequest &request,
+void UIAbilityLifecycleManager::NotifyRestartSpecifiedAbility(const AbilityRequest &request,
     const sptr<IRemoteObject> &token)
 {
     if (request.abilityInfoCallback == nullptr) {
