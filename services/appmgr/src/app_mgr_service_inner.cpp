@@ -7815,5 +7815,36 @@ bool AppMgrServiceInner::IsProcessAttached(sptr<IRemoteObject> token) const
     }
     return appRecord->IsProcessAttached();
 }
+
+int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bundleName,
+    std::vector<int32_t> &pidList)
+{
+    auto cachePrcoMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
+    auto osAccountMgr = DelayedSingleton<OsAccountManagerWrapper>::GetInstance();
+    if (cachePrcoMgr == nullptr || osAccountMgr == nullptr || appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Inner manager is nullptr.");
+        return AAFwk::INNER_ERR;
+    }
+    pidList.clear();
+    int32_t callderUserId = -1;
+    if (osAccountMgr->GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), callderUserId) != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Get caller local id failed.");
+        return AAFwk::INNER_ERR;
+    }
+    for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
+        auto appRecord = item.second;
+        if (appRecord == nullptr) {
+            continue;
+        }
+        int32_t procUserId = -1;
+        if (appRecord->GetBundleName() == bundleName &&
+            osAccountMgr->GetOsAccountLocalIdFromUid(appRecord->GetUid(), procUserId) == 0 &&
+            procUserId == callderUserId && cachePrcoMgr->IsAppSupportProcessCache(appRecord) &&
+            appRecord->GetPriorityObject() != nullptr) {
+            pidList.push_back(appRecord->GetPriorityObject()->GetPid());
+        }
+    }
+    return ERR_OK;
+}
 } // namespace AppExecFwk
 }  // namespace OHOS

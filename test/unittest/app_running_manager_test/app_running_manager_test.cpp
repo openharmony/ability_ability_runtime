@@ -689,9 +689,11 @@ HWTEST_F(AppRunningManagerTest, IsAppProcessesAllCached_0100, TestSize.Level1)
     auto appRunningRecord1 = std::make_shared<AppRunningRecord>(appInfo, recordId1, processName);
     appRunningRecord1->SetUid(appInfo->uid);
     appRunningRecord1->SetSupportedProcessCache(true);
+    appRunningRecord1->SetUIAbilityLaunched(true);
     auto appRunningRecord2 = std::make_shared<AppRunningRecord>(appInfo, recordId2, processName);
     appRunningRecord2->SetUid(appInfo->uid);
     appRunningRecord2->SetSupportedProcessCache(true);
+    appRunningRecord2->SetUIAbilityLaunched(true);
 
     appRunningManager->appRunningRecordMap_.insert(make_pair(recordId1, appRunningRecord1));
     std::set<std::shared_ptr<AppRunningRecord>> cachedSet;

@@ -337,6 +337,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleGetAllChildrenProcesses(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_INDEX_BY_PID):
             return HandleGetAppIndexByPid(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_SUPPORTED_PROCESS_CACHE_PIDS):
+            return HandleGetSupportedProcessCachePids(data, reply);
     }
     return INVALID_FD;
 }
@@ -1611,6 +1613,31 @@ int32_t AppMgrStub::HandleGetAppIndexByPid(MessageParcel &data, MessageParcel &r
         TAG_LOGE(AAFwkTag::APPMGR, "fail to write appIndex.");
         return IPC_STUB_ERR;
     }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetSupportedProcessCachePids(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::string bundleName = data.ReadString();
+    std::vector<int32_t> pidList;
+    auto result = GetSupportedProcessCachePids(bundleName, pidList);
+    reply.WriteInt32(pidList.size());
+    for (auto it : pidList) {
+        if (!reply.WriteInt32(it)) {
+            return ERR_INVALID_VALUE;
+        }
+    }
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::GetSupportedProcessCachePids(const std::string &bundleName,
+    std::vector<int32_t> &pidList)
+{
     return NO_ERROR;
 }
 }  // namespace AppExecFwk
