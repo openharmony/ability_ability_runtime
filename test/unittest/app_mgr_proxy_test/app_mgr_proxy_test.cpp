@@ -703,5 +703,27 @@ HWTEST_F(AppMgrProxyTest, GetAppIndexByPid_001, TestSize.Level1)
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
+
+/**
+ * @tc.name: GetSupportedProcessCachePids_001
+ * @tc.desc: Get pids of processes which belong to specific bundle name and support process cache feature.
+ * @tc.type: FUNC
+ * @tc.require: issueIAGZ7H
+ */
+HWTEST_F(AppMgrProxyTest, GetSupportedProcessCachePids_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockAppMgrService_.GetRefPtr(), &MockAppMgrService::InvokeSendRequest));
+
+    std::string bundleName = "testBundleName";
+    std::vector<int32_t> pidList;
+    appMgrProxy_->GetSupportedProcessCachePids(bundleName, pidList);
+    EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(AppMgrInterfaceCode::GET_SUPPORTED_PROCESS_CACHE_PIDS));
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -4386,5 +4386,29 @@ HWTEST_F(AppMgrServiceInnerTest, BlockProcessCacheByPids_001, TestSize.Level1)
     std::vector<int32_t> pids{2};
     appMgrServiceInner->BlockProcessCacheByPids(pids);
 }
+
+/**
+ * @tc.name: GetSupportedProcessCachePids_001
+ * @tc.desc: Get pids of processes which belong to specific bundle name and support process cache feature.
+ * @tc.type: FUNC
+ * @tc.require: issueI76JBF
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetSupportedProcessCachePids_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetSupportedProcessCachePids_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "testBundleName";
+    std::vector<int32_t> pidList;
+    int32_t ret = appMgrServiceInner->GetSupportedProcessCachePids(bundleName, pidList);
+    EXPECT_EQ(ret, ERR_OK);
+
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    ret = appMgrServiceInner->GetSupportedProcessCachePids(bundleName, pidList);
+    EXPECT_NE(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetSupportedProcessCachePids_001 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

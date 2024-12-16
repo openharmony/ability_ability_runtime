@@ -109,6 +109,8 @@ public:
     MOCK_METHOD2(SetSupportedProcessCache, int32_t(int32_t pid, bool isSupport));
     MOCK_METHOD3(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback));
+    MOCK_METHOD2(GetSupportedProcessCachePids, int32_t(const std::string &bundleName,
+        std::vector<int32_t> &pidList));
 
     virtual int StartUserTestProcess(
         const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &bundleInfo, int32_t userId)
