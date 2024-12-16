@@ -179,6 +179,16 @@ public:
         GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnGetSupportedProcessCachePids);
     }
 
+    static napi_value SetKeepAliveForBundle(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnSetKeepAliveForBundle);
+    }
+
+    static napi_value GetKeepAliveBundles(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnGetKeepAliveBundles);
+    }
+
     static bool CheckCallerIsSystemApp()
     {
         auto selfToken = IPCSkeleton::GetSelfTokenID();
@@ -1426,6 +1436,20 @@ private:
         return result;
     }
 
+    napi_value OnSetKeepAliveForBundle(napi_env env, size_t argc, napi_value *argv)
+    {
+        TAG_LOGE(AAFwkTag::APPMGR, "not supported");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_CAPABILITY_NOT_SUPPORT);
+        return CreateJsUndefined(env);
+    }
+
+    napi_value OnGetKeepAliveBundles(napi_env env, size_t argc, napi_value *argv)
+    {
+        TAG_LOGE(AAFwkTag::APPMGR, "not supported");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_CAPABILITY_NOT_SUPPORT);
+        return CreateJsUndefined(env);
+    }
+
     bool CheckOnOffType(napi_env env, size_t argc, napi_value* argv)
     {
         if (argc < ARGC_ONE) {
@@ -1493,6 +1517,8 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "ApplicationState", ApplicationStateInit(env));
     napi_set_named_property(env, exportObj, "ProcessState", ProcessStateInit(env));
     napi_set_named_property(env, exportObj, "PreloadMode", PreloadModeInit(env));
+    napi_set_named_property(env, exportObj, "KeepAliveAppType", KeepAliveAppTypeInit(env));
+    napi_set_named_property(env, exportObj, "KeepAliveSetter", KeepAliveSetterInit(env));
 
     const char *moduleName = "AppManager";
     BindNativeFunction(env, exportObj, "on", moduleName, JsAppManager::On);
@@ -1503,8 +1529,7 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
         JsAppManager::GetRunningProcessInformation);
     BindNativeFunction(env, exportObj, "getRunningProcessInformation", moduleName,
         JsAppManager::GetRunningProcessInformation);
-    BindNativeFunction(env, exportObj, "isRunningInStabilityTest", moduleName,
-        JsAppManager::IsRunningInStabilityTest);
+    BindNativeFunction(env, exportObj, "isRunningInStabilityTest", moduleName, JsAppManager::IsRunningInStabilityTest);
     BindNativeFunction(env, exportObj, "killProcessWithAccount", moduleName, JsAppManager::KillProcessWithAccount);
     BindNativeFunction(env, exportObj, "killProcessesByBundleName", moduleName,
         JsAppManager::KillProcessesByBundleName);
@@ -1519,13 +1544,14 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
         JsAppManager::GetRunningProcessInfoByBundleName);
     BindNativeFunction(env, exportObj, "getRunningMultiAppInfo", moduleName, JsAppManager::GetRunningMultiAppInfo);
     BindNativeFunction(env, exportObj, "isApplicationRunning", moduleName, JsAppManager::IsApplicationRunning);
-    BindNativeFunction(env, exportObj, "isAppRunning", moduleName,
-        JsAppManager::IsAppRunning);
+    BindNativeFunction(env, exportObj, "isAppRunning", moduleName, JsAppManager::IsAppRunning);
     BindNativeFunction(env, exportObj, "preloadApplication", moduleName, JsAppManager::PreloadApplication);
     BindNativeFunction(env, exportObj, "getRunningProcessInformationByBundleType", moduleName,
         JsAppManager::GetRunningProcessInformationByBundleType);
     BindNativeFunction(env, exportObj, "getSupportedProcessCachePids", moduleName,
         JsAppManager::GetSupportedProcessCachePids);
+    BindNativeFunction(env, exportObj, "setKeepAliveForBundle", moduleName, JsAppManager::SetKeepAliveForBundle);
+    BindNativeFunction(env, exportObj, "getKeepAliveBundles", moduleName, JsAppManager::GetKeepAliveBundles);
     TAG_LOGD(AAFwkTag::APPMGR, "end");
     return CreateJsUndefined(env);
 }
