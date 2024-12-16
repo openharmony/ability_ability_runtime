@@ -24,6 +24,7 @@
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
 #include "napi_common.h"
+#include "napi_common_want_agent.h"
 #include "start_options.h"
 #include "want_agent_helper.h"
 #include "tokenid_kit.h"
@@ -155,8 +156,12 @@ auto OnSendFinishedUvAfterWorkCallback = [](uv_work_t* work, int status) {
     napi_set_named_property(dataWorkerData->env, objValueFirst, "code",
         CreateJsValue(dataWorkerData->env, BUSINESS_ERROR_CODE_OK));
 #endif
-    napi_set_named_property(dataWorkerData->env, objValueSecond, "wantAgent",
-        JsWantAgent::WrapWantAgent(dataWorkerData->env, dataWorkerData->wantAgent));
+    napi_value jsWantAgent = OHOS::AppExecFwk::WrapWantAgent(dataWorkerData->env, dataWorkerData->wantAgent, nullptr);
+    if (jsWantAgent == nullptr && dataWorkerData->wantAgent != nullptr) {
+        delete dataWorkerData->wantAgent;
+        dataWorkerData->wantAgent = nullptr;
+    }
+    napi_set_named_property(dataWorkerData->env, objValueSecond, "wantAgent", jsWantAgent);
     napi_set_named_property(dataWorkerData->env, objValueSecond, "want",
         CreateJsWant(dataWorkerData->env, dataWorkerData->want));
     napi_set_named_property(dataWorkerData->env, objValueSecond, "finalCode",
@@ -1019,137 +1024,6 @@ int32_t JsWantAgent::GetWantAgentParam(napi_env env, napi_callback_info info, Wa
     return BUSINESS_ERROR_CODE_OK;
 }
 
-inline void *DetachCallbackFunc(napi_env env, void *value, void *)
-{
-    return value;
-}
-
-napi_value AttachWantAgentFunc(napi_env env, void *value, void *)
-{
-    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
-    if (value == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "null value");
-        return nullptr;
-    }
-
-    napi_value jsObject = nullptr;
-    NAPI_CALL(env, napi_create_object(env, &jsObject));
-
-    if (!WantAgent::GetIsMultithreadingSupported()) {
-        TAG_LOGI(AAFwkTag::WANTAGENT, "wantAgent not support multi thread current");
-        return jsObject;
-    }
-
-    auto wantAgent = new WantAgent(reinterpret_cast<WantAgent*>(value)->GetPendingWant());
-
-    napi_value wantAgentClass = nullptr;
-    napi_define_class(
-        env,
-        "WantAgentClass",
-        NAPI_AUTO_LENGTH,
-        [](napi_env env, napi_callback_info info) -> napi_value {
-            napi_value thisVar = nullptr;
-            napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
-
-            return thisVar;
-        },
-        nullptr,
-        0,
-        nullptr,
-        &wantAgentClass);
-    napi_value result = nullptr;
-    napi_new_instance(env, wantAgentClass, 0, nullptr, &result);
-    if (result == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "create instance failed");
-        delete wantAgent;
-        wantAgent = nullptr;
-        return jsObject;
-    }
-
-    napi_coerce_to_native_binding_object(env, result, DetachCallbackFunc, AttachWantAgentFunc, value, nullptr);
-    auto res = napi_wrap(env,
-        result,
-        reinterpret_cast<void*>(wantAgent),
-        [](napi_env env, void* data, void* hint) {
-            TAG_LOGD(AAFwkTag::WANTAGENT, "delete wantAgent");
-            auto agent = static_cast<WantAgent*>(data);
-            delete agent;
-            agent = nullptr;
-        },
-        nullptr,
-        nullptr);
-    if (res != napi_ok && wantAgent != nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "napi_wrap failed:%{public}d", res);
-        delete wantAgent;
-        wantAgent = nullptr;
-        return jsObject;
-    }
-    return result;
-}
-
-napi_value JsWantAgent::WrapWantAgent(napi_env env, WantAgent* wantAgent)
-{
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
-    napi_value wantAgentClass = nullptr;
-    napi_define_class(
-        env,
-        "WantAgentClass",
-        NAPI_AUTO_LENGTH,
-        [](napi_env env, napi_callback_info info) -> napi_value {
-            napi_value thisVar = nullptr;
-            napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
-            return thisVar;
-        },
-        nullptr,
-        0,
-        nullptr,
-        &wantAgentClass);
-    napi_value result = nullptr;
-    napi_new_instance(env, wantAgentClass, 0, nullptr, &result);
-    if (result == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "create instance failed");
-        delete wantAgent;
-        wantAgent = nullptr;
-        return nullptr;
-    }
-
-    napi_coerce_to_native_binding_object(env, result, DetachCallbackFunc, AttachWantAgentFunc, wantAgent, nullptr);
-    auto res = napi_wrap(env,
-        result,
-        reinterpret_cast<void*>(wantAgent),
-        [](napi_env env, void* data, void* hint) {
-            TAG_LOGD(AAFwkTag::WANTAGENT, "delete wantAgent");
-            auto agent = static_cast<WantAgent*>(data);
-            delete agent;
-            agent = nullptr;
-        },
-        nullptr,
-        nullptr);
-    if (res != napi_ok && wantAgent != nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "napi_wrap failed:%{public}d", res);
-        delete wantAgent;
-        wantAgent = nullptr;
-        return nullptr;
-    }
-    return result;
-}
-
-void JsWantAgent::UnwrapWantAgent(napi_env env, napi_value jsParam, void** result)
-{
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
-    if (jsParam == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "null jsParam");
-        return;
-    }
-
-    if (!CheckTypeForNapiValue(env, jsParam, napi_object)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "jsParam type error");
-        return;
-    }
-
-    napi_unwrap(env, jsParam, result);
-}
-
 napi_value JsWantAgent::OnGetWantAgent(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGS_MAX_COUNT;
@@ -1184,11 +1058,17 @@ napi_value JsWantAgent::OnGetWantAgent(napi_env env, napi_callback_info info)
         std::shared_ptr<WantAgent> wantAgent = nullptr;
         WantAgentHelper::GetWantAgent(context, wantAgentInfo, wantAgent);
         WantAgent* pWantAgent = nullptr;
+        napi_value jsWantAgent = nullptr;
         if (wantAgent) {
             pWantAgent = new WantAgent(wantAgent->GetPendingWant());
         }
+        jsWantAgent = OHOS::AppExecFwk::WrapWantAgent(env, pWantAgent, nullptr);
+        if (jsWantAgent == nullptr && pWantAgent != nullptr) {
+            delete pWantAgent;
+            pWantAgent = nullptr;
+        }
 
-        task.Resolve(env, self->WrapWantAgent(env, pWantAgent));
+        task.Resolve(env, jsWantAgent);
     };
 
     napi_value result = nullptr;
@@ -1332,23 +1212,25 @@ void JsWantAgent::SetOnNapiGetWantAgentCallback(std::shared_ptr<WantAgentWantsPa
         ErrCode result = WantAgentHelper::GetWantAgent(context, wantAgentInfo, wantAgent);
         if (result != NO_ERROR) {
             task.Reject(env, CreateJsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result)));
+            return;
+        }
+        if (wantAgent == nullptr) {
+            result = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+            task.Reject(env, CreateJsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result)));
+            return;
+        }
+        WantAgent *pWantAgent = new (std::nothrow) WantAgent(wantAgent->GetPendingWant());
+        if (pWantAgent == nullptr) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "null pWantAgent");
+            result = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+            task.Reject(env, CreateJsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result)));
         } else {
-            WantAgent* pWantAgent = nullptr;
-            if (wantAgent == nullptr) {
-                result = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
-                task.Reject(env, CreateJsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result)));
-                return;
-            } else {
-                pWantAgent = new (std::nothrow) WantAgent(wantAgent->GetPendingWant());
+            napi_value jsWantAgent = OHOS::AppExecFwk::WrapWantAgent(env, pWantAgent, nullptr);
+            if (jsWantAgent == nullptr) {
+                delete pWantAgent;
+                pWantAgent = nullptr;
             }
-
-            if (pWantAgent == nullptr) {
-                TAG_LOGE(AAFwkTag::WANTAGENT, "null pWantAgent");
-                result = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
-                task.Reject(env, CreateJsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result)));
-            } else {
-                task.ResolveWithNoError(env, self->WrapWantAgent(env, pWantAgent));
-            }
+            task.ResolveWithNoError(env, jsWantAgent);
         }
     };
 }
@@ -1405,7 +1287,7 @@ napi_value JsWantAgent::OnNapiGetOperationType(napi_env env, napi_callback_info 
 
 napi_value JsWantAgent::OnNapiSetWantAgentMultithreading(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "set want agent multithreading");
     bool isMultithreadingSupported = false;
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
@@ -1413,6 +1295,13 @@ napi_value JsWantAgent::OnNapiSetWantAgentMultithreading(napi_env env, napi_call
     if (argc != ARGC_ONE) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid argc");
         ThrowInvalidNumParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app forbidden to call");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
         return CreateJsUndefined(env);
     }
 
@@ -1429,15 +1318,7 @@ napi_value JsWantAgent::OnNapiSetWantAgentMultithreading(napi_env env, napi_call
         return CreateJsUndefined(env);
     }
 
-    auto execute = [isMultithreadingSupported] () {
-        TAG_LOGD(AAFwkTag::WANTAGENT, "called");
-        WantAgent::SetIsMultithreadingSupported(isMultithreadingSupported);
-    };
-
-    napi_value result = nullptr;
-    NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnNapiSetWantAgentMultithreading",
-        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), nullptr, &result));
-
+    WantAgent::SetIsMultithreadingSupported(isMultithreadingSupported);
     return CreateJsNull(env);
 }
 
