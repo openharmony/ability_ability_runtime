@@ -60,7 +60,8 @@ public:
      * @return AppRunningRecord pointer if success get or create.
      */
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::string &processName, const BundleInfo &bundleInfo, const std::string &instanceKey);
+        const std::string &processName, const BundleInfo &bundleInfo, const std::string &instanceKey,
+        const std::string &customProcessFlag = "");
 
     /**
      * CheckAppRunningRecordIsExist, Get process record by application name and process Name.
