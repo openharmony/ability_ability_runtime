@@ -90,9 +90,13 @@ private:
     AppfreezeManager& operator=(const AppfreezeManager&) = delete;
     AppfreezeManager(const AppfreezeManager&) = delete;
     uint64_t GetMilliseconds();
-    std::map<int, std::set<int>> BinderParser(std::ifstream& fin, std::string& stack) const;
+    std::map<int, std::set<int>> BinderParser(std::ifstream& fin, std::string& stack, std::set<int>& asyncPids) const;
+    std::map<int, std::set<int>> BinderLineParser(std::ifstream& fin, std::string& stack,
+        std::map<uint32_t, uint32_t>& asyncBinderMap,
+        std::vector<std::pair<uint32_t, uint64_t>>& freeAsyncSpacePairs) const;
+    std::vector<std::string> GetFileToList(std::string line) const;
     void ParseBinderPids(const std::map<int, std::set<int>>& binderInfo, std::set<int>& pids, int pid, int layer) const;
-    std::set<int> GetBinderPeerPids(std::string& stack, int pid) const;
+    std::set<int> GetBinderPeerPids(std::string& stack, int pid, std::set<int>& asyncPids) const;
     void FindStackByPid(std::string& ret, int pid) const;
     std::string CatchJsonStacktrace(int pid, const std::string& faultType) const;
     std::string CatcherStacktrace(int pid) const;
