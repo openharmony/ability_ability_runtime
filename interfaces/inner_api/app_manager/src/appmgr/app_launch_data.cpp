@@ -111,6 +111,11 @@ bool AppLaunchData::MarshallingExtend(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteString(instanceKey_)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write instance key.");
+        return false;
+    }
+
     if (!parcel.WriteBool(isAllowedNWebPreload_)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write isAllowedNWebPreload.");
         return false;
@@ -162,6 +167,7 @@ bool AppLaunchData::ReadFromParcel(Parcel &parcel)
     appRunningUniqueId_ = parcel.ReadString();
     isMultiThread_ = parcel.ReadBool();
     isErrorInfoEnhance_ = parcel.ReadBool();
+    instanceKey_ = parcel.ReadString();
     isAllowedNWebPreload_ = parcel.ReadBool();
     return true;
 }

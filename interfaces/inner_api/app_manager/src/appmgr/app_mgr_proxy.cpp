@@ -219,6 +219,43 @@ int32_t AppMgrProxy::GetRunningMultiAppInfoByBundleName(const std::string &bundl
     return result;
 }
 
+int32_t AppMgrProxy::GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_All_RUNNING_INSTANCE_KEYS_BY_SELF, data, reply, option);
+    if (!reply.ReadStringVector(&instanceKeys)) {
+        return ERR_INVALID_DATA;
+    }
+    int32_t result = reply.ReadInt32();
+    return result;
+}
+
+int32_t AppMgrProxy::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys, int32_t userId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, String, bundleName);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, userId);
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_All_RUNNING_INSTANCE_KEYS_BY_BUNDLENAME, data, reply, option);
+    if (!reply.ReadStringVector(&instanceKeys)) {
+        return ERR_INVALID_DATA;
+    }
+    int32_t result = reply.ReadInt32();
+    return result;
+}
+
 int32_t AppMgrProxy::GetRunningProcessesByBundleType(const BundleType bundleType,
     std::vector<RunningProcessInfo> &info)
 {

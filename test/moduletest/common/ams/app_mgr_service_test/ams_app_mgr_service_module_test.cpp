@@ -402,6 +402,49 @@ HWTEST_F(AppMgrServiceModuleTest, GetAllRunningProcesses_001, TestSize.Level1)
 
 /*
  * Feature: AppMgrService
+ * Function: GetAllRunningInstanceKeysBySelf
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService => AppMgrServiceInner: GetAllRunningInstanceKeysBySelf
+ * CaseDescription: Check GetAllRunningInstanceKeysBySelf.
+ */
+HWTEST_F(AppMgrServiceModuleTest, GetAllRunningInstanceKeysBySelf_001, TestSize.Level1)
+{
+    EXPECT_TRUE(appMgrService_);
+    EXPECT_TRUE(mockAppMgrServiceInner_);
+
+    std::vector<std::string> testInstanceKeys;
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, GetAllRunningInstanceKeysBySelf(_))
+        .Times(1).WillOnce(Return(ERR_OK));
+
+    auto result = appMgrService_->GetAllRunningInstanceKeysBySelf(testInstanceKeys);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllRunningInstanceKeysByBundleName
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService => AppMgrServiceInner: GetAllRunningInstanceKeysByBundleName
+ * CaseDescription: Check GetAllRunningInstanceKeysByBundleName.
+ */
+HWTEST_F(AppMgrServiceModuleTest, GetAllRunningInstanceKeysByBundleName_001, TestSize.Level1)
+{
+    EXPECT_TRUE(appMgrService_);
+    EXPECT_TRUE(mockAppMgrServiceInner_);
+
+    std::string testBundleName = "testBundleName";
+    std::vector<std::string> testInstanceKeys;
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, GetAllRunningInstanceKeysByBundleName(_, _, _))
+        .Times(1).WillOnce(Return(ERR_OK));
+
+    auto result = appMgrService_->GetAllRunningInstanceKeysByBundleName(testBundleName, testInstanceKeys);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/*
+ * Feature: AppMgrService
  * Function: KillApplication
  * SubFunction: NA
  * FunctionPoints: AppMgrService => AppMgrServiceInner: KillApplication

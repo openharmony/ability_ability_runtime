@@ -212,6 +212,16 @@ public:
         appRunningUniqueId_ = appRunningUniqueId;
     }
 
+    inline std::string GetInstanceKey() const
+    {
+        return instanceKey_;
+    }
+
+    inline void SetInstanceKey(const std::string& instanceKey)
+    {
+        instanceKey_ = instanceKey;
+    }
+
     /**
      * @brief read this Sequenceable object from a Parcel.
      *
@@ -281,6 +291,7 @@ private:
     bool isMultiThread_ = false;
     bool isErrorInfoEnhance_ = false;
     std::string appRunningUniqueId_;
+    std::string instanceKey_;
     bool isAllowedNWebPreload_ = false;
 };
 }  // namespace AppExecFwk
