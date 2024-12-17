@@ -363,6 +363,27 @@ public:
         RunningMultiAppInfo &info);
 
     /**
+     * GetAllRunningInstanceKeysBySelf, call GetAllRunningInstanceKeysBySelf() through proxy project.
+     * Obtains running instance keys of multi-instance app that are running on the device.
+     *
+     * @param instanceKeys, output instance keys of the multi-instance app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys);
+
+    /**
+     * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
+     * Obtains running isntance keys of multi-instance app that are running on the device.
+     *
+     * @param bundlename, bundle name in Application record.
+     * @param instanceKeys, output instance keys of the multi-insatnce app.
+     * @param userId, user id.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys, int32_t userId = -1);
+
+    /**
      * GetRunningProcessesByBundleType, Obtains information about application processes by bundle type.
      *
      * @param bundleType, the bundle type of the application process
@@ -1500,6 +1521,8 @@ private:
     void GetRunningCloneAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
         RunningMultiAppInfo &info);
 
+    void GetRunningMultiInstanceKeys(const std::shared_ptr<AppRunningRecord> &appRecord,
+        std::vector<std::string> &instanceKeys);
     /**
      * To Prevent process being killed when ability is starting in an existing process,
      * we need notify memmgr to increase process priority.
@@ -1582,6 +1605,13 @@ private:
     int32_t KillProcessByPidInner(const pid_t pid, const std::string& reason,
         const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord);
     bool IsAllowedNWebPreload(const std::string &processName);
+    bool CheckAppRecordAndPriorityObject(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void GetAppCloneInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+        RunningMultiAppInfo &info);
+    void GetMultiInstanceInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+        RunningMultiAppInfo &info);
+    int32_t GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys, int32_t userId);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;

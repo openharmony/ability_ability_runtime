@@ -100,6 +100,8 @@ public:
     napi_value OnSetSupportedProcessCacheSelf(napi_env env, NapiCallbackInfo& info);
     napi_value OnPreloadUIExtensionAbility(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetCurrentAppCloneIndex(napi_env env, NapiCallbackInfo& info);
+    napi_value OnGetCurrentInstanceKey(napi_env env, NapiCallbackInfo& info);
+    napi_value OnGetAllRunningInstanceKeys(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetFontSizeScale(napi_env env, NapiCallbackInfo& info);
 
     static napi_value GetCacheDir(napi_env env, napi_callback_info info);
@@ -124,6 +126,8 @@ public:
     static napi_value SetSupportedProcessCacheSelf(napi_env env, napi_callback_info info);
     static napi_value PreloadUIExtensionAbility(napi_env env, napi_callback_info info);
     static napi_value GetCurrentAppCloneIndex(napi_env env, napi_callback_info info);
+    static napi_value GetCurrentInstanceKey(napi_env env, napi_callback_info info);
+    static napi_value GetAllRunningInstanceKeys(napi_env env, napi_callback_info info);
     static napi_value SetFontSizeScale(napi_env env, napi_callback_info info);
 
 protected:
@@ -139,7 +143,8 @@ private:
     napi_value OnCreateSystemHspModuleResourceManager(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetApplicationContext(napi_env env, NapiCallbackInfo& info);
     bool CheckCallerIsSystemApp();
-    static void BindNativeApplicationContext(napi_env env, napi_value object);
+    static void BindNativeApplicationContextOne(napi_env env, napi_value object);
+    static void BindNativeApplicationContextTwo(napi_env env, napi_value object);
     static JsAppProcessState ConvertToJsAppProcessState(
         const AppExecFwk::AppProcessState &appProcessState, const bool &isFocused);
     std::shared_ptr<JsAbilityLifecycleCallback> callback_;

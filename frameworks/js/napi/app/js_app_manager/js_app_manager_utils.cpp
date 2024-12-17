@@ -165,7 +165,10 @@ napi_value CreateJsRunningMultiAppInfo(napi_env env, const RunningMultiAppInfo &
     }
     napi_set_named_property(env, object, "bundleName", CreateJsValue(env, info.bundleName));
     napi_set_named_property(env, object, "mode", CreateJsValue(env, info.mode));
-    napi_set_named_property(env, object, "runningAppClones", CreateJsRunningAppCloneArray(env, info.runningAppClones));
+    napi_set_named_property(env, object, "runningAppClones",
+        CreateJsRunningAppCloneArray(env, info.runningAppClones));
+    napi_set_named_property(env, object, "runningMultiInstances",
+        CreateJsRunningMultiInstanceInfosArray(env, info.runningMultiIntanceInfos));
 
     return object;
 }
@@ -181,6 +184,17 @@ napi_value CreateJsRunningAppCloneArray(napi_env env, const std::vector<RunningA
     return arrayValue;
 }
 
+napi_value CreateJsRunningMultiInstanceInfosArray(napi_env env, const std::vector<RunningMultiInstanceInfo>& data)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, data.size(), &arrayValue);
+    uint32_t index = 0;
+    for (const auto &item : data) {
+        napi_set_element(env, arrayValue, index++, CreateJsRunningMultiInstanceInfo(env, item));
+    }
+    return arrayValue;
+}
+
 napi_value CreateJsRunningAppClone(napi_env env, const RunningAppClone &info)
 {
     napi_value object = nullptr;
@@ -190,6 +204,21 @@ napi_value CreateJsRunningAppClone(napi_env env, const RunningAppClone &info)
         return nullptr;
     }
     napi_set_named_property(env, object, "appCloneIndex", CreateJsValue(env, info.appCloneIndex));
+    napi_set_named_property(env, object, "uid", CreateJsValue(env, info.uid));
+    napi_set_named_property(env, object, "pids", CreateNativeArray(env, info.pids));
+
+    return object;
+}
+
+napi_value CreateJsRunningMultiInstanceInfo(napi_env env, const RunningMultiInstanceInfo &info)
+{
+    napi_value object = nullptr;
+    napi_create_object(env, &object);
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null obj");
+        return nullptr;
+    }
+    napi_set_named_property(env, object, "instanceKey", CreateJsValue(env, info.instanceKey));
     napi_set_named_property(env, object, "uid", CreateJsValue(env, info.uid));
     napi_set_named_property(env, object, "pids", CreateNativeArray(env, info.pids));
 

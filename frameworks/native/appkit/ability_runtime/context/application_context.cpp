@@ -597,6 +597,11 @@ int32_t ApplicationContext::GetProcessRunningInformation(AppExecFwk::RunningProc
     return (contextImpl_ != nullptr) ? contextImpl_->GetProcessRunningInformation(info) : -1;
 }
 
+int32_t ApplicationContext::GetAllRunningInstanceKeys(std::vector<std::string> &instanceKeys)
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->GetAllRunningInstanceKeys(instanceKeys) : -1;
+}
+
 bool ApplicationContext::IsUpdatingConfigurations()
 {
     return (contextImpl_ != nullptr) ? contextImpl_->IsUpdatingConfigurations() : false;
@@ -820,6 +825,11 @@ int32_t ApplicationContext::GetCurrentAppMode()
     return appMode_;
 }
 
+std::string ApplicationContext::GetCurrentInstanceKey()
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getCurrentInstanceKey is %{public}s", instanceKey_.c_str());
+    return instanceKey_;
+}
 
 void ApplicationContext::SetAppRunningUniqueId(const std::string &appRunningUniqueId)
 {
@@ -846,6 +856,12 @@ void ApplicationContext::SetCurrentAppMode(int32_t appMode)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "setCurrentAppMode is %{public}d", appMode);
     appMode_ = appMode;
+}
+
+void ApplicationContext::SetCurrentInstanceKey(const std::string& instanceKey)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "setCurrentInstanceKey is %{public}s", instanceKey.c_str());
+    instanceKey_ = instanceKey;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

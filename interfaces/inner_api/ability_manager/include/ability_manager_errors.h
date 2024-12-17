@@ -612,6 +612,41 @@ enum {
     ERR_GET_TARGET_BUNDLE_INFO_FAILED = 2097279,
 
     /**
+     * Result(2097271) not support multi-instance.
+     */
+    ERR_MULTI_INSTANCE_NOT_SUPPORTED = 2097271,
+
+    /*
+     * Result (2097272) for not support app instance key.
+     */
+    ERR_APP_INSTANCE_KEY_NOT_SUPPORT = 2097272,
+
+    /*
+     * Result (2097273) for reach the upper limit.
+     */
+    ERR_UPPER_LIMIT = 2097273,
+
+    /*
+     * Result (2097274) for not support to create a new instance.
+     */
+    ERR_CREATE_NEW_INSTANCE_NOT_SUPPORT = 2097274,
+
+    /*
+     * Result (2097275) for invalid app instance key.
+     */
+    ERR_INVALID_APP_INSTANCE_KEY = 2097275,
+
+    /*
+     * Result (2097276) for not support app clone.
+     */
+    ERR_NOT_SUPPORT_APP_CLONE = 2097276,
+
+    /*
+     * Result (2097277) for invalid extension type.
+     */
+    ERR_INVALID_EXTENSION_TYPE = 2097277,
+
+    /**
      * Native error(3000000) for target bundle not exist.
      */
     ERR_CODE_NOT_EXIST = 3000000,
