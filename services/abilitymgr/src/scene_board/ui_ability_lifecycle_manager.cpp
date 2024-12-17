@@ -1509,8 +1509,16 @@ void UIAbilityLifecycleManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordI
         }
     }
     if (abilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ability record is nullptr");
-        return;
+        for (auto abilityIter : terminateAbilityList_) {
+            if (abilityIter && abilityIter->GetAbilityRecordId() == abilityRecordId) {
+                abilityRecord = abilityIter;
+                break;
+            }
+        }
+        if (abilityRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ability record is nullptr");
+            return;
+        }
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call, msgId:%{public}d, name:%{public}s", msgId,
         abilityRecord->GetAbilityInfo().name.c_str());
