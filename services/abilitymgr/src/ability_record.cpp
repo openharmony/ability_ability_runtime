@@ -2167,6 +2167,22 @@ bool AbilityRecord::IsConnectListEmpty()
     return connRecordList_.empty();
 }
 
+size_t AbilityRecord::GetConnectedListSize()
+{
+    std::lock_guard guard(connRecordListMutex_);
+    return std::count_if(connRecordList_.begin(), connRecordList_.end(), [](std::shared_ptr<ConnectionRecord> record) {
+        return record && record->GetConnectState() == ConnectionState::CONNECTED;
+    });
+}
+
+size_t AbilityRecord::GetConnectingListSize()
+{
+    std::lock_guard guard(connRecordListMutex_);
+    return std::count_if(connRecordList_.begin(), connRecordList_.end(), [](std::shared_ptr<ConnectionRecord> record) {
+        return record && record->GetConnectState() == ConnectionState::CONNECTING;
+    });
+}
+
 std::shared_ptr<ConnectionRecord> AbilityRecord::GetConnectingRecord() const
 {
     std::lock_guard guard(connRecordListMutex_);
