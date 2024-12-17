@@ -70,7 +70,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     freeze->ResetAppfreezeState(pid, bundleName);
     freeze->IsValidFreezeFilter(pid, bundleName);
     std::string stack(data, size);
-    freeze->GetBinderPeerPids(stack, pid);
+    std::set<int> asyncPids;
+    freeze->GetBinderPeerPids(stack, pid, asyncPids);
     std::string ret(data, size);
     freeze->FindStackByPid(ret, pid);
     std::string faultType(data, size);
