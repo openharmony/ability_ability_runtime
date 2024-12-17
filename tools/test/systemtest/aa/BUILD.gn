@@ -87,41 +87,41 @@ ohos_systemtest("aa_command_stop_service_system_test") {
   ]
 }
 
-# ohos_systemtest("aa_command_dump_system_test") {
-#   module_out_path = module_output_path
+ohos_systemtest("aa_command_dump_system_test") {
+  module_out_path = module_output_path
 
-#   include_dirs = [ "//third_party/jsoncpp/include" ]
+  include_dirs = [ "//third_party/jsoncpp/include" ]
 
-#   sources = [
-#     "aa_command_dump_system_test.cpp",
-#     "tool_system_test.cpp",
-#   ]
+  sources = [
+    "aa_command_dump_system_test.cpp",
+    "tool_system_test.cpp",
+  ]
 
-#   configs = [ ":tools_aa_test_config" ]
+  configs = [ ":tools_aa_test_config" ]
 
-#   cflags = []
-#   if (target_cpu == "arm") {
-#     cflags += [ "-DBINDER_IPC_32BIT" ]
-#   }
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
 
-#   deps = [
-#     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-#     "${ability_runtime_path}/tools/test/resource/aa/dataAbilityBundleForDump:dataAbilityBundleForDump",
-#     "${ability_runtime_path}/tools/test/resource/aa/pageAbilityBundleForDump:pageAbilityBundleForDump",
-#     "${ability_runtime_path}/tools/test/resource/aa/serviceAbilityBundleForStart:serviceAbilityBundleForStart",
-#     "${ability_runtime_path}/tools/test/resource/ohos_test:copy_ohos_test",
-#     "//third_party/googletest:gtest_main",
-#     "//third_party/jsoncpp:jsoncpp",
-#   ]
+  deps = [
+    "${ability_runtime_path}/tools/aa:tools_aa_source_set",
+    "${ability_runtime_path}/tools/test/resource/aa/dataAbilityBundleForDump:dataAbilityBundleForDump",
+    "${ability_runtime_path}/tools/test/resource/aa/pageAbilityBundleForDump:pageAbilityBundleForDump",
+    "${ability_runtime_path}/tools/test/resource/aa/serviceAbilityBundleForStart:serviceAbilityBundleForStart",
+    "${ability_runtime_path}/tools/test/resource/ohos_test:copy_ohos_test",
+    "//third_party/googletest:gtest_main",
+    "//third_party/jsoncpp:jsoncpp",
+  ]
 
-#   external_deps = [
-#     "ability_base:base",
-#     "ability_base:configuration",
-#     "bundle_framework:appexecfwk_base",
-#     "hilog:libhilog",
-#     "ipc:ipc_core",
-#   ]
-# }
+  external_deps = [
+    "ability_base:base",
+    "ability_base:configuration",
+    "bundle_framework:appexecfwk_base",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+  ]
+}
 
 group("systemtest") {
   testonly = true
