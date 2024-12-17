@@ -16,6 +16,7 @@
 #include "interceptor/screen_unlock_interceptor.h"
 
 #include "ability_util.h"
+#include "event_report.h"
 #include "parameters.h"
 #include "start_ability_utils.h"
 #ifdef SUPPORT_SCREEN
@@ -58,11 +59,20 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
     if (targetAbilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked) {
         return ERR_OK;
     }
+
 #ifdef SUPPORT_SCREEN
     if (!OHOS::ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
         return ERR_OK;
     }
 #endif
+
+    if (targetAbilityInfo.applicationInfo.isSystemApp) {
+        EventInfo eventInfo;
+        eventInfo.bundleName = targetAbilityInfo.applicationInfo.bundleName;
+        eventInfo.moduleName = "StartScreenUnlock";
+        EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
+        return ERR_OK;
+    }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "no startup when device first locked");
     return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
 }
