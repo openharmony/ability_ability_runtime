@@ -2163,6 +2163,7 @@ private:
      */
     int CheckCallServiceExtensionPermission(const AbilityRequest &abilityRequest);
 
+#ifdef SUPPORT_AUTO_FILL
     /**
      * Check if Caller is allowed to start AutoFillExtension.
      *
@@ -2170,7 +2171,7 @@ private:
      * @return Returns whether the caller is allowed to start ServiceExtension.
      */
     int CheckCallAutoFillExtensionPermission(const AbilityRequest &abilityRequest);
-
+#endif // SUPPORT_AUTO_FILL
     /**
      * Check if Caller is allowed to start other Extension(Stage).
      *

@@ -1812,6 +1812,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, UpdateKeepAliveEnableState_001, TestSi
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UpdateKeepAliveEnableState_001 end");
 }
 
+#ifdef SUPPORT_AUTO_FILL
 /**
  * @tc.name: CheckCallAutoFillExtensionPermission_001
  * @tc.desc: Check can't start non-system app when extension type is AUTO_FILL_PASSWORD.
@@ -1845,5 +1846,6 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallAutoFillExtensionPermission_0
     EXPECT_EQ(abilityMs_->CheckCallAutoFillExtensionPermission(abilityRequest_), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "testcase end.");
 }
+#endif // SUPPORT_AUTO_FILL
 }  // namespace AAFwk
 }  // namespace OHOS
