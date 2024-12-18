@@ -122,6 +122,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     UpdateAbilityRecordLaunchReason(abilityRequest, uiAbilityRecord);
     NotifyAbilityToken(uiAbilityRecord->GetToken(), abilityRequest);
     if (HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag)) {
+        AddCallerRecord(abilityRequest, sessionInfo, uiAbilityRecord);
         return ERR_OK;
     }
 
