@@ -99,8 +99,10 @@ AbilityConnectManager::~AbilityConnectManager()
 
 int AbilityConnectManager::StartAbility(const AbilityRequest &abilityRequest)
 {
+#ifdef SUPPORT_UPMS
     // grant uri permission to service extension and ui extension, must call out of serialMutext_.
     UriUtils::GetInstance().GrantUriPermissionForUIOrServiceExtension(abilityRequest);
+#endif // SUPPORT_UPMS
     std::lock_guard guard(serialMutex_);
     return StartAbilityLocked(abilityRequest);
 }
@@ -573,8 +575,10 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     auto connectObject = connect->AsObject();
+#ifdef SUPPORT_UPMS
     // grant uri to service extension by connect, must call out of serialMutex_
     UriUtils::GetInstance().GrantUriPermissionForServiceExtension(abilityRequest);
+#endif // SUPPORT_UPMS
     std::lock_guard guard(serialMutex_);
 
     // 1. get target service ability record, and check whether it has been loaded.
