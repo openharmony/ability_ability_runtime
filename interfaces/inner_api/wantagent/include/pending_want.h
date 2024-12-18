@@ -205,7 +205,7 @@ public:
     static ErrCode IsEquals(
         const std::shared_ptr<PendingWant> &targetPendingWant, const std::shared_ptr<PendingWant> &otherPendingWant);
 
-    ErrCode Cancel(const sptr<AAFwk::IWantSender> &target);
+    ErrCode Cancel(const sptr<AAFwk::IWantSender> &target, uint32_t flags = 0);
 
     void Send(const sptr<AAFwk::IWantSender> &target);
 
