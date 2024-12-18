@@ -35,7 +35,9 @@ constexpr static char CUSTOM_EXTENSION[] = "ExtensionAbility";
 constexpr static char USER_AUTH_EXTENSION[] = "UserAuthExtensionAbility";
 constexpr static char ACTION_EXTENSION[] = "ActionExtensionAbility";
 constexpr static char SHARE_EXTENSION[] = "ShareExtensionAbility";
+#ifdef SUPPORT_AUTO_FILL
 constexpr static char AUTO_FILL_EXTENSION[] = "AutoFillExtensionAbility";
+#endif  // SUPPORT_AUTO_FILL
 constexpr static char EMBEDDED_UI_EXTENSION[] = "EmbeddedUIExtensionAbility";
 constexpr static char PHOTO_EDITOR_EXTENSION[] = "PhotoEditorExtensionAbility";
 constexpr static char VPN_EXTENSION[] = "VpnExtension";
@@ -59,8 +61,10 @@ const std::map<AppExecFwk::ExtensionAbilityType, std::string> UI_EXTENSION_NAME_
 #ifdef SUPPORT_GRAPHICS
     { AppExecFwk::ExtensionAbilityType::SHARE, SHARE_EXTENSION },
     { AppExecFwk::ExtensionAbilityType::ACTION, ACTION_EXTENSION },
+#ifdef SUPPORT_AUTO_FILL
     { AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD, AUTO_FILL_EXTENSION },
     { AppExecFwk::ExtensionAbilityType::AUTO_FILL_SMART, AUTO_FILL_EXTENSION },
+#endif  // SUPPORT_AUTO_FILL
     { AppExecFwk::ExtensionAbilityType::EMBEDDED_UI, EMBEDDED_UI_EXTENSION },
     { AppExecFwk::ExtensionAbilityType::PHOTO_EDITOR, PHOTO_EDITOR_EXTENSION }
 #endif //SUPPORT_GRAPHICS
