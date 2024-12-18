@@ -20,11 +20,14 @@
 #include "ability_util.h"
 #include "app_utils.h"
 #include "accesstoken_kit.h"
+#include "global_constant.h"
 #include "hitrace_meter.h"
 #include "insight_intent_execute_param.h"
 #include "ipc_skeleton.h"
 #include "permission_constants.h"
 #include "permission_verification.h"
+#include "start_ability_utils.h"
+#include "utils/app_mgr_util.h"
 
 using OHOS::Security::AccessToken::AccessTokenKit;
 
@@ -102,6 +105,21 @@ bool AbilityPermissionUtil::IsDominateScreen(const Want &want, bool isPendingWan
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "not dominate screen.");
     return false;
+}
+
+int32_t AbilityPermissionUtil::CheckMultiInstanceAndAppClone(Want &want, int32_t userId, int32_t appIndex,
+    sptr<IRemoteObject> callerToken)
+{
+    auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
+    auto isCreating = want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
+    auto isSupportMultiInstance = AppUtils::GetInstance().IsSupportMultiInstance();
+    if (!isSupportMultiInstance) {
+        if (!instanceKey.empty() || isCreating) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Not support multi-instance");
+            return ERR_MULTI_INSTANCE_NOT_SUPPORTED;
+        }
+    }
+    return ERR_OK;
 }
 } // AAFwk
 } // OHOS

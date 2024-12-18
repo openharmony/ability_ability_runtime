@@ -38,6 +38,9 @@ public:
     // check dominate screen
     bool IsDominateScreen(const Want &want, bool isPendingWantCaller);
 
+    int32_t CheckMultiInstanceAndAppClone(Want &want, int32_t userId, int32_t appIndex,
+        sptr<IRemoteObject> callerToken);
+
 private:
     AbilityPermissionUtil() = default;
     ~AbilityPermissionUtil() = default;
