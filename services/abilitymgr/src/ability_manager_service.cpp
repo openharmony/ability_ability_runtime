@@ -9306,7 +9306,6 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     if (IPCSkeleton::GetCallingUid() != BROKER_UID && AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         return ERR_OK;
     }
-
     auto extensionType = abilityRequest.abilityInfo.extensionAbilityType;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "OtherExtension type: %{public}d.", static_cast<int32_t>(extensionType));
     if (system::GetBoolParameter(DEVELOPER_MODE_STATE, false) &&
@@ -9330,15 +9329,37 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     if (extensionType == AppExecFwk::ExtensionAbilityType::VPN) {
         return ERR_OK;
     }
-    const std::string fileAccessPermission = "ohos.permission.FILE_ACCESS_MANAGER";
-    if (extensionType == AppExecFwk::ExtensionAbilityType::FILEACCESS_EXTENSION &&
-        AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(fileAccessPermission)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Temporary, FILEACCESS_EXTENSION use serviceExtension start-up rule.");
-        return CheckCallServiceExtensionPermission(abilityRequest);
+    if (extensionType == AppExecFwk::ExtensionAbilityType::FILEACCESS_EXTENSION) {
+        return CheckFileAccessExtensionPermission(abilityRequest);
     }
-
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Not SA, can not start other Extension");
+    if (extensionType == AppExecFwk::ExtensionAbilityType::CALLER_INFO_QUERY) {
+        return CheckCallerInfoQueryExtensionPermission(abilityRequest);
+    }
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "not SA, can't start other extension");
     return CHECK_PERMISSION_FAILED;
+}
+
+int AbilityManagerService::CheckCallerInfoQueryExtensionPermission(const AbilityRequest &abilityRequest)
+{
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_GET_TELEPHONY_STATE);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "permission deny for callerInfoQueryExtension");
+        return CHECK_PERMISSION_FAILED;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "check permission success");
+    return ERR_OK;
+}
+ 
+int AbilityManagerService::CheckFileAccessExtensionPermission(const AbilityRequest &abilityRequest)
+{
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER);
+    if (!ret) {
+        return CHECK_PERMISSION_FAILED;
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Temporary, FILEACCESS_EXTENSION use serviceExtension start-up rule.");
+    return CheckCallServiceExtensionPermission(abilityRequest);
 }
 
 int AbilityManagerService::CheckUIExtensionPermission(const AbilityRequest &abilityRequest)
