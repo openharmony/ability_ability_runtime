@@ -5509,6 +5509,7 @@ int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecor
     renderPid = pid;
     renderRecord->SetPid(pid);
     renderRecord->SetUid(renderUid);
+    renderRecord->SetProcessName(startMsg.procName);
     if (isGPU) {
         renderRecord->SetProcessType(ProcessType::GPU);
         appRecord->SetGPUPid(pid);

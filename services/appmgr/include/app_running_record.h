@@ -106,11 +106,11 @@ public:
     void SetState(int32_t state);
     int32_t GetState() const;
     void SetProcessType(ProcessType type);
+    void SetProcessName(const std::string &processName);
 
 private:
     void SetHostUid(const int32_t hostUid);
     void SetHostBundleName(const std::string &hostBundleName);
-    void SetProcessName(const std::string &hostProcessName);
 
     pid_t pid_ = 0;
     pid_t hostPid_ = 0;
