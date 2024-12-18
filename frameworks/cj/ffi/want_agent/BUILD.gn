@@ -69,9 +69,13 @@ ohos_shared_library("cj_want_agent_ffi") {
     "hilog:libhilog",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
+    "napi:ace_napi",
   ]
 
-  sources = [ "src/cj_want_agent_ffi.cpp" ]
+  sources = [ 
+    "src/cj_want_agent_ffi.cpp",
+    "src/cj_want_agent_object.cpp"
+  ]
 
   cflags = [
     "-fstack-protector-all",
