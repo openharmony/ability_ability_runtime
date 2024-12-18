@@ -880,7 +880,7 @@ std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::InitResourceMana
                 } else if (bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::SHARED) {
                     loadPath = std::regex_replace(loadPath, hsp_pattern, hsp_sandbox);
                 } else if (bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::APP_SERVICE_FWK) {
-                    TAG_LOGD(AAFwkTag::APPKIT, "System hsp path, not need translate");
+                    loadPath = std::regex_replace(loadPath, hsp_pattern, hsp_sandbox);
                 } else {
                     loadPath = std::regex_replace(loadPath, outer_pattern, LOCAL_BUNDLES);
                 }
