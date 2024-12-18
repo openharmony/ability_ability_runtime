@@ -26,6 +26,7 @@ ohos_unittest("implicit_start_processor_test") {
     debug = false
   }
   branch_protector_ret = "pac_ret"
+  defines = [ "APP_DOMAIN_VERIFY_ENABLED" ]
   include_dirs = [
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
@@ -38,6 +39,7 @@ ohos_unittest("implicit_start_processor_test") {
 
   sources = [
     "implicit_start_processor_test.cpp",
+    "mock/src/mock_app_domain_verify_mgr_client.cpp",
     "mock/src/mock_parameters.cpp",
   ]
 
