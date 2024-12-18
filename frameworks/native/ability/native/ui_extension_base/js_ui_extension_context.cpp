@@ -1052,6 +1052,7 @@ void JsUIExtensionContext::AddFreeInstallObserver(napi_env env, const AAFwk::Wan
         std::string abilityName = want.GetElement().GetAbilityName();
         freeInstallObserver_->AddJsObserverObject(
             bundleName, abilityName, startTime, callback, result, isAbilityResult);
+        return;
     }
     std::string url = want.GetUriString();
     freeInstallObserver_->AddJsObserverObject(startTime, url, callback, result, isAbilityResult);
