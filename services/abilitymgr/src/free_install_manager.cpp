@@ -396,6 +396,12 @@ void FreeInstallManager::StartAbilityByPreInstall(int32_t recordId, FreeInstallI
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", identity.c_str());
     IPCSkeleton::SetCallingIdentity(identity);
     TAG_LOGI(AAFwkTag::FREE_INSTALL, "preInstall result: %{public}d", result);
+    if (info.isOpenAtomicServiceShortUrl) {
+        auto url = info.want.GetUriString();
+        DelayedSingleton<FreeInstallObserverManager>::GetInstance()->OnInstallFinishedByUrl(recordId,
+            startTime, url, result);
+        return;
+    }
     DelayedSingleton<FreeInstallObserverManager>::GetInstance()->OnInstallFinished(
         recordId, bundleName, abilityName, startTime, result);
 }

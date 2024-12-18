@@ -224,6 +224,7 @@ private:
             std::string abilityName = want.GetElement().GetAbilityName();
             freeInstallObserver_->AddJsObserverObject(
                 bundleName, abilityName, startTime, callback, result);
+            return;
         }
         std::string url = want.GetUriString();
         freeInstallObserver_->AddJsObserverObject(startTime, url, callback, result);
@@ -363,7 +364,6 @@ private:
             }
             if (freeInstallObserver == nullptr) {
                 TAG_LOGE(AAFwkTag::SERVICE_EXT, "null freeInstallObserver_");
-                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
                 return;
             }
             if (*innerErrorCode == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
