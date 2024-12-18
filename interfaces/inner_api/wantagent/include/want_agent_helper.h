@@ -41,6 +41,8 @@ static const int FLAG_NO_CREATE = 1 << 29;
 static const int FLAG_CANCEL_CURRENT = 1 << 28;
 static const int FLAG_UPDATE_CURRENT = 1 << 27;
 static const int FLAG_IMMUTABLE = 1 << 26;
+static const int FLAG_INVLID = 0;
+
 static const int INVLID_WANT_AGENT_USER_ID = -1;
 
 class WantAgentHelper final : public std::enable_shared_from_this<WantAgentHelper> {
@@ -104,11 +106,12 @@ public:
     /**
      * Cancels an WantAgent.
      *
-     * Only the application that creates the WantAgent can cancel it.
+     * if flags not equal FLAG_INVLID, cancel only when flags match wantAgent flags.
      *
      * @param agent Indicates the WantAgent to cancel.
+     * @param flags Indicates the flags to cancel, default is FLAG_INVLID(0).
      */
-    static ErrCode Cancel(const std::shared_ptr<WantAgent> agent);
+    static ErrCode Cancel(const std::shared_ptr<WantAgent> agent, uint32_t flags = FLAG_INVLID);
 
     /**
      * Checks whether two WantAgent objects are the same.

@@ -67,6 +67,8 @@ public:
 
     virtual int GetConnectionData(std::vector<AbilityRuntime::ConnectionData> &connectionData);
 
+    virtual void CancelWantSenderByFlags(const sptr<IWantSender> &sender, uint32_t flags);
+
 private:
     int TerminateAbilityInner(MessageParcel &data, MessageParcel &reply);
     int BackToCallerInner(MessageParcel &data, MessageParcel &reply);
