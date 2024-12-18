@@ -63,6 +63,7 @@ constexpr const char* PERMISSION_KILL_APP_PROCESSES = "ohos.permission.KILL_APP_
 constexpr const char* PERMISSION_KILL_PROCESS_DEPENDED_ON_WEB = "ohos.permission.KILL_PROCESS_DEPENDED_ON_ARKWEB";
 constexpr const char* PERMISSION_PRE_START_ATOMIC_SERVICE = "ohos.permission.PRE_START_ATOMIC_SERVICE";
 constexpr const char* PERMISSION_START_NATIVE_CHILD_PROCESS = "ohos.permission.START_NATIVE_CHILD_PROCESS";
+constexpr const char* PERMISSION_GET_TELEPHONY_STATE = "ohos.permission.GET_TELEPHONY_STATE";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS
