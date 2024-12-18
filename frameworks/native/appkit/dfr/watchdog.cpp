@@ -58,7 +58,7 @@ void Watchdog::Init(const std::shared_ptr<EventHandler> mainHandler)
     Watchdog::appMainHandler_ = mainHandler;
     if (appMainHandler_ != nullptr) {
         TAG_LOGD(AAFwkTag::APPDFR, "Watchdog init send event");
-        appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE, 0, EventQueue::Priority::IMMEDIATE);
+        appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE, 0, EventQueue::Priority::VIP);
     }
     lastWatchTime_ = 0;
     auto watchdogTask = [this] { this->Timer(); };
@@ -167,7 +167,7 @@ void Watchdog::Timer()
         }
     }
     if (appMainHandler_ != nullptr) {
-        appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE, 0, EventQueue::Priority::IMMEDIATE);
+        appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE, 0, EventQueue::Priority::VIP);
     }
     int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
