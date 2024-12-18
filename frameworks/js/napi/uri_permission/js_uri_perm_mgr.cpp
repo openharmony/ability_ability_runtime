@@ -47,7 +47,7 @@ static void ResolveGrantUriPermissionTask(napi_env env, NapiAsyncTask &task, int
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveGrantUriPermissionTask");
     if (errCode == ERR_OK) {
-        task.Resolve(env, CreateJsNumber(env, 0));
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
         return;
     }
     if (errCode == AAFwk::CHECK_PERMISSION_FAILED || errCode == AAFwk::ERR_CODE_INVALID_URI_FLAG ||
@@ -63,7 +63,7 @@ static void ResolveGrantUriPermissionWithAppIndexTask(napi_env env, NapiAsyncTas
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveGrantUriPermissionWithAppIndexTask");
     if (errCode == ERR_OK) {
-        task.Resolve(env, CreateJsUndefined(env));
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
         return;
     }
     if (errCode == AAFwk::CHECK_PERMISSION_FAILED || errCode == AAFwk::ERR_CODE_INVALID_URI_FLAG ||
@@ -80,7 +80,7 @@ static void ResolveRevokeUriPermissionTask(napi_env env, NapiAsyncTask &task, in
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveRevokeUriPermissionTask");
     if (errCode == ERR_OK) {
-        task.Resolve(env, CreateJsNumber(env, 0));
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
         return;
     }
     if (errCode == AAFwk::ERR_CODE_INVALID_URI_TYPE || errCode == AAFwk::ERR_CODE_GRANT_URI_PERMISSION) {
@@ -95,7 +95,7 @@ static void ResolveRevokeUriPermissionWithAppIndexTask(napi_env env, NapiAsyncTa
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ResolveRevokeUriPermissionWithAppIndexTask");
     if (errCode == ERR_OK) {
-        task.Resolve(env, CreateJsUndefined(env));
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
         return;
     }
     if (errCode == AAFwk::ERR_CODE_INVALID_URI_TYPE || errCode == AAFwk::ERR_CODE_GRANT_URI_PERMISSION ||
