@@ -31,7 +31,9 @@
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #include "ui_extension_utils.h"
+#ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
+#endif // SUPPORT_UPMS
 
 namespace OHOS {
 namespace AAFwk {
@@ -110,9 +112,11 @@ int32_t UriUtils::CheckNonImplicitShareFileUri(const Want &want, int32_t userId,
     if (element.GetBundleName().empty() || element.GetAbilityName().empty()) {
         return ERR_OK;
     }
+#ifdef SUPPORT_UPMS
     if (!IsGrantUriPermissionFlag(want)) {
         return ERR_OK;
     }
+#endif // SUPPORT_UPMS
     bool isFileUri = (!want.GetUriString().empty() && want.GetUri().GetScheme() == "file");
     if (!isFileUri && want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM).empty()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "not file uri");
@@ -251,10 +255,12 @@ bool UriUtils::GetUriListFromWant(Want &want, std::vector<std::string> &uriVec)
     return true;
 }
 
+#ifdef SUPPORT_UPMS
 bool UriUtils::IsGrantUriPermissionFlag(const Want &want)
 {
     return ((want.GetFlags() & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) != 0);
 }
+#endif // SUPPORT_UPMS
 
 bool UriUtils::IsServiceExtensionType(AppExecFwk::ExtensionAbilityType extensionAbilityType)
 {
@@ -279,6 +285,7 @@ bool UriUtils::IsDmsCall(uint32_t fromTokenId)
     return false;
 }
 
+#ifdef SUPPORT_UPMS
 void UriUtils::GrantDmsUriPermission(Want &want, uint32_t callerTokenId, std::string targetBundleName, int32_t appIndex)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -336,6 +343,7 @@ void UriUtils::CheckUriPermission(uint32_t callerTokenId, Want &want)
         return;
     }
 }
+#endif // SUPPORT_UPMS
 
 bool UriUtils::IsSandboxApp(uint32_t tokenId)
 {
@@ -352,6 +360,7 @@ bool UriUtils::IsSandboxApp(uint32_t tokenId)
     return false;
 }
 
+#ifdef SUPPORT_UPMS
 void UriUtils::GrantUriPermission(Want &want, std::string targetBundleName, int32_t appIndex,
     bool isSandboxApp, uint32_t callerTokenId, int32_t collaboratorType)
 {
@@ -421,6 +430,7 @@ bool UriUtils::GrantUriPermissionInner(std::vector<std::string> uriVec, uint32_t
     }
     return true;
 }
+#endif // SUPPORT_UPMS
 
 void UriUtils::PublishFileOpenEvent(const Want &want)
 {
@@ -447,6 +457,7 @@ void UriUtils::PublishFileOpenEvent(const Want &want)
     }
 }
 
+#ifdef SUPPORT_UPMS
 void UriUtils::GrantUriPermissionForServiceExtension(const AbilityRequest &abilityRequest)
 {
     if (IsServiceExtensionType(abilityRequest.abilityInfo.extensionAbilityType)) {
@@ -471,5 +482,6 @@ void UriUtils::GrantUriPermissionForUIOrServiceExtension(const AbilityRequest &a
             abilityRequest.collaboratorType);
     }
 }
+#endif // SUPPORT_UPMS
 } // AAFwk
 } // OHOS
