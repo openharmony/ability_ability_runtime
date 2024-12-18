@@ -160,22 +160,13 @@ int64_t FfiWantAgentGetWantAgent(CJWantAgentInfo info, int32_t *errCode)
         *errCode = result;
         return -1;
     } else {
-        OHOS::AbilityRuntime::WantAgent::WantAgent* pWantAgent = nullptr;
         if (wantAgent == nullptr) {
             *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
             return -1;
-        } else {
-            pWantAgent = new (std::nothrow) OHOS::AbilityRuntime::WantAgent::WantAgent(
-                wantAgent->GetPendingWant());
         }
-        if (pWantAgent == nullptr) {
-            *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
-            return -1;
-        } else {
-            auto nativeWantAgent = OHOS::FFI::FFIData::Create<CJWantAgent>(
-                std::make_shared<OHOS::AbilityRuntime::WantAgent::WantAgent>(*pWantAgent));
-            return nativeWantAgent->GetID();
-        }
+        auto nativeWantAgent = OHOS::FFI::FFIData::Create<CJWantAgent>(
+            std::make_shared<OHOS::AbilityRuntime::WantAgent::WantAgent>(wantAgent->GetPendingWant()));
+        return nativeWantAgent->GetID();
     }
 }
 
