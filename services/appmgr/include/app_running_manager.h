@@ -42,7 +42,7 @@ class WindowVisibilityInfo;
 }
 namespace AppExecFwk {
 
-class AppRunningManager {
+class AppRunningManager : public std::enable_shared_from_this<AppRunningManager> {
 public:
     AppRunningManager();
     virtual ~AppRunningManager();
@@ -347,7 +347,9 @@ public:
 
     void SetMultiUserConfigurationMgr(const std::shared_ptr<MultiUserConfigurationMgr>& multiUserConfigurationMgr);
 
-  private:
+    bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;

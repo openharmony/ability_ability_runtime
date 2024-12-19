@@ -471,6 +471,28 @@ int32_t AppMgrService::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
     return ERR_OK;
 }
 
+int32_t AppMgrService::IsTerminatingByPid(pid_t pid, bool &isTerminating)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    bool isCallingPermission =
+        AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
+    if (!isCallingPermission) {
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+    auto appRunningRecord = appMgrServiceInner_->GetAppRunningRecordByPid(pid);
+    if (appRunningRecord && appRunningRecord->IsTerminating()) {
+        isTerminating = true;
+        TAG_LOGD(AAFwkTag::APPMGR, "current pid %{public}d is terminating.", pid);
+        return ERR_OK;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "current pid %{public}d is not terminating.", pid);
+    return ERR_OK;
+}
+
 int32_t AppMgrService::GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId)
 {
     if (!IsReady()) {

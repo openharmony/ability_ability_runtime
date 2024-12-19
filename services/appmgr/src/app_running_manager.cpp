@@ -38,6 +38,7 @@
 #include "cache_process_manager.h"
 #include "res_sched_util.h"
 #include "ui_extension_utils.h"
+#include "uri_permission_manager_client.h"
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
@@ -559,7 +560,7 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
 
     if ((isSCB || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent())) {
-        appRecord->SetTerminating();
+        appRecord->SetTerminating(shared_from_this());
     }
 
     auto timeoutTask = [appRecord, token]() {
@@ -604,7 +605,7 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token, bool 
             return;
         }
         TAG_LOGI(AAFwkTag::APPMGR, "The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
-        appRecord->SetTerminating();
+        appRecord->SetTerminating(shared_from_this());
     }
 }
 
@@ -670,7 +671,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             return;
         }
         TAG_LOGI(AAFwkTag::APPMGR, "Terminate last ability in app:%{public}s.", appRecord->GetName().c_str());
-        appRecord->SetTerminating();
+        appRecord->SetTerminating(shared_from_this());
         if (clearMissionFlag && appMgrServiceInner != nullptr) {
             auto delayTime = appRecord->ExtensionAbilityRecordExists() ?
                 AMSEventHandler::DELAY_KILL_EXTENSION_PROCESS_TIMEOUT : AMSEventHandler::DELAY_KILL_PROCESS_TIMEOUT;
@@ -1680,6 +1681,30 @@ void AppRunningManager::SetMultiUserConfigurationMgr(
     const std::shared_ptr<MultiUserConfigurationMgr>& multiUserConfigurationMgr)
 {
     multiUserConfigurationMgr_ = multiUserConfigurationMgr;
+}
+
+bool AppRunningManager::CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+        return false;
+    }
+    std::lock_guard guard(runningRecordMapMutex_);
+    if (appRunningRecordMap_.empty()) {
+        return true;
+    }
+    auto uid = appRecord->GetUid();
+    auto appRecordId = appRecord->GetRecordId();
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &itemAppRecord = item.second;
+        if (itemAppRecord != nullptr &&
+            itemAppRecord->GetRecordId() != appRecordId &&
+            itemAppRecord->GetUid() == uid &&
+            !(appRecord->GetRestartAppFlag())) {
+            return false;
+        }
+    }
+    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

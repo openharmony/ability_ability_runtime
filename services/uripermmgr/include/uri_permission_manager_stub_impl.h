@@ -27,10 +27,21 @@
 #include "uri.h"
 #include "uri_permission_manager_stub.h"
 
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+#include "policy_info.h"
+#include "sandbox_manager_kit.h"
+#else
+#include "upms_policy_info.h"
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+
 namespace OHOS::AAFwk {
 namespace {
 using ClearProxyCallback = std::function<void(const wptr<IRemoteObject>&)>;
 using TokenId = Security::AccessToken::AccessTokenID;
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+using namespace AccessControl::SandboxManager;
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+
 constexpr int32_t DEFAULT_ABILITY_ID = -1;
 }
 
@@ -62,12 +73,6 @@ struct GrantInfo {
     {
         abilityIds.clear();
     }
-};
-
-struct PolicyInfo final {
-public:
-    std::string path;
-    uint64_t mode;
 };
 
 class UriPermissionManagerStubImpl : public UriPermissionManagerStub,
@@ -146,6 +151,12 @@ private:
 
     bool IsDistributedSubDirUri(const std::string &inputUri, const std::string &cachedUri);
 
+    int32_t ClearPermissionTokenByMap(const uint32_t tokenId) override;
+
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    int32_t Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result) override;
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+
     class ProxyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         explicit ProxyDeathRecipient(ClearProxyCallback&& proxy) : proxy_(proxy) {}
@@ -162,6 +173,8 @@ private:
     std::mutex mgrMutex_;
     sptr<AppExecFwk::IAppMgr> appMgr_ = nullptr;
     sptr<StorageManager::IStorageManager> storageManager_ = nullptr;
+    std::set<uint32_t> permissionTokenMap_;
+    std::mutex ptMapMutex_;
 };
 }  // namespace OHOS::AAFwk
 #endif  // OHOS_ABILITY_RUNTIME_URI_PERMISSION_MANAGER_STUB_IMPL_H
