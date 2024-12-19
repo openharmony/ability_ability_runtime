@@ -325,7 +325,6 @@ private:
                 errCode = ERR_NOT_OK;
             }
         }
-
         TAG_LOGI(AAFwkTag::APPMGR, "kill process [%{public}s]", bundleName.c_str());
         NapiAsyncTask::CompleteCallback complete =
             [bundleName, abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task,
@@ -346,7 +345,6 @@ private:
                 task.Reject(env, CreateJsError(env, ret, "kill process failed."));
             }
         };
-
         napi_value lastParam = (argc == ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSAppManager::OnkillProcessByBundleName",
@@ -423,8 +421,8 @@ private:
         }
 
         NapiAsyncTask::CompleteCallback complete =
-            [appManager = appManager_, bundleName, accountId, errCode](napi_env env, NapiAsyncTask &task,
-                int32_t status) {
+            [appManager = appManager_, bundleName, accountId, errCode](
+                napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (errCode != 0) {
                     task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                     return;

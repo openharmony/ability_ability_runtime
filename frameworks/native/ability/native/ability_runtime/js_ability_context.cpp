@@ -378,6 +378,11 @@ napi_value JsAbilityContext::MoveAbilityToBackground(napi_env env, napi_callback
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnMoveAbilityToBackground);
 }
 
+napi_value JsAbilityContext::SetRestoreEnabled(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnSetRestoreEnabled);
+}
+
 napi_value JsAbilityContext::OpenAtomicService(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnOpenAtomicService);
@@ -1732,6 +1737,7 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
     BindNativeFunction(env, object, "hideAbility", moduleName,
         JsAbilityContext::HideAbility);
     BindNativeFunction(env, object, "moveAbilityToBackground", moduleName, JsAbilityContext::MoveAbilityToBackground);
+    BindNativeFunction(env, object, "setRestoreEnabled", moduleName, JsAbilityContext::SetRestoreEnabled);
     BindNativeFunction(env, object, "openAtomicService", moduleName, JsAbilityContext::OpenAtomicService);
 
 #ifdef SUPPORT_GRAPHICS
@@ -2367,5 +2373,32 @@ int32_t JsAbilityContext::GenerateRequestCode()
 
 int32_t JsAbilityContext::curRequestCode_ = 0;
 std::mutex JsAbilityContext::requestCodeMutex_;
+
+napi_value JsAbilityContext::OnSetRestoreEnabled(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "called");
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "not enough params");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    auto abilityContext = context_.lock();
+    if (abilityContext == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "null abilityContext");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+
+    bool enabled = true;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], enabled)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "parse param failed");
+        ThrowInvalidParamError(env, "Parse param enabled failed.");
+        return CreateJsUndefined(env);
+    }
+
+    abilityContext->SetRestoreEnabled(enabled);
+    return CreateJsUndefined(env);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

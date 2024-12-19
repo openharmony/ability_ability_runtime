@@ -594,23 +594,30 @@ napi_value JsApplicationContextUtils::KillProcessBySelf(napi_env env, napi_callb
 
 napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCallbackInfo& info)
 {
-    // only support 0 or 1 params
-    if (info.argc != ARGC_ZERO && info.argc != ARGC_ONE) {
+    // only support 0 or 1 or 2 params
+    if (info.argc != ARGC_ZERO && info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
         TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
         ThrowInvalidParamError(env, "Not enough params.");
         return CreateJsUndefined(env);
     }
+
+    bool clearPageStack = false;
+    bool hasClearPageStack = false;
+    if (info.argc > ARGC_ZERO && ConvertFromJsValue(env, info.argv[0], clearPageStack)) {
+        hasClearPageStack = true;
+    }
+
     TAG_LOGD(AAFwkTag::APPKIT, "kill self process");
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
-        [applicationContext = applicationContext_, innerErrCode]() {
+        [applicationContext = applicationContext_, clearPageStack, innerErrCode]() {
         auto context = applicationContext.lock();
         if (!context) {
             TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
             *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
             return;
         }
-        context->KillProcessBySelf();
+        context->KillProcessBySelf(clearPageStack);
     };
     NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrCode != ERR_OK) {
@@ -619,7 +626,7 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
         }
         task.ResolveWithNoError(env, CreateJsUndefined(env));
     };
-    napi_value lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
+    napi_value lastParam = (info.argc == ARGC_ONE && !hasClearPageStack) ? info.argv[INDEX_ZERO] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsApplicationContextUtils::OnkillProcessBySelf",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));

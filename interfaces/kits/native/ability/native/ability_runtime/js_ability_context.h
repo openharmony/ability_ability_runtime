@@ -67,6 +67,7 @@ public:
     static napi_value ShowAbility(napi_env env, napi_callback_info info);
     static napi_value HideAbility(napi_env env, napi_callback_info info);
     static napi_value MoveAbilityToBackground(napi_env env, napi_callback_info info);
+    static napi_value SetRestoreEnabled(napi_env env, napi_callback_info info);
     static napi_value OpenAtomicService(napi_env env, napi_callback_info info);
 
     static void ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
@@ -126,6 +127,7 @@ private:
     napi_value OnOpenAtomicService(napi_env env, NapiCallbackInfo& info);
     napi_value OpenAtomicServiceInner(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
         AAFwk::StartOptions &options);
+    napi_value OnSetRestoreEnabled(napi_env env, NapiCallbackInfo& info);
     void RemoveOpenLinkTask(int requestCode);
 
     static bool UnWrapWant(napi_env env, napi_value argv, AAFwk::Want& want);

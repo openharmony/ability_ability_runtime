@@ -237,6 +237,9 @@ public:
 
     void RemoveResultCallbackTask(int requestCode) override;
 
+    void SetRestoreEnabled(bool enabled) override;
+    bool GetRestoreEnabled() override;
+
     std::shared_ptr<AAFwk::Want> GetWant() override;
 
 #ifdef SUPPORT_GRAPHICS
@@ -305,6 +308,7 @@ private:
     wptr<IRemoteObject> sessionToken_;
     std::mutex uiExtensionMutex_;
     std::map<int32_t, Want> uiExtensionMap_;
+    std::atomic<bool> restoreEnabled_ = false;
 
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);

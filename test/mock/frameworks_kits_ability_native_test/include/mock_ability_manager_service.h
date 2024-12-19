@@ -169,7 +169,7 @@ public:
         return releaseDataAbility_;
     }
 
-    int KillProcess(const std::string& bundleName) override;
+    int KillProcess(const std::string& bundleName, const bool clearPageStack = false) override;
 
     int UninstallApp(const std::string& bundleName, int32_t uid) override;
 

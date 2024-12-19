@@ -217,6 +217,12 @@ int AbilityManagerStub::OnRemoteRequestInnerFifth(uint32_t code, MessageParcel &
     if (interfaceCode == AbilityManagerInterfaceCode::ABILITY_RECOVERY_ENABLE) {
         return EnableRecoverAbilityInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::ABILITY_RECOVERY_SUBMITINFO) {
+        return SubmitSaveRecoveryInfoInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::CLEAR_RECOVERY_PAGE_STACK) {
+        return ScheduleClearRecoveryPageStackInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::MINIMIZE_UI_ABILITY_BY_SCB) {
         return MinimizeUIAbilityBySCBInner(data, reply);
     }
@@ -1127,7 +1133,8 @@ int AbilityManagerStub::ReleaseDataAbilityInner(MessageParcel &data, MessageParc
 int AbilityManagerStub::KillProcessInner(MessageParcel &data, MessageParcel &reply)
 {
     std::string bundleName = Str16ToStr8(data.ReadString16());
-    int result = KillProcess(bundleName);
+    bool clearPageStack = data.ReadBool();
+    int result = KillProcess(bundleName, clearPageStack);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "remove stack error");
         return ERR_INVALID_VALUE;
@@ -2748,6 +2755,23 @@ int AbilityManagerStub::EnableRecoverAbilityInner(MessageParcel &data, MessagePa
         return ERR_NULL_OBJECT;
     }
     EnableRecoverAbility(token);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::ScheduleClearRecoveryPageStackInner(MessageParcel &data, MessageParcel &reply)
+{
+    ScheduleClearRecoveryPageStack();
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::SubmitSaveRecoveryInfoInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (!token) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SubmitSaveRecoveryInfoInner read ability token failed.");
+        return ERR_NULL_OBJECT;
+    }
+    SubmitSaveRecoveryInfo(token);
     return NO_ERROR;
 }
 

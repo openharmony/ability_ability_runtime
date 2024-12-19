@@ -1328,6 +1328,8 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_StartAbilityByType_0100, F
     const std::string type = "share";
     ErrCode ret = context_->StartAbilityByType(type, wantParams, nullptr);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
+    context_->SetRestoreEnabled(true);
+    context_->GetRestoreEnabled();
 }
 
 /**

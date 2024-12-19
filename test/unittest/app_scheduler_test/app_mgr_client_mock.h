@@ -37,7 +37,7 @@ public:
     MOCK_METHOD2(UpdateExtensionState, AppMgrResultCode(const sptr<IRemoteObject> &token, const ExtensionState state));
     MOCK_METHOD2(UpdateApplicationInfoInstalled, AppMgrResultCode(const std::string &bundleName, const int uid));
     MOCK_METHOD0(UpdateApplicationInfoInstalledDone, AppMgrResultCode());
-    MOCK_METHOD1(KillApplication, AppMgrResultCode(const std::string&));
+    MOCK_METHOD2(KillApplication, AppMgrResultCode(const std::string&, const bool clearPageStack));
     MOCK_METHOD3(KillApplicationByUid,
         AppMgrResultCode(const std::string &bundleName, const int uid, const std::string&));
     MOCK_METHOD3(ClearUpApplicationData, AppMgrResultCode(const std::string&, int32_t appCloneIndex, int32_t userId));
