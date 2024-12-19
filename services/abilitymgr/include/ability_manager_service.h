@@ -2127,6 +2127,16 @@ private:
      */
     int CheckUIExtensionPermission(const AbilityRequest &abilityRequest);
 
+    /**
+     * @brief Check CallerInfoQueryExtension permission
+     *
+     * @param abilityRequest The ability request.
+     * @return Returns ERR_OK when allowed, others when check failed.
+     */
+    int CheckCallerInfoQueryExtensionPermission(const AbilityRequest &abilityRequest);
+
+    int CheckFileAccessExtensionPermission(const AbilityRequest &abilityRequest);
+
     bool IsTargetPermission(const Want &want) const;
 
     bool IsDelegatorCall(const AppExecFwk::RunningProcessInfo &processInfo, const AbilityRequest &abilityRequest) const;
