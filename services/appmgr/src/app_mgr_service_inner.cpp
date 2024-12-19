@@ -4041,14 +4041,12 @@ void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleNam
 int32_t AppMgrServiceInner::RegisterApplicationStateObserver(
     const sptr<IApplicationStateObserver> &observer, const std::vector<std::string> &bundleNameList)
 {
-    CHECK_CALLER_IS_SYSTEM_APP;
     return DelayedSingleton<AppStateObserverManager>::GetInstance()->RegisterApplicationStateObserver(
         observer, bundleNameList);
 }
 
 int32_t AppMgrServiceInner::UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer)
 {
-    CHECK_CALLER_IS_SYSTEM_APP;
     return DelayedSingleton<AppStateObserverManager>::GetInstance()->UnregisterApplicationStateObserver(observer);
 }
 
@@ -4897,7 +4895,6 @@ int AppMgrServiceInner::VerifyKillProcessPermission(const sptr<IRemoteObject> &t
 
 int32_t AppMgrServiceInner::VerifyKillProcessPermissionCommon() const
 {
-    CHECK_CALLER_IS_SYSTEM_APP;
     auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_KILL_APP_PROCESSES);
     if (isCallingPerm) {
@@ -5995,7 +5992,6 @@ int32_t AppMgrServiceInner::IsAppRunning(const std::string &bundleName, int32_t 
     bool &isRunning)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called, bundleName: %{public}s", bundleName.c_str());
-    CHECK_CALLER_IS_SYSTEM_APP;
     if (!CheckGetRunningInfoPermission()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed.");
         return ERR_PERMISSION_DENIED;
