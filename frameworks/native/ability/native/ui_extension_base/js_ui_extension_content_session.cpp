@@ -206,6 +206,11 @@ napi_value JsUIExtensionContentSession::LoadContent(napi_env env, napi_callback_
     GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContentSession, OnLoadContent);
 }
 
+napi_value JsUIExtensionContentSession::LoadContentByName(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContentSession, OnLoadContentByName);
+}
+
 napi_value JsUIExtensionContentSession::SetWindowBackgroundColor(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContentSession, OnSetWindowBackgroundColor);
@@ -754,6 +759,58 @@ napi_value JsUIExtensionContentSession::OnLoadContent(napi_env env, NapiCallback
     return CreateJsUndefined(env);
 }
 
+napi_value JsUIExtensionContentSession::OnLoadContentByName(napi_env env, NapiCallbackInfo& info)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UI_EXT, "LoadContentByName");
+    if (info.argc < ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Not enough params");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    std::string name;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], name)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid param name");
+        ThrowInvalidParamError(env, "Parameter error: name must be a string");
+        return CreateJsUndefined(env);
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "name: %{public}s", name.c_str());
+
+    napi_value storage = nullptr;
+    if (info.argc > ARGC_ONE) {
+        if (!CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "Invalid param storage");
+            ThrowInvalidParamError(env, "Parameter error: storage must be a object");
+            return CreateJsUndefined(env);
+        }
+        storage = info.argv[INDEX_ONE];
+    }
+
+    if (uiWindow_ == nullptr || sessionInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "uiWindow or sessionInfo is null");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return CreateJsUndefined(env);
+    }
+
+    if (sessionInfo_->isAsyncModalBinding && isFirstTriggerBindModal_) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "Trigger binding UIExtension modal window");
+        uiWindow_->TriggerBindModalUIExtension();
+        isFirstTriggerBindModal_ = false;
+    }
+
+    sptr<IRemoteObject> parentToken = sessionInfo_->parentToken;
+    auto ret = uiWindow_->NapiSetUIContentByName(name, env, storage, Rosen::BackupAndRestoreType::NONE, parentToken);
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "NapiSetUIContentByName failed, ret: %{public}d", ret);
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return CreateJsUndefined(env);
+    }
+
+    TAG_LOGD(AAFwkTag::UI_EXT, "NapiSetUIContentByName success");
+    return CreateJsUndefined(env);
+}
+
 napi_value JsUIExtensionContentSession::OnSetWindowBackgroundColor(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
@@ -931,6 +988,7 @@ napi_value JsUIExtensionContentSession::CreateJsUIExtensionContentSession(napi_e
     BindNativeFunction(env, object, "setReceiveDataCallback", moduleName, SetReceiveDataCallback);
     BindNativeFunction(env, object, "setReceiveDataForResultCallback", moduleName, SetReceiveDataForResultCallback);
     BindNativeFunction(env, object, "loadContent", moduleName, LoadContent);
+    BindNativeFunction(env, object, "loadContentByName", moduleName, LoadContentByName);
     BindNativeFunction(env, object, "setWindowBackgroundColor", moduleName, SetWindowBackgroundColor);
     BindNativeFunction(env, object, "setWindowPrivacyMode", moduleName, SetWindowPrivacyMode);
     BindNativeFunction(env, object, "startAbility", moduleName, StartAbility);
