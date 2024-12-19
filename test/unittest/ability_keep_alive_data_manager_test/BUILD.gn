@@ -39,7 +39,6 @@ ohos_unittest("ability_keep_alive_data_manager_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:app_util",
@@ -61,6 +60,12 @@ ohos_unittest("ability_keep_alive_data_manager_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
+
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    ]
+  }
 }
 
 group("unittest") {

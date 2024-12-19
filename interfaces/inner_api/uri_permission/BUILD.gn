@@ -34,12 +34,7 @@ ohos_shared_library("uri_permission_mgr") {
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
   public_configs = [ ":uripermkit_public_config" ]
 
-  sources = [
-    "src/uri_permission_load_callback.cpp",
-    "src/uri_permission_manager_client.cpp",
-    "src/uri_permission_manager_proxy.cpp",
-    "src/uri_permission_manager_stub.cpp",
-  ]
+  sources = []
 
   deps = []
 
@@ -52,6 +47,15 @@ ohos_shared_library("uri_permission_mgr") {
     "samgr:samgr_proxy",
     "storage_service:storage_manager_sa_proxy",
   ]
+
+  if (ability_runtime_upms) {
+    sources += [
+      "src/uri_permission_load_callback.cpp",
+      "src/uri_permission_manager_client.cpp",
+      "src/uri_permission_manager_proxy.cpp",
+      "src/uri_permission_manager_stub.cpp",
+    ]
+  }
 
   if (ability_runtime_feature_sandboxmanager) {
     external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]

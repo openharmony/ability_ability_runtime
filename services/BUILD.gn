@@ -19,6 +19,8 @@ group("ams_target") {
     "common:ams_common_target",
     "dataobsmgr:dataobsms",
     "quickfixmgr:quickfixms",
-    "uripermmgr:libupms",
   ]
+  if (ability_runtime_upms) {
+    deps += [ "uripermmgr:libupms" ]
+  }
 }
