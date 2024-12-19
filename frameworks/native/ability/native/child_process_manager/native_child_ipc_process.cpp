@@ -53,7 +53,9 @@ bool NativeChildIpcProcess::Init(const std::shared_ptr<ChildProcessStartInfo> &i
     }
 
     if (!LoadNativeLib(info)) {
-        iNotify->OnError(static_cast<int32_t>(ChildProcessManagerErrorCode::ERR_LIB_LOADING_FAILED));
+        auto errcode = ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(
+            ChildProcessManagerErrorCode::ERR_LIB_LOADING_FAILED);
+        iNotify->OnError(static_cast<int32_t>(errcode));
         return false;
     }
 
@@ -72,7 +74,9 @@ void NativeChildIpcProcess::OnStart()
     OHIPCRemoteStub *ipcStub = funcNativeLibOnConnect_();
     if (ipcStub == nullptr || ipcStub->remote == nullptr) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "null ipcStub");
-        mainProcessCb_->OnError(static_cast<int32_t>(ChildProcessManagerErrorCode::ERR_CONNECTION_FAILED));
+        auto errcode = ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(
+            ChildProcessManagerErrorCode::ERR_CONNECTION_FAILED);
+        mainProcessCb_->OnError(static_cast<int32_t>(errcode));
         return;
     }
 

@@ -39,5 +39,16 @@ ChildProcessManagerErrorCode ChildProcessManagerErrorUtil::GetChildProcessManage
 
     return ChildProcessManagerErrorCode::ERR_APP_MGR_FAILED_INNER;
 }
+
+Ability_NativeChildProcess_ErrCode ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(
+    ChildProcessManagerErrorCode cpmErr)
+{
+    auto it = CPM_ERRCODE_MAP.find(cpmErr);
+    if (it == CPM_ERRCODE_MAP.end()) {
+        return NCP_ERR_INTERNAL;
+    }
+
+    return it->second;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
