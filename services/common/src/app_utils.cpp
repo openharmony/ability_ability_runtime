@@ -60,6 +60,7 @@ constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_PATH =
     "/etc/ability_runtime/start_ability_without_caller_token.json";
 constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_TITLE = "startAbilityWithoutCallerToken";
 constexpr const char* MAX_CHILD_PROCESS = "const.max_native_child_process";
+constexpr const char* SUPPORT_MULTI_INSTANCE = "const.abilityms.support_multi_instance";
 }
 
 AppUtils::~AppUtils() {}
@@ -400,6 +401,16 @@ int32_t AppUtils::MaxChildProcess()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "MaxChildProcess: %{public}d", maxChildProcess_.value);
     return maxChildProcess_.value;
+}
+
+bool AppUtils::IsSupportMultiInstance()
+{
+    if (!isSupportMultiInstance_.isLoaded) {
+        isSupportMultiInstance_.value = system::GetBoolParameter(SUPPORT_MULTI_INSTANCE, false);
+        isSupportMultiInstance_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isSupportMultiInstance_.value);
+    return isSupportMultiInstance_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
