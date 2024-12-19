@@ -74,6 +74,7 @@ constexpr static char FILEACCESS_EXT_ABILITY[] = "FileAccessExtension";
 constexpr static char ENTERPRISE_ADMIN_EXTENSION[] = "EnterpriseAdminExtension";
 constexpr static char INPUTMETHOD_EXTENSION[] = "InputMethodExtensionAbility";
 constexpr static char APP_ACCOUNT_AUTHORIZATION_EXTENSION[] = "AppAccountAuthorizationExtension";
+constexpr static char CALLER_INFO_QUERY_EXTENSION[] = "CallerInfoQueryExtension";
 #ifdef WITH_DLP
 constexpr static char DLP_PARAMS_SANDBOX[] = "ohos.dlp.params.sandbox";
 #endif // WITH_DLP
@@ -187,6 +188,9 @@ void FAAbilityThread::CreateExtensionAbilityName(const std::shared_ptr<AppExecFw
     }
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::APP_ACCOUNT_AUTHORIZATION) {
         abilityName = APP_ACCOUNT_AUTHORIZATION_EXTENSION;
+    }
+    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::CALLER_INFO_QUERY) {
+        abilityName = CALLER_INFO_QUERY_EXTENSION;
     }
     CreateExtensionAbilityNameSupportGraphics(abilityInfo, abilityName);
     TAG_LOGD(AAFwkTag::FA, "extension abilityName: %{public}s", abilityName.c_str());
