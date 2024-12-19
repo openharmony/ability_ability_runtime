@@ -53,7 +53,9 @@ public:
     MOCK_METHOD3(GetAllRunningInstanceKeysByBundleName, int32_t(const std::string &bundleName,
         std::vector<std::string> &instanceKeys, int32_t userId));
     MOCK_METHOD1(GetAllRenderProcesses, int32_t(std::vector<RenderProcessInfo>&));
+#ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD1(GetAllChildrenProcesses, int(std::vector<ChildProcessInfo>&));
+#endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD1(RegisterAppStateCallback, void(const sptr<IAppStateCallback>& callback));
     MOCK_METHOD0(StopAllProcess, void());
     MOCK_CONST_METHOD0(QueryAppSpawnConnectionState, SpawnConnectionState());
@@ -64,16 +66,20 @@ public:
     MOCK_METHOD0(GetConfiguration, std::shared_ptr<Configuration>());
     MOCK_METHOD2(IsSharedBundleRunning, bool(const std::string &bundleName, uint32_t versionCode));
     MOCK_METHOD3(GetBundleNameByPid, int32_t(const int pid, std::string &bundleName, int32_t &uid));
+#ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD3(StartChildProcess, int32_t(const pid_t hostPid, pid_t &childPid, const ChildProcessRequest &request));
     MOCK_METHOD1(GetChildProcessInfoForSelf, int32_t(ChildProcessInfo &info));
+#endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD2(SetAppWaitingDebug, int32_t(const std::string &bundleName, bool isPersist));
     MOCK_METHOD0(CancelAppWaitingDebug, int32_t());
     MOCK_METHOD1(GetWaitingDebugApp, int32_t(std::vector<std::string> &debugInfoList));
     MOCK_METHOD1(IsWaitingDebugApp, bool(const std::string &bundleName));
     MOCK_METHOD0(ClearNonPersistWaitingDebugFlag, void());
     MOCK_METHOD0(IsMemorySizeSufficient, bool());
+#ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD4(StartNativeChildProcess, int32_t(const pid_t hostPid,
         const std::string &libName, int32_t childProcessCount, const sptr<IRemoteObject> &callback));
+#endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD1(SendAppSpawnUninstallDebugHapMsg, void(int32_t userId));
 
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)

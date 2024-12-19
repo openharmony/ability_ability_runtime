@@ -38,8 +38,10 @@
 #include "application_env_impl.h"
 #include "bundle_mgr_proxy.h"
 #include "hitrace_meter.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_main_thread.h"
 #include "child_process_manager.h"
+#endif // SUPPORT_CHILD_PROCESS
 #include "configuration_convertor.h"
 #include "common_event_manager.h"
 #include "global_constant.h"
@@ -1492,11 +1494,13 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             options.isErrorInfoEnhance = appLaunchData.GetErrorInfoEnhance();
         }
         options.jitEnabled = appLaunchData.IsJITEnabled();
+#ifdef SUPPORT_CHILD_PROCESS
         AbilityRuntime::ChildProcessManager::GetInstance().SetForkProcessJITEnabled(appLaunchData.IsJITEnabled());
         TAG_LOGD(AAFwkTag::APPKIT, "isStartWithDebug:%{public}d, debug:%{public}d, isNativeStart:%{public}d",
             appLaunchData.GetDebugApp(), appInfo.debug, appLaunchData.isNativeStart());
         AbilityRuntime::ChildProcessManager::GetInstance().SetForkProcessDebugOption(appInfo.bundleName,
             appLaunchData.GetDebugApp(), appInfo.debug, appLaunchData.isNativeStart());
+#endif // SUPPORT_CHILD_PROCESS
         if (!bundleInfo.hapModuleInfos.empty()) {
             for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
                 options.hapModulePath[hapModuleInfo.moduleName] = hapModuleInfo.hapPath;
@@ -2714,8 +2718,10 @@ void MainThread::Start()
 
 void MainThread::StartChild(const std::map<std::string, int32_t> &fds)
 {
+#ifdef SUPPORT_CHILD_PROCESS
     TAG_LOGI(AAFwkTag::APPKIT, "MainThread StartChild, fds size:%{public}zu", fds.size());
     ChildMainThread::Start(fds);
+#endif  // SUPPORT_CHILD_PROCESS
 }
 
 void MainThread::PreloadExtensionPlugin()

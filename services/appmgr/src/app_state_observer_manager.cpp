@@ -297,6 +297,7 @@ void AppStateObserverManager::OnRenderProcessDied(const std::shared_ptr<RenderRe
     handler_->SubmitTask(task);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 void AppStateObserverManager::OnChildProcessDied(std::shared_ptr<ChildProcessRecord> childRecord)
 {
     if (handler_ == nullptr) {
@@ -315,6 +316,7 @@ void AppStateObserverManager::OnChildProcessDied(std::shared_ptr<ChildProcessRec
     };
     handler_->SubmitTask(task);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 void AppStateObserverManager::OnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
@@ -429,6 +431,7 @@ void AppStateObserverManager::OnRenderProcessCreated(const std::shared_ptr<Rende
     handler_->SubmitTask(task);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 void AppStateObserverManager::OnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord)
 {
     if (handler_ == nullptr) {
@@ -447,6 +450,7 @@ void AppStateObserverManager::OnChildProcessCreated(std::shared_ptr<ChildProcess
     };
     handler_->SubmitTask(task);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 void AppStateObserverManager::StateChangedNotifyObserver(
     const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged)
@@ -659,6 +663,7 @@ void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr
     HandleOnProcessCreated(data);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 void AppStateObserverManager::HandleOnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord)
 {
     if (!childRecord) {
@@ -676,6 +681,7 @@ void AppStateObserverManager::HandleOnChildProcessCreated(std::shared_ptr<ChildP
         data.bundleName.c_str(), data.pid, data.uid, data.processType, data.processName.c_str());
     HandleOnProcessCreated(data);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 void AppStateObserverManager::HandleOnProcessCreated(const ProcessData &data)
 {
@@ -782,6 +788,7 @@ void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<Re
     HandleOnProcessDied(data);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 void AppStateObserverManager::HandleOnChildProcessDied(std::shared_ptr<ChildProcessRecord> childRecord)
 {
     if (!childRecord) {
@@ -799,6 +806,7 @@ void AppStateObserverManager::HandleOnChildProcessDied(std::shared_ptr<ChildProc
         data.bundleName.c_str(), data.pid, data.uid, data.processType, data.processName.c_str());
     HandleOnProcessDied(data);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 void AppStateObserverManager::HandleOnProcessDied(const ProcessData &data)
 {
@@ -853,6 +861,7 @@ ProcessData AppStateObserverManager::WrapRenderProcessData(const std::shared_ptr
     return processData;
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 int32_t AppStateObserverManager::WrapChildProcessData(ProcessData &processData,
     std::shared_ptr<ChildProcessRecord> childRecord)
 {
@@ -874,6 +883,7 @@ int32_t AppStateObserverManager::WrapChildProcessData(ProcessData &processData,
     processData.processType = childRecord->GetProcessType();
     return ERR_OK;
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 bool AppStateObserverManager::ObserverExist(const sptr<IRemoteBroker> &observer)
 {

@@ -35,9 +35,6 @@ group("fuzztest") {
     "abilityautostartupserviceb_fuzzer:fuzztest",
     "abilitybackgroundconnection_fuzzer:fuzztest",
     "abilitycachemanagera_fuzzer:fuzztest",
-    "abilitychildprocessinfo_fuzzer:fuzztest",
-    "abilitychildprocessinfo_fuzzer:fuzztest",
-    "abilitychildprocessrecord_fuzzer:fuzztest",
     "abilityconnectionstub_fuzzer:fuzztest",
     "abilitycontext_fuzzer:fuzztest",
     "abilitydebugdeal_fuzzer:fuzztest",
@@ -358,4 +355,10 @@ group("fuzztest") {
     "wantagenthelpertrigger_fuzzer:fuzztest",
     "wantsenderstub_fuzzer:fuzztest",
   ]
+  if (ability_runtime_child_process) {
+    deps += [
+      "abilitychildprocessinfo_fuzzer:fuzztest",
+      "abilitychildprocessrecord_fuzzer:fuzztest",
+    ]
+  }
 }

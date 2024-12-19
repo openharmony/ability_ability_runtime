@@ -24,6 +24,9 @@ config("appmgr_sdk_config") {
   if (ability_command_for_test) {
     defines += [ "ABILITY_COMMAND_FOR_TEST" ]
   }
+  if (ability_runtime_child_process) {
+    defines += [ "SUPPORT_CHILD_PROCESS" ]
+  }
 }
 
 config("appmgr_core_config") {
@@ -31,6 +34,9 @@ config("appmgr_core_config") {
   defines = []
   if (ability_command_for_test) {
     defines += [ "ABILITY_COMMAND_FOR_TEST" ]
+  }
+  if (ability_runtime_child_process) {
+    defines += [ "SUPPORT_CHILD_PROCESS" ]
   }
 }
 
@@ -81,10 +87,6 @@ ohos_shared_library("app_manager") {
     "src/appmgr/app_state_data.cpp",
     "src/appmgr/application_state_observer_proxy.cpp",
     "src/appmgr/application_state_observer_stub.cpp",
-    "src/appmgr/child_process_args.cpp",
-    "src/appmgr/child_process_info.cpp",
-    "src/appmgr/child_process_options.cpp",
-    "src/appmgr/child_process_request.cpp",
     "src/appmgr/child_scheduler_proxy.cpp",
     "src/appmgr/child_scheduler_stub.cpp",
     "src/appmgr/configuration_observer_proxy.cpp",
@@ -152,6 +154,15 @@ ohos_shared_library("app_manager") {
     "image_framework:image_native",
     "relational_store:native_rdb",
   ]
+  if (ability_runtime_child_process) {
+    defines += [ "SUPPORT_CHILD_PROCESS" ]
+    sources += [
+      "src/appmgr/child_process_args.cpp",
+      "src/appmgr/child_process_info.cpp",
+      "src/appmgr/child_process_options.cpp",
+      "src/appmgr/child_process_request.cpp",
+    ]
+  }
 
   if (background_task_mgr_continuous_task_enable) {
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]

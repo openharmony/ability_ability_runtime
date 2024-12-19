@@ -249,11 +249,13 @@ int32_t AppSpawnClient::SetStartFlags(const AppSpawnStartMsg &startMsg, AppSpawn
             return ret;
         }
     }
+#ifdef SUPPORT_CHILD_PROCESS
     ret = SetChildProcessTypeStartFlag(reqHandle, startMsg.childProcessType);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
         return ret;
     }
+#endif // SUPPORT_CHILD_PROCESS
     ret = SetIsolationModeFlag(startMsg, reqHandle);
     return ret;
 }
@@ -332,6 +334,7 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
         }
     }
 
+#ifdef SUPPORT_CHILD_PROCESS
     std::string maxChildProcessStr = std::to_string(startMsg.maxChildProcess);
     ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_MAX_CHILD_PROCCESS_MAX, maxChildProcessStr.c_str());
     if (ret) {
@@ -339,6 +342,7 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
         return ret;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "Send maxChildProcess %{public}s success", maxChildProcessStr.c_str());
+#endif // SUPPORT_CHILD_PROCESS
 
     if (!startMsg.extensionSandboxPath.empty()) {
         ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_APP_EXTENSION,
@@ -597,6 +601,7 @@ int32_t AppSpawnClient::GetRenderProcessTerminationStatus(const AppSpawnStartMsg
     return ret;
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 int32_t AppSpawnClient::SetChildProcessTypeStartFlag(const AppSpawnReqMsgHandle &reqHandle,
     int32_t childProcessType)
 {
@@ -606,6 +611,7 @@ int32_t AppSpawnClient::SetChildProcessTypeStartFlag(const AppSpawnReqMsgHandle 
     }
     return ERR_OK;
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 int32_t AppSpawnClient::SetExtMsgFds(const AppSpawnReqMsgHandle &reqHandle,
     const std::map<std::string, int32_t> &fds)

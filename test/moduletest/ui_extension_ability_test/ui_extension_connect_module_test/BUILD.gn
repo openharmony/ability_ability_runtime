@@ -58,6 +58,9 @@ ohos_moduletest("ui_extension_connect_module_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (ability_runtime_child_process) {
+    defines = [ "SUPPORT_CHILD_PROCESS" ]
+  }
 }
 
 group("moduletest") {

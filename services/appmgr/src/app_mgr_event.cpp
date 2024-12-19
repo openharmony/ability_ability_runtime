@@ -193,6 +193,7 @@ void AppMgrEventUtil::UpdateCallerInfo(AAFwk::EventInfo &eventInfo, std::shared_
     }
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 bool AppMgrEventUtil::SendChildProcessStartFailedEvent(std::shared_ptr<ChildProcessRecord> childRecord,
     ProcessStartFailedReason reason, int32_t subReason)
 {
@@ -224,6 +225,7 @@ bool AppMgrEventUtil::SendChildProcessStartFailedEvent(std::shared_ptr<ChildProc
     AAFwk::EventReport::SendProcessStartFailedEvent(AAFwk::EventName::PROCESS_START_FAILED, eventInfo);
     return true;
 }
+#endif  // SUPPORT_CHILD_PROCESS
 
 bool AppMgrEventUtil::SendRenderProcessStartFailedEvent(std::shared_ptr<RenderRecord> renderRecord,
     ProcessStartFailedReason reason, int32_t subReason)

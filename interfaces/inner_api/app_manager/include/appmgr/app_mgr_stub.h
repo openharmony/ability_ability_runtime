@@ -78,7 +78,9 @@ private:
     int32_t HandleGetProcessRunningInfosByUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetProcessRunningInformation(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAllRenderProcesses(MessageParcel &data, MessageParcel &reply);
+#ifdef SUPPORT_CHILD_PROCESS
     int32_t HandleGetAllChildrenProcesses(MessageParcel &data, MessageParcel &reply);
+#endif  // SUPPORT_CHILD_PROCESS
     int32_t HandleAddAbilityStageDone(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyMemoryLevel(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyProcMemoryLevel(MessageParcel &data, MessageParcel &reply);
@@ -135,10 +137,12 @@ private:
     int32_t HandleRegisterAppForegroundStateObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUnregisterAppForegroundStateObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsApplicationRunning(MessageParcel &data, MessageParcel &reply);
+#ifdef SUPPORT_CHILD_PROCESS
     int32_t HandleStartChildProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetChildProcessInfoForSelf(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAttachChildProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleExitChildProcessSafely(MessageParcel &data, MessageParcel &reply);
+#endif // SUPPORT_CHILD_PROCESS
     int32_t HandleClearUpApplicationDataBySelf(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsFinalAppProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterRenderStateObserver(MessageParcel &data, MessageParcel &reply);
@@ -156,7 +160,9 @@ private:
     int32_t HandleSetSupportedProcessCache(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSaveBrowserChannel(MessageParcel &data, MessageParcel &reply);
     int32_t HandleCheckCallingIsUserTestMode(MessageParcel &data, MessageParcel &reply);
+#ifdef SUPPORT_CHILD_PROCESS
     int32_t HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply);
+#endif // SUPPORT_CHILD_PROCESS
     int32_t HandleNotifyProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRestartResidentProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);

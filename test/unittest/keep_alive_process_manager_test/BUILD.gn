@@ -58,6 +58,10 @@ ohos_unittest("keep_alive_process_manager_test") {
     "init:libbeget_proxy",
     "ipc:ipc_core",
   ]
+
+  if (ability_runtime_child_process) {
+    defines = [ "SUPPORT_CHILD_PROCESS" ]
+  }
 }
 
 group("unittest") {

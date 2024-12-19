@@ -43,6 +43,9 @@ ohos_unittest("AppMgrProxyTest") {
   ]
 
   defines = []
+  if (ability_runtime_child_process) {
+    defines += [ "SUPPORT_CHILD_PROCESS" ]
+  }
   if (background_task_mgr_continuous_task_enable) {
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }

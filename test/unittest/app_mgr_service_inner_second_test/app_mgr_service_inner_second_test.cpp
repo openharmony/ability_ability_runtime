@@ -476,6 +476,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_010
     TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_0100 end");
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: AppMgrServiceInnerSecondTest_GetAllChildrenProcesses_0100
  * @tc.desc: Test GetAllChildrenProcesses
@@ -534,6 +535,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_GetAllChildr
     EXPECT_EQ(info[0].bundleName, TEST_BUNDLE_NAME);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllChildrenProcesses_0200 end");
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /**
  * @tc.name: AppMgrServiceInnerSecondTest_NotifyMemoryLevel_0100
@@ -2020,6 +2022,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_JudgeSelfCal
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_JudgeSelfCalledByToken_0100 end");
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: AppMgrServiceInnerSecondTest_StartChildProcessPreCheck_0100
  * @tc.desc: Test StartChildProcessPreCheck
@@ -2159,6 +2162,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillChildPro
 
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_KillChildProcess_0100 end");
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /**
  * @tc.name: AppMgrServiceInnerSecondTest_VerifyKillProcessPermission_0100
