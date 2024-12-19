@@ -30,6 +30,7 @@ constexpr const char* ABILITY_SUPPORT_ECOLOGICAL_RULEMGRSERVICE =
 constexpr const char* BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
 constexpr const char* START_ABILITY_AS_CALLER_SKIP_ERMS = "ability.params.skipErms";
 constexpr int32_t ERMS_ISALLOW_RESULTCODE = 10;
+constexpr int32_t ERMS_ISALLOW_EMBED_RESULTCODE = 1;
 }
 ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 {
@@ -124,6 +125,57 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
         return true;
     }
     return rule.resultCode == ERMS_ISALLOW_RESULTCODE;
+}
+
+ErrCode EcologicalRuleInterceptor::QueryAtomicServiceStartupRule(Want &want, sptr<IRemoteObject> callerToken,
+    int32_t userId, AtomicServiceStartupRule &rule, sptr<Want> &replaceWant)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    CHECK_TRUE_RETURN_RET(want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME) == want.GetElement().GetBundleName(),
+        ERR_INVALID_CALLER, "same bundle");
+    std::string supportErms = OHOS::system::GetParameter(ABILITY_SUPPORT_ECOLOGICAL_RULEMGRSERVICE, "true");
+    CHECK_TRUE_RETURN_RET(supportErms == "false", ERR_CAPABILITY_NOT_SUPPORT, "not support erms");
+
+    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bundleMgrHelper, BMS_NOT_CONNECTED);
+    Want launchWant;
+    auto errCode = IN_PROCESS_CALL(bundleMgrHelper->GetLaunchWantForBundle(want.GetBundle(), launchWant, userId));
+    CHECK_RET_RETURN_RET(errCode, "GetLaunchWantForBundle failed");
+    want.SetElement(launchWant.GetElement());
+
+    int32_t appIndex = 0;
+    StartAbilityUtils::startAbilityInfo = StartAbilityInfo::CreateStartAbilityInfo(want, userId, appIndex);
+    CHECK_RET_RETURN_RET(StartAbilityUtils::startAbilityInfo->status, "Get targetApplicationInfo failed");
+
+    ErmsCallerInfo callerInfo;
+    InitErmsCallerInfo(want, std::make_shared<AppExecFwk::AbilityInfo>(
+        StartAbilityUtils::startAbilityInfo->abilityInfo), callerInfo, userId);
+
+    ExperienceRule _rule;
+    auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(want,
+        callerInfo, _rule));
+    CHECK_RET_RETURN_RET(ret, "check ecological rule failed");
+
+    TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "check ecological rule success");
+    StartAbilityUtils::ermsResultCode = _rule.resultCode;
+    StartAbilityUtils::ermsSupportBackToCallerFlag = _rule.isBackSkuExempt;
+    rule.isOpenAllowed = _rule.resultCode == ERMS_ISALLOW_RESULTCODE;
+    rule.isEmbeddedAllowed = _rule.embedResultCode == ERMS_ISALLOW_EMBED_RESULTCODE;
+    if (rule.isOpenAllowed) {
+        TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "allow ecological rule");
+        return ERR_OK;
+    }
+    TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "isOpenAllowed false");
+
+#ifdef SUPPORT_GRAPHICS
+    if (_rule.replaceWant != nullptr) {
+        replaceWant = _rule.replaceWant;
+        replaceWant->SetParam("queryWantFromErms", true);
+        return ERR_ECOLOGICAL_CONTROL_STATUS;
+    }
+#endif
+    TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "replaceWant is nullptr");
+    return ERR_OK;
 }
 
 void EcologicalRuleInterceptor::GetEcologicalTargetInfo(const Want &want,

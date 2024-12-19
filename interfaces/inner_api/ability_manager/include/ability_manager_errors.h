@@ -828,6 +828,11 @@ enum NativeFreeInstallError {
     CONTINUE_FREE_INSTALL_FAILED = 29360205,
 
     /**
+     * Result(29360138) for Connect State: An error of the BMS not connect.
+     */
+    BMS_NOT_CONNECTED = 29360138,
+
+    /**
      * Undefine error code.
      */
     UNDEFINE_ERROR_CODE = 3,
