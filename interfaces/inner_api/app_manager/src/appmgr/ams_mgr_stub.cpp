@@ -355,10 +355,13 @@ ErrCode AmsMgrStub::HandleKillProcessWithAccount(MessageParcel &data, MessagePar
 
     std::string bundleName = data.ReadString();
     int accountId = data.ReadInt32();
+    bool clearPageStack = data.ReadBool();
 
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d", bundleName.c_str(), accountId);
+    TAG_LOGI(AAFwkTag::APPMGR,
+        "bundleName = %{public}s, accountId = %{public}d, clearPageStack = %{public}d",
+        bundleName.c_str(), accountId, clearPageStack);
 
-    int32_t result = KillProcessWithAccount(bundleName, accountId);
+    int32_t result = KillProcessWithAccount(bundleName, accountId, clearPageStack);
     reply.WriteInt32(result);
 
     TAG_LOGI(AAFwkTag::APPMGR, "end");
@@ -370,12 +373,12 @@ ErrCode AmsMgrStub::HandleKillApplication(MessageParcel &data, MessageParcel &re
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
+    bool clearPageStack = data.ReadBool();
 
-    TAG_LOGW(AAFwkTag::APPMGR,
-        "KillApplication,callingPid=%{public}d,bundleName=%{public}s",
-        IPCSkeleton::GetCallingPid(), bundleName.c_str());
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, clearPageStack = %{public}d",
+        bundleName.c_str(), clearPageStack);
 
-    int32_t result = KillApplication(bundleName);
+    int32_t result = KillApplication(bundleName, clearPageStack);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -423,8 +426,9 @@ ErrCode AmsMgrStub::HandleKillApplicationSelf(MessageParcel &data, MessageParcel
 {
     HITRACE_METER(HITRACE_TAG_APP);
     TAG_LOGW(AAFwkTag::APPMGR, "KillApplicationSelf,callingPid=%{public}d", IPCSkeleton::GetCallingPid());
+    bool clearPageStack = data.ReadBool();
     std::string reason = data.ReadString();
-    int32_t result = KillApplicationSelf(reason);
+    int32_t result = KillApplicationSelf(clearPageStack, reason);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "result write failed.");
         return ERR_INVALID_VALUE;

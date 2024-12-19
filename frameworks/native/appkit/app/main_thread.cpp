@@ -619,6 +619,23 @@ void MainThread::ScheduleProcessSecurityExit()
 
 /**
  *
+ * @brief Schedule the application clear recovery page stack.
+ *
+ */
+void MainThread::ScheduleClearPageStack()
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "ScheduleClearPageStack called");
+    if (applicationInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationInfo_ is nullptr");
+        return;
+    }
+
+    auto bundleName = applicationInfo_->bundleName;
+    AppRecovery::GetInstance().ClearPageStack(bundleName);
+}
+
+/**
+ *
  * @brief Low the memory which used by application.
  *
  */

@@ -655,12 +655,12 @@ ErrCode AbilityManagerClient::StopServiceAbility(const Want &want, sptr<IRemoteO
     return abms->StopServiceAbility(want, -1, token);
 }
 
-ErrCode AbilityManagerClient::KillProcess(const std::string &bundleName)
+ErrCode AbilityManagerClient::KillProcess(const std::string &bundleName, const bool clearPageStack)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "enter");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->KillProcess(bundleName);
+    return abms->KillProcess(bundleName, clearPageStack);
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST
@@ -1484,6 +1484,20 @@ ErrCode AbilityManagerClient::AddFreeInstallObserver(const sptr<IRemoteObject> c
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->AddFreeInstallObserver(callerToken, observer);
+}
+
+void AbilityManagerClient::SubmitSaveRecoveryInfo(sptr<IRemoteObject> token)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    return abms->SubmitSaveRecoveryInfo(token);
+}
+
+void AbilityManagerClient::ScheduleClearRecoveryPageStack()
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    return abms->ScheduleClearRecoveryPageStack();
 }
 
 int32_t AbilityManagerClient::IsValidMissionIds(
