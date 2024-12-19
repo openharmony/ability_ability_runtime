@@ -528,8 +528,6 @@ group("unittest") {
       "insight_intent:unittest",
       "insight_intent_profile_test:unittest",
       "js_ability_context_test:unittest",
-      "js_photo_editor_extension_context_test:unittest",
-      "js_photo_editor_extension_impl_test:unittest",
       "js_service_extension_test:unittest",
       "js_ui_extension_content_session_test:unittest",
       "js_ui_extension_context_test:unittest",
@@ -556,8 +554,6 @@ group("unittest") {
       "pending_want_record_test:unittest",
       "pending_want_test:unittest",
       "permission_verification_test:unittest",
-      "photo_editor_extension_a_test:unittest",
-      "photo_editor_extension_test:unittest",
       "preload_uiext_state_observer_test:unittest",
       "prepare_terminate_callback_proxy_test:unittest",
       "quick_fix:unittest",
@@ -620,6 +616,15 @@ group("unittest") {
         "auto_fill_manager_util_test:unittest",
         "auto_fill_request_callback_interface_test:unittest",
         "js_auto_fill_extension_test:unittest",
+      ]
+    }
+
+    if (ability_runtime_photo_editor_extension) {
+      deps += [
+        "js_photo_editor_extension_context_test:unittest",
+        "js_photo_editor_extension_impl_test:unittest",
+        "photo_editor_extension_a_test:unittest",
+        "photo_editor_extension_test:unittest",
       ]
     }
 
