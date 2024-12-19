@@ -624,6 +624,7 @@ int32_t AbilityManagerService::StartAbilityByInsightIntent(const Want &want, con
     std::string bundleNameFromAbilityRecord = abilityRecord->GetAbilityInfo().bundleName;
     if (!bundleNameFromWant.empty() && bundleNameFromWant == bundleNameFromIntentMgr &&
         bundleNameFromWant == bundleNameFromAbilityRecord) {
+        AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
         TAG_LOGI(AAFwkTag::ABILITYMGR, "bundleName match");
         return StartAbility(want, callerToken, userId, -1);
     }
@@ -660,6 +661,7 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
         TAG_LOGE(AAFwkTag::ABILITYMGR, "callerToken is not equal to top ablity token");
         return NOT_TOP_ABILITY;
     }
+    AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
     return StartAbility(want, callerToken, userId, requestCode);
 }
 
@@ -1029,6 +1031,13 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
         return ERR_APP_CLONE_INDEX_INVALID;
     }
+    if (!isForegroundToRestartApp) {
+        auto checkRet = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
+            validUserId, appIndex, callerToken);
+        if (checkRet != ERR_OK) {
+            return checkRet;
+        }
+    }
     StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, callerToken);
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr);
@@ -1052,6 +1061,10 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_GRAPHICS
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
+        auto checkResult = AbilityUtil::CheckInstanceKey(want);
+        if (checkResult != ERR_OK) {
+            return checkResult;
+        }
         abilityRequest.Voluation(want, requestCode, callerToken);
         if (specifyTokenId > 0 && callerToken != nullptr) { // for sa specify tokenId and caller token
             UpdateCallerInfoFromToken(abilityRequest.want, callerToken);
@@ -1331,6 +1344,11 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
         return ERR_APP_CLONE_INDEX_INVALID;
     }
+    auto checkRet = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
+        validUserId, appIndex, callerToken);
+    if (checkRet != ERR_OK) {
+        return checkRet;
+    }
     StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, callerToken);
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr);
@@ -1364,6 +1382,10 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_GRAPHICS
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
+        auto checkResult = AbilityUtil::CheckInstanceKey(want);
+        if (checkResult != ERR_OK) {
+            return checkResult;
+        }
         abilityRequest.Voluation(
             want, requestCode, callerToken, std::make_shared<AbilityStartSetting>(abilityStartSetting));
         abilityRequest.callType = AbilityCallType::START_SETTINGS_TYPE;
@@ -1616,6 +1638,11 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
         return ERR_APP_CLONE_INDEX_INVALID;
     }
+    auto checkRet = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
+        validUserId, appIndex, callerToken);
+    if (checkRet != ERR_OK) {
+        return checkRet;
+    }
     StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, callerToken);
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr);
@@ -1654,6 +1681,10 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_GRAPHICS
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
+        auto checkResult = AbilityUtil::CheckInstanceKey(want);
+        if (checkResult != ERR_OK) {
+            return checkResult;
+        }
         abilityRequest.Voluation(want, requestCode, callerToken);
         if (PermissionVerification::GetInstance()->IsSystemAppCall()) {
             bool windowFocused = startOptions.GetWindowFocused();
@@ -7089,6 +7120,11 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
     if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
         return ERR_APP_CLONE_INDEX_INVALID;
     }
+    auto checkRet = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
+        GetUserId(), appIndex, callerToken);
+    if (checkRet != ERR_OK) {
+        return checkRet;
+    }
     StartAbilityInfoWrap threadLocalInfo(want, GetUserId(), appIndex, callerToken);
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), true, nullptr);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
@@ -8025,6 +8061,16 @@ int AbilityManagerService::StartUserTest(const Want &want, const sptr<IRemoteObj
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid bundle name");
         return ERR_INVALID_VALUE;
+    }
+
+    auto checkResult = AbilityUtil::CheckInstanceKey(want);
+    if (checkResult != ERR_OK) {
+        return checkResult;
+    }
+    int32_t appIndex = 0;
+    if (!StartAbilityUtils::GetAppIndex(want, nullptr, appIndex) || appIndex != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not support app clone");
+        return ERR_NOT_SUPPORT_APP_CLONE;
     }
 
     auto bms = GetBundleManager();
@@ -10125,6 +10171,10 @@ int32_t AbilityManagerService::NotifySaveAsResult(const Want &want, int resultCo
         return CHECK_PERMISSION_FAILED;
     }
 #endif // WITH_DLP
+    auto checkResult = AbilityUtil::CheckInstanceKey(want);
+    if (checkResult != ERR_OK) {
+        return checkResult;
+    }
 
     for (const auto &item : startAbilityChain_) {
         if (item.second->GetHandlerName() == StartAbilitySandboxSavefile::handlerName_) {
@@ -10194,6 +10244,12 @@ void AbilityManagerService::StartSpecifiedAbilityBySCB(const Want &want)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return;
     }
+    int32_t appIndex = 0;
+    if (!StartAbilityUtils::GetAppIndex(want, nullptr, appIndex)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid app clone index");
+    }
+    (void)AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
+        GetUserId(), appIndex, nullptr);
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER(uiAbilityManager);
     uiAbilityManager->StartSpecifiedAbilityBySCB(want);
@@ -10621,6 +10677,7 @@ int32_t AbilityManagerService::StartAbilityWithInsightIntent(const Want &want, i
         CHECK_CALLER_IS_SYSTEM_APP;
     }
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
+    AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     int32_t ret = StartAbilityWrap(want, nullptr, requestCode, false, userId);
@@ -10649,6 +10706,7 @@ int32_t AbilityManagerService::StartAbilityByCallWithInsightIntent(const Want &w
     }
 
     AbilityUtil::RemoveWantKey(const_cast<Want &>(want));
+    AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
     AbilityRequest abilityRequest;
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     abilityRequest.callerUid = IPCSkeleton::GetCallingUid();
@@ -12029,6 +12087,7 @@ ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> ca
         return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
     }
 
+    AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
     Want convertedWant = want;
     retCode = ConvertToExplicitWant(convertedWant);
     if (retCode != ERR_OK) {
