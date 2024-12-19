@@ -258,6 +258,7 @@ struct AbilityRequest {
     int callerUid = -1;
     AbilityCallType callType = AbilityCallType::INVALID_TYPE;
     sptr<IRemoteObject> callerToken = nullptr;
+    int32_t callerTokenRecordId = -1;
     sptr<IRemoteObject> asCallerSourceToken = nullptr;
     uint32_t callerAccessTokenId = -1;
     sptr<IAbilityConnection> connect = nullptr;
@@ -281,6 +282,13 @@ struct AbilityRequest {
     std::string reservedBundleName;
     bool isFromIcon = false;
     bool isShellCall = false;
+
+    // ERMS embedded atomic service
+    bool isQueryERMS = false;
+    std::string appId;
+    std::string startTime;
+    bool isEmbeddedAllowed = false;
+
     std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();

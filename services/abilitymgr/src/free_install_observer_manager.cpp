@@ -32,8 +32,11 @@ int32_t FreeInstallObserverManager::AddObserver(int32_t recordId, const sptr<IFr
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "null observer");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<ffrt::mutex> lock(observerLock_);
-    observerMap_[recordId] = observer;
+
+    {
+        std::lock_guard<ffrt::mutex> lock(observerLock_);
+        observerMap_[recordId] = observer;
+    }
 
     if (!deathRecipient_) {
         std::weak_ptr<FreeInstallObserverManager> thisWeakPtr(shared_from_this());
@@ -113,6 +116,7 @@ void FreeInstallObserverManager::HandleOnInstallFinished(int32_t recordId, const
     const std::string &abilityName, const std::string &startTime, const int &resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "begin");
+    std::lock_guard<ffrt::mutex> lock(observerLock_);
     auto iter = observerMap_.find(recordId);
     if (iter != observerMap_.end() && iter->second != nullptr) {
         (iter->second)->OnInstallFinished(bundleName, abilityName, startTime, resultCode);
@@ -123,6 +127,7 @@ void FreeInstallObserverManager::HandleOnInstallFinishedByUrl(int32_t recordId, 
     const std::string &url, const int &resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "begin");
+    std::lock_guard<ffrt::mutex> lock(observerLock_);
     auto iter = observerMap_.find(recordId);
     if (iter != observerMap_.end() && iter->second != nullptr) {
         (iter->second)->OnInstallFinishedByUrl(startTime, url, resultCode);

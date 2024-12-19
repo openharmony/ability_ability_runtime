@@ -32,6 +32,7 @@ struct AbilityExperienceRule : public Parcelable {
     std::string sceneCode = "";
     sptr<Want> replaceWant = nullptr;
     bool isBackSkuExempt = false;
+    int32_t embedResultCode = 1;
 
     bool Marshalling(Parcel &parcel) const override;
 
