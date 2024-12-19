@@ -149,7 +149,9 @@ int FreeInstallManager::RemoteFreeInstall(const Want &want, int32_t userId, int 
     sptr<AtomicServiceStatusCallback> callback = new AtomicServiceStatusCallback(weak_from_this(), false, recordId);
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+#ifdef SUPPORT_UPMS
     UriUtils::GetInstance().CheckUriPermission(accessToken, info.want);
+#endif // SUPPORT_UPMS
     DistributedClient dmsClient;
     auto result = dmsClient.StartRemoteFreeInstall(info.want, callerUid, info.requestCode, accessToken, callback);
     if (result != ERR_NONE) {

@@ -175,7 +175,6 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_services_path}/abilitymgr/src/task_data_persistence_mgr.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension_record/ui_extension_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension_record/ui_extension_record_factory.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/uri_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_controller.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_event_handler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/ability_event_util.cpp",
@@ -221,7 +220,6 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/connectionobs_manager:connection_obs_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
@@ -304,6 +302,14 @@ ohos_source_set("abilityms_test_source") {
       "window_manager:libwm",
       "window_manager:libwsutils",
       "window_manager:sms",
+    ]
+  }
+  if (ability_runtime_upms) {
+    sources +=
+        [ "${ability_runtime_services_path}/abilitymgr/src/uri_utils.cpp" ]
+
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     ]
   }
 
@@ -511,7 +517,6 @@ group("unittest") {
       "extension_record_test:unittest",
       "fault_data:unittest",
       "file_path_utils_test:unittest",
-      "file_permission_manager_test:unittest",
       "frameworks_kits_ability_ability_runtime_test:unittest",
       "frameworks_kits_ability_native_test:unittest",
       "frameworks_kits_appkit_native_test:unittest",
@@ -601,10 +606,6 @@ group("unittest") {
       "ui_service_stub_test:unittest",
       "unlock_screen_test:unittest",
       "update_caller_info_util_test:unittest",
-      "uri_perm_mgr_test:unittest",
-      "uri_permission_manager_test:unittest",
-      "uri_permission_test:unittest",
-      "uri_permission_utils_test:unittest",
       "user_controller_test:unittest",
       "user_event_handler_test:unittest",
       "user_record_manager_test:unittest",
@@ -633,7 +634,7 @@ group("unittest") {
       ]
     }
 
-    if (ability_runtime_feature_sandboxmanager) {
+    if (ability_runtime_feature_sandboxmanager && ability_runtime_upms) {
       deps += [ "uri_permission_impl_test:unittest" ]
     }
 
@@ -653,6 +654,16 @@ group("unittest") {
         "start_option_display_id_test:unittest",
         "status_bar_delegate_manager_test:unittest",
         "ui_ability_lifecycle_manager_test:unittest",
+      ]
+    }
+
+    if (ability_runtime_upms) {
+      deps += [
+        "file_permission_manager_test:unittest",
+        "uri_perm_mgr_test:unittest",
+        "uri_permission_manager_test:unittest",
+        "uri_permission_test:unittest",
+        "uri_permission_utils_test:unittest",
       ]
     }
 
