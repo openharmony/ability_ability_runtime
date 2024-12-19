@@ -2920,6 +2920,11 @@ void AbilityRecord::SetLaunchReason(const LaunchReason &reason)
     lifeCycleStateInfo_.launchParam.launchReason = reason;
 }
 
+void AbilityRecord::SetLaunchReasonMessage(const std::string &launchReasonMessage)
+{
+    lifeCycleStateInfo_.launchParam.launchReasonMessage = launchReasonMessage;
+}
+
 void AbilityRecord::SetLastExitReason(const ExitReason &exitReason)
 {
     lifeCycleStateInfo_.launchParam.lastExitReason = CovertAppExitReasonToLastReason(exitReason.reason);

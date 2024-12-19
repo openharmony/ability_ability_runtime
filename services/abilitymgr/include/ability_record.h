@@ -988,6 +988,7 @@ public:
     AppState GetAppState() const;
 
     void SetLaunchReason(const LaunchReason &reason);
+    void SetLaunchReasonMessage(const std::string &launchReasonMessage);
     void SetLastExitReason(const ExitReason &exitReason);
     void ContinueAbility(const std::string &deviceId, uint32_t versionCode);
     void NotifyContinuationResult(int32_t result);
