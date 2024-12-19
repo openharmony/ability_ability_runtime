@@ -1367,20 +1367,27 @@ group("extension_blocklist_config") {
 
 group("extension_module") {
   deps = [
-    ":action_extension_module",
     ":embedded_ui_extension_module",
-    ":photo_editor_extension_module",
     ":service_extension_module",
-    ":share_extension_module",
     ":ui_extension_module",
-    ":ui_service_extension_module",
   ]
-
+  if (ability_runtime_action_extension) {
+    deps += [ ":action_extension_module" ]
+  }
   if (ability_runtime_auto_fill) {
     deps += [ ":auto_fill_extension_module" ]
   }
   if (ability_runtime_graphics) {
     deps += [ ":form_extension_module" ]
+  }
+  if (ability_runtime_photo_editor_extension) {
+    deps += [ ":photo_editor_extension_module" ]
+  }
+  if (ability_runtime_share_extension) {
+    deps += [ ":share_extension_module" ]
+  }
+  if (ability_runtime_ui_service_extension) {
+    deps += [ ":ui_service_extension_module" ]
   }
 }
 
