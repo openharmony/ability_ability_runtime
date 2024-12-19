@@ -33,6 +33,7 @@
 #include "tokenid_kit.h"
 #include "uri_permission_utils.h"
 #include "want.h"
+#include "hitrace_meter.h"
 
 #define READ_MODE (1<<0)
 #define WRITE_MODE (1<<1)
@@ -42,11 +43,13 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 constexpr int32_t ERR_OK = 0;
+constexpr int32_t INVALID_PARAMTER = 2; // SandboxManager ative err
 constexpr uint32_t FLAG_READ_WRITE_URI = Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION;
 constexpr uint32_t FLAG_WRITE_URI = Want::FLAG_AUTH_WRITE_URI_PERMISSION;
 constexpr uint32_t FLAG_READ_URI = Want::FLAG_AUTH_READ_URI_PERMISSION;
 constexpr const char* CLOUND_DOCS_URI_MARK = "?networkid=";
 constexpr uint32_t INVALID_ABILITYID = -1;
+constexpr const char* FOUNDATION_PROCESS = "foundation";
 }
 
 bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId)
@@ -869,5 +872,71 @@ bool UriPermissionManagerStubImpl::CheckUriTypeIsValid(Uri uri)
     }
     return true;
 }
+
+int32_t UriPermissionManagerStubImpl::ClearPermissionTokenByMap(const uint32_t tokenId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    bool isCallingPermission =
+        AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
+    if (!isCallingPermission) {
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    std::lock_guard<std::mutex> lock(ptMapMutex_);
+    if (permissionTokenMap_.find(tokenId) == permissionTokenMap_.end()) {
+        TAG_LOGD(AAFwkTag::URIPERMMGR, "permissionTokenMap_ empty");
+        return ERR_OK;
+    }
+    uint64_t timeNow = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "clear %{private}d permission", tokenId);
+    auto ret = SandboxManagerKit::UnSetAllPolicyByToken(tokenId, timeNow);
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "clear permission end");
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "ClearPermission failed, ret is %{public}d", ret);
+        return ret;
+    }
+    permissionTokenMap_.erase(tokenId);
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    return ERR_OK;
+}
+
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+int32_t UriPermissionManagerStubImpl::Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    std::lock_guard<std::mutex> lock(ptMapMutex_);
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    ConnectManager(appMgr_, APP_MGR_SERVICE_ID);
+    if (appMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "appMgr_ null");
+        return INVALID_PARAMTER;
+    }
+    bool isTerminating = false;
+    if (IN_PROCESS_CALL(appMgr_->IsTerminatingByPid(callingPid, isTerminating)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IsTerminatingByPid failed");
+        return INVALID_PARAMTER;
+    }
+    if (isTerminating) {
+        TAG_LOGD(AAFwkTag::URIPERMMGR, "app is terminating");
+        return INVALID_PARAMTER;
+    }
+    uint64_t timeNow = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    auto tokenId = IPCSkeleton::GetCallingTokenID();
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "active %{private}d permission", tokenId);
+    auto ret = SandboxManagerKit::StartAccessingPolicy(policy, result, false, tokenId, timeNow);
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "active permission end");
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "StartAccessingPolicy failed, ret is %{public}d", ret);
+        return ret;
+    }
+    permissionTokenMap_.insert(tokenId);
+    return ERR_OK;
+}
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 }  // namespace AAFwk
 }  // namespace OHOS

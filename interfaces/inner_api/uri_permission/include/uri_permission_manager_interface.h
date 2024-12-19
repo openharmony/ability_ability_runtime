@@ -19,9 +19,17 @@
 #include "base/security/access_token/interfaces/innerkits/accesstoken/include/access_token.h"
 #include "iremote_broker.h"
 #include "uri.h"
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+#include "policy_info.h"
+#else
+#include "upms_policy_info.h"
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 
 namespace OHOS {
 namespace AAFwk {
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+using namespace AccessControl::SandboxManager;
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 class IUriPermissionManager : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ability.UriPermissionManager");
@@ -109,6 +117,12 @@ public:
     virtual std::vector<bool> CheckUriAuthorization(const std::vector<std::string> &uriVec,
         uint32_t flag, uint32_t tokenId) = 0;
 
+    virtual int32_t ClearPermissionTokenByMap(uint32_t tokenId) = 0;
+
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    virtual int32_t Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result) = 0;
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+
     enum UriPermMgrCmd {
         // ipc id for GrantUriPermission
         ON_GRANT_URI_PERMISSION = 0,
@@ -131,7 +145,14 @@ public:
         ON_GRANT_URI_PERMISSION_PRIVILEGED,
 
         //ipc id for GrantUriPermissionPrivileged
-        ON_CHECK_URI_AUTHORIZATION
+        ON_CHECK_URI_AUTHORIZATION,
+
+        //ipc id for ClearPermissionTokenByMap
+        ON_CLEAR_PERMISSION_TOKEN_BY_MAP,
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+        //ipc id for Active
+        ON_ACTIVE,
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     };
 };
 }  // namespace AAFwk
