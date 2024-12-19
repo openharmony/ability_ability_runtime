@@ -187,7 +187,7 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateHspResourceManager_0
     ret = contextImpl_->CreateHspModuleResourceManager(
         "com.example.myapplication", "*&%@#$%^&*()", resourceManager2);
     if (ret == 0) {
-        EXPECT_EQ(resourceManager2, nullptr);
+        EXPECT_NE(resourceManager2, nullptr);
     }
 
     GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateHspResourceManager_002 end";
