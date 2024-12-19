@@ -17,7 +17,6 @@ group("innerkits_target") {
     "ability_manager:ability_manager",
     "ability_manager:ability_manager_c",
     "app_manager:app_manager",
-    "child_process_manager:child_process_manager",
     "connectionobs_manager:connection_obs_manager",
     "dataobs_manager:dataobs_manager",
     "deps_wrapper:ability_deps_wrapper",
@@ -25,6 +24,9 @@ group("innerkits_target") {
     "quick_fix:quickfix_manager",
     "wantagent:wantagent_innerkits",
   ]
+  if (ability_runtime_child_process) {
+    deps += [ "child_process_manager:child_process_manager" ]
+  }
   if (ability_runtime_auto_fill) {
     deps += [ "auto_fill_manager:auto_fill_manager" ]
   }

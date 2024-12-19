@@ -2253,6 +2253,7 @@ ApplicationScheduleState AppRunningRecord::GetApplicationScheduleState() const
     return scheduleState_;
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 void AppRunningRecord::AddChildProcessRecord(pid_t pid, std::shared_ptr<ChildProcessRecord> record)
 {
     if (!record) {
@@ -2304,6 +2305,7 @@ int32_t AppRunningRecord::GetChildProcessCount()
     std::lock_guard lock(childProcessRecordMapLock_);
     return childProcessRecordMap_.size();
 }
+#endif //SUPPORT_CHILD_PROCESS
 
 void AppRunningRecord::SetJITEnabled(const bool jitEnabled)
 {

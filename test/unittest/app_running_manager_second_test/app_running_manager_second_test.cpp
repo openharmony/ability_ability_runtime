@@ -18,7 +18,9 @@
 #define private public
 #include "app_running_manager.h"
 #include "app_running_record.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_record.h"
+#endif // SUPPORT_CHILD_PROCESS
 #undef private
 
 #include "app_record_id.h"

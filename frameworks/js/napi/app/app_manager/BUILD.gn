@@ -48,6 +48,9 @@ ohos_shared_library("appmanager_napi") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
+  if (ability_runtime_child_process) {
+    defines = [ "SUPPORT_CHILD_PROCESS" ]
+  }
 
   relative_install_dir = "module/application"
 

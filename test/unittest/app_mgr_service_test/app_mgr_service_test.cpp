@@ -20,7 +20,9 @@
 #include "app_utils.h"
 #undef private
 #include "ability_manager_errors.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_main_thread.h"
+#endif // SUPPORT_CHILD_PROCESS
 #include "hilog_tag_wrapper.h"
 #include "mock_app_mgr_service_inner.h"
 #include "mock_native_token.h"
@@ -384,6 +386,7 @@ HWTEST_F(AppMgrServiceTest, GetAllRenderProcesses_002, TestSize.Level0)
     EXPECT_NE(res, ERR_INVALID_OPERATION);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /*
  * Feature: AppMgrService
  * Function: GetAllChildrenProcesses
@@ -419,6 +422,7 @@ HWTEST_F(AppMgrServiceTest, GetAllChildrenProcesses_002, TestSize.Level0)
     int32_t res = appMgrService->GetAllChildrenProcesses(info);
     EXPECT_NE(res, ERR_INVALID_OPERATION);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /*
  * Feature: AppMgrService
@@ -1403,6 +1407,7 @@ HWTEST_F(AppMgrServiceTest, IsAppRunning_001, TestSize.Level1)
     EXPECT_EQ(res, AAFwk::ERR_APP_CLONE_INDEX_INVALID);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: StartChildProcess_001
  * @tc.desc: verify StartChildProcess calls works.
@@ -1490,6 +1495,7 @@ HWTEST_F(AppMgrServiceTest, ExitChildProcessSafely_001, TestSize.Level1)
     auto ret = appMgrService->taskHandler_->CancelTask("ExitChildProcessSafelyTask");
     EXPECT_TRUE(!ret);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /**
  * @tc.name: UnregisterAbilityForegroundStateObserver_0100
@@ -1928,6 +1934,7 @@ HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysByBundleName_003, TestSize.
     EXPECT_EQ(res, ERR_OK);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: StartNativeChildProcess_0100
  * @tc.desc: Start native child process.
@@ -1952,6 +1959,7 @@ HWTEST_F(AppMgrServiceTest, StartNativeChildProcess_0100, TestSize.Level1)
     int32_t res = appMgrService->StartNativeChildProcess("test.so", 1, callback);
     EXPECT_EQ(res, ERR_OK);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /*
  * Feature: AppMgrService

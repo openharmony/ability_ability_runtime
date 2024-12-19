@@ -70,10 +70,14 @@ public:
     void OnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnWindowHidden(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord);
+#ifdef SUPPORT_CHILD_PROCESS
     void OnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord);
+#endif // SUPPORT_CHILD_PROCESS
     void OnProcessDied(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnRenderProcessDied(const std::shared_ptr<RenderRecord> &renderRecord);
+#ifdef SUPPORT_CHILD_PROCESS
     void OnChildProcessDied(std::shared_ptr<ChildProcessRecord> childRecord);
+#endif // SUPPORT_CHILD_PROCESS
     void OnProcessReused(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnPageShow(const PageStateData pageStateData);
     void OnPageHide(const PageStateData pageStateData);
@@ -89,10 +93,14 @@ private:
         const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged);
     void HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload);
     void HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord);
+#ifdef SUPPORT_CHILD_PROCESS
     void HandleOnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord);
+#endif // SUPPORT_CHILD_PROCESS
     void HandleOnAppProcessDied(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnRenderProcessDied(const std::shared_ptr<RenderRecord> &RenderRecord);
+#ifdef SUPPORT_CHILD_PROCESS
     void HandleOnChildProcessDied(std::shared_ptr<ChildProcessRecord> childRecord);
+#endif // SUPPORT_CHILD_PROCESS
     bool ObserverExist(const sptr<IRemoteBroker> &observer);
     bool IsAppForegroundObserverExist(const sptr<IRemoteBroker> &observer);
     bool IsAbilityForegroundObserverExist(const sptr<IRemoteBroker> &observer);
@@ -103,7 +111,9 @@ private:
     AbilityforegroundObserverSet GetAbilityforegroundObserverSetCopy();
     ProcessData WrapProcessData(const std::shared_ptr<AppRunningRecord> &appRecord);
     ProcessData WrapRenderProcessData(const std::shared_ptr<RenderRecord> &renderRecord);
+#ifdef SUPPORT_CHILD_PROCESS
     int32_t WrapChildProcessData(ProcessData &processData, std::shared_ptr<ChildProcessRecord> childRecord);
+#endif // SUPPORT_CHILD_PROCESS
     void OnObserverDied(const wptr<IRemoteObject> &remote, const ObserverType &type);
     AppStateData WrapAppStateData(const std::shared_ptr<AppRunningRecord> &appRecord,
     const ApplicationState state);

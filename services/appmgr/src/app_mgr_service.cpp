@@ -69,8 +69,10 @@ constexpr const char* TASK_ADD_ABILITY_STAGE_DONE = "AddAbilityStageDone";
 constexpr const char* TASK_START_USER_TEST_PROCESS = "StartUserTestProcess";
 constexpr const char* TASK_FINISH_USER_TEST = "FinishUserTest";
 constexpr const char* TASK_ATTACH_RENDER_PROCESS = "AttachRenderTask";
+#ifdef SUPPORT_CHILD_PROCESS
 constexpr const char* TASK_ATTACH_CHILD_PROCESS = "AttachChildProcessTask";
 constexpr const char* TASK_EXIT_CHILD_PROCESS_SAFELY = "ExitChildProcessSafelyTask";
+#endif // SUPPORT_CHILD_PROCESS
 constexpr const char* FOUNDATION_PROCESS = "foundation";
 constexpr int32_t USER_UID = 2000;
 }  // namespace
@@ -441,6 +443,7 @@ int32_t AppMgrService::GetAllRenderProcesses(std::vector<RenderProcessInfo> &inf
     return appMgrServiceInner_->GetAllRenderProcesses(info);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 int AppMgrService::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
 {
     if (!IsReady()) {
@@ -448,6 +451,7 @@ int AppMgrService::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
     }
     return appMgrServiceInner_->GetAllChildrenProcesses(info);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 int32_t AppMgrService::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
 {
@@ -1410,6 +1414,7 @@ int32_t AppMgrService::IsAppRunningByBundleNameAndUserId(const std::string &bund
     return appMgrServiceInner_->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 int32_t AppMgrService::StartChildProcess(pid_t &childPid, const ChildProcessRequest &request)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -1474,6 +1479,7 @@ void AppMgrService::ExitChildProcessSafely()
         .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
     });
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 bool AppMgrService::IsFinalAppProcess()
 {
@@ -1615,6 +1621,7 @@ void AppMgrService::SetAppAssertionPauseState(bool flag)
     return appMgrServiceInner_->SetAppAssertionPauseState(flag);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
     const sptr<IRemoteObject> &callback)
 {
@@ -1627,6 +1634,7 @@ int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32
     return appMgrServiceInner_->StartNativeChildProcess(
         IPCSkeleton::GetCallingPid(), libName, childProcessCount, callback);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 int32_t AppMgrService::CheckCallingIsUserTestMode(const pid_t pid, bool &isUserTest)
 {

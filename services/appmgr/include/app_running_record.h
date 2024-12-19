@@ -35,7 +35,9 @@
 #include "app_mgr_constants.h"
 #include "app_scheduler_proxy.h"
 #include "app_record_id.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_record.h"
+#endif // SUPPORT_CHILD_PROCESS
 #include "fault_data.h"
 #include "fd_guard.h"
 #include "profile.h"
@@ -874,11 +876,13 @@ public:
 
     void GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool &isFloatingWindowMode);
 
+#ifdef SUPPORT_CHILD_PROCESS
     void AddChildProcessRecord(pid_t pid, std::shared_ptr<ChildProcessRecord> record);
     void RemoveChildProcessRecord(std::shared_ptr<ChildProcessRecord> record);
     std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(pid_t pid);
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
     int32_t GetChildProcessCount();
+#endif //SUPPORT_CHILD_PROCESS
 
     void SetPreloadState(PreloadState state);
 
@@ -1186,8 +1190,10 @@ private:
 
     std::set<uint32_t> windowIds_;
     ffrt::mutex windowIdsLock_;
+#ifdef SUPPORT_CHILD_PROCESS
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> childProcessRecordMap_;
     ffrt::mutex childProcessRecordMapLock_;
+#endif //SUPPORT_CHILD_PROCESS
 
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isAssertPause_ = false;

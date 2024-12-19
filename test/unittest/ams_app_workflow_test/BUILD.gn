@@ -90,6 +90,9 @@ ohos_unittest("AmsWorkFlowTest") {
       "window_manager:libwsutils",
     ]
   }
+  if (ability_runtime_child_process) {
+    defines = [ "SUPPORT_CHILD_PROCESS" ]
+  }
   if (ability_runtime_upms) {
     deps += [
       "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
