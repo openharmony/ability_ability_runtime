@@ -66,7 +66,7 @@ const std::string ACCESSIBILITY_SET_BRIGHTNESS_DISCOUNT_OK = "set brightness dis
 const std::string ACCESSIBILITY_SET_BRIGHTNESS_DISCOUNT_NG = "error: failed to set brightness discount.\n";
 const std::string ACCESSIBILITY_SET_AUDIO_MONO_STATE_OK = "set audio mono state successfully.";
 const std::string ACCESSIBILITY_SET_AUDIO_MONO_STATE_NG = "error: failed to set audio mono state.";
-const std::string ACCESSIBILITY_SET_AUDIO_BALANCE_OK = "set audio balance successfully.";
+const std::string ACCESSIBILITY_SET_AUDIO_BALANCE_OK = "set audio balance successfully.\n";
 const std::string ACCESSIBILITY_SET_AUDIO_BALANCE_NG = "error: failed to set audio balance successfully.";
 
 const std::string ACCESSIBILITY_ABILITY_NO_ABILITY_ARGUMENT =

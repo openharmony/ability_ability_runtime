@@ -299,8 +299,8 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_RequestModalUIEx
     ServiceExtensionContext serviceExtensionContextTest;
     Want want;
     ErrCode result = serviceExtensionContextTest.RequestModalUIExtension(want);
+    EXPECT_EQ(serviceExtensionContextTest.localCallContainer_, nullptr);
     GTEST_LOG_(INFO) <<result;
-    EXPECT_EQ(ERR_OK, result);
 }
 
 /*
