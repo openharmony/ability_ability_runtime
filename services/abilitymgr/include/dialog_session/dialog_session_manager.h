@@ -48,6 +48,13 @@ struct StartupSessionInfo {
     AbilityRequest abilityRequest;
 };
 
+struct QueryERMSInfo {
+    int32_t recordId;
+    std::string appId;
+    std::string startTime;
+    bool isEmbeddedAllowed;
+};
+
 class DialogSessionManager {
 public:
     static DialogSessionManager &GetInstance();
@@ -108,10 +115,17 @@ private:
     int CreateModalDialogCommon(const Want &replaceWant, sptr<IRemoteObject> callerToken,
         const std::string &dialogSessionId);
 
+    void SetQueryERMSInfo(const std::string &dialogSessionId, const AbilityRequest &abilityRequest);
+
+    void NotifyQueryERMSFinished(const std::string &dialogSessionId, bool isAllowed);
+
     mutable ffrt::mutex dialogSessionRecordLock_;
     std::unordered_map<std::string, sptr<DialogSessionInfo>> dialogSessionInfoMap_;
     std::unordered_map<std::string, std::shared_ptr<DialogCallerInfo>> dialogCallerInfoMap_;
     std::unordered_map<std::string, std::shared_ptr<StartupSessionInfo>> startupSessionInfoMap_;
+
+    ffrt::mutex queryERMSInfoLock_;
+    std::unordered_map<std::string, QueryERMSInfo> queryERMSInfoMap_;
 
     DISALLOW_COPY_AND_MOVE(DialogSessionManager);
 };

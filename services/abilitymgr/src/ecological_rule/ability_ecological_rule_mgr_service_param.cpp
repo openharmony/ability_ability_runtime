@@ -45,6 +45,11 @@ AbilityExperienceRule *AbilityExperienceRule::Unmarshalling(Parcel &in)
         rule->isBackSkuExempt = true;
     }
 
+    if (!in.ReadInt32(rule->embedResultCode)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "read embedResultCode failed");
+        rule->embedResultCode = 1;
+    }
+
     return rule;
 }
 
@@ -66,6 +71,10 @@ bool AbilityExperienceRule::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteBool(isBackSkuExempt)) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write isBackSkuExempt failed");
+    }
+
+    if (!parcel.WriteInt32(embedResultCode)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write embedResultCode failed");
     }
 
     return true;
