@@ -87,10 +87,10 @@ HWTEST_F(AbilityDelegatorArgsModuleTest, Ability_Delegator_Args_Module_Test_0100
 
     AbilityDelegatorArgs delegatorArgs(want);
     std::map<std::string, std::string>::iterator iter = delegatorArgs.params_.find(KEY_TEST_WAIT_TIMEOUT);
-    std::string value_timeout = iter->second;
+    std::string valueTimeout = iter->second;
 
     EXPECT_EQ(delegatorArgs.GetTestBundleName(), VALUE_TEST_BUNDLE_NAME);
     EXPECT_EQ(delegatorArgs.GetTestRunnerClassName(), VALUE_TEST_RUNNER_CLASS);
     EXPECT_EQ(delegatorArgs.GetTestCaseName(), VALUE_TEST_CASE);
-    EXPECT_EQ(value_timeout, VALUE_TEST_WAIT_TIMEOUT);
+    EXPECT_EQ(valueTimeout, VALUE_TEST_WAIT_TIMEOUT);
 }
