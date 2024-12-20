@@ -4036,7 +4036,6 @@ void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleNam
     want.SetParam(TOKEN_ID, tokenId);
     want.SetParam(Constants::USER_ID, userId);
     want.SetParam(Constants::UID, callerUid);
-    want.SetParam(Want::PARAM_RESV_CALLER_UID, callerUid);
     want.SetParam(TARGET_UID_KEY, targetUid);
     EventFwk::CommonEventData commonData {want};
     EventFwk::CommonEventManager::PublishCommonEvent(commonData);
