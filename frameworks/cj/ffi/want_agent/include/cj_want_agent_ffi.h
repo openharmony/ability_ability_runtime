@@ -19,13 +19,13 @@
 #include <cstdint>
 
 #include "application_context.h"
+#include "cj_common_ffi.h"
+#include "cj_want_agent_utils.h"
+#include "ffi_remote_data.h"
 #include "want.h"
 #include "want_agent.h"
 #include "want_agent_constant.h"
 #include "want_params.h"
-#include "cj_common_ffi.h"
-#include "cj_want_agent_utils.h"
-#include "ffi_remote_data.h"
 
 namespace OHOS {
 namespace FfiWantAgent {
@@ -38,8 +38,8 @@ public:
     virtual ~CJTriggerCompleteCallBack();
 
 public:
-    void OnSendFinished(const AAFwk::Want &want, int resultCode, const std::string &resultData,
-        const AAFwk::WantParams &resultExtras) override;
+    void OnSendFinished(const AAFwk::Want& want, int resultCode, const std::string& resultData,
+        const AAFwk::WantParams& resultExtras) override;
     void SetCallbackInfo(std::function<void(CJCompleteData)> callback);
     void SetWantAgentInstance(int64_t wantAgent);
 
@@ -51,36 +51,35 @@ private:
 class CJWantAgent : public OHOS::FFI::FFIData {
     DECL_TYPE(CJWantAgent, OHOS::FFI::FFIData)
 public:
-    explicit CJWantAgent(std::shared_ptr<WantAgent> wantAgent)
-        : wantAgent_(wantAgent) {};
-    
-    std::string OnGetBundleName(int32_t *errCode);
-    int32_t OnGetUid(int32_t *errCode);
-    void OnCancel(int32_t *errCode);
-    void OnTrigger(CJTriggerInfo triggerInfo, std::function<void(CJCompleteData)> callback, int32_t *errCode);
-    int32_t OnGetOperationType(int32_t *errCode);
-    bool OnEqual(std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> second, int32_t *errCode);
+    explicit CJWantAgent(std::shared_ptr<WantAgent> wantAgent) : wantAgent_(wantAgent) {};
+
+    std::string OnGetBundleName(int32_t* errCode);
+    int32_t OnGetUid(int32_t* errCode);
+    void OnCancel(int32_t* errCode);
+    void OnTrigger(CJTriggerInfo triggerInfo, std::function<void(CJCompleteData)> callback, int32_t* errCode);
+    int32_t OnGetOperationType(int32_t* errCode);
+    bool OnEqual(std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> second, int32_t* errCode);
 
 private:
     int32_t UnWrapTriggerInfoParam(CJTriggerInfo cjTriggerInfo, std::function<void(CJCompleteData)> callback,
-        std::shared_ptr<WantAgent> &wantAgent, TriggerInfo &triggerInfo,
-        std::shared_ptr<CJTriggerCompleteCallBack> &triggerObj);
+        std::shared_ptr<WantAgent>& wantAgent, TriggerInfo& triggerInfo,
+        std::shared_ptr<CJTriggerCompleteCallBack>& triggerObj);
 
 public:
     std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> wantAgent_;
 };
 
 extern "C" {
-    FFI_EXPORT int64_t FfiWantAgentGetWantAgent(CJWantAgentInfo info, int32_t *errCode);
-    FFI_EXPORT char* FfiWantAgentGetBoundleName(int64_t cjWantAgent, int32_t *errCode);
-    FFI_EXPORT int32_t FfiWantAgentGetUid(int64_t cjWantAgent, int32_t *errCode);
-    FFI_EXPORT void FfiWantAgentCancel(int64_t cjWantAgent, int32_t *errCode);
-    FFI_EXPORT void FfiWantAgentTrigger(int64_t cjWantAgent, CJTriggerInfo triggerInfo,
-        void (*callback)(CJCompleteData), int32_t *errCode);
-    FFI_EXPORT int32_t FfiWantAgentGetOperationType(int64_t cjWantAgent, int32_t *errCode);
-    FFI_EXPORT bool FfiWantAgentEqual(int64_t cjWantAgentFirst, int64_t cjWantAgentSecond, int32_t *errCode);
+FFI_EXPORT int64_t FfiWantAgentGetWantAgent(CJWantAgentInfo info, int32_t* errCode);
+FFI_EXPORT char* FfiWantAgentGetBoundleName(int64_t cjWantAgent, int32_t* errCode);
+FFI_EXPORT int32_t FfiWantAgentGetUid(int64_t cjWantAgent, int32_t* errCode);
+FFI_EXPORT void FfiWantAgentCancel(int64_t cjWantAgent, int32_t* errCode);
+FFI_EXPORT void FfiWantAgentTrigger(
+    int64_t cjWantAgent, CJTriggerInfo triggerInfo, void (*callback)(CJCompleteData), int32_t* errCode);
+FFI_EXPORT int32_t FfiWantAgentGetOperationType(int64_t cjWantAgent, int32_t* errCode);
+FFI_EXPORT bool FfiWantAgentEqual(int64_t cjWantAgentFirst, int64_t cjWantAgentSecond, int32_t* errCode);
 }
 
-}
-}
+} // namespace FfiWantAgent
+} // namespace OHOS
 #endif // CJ_WANT_AGENT_FFI_H

@@ -67,14 +67,14 @@ ohos_shared_library("cj_want_agent_ffi") {
     "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
+    "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
-    "napi:ace_napi",
   ]
 
-  sources = [ 
+  sources = [
     "src/cj_want_agent_ffi.cpp",
-    "src/cj_want_agent_object.cpp"
+    "src/cj_want_agent_object.cpp",
   ]
 
   cflags = [
