@@ -122,9 +122,9 @@ std::string RenderRecord::GetHostBundleName() const
     return hostBundleName_;
 }
 
-void RenderRecord::SetProcessName(const std::string &hostProcessName)
+void RenderRecord::SetProcessName(const std::string &processName)
 {
-    processName_ = hostProcessName;
+    processName_ = processName;
 }
 
 std::string RenderRecord::GetProcessName() const
