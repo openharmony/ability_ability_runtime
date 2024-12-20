@@ -101,6 +101,7 @@
 #include "window_focus_changed_listener.h"
 #include "wm_common.h"
 #endif
+#include "query_erms_manager.h"
 #include "window_visibility_changed_listener.h"
 
 using OHOS::AppExecFwk::ElementName;
@@ -6361,6 +6362,9 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (abilityRecord != nullptr) {
+        request.callerTokenRecordId = abilityRecord->GetRecordId();
+    }
     if (abilityRecord && abilityRecord->GetAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX &&
         abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName()) {
         (const_cast<Want &>(want)).SetParam(AbilityRuntime::ServerConstant::DLP_INDEX, abilityRecord->GetAppIndex());
@@ -6460,6 +6464,9 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
     const Want &want, AbilityRequest &request, const sptr<IRemoteObject> &callerToken, int32_t userId)
 {
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (abilityRecord != nullptr) {
+        request.callerTokenRecordId = abilityRecord->GetRecordId();
+    }
     if (abilityRecord && abilityRecord->GetAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX &&
         abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName()) {
         (const_cast<Want &>(want)).SetParam(AbilityRuntime::ServerConstant::DLP_INDEX, abilityRecord->GetAppIndex());
@@ -11685,6 +11692,64 @@ bool AbilityManagerService::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToke
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerAbility->GetElementName().GetBundleName());
     auto erms = std::make_shared<EcologicalRuleInterceptor>();
     return erms->DoProcess(want, GetUserId());
+}
+
+int32_t AbilityManagerService::AddQueryERMSObserver(sptr<IRemoteObject> callerToken,
+    sptr<AbilityRuntime::IQueryERMSObserver> observer)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return QueryERMSManager::GetInstance().AddQueryERMSObserver(callerToken, observer);
+}
+
+int32_t AbilityManagerService::QueryAtomicServiceStartupRule(sptr<IRemoteObject> callerToken,
+    const std::string &appId, const std::string &startTime, AtomicServiceStartupRule &rule)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    CHECK_TRUE_RETURN_RET(!AppUtils::GetInstance().IsLaunchEmbededUIAbility(),
+        ERR_CAPABILITY_NOT_SUPPORT, "device type not allowd");
+    auto accessTokenId = IPCSkeleton::GetCallingTokenID();
+    auto type = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(accessTokenId);
+    CHECK_TRUE_RETURN_RET(type != Security::AccessToken::TypeATokenTypeEnum::TOKEN_HAP,
+        ERR_INVALID_VALUE, "caller not hap");
+    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+    CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
+    auto callerAbility = uiAbilityManager->GetAbilityRecordByToken(callerToken);
+    CHECK_POINTER_AND_RETURN(callerAbility, ERR_INVALID_VALUE);
+    CHECK_TRUE_RETURN_RET(callerAbility->GetApplicationInfo().accessTokenId != accessTokenId,
+        ERR_INVALID_VALUE, "callerToken don't belong caller");
+    CHECK_TRUE_RETURN_RET(!callerAbility->IsForeground() && !callerAbility->GetAbilityForegroundingFlag(),
+        NOT_TOP_ABILITY, "caller not foreground");
+
+    std::string bundleName = ATOMIC_SERVICE_PREFIX + appId;
+    Want want;
+    want.SetBundle(bundleName);
+    want.SetParam("send_to_erms_embedded", 1);
+    UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(want, callerToken);
+    auto userId = GetUserId();
+    int32_t ret = freeInstallManager_->StartFreeInstall(want, userId, 0, callerToken, false);
+    CHECK_RET_RETURN_RET(ret, "target not allowed free install");
+
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerAbility->GetElementName().GetBundleName());
+    auto erms = std::make_shared<EcologicalRuleInterceptor>();
+    sptr<Want> replaceWant = nullptr;
+    ret = erms->QueryAtomicServiceStartupRule(want, callerToken, GetUserId(), rule, replaceWant);
+    if (ret == ERR_OK) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "QueryAtomicServiceStartupRule succeeded");
+        return ERR_OK;
+    }
+    CHECK_TRUE_RETURN_RET(ret != ERR_ECOLOGICAL_CONTROL_STATUS, ret, "QueryAtomicServiceStartupRule failed");
+    AbilityRequest abilityRequest;
+    ret = GenerateAbilityRequest(want, -1, abilityRequest, callerToken, userId);
+    CHECK_TRUE_RETURN_RET(ret != ERR_OK, INNER_ERR, "GenerateAbilityRequest failed");
+
+    abilityRequest.isQueryERMS = true;
+    abilityRequest.appId = appId;
+    abilityRequest.startTime = startTime;
+    abilityRequest.isEmbeddedAllowed = rule.isEmbeddedAllowed;
+    ret = DialogSessionManager::GetInstance().HandleErmsResult(abilityRequest, userId, *replaceWant);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleErmsResult: ret=%{public}d", ret);
+    CHECK_TRUE_RETURN_RET(ret != ERR_OK, INNER_ERR, "HandleErmsResult failed");
+    return ERR_ECOLOGICAL_CONTROL_STATUS;
 }
 
 bool AbilityManagerService::CheckProcessIsBackground(int32_t pid, AbilityState currentState)
