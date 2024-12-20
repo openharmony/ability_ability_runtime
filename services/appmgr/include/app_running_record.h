@@ -949,8 +949,8 @@ public:
 
     void SetBrowserHost(sptr<IRemoteObject> browser);
     sptr<IRemoteObject> GetBrowserHost();
-    void SetIsGPU(bool gpu);
-    bool GetIsGPU();
+    void SetHasGPU(bool gpu);
+    bool HasGPU();
     void SetGPUPid(pid_t gpuPid);
     pid_t GetGPUPid();
     pid_t GetPid();
@@ -1198,7 +1198,7 @@ private:
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     bool processCacheBlocked = false; // temporarily block process cache feature
     sptr<IRemoteObject> browserHost_;
-    bool isGPU_ = false;
+    bool hasGPU_ = false;
     pid_t gpuPid_ = 0;
     bool isStrictMode_ = false;
     bool isAttachedToStatusBar = false;
