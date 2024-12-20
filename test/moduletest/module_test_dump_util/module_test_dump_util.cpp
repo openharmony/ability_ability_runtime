@@ -77,7 +77,7 @@ bool MTDumpUtil::CompStrVec(const str_vec& strVec_1, const str_vec& strVec_2)
 str_iter MTDumpUtil::GetSpecific(const string& matchStr, const str_vec& dumpInfo, const str_iter& begin)
 {
     auto checkCondition = [&matchStr](const str_vec::value_type& value) -> bool {
-        return string::npos != value.find(matchStr);
+        return value.find(matchStr) != string::npos;
     };
     str_iter end;
     std::advance(end, dumpInfo.size());
