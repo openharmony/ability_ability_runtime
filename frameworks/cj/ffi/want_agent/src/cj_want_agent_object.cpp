@@ -13,41 +13,38 @@
  * limitations under the License.
  */
 
+#include "cj_lambda.h"
+#include "cj_utils_ffi.h"
+#include "cj_want_agent_ffi.h"
 #include "hilog_tag_wrapper.h"
+#include "js_native_api.h"
+#include "napi/native_api.h"
+#include "start_options.h"
 #include "want_agent_helper.h"
 #include "want_params_wrapper.h"
-#include "start_options.h"
-#include "cj_want_agent_ffi.h"
-#include "cj_ability_runtime_error.h"
-#include "cj_utils_ffi.h"
-#include "cj_lambda.h"
-#include "napi/native_api.h"
-#include "js_native_api.h"
 
 namespace OHOS {
 namespace FfiWantAgent {
 
-using OHOS::FFI::FFIData;
 using OHOS::AbilityRuntime::WantAgent::WantAgent;
+using OHOS::FFI::FFIData;
 
 namespace {
+
+constexpr int32_t INVALID_REMOTE_DATA_ID = -1;
+
 napi_value WrapWantAgent(napi_env env, WantAgent* wantAgent)
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "called");
     napi_value wantAgentClass = nullptr;
     napi_define_class(
-        env,
-        "WantAgentClass",
-        NAPI_AUTO_LENGTH,
+        env, "WantAgentClass", NAPI_AUTO_LENGTH,
         [](napi_env env, napi_callback_info info) -> napi_value {
             napi_value thisVar = nullptr;
             napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
             return thisVar;
         },
-        nullptr,
-        0,
-        nullptr,
-        &wantAgentClass);
+        nullptr, 0, nullptr, &wantAgentClass);
     napi_value result = nullptr;
     napi_new_instance(env, wantAgentClass, 0, nullptr, &result);
     if (result == nullptr) {
@@ -57,17 +54,15 @@ napi_value WrapWantAgent(napi_env env, WantAgent* wantAgent)
         return nullptr;
     }
 
-    auto res = napi_wrap(env,
-        result,
-        reinterpret_cast<void*>(wantAgent),
+    auto res = napi_wrap(
+        env, result, reinterpret_cast<void*>(wantAgent),
         [](napi_env env, void* data, void* hint) {
             TAG_LOGD(AAFwkTag::WANTAGENT, "delete wantAgent");
             auto agent = static_cast<WantAgent*>(data);
             delete agent;
             agent = nullptr;
         },
-        nullptr,
-        nullptr);
+        nullptr, nullptr);
     if (res != napi_ok && wantAgent != nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "napi_wrap failed:%{public}d", res);
         delete wantAgent;
@@ -101,19 +96,19 @@ void UnwrapWantAgent(napi_env env, napi_value jsParam, void** result)
 
     napi_unwrap(env, jsParam, result);
 }
-}
+} // namespace
 
 extern "C" {
 napi_value FfiConvertWantAgent2Napi(napi_env env, int64_t id)
 {
     napi_value undefined = nullptr;
-    // napi_get_undefined(env, &undefined);
+    napi_get_undefined(env, &undefined);
     auto cjWantAgent = FFIData::GetData<CJWantAgent>(id);
     if (cjWantAgent == nullptr || cjWantAgent->wantAgent_ == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "cj wantagent nullptr");
         return undefined;
     }
-    WantAgent *agent = new WantAgent(cjWantAgent->wantAgent_->GetPendingWant());
+    WantAgent* agent = new WantAgent(cjWantAgent->wantAgent_->GetPendingWant());
     if (agent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "cj wantaget malloc failed");
         return undefined;
@@ -122,21 +117,18 @@ napi_value FfiConvertWantAgent2Napi(napi_env env, int64_t id)
     return WrapWantAgent(env, agent);
 }
 
-#define INVALID_REMOTE_DATA_ID -1
 int64_t FfiCreateWantAgentFromNapi(napi_env env, napi_value wantAgent)
 {
     if (env == nullptr || wantAgent == nullptr) {
         return INVALID_REMOTE_DATA_ID;
     }
     WantAgent* napiAgent = nullptr;
-    UnwrapWantAgent(env, wantAgent, reinterpret_cast<void **>(&napiAgent));
+    UnwrapWantAgent(env, wantAgent, reinterpret_cast<void**>(&napiAgent));
     if (napiAgent == nullptr) {
         return INVALID_REMOTE_DATA_ID;
     }
 
-    auto nativeWantAgent = FFIData::Create<CJWantAgent>(
-        std::make_shared<WantAgent>(napiAgent->GetPendingWant()));
-
+    auto nativeWantAgent = FFIData::Create<CJWantAgent>(std::make_shared<WantAgent>(napiAgent->GetPendingWant()));
     if (nativeWantAgent == nullptr) {
         return INVALID_REMOTE_DATA_ID;
     }
@@ -144,5 +136,5 @@ int64_t FfiCreateWantAgentFromNapi(napi_env env, napi_value wantAgent)
     return nativeWantAgent->GetID();
 }
 }
-}
-}
+} // namespace FfiWantAgent
+} // namespace OHOS
