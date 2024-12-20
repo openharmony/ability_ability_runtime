@@ -46,6 +46,14 @@ struct AddInfoParam {
     std::vector<std::string> infoNames;
     bool isExistDefaultApp = false;
 };
+
+struct GenerateRequestParam {
+    bool isMoreHapList = false;
+    bool findDefaultApp = false;
+    bool isAppCloneSelector = false;
+    bool fromImplicitStartAG = false;
+};
+
 using namespace OHOS::EcologicalRuleMgrService;
 using ErmsCallerInfo = OHOS::EcologicalRuleMgrService::AbilityCallerInfo;
 /**
@@ -67,9 +75,14 @@ public:
     void RemoveIdentity(int32_t tokenId);
 
 private:
+#ifdef APP_DOMAIN_VERIFY_ENABLED
+    bool NeedQueryFromAG(const AbilityRequest &request, bool applinkExist);
+    int ImplicitStartAG(int32_t userId, AbilityRequest &request, std::vector<DialogAppInfo> &dialogAppInfos,
+        GenerateRequestParam &genReqParam, bool &queryAGSuccess);
+#endif // APP_DOMAIN_VERIFY_ENABLED
+
     int GenerateAbilityRequestByAction(int32_t userId, AbilityRequest &request,
-        std::vector<DialogAppInfo> &dialogAppInfos, bool isMoreHapList, bool &findDefaultApp,
-        bool &isAppCloneSelector);
+        std::vector<DialogAppInfo> &dialogAppInfos, GenerateRequestParam &genReqParam);
 
     int GenerateAbilityRequestByAppIndexes(int32_t userId, AbilityRequest &request,
         std::vector<DialogAppInfo> &dialogAppInfos);
