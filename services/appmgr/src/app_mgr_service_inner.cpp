@@ -5354,8 +5354,8 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
             }
         }
     }
-    appRecord->SetIsGPU(isGPU);
-    int32_t childNumLimit = appRecord->GetIsGPU() ? PHONE_MAX_RENDER_PROCESS_NUM + 1 : PHONE_MAX_RENDER_PROCESS_NUM;
+    appRecord->SetHasGPU(isGPU);
+    int32_t childNumLimit = appRecord->HasGPU() ? PHONE_MAX_RENDER_PROCESS_NUM + 1 : PHONE_MAX_RENDER_PROCESS_NUM;
     // The phone device allows a maximum of 40 render processes to be created.
     if (AAFwk::AppUtils::GetInstance().IsLimitMaximumOfRenderProcess() &&
         renderRecordMap.size() >= static_cast<uint32_t>(childNumLimit)) {
@@ -5413,7 +5413,7 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
 
     TAG_LOGI(AAFwkTag::APPMGR, "attachRenderProcess_%{public}d, notify fd", pid);
     // notify fd to render process
-    if (appRecord->GetBrowserHost() != nullptr && appRecord->GetIsGPU()) {
+    if (appRecord->GetBrowserHost() != nullptr && renderRecord->GetProcessType() == ProcessType::GPU) {
         TAG_LOGD(AAFwkTag::APPMGR, "GPU has host remote object");
         scheduler->NotifyBrowserFd(renderRecord->GetIpcFd(),
             renderRecord->GetSharedFd(), renderRecord->GetCrashFd(), appRecord->GetBrowserHost());
