@@ -40,6 +40,8 @@ constexpr char INSIGHT_INTENT_EXECUTE_PARAM_NAME[] = "ohos.insightIntent.execute
 constexpr char INSIGHT_INTENT_EXECUTE_PARAM_PARAM[] = "ohos.insightIntent.executeParam.param";
 constexpr char INSIGHT_INTENT_EXECUTE_PARAM_MODE[] = "ohos.insightIntent.executeParam.mode";
 constexpr char INSIGHT_INTENT_EXECUTE_PARAM_ID[] = "ohos.insightIntent.executeParam.id";
+constexpr char INSIGHT_INTENT_EXECUTE_PARAM_URI[] = "ohos.insightIntent.executeParam.uris";
+constexpr char INSIGHT_INTENT_EXECUTE_PARAM_FLAGS[] = "ohos.insightIntent.executeParam.flags";
 constexpr char INSIGHT_INTENT_SRC_ENTRY[] = "ohos.insightIntent.srcEntry";
 
 constexpr int32_t INVALID_DISPLAY_ID = -1;
@@ -65,6 +67,8 @@ public:
     int32_t executeMode_ = -1;
     uint64_t insightIntentId_ = 0;
     int32_t displayId_ = INVALID_DISPLAY_ID;
+    std::vector<std::string> uris_;
+    int32_t flags_ = 0;
 };
 } // namespace AppExecFwk
 } // namespace OHOS

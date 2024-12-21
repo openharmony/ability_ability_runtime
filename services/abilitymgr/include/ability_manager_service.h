@@ -2513,6 +2513,8 @@ private:
 
     bool ShouldBlockAllAppStart();
 
+    std::string InsightIntentGetcallerBundleName();
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif

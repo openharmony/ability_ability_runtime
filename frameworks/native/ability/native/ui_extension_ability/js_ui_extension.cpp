@@ -19,12 +19,12 @@
 #include "ability_info.h"
 #include "ability_manager_client.h"
 #include "ability_start_setting.h"
+#include "array_wrapper.h"
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "context.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
-#include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
 #include "js_data_struct_converter.h"
@@ -42,6 +42,7 @@
 #include "napi_common_configuration.h"
 #include "napi_common_want.h"
 #include "napi_remote_object.h"
+#include "string_wrapper.h"
 #include "ui_extension_window_command.h"
 #include "want_params_wrapper.h"
 
@@ -469,6 +470,34 @@ void JsUIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::S
     OnCommandWindowDone(sessionInfo, winCmd);
 }
 
+bool JsUIExtension::ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
+    const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo)
+{
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        return false;
+    }
+    if (sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null sessionInfo");
+        return false;
+    }
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = context->GetAbilityInfo();
+    if (abilityInfo != nullptr) {
+        executorInfo.hapPath = abilityInfo->hapPath;
+        executorInfo.windowMode = abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE;
+    }
+    executorInfo.token = context->GetToken();
+    executorInfo.pageLoader = contentSessions_[sessionInfo->uiExtensionComponentId];
+    executorInfo.executeParam = std::make_shared<InsightIntentExecuteParam>();
+    InsightIntentExecuteParam::GenerateFromWant(want, *executorInfo.executeParam);
+    executorInfo.executeParam->executeMode_ = UI_EXTENSION_ABILITY;
+    executorInfo.srcEntry = want.GetStringParam(INSIGHT_INTENT_SRC_ENTRY);
+    TAG_LOGD(AAFwkTag::UI_EXT, "executorInfo, insightIntentId: %{public}" PRIu64,
+        executorInfo.executeParam->insightIntentId_);
+    return true;
+}
+
 bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     const sptr<AAFwk::SessionInfo> &sessionInfo, bool needForeground)
 {
@@ -487,35 +516,27 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     }
 
     auto uiExtension = std::static_pointer_cast<JsUIExtension>(shared_from_this());
-    executorCallback->Push([uiExtension, sessionInfo, needForeground](AppExecFwk::InsightIntentExecuteResult result) {
+    executorCallback->Push(
+        [uiExtension, sessionInfo, needForeground, want](AppExecFwk::InsightIntentExecuteResult result) {
         TAG_LOGI(AAFwkTag::UI_EXT, "Execute post insightintent");
         if (uiExtension == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "null uiExtension");
             return;
         }
 
+        InsightIntentExecuteParam executeParam;
+        InsightIntentExecuteParam::GenerateFromWant(want, executeParam);
+        if (executeParam.uris_.size() > 0) {
+            uiExtension->ExecuteInsightIntentDone(executeParam.insightIntentId_, result);
+        }
         uiExtension->PostInsightIntentExecuted(sessionInfo, result, needForeground);
     });
 
-    auto context = GetContext();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+    InsightIntentExecutorInfo executorInfo;
+    if (!ForegroundWindowInitInsightIntentExecutorInfo(want, sessionInfo, executorInfo)) {
         return false;
     }
-    InsightIntentExecutorInfo executorInfo;
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = context->GetAbilityInfo();
-    if (abilityInfo != nullptr) {
-        executorInfo.hapPath = abilityInfo->hapPath;
-        executorInfo.windowMode = abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE;
-    }
-    executorInfo.token = context->GetToken();
-    executorInfo.pageLoader = contentSessions_[sessionInfo->uiExtensionComponentId];
-    executorInfo.executeParam = std::make_shared<InsightIntentExecuteParam>();
-    InsightIntentExecuteParam::GenerateFromWant(want, *executorInfo.executeParam);
-    executorInfo.executeParam->executeMode_ = UI_EXTENSION_ABILITY;
-    executorInfo.srcEntry = want.GetStringParam(INSIGHT_INTENT_SRC_ENTRY);
-    TAG_LOGD(AAFwkTag::UI_EXT, "executorInfo, insightIntentId: %{public}" PRIu64,
-        executorInfo.executeParam->insightIntentId_);
+
     int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executorInfo, std::move(executorCallback));
     if (!ret) {
@@ -524,6 +545,15 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return true;
+}
+
+void JsUIExtension::ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "intentId %{public}" PRIu64"", intentId);
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token_, intentId, result);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "notify execute done failed");
+    }
 }
 
 void JsUIExtension::PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &sessionInfo,
@@ -597,6 +627,18 @@ void JsUIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &s
                 resultParams.SetParam("result", pWantParams);
             }
         }
+
+        auto size = result.uris.size();
+        sptr<IArray> uriArray = new (std::nothrow) Array(size, g_IID_IString);
+        if (uriArray == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "new uriArray failed");
+            return;
+        }
+        for (std::size_t i = 0; i < size; i++) {
+            uriArray->Set(i, String::Box(result.uris[i]));
+        }
+        resultParams.SetParam("uris", uriArray);
+        resultParams.SetParam("flags", Integer::Box(result.flags));
         sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(resultParams);
         if (pWantParams != nullptr) {
             params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT, pWantParams);

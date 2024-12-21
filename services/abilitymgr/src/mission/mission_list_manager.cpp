@@ -3336,6 +3336,10 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
     targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
 
+    if (InsightIntentExecuteParam::IsInsightIntentExecute(abilityRequest.want)) {
+        targetAbilityRecord->GrantUriPermission();
+    }
+
     std::string value = abilityRequest.want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
     if (!value.empty()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "set launchReasonMessage:%{public}s", value.c_str());

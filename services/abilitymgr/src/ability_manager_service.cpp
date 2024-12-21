@@ -10855,13 +10855,30 @@ int32_t AbilityManagerService::DetachAppDebug(const std::string &bundleName)
     return IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->DetachAppDebug(bundleName));
 }
 
+std::string AbilityManagerService::InsightIntentGetcallerBundleName()
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    auto bundleMgr = AbilityUtil::GetBundleManagerHelper();
+    std::string callerBundlename;
+    if (bundleMgr != nullptr) {
+       IN_PROCESS_CALL(bundleMgr->GetNameForUid(callerUid, callerBundlename));
+    }
+    return callerBundlename;
+}
+
 int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObject> &callerToken,
     const InsightIntentExecuteParam &param)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    auto callerBundlename = InsightIntentGetcallerBundleName();
+    if (callerBundlename.empty()) {
+        return ERR_INVALID_VALUE;
+    }
+
     auto paramPtr = std::make_shared<InsightIntentExecuteParam>(param);
     int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateParam(key, callerToken,
-        paramPtr);
+        paramPtr, callerBundlename);
     if (ret != ERR_OK) {
         return ret;
     }
@@ -11042,6 +11059,11 @@ int32_t AbilityManagerService::ExecuteInsightIntentDone(const sptr<IRemoteObject
             "bundleName %{public}s and %{public}s mismatch", bundleName.c_str(), bundleNameStored.c_str());
         return ERR_INVALID_VALUE;
     }
+
+    std::string callerBundleName;
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GetCallerBundleName(intentId, callerBundleName);
+    uint32_t initiatorTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
+    abilityRecord->GrantUriPermission(result.uris, result.flags, callerBundleName, initiatorTokenId);
 
     return DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->ExecuteIntentDone(
         intentId, result.innerErr, result);
