@@ -64,8 +64,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::shared_ptr<AMSEventHandler> eventHandler;
     ModuleRunningRecord moduleRecord(info, eventHandler);
     HapModuleInfo hapInfo;
-    moduleRecord.Init(hapInfo);
     std::weak_ptr<AppMgrServiceInner> inner;
+    moduleRecord.Init(hapInfo, 0, inner, nullptr);
     moduleRecord.SetAppMgrServiceInner(inner);
     ModuleRecordState moduleState = ModuleRecordState::UNKNOWN_STATE;
     moduleRecord.SetModuleRecordState(moduleState);

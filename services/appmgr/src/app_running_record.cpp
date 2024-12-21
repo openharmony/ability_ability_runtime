@@ -799,14 +799,6 @@ void AppRunningRecord::AddModule(std::shared_ptr<ApplicationInfo> appInfo,
     }
 
     std::shared_ptr<ModuleRunningRecord> moduleRecord;
-
-    auto initModuleRecord = [&](const std::shared_ptr<ModuleRunningRecord> &moduleRecord) {
-        moduleRecord->Init(hapModuleInfo);
-        moduleRecord->SetAppIndex(appIndex_);
-        moduleRecord->SetAppMgrServiceInner(appMgrServiceInner_);
-        moduleRecord->SetApplicationClient(appLifeCycleDeal_);
-    };
-
     std::lock_guard<ffrt::mutex> hapModulesLock(hapModulesLock_);
     const auto &iter = hapModules_.find(appInfo->bundleName);
     if (iter != hapModules_.end()) {
@@ -814,7 +806,7 @@ void AppRunningRecord::AddModule(std::shared_ptr<ApplicationInfo> appInfo,
         if (!moduleRecord) {
             moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, eventHandler_);
             iter->second.push_back(moduleRecord);
-            initModuleRecord(moduleRecord);
+            moduleRecord->Init(hapModuleInfo, appIndex_, appMgrServiceInner_, appLifeCycleDeal_);
         }
     } else {
         moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, eventHandler_);
@@ -825,7 +817,7 @@ void AppRunningRecord::AddModule(std::shared_ptr<ApplicationInfo> appInfo,
             std::lock_guard<ffrt::mutex> appInfosLock(appInfosLock_);
             appInfos_.emplace(appInfo->bundleName, appInfo);
         }
-        initModuleRecord(moduleRecord);
+        moduleRecord->Init(hapModuleInfo, appIndex_, appMgrServiceInner_, appLifeCycleDeal_);
     }
 
     if (!abilityInfo || !token) {

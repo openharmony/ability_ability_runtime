@@ -38,9 +38,13 @@ ModuleRunningRecord::~ModuleRunningRecord()
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
 
-void ModuleRunningRecord::Init(const HapModuleInfo &info)
+void ModuleRunningRecord::Init(const HapModuleInfo &info, int32_t appIndex,
+    std::weak_ptr<AppMgrServiceInner> appMgrService, std::shared_ptr<AppLifeCycleDeal> appLifeCycleDeal)
 {
     moduleName_ = info.moduleName;
+    appIndex_ = appIndex;
+    appMgrServiceInner_ = appMgrService;
+    appLifeCycleDeal_ = appLifeCycleDeal;
     owenState_ = ModuleRecordState::INITIALIZED_STATE;
 }
 
