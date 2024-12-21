@@ -35,6 +35,8 @@ public:
     int32_t innerErr = AbilityRuntime::InsightIntentInnerErr::INSIGHT_INTENT_ERR_OK;
     int32_t code = 0;
     std::shared_ptr<WantParams> result = nullptr;
+    std::vector<std::string> uris;
+    int32_t flags = 0;
 
     bool ReadFromParcel(Parcel &parcel);
     bool Marshalling(Parcel &parcel) const override;
