@@ -95,14 +95,14 @@ void DialogSessionManager::SetQueryERMSInfo(const std::string &dialogSessionId,
         }));
 }
 
-void DialogSessionManager::NotifyQueryERMSFinished(const std::string &dialogSessionId, bool isAllowed)
+bool DialogSessionManager::NotifyQueryERMSFinished(const std::string &dialogSessionId, bool isAllowed)
 {
     QueryERMSInfo info;
     {
         std::lock_guard<ffrt::mutex> guard(queryERMSInfoLock_);
         auto it = queryERMSInfoMap_.find(dialogSessionId);
         if (it == queryERMSInfoMap_.end()) {
-            return;
+            return false;
         }
         TAG_LOGI(AAFwkTag::DIALOG, "found,id=%{public}s", dialogSessionId.c_str());
         info = it->second;
@@ -110,6 +110,7 @@ void DialogSessionManager::NotifyQueryERMSFinished(const std::string &dialogSess
     }
     AtomicServiceStartupRule rule = { isAllowed, info.isEmbeddedAllowed };
     QueryERMSManager::GetInstance().OnQueryFinished(info.recordId, info.appId, info.startTime, rule, ERR_OK);
+    return true;
 }
 
 sptr<DialogSessionInfo> DialogSessionManager::GetDialogSessionInfo(const std::string &dialogSessionId) const
@@ -233,7 +234,11 @@ void DialogSessionManager::GenerateDialogCallerInfo(AbilityRequest &abilityReque
 
 int DialogSessionManager::SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllowed)
 {
-    NotifyQueryERMSFinished(dialogSessionId, isAllowed);
+    if (NotifyQueryERMSFinished(dialogSessionId, isAllowed)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "query ERMS finished");
+        ClearDialogContext(dialogSessionId);
+        return ERR_OK;
+    }
     if (!isAllowed) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "user refuse to jump");
         ClearDialogContext(dialogSessionId);

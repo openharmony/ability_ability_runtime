@@ -117,7 +117,7 @@ private:
 
     void SetQueryERMSInfo(const std::string &dialogSessionId, const AbilityRequest &abilityRequest);
 
-    void NotifyQueryERMSFinished(const std::string &dialogSessionId, bool isAllowed);
+    bool NotifyQueryERMSFinished(const std::string &dialogSessionId, bool isAllowed);
 
     mutable ffrt::mutex dialogSessionRecordLock_;
     std::unordered_map<std::string, sptr<DialogSessionInfo>> dialogSessionInfoMap_;

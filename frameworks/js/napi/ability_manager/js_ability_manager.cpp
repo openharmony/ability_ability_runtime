@@ -681,13 +681,13 @@ private:
         const std::string &startTime, napi_value *result)
     {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-        queryERMSObserver_->AddJsObserverObject(appId, startTime, result);
         int ret = 0;
         if (queryERMSObserver_ == nullptr) {
             queryERMSObserver_ = new JsQueryERMSObserver(env);
-            ret = AbilityManagerClient::GetInstance()->AddQueryERMSObserver(token, queryERMSObserver_);
         }
+        queryERMSObserver_->AddJsObserverObject(appId, startTime, result);
 
+        ret = AbilityManagerClient::GetInstance()->AddQueryERMSObserver(token, queryERMSObserver_);
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "addQueryERMSObserver error");
             AtomicServiceStartupRule rule;
