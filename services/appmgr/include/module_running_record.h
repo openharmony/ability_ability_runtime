@@ -61,7 +61,8 @@ public:
      */
     void GetMainAbilityName(const std::string &name);
 
-    void Init(const HapModuleInfo &info);
+    void Init(const HapModuleInfo &info, int32_t appIndex, std::weak_ptr<AppMgrServiceInner> appMgrService,
+        std::shared_ptr<AppLifeCycleDeal> appLifeCycleDeal);
     void SetAppIndex(int32_t appIndex)
     {
         appIndex_ = appIndex;
