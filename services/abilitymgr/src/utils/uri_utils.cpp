@@ -286,7 +286,8 @@ bool UriUtils::IsDmsCall(uint32_t fromTokenId)
 }
 
 #ifdef SUPPORT_UPMS
-void UriUtils::GrantDmsUriPermission(Want &want, uint32_t callerTokenId, std::string targetBundleName, int32_t appIndex)
+void UriUtils::GrantDmsUriPermission(Want &want, uint32_t callerTokenId,
+    std::string targetBundleName, int32_t appIndex)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto validUriVec = GetUriListFromWantDms(want);
@@ -342,6 +343,26 @@ void UriUtils::CheckUriPermission(uint32_t callerTokenId, Want &want)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "all uris not permissioned.");
         return;
     }
+}
+
+void UriUtils::GrantUriPermission(const std::vector<std::string> &uriVec, int32_t flag,
+    const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId)
+{
+    std::vector<Uri> permissionUris;
+    for (auto &uriStr: uriVec) {
+        Uri uri(uriStr);
+        permissionUris.emplace_back(uri);
+    }
+    if (permissionUris.empty()) {
+        return;
+    }
+    auto ret = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().GrantUriPermission(permissionUris,
+        flag, targetBundleName, appIndex, initiatorTokenId));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, err:%{public}d", ret);
+    }
+
+    return;
 }
 #endif // SUPPORT_UPMS
 

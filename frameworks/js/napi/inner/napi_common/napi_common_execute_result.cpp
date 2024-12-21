@@ -25,6 +25,31 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
+bool UnwrapResultOfExecuteResult(napi_env env, napi_value param, InsightIntentExecuteResult &executeResult)
+{
+    napi_value result = nullptr;
+    napi_get_named_property(env, param, "result", &result);
+    if (result != nullptr) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, result, &valueType);
+        if (valueType != napi_object) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "type not function");
+            return false;
+        }
+        auto wp = std::make_shared<AAFwk::WantParams>();
+        if (!AppExecFwk::UnwrapWantParams(env, result, *wp)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "unwrap want failed");
+            return false;
+        }
+        if (!executeResult.CheckResult(wp)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "Check wp fail");
+            return false;
+        }
+        executeResult.result = wp;
+    }
+    return true;
+}
+
 bool UnwrapExecuteResult(napi_env env, napi_value param, InsightIntentExecuteResult &executeResult)
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "called");
@@ -41,26 +66,28 @@ bool UnwrapExecuteResult(napi_env env, napi_value param, InsightIntentExecuteRes
     executeResult.code = code;
 
     if (IsExistsByPropertyName(env, param, "result")) {
-        napi_value result = nullptr;
-        napi_get_named_property(env, param, "result", &result);
-        if (result != nullptr) {
-            napi_valuetype valueType = napi_undefined;
-            napi_typeof(env, result, &valueType);
-            if (valueType != napi_object) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "type not function");
-                return false;
-            }
-            auto wp = std::make_shared<AAFwk::WantParams>();
-            if (!AppExecFwk::UnwrapWantParams(env, result, *wp)) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "unwrap want failed");
-                return false;
-            }
-            if (!executeResult.CheckResult(wp)) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "Check wp fail");
-                return false;
-            }
-            executeResult.result = wp;
+        if (!UnwrapResultOfExecuteResult(env, param, executeResult)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "unwrap result fail");
+            return false;
         }
+    }
+
+    if (IsExistsByPropertyName(env, param, "uris")) {
+        std::vector<std::string> uris;
+        if (!UnwrapStringArrayByPropertyName(env, param, "uris", uris)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "unwrap uris is null");
+            return false;
+        }
+        executeResult.uris = uris;
+    }
+
+    if (IsExistsByPropertyName(env, param, "flags")) {
+        int32_t flags = 0;
+        if (!UnwrapInt32ByPropertyName(env, param, "flags", flags)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "unwrap flags is null");
+            return false;
+        }
+        executeResult.flags = flags;
     }
 
     return true;

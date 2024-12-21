@@ -22,6 +22,7 @@
 #include "display_manager.h"
 #include "window_manager.h"
 #endif // SUPPORT_GRAPHICS
+#include "insight_intent_executor_info.h"
 #include "js_ui_extension_content_session.h"
 #include "ui_extension.h"
 #include <mutex>
@@ -192,6 +193,8 @@ private:
     void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
 
     void OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd) override;
+    bool ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
+        const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo);
     bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
         bool needForeground);
     bool HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
@@ -203,6 +206,7 @@ private:
         sptr<AAFwk::SessionInfo> sessionInfo);
     sptr<Rosen::Window> CreateUIWindow(const std::shared_ptr<UIExtensionContext> context,
         const sptr<AAFwk::SessionInfo> &sessionInfo);
+    void ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result);
 
     JsRuntime& jsRuntime_;
     std::shared_ptr<NativeReference> jsObj_ = nullptr;
