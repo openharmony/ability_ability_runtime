@@ -72,6 +72,9 @@ ohos_shared_library("quickfix_manager") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (ability_runtime_child_process) {
+    defines += [ "SUPPORT_CHILD_PROCESS" ]
+  }
 
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"

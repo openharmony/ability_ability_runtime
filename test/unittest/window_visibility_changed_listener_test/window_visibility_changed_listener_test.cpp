@@ -18,7 +18,9 @@
 
 #define private public
 #include "app_running_manager.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_record.h"
+#endif // SUPPORT_CHILD_PROCESS
 #include "window_visibility_changed_listener.h"
 #undef private
 #include "hilog_tag_wrapper.h"

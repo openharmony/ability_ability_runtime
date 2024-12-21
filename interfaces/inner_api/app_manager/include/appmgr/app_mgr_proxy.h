@@ -176,6 +176,7 @@ public:
      */
     virtual int32_t GetAllRenderProcesses(std::vector<RenderProcessInfo> &info) override;
 
+#ifdef SUPPORT_CHILD_PROCESS
     /**
      * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
      * Obtains information about children processes that are running on the device.
@@ -184,6 +185,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info) override;
+#endif // SUPPORT_CHILD_PROCESS
 
     /**
      * JudgeSandboxByPid, call JudgeSandboxByPid() through proxy project.
@@ -588,6 +590,7 @@ public:
      */
     int32_t IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId, bool &isRunning) override;
 
+#ifdef SUPPORT_CHILD_PROCESS
     /**
      * Start child process, called by ChildProcessManager.
      *
@@ -615,6 +618,7 @@ public:
      * Exit child process, called by itself.
      */
     void ExitChildProcessSafely() override;
+#endif // SUPPORT_CHILD_PROCESS
 
     /**
      * Whether the current application process is the last surviving process.
@@ -728,6 +732,7 @@ public:
      */
     int32_t CheckCallingIsUserTestMode(const pid_t pid, bool &isUserTest) override;
 
+#ifdef SUPPORT_CHILD_PROCESS
     /**
      * Start native child process, callde by ChildProcessManager.
      * @param libName lib file name to be load in child process
@@ -737,6 +742,7 @@ public:
      */
     int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback) override;
+#endif // SUPPORT_CHILD_PROCESS
 
     /**
      * Notify that the process depends on web by itself.

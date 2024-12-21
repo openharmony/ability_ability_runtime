@@ -316,9 +316,11 @@ public:
      */
     void GetAbilityTokensByBundleName(const std::string &bundleName, std::vector<sptr<IRemoteObject>> &abilityTokens);
 
+#ifdef SUPPORT_CHILD_PROCESS
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByChildProcessPid(const pid_t pid);
     std::shared_ptr<ChildProcessRecord> OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
     bool IsChildProcessReachLimit(uint32_t accessTokenId);
+#endif //SUPPORT_CHILD_PROCESS
 
     /**
      * @brief Obtain number of app through bundlename.

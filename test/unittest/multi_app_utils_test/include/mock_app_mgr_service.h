@@ -50,7 +50,9 @@ public:
         std::vector<RunningProcessInfo>& info));
     MOCK_METHOD2(GetProcessRunningInfosByUserId, int(std::vector<RunningProcessInfo>& info, int32_t userId));
     MOCK_METHOD1(GetAllRenderProcesses, int(std::vector<RenderProcessInfo>& info));
+#ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD1(GetAllChildrenProcesses, int(std::vector<ChildProcessInfo>&));
+#endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD0(GetAmsMgr, sptr<IAmsMgr>());
     MOCK_METHOD1(GetAppFreezingTime, void(int& time));
     MOCK_METHOD1(SetAppFreezingTime, void(int time));
@@ -99,10 +101,12 @@ public:
         int32_t appCloneIndex, bool &isRunning));
     MOCK_METHOD3(IsAppRunningByBundleNameAndUserId, int32_t(const std::string &bundleName,
         int32_t userId, bool &isRunning));
+#ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD2(StartChildProcess, int32_t(pid_t &childPid, const ChildProcessRequest &request));
     MOCK_METHOD1(GetChildProcessInfoForSelf, int32_t(ChildProcessInfo &info));
     MOCK_METHOD1(AttachChildProcess, void(const sptr<IRemoteObject> &childScheduler));
     MOCK_METHOD0(ExitChildProcessSafely, void());
+#endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD1(RegisterRenderStateObserver, int32_t(const sptr<IRenderStateObserver> &observer));
     MOCK_METHOD1(UnregisterRenderStateObserver, int32_t(const sptr<IRenderStateObserver> &observer));
     MOCK_METHOD2(UpdateRenderState, int32_t(pid_t renderPid, int32_t state));
@@ -110,8 +114,10 @@ public:
     MOCK_METHOD0(IsFinalAppProcess, bool());
     MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupport));
     MOCK_METHOD2(SetSupportedProcessCache, int32_t(int32_t pid, bool isSupport));
+#ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD3(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback));
+#endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD2(GetSupportedProcessCachePids, int32_t(const std::string &bundleName,
         std::vector<int32_t> &pidList));
 

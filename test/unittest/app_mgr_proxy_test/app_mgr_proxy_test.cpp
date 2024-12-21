@@ -144,6 +144,7 @@ HWTEST_F(AppMgrProxyTest, AppMgrProxy_GetAllRenderProcesses_0100, TestSize.Level
     GTEST_LOG_(INFO) << "AppMgrProxy_GetAllRenderProcesses_0100 end";
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: AppMgrProxy_GetAllChildrenProcesses_0100
  * @tc.desc: GetAllChildrenProcesses
@@ -165,6 +166,7 @@ HWTEST_F(AppMgrProxyTest, AppMgrProxy_GetAllChildrenProcesses_0100, TestSize.Lev
 
     GTEST_LOG_(INFO) << "AppMgrProxy_GetAllChildrenProcesses_0100 end";
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /**
  * @tc.name: GetAppRunningStateByBundleName_0100

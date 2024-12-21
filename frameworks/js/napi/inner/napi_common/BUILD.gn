@@ -30,7 +30,6 @@ ohos_shared_library("napi_common") {
   ]
 
   sources = [
-    "napi_common_child_process_param.cpp",
     "napi_common_configuration.cpp",
     "napi_common_execute_param.cpp",
     "napi_common_execute_result.cpp",
@@ -72,6 +71,10 @@ ohos_shared_library("napi_common") {
     "bundle_framework:appexecfwk_core",
     "input:libmmi-client",
   ]
+
+  if (ability_runtime_child_process) {
+    sources += [ "napi_common_child_process_param.cpp" ]
+  }
 
   if (ability_runtime_graphics) {
     defines = [

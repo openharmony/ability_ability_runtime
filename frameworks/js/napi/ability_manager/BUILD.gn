@@ -18,8 +18,9 @@ template("abilitymanager") {
   ohos_shared_library(target_name) {
     forward_variables_from(invoker, [ "relative_install_dir" ])
 
+    defines = []
     if (defined(invoker.defines)) {
-      defines = invoker.defines
+      defines += invoker.defines
     }
 
     sources = [
@@ -58,6 +59,9 @@ template("abilitymanager") {
       "napi:ace_napi",
       "samgr:samgr_proxy",
     ]
+    if (ability_runtime_child_process) {
+      defines += [ "SUPPORT_CHILD_PROCESS" ]
+    }
 
     subsystem_name = "ability"
     part_name = "ability_runtime"

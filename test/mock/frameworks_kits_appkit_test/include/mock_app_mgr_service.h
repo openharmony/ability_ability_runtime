@@ -73,10 +73,12 @@ public:
     MOCK_METHOD2(GetProcessMemoryByPid, int32_t(const int32_t pid, int32_t & memorySize));
     MOCK_METHOD3(GetRunningProcessInformation, int32_t(const std::string & bundleName, int32_t userId,
         std::vector<RunningProcessInfo> &info));
+#ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD2(StartChildProcess, int32_t(pid_t &childPid, const ChildProcessRequest &request));
     MOCK_METHOD1(GetChildProcessInfoForSelf, int32_t(ChildProcessInfo &info));
     MOCK_METHOD1(AttachChildProcess, void(const sptr<IRemoteObject> &childScheduler));
     MOCK_METHOD0(ExitChildProcessSafely, void());
+#endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD1(RegisterRenderStateObserver, int32_t(const sptr<IRenderStateObserver> &observer));
     MOCK_METHOD1(UnregisterRenderStateObserver, int32_t(const sptr<IRenderStateObserver> &observer));
     MOCK_METHOD2(UpdateRenderState, int32_t(pid_t renderPid, int32_t state));
@@ -87,8 +89,10 @@ public:
         std::vector<std::string> &instanceKeys, int32_t userId));
     MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupported));
     MOCK_METHOD2(SetSupportedProcessCache, int32_t(int32_t pid, bool isSupport));
+#ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD3(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback));
+#endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD2(GetSupportedProcessCachePids, int32_t(const std::string &bundleName,
         std::vector<int32_t> &pidList));
     MOCK_METHOD1(RegisterKiaInterceptor, int32_t(const sptr<IKiaInterceptor> &interceptor));
@@ -179,10 +183,12 @@ public:
         return 0;
     }
 
+#ifdef SUPPORT_CHILD_PROCESS
     virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info) override
     {
         return 0;
     }
+#endif // SUPPORT_CHILD_PROCESS
 
     virtual int32_t StartNativeProcessForDebugger(const AAFwk::Want &want) override
     {
