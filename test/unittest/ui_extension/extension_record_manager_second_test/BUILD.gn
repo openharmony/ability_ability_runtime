@@ -103,6 +103,9 @@ ohos_unittest("extension_record_manager_second_test") {
     "selinux_adapter:librestorecon",
   ]
 
+  if (ability_runtime_child_process) {
+    defines = [ "SUPPORT_CHILD_PROCESS" ]
+  }
   if (ability_runtime_graphics) {
     external_deps += [
       "input:libmmi-client",

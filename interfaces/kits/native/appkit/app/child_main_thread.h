@@ -26,7 +26,9 @@
 #include "bundle_mgr_interface.h"
 #include "child_scheduler_interface.h"
 #include "child_scheduler_stub.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_info.h"
+#endif // SUPPORT_CHILD_PROCESS
 #include "event_handler.h"
 #include "ipc_singleton.h"
 #include "js_runtime.h"

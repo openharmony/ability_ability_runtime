@@ -466,6 +466,7 @@ AppMgrResultCode AppMgrClient::GetAllRenderProcesses(std::vector<RenderProcessIn
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 AppMgrResultCode AppMgrClient::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -480,6 +481,7 @@ AppMgrResultCode AppMgrClient::GetAllChildrenProcesses(std::vector<ChildProcessI
     }
     return AppMgrResultCode::RESULT_OK;
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 AppMgrResultCode AppMgrClient::NotifyMemoryLevel(MemoryLevel level)
 {

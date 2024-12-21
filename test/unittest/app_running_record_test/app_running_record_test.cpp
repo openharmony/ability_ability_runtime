@@ -22,7 +22,9 @@
 #include "app_running_record.h"
 #include "app_mgr_service_event_handler.h"
 #include "app_mgr_service_inner.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_record.h"
+#endif // SUPPORT_CHILD_PROCESS
 #include "module_running_record.h"
 #include "want_params.h"
 #undef private
@@ -182,6 +184,7 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_AbilityTerminated_0100, TestSize
     EXPECT_EQ(appRunningRecord->processType_, ProcessType::NORMAL);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: AppRunningRecord_AddChildProcessRecord_0100
  * @tc.desc: Test AddChildProcessRecord works.
@@ -269,6 +272,7 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_GetChildProcessRecordMap_0100, T
     auto childProcessRecordMap = appRecord->GetChildProcessRecordMap();
     EXPECT_EQ(childProcessRecordMap.size(), 0);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /**
  * @tc.name: GetSplitModeAndFloatingMode_0100

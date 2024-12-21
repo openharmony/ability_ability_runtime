@@ -74,6 +74,9 @@ ohos_unittest("AmsMgrKillProcessTest") {
     "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
   ]
+  if (ability_runtime_child_process) {
+    defines = [ "SUPPORT_CHILD_PROCESS" ]
+  }
 }
 
 group("unittest") {

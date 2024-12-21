@@ -50,7 +50,9 @@ public:
     MOCK_METHOD3(GetAllRunningInstanceKeysByBundleName, int32_t(const std::string &bundleName,
         std::vector<std::string> &instanceKeys, int32_t userId));
     MOCK_METHOD1(GetAllRenderProcesses, int32_t(std::vector<RenderProcessInfo>&));
+#ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD1(GetAllChildrenProcesses, int(std::vector<ChildProcessInfo>&));
+#endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD1(RegisterAppStateCallback, void(const sptr<IAppStateCallback>& callback));
     MOCK_METHOD0(StopAllProcess, void());
     MOCK_CONST_METHOD0(QueryAppSpawnConnectionState, SpawnConnectionState());
@@ -61,11 +63,15 @@ public:
     MOCK_METHOD0(GetConfiguration, std::shared_ptr<Configuration>());
     MOCK_METHOD2(IsSharedBundleRunning, bool(const std::string &bundleName, uint32_t versionCode));
     MOCK_METHOD3(GetBundleNameByPid, int32_t(const int pid, std::string &bundleName, int32_t &uid));
+#ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD3(StartChildProcess, int32_t(const pid_t hostPid, pid_t &childPid, const ChildProcessRequest &request));
     MOCK_METHOD1(GetChildProcessInfoForSelf, int32_t(ChildProcessInfo &info));
+#endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD4(PreloadApplication, int32_t(const std::string&, int32_t, AppExecFwk::PreloadMode, int32_t));
+#ifdef SUPPORT_CHILD_PROCESS
     MOCK_METHOD4(StartNativeChildProcess, int32_t(const pid_t hostPid, const std::string &libName,
         int32_t childProcessCount, const sptr<IRemoteObject> &callback));
+#endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD1(DumpIpcAllStart, int(std::string& result));
     MOCK_METHOD1(DumpIpcAllStop, int(std::string& result));
     MOCK_METHOD1(DumpIpcAllStat, int(std::string& result));

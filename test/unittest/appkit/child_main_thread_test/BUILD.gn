@@ -39,7 +39,6 @@ ohos_unittest("child_main_thread_test") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${ability_runtime_path}/interfaces/inner_api/child_process_manager:child_process_manager",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -55,6 +54,11 @@ ohos_unittest("child_main_thread_test") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
+  defines = []
+  if (ability_runtime_child_process) {
+    defines += [ "SUPPORT_CHILD_PROCESS" ]
+    deps += [ "${ability_runtime_path}/interfaces/inner_api/child_process_manager:child_process_manager" ]
+  }
 }
 
 group("unittest") {
