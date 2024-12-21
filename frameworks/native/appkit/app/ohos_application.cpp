@@ -29,6 +29,7 @@
 #include "application_cleaner.h"
 #include "application_impl.h"
 #include "bundle_mgr_helper.h"
+#include "configuration_convertor.h"
 #include "configuration_utils.h"
 #include "context_impl.h"
 #include "hilog_tag_wrapper.h"
@@ -40,6 +41,7 @@
 #include "ui_ability.h"
 #include "application_configuration_manager.h"
 #ifdef SUPPORT_GRAPHICS
+#include "display_manager.h"
 #include "window.h"
 #endif
 
@@ -191,6 +193,17 @@ void OHOSApplication::SetApplicationContext(
         }
         applicationSptr->OnUpdateConfigurationForAll(config);
     });
+#ifdef SUPPORT_GRAPHICS
+    abilityRuntimeContext_->RegisterGetDisplayConfig([applicationWptr](uint64_t displayId,
+        float &density, std::string &directionStr) -> bool {
+        std::shared_ptr<OHOSApplication> applicationSptr = applicationWptr.lock();
+        if (applicationSptr == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null applicationSptr");
+            return false;
+        }
+        return applicationSptr->GetDisplayConfig(displayId, density, directionStr);
+    });
+#endif
 }
 
 /**
@@ -912,5 +925,24 @@ bool OHOSApplication::IsMainProcess(const std::string &bundleName, const std::st
     TAG_LOGD(AAFwkTag::APPKIT, "not main process");
     return false;
 }
+
+#ifdef SUPPORT_GRAPHICS
+bool OHOSApplication::GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "get display by id %{public}" PRIu64, displayId);
+    auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "display %{public}" PRIu64 " failed", displayId);
+        return false;
+    }
+    density = display->GetVirtualPixelRatio();
+    int32_t width = display->GetWidth();
+    int32_t height = display->GetHeight();
+    directionStr = AppExecFwk::GetDirectionStr(height, width);
+    TAG_LOGD(AAFwkTag::APPKIT, "displayId: %{public}" PRIu64 ", density: %{public}f, direction: %{public}s",
+        displayId, density, directionStr.c_str());
+    return true;
+}
+#endif
 }  // namespace AppExecFwk
 }  // namespace OHOS
