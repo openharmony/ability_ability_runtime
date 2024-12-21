@@ -94,6 +94,22 @@ bool UnwrapExecuteParam(napi_env env, napi_value param, InsightIntentExecutePara
         TAG_LOGI(AAFwkTag::JSNAPI, "displayId %{public}d", displayId);
         executeParam.displayId_ = displayId;
     }
+    if (IsExistsByPropertyName(env, param, "uris")) {
+        std::vector<std::string> uris;
+        if (!UnwrapStringArrayByPropertyName(env, param, "uris", uris)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument uris fail");
+            return false;
+        }
+        executeParam.uris_ = uris;
+    }
+    if (IsExistsByPropertyName(env, param, "flags")) {
+        int32_t flags = 0;
+        if (!UnwrapInt32ByPropertyName(env, param, "flags", flags)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument flags fail");
+            return false;
+        }
+        executeParam.flags_ = flags;
+    }
 
     return true;
 }

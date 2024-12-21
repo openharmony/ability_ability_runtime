@@ -23,6 +23,10 @@ bool InsightIntentExecuteResult::ReadFromParcel(Parcel &parcel)
     innerErr = parcel.ReadInt32();
     code = parcel.ReadInt32();
     result = std::shared_ptr<WantParams>(parcel.ReadParcelable<WantParams>());
+    if (!parcel.ReadStringVector(&uris)) {
+        return false;
+    }
+    flags = parcel.ReadInt32();
     return true;
 }
 
@@ -35,6 +39,12 @@ bool InsightIntentExecuteResult::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteParcelable(result.get())) {
+        return false;
+    }
+    if (!parcel.WriteStringVector(uris)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(flags)) {
         return false;
     }
     return true;
