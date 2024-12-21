@@ -2508,16 +2508,16 @@ sptr<IRemoteObject> AppRunningRecord::GetBrowserHost()
     return browserHost_;
 }
 
-void AppRunningRecord::SetIsGPU(bool gpu)
+void AppRunningRecord::SetHasGPU(bool gpu)
 {
     if (gpu) {
-        isGPU_ = gpu;
+        hasGPU_ = gpu;
     }
 }
 
-bool AppRunningRecord::GetIsGPU()
+bool AppRunningRecord::HasGPU()
 {
-    return isGPU_;
+    return hasGPU_;
 }
 
 void AppRunningRecord::SetGPUPid(pid_t gpuPid)
