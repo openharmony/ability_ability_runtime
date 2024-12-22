@@ -18,7 +18,9 @@
 
 #define private public
 #include "app_running_manager.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_record.h"
+#endif // SUPPORT_CHILD_PROCESS
 #undef private
 #include "hilog_tag_wrapper.h"
 #include "window_visibility_info.h"
@@ -201,6 +203,7 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_OnWindowVisibilityChanged_0100
     EXPECT_FALSE(appRunningManager->appRunningRecordMap_.at(1)->windowIds_.empty());
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: AppRunningManager_GetAppRunningRecordByChildProcessPid_0100
  * @tc.desc: Test GetAppRunningRecordByChildProcessPid works
@@ -241,6 +244,7 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_IsChildProcessReachLimit_0100,
     auto record = appRunningManager->GetAppRunningRecordByChildProcessPid(123);
     EXPECT_EQ(record, nullptr);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /**
  * @tc.name: AppRunningManager_UpdateConfiguration_0100

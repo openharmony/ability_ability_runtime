@@ -35,7 +35,9 @@
 #include "app_mgr_constants.h"
 #include "app_scheduler_proxy.h"
 #include "app_record_id.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_record.h"
+#endif // SUPPORT_CHILD_PROCESS
 #include "fault_data.h"
 #include "fd_guard.h"
 #include "profile.h"
@@ -106,11 +108,11 @@ public:
     void SetState(int32_t state);
     int32_t GetState() const;
     void SetProcessType(ProcessType type);
+    void SetProcessName(const std::string &processName);
 
 private:
     void SetHostUid(const int32_t hostUid);
     void SetHostBundleName(const std::string &hostBundleName);
-    void SetProcessName(const std::string &hostProcessName);
 
     pid_t pid_ = 0;
     pid_t hostPid_ = 0;
@@ -874,11 +876,13 @@ public:
 
     void GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool &isFloatingWindowMode);
 
+#ifdef SUPPORT_CHILD_PROCESS
     void AddChildProcessRecord(pid_t pid, std::shared_ptr<ChildProcessRecord> record);
     void RemoveChildProcessRecord(std::shared_ptr<ChildProcessRecord> record);
     std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(pid_t pid);
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
     int32_t GetChildProcessCount();
+#endif //SUPPORT_CHILD_PROCESS
 
     void SetPreloadState(PreloadState state);
 
@@ -949,8 +953,8 @@ public:
 
     void SetBrowserHost(sptr<IRemoteObject> browser);
     sptr<IRemoteObject> GetBrowserHost();
-    void SetIsGPU(bool gpu);
-    bool GetIsGPU();
+    void SetHasGPU(bool gpu);
+    bool HasGPU();
     void SetGPUPid(pid_t gpuPid);
     pid_t GetGPUPid();
     pid_t GetPid();
@@ -1186,8 +1190,10 @@ private:
 
     std::set<uint32_t> windowIds_;
     ffrt::mutex windowIdsLock_;
+#ifdef SUPPORT_CHILD_PROCESS
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> childProcessRecordMap_;
     ffrt::mutex childProcessRecordMapLock_;
+#endif //SUPPORT_CHILD_PROCESS
 
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isAssertPause_ = false;
@@ -1198,7 +1204,7 @@ private:
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     bool processCacheBlocked = false; // temporarily block process cache feature
     sptr<IRemoteObject> browserHost_;
-    bool isGPU_ = false;
+    bool hasGPU_ = false;
     pid_t gpuPid_ = 0;
     bool isStrictMode_ = false;
     bool isAttachedToStatusBar = false;

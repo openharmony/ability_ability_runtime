@@ -683,7 +683,9 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityByInsightIntent_001, TestS
     std::string bundleName{""};
     uint64_t intentId{1};
     int32_t userId{0};
-    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->AddRecord(key, callerToken, bundleName, intentId);
+    std::string callerBundleName = "com.example.TDDTest";
+    DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->AddRecord(key, callerToken, bundleName, intentId,
+        callerBundleName);
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     auto ret = abilityMs_->StartAbilityByInsightIntent(want, callerToken, intentId, userId);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);

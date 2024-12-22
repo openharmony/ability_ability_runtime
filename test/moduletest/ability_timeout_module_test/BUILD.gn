@@ -59,7 +59,6 @@ ohos_moduletest("ability_timeout_module_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
@@ -128,6 +127,11 @@ ohos_moduletest("ability_timeout_module_test") {
       "window_manager:libdm",
       "window_manager:libwsutils",
       "window_manager:sms",
+    ]
+  }
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     ]
   }
 

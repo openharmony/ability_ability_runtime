@@ -35,6 +35,10 @@ napi_value CreateJsExecuteResult(napi_env env, const AppExecFwk::InsightIntentEx
         napi_set_named_property(env, objValue, "result",
             OHOS::AppExecFwk::CreateJsWantParams(env, *result.result));
     }
+    if (result.uris.size() > 0) {
+        napi_set_named_property(env, objValue, "uris", CreateNativeArray(env, result.uris));
+    }
+    napi_set_named_property(env, objValue, "flags", CreateJsValue(env, result.flags));
     return objValue;
 }
 } // namespace AbilityRuntime

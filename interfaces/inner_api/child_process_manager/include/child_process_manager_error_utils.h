@@ -20,6 +20,7 @@
 
 #include "ability_business_error.h"
 #include "ability_manager_errors.h"
+#include "native_child_process.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -66,10 +67,25 @@ const std::map<int32_t, ChildProcessManagerErrorCode> ABILITY_MANAGER_ERR_CODE_M
     { ERR_OVERFLOW, ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES },
 };
 
+const std::map<ChildProcessManagerErrorCode, Ability_NativeChildProcess_ErrCode> CPM_ERRCODE_MAP = {
+    { ChildProcessManagerErrorCode::ERR_OK, NCP_NO_ERROR },
+    { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED, NCP_ERR_MULTI_PROCESS_DISABLED },
+    { ChildProcessManagerErrorCode::ERR_ALREADY_IN_CHILD_PROCESS, NCP_ERR_ALREADY_IN_CHILD },
+    { ChildProcessManagerErrorCode::ERR_GET_APP_MGR_FAILED, NCP_ERR_SERVICE_ERROR },
+    { ChildProcessManagerErrorCode::ERR_APP_MGR_FAILED_INNER, NCP_ERR_SERVICE_ERROR },
+    { ChildProcessManagerErrorCode::ERR_UNSUPPORT_NATIVE_CHILD_PROCESS, NCP_ERR_NOT_SUPPORTED },
+    { ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES, NCP_ERR_MAX_CHILD_PROCESSES_REACHED },
+    { ChildProcessManagerErrorCode::ERR_LIB_LOADING_FAILED, NCP_ERR_LIB_LOADING_FAILED },
+    { ChildProcessManagerErrorCode::ERR_CONNECTION_FAILED, NCP_ERR_CONNECTION_FAILED },
+    { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW, NCP_ERR_MULTI_PROCESS_DISABLED },
+};
+
 class ChildProcessManagerErrorUtil {
 public:
     static AbilityErrorCode GetAbilityErrorCode(const ChildProcessManagerErrorCode &internalErrCode);
     static ChildProcessManagerErrorCode GetChildProcessManagerErrorCode(int32_t abilityManagerErrorCode);
+
+    static Ability_NativeChildProcess_ErrCode CvtChildProcessManagerErrCode(ChildProcessManagerErrorCode cpmErr);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

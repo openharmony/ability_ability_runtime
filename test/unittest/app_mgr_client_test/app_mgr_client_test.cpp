@@ -285,6 +285,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRenderProcesses_001, TestSize.Leve
     TAG_LOGI(AAFwkTag::TEST, "GetAllRenderProcesses_001 end");
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: AppMgrClient_GetAllChildrenProcesses_001
  * @tc.desc: get all children processes.
@@ -301,6 +302,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllChildrenProcesses_001, TestSize.Le
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
     TAG_LOGI(AAFwkTag::TEST, "GetAllChildrenProcesses_001 end");
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /**
  * @tc.name: AppMgrClient_GetRenderProcessTerminationStatus_001

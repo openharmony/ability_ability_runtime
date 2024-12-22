@@ -1036,6 +1036,7 @@ HWTEST_F(AppMgrServiceInnerTest, GetAllRenderProcesses_001, TestSize.Level0)
     appMgrServiceInner->GetAllRenderProcesses(info);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: GetAllChildrenProcesses_001
  * @tc.desc: get all children processes.
@@ -1050,6 +1051,7 @@ HWTEST_F(AppMgrServiceInnerTest, GetAllChildrenProcesses_001, TestSize.Level0)
     auto result = appMgrServiceInner->GetAllChildrenProcesses(info);
     EXPECT_EQ(result, ERR_OK);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /**
  * @tc.name: NotifyMemoryLevel_001

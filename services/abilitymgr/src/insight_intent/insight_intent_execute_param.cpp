@@ -39,6 +39,8 @@ bool InsightIntentExecuteParam::ReadFromParcel(Parcel &parcel)
     executeMode_ = parcel.ReadInt32();
     insightIntentId_ = parcel.ReadUint64();
     displayId_ = parcel.ReadInt32();
+    parcel.ReadStringVector(&uris_);
+    flags_ = parcel.ReadInt32();
     return true;
 }
 
@@ -66,6 +68,8 @@ bool InsightIntentExecuteParam::Marshalling(Parcel &parcel) const
     parcel.WriteInt32(executeMode_);
     parcel.WriteUint64(insightIntentId_);
     parcel.WriteInt32(displayId_);
+    parcel.WriteStringVector(uris_);
+    parcel.WriteInt32(flags_);
     return true;
 }
 
@@ -104,6 +108,8 @@ bool InsightIntentExecuteParam::GenerateFromWant(const AAFwk::Want &want,
     auto insightIntentParam = wantParams.GetWantParams(INSIGHT_INTENT_EXECUTE_PARAM_PARAM);
     UpdateInsightIntentCallerInfo(wantParams, insightIntentParam);
     executeParam.insightIntentParam_ = std::make_shared<WantParams>(insightIntentParam);
+    executeParam.uris_ = want.GetStringArrayParam(INSIGHT_INTENT_EXECUTE_PARAM_URI);
+    executeParam.flags_ = wantParams.GetIntParam(INSIGHT_INTENT_EXECUTE_PARAM_FLAGS, 0);
 
     return true;
 }
@@ -125,6 +131,12 @@ bool InsightIntentExecuteParam::RemoveInsightIntent(AAFwk::Want &want)
     }
     if (want.HasParameter(INSIGHT_INTENT_SRC_ENTRY)) {
         want.RemoveParam(INSIGHT_INTENT_SRC_ENTRY);
+    }
+    if (want.HasParameter(INSIGHT_INTENT_EXECUTE_PARAM_URI)) {
+        want.RemoveParam(INSIGHT_INTENT_EXECUTE_PARAM_URI);
+    }
+    if (want.HasParameter(INSIGHT_INTENT_EXECUTE_PARAM_FLAGS)) {
+        want.RemoveParam(INSIGHT_INTENT_EXECUTE_PARAM_FLAGS);
     }
     return true;
 }

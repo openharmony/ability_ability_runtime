@@ -79,7 +79,9 @@
 #include "system_ability_definition.h"
 #include "time_util.h"
 #include "ui_extension_utils.h"
+#ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
+#endif // SUPPORT_UPMS
 #include "user_record_manager.h"
 #ifdef APP_MGR_SERVICE_APPMS
 #include "net_conn_client.h"
@@ -1455,8 +1457,10 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     }
 
     KillRenderProcess(appRecord);
+#ifdef SUPPORT_CHILD_PROCESS
     KillChildProcess(appRecord);
     KillAttachedChildProcess(appRecord);
+#endif // SUPPORT_CHILD_PROCESS
     appRecord->SetState(ApplicationState::APP_STATE_TERMINATED);
     appRecord->RemoveAppDeathRecipient();
     appRecord->SetProcessChangeReason(ProcessChangeReason::REASON_APP_TERMINATED);
@@ -1957,10 +1961,12 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
         return ERR_INVALID_OPERATION;
     }
     // 5.revoke uri permission rights
+#ifdef SUPPORT_UPMS
     auto ret = IN_PROCESS_CALL(AAFwk::UriPermissionManagerClient::GetInstance().RevokeAllUriPermissions(tokenId));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "revoke all uri permissions fail");
     }
+#endif // SUPPORT_UPMS
     auto dataMgr = OHOS::DistributedKv::DistributedDataMgr();
     auto dataRet = dataMgr.ClearAppStorage(bundleName, userId, appCloneIndex, tokenId);
     if (dataRet != 0) {
@@ -2069,7 +2075,9 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
         if (GetUserIdByUid(appRecord->GetUid()) != currentUserId_) {
             continue;
         }
+#ifdef SUPPORT_CHILD_PROCESS
         GetRunningCloneAppInfo(appRecord, info);
+#endif // SUPPORT_CHILD_PROCESS
     }
     return ERR_OK;
 }
@@ -2155,6 +2163,7 @@ int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleNameInner(const std
     return ERR_OK;
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
     RunningMultiAppInfo &info)
 {
@@ -2166,6 +2175,7 @@ void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunning
         GetMultiInstanceInfo(appRecord, info);
     }
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 bool AppMgrServiceInner::CheckAppRecordAndPriorityObject(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
@@ -2180,6 +2190,7 @@ bool AppMgrServiceInner::CheckAppRecordAndPriorityObject(const std::shared_ptr<A
     return true;
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 void AppMgrServiceInner::GetAppCloneInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
     RunningMultiAppInfo &info)
 {
@@ -2241,6 +2252,7 @@ void AppMgrServiceInner::GetMultiInstanceInfo(const std::shared_ptr<AppRunningRe
     }
     info.runningMultiIntanceInfos.emplace_back(instanceInfo);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 void AppMgrServiceInner::GetRunningMultiInstanceKeys(const std::shared_ptr<AppRunningRecord> &appRecord,
     std::vector<std::string> &instanceKeys)
@@ -2323,6 +2335,7 @@ int32_t AppMgrServiceInner::GetAllRenderProcesses(std::vector<RenderProcessInfo>
     return ERR_OK;
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 int AppMgrServiceInner::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
 {
     auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
@@ -2345,6 +2358,7 @@ int AppMgrServiceInner::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &i
     }
     return ERR_OK;
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 int32_t AppMgrServiceInner::NotifyMemoryLevel(int32_t level)
 {
@@ -2482,6 +2496,7 @@ void AppMgrServiceInner::GetRenderProcesses(const std::shared_ptr<AppRunningReco
     }
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 void AppMgrServiceInner::GetChildrenProcesses(const std::shared_ptr<AppRunningRecord> &appRecord,
     std::vector<ChildProcessInfo> &info)
 {
@@ -2505,6 +2520,7 @@ void AppMgrServiceInner::GetChildrenProcesses(const std::shared_ptr<AppRunningRe
         }
     }
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string& reason)
 {
@@ -3486,6 +3502,7 @@ void AppMgrServiceInner::SetAppInfo(const BundleInfo &bundleInfo, AppSpawnStartM
     startMsg.apl = bundleInfo.applicationInfo.appPrivilegeLevel;
     startMsg.ownerId = bundleInfo.signatureInfo.appIdentifier;
     startMsg.provisionType = bundleInfo.applicationInfo.appProvisionType;
+#ifdef SUPPORT_CHILD_PROCESS
     if (bundleInfo.applicationInfo.apiTargetVersion % API_VERSION_MOD < API15) {
         startMsg.maxChildProcess = 0;
     } else {
@@ -3493,6 +3510,7 @@ void AppMgrServiceInner::SetAppInfo(const BundleInfo &bundleInfo, AppSpawnStartM
             startMsg.maxChildProcess = bundleInfo.applicationInfo.maxChildProcess;
         }
     }
+#endif // SUPPORT_CHILD_PROCESS
     startMsg.setAllowInternet = setAllowInternet;
     startMsg.allowInternet = allowInternet;
     startMsg.gids = gids;
@@ -3563,6 +3581,7 @@ int32_t AppMgrServiceInner::CreateStartMsg(const std::string &processName, uint3
     return ERR_OK;
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 void AppMgrServiceInner::PresetMaxChildProcess(std::shared_ptr<AppRunningRecord> appRecord, int32_t &maxChildProcess)
 {
     ProcessType processType = appRecord->GetProcessType();
@@ -3572,6 +3591,7 @@ void AppMgrServiceInner::PresetMaxChildProcess(std::shared_ptr<AppRunningRecord>
         maxChildProcess = 1;
     }
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 void AppMgrServiceInner::QueryExtensionSandBox(const std::string &moduleName, const std::string &abilityName,
     const BundleInfo &bundleInfo, AppSpawnStartMsg &startMsg, DataGroupInfoList &dataGroupInfoList, bool strictMode,
@@ -3643,7 +3663,9 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     AppSpawnStartMsg startMsg;
     auto appInfo = appRecord->GetApplicationInfo();
     auto bundleType = appInfo ? appInfo->bundleType : BundleType::APP;
+#ifdef SUPPORT_CHILD_PROCESS
     PresetMaxChildProcess(appRecord, startMsg.maxChildProcess);
+#endif // SUPPORT_CHILD_PROCESS
     auto ret = CreateStartMsg(processName, startFlags, uid, bundleInfo, bundleIndex, bundleType, startMsg, want,
         moduleName, abilityName, strictMode);
     if (ret != ERR_OK) {
@@ -3890,10 +3912,12 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
         OnRenderRemoteDied(remote);
         return;
     }
+#ifdef SUPPORT_CHILD_PROCESS
     if (isChildProcess) {
         OnChildProcessRemoteDied(remote);
         return;
     }
+#endif // SUPPORT_CHILD_PROCESS
 
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     {
@@ -3940,8 +3964,10 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
 
     // kill render if exist.
     KillRenderProcess(appRecord);
+#ifdef SUPPORT_CHILD_PROCESS
     KillChildProcess(appRecord);
     KillAttachedChildProcess(appRecord);
+#endif // SUPPORT_CHILD_PROCESS
 
     SendProcessExitEvent(appRecord);
 
@@ -5350,8 +5376,8 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
             }
         }
     }
-    appRecord->SetIsGPU(isGPU);
-    int32_t childNumLimit = appRecord->GetIsGPU() ? PHONE_MAX_RENDER_PROCESS_NUM + 1 : PHONE_MAX_RENDER_PROCESS_NUM;
+    appRecord->SetHasGPU(isGPU);
+    int32_t childNumLimit = appRecord->HasGPU() ? PHONE_MAX_RENDER_PROCESS_NUM + 1 : PHONE_MAX_RENDER_PROCESS_NUM;
     // The phone device allows a maximum of 40 render processes to be created.
     if (AAFwk::AppUtils::GetInstance().IsLimitMaximumOfRenderProcess() &&
         renderRecordMap.size() >= static_cast<uint32_t>(childNumLimit)) {
@@ -5409,7 +5435,7 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
 
     TAG_LOGI(AAFwkTag::APPMGR, "attachRenderProcess_%{public}d, notify fd", pid);
     // notify fd to render process
-    if (appRecord->GetBrowserHost() != nullptr && appRecord->GetIsGPU()) {
+    if (appRecord->GetBrowserHost() != nullptr && renderRecord->GetProcessType() == ProcessType::GPU) {
         TAG_LOGD(AAFwkTag::APPMGR, "GPU has host remote object");
         scheduler->NotifyBrowserFd(renderRecord->GetIpcFd(),
             renderRecord->GetSharedFd(), renderRecord->GetCrashFd(), appRecord->GetBrowserHost());
@@ -5509,6 +5535,7 @@ int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecor
     renderPid = pid;
     renderRecord->SetPid(pid);
     renderRecord->SetUid(renderUid);
+    renderRecord->SetProcessName(startMsg.procName);
     if (isGPU) {
         renderRecord->SetProcessType(ProcessType::GPU);
         appRecord->SetGPUPid(pid);
@@ -7249,6 +7276,7 @@ int32_t AppMgrServiceInner::UnregisterAppRunningStatusListener(const sptr<IRemot
     return appRunningStatusModule_->UnregisterListener(appRunningStatusListener);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 int32_t AppMgrServiceInner::StartChildProcess(const pid_t callingPid, pid_t &childPid,
     const ChildProcessRequest &request)
 {
@@ -7587,6 +7615,7 @@ void AppMgrServiceInner::KillAttachedChildProcess(const std::shared_ptr<AppRunni
         KillProcessByPid(pid, "KillAttachedChildProcess");
     }
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 int AppMgrServiceInner::DumpIpcAllStart(std::string& result)
 {
@@ -8197,6 +8226,7 @@ void AppMgrServiceInner::OnAppCacheStateChanged(const std::shared_ptr<AppRunning
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnAppCacheStateChanged(appRecord, state);
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const std::string &libName,
     int32_t childProcessCount, const sptr<IRemoteObject> &callback)
 {
@@ -8248,6 +8278,7 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     ChildProcessOptions options;
     return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, args, options);
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 void AppMgrServiceInner::CacheLoadAbilityTask(const LoadAbilityTaskFunc&& func)
 {
@@ -8446,7 +8477,7 @@ bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) co
 void AppMgrServiceInner::GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids)
 {
     int32_t result = ERR_OK;
-    pid_t foregroundPid = -1;
+    std::vector<pid_t> foregroundPids;
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
         if (!appRecord->GetSpawned()) {
@@ -8459,13 +8490,13 @@ void AppMgrServiceInner::GetPidsByAccessTokenId(const uint32_t accessTokenId, st
         if (accessTokenId == applicationInfo->accessTokenId) {
             pid_t curPid = appRecord->GetPid();
             if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND) {
-                foregroundPid = curPid;
+                foregroundPids.push_back(curPid);
                 continue;
             }
             pids.push_back(curPid);
         }
     }
-    if (foregroundPid >= 0) {
+    for (pid_t foregroundPid : foregroundPids) {
         pids.push_back(foregroundPid);
     }
 }

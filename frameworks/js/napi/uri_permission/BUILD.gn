@@ -27,7 +27,6 @@ ohos_shared_library("uripermissionmanager_napi") {
   deps = [
     "${ability_runtime_innerkits_path}/error_utils:ability_runtime_error_util",
     "${ability_runtime_innerkits_path}/runtime:runtime",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
   ]
@@ -48,6 +47,11 @@ ohos_shared_library("uripermissionmanager_napi") {
 
   if (!ability_runtime_graphics) {
     external_deps += [ "ipc:ipc_core" ]
+  }
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    ]
   }
 
   cflags_cc = []

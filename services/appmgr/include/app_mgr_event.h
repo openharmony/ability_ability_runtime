@@ -18,7 +18,9 @@
 
 #include "ability_info.h"
 #include "app_running_record.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_record.h"
+#endif // SUPPORT_CHILD_PROCESS
 #include "event_report.h"
 
 namespace OHOS {
@@ -44,8 +46,10 @@ public:
     static bool SendProcessStartFailedEvent(std::shared_ptr<AppRunningRecord> callerAppRecord,
         std::shared_ptr<AppRunningRecord> appRecord, AAFwk::EventInfo &eventInfo);
 
+#ifdef SUPPORT_CHILD_PROCESS
     static bool SendChildProcessStartFailedEvent(std::shared_ptr<ChildProcessRecord> childRecord,
         ProcessStartFailedReason reason, int32_t subReason);
+#endif // SUPPORT_CHILD_PROCESS
 
     static bool SendRenderProcessStartFailedEvent(std::shared_ptr<RenderRecord> renderRecord,
         ProcessStartFailedReason reason, int32_t subReason);

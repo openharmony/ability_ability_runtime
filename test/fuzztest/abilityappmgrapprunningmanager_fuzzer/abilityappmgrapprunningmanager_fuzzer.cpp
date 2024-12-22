@@ -21,7 +21,9 @@
 
 #define private public
 #include "app_running_manager.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_record.h"
+#endif // SUPPORT_CHILD_PROCESS
 #include "app_running_record.h"
 #undef private
 #include "securec.h"
@@ -127,9 +129,13 @@ void DoSomethingInterestingWithMyAPIaddb(const char* data, size_t size)
     std::vector<sptr<IRemoteObject>> abilityTokens;
     manager->GetAbilityTokensByBundleName(jsonStr, abilityTokens);
     pid_t pidApps = static_cast<pid_t>(GetU32Data(data));
+#ifdef SUPPORT_CHILD_PROCESS
     manager->GetAppRunningRecordByChildProcessPid(pidApps);
+#endif // SUPPORT_CHILD_PROCESS
     wptr<IRemoteObject> remote;
+#ifdef SUPPORT_CHILD_PROCESS
     manager->OnChildProcessRemoteDied(remote);
+#endif // SUPPORT_CHILD_PROCESS
     manager->GetAllAppRunningRecordCountByBundleName(jsonStr);
     auto uid = static_cast<int32_t>(GetU32Data(data));
     manager->SignRestartAppFlag(uid, jsonStr);

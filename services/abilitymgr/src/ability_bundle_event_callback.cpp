@@ -18,7 +18,9 @@
 #include "ability_manager_service.h"
 #include "ability_util.h"
 #include "parameters.h"
+#ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
+#endif // SUPPORT_UPMS
 
 namespace OHOS {
 namespace AAFwk {
@@ -84,10 +86,12 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
 void AbilityBundleEventCallback::HandleRemoveUriPermission(uint32_t tokenId)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "HandleRemoveUriPermission: %{public}i", tokenId);
+#ifdef SUPPORT_UPMS
     auto ret = IN_PROCESS_CALL(AAFwk::UriPermissionManagerClient::GetInstance().RevokeAllUriPermissions(tokenId));
     if (!ret) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Revoke all uri permissions failed.");
     }
+#endif // SUPPORT_UPMS
 }
 
 void AbilityBundleEventCallback::HandleUpdatedModuleInfo(const std::string &bundleName, int32_t uid)

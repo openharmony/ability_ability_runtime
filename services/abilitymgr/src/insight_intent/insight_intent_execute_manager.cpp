@@ -15,6 +15,7 @@
 
 #include "insight_intent_execute_manager.h"
 
+#include "ability_config.h"
 #include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_execute_callback_interface.h"
@@ -49,7 +50,7 @@ InsightIntentExecuteManager::InsightIntentExecuteManager() = default;
 InsightIntentExecuteManager::~InsightIntentExecuteManager() = default;
 
 int32_t InsightIntentExecuteManager::CheckAndUpdateParam(uint64_t key, const sptr<IRemoteObject> &callerToken,
-    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param)
+    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, std::string callerBundleName)
 {
     int32_t result = CheckCallerPermission();
     if (result != ERR_OK) {
@@ -69,7 +70,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateParam(uint64_t key, const spt
         return ERR_INVALID_VALUE;
     }
     uint64_t intentId = 0;
-    result = AddRecord(key, callerToken, param->bundleName_, intentId);
+    result = AddRecord(key, callerToken, param->bundleName_, intentId, callerBundleName);
     if (result != ERR_OK) {
         return result;
     }
@@ -78,15 +79,24 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateParam(uint64_t key, const spt
     return ERR_OK;
 }
 
-int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode executeMode)
+int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode executeMode,
+    std::string callerBundleName)
 {
+    auto uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
+    auto uriVecTemp = want.GetStringArrayParam(INSIGHT_INTENT_EXECUTE_PARAM_URI);
+    uriVec.insert(uriVec.begin(), uriVecTemp.begin(), uriVecTemp.end());
+    want.SetParam(AbilityConfig::PARAMS_STREAM, uriVec);
+    auto myflags = want.GetIntParam(INSIGHT_INTENT_EXECUTE_PARAM_FLAGS, 0);
+    myflags |= want.GetFlags();
+    want.SetFlags(myflags);
+
     int32_t result = IsValidCall(want);
     if (result != ERR_OK) {
         return result;
     }
     uint64_t intentId = 0;
     ElementName elementName = want.GetElement();
-    result = AddRecord(0, nullptr, want.GetBundle(), intentId);
+    result = AddRecord(0, nullptr, want.GetBundle(), intentId, callerBundleName);
     if (result != ERR_OK) {
         return result;
     }
@@ -106,7 +116,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
 }
 
 int32_t InsightIntentExecuteManager::AddRecord(uint64_t key, const sptr<IRemoteObject> &callerToken,
-    const std::string &bundleName, uint64_t &intentId)
+    const std::string &bundleName, uint64_t &intentId, const std::string &callerBundleName)
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
     intentId = ++intentIdCount_;
@@ -115,6 +125,7 @@ int32_t InsightIntentExecuteManager::AddRecord(uint64_t key, const sptr<IRemoteO
     record->state = InsightIntentExecuteState::EXECUTING;
     record->callerToken = callerToken;
     record->bundleName = bundleName;
+    record->callerBundleName = callerBundleName;
     if (callerToken != nullptr) {
         record->deathRecipient = sptr<InsightIntentExecuteRecipient>::MakeSptr(intentId);
         callerToken->AddDeathRecipient(record->deathRecipient);
@@ -206,6 +217,44 @@ int32_t InsightIntentExecuteManager::GetBundleName(uint64_t intentId, std::strin
     return ERR_OK;
 }
 
+int32_t InsightIntentExecuteManager::GetCallerBundleName(uint64_t intentId, std::string &callerBundleName) const
+{
+    std::lock_guard<ffrt::mutex> lock(mutex_);
+    auto result = records_.find(intentId);
+    if (result == records_.end()) {
+        TAG_LOGE(AAFwkTag::INTENT, "intent not found, id: %{public}" PRIu64, intentId);
+        return ERR_INVALID_VALUE;
+    }
+    if (result->second == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null intent record,id: %{public}" PRIu64, intentId);
+        return ERR_INVALID_VALUE;
+    }
+    callerBundleName = result->second->callerBundleName;
+    return ERR_OK;
+}
+
+int32_t InsightIntentExecuteManager::AddWantUirsAndFlagsFromParam(
+    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, Want &want)
+{
+    if (param == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null param");
+        return ERR_INVALID_VALUE;
+    }
+    if (param->uris_.size() > 0) {
+        auto uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
+        for (auto &uri : param->uris_) {
+            if (!uri.empty()) {
+                uriVec.insert(uriVec.begin(), uri);
+            }
+        }
+        want.SetParam(AbilityConfig::PARAMS_STREAM, uriVec);
+        auto flags = want.GetFlags();
+        flags |= param->flags_;
+        want.SetFlags(flags);
+    }
+    return ERR_OK;
+}
+
 int32_t InsightIntentExecuteManager::GenerateWant(
     const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, Want &want)
 {
@@ -248,7 +297,8 @@ int32_t InsightIntentExecuteManager::GenerateWant(
         want.SetParam(Want::PARAM_RESV_DISPLAY_ID, param->displayId_);
         TAG_LOGD(AAFwkTag::INTENT, "Generate want with displayId: %{public}d", param->displayId_);
     }
-    return ERR_OK;
+
+    return AddWantUirsAndFlagsFromParam(param, want);
 }
 
 int32_t InsightIntentExecuteManager::IsValidCall(const Want &want)

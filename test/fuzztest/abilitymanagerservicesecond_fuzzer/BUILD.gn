@@ -46,7 +46,6 @@ ohos_fuzztest("AbilityManagerServiceSecondFuzzTest") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/ability_manager:mission_info",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/abilitymgr:wantagent_manager",
@@ -100,6 +99,11 @@ ohos_fuzztest("AbilityManagerServiceSecondFuzzTest") {
     defines += [
       "SUPPORT_GRAPHICS",
       "SUPPORT_SCREEN",
+    ]
+  }
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     ]
   }
   if (background_task_mgr_continuous_task_enable) {

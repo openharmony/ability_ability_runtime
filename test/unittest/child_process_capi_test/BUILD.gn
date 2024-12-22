@@ -33,7 +33,6 @@ ohos_unittest("child_process_capi_test") {
   sources = [ "child_process_capi_test.cpp" ]
 
   deps = [
-    "${ability_runtime_native_path}/child_process:child_process",
     "${ability_runtime_services_path}/common:app_util",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -44,6 +43,10 @@ ohos_unittest("child_process_capi_test") {
     "hilog:libhilog",
     "ipc:ipc_capi",
   ]
+
+  if (ability_runtime_child_process) {
+    deps += [ "${ability_runtime_native_path}/child_process:child_process" ]
+  }
 }
 
 group("unittest") {

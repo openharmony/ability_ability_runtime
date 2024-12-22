@@ -122,6 +122,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     UpdateAbilityRecordLaunchReason(abilityRequest, uiAbilityRecord);
     NotifyAbilityToken(uiAbilityRecord->GetToken(), abilityRequest);
     if (HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag)) {
+        AddCallerRecord(abilityRequest, sessionInfo, uiAbilityRecord);
         return ERR_OK;
     }
 
@@ -867,6 +868,11 @@ void UIAbilityLifecycleManager::UpdateAbilityRecordLaunchReason(
         return;
     }
 
+    std::string value = abilityRequest.want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+    if (!value.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "set launchReasonMessage:%{public}s", value.c_str());
+        abilityRecord->SetLaunchReasonMessage(value);
+    }
     if (abilityRequest.IsAppRecovery() || abilityRecord->GetRecoveryInfo()) {
         abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_APP_RECOVERY);
         return;
@@ -1032,6 +1038,16 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
     }
     uiAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
     uiAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
+
+    if (InsightIntentExecuteParam::IsInsightIntentExecute(abilityRequest.want)) {
+        uiAbilityRecord->GrantUriPermission();
+    }
+
+    std::string value = abilityRequest.want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+    if (!value.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "set launchReasonMessage:%{public}s", value.c_str());
+        uiAbilityRecord->SetLaunchReasonMessage(value);
+    }
     NotifyAbilityToken(uiAbilityRecord->GetToken(), abilityRequest);
 
     // new version started by call type

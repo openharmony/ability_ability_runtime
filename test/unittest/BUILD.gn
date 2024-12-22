@@ -94,6 +94,10 @@ ohos_source_set("appmgr_test_source") {
     "kv_store:distributeddata_mgr",
   ]
 
+  if (ability_runtime_child_process) {
+    defines = [ "SUPPORT_CHILD_PROCESS" ]
+  }
+
   public_external_deps = [ "c_utils:utils" ]
 
   subsystem_name = "ability"
@@ -175,7 +179,6 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_services_path}/abilitymgr/src/task_data_persistence_mgr.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension_record/ui_extension_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension_record/ui_extension_record_factory.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/uri_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_controller.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_event_handler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/ability_event_util.cpp",
@@ -221,7 +224,6 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/connectionobs_manager:connection_obs_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
@@ -272,6 +274,9 @@ ohos_source_set("abilityms_test_source") {
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
   }
+  if (ability_runtime_child_process) {
+    defines = [ "SUPPORT_CHILD_PROCESS" ]
+  }
 
   if (ability_runtime_graphics) {
     sources += [
@@ -304,6 +309,14 @@ ohos_source_set("abilityms_test_source") {
       "window_manager:libwm",
       "window_manager:libwsutils",
       "window_manager:sms",
+    ]
+  }
+  if (ability_runtime_upms) {
+    sources +=
+        [ "${ability_runtime_services_path}/abilitymgr/src/uri_utils.cpp" ]
+
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     ]
   }
 
@@ -450,9 +463,6 @@ group("unittest") {
       "cache_process_manager_test:unittest",
       "call_record_test:unittest",
       "capi_ability_runtime_application_context_test:unittest",
-      "child_process_capi_test:unittest",
-      "child_process_manager_second_test:unittest",
-      "child_process_manager_test:unittest",
       "cj_ability_connect_callback_object_test:unittest",
       "cj_ability_context_object_test:unittest",
       "cj_ability_delegator_test:unittest",
@@ -511,7 +521,6 @@ group("unittest") {
       "extension_record_test:unittest",
       "fault_data:unittest",
       "file_path_utils_test:unittest",
-      "file_permission_manager_test:unittest",
       "frameworks_kits_ability_ability_runtime_test:unittest",
       "frameworks_kits_ability_native_test:unittest",
       "frameworks_kits_appkit_native_test:unittest",
@@ -523,17 +532,9 @@ group("unittest") {
       "insight_intent:unittest",
       "insight_intent_profile_test:unittest",
       "js_ability_context_test:unittest",
-      "js_photo_editor_extension_context_test:unittest",
-      "js_photo_editor_extension_impl_test:unittest",
       "js_service_extension_test:unittest",
       "js_ui_extension_content_session_test:unittest",
       "js_ui_extension_context_test:unittest",
-      "js_ui_service_extension_connection_test:unittest",
-      "js_ui_service_extension_context_first_test:unittest",
-      "js_ui_service_extension_context_second_test:unittest",
-      "js_ui_service_extension_test:unittest",
-      "js_ui_service_host_proxy_test:unittest",
-      "js_ui_service_proxy_test:unittest",
       "js_uiservice_uiext_connection_test:unittest",
       "keep_alive_process_manager_test:unittest",
       "lifecycle_deal_test:unittest",
@@ -557,8 +558,6 @@ group("unittest") {
       "pending_want_record_test:unittest",
       "pending_want_test:unittest",
       "permission_verification_test:unittest",
-      "photo_editor_extension_a_test:unittest",
-      "photo_editor_extension_test:unittest",
       "preload_uiext_state_observer_test:unittest",
       "prepare_terminate_callback_proxy_test:unittest",
       "quick_fix:unittest",
@@ -594,17 +593,8 @@ group("unittest") {
       "ui_extension_record_factory_test:unittest",
       "ui_extension_record_test:unittest",
       "ui_extension_utils_test:unittest",
-      "ui_service_extension_test:unittest",
-      "ui_service_host_proxy_test:unittest",
-      "ui_service_host_stub_test:unittest",
-      "ui_service_proxy_test:unittest",
-      "ui_service_stub_test:unittest",
       "unlock_screen_test:unittest",
       "update_caller_info_util_test:unittest",
-      "uri_perm_mgr_test:unittest",
-      "uri_permission_manager_test:unittest",
-      "uri_permission_test:unittest",
-      "uri_permission_utils_test:unittest",
       "user_controller_test:unittest",
       "user_event_handler_test:unittest",
       "user_record_manager_test:unittest",
@@ -632,9 +622,40 @@ group("unittest") {
         "js_auto_fill_extension_test:unittest",
       ]
     }
+    if (ability_runtime_child_process) {
+      deps += [
+        "child_process_capi_test:unittest",
+        "child_process_manager_second_test:unittest",
+        "child_process_manager_test:unittest",
+      ]
+    }
 
-    if (ability_runtime_feature_sandboxmanager) {
+    if (ability_runtime_photo_editor_extension) {
+      deps += [
+        "js_photo_editor_extension_context_test:unittest",
+        "js_photo_editor_extension_impl_test:unittest",
+        "photo_editor_extension_a_test:unittest",
+        "photo_editor_extension_test:unittest",
+      ]
+    }
+
+    if (ability_runtime_feature_sandboxmanager && ability_runtime_upms) {
       deps += [ "uri_permission_impl_test:unittest" ]
+    }
+    if (ability_runtime_ui_service_extension) {
+      deps += [
+        "js_ui_service_extension_connection_test:unittest",
+        "js_ui_service_extension_context_first_test:unittest",
+        "js_ui_service_extension_context_second_test:unittest",
+        "js_ui_service_extension_test:unittest",
+        "js_ui_service_host_proxy_test:unittest",
+        "js_ui_service_proxy_test:unittest",
+        "ui_service_extension_test:unittest",
+        "ui_service_host_proxy_test:unittest",
+        "ui_service_host_stub_test:unittest",
+        "ui_service_proxy_test:unittest",
+        "ui_service_stub_test:unittest",
+      ]
     }
 
     if (ability_runtime_graphics) {
@@ -653,6 +674,16 @@ group("unittest") {
         "start_option_display_id_test:unittest",
         "status_bar_delegate_manager_test:unittest",
         "ui_ability_lifecycle_manager_test:unittest",
+      ]
+    }
+
+    if (ability_runtime_upms) {
+      deps += [
+        "file_permission_manager_test:unittest",
+        "uri_perm_mgr_test:unittest",
+        "uri_permission_manager_test:unittest",
+        "uri_permission_test:unittest",
+        "uri_permission_utils_test:unittest",
       ]
     }
 

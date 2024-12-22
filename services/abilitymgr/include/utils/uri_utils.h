@@ -37,10 +37,13 @@ public:
 
     bool GetUriListFromWant(Want &want, std::vector<std::string> &uriVec);
 
+#ifdef SUPPORT_UPMS
     bool IsGrantUriPermissionFlag(const Want &want);
+#endif // SUPPORT_UPMS
 
     bool IsServiceExtensionType(AppExecFwk::ExtensionAbilityType extensionAbilityType);
 
+#ifdef SUPPORT_UPMS
     void GrantDmsUriPermission(Want &want, uint32_t callerTokenId, std::string targetBundleName, int32_t appIndex);
 
     void GrantUriPermissionForServiceExtension(const AbilityRequest &abilityRequest);
@@ -51,15 +54,21 @@ public:
         bool isSandboxApp, uint32_t callerTokenId, int32_t collaboratorType);
 
     void CheckUriPermission(uint32_t callerTokenId, Want &want);
+
+    void GrantUriPermission(const std::vector<std::string> &uriVec, int32_t flag,
+        const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId);
+#endif // SUPPORT_UPMS
 private:
     UriUtils();
     ~UriUtils();
 
+#ifdef SUPPORT_UPMS
     bool GrantShellUriPermission(const std::vector<std::string> &strUriVec, uint32_t flag,
         const std::string &targetPkg, int32_t appIndex);
     
     bool GrantUriPermissionInner(std::vector<std::string> uriVec, uint32_t callerTokenId,
         const std::string &targetBundleName, int32_t appIndex, Want &want);
+#endif // SUPPORT_UPMS
 
     bool IsDmsCall(uint32_t fromTokenId);
 

@@ -30,14 +30,7 @@ ohos_shared_library("child_process_manager") {
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
   public_configs = [ ":child_process_manager_config" ]
 
-  sources = [
-    "${ability_runtime_native_path}/ability/native/child_process_manager/child_process.cpp",
-    "${ability_runtime_native_path}/ability/native/child_process_manager/child_process_manager.cpp",
-    "${ability_runtime_native_path}/ability/native/child_process_manager/child_process_manager_error_utils.cpp",
-    "${ability_runtime_native_path}/ability/native/child_process_manager/js_child_process.cpp",
-    "${ability_runtime_native_path}/ability/native/child_process_manager/native_args_child_process.cpp",
-    "${ability_runtime_native_path}/ability/native/child_process_manager/native_child_ipc_process.cpp",
-  ]
+  sources = []
 
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
@@ -62,6 +55,17 @@ ohos_shared_library("child_process_manager") {
   ]
 
   defines = []
+  if (ability_runtime_child_process) {
+    defines += [ "SUPPORT_CHILD_PROCESS" ]
+    sources += [
+      "${ability_runtime_native_path}/ability/native/child_process_manager/child_process.cpp",
+      "${ability_runtime_native_path}/ability/native/child_process_manager/child_process_manager.cpp",
+      "${ability_runtime_native_path}/ability/native/child_process_manager/child_process_manager_error_utils.cpp",
+      "${ability_runtime_native_path}/ability/native/child_process_manager/js_child_process.cpp",
+      "${ability_runtime_native_path}/ability/native/child_process_manager/native_args_child_process.cpp",
+      "${ability_runtime_native_path}/ability/native/child_process_manager/native_child_ipc_process.cpp",
+    ]
+  }
   if (background_task_mgr_continuous_task_enable) {
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }

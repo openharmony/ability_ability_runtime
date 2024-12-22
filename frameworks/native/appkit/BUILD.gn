@@ -118,7 +118,6 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit/app/application_impl.cpp",
     "${ability_runtime_native_path}/appkit/app/assert_fault_callback.cpp",
     "${ability_runtime_native_path}/appkit/app/assert_fault_task_thread.cpp",
-    "${ability_runtime_native_path}/appkit/app/child_main_thread.cpp",
     "${ability_runtime_native_path}/appkit/app/dump_ffrt_helper.cpp",
     "${ability_runtime_native_path}/appkit/app/dump_ipc_helper.cpp",
     "${ability_runtime_native_path}/appkit/app/dump_runtime_helper.cpp",
@@ -154,10 +153,8 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
-    "${ability_runtime_innerkits_path}/child_process_manager:child_process_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_innerkits_path}/runtime:runtime",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
@@ -196,6 +193,7 @@ ohos_shared_library("appkit_native") {
     "hitrace:hitrace_meter",
     "i18n:preferred_language",
     "init:libbegetutil",
+    "ipc:ipc_capi",
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "ipc:ipc_single",
@@ -210,17 +208,32 @@ ohos_shared_library("appkit_native") {
   public_external_deps = [ "ability_base:configuration" ]
 
   defines = []
+  if (ability_runtime_child_process) {
+    defines += [ "SUPPORT_CHILD_PROCESS" ]
+    sources +=
+        [ "${ability_runtime_native_path}/appkit/app/child_main_thread.cpp" ]
+    deps += [ "${ability_runtime_innerkits_path}/child_process_manager:child_process_manager" ]
+  }
+
   if (ability_runtime_graphics) {
     external_deps += [
       "ace_engine:ace_forward_compatibility",
       "graphic_2d:librender_service_client",
       "i18n:intl_util",
       "icu:shared_icuuc",
+      "window_manager:libdm",
       "window_manager:libwm",
       "window_manager:libwsutils",
     ]
 
     defines += [ "NWEB_GRAPHIC" ]
+  }
+
+  if (ability_runtime_upms) {
+    defines += [ "SUPPORT_UPMS" ]
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    ]
   }
 
   if (is_asan || asan_detector) {
