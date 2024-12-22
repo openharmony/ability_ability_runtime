@@ -258,6 +258,7 @@ struct AbilityRequest {
     int callerUid = -1;
     AbilityCallType callType = AbilityCallType::INVALID_TYPE;
     sptr<IRemoteObject> callerToken = nullptr;
+    int32_t callerTokenRecordId = -1;
     sptr<IRemoteObject> asCallerSourceToken = nullptr;
     uint32_t callerAccessTokenId = -1;
     sptr<IAbilityConnection> connect = nullptr;
@@ -281,6 +282,13 @@ struct AbilityRequest {
     std::string reservedBundleName;
     bool isFromIcon = false;
     bool isShellCall = false;
+
+    // ERMS embedded atomic service
+    bool isQueryERMS = false;
+    std::string appId;
+    std::string startTime;
+    bool isEmbeddedAllowed = false;
+
     std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
@@ -988,6 +996,7 @@ public:
     AppState GetAppState() const;
 
     void SetLaunchReason(const LaunchReason &reason);
+    void SetLaunchReasonMessage(const std::string &launchReasonMessage);
     void SetLastExitReason(const ExitReason &exitReason);
     void ContinueAbility(const std::string &deviceId, uint32_t versionCode);
     void NotifyContinuationResult(int32_t result);
@@ -1118,6 +1127,11 @@ public:
 
     void SetDebugUIExtension();
 
+    void GrantUriPermission();
+
+    void GrantUriPermission(const std::vector<std::string> &uriVec, int32_t flag,
+        const std::string &targetBundleName, uint32_t callerTokenId);
+
     inline std::string GetInstanceKey() const
     {
         return instanceKey_;
@@ -1153,7 +1167,9 @@ private:
      */
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
+#ifdef SUPPORT_UPMS
     void GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId);
+#endif // SUPPORT_UPMS
     int32_t GetCurrentAccountId() const;
 
     /**

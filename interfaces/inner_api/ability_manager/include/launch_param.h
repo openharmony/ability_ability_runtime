@@ -72,6 +72,7 @@ enum OnContinueResult {
  */
 struct LaunchParam : public Parcelable {
     LaunchReason launchReason = LaunchReason::LAUNCHREASON_UNKNOWN;
+    std::string launchReasonMessage = "";
     LastExitReason lastExitReason = LastExitReason::LASTEXITREASON_NORMAL;
     std::string lastExitMessage = "";
 

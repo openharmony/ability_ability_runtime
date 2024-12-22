@@ -3336,6 +3336,15 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
     targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
 
+    if (InsightIntentExecuteParam::IsInsightIntentExecute(abilityRequest.want)) {
+        targetAbilityRecord->GrantUriPermission();
+    }
+
+    std::string value = abilityRequest.want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+    if (!value.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "set launchReasonMessage:%{public}s", value.c_str());
+        targetAbilityRecord->SetLaunchReasonMessage(value);
+    }
     // mission is first created, add mission to default call mission list.
     // other keep in current mission list.
     if (!targetMission->GetMissionList()) {
@@ -4015,6 +4024,12 @@ bool MissionListManager::UpdateAbilityRecordLaunchReason(
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "input record null");
         return false;
+    }
+
+    std::string value = abilityRequest.want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+    if (!value.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "set launchReasonMessage:%{public}s", value.c_str());
+        abilityRecord->SetLaunchReasonMessage(value);
     }
 
     if (abilityRequest.IsAppRecovery() || abilityRecord->GetRecoveryInfo()) {

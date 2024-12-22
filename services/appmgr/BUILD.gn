@@ -61,7 +61,6 @@ ohos_shared_library("libappms") {
     "src/app_spawn_client.cpp",
     "src/app_state_observer_manager.cpp",
     "src/cache_process_manager.cpp",
-    "src/child_process_record.cpp",
     "src/exit_resident_process_manager.cpp",
     "src/killing_process_manager.cpp",
     "src/modal_system_app_freeze_uiextension.cpp",
@@ -101,7 +100,6 @@ ohos_shared_library("libappms") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
@@ -152,6 +150,11 @@ ohos_shared_library("libappms") {
     defines += [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
   }
 
+  if (ability_runtime_child_process) {
+    defines += [ "SUPPORT_CHILD_PROCESS" ]
+    sources += [ "src/child_process_record.cpp" ]
+  }
+
   if (ability_runtime_graphics) {
     defines += [
       "SUPPORT_GRAPHICS",
@@ -163,6 +166,12 @@ ohos_shared_library("libappms") {
       "i18n:intl_util",
       "window_manager:libwm",
       "window_manager:libwsutils",
+    ]
+  }
+  if (ability_runtime_upms) {
+    defines += [ "SUPPORT_UPMS" ]
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     ]
   }
   cflags_cc = []

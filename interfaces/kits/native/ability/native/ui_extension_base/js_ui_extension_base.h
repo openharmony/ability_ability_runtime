@@ -19,6 +19,7 @@
 #include "ability_handler.h"
 #include "ability_local_record.h"
 #include "configuration.h"
+#include "insight_intent_executor_info.h"
 #include "js_extension_common.h"
 #include "js_ui_extension_content_session.h"
 #include "native_engine/native_engine.h"
@@ -180,6 +181,8 @@ protected:
     bool CallJsOnSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
         const sptr<Rosen::Window> &uiWindow, const uint64_t &uiExtensionComponentId);
     void OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd);
+    void ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
+        const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo);
     bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
         bool needForeground);
     bool HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
@@ -187,6 +190,7 @@ protected:
         const AppExecFwk::InsightIntentExecuteResult &result);
     void PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &sessionInfo,
         const AppExecFwk::InsightIntentExecuteResult &result, bool needForeground);
+    void ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result);
 
 protected:
     JsRuntime &jsRuntime_;

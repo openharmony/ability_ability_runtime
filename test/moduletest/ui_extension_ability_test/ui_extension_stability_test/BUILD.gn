@@ -63,6 +63,9 @@ ohos_moduletest("ui_extension_stability_test") {
     "selinux_adapter:librestorecon",
     "window_manager:scene_session_manager",
   ]
+  if (ability_runtime_child_process) {
+    defines = [ "SUPPORT_CHILD_PROCESS" ]
+  }
 }
 
 group("moduletest") {

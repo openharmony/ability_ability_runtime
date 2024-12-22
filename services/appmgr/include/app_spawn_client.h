@@ -26,7 +26,9 @@
 
 #include "appexecfwk_errors.h"
 #include "appspawn.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_info.h"
+#endif  // SUPPORT_CHILD_PROCESS
 #include "data_group_info.h"
 #include "nocopyable.h"
 #include "shared/base_shared_bundle_info.h"
@@ -76,7 +78,9 @@ struct AppSpawnStartMsg {
     bool strictMode = false; // whether is strict mode
     std::string processType = "";
     int32_t maxChildProcess = 0;
+#ifdef SUPPORT_CHILD_PROCESS
     int32_t childProcessType = CHILD_PROCESS_TYPE_NOT_CHILD;
+#endif // SUPPORT_CHILD_PROCESS
     std::map<std::string, int32_t> fds;
     bool isolationMode = false;
     JITPermissionsList jitPermissionsList; // list of JIT permissions
@@ -238,7 +242,9 @@ private:
     AppSpawnClientHandle handle_ = nullptr;
     SpawnConnectionState state_ = SpawnConnectionState::STATE_NOT_CONNECT;
 
+#ifdef SUPPORT_CHILD_PROCESS
     int32_t SetChildProcessTypeStartFlag(const AppSpawnReqMsgHandle &reqHandle, int32_t childProcessType);
+#endif  // SUPPORT_CHILD_PROCESS
 
     int32_t SetExtMsgFds(const AppSpawnReqMsgHandle &reqHandle, const std::map<std::string, int32_t> &fds);
 

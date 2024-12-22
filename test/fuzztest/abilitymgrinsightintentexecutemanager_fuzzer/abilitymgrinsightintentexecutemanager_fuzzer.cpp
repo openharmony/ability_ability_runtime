@@ -98,7 +98,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     Minfos->RemoteDied(intentId);
     std::string jsonStr(data, size);
     Minfos->GetBundleName(intentId, jsonStr);
-    Minfos->AddRecord(key, callerToken, jsonStr, intentId);
+    std::string callerBundleName = "com.example.fuzzTest";
+    Minfos->AddRecord(key, callerToken, jsonStr, intentId, callerBundleName);
     Minfos->GenerateWant(paramPtr, want);
     Minfos->IsValidCall(want);
     Minfos->CheckCallerPermission();

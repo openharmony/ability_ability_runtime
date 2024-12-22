@@ -15,8 +15,6 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 module_output_path = "ability_runtime/application_test"
 
-ABILITY_INNERKITS_PATH = "${ability_runtime_innerkits_path}"
-
 ###############################################################################
 config("module_private_config") {
   visibility = [ ":*" ]
@@ -345,7 +343,6 @@ ohos_unittest("overlay_event_subscriber_test") {
   ]
 
   deps = [
-    "${ABILITY_INNERKITS_PATH}/uri_permission:uri_permission_mgr",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
@@ -378,6 +375,11 @@ ohos_unittest("overlay_event_subscriber_test") {
 
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
+  }
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    ]
   }
 }
 
@@ -409,7 +411,6 @@ ohos_unittest("dump_ffrt_helper_test") {
   ]
 
   deps = [
-    "${ABILITY_INNERKITS_PATH}/uri_permission:uri_permission_mgr",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
@@ -442,6 +443,11 @@ ohos_unittest("dump_ffrt_helper_test") {
 
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
+  }
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    ]
   }
 }
 
@@ -528,7 +534,6 @@ ohos_unittest("application_impl_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "${ABILITY_INNERKITS_PATH}/uri_permission:uri_permission_mgr",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
@@ -562,6 +567,11 @@ ohos_unittest("application_impl_test") {
 
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
+  }
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    ]
   }
 }
 

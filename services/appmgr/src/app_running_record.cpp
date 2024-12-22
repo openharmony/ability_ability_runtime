@@ -122,9 +122,9 @@ std::string RenderRecord::GetHostBundleName() const
     return hostBundleName_;
 }
 
-void RenderRecord::SetProcessName(const std::string &hostProcessName)
+void RenderRecord::SetProcessName(const std::string &processName)
 {
-    processName_ = hostProcessName;
+    processName_ = processName;
 }
 
 std::string RenderRecord::GetProcessName() const
@@ -2253,6 +2253,7 @@ ApplicationScheduleState AppRunningRecord::GetApplicationScheduleState() const
     return scheduleState_;
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 void AppRunningRecord::AddChildProcessRecord(pid_t pid, std::shared_ptr<ChildProcessRecord> record)
 {
     if (!record) {
@@ -2304,6 +2305,7 @@ int32_t AppRunningRecord::GetChildProcessCount()
     std::lock_guard lock(childProcessRecordMapLock_);
     return childProcessRecordMap_.size();
 }
+#endif //SUPPORT_CHILD_PROCESS
 
 void AppRunningRecord::SetJITEnabled(const bool jitEnabled)
 {
@@ -2508,16 +2510,16 @@ sptr<IRemoteObject> AppRunningRecord::GetBrowserHost()
     return browserHost_;
 }
 
-void AppRunningRecord::SetIsGPU(bool gpu)
+void AppRunningRecord::SetHasGPU(bool gpu)
 {
     if (gpu) {
-        isGPU_ = gpu;
+        hasGPU_ = gpu;
     }
 }
 
-bool AppRunningRecord::GetIsGPU()
+bool AppRunningRecord::HasGPU()
 {
-    return isGPU_;
+    return hasGPU_;
 }
 
 void AppRunningRecord::SetGPUPid(pid_t gpuPid)

@@ -52,7 +52,6 @@ ohos_fuzztest("CacheProcessManageraFuzzTest") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/appmgr:libappms",
@@ -90,6 +89,11 @@ ohos_fuzztest("CacheProcessManageraFuzzTest") {
     external_deps += [
       "i18n:intl_util",
       "window_manager:libwm",
+    ]
+  }
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     ]
   }
 }

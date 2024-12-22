@@ -927,6 +927,8 @@ public:
 
     virtual int GetConnectionData(std::vector<AbilityRuntime::ConnectionData> &connectionData) override;
 
+    virtual void CancelWantSenderByFlags(const sptr<IWantSender> &sender, uint32_t flags) override;
+
     virtual int LockMissionForCleanup(int32_t missionId) override;
 
     virtual int UnlockMissionForCleanup(int32_t missionId) override;
@@ -1872,6 +1874,28 @@ public:
     virtual int32_t QueryKeepAliveApplicationsByEDM(int32_t appType, int32_t userId,
         std::vector<KeepAliveInfo> &list) override;
 
+    /**
+     * Add query ERMS observer.
+     *
+     * @param callerToken, The caller ability token.
+     * @param observer, The observer of the ability to query ERMS.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t AddQueryERMSObserver(sptr<IRemoteObject> callerToken,
+        sptr<AbilityRuntime::IQueryERMSObserver> observer) override;
+
+    /**
+     * Query atomic service ERMS rule.
+     *
+     * @param callerToken, The caller ability token.
+     * @param appId, The appId of the atomic service.
+     * @param startTime, The startTime of the query.
+     * @param rule, The returned ERMS rule.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryAtomicServiceStartupRule(sptr<IRemoteObject> callerToken,
+        const std::string &appId, const std::string &startTime, AtomicServiceStartupRule &rule) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -2089,6 +2113,8 @@ private:
     void UnSubscribeScreenUnlockedEvent();
     void RetrySubscribeScreenUnlockedEvent(int32_t retryCount);
     void RemoveScreenUnlockInterceptor();
+    void RemoveUnauthorizedLaunchReasonMessage(const Want &want, AbilityRequest &abilityRequest,
+        const sptr<IRemoteObject> &callerToken);
 
     int VerifyAccountPermission(int32_t userId);
 
@@ -2486,6 +2512,8 @@ private:
     void SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest, AppExecFwk::ExtensionAbilityType extensionType);
 
     bool ShouldBlockAllAppStart();
+
+    std::string InsightIntentGetcallerBundleName();
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;

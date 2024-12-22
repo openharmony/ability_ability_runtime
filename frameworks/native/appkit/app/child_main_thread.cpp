@@ -19,7 +19,9 @@
 
 #include "bundle_mgr_helper.h"
 #include "bundle_mgr_proxy.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_manager.h"
+#endif // SUPPORT_CHILD_PROCESS
 #include "constants.h"
 #include "hilog_tag_wrapper.h"
 #include "js_runtime.h"

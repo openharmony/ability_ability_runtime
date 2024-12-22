@@ -39,6 +39,7 @@
 #include "napi_common_configuration.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
+#include "js_query_erms_observer.h"
 #include "system_ability_definition.h"
 #include "tokenid_kit.h"
 
@@ -123,6 +124,11 @@ public:
         GET_NAPI_INFO_AND_CALL(env, info, JsAbilityManager, OnIsEmbeddedOpenAllowed);
     }
 
+    static napi_value QueryAtomicServiceStartupRule(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsAbilityManager, OnQueryAtomicServiceStartupRule);
+    }
+
     static napi_value SetResidentProcessEnabled(napi_env env, napi_callback_info info)
     {
         GET_CB_INFO_AND_CALL(env, info, JsAbilityManager, OnSetResidentProcessEnabled);
@@ -135,7 +141,7 @@ public:
 
 private:
     sptr<OHOS::AbilityRuntime::JSAbilityForegroundStateObserver> observerForeground_ = nullptr;
-    sptr<OHOS::AppExecFwk::IAppMgr> appManager_ = nullptr;
+    sptr<JsQueryERMSObserver> queryERMSObserver_ = nullptr;
 
     std::string ParseParamType(const napi_env &env, size_t argc, const napi_value *argv)
     {
@@ -670,6 +676,108 @@ private:
             CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
         return result;
     }
+
+    int AddQueryERMSObserver(napi_env env, sptr<IRemoteObject> token, const std::string &appId,
+        const std::string &startTime, napi_value *result)
+    {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+        int ret = 0;
+        if (queryERMSObserver_ == nullptr) {
+            queryERMSObserver_ = new JsQueryERMSObserver(env);
+        }
+        queryERMSObserver_->AddJsObserverObject(appId, startTime, result);
+
+        ret = AbilityManagerClient::GetInstance()->AddQueryERMSObserver(token, queryERMSObserver_);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "addQueryERMSObserver error");
+            AtomicServiceStartupRule rule;
+            queryERMSObserver_->OnQueryFinished(appId, startTime, rule, AAFwk::INNER_ERR);
+            return ret;
+        }
+        return ERR_OK;
+    }
+
+    napi_value OnQueryAtomicServiceStartupRuleInner(napi_env env, sptr<IRemoteObject> token,
+        const std::string &appId)
+    {
+        auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+        auto rule = std::make_shared<AtomicServiceStartupRule>();
+        std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+            system_clock::now().time_since_epoch()).count());
+        NapiAsyncTask::ExecuteCallback execute = [innerErrorCode, rule, token, appId, startTime]() {
+            *innerErrorCode = AbilityManagerClient::GetInstance()->QueryAtomicServiceStartupRule(
+                token, appId, startTime, *rule);
+        };
+
+        NapiAsyncTask::CompleteCallback complete = [appId, startTime, innerErrorCode, rule,
+            observer = queryERMSObserver_](
+            napi_env env, NapiAsyncTask &task, int32_t status) {
+            if (observer == nullptr) {
+                TAG_LOGW(AAFwkTag::ABILITYMGR, "null observer");
+                return;
+            }
+            if (*innerErrorCode == AAFwk::ERR_ECOLOGICAL_CONTROL_STATUS) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "openning dialog to confirm");
+                return;
+            }
+            if (*innerErrorCode != ERR_OK) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "query failed: %{public}d", *innerErrorCode);
+                observer->OnQueryFinished(appId, startTime, *rule, AAFwk::INNER_ERR);
+                return;
+            }
+            observer->OnQueryFinished(appId, startTime, *rule, ERR_OK);
+        };
+
+        napi_value result = nullptr;
+        auto ret = AddQueryERMSObserver(env, token, appId, startTime, &result);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "AddQueryERMSObserver failed, ret=%{public}d", ret);
+            return CreateJsUndefined(env);
+        }
+        NapiAsyncTask::Schedule("JsAbilityManager::OnQueryAtomicServiceStartupRule", env,
+            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), nullptr));
+        return result;
+    }
+
+    napi_value OnQueryAtomicServiceStartupRule(napi_env env, NapiCallbackInfo& info)
+    {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+        if (info.argc < ARGC_TWO) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+
+        bool stageMode = false;
+        napi_status status = OHOS::AbilityRuntime::IsStageContext(env, info.argv[0], stageMode);
+        if (status != napi_ok || !stageMode) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "not stageMode");
+            ThrowInvalidParamError(env, "Parse param context failed, must be a context of stageMode.");
+            return CreateJsUndefined(env);
+        }
+        auto context = OHOS::AbilityRuntime::GetStageModeContext(env, info.argv[0]);
+        if (context == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null context");
+            ThrowInvalidParamError(env, "Parse param context failed, must not be nullptr.");
+            return CreateJsUndefined(env);
+        }
+        auto uiAbilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
+        if (uiAbilityContext == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null UIAbilityContext");
+            ThrowInvalidParamError(env, "Parse param context failed, must be UIAbilityContext.");
+            return CreateJsUndefined(env);
+        }
+
+        std::string appId;
+        if (!ConvertFromJsValue(env, info.argv[1], appId)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "parse appId failed");
+            ThrowInvalidParamError(env, "Parse param appId failed, must be a string.");
+            return CreateJsUndefined(env);
+        }
+
+        auto token = uiAbilityContext->GetToken();
+        return OnQueryAtomicServiceStartupRuleInner(env, token, appId);
+    }
 };
 } // namespace
 
@@ -701,6 +809,8 @@ napi_value JsAbilityManagerInit(napi_env env, napi_value exportObj)
         env, exportObj, "notifyDebugAssertResult", moduleName, JsAbilityManager::NotifyDebugAssertResult);
     BindNativeFunction(
         env, exportObj, "setResidentProcessEnabled", moduleName, JsAbilityManager::SetResidentProcessEnabled);
+    BindNativeFunction(env, exportObj, "queryAtomicServiceStartupRule",
+        moduleName, JsAbilityManager::QueryAtomicServiceStartupRule);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "end");
     return CreateJsUndefined(env);
 }
