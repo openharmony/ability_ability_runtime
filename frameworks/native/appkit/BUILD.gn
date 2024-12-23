@@ -169,6 +169,7 @@ ohos_shared_library("appkit_native") {
 
   external_deps = [
     "ability_base:base",
+    "ability_base:extractortool",
     "ability_base:extractresourcemanager",
     "ability_base:string_utils",
     "ability_base:want",
