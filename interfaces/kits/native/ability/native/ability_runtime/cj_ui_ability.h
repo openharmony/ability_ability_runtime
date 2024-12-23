@@ -16,7 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_CJ_UI_ABILITY_H
 #define OHOS_ABILITY_RUNTIME_CJ_UI_ABILITY_H
 
-#include "ability_delegator_infos.h"
+#include "cj_ability_delegator_infos.h"
 #include "freeze_util.h"
 #include "ui_ability.h"
 #ifdef SUPPORT_GRAPHICS
@@ -287,7 +287,7 @@ private:
 #endif
 #endif
 private:
-    std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
+    std::shared_ptr<AppExecFwk::ACJDelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     sptr<IRemoteObject> SetNewRuleFlagToCallee(napi_env env, napi_value remoteJsObj);
     void SetAbilityContext(const std::shared_ptr<AbilityInfo> &abilityInfo);
     void InitSceneDoOnForeground(std::shared_ptr<Rosen::WindowScene> scene, const Want &want);

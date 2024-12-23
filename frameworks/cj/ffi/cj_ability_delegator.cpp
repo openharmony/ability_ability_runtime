@@ -19,17 +19,153 @@
 #include "application_context.h"
 #include "cj_application_context.h"
 #include "cj_utils_ffi.h"
-#include "application_context.h"
 #include "hilog_tag_wrapper.h"
+#include "shell_cmd_result.h"
 
 namespace OHOS {
 namespace AbilityDelegatorCJ {
 using namespace OHOS::FFI;
 using namespace OHOS::AbilityRuntime;
 
-int32_t CJAbilityDelegator::StartAbility(const AAFwk::Want &want)
+constexpr int COMMON_FAILED = 16000100;
+constexpr int INCORRECT_PARAMETERS = 401;
+
+std::map<int64_t, std::shared_ptr<CJAbilityMonitor>> g_monitorRecord;
+std::map<int64_t, std::shared_ptr<CJAbilityStageMonitor>> g_stageMonitorRecord;
+std::map<int64_t, sptr<OHOS::IRemoteObject>> g_abilityRecord;
+
+CJAbilityDelegator::CJAbilityDelegator(const std::shared_ptr<AppExecFwk::CJAbilityDelegatorImpl>& abilityDelegator)
+    : delegator_(abilityDelegator)
 {
+    auto clearFunc = [](const std::shared_ptr<AppExecFwk::ACJDelegatorAbilityProperty>& property) {
+        TAG_LOGI(AAFwkTag::DELEGATOR, "clearFunc called");
+        if (!property) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "property is null");
+            return;
+        }
+
+        for (auto it = g_abilityRecord.begin(); it != g_abilityRecord.end();) {
+            if (it->second == property->token_) {
+                it = g_abilityRecord.erase(it);
+                continue;
+            }
+            ++it;
+        }
+    };
+    delegator_->RegisterClearFunc(clearFunc);
+}
+
+int32_t CJAbilityDelegator::StartAbility(const AAFwk::Want& want)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityDelegator::StartAbility called");
     return delegator_->StartAbility(want);
+}
+
+void CJAbilityDelegator::AddAbilityMonitor(const std::shared_ptr<CJAbilityMonitor>& abilityMonitor)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityDelegator::AddAbilityMonitor called");
+    delegator_->AddAbilityMonitor(abilityMonitor);
+}
+
+void CJAbilityDelegator::RemoveAbilityMonitor(const std::shared_ptr<CJAbilityMonitor>& abilityMonitor)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityDelegator::RemoveAbilityMonitor called");
+    delegator_->RemoveAbilityMonitor(abilityMonitor);
+}
+
+std::shared_ptr<AppExecFwk::ACJDelegatorAbilityProperty> CJAbilityDelegator::WaitAbilityMonitor(
+    const std::shared_ptr<CJAbilityMonitor>& abilityMonitor)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityDelegator::WaitAbilityMonitor called");
+    std::shared_ptr<AppExecFwk::ACJDelegatorAbilityProperty> property = delegator_->WaitAbilityMonitor(abilityMonitor);
+    if (!property) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "property is null");
+        return nullptr;
+    }
+    g_abilityRecord.emplace(property->cjObject_, property->token_);
+    return property;
+}
+
+std::shared_ptr<AppExecFwk::ACJDelegatorAbilityProperty> CJAbilityDelegator::WaitAbilityMonitor(
+    const std::shared_ptr<CJAbilityMonitor>& abilityMonitor, int64_t timeout)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityDelegator::WaitAbilityMonitor called");
+    std::shared_ptr<AppExecFwk::ACJDelegatorAbilityProperty> property =
+        delegator_->WaitAbilityMonitor(abilityMonitor, timeout);
+    if (!property) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "property is null");
+        return nullptr;
+    }
+    g_abilityRecord.emplace(property->cjObject_, property->token_);
+    return property;
+}
+
+void CJAbilityDelegator::AddAbilityStageMonitor(const std::shared_ptr<CJAbilityStageMonitor>& stageMonitor)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityDelegator::AddAbilityStageMonitor called");
+    delegator_->AddAbilityStageMonitor(stageMonitor);
+}
+
+void CJAbilityDelegator::RemoveAbilityStageMonitor(const std::shared_ptr<CJAbilityStageMonitor>& stageMonitor)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityDelegator::RemoveAbilityStageMonitor called");
+    delegator_->RemoveAbilityStageMonitor(stageMonitor);
+}
+
+std::shared_ptr<AppExecFwk::CJDelegatorAbilityStageProperty> CJAbilityDelegator::WaitAbilityStageMonitor(
+    const std::shared_ptr<CJAbilityStageMonitor>& stageMonitor)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityDelegator::WaitAbilityStageMonitor called");
+    std::shared_ptr<AppExecFwk::CJDelegatorAbilityStageProperty> property =
+        delegator_->WaitAbilityStageMonitor(stageMonitor);
+    if (!property) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "property is null");
+        return nullptr;
+    }
+    return property;
+}
+
+std::shared_ptr<AppExecFwk::CJDelegatorAbilityStageProperty> CJAbilityDelegator::WaitAbilityStageMonitor(
+    const std::shared_ptr<CJAbilityStageMonitor>& stageMonitor, int64_t timeout)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityDelegator::WaitAbilityStageMonitor called");
+    std::shared_ptr<AppExecFwk::CJDelegatorAbilityStageProperty> property =
+        delegator_->WaitAbilityStageMonitor(stageMonitor, timeout);
+    if (!property) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "property is null");
+        return nullptr;
+    }
+    return property;
+}
+
+void CJAbilityDelegator::Print(const std::string& msg)
+{
+    return delegator_->Print(msg);
+}
+
+int64_t CJAbilityDelegator::GetAbilityState(const sptr<OHOS::IRemoteObject>& remoteObject)
+{
+    return static_cast<int64_t>(delegator_->GetAbilityState(remoteObject));
+}
+
+std::shared_ptr<AppExecFwk::ACJDelegatorAbilityProperty> CJAbilityDelegator::GetCurrentTopAbility()
+{
+    auto property = delegator_->GetCurrentTopAbility();
+    if (!property) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "property is null");
+        return nullptr;
+    }
+    return property;
+}
+
+bool CJAbilityDelegator::DoAbilityForeground(const sptr<OHOS::IRemoteObject>& remoteObject)
+{
+    return delegator_->DoAbilityForeground(remoteObject);
+}
+
+bool CJAbilityDelegator::DoAbilityBackground(const sptr<OHOS::IRemoteObject>& remoteObject)
+{
+    return delegator_->DoAbilityBackground(remoteObject);
 }
 
 std::shared_ptr<AppExecFwk::ShellCmdResult> CJAbilityDelegator::ExecuteShellCommand(const char* cmd, int64_t timeoutSec)
@@ -69,17 +205,398 @@ void CJAbilityDelegator::FinishTest(const char* msg, int64_t code)
     delegator_->FinishUserTest(msg, code);
 }
 
+std::shared_ptr<CJAbilityMonitor> ParseMonitorPara(
+    int64_t monitorId, const std::string& abilityName, const std::string& moduleName, bool& isExisted)
+{
+    for (auto iter = g_monitorRecord.begin(); iter != g_monitorRecord.end(); ++iter) {
+        if (iter->first == monitorId) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "monitor existed");
+            isExisted = true;
+            return iter->second;
+        }
+    }
+
+    auto cjMonitorObj = std::make_shared<CJMonitorObject>(monitorId);
+    std::shared_ptr<CJAbilityMonitor> cjMonitor = nullptr;
+    if (moduleName.empty()) {
+        cjMonitor = std::make_shared<CJAbilityMonitor>(abilityName, cjMonitorObj);
+    } else {
+        cjMonitor = std::make_shared<CJAbilityMonitor>(abilityName, moduleName, cjMonitorObj);
+    }
+    return cjMonitor;
+}
+
+std::shared_ptr<CJAbilityStageMonitor> ParseStageMonitorPara(
+    int64_t stageMonitorId, const std::string& moduleName, const std::string& srcEntrance, bool& isExisted)
+{
+    for (auto iter = g_stageMonitorRecord.begin(); iter != g_stageMonitorRecord.end(); ++iter) {
+        if (iter->first == stageMonitorId) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "stageMonitor existed");
+            isExisted = true;
+            return iter->second;
+        }
+    }
+    auto cjStageMonitor = std::make_shared<CJAbilityStageMonitor>(moduleName, srcEntrance, stageMonitorId);
+    return cjStageMonitor;
+}
+
 extern "C" {
+bool FFIAbilityDelegatorDoAbilityForeground(int64_t id, int64_t abilityId, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        *errorCode = COMMON_FAILED;
+        return false;
+    }
+
+    sptr<OHOS::IRemoteObject> remoteObject = nullptr;
+    for (auto iter = g_abilityRecord.begin(); iter != g_abilityRecord.end(); ++iter) {
+        if (iter->first == abilityId) {
+            remoteObject = iter->second;
+            break;
+        }
+    }
+    if (!remoteObject) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "parase remoteObject failed");
+        *errorCode = INCORRECT_PARAMETERS;
+        return false;
+    }
+    if (!cjDelegator->DoAbilityForeground(remoteObject)) {
+        *errorCode = COMMON_FAILED;
+        return false;
+    }
+    return true;
+}
+
+bool FFIAbilityDelegatorDoAbilityBackground(int64_t id, int64_t abilityId, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        *errorCode = COMMON_FAILED;
+        return false;
+    }
+
+    sptr<OHOS::IRemoteObject> remoteObject = nullptr;
+    for (auto iter = g_abilityRecord.begin(); iter != g_abilityRecord.end(); ++iter) {
+        if (iter->first == abilityId) {
+            remoteObject = iter->second;
+            break;
+        }
+    }
+    if (!remoteObject) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "parase remoteObject failed");
+        *errorCode = INCORRECT_PARAMETERS;
+        return false;
+    }
+    if (!cjDelegator->DoAbilityBackground(remoteObject)) {
+        *errorCode = COMMON_FAILED;
+        return false;
+    }
+    return true;
+}
+
+int64_t FFIAbilityDelegatorGetCurrentTopAbility(int64_t id, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        *errorCode = COMMON_FAILED;
+        return 0;
+    }
+
+    auto property = cjDelegator->GetCurrentTopAbility();
+    if (!property) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null property");
+        *errorCode = COMMON_FAILED;
+        return 0;
+    }
+    g_abilityRecord.emplace(property->cjObject_, property->token_);
+    return property->cjObject_;
+}
+
+void FFIAbilityDelegatorPrint(int64_t id, const char* msg, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        return;
+    }
+
+    return cjDelegator->Print(msg);
+}
+int64_t FFIAbilityDelegatorGetAbilityState(int64_t id, int64_t abilityId, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        return 0;
+    }
+
+    sptr<OHOS::IRemoteObject> remoteObject = nullptr;
+    for (auto iter = g_abilityRecord.begin(); iter != g_abilityRecord.end(); ++iter) {
+        if (iter->first == abilityId) {
+            remoteObject = iter->second;
+            break;
+        }
+    }
+    if (!remoteObject) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "parase remoteObject failed");
+        *errorCode = INCORRECT_PARAMETERS;
+        return 0;
+    }
+    return cjDelegator->GetAbilityState(remoteObject);
+}
+
+void FFIAbilityDelegatorAddAbilityMonitor(
+    int64_t id, int64_t monitorId, const char* abilityName, const char* moduleName, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        *errorCode = COMMON_FAILED;
+        return;
+    }
+    bool isExisted = false;
+    auto cjMonitor = ParseMonitorPara(monitorId, abilityName, moduleName, isExisted);
+    if (cjMonitor == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "parase cj monitor failed");
+        *errorCode = INCORRECT_PARAMETERS;
+        return;
+    }
+
+    if (!isExisted) {
+        g_monitorRecord.emplace(monitorId, cjMonitor);
+    }
+    return cjDelegator->AddAbilityMonitor(cjMonitor);
+}
+
+void FFIAbilityDelegatorRemoveAbilityMonitor(
+    int64_t id, int64_t monitorId, const char* abilityName, const char* moduleName, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        *errorCode = COMMON_FAILED;
+        return;
+    }
+    bool isExisted = false;
+    auto cjMonitor = ParseMonitorPara(monitorId, abilityName, moduleName, isExisted);
+    if (cjMonitor == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "parase cj monitor failed");
+        *errorCode = INCORRECT_PARAMETERS;
+        return;
+    }
+
+    if (isExisted) {
+        for (auto iter = g_monitorRecord.begin(); iter != g_monitorRecord.end(); ++iter) {
+            if (iter->first == monitorId) {
+                g_monitorRecord.erase(iter);
+                break;
+            }
+        }
+    }
+    return cjDelegator->RemoveAbilityMonitor(cjMonitor);
+}
+
+int64_t FFIAbilityDelegatorWaitAbilityMonitor(
+    int64_t id, int64_t monitorId, AbilityInfo abilityInfo, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        *errorCode = COMMON_FAILED;
+        return 0;
+    }
+
+    const char* abilityName = abilityInfo.abilityName;
+    const char* moduleName = abilityInfo.moduleName;
+    bool isExisted = false;
+    auto cjMonitor = ParseMonitorPara(monitorId, abilityName, moduleName, isExisted);
+    if (cjMonitor == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "parase cj monitor failed");
+        *errorCode = INCORRECT_PARAMETERS;
+        return 0;
+    }
+
+    if (!isExisted) {
+        g_monitorRecord.emplace(monitorId, cjMonitor);
+    }
+
+    auto property = cjDelegator->WaitAbilityMonitor(cjMonitor);
+    if (!property) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "property is null");
+        *errorCode = COMMON_FAILED;
+        return 0;
+    }
+
+    g_abilityRecord.emplace(property->cjObject_, property->token_);
+    return property->cjObject_;
+}
+
+int64_t FFIAbilityDelegatorWaitAbilityMonitorWithTimeout(
+    int64_t id, int64_t monitorId, AbilityInfo abilityInfo, int64_t timeout, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        *errorCode = COMMON_FAILED;
+        return 0;
+    }
+
+    const char* abilityName = abilityInfo.abilityName;
+    const char* moduleName = abilityInfo.moduleName;
+    bool isExisted = false;
+    auto cjMonitor = ParseMonitorPara(monitorId, abilityName, moduleName, isExisted);
+    if (cjMonitor == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "parase cj monitor failed");
+        *errorCode = INCORRECT_PARAMETERS;
+        return 0;
+    }
+
+    if (!isExisted) {
+        g_monitorRecord.emplace(monitorId, cjMonitor);
+    }
+
+    auto property = cjDelegator->WaitAbilityMonitor(cjMonitor, timeout);
+    if (!property) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "property is null");
+        *errorCode = COMMON_FAILED;
+        return 0;
+    }
+
+    g_abilityRecord.emplace(property->cjObject_, property->token_);
+    return property->cjObject_;
+}
+
+void FFIAbilityDelegatorAddAbilityStageMonitor(
+    int64_t id, int64_t stageMonitorId, const char* moduleName, const char* srcEntrance, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        *errorCode = COMMON_FAILED;
+        return;
+    }
+    bool isExisted = false;
+    auto cjStageMonitor = ParseStageMonitorPara(stageMonitorId, moduleName, srcEntrance, isExisted);
+    if (cjStageMonitor == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "parse cj stageMonitor failed");
+        *errorCode = INCORRECT_PARAMETERS;
+        return;
+    }
+
+    if (!isExisted) {
+        g_stageMonitorRecord.emplace(stageMonitorId, cjStageMonitor);
+    }
+    return cjDelegator->AddAbilityStageMonitor(cjStageMonitor);
+}
+
+void FFIAbilityDelegatorRemoveAbilityStageMonitor(
+    int64_t id, int64_t stageMonitorId, const char* moduleName, const char* srcEntrance, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        *errorCode = COMMON_FAILED;
+        return;
+    }
+    bool isExisted = false;
+    auto cjStageMonitor = ParseStageMonitorPara(stageMonitorId, moduleName, srcEntrance, isExisted);
+    if (cjStageMonitor == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "parse cj stageMonitor failed");
+        *errorCode = INCORRECT_PARAMETERS;
+        return;
+    }
+
+    if (isExisted) {
+        for (auto iter = g_stageMonitorRecord.begin(); iter != g_stageMonitorRecord.end(); ++iter) {
+            if (iter->first == stageMonitorId) {
+                g_stageMonitorRecord.erase(iter);
+                break;
+            }
+        }
+    }
+    return cjDelegator->RemoveAbilityStageMonitor(cjStageMonitor);
+}
+
+int64_t FFIAbilityDelegatorWaitAbilityStageMonitor(
+    int64_t id, int64_t stageMonitorId, AbilityStageInfo abilityStageInfo, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        *errorCode = COMMON_FAILED;
+        return 0;
+    }
+    const char* moduleName = abilityStageInfo.moduleName;
+    const char* srcEntrance = abilityStageInfo.srcEntrance;
+    bool isExisted = false;
+    auto cjStageMonitor = ParseStageMonitorPara(stageMonitorId, moduleName, srcEntrance, isExisted);
+    if (cjStageMonitor == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "parse cj stageMonitor failed");
+        *errorCode = INCORRECT_PARAMETERS;
+        return 0;
+    }
+
+    if (!isExisted) {
+        g_stageMonitorRecord.emplace(stageMonitorId, cjStageMonitor);
+    }
+
+    auto property = cjDelegator->WaitAbilityStageMonitor(cjStageMonitor);
+    if (!property) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "stageProperty is null");
+        *errorCode = COMMON_FAILED;
+        return 0;
+    }
+
+    return property->cjStageObject_;
+}
+
+int64_t FFIAbilityDelegatorWaitAbilityStageMonitorWithTimeout(
+    int64_t id, int64_t stageMonitorId, AbilityStageInfo abilityStageInfo, int64_t timeout, int32_t* errorCode)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        *errorCode = COMMON_FAILED;
+        return 0;
+    }
+    const char* moduleName = abilityStageInfo.moduleName;
+    const char* srcEntrance = abilityStageInfo.srcEntrance;
+    bool isExisted = false;
+    auto cjStageMonitor = ParseStageMonitorPara(stageMonitorId, moduleName, srcEntrance, isExisted);
+    if (cjStageMonitor == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "parse cj stageMonitor failed");
+        *errorCode = INCORRECT_PARAMETERS;
+        return 0;
+    }
+
+    if (!isExisted) {
+        g_stageMonitorRecord.emplace(stageMonitorId, cjStageMonitor);
+    }
+
+    auto property = cjDelegator->WaitAbilityStageMonitor(cjStageMonitor, timeout);
+    if (!property) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "stageProperty is null");
+        *errorCode = COMMON_FAILED;
+        return 0;
+    }
+
+    return property->cjStageObject_;
+}
+
 int64_t FFIAbilityDelegatorRegistryGetAbilityDelegator()
 {
-    auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetCJAbilityDelegator();
     if (delegator == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "cjDelegatorImpl is null");
         return INVALID_CODE;
     }
     auto cjDelegator = FFI::FFIData::Create<CJAbilityDelegator>(delegator);
     if (cjDelegator == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "cj delegator is null.");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cj delegator");
         return INVALID_CODE;
     }
     return cjDelegator->GetID();

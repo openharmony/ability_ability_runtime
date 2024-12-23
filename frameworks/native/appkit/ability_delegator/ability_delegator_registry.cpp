@@ -17,13 +17,22 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-std::shared_ptr<AbilityDelegator> AbilityDelegatorRegistry::abilityDelegator_ {};
+std::shared_ptr<IAbilityDelegator> AbilityDelegatorRegistry::abilityDelegator_ {};
 std::shared_ptr<AbilityDelegatorArgs> AbilityDelegatorRegistry::abilityDelegatorArgs_ {};
 
 std::shared_ptr<AbilityDelegator> AbilityDelegatorRegistry::GetAbilityDelegator()
 {
-    return abilityDelegator_;
+    auto p = reinterpret_cast<AbilityDelegator*>(abilityDelegator_.get());
+    return std::shared_ptr<AbilityDelegator>(abilityDelegator_, p);
 }
+
+#ifdef CJ_FRONTEND
+std::shared_ptr<CJAbilityDelegatorImpl> AbilityDelegatorRegistry::GetCJAbilityDelegator()
+{
+    auto p = reinterpret_cast<CJAbilityDelegatorImpl*>(abilityDelegator_.get());
+    return std::shared_ptr<CJAbilityDelegatorImpl>(abilityDelegator_, p);
+}
+#endif
 
 std::shared_ptr<AbilityDelegatorArgs> AbilityDelegatorRegistry::GetArguments()
 {
@@ -31,10 +40,10 @@ std::shared_ptr<AbilityDelegatorArgs> AbilityDelegatorRegistry::GetArguments()
 }
 
 void AbilityDelegatorRegistry::RegisterInstance(
-    const std::shared_ptr<AbilityDelegator> &delegator, const std::shared_ptr<AbilityDelegatorArgs> &args)
+    const std::shared_ptr<IAbilityDelegator>& delegator, const std::shared_ptr<AbilityDelegatorArgs>& args)
 {
     abilityDelegator_ = delegator;
     abilityDelegatorArgs_ = args;
 }
-}  // namespace AppExecFwk
-}  // namespace OHOS
+} // namespace AppExecFwk
+} // namespace OHOS

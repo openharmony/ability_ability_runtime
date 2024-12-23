@@ -454,6 +454,7 @@ ohos_shared_library("appkit_delegator") {
     "${ability_runtime_native_path}/appkit/ability_delegator/ability_delegator_args.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/ability_delegator_registry.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/delegator_thread.cpp",
+    "${ability_runtime_native_path}/appkit/ability_delegator/iability_delegator.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/iability_monitor.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/iability_stage_monitor.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/runner_runtime/js_test_runner.cpp",
@@ -495,6 +496,9 @@ ohos_shared_library("appkit_delegator") {
 
   if (cj_frontend) {
     sources += [
+      "${ability_runtime_native_path}/appkit/ability_delegator/cj_ability_delegator_impl.cpp",
+      "${ability_runtime_native_path}/appkit/ability_delegator/cj_iability_monitor.cpp",
+      "${ability_runtime_native_path}/appkit/ability_delegator/cj_iability_stage_monitor.cpp",
       "${ability_runtime_native_path}/appkit/ability_delegator/runner_runtime/cj_test_runner.cpp",
       "${ability_runtime_native_path}/appkit/ability_delegator/runner_runtime/cj_test_runner_object.cpp",
     ]
