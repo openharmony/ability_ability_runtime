@@ -412,21 +412,22 @@ void AppStateObserverManager::OnProcessReused(const std::shared_ptr<AppRunningRe
     handler_->SubmitTask(task);
 }
 
-void AppStateObserverManager::OnRenderProcessCreated(const std::shared_ptr<RenderRecord> &renderRecord)
+void AppStateObserverManager::OnRenderProcessCreated(const std::shared_ptr<RenderRecord> &renderRecord,
+    const bool isPreload)
 {
     if (handler_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
-    auto task = [weak = weak_from_this(), renderRecord]() {
+    auto task = [weak = weak_from_this(), renderRecord, isPreload]() {
         auto self = weak.lock();
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnRenderProcessCreated come.");
-        self->HandleOnRenderProcessCreated(renderRecord);
+        self->HandleOnRenderProcessCreated(renderRecord, isPreload);
     };
     handler_->SubmitTask(task);
 }
@@ -649,13 +650,15 @@ void AppStateObserverManager::HandleOnProcessResued(const std::shared_ptr<AppRun
     }
 }
 
-void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &renderRecord)
+void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &renderRecord,
+    const bool isPreload)
 {
     if (!renderRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null renderRecord");
         return;
     }
     ProcessData data = WrapRenderProcessData(renderRecord);
+    data.isPreload = isPreload;
     TAG_LOGD(AAFwkTag::APPMGR,
         "RenderProcess Create, bundle:%{public}s, pid:%{public}d, uid:%{public}d, processType:%{public}d, "
         "processName:%{public}s, renderUid:%{public}d",

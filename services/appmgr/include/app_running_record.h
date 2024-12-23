@@ -1045,6 +1045,8 @@ public:
 
     void SetNWebPreload(const bool isAllowedNWebPreload);
 
+    bool IsNWebPreload() const;
+
     void SetIsUnSetPermission(bool isUnSetPermission);
 
     bool IsUnSetPermission();
