@@ -181,5 +181,22 @@ std::shared_ptr<AppExecFwk::Configuration> MockContextImpl::GetConfiguration() c
     std::shared_ptr<AppExecFwk::Configuration> config = std::make_shared<AppExecFwk::Configuration>();
     return config;
 }
+
+std::string MockContextImpl::GetProcessName()
+{
+    return "processName";
+}
+
+std::shared_ptr<Context> MockContextImpl::CreateAreaModeContext(int areaMode)
+{
+    return nullptr;
+}
+
+#ifdef SUPPORT_GRAPHICS
+std::shared_ptr<Context> MockContextImpl::CreateDisplayContext(uint64_t displayId)
+{
+    return nullptr;
+}
+#endif
 }  // namespace AbilityRuntime
 }  // namespace OHOS

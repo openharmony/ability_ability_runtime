@@ -1624,5 +1624,97 @@ HWTEST_F(ApplicationContextTest, ProcessSecurityExit_0100, TestSize.Level1)
     EXPECT_TRUE(context_->appProcessExitCallback_ == nullptr);
     GTEST_LOG_(INFO) << "ProcessSecurityExit_0100 end";
 }
+
+/**
+ * @tc.number:GetProcessName_0100
+ * @tc.name: GetProcessName
+ * @tc.desc: GetProcessName fail with null contextImpl
+ */
+HWTEST_F(ApplicationContextTest, GetProcessName_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetProcessName_0100 start";
+    ASSERT_NE(context_, nullptr);
+    context_->AttachContextImpl(nullptr);
+    auto processName = context_->GetProcessName();
+    EXPECT_TRUE(processName.empty());
+    GTEST_LOG_(INFO) << "GetProcessName_0100 end";
+}
+
+/**
+ * @tc.number:GetProcessName_0200
+ * @tc.name: GetProcessName
+ * @tc.desc: GetProcessName success
+ */
+HWTEST_F(ApplicationContextTest, GetProcessName_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetProcessName_0200 start";
+    ASSERT_NE(context_, nullptr);
+    context_->AttachContextImpl(mock_);
+    auto processName = context_->GetProcessName();
+    EXPECT_EQ(processName, "processName");
+    GTEST_LOG_(INFO) << "GetProcessName_0200 end";
+}
+
+/**
+ * @tc.number:CreateAreaModeContext_0100
+ * @tc.name: CreateAreaModeContext
+ * @tc.desc: CreateAreaModeContext fail with null contextImpl
+ */
+HWTEST_F(ApplicationContextTest, CreateAreaModeContext_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateAreaModeContext_0100 start";
+    ASSERT_NE(context_, nullptr);
+    context_->AttachContextImpl(nullptr);
+    auto areaModeContext = context_->CreateAreaModeContext(0);
+    EXPECT_EQ(areaModeContext, nullptr);
+    GTEST_LOG_(INFO) << "CreateAreaModeContext_0100 end";
+}
+
+/**
+ * @tc.number:CreateAreaModeContext_0200
+ * @tc.name: CreateAreaModeContext
+ * @tc.desc: CreateAreaModeContext success
+ */
+HWTEST_F(ApplicationContextTest, CreateAreaModeContext_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateAreaModeContext_0200 start";
+    ASSERT_NE(context_, nullptr);
+    context_->AttachContextImpl(mock_);
+    auto areaModeContext = context_->CreateAreaModeContext(0);
+    EXPECT_EQ(areaModeContext, nullptr);
+    GTEST_LOG_(INFO) << "CreateAreaModeContext_0200 end";
+}
+
+#ifdef SUPPORT_GRAPHICS
+/**
+ * @tc.number:CreateDisplayContext_0100
+ * @tc.name: CreateDisplayContext
+ * @tc.desc: CreateDisplayContext fail with null contextImpl
+ */
+HWTEST_F(ApplicationContextTest, CreateDisplayContext_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateDisplayContext_0100 start";
+    ASSERT_NE(context_, nullptr);
+    context_->AttachContextImpl(nullptr);
+    auto displayContext = context_->CreateDisplayContext(0);
+    EXPECT_EQ(displayContext, nullptr);
+    GTEST_LOG_(INFO) << "CreateDisplayContext_0100 end";
+}
+
+/**
+ * @tc.number:CreateDisplayContext_0200
+ * @tc.name: CreateDisplayContext
+ * @tc.desc: CreateDisplayContext success
+ */
+HWTEST_F(ApplicationContextTest, CreateDisplayContext_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateDisplayContext_0200 start";
+    ASSERT_NE(context_, nullptr);
+    context_->AttachContextImpl(mock_);
+    auto displayContext = context_->CreateDisplayContext(0);
+    EXPECT_EQ(displayContext, nullptr);
+    GTEST_LOG_(INFO) << "CreateDisplayContext_0200 end";
+}
+#endif
 }  // namespace AbilityRuntime
 }  // namespace OHOS
