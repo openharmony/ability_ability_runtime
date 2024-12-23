@@ -3179,8 +3179,13 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     }
 
     if (InsightIntentExecuteParam::IsInsightIntentExecute(extensionSessionInfo->want)) {
+        auto callerBundlename = InsightIntentGetcallerBundleName();
+        if (callerBundlename.empty()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "insightIntent get callerBundlename failed");
+            return ERR_INVALID_VALUE;
+        }
         int32_t result = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(
-            extensionSessionInfo->want, AppExecFwk::ExecuteMode::UI_EXTENSION_ABILITY);
+            extensionSessionInfo->want, AppExecFwk::ExecuteMode::UI_EXTENSION_ABILITY, callerBundlename);
         if (result != ERR_OK) {
             eventInfo.errCode = ERR_INVALID_VALUE;
             EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
@@ -10857,7 +10862,7 @@ int32_t AbilityManagerService::DetachAppDebug(const std::string &bundleName)
 
 std::string AbilityManagerService::InsightIntentGetcallerBundleName()
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "InsightIntentGetcallerBundleName called");
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     auto bundleMgr = AbilityUtil::GetBundleManagerHelper();
     std::string callerBundlename;
