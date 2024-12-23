@@ -126,7 +126,7 @@ enum class AbilityErrorCode {
     // The target to restart does not belong to the current app or is not a UIAbility.
     ERROR_CODE_RESTART_APP_INCORRECT_ABILITY = 16000063,
 
-    // Restart too frequently. Try again at least 10s later.
+    // Restart too frequently. Try again at least 3s later.
     ERROR_CODE_RESTART_APP_FREQUENT = 16000064,
 
     // ability not foreground.
