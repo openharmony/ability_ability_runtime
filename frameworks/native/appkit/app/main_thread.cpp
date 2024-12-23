@@ -3507,6 +3507,7 @@ void MainThread::ParseAppConfigurationParams(const std::string configuration, Co
         TAG_LOGE(AAFwkTag::ABILITYMGR, "empty config");
         return;
     }
+    TAG_LOGI(AAFwkTag::APPKIT, "ParseAppConfigurationParams config:%{public}s", appConfig.GetName().c_str());
     nlohmann::json configurationJson = nlohmann::json::parse(configuration, nullptr, false);
     if (configurationJson.is_discarded()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "discarded error");
