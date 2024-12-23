@@ -75,6 +75,9 @@ napi_value WrapConfiguration(napi_env env, const AppExecFwk::Configuration &conf
     jsValue = WrapBoolToJS(env, hasPointerDevice == "true" ? true : false);
     SetPropertyValueByPropertyName(env, jsObject, "hasPointerDevice", jsValue);
 
+    jsValue = WrapStringToJS(env, configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_ID));
+    SetPropertyValueByPropertyName(env, jsObject, "fontId", jsValue);
+
     std::string fontSizeScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
     jsValue = WrapDoubleToJS(env, fontSizeScale != "" ? std::stod(fontSizeScale) : 1.0);
     SetPropertyValueByPropertyName(env, jsObject, "fontSizeScale", jsValue);
