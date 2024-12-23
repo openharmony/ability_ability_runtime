@@ -432,9 +432,9 @@ HWTEST_F(AppSpawnSocketTest, OnRenderProcessCreated_001, TestSize.Level0)
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
     std::shared_ptr<RenderRecord> renderRecord;
-    manager->OnRenderProcessCreated(renderRecord);
+    manager->OnRenderProcessCreated(renderRecord, false);
     manager->Init();
-    manager->OnRenderProcessCreated(renderRecord);
+    manager->OnRenderProcessCreated(renderRecord, false);
 }
 
 /*
@@ -921,12 +921,12 @@ HWTEST_F(AppSpawnSocketTest, HandleOnRenderProcessCreated_001, TestSize.Level0)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
-    manager->HandleOnRenderProcessCreated(nullptr);
+    manager->HandleOnRenderProcessCreated(nullptr, false);
     std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
     std::shared_ptr<RenderRecord> renderRecord =
         std::make_shared<RenderRecord>(1, "param", FdGuard(1), FdGuard(1), FdGuard(1), appRecord);
     renderRecord->SetPid(1);
-    manager->HandleOnRenderProcessCreated(renderRecord);
+    manager->HandleOnRenderProcessCreated(renderRecord, false);
 }
 
 /*
