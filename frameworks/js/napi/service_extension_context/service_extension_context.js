@@ -168,6 +168,11 @@ class ServiceExtensionContext extends ExtensionContext {
     hilog.sLogI(domainID, TAG, 'preStartMission');
     return this.__context_impl__.preStartMission(bundleName, moduleName, abilityName, startTime);
   }
+
+  openAtomicService(appId, options, callback) {
+    hilog.sLogI(domainID, TAG, 'openAtomicService');
+    return this.__context_impl__.openAtomicService(appId, options, callback);
+  }
 }
 
 export default ServiceExtensionContext;
