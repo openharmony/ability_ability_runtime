@@ -59,7 +59,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     appStateObserverManager->HandleAppStateChanged(appRecord, state, needNotifyApp, isFromWindowFocusChanged);
     appStateObserverManager->HandleOnAppProcessDied(appRecord);
     std::shared_ptr<RenderRecord> renderRecord;
-    appStateObserverManager->HandleOnRenderProcessCreated(renderRecord);
+    appStateObserverManager->HandleOnRenderProcessCreated(renderRecord, false);
     appStateObserverManager->HandleOnRenderProcessDied(renderRecord);
     ProcessData processData;
     appStateObserverManager->HandleOnProcessCreated(processData);

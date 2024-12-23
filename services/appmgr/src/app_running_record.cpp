@@ -2631,6 +2631,11 @@ void AppRunningRecord::SetNWebPreload(const bool isAllowedNWebPreload)
     isAllowedNWebPreload_ = isAllowedNWebPreload;
 }
 
+bool AppRunningRecord::IsNWebPreload() const
+{
+    return isAllowedNWebPreload_;
+}
+
 void AppRunningRecord::SetIsUnSetPermission(bool isUnSetPermission)
 {
     isUnSetPermission_ = isUnSetPermission;

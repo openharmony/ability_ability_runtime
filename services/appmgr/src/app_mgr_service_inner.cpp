@@ -5541,10 +5541,11 @@ int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecor
         appRecord->SetGPUPid(pid);
     }
     appRecord->AddRenderRecord(renderRecord);
+    bool isPreload = appRecord->IsNWebPreload();
     TAG_LOGI(AAFwkTag::APPMGR,
-        "startRenderProcess success, hostPid:%{public}d, hostUid:%{public}d, pid:%{public}d, uid:%{public}d",
-        renderRecord->GetHostPid(), renderRecord->GetHostUid(), pid, renderUid);
-    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessCreated(renderRecord);
+        "startRenderProcess success, hostPid:%{public}d, hostUid:%{public}d, pid:%{public}d, uid:%{public}d"
+        "isPreload:%{public}d", renderRecord->GetHostPid(), renderRecord->GetHostUid(), pid, renderUid, isPreload);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessCreated(renderRecord, isPreload);
     return 0;
 }
 
