@@ -17,8 +17,13 @@
 #define OHOS_ABILITY_RUNTIME_ABILITY_DELEGATOR_REGISTRY_H
 
 #include <memory>
+
 #include "ability_delegator.h"
 #include "ability_delegator_args.h"
+#ifdef CJ_FRONTEND
+#include "cj_ability_delegator_impl.h"
+#endif
+#include "iability_delegator.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -30,6 +35,15 @@ public:
      * @return the AbilityDelegator object initialized when the application is started.
      */
     static std::shared_ptr<AbilityDelegator> GetAbilityDelegator();
+
+#ifdef CJ_FRONTEND
+    /**
+     * Obtains the AbilityDelegator object of the application.
+     *
+     * @return the AbilityDelegator object initialized when the application is started.
+     */
+    static std::shared_ptr<CJAbilityDelegatorImpl> GetCJAbilityDelegator();
+#endif
 
     /**
      * Obtains test parameters stored in the AbilityDelegatorArgs object.
@@ -46,13 +60,13 @@ public:
      * @param args, Indicates the AbilityDelegatorArgs object.
      */
     static void RegisterInstance(
-        const std::shared_ptr<AbilityDelegator> &delegator, const std::shared_ptr<AbilityDelegatorArgs> &args);
+        const std::shared_ptr<IAbilityDelegator>& delegator, const std::shared_ptr<AbilityDelegatorArgs>& args);
 
 private:
-    static std::shared_ptr<AbilityDelegator> abilityDelegator_;
+    static std::shared_ptr<IAbilityDelegator> abilityDelegator_;
     static std::shared_ptr<AbilityDelegatorArgs> abilityDelegatorArgs_;
 };
-}  // namespace AppExecFwk
-}  // namespace OHOS
+} // namespace AppExecFwk
+} // namespace OHOS
 
-#endif  // OHOS_ABILITY_RUNTIME_ABILITY_DELEGATOR_REGISTRY_H
+#endif // OHOS_ABILITY_RUNTIME_ABILITY_DELEGATOR_REGISTRY_H
