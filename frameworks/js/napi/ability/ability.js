@@ -50,6 +50,9 @@ class Ability {
     return AbilityConstant.OnSaveResult.RECOVERY_AGREE;
   }
   onShare(wantParams) { }
+  onCollaborate(wantParams) {
+    return AbilityConstant.CollaborateResult.REJECT;
+  }
 }
 
 export default Ability;

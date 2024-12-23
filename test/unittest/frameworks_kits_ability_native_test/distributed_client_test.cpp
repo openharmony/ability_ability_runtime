@@ -1189,3 +1189,22 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState_0200, TestSize.Level3)
     EXPECT_EQ(result, OHOS::AAFwk::INVALID_PARAMETERS_ERR);
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState_0200 end";
 }
+
+/**
+ * @tc.number: OnCollaborateDone_0100
+ * @tc.name: OnCollaborateDone
+ * @tc.desc: OnCollaborateDone Test.
+ */
+HWTEST_F(DistributedClientTest, OnCollaborateDone_0100, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "DistributedClientTest OnCollaborateDone_0100 start";
+    auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
+    std::string collabToken ="collabToken";
+    int32_t resultCode = 0;
+    int32_t pid = 0;
+    int32_t uid = 0;
+    int32_t accessTokenId = 0;
+    int32_t result = client->OnCollaborateDone(collabToken, resultCode, pid, uid, accessTokenId);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+    GTEST_LOG_(INFO) << "DistributedClientTest OnCollaborateDone_0100 end";
+}

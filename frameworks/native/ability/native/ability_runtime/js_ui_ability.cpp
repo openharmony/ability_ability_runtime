@@ -40,6 +40,7 @@
 #include "js_runtime_utils.h"
 #include "js_utils.h"
 #ifdef SUPPORT_SCREEN
+#include "distributed_client.h"
 #include "js_window_stage.h"
 #include "scene_board_judgement.h"
 #endif
@@ -61,6 +62,13 @@ const std::string METHOD_NAME = "WindowScene::GoForeground";
 // Numerical base (radix) that determines the valid characters and their interpretation.
 #ifdef SUPPORT_SCREEN
 const int32_t BASE_DISPLAY_ID_NUM (10);
+constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
+constexpr const char* SUPPORT_COLLABORATE_INDEX = "ohos.extra.param.key.supportCollaborateIndex";
+constexpr const char* COLLABORATE_KEY = "ohos.dms.collabToken";
+enum CollaborateResult {
+    ACCEPT = 0,
+    REJECT,
+};
 #endif
 constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;
@@ -216,6 +224,9 @@ void JsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     moduleName.append("::").append(abilityInfo->name);
 
     SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath);
+#ifdef SUPPORT_SCREEN
+    SetWant(*record->GetWant());
+#endif
 }
 
 void JsUIAbility::UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
@@ -615,6 +626,8 @@ void JsUIAbility::OnForeground(const Want &want)
     }
 
     UIAbility::OnForeground(want);
+    HandleCollaboration();
+
     if (CheckIsSilentForeground()) {
         TAG_LOGD(AAFwkTag::UIABILITY, "silent foreground, do not call 'onForeground'");
         return;
@@ -674,6 +687,7 @@ void JsUIAbility::OnBackground()
     if (applicationContext != nullptr) {
         applicationContext->DispatchOnAbilityWillBackground(jsAbilityObj_);
     }
+    HandleCollaboration();
     std::string methodName = "OnBackground";
     HandleScope handleScope(jsRuntime_);
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
@@ -1091,6 +1105,71 @@ bool JsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
     executeInfo.executeParam = executeParam;
     return true;
 }
+
+int32_t JsUIAbility::OnCollaborate(WantParams &wantParam)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnCollaborate: %{public}s", GetAbilityName().c_str());
+    int32_t ret = CollaborateResult::REJECT;
+    UIAbility::OnCollaborate(wantParam);
+    HandleScope handleScope(jsRuntime_);
+    auto env = jsRuntime_.GetNapiEnv();
+
+    if (jsAbilityObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null jsAbilityObj_");
+        return ret;
+    }
+    napi_value obj = jsAbilityObj_->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, obj, napi_object)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "get ability object fail");
+        return ret;
+    }
+
+    napi_value jsWantParams = OHOS::AppExecFwk::WrapWantParams(env, wantParam);
+    napi_value argv[] = {
+        jsWantParams,
+    };
+    auto result = CallObjectMethod("onCollaborate", argv, ArraySize(argv), true);
+    OHOS::AppExecFwk::UnwrapWantParams(env, jsWantParams, wantParam);
+
+    if (!ConvertFromJsValue(env, result, ret)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "get js value failed");
+        return ret;
+    }
+    ret = (ret == CollaborateResult::ACCEPT) ? CollaborateResult::ACCEPT : CollaborateResult::REJECT;
+    return ret;
+}
+
+void JsUIAbility::HandleCollaboration()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto want = GetWant();
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null want");
+        return;
+    }
+    if (abilityInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
+        return;
+    }
+    if (want->GetBoolParam(IS_CALLING_FROM_DMS, false) &&
+        (abilityInfo_->launchMode != AppExecFwk::LaunchMode::SPECIFIED)) {
+        want->RemoveParam(IS_CALLING_FROM_DMS);
+        OHOS::AAFwk::WantParams param = want->GetParams().GetWantParams(SUPPORT_COLLABORATE_INDEX);
+        int32_t resultCode = OnCollaborate(param);
+        auto abilityContext = GetAbilityContext();
+        if (abilityContext == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+            return;
+        }
+        auto collabToken = param.GetStringParam(COLLABORATE_KEY);
+        auto uid = abilityInfo_->uid;
+        auto callerPid = getpid();
+        auto accessTokenId = abilityInfo_->applicationInfo.accessTokenId;
+        AAFwk::DistributedClient dmsClient;
+        dmsClient.OnCollaborateDone(collabToken, resultCode, callerPid, uid, accessTokenId);
+    }
+}
 #endif
 
 int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
@@ -1327,6 +1406,7 @@ void JsUIAbility::OnNewWant(const Want &want)
     if (scene_) {
         scene_->OnNewWant(want);
     }
+    HandleCollaboration();
 #endif
 
     HandleScope handleScope(jsRuntime_);
