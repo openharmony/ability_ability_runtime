@@ -19,6 +19,7 @@
 #include "ability_recovery.h"
 #include "configuration_convertor.h"
 #include "display_util.h"
+#include "display_info.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -1050,8 +1051,11 @@ void UIAbility::ContinuationRestore(const AAFwk::Want &want)
 void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
 {
     if (abilityInfo_->type == AppExecFwk::AbilityType::PAGE) {
-        int32_t defualtDisplayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
-        int32_t displayId = want.GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
+        int32_t displayId = want.GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID,
+            static_cast<int32_t>(Rosen::DISPLAY_ID_INVALID));
+        if (displayId == static_cast<int32_t>(Rosen::DISPLAY_ID_INVALID)) {
+            displayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
+        }
         TAG_LOGD(AAFwkTag::UIABILITY, "abilityName: %{public}s, displayId: %{public}d",
             abilityInfo_->name.c_str(), displayId);
 #ifdef SUPPORT_SCREEN
@@ -1064,9 +1068,14 @@ void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
         TAG_LOGD(AAFwkTag::UIABILITY, "displayId: %{public}d", displayId);
         auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
         if (display) {
-            float density = display->GetVirtualPixelRatio();
-            int32_t width = display->GetWidth();
-            int32_t height = display->GetHeight();
+            float density = 1.0f;
+            int32_t width = 0;
+            int32_t height = 0;
+            if (auto displayInfo = display->GetDisplayInfo(); displayInfo != nullptr) {
+                density = displayInfo->GetVirtualPixelRatio();
+                width = displayInfo->GetWidth();
+                height = displayInfo->GetHeight();
+            }
             std::shared_ptr<AppExecFwk::Configuration> configuration = nullptr;
             if (application_) {
                 configuration = application_->GetConfiguration();
