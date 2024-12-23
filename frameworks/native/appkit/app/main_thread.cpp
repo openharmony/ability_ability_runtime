@@ -2202,12 +2202,13 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
 #endif
     };
 #ifdef SUPPORT_SCREEN
-    Rosen::DisplayId defaultDisplayId = static_cast<Rosen::DisplayId>(
-        AAFwk::DisplayUtil::GetDefaultDisplayId());
-    Rosen::DisplayId displayId = defaultDisplayId;
+    Rosen::DisplayId displayId = Rosen::DISPLAY_ID_INVALID;
     if (abilityRecord->GetWant() != nullptr) {
         displayId = static_cast<uint64_t>(abilityRecord->GetWant()->GetIntParam(
-            AAFwk::Want::PARAM_RESV_DISPLAY_ID, defaultDisplayId));
+            AAFwk::Want::PARAM_RESV_DISPLAY_ID, static_cast<uint32_t>(Rosen::DISPLAY_ID_INVALID)));
+    }
+    if (displayId == Rosen::DISPLAY_ID_INVALID) {
+        displayId = static_cast<Rosen::DisplayId>(AAFwk::DisplayUtil::GetDefaultDisplayId());
     }
     Rosen::DisplayManager::GetInstance().AddDisplayIdFromAms(displayId, abilityRecord->GetToken());
     TAG_LOGD(AAFwkTag::APPKIT, "add displayId: %{public}" PRIu64, displayId);
