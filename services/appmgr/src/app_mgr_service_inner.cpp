@@ -160,6 +160,7 @@ constexpr const char* PERMISSION_INTERNET = "ohos.permission.INTERNET";
 constexpr const char* PERMISSION_MANAGE_VPN = "ohos.permission.MANAGE_VPN";
 constexpr const char* PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_DIR";
 constexpr const char* PERMISSION_TEMP_JIT_ALLOW = "TEMPJITALLOW";
+constexpr const char* TARGET_UID_KEY = "ohos.aafwk.param.targetUid";
 constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
 constexpr const int32_t KILL_PROCESS_BY_USER_DELAY_BASE = 500;
 
@@ -1670,7 +1671,8 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
         TAG_LOGW(
             AAFwkTag::APPMGR, "Distributeddata clear app storage failed, bundleName:%{public}s", bundleName.c_str());
     }
-    NotifyAppStatusByCallerUid(bundleName, tokenId, userId, callerUid,
+    int targetUid = IN_PROCESS_CALL(bundleMgrHelper->GetUidByBundleName(bundleName, userId, appCloneIndex));
+    NotifyAppStatusByCallerUid(bundleName, tokenId, userId, callerUid, targetUid,
         EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
     return ERR_OK;
 }
@@ -4021,7 +4023,7 @@ void AppMgrServiceInner::NotifyAppStatus(const std::string &bundleName, const st
 }
 
 void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleName, const int32_t tokenId,
-    const int32_t userId, const int32_t callerUid, const std::string &eventData)
+    const int32_t userId, const int32_t callerUid, const int32_t targetUid, const std::string &eventData)
 {
     TAG_LOGI(AAFwkTag::APPMGR,
         "%{public}s called, bundle name is %{public}s, userId is %{public}d, event is %{public}s", __func__,
@@ -4034,6 +4036,7 @@ void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleNam
     want.SetParam(TOKEN_ID, tokenId);
     want.SetParam(Constants::USER_ID, userId);
     want.SetParam(Constants::UID, callerUid);
+    want.SetParam(TARGET_UID_KEY, targetUid);
     EventFwk::CommonEventData commonData {want};
     EventFwk::CommonEventManager::PublishCommonEvent(commonData);
 }
