@@ -270,5 +270,15 @@ ErrCode ServiceExtensionContext::OpenLink(const AAFwk::Want& want, int requestCo
     return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode);
 }
 
+ErrCode ServiceExtensionContext::OpenAtomicService(const AAFwk::Want &want, const AAFwk::StartOptions &options)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "OpenAtomicService called");
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->OpenAtomicService(const_cast<AAFwk::Want&>(want),
+        options, token_);
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "OpenAtomicService ret=%{public}d", err);
+    }
+    return err;
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

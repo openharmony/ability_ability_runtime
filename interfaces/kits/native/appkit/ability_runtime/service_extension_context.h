@@ -170,6 +170,7 @@ public:
     static const size_t CONTEXT_TYPE_ID;
 
     ErrCode OpenLink(const AAFwk::Want& want, int reuqestCode);
+    ErrCode OpenAtomicService(const AAFwk::Want &want, const AAFwk::StartOptions &options);
 
 protected:
     bool IsContext(size_t contextTypeId) override
