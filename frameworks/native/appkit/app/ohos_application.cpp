@@ -459,6 +459,10 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
         configuration_->GetName().c_str(), config.GetName().c_str());
     // Update resConfig of resource manager, which belongs to application context.
     UpdateAppContextResMgr(config);
+    #ifdef SUPPORT_GRAPHICS
+        auto diffSyncConfiguration = std::make_shared<AppExecFwk::Configuration>(config);
+        Rosen::Window::UpdateConfigurationSyncForAll(diffSyncConfiguration);
+    #endif
     // Notify all abilities
     for (const auto &abilityToken : abilityRecordMgr_->GetAllTokens()) {
         auto abilityRecord = abilityRecordMgr_->GetAbilityItem(abilityToken);
@@ -466,16 +470,13 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
             abilityRecord->GetAbilityThread()->ScheduleUpdateConfiguration(config);
         }
     }
-
     for (auto it = abilityStages_.begin(); it != abilityStages_.end(); it++) {
         auto abilityStage = it->second;
         if (abilityStage) {
             abilityStage->OnConfigurationUpdated(config);
         }
     }
-
 #ifdef SUPPORT_GRAPHICS
-    TAG_LOGD(AAFwkTag::APPKIT, "Update configuration for all window.");
     auto diffConfiguration = std::make_shared<AppExecFwk::Configuration>(config);
     Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
 #endif
