@@ -560,6 +560,13 @@ public:
     void SetIdentityToken(const std::string &identityToken);
     std::string GetIdentityToken() const;
 
+    /**
+     * @brief Called when distributed system tring to collaborate remote ability.
+     * @param wantParams wantParams with collaborative info.
+     * @return Returns whether the ability agree to collaborate.
+     */
+    virtual int32_t OnCollaborate(AAFwk::WantParams &wantParams);
+
 protected:
     class UIAbilityDisplayListener : public OHOS::Rosen::IDisplayInfoChangedListener {
     public:
