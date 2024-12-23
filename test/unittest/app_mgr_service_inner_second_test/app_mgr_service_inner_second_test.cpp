@@ -1261,6 +1261,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, CheckAppRecordAndPriorityObject_0100, Tes
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_CheckAppRecordAndPriorityObject_0100 end");
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: AppMgrServiceInnerSecondTest_GetAppCloneInfo_0100
  * @tc.desc: Test GetAppCloneInfo
@@ -1287,6 +1288,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAppCloneInfo_0100, TestSize.Level1)
     EXPECT_EQ(appMgrServiceInner->CheckAppRecordAndPriorityObject(appRecord), true);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAppCloneInfo_0100 end");
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /**
  * @tc.name: AppMgrServiceInnerSecondTest_CheckAppFault_0100
@@ -1607,6 +1609,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ClearAppRunn
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_ClearAppRunningDataForKeepAlive_0100 end");
 }
 
+#ifdef SUPPORT_CHILD_PROCESS
 /**
  * @tc.name: GetMultiInstanceInfo_001
  * @tc.desc: Test GetMultiInstanceInfo.
@@ -1642,6 +1645,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetMultiInstanceInfo_001, TestSize.Level1
 
     TAG_LOGI(AAFwkTag::TEST, "GetMultiInstanceInfo_001 end");
 }
+#endif // SUPPORT_CHILD_PROCESS
 
 /**
  * @tc.name: GetRunningMultiInstanceKeys_001
