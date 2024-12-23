@@ -69,7 +69,7 @@ public:
     void OnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnWindowHidden(const std::shared_ptr<AppRunningRecord> &appRecord);
-    void OnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord);
+    void OnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord, const bool isPreload);
 #ifdef SUPPORT_CHILD_PROCESS
     void OnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord);
 #endif // SUPPORT_CHILD_PROCESS
@@ -92,7 +92,7 @@ private:
     void HandleStateChangedNotifyObserver(
         const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged);
     void HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload);
-    void HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord);
+    void HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord, const bool isPreload);
 #ifdef SUPPORT_CHILD_PROCESS
     void HandleOnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord);
 #endif // SUPPORT_CHILD_PROCESS
