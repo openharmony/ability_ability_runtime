@@ -62,6 +62,7 @@ void InnerInitWantOptionsData(std::map<std::string, unsigned int> &flagMap)
     flagMap.emplace("abilityClearMission", Want::FLAG_ABILITY_CLEAR_MISSION);
     flagMap.emplace("abilityNewMission", Want::FLAG_ABILITY_NEW_MISSION);
     flagMap.emplace("abilityMissionTop", Want::FLAG_ABILITY_MISSION_TOP);
+    flagMap.emplace("abilityOnCollaborate", Want::FLAG_ABILITY_ON_COLLABORATE);
 }
 
 napi_value WrapElementName(napi_env env, const ElementName &elementName)

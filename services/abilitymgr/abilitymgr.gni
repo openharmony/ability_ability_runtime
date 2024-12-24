@@ -141,6 +141,7 @@ abilityms_files = [
   "src/utils/ability_event_util.cpp",
   "src/utils/ability_permission_util.cpp",
   "src/utils/app_mgr_util.cpp",
+  "src/utils/dms_util.cpp",
   "src/utils/dump_utils.cpp",
   "src/utils/extension_permissions_util.cpp",
   "src/utils/keep_alive_utils.cpp",

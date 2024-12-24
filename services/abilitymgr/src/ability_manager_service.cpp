@@ -103,6 +103,9 @@
 #endif
 #include "query_erms_manager.h"
 #include "window_visibility_changed_listener.h"
+#ifdef SUPPORT_SCREEN
+#include "utils/dms_util.h"
+#endif
 
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
@@ -273,6 +276,9 @@ constexpr int32_t MAX_BUFFER = 2048;
 constexpr int32_t API12 = 12;
 constexpr int32_t API_VERSION_MOD = 100;
 constexpr const char* WHITE_LIST = "white_list";
+constexpr const char* SUPPORT_COLLABORATE_INDEX = "ohos.extra.param.key.supportCollaborateIndex";
+constexpr const char* COLLABORATE_KEY = "ohos.dms.collabToken";
+constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
 
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<AbilityManagerService>::GetInstance().get());
@@ -544,6 +550,9 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
     if (checkFileShareRet != ERR_OK) {
         return checkFileShareRet;
     }
+#ifdef SUPPORT_SCREEN
+    DmsUtil::GetInstance().UpdateFlagForCollaboration(want);
+#endif
     int32_t ret = StartAbilityWrap(want, nullptr, requestCode, false, userId);
     AAFWK::ContinueRadar::GetInstance().ClickIconStartAbility("StartAbilityWrap", want.GetFlags(), ret);
     if (ret != ERR_OK) {
@@ -564,6 +573,9 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
     if (checkFileShareRet != ERR_OK) {
         return checkFileShareRet;
     }
+#ifdef SUPPORT_SCREEN
+    DmsUtil::GetInstance().UpdateFlagForCollaboration(want);
+#endif
     return StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
 }
 
@@ -1347,6 +1359,9 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     if (checkFileShareRet != ERR_OK) {
         return checkFileShareRet;
     }
+#ifdef SUPPORT_SCREEN
+    DmsUtil::GetInstance().UpdateFlagForCollaboration(want);
+#endif
     return StartAbilityDetails(want, abilityStartSetting, callerToken, userId, requestCode);
 }
 
@@ -1595,6 +1610,9 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
     if (checkFileShareRet != ERR_OK) {
         return checkFileShareRet;
     }
+#ifdef SUPPORT_SCREEN
+    DmsUtil::GetInstance().UpdateFlagForCollaboration(want);
+#endif
     return StartUIAbilityForOptionWrap(want, startOptions, callerToken, false, userId, requestCode);
 }
 
@@ -2245,8 +2263,9 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
     StartAbilityInfoWrap threadLocalInfo(sessionInfo->want, currentUserId, appIndex, sessionInfo->callerToken);
     if (sessionInfo->want.GetBoolParam(ServerConstant::IS_CALL_BY_SCB, true)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "interceptorExecuter_ called");
-    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
-    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(sessionInfo->want, requestCode,
+        (sessionInfo->want).RemoveParam(IS_CALLING_FROM_DMS);
+        auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
+        AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(sessionInfo->want, requestCode,
             currentUserId, true, nullptr, shouldBlockFunc);
         auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
@@ -7544,6 +7563,11 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
     if (checkRet != ERR_OK) {
         return checkRet;
     }
+
+#ifdef SUPPORT_SCREEN
+    DmsUtil::GetInstance().UpdateFlagForCollaboration(want);
+#endif
+
     StartAbilityInfoWrap threadLocalInfo(want, GetUserId(), appIndex, callerToken);
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), true, nullptr,
