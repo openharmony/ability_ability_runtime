@@ -726,7 +726,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
 
     std::weak_ptr<AppRunningRecord> appRecordWeakPtr(appRecord);
     auto killProcess = [appRecordWeakPtr, token, inner = appMgrServiceInner]() {
-        appRecordSptr = appRecordWeakPtr.lock();
+        auto appRecordSptr = appRecordWeakPtr.lock();
         if (appRecordSptr == nullptr || token == nullptr || inner == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "parameter error");
             return;
