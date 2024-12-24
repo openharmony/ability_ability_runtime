@@ -87,6 +87,7 @@ public:
     static napi_value SetReceiveDataCallback(napi_env env, napi_callback_info info);
     static napi_value SetReceiveDataForResultCallback(napi_env env, napi_callback_info info);
     static napi_value LoadContent(napi_env env, napi_callback_info info);
+    static napi_value LoadContentByName(napi_env env, napi_callback_info info);
     static napi_value SetWindowBackgroundColor(napi_env env, napi_callback_info info);
     static napi_value SetWindowPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value StartAbilityByType(napi_env env, napi_callback_info info);
@@ -103,6 +104,7 @@ protected:
     napi_value OnSetReceiveDataCallback(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetReceiveDataForResultCallback(napi_env env, NapiCallbackInfo& info);
     napi_value OnLoadContent(napi_env env, NapiCallbackInfo& info);
+    napi_value OnLoadContentByName(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetWindowBackgroundColor(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetWindowPrivacyMode(napi_env env, NapiCallbackInfo& info);
     napi_value OnStartAbilityByType(napi_env env, NapiCallbackInfo& info);
