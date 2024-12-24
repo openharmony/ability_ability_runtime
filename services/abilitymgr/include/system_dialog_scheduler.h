@@ -60,6 +60,7 @@ struct DialogAppInfo {
     std::string abilityName = {};
     std::string moduleName = {};
     bool visible = true;
+    bool isAppLink = false;
     int32_t appIndex = 0;
     AppExecFwk::MultiAppModeData multiAppMode;
 };
