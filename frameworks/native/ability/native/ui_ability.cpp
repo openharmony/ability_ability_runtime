@@ -704,6 +704,12 @@ void UIAbility::OnLeaveForeground()
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 }
 
+int32_t UIAbility::OnCollaborate(AAFwk::WantParams &wantParams)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    return ERR_OK;
+}
+
 std::string UIAbility::GetContentInfo()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

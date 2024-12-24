@@ -60,6 +60,8 @@ public:
     int32_t StopRemoteExtensionAbility(const Want &want, int32_t callerUid,
         uint32_t accessToken, int32_t extensionType);
     int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state, int32_t callingUid);
+    int32_t OnCollaborateDone(
+        const std::string &collabToken, int32_t result, int32_t pid, int32_t uid, int32_t accessTokenId);
     enum {
         START_REMOTE_ABILITY = 1,
         CONNECT_REMOTE_ABILITY = 6,
@@ -80,7 +82,8 @@ public:
         STOP_REMOTE_EXTERNSION_ABILITY = 225,
         REGISTER_ON_LISTENER = 260,
         REGISTER_OFF_LISTENER = 261,
-        SET_MISSION_CONTINUE_STATE = 300
+        SET_MISSION_CONTINUE_STATE = 300,
+        NOTIFY_ON_COLLABORATE_DONE = 334
     };
 private:
     sptr<IRemoteObject> GetDmsProxy();

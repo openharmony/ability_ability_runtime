@@ -543,5 +543,30 @@ int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFw
     PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, SET_MISSION_CONTINUE_STATE, data, reply);
 }
+
+int32_t DistributedClient::OnCollaborateDone(
+    const std::string &collabToken, int32_t result, int32_t pid, int32_t uid, int32_t accessTokenId)
+{
+    sptr<IRemoteObject> remote = GetDmsProxy();
+    if (remote == nullptr) {
+        TAG_LOGE(AAFwkTag::DISTRIBUTED, "null remote");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        TAG_LOGE(AAFwkTag::DISTRIBUTED, "WriteInterfaceToken fail");
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_WRITE_HELPER(data, String, collabToken);
+    PARCEL_WRITE_HELPER(data, Int32, result);
+    PARCEL_WRITE_HELPER(data, Int32, pid);
+    PARCEL_WRITE_HELPER(data, Int32, uid);
+    PARCEL_WRITE_HELPER(data, Int32, accessTokenId);
+
+    MessageParcel reply;
+    PARCEL_TRANSACT_SYNC_RET_INT(remote,
+        static_cast<uint32_t>(NOTIFY_ON_COLLABORATE_DONE), data, reply);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
