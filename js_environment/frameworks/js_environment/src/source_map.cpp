@@ -501,7 +501,7 @@ std::string SourceMap::GetSourceInfo(const std::string& line, const std::string&
     if (!packageInfo.empty()) {
         auto last = packageInfo.rfind('|');
         if (last != std::string::npos) {
-            sourceInfo = packageInfo.substr(FLAG_PACKAGE_INFO_SIZE, packageInfo.rfind('|') - FLAG_PACKAGE_INFO_SIZE);
+            sourceInfo = packageInfo.substr(FLAG_PACKAGE_INFO_SIZE, last - FLAG_PACKAGE_INFO_SIZE);
             return sourceInfo.append(" (" + sources + ":" + std::to_string(mapInfo.row) + ":" +
                 std::to_string(mapInfo.col) + ")");
         }
@@ -509,8 +509,7 @@ std::string SourceMap::GetSourceInfo(const std::string& line, const std::string&
     if (!entryPackageInfo.empty()) {
         auto last = entryPackageInfo.rfind('|');
         if (last != std::string::npos) {
-            sourceInfo = entryPackageInfo.substr(FLAG_ENTRY_PACKAGE_INFO_SIZE,
-                entryPackageInfo.rfind('|') - FLAG_ENTRY_PACKAGE_INFO_SIZE);
+            sourceInfo = entryPackageInfo.substr(FLAG_ENTRY_PACKAGE_INFO_SIZE, last - FLAG_ENTRY_PACKAGE_INFO_SIZE);
             return sourceInfo.append(" (" + sources + ":" + std::to_string(mapInfo.row) + ":" +
                 std::to_string(mapInfo.col) + ")");
         }
@@ -554,12 +553,12 @@ bool SourceMap::ReadSourceMapData(const std::string& hapPath, const std::string&
     return false;
 }
 
-bool SourceMap::TranslateUrlPositionBySourceMap(std::string& url, int& line, int& column)
+bool SourceMap::TranslateUrlPositionBySourceMap(std::string& url, int& line, int& column, std::string& packageName)
 {
     if (isModular_) {
         auto iter = sourceMaps_.find(url);
         if (iter != sourceMaps_.end()) {
-            return GetLineAndColumnNumbers(line, column, *(iter->second), url);
+            return GetLineAndColumnNumbers(line, column, *(iter->second), url, packageName);
         }
         TAG_LOGE(AAFwkTag::JSENV, "stageMode sourceMaps find fail");
         return false;
@@ -567,7 +566,8 @@ bool SourceMap::TranslateUrlPositionBySourceMap(std::string& url, int& line, int
     return false;
 }
 
-bool SourceMap::GetLineAndColumnNumbers(int& line, int& column, SourceMapData& targetMap, std::string& url)
+bool SourceMap::GetLineAndColumnNumbers(int& line, int& column, SourceMapData& targetMap,
+    std::string& url, std::string& packageName)
 {
     int32_t offSet = 0;
     MappingInfo mapInfo;
@@ -582,6 +582,7 @@ bool SourceMap::GetLineAndColumnNumbers(int& line, int& column, SourceMapData& t
         line = mapInfo.row;
         column = mapInfo.col;
         url = mapInfo.sources;
+        GetPackageName(targetMap, packageName);
         return true;
     }
 }
@@ -597,6 +598,24 @@ void SourceMap::GetHapPath(const std::string &bundleName, std::vector<std::strin
     std::lock_guard<std::mutex> lock(sourceMapMutex_);
     if (getHapPathFunc_) {
         getHapPathFunc_(bundleName, hapList);
+    }
+}
+
+void SourceMap::GetPackageName(const SourceMapData& targetMap, std::string& packageName)
+{
+    std::string entryPackageInfo = targetMap.entryPackageInfo_[0];
+    std::string packageInfo = targetMap.packageInfo_[0];
+    if (!packageInfo.empty()) {
+        auto last = packageInfo.rfind('|');
+        if (last != std::string::npos) {
+            packageName = packageInfo.substr(FLAG_PACKAGE_INFO_SIZE, last - FLAG_PACKAGE_INFO_SIZE);
+        }
+    }
+    if (!entryPackageInfo.empty()) {
+        auto last = entryPackageInfo.rfind('|');
+        if (last != std::string::npos) {
+            packageName = entryPackageInfo.substr(FLAG_ENTRY_PACKAGE_INFO_SIZE, last - FLAG_ENTRY_PACKAGE_INFO_SIZE);
+        }
     }
 }
 }   // namespace JsEnv
