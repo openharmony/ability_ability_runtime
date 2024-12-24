@@ -11792,25 +11792,28 @@ int32_t AbilityManagerService::QueryAtomicServiceStartupRule(sptr<IRemoteObject>
         ERR_CAPABILITY_NOT_SUPPORT, "device type not allowd");
     auto accessTokenId = IPCSkeleton::GetCallingTokenID();
     auto type = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(accessTokenId);
-    CHECK_TRUE_RETURN_RET(type != Security::AccessToken::TypeATokenTypeEnum::TOKEN_HAP,
-        ERR_INVALID_VALUE, "caller not hap");
+    CHECK_TRUE_RETURN_RET(type != Security::AccessToken::TypeATokenTypeEnum::TOKEN_HAP, INNER_ERR, "caller not hap");
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
-    CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
+    CHECK_POINTER_AND_RETURN(uiAbilityManager, INNER_ERR);
     auto callerAbility = uiAbilityManager->GetAbilityRecordByToken(callerToken);
-    CHECK_POINTER_AND_RETURN(callerAbility, ERR_INVALID_VALUE);
+    CHECK_POINTER_AND_RETURN(callerAbility, INNER_ERR);
     CHECK_TRUE_RETURN_RET(callerAbility->GetApplicationInfo().accessTokenId != accessTokenId,
-        ERR_INVALID_VALUE, "callerToken don't belong caller");
+        INNER_ERR, "callerToken don't belong caller");
     CHECK_TRUE_RETURN_RET(!callerAbility->IsForeground() && !callerAbility->GetAbilityForegroundingFlag(),
-        NOT_TOP_ABILITY, "caller not foreground");
+        INNER_ERR, "caller not foreground");
 
-    std::string bundleName = ATOMIC_SERVICE_PREFIX + appId;
     Want want;
-    want.SetBundle(bundleName);
+    want.SetBundle(ATOMIC_SERVICE_PREFIX + appId);
     want.SetParam("send_to_erms_embedded", 1);
     UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(want, callerToken);
     auto userId = GetUserId();
     int32_t ret = freeInstallManager_->StartFreeInstall(want, userId, 0, callerToken, false);
-    CHECK_RET_RETURN_RET(ret, "target not allowed free install");
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "free install failed:%{public}d", ret);
+        rule.isOpenAllowed = false;
+        rule.isEmbeddedAllowed = false;
+        return ERR_OK;
+    }
 
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerAbility->GetElementName().GetBundleName());
     auto erms = std::make_shared<EcologicalRuleInterceptor>();
@@ -11820,7 +11823,14 @@ int32_t AbilityManagerService::QueryAtomicServiceStartupRule(sptr<IRemoteObject>
         TAG_LOGI(AAFwkTag::ABILITYMGR, "QueryAtomicServiceStartupRule succeeded");
         return ERR_OK;
     }
-    CHECK_TRUE_RETURN_RET(ret != ERR_ECOLOGICAL_CONTROL_STATUS, ret, "QueryAtomicServiceStartupRule failed");
+    if (ret != ERR_ECOLOGICAL_CONTROL_STATUS) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "QueryAtomicServiceStartupRule failed:%{public}d", ret);
+        if (ret == ERR_CAPABILITY_NOT_SUPPORT) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "not supported");
+            return ret;
+        }
+        return INNER_ERR;
+    }
     AbilityRequest abilityRequest;
     ret = GenerateAbilityRequest(want, -1, abilityRequest, callerToken, userId);
     CHECK_TRUE_RETURN_RET(ret != ERR_OK, INNER_ERR, "GenerateAbilityRequest failed");
