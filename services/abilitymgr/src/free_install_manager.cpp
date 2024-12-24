@@ -388,6 +388,12 @@ void FreeInstallManager::StartAbilityByPreInstall(int32_t recordId, FreeInstallI
             result, "start ability failed");
     }
     IPCSkeleton::SetCallingIdentity(identity);
+    if (info.isOpenAtomicServiceShortUrl) {
+        auto url = info.want.GetUriString();
+        DelayedSingleton<FreeInstallObserverManager>::GetInstance()->OnInstallFinishedByUrl(recordId,
+            startTime, url, result);
+        return;
+    }
     DelayedSingleton<FreeInstallObserverManager>::GetInstance()->OnInstallFinished(
         recordId, bundleName, abilityName, startTime, result);
 }
