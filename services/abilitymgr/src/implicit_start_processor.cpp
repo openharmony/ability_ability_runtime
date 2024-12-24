@@ -126,6 +126,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start ability by type: %{public}d", request.callType);
+    bool isNfcCalling = (IPCSkeleton::GetCallingUid() == NFC_CALLER_UID);
     auto sysDialogScheduler = DelayedSingleton<SystemDialogScheduler>::GetInstance();
     CHECK_POINTER_AND_RETURN(sysDialogScheduler, ERR_INVALID_VALUE);
 
@@ -236,6 +237,10 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     //There is a default opening method add Only one application supports
     bool defaultPicker = false;
     defaultPicker = request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, defaultPicker);
+    if (isNfcCalling && dialogAppInfos.size() == 1 && !dialogAppInfos[0].isAppLink) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "ImplicitQueryInfos, is nfc calling.");
+        defaultPicker = true;
+    }
     if (dialogAppInfos.size() == 1 && !defaultPicker) {
         auto info = dialogAppInfos.front();
         // Compatible with the action's sunset scene
@@ -958,6 +963,7 @@ void ImplicitStartProcessor::AddAbilityInfoToDialogInfos(const AddInfoParam &par
     dialogAppInfo.visible = param.info.visible;
     dialogAppInfo.appIndex = param.info.applicationInfo.appIndex;
     dialogAppInfo.multiAppMode = param.info.applicationInfo.multiAppMode;
+    dialogAppInfo.isAppLink = (param.info.linkType == AppExecFwk::LinkType::APP_LINK);
     dialogAppInfos.emplace_back(dialogAppInfo);
 }
 
