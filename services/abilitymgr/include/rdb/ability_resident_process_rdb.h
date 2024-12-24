@@ -79,7 +79,7 @@ public:
     int32_t GetResidentProcessEnable(const std::string &bundleName, bool &enable);
     int32_t UpdateResidentProcessEnable(const std::string &bundleName, bool enable);
     int32_t RemoveData(std::string &bundleName);
-
+    int32_t GetResidentProcessRawData(const std::string &bundleName, const std::string &callerName);
 private:
     std::unique_ptr<RdbDataManager> rdbMgr_ = nullptr;
 };
