@@ -251,5 +251,39 @@ int32_t AmsResidentProcessRdb::RemoveData(std::string &bundleName)
     absRdbPredicates.EqualTo(KEY_BUNDLE_NAME, bundleName);
     return rdbMgr_->DeleteData(absRdbPredicates);
 }
+
+int32_t AmsResidentProcessRdb::GetResidentProcessRawData(const std::string &bundleName, const std::string &callerName)
+{
+    std::vector<std::tuple<std::string, std::string, std::string>> initList;
+    ParserUtil::GetInstance().GetResidentProcessRawData(initList);
+
+    if (initList.empty() || bundleName.empty() || callerName.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "initList size : %{public}d bundleName : %{public}s callerName : %{public}s",
+            static_cast<int>(initList.size()), bundleName.c_str(), callerName.c_str());
+        return Rdb_Parameter_Err;
+    }
+
+    for (auto const &item : initList) {
+        if (std::get<INDEX_BUNDLE_NAME>(item) == bundleName) {
+            std::string configList = std::get<INDEX_KEEP_ALIVE_CONFIGURED_LIST>(item);
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "match bundle : %{public}s  list : %{public}s", bundleName.c_str(),
+                configList.c_str());
+            // regardless of whether a caller is added or deleted in the configuration file,
+            // we need to update the database
+            NativeRdb::ValuesBucket valuesBucket;
+            valuesBucket.PutString(KEY_KEEP_ALIVE_CONFIGURED_LIST, configList);
+            NativeRdb::AbsRdbPredicates absRdbPredicates(ABILITY_RDB_TABLE_NAME);
+            absRdbPredicates.EqualTo(KEY_BUNDLE_NAME, bundleName);
+            if (rdbMgr_ != nullptr) {
+                rdbMgr_->UpdateData(valuesBucket, absRdbPredicates);
+            }
+            if (configList.find(callerName) != std::string::npos) {
+                return Rdb_OK;
+            }
+        }
+    }
+
+    return Rdb_Parameter_Err;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
