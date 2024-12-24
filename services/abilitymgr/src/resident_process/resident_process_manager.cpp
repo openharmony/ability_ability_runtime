@@ -146,8 +146,10 @@ int32_t ResidentProcessManager::SetResidentProcessEnabled(
     }
     auto &rdb = AmsResidentProcessRdb::GetInstance();
     auto rdbResult = rdb.VerifyConfigurationPermissions(bundleName, callerName);
-    if (rdbResult != Rdb_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "obtain permissions failed. result: %{public}d", rdbResult);
+    auto configResult = rdb.GetResidentProcessRawData(bundleName, callerName);
+    if (rdbResult != Rdb_OK && configResult != Rdb_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "obtain permissions failed. result: %{public}d, configResult: %{public}d",
+            rdbResult, configResult);
         return ERR_NO_RESIDENT_PERMISSION;
     }
 
