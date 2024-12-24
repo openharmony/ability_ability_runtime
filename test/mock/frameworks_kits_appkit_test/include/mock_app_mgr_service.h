@@ -183,12 +183,10 @@ public:
         return 0;
     }
 
-#ifdef SUPPORT_CHILD_PROCESS
     virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info) override
     {
         return 0;
     }
-#endif // SUPPORT_CHILD_PROCESS
 
     virtual int32_t StartNativeProcessForDebugger(const AAFwk::Want &want) override
     {

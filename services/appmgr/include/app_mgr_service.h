@@ -201,7 +201,6 @@ public:
      */
     virtual int32_t GetAllRenderProcesses(std::vector<RenderProcessInfo> &info) override;
 
-#ifdef SUPPORT_CHILD_PROCESS
     /**
      * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
      * Obtains information about children processes that are running on the device.
@@ -210,7 +209,6 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info) override;
-#endif // SUPPORT_CHILD_PROCESS
 
     /**
      * JudgeSandboxByPid, call JudgeSandboxByPid() through proxy project.
