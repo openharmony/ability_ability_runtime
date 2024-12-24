@@ -724,14 +724,16 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         return;
     }
 
-    auto killProcess = [appRecord, token, inner = appMgrServiceInner]() {
-        if (appRecord == nullptr || token == nullptr || inner == nullptr) {
+    std::weak_ptr<AppRunningRecord> appRecordWeakPtr(appRecord);
+    auto killProcess = [appRecordWeakPtr, token, inner = appMgrServiceInner]() {
+        auto appRecordSptr = appRecordWeakPtr.lock();
+        if (appRecordSptr == nullptr || token == nullptr || inner == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "parameter error");
             return;
         }
-        appRecord->RemoveTerminateAbilityTimeoutTask(token);
+        appRecordSptr->RemoveTerminateAbilityTimeoutTask(token);
         TAG_LOGD(AAFwkTag::APPMGR, "The ability is the last, kill application");
-        auto priorityObject = appRecord->GetPriorityObject();
+        auto priorityObject = appRecordSptr->GetPriorityObject();
         if (priorityObject == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null priorityObject");
             return;
@@ -745,7 +747,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         if (result < 0) {
             TAG_LOGW(AAFwkTag::APPMGR, "failed, pid: %{public}d", pid);
         }
-        inner->NotifyAppStatus(appRecord->GetBundleName(), appRecord->GetAppIndex(),
+        inner->NotifyAppStatus(appRecordSptr->GetBundleName(), appRecordSptr->GetAppIndex(),
             CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
         };
 
