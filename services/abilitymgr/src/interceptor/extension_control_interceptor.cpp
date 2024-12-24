@@ -50,13 +50,16 @@ ErrCode ExtensionControlInterceptor::DoProcess(AbilityInterceptorParam param)
     if (!targetAbilityInfo.applicationInfo.isSystemApp &&
         !DelayedSingleton<ExtensionConfig>::GetInstance()->IsExtensionStartThirdPartyAppEnable(
             callerAbilityInfo.extensionTypeName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "third party app block extension call");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "third party app block extension call, bundleName: %{public}s",
+            callerAbilityInfo.bundleName.c_str());
         return EXTENSION_BLOCKED_BY_THIRD_PARTY_APP_FLAG;
     }
-    if (targetAbilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE &&
+    if ((targetAbilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE ||
+         targetAbilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::DATASHARE) &&
         !DelayedSingleton<ExtensionConfig>::GetInstance()->IsExtensionStartServiceEnable(
             callerAbilityInfo.extensionTypeName, param.want.GetElement().GetURI())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "service list block extension call");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "service list block extension call, bundleName: %{public}s",
+            callerAbilityInfo.bundleName.c_str());
         return EXTENSION_BLOCKED_BY_SERVICE_LIST;
     }
 
@@ -79,6 +82,7 @@ bool ExtensionControlInterceptor::GetCallerAbilityInfo(const AbilityInterceptorP
         if (appScheduler != nullptr) {
             appScheduler->GetRunningProcessInfoByToken(param.callerToken, processInfo);
             if (!processInfo.isStrictMode && !param.want.GetBoolParam(STRICT_MODE, false)) {
+                TAG_LOGD(AAFwkTag::ABILITYMGR, "caller and want not strict mode");
                 return true;
             }
         }
@@ -92,6 +96,7 @@ bool ExtensionControlInterceptor::GetTargetAbilityInfo(const AbilityInterceptorP
     if (StartAbilityUtils::startAbilityInfo != nullptr &&
         StartAbilityUtils::startAbilityInfo->abilityInfo.bundleName == param.want.GetBundle() &&
         StartAbilityUtils::startAbilityInfo->abilityInfo.name == param.want.GetElement().GetAbilityName()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "targetAbilityInfo get from startAbiiltyInfo");
         targetAbilityInfo = StartAbilityUtils::startAbilityInfo->abilityInfo;
     } else {
         auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
