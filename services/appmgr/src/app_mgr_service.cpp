@@ -443,15 +443,16 @@ int32_t AppMgrService::GetAllRenderProcesses(std::vector<RenderProcessInfo> &inf
     return appMgrServiceInner_->GetAllRenderProcesses(info);
 }
 
-#ifdef SUPPORT_CHILD_PROCESS
 int AppMgrService::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
 {
+#ifdef SUPPORT_CHILD_PROCESS
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->GetAllChildrenProcesses(info);
-}
 #endif // SUPPORT_CHILD_PROCESS
+    return ERR_INVALID_OPERATION;
+}
 
 int32_t AppMgrService::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
 {

@@ -299,11 +299,11 @@ int32_t AppMgrProxy::GetAllRenderProcesses(std::vector<RenderProcessInfo> &info)
     return result;
 }
 
-#ifdef SUPPORT_CHILD_PROCESS
 int AppMgrProxy::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
 {
     MessageParcel data;
     MessageParcel reply;
+#ifdef SUPPORT_CHILD_PROCESS
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -316,10 +316,10 @@ int AppMgrProxy::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
         TAG_LOGE(AAFwkTag::APPMGR, "GetParcelableInfos fail, error: %{public}d", error);
         return error;
     }
+#endif // SUPPORT_CHILD_PROCESS
     int result = reply.ReadInt32();
     return result;
 }
-#endif // SUPPORT_CHILD_PROCESS
 
 int32_t AppMgrProxy::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
 {

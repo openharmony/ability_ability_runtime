@@ -25,8 +25,8 @@
 #include "app_record_id.h"
 #include "application_info.h"
 #include "bundle_info.h"
-#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_info.h"
+#ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_request.h"
 #endif // SUPPORT_CHILD_PROCESS
 #include "fault_data.h"
@@ -201,7 +201,6 @@ public:
      */
     virtual int GetAllRenderProcesses(std::vector<RenderProcessInfo> &info) = 0;
 
-#ifdef SUPPORT_CHILD_PROCESS
     /**
      * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
      * Obtains information about children processes that are running on the device.
@@ -210,7 +209,6 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info) = 0;
-#endif // SUPPORT_CHILD_PROCESS
 
     /**
      * JudgeSandboxByPid, call JudgeSandboxByPid() through proxy project.

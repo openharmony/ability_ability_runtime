@@ -11,13 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
+
 group("unittest") {
   testonly = true
 
   deps = [
-    "child_main_thread_first_test:unittest",
-    "child_main_thread_test:unittest",
     "ohos_application_first_test:unittest",
     "ohos_application_test:unittest",
   ]
+  if (ability_runtime_child_process) {
+    deps += [
+      "child_main_thread_first_test:unittest",
+      "child_main_thread_test:unittest",
+    ]
+  }
 }

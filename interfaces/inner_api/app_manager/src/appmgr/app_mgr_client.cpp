@@ -466,9 +466,9 @@ AppMgrResultCode AppMgrClient::GetAllRenderProcesses(std::vector<RenderProcessIn
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-#ifdef SUPPORT_CHILD_PROCESS
 AppMgrResultCode AppMgrClient::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
 {
+#ifdef SUPPORT_CHILD_PROCESS
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "service is nullptr");
@@ -479,9 +479,9 @@ AppMgrResultCode AppMgrClient::GetAllChildrenProcesses(std::vector<ChildProcessI
         TAG_LOGE(AAFwkTag::APPMGR, "service->GetAllChildrenProcesses failed,result=%{public}d", result);
         return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
     }
+#endif // SUPPORT_CHILD_PROCESS
     return AppMgrResultCode::RESULT_OK;
 }
-#endif // SUPPORT_CHILD_PROCESS
 
 AppMgrResultCode AppMgrClient::NotifyMemoryLevel(MemoryLevel level)
 {
