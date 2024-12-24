@@ -3378,11 +3378,26 @@ void AppMgrServiceInner::AddMountPermission(uint32_t accessTokenId, std::set<std
     }
     auto handle = spawnClient->GetAppSpawnClientHandle();
     int32_t maxPermissionIndex = GetMaxPermissionIndex(handle);
+    if (maxPermissionIndex <= 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "maxPermissionIndex error: %{public}d", maxPermissionIndex);
+        return;
+    }
+    std::vector<std::string> tmpPermissionList;
+    tmpPermissionList.reserve(maxPermissionIndex);
     for (int i = 0; i < maxPermissionIndex; i++) {
-        std::string permission = std::string(GetPermissionByIndex(handle, i));
-        if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(accessTokenId, permission, false) ==
-            Security::AccessToken::PERMISSION_GRANTED) {
-            permissions.insert(permission);
+        tmpPermissionList.emplace_back(std::string(GetPermissionByIndex(handle, i)));
+    }
+
+    std::vector<int32_t> permStateList;
+    auto result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(accessTokenId, tmpPermissionList,
+        permStateList, true);
+    if (result != ERR_OK || permStateList.size() != tmpPermissionList.size()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "VerifyAccessToken error: %{public}d", result);
+        return;
+    }
+    for (int i = 0; i < permStateList.size(); i++) {
+        if (permStateList[i] == Security::AccessToken::PERMISSION_GRANTED) {
+            permissions.insert(tmpPermissionList[i]);
         }
     }
 }
