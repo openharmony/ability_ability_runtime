@@ -322,6 +322,18 @@ public:
      */
     void RegisterClearFunc(ClearFunc func);
 
+    /**
+     * return api target version.
+     */
+    int32_t getApiTargetVersion();
+
+    /**
+     * set api target version.
+     *
+     * @param apiTargetVersion, app target version.
+     */
+    void setApiTargetVersion(int32_t apiTargetVersion);
+
 private:
     AbilityDelegator::AbilityState ConvertAbilityState(const AbilityLifecycleExecutor::LifecycleState lifecycleState);
     void ProcessAbilityProperties(const std::shared_ptr<ADelegatorAbilityProperty> &ability);
@@ -350,6 +362,8 @@ private:
     std::mutex mutexMonitor_;
     std::mutex mutexAbilityProperties_;
     std::mutex mutexStageMonitor_;
+
+    int32_t apiTargetVersion_ = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
