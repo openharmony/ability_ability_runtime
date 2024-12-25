@@ -7903,7 +7903,7 @@ void AppMgrServiceInner::CheckCleanAbilityByUserRequest(const std::shared_ptr<Ap
 void AppMgrServiceInner::GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids)
 {
     int32_t result = ERR_OK;
-    pid_t foregroundPid = -1;
+    std::vector<pid_t> foregroundPids;
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
         if (!appRecord->GetSpawned()) {
@@ -7916,13 +7916,13 @@ void AppMgrServiceInner::GetPidsByAccessTokenId(const uint32_t accessTokenId, st
         if (accessTokenId == applicationInfo->accessTokenId) {
             pid_t curPid = appRecord->GetPriorityObject()->GetPid();
             if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND) {
-                foregroundPid = curPid;
+                foregroundPids.push_back(curPid);
                 continue;
             }
             pids.push_back(curPid);
         }
     }
-    if (foregroundPid >= 0) {
+    for (pid_t foregroundPid : foregroundPids) {
         pids.push_back(foregroundPid);
     }
 }
