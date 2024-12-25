@@ -447,5 +447,22 @@ HWTEST_F(UIExtensionContextTest, StartUIServiceExtension_0100, TestSize.Level1)
     EXPECT_TRUE(ans != ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "StartUIServiceExtension_0100 end");
 }
+
+/**
+ * @tc.number: GetScreenMode_0100
+ * @tc.name: GetScreenMode
+ * @tc.desc: GetScreenMode.
+ */
+HWTEST_F(UIExtensionContextTest, GetScreenMode_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetScreenMode_0100 start");
+    auto context = std::make_shared<UIExtensionContext>();
+    EXPECT_NE(context, nullptr);
+    int32_t screenMode = 2;
+    context->SetScreenMode(screenMode);
+    auto ans = context->GetScreenMode();
+    EXPECT_EQ(ans, screenMode);
+    TAG_LOGI(AAFwkTag::TEST, "GetScreenMode_0100 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
