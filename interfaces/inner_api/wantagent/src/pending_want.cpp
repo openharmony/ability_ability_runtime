@@ -234,9 +234,9 @@ ErrCode PendingWant::BuildServicePendingWant(
     return ERR_OK;
 }
 
-ErrCode PendingWant::Cancel(const sptr<AAFwk::IWantSender> &target)
+ErrCode PendingWant::Cancel(const sptr<AAFwk::IWantSender> &target, uint32_t flags)
 {
-    return WantAgentClient::GetInstance().CancelWantSender(target);
+    return WantAgentClient::GetInstance().CancelWantSender(target, flags);
 }
 
 void PendingWant::Send(const sptr<AAFwk::IWantSender> &target)
