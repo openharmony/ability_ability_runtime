@@ -629,16 +629,16 @@ void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &
         TAG_LOGW(AAFwkTag::ABILITYMGR, "null target service");
         return;
     }
-    if (targetService->GetConnectRecordList().size() > 1) {
+
+    if (targetService->GetConnectedListSize() >= 1) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "connected");
         targetService->RemoveSignatureInfo();
-        if (taskHandler_ != nullptr && targetService->GetConnRemoteObject()) {
-            auto task = [connectRecord]() { connectRecord->CompleteConnect(ERR_OK); };
-            taskHandler_->SubmitTask(task, TaskQoS::USER_INTERACTIVE);
-        } else {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "Target service is connecting, wait for callback");
-        }
-    } else {
+        CHECK_POINTER(connectRecord);
+        connectRecord->CompleteConnect();
+    } else if (targetService->GetConnectingListSize() <= 1) {
         ConnectAbility(targetService);
+    } else {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "connecting");
     }
 }
 

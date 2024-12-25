@@ -125,13 +125,12 @@ int ConnectionRecord::DisconnectAbility()
     return ERR_OK;
 }
 
-void ConnectionRecord::CompleteConnect(int resultCode)
+void ConnectionRecord::CompleteConnect()
 {
+    SetConnectState(ConnectionState::CONNECTED);
     CHECK_POINTER(targetService_);
-    if (resultCode == ERR_OK) {
-        SetConnectState(ConnectionState::CONNECTED);
-        targetService_->SetAbilityState(AbilityState::ACTIVE);
-    }
+    targetService_->SetAbilityState(AbilityState::ACTIVE);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "CompleteConnect,%{public}s", targetService_->GetAbilityInfo().name.c_str());
     const AppExecFwk::AbilityInfo &abilityInfo = targetService_->GetAbilityInfo();
     AppExecFwk::ElementName element(abilityInfo.deviceId, abilityInfo.bundleName,
         abilityInfo.name, abilityInfo.moduleName);
@@ -151,13 +150,13 @@ void ConnectionRecord::CompleteConnect(int resultCode)
     }
 
     if (callback && handler) {
-        handler->SubmitTask([callback, element, remoteObject, resultCode] {
+        handler->SubmitTask([callback, element, remoteObject] {
             TAG_LOGD(AAFwkTag::CONNECTION, "OnAbilityConnectDone");
-            callback->OnAbilityConnectDone(element, remoteObject, resultCode);
+            callback->OnAbilityConnectDone(element, remoteObject, ERR_OK);
             });
     }
     DelayedSingleton<ConnectionStateManager>::GetInstance()->AddConnection(shared_from_this());
-    TAG_LOGI(AAFwkTag::CONNECTION, "result: %{public}d, connectState:%{public}d", resultCode, state_);
+    TAG_LOGI(AAFwkTag::CONNECTION, "connectState:%{public}d", state_);
 }
 
 void ConnectionRecord::CompleteDisconnect(int resultCode, bool isCallerDied, bool isTargetDied)
@@ -220,7 +219,7 @@ void ConnectionRecord::ScheduleConnectAbilityDone()
         handler->CancelTask(taskName);
     }
 
-    CompleteConnect(ERR_OK);
+    CompleteConnect();
 }
 
 void ConnectionRecord::DisconnectTimeout()
