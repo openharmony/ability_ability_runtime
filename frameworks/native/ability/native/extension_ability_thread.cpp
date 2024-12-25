@@ -55,6 +55,7 @@ constexpr static char INPUTMETHOD_EXTENSION[] = "InputMethodExtensionAbility";
 constexpr static char APP_ACCOUNT_AUTHORIZATION_EXTENSION[] = "AppAccountAuthorizationExtension";
 constexpr static char FENCE_EXTENSION[] = "FenceExtension";
 constexpr static char CALLER_INFO_QUERY_EXTENSION[] = "CallerInfoQueryExtension";
+constexpr static char ASSET_ACCELERATION_EXTENSION[] = "AssetAccelerationExtension";
 }
 
 const std::map<AppExecFwk::ExtensionAbilityType, std::string> UI_EXTENSION_NAME_MAP = {
@@ -131,48 +132,37 @@ void ExtensionAbilityThread::CreateExtensionAbilityName(
 {
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER) {
         abilityName = STATIC_SUBSCRIBER_EXTENSION;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::DRIVER) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::DRIVER) {
         abilityName = BASE_DRIVER_EXTENSION;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::DATASHARE) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::DATASHARE) {
         abilityName = DATA_SHARE_EXT_ABILITY;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WORK_SCHEDULER) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WORK_SCHEDULER) {
         abilityName = WORK_SCHEDULER_EXTENSION;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::ACCESSIBILITY) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::ACCESSIBILITY) {
         abilityName = ACCESSIBILITY_EXTENSION;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WALLPAPER) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WALLPAPER) {
         abilityName = WALLPAPER_EXTENSION;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::FILEACCESS_EXTENSION) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::FILEACCESS_EXTENSION) {
         abilityName = FILEACCESS_EXT_ABILITY;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::ENTERPRISE_ADMIN) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::ENTERPRISE_ADMIN) {
         abilityName = ENTERPRISE_ADMIN_EXTENSION;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::INPUTMETHOD) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::INPUTMETHOD) {
         abilityName = INPUTMETHOD_EXTENSION;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::APP_ACCOUNT_AUTHORIZATION) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::APP_ACCOUNT_AUTHORIZATION) {
         abilityName = APP_ACCOUNT_AUTHORIZATION_EXTENSION;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::FENCE) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::FENCE) {
         abilityName = FENCE_EXTENSION;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::CALLER_INFO_QUERY) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::CALLER_INFO_QUERY) {
         abilityName = CALLER_INFO_QUERY_EXTENSION;
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::ASSET_ACCELERATION) {
+        abilityName = ASSET_ACCELERATION_EXTENSION;
     }
 #ifdef SUPPORT_GRAPHICS
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH) {
+    else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH) {
         abilityName = USER_AUTH_EXTENSION;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::VPN) {
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::VPN) {
         abilityName = VPN_EXTENSION;
-    }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UNSPECIFIED &&
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UNSPECIFIED &&
         abilityInfo->type == AppExecFwk::AbilityType::EXTENSION) {
         abilityName = abilityInfo->extensionTypeName + CUSTOM_EXTENSION;
     }
