@@ -527,7 +527,7 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
 
         InsightIntentExecuteParam executeParam;
         InsightIntentExecuteParam::GenerateFromWant(want, executeParam);
-        if (executeParam.uris_.size() > 0) {
+        if (result.uris.size() > 0) {
             uiExtension->ExecuteInsightIntentDone(executeParam.insightIntentId_, result);
         }
         uiExtension->PostInsightIntentExecuted(sessionInfo, result, needForeground);
@@ -553,7 +553,7 @@ void JsUIExtension::ExecuteInsightIntentDone(uint64_t intentId, const InsightInt
     TAG_LOGD(AAFwkTag::UI_EXT, "intentId %{public}" PRIu64"", intentId);
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token_, intentId, result);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "notify execute done failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "notify execute done failed");
     }
 }
 
