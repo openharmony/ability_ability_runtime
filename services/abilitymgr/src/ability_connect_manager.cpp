@@ -792,15 +792,6 @@ void AbilityConnectManager::DisconnectRecordForce(ConnectListType &list,
     if (abilityRecord->IsConnectListEmpty() && abilityRecord->IsNeverStarted() && !isUIService) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "force terminate ability record state: %{public}d",
             abilityRecord->GetAbilityState());
-        if (abilityRecord->IsReady()) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "Immediately trigger HandleStopTimeoutTask");
-            if (!GetExtensionByIdFromServiceMap(abilityRecord->GetRecordId()) &&
-                !AbilityCacheManager::GetInstance().FindRecordByToken(abilityRecord->GetToken())) {
-                return;
-            }
-            HandleStopTimeoutTask(abilityRecord);
-            return;
-        }
         TerminateRecord(abilityRecord);
     }
 }
