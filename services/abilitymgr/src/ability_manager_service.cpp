@@ -10134,8 +10134,16 @@ int32_t AbilityManagerService::SetBackgroundCall(const AppExecFwk::RunningProces
 
 bool AbilityManagerService::IsTargetPermission(const Want &want) const
 {
-    if (want.GetElement().GetBundleName() == PERMISSIONMGR_BUNDLE_NAME &&
-        want.GetElement().GetAbilityName() == PERMISSIONMGR_ABILITY_NAME) {
+    std::string bundleName = PERMISSIONMGR_BUNDLE_NAME;
+    std::string abilityName = PERMISSIONMGR_ABILITY_NAME;
+    Security::AccessToken::PermissionGrantInfo info;
+    Security::AccessToken::AccessTokenKit::GetPermissionManagerInfo(info);
+    if (!info.grantBundleName.empty() && !info.grantServiceAbilityName.empty()) {
+        bundleName = info.grantBundleName;
+        abilityName = info.grantServiceAbilityName;
+    }
+    if (want.GetElement().GetBundleName() == bundleName &&
+        want.GetElement().GetAbilityName() == abilityName) {
         return true;
     }
 

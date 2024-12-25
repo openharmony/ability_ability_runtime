@@ -290,8 +290,17 @@ void AbilityContext::RequestPermissionsFromUser(std::vector<std::string> &permis
         return;
     }
 
+    Security::AccessToken::PermissionGrantInfo info;
+    Security::AccessToken::AccessTokenKit::GetPermissionManagerInfo(info);
+
     AAFwk::Want want;
-    want.SetElementName(GRANT_ABILITY_BUNDLE_NAME, GRANT_ABILITY_ABILITY_NAME);
+    if (info.grantBundleName.empty() || info.grantServiceAbilityName.empty()) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "default");
+        want.SetElementName(GRANT_ABILITY_BUNDLE_NAME, GRANT_ABILITY_ABILITY_NAME);
+    } else {
+        want.SetElementName(info.grantBundleName, info.grantServiceAbilityName);
+    }
+
     want.SetParam(PERMISSION_KEY, permissions);
     want.SetParam(STATE_KEY, permissionsState);
     want.SetParam(TOKEN_KEY, token_);
