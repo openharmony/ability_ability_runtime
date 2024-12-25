@@ -2650,9 +2650,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsContainsAbilityInner_002, TestSize.Lev
 HWTEST_F(UIAbilityLifecycleManagerTest, NotifySCBToMinimizeUIAbility_001, TestSize.Level1)
 {
     auto mgr = std::make_unique<UIAbilityLifecycleManager>();
-    std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    EXPECT_NE(mgr->NotifySCBToMinimizeUIAbility(abilityRecord, token), ERR_OK);
+    EXPECT_NE(mgr->NotifySCBToMinimizeUIAbility(token), ERR_OK);
 }
 
 /**
