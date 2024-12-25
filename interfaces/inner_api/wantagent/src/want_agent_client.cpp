@@ -121,7 +121,7 @@ ErrCode WantAgentClient::CancelWantSender(const sptr<IWantSender> &sender, uint3
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
 
-    if (sender == nullptr || !data.WriteRemoteObject(sender->AsObject())) {
+    if (!data.WriteRemoteObject(sender->AsObject())) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "sender write failed");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
     }
