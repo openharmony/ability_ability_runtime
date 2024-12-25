@@ -224,9 +224,6 @@ void JsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     moduleName.append("::").append(abilityInfo->name);
 
     SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath);
-#ifdef SUPPORT_SCREEN
-    SetWant(*record->GetWant());
-#endif
 }
 
 void JsUIAbility::UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
