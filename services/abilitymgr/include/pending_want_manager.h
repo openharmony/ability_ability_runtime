@@ -140,7 +140,7 @@ public:
     sptr<IWantSender> GetWantSender(int32_t callingUid, int32_t uid, const bool isSystemApp,
         const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t appIndex = 0);
     int32_t SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo);
-    void CancelWantSender(const bool isSystemApp, const sptr<IWantSender> &sender);
+    void CancelWantSender(const bool isSystemAppCall, const sptr<IWantSender> &sender);
 
     int32_t GetPendingWantUid(const sptr<IWantSender> &target);
     int32_t GetPendingWantUserId(const sptr<IWantSender> &target);
