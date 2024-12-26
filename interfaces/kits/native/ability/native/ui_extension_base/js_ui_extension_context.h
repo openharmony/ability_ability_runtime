@@ -83,7 +83,6 @@ private:
         bool isAbilityResult = false, bool isOpenLink = false);
     bool CreateOpenLinkTask(const napi_env &env, const napi_value &lastParam,
         AAFwk::Want &want, int &requestCode);
-    void RemoveOpenLinkTask(int requestCode);
     napi_value OnOpenLink(napi_env env, NapiCallbackInfo& info);
     napi_value OnOpenLinkInner(napi_env env, const AAFwk::Want& want,
         int requestCode, const std::string& startTime, const std::string& url);
