@@ -920,7 +920,7 @@ public:
      */
     virtual AppMgrResultCode IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
         bool &isRunning);
-    
+
     /**
      * Send appSpawn uninstall debug hap message.
      *

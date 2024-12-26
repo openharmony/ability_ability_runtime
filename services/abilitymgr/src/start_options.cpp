@@ -128,9 +128,15 @@ bool StartOptions::Marshalling(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write startWindowOption failed");
         return false;
     }
-    parcel.WriteInt32(supportWindowModes_.size());
+    if (!parcel.WriteInt32(supportWindowModes_.size())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write supportWindowModes_ failed");
+        return false;
+    }
     for (auto windowMode : supportWindowModes_) {
-        parcel.WriteInt32(static_cast<int32_t>(windowMode));
+        if (!parcel.WriteInt32(static_cast<int32_t>(windowMode))) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write windowMode failed");
+            return false;
+        }
     }
     return true;
 }

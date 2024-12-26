@@ -584,6 +584,9 @@ enum class AbilityManagerInterfaceCode {
 
     // query atomic service startup rule
     QUERY_ATOMIC_SERVICE_STARTUP_RULE = 6131,
+
+    // start seld uiability
+    NDK_START_SELF_UI_ABILITY = 6132,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
