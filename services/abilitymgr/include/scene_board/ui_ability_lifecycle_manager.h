@@ -113,11 +113,9 @@ public:
     /**
      * Notify SCB to minimize UIAbility
      *
-     * @param abilityRecord the abilityRecord to minimize
      * @param token ability's token
      */
-    int32_t NotifySCBToMinimizeUIAbility(const std::shared_ptr<AbilityRecord> abilityRecord,
-        const sptr<IRemoteObject> token);
+    int32_t NotifySCBToMinimizeUIAbility(const sptr<IRemoteObject> token);
 
     /**
      * MinimizeUIAbility, minimize the special ability by scb.

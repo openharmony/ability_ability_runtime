@@ -3545,7 +3545,7 @@ int32_t AbilityManagerService::MoveUIAbilityToBackground(const sptr<IRemoteObjec
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetUIAbilityManagerByUserId(ownerUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-        return uiAbilityManager->NotifySCBToMinimizeUIAbility(abilityRecord, token);
+        return uiAbilityManager->NotifySCBToMinimizeUIAbility(token);
     }
 
     auto missionListManager = GetMissionListManagerByUserId(ownerUserId);
