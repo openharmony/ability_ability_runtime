@@ -13,15 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_CONSTANTS
-#define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_CONSTANTS
+#ifndef OHOS_ABILITY_RUNTIME_EXTENSION_LOAD_PARAM_H
+#define OHOS_ABILITY_RUNTIME_EXTENSION_LOAD_PARAM_H
 
-#include <string>
+#include "iremote_object.h"
+#include "parcel.h"
 
 namespace OHOS {
-namespace AAFwk {
-constexpr const int32_t NO_PID = -1;
-constexpr const char* STRICT_MODE = "strictMode";
-}  // namespace AAFwk
+namespace AbilityRuntime {
+struct ExtensionLoadParam : public Parcelable {
+    virtual bool Marshalling(Parcel &parcel) const override;
+    static ExtensionLoadParam *Unmarshalling(Parcel &parcel);
+    bool ReadFromParcel(Parcel &parcel);
+
+    bool networkEnableFlags = true;
+    bool saEnableFlags = true;
+    bool strictMode = false;
+};
+}  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_CONSTANTS
+#endif  // OHOS_ABILITY_RUNTIME_EXTENSION_LOAD_PARAM_H

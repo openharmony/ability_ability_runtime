@@ -1537,9 +1537,8 @@ private:
                       const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag = true,
                       bool isPreload = false,  AppExecFwk::PreloadMode preloadMode = AppExecFwk::PreloadMode::PRE_MAKE,
                       const std::string &moduleName = "", const std::string &abilityName = "",
-                      bool strictMode = false, sptr<IRemoteObject> token = nullptr,
-                      std::shared_ptr<AAFwk::Want> want = nullptr,
-                      ExtensionAbilityType ExtensionAbilityType = ExtensionAbilityType::UNSPECIFIED);
+                      sptr<IRemoteObject> token = nullptr, std::shared_ptr<AAFwk::Want> want = nullptr,
+                      ExtensionAbilityType extensionAbilityType = ExtensionAbilityType::UNSPECIFIED);
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -1824,14 +1823,16 @@ private:
     /**
      * Build message body for app spawn
      */
-    int32_t CreateStartMsg(const std::string &processName, uint32_t startFlags, const int uid,
-        const BundleInfo &bundleInfo, const int32_t bundleIndex, BundleType bundleType, AppSpawnStartMsg &startMsg,
-        std::shared_ptr<AAFwk::Want> want, const std::string &moduleName = "", const std::string &abilityName = "",
-        bool strictMode = false);
+    int32_t CreateStartMsg(const CreateStartMsgParam &param, AppSpawnStartMsg &startMsg);
+
+    void SetStartMsgStrictMode(AppSpawnStartMsg &startMsg, const CreateStartMsgParam &param);
+    
+    void SetAppRunningRecordStrictMode(std::shared_ptr<AppRunningRecord> appRecord,
+        std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
 
     void QueryExtensionSandBox(const std::string &moduleName, const std::string &abilityName,
         const BundleInfo &bundleInfo, AppSpawnStartMsg &startMsg, DataGroupInfoList& dataGroupInfoList,
-        bool strictMode, std::shared_ptr<AAFwk::Want> want);
+        std::shared_ptr<AAFwk::Want> want);
 
     int32_t StartPerfProcessByStartMsg(AppSpawnStartMsg &startMsg, const std::string& perfCmd,
         const std::string& debugCmd, bool isSandboxApp);
