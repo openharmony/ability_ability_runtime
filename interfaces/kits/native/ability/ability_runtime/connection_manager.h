@@ -36,6 +36,7 @@ struct ConnectionInfo {
     sptr<AbilityConnection> abilityConnection;
 
     int32_t userid;
+    void* uiServiceExtProxy = nullptr;
 
     ConnectionInfo(const sptr<IRemoteObject> &connectCaller, const AAFwk::Operation &connectReceiver,
         const sptr<AbilityConnection> &abilityConnection, int32_t accountId = -1) : connectCaller(connectCaller),
@@ -43,9 +44,17 @@ struct ConnectionInfo {
     {
     }
 
+    void SetUIServiceExtProxyPtr(void* proxyPtr)
+    {
+        uiServiceExtProxy = proxyPtr;
+    }
+
     inline bool operator < (const ConnectionInfo &that) const
     {
         if (userid < that.userid) {
+            return true;
+        }
+        if (uiServiceExtProxy < that.uiServiceExtProxy) {
             return true;
         }
         if (connectCaller < that.connectCaller) {
@@ -115,6 +124,17 @@ public:
         const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback);
 
     /**
+     * @brief connect uiService ability connection.
+     *
+     * @param connectCaller The connection caller.
+     * @param connectReceiver The connection receiver.
+     * @param connectCallback The connection callback.
+     * @return Returns the result of connecting uiService ability connection.
+     */
+    ErrCode ConnectUIServiceExtensionAbility(const sptr<IRemoteObject>& connectCaller,
+        const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback);
+
+    /**
      * @brief disconnect ability connection.
      *
      * @param connectCaller The connection caller.
@@ -167,15 +187,17 @@ private:
     bool IsConnectCallerEqual(const sptr<IRemoteObject> &connectCaller, const sptr<IRemoteObject> &connectCallerOther);
     bool IsConnectReceiverEqual(AAFwk::Operation &connectReceiver,
         const AppExecFwk::ElementName &connectReceiverOther);
+    void* GetUIServiceExtProxyPtr(const AAFwk::Want& want);
     bool MatchConnection(
         const sptr<IRemoteObject>& connectCaller, const AAFwk::Want& connectReceiver, int32_t accountId,
         const std::map<ConnectionInfo, std::vector<sptr<AbilityConnectCallback>>>::value_type& connection);
     std::recursive_mutex connectionsLock_;
     std::map<ConnectionInfo, std::vector<sptr<AbilityConnectCallback>>> abilityConnections_;
     ErrCode ConnectAbilityInner(const sptr<IRemoteObject> &connectCaller,
-        const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback);
+        const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback,
+        bool isUIService = false);
     ErrCode CreateConnection(const sptr<IRemoteObject> &connectCaller,
-        const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback);
+        const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback, bool isUIService);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
