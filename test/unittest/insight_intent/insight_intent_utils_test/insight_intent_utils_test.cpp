@@ -181,12 +181,12 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0200, TestSize.Level1)
     AppExecFwk::ElementName element1("", TEST_ABILITY_NAME, TEST_BUNDLE_NAME, TEST_MODULE_NAME);
     auto result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::SERVICE_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
     EXPECT_CALL(*mockBundleMgr, GetJsonProfile(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<3>(TEST_JSON_STR), Return(ERR_OK)));
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::SERVICE_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
+    EXPECT_EQ(result, ERR_INSIGHT_INTENT_START_INVALID_COMPONENT);
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest GetSrcEntry_0200 end.");
 }
 
@@ -204,7 +204,7 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0300, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgReferee<3>(TEST_JSON_STR_ARRAY), Return(ERR_OK)));
     auto result = utils.GetSrcEntry(element1, TEST_BUNDLE_NAME, ExecuteMode::SERVICE_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
+    EXPECT_EQ(result, ERR_INSIGHT_INTENT_START_INVALID_COMPONENT);
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest GetSrcEntry_0300 end.");
 }
 
@@ -222,20 +222,20 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0400, TestSize.Level1)
     AppExecFwk::ElementName element1("", TEST_BUNDLE_NAME, "ability1", TEST_MODULE_NAME);
     auto result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::UI_ABILITY_FOREGROUND,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
+    EXPECT_EQ(result, ERR_OK);
 
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::UI_ABILITY_BACKGROUND,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
+    EXPECT_EQ(result, ERR_OK);
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::UI_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
+    EXPECT_EQ(result, ERR_OK);
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::SERVICE_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
+    EXPECT_EQ(result, ERR_OK);
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, static_cast<ExecuteMode>(INT_MAX),
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
+    EXPECT_EQ(result, ERR_INSIGHT_INTENT_START_INVALID_COMPONENT);
     Mock::VerifyAndClear(mockBundleMgr);
     testing::Mock::AllowLeak(mockBundleMgr);
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest GetSrcEntry_0400 end.");
