@@ -72,9 +72,18 @@ bool UnlockScreenManager::UnlockScreen()
 
 #ifdef SUPPORT_GRAPHICS
     if (isScreenLocked) {
-        sptr<UnlockScreenCallback> listener = sptr<UnlockScreenCallback>(new (std::nothrow) UnlockScreenCallback());
+        auto promise = std::make_shared<std::promise<bool>>();
+        sptr<UnlockScreenCallback> listener = sptr<UnlockScreenCallback>::MakeSptr(promise);
         IN_PROCESS_CALL(OHOS::ScreenLock::ScreenLockManager::GetInstance()->Unlock(
             OHOS::ScreenLock::Action::UNLOCKSCREEN, listener));
+        auto future = promise->get_future();
+        std::future_status status = future.wait_for(std::chrono::milliseconds(500));
+        if (status == std::future_status::timeout) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "UnlockScreen timeout");
+            return false;
+        }
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "UnlockScreen end");
+        return future.get();
     }
 #endif
     TAG_LOGI(AAFwkTag::ABILITYMGR, "UnlockScreen end");
