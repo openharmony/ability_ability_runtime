@@ -634,6 +634,10 @@ private:
     int32_t ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
     void ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
         const std::shared_ptr<AbilityRecord> abilityRecord, sptr<IRemoteObject> callerToken);
+        
+    void SetExtensionLoadParam(AbilityRuntime::LoadParam &loadParam, std::shared_ptr<AbilityRecord> abilityRecord);
+    bool IsStrictMode(std::shared_ptr<AbilityRecord> abilityRecord);
+    bool NeedExtensionControl(std::shared_ptr<AbilityRecord> abilityRecord);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";

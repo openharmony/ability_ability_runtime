@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_PARAM_H
 #define OHOS_ABILITY_RUNTIME_PARAM_H
 
+#include "extension_load_param.h"
 #include "iremote_object.h"
 #include "parcel.h"
 #include "refbase.h"
@@ -47,6 +48,7 @@ struct LoadParam : public Parcelable {
     bool isCallerSetProcess = false;
     std::string customProcessFlag = "";
     uint32_t extensionProcessMode = 0;
+    ExtensionLoadParam extensionLoadParam;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

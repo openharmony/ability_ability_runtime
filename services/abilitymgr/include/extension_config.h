@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_EXTENSION_CONFIG_H
 
 #include <map>
+#include <mutex>
 #include <nlohmann/json.hpp>
 #include <unordered_map>
 #include <unordered_set>
@@ -34,6 +35,8 @@ public:
     int32_t GetExtensionAutoDisconnectTime(const std::string &extensionTypeName);
     bool IsExtensionStartThirdPartyAppEnable(const std::string &extensionTypeName);
     bool IsExtensionStartServiceEnable(const std::string &extensionTypeName, const std::string &targetUri);
+    bool IsExtensionNetworkEnable(const std::string &extensionTypeName);
+    bool IsExtensionSAEnable(const std::string &extensionTypeName);
 private:
     void LoadExtensionConfig(const nlohmann::json &object);
     bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
@@ -41,7 +44,9 @@ private:
     std::string GetExtensionConfigPath() const;
     void LoadExtensionAutoDisconnectTime(const nlohmann::json &object, std::string extensionTypeName);
     void LoadExtensionThirdPartyAppBlockedList(const nlohmann::json &object, std::string extensionTypeName);
-    void LoadExtensionServiceBlockedList(const nlohmann::json &, std::string extensionTypeNameobject);
+    void LoadExtensionServiceBlockedList(const nlohmann::json &object, std::string extensionTypeNameobject);
+    void LoadExtensionNetworkEnable(const nlohmann::json &object, const std::string &extensionTypeName);
+    void LoadExtensionSAEnable(const nlohmann::json &object, const std::string &extensionTypeName);
 
     bool CheckServiceExtensionUriValid(const std::string &uri);
 
@@ -49,6 +54,10 @@ private:
     std::unordered_map<std::string, bool> thirdPartyAppEnableFlags_;
     std::unordered_map<std::string, bool> serviceEnableFlags_;
     std::unordered_map<std::string, std::unordered_set<std::string>> serviceBlockedLists_;
+    std::unordered_map<std::string, bool> networkEnableFlags_;
+    std::mutex networkEnableMutex_;
+    std::unordered_map<std::string, bool> saEnableFlags_;
+    std::mutex saEnableMutex_;
 };
 } // OHOS
 } // AAFwk
