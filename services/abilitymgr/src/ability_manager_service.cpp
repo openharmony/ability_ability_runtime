@@ -4912,19 +4912,11 @@ void AbilityManagerService::CancelWantSenderByFlags(const sptr<IWantSender> &sen
     auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER(bms);
 
-    int32_t callerUid = IPCSkeleton::GetCallingUid();
     sptr<PendingWantRecord> record = iface_cast<PendingWantRecord>(obj);
 
     if (flags != 0 && record->GetKey() != nullptr && static_cast<uint32_t>(record->GetKey()->GetFlags()) != flags) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "cancel quit, flags=%{public}u not match wantAgent flags=%{public}d",
                 flags, record->GetKey()->GetFlags());
-        return;
-    }
-
-    int userId = -1;
-    if (DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
-        GetOsAccountLocalIdFromUid(callerUid, userId) != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "getOsAccountLocalIdFromUid failed uid=%{public}d", callerUid);
         return;
     }
 
