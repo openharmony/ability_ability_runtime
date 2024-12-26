@@ -57,6 +57,9 @@ bool LoadParam::Marshalling(Parcel &parcel) const
     if (!parcel.WriteUint32(extensionProcessMode)) {
         return false;
     }
+    if (!parcel.WriteParcelable(&extensionLoadParam)) {
+        return false;
+    }
     return true;
 }
 
@@ -79,6 +82,11 @@ bool LoadParam::ReadFromParcel(Parcel &parcel)
     }
     isKeepAlive = parcel.ReadBool();
     extensionProcessMode = parcel.ReadUint32();
+    std::unique_ptr<ExtensionLoadParam> extensionParamRead(parcel.ReadParcelable<ExtensionLoadParam>());
+    if (!extensionParamRead) {
+        return false;
+    }
+    extensionLoadParam = *extensionParamRead;
     return true;
 }
 

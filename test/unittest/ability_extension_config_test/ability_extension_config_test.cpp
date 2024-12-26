@@ -32,6 +32,8 @@ constexpr const char* EXTENSION_AUTO_DISCONNECT_TIME = "auto_disconnect_time";
 constexpr const char* EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME = "third_party_app_blocked_flag";
 constexpr const char* EXTENSION_SERVICE_BLOCKED_LIST_NAME = "service_blocked_list";
 constexpr const char* EXTENSION_SERVICE_STARTUP_ENABLE_FLAG = "service_startup_enable_flag";
+constexpr const char* EXTENSION_NETWORK_ENABLE_FLAG = "network_acesss_enable_flag";
+constexpr const char* EXTENSION_SA_ENABLE_FLAG = "sa_acesss_enable_flag";
 }
 namespace OHOS {
 namespace AbilityRuntime {
@@ -157,6 +159,63 @@ HWTEST_F(AbilityExtensionConfigTest, ReadFileInfoJson_001, TestSize.Level1)
     nlohmann::json jsOne;
     auto result = extensionConfig_->ReadFileInfoJson("d://dddd", jsOne);
     EXPECT_EQ(result, false);
+}
+
+/*
+ * @tc.number    : LoadExtensionNetworkEnable_001
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function LoadExtensionNetworkEnable
+ */
+HWTEST_F(AbilityExtensionConfigTest, LoadExtensionNetworkEnable_001, TestSize.Level1)
+{
+    json jsOnFile;
+    jsOnFile[EXTENSION_NETWORK_ENABLE_FLAG] = true;
+    extensionConfig_->LoadExtensionNetworkEnable(jsOnFile, "form");
+    EXPECT_TRUE(extensionConfig_->networkEnableFlags_["form"]);
+}
+
+/*
+ * @tc.number    : LoadExtensionSAEnable_001
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function LoadExtensionSAEnable
+ */
+HWTEST_F(AbilityExtensionConfigTest, LoadExtensionSAEnable_001, TestSize.Level1)
+{
+    json jsOnFile;
+    jsOnFile[EXTENSION_SA_ENABLE_FLAG] = true;
+    auto extType = "form";
+    extensionConfig_->LoadExtensionSAEnable(jsOnFile, extType);
+    EXPECT_TRUE(extensionConfig_->saEnableFlags_[extType]);
+}
+
+/*
+ * @tc.number    : IsExtensionNetworkEnable_001
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function IsExtensionNetworkEnable
+ */
+HWTEST_F(AbilityExtensionConfigTest, IsExtensionNetworkEnable_001, TestSize.Level1)
+{
+    json jsOnFile;
+    jsOnFile[EXTENSION_NETWORK_ENABLE_FLAG] = true;
+    auto extType = "form";
+    extensionConfig_->networkEnableFlags_[extType] = true;
+    bool enable = extensionConfig_->IsExtensionNetworkEnable(extType);
+    EXPECT_TRUE(enable);
+}
+
+/*
+ * @tc.number    : IsExtensionSAEnable_001
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function IsExtensionSAEnable
+ */
+HWTEST_F(AbilityExtensionConfigTest, IsExtensionSAEnable_001, TestSize.Level1)
+{
+    json jsOnFile;
+    jsOnFile[EXTENSION_SA_ENABLE_FLAG] = true;
+    auto extType = "form";
+    extensionConfig_->saEnableFlags_[extType] = true;
+    bool enable = extensionConfig_->IsExtensionSAEnable(extType);
+    EXPECT_TRUE(enable);
 }
 }
 }

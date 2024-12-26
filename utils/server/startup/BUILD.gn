@@ -35,6 +35,7 @@ ohos_shared_library("startup_util") {
   ]
 
   sources = [
+    "src/extension_load_param.cpp",
     "src/param.cpp",
     "src/startup_util.cpp",
   ]

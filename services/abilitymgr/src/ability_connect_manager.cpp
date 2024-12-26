@@ -18,11 +18,13 @@
 #include <regex>
 
 #include "ability_manager_service.h"
+#include "ability_manager_constants.h"
 #include "ability_permission_util.h"
 #include "ability_resident_process_rdb.h"
 #include "appfreeze_manager.h"
 #include "app_exit_reason_data_manager.h"
 #include "assert_fault_callback_death_mgr.h"
+#include "extension_ability_info.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
@@ -70,6 +72,9 @@ constexpr const char* FROZEN_WHITE_DIALOG = "com.huawei.hmos.huaweicast";
 constexpr char BUNDLE_NAME_DIALOG[] = "com.ohos.amsdialog";
 constexpr char ABILITY_NAME_ASSERT_FAULT_DIALOG[] = "AssertFaultDialog";
 constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
+
+constexpr uint32_t PROCESS_MODE_RUN_WITH_MAIN_PROCESS =
+    1 << static_cast<uint32_t>(AppExecFwk::ExtensionProcessMode::RUN_WITH_MAIN_PROCESS);
 
 const std::string XIAOYI_BUNDLE_NAME = "com.huawei.hmos.vassistant";
 
@@ -1462,8 +1467,73 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
     loadParam.isCallerSetProcess = abilityRecord->IsCallerSetProcess();
     loadParam.customProcessFlag = abilityRecord->GetCustomProcessFlag();
     loadParam.extensionProcessMode = abilityRecord->GetExtensionProcessMode();
+    SetExtensionLoadParam(loadParam, abilityRecord);
     DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         loadParam, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(), abilityRecord->GetWant());
+}
+
+void AbilityConnectManager::SetExtensionLoadParam(AbilityRuntime::LoadParam &loadParam,
+    std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    CHECK_POINTER(abilityRecord);
+    if (!IsStrictMode(abilityRecord)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "SetExtensionLoadParam, strictMode:false");
+        return;
+    }
+    auto &extensionParam = loadParam.extensionLoadParam;
+    extensionParam.strictMode = true;
+    extensionParam.networkEnableFlags = DelayedSingleton<ExtensionConfig>::GetInstance()->IsExtensionNetworkEnable(
+        abilityRecord->GetAbilityInfo().extensionTypeName);
+    extensionParam.saEnableFlags = DelayedSingleton<ExtensionConfig>::GetInstance()->IsExtensionSAEnable(
+        abilityRecord->GetAbilityInfo().extensionTypeName);
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "SetExtensionLoadParam, networkEnableFlags:%{public}d, saEnableFlags:%{public}d, strictMode:%{public}d",
+        extensionParam.networkEnableFlags, extensionParam.saEnableFlags, extensionParam.strictMode);
+}
+
+bool AbilityConnectManager::IsStrictMode(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    CHECK_POINTER_AND_RETURN(abilityRecord, false);
+    const auto &want = abilityRecord->GetWant();
+    bool strictMode = want.GetBoolParam(OHOS::AAFwk::STRICT_MODE, false);
+    if (abilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::INPUTMETHOD) {
+        return strictMode;
+    }
+    if (!NeedExtensionControl(abilityRecord)) {
+        return false;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "SetExtensionLoadParam, not SACall, force enable strictMode");
+        return true;
+    }
+    if (!want.HasParameter(OHOS::AAFwk::STRICT_MODE)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "SetExtensionLoadParam, no striteMode param, force enable strictMode");
+        return true;
+    }
+    return strictMode;
+}
+
+bool AbilityConnectManager::NeedExtensionControl(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    CHECK_POINTER_AND_RETURN(abilityRecord, false);
+    auto extensionType = abilityRecord->GetAbilityInfo().extensionAbilityType;
+    if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE ||
+        extensionType == AppExecFwk::ExtensionAbilityType::DATASHARE) {
+        return false;
+    }
+    if (!abilityRecord->GetCustomProcessFlag().empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "SetExtensionLoadParam, customProces not empty");
+        return false;
+    }
+    if (abilityRecord->GetExtensionProcessMode() == PROCESS_MODE_RUN_WITH_MAIN_PROCESS) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "SetExtensionLoadParam, extensionProcesMode:runWithMain");
+        return false;
+    }
+    if (abilityRecord->GetAbilityInfo().applicationInfo.allowMultiProcess) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "SetExtensionLoadParam, allowMultiProcess:1");
+        return false;
+    }
+    return true;
 }
 
 void AbilityConnectManager::PostRestartResidentTask(const AbilityRequest &abilityRequest)

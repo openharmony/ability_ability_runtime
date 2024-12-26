@@ -229,9 +229,8 @@ int32_t AppSpawnClient::SetStartFlags(const AppSpawnStartMsg &startMsg, AppSpawn
         }
     }
     if (startMsg.strictMode) {
-        ret = AppSpawnReqMsgSetAppFlag(reqHandle, APP_FLAGS_ISOLATED_SANDBOX);
-        if (ret != 0) {
-            TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
+        ret = SetStrictMode(startMsg, reqHandle);
+        if (ret != ERR_OK) {
             return ret;
         }
     }
@@ -258,6 +257,42 @@ int32_t AppSpawnClient::SetStartFlags(const AppSpawnStartMsg &startMsg, AppSpawn
 #endif // SUPPORT_CHILD_PROCESS
     ret = SetIsolationModeFlag(startMsg, reqHandle);
     return ret;
+}
+
+int32_t AppSpawnClient::SetStrictMode(const AppSpawnStartMsg &startMsg, const AppSpawnReqMsgHandle &reqHandle)
+{
+    int32_t ret = ERR_OK;
+    TAG_LOGD(AAFwkTag::APPMGR, "SetStrictMode");
+    if (startMsg.isolatedSandboxFlagLegacy) {
+        TAG_LOGD(AAFwkTag::APPMGR, "SetIsolatedSandBoxLegacy");
+        ret = AppSpawnReqMsgSetAppFlag(reqHandle, APP_FLAGS_ISOLATED_SANDBOX);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::APPMGR, "SetIsolatedSandBoxLegacy fail, ret: %{public}d", ret);
+            return ret;
+        }
+    }
+    if (startMsg.isolatedNetworkFlag) {
+        TAG_LOGD(AAFwkTag::APPMGR, "Set isolatedNetwork");
+        ret = AppSpawnReqMsgSetAppFlag(reqHandle, APP_FLAGS_ISOLATED_NETWORK);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Set isolatedNetwork fail, ret: %{public}d", ret);
+            return ret;
+        }
+    }
+    if (startMsg.isolatedSELinuxFlag) {
+        TAG_LOGD(AAFwkTag::APPMGR, "Set isolatedSELinux,extType:%{public}s:", startMsg.extensionTypeName.c_str());
+        ret = AppSpawnReqMsgSetAppFlag(reqHandle, APP_FLAGS_ISOLATED_SELINUX_LABEL);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Set isolatedSELinuxFlag fail, ret: %{public}d", ret);
+            return ret;
+        }
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_EXTENSION_TYPE, startMsg.extensionTypeName.c_str());
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Set extensionTypeName fail, ret: %{public}d", ret);
+            return ret;
+        }
+    }
+    return ERR_OK;
 }
 
 int32_t AppSpawnClient::AppspawnSetExtMsg(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle)

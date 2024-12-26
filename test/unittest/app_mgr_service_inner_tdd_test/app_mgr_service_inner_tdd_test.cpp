@@ -1032,9 +1032,8 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_001, TestSize.Level0)
     DataGroupInfo dataGroupInfo;
     dataGroupInfo.dataGroupId = "test1";
     dataGroupInfoList.emplace_back(dataGroupInfo);
-    bool strictMode = false;
     appMgrServiceInner->QueryExtensionSandBox(moduleName, extensionName, bundleInfo, startMsg, dataGroupInfoList,
-        strictMode, nullptr);
+        nullptr);
     EXPECT_EQ(startMsg.dataGroupInfoList.size(), 1);
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_001 end");
 }
@@ -1069,9 +1068,8 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_002, TestSize.Level0)
     DataGroupInfo dataGroupInfo;
     dataGroupInfo.dataGroupId = "test3";
     dataGroupInfoList.emplace_back(dataGroupInfo);
-    bool strictMode = true;
     appMgrServiceInner->QueryExtensionSandBox(moduleName, extensionName, bundleInfo, startMsg, dataGroupInfoList,
-        strictMode, nullptr);
+        nullptr);
     EXPECT_EQ(startMsg.dataGroupInfoList.size(), 0);
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_002 end");
 }
@@ -1100,9 +1098,8 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_003, TestSize.Level0)
     extensionAbilityInfo.needCreateSandbox = false;
     AppSpawnStartMsg startMsg;
     DataGroupInfoList dataGroupInfoList;
-    bool strictMode = false;
     appMgrServiceInner->QueryExtensionSandBox(moduleName, extensionName, bundleInfo, startMsg, dataGroupInfoList,
-        strictMode, nullptr);
+        nullptr);
     EXPECT_EQ(startMsg.dataGroupInfoList.size(), 0);
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_003 end");
 }
@@ -1131,9 +1128,8 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_004, TestSize.Level0)
     extensionAbilityInfo.needCreateSandbox = true;
     AppSpawnStartMsg startMsg;
     DataGroupInfoList dataGroupInfoList;
-    bool strictMode = false;
     appMgrServiceInner->QueryExtensionSandBox(moduleName, extensionName, bundleInfo, startMsg, dataGroupInfoList,
-        strictMode, nullptr);
+        nullptr);
     EXPECT_EQ(startMsg.dataGroupInfoList.size(), 0);
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_004 end");
 }
