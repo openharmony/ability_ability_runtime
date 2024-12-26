@@ -45,7 +45,6 @@ ohos_unittest("window_focus_changed_listener_test") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${ability_runtime_test_path}/mock/common/include",
   ]
 
@@ -75,8 +74,6 @@ ohos_unittest("window_focus_changed_listener_test") {
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit:aakit_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_appmgr_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_bundlemgr_mock",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -91,6 +88,8 @@ ohos_unittest("window_focus_changed_listener_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "init:libbeget_proxy",
@@ -98,6 +97,7 @@ ohos_unittest("window_focus_changed_listener_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "samgr:samgr_proxy",
     "storage_service:storage_manager_sa_proxy",
   ]
 

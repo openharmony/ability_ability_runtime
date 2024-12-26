@@ -22,7 +22,6 @@ ohos_unittest("app_config_data_manager_test") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_services_path}/appmgr/include",
-    "${distributeddatamgr_path}/kv_store/interfaces/innerkits/distributeddata/include",
   ]
 
   sources = [

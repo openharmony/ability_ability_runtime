@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,7 +23,6 @@ ohos_unittest("app_foreground_state_observer_proxy_test") {
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr/",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_test_path}/unittest/app_foreground_state_observer_proxy_test/",
-    "//foundation/filemanagement/user_file_service/utils/",
   ]
 
   sources = [
@@ -31,11 +30,7 @@ ohos_unittest("app_foreground_state_observer_proxy_test") {
     "app_foreground_state_observer_proxy_test.cpp",
   ]
 
-  deps = [
-    "${ability_runtime_innerkits_path}/app_manager:app_manager",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_innerkits_path}/app_manager:app_manager" ]
 
   external_deps = [
     "ability_base:configuration",
@@ -46,6 +41,8 @@ ohos_unittest("app_foreground_state_observer_proxy_test") {
     "faultloggerd:libdfx_dumpcatcher",
     "faultloggerd:libfaultloggerd",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",

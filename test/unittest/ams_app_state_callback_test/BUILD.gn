@@ -32,16 +32,14 @@ ohos_unittest("AmsAppStateCallbackTest") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-  deps = [
-    "${ability_runtime_innerkits_path}/app_manager:app_manager",
-    "//third_party/googletest:gmock_main",
-  ]
+  deps = [ "${ability_runtime_innerkits_path}/app_manager:app_manager" ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",

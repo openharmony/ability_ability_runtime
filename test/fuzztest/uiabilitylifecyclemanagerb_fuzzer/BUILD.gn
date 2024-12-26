@@ -29,7 +29,6 @@ ohos_fuzztest("UiAbilityLifeCycleManagerBFuzzTest") {
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_services_path}/abilitymgr/include/",
     "${ability_runtime_services_path}/abilitymgr/include/scene_board/",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
 
   public_configs =

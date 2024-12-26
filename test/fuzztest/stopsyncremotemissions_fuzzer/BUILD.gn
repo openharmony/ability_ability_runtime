@@ -38,10 +38,7 @@ ohos_fuzztest("StopSyncRemoteMissionsFuzzTest") {
     "${ability_runtime_services_path}/abilitymgr:abilityms_config",
   ]
 
-  deps = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
-    "//third_party/jsoncpp:jsoncpp",
-  ]
+  deps = [ "${ability_runtime_innerkits_path}/ability_manager:ability_manager" ]
 
   external_deps = [
     "ability_base:want",
@@ -51,6 +48,7 @@ ohos_fuzztest("StopSyncRemoteMissionsFuzzTest") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "samgr:samgr_proxy",

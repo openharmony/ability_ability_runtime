@@ -51,8 +51,6 @@ ohos_unittest("ui_service_host_proxy_test") {
     "${ability_runtime_native_path}/ability/native:ui_service_extension_connection",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -63,6 +61,8 @@ ohos_unittest("ui_service_host_proxy_test") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",

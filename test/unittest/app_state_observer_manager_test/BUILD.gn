@@ -27,7 +27,6 @@ ohos_unittest("app_state_observer_manager_test") {
     "${ability_runtime_test_path}/unittest/ability_foreground_state_observer_stub_test",
     "${ability_runtime_test_path}/unittest/app_state_observer_manager_test",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
 
   sources =
@@ -59,6 +58,7 @@ ohos_unittest("app_state_observer_manager_test") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "ipc:ipc_core",
+    "samgr:samgr_proxy",
   ]
 
   defines = [ "AMS_LOG_TAG = \"AppMgrService\"" ]

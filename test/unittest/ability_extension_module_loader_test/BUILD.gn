@@ -38,8 +38,6 @@ ohos_unittest("ability_extension_module_loader_test") {
     "${ability_runtime_napi_path}/dialog_request_info:dialog_request_info",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:service_extension_module",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -48,6 +46,8 @@ ohos_unittest("ability_extension_module_loader_test") {
     "ability_runtime:runtime",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",

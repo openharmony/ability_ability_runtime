@@ -20,11 +20,8 @@ ohos_unittest("insight_intent_execute_manager_test") {
 
   cflags_cc = []
 
-  include_dirs = [
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
-    "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
-    "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
-  ]
+  include_dirs =
+      [ "${ability_runtime_innerkits_path}/app_manager/include/appmgr" ]
 
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_execute_manager.cpp",
@@ -40,11 +37,7 @@ ohos_unittest("insight_intent_execute_manager_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_native_path}/appkit:appkit_manager_helper" ]
 
   external_deps = [
     "ability_base:want",
@@ -54,9 +47,12 @@ ohos_unittest("insight_intent_execute_manager_test") {
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 }
 

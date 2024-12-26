@@ -26,7 +26,7 @@ ohos_unittest("dataobs_mgr_service_test") {
   }
   module_out_path = module_output_path
 
-  include_dirs = [ "${distributedschedule_path}/safwk/services/safwk/include" ]
+  include_dirs = []
 
   sources = [ "dataobs_mgr_service_test.cpp" ]
 
@@ -39,8 +39,6 @@ ohos_unittest("dataobs_mgr_service_test") {
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
     "${ability_runtime_services_path}/common:task_handler_wrap",
     "${ability_runtime_services_path}/dataobsmgr:dataobsms_static",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -48,9 +46,12 @@ ohos_unittest("dataobs_mgr_service_test") {
     "ability_base:zuri",
     "c_utils:utils",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "safwk:api_cache_manager",
+    "safwk:system_ability_fwk",
   ]
 }
 

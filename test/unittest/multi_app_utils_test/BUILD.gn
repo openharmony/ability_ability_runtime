@@ -41,11 +41,6 @@ ohos_unittest("multi_app_utils_test") {
     "src/mock_app_mgr_utils.cpp",
   ]
 
-  deps = [
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
-
   external_deps = [
     "ability_base:want",
     "ability_runtime:app_manager",
@@ -54,6 +49,8 @@ ohos_unittest("multi_app_utils_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",

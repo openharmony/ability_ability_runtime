@@ -27,8 +27,6 @@ ohos_fuzztest("AbilityMgrRdbParserUtilFuzzTest") {
       "${ability_runtime_test_path}/fuzztest/abilitymgrrdbparserutil_fuzzer"
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
-    "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
@@ -61,9 +59,6 @@ ohos_fuzztest("AbilityMgrRdbParserUtilFuzzTest") {
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:perm_verification",
-    "//third_party/json:nlohmann_json_static",
-    "//third_party/jsoncpp:jsoncpp",
-    "//third_party/libjpeg-turbo:turbojpeg_static",
   ]
 
   external_deps = [
@@ -78,7 +73,11 @@ ohos_fuzztest("AbilityMgrRdbParserUtilFuzzTest") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
+    "jsoncpp:jsoncpp",
+    "libjpeg-turbo:turbojpeg_static",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   if (background_task_mgr_continuous_task_enable) {

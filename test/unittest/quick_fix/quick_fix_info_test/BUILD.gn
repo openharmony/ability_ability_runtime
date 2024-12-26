@@ -28,14 +28,15 @@ ohos_unittest("quick_fix_info_test") {
     "quick_fix_info_test.cpp",
   ]
 
-  deps = [
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = []
 
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
 }
 
 group("unittest") {

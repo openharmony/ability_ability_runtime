@@ -25,10 +25,7 @@ ohos_unittest("ability_manager_service_dialog_test") {
 
   configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
 
-  deps = [
-    "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_services_path}/abilitymgr:abilityms" ]
 
   external_deps = [
     "ability_base:want",
@@ -37,6 +34,7 @@ ohos_unittest("ability_manager_service_dialog_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
   ]

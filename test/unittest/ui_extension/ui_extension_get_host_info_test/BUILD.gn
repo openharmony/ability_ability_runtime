@@ -38,11 +38,7 @@ ohos_unittest("ui_extension_get_host_info_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_native_path}/appkit:appkit_manager_helper" ]
 
   external_deps = [
     "ability_base:want",
@@ -56,6 +52,8 @@ ohos_unittest("ui_extension_get_host_info_test") {
     "cJSON:cjson",
     "c_utils:utils",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_core",

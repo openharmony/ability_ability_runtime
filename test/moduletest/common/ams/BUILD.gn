@@ -46,13 +46,6 @@ ohos_source_set("appmgr_mst_source") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_services_path}/common:perm_verification",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
-    "${bundlefwk_inner_api_path}/appexecfwk_core:appexecfwk_core",
-    "${c_utils_base_path}:utils",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-    "//third_party/icu/icu4c:shared_icuuc",
   ]
 
   external_deps = [
@@ -61,9 +54,6 @@ ohos_source_set("appmgr_mst_source") {
     "ability_runtime:ability_deps_wrapper",
     "access_token:libaccesstoken_sdk",
     "appspawn:appspawn_client",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "c_utils:utils",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
@@ -78,9 +68,12 @@ ohos_source_set("appmgr_mst_source") {
   ]
 
   public_external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "icu:shared_icuuc",
     "samgr:samgr_proxy",
   ]
 

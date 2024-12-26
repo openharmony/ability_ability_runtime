@@ -28,10 +28,7 @@ ohos_unittest("ui_extension_preload_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = []
 
   external_deps = [
     "ability_base:session_info",
@@ -42,6 +39,8 @@ ohos_unittest("ui_extension_preload_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_single",
   ]

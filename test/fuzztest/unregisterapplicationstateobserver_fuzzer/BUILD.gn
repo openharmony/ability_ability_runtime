@@ -23,10 +23,7 @@ ohos_fuzztest("UnregisterApplicationStateObserverFuzzTest") {
   module_out_path = module_output_path
 
   fuzz_config_file = "${ability_runtime_test_path}/fuzztest/unregisterapplicationstateobserver_fuzzer"
-  include_dirs = [
-    "${ability_runtime_innerkits_path}/ability_manager/include",
-    "${appspawn_path}/interfaces/innerkits_new/include",
-  ]
+  include_dirs = [ "${ability_runtime_innerkits_path}/ability_manager/include" ]
   cflags = [
     "-g",
     "-O0",

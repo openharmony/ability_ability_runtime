@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -68,8 +68,11 @@ group("moduletest") {
       "running_infos_module_test:moduletest",
       "start_option_display_id_test:moduletest",
       "ui_extension_ability_test:moduletest",
-      "//third_party/icu/icu4c:shared_icuuc",
-      "//third_party/jsoncpp:jsoncpp",
+    ]
+
+    external_deps = [
+      "icu:shared_icuuc",
+      "jsoncpp:jsoncpp",
     ]
   }
 }

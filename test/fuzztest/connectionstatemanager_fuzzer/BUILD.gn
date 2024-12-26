@@ -27,8 +27,6 @@ ohos_fuzztest("ConnectionStateManagerFuzzTest") {
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
-    "${bgtaskmgr_interfaces_path}/innerkits/include",
-    "${multimodalinput_path}/interfaces/native/innerkits/event/include",
   ]
   cflags = [
     "-g",
@@ -47,19 +45,21 @@ ohos_fuzztest("ConnectionStateManagerFuzzTest") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:connection_obs_manager",
+    "background_task_mgr:bgtaskmgr_innerkits",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
+    "input:libmmi-client",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "relational_store:native_dataability",
     "relational_store:native_rdb",

@@ -42,7 +42,6 @@ ohos_fuzztest("AttachAbilityThreadFuzzTest") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -55,6 +54,7 @@ ohos_fuzztest("AttachAbilityThreadFuzzTest") {
     "ffrt:libffrt",
     "hisysevent:libhisysevent",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
