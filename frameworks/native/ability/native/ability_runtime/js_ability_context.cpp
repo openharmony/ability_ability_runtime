@@ -762,16 +762,6 @@ bool JsAbilityContext::CreateOpenLinkTask(const napi_env &env, const napi_value 
     return true;
 }
 
-void JsAbilityContext::RemoveOpenLinkTask(int requestCode)
-{
-    auto context = context_.lock();
-    if (!context) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "null context");
-        return;
-    }
-    context->RemoveResultCallbackTask(requestCode);
-}
-
 static bool ParseOpenLinkParams(const napi_env &env, const NapiCallbackInfo &info, std::string &linkValue,
     AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want)
 {
@@ -844,25 +834,27 @@ napi_value JsAbilityContext::OnOpenLinkInner(napi_env env, const AAFwk::Want& wa
         }
         *innerErrCode = context->OpenLink(want, requestCode);
     };
-    NapiAsyncTask::CompleteCallback complete = [innerErrCode, requestCode, startTime, url, this](
+    NapiAsyncTask::CompleteCallback complete = [innerErrCode, requestCode, startTime, url, weak = context_,
+        &observer = freeInstallObserver_](
         napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrCode == 0) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "openLink succeeded");
+            TAG_LOGI(AAFwkTag::CONTEXT, "openLink succeeded");
             return;
         }
-        if (freeInstallObserver_ == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "null freeInstallObserver_");
-            RemoveOpenLinkTask(requestCode);
+        if (observer != nullptr) {
+            if (*innerErrCode == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
+                TAG_LOGI(AAFwkTag::CONTEXT, "start ability by default succeeded");
+                observer->OnInstallFinishedByUrl(startTime, url, ERR_OK);
+                return;
+            }
+            observer->OnInstallFinishedByUrl(startTime, url, *innerErrCode);
+        }
+        auto context = weak.lock();
+        if (!context) {
+            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
             return;
         }
-        if (*innerErrCode == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "start ability by default succeeded");
-            freeInstallObserver_->OnInstallFinishedByUrl(startTime, url, ERR_OK);
-            return;
-        }
-        TAG_LOGI(AAFwkTag::CONTEXT, "failed");
-        freeInstallObserver_->OnInstallFinishedByUrl(startTime, url, *innerErrCode);
-        RemoveOpenLinkTask(requestCode);
+        context->RemoveResultCallbackTask(requestCode);
     };
 
     napi_value result = nullptr;

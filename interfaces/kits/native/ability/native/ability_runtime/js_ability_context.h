@@ -133,7 +133,6 @@ private:
     napi_value OpenAtomicServiceInner(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
         AAFwk::StartOptions &options);
     napi_value OnStartUIServiceExtension(napi_env env, NapiCallbackInfo& info);
-    void RemoveOpenLinkTask(int requestCode);
     bool UnwrapConnectUIServiceExtensionParam(napi_env env, NapiCallbackInfo& info, AAFwk::Want& want);
     bool CheckConnectAlreadyExist(napi_env env, AAFwk::Want& want, napi_value callback, napi_value& result);
     napi_value OnConnectUIServiceExtension(napi_env env, NapiCallbackInfo& info);
