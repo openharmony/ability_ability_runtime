@@ -37,6 +37,7 @@
 #include "startup_util.h"
 #include "system_ability_token_callback.h"
 #include "ui_extension_utils.h"
+#include "ui_service_extension_connection_constants.h"
 #include "uri_permission_manager_client.h"
 #include "param.h"
 #include "permission_constants.h"
@@ -1333,6 +1334,11 @@ AbilityState AbilityRecord::GetAbilityState() const
     return currentState_;
 }
 
+WindowConfig AbilityRecord::GetAbilityWindowConfig() const
+{
+    return windowConfig_;
+}
+
 bool AbilityRecord::IsForeground() const
 {
     return currentState_ == AbilityState::FOREGROUND || currentState_ == AbilityState::FOREGROUNDING;
@@ -1675,14 +1681,22 @@ void AbilityRecord::ShareData(const int32_t &uniqueId)
 
 void AbilityRecord::ConnectAbility()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Connect ability.");
     Want want = GetWant();
     UpdateDmsCallerInfo(want);
+    ConnectAbilityWithWant(want);
+}
+
+void AbilityRecord::ConnectAbilityWithWant(const Want &want)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Connect ability.");
     CHECK_POINTER(lifecycleDeal_);
     if (isConnected) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "connect state error.");
     }
+#ifdef SUPPORT_SCREEN
     GrantUriPermissionForServiceExtension();
+#endif // SUPPORT_SCREEN
     lifecycleDeal_->ConnectAbility(want);
     isConnected = true;
 }
@@ -1694,12 +1708,30 @@ void AbilityRecord::DisconnectAbility()
         abilityInfo_.applicationInfo.bundleName.c_str(), abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
     lifecycleDeal_->DisconnectAbility(GetWant());
-    isConnected = false;
+    if (GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+        if (GetInProgressRecordCount() == 0) {
+            isConnected = false;
+        }
+    } else {
+        isConnected = false;
+    }
+}
+
+void AbilityRecord::DisconnectAbilityWithWant(const Want &want)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability:%{public}s.", abilityInfo_.name.c_str());
+    CHECK_POINTER(lifecycleDeal_);
+    lifecycleDeal_->DisconnectAbility(want);
+    if (GetInProgressRecordCount() == 0) {
+        isConnected = false;
+    }
 }
 
 bool AbilityRecord::GrantUriPermissionForServiceExtension()
 {
-    if (abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+    if (abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE ||
+        abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         std::lock_guard guard(wantLock_);
         auto callerTokenId = want_.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0);
         auto callerName = want_.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
@@ -1737,6 +1769,12 @@ void AbilityRecord::SaveAbilityState(const PacMap &inState)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     stateDatas_ = inState;
+}
+
+void AbilityRecord::SaveAbilityWindowConfig(const WindowConfig &windowConfig)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    windowConfig_ = windowConfig;
 }
 
 void AbilityRecord::RestoreAbilityState()
@@ -2014,6 +2052,9 @@ void AbilityRecord::RemoveConnectRecordFromList(const std::shared_ptr<Connection
     CHECK_POINTER(connRecord);
     std::lock_guard guard(connRecordListMutex_);
     connRecordList_.remove(connRecord);
+    if (connRecordList_.empty()) {
+        isConnected = false;
+    }
 }
 
 void AbilityRecord::RemoveSpecifiedWantParam(const std::string &key)
@@ -2203,6 +2244,19 @@ std::list<std::shared_ptr<ConnectionRecord>> AbilityRecord::GetConnectingRecordL
         }
     }
     return connectingList;
+}
+
+uint32_t AbilityRecord::GetInProgressRecordCount()
+{
+    std::lock_guard guard(connRecordListMutex_);
+    uint32_t count = 0;
+    for (auto record : connRecordList_) {
+        if (record && (record->GetConnectState() == ConnectionState::CONNECTING ||
+            record->GetConnectState() == ConnectionState::CONNECTED)) {
+            count ++;
+        }
+    }
+    return count;
 }
 
 std::shared_ptr<ConnectionRecord> AbilityRecord::GetDisconnectingRecord() const
@@ -2419,7 +2473,15 @@ void AbilityRecord::DumpService(std::vector<std::string> &info, std::vector<std:
     if (isUIExtension) {
         info.emplace_back("      ability type [UIEXTENSION]");
     } else {
-        info.emplace_back("      ability type [SERVICE]");
+        if (GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+            info.emplace_back("      ability type [UI_SERVICE]");
+            info.emplace_back("      windowConfig windowType [" +
+                std::to_string(GetAbilityWindowConfig().windowType) + "]");
+            info.emplace_back("      windowConfig windowId [" +
+                std::to_string(GetAbilityWindowConfig().windowId) + "]");
+        } else {
+            info.emplace_back("      ability type [SERVICE]");
+        }
     }
     info.emplace_back("      app state #" + AbilityRecord::ConvertAppState(appState_));
 
@@ -2682,6 +2744,9 @@ void AbilityRecord::SetWant(const Want &want)
     }
     if (errorInfoEnhance) {
         want_.SetParam(ERROR_INFO_ENHANCE, true);
+    }
+    if (want_.HasParameter(UISERVICEHOSTPROXY_KEY)) {
+        want_.RemoveParam(UISERVICEHOSTPROXY_KEY);
     }
 }
 

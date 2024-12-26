@@ -62,6 +62,14 @@ public:
     ErrCode AbilityTransitionDone(sptr<IRemoteObject> token, int state, const PacMap &saveData);
 
     /**
+     * AbilityWindowConfigTransitionDone, ability call this interface after lift cycle was changed.
+     *
+     * @param token,.ability's token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AbilityWindowConfigTransitionDone(sptr<IRemoteObject> token, const WindowConfig &windowConfig);
+
+    /**
      * ScheduleConnectAbilityDone, service ability call this interface while session was connected.
      *
      * @param token,.service ability's token.
@@ -390,6 +398,14 @@ public:
         const Want *resultWant, int64_t callerRequestCode);
 
     /**
+     * TerminateUIServiceExtensionAbility with token.
+     *
+     * @param token Ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode TerminateUIServiceExtensionAbility(sptr<IRemoteObject> token);
+
+    /**
      * TerminateUIExtensionAbility with want, return want from ability manager service.
      *
      * @param extensionSessionInfo the extension session info of the ability to terminate.
@@ -490,6 +506,20 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ConnectAbility(
+        const Want &want,
+        sptr<IAbilityConnection> connect,
+        sptr<IRemoteObject> callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * ConnectUIServiceExtesnionAbility, connect session with uiService ability.
+     *
+     * @param want, Special want for uiService type's ability.
+     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param callerToken, caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ConnectUIServiceExtesnionAbility(
         const Want &want,
         sptr<IAbilityConnection> connect,
         sptr<IRemoteObject> callerToken,

@@ -166,6 +166,16 @@ public:
     int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state);
 
     /**
+     * @brief execute after the ability schedule the lifecycle
+     *
+     * @param token the ability token
+     * @param windowConfig the windowconfig
+     * @return execute error code
+     */
+    int AbilityWindowConfigTransactionDone(
+        const sptr<IRemoteObject> &token, const AppExecFwk::WindowConfig &windowConfig);
+
+    /**
      * ScheduleConnectAbilityDoneLocked, service ability call this interface while session was connected.
      *
      * @param token, service ability's token.
@@ -377,6 +387,21 @@ private:
     void ConnectAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     /**
+     * ConnectAbility.Schedule connect ability
+     *
+     * @param abilityRecord, the ptr of the ability to connect.
+     */
+    void ConnectUIServiceExtAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        int connectRecordId, const Want &want);
+
+    /**
+     * ConnectAbility.Schedule Resume Connect ability
+     *
+     * @param abilityRecord, the ptr of the ability to connect.
+     */
+    void ResumeConnectAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
      * CommandAbility. Schedule command ability
      *
      * @param abilityRecord, the ptr of the ability to command.
@@ -521,6 +546,7 @@ private:
      * @param messageId, message id.
      */
     void PostTimeOutTask(const std::shared_ptr<AbilityRecord> &abilityRecord, uint32_t messageId);
+    void PostTimeOutTask(const std::shared_ptr<AbilityRecord> &abilityRecord, int connectRecordId, uint32_t messageId);
 
     void CompleteForeground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
