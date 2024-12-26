@@ -46,10 +46,8 @@ std::string GetInstanceMapMessage(
 using StartServer = void (*)(const std::string&);
 using StartServerForSocketPair = bool (*)(int);
 using SendMessage = void (*)(const std::string&);
-using SendLayoutMessage = void (*)(const std::string&);
 using StopServer = void (*)(const std::string&);
 using StoreMessage = void (*)(int32_t, const std::string&);
-using StoreInspectorInfo = void (*)(const std::string&, const std::string&);
 using SetProfilerCallback = void (*)(const std::function<void(bool)> &setStateProfilerStatus);
 using SetSwitchCallBack = void (*)(const std::function<void(bool)> &setSwitchStatus,
     const std::function<void(int32_t)> &createLayoutInfo, int32_t instanceId);
@@ -344,33 +342,25 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
 void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr)
 {
     TAG_LOGI(AAFwkTag::JSRUNTIME, "called");
-    auto sendLayoutMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendLayoutMessage"));
-    if (sendLayoutMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendLayoutMessage");
+    auto sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
+    if (sendMessage == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendMessage");
         return;
     }
-
-    sendLayoutMessage(jsonTreeStr);
-    sendLayoutMessage(jsonSnapshotStr);
-    auto storeInspectorInfo = reinterpret_cast<StoreInspectorInfo>(
-        dlsym(handlerConnectServerSo_, "StoreInspectorInfo"));
-    if (storeInspectorInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null StoreInspectorInfo");
-        return;
-    }
-    storeInspectorInfo(jsonTreeStr, jsonSnapshotStr);
+    sendMessage(jsonTreeStr);
+    sendMessage(jsonSnapshotStr);
 }
 
 void ConnectServerManager::SendStateProfilerMessage(const std::string &message)
 {
     TAG_LOGI(AAFwkTag::JSRUNTIME, "called");
-    auto sendProfilerMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendProfilerMessage"));
-    if (sendProfilerMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendProfilerMessage");
+    auto sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
+    if (sendMessage == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendMessage");
         return;
     }
 
-    sendProfilerMessage(message);
+    sendMessage(message);
 }
 
 DebuggerPostTask ConnectServerManager::GetDebuggerPostTask(int32_t tid)
@@ -405,12 +395,12 @@ void ConnectServerManager::SetRecordResults(const std::string &jsonArrayStr)
         TAG_LOGE(AAFwkTag::JSRUNTIME, "No connected server");
         return;
     }
-    auto sendLayoutMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendLayoutMessage"));
-    if (sendLayoutMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendLayoutMessage");
+    auto sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
+    if (sendMessage == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendMessage");
         return;
     }
-    sendLayoutMessage(jsonArrayStr);
+    sendMessage(jsonArrayStr);
 }
 
 void ConnectServerManager::RegisterConnectServerCallback(const ServerConnectCallback &connectServerCallback)
