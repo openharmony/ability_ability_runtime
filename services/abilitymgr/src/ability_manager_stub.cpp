@@ -52,6 +52,9 @@ int AbilityManagerStub::OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &
     if (interfaceCode == AbilityManagerInterfaceCode::ABILITY_TRANSITION_DONE) {
         return AbilityTransitionDoneInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::ABILITY_WINDOW_CONFIG_TRANSITION_DONE) {
+        return AbilityWindowConfigTransitionDoneInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::CONNECT_ABILITY_DONE) {
         return ScheduleConnectAbilityDoneInner(data, reply);
     }
@@ -540,6 +543,9 @@ int AbilityManagerStub::OnRemoteRequestInnerFourteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::PRELOAD_UIEXTENSION_ABILITY) {
         return PreloadUIExtensionAbilityInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::TERMINATE_UI_SERVICE_EXTENSION_ABILITY) {
+        return TerminateUIServiceExtensionAbilityInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -964,6 +970,18 @@ int AbilityManagerStub::BackToCallerInner(MessageParcel &data, MessageParcel &re
     return NO_ERROR;
 }
 
+int32_t AbilityManagerStub::TerminateUIServiceExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = nullptr;
+    if (data.ReadBool()) {
+        token = data.ReadRemoteObject();
+    }
+    
+    int32_t result = TerminateUIServiceExtensionAbility(token);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::TerminateUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<SessionInfo> extensionSessionInfo = nullptr;
@@ -1054,6 +1072,19 @@ int AbilityManagerStub::AbilityTransitionDoneInner(MessageParcel &data, MessageP
         return ERR_INVALID_VALUE;
     }
     int32_t result = AbilityTransitionDone(token, targetState, *saveData);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::AbilityWindowConfigTransitionDoneInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto token = data.ReadRemoteObject();
+    std::unique_ptr<WindowConfig> windowConfig(data.ReadParcelable<WindowConfig>());
+    if (!windowConfig) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "windowConfig is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = AbilityWindowConfigTransitionDone(token, *windowConfig);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

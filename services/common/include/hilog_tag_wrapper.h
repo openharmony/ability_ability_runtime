@@ -26,7 +26,8 @@
 #endif
 
 #ifndef AAFWK_FILE_NAME
-#define AAFWK_FILE_NAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
+#define AAFWK_FILE_NAME \
+    (__builtin_strrchr(__FILE_NAME__, '/') ? __builtin_strrchr(__FILE_NAME__, '/') + 1 : __FILE_NAME__)
 #endif
 
 #ifndef AAFWK_FUNC_INFO
@@ -76,6 +77,7 @@ enum class AAFwkLogTag : uint32_t {
     UI_EXT,
     ACTION_EXT,
     EMBEDDED_EXT,
+    UISERVC_EXT,
 
     WANTAGENT = DEFAULT + 0x50, // 0xD001350
     AUTOFILLMGR,
@@ -146,7 +148,7 @@ inline const char* GetDomainName3(AAFwkLogTag tag)
 inline const char* GetDomainName4(AAFwkLogTag tag)
 {
     const char* tagNames[] = { "Ext", "AutoFillExt", "ServiceExt", "FormExt", "ShareExt",
-        "UIExt", "ActionExt", "EmbeddedExt" };
+        "UIExt", "ActionExt", "EmbeddedExt", "UIServiceExt" };
     uint32_t offset = GetOffset(tag, AAFwkLogTag::EXT);
     if (offset >= sizeof(tagNames) / sizeof(const char*)) {
         return "UN";
