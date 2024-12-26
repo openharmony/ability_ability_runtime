@@ -41,7 +41,6 @@ ohos_fuzztest("GetMissionInfosFuzzTest") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:mission_info",
-    "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -51,6 +50,7 @@ ohos_fuzztest("GetMissionInfosFuzzTest") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "samgr:samgr_proxy",

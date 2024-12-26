@@ -22,7 +22,6 @@ ability_delegator_mock_sources =
 config("tools_ability_delegator_config") {
   include_dirs = [
     "${ability_runtime_path}/tools/test/mock",
-    "//third_party/googletest/googlemock/include",
     "${ability_runtime_path}/tools/aa/include",
   ]
 }
@@ -38,13 +37,13 @@ ohos_unittest("ability_command_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -61,13 +60,13 @@ ohos_unittest("test_observer_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -78,13 +77,11 @@ ohos_unittest("test_observer_proxy_test") {
 
   sources = [ "test_observer_proxy_test.cpp" ]
 
-  deps = [
-    "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_path}/tools/aa:tools_aa_source_set" ]
 
   external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -98,13 +95,11 @@ ohos_unittest("test_observer_stub_test") {
     "test_observer_stub_test.cpp",
   ]
 
-  deps = [
-    "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_path}/tools/aa:tools_aa_source_set" ]
 
   external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -117,15 +112,13 @@ ohos_unittest("shell_command_result_test") {
 
   configs = [ ":tools_ability_delegator_config" ]
 
-  deps = [
-    "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_path}/tools/aa:tools_aa_source_set" ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -140,11 +133,7 @@ if (accessibility_enable) {
 
     configs = [ ":tools_ability_delegator_config" ]
 
-    deps = [
-      "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-      "//third_party/googletest:gmock_main",
-      "//third_party/googletest:gtest_main",
-    ]
+    deps = [ "${ability_runtime_path}/tools/aa:tools_aa_source_set" ]
 
     external_deps = [
       "ability_base:configuration",
@@ -153,6 +142,8 @@ if (accessibility_enable) {
       "accessibility:accessibilityconfig",
       "bundle_framework:appexecfwk_base",
       "eventhandler:libeventhandler",
+      "googletest:gmock_main",
+      "googletest:gtest_main",
       "hilog:libhilog",
       "ipc:ipc_core",
     ]
@@ -174,10 +165,7 @@ if (accessibility_enable) {
       "mock_accessibility_config.cpp",
     ]
 
-    deps = [
-      "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-      "//third_party/googletest:gtest_main",
-    ]
+    deps = [ "${ability_runtime_path}/tools/aa:tools_aa_source_set" ]
 
     external_deps = [
       "ability_base:configuration",
@@ -189,6 +177,7 @@ if (accessibility_enable) {
       "accessibility:accessibilityconfig",
       "bundle_framework:appexecfwk_base",
       "cJSON:cjson",
+      "googletest:gtest_main",
       "hilog:libhilog",
       "ipc:ipc_core",
       "selinux_adapter:librestorecon",

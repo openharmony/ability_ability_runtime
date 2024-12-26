@@ -41,8 +41,6 @@ ohos_unittest("start_other_app_interceptor_test") {
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/appmgr:libappms",
     "${ability_runtime_services_path}/common:perm_verification",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -56,6 +54,8 @@ ohos_unittest("start_other_app_interceptor_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",

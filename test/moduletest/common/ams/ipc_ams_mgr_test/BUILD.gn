@@ -30,7 +30,6 @@ ohos_moduletest("AmsIpcAmsmgrModuleTest") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_services_path}/appmgr/include",
     "${ability_runtime_test_path}/mock/common/include",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
   sources = [
     "${ability_runtime_services_path}/appmgr/src/cache_process_manager.cpp",
@@ -62,6 +61,7 @@ ohos_moduletest("AmsIpcAmsmgrModuleTest") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
   ]
 

@@ -70,8 +70,6 @@ ohos_unittest("extension_record_manager_second_test") {
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -92,6 +90,8 @@ ohos_unittest("extension_record_manager_second_test") {
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",

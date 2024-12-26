@@ -17,10 +17,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 module_output_path = "ability_tools/tools"
 
 config("tools_aa_config_mock") {
-  include_dirs = [
-    "${ability_runtime_path}/tools/test/mock",
-    "//third_party/googletest/googlemock/include",
-  ]
+  include_dirs = [ "${ability_runtime_path}/tools/test/mock" ]
 }
 
 tools_aa_mock_sources =
@@ -42,13 +39,13 @@ ohos_unittest("aa_command_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -70,13 +67,13 @@ ohos_unittest("aa_command_ability_first_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -98,13 +95,13 @@ ohos_unittest("aa_command_start_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -126,13 +123,13 @@ ohos_unittest("aa_command_stop_service_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -154,13 +151,13 @@ ohos_unittest("aa_command_dump_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -182,13 +179,13 @@ ohos_unittest("aa_command_dumpsys_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -210,13 +207,13 @@ ohos_unittest("aa_command_force_stop_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -238,13 +235,13 @@ ohos_unittest("aa_command_force_timeout_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -266,13 +263,13 @@ ohos_unittest("aa_command_test_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -290,14 +287,12 @@ ohos_unittest("aa_command_attach_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_path}/tools/aa:tools_aa_source_set" ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
@@ -307,8 +302,6 @@ print("accessibility_enable = ", accessibility_enable)
 if (accessibility_enable) {
   ohos_unittest("accessibility_ability_utils_test") {
     module_out_path = module_output_path
-
-    include_dirs = [ "//third_party/jsoncpp/include" ]
 
     sources = [
       "${ability_runtime_path}/tools/aa/src/accessibility_ability_utils.cpp",
@@ -320,10 +313,7 @@ if (accessibility_enable) {
       cflags += [ "-DBINDER_IPC_32BIT" ]
     }
 
-    deps = [
-      "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-      "//third_party/googletest:gmock_main",
-    ]
+    deps = [ "${ability_runtime_path}/tools/aa:tools_aa_source_set" ]
 
     external_deps = [
       "access_token:libaccesstoken_sdk",
@@ -333,7 +323,9 @@ if (accessibility_enable) {
       "accessibility:accessibilityclient",
       "accessibility:accessibilityconfig",
       "cJSON:cjson",
+      "googletest:gmock_main",
       "hilog:libhilog",
+      "jsoncpp:jsoncpp",
       "selinux_adapter:librestorecon",
     ]
   }

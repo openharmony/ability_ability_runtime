@@ -34,14 +34,14 @@ ohos_unittest("render_state_observer_manager_test") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_services_path}/appmgr:libappms",
     "${ability_runtime_services_path}/common:task_handler_wrap",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "appspawn:appspawn_client",
     "c_utils:utils",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",

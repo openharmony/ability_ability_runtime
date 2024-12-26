@@ -38,13 +38,13 @@ ohos_unittest("ability_record_mgr_test") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-  deps = [ "//third_party/googletest:gmock_main" ]
 
   external_deps = [
     "ability_runtime:abilitykit_native",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",

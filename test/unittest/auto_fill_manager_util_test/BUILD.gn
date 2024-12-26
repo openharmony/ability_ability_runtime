@@ -34,8 +34,6 @@ ohos_unittest("auto_fill_manager_util_test") {
   deps = [
     "${ability_runtime_innerkits_path}/auto_fill_manager:auto_fill_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
@@ -51,6 +49,8 @@ ohos_unittest("auto_fill_manager_util_test") {
     "faultloggerd:libdfx_dumpcatcher",
     "faultloggerd:libfaultloggerd",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",

@@ -31,12 +31,10 @@ ohos_unittest("advanced_security_mode_manager_test") {
     "advanced_security_mode_manager_test.cpp",
   ]
 
-  deps = [
-    "${ability_runtime_services_path}/appmgr:libappms",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${ability_runtime_services_path}/appmgr:libappms" ]
 
   external_deps = [
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
