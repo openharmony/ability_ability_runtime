@@ -472,6 +472,14 @@ public:
         const Want *resultWant = nullptr) override;
 
     /**
+     * TerminateUIServiceExtensionAbility, terminate the UIServiceExtensionAbility.
+     *
+     * @param token, the token of the ability to terminate.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t TerminateUIServiceExtensionAbility(const sptr<IRemoteObject> &token) override;
+
+    /**
      * BackToCallerAbilityWithResult, return to the caller ability.
      *
      * @param token, the token of the ability to terminate.
@@ -744,6 +752,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData) override;
+
+    /**
+     * AbilityWindowConfigTransitionDone, ability call this interface after lift cycle was changed.
+     *
+     * @param token,.ability's token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int AbilityWindowConfigTransitionDone(
+        const sptr<IRemoteObject> &token, const WindowConfig &windowConfig) override;
 
     /**
      * ScheduleConnectAbilityDone, service ability call this interface while session was connected.
@@ -2020,6 +2037,9 @@ private:
     int CheckStaticCfgPermission(const AppExecFwk::AbilityRequest &abilityRequest, bool isStartAsCaller,
         uint32_t callerTokenId, bool isData = false, bool isSaCall = false, bool isImplicit = false);
 
+    int CheckPermissionForUIService(AppExecFwk::ExtensionAbilityType extensionType,
+        const Want &want, const AbilityRequest &abilityRequest);
+
     bool GetValidDataAbilityUri(const std::string &abilityInfoUri, std::string &adjustUri);
 
     int GenerateExtensionAbilityRequest(const Want &want, AbilityRequest &request,
@@ -2388,6 +2408,7 @@ private:
 
     int32_t GetAppIndex(const Want& want);
 
+    void SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest, AppExecFwk::ExtensionAbilityType extensionType);
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif

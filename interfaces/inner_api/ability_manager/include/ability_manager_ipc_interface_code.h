@@ -244,6 +244,9 @@ enum class AbilityManagerInterfaceCode {
     // Set resident process enable status.
     SET_RESIDENT_PROCESS_ENABLE = 80,
 
+    // ipc id for ability window config transition done (81)
+    ABILITY_WINDOW_CONFIG_TRANSITION_DONE = 81,
+
     // Back to caller.
     BACK_TO_CALLER_UIABILITY = 82,
 
@@ -407,6 +410,9 @@ enum class AbilityManagerInterfaceCode {
     // start ability only ui ability
     START_ABILITY_ONLY_UI_ABILITY = 1067,
 
+    //terminate UIServiceExtensionAbility
+    TERMINATE_UI_SERVICE_EXTENSION_ABILITY = 1068,
+    
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 

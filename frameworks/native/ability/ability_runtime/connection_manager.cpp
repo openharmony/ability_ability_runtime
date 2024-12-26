@@ -20,6 +20,7 @@
 #include "dfx_dump_catcher.h"
 #include "hichecker.h"
 #include "hilog_tag_wrapper.h"
+#include "ui_service_extension_connection_constants.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -42,8 +43,14 @@ ErrCode ConnectionManager::ConnectAbilityWithAccount(const sptr<IRemoteObject>& 
     return ConnectAbilityInner(connectCaller, want, accountId, connectCallback);
 }
 
+ErrCode ConnectionManager::ConnectUIServiceExtensionAbility(const sptr<IRemoteObject>& connectCaller,
+    const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback)
+{
+    return ConnectAbilityInner(connectCaller, want, AAFwk::DEFAULT_INVAL_VALUE, connectCallback, true);
+}
+
 ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connectCaller,
-    const AAFwk::Want& want, int accountId, const sptr<AbilityConnectCallback>& connectCallback)
+    const AAFwk::Want& want, int accountId, const sptr<AbilityConnectCallback>& connectCallback, bool isUIService)
 {
     if (connectCaller == nullptr || connectCallback == nullptr) {
         TAG_LOGE(AAFwkTag::CONNECTION, "null connectCaller or connectCallback");
@@ -83,17 +90,32 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connec
         } else {
             TAG_LOGE(AAFwkTag::CONNECTION, "AbilityConnection disconnected, erase it and reconnect");
             abilityConnections_.erase(connectionIter);
-            return CreateConnection(connectCaller, want, accountId, connectCallback);
+            return CreateConnection(connectCaller, want, accountId, connectCallback, isUIService);
         }
     } else {
-        return CreateConnection(connectCaller, want, accountId, connectCallback);
+        return CreateConnection(connectCaller, want, accountId, connectCallback, isUIService);
     }
+}
+
+void* ConnectionManager::GetUIServiceExtProxyPtr(const AAFwk::Want& want)
+{
+    sptr<IRemoteObject> uiServiceExtProxySptr = want.GetRemoteObject(UISERVICEHOSTPROXY_KEY);
+    void* uiServiceExtProxy = nullptr;
+    if (uiServiceExtProxySptr != nullptr) {
+        uiServiceExtProxy = uiServiceExtProxySptr.GetRefPtr();
+    }
+    return uiServiceExtProxy;
 }
 
 bool ConnectionManager::MatchConnection(
     const sptr<IRemoteObject>& connectCaller, const AAFwk::Want& connectReceiver, int32_t accountId,
     const std::map<ConnectionInfo, std::vector<sptr<AbilityConnectCallback>>>::value_type& connection)
 {
+    void* uiServiceExtProxy = GetUIServiceExtProxyPtr(connectReceiver);
+    if (uiServiceExtProxy != connection.first.uiServiceExtProxy) {
+        return false;
+    }
+
     if (accountId != connection.first.userid) {
         return false;
     }
@@ -111,7 +133,7 @@ bool ConnectionManager::MatchConnection(
 }
 
 ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCaller,
-    const AAFwk::Want& want, int accountId, const sptr<AbilityConnectCallback>& connectCallback)
+    const AAFwk::Want& want, int accountId, const sptr<AbilityConnectCallback>& connectCallback, bool isUIService)
 {
     TAG_LOGD(AAFwkTag::CONNECTION, "called");
     sptr<AbilityConnection> abilityConnection = new AbilityConnection();
@@ -121,11 +143,19 @@ ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCa
     }
     abilityConnection->AddConnectCallback(connectCallback);
     abilityConnection->SetConnectionState(CONNECTION_STATE_CONNECTING);
-    ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
-        want, abilityConnection, connectCaller, accountId);
+    ErrCode ret = ERR_OK;
+    if (isUIService) {
+        ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectUIServiceExtesnionAbility(
+            want, abilityConnection, connectCaller, accountId);
+    } else {
+        ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
+            want, abilityConnection, connectCaller, accountId);
+    }
     std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     if (ret == ERR_OK) {
         ConnectionInfo connectionInfo(connectCaller, want.GetOperation(), abilityConnection, accountId);
+        void* uiServiceExtProxy = GetUIServiceExtProxyPtr(want);
+        connectionInfo.SetUIServiceExtProxyPtr(uiServiceExtProxy);
         std::vector<sptr<AbilityConnectCallback>> callbacks;
         callbacks.push_back(connectCallback);
         abilityConnections_[connectionInfo] = callbacks;

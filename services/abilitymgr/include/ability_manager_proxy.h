@@ -341,6 +341,14 @@ public:
         const Want *resultWant, int64_t callerRequestCode) override;
 
     /**
+     * TerminateUIServiceExtensionAbility, terminate UIServiceExtensionAbility.
+     *
+     * @param token, the token of the UIServiceExtensionAbility to terminate.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t TerminateUIServiceExtensionAbility(const sptr<IRemoteObject> &token) override;
+
+    /**
      * TerminateUIExtensionAbility, terminate the special ui extension ability.
      *
      * @param extensionSessionInfo the extension session info of the ability to terminate.
@@ -503,6 +511,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData) override;
+
+    /**
+     * AbilityWindowConfigTransitionDone, ability call this interface after lift cycle was changed.
+     *
+     * @param token,.ability's token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int AbilityWindowConfigTransitionDone(
+        const sptr<IRemoteObject> &token, const WindowConfig &windowConfig) override;
 
     /**
      * ScheduleConnectAbilityDone, service ability call this interface while session was connected.

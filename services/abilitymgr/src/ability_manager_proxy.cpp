@@ -951,6 +951,36 @@ int AbilityManagerProxy::BackToCallerAbilityWithResult(const sptr<IRemoteObject>
     return reply.ReadInt32();
 }
 
+int32_t AbilityManagerProxy::TerminateUIServiceExtensionAbility(const sptr<IRemoteObject> &token)
+{
+    int error;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+    if (token) {
+        if (!data.WriteBool(true) || !data.WriteRemoteObject(token)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and token write fail");
+            return INNER_ERR;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag write fail");
+            return INNER_ERR;
+        }
+    }
+    
+    error = SendRequest(AbilityManagerInterfaceCode::TERMINATE_UI_SERVICE_EXTENSION_ABILITY, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
 int AbilityManagerProxy::TerminateUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo, int resultCode,
     const Want *resultWant)
 {
@@ -1327,6 +1357,34 @@ int AbilityManagerProxy::AbilityTransitionDone(const sptr<IRemoteObject> &token,
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
             std::string("ERROR AbilityTransitionDone failed IPC error") + std::to_string(error));
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int AbilityManagerProxy::AbilityWindowConfigTransitionDone(
+    const sptr<IRemoteObject> &token, const WindowConfig &windowConfig)
+{
+    int error;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "token or state write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteParcelable(&windowConfig)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "saveData write failed.");
+        return INNER_ERR;
+    }
+    
+    error = SendRequest(AbilityManagerInterfaceCode::ABILITY_WINDOW_CONFIG_TRANSITION_DONE, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
         return error;
     }
     return reply.ReadInt32();

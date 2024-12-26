@@ -59,6 +59,18 @@ ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want, const AAFwk::S
     return err;
 }
 
+ErrCode UIExtensionContext::StartUIServiceExtension(const AAFwk::Want& want, int32_t accountId) const
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UI_EXT, "Start UIServiceExtension begin");
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(
+        want, token_, accountId, AppExecFwk::ExtensionAbilityType::UI_SERVICE);
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "StartUIServiceExtension is failed %{public}d", err);
+    }
+    return err;
+}
+
 ErrCode UIExtensionContext::TerminateSelf()
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "begin");
@@ -78,6 +90,17 @@ ErrCode UIExtensionContext::ConnectAbility(
     ErrCode ret =
         ConnectionManager::GetInstance().ConnectAbility(token_, want, connectCallback);
     TAG_LOGD(AAFwkTag::UI_EXT, "UIExtensionContext::ConnectAbility ErrorCode = %{public}d", ret);
+    return ret;
+}
+
+ErrCode UIExtensionContext::ConnectUIServiceExtensionAbility(
+    const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin, ability:%{public}s",
+        want.GetElement().GetAbilityName().c_str());
+    ErrCode ret =
+        ConnectionManager::GetInstance().ConnectUIServiceExtensionAbility(token_, want, connectCallback);
+    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtensionContext::ConnectUIServiceExtensionAbility ErrorCode = %{public}d", ret);
     return ret;
 }
 
