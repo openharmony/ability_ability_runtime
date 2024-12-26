@@ -159,7 +159,7 @@ public:
 
     void RemoveResultCallbackTask(int requestCode);
 
-    int32_t GetScreenMode();
+    int32_t GetScreenMode() const;
     void SetScreenMode(int32_t screenMode);
     using SelfType = UIExtensionContext;
     static const size_t CONTEXT_TYPE_ID;
