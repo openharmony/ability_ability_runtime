@@ -509,7 +509,6 @@ void AppMgrServiceInner::reportpreLoadTask(const std::shared_ptr<AppRunningRecor
     };
     if (taskHandler_) {
         taskHandler_->SubmitTask(reportLoadTask, "reportpreLoadTask");
-        }
     }
 }
 
