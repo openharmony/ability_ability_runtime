@@ -499,7 +499,8 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     }
 }
 
-void AppMgrServiceInner::reportpreLoadTask(const std::shared_ptr<AppRunningRecord> appRecord) {
+void AppMgrServiceInner::reportpreLoadTask(const std::shared_ptr<AppRunningRecord> appRecord)
+{
     auto reportLoadTask = [appRecord]() {
         auto priorityObj = appRecord->GetPriorityObject();
         if (priorityObj) {
@@ -841,9 +842,9 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     appRecord->SetStrictMode(strictMode);
     int32_t maxChildProcess = 0;
     PresetMaxChildProcess(abilityInfo, maxChildProcess);
-    StartProcess(abilityInfo->applicationName, processName, startFlags, appRecord,
-        appInfo->uid, bundleInfo, appInfo->bundleName, bundleIndex, appExistFlag, isPreload, preloadMode,
-        abilityInfo->moduleName, abilityInfo->name, strictMode, maxChildProcess, token, want, abilityInfo->extensionAbilityType);
+    StartProcess(abilityInfo->applicationName, processName, startFlags, appRecord, appInfo->uid,
+        bundleInfo, appInfo->bundleName, bundleIndex, appExistFlag, isPreload, preloadMode, abilityInfo->moduleName,
+        abilityInfo->name, strictMode, maxChildProcess, token, want, abilityInfo->extensionAbilityType);
     if (isShellCall) {
         std::string perfCmd = (want == nullptr) ? "" : want->GetStringParam(PERF_CMD);
         bool isSandboxApp = (want == nullptr) ? false : want->GetBoolParam(ENTER_SANDBOX, false);
@@ -2305,7 +2306,8 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
     return ret;
 }
 
-bool AppMgrServiceInner::CheckIsThreadInFoundation(pid_t pid) {
+bool AppMgrServiceInner::CheckIsThreadInFoundation(pid_t pid)
+{
     std::ostringstream pathBuilder;
     pathBuilder << PROC_SELF_TASK_PATH << pid;
     std::string path = pathBuilder.str();

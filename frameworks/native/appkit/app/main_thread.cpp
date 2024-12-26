@@ -1821,7 +1821,6 @@ void MainThread::HandleNWebPreload()
     TAG_LOGI(AAFwkTag::APPKIT, "postIdleTask success");
 }
 #endif
-}
 
 void MainThread::ProcessMainAbility(const AbilityInfo &info, const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
