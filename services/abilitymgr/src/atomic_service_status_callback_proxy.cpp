@@ -16,6 +16,7 @@
 #include "atomic_service_status_callback_proxy.h"
 
 #include "hilog_tag_wrapper.h"
+#include "ipc_capacity_wrap.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -30,6 +31,7 @@ void AtomicServiceStatusCallbackProxy::OnInstallFinished(int resultCode, const W
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
 
     if (!data.WriteInterfaceToken(IAtomicServiceStatusCallback::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token failed");
@@ -64,6 +66,7 @@ void AtomicServiceStatusCallbackProxy::OnRemoteInstallFinished(int resultCode, c
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
 
     if (!data.WriteInterfaceToken(IAtomicServiceStatusCallback::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token failed");

@@ -1587,6 +1587,7 @@ private:
         const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode);
     bool UpdateAssociateConfigInner(const std::map<std::string, std::list<std::string>>& configs,
         MessageParcel& data);
+    bool ExtendMaxIpcCapacityForWant(const Want &want, MessageParcel &data);
 
 private:
     static inline BrokerDelegator<AbilityManagerProxy> delegator_;

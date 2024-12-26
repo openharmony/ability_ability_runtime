@@ -17,6 +17,7 @@
 
 #include "configuration.h"
 #include "hilog_tag_wrapper.h"
+#include "ipc_capacity_wrap.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -26,6 +27,7 @@ int32_t AbilityManagerCollaboratorProxy::NotifyStartAbility(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
 
     if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
@@ -71,6 +73,7 @@ int32_t AbilityManagerCollaboratorProxy::NotifyMissionCreated(int32_t missionId,
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
 
     if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
@@ -103,6 +106,7 @@ int32_t AbilityManagerCollaboratorProxy::NotifyMissionCreated(const sptr<Session
         return ERR_INVALID_OPERATION;
     }
     if (sessionInfo) {
+        AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and sessionInfo write fail");
             return ERR_INVALID_OPERATION;
@@ -127,6 +131,7 @@ int32_t AbilityManagerCollaboratorProxy::NotifyLoadAbility(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
 
     if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
@@ -168,6 +173,7 @@ int32_t AbilityManagerCollaboratorProxy::NotifyLoadAbility(
         return ERR_INVALID_OPERATION;
     }
     if (sessionInfo) {
+        AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and sessionInfo write fail");
             return ERR_INVALID_OPERATION;
@@ -349,6 +355,7 @@ void AbilityManagerCollaboratorProxy::UpdateMissionInfo(sptr<SessionInfo> &sessi
     }
 
     if (sessionInfo) {
+        AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and sessionInfo write fail");
             return;
@@ -375,6 +382,7 @@ int32_t AbilityManagerCollaboratorProxy::CheckCallAbilityPermission(const Want &
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
 
     if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
@@ -473,6 +481,7 @@ int32_t AbilityManagerCollaboratorProxy::CheckStaticCfgPermission(const Want &wa
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
         return ERR_INVALID_OPERATION;

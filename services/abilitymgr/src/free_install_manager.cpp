@@ -22,6 +22,7 @@
 #include "hitrace_meter.h"
 #include "insight_intent_execute_manager.h"
 #include "insight_intent_utils.h"
+#include "ipc_capacity_wrap.h"
 #include "permission_constants.h"
 #include "utils/app_mgr_util.h"
 #include "uri_utils.h"
@@ -225,6 +226,7 @@ int FreeInstallManager::NotifyDmsCallback(const Want &want, int resultCode)
         if (want.GetElement().GetAbilityName().compare(abilityName) == 0) {
             TAG_LOGI(AAFwkTag::FREE_INSTALL, "Handle DMS");
             MessageParcel data;
+            AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
             if (!data.WriteInterfaceToken(DMS_FREE_INSTALL_CALLBACK_TOKEN)) {
                 TAG_LOGE(AAFwkTag::FREE_INSTALL, "write interface token failed");
                 return ERR_INVALID_VALUE;
