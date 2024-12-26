@@ -16,6 +16,7 @@
 #include "ability_info_callback_proxy.h"
 
 #include "hilog_tag_wrapper.h"
+#include "ipc_capacity_wrap.h"
 #include "ipc_types.h"
 
 namespace OHOS {
@@ -37,6 +38,7 @@ void AbilityInfoCallbackProxy::NotifyAbilityToken(const sptr<IRemoteObject> toke
 {
     MessageParcel data;
     MessageParcel reply;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
         return;
@@ -72,6 +74,7 @@ void AbilityInfoCallbackProxy::NotifyStartSpecifiedAbility(const sptr<IRemoteObj
 {
     MessageParcel data;
     MessageParcel reply;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
         return;
@@ -113,6 +116,7 @@ void AbilityInfoCallbackProxy::NotifyStartAbilityResult(const Want &want, int re
 {
     MessageParcel data;
     MessageParcel reply;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         return;

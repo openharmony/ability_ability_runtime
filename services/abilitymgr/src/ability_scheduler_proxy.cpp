@@ -22,6 +22,7 @@
 #include "error_msg_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "ipc_capacity_wrap.h"
 #include "ishared_result_set.h"
 #include "session_info.h"
 #include "values_bucket.h"
@@ -49,6 +50,7 @@ bool AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     if (!WriteInterfaceToken(data)) {
         return false;
     }
@@ -137,6 +139,7 @@ void AbilitySchedulerProxy::ScheduleConnectAbility(const Want &want)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     if (!WriteInterfaceToken(data)) {
         return;
     }
@@ -155,6 +158,7 @@ void AbilitySchedulerProxy::ScheduleDisconnectAbility(const Want &want)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     if (!WriteInterfaceToken(data)) {
         return;
     }
@@ -174,6 +178,7 @@ void AbilitySchedulerProxy::ScheduleCommandAbility(const Want &want, bool restar
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     if (!WriteInterfaceToken(data)) {
         return;
     }
@@ -221,6 +226,7 @@ void AbilitySchedulerProxy::ScheduleCommandAbilityWindow(const Want &want, const
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     if (!WriteInterfaceToken(data)) {
         return;
     }
@@ -1125,6 +1131,7 @@ void AbilitySchedulerProxy::OnExecuteIntent(const Want &want)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     if (!WriteInterfaceToken(data)) {
         return;
     }
@@ -1144,6 +1151,7 @@ int32_t AbilitySchedulerProxy::CreateModalUIExtension(const Want &want)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface fail");
         return INNER_ERR;

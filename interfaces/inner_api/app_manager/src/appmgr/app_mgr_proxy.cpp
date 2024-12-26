@@ -18,6 +18,7 @@
 #include "appexecfwk_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "ipc_capacity_wrap.h"
 #include "ipc_types.h"
 #include "iremote_object.h"
 #include "parcel_util.h"
@@ -704,6 +705,7 @@ void AppMgrProxy::ScheduleAcceptWantDone(const int32_t recordId, const AAFwk::Wa
 {
     MessageParcel data;
     MessageParcel reply;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
@@ -725,6 +727,7 @@ void AppMgrProxy::ScheduleNewProcessRequestDone(const int32_t recordId, const AA
 {
     MessageParcel data;
     MessageParcel reply;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;

@@ -19,6 +19,7 @@
 #include "iservice_registry.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "ipc_capacity_wrap.h"
 
 namespace OHOS {
 namespace EcologicalRuleMgrService {
@@ -166,6 +167,7 @@ int32_t AbilityEcologicalRuleMgrServiceProxy::EvaluateResolveInfos(const Want &w
 {
     TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "called");
     MessageParcel data;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
 
     if (!data.WriteInterfaceToken(ERMS_INTERFACE_TOKEN)) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write token failed");
@@ -246,7 +248,7 @@ int32_t AbilityEcologicalRuleMgrServiceProxy::QueryStartExperience(const Want &w
 {
     TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "called");
     MessageParcel data;
-
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     if (!data.WriteInterfaceToken(ERMS_INTERFACE_TOKEN)) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write token failed");
         return ERR_FAILED;
