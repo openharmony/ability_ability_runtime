@@ -744,16 +744,6 @@ bool JsAbilityContext::CreateOpenLinkTask(const napi_env &env, const napi_value 
     return true;
 }
 
-void JsAbilityContext::RemoveOpenLinkTask(int requestCode)
-{
-    auto context = context_.lock();
-    if (!context) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
-        return;
-    }
-    context->RemoveResultCallbackTask(requestCode);
-}
-
 static bool ParseOpenLinkParams(const napi_env &env, const NapiCallbackInfo &info, std::string &linkValue,
     AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want)
 {
@@ -826,30 +816,30 @@ napi_value JsAbilityContext::OnOpenLinkInner(napi_env env, const AAFwk::Want& wa
         }
         *innerErrorCode = context->OpenLink(want, requestCode);
     };
-
-    NapiAsyncTask::CompleteCallback complete = [innerErrorCode, requestCode, startTime, url, this](
-        napi_env env, NapiAsyncTask& task, int32_t status) {
-        if (*innerErrorCode == 0) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "openLink succeeded");
-            return;
-        }
-        if (freeInstallObserver_ == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "null freeInstallObserver_");
-            RemoveOpenLinkTask(requestCode);
-            return;
-        }
-        if (*innerErrorCode == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "start ability by default succeeded");
-            freeInstallObserver_->OnInstallFinishedByUrl(startTime, url, ERR_OK);
-            return;
-        }
-        TAG_LOGI(AAFwkTag::CONTEXT, "failed");
-        freeInstallObserver_->OnInstallFinishedByUrl(startTime, url, *innerErrorCode);
-        RemoveOpenLinkTask(requestCode);
-    };
-
     napi_value result = nullptr;
     AddFreeInstallObserver(env, want, nullptr, &result, false, true);
+    NapiAsyncTask::CompleteCallback complete = [innerErrorCode, requestCode, startTime, url, weak = context_,
+        observer = freeInstallObserver_](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*innerErrorCode == 0) {
+            TAG_LOGI(AAFwkTag::CONTEXT, "openLink succeeded");
+            return;
+        }
+        auto context = weak.lock();
+        if (!context) {
+            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
+            return;
+        }
+        if (observer != nullptr) {
+            if (*innerErrorCode == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
+                TAG_LOGI(AAFwkTag::CONTEXT, "start ability by default succeeded");
+                observer->OnInstallFinishedByUrl(startTime, url, ERR_OK);
+                return;
+            }
+            observer->OnInstallFinishedByUrl(startTime, url, *innerErrorCode);
+        }
+        context->RemoveResultCallbackTask(requestCode);
+    };
+
     NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnOpenLink", env,
         CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), nullptr));
 
