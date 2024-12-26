@@ -307,12 +307,12 @@ QuickFixManagerApplyTask::~QuickFixManagerApplyTask()
     TAG_LOGD(AAFwkTag::QUICKFIX, "destroyed");
 }
 
-void QuickFixManagerApplyTask::Run(const std::vector<std::string> &quickFixFiles, bool isDebug)
+void QuickFixManagerApplyTask::Run(const std::vector<std::string> &quickFixFiles, bool isDebug, bool isReplace)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::QUICKFIX, "Run apply task");
     taskType_ = TaskType::QUICK_FIX_APPLY;
-    PostDeployQuickFixTask(quickFixFiles, isDebug);
+    PostDeployQuickFixTask(quickFixFiles, isDebug, isReplace);
 }
 
 void QuickFixManagerApplyTask::RunRevoke()
@@ -385,7 +385,8 @@ void QuickFixManagerApplyTask::HandlePatchDeleted()
     RemoveSelf();
 }
 
-void QuickFixManagerApplyTask::PostDeployQuickFixTask(const std::vector<std::string> &quickFixFiles, bool isDebug)
+void QuickFixManagerApplyTask::PostDeployQuickFixTask(const std::vector<std::string> &quickFixFiles, bool isDebug,
+    bool isReplace)
 {
     auto callback = sptr<QuickFixManagerStatusCallback>::MakeSptr(shared_from_this());
     if (callback == nullptr) {
@@ -396,7 +397,7 @@ void QuickFixManagerApplyTask::PostDeployQuickFixTask(const std::vector<std::str
     }
 
     std::weak_ptr<QuickFixManagerApplyTask> thisWeakPtr(weak_from_this());
-    auto deployTask = [thisWeakPtr, quickFixFiles, callback, isDebug]() {
+    auto deployTask = [thisWeakPtr, quickFixFiles, callback, isDebug, isReplace]() {
         auto applyTask = thisWeakPtr.lock();
         if (applyTask == nullptr) {
             TAG_LOGE(AAFwkTag::QUICKFIX, "null apply task");
@@ -410,8 +411,8 @@ void QuickFixManagerApplyTask::PostDeployQuickFixTask(const std::vector<std::str
             return;
         }
 
-        TAG_LOGD(AAFwkTag::QUICKFIX, "isDebug is %d", isDebug);
-        auto ret = applyTask->bundleQfMgr_->DeployQuickFix(quickFixFiles, callback, isDebug);
+        TAG_LOGD(AAFwkTag::QUICKFIX, "isDebug is %d isReplace is %d", isDebug, isReplace);
+        auto ret = applyTask->bundleQfMgr_->DeployQuickFix(quickFixFiles, callback, isDebug, "", isReplace);
         if (ret != 0) {
             TAG_LOGE(AAFwkTag::QUICKFIX, "failed: %{public}d", ret);
             applyTask->NotifyApplyStatus(QUICK_FIX_DEPLOY_FAILED);

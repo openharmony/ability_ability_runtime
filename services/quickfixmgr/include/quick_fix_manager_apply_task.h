@@ -38,7 +38,7 @@ public:
         QUICK_FIX_REVOKE,
     };
 
-    void Run(const std::vector<std::string> &quickFixFiles, bool isDebug = false);
+    void Run(const std::vector<std::string> &quickFixFiles, bool isDebug = false, bool isReplace = false);
     void HandlePatchDeployed();
     void HandlePatchSwitched();
     void HandlePatchDeleted();
@@ -65,7 +65,8 @@ public:
     void PostRevokeQuickFixDeleteTask();
     void PostRevokeQuickFixProcessDiedTask();
 private:
-    void PostDeployQuickFixTask(const std::vector<std::string> &quickFixFiles, bool isDebug = false);
+    void PostDeployQuickFixTask(const std::vector<std::string> &quickFixFiles, bool isDebug = false,
+        bool isReplace = false);
     void PostTimeOutTask();
     void PostNotifyLoadRepairPatchTask();
     void PostNotifyUnloadRepairPatchTask();

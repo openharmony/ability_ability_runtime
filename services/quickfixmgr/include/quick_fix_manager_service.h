@@ -51,9 +51,11 @@ public:
      *
      * @param quickFixFiles Quick fix files need to apply, this value should include file path and file name.
      * @param isDebug this value is for the quick fix debug mode selection.
+     * @param isReplace this value is for the quick fix replace mode selection.
      * @return Returns 0 on success, error code on failure.
      */
-    int32_t ApplyQuickFix(const std::vector<std::string> &quickFixFiles, bool isDebug = false) override;
+    int32_t ApplyQuickFix(const std::vector<std::string> &quickFixFiles, bool isDebug = false,
+        bool isReplace = false) override;
 
     /**
      * @brief Get applyed quick fix info.
