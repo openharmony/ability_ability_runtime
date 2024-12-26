@@ -55,7 +55,8 @@ bool QuickFixManagerService::Init()
     return true;
 }
 
-int32_t QuickFixManagerService::ApplyQuickFix(const std::vector<std::string> &quickFixFiles, bool isDebug)
+int32_t QuickFixManagerService::ApplyQuickFix(const std::vector<std::string> &quickFixFiles, bool isDebug,
+    bool isReplace)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::QUICKFIX, "called");
@@ -80,7 +81,7 @@ int32_t QuickFixManagerService::ApplyQuickFix(const std::vector<std::string> &qu
     }
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr, appMgr, eventHandler_, this);
     AddApplyTask(applyTask);
-    applyTask->Run(quickFixFiles, isDebug);
+    applyTask->Run(quickFixFiles, isDebug, isReplace);
 
     return QUICK_FIX_OK;
 }
