@@ -964,9 +964,29 @@ public:
         isStrictMode_ = strictMode;
     }
 
-    inline bool IsStrictMode()
+    inline bool IsStrictMode() const
     {
         return isStrictMode_;
+    }
+
+    inline void SetNetworkEnableFlags(bool enable)
+    {
+        networkEnableFlags_ = enable;
+    }
+
+    inline bool GetNetworkEnableFlags() const
+    {
+        return networkEnableFlags_;
+    }
+
+    inline void SetSAEnableFlags(bool enable)
+    {
+        saEnableFlags_ = enable;
+    }
+
+    inline bool GetSAEnableFlags() const
+    {
+        return saEnableFlags_;
     }
 
     inline void SetIsDependedOnArkWeb(bool isDepend)
@@ -1209,6 +1229,8 @@ private:
     bool hasGPU_ = false;
     pid_t gpuPid_ = 0;
     bool isStrictMode_ = false;
+    bool networkEnableFlags_ = true;
+    bool saEnableFlags_ = true;
     bool isAttachedToStatusBar = false;
     bool isDependedOnArkWeb_ = false;
     bool isUserRequestCleaning_ = false;

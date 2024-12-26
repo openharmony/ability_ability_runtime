@@ -15,6 +15,7 @@
 
 #include "interceptor/extension_control_interceptor.h"
 
+#include "ability_manager_constants.h"
 #include "ability_util.h"
 #include "app_scheduler.h"
 #include "extension_config.h"
@@ -22,9 +23,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-namespace {
-constexpr char STRICT_MODE[] = "strictMode";
-}
 
 ErrCode ExtensionControlInterceptor::DoProcess(AbilityInterceptorParam param)
 {

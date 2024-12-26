@@ -26,6 +26,7 @@
 
 #include "appexecfwk_errors.h"
 #include "appspawn.h"
+#include "bundle_info.h"
 #ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_info.h"
 #endif  // SUPPORT_CHILD_PROCESS
@@ -84,6 +85,10 @@ struct AppSpawnStartMsg {
     std::map<std::string, int32_t> fds;
     bool isolationMode = false;
     JITPermissionsList jitPermissionsList; // list of JIT permissions
+    std::string extensionTypeName;
+    bool isolatedNetworkFlag = false;
+    bool isolatedSELinuxFlag = false;
+    bool isolatedSandboxFlagLegacy = false; // APP_FLAGS_EXTENSION_SANDBOX legacy
 };
 
 constexpr auto LEN_PID = sizeof(pid_t);
@@ -105,6 +110,22 @@ struct StartFlags {
     static const int HWASANENABLED = 21;
     static const int UBSANENABLED = 22;
     static const int TEMP_JIT_ALLOW = 28;
+};
+
+struct CreateStartMsgParam {
+    uint32_t startFlags = 0;
+    int32_t uid = -1;
+    int32_t bundleIndex = 0;
+    BundleInfo bundleInfo;
+    BundleType bundleType = BundleType::APP;
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    std::string moduleName;
+    std::string abilityName;
+    std::string processName;
+    bool strictMode = false;
+    bool networkEnableFlags = true;
+    bool saEnableFlags = true;
+    ExtensionAbilityType extensionAbilityType = ExtensionAbilityType::UNSPECIFIED;
 };
 
 union AppSpawnPidMsg {
@@ -249,6 +270,8 @@ private:
     int32_t SetExtMsgFds(const AppSpawnReqMsgHandle &reqHandle, const std::map<std::string, int32_t> &fds);
 
     int32_t SetIsolationModeFlag(const AppSpawnStartMsg &startMsg, const AppSpawnReqMsgHandle &reqHandle);
+
+    int32_t SetStrictMode(const AppSpawnStartMsg &startMsg, const AppSpawnReqMsgHandle &reqHandle);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
