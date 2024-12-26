@@ -495,7 +495,6 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     appRecord->SetNeedLimitPrio(false);
     if (request.preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE) {
             reportpreLoadTask(appRecord);
-        }
     }
 }
 
