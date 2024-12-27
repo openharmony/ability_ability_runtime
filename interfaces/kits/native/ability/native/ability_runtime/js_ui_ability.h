@@ -294,7 +294,7 @@ public:
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
 
     /**
-     * @brief Called when distributed system tring to collaborate remote ability.
+     * @brief Called when distributed system trying to collaborate remote ability.
      * @param wantParam wantParam with collaborative info.
      * @return Returns whether the ability agree to collaborate.
      */

@@ -561,7 +561,7 @@ public:
     std::string GetIdentityToken() const;
 
     /**
-     * @brief Called when distributed system tring to collaborate remote ability.
+     * @brief Called when distributed system trying to collaborate remote ability.
      * @param wantParams wantParams with collaborative info.
      * @return Returns whether the ability agree to collaborate.
      */
