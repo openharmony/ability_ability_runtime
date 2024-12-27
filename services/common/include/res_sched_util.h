@@ -37,6 +37,7 @@ enum class LoadingStage : int32_t {
     FOREGROUND_END,
     DESTROY_BEGIN = 8,
     DESTROY_END = 9,
+    PRELOAD_BEGIN,
 };
 
 class ResSchedUtil final {

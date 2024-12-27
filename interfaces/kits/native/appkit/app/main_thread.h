@@ -368,6 +368,11 @@ private:
 
     void HandleJsHeapMemory(const OHOS::AppExecFwk::JsHeapDumpInfo &info);
 
+    void PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleInfo,
+        const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
+
+    void ProcessMainAbility(const AbilityInfo &info, const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
+
     /**
      *
      * @brief Schedule the application process exit safely.

@@ -759,6 +759,10 @@ public:
 
     bool IsPreloaded() const;
 
+    void SetPreloadMode(PreloadMode mode);
+
+    PreloadMode GetPreloadMode();
+
     /**
      * @brief Obtains the app record assign tokenId.
      *
@@ -848,6 +852,10 @@ public:
 
     void SetProcessCaching(bool isCaching);
     bool IsCaching();
+    void SetNeedPreloadModule(bool isNeedPreloadModule);
+    bool GetNeedPreloadModule();
+    void SetNeedLimitPrio(bool isNeedLimitPrio);
+    bool GetNeedLimitPrio();
 
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
@@ -987,6 +995,7 @@ private:
     int64_t restartTimeMillis_ = 0; // The time of last trying app restart
     bool jitEnabled_ = false;
     PreloadState preloadState_ = PreloadState::NONE;
+    PreloadMode preloadMode_ = PreloadMode::PRESS_DOWN;
     int32_t exitReason_ = 0;
     std::string exitMsg_ = "";
 
@@ -1038,6 +1047,8 @@ private:
     bool isDependedOnArkWeb_ = false;
     bool isUserRequestCleaning_ = false;
     bool hasUIAbilityLaunched_ = false;
+    bool isNeedPreloadModule_ = false;
+    bool isNeedLimitPrio_ = false;
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;
 };

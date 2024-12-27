@@ -1771,6 +1771,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         HandleNWebPreload();
     }
 #endif
+    if (appLaunchData.IsNeedPreloadModule()) {
+        PreloadModule(entryHapModuleInfo, application_->GetRuntime());
+    }
 }
 
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
@@ -1818,6 +1821,52 @@ void MainThread::HandleNWebPreload()
     TAG_LOGI(AAFwkTag::APPKIT, "postIdleTask success");
 }
 #endif
+
+void MainThread::ProcessMainAbility(const AbilityInfo &info, const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
+{
+    std::string srcPath(info.package);
+    if (!info.isModuleJson) {
+    /* temporary compatibility api8 + config.json */
+        srcPath.append("/assets/js/");
+        if (!info.srcPath.empty()) {
+            srcPath.append(info.srcPath);
+        }
+        srcPath.append("/").append(info.name).append(".abc");
+    } else {
+        if (info.srcEntrance.empty()) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "empty srcEntrance");
+            return;
+        }
+        srcPath.append("/");
+        srcPath.append(info.srcEntrance);
+        srcPath.erase(srcPath.rfind("."));
+        srcPath.append(".abc");
+        TAG_LOGD(AAFwkTag::UIABILITY, "jsAbility srcPath: %{public}s", srcPath.c_str());
+    }
+
+    std::string moduleName(info.moduleName);
+    moduleName.append("::").append(info.name);
+    bool isEsmode = info.compileMode == AppExecFwk::CompileMode::ES_MODULE;
+    runtime->PreloadMainAbility(moduleName, srcPath, info.hapPath, isEsmode, info.srcEntrance);
+}
+
+void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleInfo,
+    const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "preload module %{public}s", entryHapModuleInfo.moduleName.c_str());
+    auto callback = []() {};
+    bool isAsyncCallback = false;
+    application_->AddAbilityStage(entryHapModuleInfo, callback, isAsyncCallback);
+    if (isAsyncCallback) {
+        return;
+    }
+    for (const auto &info : entryHapModuleInfo.abilityInfos) {
+        if (info.name == entryHapModuleInfo.mainAbility) {
+            ProcessMainAbility(info, runtime);
+            return;
+        }
+    }
+}
 
 #ifdef ABILITY_LIBRARY_LOADER
 void MainThread::CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::string &nativeLibraryPath)
