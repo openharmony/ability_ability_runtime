@@ -623,7 +623,7 @@ void JsUIAbility::OnForeground(const Want &want)
     }
 
     UIAbility::OnForeground(want);
-    HandleCollaboration();
+    HandleCollaboration(want);
 
     if (CheckIsSilentForeground()) {
         TAG_LOGD(AAFwkTag::UIABILITY, "silent foreground, do not call 'onForeground'");
@@ -684,7 +684,10 @@ void JsUIAbility::OnBackground()
     if (applicationContext != nullptr) {
         applicationContext->DispatchOnAbilityWillBackground(jsAbilityObj_);
     }
-    HandleCollaboration();
+    auto want = GetWant();
+    if (want != nullptr) {
+        HandleCollaboration(*want);
+    }
     std::string methodName = "OnBackground";
     HandleScope handleScope(jsRuntime_);
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
@@ -1137,22 +1140,18 @@ int32_t JsUIAbility::OnCollaborate(WantParams &wantParam)
     return ret;
 }
 
-void JsUIAbility::HandleCollaboration()
+void JsUIAbility::HandleCollaboration(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    auto want = GetWant();
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null want");
-        return;
-    }
     if (abilityInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
         return;
     }
-    if (want->GetBoolParam(IS_CALLING_FROM_DMS, false) &&
+    if (want.GetBoolParam(IS_CALLING_FROM_DMS, false) &&
         (abilityInfo_->launchMode != AppExecFwk::LaunchMode::SPECIFIED)) {
-        want->RemoveParam(IS_CALLING_FROM_DMS);
-        OHOS::AAFwk::WantParams param = want->GetParams().GetWantParams(SUPPORT_COLLABORATE_INDEX);
+        (const_cast<Want &>(want)).RemoveParam(IS_CALLING_FROM_DMS);
+        SetWant(want);
+        OHOS::AAFwk::WantParams param = want.GetParams().GetWantParams(SUPPORT_COLLABORATE_INDEX);
         int32_t resultCode = OnCollaborate(param);
         auto abilityContext = GetAbilityContext();
         if (abilityContext == nullptr) {
@@ -1403,7 +1402,7 @@ void JsUIAbility::OnNewWant(const Want &want)
     if (scene_) {
         scene_->OnNewWant(want);
     }
-    HandleCollaboration();
+    HandleCollaboration(want);
 #endif
 
     HandleScope handleScope(jsRuntime_);
