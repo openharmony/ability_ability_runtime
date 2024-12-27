@@ -50,6 +50,7 @@ private:
     int32_t resultCode_ = ERR_OK;
     std::string resultMessage_;
 };
+using StartupTaskResultCallback = AppExecFwk::AbilityTransactionCallbackInfo<const std::shared_ptr<StartupTaskResult>>;
 using OnCompletedCallbackFunc = std::function<void(const std::shared_ptr<StartupTaskResult> &)>;
 class OnCompletedCallback {
 public:
@@ -61,11 +62,16 @@ public:
 
     bool IsCalled() const;
 
+    static void OnCallback(std::unique_ptr<StartupTaskResultCallback> callback, int32_t resultCode,
+        const std::string& resultMessage = "");
+
+    static void OnCallback(std::unique_ptr<StartupTaskResultCallback> callback,
+        const std::shared_ptr<StartupTaskResult> &result);
+
 private:
     OnCompletedCallbackFunc callbackFunc_;
     bool isCalled_ = false;
 };
-using StartupTaskResultCallback = AppExecFwk::AbilityTransactionCallbackInfo<const std::shared_ptr<StartupTaskResult>>;
 } // namespace AbilityRuntime
 } // namespace OHOS
 

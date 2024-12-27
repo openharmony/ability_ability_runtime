@@ -17,68 +17,105 @@
 
 #include "hilog_tag_wrapper.h"
 #include "js_runtime_utils.h"
+#include "js_startup_task_executor.h"
 
+namespace OHOS {
+namespace AbilityRuntime {
 namespace {
 constexpr size_t ARGC_TWO = 2;
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
+
+class AsyncTaskCallBack {
+public:
+    AsyncTaskCallBack() = default;
+    ~AsyncTaskCallBack() = default;
+
+    static napi_value AsyncTaskCompleted(napi_env env, napi_callback_info info)
+    {
+        TAG_LOGD(AAFwkTag::STARTUP, "called");
+        size_t argc = ARGC_TWO;
+        napi_value argv[ARGC_TWO] = { nullptr };
+        napi_value thisVar = nullptr;
+        NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+
+        std::string startupName;
+        if (!ConvertFromJsValue(env, argv[INDEX_ZERO], startupName)) {
+            TAG_LOGE(AAFwkTag::STARTUP, "Convert error");
+            return CreateJsUndefined(env);
+        }
+
+        napi_value resultJs = argv[INDEX_ONE];
+        napi_ref resultRef = nullptr;
+        napi_create_reference(env, resultJs, INDEX_ONE, &resultRef);
+        std::shared_ptr<NativeReference> result(reinterpret_cast<NativeReference*>(resultRef));
+        std::shared_ptr<StartupTaskResult> callbackResult = std::make_shared<JsStartupTaskResult>(result);
+
+        std::shared_ptr<JsStartupTask> jsStartupTask;
+        for (const auto& iter : jsStartupTaskObjects_) {
+            if (iter.first == startupName) {
+                jsStartupTask = iter.second.lock();
+            }
+        }
+
+        if (jsStartupTask != nullptr) {
+            jsStartupTask->OnAsyncTaskCompleted(callbackResult);
+            jsStartupTaskObjects_.erase(startupName);
+        }
+
+        return CreateJsUndefined(env);
+    }
+
+    static napi_value Constructor(napi_env env, napi_callback_info cbinfo)
+    {
+        TAG_LOGD(AAFwkTag::STARTUP, "called");
+        return CreateJsUndefined(env);
+    }
+
+    static std::map<std::string, std::weak_ptr<JsStartupTask>> jsStartupTaskObjects_;
+};
+std::map<std::string, std::weak_ptr<JsStartupTask>> AsyncTaskCallBack::jsStartupTaskObjects_;
 }
-namespace OHOS {
-namespace AbilityRuntime {
-std::map<std::string, std::weak_ptr<StartupTask>> AsyncTaskCallBack::jsStartupTaskObjects_;
-JsStartupTask::JsStartupTask(const std::string &name, JsRuntime &jsRuntime,
-    std::unique_ptr<NativeReference> &startupJsRef, std::shared_ptr<NativeReference> &contextJsRef)
-    : StartupTask(name), jsRuntime_(jsRuntime), startupJsRef_(std::move(startupJsRef)), contextJsRef_(contextJsRef) {}
+
+const std::string JsStartupTask::TASK_TYPE = "Js";
+
+JsStartupTask::JsStartupTask(const std::string& name, JsRuntime& jsRuntime,
+    std::unique_ptr<NativeReference>& startupJsRef, std::shared_ptr<NativeReference>& contextJsRef)
+    : AppStartupTask(name), jsRuntime_(jsRuntime), startupJsRef_(std::move(startupJsRef)), contextJsRef_(contextJsRef)
+{
+}
 
 JsStartupTask::~JsStartupTask() = default;
 
-int32_t JsStartupTask::Init()
+const std::string &JsStartupTask::GetType() const
 {
-    // init dependencies_, callCreateOnMainThread_, waitOnMainThread_, isExcludeFromAutoStart_
-    TAG_LOGD(AAFwkTag::STARTUP, "%{public}s, dump: %{public}d%{public}d%{public}d, dep: %{public}s", name_.c_str(),
-        callCreateOnMainThread_, waitOnMainThread_, isExcludeFromAutoStart_, DumpDependencies().c_str());
-    return ERR_OK;
+    return TASK_TYPE;
 }
 
 int32_t JsStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallback> callback)
 {
-    if (state_ != State::CREATED) {
-        TAG_LOGE(AAFwkTag::STARTUP, "%{public}s, state wrong %{public}d", name_.c_str(), static_cast<int32_t>(state_));
-        return ERR_STARTUP_INTERNAL_ERROR;
-    }
-    state_ = State::INITIALIZING;
-    callback->Push([weak = weak_from_this()](const std::shared_ptr<StartupTaskResult> &result) {
-        auto startupTask = weak.lock();
-        if (startupTask == nullptr) {
-            TAG_LOGE(AAFwkTag::STARTUP, "null startupTask");
-            return;
-        }
-        startupTask->SaveResult(result);
-        startupTask->CallExtraCallback(result);
-    });
-
     if (callCreateOnMainThread_) {
         return JsStartupTaskExecutor::RunOnMainThread(jsRuntime_, startupJsRef_, contextJsRef_, std::move(callback));
     }
 
-    if (LoadJsAsyncTaskExcutor() != ERR_OK) {
-        TAG_LOGE(AAFwkTag::STARTUP, "LoadJsAsyncTaskExcutor failed");
+    if (LoadJsAsyncTaskExecutor() != ERR_OK) {
+        TAG_LOGE(AAFwkTag::STARTUP, "LoadJsAsyncTaskExecutor failed");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     LoadJsAsyncTaskCallback();
 
     startupTaskResultCallback_ = std::move(callback);
 
-    auto startupName = GetName();
     auto result = JsStartupTaskExecutor::RunOnTaskPool(
-        jsRuntime_, startupJsRef_, contextJsRef_, AsyncTaskExcutorJsRef_, AsyncTaskExcutorCallbackJsRef_, startupName);
+        jsRuntime_, startupJsRef_, contextJsRef_, AsyncTaskExecutorJsRef_, AsyncTaskExecutorCallbackJsRef_, name_);
     if (result == ERR_OK) {
-        AsyncTaskCallBack::jsStartupTaskObjects_.emplace(startupName, shared_from_this());
+        AsyncTaskCallBack::jsStartupTaskObjects_.emplace(name_,
+            std::static_pointer_cast<JsStartupTask>(shared_from_this()));
     }
     return result;
 }
 
-int32_t JsStartupTask::LoadJsAsyncTaskExcutor()
+int32_t JsStartupTask::LoadJsAsyncTaskExecutor()
 {
     TAG_LOGD(AAFwkTag::STARTUP, "called");
     HandleScope handleScope(jsRuntime_);
@@ -91,7 +128,7 @@ int32_t JsStartupTask::LoadJsAsyncTaskExcutor()
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
-    AsyncTaskExcutorJsRef_ =
+    AsyncTaskExecutorJsRef_ =
         JsRuntime::LoadSystemModuleByEngine(env, "app.appstartup.AsyncTaskExcutor", &object, 1);
     return ERR_OK;
 }
@@ -114,7 +151,7 @@ void JsStartupTask::LoadJsAsyncTaskCallback()
     napi_value asyncTaskCallbackClass = nullptr;
     napi_define_sendable_class(env, "AsyncTaskCallback", NAPI_AUTO_LENGTH, AsyncTaskCallBack::Constructor,
         nullptr, sizeof(props) / sizeof(props[0]), props, nullptr, &asyncTaskCallbackClass);
-    AsyncTaskExcutorCallbackJsRef_ =
+    AsyncTaskExecutorCallbackJsRef_ =
         JsRuntime::LoadSystemModuleByEngine(env, "app.appstartup.AsyncTaskCallback", &asyncTaskCallbackClass, 1);
 }
 
@@ -181,47 +218,6 @@ napi_value JsStartupTask::GetDependencyResult(napi_env env, const std::string &d
         }
         return jsResultRef->GetNapiValue();
     }
-}
-
-napi_value AsyncTaskCallBack::AsyncTaskCompleted(napi_env env, napi_callback_info info)
-{
-    TAG_LOGD(AAFwkTag::STARTUP, "called");
-    size_t argc = ARGC_TWO;
-    napi_value argv[ARGC_TWO] = { nullptr };
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
-
-    std::string startupName;
-    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], startupName)) {
-        TAG_LOGE(AAFwkTag::STARTUP, "Convert error");
-        return CreateJsUndefined(env);
-    }
-
-    napi_value resultJs = argv[INDEX_ONE];
-    napi_ref resultRef = nullptr;
-    napi_create_reference(env, resultJs, INDEX_ONE, &resultRef);
-    std::shared_ptr<NativeReference> result(reinterpret_cast<NativeReference*>(resultRef));
-    std::shared_ptr<StartupTaskResult> callbackResult = std::make_shared<JsStartupTaskResult>(result);
-
-    std::shared_ptr<StartupTask> startupTask;
-    for (auto iter : AsyncTaskCallBack::jsStartupTaskObjects_) {
-        if (iter.first == startupName) {
-            startupTask = iter.second.lock();
-        }
-    }
-
-    if (startupTask != nullptr) {
-        startupTask->OnAsyncTaskCompleted(callbackResult);
-        AsyncTaskCallBack::jsStartupTaskObjects_.erase(startupName);
-    }
-
-    return CreateJsUndefined(env);
-}
-
-napi_value AsyncTaskCallBack::Constructor(napi_env env, napi_callback_info cbinfo)
-{
-    TAG_LOGD(AAFwkTag::STARTUP, "called");
-    return CreateJsUndefined(env);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

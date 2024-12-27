@@ -77,5 +77,26 @@ bool OnCompletedCallback::IsCalled() const
 {
     return isCalled_;
 }
+
+void OnCompletedCallback::OnCallback(std::unique_ptr<StartupTaskResultCallback> callback,
+    int32_t resultCode, const std::string& resultMessage)
+{
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "callback null");
+        return;
+    }
+    std::shared_ptr<StartupTaskResult> result = std::make_shared<StartupTaskResult>(resultCode, resultMessage);
+    callback->Call(result);
+}
+
+void OnCompletedCallback::OnCallback(std::unique_ptr<StartupTaskResultCallback> callback,
+    const std::shared_ptr<StartupTaskResult> &result)
+{
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "callback null");
+        return;
+    }
+    callback->Call(result);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

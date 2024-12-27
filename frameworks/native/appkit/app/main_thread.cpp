@@ -1468,6 +1468,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 #endif
 
+    application_->PreloadAppStartup(bundleInfo, entryHapModuleInfo, appLaunchData.GetPreloadModuleName());
+
     if (isStageBased) {
         // Create runtime
         auto hapPath = entryHapModuleInfo.hapPath;

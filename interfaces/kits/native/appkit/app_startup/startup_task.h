@@ -21,7 +21,6 @@
 #include <memory>
 
 #include "startup_task_result.h"
-#include "startup_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -42,27 +41,27 @@ public:
 
     std::vector<std::string> GetDependencies() const;
 
-    bool GetCallCreateOnMainThread() const;
+    void SetDependencies(const std::vector<std::string> &dependencies);
+
+    uint32_t GetDependenciesCount() const;
 
     bool GetWaitOnMainThread() const;
 
-    bool GetIsExcludeFromAutoStart() const;
-
-    void SetDependencies(const std::vector<std::string> &dependencies);
-
-    void SetCallCreateOnMainThread(bool callCreateOnMainThread);
-
     void SetWaitOnMainThread(bool waitOnMainThread);
 
-    void SetIsExcludeFromAutoStart(bool excludeFromAutoStart);
+    bool GetCallCreateOnMainThread() const;
 
-    uint32_t getDependenciesCount() const;
+    void SetCallCreateOnMainThread(bool callCreateOnMainThread);
 
     void SaveResult(const std::shared_ptr<StartupTaskResult> &result);
 
     int32_t RemoveResult();
 
     const std::shared_ptr<StartupTaskResult>& GetResult() const;
+
+    int32_t RunTaskPreInit(std::unique_ptr<StartupTaskResultCallback>& callback);
+
+    virtual const std::string &GetType() const = 0;
 
     virtual int32_t RunTaskInit(std::unique_ptr<StartupTaskResultCallback> callback) = 0;
 
@@ -75,14 +74,11 @@ public:
 
     void CallExtraCallback(const std::shared_ptr<StartupTaskResult> &result);
 
-    virtual void OnAsyncTaskCompleted(const std::shared_ptr<StartupTaskResult> &result) = 0;
-
 protected:
     std::string name_;
     std::vector<std::string> dependencies_;
-    bool callCreateOnMainThread_ = true;
     bool waitOnMainThread_ = true;
-    bool isExcludeFromAutoStart_ = false;
+    bool callCreateOnMainThread_ = true;
     std::shared_ptr<StartupTaskResult> result_;
     State state_ = State::INVALID;
     std::vector<std::unique_ptr<StartupTaskResultCallback>> extraCallbacks_;

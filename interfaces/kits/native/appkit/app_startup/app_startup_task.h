@@ -13,20 +13,28 @@
  * limitations under the License.
  */
 
-#include "startup_listener.h"
+#ifndef OHOS_ABILITY_RUNTIME_APP_STARTUP_TASK_H
+#define OHOS_ABILITY_RUNTIME_APP_STARTUP_TASK_H
+
+#include <string>
+
+#include "startup_task.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-StartupListener::StartupListener(OnCompletedCallbackFunc callback) : onCompletedCallback_(std::move(callback))
-{}
+class AppStartupTask : public StartupTask {
+public:
+    explicit AppStartupTask(const std::string& name);
 
-StartupListener::~StartupListener() = default;
+    ~AppStartupTask() override;
 
-void StartupListener::OnCompleted(const std::shared_ptr<StartupTaskResult> &result)
-{
-    if (onCompletedCallback_ != nullptr) {
-        onCompletedCallback_(result);
-    }
-}
+    bool GetIsExcludeFromAutoStart() const;
+
+    void SetIsExcludeFromAutoStart(bool excludeFromAutoStart);
+
+protected:
+    bool isExcludeFromAutoStart_ = false;
+};
 } // namespace AbilityRuntime
 } // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_APP_STARTUP_TASK_H
