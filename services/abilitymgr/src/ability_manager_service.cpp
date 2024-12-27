@@ -11091,9 +11091,11 @@ int32_t AbilityManagerService::ExecuteInsightIntentDone(const sptr<IRemoteObject
     std::string callerBundleName;
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GetCallerBundleName(intentId, callerBundleName);
     uint32_t initiatorTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
+#ifdef SUPPORT_UPMS
     if (!callerBundleName.empty()) {
         abilityRecord->GrantUriPermission(result.uris, result.flags, callerBundleName, initiatorTokenId);
     }
+#endif // SUPPORT_UPMS
 
     return DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->ExecuteIntentDone(
         intentId, result.innerErr, result);

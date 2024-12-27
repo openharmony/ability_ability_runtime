@@ -487,6 +487,7 @@ ohos_shared_library("mission_list") {
   }
 
   if (ability_runtime_upms) {
+    defines += [ "SUPPORT_UPMS" ]
     deps += [
       "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     ]

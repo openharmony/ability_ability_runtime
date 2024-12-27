@@ -1127,10 +1127,12 @@ public:
 
     void SetDebugUIExtension();
 
+#ifdef SUPPORT_UPMS
     void GrantUriPermission();
 
     void GrantUriPermission(const std::vector<std::string> &uriVec, int32_t flag,
         const std::string &targetBundleName, uint32_t callerTokenId);
+#endif // SUPPORT_UPMS
 
     inline std::string GetInstanceKey() const
     {

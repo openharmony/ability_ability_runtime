@@ -32,10 +32,7 @@ ohos_unittest("ability_record_first_test") {
     "ability_record_first_test.cpp",
   ]
 
-  configs = [
-    "${ability_runtime_services_path}/abilitymgr:abilityms_config",
-    "${ability_runtime_services_path}/uripermmgr:upms_config",
-  ]
+  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
