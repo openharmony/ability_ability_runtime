@@ -21,9 +21,18 @@
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "app_utils.h"
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+void SetAbilityProcessEmpty(AbilityInfo &abilityInfo)
+{
+    if (!AAFwk::AppUtils::GetInstance().IsMultiProcessModel() && abilityInfo.isStageBasedModel) {
+        abilityInfo.process = "";
+    }
+}
+}
 BundleMgrHelper::BundleMgrHelper() {}
 
 BundleMgrHelper::~BundleMgrHelper()
@@ -162,7 +171,9 @@ ErrCode BundleMgrHelper::GetSandboxAbilityInfo(const Want &want, int32_t appInde
     newWant.RemoveAllFd();
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->GetSandboxAbilityInfo(newWant, appIndex, flags, userId, abilityInfo);
+    auto ret = bundleMgr->GetSandboxAbilityInfo(newWant, appIndex, flags, userId, abilityInfo);
+    SetAbilityProcessEmpty(abilityInfo);
+    return ret;
 }
 
 ErrCode BundleMgrHelper::GetSandboxExtAbilityInfos(const Want &want, int32_t appIndex, int32_t flags,
@@ -451,7 +462,9 @@ bool BundleMgrHelper::QueryAbilityInfo(const Want &want, AbilityInfo &abilityInf
     AAFwk::Want newWant = want;
     newWant.RemoveAllFd();
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->QueryAbilityInfo(newWant, abilityInfo);
+    auto ret = bundleMgr->QueryAbilityInfo(newWant, abilityInfo);
+    SetAbilityProcessEmpty(abilityInfo);
+    return ret;
 }
 
 bool BundleMgrHelper::QueryAbilityInfo(const Want &want, int32_t flags, int32_t userId, AbilityInfo &abilityInfo)
@@ -466,7 +479,9 @@ bool BundleMgrHelper::QueryAbilityInfo(const Want &want, int32_t flags, int32_t 
     AAFwk::Want newWant = want;
     newWant.RemoveAllFd();
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->QueryAbilityInfo(newWant, flags, userId, abilityInfo);
+    auto ret = bundleMgr->QueryAbilityInfo(newWant, flags, userId, abilityInfo);
+    SetAbilityProcessEmpty(abilityInfo);
+    return ret;
 }
 
 bool BundleMgrHelper::GetBundleInfos(int32_t flags, std::vector<BundleInfo> &bundleInfos, int32_t userId)
@@ -675,7 +690,9 @@ bool BundleMgrHelper::ImplicitQueryInfoByPriority(
     AAFwk::Want newWant = want;
     newWant.RemoveAllFd();
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->ImplicitQueryInfoByPriority(newWant, flags, userId, abilityInfo, extensionInfo);
+    auto ret = bundleMgr->ImplicitQueryInfoByPriority(newWant, flags, userId, abilityInfo, extensionInfo);
+    SetAbilityProcessEmpty(abilityInfo);
+    return ret;
 }
 
 bool BundleMgrHelper::QueryAbilityInfoByUri(const std::string &abilityUri, int32_t userId, AbilityInfo &abilityInfo)
@@ -688,7 +705,9 @@ bool BundleMgrHelper::QueryAbilityInfoByUri(const std::string &abilityUri, int32
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->QueryAbilityInfoByUri(abilityUri, userId, abilityInfo);
+    auto ret = bundleMgr->QueryAbilityInfoByUri(abilityUri, userId, abilityInfo);
+    SetAbilityProcessEmpty(abilityInfo);
+    return ret;
 }
 
 bool BundleMgrHelper::QueryAbilityInfo(
@@ -704,7 +723,9 @@ bool BundleMgrHelper::QueryAbilityInfo(
     AAFwk::Want newWant = want;
     newWant.RemoveAllFd();
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->QueryAbilityInfo(newWant, flags, userId, abilityInfo, callBack);
+    auto ret = bundleMgr->QueryAbilityInfo(newWant, flags, userId, abilityInfo, callBack);
+    SetAbilityProcessEmpty(abilityInfo);
+    return ret;
 }
 
 void BundleMgrHelper::UpgradeAtomicService(const Want &want, int32_t userId)
@@ -738,6 +759,9 @@ bool BundleMgrHelper::ImplicitQueryInfos(const Want &want, int32_t flags, int32_
     bool ret = bundleMgr->ImplicitQueryInfos(newWant, flags, userId, withDefault, abilityInfos,
         extensionInfos, findDefaultApp);
     TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "findDefaultApp is %{public}d.", findDefaultApp);
+    for (auto abilityInfo: abilityInfos) {
+        SetAbilityProcessEmpty(abilityInfo);
+    }
     return ret;
 }
 
@@ -891,7 +915,9 @@ ErrCode BundleMgrHelper::QueryCloneAbilityInfo(const ElementName &element, int32
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->QueryCloneAbilityInfo(element, flags, appCloneIndex, abilityInfo, userId);
+    auto ret = bundleMgr->QueryCloneAbilityInfo(element, flags, appCloneIndex, abilityInfo, userId);
+    SetAbilityProcessEmpty(abilityInfo);
+    return ret;
 }
 
 ErrCode BundleMgrHelper::GetCloneBundleInfo(const std::string &bundleName, int32_t flags, int32_t appCloneIndex,
