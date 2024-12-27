@@ -3200,8 +3200,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     if (InsightIntentExecuteParam::IsInsightIntentExecute(extensionSessionInfo->want)) {
         auto callerBundlename = InsightIntentGetcallerBundleName();
         if (callerBundlename.empty()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "insightIntent get callerBundlename failed");
-            return ERR_INVALID_VALUE;
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "insightIntent get callerBundlename failed");
         }
         int32_t result = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(
             extensionSessionInfo->want, AppExecFwk::ExecuteMode::UI_EXTENSION_ABILITY, callerBundlename);
@@ -10902,7 +10901,7 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto callerBundlename = InsightIntentGetcallerBundleName();
     if (callerBundlename.empty()) {
-        return ERR_INVALID_VALUE;
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "callerBundlename is null");
     }
 
     auto paramPtr = std::make_shared<InsightIntentExecuteParam>(param);
@@ -11092,7 +11091,9 @@ int32_t AbilityManagerService::ExecuteInsightIntentDone(const sptr<IRemoteObject
     std::string callerBundleName;
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GetCallerBundleName(intentId, callerBundleName);
     uint32_t initiatorTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
-    abilityRecord->GrantUriPermission(result.uris, result.flags, callerBundleName, initiatorTokenId);
+    if (!callerBundleName.empty()) {
+        abilityRecord->GrantUriPermission(result.uris, result.flags, callerBundleName, initiatorTokenId);
+    }
 
     return DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->ExecuteIntentDone(
         intentId, result.innerErr, result);
