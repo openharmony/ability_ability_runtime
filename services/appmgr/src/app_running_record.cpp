@@ -487,6 +487,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetJITEnabled(jitEnabled_);
     launchData.SetNativeStart(isNativeStart_);
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
+    launchData.SetIsNeedPreloadModule(isNeedPreloadModule_);
     launchData.SetNWebPreload(isAllowedNWebPreload_);
 
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
@@ -2253,6 +2254,16 @@ bool AppRunningRecord::IsJITEnabled() const
     return jitEnabled_;
 }
 
+void AppRunningRecord::SetPreloadMode(PreloadMode mode)
+{
+    preloadMode_ = mode;
+}
+
+PreloadMode AppRunningRecord::GetPreloadMode()
+{
+    return preloadMode_;
+}
+
 void AppRunningRecord::SetPreloadState(PreloadState state)
 {
     preloadState_ = state;
@@ -2541,6 +2552,16 @@ bool AppRunningRecord::IsCaching()
     return isCaching_;
 }
 
+void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
+{
+    isNeedPreloadModule_ = isNeedPreloadModule;
+}
+
+bool AppRunningRecord::GetNeedPreloadModule()
+{
+    return isNeedPreloadModule_;
+}
+
 void AppRunningRecord::SetNWebPreload(const bool isAllowedNWebPreload)
 {
     isAllowedNWebPreload_ = isAllowedNWebPreload;
@@ -2554,6 +2575,16 @@ void AppRunningRecord::SetIsUnSetPermission(bool isUnSetPermission)
 bool AppRunningRecord::IsUnSetPermission()
 {
     return isUnSetPermission_;
+}
+
+bool AppRunningRecord::GetNeedLimitPrio()
+{
+    return isNeedLimitPrio_;
+}
+
+void AppRunningRecord::SetNeedLimitPrio(bool isNeedLimitPrio)
+{
+    isNeedLimitPrio_ = isNeedLimitPrio;
 }
 
 void AppRunningRecord::UnSetPolicy()

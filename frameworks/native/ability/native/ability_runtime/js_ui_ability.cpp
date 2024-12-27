@@ -214,15 +214,23 @@ void JsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath);
 }
 
+void JsUIAbility::UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
+    const std::string &moduleName, const std::string &srcPath)
+{
+    std::string key = moduleName + "::" + srcPath;
+    std::unique_ptr<NativeReference> moduleObj = nullptr;
+    jsAbilityObj_ = jsRuntime_.PopPreloadObj(key, moduleObj) ? std::move(moduleObj) : jsRuntime_.LoadModule(
+        moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
+        false, abilityInfo->srcEntrance);
+}
+
 void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
     std::shared_ptr<AAFwk::Want> want, const std::string &moduleName, const std::string &srcPath)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
-    jsAbilityObj_ = jsRuntime_.LoadModule(
-        moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
-        false, abilityInfo->srcEntrance);
+    UpdateAbilityObj(abilityInfo, moduleName, srcPath);
     if (jsAbilityObj_ == nullptr || abilityContext_ == nullptr || want == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null jsAbilityObj_ or abilityContext_ or want");
         return;
