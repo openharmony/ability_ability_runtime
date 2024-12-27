@@ -26,8 +26,12 @@ public:
     static DmsUtil &GetInstance();
 
     void UpdateFlagForCollaboration(const Want &want);
-};
 
+private:
+    DmsUtil() = default;
+    ~DmsUtil() = default;
+    DISALLOW_COPY_AND_MOVE(DmsUtil);
+};
 } // namespace AAFwk
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_DMS_UTIL_H
