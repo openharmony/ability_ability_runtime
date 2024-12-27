@@ -894,6 +894,10 @@ public:
 
     PreloadMode GetPreloadMode();
 
+    void SetPreloadModuleName(const std::string& preloadModuleName);
+
+    std::string GetPreloadModuleName() const;
+
     /**
      * @brief Obtains the app record assign tokenId.
      *
@@ -1179,6 +1183,7 @@ private:
     bool jitEnabled_ = false;
     PreloadState preloadState_ = PreloadState::NONE;
     PreloadMode preloadMode_ = PreloadMode::PRESS_DOWN;
+    std::string preloadModuleName_;
     int32_t exitReason_ = 0;
     std::string exitMsg_ = "";
 

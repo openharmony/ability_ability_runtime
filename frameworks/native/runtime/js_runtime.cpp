@@ -1549,6 +1549,12 @@ void JsRuntime::SetDeviceDisconnectCallback(const std::function<bool()> &cb)
     jsEnv_->SetDeviceDisconnectCallback(cb);
 }
 
+void JsRuntime::SetStopPreloadSoCallback(const std::function<void()> &callback)
+{
+    auto vm = GetEcmaVm();
+    panda::JSNApi::SetStopPreLoadSoCallback(vm, callback);
+}
+
 std::string JsRuntime::GetSystemKitPath()
 {
     char buf[MAX_PATH_LEN] = { 0 };

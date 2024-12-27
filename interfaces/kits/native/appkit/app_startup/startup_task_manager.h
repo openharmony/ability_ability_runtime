@@ -39,9 +39,15 @@ public:
 
     void SetConfig(const std::shared_ptr<StartupConfig> &config);
 
+    size_t GetStartupTaskCount() const;
+
     int32_t Prepare();
 
     int32_t Run(const std::shared_ptr<OnCompletedCallback> &mainThreadAwaitCallback);
+
+    void TimeoutStop();
+
+    void OnTimeout();
 
 private:
     uint32_t startupTaskManagerId_ = 0;
@@ -53,7 +59,6 @@ private:
     void CallListenerOnCompleted(int32_t result, const std::string &resultMessage = "");
     void AddAsyncTimeoutTimer();
     void CancelAsyncTimeoutTimer();
-    void OnTimeout();
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

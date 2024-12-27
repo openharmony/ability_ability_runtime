@@ -25,7 +25,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 class StartupListener {
 public:
-    explicit StartupListener(OnCompletedCallbackFunc &callback);
+    explicit StartupListener(OnCompletedCallbackFunc callback);
 
     ~StartupListener();
 
