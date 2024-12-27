@@ -59,6 +59,7 @@ static std::set<GlobalObserverItem> promiseList;
 static std::mutex errorMtx;
 static std::mutex promiseMtx;
 static std::shared_ptr<JsLoopObserver> loopObserver_;
+static std::once_flag registerCallbackFlag;
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t INDEX_TWO = 2;
@@ -889,9 +890,11 @@ napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
     jsErrorManager->SetRejectionCallback(env);
     napi_wrap(env, exportObj, jsErrorManager.release(), JsErrorManager::Finalizer, nullptr, nullptr);
 
-    NapiErrorManager::GetInstance()->RegisterHasOnAllErrorCallback(IsObserverListNotEmpty);
-    NapiErrorManager::GetInstance()->RegisterOnAllErrorCallback(ErrorManagerCallback);
-    NapiErrorManager::GetInstance()->RegisterAllUnhandledRejectionCallback(promiseManagerCallback);
+    std::call_once(registerCallbackFlag, []() {
+        NapiErrorManager::GetInstance()->RegisterHasOnAllErrorCallback(IsObserverListNotEmpty);
+        NapiErrorManager::GetInstance()->RegisterOnAllErrorCallback(ErrorManagerCallback);
+        NapiErrorManager::GetInstance()->RegisterAllUnhandledRejectionCallback(promiseManagerCallback);
+    });
 
     TAG_LOGD(AAFwkTag::JSNAPI, "bind func ready");
     const char *moduleName = "JsErrorManager";
