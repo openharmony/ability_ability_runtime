@@ -40,7 +40,6 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 constexpr int32_t ERR_OK = 0;
-constexpr int32_t INVALID_PARAMTER = 2; // SandboxManager ative err
 constexpr uint32_t FLAG_READ_WRITE_URI = Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION;
 constexpr uint32_t FLAG_WRITE_URI = Want::FLAG_AUTH_WRITE_URI_PERMISSION;
 constexpr uint32_t FLAG_READ_URI = Want::FLAG_AUTH_READ_URI_PERMISSION;
@@ -802,21 +801,6 @@ int32_t UriPermissionManagerStubImpl::Active(const std::vector<PolicyInfo> &poli
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
-    auto callingPid = IPCSkeleton::GetCallingPid();
-    ConnectManager(appMgr_, APP_MGR_SERVICE_ID);
-    if (appMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "appMgr_ null");
-        return INVALID_PARAMTER;
-    }
-    bool isTerminating = false;
-    if (IN_PROCESS_CALL(appMgr_->IsTerminatingByPid(callingPid, isTerminating)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "IsTerminatingByPid failed");
-        return INVALID_PARAMTER;
-    }
-    if (isTerminating) {
-        TAG_LOGD(AAFwkTag::URIPERMMGR, "app is terminating");
-        return INVALID_PARAMTER;
-    }
     uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()).count());
     auto tokenId = IPCSkeleton::GetCallingTokenID();
