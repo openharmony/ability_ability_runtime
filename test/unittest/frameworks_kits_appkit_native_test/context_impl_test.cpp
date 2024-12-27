@@ -40,6 +40,12 @@ using namespace OHOS::AppExecFwk;
 
 namespace {
 const int64_t CONTEXT_CREATE_BY_SYSTEM_APP(0x00000001);
+#ifdef SUPPORT_GRAPHICS
+const uint64_t INVALID_DISPLAY_ID = 500000;
+#endif
+const uint64_t DEFAULT_DISPLAY_ID = 0;
+const float DENSITY = 1.5;
+constexpr const char* DIRECTION_HORIZONTAL = "horizontal";
 } // namespace
 
 class ContextImplTest : public testing::Test {
@@ -1476,6 +1482,157 @@ HWTEST_F(ContextImplTest, SetSupportedProcessCacheSelf_001, Function | MediumTes
     GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_SetSupportedProcessCacheSelf_001 start";
     EXPECT_NE(contextImpl_->SetSupportedProcessCacheSelf(true), 0);
     GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_SetSupportedProcessCacheSelf_001 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_ContextImpl_CreateAreaModeContext_001
+ * @tc.name: CreateAreaModeContext
+ * @tc.desc: CreateAreaModeContext success
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_CreateAreaModeContext_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_CreateAreaModeContext_001 start";
+    ASSERT_NE(contextImpl_, nullptr);
+    auto displayContext = contextImpl_->CreateAreaModeContext(0);
+    EXPECT_NE(displayContext, nullptr);
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_CreateAreaModeContext_001 end";
+}
+
+#ifdef SUPPORT_GRAPHICS
+/**
+ * @tc.number: AppExecFwk_ContextImpl_CreateDisplayContext_001
+ * @tc.name: CreateDisplayContext
+ * @tc.desc: CreateDisplayContext fail with null getDisplayConfigCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_CreateDisplayContext_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_CreateDisplayContext_001 start";
+    ASSERT_NE(contextImpl_, nullptr);
+    auto displayContext = contextImpl_->CreateDisplayContext(INVALID_DISPLAY_ID);
+    EXPECT_EQ(displayContext, nullptr);
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_CreateDisplayContext_001 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_ContextImpl_CreateDisplayContext_002
+ * @tc.name: CreateDisplayContext
+ * @tc.desc: CreateDisplayContext fail with invalid displayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_CreateDisplayContext_002, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_CreateDisplayContext_002 start";
+    ASSERT_NE(contextImpl_, nullptr);
+    contextImpl_->RegisterGetDisplayConfig([](uint64_t displayId, float &density, std::string &directionStr) -> bool {
+        density = DENSITY;
+        directionStr = DIRECTION_HORIZONTAL;
+        return true;
+    });
+    auto displayContext = contextImpl_->CreateDisplayContext(INVALID_DISPLAY_ID);
+    EXPECT_EQ(displayContext, nullptr);
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_CreateDisplayContext_002 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_ContextImpl_CreateDisplayContext_003
+ * @tc.name: CreateDisplayContext
+ * @tc.desc: CreateDisplayContext fail with invalid bundle info
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_CreateDisplayContext_003, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_CreateDisplayContext_003 start";
+    ASSERT_NE(contextImpl_, nullptr);
+    contextImpl_->RegisterGetDisplayConfig([](uint64_t displayId, float &density, std::string &directionStr) -> bool {
+        density = DENSITY;
+        directionStr = DIRECTION_HORIZONTAL;
+        return true;
+    });
+    auto displayContext = contextImpl_->CreateDisplayContext(DEFAULT_DISPLAY_ID);
+    EXPECT_EQ(displayContext, nullptr);
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_CreateDisplayContext_003 end";
+}
+#endif
+
+/**
+ * @tc.number: AppExecFwk_ContextImpl_UpdateDisplayConfiguration_001
+ * @tc.name: UpdateDisplayConfiguration
+ * @tc.desc: UpdateDisplayConfiguration fail with null contextImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_UpdateDisplayConfiguration_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_UpdateDisplayConfiguration_001 start";
+    ASSERT_NE(contextImpl_, nullptr);
+    std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = nullptr;
+    auto result = contextImpl_->UpdateDisplayConfiguration(contextImpl,
+        DEFAULT_DISPLAY_ID, DENSITY, DIRECTION_HORIZONTAL);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_UpdateDisplayConfiguration_001 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_ContextImpl_UpdateDisplayConfiguration_002
+ * @tc.name: UpdateDisplayConfiguration
+ * @tc.desc: UpdateDisplayConfiguration fail with null config
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_UpdateDisplayConfiguration_002, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_UpdateDisplayConfiguration_002 start";
+    ASSERT_NE(contextImpl_, nullptr);
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    ASSERT_NE(contextImpl, nullptr);
+    contextImpl->config_ = nullptr;
+    auto result = contextImpl_->UpdateDisplayConfiguration(contextImpl,
+        DEFAULT_DISPLAY_ID, DENSITY, DIRECTION_HORIZONTAL);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_UpdateDisplayConfiguration_002 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_ContextImpl_UpdateDisplayConfiguration_003
+ * @tc.name: UpdateDisplayConfiguration
+ * @tc.desc: UpdateDisplayConfiguration fail with null resourceManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_UpdateDisplayConfiguration_003, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_UpdateDisplayConfiguration_003 start";
+    ASSERT_NE(contextImpl_, nullptr);
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    ASSERT_NE(contextImpl, nullptr);
+    contextImpl->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    contextImpl_->resourceManager_ = resourceManager;
+    auto result = contextImpl_->UpdateDisplayConfiguration(contextImpl,
+        DEFAULT_DISPLAY_ID, DENSITY, DIRECTION_HORIZONTAL);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_UpdateDisplayConfiguration_003 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_ContextImpl_UpdateDisplayConfiguration_004
+ * @tc.name: UpdateDisplayConfiguration
+ * @tc.desc: UpdateDisplayConfiguration success
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_UpdateDisplayConfiguration_004, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_UpdateDisplayConfiguration_004 start";
+    ASSERT_NE(contextImpl_, nullptr);
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    ASSERT_NE(contextImpl, nullptr);
+    contextImpl->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    contextImpl_->resourceManager_ = resourceManager;
+    contextImpl->resourceManager_ = resourceManager;
+    auto result = contextImpl_->UpdateDisplayConfiguration(contextImpl,
+        DEFAULT_DISPLAY_ID, DENSITY, DIRECTION_HORIZONTAL);
+    EXPECT_EQ(result, true);
+    GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_UpdateDisplayConfiguration_004 end";
 }
 }  // namespace AppExecFwk
 }
