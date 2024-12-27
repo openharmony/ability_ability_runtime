@@ -51,6 +51,28 @@ constexpr const char* WAIT_ON_MAIN_THREAD = "waitOnMainThread";
 constexpr const char* CONFIG_ENTRY = "configEntry";
 constexpr const char *TASKPOOL = "taskPool";
 constexpr const char *TASKPOOL_LOWER = "taskpool";
+namespace {
+void RegisterStopPreloadSoCallback(JsRuntime& jsRuntime)
+{
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    if (startupManager == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null startupManager");
+        return;
+    }
+    if (!startupManager->HasAppStartupConfig()) {
+        // no app startup config, no need to register stop preload so callback.
+        return;
+    }
+    jsRuntime.SetStopPreloadSoCallback([]()-> void {
+        std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+        if (startupManager == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null startupManager");
+            return;
+        }
+        startupManager->StopAutoPreloadSoTask();
+    });
+}
+} // namespace
 
 bool JsAbilityStage::UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleInfo)
 {
@@ -79,6 +101,7 @@ std::shared_ptr<AbilityStage> JsAbilityStage::Create(
     std::string moduleName(hapModuleInfo.moduleName);
     moduleName.append("::").append("AbilityStage");
     bool commonChunkFlag = UseCommonChunk(hapModuleInfo);
+    RegisterStopPreloadSoCallback(jsRuntime);
     /* temporary compatibility api8 + config.json */
     if (!hapModuleInfo.isModuleJson) {
         srcPath.append("/assets/js/");

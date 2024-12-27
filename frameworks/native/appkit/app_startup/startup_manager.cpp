@@ -147,7 +147,6 @@ int32_t StartupManager::BuildAutoAppStartupTaskManager(std::shared_ptr<StartupTa
         startupTaskManagerId, autoStartupTasks.size());
     startupTaskManager = std::make_shared<StartupTaskManager>(startupTaskManagerId, autoStartupTasks);
     startupTaskManager->SetConfig(defaultConfig_);
-    autoPreloadSoTaskManager = startupTaskManager;
     startupTaskManagerMap_.emplace(startupTaskManagerId, startupTaskManager);
     startupTaskManagerId++;
     return ERR_OK;
@@ -317,11 +316,18 @@ int32_t StartupManager::PostMainThreadTask(const std::function<void()> &task)
 
 void StartupManager::StopAutoPreloadSoTask()
 {
-    auto task = autoPreloadSoTaskManager.lock();
+    std::lock_guard guard(autoPreloadSoTaskManagerMutex_);
+    autoPreloadSoStopped_ = true;
+    auto task = autoPreloadSoTaskManager_.lock();
     if (task == nullptr) {
         return;
     }
     task->TimeoutStop();
+}
+
+bool StartupManager::HasAppStartupConfig() const
+{
+    return !moduleStartupConfigInfos_.empty();
 }
 
 const std::vector<StartupTaskInfo> &StartupManager::GetStartupTaskInfos() const
@@ -637,6 +643,15 @@ int32_t StartupManager::RunAppPreloadSoTask(
     if (result != ERR_OK || startupTaskManager == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "build preload so startup task manager failed, result: %{public}d", result);
         return ERR_STARTUP_INTERNAL_ERROR;
+    }
+    {
+        std::lock_guard guard(autoPreloadSoTaskManagerMutex_);
+        if (autoPreloadSoStopped_) {
+            TAG_LOGI(AAFwkTag::STARTUP, "auto preload so is stopped, remove startupTaskManager");
+            startupTaskManager->OnTimeout();
+            return ERR_STARTUP_TIMEOUT;
+        }
+        autoPreloadSoTaskManager_ = startupTaskManager;
     }
 
     result = startupTaskManager->Prepare();

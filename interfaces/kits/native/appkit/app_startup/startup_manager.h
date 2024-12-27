@@ -95,6 +95,8 @@ public:
 
     void StopAutoPreloadSoTask();
 
+    bool HasAppStartupConfig() const;
+
 private:
     // read only after initialization
     std::vector<ModuleStartupConfigInfo> moduleStartupConfigInfos_;
@@ -110,7 +112,10 @@ private:
     std::map<std::string, std::shared_ptr<AppStartupTask>> appStartupTasks_;
     std::vector<StartupTaskInfo> pendingStartupTaskInfos_;
     std::string pendingConfigEntry_;
-    std::weak_ptr<StartupTaskManager> autoPreloadSoTaskManager;
+
+    std::mutex autoPreloadSoTaskManagerMutex_;
+    std::weak_ptr<StartupTaskManager> autoPreloadSoTaskManager_;
+    bool autoPreloadSoStopped_ = false;
 
     std::shared_ptr<StartupConfig> defaultConfig_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;

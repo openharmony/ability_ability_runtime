@@ -117,6 +117,7 @@ int32_t StartupTaskManager::Run(const std::shared_ptr<OnCompletedCallback> &main
 void StartupTaskManager::TimeoutStop()
 {
     if (dispatcher_ != nullptr) {
+        TAG_LOGD(AAFwkTag::STARTUP, "id: %{public}d is timeout stop", startupTaskManagerId_);
         dispatcher_->TimeoutStop();
     }
 }
