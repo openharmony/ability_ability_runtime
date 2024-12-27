@@ -12029,14 +12029,14 @@ int32_t AbilityManagerService::StartUIAbilityByPreInstall(const FreeInstallInfo 
 
     if (sessionInfo == nullptr || sessionInfo->isMinimizedDuringFreeInstall) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo is nullptr or ability is already minimized");
-        RemovePreStartSession(sessionId);
         return ERR_INVALID_VALUE;
     }
 
-    int errCode = ERR_OK;
     bool isColdStart = true;
-    if ((errCode = StartUIAbilityByPreInstallInner(sessionInfo, taskInfo.specifyTokenId, 0, isColdStart)) != ERR_OK) {
+    int errCode = StartUIAbilityByPreInstallInner(sessionInfo, taskInfo.specifyTokenId, 0, isColdStart);
+    if (errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUIAbilityByPreInstallInner failed,errCode=%{public}d.", errCode);
+        return errCode;
     }
     RemovePreStartSession(sessionId);
     return errCode;

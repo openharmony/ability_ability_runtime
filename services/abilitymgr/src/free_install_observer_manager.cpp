@@ -111,6 +111,7 @@ void FreeInstallObserverManager::HandleOnInstallFinished(int32_t recordId, const
     const std::string &abilityName, const std::string &startTime, const int &resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "begin");
+    std::lock_guard<ffrt::mutex> lock(observerLock_);
     auto iter = observerMap_.find(recordId);
     if (iter != observerMap_.end() && iter->second != nullptr) {
         (iter->second)->OnInstallFinished(bundleName, abilityName, startTime, resultCode);
@@ -121,6 +122,7 @@ void FreeInstallObserverManager::HandleOnInstallFinishedByUrl(int32_t recordId, 
     const std::string &url, const int &resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "begin");
+    std::lock_guard<ffrt::mutex> lock(observerLock_);
     auto iter = observerMap_.find(recordId);
     if (iter != observerMap_.end() && iter->second != nullptr) {
         (iter->second)->OnInstallFinishedByUrl(startTime, url, resultCode);
