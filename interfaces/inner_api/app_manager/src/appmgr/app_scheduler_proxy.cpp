@@ -19,6 +19,7 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "ipc_capacity_wrap.h"
 #include "ipc_types.h"
 #include "iremote_object.h"
 #include "app_scheduler_const.h"
@@ -193,6 +194,7 @@ void AppSchedulerProxy::ScheduleLaunchAbility(const AbilityInfo &info, const spt
 {
     MessageParcel data;
     MessageParcel reply;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         return;
@@ -412,6 +414,7 @@ void AppSchedulerProxy::ScheduleAcceptWant(const AAFwk::Want &want, const std::s
 {
     MessageParcel data;
     MessageParcel reply;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         return;
@@ -431,6 +434,7 @@ void AppSchedulerProxy::ScheduleNewProcessRequest(const AAFwk::Want &want, const
 {
     MessageParcel data;
     MessageParcel reply;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         return;
