@@ -16,6 +16,7 @@
 #include "ability_controller_proxy.h"
 
 #include "hilog_tag_wrapper.h"
+#include "ipc_capacity_wrap.h"
 #include "ipc_types.h"
 
 
@@ -38,6 +39,7 @@ bool AbilityControllerProxy::AllowAbilityStart(const Want &want, const std::stri
 {
     MessageParcel data;
     MessageParcel reply;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
         return true;

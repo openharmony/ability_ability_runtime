@@ -19,6 +19,8 @@
 #include "ability_util.h"
 #include "freeze_util.h"
 #include "hitrace_meter.h"
+#include "ipc_capacity_wrap.h"
+#include "server_constant.h"
 #include "status_bar_delegate_interface.h"
 
 namespace OHOS {
@@ -44,6 +46,17 @@ bool AbilityManagerProxy::WriteInterfaceToken(MessageParcel &data)
         return false;
     }
     return true;
+}
+
+bool AbilityManagerProxy::ExtendMaxIpcCapacityForWant(const Want &want, MessageParcel &data)
+{
+    auto isCallBySCB = want.GetBoolParam(AbilityRuntime::ServerConstant::IS_CALL_BY_SCB, true);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "isCallBySCB:%{public}d", isCallBySCB);
+    if (!isCallBySCB) {
+        AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
+        return true;
+    }
+    return false;
 }
 
 int AbilityManagerProxy::StartAbility(const Want &want, int32_t userId, int requestCode)
@@ -803,6 +816,7 @@ int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool
         return INNER_ERR;
     }
     if (sessionInfo) {
+        ExtendMaxIpcCapacityForWant(sessionInfo->want, data);
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and sessionInfo write fail");
             return INNER_ERR;
@@ -1060,6 +1074,7 @@ int AbilityManagerProxy::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
     }
 
     if (sessionInfo) {
+        ExtendMaxIpcCapacityForWant(sessionInfo->want, data);
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and sessionInfo write fail");
             return INNER_ERR;
@@ -1682,6 +1697,7 @@ int AbilityManagerProxy::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &session
         return INNER_ERR;
     }
     if (sessionInfo) {
+        ExtendMaxIpcCapacityForWant(sessionInfo->want, data);
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and sessionInfo write fail");
             return INNER_ERR;
@@ -4439,6 +4455,7 @@ void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
         return;
     }
     if (sessionInfo) {
+        ExtendMaxIpcCapacityForWant(sessionInfo->want, data);
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and sessionInfo write fail");
             return;
@@ -4788,6 +4805,7 @@ int AbilityManagerProxy::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &s
         return INNER_ERR;
     }
     if (sessionInfo) {
+        ExtendMaxIpcCapacityForWant(sessionInfo->want, data);
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and sessionInfo write fail");
             return INNER_ERR;
@@ -5549,6 +5567,7 @@ int AbilityManagerProxy::CleanUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
     }
 
     if (sessionInfo) {
+        ExtendMaxIpcCapacityForWant(sessionInfo->want, data);
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag or sessionInfo fail");
             return INNER_ERR;

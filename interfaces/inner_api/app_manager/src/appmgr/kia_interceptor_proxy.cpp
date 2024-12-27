@@ -16,6 +16,7 @@
 #include "kia_interceptor_proxy.h"
 
 #include "hilog_tag_wrapper.h"
+#include "ipc_capacity_wrap.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -32,6 +33,7 @@ int KiaInterceptorProxy::OnIntercept(AAFwk::Want &want)
 {
     MessageParcel data;
     MessageParcel reply;
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
         return ERR_INVALID_VALUE;
