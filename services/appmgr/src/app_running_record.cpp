@@ -30,7 +30,9 @@
 #ifdef SUPPORT_SCREEN
 #include "window_visibility_info.h"
 #endif //SUPPORT_SCREEN
+#ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
+#endif // SUPPORT_UPMS
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
@@ -2700,7 +2702,9 @@ void AppRunningRecord::UnSetPolicy()
         return;
     }
     SetIsUnSetPermission(true);
+#ifdef SUPPORT_UPMS
     AAFwk::UriPermissionManagerClient::GetInstance().ClearPermissionTokenByMap(appInfo->accessTokenId);
+#endif // SUPPORT_UPMS
 }
 
 uint32_t AppRunningRecord::GetAddStageTimeout() const
