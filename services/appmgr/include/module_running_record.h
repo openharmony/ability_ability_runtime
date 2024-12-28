@@ -62,8 +62,10 @@ public:
     void GetMainAbilityName(const std::string &name);
 
     void Init(const HapModuleInfo &info);
-
-    const HapModuleInfo GetModuleInfo();
+    void SetAppIndex(int32_t appIndex)
+    {
+        appIndex_ = appIndex;
+    }
 
     /**
      * GetAbilityRunningRecordByToken, Obtaining the ability record through token.
@@ -174,11 +176,11 @@ private:
     std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilities_;
     std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> terminateAbilities_;
     std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
-    std::weak_ptr<AppRunningRecord> appRunningRecord_;
     std::shared_ptr<AppLifeCycleDeal> appLifeCycleDeal_;
     std::shared_ptr<ApplicationInfo> appInfo_;  // the application's info
     std::shared_ptr<AMSEventHandler> eventHandler_;
-    HapModuleInfo owenInfo_;
+    std::string moduleName_;
+    int32_t appIndex_ = 0;
     ModuleRecordState owenState_ = ModuleRecordState::UNKNOWN_STATE;
 };
 }  // namespace AppExecFwk

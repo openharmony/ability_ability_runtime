@@ -16,8 +16,10 @@
 #include "module_running_record.h"
 #include "app_mgr_service_inner.h"
 #include "app_running_record.h"
+#include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "in_process_call_wrapper.h"
 #include "ui_extension_utils.h"
 #include "cache_process_manager.h"
 
@@ -38,13 +40,13 @@ ModuleRunningRecord::~ModuleRunningRecord()
 
 void ModuleRunningRecord::Init(const HapModuleInfo &info)
 {
-    owenInfo_ = info;
+    moduleName_ = info.moduleName;
     owenState_ = ModuleRecordState::INITIALIZED_STATE;
 }
 
 const std::string &ModuleRunningRecord::GetModuleName() const
 {
-    return owenInfo_.moduleName;
+    return moduleName_;
 }
 
 const std::shared_ptr<ApplicationInfo> ModuleRunningRecord::GetAppInfo()
@@ -361,7 +363,44 @@ void ModuleRunningRecord::SetModuleRecordState(const ModuleRecordState &state)
 
 void ModuleRunningRecord::GetHapModuleInfo(HapModuleInfo &info)
 {
-    info = owenInfo_;
+    if (appInfo_ == nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "appInfo null");
+        return;
+    }
+    BundleInfo bundleInfo;
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    auto userId = appInfo_->uid / BASE_USER_RANGE;
+    TAG_LOGD(AAFwkTag::APPMGR, "userId: %{public}d, bundleName: %{public}s, appIndex: %{public}d", userId,
+        appInfo_->bundleName.c_str(), appIndex_);
+    int32_t bundleMgrResult;
+    auto flag = static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE);
+    if (appIndex_ <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+        bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(appInfo_->bundleName,
+            flag, appIndex_, bundleInfo, userId));
+    } else {
+        bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetSandboxBundleInfo(appInfo_->bundleName,
+            appIndex_, userId, bundleInfo));
+    }
+
+    if (bundleMgrResult != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "getBundleInfo fail");
+        return;
+    }
+
+    bool found = false;
+    for (const auto &moduleIno : bundleInfo.hapModuleInfos) {
+        if (moduleIno.moduleName == moduleName_) {
+            info = moduleIno;
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        TAG_LOGW(AAFwkTag::APPMGR, "not found userId: %{public}d, bundleName: %{public}s, appIndex: %{public}d, "
+            "name: %{public}s", userId, appInfo_->bundleName.c_str(), appIndex_, moduleName_.c_str());
+    }
 }
 
 void ModuleRunningRecord::SetApplicationClient(std::shared_ptr<AppLifeCycleDeal> &appLifeCycleDeal)
