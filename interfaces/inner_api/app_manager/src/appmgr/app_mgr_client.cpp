@@ -682,6 +682,22 @@ void AppMgrClient::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecF
     amsService->StartSpecifiedAbility(want, abilityInfo, requestId);
 }
 
+void AppMgrClient::PrepareTerminateApp(const pid_t pid, int32_t &prepareTermination, bool &isExist)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "service is nullptr");
+        return;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "amsService is nullptr");
+        return;
+    }
+    amsService->PrepareTerminateApp(pid, prepareTermination, isExist);
+}
+
 void AppMgrClient::SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid)
 {
     if (!IsAmsServiceReady()) {

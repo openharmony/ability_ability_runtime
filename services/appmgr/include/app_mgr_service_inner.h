@@ -842,6 +842,8 @@ public:
      */
     void ScheduleAcceptWantDone(const int32_t recordId, const AAFwk::Want &want, const std::string &flag);
 
+    void SchedulePrepareTerminate(const pid_t pid, int32_t &prepareTermination, bool &isExist);
+
     void ScheduleNewProcessRequestDone(const int32_t recordId, const AAFwk::Want &want, const std::string &flag);
 
     /**

@@ -718,6 +718,9 @@ public:
      * Called when one specified request is finished to set the request id to -1
      */
     void ResetSpecifiedRequestId();
+    
+    void SchedulePrepareTerminate(int32_t &prepareTermination, bool &isExist);
+
     /**
      * call the scheduler to go acceptWant procedure
      */

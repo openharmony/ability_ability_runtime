@@ -233,6 +233,15 @@ public:
     void SetAbilityForegroundingFlagToAppRecord(const pid_t pid) override;
 
     /**
+     * Prepare terminate application
+     *
+     * @param pid Process ID
+     * @param prepareTelrmination PrepareTermination Enum
+     * @param isExist whether this callback event exist
+     */
+    virtual void PrepareTerminateApp(const pid_t pid, int32_t &prepareTermination, bool &isExist) override;
+
+    /**
      * Start specified ability.
      *
      * @param want Want contains information of the ability to start.
