@@ -115,6 +115,8 @@ public:
         return 0;
     };
     virtual void UpdateSessionToken(sptr<IRemoteObject> sessionToken) override {}
+
+    virtual void ScheduleCollaborate(const Want &want) override {}
 private:
     AbilityResult result_;
 };

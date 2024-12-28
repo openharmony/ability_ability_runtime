@@ -154,6 +154,8 @@ int AbilitySchedulerStub::OnRemoteRequestInnerThird(
             return CreateModalUIExtensionInner(data, reply);
         case UPDATE_SESSION_TOKEN:
             return UpdateSessionTokenInner(data, reply);
+        case SCHEDULE_COLLABORATE_DATA:
+            return CollaborateDataInner(data);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -735,6 +737,17 @@ int AbilitySchedulerStub::UpdateSessionTokenInner(MessageParcel &data, MessagePa
 {
     sptr<IRemoteObject> sessionToken = data.ReadRemoteObject();
     UpdateSessionToken(sessionToken);
+    return NO_ERROR;
+}
+
+int AbilitySchedulerStub::CollaborateDataInner(MessageParcel &data)
+{
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null want");
+        return ERR_INVALID_VALUE;
+    }
+    ScheduleCollaborate(*want);
     return NO_ERROR;
 }
 

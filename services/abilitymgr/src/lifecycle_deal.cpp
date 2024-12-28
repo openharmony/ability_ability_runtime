@@ -192,5 +192,13 @@ void LifecycleDeal::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
     CHECK_POINTER(abilityScheduler);
     abilityScheduler->UpdateSessionToken(sessionToken);
 }
+
+void LifecycleDeal::ScheduleCollaborate(const Want &want)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    auto abilityScheduler = GetScheduler();
+    CHECK_POINTER(abilityScheduler);
+    abilityScheduler->ScheduleCollaborate(want);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

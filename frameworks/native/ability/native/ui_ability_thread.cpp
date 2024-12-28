@@ -679,5 +679,31 @@ void UIAbilityThread::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
     currentAbility_->UpdateSessionToken(sessionToken);
 #endif //SUPPORT_SCREEN
 }
+
+void UIAbilityThread::ScheduleCollaborate(const Want &want)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    if (abilityImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
+        return;
+    }
+    wptr<UIAbilityThread> weak = this;
+    auto task = [weak, want]() {
+        auto abilityThread = weak.promote();
+        if (abilityThread == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityThread");
+            return;
+        }
+        if (abilityThread->abilityImpl_ != nullptr) {
+            abilityThread->abilityImpl_->ScheduleCollaborate(want);
+            return;
+        }
+    };
+    bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:ScheduleCollaborate");
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "postTask error");
+        return;
+    }
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

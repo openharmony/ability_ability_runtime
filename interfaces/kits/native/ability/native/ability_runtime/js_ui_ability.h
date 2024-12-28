@@ -295,10 +295,9 @@ public:
 
     /**
      * @brief Called when distributed system trying to collaborate remote ability.
-     * @param wantParam wantParam with collaborative info.
-     * @return Returns whether the ability agree to collaborate.
+     * @param want want with collaborative info.
      */
-    int32_t OnCollaborate(WantParams &wantParam) override;
+    void HandleCollaboration(const Want &want) override;
 
 protected:
     void DoOnForeground(const Want &want) override;
@@ -313,7 +312,7 @@ private:
     inline bool GetInsightIntentExecutorInfo(const Want &want,
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         InsightIntentExecutorInfo& executeInfo);
-    void HandleCollaboration(const Want &want);
+    int32_t OnCollaborate(WantParams &wantParams);
     
     std::shared_ptr<NativeReference> jsWindowStageObj_;
     int32_t windowMode_ = 0;
