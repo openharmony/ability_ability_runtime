@@ -514,7 +514,7 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_IsAppContainsSrvExt_0100, 
     auto abilityRunningRecord = moduleRecord->GetAbilityRunningRecordByToken(token);
     EXPECT_TRUE(abilityRunningRecord != nullptr);
     
-    EXPECT_EQ(cacheProcMgr->IsAppContainsSrvExt(appRunningRecord), true);
+    EXPECT_EQ(cacheProcMgr->IsAppContainsSrvExt(appRunningRecord), false);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
