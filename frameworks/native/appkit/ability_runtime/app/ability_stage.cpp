@@ -52,6 +52,11 @@ void AbilityStage::OnCreate(const AAFwk::Want &want) const
 void AbilityStage::OnDestroy() const
 {}
 
+bool AbilityStage::OnPrepareTerminate(int &prepareTermination) const
+{
+    return false;
+}
+
 std::shared_ptr<Context> AbilityStage::GetContext() const
 {
     return context_;

@@ -195,6 +195,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
             return HandleBlockProcessCacheByPids(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_KILLED_FOR_UPGRADE_WEB):
             return HandleIsKilledForUpgradeWeb(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::PREPARE_TERMINATE_APP):
+            return HandlePrepareTerminateApp(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -490,6 +492,24 @@ int32_t AmsMgrStub::HandleSetAbilityForegroundingFlagToAppRecord(MessageParcel &
     RunningProcessInfo processInfo;
     auto pid = static_cast<pid_t>(data.ReadInt32());
     SetAbilityForegroundingFlagToAppRecord(pid);
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandlePrepareTerminateApp(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    auto pid = static_cast<pid_t>(data.ReadInt32());
+    int32_t prepareTermination = 0;
+    bool isExist = false;
+    PrepareTerminateApp(pid, prepareTermination, isExist);
+    if (!reply.WriteInt32(prepareTermination)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write prepareTermination failed.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteBool(isExist)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write isExist failed.");
+        return ERR_INVALID_VALUE;
+    }
     return NO_ERROR;
 }
 

@@ -51,6 +51,7 @@ private:
     int32_t HandleScheduleProcessSecurityExit(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleClearPageStack(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleAcceptWant(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSchedulePrepareTerminate(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleNewProcessRequest(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyHotReloadPage(MessageParcel &data, MessageParcel &reply);
