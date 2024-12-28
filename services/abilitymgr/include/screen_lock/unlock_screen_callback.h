@@ -18,6 +18,8 @@
 
 #ifdef SUPPORT_GRAPHICS
 #ifdef SUPPORT_SCREEN
+#include <future>
+
 #include "screenlock_manager.h"
 #include "screenlock_callback_stub.h"
 
@@ -25,9 +27,11 @@ namespace OHOS {
 namespace AbilityRuntime {
 class UnlockScreenCallback : public ScreenLock::ScreenLockCallbackStub {
 public:
-    explicit UnlockScreenCallback();
+    explicit UnlockScreenCallback(std::shared_ptr<std::promise<bool>>);
     ~UnlockScreenCallback() override;
     void OnCallBack(const int32_t screenLockResult) override;
+
+    std::shared_ptr<std::promise<bool>> screenLockResult_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

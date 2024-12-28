@@ -21,11 +21,16 @@ namespace OHOS {
 namespace AbilityRuntime {
 UnlockScreenCallback::~UnlockScreenCallback() {}
 
-UnlockScreenCallback::UnlockScreenCallback() {}
+UnlockScreenCallback::UnlockScreenCallback(std::shared_ptr<std::promise<bool>> promise) : screenLockResult_(promise) {}
 
 void UnlockScreenCallback::OnCallBack(const int32_t screenLockResult)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "result: %{public}d", screenLockResult);
+    if (screenLockResult_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null");
+        return;
+    }
+    screenLockResult_->set_value(screenLockResult == 0);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
