@@ -195,6 +195,16 @@ public:
      */
     virtual void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) = 0;
 
+    /**
+     * @brief Schedule prepare terminate application
+     *
+     * @param moduleName module name
+     * @param prepareTermination the return enum type PrepareTermination
+     * @param isExist whether the onPrepareTerminate exists
+     */
+    virtual void SchedulePrepareTerminate(const std::string &moduleName,
+        int32_t &prepareTermination, bool &isExist) = 0;
+
     virtual void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) = 0;
 
     /**
@@ -335,6 +345,7 @@ public:
         SCHEDULE_DUMP_FFRT,
         SCHEDULE_CACHE_PROCESS,
         SCHEDULE_CLEAR_PAGE_STACK,
+        SCHEDULE_PREPARE_TERMINATE,
     };
 };
 }  // namespace AppExecFwk

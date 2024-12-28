@@ -1693,6 +1693,25 @@ bool AppRunningRecord::IsStartSpecifiedAbility() const
     return specifiedRequestId_ != -1;
 }
 
+void AppRunningRecord::SchedulePrepareTerminate(int32_t &prepareTermination, bool &isExist)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (appLifeCycleDeal_ == nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
+        return;
+    }
+    std::lock_guard<ffrt::mutex> hapModulesLock(hapModulesLock_);
+    for (const auto &iter : hapModules_) {
+        for (const auto &moduleRecord : iter.second) {
+            if (moduleRecord == nullptr) {
+                TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
+                continue;
+            }
+            appLifeCycleDeal_->SchedulePrepareTerminate(moduleRecord->GetModuleName(), prepareTermination, isExist);
+        }
+    }
+}
+
 void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)
 {
     auto timeOUt = AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT;

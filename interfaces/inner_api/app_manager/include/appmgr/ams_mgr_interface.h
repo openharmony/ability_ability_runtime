@@ -247,6 +247,15 @@ public:
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) = 0;
 
     /**
+     * Prepare terminate application
+     *
+     * @param pid Process ID
+     * @param prepareTelrmination PrepareTermination Enum
+     * @param isExist whether this callback event exist
+     */
+    virtual void PrepareTerminateApp(const pid_t pid, int32_t &prepareTermination, bool &isExist) = 0;
+
+    /**
      * Start specified process.
      *
      * @param want Want contains information wish to start.
@@ -526,6 +535,7 @@ public:
         SET_KEEP_ALIVE_DKV,
         KILL_PROCESSES_IN_BATCH,
         SEND_APP_SPAWN_UNINSTALL_DEBUG_HAP_MSG,
+        PREPARE_TERMINATE_APP,
         // Add enumeration values above
         END
     };

@@ -430,6 +430,37 @@ void AppSchedulerProxy::ScheduleAcceptWant(const AAFwk::Want &want, const std::s
     }
 }
 
+void AppSchedulerProxy::SchedulePrepareTerminate(const std::string &moduleName,
+    int32_t &prepareTermination, bool &isExist)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "token write error");
+        return;
+    }
+    if (!data.WriteString(moduleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write SchedulePrepareTerminate moduleName failed.");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Remote() is NULL");
+        return;
+    }
+    int32_t ret = remote->SendRequest(
+        static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_PREPARE_TERMINATE), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest SchedulePrepareTerminate err: %{public}d", ret);
+        return;
+    }
+    prepareTermination = reply.ReadInt32();
+    isExist = reply.ReadBool();
+    TAG_LOGD(AAFwkTag::APPMGR, "Get SchedulePrepareTerminate reply success");
+}
+
 void AppSchedulerProxy::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)
 {
     MessageParcel data;

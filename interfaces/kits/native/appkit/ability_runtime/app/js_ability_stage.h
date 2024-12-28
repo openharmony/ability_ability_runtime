@@ -48,6 +48,8 @@ public:
 
     void OnDestroy() const override;
 
+    bool OnPrepareTerminate(int &prepareTermination) const override;
+
     std::string OnAcceptWant(const AAFwk::Want &want) override;
 
     std::string OnNewProcessRequest(const AAFwk::Want &want) override;

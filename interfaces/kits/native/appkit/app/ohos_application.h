@@ -183,6 +183,8 @@ public:
 
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName, std::string &flag);
 
+    void SchedulePrepareTerminate(const std::string &moduleName, int32_t &prepareTermination, bool &isExist);
+
     void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName, std::string &flag);
 
     virtual std::shared_ptr<Configuration> GetConfiguration() const;

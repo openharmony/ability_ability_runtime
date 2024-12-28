@@ -2989,6 +2989,17 @@ void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &
     }
 }
 
+void MainThread::SchedulePrepareTerminate(const std::string &moduleName,
+    int32_t &prepareTermination, bool &isExist)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (!application_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
+        return;
+    }
+    application_->SchedulePrepareTerminate(moduleName, prepareTermination, isExist);
+}
+
 void MainThread::HandleScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
