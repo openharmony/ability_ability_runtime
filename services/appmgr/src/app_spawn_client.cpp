@@ -286,6 +286,8 @@ int32_t AppSpawnClient::SetStrictMode(const AppSpawnStartMsg &startMsg, const Ap
             TAG_LOGE(AAFwkTag::APPMGR, "Set isolatedSELinuxFlag fail, ret: %{public}d", ret);
             return ret;
         }
+    }
+    if (startMsg.isolatedNetworkFlag || startMsg.isolatedSELinuxFlag) {
         ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_EXTENSION_TYPE, startMsg.extensionTypeName.c_str());
         if (ret != 0) {
             TAG_LOGE(AAFwkTag::APPMGR, "Set extensionTypeName fail, ret: %{public}d", ret);
