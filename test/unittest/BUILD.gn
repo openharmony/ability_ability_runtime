@@ -261,6 +261,7 @@ ohos_source_set("abilityms_test_source") {
     "window_manager:sms",
   ]
 
+  defines = []
   if (resource_schedule_service_enable) {
     cflags_cc += [ "-RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
     external_deps += [ "resource_schedule_service:ressched_client" ]
@@ -269,7 +270,7 @@ ohos_source_set("abilityms_test_source") {
     cflags_cc += [ "-DWITH_DLP" ]
   }
   if (ability_runtime_child_process) {
-    defines = [ "SUPPORT_CHILD_PROCESS" ]
+    defines += [ "SUPPORT_CHILD_PROCESS" ]
   }
 
   if (ability_runtime_graphics) {
@@ -306,6 +307,7 @@ ohos_source_set("abilityms_test_source") {
     ]
   }
   if (ability_runtime_upms) {
+    defines += [ "SUPPORT_UPMS" ]
     sources +=
         [ "${ability_runtime_services_path}/abilitymgr/src/uri_utils.cpp" ]
 

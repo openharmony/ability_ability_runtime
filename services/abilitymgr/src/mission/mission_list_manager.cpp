@@ -3336,9 +3336,11 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
     targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
 
+#ifdef SUPPORT_UPMS
     if (InsightIntentExecuteParam::IsInsightIntentExecute(abilityRequest.want)) {
         targetAbilityRecord->GrantUriPermission();
     }
+#endif // SUPPORT_UPMS
 
     std::string value = abilityRequest.want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
     if (!value.empty()) {
