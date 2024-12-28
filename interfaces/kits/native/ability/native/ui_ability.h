@@ -562,10 +562,9 @@ public:
 
     /**
      * @brief Called when distributed system trying to collaborate remote ability.
-     * @param wantParams wantParams with collaborative info.
-     * @return Returns whether the ability agree to collaborate.
+     * @param want want with collaborative info.
      */
-    virtual int32_t OnCollaborate(AAFwk::WantParams &wantParams);
+    virtual void HandleCollaboration(const AAFwk::Want &want);
 
 protected:
     class UIAbilityDisplayListener : public OHOS::Rosen::IDisplayInfoChangedListener {

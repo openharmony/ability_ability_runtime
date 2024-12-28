@@ -166,6 +166,8 @@ public:
 
     virtual void UpdateSessionToken(sptr<IRemoteObject> sessionToken) override {}
 
+    virtual void ScheduleCollaborate(const Want &want) override {}
+
     int code_ = 0;
 };
 }  // namespace AAFwk

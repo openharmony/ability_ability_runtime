@@ -304,6 +304,8 @@ public:
      */
     virtual void UpdateSessionToken(sptr<IRemoteObject> sessionToken) = 0;
 
+    virtual void ScheduleCollaborate(const Want &want) = 0;
+
     enum {
         // ipc id for scheduling ability to a state of life cycle
         SCHEDULE_ABILITY_TRANSACTION = 0,
@@ -399,7 +401,9 @@ public:
 
         CREATE_MODAL_UI_EXTENSION,
 
-        UPDATE_SESSION_TOKEN
+        UPDATE_SESSION_TOKEN,
+
+        SCHEDULE_COLLABORATE_DATA
     };
 };
 }  // namespace AAFwk
