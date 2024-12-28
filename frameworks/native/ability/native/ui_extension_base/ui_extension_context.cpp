@@ -251,7 +251,7 @@ void UIExtensionContext::OnAbilityResultInner(int requestCode, int resultCode, c
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
-int32_t UIExtensionContext::GetScreenMode()
+int32_t UIExtensionContext::GetScreenMode() const
 {
     return screenMode_;
 }
