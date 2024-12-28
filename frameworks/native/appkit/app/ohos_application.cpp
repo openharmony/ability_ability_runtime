@@ -696,6 +696,19 @@ void OHOSApplication::ScheduleAcceptWant(const AAFwk::Want &want, const std::str
     }
 }
 
+void OHOSApplication::SchedulePrepareTerminate(const std::string &moduleName,
+    int32_t &prepareTermination, bool &isExist)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    auto iter = abilityStages_.find(moduleName);
+    if (iter == abilityStages_.end() || iter->second == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "%{public}s is not in abilityStage", moduleName.c_str());
+        return;
+    }
+    isExist = iter->second->OnPrepareTerminate(prepareTermination);
+    TAG_LOGD(AAFwkTag::APPKIT, "OnPrepareTerminate isExist = %{public}d", isExist);
+}
+
 void OHOSApplication::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName,
     std::string &flag)
 {

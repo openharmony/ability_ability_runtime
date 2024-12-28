@@ -425,6 +425,17 @@ private:
     void SetReceiverInfo(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord) const;
 
     bool CheckPrepareTerminateEnable(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief Execute PrepareTerminateApp when it is implemented
+     *
+     * @param pid process id
+     * @param tokens the tokens of ability records
+     * @return Returns the tokens that still need to execute PrepareTerminate.
+     */
+    std::vector<sptr<IRemoteObject>> PrepareTerminateAppAndGetRemaining(
+        int32_t pid, std::vector<sptr<IRemoteObject>> tokens);
+
     bool GetContentAndTypeId(uint32_t msgId, std::string &msgContent, int &typeId) const;
 
     bool CheckSessionInfo(sptr<SessionInfo> sessionInfo) const;

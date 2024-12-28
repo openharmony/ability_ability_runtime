@@ -111,6 +111,8 @@ int32_t AppSchedulerHost::OnRemoteRequestInnerSecond(uint32_t code, MessageParce
             return HandleScheduleClearPageStack(data, reply);
         case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_ACCEPT_WANT):
             return HandleScheduleAcceptWant(data, reply);
+        case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_PREPARE_TERMINATE):
+            return HandleSchedulePrepareTerminate(data, reply);
         case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_NEW_PROCESS_REQUEST):
             return HandleScheduleNewProcessRequest(data, reply);
         case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_NOTIFY_LOAD_REPAIR_PATCH):
@@ -343,6 +345,24 @@ int32_t AppSchedulerHost::HandleScheduleAcceptWant(MessageParcel &data, MessageP
     }
     auto moduleName = data.ReadString();
     ScheduleAcceptWant(*want, moduleName);
+    return NO_ERROR;
+}
+
+int32_t AppSchedulerHost::HandleSchedulePrepareTerminate(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    auto moduleName = data.ReadString();
+    int32_t prepareTermination = 0;
+    bool isExist = false;
+    SchedulePrepareTerminate(moduleName, prepareTermination, isExist);
+    if (!reply.WriteInt32(prepareTermination)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write HandleSchedulePrepareTerminate prepareTermination failed.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteBool(isExist)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write HandleSchedulePrepareTerminate isExist failed.");
+        return ERR_INVALID_VALUE;
+    }
     return NO_ERROR;
 }
 

@@ -444,6 +444,15 @@ public:
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response);
 
     /**
+     * Prepare terminate application
+     *
+     * @param pid Process ID
+     * @param prepareTelrmination PrepareTermination Enum
+     * @param isExist whether this callback event exist
+     */
+    virtual void PrepareTerminateApp(const pid_t pid, int32_t &prepareTermination, bool &isExist);
+
+    /**
      * Start specified process.
      *
      * @param want Want contains information wish to start.
