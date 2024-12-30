@@ -704,10 +704,9 @@ void UIAbility::OnLeaveForeground()
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 }
 
-int32_t UIAbility::OnCollaborate(AAFwk::WantParams &wantParams)
+void UIAbility::HandleCollaboration(const AAFwk::Want &want)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    return ERR_OK;
 }
 
 std::string UIAbility::GetContentInfo()

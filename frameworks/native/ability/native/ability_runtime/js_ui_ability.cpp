@@ -1111,7 +1111,6 @@ int32_t JsUIAbility::OnCollaborate(WantParams &wantParam)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "OnCollaborate: %{public}s", GetAbilityName().c_str());
     int32_t ret = CollaborateResult::REJECT;
-    UIAbility::OnCollaborate(wantParam);
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
 
@@ -1151,13 +1150,14 @@ void JsUIAbility::HandleCollaboration(const Want &want)
         (abilityInfo_->launchMode != AppExecFwk::LaunchMode::SPECIFIED)) {
         (const_cast<Want &>(want)).RemoveParam(IS_CALLING_FROM_DMS);
         SetWant(want);
-        OHOS::AAFwk::WantParams param = want.GetParams().GetWantParams(SUPPORT_COLLABORATE_INDEX);
-        int32_t resultCode = OnCollaborate(param);
+        OHOS::AAFwk::WantParams wantParams = want.GetParams();
+        int32_t resultCode = OnCollaborate(wantParams);
         auto abilityContext = GetAbilityContext();
         if (abilityContext == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
             return;
         }
+        OHOS::AAFwk::WantParams param = want.GetParams().GetWantParams(SUPPORT_COLLABORATE_INDEX);
         auto collabToken = param.GetStringParam(COLLABORATE_KEY);
         auto uid = abilityInfo_->uid;
         auto callerPid = getpid();

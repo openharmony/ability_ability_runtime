@@ -155,6 +155,8 @@ public:
     {
         return;
     }
+    void ScheduleCollaborate(const Want &want) override
+    {}
 };
 sptr<Token> GetFuzzAbilityToken(AbilityType type)
 {

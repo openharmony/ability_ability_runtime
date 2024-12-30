@@ -85,6 +85,7 @@ public:
     void ShareData(const int32_t &uniqueId);
     bool PrepareTerminateAbility();
     void UpdateSessionToken(sptr<IRemoteObject> sessionToken);
+    void ScheduleCollaborate(const Want &want);
 
 private:
     sptr<IAbilityScheduler> GetScheduler();

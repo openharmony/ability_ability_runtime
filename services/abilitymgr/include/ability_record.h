@@ -1154,6 +1154,8 @@ public:
         return securityFlag_;
     }
 
+    void ScheduleCollaborate(const Want &want);
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false);
 
@@ -1373,6 +1375,7 @@ private:
     LaunchDebugInfo launchDebugInfo_;
     std::string instanceKey_ = "";
     bool securityFlag_ = false;
+    std::mutex collaborateWantLock_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
