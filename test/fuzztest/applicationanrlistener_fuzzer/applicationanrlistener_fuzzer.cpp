@@ -112,7 +112,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     sptr<IAbilityConnection> connect = new MyAbilityConnection();
     std::vector<std::string> info;
     std::shared_ptr<AbilityRecord> targetService = GetFuzzAbilityRecord();
-    bool boolParam = *data % ENABLE;
 
     // fuzz for ApplicationAnrListener
     auto applicationAnrListener = std::make_shared<ApplicationAnrListener>();
@@ -125,7 +124,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     freeInstallManager->IsTopAbility(token);
     freeInstallManager->StartFreeInstall(*want, int32Param, intParam, token);
     freeInstallManager->RemoteFreeInstall(*want, int32Param, intParam, token);
-    freeInstallManager->BuildFreeInstallInfo(*want, int32Param, intParam, token, boolParam);
+    freeInstallManager->BuildFreeInstallInfo(*want, int32Param, intParam, token);
     freeInstallManager->StartRemoteFreeInstall(*want, intParam, int32Param, token);
     freeInstallManager->NotifyDmsCallback(*want, intParam);
     freeInstallManager->NotifyFreeInstallResult(*want, intParam);

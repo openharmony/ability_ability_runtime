@@ -1171,10 +1171,12 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
 
         if (isStartFreeInstallByWant) {
-            return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode,
-                callerToken, true, specifyTokenId);
+            auto param = std::make_shared<FreeInstallParams>();
+            param->isAsync = true;
+            param->specifyTokenId = specifyTokenId;
+            return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, param);
         }
-        int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, false);
+        int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken);
         if (ret == ERR_OK) {
             result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
         }
@@ -1469,7 +1471,9 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
         (const_cast<Want &>(want)).RemoveParam("send_to_erms_embedded");
         Want localWant = want;
         UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(localWant, callerToken);
-        return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
+        auto param = std::make_shared<FreeInstallParams>();
+        param->isAsync = true;
+        return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, param);
     }
 
     if (!JudgeMultiUserConcurrency(validUserId)) {
@@ -1792,8 +1796,11 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(localWant, callerToken);
         }
         TAG_LOGD(AAFwkTag::ABILITYMGR, "is start free install");
-        return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode,
-            callerToken, true, specifyTokenId);
+        auto param = std::make_shared<FreeInstallParams>();
+        param->isAsync = true;
+        param->specifyTokenId = specifyTokenId;
+        param->startOptions = std::make_shared<AAFwk::StartOptions>(startOptions);
+        return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, param);
     }
     if (!JudgeMultiUserConcurrency(validUserId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "multi-user non-concurrent unsatisfied");
@@ -11775,7 +11782,7 @@ bool AbilityManagerService::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToke
     want.SetBundle(bundleName);
     want.SetParam("send_to_erms_embedded", 1);
     UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(want, callerToken);
-    int32_t ret = freeInstallManager_->StartFreeInstall(want, GetUserId(), 0, callerToken, false);
+    int32_t ret = freeInstallManager_->StartFreeInstall(want, GetUserId(), 0, callerToken);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "target not allowed free install");
         return false;
@@ -11815,7 +11822,7 @@ int32_t AbilityManagerService::QueryAtomicServiceStartupRule(sptr<IRemoteObject>
     want.SetParam("send_to_erms_embedded", 1);
     UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(want, callerToken);
     auto userId = GetUserId();
-    int32_t ret = freeInstallManager_->StartFreeInstall(want, userId, 0, callerToken, false);
+    int32_t ret = freeInstallManager_->StartFreeInstall(want, userId, 0, callerToken);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "free install failed:%{public}d", ret);
         rule.isOpenAllowed = false;
@@ -12565,8 +12572,12 @@ ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> ca
 
     convertedWant.AddFlags(Want::FLAG_INSTALL_ON_DEMAND);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "convertedWant=%{private}s", convertedWant.ToString().c_str());
+    auto param = std::make_shared<FreeInstallParams>();
+    param->isAsync = true;
+    param->isOpenAtomicServiceShortUrl = true;
+    param->originalWant = std::make_shared<Want>(want);
     ErrCode retCode = freeInstallManager_->StartFreeInstall(convertedWant, GetValidUserId(userId),
-        requestCode, callerToken, true, 0, true, std::make_shared<Want>(want));
+        requestCode, callerToken, param);
     if (retCode != ERR_OK) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "startFreeInstall returns errCode=%{public}d", retCode);
         if (retCode == NOT_TOP_ABILITY) {
