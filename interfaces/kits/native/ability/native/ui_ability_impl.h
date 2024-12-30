@@ -171,6 +171,8 @@ public:
         }
     }
 
+    void ScheduleCollaborate(const Want &want);
+
 #ifdef SUPPORT_GRAPHICS
 public:
 

@@ -151,6 +151,8 @@ public:
         return 0;
     }
     virtual void UpdateSessionToken(sptr<IRemoteObject> sessionToken) {}
+
+    virtual void ScheduleCollaborate(const Want &want) {}
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

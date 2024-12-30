@@ -61,6 +61,7 @@ constexpr int32_t MAX_FIND_UIEXTENSION_CALLER_TIMES = 10;
 constexpr int32_t START_UI_ABILITY_PER_SECOND_UPPER_LIMIT = 20;
 constexpr int32_t API16 = 16;
 constexpr int32_t API_VERSION_MOD = 100;
+constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
 
 FreezeUtil::TimeoutState MsgId2State(uint32_t msgId)
 {
@@ -1061,6 +1062,10 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
         if (abilityRequest.want.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");
             auto sessionInfo = CreateSessionInfo(abilityRequest);
+            if ((persistentId != 0) && abilityRequest.want.GetBoolParam(IS_CALLING_FROM_DMS, false) &&
+                (uiAbilityRecord->GetAbilityState() == AbilityState::FOREGROUND)) {
+                uiAbilityRecord->ScheduleCollaborate(abilityRequest.want);
+            }
             sessionInfo->persistentId = persistentId;
             sessionInfo->state = CallToState::FOREGROUND;
             sessionInfo->reuse = reuse;
@@ -1075,6 +1080,10 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
             uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
             uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId);
             return NotifySCBPendingActivation(sessionInfo, abilityRequest);
+        } else {
+            if ((persistentId != 0) && abilityRequest.want.GetBoolParam(IS_CALLING_FROM_DMS, false)) {
+                uiAbilityRecord->ScheduleCollaborate(abilityRequest.want);
+            }
         }
         return ERR_OK;
     } else if (ret == ResolveResultType::NG_INNER_ERROR) {

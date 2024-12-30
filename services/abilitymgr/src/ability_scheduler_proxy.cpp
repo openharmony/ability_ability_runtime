@@ -1202,5 +1202,28 @@ int32_t AbilitySchedulerProxy::SendTransactCmd(uint32_t code, MessageParcel &dat
     }
     return NO_ERROR;
 }
+
+void AbilitySchedulerProxy::ScheduleCollaborate(const Want &want)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token failed");
+        return;
+    }
+    auto msgKey = AbilityRuntime::ErrorMgsUtil::BuildErrorKey(reinterpret_cast<uintptr_t>(this),
+        "ScheduleCollaborate");
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write want failed");
+        AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "write want failed");
+        return;
+    }
+    int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_COLLABORATE_DATA, data, reply, option);
+    if (err != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, err: %{public}d", err);
+    }
+    return;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
