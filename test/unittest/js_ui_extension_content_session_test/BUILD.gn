@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
@@ -35,8 +34,6 @@ ohos_unittest("js_ui_extension_content_session_test") {
     "-Dprotected = public",
   ]
 
-  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
-
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
@@ -58,24 +55,12 @@ ohos_unittest("js_ui_extension_content_session_test") {
     "ability_runtime:js_environment",
     "ability_runtime:runtime",
     "ability_runtime:service_extension",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "c_utils:utils",
-    "ets_runtime:libark_jsruntime",
-    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",
-    "i18n:intl_util",
-    "icu:shared_icuuc",
-    "init:libbegetutil",
-    "ipc:ipc_core",
-    "json:nlohmann_json_static",
-    "jsoncpp:jsoncpp",
-    "napi:ace_napi",
-    "resource_management:global_resmgr",
-    "window_manager:libwsutils",
   ]
+
+  public_external_deps = [ "window_manager:scene_session_manager" ]
 }
 
 group("unittest") {
