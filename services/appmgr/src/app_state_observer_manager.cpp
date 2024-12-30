@@ -848,6 +848,7 @@ void AppStateObserverManager::AddObserverDeathRecipient(const sptr<IRemoteBroker
         TAG_LOGE(AAFwkTag::APPMGR, "The param observer is nullptr.");
         return;
     }
+    std::lock_guard lock(recipientMapMutex_);
     auto it = recipientMap_.find(observer->AsObject());
     if (it != recipientMap_.end()) {
         TAG_LOGE(AAFwkTag::APPMGR, "This death recipient has been added.");
@@ -890,6 +891,7 @@ void AppStateObserverManager::RemoveObserverDeathRecipient(const sptr<IRemoteBro
         TAG_LOGE(AAFwkTag::APPMGR, "The param observer is nullptr.");
         return;
     }
+    std::lock_guard lock(recipientMapMutex_);
     auto it = recipientMap_.find(observer->AsObject());
     if (it != recipientMap_.end()) {
         it->first->RemoveDeathRecipient(it->second);
