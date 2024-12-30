@@ -26,7 +26,6 @@
 #include "napi_common_want.h"
 #include "session_info.h"
 #include "ui_extension_context.h"
-#include "window.h"
 
 using namespace testing;
 using namespace testing::ext;
