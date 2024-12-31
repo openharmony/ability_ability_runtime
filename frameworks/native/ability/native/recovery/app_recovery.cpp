@@ -115,8 +115,8 @@ bool AppRecovery::InitApplicationInfo(const std::shared_ptr<EventHandler>& mainH
 bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
     const std::shared_ptr<AbilityInfo>& abilityInfo, const sptr<IRemoteObject>& token)
 {
-    if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "null abilityInfo");
+    if (abilityInfo == nullptr || ability == nullptr) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "null abilityInfo or ability");
         return false;
     }
 
