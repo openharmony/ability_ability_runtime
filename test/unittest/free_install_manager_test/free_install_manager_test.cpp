@@ -174,7 +174,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_OnInstallFinished_001, TestSize.Level1)
     const int requestCode = 0;
     want.SetParam(Want::PARAM_RESV_START_TIME, std::string("0"));
 
-    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, nullptr, false);
+    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, nullptr);
     freeInstallManager_->freeInstallList_.resize(0);
     freeInstallManager_->freeInstallList_.emplace_back(info);
     freeInstallManager_->OnInstallFinished(-1, 0, want, userId, false);
@@ -208,7 +208,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_OnInstallFinished_002, TestSize.Level1)
     const int requestCode = 0;
     want.SetParam(Want::PARAM_RESV_START_TIME, std::string("0"));
 
-    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, nullptr, false);
+    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, nullptr);
     freeInstallManager_->freeInstallList_.resize(0);
     freeInstallManager_->freeInstallList_.emplace_back(info);
     freeInstallManager_->OnInstallFinished(-1, 1, want, userId, false);
@@ -242,7 +242,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_OnInstallFinished_003, TestSize.Level1)
     const int32_t userId = 1;
     const int requestCode = 0;
 
-    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, nullptr, false);
+    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, nullptr);
     info.isInstalled = true;
     freeInstallManager_->freeInstallList_.resize(0);
     info.promise.reset();
@@ -288,7 +288,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_OnRemoteInstallFinished_001, TestSize.Leve
     const int requestCode = 0;
     want.SetParam(Want::PARAM_RESV_START_TIME, std::string("0"));
 
-    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, nullptr, false);
+    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, nullptr);
     freeInstallManager_->freeInstallList_.resize(0);
     freeInstallManager_->freeInstallList_.emplace_back(info);
     freeInstallManager_->OnRemoteInstallFinished(-1, 0, want, userId);
@@ -410,7 +410,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_SetFreeInstallTaskSessionId_001, TestSize.
     const int requestCode = 0;
     // mock callerToken
     const sptr<IRemoteObject> callerToken = MockToken();
-    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, callerToken, false);
+    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, callerToken);
     {
         std::lock_guard<ffrt::mutex> lock(freeInstallManager_->freeInstallListLock_);
         freeInstallManager_->freeInstallList_.push_back(info);
