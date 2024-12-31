@@ -42,20 +42,17 @@ ohos_unittest("cj_test_runner_test") {
     "${ability_runtime_native_path}/appkit/ability_delegator/delegator_thread.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/iability_monitor.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/iability_stage_monitor.cpp",
+    "${ability_runtime_native_path}/appkit/ability_delegator/runner_runtime/cj_test_runner_object.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/runner_runtime/js_test_runner.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/shell_cmd_result.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/test_runner.cpp",
+    "${ability_runtime_path}/frameworks/native/appkit/ability_delegator/runner_runtime/cj_test_runner.cpp",
     "${ability_runtime_path}/tools/aa/src/shell_command_result.cpp",
     "${ability_runtime_path}/tools/aa/src/test_observer_proxy.cpp",
     "cj_test_runner_test.cpp",
   ]
 
   if (cj_frontend) {
-    sources += [
-      "${ability_runtime_native_path}/appkit/ability_delegator/runner_runtime/cj_test_runner_object.cpp",
-      "${ability_runtime_path}/frameworks/native/appkit/ability_delegator/runner_runtime/cj_test_runner.cpp",
-    ]
-
     defines = [ "CJ_FRONTEND" ]
   }
   cflags = []
