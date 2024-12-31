@@ -169,27 +169,24 @@ ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk:
     }
     SetInterceptInfo(want, disposedRule);
     std::string bundleName = want.GetBundle();
+    sptr<OHOS::AppExecFwk::IAppMgr> appManager = GetAppMgr();
+    CHECK_POINTER_AND_RETURN(appManager, ERR_INVALID_VALUE);
     {
         std::lock_guard<ffrt::mutex> guard(observerLock_);
         if (disposedObserverMap_.find(bundleName) != disposedObserverMap_.end()) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "start same disposed app, do not need to register again");
             return ERR_OK;
         }
-    }
-    auto disposedObserver = sptr<DisposedObserver>::MakeSptr(disposedRule, shared_from_this());
-    CHECK_POINTER_AND_RETURN(disposedObserver, ERR_INVALID_VALUE);
-    sptr<OHOS::AppExecFwk::IAppMgr> appManager = GetAppMgr();
-    CHECK_POINTER_AND_RETURN(appManager, ERR_INVALID_VALUE);
-    std::vector<std::string> bundleNameList;
-    bundleNameList.push_back(bundleName);
-    int32_t ret = IN_PROCESS_CALL(appManager->RegisterApplicationStateObserver(disposedObserver, bundleNameList));
-    if (ret != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "register failed, err:%{public}d", ret);
-        disposedObserver = nullptr;
-        return ret;
-    }
-    {
-        std::lock_guard<ffrt::mutex> guard(observerLock_);
+        auto disposedObserver = sptr<DisposedObserver>::MakeSptr(disposedRule, shared_from_this());
+        CHECK_POINTER_AND_RETURN(disposedObserver, ERR_INVALID_VALUE);
+        std::vector<std::string> bundleNameList;
+        bundleNameList.push_back(bundleName);
+        int32_t ret = IN_PROCESS_CALL(appManager->RegisterApplicationStateObserver(disposedObserver, bundleNameList));
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "register failed, err:%{public}d", ret);
+            disposedObserver = nullptr;
+            return ret;
+        }
         disposedObserverMap_.emplace(bundleName, disposedObserver);
     }
     auto unregisterTask = [appManager, bundleName, interceptor = shared_from_this()] () {
