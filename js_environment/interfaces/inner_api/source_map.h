@@ -75,13 +75,14 @@ public:
 
     void Init(bool isModular, const std::string& hapPath);
     std::string TranslateBySourceMap(const std::string& stackStr);
-    bool TranslateUrlPositionBySourceMap(std::string& url, int& line, int& column);
+    bool TranslateUrlPositionBySourceMap(std::string& url, int& line, int& column, std::string& packageName);
     static ErrorPos GetErrorPos(const std::string& rawStack);
     static void RegisterReadSourceMapCallback(ReadSourceMapCallback readFunc);
     static bool ReadSourceMapData(const std::string& hapPath, const std::string& sourceMapPath, std::string& content);
     static void RegisterGetHapPathCallback(GetHapPathCallback getFunc);
     static void GetHapPath(const std::string &bundleName, std::vector<std::string> &hapList);
-    bool GetLineAndColumnNumbers(int& line, int& column, SourceMapData& targetMap, std::string& url);
+    bool GetLineAndColumnNumbers(int& line, int& column, SourceMapData& targetMap, std::string& url,
+                                 std::string& packageName);
     static void ExtractStackInfo(const std::string& stackStr, std::vector<std::string>& res);
     void SplitSourceMap(const std::string& sourceMapData);
     
@@ -96,6 +97,7 @@ private:
     std::string GetSourceInfo(const std::string& line, const std::string& column,
                               const SourceMapData& targetMap, const std::string& key);
     void SetSourceMapData();
+    static void GetPackageName(const SourceMapData& targetMap, std::string& packageName);
 
 private:
     bool isModular_ = true;

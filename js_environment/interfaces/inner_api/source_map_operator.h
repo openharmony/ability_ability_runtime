@@ -64,12 +64,12 @@ public:
         }
     }
 
-    bool TranslateUrlPositionBySourceMap(std::string& url, int& line, int& column)
+    bool TranslateUrlPositionBySourceMap(std::string& url, int& line, int& column, std::string& packageName)
     {
         if (sourceMapObj_ == nullptr) {
             return false;
         }
-        return sourceMapObj_->TranslateUrlPositionBySourceMap(url, line, column);
+        return sourceMapObj_->TranslateUrlPositionBySourceMap(url, line, column, packageName);
     }
 
     bool GetInitStatus() const

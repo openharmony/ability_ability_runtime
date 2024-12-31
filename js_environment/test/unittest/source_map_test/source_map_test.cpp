@@ -401,5 +401,27 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_1800, Function | MediumTest | Level1)
 
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_1800 end" << stack.c_str();
 }
+
+HWTEST_F(SourceMapTest, JsEnv_SourceMap_1900, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_1900 start";
+    SourceMapData targetMap;
+    std::string packageName;
+    targetMap.entryPackageInfo_.emplace_back("SourceMap1");
+    SourceMap::GetPackageName(targetMap, packageName);
+    EXPECT_STREQ("SourceMap1", packageName.c_str());
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_1900 end";
+}
+
+HWTEST_F(SourceMapTest, JsEnv_SourceMap_2000, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2000 start";
+    SourceMapData targetMap;
+    std::string packageName;
+    targetMap.packageInfo_.emplace_back("SourceMap");
+    SourceMap::GetPackageName(targetMap, packageName);
+    EXPECT_STREQ("SourceMap", packageName.c_str());
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2000 end";
+}
 } // namespace AppExecFwk
 } // namespace OHOS
