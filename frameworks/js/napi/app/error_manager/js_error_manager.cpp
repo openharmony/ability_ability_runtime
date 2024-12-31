@@ -54,10 +54,12 @@ struct GlobalObserverItem {
         return ref < other.ref;
     }
 };
-static std::set<GlobalObserverItem> observerList;
-static std::set<GlobalObserverItem> promiseList;
+static std::set<GlobalObserverItem> globalObserverList;
+static std::set<GlobalObserverItem> globalPromiseList;
+static std::map<napi_env, std::vector<std::pair<int32_t, std::shared_ptr<NativeReference>>>> observerList;
+static std::mutex globalErrorMtx;
+static std::mutex globalPromiseMtx;
 static std::mutex errorMtx;
-static std::mutex promiseMtx;
 static std::shared_ptr<JsLoopObserver> loopObserver_;
 static std::once_flag registerCallbackFlag;
 constexpr int32_t INDEX_ZERO = 0;
@@ -159,13 +161,30 @@ static napi_value NotifyUnhandledRejectionHandler(napi_env env, napi_callback_in
     return CreateJsUndefined(env);
 }
 
-bool IsObserverListNotEmpty()
+static bool IsobserverListNotEmpty()
 {
     std::lock_guard<std::mutex> lock(errorMtx);
     return !observerList.empty();
 }
 
-std::string GetContent(napi_env env, napi_value exception, const std::string name)
+static bool IsGlobalObserverListNotEmpty()
+{
+    std::lock_guard<std::mutex> lock(globalErrorMtx);
+    return !globalObserverList.empty();
+}
+
+static bool IsErrorObserverListNotEmpty()
+{
+    return IsobserverListNotEmpty() || IsGlobalObserverListNotEmpty();
+}
+
+static bool IsGlobalPromiseListNotEmpty()
+{
+    std::lock_guard<std::mutex> lock(globalPromiseMtx);
+    return !globalPromiseList.empty();
+}
+
+static std::string GetContent(napi_env env, napi_value exception, const std::string name)
 {
     napi_value tempContent;
     std::string content;
@@ -196,7 +215,26 @@ static napi_value CreateGlobalObject(napi_env env, WorkItem *item)
     return objValue;
 }
 
-static void DoCallback(uv_work_t *reqwork, int status)
+static void CallJsFunction(napi_env env, napi_value obj, const char *methodName,
+                           napi_value const *argv, size_t argc)
+{
+    TAG_LOGI(AAFwkTag::JSNAPI, "call func: %{public}s", methodName);
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null obj");
+        return;
+    }
+
+    napi_value method = nullptr;
+    napi_get_named_property(env, obj, methodName, &method);
+    if (method == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null method");
+        return;
+    }
+    napi_value callResult = nullptr;
+    napi_call_function(env, obj, method, argc, argv, &callResult);
+}
+
+static void DoFunctionCallback(uv_work_t *reqwork, int status)
 {
     WorkItem *newItem = static_cast<WorkItem *>(reqwork->data);
     if (newItem == nullptr) {
@@ -223,48 +261,169 @@ static void DoCallback(uv_work_t *reqwork, int status)
         TAG_LOGI(AAFwkTag::JSNAPI, "Do Callback Failed");
         return;
     }
+    delete newItem;
+    newItem = nullptr;
 }
-
-static bool ErrorManagerCallback(napi_env env, napi_value exception, std::string instanceName, uint32_t type)
+static void DoCallbackInRegesterThread(napi_env env, WorkItem &info)
 {
-    std::lock_guard<std::mutex> lock(errorMtx);
-    if (observerList.empty()) {
-        return false;
-    }
-    if (exception == nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "excepton is nullptr");
-        return false;
-    }
-
-    std::string name = GetContent(env, exception, "name");
-    std::string stack = GetContent(env, exception, "stack");
-    std::string message = GetContent(env, exception, "message");
-
-    for (auto iter : observerList) {
+    std::lock_guard<std::mutex> lock(globalErrorMtx);
+    for (auto iter : globalObserverList) {
         uv_loop_t *loop = nullptr;
         if (napi_get_uv_event_loop(iter.env, &loop) != napi_ok) {
             TAG_LOGI(AAFwkTag::JSNAPI, "Get Loop Failed");
             continue;
         }
-        WorkItem *item = new WorkItem();
+        WorkItem *item = new (std::nothrow) WorkItem();
+        if (item == nullptr) {
+            TAG_LOGI(AAFwkTag::JSNAPI, "new WorkItem Failed");
+            continue;
+        }
         item->env = iter.env;
         item->ref = iter.ref;
-        item->instanceName = instanceName;
-        item->instanceType = type;
+        item->instanceName = info.instanceName;
+        item->instanceType = info.instanceType;
         item->work.data = item;
-        item->name = name;
-        item->stack = stack;
-        item->message = message;
-        uv_queue_work(
-            loop, &item->work, [](uv_work_t *reqwork) {}, DoCallback);
+        item->name = info.name;
+        item->stack = info.stack;
+        item->message = info.message;
+        int ret = uv_queue_work(
+            loop, &item->work, [](uv_work_t *reqwork) {}, DoFunctionCallback);
+        if (ret != 0) {
+            if (item != nullptr) {
+                delete item;
+                item = nullptr;
+            }
+        }
     }
+}
+static void DoGlobalCallback(napi_env env, napi_value exception, std::string instanceName, uint32_t type)
+{
+    {
+        std::lock_guard<std::mutex> lock(globalErrorMtx);
+        if (globalObserverList.empty()) {
+            return;
+        }
+    }
+    if (exception == nullptr) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "excepton is nullptr");
+        return;
+    }
+    std::string name = GetContent(env, exception, "name");
+    std::string stack = GetContent(env, exception, "stack");
+    std::string message = GetContent(env, exception, "message");
+    WorkItem item;
+    item.name = name;
+    item.message = message;
+    item.stack = stack;
+    item.instanceName = instanceName;
+    item.instanceType = type;
+    DoCallbackInRegesterThread(env, item);
+}
+static napi_value CreateJsErrorObject(napi_env env, std::string &name, std::string &message, std::string &stack)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TAG_LOGW(AAFwkTag::JSNAPI, "null obj");
+        return objValue;
+    }
+    napi_set_named_property(env, objValue, "name", CreateJsValue(env, name));
+    napi_set_named_property(env, objValue, "message", CreateJsValue(env, message));
+    if (!stack.empty()) {
+        napi_set_named_property(env, objValue, "stack", CreateJsValue(env, stack));
+    }
+
+    return objValue;
+}
+
+static void DoMainThreadOnException(napi_env env, std::string name, std::string message, std::string stack)
+{
+    std::lock_guard<std::mutex> lock(errorMtx);
+    if (observerList.empty()) {
+        return;
+    }
+    if (!observerList.count(env)) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "the thread not on error");
+        return;
+    }
+
+    std::vector<std::pair<int32_t, std::shared_ptr<NativeReference>>> functions = observerList[env];
+    for (auto &functionTemp : functions) {
+        size_t argc = ARGC_ONE;
+        napi_value args[] = {CreateJsErrorObject(env, name, message, stack)};
+        CallJsFunction(env, functionTemp.second->GetNapiValue(), "onException", args, argc);
+    }
+}
+
+static void DoMainThreadOnUnhandleException(napi_env env, std::string summary)
+{
+    std::lock_guard<std::mutex> lock(errorMtx);
+    if (observerList.empty()) {
+        return;
+    }
+    if (!observerList.count(env)) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "the thread not on error");
+        return;
+    }
+
+    std::vector<std::pair<int32_t, std::shared_ptr<NativeReference>>> functions = observerList[env];
+    for (auto &functionTemp : functions) {
+        size_t argc = ARGC_ONE;
+        napi_value args[] = {CreateJsValue(env, summary)};
+        CallJsFunction(env, functionTemp.second->GetNapiValue(), "onUnhandledException", args, argc);
+    }
+}
+
+static void DoWorkThreadCallback(napi_env env, napi_value exception)
+{
+    std::lock_guard<std::mutex> lock(errorMtx);
+    if (observerList.empty()) {
+        return;
+    }
+    if (exception == nullptr) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "excepton is nullptr");
+        return;
+    }
+    if (!observerList.count(env)) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "the thread not on error");
+        return;
+    }
+    std::string name = GetContent(env, exception, "name");
+    std::string stack = GetContent(env, exception, "stack");
+    std::string message = GetContent(env, exception, "message");
+    std::vector<std::pair<int32_t, std::shared_ptr<NativeReference>>> functions = observerList[env];
+    for (auto &functionTemp : functions) {
+        size_t argc = ARGC_ONE;
+        napi_value args[] = {CreateJsErrorObject(env, name, message, stack)};
+        CallJsFunction(env, functionTemp.second->GetNapiValue(), "onException", args, argc);
+    }
+}
+static bool ErrorManagerWorkerCallback(napi_env env, napi_value exception, std::string instanceName, uint32_t type)
+{
+    DoGlobalCallback(env, exception, instanceName, type);
+    DoWorkThreadCallback(env, exception);
     return true;
 }
 
-static bool promiseManagerCallback(napi_env env, napi_value *args, std::string instanceName, uint32_t type)
+static bool ErrorManagerMainWorkerCallback(
+    napi_env env, std::string summary, std::string name, std::string message, std::string stack)
 {
-    std::lock_guard<std::mutex> lock(promiseMtx);
-    if (promiseList.empty()) {
+    DoMainThreadOnUnhandleException(env, summary);
+    DoMainThreadOnException(env, name, message, stack);
+    WorkItem item;
+    item.name = name;
+    item.message = message;
+    item.stack = stack;
+    item.instanceName = "";
+    item.instanceType = 0;
+    DoCallbackInRegesterThread(env, item);
+    return true;
+}
+
+static bool PromiseManagerCallback(napi_env env, napi_value *args, std::string instanceName, uint32_t type)
+{
+    std::lock_guard<std::mutex> lock(globalPromiseMtx);
+    if (globalPromiseList.empty()) {
         return false;
     }
     int32_t event = -1;
@@ -279,13 +438,17 @@ static bool promiseManagerCallback(napi_env env, napi_value *args, std::string i
     std::string stack = GetContent(env, reason, "stack");
     std::string message = GetContent(env, reason, "message");
 
-    for (auto iter : promiseList) {
+    for (auto iter : globalPromiseList) {
         uv_loop_t *loop = nullptr;
         if (napi_get_uv_event_loop(iter.env, &loop) != napi_ok) {
             TAG_LOGI(AAFwkTag::JSNAPI, "Get Loop Failed");
             continue;
         }
-        WorkItem *item = new WorkItem();
+        WorkItem *item = new (std::nothrow) WorkItem();
+        if (item == nullptr) {
+            TAG_LOGI(AAFwkTag::JSNAPI, "new WorkItem Failed");
+            continue;
+        }
         item->env = iter.env;
         item->ref = iter.ref;
         item->instanceName = instanceName;
@@ -294,8 +457,14 @@ static bool promiseManagerCallback(napi_env env, napi_value *args, std::string i
         item->name = name;
         item->stack = stack;
         item->message = message;
-        uv_queue_work(
-            loop, &item->work, [](uv_work_t *reqwork) {}, DoCallback);
+        int ret = uv_queue_work(
+            loop, &item->work, [](uv_work_t *reqwork) {}, DoFunctionCallback);
+        if (ret != 0) {
+            if (item != nullptr) {
+                delete item;
+                item = nullptr;
+            }
+        }
     }
     return true;
 }
@@ -429,14 +598,11 @@ private:
         } else {
             serialNumber_ = 0;
         }
-
-        if (observer_ == nullptr) {
-            TAG_LOGD(AAFwkTag::JSNAPI, "null observer_");
-            // create observer
-            observer_ = std::make_shared<JsErrorObserver>(env);
-            AppExecFwk::ApplicationDataManager::GetInstance().AddErrorObserver(observer_);
-        }
-        observer_->AddJsObserverObject(observerId, argv[INDEX_ONE]);
+        std::lock_guard<std::mutex> lock(errorMtx);
+        napi_ref ref = nullptr;
+        napi_create_reference(env, argv[INDEX_ONE], 1, &ref);
+        observerList[env].push_back(
+            std::make_pair(observerId, std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref))));
         return CreateJsValue(env, observerId);
     }
 
@@ -540,22 +706,22 @@ private:
         if (!ValidateFunction(env, function)) {
             return nullptr;
         }
-        std::lock_guard<std::mutex> lock(errorMtx);
-        for (auto &iter : observerList) {
+        std::lock_guard<std::mutex> lock(globalErrorMtx);
+        for (auto &iter : globalObserverList) {
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
             NAPI_CALL(env, napi_strict_equals(env, observer, function, &equals));
             if (equals) {
                 NAPI_CALL(env, napi_delete_reference(env, iter.ref));
-                observerList.erase(iter);
+                globalObserverList.erase(iter);
                 break;
             }
         }
         GlobalObserverItem item;
         NAPI_CALL(env, napi_create_reference(env, function, INITITAL_REFCOUNT_ONE, &item.ref));
         item.env = env;
-        observerList.insert(item);
+        globalObserverList.insert(item);
         return CreateJsUndefined(env);
     }
 
@@ -564,22 +730,22 @@ private:
         if (!ValidateFunction(env, function)) {
             return nullptr;
         }
-        std::lock_guard<std::mutex> lock(promiseMtx);
-        for (auto &iter : promiseList) {
+        std::lock_guard<std::mutex> lock(globalPromiseMtx);
+        for (auto &iter : globalPromiseList) {
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
             NAPI_CALL(env, napi_strict_equals(env, observer, function, &equals));
             if (equals) {
                 NAPI_CALL(env, napi_delete_reference(env, iter.ref));
-                promiseList.erase(iter);
+                globalPromiseList.erase(iter);
                 break;
             }
         }
         GlobalObserverItem item;
         NAPI_CALL(env, napi_create_reference(env, function, INITITAL_REFCOUNT_ONE, &item.ref));
         item.env = env;
-        promiseList.insert(item);
+        globalPromiseList.insert(item);
         return CreateJsUndefined(env);
     }
 
@@ -587,26 +753,26 @@ private:
     {
         auto res = CreateJsUndefined(env);
         if (function == nullptr) {
-            std::lock_guard<std::mutex> lock(errorMtx);
-            for (auto &iter : observerList) {
+            std::lock_guard<std::mutex> lock(globalErrorMtx);
+            for (auto &iter : globalObserverList) {
                 NAPI_CALL(env, napi_delete_reference(env, iter.ref));
             }
-            observerList.clear();
+            globalObserverList.clear();
             return res;
         }
         if (!ValidateFunction(env, function)) {
             return nullptr;
         }
 
-        std::lock_guard<std::mutex> lock(errorMtx);
-        for (auto &iter : observerList) {
+        std::lock_guard<std::mutex> lock(globalErrorMtx);
+        for (auto &iter : globalObserverList) {
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
             NAPI_CALL(env, napi_strict_equals(env, observer, function, &equals));
             if (equals) {
                 NAPI_CALL(env, napi_delete_reference(env, iter.ref));
-                observerList.erase(iter);
+                globalObserverList.erase(iter);
                 return res;
             }
         }
@@ -619,25 +785,25 @@ private:
     {
         auto res = CreateJsUndefined(env);
         if (function == nullptr) {
-            std::lock_guard<std::mutex> lock(promiseMtx);
-            for (auto &iter : promiseList) {
+            std::lock_guard<std::mutex> lock(globalPromiseMtx);
+            for (auto &iter : globalPromiseList) {
                 NAPI_CALL(env, napi_delete_reference(env, iter.ref));
             }
-            promiseList.clear();
+            globalPromiseList.clear();
             return res;
         }
         if (!ValidateFunction(env, function)) {
             return nullptr;
         }
-        std::lock_guard<std::mutex> lock(promiseMtx);
-        for (auto &iter : promiseList) {
+        std::lock_guard<std::mutex> lock(globalPromiseMtx);
+        for (auto &iter : globalPromiseList) {
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
             NAPI_CALL(env, napi_strict_equals(env, observer, function, &equals));
             if (equals) {
                 NAPI_CALL(env, napi_delete_reference(env, iter.ref));
-                promiseList.erase(iter);
+                globalPromiseList.erase(iter);
                 return res;
             }
         }
@@ -663,31 +829,27 @@ private:
             ThrowInvalidParamError(env, "Parameter error: Parse type failed, must be a string error.");
             return CreateJsUndefined(env);
         }
-
-        NapiAsyncTask::CompleteCallback complete =
-            [&observer = observer_, observerId](
-                napi_env env, NapiAsyncTask& task, int32_t status) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "complete called");
-                if (observerId == -1) {
-                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
-                    return;
+        std::lock_guard<std::mutex> lock(errorMtx);
+        if (!observerList.count(env)) {
+            ThrowInvalidParamError(env, "env error");
+            return CreateJsUndefined(env);
+        } else if (!(observerId >= 0 && observerId < INT32_MAX)) {
+            ThrowInvalidParamError(env, "observaerId error");
+            return CreateJsUndefined(env);
+        } else {
+            auto& envObservers = observerList[env];
+            auto iter = std::find_if(envObservers.begin(), envObservers.end(),
+                [observerId](const std::pair<int32_t, std::shared_ptr<NativeReference>>& item) {
+                    return item.first == observerId;
+                });
+            if (iter != envObservers.end()) {
+                iter = envObservers.erase(iter);
+                if (envObservers.empty()) {
+                    observerList.erase(env);
                 }
-                if (observer && observer->RemoveJsObserverObject(observerId)) {
-                    task.ResolveWithNoError(env, CreateJsUndefined(env));
-                } else {
-                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_ID));
-                }
-                if (observer && observer->IsEmpty()) {
-                    AppExecFwk::ApplicationDataManager::GetInstance().RemoveErrorObserver();
-                    observer = nullptr;
-                }
-            };
-
-        napi_value lastParam = (argc <= ARGC_TWO) ? nullptr : argv[INDEX_TWO];
-        napi_value result = nullptr;
-        NapiAsyncTask::Schedule("JSErrorManager::OnUnregisterErrorObserver",
-            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-        return result;
+            }
+        }
+        return CreateJsUndefined(env);
     }
 
     napi_value OnOffUnhandledRejection(napi_env env, size_t argc, napi_value* argv)
@@ -891,9 +1053,11 @@ napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
     napi_wrap(env, exportObj, jsErrorManager.release(), JsErrorManager::Finalizer, nullptr, nullptr);
 
     std::call_once(registerCallbackFlag, []() {
-        NapiErrorManager::GetInstance()->RegisterHasOnAllErrorCallback(IsObserverListNotEmpty);
-        NapiErrorManager::GetInstance()->RegisterOnAllErrorCallback(ErrorManagerCallback);
-        NapiErrorManager::GetInstance()->RegisterAllUnhandledRejectionCallback(promiseManagerCallback);
+        NapiErrorManager::GetInstance()->RegisterHasOnErrorCallback(IsErrorObserverListNotEmpty);
+        NapiErrorManager::GetInstance()->RegisterHasAllUnhandledRejectionCallback(IsGlobalPromiseListNotEmpty);
+        NapiErrorManager::GetInstance()->RegisterOnErrorCallback(
+            ErrorManagerWorkerCallback, ErrorManagerMainWorkerCallback);
+        NapiErrorManager::GetInstance()->RegisterAllUnhandledRejectionCallback(PromiseManagerCallback);
     });
 
     TAG_LOGD(AAFwkTag::JSNAPI, "bind func ready");
