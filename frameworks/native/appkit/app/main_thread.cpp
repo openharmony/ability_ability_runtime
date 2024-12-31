@@ -1604,6 +1604,13 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 faultData.faultType = FaultDataType::JS_ERROR;
                 faultData.errorObject = appExecErrorObj;
                 DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
+                auto napiEnv =
+                    (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
+                if (NapiErrorManager::GetInstance()->NotifyUncaughtException(
+                    napiEnv, summary, appExecErrorObj.name,
+                    appExecErrorObj.message, appExecErrorObj.stack)) {
+                    return;
+                }
                 if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
                     ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
                     return;
