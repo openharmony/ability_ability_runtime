@@ -28,6 +28,7 @@
 #include "napi_common_start_options.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
+#include "napi/native_api.h"
 #include "native_engine.h"
 #include "native_value.h"
 #include "string_wrapper.h"
@@ -808,24 +809,28 @@ napi_value JsUIExtensionContentSession::OnSetWindowPrivacyMode(napi_env env, Nap
         return CreateJsUndefined(env);
     }
 
-    NapiAsyncTask::CompleteCallback complete =
-        [uiWindow = uiWindow_, isPrivacyMode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (uiWindow == nullptr) {
-                TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
-                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-                return;
-            }
-            auto ret = uiWindow->SetPrivacyMode(isPrivacyMode);
-            if (ret == Rosen::WMError::WM_OK) {
-                task.ResolveWithNoError(env, CreateJsUndefined(env));
-            } else {
-                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-            }
-        };
     napi_value lastParam = (info.argc > ARGC_ONE) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsUIExtensionContentSession::OnSetWindowPrivacyMode",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [uiWindow = uiWindow_, isPrivacyMode, env, task = napiAsyncTask.get()]() {
+        if (uiWindow == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
+            task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+            return;
+        }
+        auto ret = uiWindow->SetPrivacyMode(isPrivacyMode);
+        if (ret == Rosen::WMError::WM_OK) {
+            task->ResolveWithNoError(env, CreateJsUndefined(env));
+        } else {
+            task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+        }
+        delete task;
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_vip)) {
+        napiAsyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+    } else {
+        napiAsyncTask.release();
+    }
     return result;
 }
 

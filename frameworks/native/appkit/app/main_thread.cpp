@@ -707,7 +707,7 @@ void MainThread::ScheduleAbilityStage(const HapModuleInfo &abilityStage)
         }
         appThread->HandleAbilityStage(abilityStage);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:AbilityStage")) {
+    if (!mainHandler_->PostTask(task, "MainThread:AbilityStage", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -810,7 +810,8 @@ void MainThread::ScheduleConfigurationUpdated(const Configuration &config)
         }
         appThread->HandleConfigurationUpdated(config);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:ConfigurationUpdated")) {
+    if (!mainHandler_->PostTask(task, "MainThread:ConfigurationUpdated", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
