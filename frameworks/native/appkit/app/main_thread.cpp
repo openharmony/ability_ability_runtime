@@ -3498,6 +3498,22 @@ int32_t MainThread::ScheduleDumpFfrt(std::string& result)
 
 /**
  *
+ * @brief Set watchdog background status of applicaton.
+ *
+ */
+void MainThread::SetWatchdogBackgroundStatus(bool status)
+{
+    auto tmpWatchdog = watchdog_;
+    if (tmpWatchdog == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null Watch dog");
+        return;
+    }
+    tmpWatchdog->SetBackgroundStatus(status);
+    tmpWatchdog = nullptr;
+}
+
+/**
+ *
  * @brief Notify application to prepare for process caching.
  *
  */

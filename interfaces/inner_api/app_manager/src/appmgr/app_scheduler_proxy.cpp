@@ -801,6 +801,28 @@ int32_t AppSchedulerProxy::ScheduleDumpFfrt(std::string& result)
     return DumpErrorCode::ERR_OK;
 }
 
+void AppSchedulerProxy::SetWatchdogBackgroundStatus(bool status)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    if (!data.WriteBool(status)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write bool failed.");
+        return;
+    }
+    int32_t ret =
+        SendTransactCmd(static_cast<uint32_t>(IAppScheduler::Message::WATCHDOG_BACKGROUND_STATUS_TRANSACTION),
+            data,
+            reply,
+            option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is wrong, error code: %{public}d", ret);
+    }
+}
+
 int32_t AppSchedulerProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {

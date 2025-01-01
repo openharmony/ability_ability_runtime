@@ -68,6 +68,7 @@ private:
     int32_t HandleScheduleDumpIpcStat(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleCacheProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleDumpFfrt(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetWatchdogBackgroundStatus(MessageParcel &data, MessageParcel &reply);
     int32_t OnRemoteRequestInner(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int32_t OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,

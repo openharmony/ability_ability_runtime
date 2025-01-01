@@ -970,6 +970,13 @@ public:
      */
     void ScheduleBackgroundRunning();
 
+    /**
+     * SetWatchdogBackgroundStatusRunning, Notify application to set watchdog background status.
+     *
+     * @return
+     */
+    void SetWatchdogBackgroundStatusRunning(bool status);
+
     void SetUserRequestCleaning();
     bool IsUserRequestCleaning() const;
     bool IsAllAbilityReadyToCleanedByUserRequest();

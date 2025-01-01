@@ -215,6 +215,8 @@ public:
     {
         return 0;
     }
+    void SetWatchdogBackgroundStatus(bool status) override
+    {}
 
     void ScheduleClearPageStack() override
     {}
