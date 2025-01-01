@@ -531,6 +531,7 @@ void AppRunningRecord::LaunchPendingAbilities()
         moduleRecord->LaunchPendingAbilities();
     }
 }
+
 bool AppRunningRecord::ScheduleForegroundRunning()
 {
     SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_FOREGROUNDING);
@@ -1943,11 +1944,8 @@ void AppRunningRecord::OnWindowVisibilityChanged(
     }
 
     for (const auto &info : windowVisibilityInfos) {
-        if (info == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "null info");
-            continue;
-        }
-        if (info->pid_ != GetPid()) {
+        if (info == nullptr || info->pid_ != GetPid()) {
+            TAG_LOGE(AAFwkTag::APPMGR, "null info or info pid is not matched");
             continue;
         }
         std::lock_guard windowIdsLock(windowIdsLock_);
@@ -1966,13 +1964,18 @@ void AppRunningRecord::OnWindowVisibilityChanged(
     TAG_LOGI(AAFwkTag::APPMGR, "wnd call, %{public}s_%{public}d, isEmpty_%{public}d, c_%{public}d -> p_%{public}d",
         GetBundleName().c_str(), GetPid(), IsWindowIdsEmpty(), curState_, pendingState_);
     if (pendingState_ == ApplicationPendingState::READY) {
-        if (!IsWindowIdsEmpty() && curState_ != ApplicationState::APP_STATE_FOREGROUND) {
-            SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
-            ScheduleForegroundRunning();
-        }
-        if (IsWindowIdsEmpty() && IsAbilitiesBackground() && curState_ == ApplicationState::APP_STATE_FOREGROUND) {
-            SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
-            ScheduleBackgroundRunning();
+        if (!IsWindowIdsEmpty()) {
+            if (curState_ != ApplicationState::APP_STATE_FOREGROUND) {
+                SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
+                ScheduleForegroundRunning();
+            }
+            SetWatchdogBackgroundStatusRunning(false);
+        } else {
+            if (IsAbilitiesBackground() && curState_ == ApplicationState::APP_STATE_FOREGROUND) {
+                SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
+                ScheduleBackgroundRunning();
+            }
+            SetWatchdogBackgroundStatusRunning(true);
         }
     } else {
         if (!IsWindowIdsEmpty()) {
@@ -2331,6 +2334,13 @@ int AppRunningRecord::DumpFfrt(std::string& result)
         return DumpErrorCode::ERR_INTERNAL_ERROR;
     }
     return appLifeCycleDeal_->DumpFfrt(result);
+}
+
+void AppRunningRecord::SetWatchdogBackgroundStatusRunning(bool status)
+{
+    if (appLifeCycleDeal_) {
+        appLifeCycleDeal_->SetWatchdogBackgroundStatusRunning(status);
+    }
 }
 
 bool AppRunningRecord::SetSupportedProcessCache(bool isSupport)
