@@ -46,6 +46,7 @@ ohos_unittest("cj_ability_stage_test") {
   ]
 
   if (cj_frontend) {
+    sources += [ "${ability_runtime_native_path}/appkit/ability_delegator/ability_delegator_registry.cpp" ]
     defines = [ "CJ_FRONTEND" ]
   }
   cflags = []
