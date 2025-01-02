@@ -18,9 +18,9 @@
 
 #include <string>
 
+#include "cj_common_ffi.h"
 #include "want_agent_constant.h"
 #include "want_agent_helper.h"
-#include "cj_common_ffi.h"
 
 using WantHandle = void*;
 
@@ -59,6 +59,6 @@ struct CJCompleteData {
     char* extraInfo;
 };
 
-}
-}
+} // namespace FfiWantAgent
+} // namespace OHOS
 #endif // CJ_WANT_AGENT_UTILS_FFI_H
