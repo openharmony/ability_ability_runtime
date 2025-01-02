@@ -4338,7 +4338,8 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
     StartAbilityInfoWrap threadLocalInfo;
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     bool isEnterpriseAdmin = AAFwk::UIExtensionUtils::IsEnterpriseAdmin(extensionType);
-    if (extensionType != AppExecFwk::ExtensionAbilityType::SERVICE &&
+    if (extensionType != AppExecFwk::ExtensionAbilityType::DATASHARE &&
+        extensionType != AppExecFwk::ExtensionAbilityType::SERVICE &&
         !isEnterpriseAdmin && !JudgeMultiUserConcurrency(userId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "multi-user non-concurrent unsatisfied");
         return ERR_CROSS_USER;
