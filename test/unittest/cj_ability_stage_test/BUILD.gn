@@ -44,6 +44,10 @@ ohos_unittest("cj_ability_stage_test") {
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
     "cj_ability_stage_test.cpp",
   ]
+
+  if (cj_frontend) {
+    defines = [ "CJ_FRONTEND" ]
+  }
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
