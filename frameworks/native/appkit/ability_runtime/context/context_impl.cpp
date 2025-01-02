@@ -404,13 +404,11 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
     std::shared_ptr<Context> inputContext)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPKIT, "begin");
     if (bundleName.empty() || moduleName.empty()) {
         return nullptr;
     }
 
-    TAG_LOGD(AAFwkTag::APPKIT, "length: %{public}zu, bundleName: %{public}s",
-        (size_t)bundleName.length(), bundleName.c_str());
+    TAG_LOGD(AAFwkTag::APPKIT, "bundleName: %{public}s", bundleName.c_str());
 
     int accountId = GetCurrentAccountId();
     if (accountId == 0) {
@@ -429,7 +427,7 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
         }
     }
 
-    std::shared_ptr<ContextImpl> appContext = std::make_shared<ContextImpl>();
+    auto appContext = std::make_shared<ContextImpl>();
     if (bundleInfo.applicationInfo.codePath != std::to_string(TYPE_RESERVE) &&
         bundleInfo.applicationInfo.codePath != std::to_string(TYPE_OTHERS)) {
         TAG_LOGD(AAFwkTag::APPKIT, "modulename: %{public}s, bundleName: %{public}s",
@@ -576,12 +574,7 @@ int32_t ContextImpl::GetBundleInfo(const std::string &bundleName, AppExecFwk::Bu
     if (currentBundle) {
         bundleMgr_->GetBundleInfoForSelf((
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)), bundleInfo);
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)), bundleInfo);
     } else {
         int accountId = GetCurrentAccountId();
         if (accountId == 0) {
@@ -1022,12 +1015,7 @@ void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceMana
     UErrorCode status = U_ZERO_ERROR;
     icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLocale(), status);
     resConfig->SetLocaleInfo(locale);
-    if (resConfig->GetLocaleInfo() != nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT,
-            "ContextImpl::InitResourceManager language: %{public}s, script: %{public}s, region: %{public}s,",
-            resConfig->GetLocaleInfo()->getLanguage(), resConfig->GetLocaleInfo()->getScript(),
-            resConfig->GetLocaleInfo()->getCountry());
-    } else {
+    if (resConfig->GetLocaleInfo() == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null LocaleInfo");
     }
 #endif
@@ -1538,7 +1526,7 @@ int32_t ContextImpl::CreateHspModuleResourceManager(const std::string &bundleNam
             bundleName.c_str(), moduleName.c_str());
         return ERR_INVALID_VALUE;
     }
-    
+
     int errCode = GetBundleManager();
     if (errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "The bundleMgr_ is nullptr");
@@ -1552,7 +1540,7 @@ int32_t ContextImpl::CreateHspModuleResourceManager(const std::string &bundleNam
         TAG_LOGE(AAFwkTag::APPKIT, "GetDependentBundleInfo failed:%{public}d", ret);
         return ERR_INVALID_VALUE;
     }
-    
+
     std::string selfBundleName = GetBundleName();
     if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE) ||
         bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
