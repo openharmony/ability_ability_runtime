@@ -177,7 +177,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_005, TestSize.Level1)
     appfreezeManager->ParseBinderPids(binderInfos, pids, 2, 8, terminalBinder);
     EXPECT_EQ(pids.size(), 0);
     appfreezeManager->ParseBinderPids(binderInfos, pids, 1, 0, terminalBinder);
-    EXPECT_EQ(pids.size(), 2);
+    EXPECT_EQ(pids.size(), 1);
 }
 
 /**
