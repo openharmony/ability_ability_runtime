@@ -2109,7 +2109,6 @@ int UIAbilityLifecycleManager::StartAbilityBySpecifed(const AbilityRequest &abil
     sessionInfo->instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
     sessionInfo->isFromIcon = abilityRequest.isFromIcon;
     sessionInfo->tmpSpecifiedId = requestId;
-    sessionInfo->reuse = true;
     PutSpecifiedFlag(requestId, abilityRequest.specifiedFlag);
     SendSessionInfoToSCB(callerAbility, sessionInfo);
     return ERR_OK;
