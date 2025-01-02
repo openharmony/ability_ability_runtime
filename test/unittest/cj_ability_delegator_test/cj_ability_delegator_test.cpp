@@ -101,7 +101,7 @@ void CjAbilityDelegatorTest::SetUpTestCase()
     AbilityRuntime::Runtime::Options options;
     BundleInfo bundleInfo;
     auto testRunner = CJTestRunner::Create(AbilityRuntime::Runtime::Create(options), delegatorArgs_, bundleInfo);
-    commonDelegator_ = std::make_shared<AbilityDelegator>(std::make_shared<AbilityRuntime::ContextImpl>(),
+    commonDelegator_ = std::make_shared<CJAbilityDelegatorImpl>(std::make_shared<AbilityRuntime::ContextImpl>(),
         std::move(testRunner), nullptr);
 
     // 创建一个 CJAbilityDelegator 对象
