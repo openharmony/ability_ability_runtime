@@ -75,5 +75,5 @@ ohos_moduletest("AppRunningProcessesInfoModuleTest") {
 group("moduletest") {
   testonly = true
 
-  deps = [ ":AppRunningProcessesInfoModuleTest" ]
+  deps = []
 }
