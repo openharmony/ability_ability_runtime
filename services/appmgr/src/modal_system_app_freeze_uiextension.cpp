@@ -89,8 +89,7 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
         auto deviceTypeStr = system::GetParameter("const.product.devicetype", "unknown");
         if (deviceTypeStr == "tablet") {
             callback();
-        }
-        else {
+        } else {
             CreateModalUIExtension(pid, bundleName);
         }
     } else if (callback && (faultType != FaultDataType::APP_FREEZE || !isAppFreezeDialog)) {
