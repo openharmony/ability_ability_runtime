@@ -281,7 +281,8 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
             appRecord->GetName().c_str(), actualVer);
         return false;
     }
-    if (!appRecord->HasUIAbilityLaunched()) {
+    if (!appRecord->HasUIAbilityLaunched() &&
+        !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
         TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s has not created uiability before.",
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
         return false;
