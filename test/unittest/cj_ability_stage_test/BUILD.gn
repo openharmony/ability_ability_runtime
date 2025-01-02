@@ -46,12 +46,6 @@ ohos_unittest("cj_ability_stage_test") {
   ]
 
   if (cj_frontend) {
-    sources += [
-      "${ability_runtime_native_path}/appkit/ability_delegator/ability_delegator_args.cpp",
-      "${ability_runtime_native_path}/appkit/ability_delegator/ability_delegator_registry.cpp",
-      "${ability_runtime_native_path}/appkit/ability_delegator/cj_ability_delegator_impl.cpp",
-      "${ability_runtime_native_path}/appkit/ability_delegator/shell_cmd_result.cpp",
-    ]
     defines = [ "CJ_FRONTEND" ]
   }
   cflags = []
@@ -68,6 +62,7 @@ ohos_unittest("cj_ability_stage_test") {
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_path}/cj_environment/frameworks/cj_environment:cj_environment",
