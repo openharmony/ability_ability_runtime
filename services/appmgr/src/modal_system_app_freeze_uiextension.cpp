@@ -86,10 +86,11 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
         lastFreezeTime = now;
     }
     if (focusFlag && isPullUpBox) {
-        auto deviceTypeStr = system::GetParameter("const.product.devicetype", "pc");
+        auto deviceTypeStr = system::GetParameter("const.product.devicetype", "unknown");
         if (deviceTypeStr == "tablet") {
             callback();
-        } else if (deviceTypeStr == "pc" || deviceTypeStr == "2in1") {
+        }
+        else {
             CreateModalUIExtension(pid, bundleName);
         }
     } else if (callback && (faultType != FaultDataType::APP_FREEZE || !isAppFreezeDialog)) {
