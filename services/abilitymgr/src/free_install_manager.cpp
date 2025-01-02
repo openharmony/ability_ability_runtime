@@ -91,9 +91,9 @@ int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int r
         std::lock_guard<ffrt::mutex> lock(freeInstallListLock_);
         freeInstallList_.push_back(info);
     }
+    bool isAsync = param != nullptr ? param->isAsync : false;
     int32_t recordId = GetRecordIdByToken(callerToken);
-    sptr<AtomicServiceStatusCallback> callback =
-        new AtomicServiceStatusCallback(weak_from_this(), param->isAsync, recordId);
+    sptr<AtomicServiceStatusCallback> callback = new AtomicServiceStatusCallback(weak_from_this(), isAsync, recordId);
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bundleMgrHelper, GET_ABILITY_SERVICE_FAILED);
     AppExecFwk::AbilityInfo abilityInfo = {};
@@ -117,7 +117,7 @@ int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int r
     info.want.RemoveParam(PARAM_FREEINSTALL_APPID);
     info.want.RemoveParam(PARAM_FREEINSTALL_BUNDLENAMES);
 
-    if (param->isAsync) {
+    if (isAsync) {
         return ERR_OK;
     } else {
         auto future = info.promise->get_future();
