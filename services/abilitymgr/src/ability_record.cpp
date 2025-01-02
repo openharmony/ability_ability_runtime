@@ -1650,6 +1650,10 @@ void AbilityRecord::Terminate(const Closure &task)
                 terminateTimeout =
                     AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * TERMINATE_TIMEOUT_ASANENABLED;
             }
+            if (isReady_) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "terminate ready");
+                terminateTimeout = 0;
+            }
             handler->SubmitTask(task, "terminate_" + std::to_string(recordId_), terminateTimeout);
             ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::DESTROY_BEGIN, GetPid(), GetUid(),
                 terminateTimeout, GetRecordId());
