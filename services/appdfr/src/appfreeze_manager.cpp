@@ -288,12 +288,13 @@ int AppfreezeManager::AcquireStack(const FaultData& faultData,
         if (pidTemp == pid) {
             continue;
         }
-        std::string content = "PeerBinder catcher stacktrace for pid : " + std::to_string(pidTemp) + "\n";
+        std::string content = "Binder catcher stacktrace, type is peer, pid : " + std::to_string(pidTemp) + "\n";
         content += CatcherStacktrace(pidTemp);
         binderPidsStr += " " + std::to_string(pidTemp);
         if (terminalBinder.pid > 0 && pidTemp == terminalBinder.pid) {
             terminalBinder.tid  = (terminalBinder.tid > 0) ? terminalBinder.tid : terminalBinder.pid;
-            content = "TerminalBinder stacktrace:\n" + content + "TerminalBinder stacktrace ends here!\n";
+            content = "Binder catcher stacktrace, terminal binder tag\n" + content +
+                "Binder catcher stacktrace, terminal binder tag\n";
             terminalBinderTid = std::to_string(terminalBinder.tid);
         }
         binderInfo += content;
@@ -301,7 +302,7 @@ int AppfreezeManager::AcquireStack(const FaultData& faultData,
     for (auto& pidTemp : asyncPids) {
         TAG_LOGI(AAFwkTag::APPDFR, "AsyncBinder pidTemp pids:%{public}d", pidTemp);
         if (pidTemp != pid && syncPids.find(pidTemp) == syncPids.end()) {
-            std::string content = "AsyncBinder catcher stacktrace for pid : " + std::to_string(pidTemp) + "\n";
+            std::string content = "Binder catcher stacktrace, type is async, pid : " + std::to_string(pidTemp) + "\n";
             content += CatcherStacktrace(pidTemp);
             binderInfo += content;
         }
