@@ -119,6 +119,11 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     abilityRequest.sessionInfo = sessionInfo;
     auto uiAbilityRecord = GenerateAbilityRecord(abilityRequest, sessionInfo, isColdStart);
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
+    auto want = uiAbilityRecord->GetWant();
+    if (want.GetBoolParam(IS_CALLING_FROM_DMS, false)) {
+        want.RemoveParam(IS_CALLING_FROM_DMS);
+        uiAbilityRecord->SetWant(want);
+    }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "StartUIAbility");
     uiAbilityRecord->SetSpecifyTokenId(abilityRequest.specifyTokenId);
     UpdateAbilityRecordLaunchReason(abilityRequest, uiAbilityRecord);
@@ -1062,9 +1067,8 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
         if (abilityRequest.want.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");
             auto sessionInfo = CreateSessionInfo(abilityRequest);
-            if ((persistentId != 0) && abilityRequest.want.GetBoolParam(IS_CALLING_FROM_DMS, false) &&
-                (uiAbilityRecord->GetAbilityState() == AbilityState::FOREGROUND)) {
-                uiAbilityRecord->ScheduleCollaborate(abilityRequest.want);
+            if ((persistentId != 0) && abilityRequest.want.GetBoolParam(IS_CALLING_FROM_DMS, false)) {
+                HandleForegroundCollaborate(abilityRequest, uiAbilityRecord);
             }
             sessionInfo->persistentId = persistentId;
             sessionInfo->state = CallToState::FOREGROUND;
@@ -3225,6 +3229,15 @@ void UIAbilityLifecycleManager::PutSpecifiedFlag(int32_t requestId, const std::s
     };
     TaskHandlerWrap::GetFfrtHandler()->SubmitTaskJust(timeoutTask, "PutSpecifiedFlagTimeout",
         AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE);
+}
+
+void UIAbilityLifecycleManager::HandleForegroundCollaborate(
+    const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    abilityRecord->SetWant(abilityRequest.want);
+    if (abilityRecord->GetAbilityState() == AbilityState::FOREGROUND) {
+        abilityRecord->ScheduleCollaborate(abilityRequest.want);
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
