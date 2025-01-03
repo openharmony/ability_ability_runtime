@@ -94,13 +94,21 @@ enum class AppStartType {
     COLD = 0,
     HOT,
     MULTI_INSTANCE,
-    PROCESS_CACHE_LAUNCH
+    PROCESS_CACHE_LAUNCH,
+    WARM
 };
 
 enum class PreloadMode {
     PRESS_DOWN = 0,
     PRE_MAKE = 1,
     PRELOAD_MODULE = 2,
+};
+
+enum class AppStartReason {
+    NONE = 0,
+    PRELOADING = 1,
+    PRELOADED = 2,
+    SUGGEST_CACHE = 3,
 };
 
 enum class PreloadState {

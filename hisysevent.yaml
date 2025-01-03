@@ -304,6 +304,7 @@ APP_STARTUP_TYPE:
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   ABILITY_NAME: {type: STRING, desc: ability name}
   START_TYPE: {type: INT32, desc: 'type of start, cold or hot'}
+  START_REASON: {type: INT32, desc: start reason}
 
 PROCESS_START:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: app, desc: application process startup event reporting}
