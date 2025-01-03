@@ -21,6 +21,7 @@
 #include "bundle_manager_convert.h"
 #include "cj_common_ffi.h"
 #include "cj_utils_ffi.h"
+#include "cj_context.h"
 #include "configuration.h"
 #include "ffi_remote_data.h"
 #include "hap_module_info.h"
@@ -31,18 +32,14 @@ namespace AbilityRuntime {
 class Context;
 using OHOS::CJSystemapi::BundleManager::RetHapModuleInfo;
 
-class CJAbilityStageContext : public FFI::FFIData {
+class CJAbilityStageContext : public FfiContext::CJContext {
 public:
     explicit CJAbilityStageContext(std::weak_ptr<AbilityRuntime::Context> &&abilityStageContext)
-        :abilityStageContext_(std::move(abilityStageContext)){};
+        : FfiContext::CJContext(abilityStageContext.lock()), abilityStageContext_(std::move(abilityStageContext)) {};
 
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo();
     RetHapModuleInfo GetRetHapModuleInfo();
     CConfiguration GetConfiguration();
-    std::shared_ptr<Context> GetContext()
-    {
-        return abilityStageContext_.lock();
-    }
 
 private:
     std::weak_ptr<AbilityRuntime::Context> abilityStageContext_;

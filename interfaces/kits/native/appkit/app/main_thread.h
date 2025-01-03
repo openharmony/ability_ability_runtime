@@ -571,6 +571,7 @@ private:
      */
     void LoadAllExtensions(NativeEngine &nativeEngine);
 
+    void LoadAllExtensions();
     /**
      *
      * @brief Ability Delegator Prepare.

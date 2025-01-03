@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_JS_UI_EXTENSION_CONTENT_SESSION_H
 #define OHOS_ABILITY_RUNTIME_JS_UI_EXTENSION_CONTENT_SESSION_H
 
+#include "ability_result_listener.h"
 #include "native_engine/native_engine.h"
 #include "js_free_install_observer.h"
 #include "js_runtime_utils.h"
@@ -26,25 +27,6 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using RuntimeTask = std::function<void(int, const AAFwk::Want&, bool)>;
-
-class AbilityResultListener {
-public:
-    AbilityResultListener() = default;
-    virtual ~AbilityResultListener() = default;
-    virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData) = 0;
-    virtual bool IsMatch(int requestCode) = 0;
-};
-
-class AbilityResultListeners {
-public:
-    AbilityResultListeners() = default;
-    virtual ~AbilityResultListeners() = default;
-    void AddListener(const uint64_t &uiExtensionComponentId, std::shared_ptr<AbilityResultListener> listener);
-    void RemoveListener(const uint64_t &uiExtensionComponentId);
-    void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData);
-private:
-    std::map<uint64_t, std::shared_ptr<AbilityResultListener>> listeners_;
-};
 
 class UISessionAbilityResultListener : public AbilityResultListener {
 public:
