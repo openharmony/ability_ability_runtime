@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace AAFwk {
 constexpr int MILL_TO_MICRO = 1000;
+constexpr uint64_t TASK_COUNT_INTERVAL = 50;
 bool TaskHandle::Cancel() const
 {
     auto handler = handler_.lock();
@@ -148,13 +149,13 @@ TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task, const 
     if (!task) {
         return TaskHandle();
     }
-    const int32_t LOG_INTERVAL = 5;
+
     TaskHandle result(shared_from_this(), nullptr);
     result.printTaskLog_ = printTaskLog_;
-    auto taskWrap = [result, task, taskName = taskAttr.taskName_]() {
-        if (result.PrintTaskLog() && result.GetTaskId() % LOG_INTERVAL == 0) {
-            TAG_LOGW(AAFwkTag::DEFAULT, "begin execute task name: %{public}s, taskId: %{public}" PRIu64"",
-                taskName.c_str(), ffrt::this_task::get_id());
+    auto taskWrap = [result, task, taskName = taskAttr.taskName_, taskCount = GetTaskCount()]() {
+        if (result.PrintTaskLog() && taskCount > TASK_COUNT_INTERVAL) {
+            TAG_LOGW(AAFwkTag::DEFAULT, "T: %{public}s, Id: %{public}" PRIu64"",
+                taskName.c_str(), result.GetTaskId());
         }
         *result.status_ = TaskStatus::EXECUTING;
         task();
@@ -162,8 +163,8 @@ TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task, const 
     };
 
     result.innerTaskHandle_ = SubmitTaskInner(std::move(taskWrap), taskAttr);
-    if (printTaskLog_ && result.GetTaskId() % LOG_INTERVAL == 0) {
-        TAG_LOGW(AAFwkTag::DEFAULT, "submitTask: %{public}s, taskId: %{public}" PRIu64", queueName: %{public}s count: "
+    if (printTaskLog_ && GetTaskCount() > TASK_COUNT_INTERVAL) {
+        TAG_LOGW(AAFwkTag::DEFAULT, "T: %{public}s, Id: %{public}" PRIu64", q: %{public}s cnt: "
             "%{public}" PRIu64"", taskAttr.taskName_.c_str(), result.GetTaskId(), queueName_.c_str(), GetTaskCount());
     }
     return result;
