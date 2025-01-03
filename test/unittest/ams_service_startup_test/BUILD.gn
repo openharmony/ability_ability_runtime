@@ -42,6 +42,7 @@ ohos_unittest("AmsServiceStartupTest") {
     "${ability_runtime_services_path}/appmgr/src/cache_process_manager.cpp",
     "${ability_runtime_services_path}/appmgr/src/exit_resident_process_manager.cpp",
     "${ability_runtime_services_path}/appmgr/src/killing_process_manager.cpp",
+    "${ability_runtime_services_path}/appmgr/src/multi_user_config_mgr.cpp",
     "${ability_runtime_services_path}/appmgr/src/render_state_observer_manager.cpp",
     "${ability_runtime_services_path}/appmgr/src/user_record_manager.cpp",
   ]
@@ -87,6 +88,7 @@ ohos_unittest("AmsServiceStartupTest") {
     "kv_store:distributeddata_inner",
     "memmgr:memmgrclient",
     "memory_utils:libmeminfo",
+    "os_account:os_account_innerkits",
     "resource_schedule_service:ressched_client",
     "safwk:api_cache_manager",
     "safwk:system_ability_fwk",

@@ -957,7 +957,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LaunchApplic
     appMgrServiceInner->LaunchApplication(appRecord);
     appRecord->SetState(ApplicationState::APP_STATE_CREATE);
     appMgrServiceInner->LaunchApplication(appRecord);
-    appMgrServiceInner->configuration_ = nullptr;
     appMgrServiceInner->LaunchApplication(appRecord);
     appRecord->appInfo_ = nullptr;
     appMgrServiceInner->LaunchApplication(appRecord);

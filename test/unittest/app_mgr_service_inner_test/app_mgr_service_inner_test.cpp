@@ -622,7 +622,6 @@ HWTEST_F(AppMgrServiceInnerTest, LaunchApplication_001, TestSize.Level0)
     appRecord->SetSpecifiedAbilityFlagAndWant(1, want, "");
     appMgrServiceInner->LaunchApplication(appRecord);
 
-    appMgrServiceInner->configuration_ = nullptr;
     appMgrServiceInner->LaunchApplication(appRecord);
     TAG_LOGI(AAFwkTag::TEST, "LaunchApplication_001 end");
 }
@@ -2679,7 +2678,6 @@ HWTEST_F(AppMgrServiceInnerTest, InitGlobalConfiguration_001, TestSize.Level0)
 
     appMgrServiceInner->InitGlobalConfiguration();
 
-    appMgrServiceInner->configuration_ = nullptr;
     appMgrServiceInner->InitGlobalConfiguration();
 
     TAG_LOGI(AAFwkTag::TEST, "InitGlobalConfiguration_001 end");

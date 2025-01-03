@@ -1796,12 +1796,6 @@ int32_t AppRunningManager::UpdateConfigurationDelayed(const std::shared_ptr<AppR
     return result;
 }
 
-void AppRunningManager::SetMultiUserConfigurationMgr(
-    const std::shared_ptr<MultiUserConfigurationMgr>& multiUserConfigurationMgr)
-{
-    multiUserConfigurationMgr_ = multiUserConfigurationMgr;
-}
-
 int32_t AppRunningManager::CheckIsKiaProcess(pid_t pid, bool &isKia)
 {
     auto appRunningRecord = GetAppRunningRecordByPid(pid);
