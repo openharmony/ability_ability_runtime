@@ -58,7 +58,6 @@ ohos_shared_library("runtime") {
 
   sources = [
     "${ability_runtime_native_path}/appkit/ability_bundle_manager_helper/bundle_mgr_helper.cpp",
-    "${ability_runtime_native_path}/runtime/connect_server_manager.cpp",
     "${ability_runtime_native_path}/runtime/hdc_register.cpp",
     "${ability_runtime_native_path}/runtime/js_data_struct_converter.cpp",
     "${ability_runtime_native_path}/runtime/js_error_utils.cpp",
@@ -85,6 +84,7 @@ ohos_shared_library("runtime") {
   all_dependent_configs = [ ":runtime_all_deps_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/connect_server_manager:connect_server_manager",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_path}/js_environment/frameworks/js_environment:js_environment",
