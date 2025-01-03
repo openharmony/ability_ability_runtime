@@ -3926,39 +3926,6 @@ bool AppMgrServiceInner::SendProcessStartFailedEvent(std::shared_ptr<AppRunningR
     return true;
 }
 
-
-void AppMgrServiceInner::SendAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
-    const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType, int32_t startReason)
-{
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
-        return;
-    }
-    AAFwk::EventInfo eventInfo;
-    auto applicationInfo = appRecord->GetApplicationInfo();
-    if (!applicationInfo) {
-        TAG_LOGE(AAFwkTag::APPMGR, "applicationInfo null");
-    } else {
-        eventInfo.bundleName = applicationInfo->name;
-        eventInfo.versionName = applicationInfo->versionName;
-        eventInfo.versionCode = applicationInfo->versionCode;
-    }
-    if (!abilityInfo) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo null");
-    } else {
-        eventInfo.abilityName = abilityInfo->name;
-    }
-    if (appRecord->GetPriorityObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "priorityObject null");
-    } else {
-        eventInfo.pid = appRecord->GetPid();
-    }
-    eventInfo.startType = static_cast<int32_t>(startType);
-    eventInfo.startReason = startReason;
-    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_STARTUP_TYPE, HiSysEventType::BEHAVIOR, eventInfo);
-}
-
-
 void AppMgrServiceInner::SendAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
     const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType)
 {
