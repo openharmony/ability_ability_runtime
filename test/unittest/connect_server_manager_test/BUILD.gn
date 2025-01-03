@@ -44,6 +44,7 @@ ohos_unittest("connect_server_manager_test") {
     "ability_base:want",
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:connect_server_manager",
     "ability_runtime:runtime",
     "c_utils:utils",
     "googletest:gmock_main",

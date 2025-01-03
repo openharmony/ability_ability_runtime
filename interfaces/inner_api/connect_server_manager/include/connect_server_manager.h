@@ -23,6 +23,8 @@ using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 using DebuggerInfo = std::unordered_map<int, std::pair<void*, const DebuggerPostTask>>;
 using InstanceMap = std::unordered_map<int32_t, std::string>;
 using ServerConnectCallback = void(*)(void);
+using AddInstanceCallBack = void(*)(int32_t);
+using SendInstanceMessageCallBack = void(*)(int32_t);
 #ifdef APP_USE_ARM
 constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_inspector.z.so";
 #elif defined(APP_USE_X86_64)
@@ -40,26 +42,25 @@ public:
     bool AddInstance(int32_t tid, int32_t instanceId, const std::string& instanceName = "PandaDebugger");
     void RemoveInstance(int32_t instanceId);
     void SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr);
-    void SendArkUIStateProfilerMessage(const std::string &message);
-    void SetLayoutInspectorCallback(
-        const std::function<void(int32_t)> &createLayoutInfo, const std::function<void(bool)> &setStatus);
-    void SetStateProfilerCallback(const std::function<void(bool)> &setArkUIStateProfilerStatus);
-    std::function<void(int32_t)> GetLayoutInspectorCallback();
+    void SendStateProfilerMessage(const std::string &message);
     bool StoreInstanceMessage(
         int32_t tid, int32_t instanceId, const std::string& instanceName = "PandaDebugger");
     void StoreDebuggerInfo(int32_t tid, void* vm, const panda::JSNApi::DebugOption& debugOption,
         const DebuggerPostTask& debuggerPostTask, bool isDebugApp);
+    void SetSwitchCallback(const std::function<void(bool)> &setSwitchStatus,
+        const std::function<void(int32_t)> &createLayoutInfo, int32_t instanceId);
+    void SetProfilerCallBack(const std::function<void(bool)> &setStateProfilerStatus);
     void SetConnectedCallback();
     bool SendInstanceMessage(int32_t tid, int32_t instanceId, const std::string& instanceName);
     void SendDebuggerInfo(bool needBreakPoint, bool isDebugApp);
     void LoadConnectServerDebuggerSo();
     DebuggerPostTask GetDebuggerPostTask(int32_t tid);
-    void SetSwitchCallback(int32_t instanceId);
-    void SetProfilerCallBack();
     bool SetRecordCallback(const std::function<void(void)> &startRecordFunc,
         const std::function<void(void)> &stopRecordFunc);
     void SetRecordResults(const std::string &jsonArrayStr);
-    void RegistConnectServerCallback(const ServerConnectCallback &connectServerCallback);
+    void RegisterConnectServerCallback(const ServerConnectCallback &connectServerCallback);
+    void RegisterSendInstanceMessageCallback(const SendInstanceMessageCallBack &sendInstanceMessageCallback);
+    void RegisterAddInstanceCallback(const AddInstanceCallBack &addInstanceCallback);
 
 private:
     ConnectServerManager() = default;
@@ -70,17 +71,22 @@ private:
 
     std::mutex mutex_;
     static std::mutex instanceMutex_;
-    static std::mutex callbackMutex_;
+    static std::mutex connectServerCallbackMutex_;
+    static std::mutex addInstanceCallbackMutex_;
+    static std::mutex sendInstanceMessageCallbackMutex_;
     std::atomic<bool> isConnected_ = false;
     std::unordered_map<int32_t, std::pair<std::string, int32_t>> instanceMap_;
-    std::function<void(int32_t)> createLayoutInfo_;
-    std::function<void(int32_t)> setStatus_;
-    std::function<void(int32_t)> setArkUIStateProfilerStatus_;
     std::vector<ServerConnectCallback> connectServerCallbacks_;
+
+    std::vector<AddInstanceCallBack> addInstanceCallbacks_;
+    std::vector<SendInstanceMessageCallBack> sendInstanceMessageCallbacks_;
     ConnectServerManager(const ConnectServerManager&) = delete;
     ConnectServerManager(ConnectServerManager&&) = delete;
     ConnectServerManager& operator=(const ConnectServerManager&) = delete;
     ConnectServerManager& operator=(ConnectServerManager&&) = delete;
+
+    void SendInstanceMessageCallback(const int32_t instanceId);
+    void AddInstanceCallback(const int32_t instanceId);
 };
 } // namespace OHOS::AbilityRuntime
 
