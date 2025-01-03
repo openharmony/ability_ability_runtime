@@ -460,7 +460,7 @@ void UriUtils::PublishFileOpenEvent(const Want &want)
     if (!uriStr.empty() && wangUri.GetScheme() == "file") {
         int32_t userId = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, 0) / AppExecFwk::Constants::BASE_USER_RANGE;
         OHOS::AppExecFwk::ElementName element = want.GetElement();
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "ams record file:%{private}s, ability:%{public}s_%{public}s, userId:%{public}d",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "ability record uri:%{private}s, ability:%{public}s_%{public}s, userId:%{public}d",
             uriStr.c_str(), element.GetBundleName().c_str(), element.GetAbilityName().c_str(), userId);
         Want msgWant;
         msgWant.SetAction("file.event.OPEN_TIME");
