@@ -70,6 +70,7 @@ constexpr const char* PERMISSION_GET_TELEPHONY_STATE = "ohos.permission.GET_TELE
 constexpr const char* PERMISSION_MANAGE_APP_KEEP_ALIVE = "ohos.permission.MANAGE_APP_KEEP_ALIVE";
 constexpr const char* PERMISSION_MANAGE_APP_KEEP_ALIVE_INTERNAL = "ohos.permission.MANAGE_APP_KEEP_ALIVE_INTERNAL";
 constexpr const char* PERMISSION_SET_LAUNCH_REASON_MESSAGE = "ohos.permission.SET_LAUNCH_REASON_MESSAGE";
+constexpr const char* PERMISSION_NDK_START_SELF_UI_ABILITY = "ohos.permission.NDK_START_SELF_UI_ABILITY";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS
