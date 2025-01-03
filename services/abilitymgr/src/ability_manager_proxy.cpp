@@ -689,7 +689,8 @@ int AbilityManagerProxy::RequestModalUIExtension(const Want &want)
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName, int32_t userId)
+int AbilityManagerProxy::PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
+    int32_t userId, int32_t hostPid)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -704,6 +705,7 @@ int AbilityManagerProxy::PreloadUIExtensionAbility(const Want &want, std::string
     }
 
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, userId);
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, hostPid);
     int error;
     MessageParcel reply;
     MessageOption option;

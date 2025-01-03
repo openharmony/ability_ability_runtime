@@ -108,7 +108,8 @@ public:
      * @param hostBundleName, the caller application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int PreloadUIExtensionAbilityInner(const AbilityRequest &abilityRequest, std::string &hostBundleName);
+    int PreloadUIExtensionAbilityInner(const AbilityRequest &abilityRequest, std::string &hostBundleName,
+        int32_t hostPid = AAFwk::DEFAULT_INVAL_VALUE);
 
     /**
      * PreloadUIExtensionAbilityLocked, preload uiextension ability.
@@ -117,7 +118,8 @@ public:
      * @param hostBundleName, the caller application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int PreloadUIExtensionAbilityLocked(const AbilityRequest &abilityRequest, std::string &hostBundleName);
+    int PreloadUIExtensionAbilityLocked(const AbilityRequest &abilityRequest, std::string &hostBundleName,
+        int32_t hostPid = AAFwk::DEFAULT_INVAL_VALUE);
 
     /**
      * UnloadUIExtensionAbility, unload uiextension ability.
@@ -377,7 +379,8 @@ private:
      *
      * @param abilityRecord, the ptr of the ability to load.
      */
-    void LoadAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void LoadAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        std::function<void(const std::shared_ptr<AbilityRecord>&)> updateRecordCallback = nullptr);
 
     /**
      * ConnectAbility.Schedule connect ability
@@ -617,7 +620,8 @@ private:
         std::shared_ptr<AbilityRecord> &targetService, bool &isLoadedAbility);
     void HandleNotifyAssertFaultDialogDied(const std::shared_ptr<AbilityRecord> &abilityRecord);
     EventInfo BuildEventInfo(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void UpdateUIExtensionInfo(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void UpdateUIExtensionInfo(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        int32_t hostPid = AAFwk::DEFAULT_INVAL_VALUE);
     std::string GenerateBundleName(const AbilityRequest &abilityRequest) const;
 
     bool AddToServiceMap(const std::string &key, std::shared_ptr<AbilityRecord> abilityRecord);

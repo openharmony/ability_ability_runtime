@@ -279,7 +279,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
-        int32_t userId = DEFAULT_INVAL_VALUE) override;
+        int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE) override;
 
     int ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow) override;
 
