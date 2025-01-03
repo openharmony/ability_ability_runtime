@@ -46,6 +46,7 @@ constexpr const char *EVENT_KEY_EXIT_PID = "EXIT_PID";
 constexpr const char *EVENT_KEY_EXIT_REASON = "EXIT_REASON";
 constexpr const char *EVENT_KEY_BUNDLE_TYPE = "BUNDLE_TYPE";
 constexpr const char *EVENT_KEY_START_TYPE = "START_TYPE";
+constexpr const char *EVENT_KEY_START_REASON = "START_REASON";
 constexpr const char *EVENT_KEY_CALLER_STATE = "CALLER_STATE";
 constexpr const char *EVENT_KEY_CALLER_VERSION_NAME = "CALLER_VERSION_NAME";
 constexpr const char *EVENT_KEY_CALLER_VERSION_CODE = "CALLER_VERSION_CODE";
@@ -80,7 +81,8 @@ void EventReport::SendAppEvent(const EventName &eventName, HiSysEventType type, 
                 EVENT_KEY_VERSION_NAME, eventInfo.versionName,
                 EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
                 EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-                EVENT_KEY_START_TYPE, eventInfo.startType);
+                EVENT_KEY_START_TYPE, eventInfo.startType,
+                EVENT_KEY_START_REASON, eventInfo.startReason);
             break;
         case EventName::DRAWN_COMPLETED:
             TAG_LOGI(AAFwkTag::DEFAULT,

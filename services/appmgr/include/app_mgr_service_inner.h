@@ -1733,6 +1733,9 @@ private:
         int32_t subReason);
 
     void SendAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
+        const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType, int32_t startReason);
+
+    void SendAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
         const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType);
 
     bool SendCreateAtomicServiceProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
