@@ -48,8 +48,9 @@ int32_t StatusBarDelegateStub::HandleCheckIfStatusBarItemExists(MessageParcel &d
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     uint32_t accessTokenId = data.ReadUint32();
+    auto instanceKey = data.ReadString();
     bool isExist = false;
-    auto result = CheckIfStatusBarItemExists(accessTokenId, isExist);
+    auto result = CheckIfStatusBarItemExists(accessTokenId, instanceKey, isExist);
     if (!reply.WriteBool(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result failed");
         return AAFwk::ERR_NATIVE_IPC_PARCEL_FAILED;

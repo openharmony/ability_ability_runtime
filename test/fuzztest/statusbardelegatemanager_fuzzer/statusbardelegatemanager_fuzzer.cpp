@@ -41,7 +41,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     sptr<AbilityRuntime::IStatusBarDelegate> delegate; 
     statusBarDelegate->RegisterStatusBarDelegate(delegate);
     statusBarDelegate->GetStatusBarDelegate();
-    statusBarDelegate->IsCallerInStatusBar();
+    statusBarDelegate->IsCallerInStatusBar("");
     std::shared_ptr<AbilityRecord> abilityRecord;
     statusBarDelegate->DoProcessAttachment(abilityRecord);
     return true;
