@@ -46,7 +46,6 @@ const int32_t MAX_URI_COUNT = 500;
 constexpr int32_t API14 = 14;
 constexpr int32_t API_VERSION_MOD = 100;
 constexpr uint32_t TOKEN_ID_BIT_SIZE = 32;
-constexpr int32_t BASE_USER_RANGE = 200000;
 }
 
 UriUtils::UriUtils() {}
@@ -459,11 +458,10 @@ void UriUtils::PublishFileOpenEvent(const Want &want)
     auto wangUri = want.GetUri();
     std::string uriStr = wangUri.ToString();
     if (!uriStr.empty() && wangUri.GetScheme() == "file") {
-        int32_t userId = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, 0) / BASE_USER_RANGE;
+        int32_t userId = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, 0) / AppExecFwk::Constants::BASE_USER_RANGE;
         OHOS::AppExecFwk::ElementName element = want.GetElement();
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "ability record, file uri:%{private}s, bundle:%{public}s, ability:%{public}s,
-            userId:%{public}d", uriStr.c_str(), element.GetBundleName().c_str(), element.GetAbilityName().c_str(),
-            userId);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "ams record file:%{private}s, ability:%{public}s_%{public}s, userId:%{public}d",
+            uriStr.c_str(), element.GetBundleName().c_str(), element.GetAbilityName().c_str(), userId);
         Want msgWant;
         msgWant.SetAction("file.event.OPEN_TIME");
         msgWant.SetParam("uri", uriStr);
@@ -477,7 +475,8 @@ void UriUtils::PublishFileOpenEvent(const Want &want)
         EventFwk::CommonEventPublishInfo commonEventPublishInfo;
         std::vector<std::string> subscriberPermissions = {"ohos.permission.MANAGE_LOCAL_ACCOUNTS"};
         commonEventPublishInfo.SetSubscriberPermissions(subscriberPermissions);
-        IN_PROCESS_CALL(EventFwk::CommonEventManager::PublishCommonEventAsUser(commonData, commonEventPublishInfo, userId));
+        IN_PROCESS_CALL(EventFwk::CommonEventManager::PublishCommonEventAsUser(commonData, commonEventPublishInfo,
+            userId));
     }
 }
 
