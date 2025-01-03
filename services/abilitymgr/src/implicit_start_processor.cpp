@@ -970,6 +970,7 @@ void ImplicitStartProcessor::AddAbilityInfoToDialogInfos(const AddInfoParam &par
 bool ImplicitStartProcessor::IsExistDefaultApp(int32_t userId, const std::string &typeName)
 {
     auto defaultMgr = GetDefaultAppProxy();
+    CHECK_POINTER_AND_RETURN_LOG(defaultMgr, false, "defaultMgr null");
     AppExecFwk::BundleInfo bundleInfo;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId: %{public}d, typeName: %{public}s", userId, typeName.c_str());
     ErrCode ret =
@@ -1047,7 +1048,7 @@ int32_t ImplicitStartProcessor::FindAppClone(std::vector<AppExecFwk::AbilityInfo
     if (abilityInfos.size() > 0 && extensionInfos.size() > 0) {
         return ERR_OK;
     }
-    
+
     bool isExitAbilityAppClone = FindAbilityAppClone(abilityInfos);
     bool isExitExtensionAppClone = FindExtensionAppClone(extensionInfos);
     if ((abilityInfos.size() == 0 && FindExtensionAppClone(extensionInfos)) ||
