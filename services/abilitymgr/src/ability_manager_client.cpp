@@ -2089,5 +2089,13 @@ ErrCode AbilityManagerClient::QueryAtomicServiceStartupRule(sptr<IRemoteObject> 
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->QueryAtomicServiceStartupRule(callerToken, appId, startTime, rule);
 }
+
+ErrCode AbilityManagerClient::StartSelfUIAbility(const Want &want)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->StartSelfUIAbility(want);
+}
 } // namespace AAFwk
 } // namespace OHOS

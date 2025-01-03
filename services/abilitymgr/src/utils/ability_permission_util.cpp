@@ -102,6 +102,10 @@ bool AbilityPermissionUtil::IsDominateScreen(const Want &want, bool isPendingWan
                 TAG_LOGD(AAFwkTag::ABILITYMGR, "not dominate screen, app detail.");
                 return false;
             }
+        } else if (AppUtils::GetInstance().IsStartOptionsWithAnimation() &&
+            PermissionVerification::GetInstance()->VerifyStartSelfUIAbility()) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "caller from capi.");
+            return false;
         }
         TAG_LOGE(AAFwkTag::ABILITYMGR, "dominate screen.");
         return true;

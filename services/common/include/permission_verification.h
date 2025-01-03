@@ -117,6 +117,8 @@ struct VerificationInfo {
 
     bool VerifySuperviseKiaServicePermission() const;
 
+    bool VerifyStartSelfUIAbility() const;
+
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);
 
