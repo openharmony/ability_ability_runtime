@@ -1694,10 +1694,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
             auto helper = std::make_shared<DumpRuntimeHelper>(application_);
             helper->SetAppFreezeFilterCallback();
-        }
 #ifdef CJ_FRONTEND
-    }
+        } else {
+            LoadAllExtensions();
+        }
 #endif
+    }
 
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
@@ -2070,6 +2072,12 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
 }
 
 void MainThread::LoadAllExtensions(NativeEngine &nativeEngine)
+{
+    (void)nativeEngine;
+    return LoadAllExtensions();
+}
+
+void MainThread::LoadAllExtensions()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "LoadAllExtensions");

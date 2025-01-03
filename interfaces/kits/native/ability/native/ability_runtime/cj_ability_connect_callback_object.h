@@ -20,32 +20,48 @@
 
 #include "ability_connect_callback.h"
 #include "cj_element_name_ffi.h"
+#include "want.h"
 
-extern "C" {
+namespace OHOS {
+namespace AbilityRuntime {
 struct CJAbilityConnectCallbackFuncs {
     void (*onConnect)(int64_t id, ElementNameHandle elementNameHandle, int64_t remoteObjectId, int32_t resultCode);
     void (*onDisconnect)(int64_t id, ElementNameHandle elementNameHandle, int32_t resultCode);
     void (*release)(int64_t id);
+    void (*onFailed)(int64_t id, int32_t resultCode);
 };
 
+extern "C" {
 #define EXPORT __attribute__((visibility("default")))
 EXPORT void RegisterCJAbilityConnectCallbackFuncs(void (*registerFunc)(CJAbilityConnectCallbackFuncs* result));
 #undef EXPORT
 };
 
-namespace OHOS {
-namespace AbilityRuntime {
 class CJAbilityConnectCallback : public AbilityConnectCallback {
 public:
     explicit CJAbilityConnectCallback(int64_t id) : callbackId_(id) {};
     ~CJAbilityConnectCallback() override;
 
+    static sptr<CJAbilityConnectCallback> Create(int64_t id, AAFwk::Want& want);
+    static void Remove(int64_t connectId);
+    static void FindConnection(AAFwk::Want& want, sptr<CJAbilityConnectCallback>& connection, int64_t connectId);
+
     void OnAbilityConnectDone(
         const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode) override;
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
+    void OnFailed(int32_t resultCode);
 
+    void SetConnectionId(int64_t connectId)
+    {
+        connectId_ = connectId;
+    }
+    int64_t GetConnectionId()
+    {
+        return connectId_;
+    }
 private:
     int64_t callbackId_ = 0;
+    int64_t connectId_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

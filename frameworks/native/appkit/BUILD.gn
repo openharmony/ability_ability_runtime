@@ -274,7 +274,10 @@ ohos_shared_library("appkit_native") {
 
     defines += [ "CJ_FRONTEND" ]
 
-    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
+    deps += [
+      "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+      "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi",
+    ]
 
     external_deps += [
       "bundle_framework:appexecfwk_base",

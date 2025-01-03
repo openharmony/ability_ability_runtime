@@ -13,30 +13,38 @@
  * limitations under the License.
  */
 
-#include "embedded_ui_extension.h"
+#include "cj_extension_common.h"
 
 #include "hilog_tag_wrapper.h"
-#include "js_embedded_ui_extension.h"
-#include "cj_embedded_ui_extension.h"
-#include "runtime.h"
-#include "ui_extension_context.h"
+#include "cj_runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-EmbeddedUIExtension *EmbeddedUIExtension::Create(const std::unique_ptr<Runtime> &runtime)
+using namespace OHOS::AppExecFwk;
+
+std::shared_ptr<CJExtensionCommon> CJExtensionCommon::Create(CJUIExtensionObject cjObj)
 {
-    TAG_LOGD(AAFwkTag::EMBEDDED_EXT, "called");
-    if (runtime == nullptr) {
-        return new (std::nothrow) EmbeddedUIExtension();
+    return std::make_shared<CJExtensionCommon>(cjObj);
+}
+
+CJExtensionCommon::CJExtensionCommon(CJUIExtensionObject cjObj)
+    : cjObj_(cjObj) {}
+
+void CJExtensionCommon::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration> &fullConfig)
+{
+    TAG_LOGI(AAFwkTag::EXT, "called");
+    if (!fullConfig) {
+        TAG_LOGE(AAFwkTag::EXT, "invalid config");
+        return;
     }
-    switch (runtime->GetLanguage()) {
-        case Runtime::Language::JS:
-            return JsEmbeddedUIExtension::Create(runtime);
-        case Runtime::Language::CJ:
-            return CJEmbeddedUIExtension::Create(runtime);
-        default:
-            return new (std::nothrow) EmbeddedUIExtension();
-    }
+
+    cjObj_.OnConfigurationUpdate(fullConfig);
+}
+
+void CJExtensionCommon::OnMemoryLevel(int level)
+{
+    TAG_LOGD(AAFwkTag::EXT, "called");
+    cjObj_.OnMemoryLevel(level);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
