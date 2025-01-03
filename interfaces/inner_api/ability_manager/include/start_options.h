@@ -72,7 +72,7 @@ public:
     int32_t GetWindowHeight() const;
 private:
     int32_t windowMode_ = AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED;
-    int32_t displayId_ = DEFAULT_DISPLAY_ID;
+    int32_t displayId_ = -1;
     bool withAnimation_ = true;
     bool windowFocused_ = true;
     int32_t windowLeft_ = 0;
