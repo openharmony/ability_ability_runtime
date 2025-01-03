@@ -10786,8 +10786,12 @@ int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const Start
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
 
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
     CHECK_TRUE_RETURN_RET((ProcessOptions::IsAttachToStatusBarMode(startOptions.processOptions->processMode) &&
-        !uiAbilityManager->IsCallerInStatusBar()) && !canStartupHide, ERR_START_OPTIONS_CHECK_FAILED,
+        !uiAbilityManager->IsCallerInStatusBar(processInfo.instanceKey)) &&
+        !canStartupHide, ERR_START_OPTIONS_CHECK_FAILED,
         "not in status bar no start hidden permission");
 
     auto abilityRecords = uiAbilityManager->GetAbilityRecordsByName(element);

@@ -2691,11 +2691,11 @@ int32_t UIAbilityLifecycleManager::RegisterStatusBarDelegate(sptr<AbilityRuntime
     return statusBarDelegateManager->RegisterStatusBarDelegate(delegate);
 }
 
-bool UIAbilityLifecycleManager::IsCallerInStatusBar()
+bool UIAbilityLifecycleManager::IsCallerInStatusBar(const std::string &instanceKey)
 {
     auto statusBarDelegateManager = GetStatusBarDelegateManager();
     CHECK_POINTER_AND_RETURN(statusBarDelegateManager, false);
-    return statusBarDelegateManager->IsCallerInStatusBar();
+    return statusBarDelegateManager->IsCallerInStatusBar(instanceKey);
 }
 
 bool UIAbilityLifecycleManager::IsInStatusBar(uint32_t accessTokenId)
@@ -2844,7 +2844,7 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     auto sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
 
-    if (!IsCallerInStatusBar() && sessionInfo->processOptions != nullptr &&
+    if (!IsCallerInStatusBar(abilityRecord->GetInstanceKey()) && sessionInfo->processOptions != nullptr &&
         !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
         !sessionInfo->processOptions->isRestartKeepAlive) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not add to status bar");
