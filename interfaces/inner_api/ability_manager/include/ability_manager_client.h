@@ -335,7 +335,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
-        int32_t userId = DEFAULT_INVAL_VALUE);
+        int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE);
 
     ErrCode ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);
 

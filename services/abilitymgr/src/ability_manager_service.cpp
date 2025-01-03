@@ -2780,7 +2780,8 @@ int AbilityManagerService::ImplicitStartExtensionAbility(const Want &want, const
     return StartExtensionAbilityInner(want, callerToken, userId, extensionType, true, true);
 }
 
-int AbilityManagerService::PreloadUIExtensionAbility(const Want &want, std::string &bundleName, int32_t userId)
+int AbilityManagerService::PreloadUIExtensionAbility(const Want &want, std::string &bundleName,
+    int32_t userId, int32_t hostPid)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -2792,10 +2793,11 @@ int AbilityManagerService::PreloadUIExtensionAbility(const Want &want, std::stri
             PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
         return ERR_PERMISSION_DENIED;
     }
-    return PreloadUIExtensionAbilityInner(want, bundleName, userId);
+    return PreloadUIExtensionAbilityInner(want, bundleName, userId, hostPid);
 }
 
-int AbilityManagerService::PreloadUIExtensionAbilityInner(const Want &want, std::string &hostBundleName, int32_t userId)
+int AbilityManagerService::PreloadUIExtensionAbilityInner(const Want &want, std::string &hostBundleName,
+    int32_t userId, int32_t hostPid)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Preload ui extension called, elementName: %{public}s.",
         want.GetElement().GetURI().c_str());
@@ -2820,7 +2822,7 @@ int AbilityManagerService::PreloadUIExtensionAbilityInner(const Want &want, std:
         TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null, userId:%{public}d", validUserId);
         return ERR_INVALID_VALUE;
     }
-    return connectManager->PreloadUIExtensionAbilityLocked(abilityRequest, hostBundleName);
+    return connectManager->PreloadUIExtensionAbilityLocked(abilityRequest, hostBundleName, hostPid);
 }
 
 int AbilityManagerService::UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
