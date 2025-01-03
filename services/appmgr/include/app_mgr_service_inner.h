@@ -73,6 +73,7 @@
 #include "want.h"
 #include "app_jsheap_mem_info.h"
 #include "running_multi_info.h"
+#include "multi_user_config_mgr.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -1896,7 +1897,7 @@ private:
     void GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids);
     void MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
-    void DealMultiUserConfig(const Configuration &config, const int32_t userId);
+    std::vector<std::string> DealWithUserConfiguration(const Configuration &config, const int32_t userId);
     bool CheckIsDebugApp(const std::string &bundleName);
     int32_t MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia, std::string &watermarkBusinessName,
         bool &isWatermarkEnabled, bool &isFileUri, std::string &processName);
@@ -1926,7 +1927,6 @@ private:
     std::shared_ptr<AppRunningManager> appRunningManager_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AMSEventHandler> eventHandler_;
-    std::shared_ptr<Configuration> configuration_;
     ffrt::mutex userTestLock_;
     ffrt::mutex appStateCallbacksLock_;
     ffrt::mutex renderUidSetLock_;

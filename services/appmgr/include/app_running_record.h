@@ -60,17 +60,6 @@ class AppMgrServiceInner;
 class AppRunningRecord;
 class AppRunningManager;
 
-class MultiUserConfigurationMgr {
-public:
-    void Insert(const int32_t userId, const Configuration& config);
-
-    Configuration GetConfigurationByUserId(const int32_t userId);
-
-private:
-    std::map<int32_t, Configuration> multiUserConfiguration_;
-    std::mutex multiUserConfigurationMutex_;
-};
-
 class AppRunningRecord : public std::enable_shared_from_this<AppRunningRecord> {
 public:
     static int64_t appEventId_;
