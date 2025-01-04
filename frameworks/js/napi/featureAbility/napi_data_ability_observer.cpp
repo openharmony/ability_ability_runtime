@@ -83,7 +83,7 @@ void NAPIDataAbilityObserver::SafeReleaseJSCallback()
             delRefCallbackInfo = nullptr;
             delete work;
             work = nullptr;
-        }, uv_qos_user_initiated);
+        }, uv_qos_default);
     if (ret != 0) {
         if (delRefCallbackInfo != nullptr) {
             delete delRefCallbackInfo;
