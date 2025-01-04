@@ -210,7 +210,7 @@ export default class SelectorServiceExtensionAbility extends extension {
   }
 
   onDestroy() {
-    console.info(TAG, 'onDestroy.');
+    console.info(TAG, 'SelectorServiceExtensionAbility onDestroy.');
     if (win !== undefined) {
       win.destroy();
     }
