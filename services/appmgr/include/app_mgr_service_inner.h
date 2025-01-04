@@ -1726,14 +1726,11 @@ private:
     int32_t KillApplicationByBundleName(const std::string &bundleName, int32_t appIndex, bool clearPageStack = false,
         const std::string& reason = "KillApplicationByBundleName");
 
-    bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload,
-        AppExecFwk::PreloadMode preloadMode);
-
     bool SendProcessStartFailedEvent(std::shared_ptr<AppRunningRecord> appRecord, ProcessStartFailedReason reason,
         int32_t subReason);
 
     void SendAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
-        const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType);
+        const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType, const AppStartReason reason);
 
     bool SendCreateAtomicServiceProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
         const BundleType &bundleType, const std::string &moduleName = "", const std::string &abilityName = "");
