@@ -72,7 +72,7 @@ ohos_unittest("ability_interceptor_third_test") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
-    "libjpeg-turbo:turbojpeg_static",
+    "libjpeg-turbo:turbojpeg",
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]

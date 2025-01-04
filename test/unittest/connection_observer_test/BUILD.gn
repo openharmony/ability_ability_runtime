@@ -48,7 +48,7 @@ ohos_unittest("connection_observer_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "libjpeg-turbo:turbojpeg_static",
+    "libjpeg-turbo:turbojpeg",
     "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
   ]

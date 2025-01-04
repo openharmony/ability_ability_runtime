@@ -86,7 +86,7 @@ ohos_fuzztest("AbilityFrameworksNativeOhosJsEnvLoggerFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
-    "libjpeg-turbo:turbojpeg_static",
+    "libjpeg-turbo:turbojpeg",
     "napi:ace_napi",
     "safwk:api_cache_manager",
     "samgr:samgr_proxy",
