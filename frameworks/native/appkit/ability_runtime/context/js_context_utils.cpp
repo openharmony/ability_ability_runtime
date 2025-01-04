@@ -830,8 +830,8 @@ napi_value AttachBaseContext(napi_env env, void* value, void* hint)
         TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         return nullptr;
     }
-    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachBaseContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<Context>(ptr);
+    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachBaseContext, workContext, nullptr);
     auto res = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr base context is called");
@@ -869,9 +869,9 @@ napi_value AttachApplicationContext(napi_env env, void* value, void* hint)
         TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         return nullptr;
     }
-    napi_coerce_to_native_binding_object(
-        env, contextObj, DetachCallbackFunc, AttachApplicationContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(ptr);
+    napi_coerce_to_native_binding_object(
+        env, contextObj, DetachCallbackFunc, AttachApplicationContext, workContext, nullptr);
     auto res = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr application context is called");
