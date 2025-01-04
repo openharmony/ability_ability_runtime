@@ -61,7 +61,6 @@ ohos_unittest("cj_ability_delegator_test") {
     "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
     "ability_runtime:wantagent_innerkits",
-    "ace_engine:libace",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",

@@ -71,7 +71,7 @@ ohos_fuzztest("AbilityMgrEcologicalRuleMgrServiceParamFuzzTest") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
-    "libjpeg-turbo:turbojpeg_static",
+    "libjpeg-turbo:turbojpeg",
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
