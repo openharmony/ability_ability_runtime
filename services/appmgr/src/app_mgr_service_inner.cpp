@@ -748,11 +748,12 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         appRunningManager_->UpdateConfigurationDelayed(appRecord);
         if (!isProcCache) {
             SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::MULTI_INSTANCE);
+            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM);
         } else {
             SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::PROCESS_CACHE_LAUNCH);
+            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM);
         }
         if (appRecord->IsPreloaded()) {
-            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD);
             appRecord->SetPreloadState(PreloadState::NONE);
         }
         int32_t requestProcCode = (want == nullptr) ? 0 : want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
@@ -3952,6 +3953,13 @@ void AppMgrServiceInner::SendAppStartupTypeEvent(const std::shared_ptr<AppRunnin
         eventInfo.pid = appRecord->GetPid();
     }
     eventInfo.startType = static_cast<int32_t>(startType);
+    if (startType == AppStartType::WARM) {
+        PreloadMode preloadMode = appRecord->GetPreloadMode();
+        int32_t startReason = (appRecord->IsPreloaded() && preloadMode != PreloadMode::PRESS_DOWN) ?
+            static_cast<int32_t>(preloadMode) : static_cast<int32_t>(AppStartReason::SUGGEST_CACHE);
+        eventInfo.startReason = startReason;
+    }
+
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_STARTUP_TYPE, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
