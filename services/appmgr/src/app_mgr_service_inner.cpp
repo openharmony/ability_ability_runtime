@@ -751,7 +751,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::NONE);
         } else {
             SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::PROCESS_CACHE_LAUNCH, AppStartReason::NONE);
-            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::NONE);
+            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::SUGGEST_CACHE);
         }
         if (appRecord->IsPreloaded()) {
             appRecord->SetPreloadState(PreloadState::NONE);
