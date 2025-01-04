@@ -1932,7 +1932,7 @@ void Ability::OnChange(Rosen::DisplayId displayId)
         auto task = [ability = shared_from_this(), configuration = *configuration]() {
             ability->OnConfigurationUpdated(configuration);
         };
-        handler_->PostTask(task, "Ability:OnChange");
+        handler_->PostTask(task, "Ability:OnChange", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 
         auto diffConfiguration = std::make_shared<AppExecFwk::Configuration>(newConfig);
         TAG_LOGI(AAFwkTag::ABILITY, "update display config %{public}s for all windows",
@@ -1994,7 +1994,7 @@ void Ability::OnDisplayMove(Rosen::DisplayId from, Rosen::DisplayId to)
         auto task = [ability = shared_from_this(), configuration = *configuration]() {
             ability->OnConfigurationUpdated(configuration);
         };
-        handler_->PostTask(task, "Ability:OnDisplayMove");
+        handler_->PostTask(task, "Ability:OnDisplayMove", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
 
