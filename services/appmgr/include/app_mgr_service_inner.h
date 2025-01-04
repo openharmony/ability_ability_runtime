@@ -1726,6 +1726,9 @@ private:
     int32_t KillApplicationByBundleName(const std::string &bundleName, int32_t appIndex, bool clearPageStack = false,
         const std::string& reason = "KillApplicationByBundleName");
 
+    bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload,
+        AppExecFwk::PreloadMode preloadMode);
+
     bool SendProcessStartFailedEvent(std::shared_ptr<AppRunningRecord> appRecord, ProcessStartFailedReason reason,
         int32_t subReason);
 
