@@ -35,6 +35,7 @@ constexpr int32_t TERMINATE_TIMEOUT_MULTIPLE = 15000;
 constexpr int32_t INACTIVE_TIMEOUT_MULTIPLE = 800;
 constexpr int32_t DUMP_TIMEOUT_MULTIPLE = 1500;
 constexpr int32_t SHAREDATA_TIMEOUT_MULTIPLE = 7500;
+constexpr int32_t CONCURRENT_START_TIMEOUT = 10;
 #else
 constexpr int32_t COLDSTART_TIMEOUT_MULTIPLE = 10;
 constexpr int32_t LOAD_TIMEOUT_MULTIPLE = 10;
@@ -46,6 +47,7 @@ constexpr int32_t TERMINATE_TIMEOUT_MULTIPLE = 10;
 constexpr int32_t INACTIVE_TIMEOUT_MULTIPLE = 1;
 constexpr int32_t DUMP_TIMEOUT_MULTIPLE = 1000;
 constexpr int32_t SHAREDATA_TIMEOUT_MULTIPLE = 5;
+constexpr int32_t CONCURRENT_START_TIMEOUT = 1;
 constexpr int32_t TYPE_RESERVE = 1;
 constexpr int32_t TYPE_OTHERS = 2;
 #endif
