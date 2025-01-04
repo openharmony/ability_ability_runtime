@@ -415,5 +415,15 @@ int AppLifeCycleDeal::DumpFfrt(std::string& result)
     }
     return appThread->ScheduleDumpFfrt(result);
 }
+
+void AppLifeCycleDeal::SetWatchdogBackgroundStatusRunning(bool status)
+{
+    auto appThread = GetApplicationClient();
+    if (!appThread) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
+        return;
+    }
+    appThread->SetWatchdogBackgroundStatus(status);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
