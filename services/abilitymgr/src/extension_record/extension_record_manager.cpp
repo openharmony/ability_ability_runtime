@@ -515,7 +515,8 @@ sptr<IRemoteObject> ExtensionRecordManager::GetRootCallerTokenLocked(
 }
 
 int32_t ExtensionRecordManager::CreateExtensionRecord(const AAFwk::AbilityRequest &abilityRequest,
-    const std::string &hostBundleName, std::shared_ptr<ExtensionRecord> &extensionRecord, int32_t &extensionRecordId)
+    const std::string &hostBundleName, std::shared_ptr<ExtensionRecord> &extensionRecord,
+    int32_t &extensionRecordId, int32_t hostPid)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     std::shared_ptr<ExtensionRecordFactory> factory = nullptr;
@@ -543,7 +544,7 @@ int32_t ExtensionRecordManager::CreateExtensionRecord(const AAFwk::AbilityReques
     extensionRecord->hostBundleName_ = hostBundleName;
     abilityRecord->SetOwnerMissionUserId(userId_);
     abilityRecord->SetUIExtensionAbilityId(extensionRecordId);
-    extensionRecord->hostPid_ = IPCSkeleton::GetCallingPid();
+    extensionRecord->hostPid_ = (hostPid == AAFwk::DEFAULT_INVAL_VALUE) ? IPCSkeleton::GetCallingPid() : hostPid;
     //add uiextension record register state observer object.
     if (abilityRecord->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
         auto ret = extensionRecord->RegisterStateObserver(hostBundleName);
