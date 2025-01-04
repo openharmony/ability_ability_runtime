@@ -496,14 +496,14 @@ int32_t AbilityConnectManager::GetOrCreateTargetServiceRecord(
 }
 
 int AbilityConnectManager::PreloadUIExtensionAbilityLocked(const AbilityRequest &abilityRequest,
-    std::string &hostBundleName)
+    std::string &hostBundleName, int32_t hostPid)
 {
     std::lock_guard guard(serialMutex_);
-    return PreloadUIExtensionAbilityInner(abilityRequest, hostBundleName);
+    return PreloadUIExtensionAbilityInner(abilityRequest, hostBundleName, hostPid);
 }
 
 int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &abilityRequest,
-    std::string &hostBundleName)
+    std::string &hostBundleName, int32_t hostPid)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     if (!UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
@@ -519,7 +519,7 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
     CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_NULL_OBJECT);
     int32_t extensionRecordId = INVALID_EXTENSION_RECORD_ID;
     ret = uiExtensionAbilityRecordMgr_->CreateExtensionRecord(abilityRequest, hostBundleName,
-        extensionRecord, extensionRecordId);
+        extensionRecord, extensionRecordId, hostPid);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CreateExtensionRecord ERR");
         return ret;
@@ -531,7 +531,14 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
     std::string extensionRecordKey = element.GetURI() + std::to_string(targetService->GetUIExtensionAbilityId());
     targetService->SetURI(extensionRecordKey);
     AddToServiceMap(extensionRecordKey, targetService);
-    LoadAbility(targetService);
+
+    auto updateRecordCallback = [hostPid, mgr = shared_from_this()](
+        const std::shared_ptr<AbilityRecord>& targetService) {
+        if (mgr != nullptr) {
+            mgr->UpdateUIExtensionInfo(targetService, hostPid);
+        }
+    };
+    LoadAbility(targetService, updateRecordCallback);
     return ERR_OK;
 }
 
@@ -1428,7 +1435,8 @@ std::list<std::shared_ptr<ConnectionRecord>> AbilityConnectManager::GetConnectRe
     return connectList;
 }
 
-void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
+void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    std::function<void(const std::shared_ptr<AbilityRecord>&)> updateRecordCallback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER(abilityRecord);
@@ -1456,8 +1464,9 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
             }
         }
     }
-
-    UpdateUIExtensionInfo(abilityRecord);
+    if (updateRecordCallback != nullptr) {
+        updateRecordCallback(abilityRecord);
+    }
     AbilityRuntime::LoadParam loadParam;
     loadParam.abilityRecordId = abilityRecord->GetRecordId();
     loadParam.isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
@@ -3292,7 +3301,8 @@ EventInfo AbilityConnectManager::BuildEventInfo(const std::shared_ptr<AbilityRec
     return eventInfo;
 }
 
-void AbilityConnectManager::UpdateUIExtensionInfo(const std::shared_ptr<AbilityRecord> &abilityRecord)
+void AbilityConnectManager::UpdateUIExtensionInfo(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    int32_t hostPid)
 {
     if (abilityRecord == nullptr ||
         !UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
@@ -3304,7 +3314,7 @@ void AbilityConnectManager::UpdateUIExtensionInfo(const std::shared_ptr<AbilityR
     wantParams.SetParam(UIEXTENSION_ABILITY_ID, AAFwk::Integer::Box(uiExtensionAbilityId));
     auto rootHostRecord = GetUIExtensionRootHostInfo(abilityRecord->GetToken());
     if (rootHostRecord != nullptr) {
-        auto rootHostPid = rootHostRecord->GetPid();
+        auto rootHostPid = (hostPid == AAFwk::DEFAULT_INVAL_VALUE) ? rootHostRecord->GetPid() : hostPid;
         wantParams.SetParam(UIEXTENSION_ROOT_HOST_PID, AAFwk::Integer::Box(rootHostPid));
     }
     if (abilityRecord->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {

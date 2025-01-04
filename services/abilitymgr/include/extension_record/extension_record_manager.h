@@ -87,7 +87,8 @@ public:
     int32_t StartAbility(const AAFwk::AbilityRequest &abilityRequest);
 
     int32_t CreateExtensionRecord(const AAFwk::AbilityRequest &abilityRequest, const std::string &hostBundleName,
-        std::shared_ptr<ExtensionRecord> &extensionRecord, int32_t &extensionRecordId);
+        std::shared_ptr<ExtensionRecord> &extensionRecord, int32_t &extensionRecordId,
+        int32_t hostPid = AAFwk::DEFAULT_INVAL_VALUE);
 
     bool IsPreloadExtensionRecord(const AAFwk::AbilityRequest &abilityRequest,
         const std::string &hostBundleName, std::shared_ptr<ExtensionRecord> &extensionRecord, bool &isLoaded);
