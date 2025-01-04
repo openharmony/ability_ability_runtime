@@ -59,7 +59,7 @@ static std::set<GlobalObserverItem> globalPromiseList;
 static std::map<napi_env, std::vector<std::pair<int32_t, std::shared_ptr<NativeReference>>>> observerList;
 static std::mutex globalErrorMtx;
 static std::mutex globalPromiseMtx;
-static std::mutex errorMtx;
+static std::recursive_mutex errorMtx;
 static std::shared_ptr<JsLoopObserver> loopObserver_;
 static std::once_flag registerCallbackFlag;
 constexpr int32_t INDEX_ZERO = 0;
@@ -163,7 +163,7 @@ static napi_value NotifyUnhandledRejectionHandler(napi_env env, napi_callback_in
 
 static bool IsobserverListNotEmpty()
 {
-    std::lock_guard<std::mutex> lock(errorMtx);
+    std::lock_guard<std::recursive_mutex> lock(errorMtx);
     return !observerList.empty();
 }
 
@@ -338,7 +338,7 @@ static napi_value CreateJsErrorObject(napi_env env, std::string &name, std::stri
 
 static void DoMainThreadOnException(napi_env env, std::string name, std::string message, std::string stack)
 {
-    std::lock_guard<std::mutex> lock(errorMtx);
+    std::lock_guard<std::recursive_mutex> lock(errorMtx);
     if (observerList.empty()) {
         return;
     }
@@ -357,7 +357,7 @@ static void DoMainThreadOnException(napi_env env, std::string name, std::string 
 
 static void DoMainThreadOnUnhandleException(napi_env env, std::string summary)
 {
-    std::lock_guard<std::mutex> lock(errorMtx);
+    std::lock_guard<std::recursive_mutex> lock(errorMtx);
     if (observerList.empty()) {
         return;
     }
@@ -376,7 +376,7 @@ static void DoMainThreadOnUnhandleException(napi_env env, std::string summary)
 
 static void DoWorkThreadCallback(napi_env env, napi_value exception)
 {
-    std::lock_guard<std::mutex> lock(errorMtx);
+    std::lock_guard<std::recursive_mutex> lock(errorMtx);
     if (observerList.empty()) {
         return;
     }
@@ -592,13 +592,13 @@ private:
             TAG_LOGE(AAFwkTag::JSNAPI, "parse type failed");
             return CreateJsUndefined(env);
         }
+        std::lock_guard<std::recursive_mutex> lock(errorMtx);
         int32_t observerId = serialNumber_;
         if (serialNumber_ < INT32_MAX) {
             serialNumber_++;
         } else {
             serialNumber_ = 0;
         }
-        std::lock_guard<std::mutex> lock(errorMtx);
         napi_ref ref = nullptr;
         napi_create_reference(env, argv[INDEX_ONE], 1, &ref);
         observerList[env].push_back(
@@ -810,7 +810,7 @@ private:
         TAG_LOGI(AAFwkTag::JSNAPI, "remove observer failed");
         return CreateJsUndefined(env);
     }
-
+    
     napi_value OnOffOld(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGD(AAFwkTag::JSNAPI, "called");
@@ -829,27 +829,33 @@ private:
             ThrowInvalidParamError(env, "Parameter error: Parse type failed, must be a string error.");
             return CreateJsUndefined(env);
         }
-        std::lock_guard<std::mutex> lock(errorMtx);
-        if (!observerList.count(env)) {
-            ThrowInvalidParamError(env, "env error");
-            return CreateJsUndefined(env);
-        } else if (!(observerId >= 0 && observerId < INT32_MAX)) {
-            ThrowInvalidParamError(env, "observaerId error");
-            return CreateJsUndefined(env);
-        } else {
+        NapiAsyncTask::CompleteCallback complete = [observerId](napi_env env, NapiAsyncTask& task, int32_t status) {
+            TAG_LOGI(AAFwkTag::JSNAPI, "complete called");
+            std::lock_guard<std::recursive_mutex> lock(errorMtx);
+            if (!observerList.count(env) || observerId == -1) {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+                return;
+            }
             auto& envObservers = observerList[env];
             auto iter = std::find_if(envObservers.begin(), envObservers.end(),
-                [observerId](const std::pair<int32_t, std::shared_ptr<NativeReference>>& item) {
+                [observerId](const auto& item) {
                     return item.first == observerId;
                 });
-            if (iter != envObservers.end()) {
-                iter = envObservers.erase(iter);
-                if (envObservers.empty()) {
-                    observerList.erase(env);
-                }
+            if (iter == envObservers.end()) {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_ID));
+                return;
             }
-        }
-        return CreateJsUndefined(env);
+            envObservers.erase(iter);
+            if (envObservers.empty()) {
+                observerList.erase(env);
+            }
+            task.ResolveWithNoError(env, CreateJsUndefined(env));
+        };
+        napi_value lastParam = (argc <= ARGC_TWO) ? nullptr : argv[INDEX_TWO];
+        napi_value result = nullptr;
+        NapiAsyncTask::Schedule("JSErrorManager::OnUnregisterErrorObserver",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        return result;
     }
 
     napi_value OnOffUnhandledRejection(napi_env env, size_t argc, napi_value* argv)
