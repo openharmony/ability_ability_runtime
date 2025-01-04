@@ -3955,7 +3955,7 @@ void AppMgrServiceInner::SendAppStartupTypeEvent(const std::shared_ptr<AppRunnin
     eventInfo.startType = static_cast<int32_t>(startType);
     if (startType == AppStartType::WARM) {
         PreloadMode preloadMode = appRecord->GetPreloadMode();
-        int32_t startReason = (appRecord->isPreloaded() && preloadMode != PreloadMode::PRESS_DOWN) ?
+        int32_t startReason = (appRecord->IsPreloaded() && preloadMode != PreloadMode::PRESS_DOWN) ?
             static_cast<int32_t>(preloadMode) : static_cast<int32_t>(AppStartReason::SUGGEST_CACHE);
         eventInfo.startReason = startReason;
     }
