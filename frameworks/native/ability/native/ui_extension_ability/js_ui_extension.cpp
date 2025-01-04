@@ -250,7 +250,7 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
 void JsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnStart begin");
     Extension::OnStart(want);
     auto context = GetContext();
 #ifdef SUPPORT_GRAPHICS
@@ -678,7 +678,7 @@ void JsUIExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId
 void JsUIExtension::OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnForeground begin");
     CHECK_POINTER(sessionInfo);
     Extension::OnForeground(want, sessionInfo);
 
