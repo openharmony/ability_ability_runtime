@@ -747,11 +747,11 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         TAG_LOGI(AAFwkTag::APPMGR, "have apprecord");
         appRunningManager_->UpdateConfigurationDelayed(appRecord);
         if (!isProcCache) {
-            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::MULTI_INSTANCE);
-            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM);
+            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::MULTI_INSTANCE, AppStartReason::NONE);
+            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::NONE);
         } else {
-            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::PROCESS_CACHE_LAUNCH);
-            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM);
+            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::PROCESS_CACHE_LAUNCH, AppStartReason::NONE);
+            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::SUGGEST_CACHE);
         }
         if (appRecord->IsPreloaded()) {
             appRecord->SetPreloadState(PreloadState::NONE);
@@ -1011,7 +1011,7 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     if (otherTaskHandler_ != nullptr) {
         otherTaskHandler_->SubmitTaskJust([appRecord, abilityInfo, pThis = shared_from_this()]() {
             pThis->OnAppStateChanged(appRecord, ApplicationState::APP_STATE_SET_COLD_START, false, false);
-            pThis->SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD);
+            pThis->SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD, AppStartReason::NONE);
             }, "AppStateChangedNotify", FIRST_FRAME_NOTIFY_TASK_DELAY);
     }
     uint32_t startFlags = (want == nullptr) ? 0 : AppspawnUtil::BuildStartFlags(*want, *abilityInfo);
@@ -3927,7 +3927,7 @@ bool AppMgrServiceInner::SendProcessStartFailedEvent(std::shared_ptr<AppRunningR
 }
 
 void AppMgrServiceInner::SendAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
-    const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType)
+    const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType, const AppStartReason reason)
 {
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
@@ -3955,9 +3955,8 @@ void AppMgrServiceInner::SendAppStartupTypeEvent(const std::shared_ptr<AppRunnin
     eventInfo.startType = static_cast<int32_t>(startType);
     if (startType == AppStartType::WARM) {
         PreloadMode preloadMode = appRecord->GetPreloadMode();
-        int32_t startReason = (appRecord->IsPreloaded() && preloadMode != PreloadMode::PRESS_DOWN) ?
-            static_cast<int32_t>(preloadMode) : static_cast<int32_t>(AppStartReason::SUGGEST_CACHE);
-        eventInfo.startReason = startReason;
+        eventInfo.startReason = (appRecord->IsPreloaded() && preloadMode != PreloadMode::PRESS_DOWN) ?
+            static_cast<int32_t>(preloadMode) : static_cast<int32_t>(reason);
     }
 
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_STARTUP_TYPE, HiSysEventType::BEHAVIOR, eventInfo);
