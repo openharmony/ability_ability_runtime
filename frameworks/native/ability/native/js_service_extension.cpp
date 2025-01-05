@@ -178,7 +178,7 @@ void JsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     auto env = jsRuntime_.GetNapiEnv();
 
     jsObj_ = jsRuntime_.LoadModule(
-        moduleName, srcPath, abilityInfo_->hapPath, abilityInfo_->compileMode == CompileMode::ES_MODULE);
+        moduleName, srcPath, abilityInfo_->hapPath, abilityInfo_->compileMode == CompileMode::ES_MODULE, false, abilityInfo_->srcEntrance);
     if (jsObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null jsObj_");
         return;
