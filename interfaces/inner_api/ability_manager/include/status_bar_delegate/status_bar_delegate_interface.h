@@ -33,7 +33,8 @@ public:
         END
     };
 
-    virtual int32_t CheckIfStatusBarItemExists(uint32_t accessTokenId, bool& isExist) = 0;
+    virtual int32_t CheckIfStatusBarItemExists(uint32_t accessTokenId, const std::string &instanceKey,
+        bool& isExist) = 0;
     virtual int32_t AttachPidToStatusBarItem(uint32_t accessTokenId, int32_t pid, const std::string &instanceKey) = 0;
 };
 } // namespace AbilityRuntime

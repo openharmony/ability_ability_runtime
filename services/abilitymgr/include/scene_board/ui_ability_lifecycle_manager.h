@@ -339,7 +339,7 @@ public:
 
     int32_t RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate);
 
-    bool IsCallerInStatusBar();
+    bool IsCallerInStatusBar(const std::string &instanceKey);
 
     bool IsInStatusBar(uint32_t accessTokenId);
 
