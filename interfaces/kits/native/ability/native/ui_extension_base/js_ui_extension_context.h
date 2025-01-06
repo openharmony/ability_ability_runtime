@@ -47,6 +47,8 @@ public:
     static napi_value StartUIServiceExtension(napi_env env, napi_callback_info info);
     static napi_value ConnectUIServiceExtension(napi_env env, napi_callback_info info);
     static napi_value DisconnectUIServiceExtension(napi_env env, napi_callback_info info);
+    static napi_value StartServiceExtensionAbility(napi_env env, napi_callback_info info);
+    static napi_value StartServiceExtensionAbilityWithAccount(napi_env env, napi_callback_info info);
 
 protected:
     virtual napi_value OnStartAbility(napi_env env, NapiCallbackInfo& info);
@@ -59,6 +61,8 @@ protected:
     virtual napi_value OnReportDrawnCompleted(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnOpenAtomicService(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnStartUIServiceExtension(napi_env env, NapiCallbackInfo& info);
+    virtual napi_value OnStartServiceExtensionAbility(napi_env env, NapiCallbackInfo& info);
+    virtual napi_value OnStartServiceExtensionAbilityWithAccount(napi_env env, NapiCallbackInfo& info);
     bool UnwrapConnectUIServiceExtensionParam(napi_env env, NapiCallbackInfo& info, AAFwk::Want& want);
     bool CheckConnectAlreadyExist(napi_env env, AAFwk::Want& want, napi_value callback, napi_value& result);
     virtual napi_value OnConnectUIServiceExtension(napi_env env, NapiCallbackInfo& info);
