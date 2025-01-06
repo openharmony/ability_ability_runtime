@@ -1431,7 +1431,8 @@ HWTEST_F(ContextImplTest, GetBundleInfo_001, Function | MediumTest | Level1)
     GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_GetBundleInfo_001 start";
     std::string bundleName = "bundleName";
     AppExecFwk::BundleInfo bundleInfo;
-    contextImpl_->GetBundleInfo(bundleName, bundleInfo, false);
+    bool currentBundle = false;
+    contextImpl_->GetBundleInfo(bundleName, bundleInfo, currentBundle);
     GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_GetBundleInfo_001 end";
 }
 
@@ -1439,7 +1440,8 @@ HWTEST_F(ContextImplTest, GetBundleInfo_002, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_GetBundleInfo_002 start";
     AppExecFwk::BundleInfo bundleInfo;
-    contextImpl_->GetBundleInfo(contextImpl_->GetBundleName(), bundleInfo, false);
+    bool currentBundle = false;
+    contextImpl_->GetBundleInfo(contextImpl_->GetBundleName(), bundleInfo, currentBundle);
     GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_GetBundleInfo_002 end";
 }
 
@@ -1448,7 +1450,8 @@ HWTEST_F(ContextImplTest, GetBundleInfo_003, Function | MediumTest | Level1)
     GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_GetBundleInfo_003 start";
     AppExecFwk::BundleInfo bundleInfo;
     bundleInfo.name = contextImpl_->GetBundleName();
-    contextImpl_->GetBundleInfo(contextImpl_->GetBundleName(), bundleInfo, false);
+    bool currentBundle = false;
+    contextImpl_->GetBundleInfo(contextImpl_->GetBundleName(), bundleInfo, currentBundle);
     GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_GetBundleInfo_003 end";
 }
 
