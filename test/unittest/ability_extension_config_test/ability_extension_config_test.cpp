@@ -160,6 +160,13 @@ HWTEST_F(AbilityExtensionConfigTest, CheckServiceExtensionUriValid_001, TestSize
     EXPECT_EQ(result, false);
     result = extensionConfig_->CheckServiceExtensionUriValid("/bundleName/moduleName/abilityName");
     EXPECT_EQ(result, true);
+    result = extensionConfig_->CheckServiceExtensionUriValid("deviceName/bundleName/moduleName/abilityName");
+    EXPECT_EQ(result, true);
+    AppExecFwk::ElementName targetElementName;
+    EXPECT_EQ(targetElementName.ParseURI("deviceName/bundleName/moduleName/abilityName"), true);
+    EXPECT_EQ(targetElementName.GetBundleName(), "bundleName");
+    EXPECT_EQ(targetElementName.GetModuleName(), "moduleName");
+    EXPECT_EQ(targetElementName.GetAbilityName(), "abilityName");
 }
 
 /*
