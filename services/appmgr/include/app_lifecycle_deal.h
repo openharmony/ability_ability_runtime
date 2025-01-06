@@ -286,6 +286,14 @@ public:
 
     int DumpFfrt(std::string& result);
 
+    /**
+     * SetWatchdogBackgroundStatusRunning , call SetWatchdogBackgroundStatusRunning(bool status) through proxy project,
+     * Notify application to set watchdog background status.
+     *
+     * @return
+     */
+    void SetWatchdogBackgroundStatusRunning(bool status);
+
 private:
     mutable std::mutex schedulerMutex_;
     sptr<IAppScheduler> appThread_ = nullptr;

@@ -45,6 +45,7 @@ struct EventInfo {
     int32_t exitResult = -1;
     int32_t bundleType = -1;
     int32_t startType = 0;
+    int32_t startReason = 0;
     int32_t appUid = -1;
     int32_t callerState = -1;
     uint32_t callerVersionCode = -1;

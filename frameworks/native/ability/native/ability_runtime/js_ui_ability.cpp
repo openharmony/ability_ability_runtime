@@ -684,10 +684,6 @@ void JsUIAbility::OnBackground()
     if (applicationContext != nullptr) {
         applicationContext->DispatchOnAbilityWillBackground(jsAbilityObj_);
     }
-    auto want = GetWant();
-    if (want != nullptr) {
-        HandleCollaboration(*want);
-    }
     std::string methodName = "OnBackground";
     HandleScope handleScope(jsRuntime_);
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
@@ -705,6 +701,10 @@ void JsUIAbility::OnBackground()
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
         applicationContext->DispatchOnAbilityBackground(jsAbilityObj_);
+    }
+    auto want = GetWant();
+    if (want != nullptr) {
+        HandleCollaboration(*want);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }

@@ -304,6 +304,14 @@ public:
      */
     virtual int32_t ScheduleDumpFfrt(std::string& result) override;
 
+    /**
+     * SetWatchdogBackgroundStatus, call SetWatchdogBackgroundStatus(bool status) through proxy project,
+     * Notify application to set watchdog background status.
+     *
+     * @return
+     */
+    virtual void SetWatchdogBackgroundStatus(bool status) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     void ScheduleMemoryCommon(const int32_t level, const uint32_t operation);

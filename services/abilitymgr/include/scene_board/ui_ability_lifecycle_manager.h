@@ -412,6 +412,8 @@ private:
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
     std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
+    void HandleForegroundCollaborate(const AbilityRequest &abilityRequest,
+        std::shared_ptr<AbilityRecord> abilityRecord);
 
     void NotifyStartSpecifiedAbility(AbilityRequest &request, const AAFwk::Want &want);
     void NotifyRestartSpecifiedAbility(const AbilityRequest &request, const sptr<IRemoteObject> &token);
@@ -460,8 +462,15 @@ private:
     bool AddStartCallerTimestamp(int32_t callerUid);
     std::shared_ptr<AbilityRecord> FindRecordFromSessionMap(const AbilityRequest &abilityRequest);
     bool HasAbilityRequest(const AbilityRequest &abilityRequest);
-    void AddAbilityRequest(const AbilityRequest &abilityRequest);
-    void RemoveAbilityRequest(const AbilityRequest &abilityRequest);
+    void AddAbilityRequest(const AbilityRequest &abilityRequest, int32_t requestId);
+    void RemoveAbilityRequest(int32_t requestId);
+    inline int32_t GetRequestId()
+    {
+        if (requestId_ == 0 || requestId_ == INT32_MAX) {
+            requestId_ = 1;
+        }
+        return requestId_++;
+    }
 
     void AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request);
     void StartSpecifiedRequest(SpecifiedRequest &specifiedRequest);
@@ -482,7 +491,7 @@ private:
     std::unordered_map<std::shared_ptr<AbilityRecord>, std::list<AbilityRequest>> callRequestCache_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<IRemoteObject> rootSceneSession_;
-    int32_t specifiedRequestId_ = 0;
+    int32_t requestId_ = 0;
     std::map<int32_t, AbilityRequest> specifiedRequestMap_;
     sptr<ISessionHandler> handler_;
     ffrt::mutex statusBarDelegateManagerLock_;
@@ -492,7 +501,7 @@ private:
 
     ffrt::mutex startUIAbilityCallerTimestampsLock_;
     std::map<int32_t, std::vector<int64_t>> startUIAbilityCallerTimestamps_;
-    std::list<std::shared_ptr<AbilityRequest>> startAbilityCheckList_;
+    std::map<int32_t, std::shared_ptr<AbilityRequest>> startAbilityCheckMap_;
 
     std::map<std::string, std::list<std::shared_ptr<SpecifiedRequest>>> specifiedRequestList_;
     std::map<int32_t, std::string> specifiedFlagMap_;

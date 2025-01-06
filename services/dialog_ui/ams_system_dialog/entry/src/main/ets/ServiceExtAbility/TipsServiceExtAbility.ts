@@ -21,7 +21,7 @@ import deviceInfo from '@ohos.deviceInfo';
 
 const TAG = 'TipsDialog_Service';
 
-let winNum = 1;
+let tipsWinNum = 1;
 let win;
 
 export default class TipsServiceExtensionAbility extends extension {
@@ -38,14 +38,14 @@ export default class TipsServiceExtensionAbility extends extension {
       globalThis.position = PositionUtils.getTipsDialogPosition();
       globalThis.callerToken = want.parameters.callerToken;
       display.on('change', (data: number) => {
-        let position = PositionUtils.getTipsDialogPosition();
-        if (position.offsetX !== globalThis.position.offsetX || position.offsetY !== globalThis.position.offsetY) {
-          win.moveTo(position.offsetX, position.offsetY);
+        let tipsPosition = PositionUtils.getTipsDialogPosition();
+        if (tipsPosition.offsetX !== globalThis.position.offsetX || tipsPosition.offsetY !== globalThis.position.offsetY) {
+          win.moveTo(tipsPosition.offsetX, tipsPosition.offsetY);
         }
-        if (position.width !== globalThis.position.width || position.height !== globalThis.position.height) {
-          win.resetSize(position.width, position.height);
+        if (tipsPosition.width !== globalThis.position.width || tipsPosition.height !== globalThis.position.height) {
+          win.resetSize(tipsPosition.width, tipsPosition.height);
         }
-        globalThis.position = position;
+        globalThis.position = tipsPosition;
       });
     } catch (exception) {
       console.error('Failed to register callback. Code: ' + JSON.stringify(exception));
@@ -58,19 +58,19 @@ export default class TipsServiceExtensionAbility extends extension {
         width: globalThis.position.width,
         height: globalThis.position.height
       };
-      if (winNum > 1) {
+      if (tipsWinNum > 1) {
         win.destroy();
-        winNum--;
+        tipsWinNum--;
       }
       let windowType = (typeof(globalThis.callerToken) === 'object' && globalThis.callerToken !== null) ?
         window.WindowType.TYPE_DIALOG : window.WindowType.TYPE_SYSTEM_ALERT;
       this.createWindow('TipsDialog' + startId, windowType, navigationBarRect);
-      winNum++;
+      tipsWinNum++;
     });
   }
 
   onDestroy() {
-    console.info(TAG, 'onDestroy.');
+    console.info(TAG, 'TipsServiceExtensionAbility onDestroy.');
     if (win !== undefined) {
       win.destroy();
     }
@@ -84,8 +84,8 @@ export default class TipsServiceExtensionAbility extends extension {
       if (windowType === window.WindowType.TYPE_DIALOG) {
         await win.bindDialogTarget(globalThis.callerToken.value, () => {
           win.destroyWindow();
-          winNum--;
-          if (winNum === 0) {
+          tipsWinNum--;
+          if (tipsWinNum === 0) {
             globalThis.tipsExtensionContext.terminateSelf();
           }
         });

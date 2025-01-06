@@ -458,9 +458,10 @@ void UriUtils::PublishFileOpenEvent(const Want &want)
     auto wangUri = want.GetUri();
     std::string uriStr = wangUri.ToString();
     if (!uriStr.empty() && wangUri.GetScheme() == "file") {
+        int32_t userId = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, 0) / AppExecFwk::Constants::BASE_USER_RANGE;
         OHOS::AppExecFwk::ElementName element = want.GetElement();
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "ability record, file uri:%{private}s, bundle:%{public}s, ability:%{public}s",
-            uriStr.c_str(), element.GetBundleName().c_str(), element.GetAbilityName().c_str());
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "ability record:%{private}s,ability:%{public}s_%{public}s,userId:%{public}d",
+            uriStr.c_str(), element.GetBundleName().c_str(), element.GetAbilityName().c_str(), userId);
         Want msgWant;
         msgWant.SetAction("file.event.OPEN_TIME");
         msgWant.SetParam("uri", uriStr);
@@ -474,7 +475,8 @@ void UriUtils::PublishFileOpenEvent(const Want &want)
         EventFwk::CommonEventPublishInfo commonEventPublishInfo;
         std::vector<std::string> subscriberPermissions = {"ohos.permission.MANAGE_LOCAL_ACCOUNTS"};
         commonEventPublishInfo.SetSubscriberPermissions(subscriberPermissions);
-        IN_PROCESS_CALL(EventFwk::CommonEventManager::PublishCommonEvent(commonData, commonEventPublishInfo));
+        IN_PROCESS_CALL(EventFwk::CommonEventManager::PublishCommonEventAsUser(commonData, commonEventPublishInfo,
+            userId));
     }
 }
 
