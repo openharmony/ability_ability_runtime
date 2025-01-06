@@ -121,6 +121,11 @@ public:
         GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnKillProcessWithAccount);
     }
 
+    static napi_value KillProcessesInBatch(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnKillProcessesInBatch);
+    }
+
     static napi_value KillProcessesByBundleName(napi_env env, napi_callback_info info)
     {
         GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnkillProcessesByBundleName);
@@ -1119,6 +1124,45 @@ private:
         return result;
     }
 
+    napi_value OnKillProcessesInBatch(napi_env env, size_t argc, napi_value* argv)
+    {
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
+        if (argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Params mismatch");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        std::vector<int32_t> pids;
+        if (!AppExecFwk::UnwrapArrayInt32FromJS(env, argv[INDEX_ZERO], pids)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Parse pids failed");
+            ThrowInvalidParamError(env, "Parse param pids failed, must be array of numbers.");
+            return CreateJsUndefined(env);
+        }
+        auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+        NapiAsyncTask::ExecuteCallback execute = [pids, appManager = appManager_, innerErrorCode]() {
+            if (appManager == nullptr || appManager->GetAmsMgr() == nullptr) {
+                TAG_LOGW(AAFwkTag::APPMGR, "null appManager or amsMgr");
+                *innerErrorCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
+                return;
+            }
+            *innerErrorCode = appManager->GetAmsMgr()->KillProcessesInBatch(pids);
+        };
+        NapiAsyncTask::CompleteCallback complete =
+            [innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+            if (*innerErrorCode == ERR_OK) {
+                task.ResolveWithNoError(env, CreateJsUndefined(env));
+                return;
+            }
+            TAG_LOGE(AAFwkTag::APPMGR, "KillProcessesInBatch failed:%{public}d", *innerErrorCode);
+            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
+        };
+
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessesInBatch",
+            env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+        return result;
+    }
+
     napi_value OnGetAppMemorySize(napi_env env, size_t argc, napi_value* argv)
     {
         napi_value lastParam = (argc > ARGC_ZERO) ? argv[INDEX_ZERO] : nullptr;
@@ -1557,6 +1601,7 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
         JsAppManager::GetRunningProcessInformation);
     BindNativeFunction(env, exportObj, "isRunningInStabilityTest", moduleName, JsAppManager::IsRunningInStabilityTest);
     BindNativeFunction(env, exportObj, "killProcessWithAccount", moduleName, JsAppManager::KillProcessWithAccount);
+    BindNativeFunction(env, exportObj, "killProcessesInBatch", moduleName, JsAppManager::KillProcessesInBatch);
     BindNativeFunction(env, exportObj, "killProcessesByBundleName", moduleName,
         JsAppManager::KillProcessesByBundleName);
     BindNativeFunction(env, exportObj, "clearUpApplicationData", moduleName, JsAppManager::ClearUpApplicationData);

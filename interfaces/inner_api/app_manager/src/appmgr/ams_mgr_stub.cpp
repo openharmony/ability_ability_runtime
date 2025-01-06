@@ -215,6 +215,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleKillProcessesByAccessTokenId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_ATTACHED):
             return HandleIsProcessAttached(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_IN_BATCH):
+            return HandleKillProcessesInBatch(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -362,6 +364,31 @@ ErrCode AmsMgrStub::HandleKillProcessWithAccount(MessageParcel &data, MessagePar
         bundleName.c_str(), accountId, clearPageStack);
 
     int32_t result = KillProcessWithAccount(bundleName, accountId, clearPageStack);
+    reply.WriteInt32(result);
+
+    TAG_LOGI(AAFwkTag::APPMGR, "end");
+
+    return NO_ERROR;
+}
+
+ErrCode AmsMgrStub::HandleKillProcessesInBatch(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "enter");
+
+    HITRACE_METER(HITRACE_TAG_APP);
+
+    auto size = data.ReadUint32();
+    TAG_LOGI(AAFwkTag::APPMGR, "pids.size=%{public}d", size);
+    if (size == 0 || size > MAX_KILL_PROCESS_PID_COUNT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid size");
+        return ERR_INVALID_VALUE;
+    }
+    std::vector<int32_t> pids;
+    for (uint32_t i = 0; i < size; i++) {
+        pids.emplace_back(data.ReadInt32());
+    }
+
+    int32_t result = KillProcessesInBatch(pids);
     reply.WriteInt32(result);
 
     TAG_LOGI(AAFwkTag::APPMGR, "end");

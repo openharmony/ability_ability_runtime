@@ -195,6 +195,15 @@ public:
 
     virtual void KillProcessesByPids(std::vector<int32_t> &pids);
 
+    /**
+     * KillProcessesInBatch, kill processes in batch;
+     * the killed bundle won't be started by the watcher.
+     *
+     * @param pids, the pid list of processes are going to be killed.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t KillProcessesInBatch(const std::vector<int32_t> &pids);
+
     virtual void AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken);
 
     /**
@@ -1667,6 +1676,8 @@ private:
 
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
     std::unordered_set<std::string> nwebPreloadSet_ {};
+    ffrt::mutex killedBundleSetMutex_;
+    std::set<std::string> killedBundleSet_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
