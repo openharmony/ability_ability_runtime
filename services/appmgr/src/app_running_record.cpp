@@ -1960,7 +1960,11 @@ void AppRunningRecord::OnWindowVisibilityChanged(
             windowIds_.emplace(info->windowId_);
         }
     }
+    OnWindowVisibilityChangedWithPendingState();
+}
 
+void AppRunningRecord::OnWindowVisibilityChangedWithPendingState()
+{
     TAG_LOGI(AAFwkTag::APPMGR, "wnd call, %{public}s_%{public}d, isEmpty_%{public}d, c_%{public}d -> p_%{public}d",
         GetBundleName().c_str(), GetPid(), IsWindowIdsEmpty(), curState_, pendingState_);
     if (pendingState_ == ApplicationPendingState::READY) {
@@ -1969,13 +1973,19 @@ void AppRunningRecord::OnWindowVisibilityChanged(
                 SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
                 ScheduleForegroundRunning();
             }
-            SetWatchdogBackgroundStatusRunning(false);
+            if (watchdogVisibilityState_ != WatchdogVisibilityState::WATCHDOG_STATE_VISIBILITY) {
+                watchdogVisibilityState_ = WatchdogVisibilityState::WATCHDOG_STATE_VISIBILITY;
+                SetWatchdogBackgroundStatusRunning(false);
+            }
         } else {
             if (IsAbilitiesBackground() && curState_ == ApplicationState::APP_STATE_FOREGROUND) {
                 SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
                 ScheduleBackgroundRunning();
             }
-            SetWatchdogBackgroundStatusRunning(true);
+            if (watchdogVisibilityState_ != WatchdogVisibilityState::WATCHDOG_STATE_UNVISIBILITY) {
+                watchdogVisibilityState_ = WatchdogVisibilityState::WATCHDOG_STATE_UNVISIBILITY;
+                SetWatchdogBackgroundStatusRunning(true);
+            }
         }
     } else {
         if (!IsWindowIdsEmpty()) {
