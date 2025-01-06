@@ -75,11 +75,12 @@ HWTEST_F(QuickFixManagerClientTest, ApplyQuickFix_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start", __func__);
 
     quickFixClient_->quickFixMgr_ = mockQuickFixMgrService_;
-    EXPECT_CALL(*mockQuickFixMgrService_, ApplyQuickFix(_, _)).Times(1);
+    EXPECT_CALL(*mockQuickFixMgrService_, ApplyQuickFix(_, _, _)).Times(1);
 
     std::vector<std::string> quickfixFiles;
     bool isDebug = false;
-    auto ret = quickFixClient_->ApplyQuickFix(quickfixFiles, isDebug);
+    bool isReplace = false;
+    auto ret = quickFixClient_->ApplyQuickFix(quickfixFiles, isDebug, isReplace);
     EXPECT_EQ(ret, QUICK_FIX_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end", __func__);

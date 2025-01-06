@@ -32,7 +32,8 @@ namespace {
 const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 } // namespace
 
-int32_t QuickFixManagerClient::ApplyQuickFix(const std::vector<std::string> &quickFixFiles, bool isDebug)
+int32_t QuickFixManagerClient::ApplyQuickFix(const std::vector<std::string> &quickFixFiles, bool isDebug,
+    bool isReplace)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::QUICKFIX, "called");
@@ -57,7 +58,7 @@ int32_t QuickFixManagerClient::ApplyQuickFix(const std::vector<std::string> &qui
             QUICK_FIX_COPY_FILES_FAILED;
     }
 
-    return quickFixMgr->ApplyQuickFix(destFiles, isDebug);
+    return quickFixMgr->ApplyQuickFix(destFiles, isDebug, isReplace);
 }
 
 int32_t QuickFixManagerClient::GetApplyedQuickFixInfo(const std::string &bundleName,
