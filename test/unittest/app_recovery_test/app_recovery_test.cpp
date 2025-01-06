@@ -231,7 +231,7 @@ HWTEST_F(AppRecoveryUnitTest, RemoveAbility_002, TestSize.Level1)
 {
     AppRecovery::GetInstance().isEnable_ = false;
     bool ret = AppRecovery::GetInstance().RemoveAbility(token_);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 /**

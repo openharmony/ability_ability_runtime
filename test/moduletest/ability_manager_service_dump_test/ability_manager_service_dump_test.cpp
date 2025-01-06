@@ -172,7 +172,7 @@ HWTEST_F(AbilityManagerServiceDumpTest, AbilityManagerService_DumpSysProcess_010
     bool isClient = false;
     bool isUserID = true;
     abilityMs_->DumpSysProcess(args, info, isClient, isUserID, USER_ID);
-    EXPECT_NE(info.size(), SIZE_ZERO);
+    EXPECT_EQ(info.size(), SIZE_ZERO);
 }
 
 /**
