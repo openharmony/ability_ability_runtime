@@ -507,7 +507,7 @@ private:
     void UpdateResConfig(std::shared_ptr<Global::Resource::ResourceManager> src,
         std::shared_ptr<Global::Resource::ResourceManager> &resourceManager);
     int32_t GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo, bool &currentBundle);
-    void GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo, const int &accountId,
+    void GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo,
         std::shared_ptr<Context> inputContext = nullptr);
     ErrCode GetOverlayMgrProxy();
     void UnsubscribeToOverlayEvents();
