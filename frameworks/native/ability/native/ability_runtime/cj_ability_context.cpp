@@ -461,6 +461,15 @@ int32_t CJAbilityContext::OpenLink(const AAFwk::Want& want, int requestCode)
     return context_->OpenLink(want, requestCode);
 }
 
+int32_t CJAbilityContext::ChangeAbilityVisibility(bool isShow)
+{
+    if (context_ == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+    }
+    return context_->ChangeAbilityVisibility(isShow);
+}
+
 void CjUIExtensionCallback::SetSessionId(int32_t sessionId)
 {
     sessionId_ = sessionId;
