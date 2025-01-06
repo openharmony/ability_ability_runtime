@@ -37,7 +37,7 @@ struct ACJDelegatorAbilityProperty {
     AbilityLifecycleExecutor::LifecycleState lifecycleState_ {
         AbilityLifecycleExecutor::LifecycleState::UNINITIALIZED
     };
-    // ability object in jsruntime
+    // cj ability ID
     int64_t cjObject_;
 };
 
