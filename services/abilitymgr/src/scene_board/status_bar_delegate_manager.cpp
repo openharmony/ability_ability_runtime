@@ -34,14 +34,14 @@ sptr<AbilityRuntime::IStatusBarDelegate> StatusBarDelegateManager::GetStatusBarD
     return statusBarDelegate_;
 }
 
-bool StatusBarDelegateManager::IsCallerInStatusBar()
+bool StatusBarDelegateManager::IsCallerInStatusBar(const std::string &instanceKey)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto statusBarDelegate = GetStatusBarDelegate();
     CHECK_POINTER_AND_RETURN(statusBarDelegate, false);
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
     bool isExist = false;
-    auto ret = statusBarDelegate->CheckIfStatusBarItemExists(callingTokenId, isExist);
+    auto ret = statusBarDelegate->CheckIfStatusBarItemExists(callingTokenId, instanceKey, isExist);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ret: %{public}d", ret);
         return false;
@@ -56,7 +56,7 @@ bool StatusBarDelegateManager::IsInStatusBar(uint32_t accessTokenId)
     auto statusBarDelegate = GetStatusBarDelegate();
     CHECK_POINTER_AND_RETURN(statusBarDelegate, false);
     bool isExist = false;
-    auto ret = statusBarDelegate->CheckIfStatusBarItemExists(accessTokenId, isExist);
+    auto ret = statusBarDelegate->CheckIfStatusBarItemExists(accessTokenId, "app_instance_0", isExist);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ret: %{public}d", ret);
         return false;

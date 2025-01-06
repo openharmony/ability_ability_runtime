@@ -26,7 +26,7 @@ public:
     explicit StatusBarDelegateProxy(const sptr<IRemoteObject> &impl);
     virtual ~StatusBarDelegateProxy() = default;
 
-    virtual int32_t CheckIfStatusBarItemExists(uint32_t accessTokenId, bool& isExist);
+    virtual int32_t CheckIfStatusBarItemExists(uint32_t accessTokenId, const std::string &instanceKey, bool& isExist);
     virtual int32_t AttachPidToStatusBarItem(uint32_t accessTokenId, int32_t pid, const std::string &instanceKey);
 
 private:

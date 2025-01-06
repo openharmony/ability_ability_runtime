@@ -68,7 +68,7 @@ HWTEST_F(StatusBarDelegateManagerTest, IsCallerInStatusBar_0100, TestSize.Level1
     EXPECT_NE(statusBarDelegate, nullptr);
     statusBarDelegate->RegisterStatusBarDelegate(nullptr);
     statusBarDelegate->GetStatusBarDelegate();
-    bool ret = statusBarDelegate->IsCallerInStatusBar();
+    bool ret = statusBarDelegate->IsCallerInStatusBar("");
     EXPECT_EQ(ret, false);
 }
 
@@ -83,7 +83,7 @@ HWTEST_F(StatusBarDelegateManagerTest, DoProcessAttachment_0100, TestSize.Level1
     EXPECT_NE(statusBarDelegate, nullptr);
     statusBarDelegate->RegisterStatusBarDelegate(nullptr);
     statusBarDelegate->GetStatusBarDelegate();
-    bool ret = statusBarDelegate->IsCallerInStatusBar();
+    bool ret = statusBarDelegate->IsCallerInStatusBar("");
     EXPECT_EQ(ret, false);
     std::shared_ptr<AbilityRecord> abilityRecord;
     int32_t attach_ret = statusBarDelegate->DoProcessAttachment(abilityRecord);
@@ -101,7 +101,7 @@ HWTEST_F(StatusBarDelegateManagerTest, DoCallerProcessAttachment_0100, TestSize.
     EXPECT_NE(statusBarDelegate, nullptr);
     statusBarDelegate->RegisterStatusBarDelegate(nullptr);
     statusBarDelegate->GetStatusBarDelegate();
-    bool ret = statusBarDelegate->IsCallerInStatusBar();
+    bool ret = statusBarDelegate->IsCallerInStatusBar("");
     EXPECT_EQ(ret, false);
     std::shared_ptr<AbilityRecord> abilityRecord;
     int32_t attach_ret = statusBarDelegate->DoProcessAttachment(abilityRecord);
