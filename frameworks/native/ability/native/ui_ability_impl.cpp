@@ -405,7 +405,8 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
     };
 
     if (handler_) {
-        handler_->PostTask(task);
+        handler_->PostTask(task, "UIAbilityImpl::AfterFocusedCommon", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }

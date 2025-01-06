@@ -335,7 +335,8 @@ bool UIAbilityThread::ScheduleAbilityTransaction(
 
         abilityThread->HandleAbilityTransaction(want, lifeCycleStateInfo, sessionInfo);
     };
-    bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:AbilityTransaction");
+    bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:AbilityTransaction", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
     if (!ret) {
         TAG_LOGE(AAFwkTag::UIABILITY, "postTask error");
         return false;

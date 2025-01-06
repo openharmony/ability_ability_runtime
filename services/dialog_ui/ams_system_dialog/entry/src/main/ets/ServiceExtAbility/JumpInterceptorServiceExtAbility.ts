@@ -20,7 +20,7 @@ import deviceInfo from '@ohos.deviceInfo';
 
 const TAG = 'JumpInterceptorDialog_Service';
 
-let winNum = 1;
+let jumpWinNum = 1;
 let win;
 
 export default class JumpInterceptorServiceExtAbility extends extension {
@@ -50,16 +50,16 @@ export default class JumpInterceptorServiceExtAbility extends extension {
         width: globalThis.position.width,
         height: globalThis.position.height
       };
-      if (winNum > 1) {
+      if (jumpWinNum > 1) {
         win.destroy();
-        winNum--;
+        jumpWinNum--;
       }
       if (globalThis.params.isDefaultSelector) {
         this.createWindow('JumpInterceptorDialog' + startId, window.WindowType.TYPE_SYSTEM_ALERT, navigationBarRect);
       } else {
         this.createWindow('JumpInterceptorDialog' + startId, window.WindowType.TYPE_FLOAT, navigationBarRect);
       }
-      winNum++;
+      jumpWinNum++;
     });
   }
 
@@ -90,7 +90,7 @@ export default class JumpInterceptorServiceExtAbility extends extension {
   }
 
   onDestroy() {
-    console.info(TAG, 'onDestroy.');
+    console.info(TAG, 'JumpInterceptorServiceExtAbility onDestroy.');
     if (win !== undefined) {
       win.destroy();
     }

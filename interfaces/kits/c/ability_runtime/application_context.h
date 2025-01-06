@@ -39,12 +39,16 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "want.h"
 #include "ability_runtime_common.h"
 #include "context_constant.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct AbilityBase_Want;
+typedef struct AbilityBase_Want AbilityBase_Want;
 
 /**
  * @brief Obtain the cache directory of the application.
@@ -210,6 +214,32 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetDistributedFiles
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetCloudFileDir(
     char* buffer, const int32_t bufferSize, int32_t* writeLength);
+
+/**
+ * @brief Starts self UIAbility.
+ *
+ * @permission {@code ohos.permission.NDK_START_SELF_UI_ABILITY}
+ * @param want The arguments passed to start self UIAbility.
+ * For details, see {@link AbilityBase_Want}.
+ * @return Returns {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the call is successful.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED} if the caller has no correct permission.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_INVALID_PARAM} if the arguments provided is invalid.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} if the device does not support starting self uiability.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY} if the target ability does not exist.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE} if the ability type is incorrect.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_INVISIBLE} if the target ability is invisible.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_CROSS_USER} if the caller tries to start cross-user ability.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_CROWDTEST_EXPIRED} if the crowdtesting application expires.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_WUKONG_MODE} if the ability cannot be started in Wukong mode.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_CONTROLLED} if the app is controlled.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_EDM_CONTROLLED} if the app is controlled by EDM.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_CROSS_APP} if the caller tries to start a different application.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if internal error occurs.\n
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY} if the caller is not top ability.\n
+ * For details, see {@link AbilityRuntime_ErrorCode}.
+ * @since 15
+ */
+AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbility(AbilityBase_Want *want);
 
 #ifdef __cplusplus
 } // extern "C"

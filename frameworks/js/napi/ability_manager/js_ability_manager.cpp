@@ -710,7 +710,7 @@ private:
         };
 
         NapiAsyncTask::CompleteCallback complete = [appId, startTime, innerErrorCode, rule,
-            observer = queryERMSObserver_](
+            &observer = queryERMSObserver_](
             napi_env env, NapiAsyncTask &task, int32_t status) {
             if (observer == nullptr) {
                 TAG_LOGW(AAFwkTag::ABILITYMGR, "null observer");

@@ -1001,7 +1001,7 @@ void UIAbility::UpdateConfiguration(Rosen::DisplayId to, float density, int32_t 
             }
             ability->OnConfigurationUpdated(configuration);
         };
-        handler_->PostTask(task);
+        handler_->PostTask(task, "UIAbility::UpdateConfiguration", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
 
@@ -1138,7 +1138,8 @@ void UIAbility::OnChangeForUpdateConfiguration(const AppExecFwk::Configuration &
             }
             ability->OnConfigurationUpdated(configuration);
         };
-        handler_->PostTask(task);
+        handler_->PostTask(task, "UIAbility::OnChangeForUpdateConfiguration", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
 

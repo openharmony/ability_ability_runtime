@@ -310,7 +310,7 @@ int32_t StartupManager::PostMainThreadTask(const std::function<void()> &task)
         TAG_LOGE(AAFwkTag::STARTUP, "null mainHandler");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
-    mainHandler_->PostTask(task);
+    mainHandler_->PostTask(task, "StartupManager:PostMainThreadTask", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     return ERR_OK;
 }
 

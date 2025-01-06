@@ -566,5 +566,15 @@ bool PermissionVerification::VerifySuperviseKiaServicePermission() const
     TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
     return false;
 }
+
+bool PermissionVerification::VerifyStartSelfUIAbility() const
+{
+    if (!IsSACall() && VerifyCallingPermission(PermissionConstants::PERMISSION_NDK_START_SELF_UI_ABILITY)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+        return true;
+    }
+    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
+    return false;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

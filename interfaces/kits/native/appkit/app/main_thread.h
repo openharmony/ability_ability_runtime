@@ -360,6 +360,13 @@ public:
      */
     int32_t ScheduleDumpFfrt(std::string& result) override;
 
+    /**
+     *
+     * @brief Set watchdog background status of application.
+     *
+     */
+    void SetWatchdogBackgroundStatus(bool status) override;
+
 private:
     /**
      *
