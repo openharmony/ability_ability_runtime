@@ -410,13 +410,8 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
 
     TAG_LOGD(AAFwkTag::APPKIT, "bundleName: %{public}s", bundleName.c_str());
 
-    int accountId = GetCurrentAccountId();
-    if (accountId == 0) {
-        accountId = GetCurrentActiveAccountId();
-    }
-
     AppExecFwk::BundleInfo bundleInfo;
-    GetBundleInfo(bundleName, bundleInfo, accountId, inputContext);
+    GetBundleInfo(bundleName, bundleInfo, inputContext);
     if (bundleInfo.name.empty() || bundleInfo.applicationInfo.name.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "GetBundleInfo error");
         ErrCode ret = bundleMgr_->GetDependentBundleInfo(bundleName, bundleInfo,
@@ -515,12 +510,8 @@ int32_t ContextImpl::CreateSystemHspModuleResourceManager(const std::string &bun
         return ERR_INVALID_VALUE;
     }
 
-    int accountId = GetCurrentAccountId();
-    if (accountId == 0) {
-        accountId = GetCurrentActiveAccountId();
-    }
     AppExecFwk::BundleInfo bundleInfo;
-    GetBundleInfo(bundleName, bundleInfo, accountId);
+    GetBundleInfo(bundleName, bundleInfo);
     if (bundleInfo.name.empty() || bundleInfo.applicationInfo.name.empty()) {
         TAG_LOGW(AAFwkTag::APPKIT, "GetBundleInfo error");
         ErrCode ret = bundleMgr_->GetDependentBundleInfo(bundleName, bundleInfo,
@@ -574,7 +565,12 @@ int32_t ContextImpl::GetBundleInfo(const std::string &bundleName, AppExecFwk::Bu
     if (currentBundle) {
         bundleMgr_->GetBundleInfoForSelf((
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)), bundleInfo);
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)), bundleInfo);
     } else {
         int accountId = GetCurrentAccountId();
         if (accountId == 0) {
@@ -598,7 +594,7 @@ int32_t ContextImpl::GetBundleInfo(const std::string &bundleName, AppExecFwk::Bu
 }
 
 void ContextImpl::GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo,
-    const int &accountId, std::shared_ptr<Context> inputContext)
+    std::shared_ptr<Context> inputContext)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "begin");
     if (bundleMgr_ == nullptr) {
@@ -612,13 +608,12 @@ void ContextImpl::GetBundleInfo(const std::string &bundleName, AppExecFwk::Bundl
     if (bundleName == GetBundleNameWithContext(inputContext)) {
         bundleMgr_->GetBundleInfoForSelf(
             (static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)), bundleInfo);
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)), bundleInfo);
     } else {
+        int accountId = GetCurrentAccountId();
+        if (accountId == 0) {
+            accountId = GetCurrentActiveAccountId();
+        }
         bundleMgr_->GetBundleInfoV9(bundleName,
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE),
