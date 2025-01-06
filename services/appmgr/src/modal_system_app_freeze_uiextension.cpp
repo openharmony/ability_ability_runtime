@@ -19,8 +19,6 @@
 #include <chrono>
 #include <mutex>
 
-#include <parameters.h>
-
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
@@ -86,12 +84,15 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
         lastFreezeTime = now;
     }
     if (focusFlag && isPullUpBox) {
-        auto deviceTypeStr = system::GetParameter("const.product.devicetype", "unknown");
-        if (deviceTypeStr == "tablet") {
+        std::string appNoResponseBundleName = APP_NO_RESPONSE_BUNDLENAME;
+        if (appNoResponseBundleName == "com.ohos.taskmanager") {
             callback();
         } else {
             CreateModalUIExtension(pid, bundleName);
         }
+    } else if (callback && (faultType != FaultDataType::APP_FREEZE || !isAppFreezeDialog)) {
+        callback();
+    }
     } else if (callback && (faultType != FaultDataType::APP_FREEZE || !isAppFreezeDialog)) {
         callback();
     }
