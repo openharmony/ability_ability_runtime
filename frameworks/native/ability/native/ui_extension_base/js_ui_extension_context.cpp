@@ -360,11 +360,17 @@ napi_value JsUIExtensionContext::OnOpenLinkInner(napi_env env, const AAFwk::Want
         *innerErrorCode = context->OpenLink(want, requestCode);
     };
 
+    napi_value result = nullptr;
+    AddFreeInstallObserver(env, want, nullptr, &result, false, true);
     NapiAsyncTask::CompleteCallback complete = [innerErrorCode, requestCode, startTime, url, weak = context_,
-        &observer = freeInstallObserver_](
-        napi_env env, NapiAsyncTask& task, int32_t status) {
+        observer = freeInstallObserver_](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrorCode == 0) {
             TAG_LOGI(AAFwkTag::UI_EXT, "OpenLink succeeded");
+            return;
+        }
+        auto context = weak.lock();
+        if (context == nullptr) {
+            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
             return;
         }
         if (observer != nullptr) {
@@ -375,16 +381,9 @@ napi_value JsUIExtensionContext::OnOpenLinkInner(napi_env env, const AAFwk::Want
             }
             observer->OnInstallFinishedByUrl(startTime, url, *innerErrorCode);
         }
-        auto context = weak.lock();
-        if (!context) {
-            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
-            return;
-        }
         context->RemoveResultCallbackTask(requestCode);
     };
 
-    napi_value result = nullptr;
-    AddFreeInstallObserver(env, want, nullptr, &result, false, true);
     NapiAsyncTask::ScheduleHighQos("JsUIExtensionContext::OnOpenLink", env,
         CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), nullptr));
 
