@@ -58,23 +58,6 @@ int32_t HiddenStartUtils::CheckHiddenStartSupported(const Want &want, const Star
         return ERR_INVALID_VALUE;
     }
 
-    std::string bundleName = want.GetElement().GetBundleName();
-    bool isRunning = false;
-    auto appMgr = AppMgrUtil::GetAppMgr();
-    if (appMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
-        return ERR_INVALID_VALUE;
-    }
-    auto result = appMgr->IsAppRunning(bundleName, 0, isRunning);
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Query for app running failed, error code: %{public}d", result);
-        return result;
-    }
-    if (isRunning) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ability is running now");
-        return ERR_ABILITY_ALREADY_RUNNING;
-    }
-
     return ERR_OK;
 }
 }
