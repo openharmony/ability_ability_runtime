@@ -74,37 +74,37 @@ private:
 };
 
 extern "C" {
-struct AbilityInfo {
+struct CJAbilityInfo {
     const char* abilityName;
     const char* moduleName;
 };
 
-struct AbilityStageInfo {
+struct CJAbilityStageInfo {
     const char* moduleName;
     const char* srcEntrance;
 };
 
-CJ_EXPORT bool FFIAbilityDelegatorDoAbilityForeground(int64_t id, int64_t abilityId, int32_t* errorCode);
-CJ_EXPORT bool FFIAbilityDelegatorDoAbilityBackground(int64_t id, int64_t abilityId, int32_t* errorCode);
-CJ_EXPORT int64_t FFIAbilityDelegatorGetCurrentTopAbility(int64_t id, int32_t* errorCode);
-CJ_EXPORT int64_t FFIAbilityDelegatorGetAbilityState(int64_t id, int64_t abilityId, int32_t* errorCode);
-CJ_EXPORT void FFIAbilityDelegatorPrint(int64_t id, const char* msg, int32_t* errorCode);
-CJ_EXPORT void FFIAbilityDelegatorAddAbilityMonitor(
-    int64_t id, int64_t monitorId, const char* abilityName, const char* moduleName, int32_t* errorCode);
-CJ_EXPORT void FFIAbilityDelegatorRemoveAbilityMonitor(
-    int64_t id, int64_t monitorId, const char* abilityName, const char* moduleName, int32_t* errorCode);
-CJ_EXPORT int64_t FFIAbilityDelegatorWaitAbilityMonitor(
-    int64_t id, int64_t monitorId, AbilityInfo abilityInfo, int32_t* errorCode);
-CJ_EXPORT int64_t FFIAbilityDelegatorWaitAbilityMonitorWithTimeout(
-    int64_t id, int64_t monitorId, AbilityInfo abilityInfo, int64_t timeout, int32_t* errorCode);
-CJ_EXPORT void FFIAbilityDelegatorAddAbilityStageMonitor(
-    int64_t id, int64_t stageMonitorId, const char* moduleName, const char* srcEntrance, int32_t* errorCode);
-CJ_EXPORT void FFIAbilityDelegatorRemoveAbilityStageMonitor(
-    int64_t id, int64_t stageMonitorId, const char* moduleName, const char* srcEntrance, int32_t* errorCode);
-CJ_EXPORT int64_t FFIAbilityDelegatorWaitAbilityStageMonitor(
-    int64_t id, int64_t stageMonitorId, AbilityStageInfo abilityStageInfo, int32_t* errorCode);
-CJ_EXPORT int64_t FFIAbilityDelegatorWaitAbilityStageMonitorWithTimeout(
-    int64_t id, int64_t stageMonitorId, AbilityStageInfo abilityStageInfo, int64_t timeout, int32_t* errorCode);
+CJ_EXPORT int32_t FFIAbilityDelegatorDoAbilityForeground(int64_t id, int64_t abilityId, bool* ret);
+CJ_EXPORT int32_t FFIAbilityDelegatorDoAbilityBackground(int64_t id, int64_t abilityId, bool* ret);
+CJ_EXPORT int32_t FFIAbilityDelegatorGetCurrentTopAbility(int64_t id, int64_t* abilityId);
+CJ_EXPORT int32_t FFIAbilityDelegatorGetAbilityState(int64_t id, int64_t abilityId, int64_t* state);
+CJ_EXPORT int32_t FFIAbilityDelegatorPrint(int64_t id, const char* msg);
+CJ_EXPORT int32_t FFIAbilityDelegatorAddAbilityMonitor(
+    int64_t id, int64_t monitorId, const char* abilityName, const char* moduleName);
+CJ_EXPORT int32_t FFIAbilityDelegatorRemoveAbilityMonitor(
+    int64_t id, int64_t monitorId, const char* abilityName, const char* moduleName);
+CJ_EXPORT int32_t FFIAbilityDelegatorWaitAbilityMonitor(
+    int64_t id, int64_t monitorId, CJAbilityInfo abilityInfo, int64_t* abilityId);
+CJ_EXPORT int32_t FFIAbilityDelegatorWaitAbilityMonitorWithTimeout(
+    int64_t id, int64_t monitorId, CJAbilityInfo abilityInfo, int64_t timeout, int64_t* abilityId);
+CJ_EXPORT int32_t FFIAbilityDelegatorAddAbilityStageMonitor(
+    int64_t id, int64_t stageMonitorId, const char* moduleName, const char* srcEntrance);
+CJ_EXPORT int32_t FFIAbilityDelegatorRemoveAbilityStageMonitor(
+    int64_t id, int64_t stageMonitorId, const char* moduleName, const char* srcEntrance);
+CJ_EXPORT int32_t FFIAbilityDelegatorWaitAbilityStageMonitor(
+    int64_t id, int64_t stageMonitorId, CJAbilityStageInfo abilityStageInfo, int64_t* abilityStageId);
+CJ_EXPORT int32_t FFIAbilityDelegatorWaitAbilityStageMonitorWithTimeout(
+    int64_t id, int64_t stageMonitorId, CJAbilityStageInfo abilityStageInfo, int64_t timeout, int64_t* abilityStageId);
 
 CJ_EXPORT int64_t FFIAbilityDelegatorRegistryGetAbilityDelegator();
 CJ_EXPORT int32_t FFIAbilityDelegatorStartAbility(int64_t id, WantHandle want);
