@@ -94,6 +94,7 @@ const std::string &JsStartupTask::GetType() const
 
 int32_t JsStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallback> callback)
 {
+    TAG_LOGI(AAFwkTag::STARTUP, "task: %{public}s init", GetName().c_str());
     if (callCreateOnMainThread_) {
         return JsStartupTaskExecutor::RunOnMainThread(jsRuntime_, startupJsRef_, contextJsRef_, std::move(callback));
     }

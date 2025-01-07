@@ -122,7 +122,7 @@ int32_t PreloadSoStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallb
         TAG_LOGW(AAFwkTag::STARTUP, "task %{public}s, parse ohmUrl failed: %{public}s", name_.c_str(), ohmUrl_.c_str());
         return ERR_OK;
     }
-    TAG_LOGD(AAFwkTag::STARTUP, "task: %{public}s, soName: %{public}s", name_.c_str(), soName.c_str());
+    TAG_LOGI(AAFwkTag::STARTUP, "task: %{public}s, soName: %{public}s", name_.c_str(), soName.c_str());
 
     NativeModuleManager* moduleManager = NativeModuleManager::GetInstance();
     if (moduleManager == nullptr) {
