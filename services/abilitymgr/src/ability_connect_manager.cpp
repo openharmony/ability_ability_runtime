@@ -3314,12 +3314,12 @@ void AbilityConnectManager::UpdateUIExtensionInfo(const std::shared_ptr<AbilityR
     wantParams.SetParam(UIEXTENSION_ABILITY_ID, AAFwk::Integer::Box(uiExtensionAbilityId));
     auto rootHostRecord = GetUIExtensionRootHostInfo(abilityRecord->GetToken());
     if (rootHostRecord != nullptr) {
-        auto rootHostPid = (hostPid == AAFwk::DEFAULT_INVAL_VALUE) ? rootHostRecord->GetPid() : hostPid;
+        auto rootHostPid = rootHostRecord->GetPid();
         wantParams.SetParam(UIEXTENSION_ROOT_HOST_PID, AAFwk::Integer::Box(rootHostPid));
     }
     if (abilityRecord->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
         // Applicable only to preloadUIExtension scenarios
-        auto rootHostPid = IPCSkeleton::GetCallingPid();
+        auto rootHostPid = (hostPid == AAFwk::DEFAULT_INVAL_VALUE) ? IPCSkeleton::GetCallingPid() : hostPid;
         wantParams.SetParam(UIEXTENSION_ROOT_HOST_PID, AAFwk::Integer::Box(rootHostPid));
     }
     abilityRecord->UpdateUIExtensionInfo(wantParams);
