@@ -32,7 +32,7 @@ CJAbilityMonitor::CJAbilityMonitor(
 
 void CJAbilityMonitor::OnAbilityStart(const int64_t abilityId)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnAbilityStart called");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnAbilityStart called");
 
     if (cjMonitor_ == nullptr) {
         return;
@@ -43,7 +43,7 @@ void CJAbilityMonitor::OnAbilityStart(const int64_t abilityId)
 
 void CJAbilityMonitor::OnAbilityForeground(const int64_t abilityId)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnAbilityForeground called");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnAbilityForeground called");
 
     if (cjMonitor_ == nullptr) {
         return;
@@ -54,7 +54,7 @@ void CJAbilityMonitor::OnAbilityForeground(const int64_t abilityId)
 
 void CJAbilityMonitor::OnAbilityBackground(const int64_t abilityId)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnAbilityBackground called");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnAbilityBackground called");
 
     if (cjMonitor_ == nullptr) {
         return;
@@ -65,7 +65,7 @@ void CJAbilityMonitor::OnAbilityBackground(const int64_t abilityId)
 
 void CJAbilityMonitor::OnAbilityStop(const int64_t abilityId)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnAbilityStop called");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnAbilityStop called");
 
     if (cjMonitor_ == nullptr) {
         return;
@@ -76,7 +76,7 @@ void CJAbilityMonitor::OnAbilityStop(const int64_t abilityId)
 
 void CJAbilityMonitor::OnWindowStageCreate(const int64_t abilityId)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnWindowStageCreate called");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnWindowStageCreate called");
 
     if (cjMonitor_ == nullptr) {
         return;
@@ -87,7 +87,7 @@ void CJAbilityMonitor::OnWindowStageCreate(const int64_t abilityId)
 
 void CJAbilityMonitor::OnWindowStageRestore(const int64_t abilityId)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnWindowStageRestore called");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnWindowStageRestore called");
 
     if (cjMonitor_ == nullptr) {
         return;
@@ -98,7 +98,7 @@ void CJAbilityMonitor::OnWindowStageRestore(const int64_t abilityId)
 
 void CJAbilityMonitor::OnWindowStageDestroy(const int64_t abilityId)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnWindowStageDestroy called");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "CJAbilityMonitor::OnWindowStageDestroy called");
 
     if (cjMonitor_ == nullptr) {
         return;
