@@ -16,6 +16,7 @@
 #include "photo_editor_extension.h"
 #include "hilog_tag_wrapper.h"
 #include "js_photo_editor_extension.h"
+#include "cj_photo_editor_extension.h"
 #include "runtime.h"
 #include "photo_editor_extension_context.h"
 
@@ -30,6 +31,8 @@ PhotoEditorExtension *PhotoEditorExtension::Create(const std::unique_ptr<Runtime
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
             return JsPhotoEditorExtension::Create(runtime);
+        case Runtime::Language::CJ:
+            return CJPhotoEditorExtension::Create(runtime);
         default:
             return new PhotoEditorExtension();
     }

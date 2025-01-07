@@ -391,7 +391,11 @@ ohos_shared_library("abilitykit_native") {
       "${ability_runtime_path}/frameworks/cj/ffi",
       "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
     ]
-    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
+    public_configs += [ "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi_public_config" ]
+    deps += [
+      "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+      "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi",
+    ]
     external_deps += [
       "ace_engine:ace_uicontent",
       "bundle_framework:cj_bundle_manager_ffi",
@@ -514,6 +518,22 @@ ohos_shared_library("extensionkit_native") {
     "jsoncpp:jsoncpp",
   ]
 
+  if (cj_frontend) {
+    sources += [
+      "${ability_runtime_native_path}/ability/native/cj_extension_common.cpp",
+      "${ability_runtime_native_path}/ability/native/cj_ui_extension_object.cpp",
+    ]
+
+    include_dirs +=
+        [ "${ability_runtime_path}/cj_environment/interfaces/inner_api" ]
+
+    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
+
+    external_deps += [
+      "napi:cj_bind_ffi",
+      "napi:cj_bind_native",
+    ]
+  }
   if (ability_runtime_graphics) {
     external_deps += [ "ability_base:session_info" ]
     public_external_deps += [
@@ -1456,6 +1476,29 @@ ohos_shared_library("ui_extension") {
     "window_manager:windowstage_kit",
   ]
 
+  if (cj_frontend) {
+    sources += [
+      "${ability_runtime_native_path}/ability/native/ui_extension_base/cj_ui_extension_base.cpp",
+      "${ability_runtime_native_path}/ability/native/ui_extension_base/cj_ui_extension_content_session.cpp",
+      "${ability_runtime_native_path}/ability/native/ui_extension_base/cj_ui_extension_context.cpp",
+    ]
+
+    include_dirs += [
+      "${ability_runtime_path}/cj_environment/interfaces/inner_api",
+      "${ability_runtime_path}/frameworks/cj/ffi",
+    ]
+
+    deps += [
+      ":extensionkit_native",
+      "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+    ]
+
+    external_deps += [
+      "napi:cj_bind_ffi",
+      "napi:cj_bind_native",
+    ]
+  }
+
   if (ability_runtime_graphics) {
     defines = [ "SUPPORT_SCREEN" ]
     external_deps += [
@@ -1549,6 +1592,11 @@ ohos_shared_library("share_extension") {
     "napi:ace_napi",
   ]
 
+  if (cj_frontend) {
+    sources += [ "${ability_runtime_native_path}/ability/native/share_extension_ability/cj_share_extension.cpp" ]
+
+    external_deps += [ "napi:cj_bind_native" ]
+  }
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
   }
@@ -1600,6 +1648,11 @@ ohos_shared_library("action_extension") {
     "napi:ace_napi",
   ]
 
+  if (cj_frontend) {
+    sources += [ "${ability_runtime_native_path}/ability/native/action_extension_ability/cj_action_extension.cpp" ]
+
+    external_deps += [ "napi:cj_bind_native" ]
+  }
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
   }
@@ -1815,6 +1868,17 @@ ohos_shared_library("embedded_ui_extension") {
     "napi:ace_napi",
   ]
 
+  if (cj_frontend) {
+    sources += [ "${ability_runtime_native_path}/ability/native/embedded_ui_extension_ability/cj_embedded_ui_extension.cpp" ]
+
+    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
+
+    external_deps += [
+      "napi:cj_bind_ffi",
+      "napi:cj_bind_native",
+    ]
+  }
+
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
   }
@@ -2028,6 +2092,22 @@ ohos_shared_library("photo_editor_extension") {
     "ipc:ipc_napi",
     "napi:ace_napi",
   ]
+
+  if (cj_frontend) {
+    sources += [
+      "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/cj_photo_editor_extension.cpp",
+      "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/cj_photo_editor_extension_context.cpp",
+      "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/cj_photo_editor_extension_impl.cpp",
+    ]
+
+    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
+
+    external_deps += [
+      "image_framework:cj_image_ffi",
+      "napi:cj_bind_ffi",
+      "napi:cj_bind_native",
+    ]
+  }
 
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]

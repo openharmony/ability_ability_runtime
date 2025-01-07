@@ -16,6 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_CJ_ABILITY_CONTEXT_UTILS_H
 #define OHOS_ABILITY_RUNTIME_CJ_ABILITY_CONTEXT_UTILS_H
 
+#include <cstdint>
+
 extern "C" {
 using WantHandle = void*;
 

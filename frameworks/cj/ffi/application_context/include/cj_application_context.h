@@ -23,6 +23,7 @@
 #include "cj_ability_lifecycle_callback_impl.h"
 #include "cj_application_state_change_callback.h"
 #include "cj_environment_callback.h"
+#include "cj_context.h"
 #include "ffi_remote_data.h"
 #include "running_process_info.h"
 #include "want.h"
@@ -40,10 +41,10 @@ enum CjAppProcessState {
     STATE_DESTROY
 };
 
-class CJApplicationContext : public FFI::FFIData {
+class CJApplicationContext : public FfiContext::CJContext {
 public:
     explicit CJApplicationContext(std::weak_ptr<AbilityRuntime::ApplicationContext> &&applicationContext)
-        : applicationContext_(std::move(applicationContext)) {};
+        : FfiContext::CJContext(applicationContext.lock()), applicationContext_(std::move(applicationContext)) {};
 
     int GetArea();
     std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo();

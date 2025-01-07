@@ -15,6 +15,14 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/ability/ability_runtime/cj_environment/cj_environment.gni")
 
+config("cj_context_ffi_public_config") {
+  visibility = [
+    ":*",
+    "${ability_runtime_native_path}/ability/*",
+  ]
+  include_dirs = [ "${ability_runtime_path}/frameworks/cj/ffi/context" ]
+}
+
 ohos_shared_library("cj_context_ffi") {
   defines = [
     "AMS_LOG_TAG = \"CJ_ABILITY_FFI\"",
@@ -30,13 +38,14 @@ ohos_shared_library("cj_context_ffi") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/frameworks/cj/ffi",
     "${ability_runtime_path}/frameworks/cj/ffi/context",
+    "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
     "${ability_runtime_services_path}/common/include",
   ]
 
+  public_configs = [ ":cj_context_ffi_public_config" ]
+
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
-    "${ability_runtime_native_path}/ability:ability_context_native",
-    "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
   ]

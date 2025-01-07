@@ -13,31 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_CJ_CONTEXT_H
-#define OHOS_ABILITY_RUNTIME_CJ_CONTEXT_H
+#ifndef OHOS_ABILITY_RUNTIME_CJ_UI_EXTENSION_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_CJ_UI_EXTENSION_CONTEXT_H
 
 #include <memory>
 
-#include "ffi_remote_data.h"
+#include "ui_extension_context.h"
+#include "cj_extension_context.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-class Context;
-}
-namespace FfiContext {
-using namespace OHOS::AbilityRuntime;
-
-class CJContext : public FFI::FFIData {
+class CJUIExtensionContextImpl;
+class CJUIExtensionContext : public CJExtensionContext {
 public:
-    explicit CJContext(std::shared_ptr<AbilityRuntime::Context> context)
-        : context_(context) {};
-    std::shared_ptr<AbilityRuntime::Context> GetContext()
-    {
-        return context_;
-    }
-private:
-    std::shared_ptr<AbilityRuntime::Context> context_;
+    explicit CJUIExtensionContext(const std::shared_ptr<UIExtensionContext> &context);
+
+    virtual ~CJUIExtensionContext() = default;
+    std::shared_ptr<CJUIExtensionContextImpl> impl;
 };
-}
-}
-#endif // OHOS_ABILITY_RUNTIME_CJ_CONTEXT_H
+
+}  // namespace AbilityRuntime
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_CJ_UI_EXTENSION_CONTEXT_H

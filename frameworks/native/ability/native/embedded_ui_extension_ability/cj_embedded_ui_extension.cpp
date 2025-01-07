@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,30 +13,29 @@
  * limitations under the License.
  */
 
-#include "action_extension.h"
+#include "cj_embedded_ui_extension.h"
 
 #include "hilog_tag_wrapper.h"
-#include "js_action_extension.h"
-#include "cj_action_extension.h"
-#include "runtime.h"
-#include "ui_extension_context.h"
+#include "hitrace_meter.h"
+#include "cj_ui_extension_base.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-ActionExtension *ActionExtension::Create(const std::unique_ptr<Runtime> &runtime)
+CJEmbeddedUIExtension *CJEmbeddedUIExtension::Create(const std::unique_ptr<Runtime> &runtime)
 {
-    TAG_LOGD(AAFwkTag::ACTION_EXT, "called");
-    if (!runtime) {
-        return new ActionExtension();
-    }
-    switch (runtime->GetLanguage()) {
-        case Runtime::Language::JS:
-            return JsActionExtension::Create(runtime);
-        case Runtime::Language::CJ:
-            return CJActionExtension::Create(runtime);
-        default:
-            return new ActionExtension();
-    }
+    return new CJEmbeddedUIExtension(runtime);
+}
+
+CJEmbeddedUIExtension::CJEmbeddedUIExtension(const std::unique_ptr<Runtime> &runtime)
+{
+    auto uiExtensionBaseImpl = std::make_shared<CJUIExtensionBase>(runtime);
+    uiExtensionBaseImpl->SetExtType(CJExtensionAbilityType::EMBEDDED);
+    SetUIExtensionBaseImpl(uiExtensionBaseImpl);
+}
+
+CJEmbeddedUIExtension::~CJEmbeddedUIExtension()
+{
+    TAG_LOGD(AAFwkTag::EMBEDDED_EXT, "destructor");
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
