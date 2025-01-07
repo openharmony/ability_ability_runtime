@@ -264,7 +264,7 @@ int32_t FFIAbilityDelegatorDoAbilityForeground(int64_t id, int64_t abilityId, bo
     }
     if (!remoteObject) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "parase remoteObject failed");
-        *errorCode = false;
+        *ret = false;
         return INCORRECT_PARAMETERS;
     }
     if (!cjDelegator->DoAbilityForeground(remoteObject)) {
@@ -298,7 +298,7 @@ int32_t FFIAbilityDelegatorDoAbilityBackground(int64_t id, int64_t abilityId, bo
     }
     if (!remoteObject) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "parase remoteObject failed");
-        *errorCode = false;
+        *ret = false;
         return INCORRECT_PARAMETERS;
     }
     if (!cjDelegator->DoAbilityBackground(remoteObject)) {
@@ -423,7 +423,7 @@ int32_t FFIAbilityDelegatorRemoveAbilityMonitor(
 }
 
 int32_t FFIAbilityDelegatorWaitAbilityMonitor(
-    int64_t id, int64_t monitorId, AbilityInfo abilityInfo, int64_t* abilityId)
+    int64_t id, int64_t monitorId, CJAbilityInfo abilityInfo, int64_t* abilityId)
 {
     if (!abilityId) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "receiver is nullptr");
@@ -463,7 +463,7 @@ int32_t FFIAbilityDelegatorWaitAbilityMonitor(
 }
 
 int32_t FFIAbilityDelegatorWaitAbilityMonitorWithTimeout(
-    int64_t id, int64_t monitorId, AbilityInfo abilityInfo, int64_t timeout, int64_t* abilityId)
+    int64_t id, int64_t monitorId, CJAbilityInfo abilityInfo, int64_t timeout, int64_t* abilityId)
 {
     if (!abilityId) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "receiver is nullptr");
@@ -552,7 +552,7 @@ int32_t FFIAbilityDelegatorRemoveAbilityStageMonitor(
 }
 
 int32_t FFIAbilityDelegatorWaitAbilityStageMonitor(
-    int64_t id, int64_t stageMonitorId, AbilityStageInfo abilityStageInfo, int64_t* abilityStageId)
+    int64_t id, int64_t stageMonitorId, CJAbilityStageInfo abilityStageInfo, int64_t* abilityStageId)
 {
     if (!abilityStageId) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "receiver is nullptr");
@@ -590,7 +590,7 @@ int32_t FFIAbilityDelegatorWaitAbilityStageMonitor(
 }
 
 int32_t FFIAbilityDelegatorWaitAbilityStageMonitorWithTimeout(
-    int64_t id, int64_t stageMonitorId, AbilityStageInfo abilityStageInfo, int64_t timeout, int64_t* abilityStageId)
+    int64_t id, int64_t stageMonitorId, CJAbilityStageInfo abilityStageInfo, int64_t timeout, int64_t* abilityStageId)
 {
     if (!abilityStageId) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "receiver is nullptr");
