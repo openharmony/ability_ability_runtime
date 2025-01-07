@@ -121,6 +121,10 @@ std::shared_ptr<RequestInfo> RequestInfo::UnwrapRequestInfo(napi_env env, napi_v
     void* result = nullptr;
     napi_unwrap(env, jsParam, &result);
     RequestInfo *info = static_cast<RequestInfo*>(result);
+    if (info == nullptr) {
+        TAG_LOGE(AAFwkTag::DIALOG, "info null");
+        return nullptr;
+    }
     return std::make_shared<RequestInfo>(*info);
 }
 
