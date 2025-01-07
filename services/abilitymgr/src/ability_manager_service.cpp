@@ -2752,6 +2752,45 @@ void AbilityManagerService::ReportEventToRSS(const AppExecFwk::AbilityInfo &abil
     });
 }
 
+void AbilityManagerService::ReportAppConnectOtherExtensionEvent(const AppExecFwk::AbilityInfo &abilityInfo,
+    const Want &want)
+{
+    if (PermissionVerification::GetInstance()->IsSACall()) {
+        return;
+    }
+    const std::unordered_set<AppExecFwk::ExtensionAbilityType> extensionSet {
+        AppExecFwk::ExtensionAbilityType::FORM,
+        AppExecFwk::ExtensionAbilityType::WORK_SCHEDULER,
+        AppExecFwk::ExtensionAbilityType::INPUTMETHOD,
+        AppExecFwk::ExtensionAbilityType::ACCESSIBILITY,
+        AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER,
+        AppExecFwk::ExtensionAbilityType::WALLPAPER,
+        AppExecFwk::ExtensionAbilityType::BACKUP,
+        AppExecFwk::ExtensionAbilityType::ENTERPRISE_ADMIN,
+        AppExecFwk::ExtensionAbilityType::PRINT,
+        AppExecFwk::ExtensionAbilityType::VPN,
+        AppExecFwk::ExtensionAbilityType::FILEACCESS_EXTENSION,
+        AppExecFwk::ExtensionAbilityType::REMOTE_NOTIFICATION,
+        AppExecFwk::ExtensionAbilityType::REMOTE_LOCATION,
+        AppExecFwk::ExtensionAbilityType::PUSH,
+        AppExecFwk::ExtensionAbilityType::VOIP
+    };
+    if (extensionSet.find(abilityInfo.extensionAbilityType) != extensionSet.end()) {
+        EventInfo eventInfo;
+        eventInfo.bundleName = abilityInfo.bundleName;
+        eventInfo.moduleName = abilityInfo.moduleName;
+        eventInfo.abilityName = abilityInfo.name;
+        eventInfo.extensionType = static_cast<int32_t>(abilityInfo.extensionAbilityType);
+        eventInfo.callerBundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+        if (eventInfo.callerBundleName.empty()) {
+            eventInfo.callerBundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+        }
+        // Add prefix to distinguish reporting scenarios
+        eventInfo.callerBundleName = "Connect:" + eventInfo.callerBundleName;
+        EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
+    }
+}
+
 int32_t AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
 {
@@ -4436,6 +4475,8 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s checkCallServicePermission error", __func__);
         return result;
     }
+
+    ReportAppConnectOtherExtensionEvent(abilityInfo, want);
 
     if (!ExtensionPermissionsUtil::CheckSAPermission(targetExtensionType)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "SA doesn't have target extension permission");
