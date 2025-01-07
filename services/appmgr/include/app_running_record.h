@@ -768,6 +768,7 @@ public:
 #ifdef SUPPORT_SCREEN
     void ChangeWindowVisibility(const sptr<OHOS::Rosen::WindowVisibilityInfo> &info);
     void OnWindowVisibilityChanged(const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
+    void OnWindowVisibilityChangedWithPendingState();
 #endif //SUPPORT_SCREEN
     bool IsAbilitiesBackground();
 
@@ -1083,6 +1084,7 @@ private:
     ApplicationState curState_ = ApplicationState::APP_STATE_CREATE;  // current state of this process
     ApplicationPendingState pendingState_ = ApplicationPendingState::READY;
     ApplicationScheduleState scheduleState_ = ApplicationScheduleState::SCHEDULE_READY;
+    WatchdogVisibilityState watchdogVisibilityState_ = WatchdogVisibilityState::WATCHDOG_STATE_READY;
     bool isFocused_ = false; // if process is focused.
     /**
      * If there is an ability is foregrounding, this flag will be true,

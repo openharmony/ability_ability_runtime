@@ -34,6 +34,12 @@ enum class ApplicationState {
     APP_STATE_CACHED = 100,
 };
 
+enum class WatchdogVisibilityState {
+    WATCHDOG_STATE_READY = 0,
+    WATCHDOG_STATE_VISIBILITY,
+    WATCHDOG_STATE_UNVISIBILITY,
+};
+
 enum class ApplicationPendingState {
     READY = 0,
     FOREGROUNDING,
