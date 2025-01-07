@@ -2064,6 +2064,8 @@ private:
 
     void ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo, sptr<IRemoteObject> callerToken);
 
+    void ReportAppConnectOtherExtensionEvent(const AppExecFwk::AbilityInfo &abilityInfo, const Want &want);
+
     void ReportAppRecoverResult(const int32_t appId, const AppExecFwk::ApplicationInfo &appInfo,
         const std::string& abilityName, const std::string& result);
 
