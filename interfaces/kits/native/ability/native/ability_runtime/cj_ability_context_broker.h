@@ -65,6 +65,7 @@ struct AbilityContextBroker {
     int32_t (*setMissionIcon)(int64_t id, int64_t pixelMapId);
 };
 
+CJ_EXPORT int32_t FFIAbilityContextStartAbilityWithOptions(int64_t id, WantHandle want, CJNewStartOptions startOption);
 CJ_EXPORT int32_t FFIAbilityContextSetRestoreEnabled(int64_t id, bool enabled);
 CJ_EXPORT int32_t FFIAbilityContextBackToCallerAbilityWithResult(int64_t id,
     CJAbilityResult abilityResult, char* requestCode);
@@ -81,6 +82,8 @@ CJ_EXPORT int32_t FFIAbilityContextMoveAbilityToBackground(int64_t id);
 CJ_EXPORT int32_t FFIAbilityContextReportDrawnCompleted(int64_t id);
 CJ_EXPORT int32_t FFIAbilityContextOpenAtomicService(int64_t id, char* cAppId,
     CJAtomicServiceOptions cAtomicServiceOptions, int32_t requestCode, int64_t lambdaId);
+CJ_EXPORT int32_t FFIAbilityContextShowAbility(int64_t id);
+CJ_EXPORT int32_t FFIAbilityContextHideAbility(int64_t id);
 }
 
 #endif // OHOS_ABILITY_RUNTIME_CJ_ABILITY_CONTEXT_BROKER_H
