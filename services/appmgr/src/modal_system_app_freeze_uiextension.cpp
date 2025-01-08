@@ -93,9 +93,6 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
     } else if (callback && (faultType != FaultDataType::APP_FREEZE || !isAppFreezeDialog)) {
         callback();
     }
-    } else if (callback && (faultType != FaultDataType::APP_FREEZE || !isAppFreezeDialog)) {
-        callback();
-    }
     if (!isDialogExist && !focusFlag && lastFreezePid == pid) {
         lastFreezePid = INVALID_PID;
         lastFocusStatus = false;
