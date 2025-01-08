@@ -393,6 +393,7 @@ ohos_shared_library("abilitykit_native") {
     ]
     public_configs += [ "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi_public_config" ]
     deps += [
+      "${ability_runtime_innerkits_path}/ability_manager:process_options",
       "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
       "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi",
     ]

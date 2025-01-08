@@ -39,6 +39,8 @@ struct CJNewStartOptions {
     int32_t windowTop;
     int32_t windowWidth;
     int32_t windowHeight;
+    int32_t processMode;
+    int32_t startupVisibility;
 };
 
 struct CJAtomicServiceOptions {

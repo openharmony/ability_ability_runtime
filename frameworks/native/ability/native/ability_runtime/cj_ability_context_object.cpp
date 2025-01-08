@@ -34,6 +34,7 @@
 #include "napi_common_util.h"
 #include "open_link_options.h"
 #include "pixel_map.h"
+#include "process_options.h"
 #include "uri.h"
 
 using namespace OHOS::FFI;
@@ -95,6 +96,14 @@ void UnWrapStartOptions(CJNewStartOptions source, AAFwk::StartOptions& target)
     target.SetWindowTop(source.windowTop);
     target.SetWindowWidth(source.windowWidth);
     target.SetWindowHeight(source.windowHeight);
+}
+
+void UnWrapProcessOptions(CJNewStartOptions source, std::shared_ptr<AAFwk::ProcessOptions> &processOptions)
+{
+    auto option = std::make_shared<AAFwk::ProcessOptions>();
+    option->processMode = AAFwk::ProcessOptions::ConvertInt32ToProcessMode(source.processMode);
+    option->startupVisibility = AAFwk::ProcessOptions::ConvertInt32ToStartupVisibility(source.startupVisibility);
+    processOptions = option;
 }
 
 std::function<void(int32_t, CJAbilityResult*)> WrapCJAbilityResultTask(int64_t lambdaId)
@@ -217,6 +226,21 @@ int32_t FFIAbilityContextStartAbilityWithOption(int64_t id, WantHandle want, CJS
     context->InheritWindowMode(*actualWant);
     AAFwk::StartOptions option;
     UnWrapStartOption(startOption, option);
+    return context->StartAbility(*actualWant, option);
+}
+
+int32_t FFIAbilityContextStartAbilityWithOptions(int64_t id, WantHandle want, CJNewStartOptions startOption)
+{
+    auto context = FFIData::GetData<CJAbilityContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    auto actualWant = reinterpret_cast<Want*>(want);
+    context->InheritWindowMode(*actualWant);
+    AAFwk::StartOptions option;
+    UnWrapStartOptions(startOption, option);
+    UnWrapProcessOptions(startOption, option.processOptions);
     return context->StartAbility(*actualWant, option);
 }
 
@@ -736,6 +760,28 @@ int32_t FFIAbilityContextOpenLink(
     if (innerErrCod == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
         return SUCCESS_CODE;
     }
+    return static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCod));
+}
+
+int32_t FFIAbilityContextShowAbility(int64_t id)
+{
+    auto context = FFIData::GetData<CJAbilityContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null CJAbilityContext");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    auto innerErrCod = context->ChangeAbilityVisibility(true);
+    return static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCod));
+}
+
+int32_t FFIAbilityContextHideAbility(int64_t id)
+{
+    auto context = FFIData::GetData<CJAbilityContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null CJAbilityContext");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    auto innerErrCod = context->ChangeAbilityVisibility(false);
     return static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCod));
 }
 
