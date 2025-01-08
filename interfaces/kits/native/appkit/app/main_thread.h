@@ -587,7 +587,7 @@ private:
      *
      */
     bool PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
-        const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion);
+        const AppExecFwk::HapModuleInfo &entryHapModuleInfo);
 
     /**
      * @brief Set current process extension type
