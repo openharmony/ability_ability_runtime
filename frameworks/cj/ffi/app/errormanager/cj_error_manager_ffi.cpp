@@ -18,6 +18,7 @@
 #include "cj_error_observer.h"
 #include "application_data_manager.h"
 #include "hilog_tag_wrapper.h"
+#include "event_runner.h"
 
 using namespace OHOS::AbilityRuntime;
 using namespace OHOS::FFI;
@@ -25,9 +26,16 @@ using namespace OHOS::FFI;
 namespace {
     constexpr int ERR_PARAM = 401;
     constexpr int ERROR_CODE_INVALID_ID = 16000003;
+    constexpr int ERROR_CODE_INVALID_CALLER = 16200001;
     constexpr const char* ON_OFF_TYPE = "error";
     int32_t g_serialNumber = 0;
     std::shared_ptr<ErrorObserver> g_observer;
+
+    struct CJLoopObserver {
+        std::shared_ptr<OHOS::AppExecFwk::EventRunner> mainRunner;
+        std::function<void(int64_t)> callbackOnLoopTimeout = nullptr;
+    };
+    static std::shared_ptr<CJLoopObserver> g_loopObserver;
 }
 
 extern "C" {
@@ -82,5 +90,50 @@ int FfiOHOSErrorManagerOff(char* offType, int observerId)
     TAG_LOGI(AAFwkTag::APPKIT, "FfiOHOSErrorManagerOff success.");
     ret = SUCCESS_CODE;
     return ret;
+}
+
+static void CallbackTimeout(int64_t timeout)
+{
+    if (g_loopObserver != nullptr && g_loopObserver->callbackOnLoopTimeout != nullptr) {
+        g_loopObserver->callbackOnLoopTimeout(timeout);
+    }
+}
+
+int32_t FfiOHOSErrorManagerLoopObserverOn(int64_t timeout, CLoopObserver observer)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "FfiOHOSErrorManagerLoopObserverOn.");
+    if (!OHOS::AppExecFwk::EventRunner::IsAppMainThread()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not mainThread");
+        return ERROR_CODE_INVALID_CALLER;
+    }
+    if (timeout <= 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Param invalid, timeout<=0");
+        return ERR_PARAM;
+    }
+    if (g_loopObserver == nullptr) {
+        g_loopObserver = std::make_shared<CJLoopObserver>();
+    }
+    if (observer.callbackOnLoopTimeout != nullptr) {
+        g_loopObserver->callbackOnLoopTimeout = CJLambda::Create(observer.callbackOnLoopTimeout);
+    }
+    g_loopObserver->mainRunner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+    g_loopObserver->mainRunner->SetTimeout(timeout);
+    g_loopObserver->mainRunner->SetTimeoutCallback(CallbackTimeout);
+    return SUCCESS_CODE;
+}
+
+int32_t FfiOHOSErrorManagerLoopObserverOff()
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "FfiOHOSErrorManagerLoopObserverOff.");
+    if (!OHOS::AppExecFwk::EventRunner::IsAppMainThread()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not mainThread");
+        return ERROR_CODE_INVALID_CALLER;
+    }
+    if (g_loopObserver) {
+        g_loopObserver.reset();
+        g_loopObserver = nullptr;
+        TAG_LOGI(AAFwkTag::APPKIT, "LoopObserverOff success");
+    }
+    return SUCCESS_CODE;
 }
 }
