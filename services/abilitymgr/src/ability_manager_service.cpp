@@ -6753,20 +6753,20 @@ int32_t AbilityManagerService::UninstallAppInner(const std::string &bundleName, 
         return CHECK_PERMISSION_FAILED;
     }
 
+    auto userId = uid / BASE_USER_RANGE;
     if (isUpgrade) {
         CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
         AAFwk::ExitReason exitReason = { REASON_UPGRADE, exitMsg };
         appExitReasonHelper_->RecordAppExitReason(bundleName, uid, appIndex, exitReason);
     } else {
-        IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppExecFwk::AppMgrClient>::
-            GetInstance()->SetKeepAliveEnableState(bundleName, false, uid));
-        auto userId = uid / BASE_USER_RANGE;
         IN_PROCESS_CALL_WITHOUT_RET(
             KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, false, true));
-        auto connectManager = GetConnectManagerByUserId(userId);
-        if (connectManager) {
-            connectManager->UninstallApp(bundleName);
-        }
+    }
+    IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppExecFwk::AppMgrClient>::
+        GetInstance()->SetKeepAliveEnableState(bundleName, false, uid));
+    auto connectManager = GetConnectManagerByUserId(userId);
+    if (connectManager) {
+        connectManager->UninstallApp(bundleName, uid);
     }
 
     CHECK_POINTER_AND_RETURN(subManagersHelper_, ERR_NULL_OBJECT);
