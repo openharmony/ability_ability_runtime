@@ -119,7 +119,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     auto uiAbilityRecord = GenerateAbilityRecord(abilityRequest, sessionInfo, isColdStart);
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
     auto want = uiAbilityRecord->GetWant();
-    if (want.GetBoolParam(IS_CALLING_FROM_DMS, false)) {
+    if (want.GetBoolParam(IS_CALLING_FROM_DMS, false) && !(sessionInfo->isNewWant)) {
         want.RemoveParam(IS_CALLING_FROM_DMS);
         uiAbilityRecord->SetWant(want);
     }
