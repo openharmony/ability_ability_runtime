@@ -748,5 +748,17 @@ inline void AbilityDelegator::CallClearFunc(const std::shared_ptr<ADelegatorAbil
         clearFunc_(ability);
     }
 }
+
+int32_t AbilityDelegator::getApiTargetVersion()
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
+    return apiTargetVersion_;
+}
+
+void AbilityDelegator::setApiTargetVersion(int32_t apiTargetVersion)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
+    apiTargetVersion_ = apiTargetVersion;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
