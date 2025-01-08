@@ -223,7 +223,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     } else if (IsUIExtensionAbility(targetService)) {
         DoForegroundUIExtension(targetService, abilityRequest);
     } else {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "targetService activating");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "TargetService not active, state: %{public}d", targetService->GetAbilityState());
         EnqueueStartServiceReq(abilityRequest);
         return ERR_OK;
     }
