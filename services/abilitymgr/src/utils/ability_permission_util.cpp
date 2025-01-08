@@ -28,6 +28,10 @@
 #include "permission_verification.h"
 #include "start_ability_utils.h"
 #include "utils/app_mgr_util.h"
+#ifdef SUPPORT_SCREEN
+#include "scene_board_judgement.h"
+#include "session_manager_lite.h"
+#endif // SUPPORT_SCREEN
 
 using OHOS::Security::AccessToken::AccessTokenKit;
 
@@ -121,5 +125,74 @@ int32_t AbilityPermissionUtil::CheckMultiInstanceAndAppClone(Want &want, int32_t
     }
     return ERR_OK;
 }
+
+int32_t AbilityPermissionUtil::CheckStartByCallPermissionOrHasFloatingWindow(
+    PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken)
+{
+    int32_t permissionRet =
+        PermissionVerification::GetInstance()->CheckStartByCallPermission(verificationInfo);
+    if (permissionRet == ERR_OK) {
+        return ERR_OK;
+    }
+#ifdef SUPPORT_SCREEN
+    if (CheckStartCallHasFloatingWindow(callerToken) == ERR_OK) {
+        return ERR_OK;
+    }
+#endif // SUPPORT_SCREEN
+    return permissionRet;
+}
+
+int32_t AbilityPermissionUtil::CheckCallServiceExtensionPermissionOrHasFloatingWindow(
+    PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken)
+{
+    int32_t permissionRet =
+        PermissionVerification::GetInstance()->CheckCallServiceExtensionPermission(verificationInfo);
+    if (permissionRet == ERR_OK) {
+        return ERR_OK;
+    }
+#ifdef SUPPORT_SCREEN
+    if (CheckStartCallHasFloatingWindow(callerToken) == ERR_OK) {
+        return ERR_OK;
+    }
+#endif // SUPPORT_SCREEN
+    return permissionRet;
+}
+
+int32_t AbilityPermissionUtil::CheckCallAbilityPermissionOrHasFloatingWindow(
+    PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken,
+    bool isCallByShortcut)
+{
+    int32_t permissionRet =
+        PermissionVerification::GetInstance()->CheckCallAbilityPermission(verificationInfo, isCallByShortcut);
+    if (permissionRet == ERR_OK) {
+        return ERR_OK;
+    }
+#ifdef SUPPORT_SCREEN
+    if (CheckStartCallHasFloatingWindow(callerToken) == ERR_OK) {
+        return ERR_OK;
+    }
+#endif // SUPPORT_SCREEN
+    return permissionRet;
+}
+
+#ifdef SUPPORT_SCREEN
+int32_t AbilityPermissionUtil::CheckStartCallHasFloatingWindow(const sptr<IRemoteObject> &callerToken)
+{
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+        bool hasFloatingWindow = CHECK_PERMISSION_FAILED;
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "startAbility call from background, checking floatingwindow.");
+        auto err = sceneSessionManager->UIAbilityHasFloatingWindowForeground(callerToken, hasFloatingWindow);
+        if (err != Rosen::WMError::WM_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR,
+                "startAbility call from background, checking floatingwindow err: %{public}d",
+                static_cast<int32_t>(err));
+        } else if (hasFloatingWindow) {
+            return ERR_OK;
+        }
+    }
+    return CHECK_PERMISSION_FAILED;
+}
+#endif // SUPPORT_SCREEN
 } // AAFwk
 } // OHOS
