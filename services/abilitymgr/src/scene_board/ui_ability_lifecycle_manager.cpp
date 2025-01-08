@@ -145,7 +145,8 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         AddCallerRecord(abilityRequest, sessionInfo, uiAbilityRecord);
     }
     auto isShellCall = abilityRequest.want.GetBoolParam(IS_SHELL_CALL, false);
-    uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId, sceneFlag, isShellCall);
+    uint32_t callerTokenId = static_cast<uint32_t>(abilityRequest.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
+    uiAbilityRecord->ProcessForegroundAbility(callerTokenId, sceneFlag, isShellCall);
     CheckSpecified(sessionInfo->requestId, uiAbilityRecord);
     SendKeyEvent(abilityRequest);
     return ERR_OK;
