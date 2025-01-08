@@ -22,6 +22,7 @@
 #include "cj_ability_stage_object.h"
 #include "cj_ability_stage_context.h"
 #include "ffi_remote_data.h"
+#include "cj_ability_delegator_infos.h"
 
 #ifdef WINDOWS_PLATFORM
 #define CJ_EXPORT __declspec(dllexport)
@@ -69,6 +70,7 @@ public:
     void OnDestroy() const override;
 
 private:
+    std::shared_ptr<OHOS::AppExecFwk::CJDelegatorAbilityStageProperty> CreateStageProperty() const;
     std::shared_ptr<CJAbilityStageObject> cjAbilityStageObject_;
 };
 } // namespace AbilityRuntime

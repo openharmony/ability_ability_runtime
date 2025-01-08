@@ -48,6 +48,10 @@ ohos_unittest("cj_test_runner_test") {
     "${ability_runtime_path}/tools/aa/src/test_observer_proxy.cpp",
     "cj_test_runner_test.cpp",
   ]
+
+  if (cj_frontend) {
+    defines = [ "CJ_FRONTEND" ]
+  }
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]

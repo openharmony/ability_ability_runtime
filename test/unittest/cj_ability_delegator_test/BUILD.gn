@@ -32,6 +32,10 @@ ohos_unittest("cj_ability_delegator_test") {
     "cj_ability_delegator_test.cpp",
   ]
 
+  if (cj_frontend) {
+    defines = [ "CJ_FRONTEND" ]
+  }
+
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]

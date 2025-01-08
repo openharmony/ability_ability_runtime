@@ -42,6 +42,10 @@ ohos_unittest("cj_ability_stage_test") {
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
     "cj_ability_stage_test.cpp",
   ]
+
+  if (cj_frontend) {
+    defines = [ "CJ_FRONTEND" ]
+  }
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -56,6 +60,7 @@ ohos_unittest("cj_ability_stage_test") {
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_path}/cj_environment/frameworks/cj_environment:cj_environment",
