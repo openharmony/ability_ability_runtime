@@ -72,6 +72,7 @@ public:
     std::string OnNewProcessRequest(const AAFwk::Want& want) const;
     void OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration) const;
     void OnMemoryLevel(int32_t level) const;
+    int64_t GetId() const { return id_; }
 
 private:
     int64_t id_;

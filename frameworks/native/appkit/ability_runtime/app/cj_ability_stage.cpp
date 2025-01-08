@@ -18,6 +18,7 @@
 #include "context_impl.h"
 #include "hilog_tag_wrapper.h"
 #include "securec.h"
+#include "ability_delegator_registry.h"
 
 using namespace OHOS::AbilityRuntime;
 
@@ -144,6 +145,11 @@ void CJAbilityStage::OnCreate(const AAFwk::Want& want) const
     }
     TAG_LOGD(AAFwkTag::APPKIT, "CJAbilityStage::OnCreate");
     cjAbilityStageObject_->OnCreate();
+
+    auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetCJAbilityDelegator();
+    if (delegator) {
+        delegator->PostPerformStageStart(CreateStageProperty());
+    }
 }
 
 std::string CJAbilityStage::OnAcceptWant(const AAFwk::Want& want)
@@ -200,4 +206,23 @@ void CJAbilityStage::OnDestroy() const
         return;
     }
     cjAbilityStageObject_->OnDestroy();
+}
+
+std::shared_ptr<OHOS::AppExecFwk::CJDelegatorAbilityStageProperty> CJAbilityStage::CreateStageProperty() const
+{
+    auto property = std::make_shared<OHOS::AppExecFwk::CJDelegatorAbilityStageProperty>();
+    auto context = GetContext();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get context");
+        return nullptr;
+    }
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    if (!hapModuleInfo) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get hapModuleInfo");
+        return nullptr;
+    }
+    property->moduleName_ = hapModuleInfo->name;
+    property->srcEntrance_ = hapModuleInfo->srcEntrance;
+    property->cjStageObject_ = cjAbilityStageObject_->GetId();
+    return property;
 }
