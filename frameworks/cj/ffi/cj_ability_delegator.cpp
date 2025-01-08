@@ -348,13 +348,13 @@ int32_t FFIAbilityDelegatorGetAbilityState(int64_t id, int64_t abilityId, int64_
 {
     if (!state) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "receiver is nullptr");
-        return COMMON_FAILED;    
+        return COMMON_FAILED;
     }
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
         *state = -1;
-        return COMMON_FAILED; 
+        return COMMON_FAILED;
     }
 
     sptr<OHOS::IRemoteObject> remoteObject = nullptr;
@@ -427,7 +427,7 @@ int32_t FFIAbilityDelegatorWaitAbilityMonitor(
 {
     if (!abilityId) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "receiver is nullptr");
-        return COMMON_FAILED;           
+        return COMMON_FAILED;
     }
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
@@ -467,7 +467,7 @@ int32_t FFIAbilityDelegatorWaitAbilityMonitorWithTimeout(
 {
     if (!abilityId) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "receiver is nullptr");
-        return COMMON_FAILED;           
+        return COMMON_FAILED;
     }
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
@@ -556,7 +556,7 @@ int32_t FFIAbilityDelegatorWaitAbilityStageMonitor(
 {
     if (!abilityStageId) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "receiver is nullptr");
-        return COMMON_FAILED;            
+        return COMMON_FAILED;
     }
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
@@ -594,7 +594,7 @@ int32_t FFIAbilityDelegatorWaitAbilityStageMonitorWithTimeout(
 {
     if (!abilityStageId) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "receiver is nullptr");
-        return COMMON_FAILED;            
+        return COMMON_FAILED;
     }
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
