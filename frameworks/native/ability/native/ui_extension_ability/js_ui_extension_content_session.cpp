@@ -328,8 +328,7 @@ napi_value JsUIExtensionContentSession::OnStartAbilityAsCaller(napi_env env, Nap
         return CreateJsUndefined(env);
     }
     AAFwk::Want want;
-    bool unWrapWantFlag = OHOS::AppExecFwk::UnwrapWant(env, info.argv[0], want);
-    if (!unWrapWantFlag) {
+    if (!OHOS::AppExecFwk::UnwrapWant(env, info.argv[0], want)) {
         ThrowInvalidParamError(env, "Parameter error: Parse want failed! Want must be a Want");
         return CreateJsUndefined(env);
     }
@@ -341,6 +340,9 @@ napi_value JsUIExtensionContentSession::OnStartAbilityAsCaller(napi_env env, Nap
         AppExecFwk::UnwrapStartOptions(env, info.argv[INDEX_ONE], startOptions);
         unwrapArgc++;
     }
+#ifdef SUPPORT_SCREEN
+    (unwrapArgc == INDEX_ONE) ? InitDisplayId(want) : InitDisplayId(want, startOptions, env, info);
+#endif
     NapiAsyncTask::CompleteCallback complete =
         [weak = context_, want, startOptions, unwrapArgc, sessionInfo = sessionInfo_]
         (napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -383,12 +385,14 @@ NapiAsyncTask::ExecuteCallback JsUIExtensionContentSession::StartAbilityExecuteC
         }
         unwrapArgc++;
     }
-
     if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
         std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
             system_clock::now().time_since_epoch()).count());
         want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
     }
+#ifdef SUPPORT_SCREEN
+    (unwrapArgc == INDEX_ONE) ? InitDisplayId(want) : InitDisplayId(want, startOptions, env, info);
+#endif
     NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, startOptions, unwrapArgc,
         sessionInfo = sessionInfo_, &observer = freeInstallObserver_, innerErrorCode]() {
         auto context = weak.lock();
@@ -397,7 +401,6 @@ NapiAsyncTask::ExecuteCallback JsUIExtensionContentSession::StartAbilityExecuteC
             *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
-
         *innerErrorCode = (unwrapArgc == 1) ?
             AAFwk::AbilityManagerClient::GetInstance()->StartAbilityByUIContentSession(want,
                 context->GetToken(), sessionInfo, -1, -1) :
@@ -434,14 +437,14 @@ napi_value JsUIExtensionContentSession::OnStartAbilityForResult(napi_env env, Na
     size_t unwrapArgc = 1;
     AAFwk::StartOptions startOptions;
     if (info.argc > ARGC_ONE && CheckTypeForNapiValue(env, info.argv[1], napi_object)) {
-        TAG_LOGD(AAFwkTag::UI_EXT, "OnStartAbilityForResult start options is used");
-        bool unWrapStartOptionsFlag = AppExecFwk::UnwrapStartOptions(env, info.argv[1], startOptions);
-        if (!unWrapStartOptionsFlag) {
+        if (!AppExecFwk::UnwrapStartOptions(env, info.argv[1], startOptions)) {
             ThrowInvalidParamError(env, "Parameter error: Parse startOptions failed! Options must be a StartOption");
         }
         unwrapArgc++;
     }
-
+#ifdef SUPPORT_SCREEN
+    (unwrapArgc == INDEX_ONE) ? InitDisplayId(want) : InitDisplayId(want, startOptions, env, info);
+#endif
     napi_value lastParam = info.argc > unwrapArgc ? info.argv[unwrapArgc] : nullptr;
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> uasyncTask;
@@ -478,7 +481,6 @@ void JsUIExtensionContentSession::StartAbilityForResultRuntimeTask(napi_env env,
     std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
     RuntimeTask task = [env, asyncTask, element = want.GetElement(), flags = want.GetFlags(), startTime,
         &observer = freeInstallObserver_](int resultCode, const AAFwk::Want& want, bool isInner) {
-        TAG_LOGD(AAFwkTag::UI_EXT, "OnStartAbilityForResult async callback is enter");
         std::string bundleName = element.GetBundleName();
         std::string abilityName = element.GetAbilityName();
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
@@ -612,7 +614,7 @@ napi_value JsUIExtensionContentSession::OnSetReceiveDataCallback(napi_env env, N
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
-    
+
     if (!CheckTypeForNapiValue(env, info.argv[INDEX_ZERO], napi_function)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid param");
         ThrowInvalidParamError(env, "Parameter error: Callback must be a function");
@@ -832,21 +834,20 @@ napi_value JsUIExtensionContentSession::OnStartAbilityByType(napi_env env, NapiC
 
     std::string type;
     AAFwk::WantParams wantParam;
-
-    bool checkResult = CheckStartAbilityByTypeParam(env, info, type, wantParam);
-    if (!checkResult) {
+    if (!CheckStartAbilityByTypeParam(env, info, type, wantParam)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "check startAbilityByCall param failed");
         return CreateJsUndefined(env);
     }
-
     wantParam.SetParam(UIEXTENSION_TARGET_TYPE_KEY, AAFwk::String::Box(type));
     AAFwk::Want want;
     want.SetParams(wantParam);
     if (wantParam.HasParam(FLAG_AUTH_READ_URI_PERMISSION)) {
-        int32_t flag = wantParam.GetIntParam(FLAG_AUTH_READ_URI_PERMISSION, 0);
-        want.SetFlags(flag);
+        want.SetFlags(wantParam.GetIntParam(FLAG_AUTH_READ_URI_PERMISSION, 0));
         wantParam.Remove(FLAG_AUTH_READ_URI_PERMISSION);
     }
+#ifdef SUPPORT_SCREEN
+    InitDisplayId(want);
+#endif
     std::shared_ptr<JsUIExtensionCallback> uiExtensionCallback = std::make_shared<JsUIExtensionCallback>(env);
     uiExtensionCallback->SetJsCallbackObject(info.argv[INDEX_TWO]);
     NapiAsyncTask::CompleteCallback complete = [uiWindow = uiWindow_, type, want, uiExtensionCallback]
@@ -863,17 +864,15 @@ napi_value JsUIExtensionContentSession::OnStartAbilityByType(napi_env env, NapiC
                 uiExtensionCallback->OnRelease(arg);
             };
             Ace::ModalUIExtensionConfig config;
-            auto uiContent = uiWindow->GetUIContent();
-            int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
+            int32_t sessionId = uiWindow->GetUIContent()->CreateModalUIExtension(want, callback, config);
             if (sessionId == 0) {
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
             } else {
-                uiExtensionCallback->SetUIContent(uiContent);
+                uiExtensionCallback->SetUIContent(uiWindow->GetUIContent());
                 uiExtensionCallback->SetSessionId(sessionId);
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             }
         };
-
     napi_value lastParam = (info.argc > ARGC_THREE) ? info.argv[INDEX_THREE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsUIExtensionContentSession::OnStartAbilityByType",
@@ -1106,5 +1105,51 @@ void JsUIExtensionContentSession::SetCallbackForTerminateWithResult(int32_t resu
             }
         };
 }
+#ifdef SUPPORT_SCREEN
+void JsUIExtensionContentSession::InitDisplayId(AAFwk::Want &want)
+{
+    auto context = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(context_.lock());
+    if (!context) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        return;
+    }
+
+    auto window = context->GetWindow();
+    if (window == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null window");
+        return;
+    }
+
+    TAG_LOGI(AAFwkTag::UI_EXT, "window displayId %{public}" PRIu64, window->GetDisplayId());
+    want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, static_cast<int32_t>(window->GetDisplayId()));
+}
+
+void JsUIExtensionContentSession::InitDisplayId(AAFwk::Want &want, AAFwk::StartOptions &startOptions,
+    napi_env &env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnStartAbilityForResult start options is used");
+    auto context = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(context_.lock());
+    if (!context) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        return;
+    }
+
+    auto window = context->GetWindow();
+    if (window == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null window");
+        return;
+    }
+
+    int32_t displayId = 0;
+    if (info.argc > ARGC_ONE && CheckTypeForNapiValue(env, info.argv[1], napi_object)
+        && AppExecFwk::UnwrapInt32ByPropertyName(env, info.argv[1], "displayId", displayId)) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "startOption displayId %{public}d", startOptions.GetDisplayID());
+        return;
+    }
+
+    TAG_LOGI(AAFwkTag::UI_EXT, "window displayId %{public}" PRIu64, window->GetDisplayId());
+    startOptions.SetDisplayID(window->GetDisplayId());
+}
+#endif
 }  // namespace AbilityRuntime
 }  // namespace OHOS
