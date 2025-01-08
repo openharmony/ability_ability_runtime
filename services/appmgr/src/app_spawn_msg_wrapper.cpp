@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 
 #include "hilog_tag_wrapper.h"
 #include "nlohmann/json.hpp"
+#include "permission_constants.h"
+#include "permission_verification.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -32,8 +34,12 @@ constexpr const char* DATA_GROUP_SOCKET_TYPE = "|DataGroup|";
 constexpr const char* APP_ENV_TYPE = "|AppEnv|";
 constexpr const char* DATAGROUPINFOLIST_DATAGROUPID = "dataGroupId";
 constexpr const char* DATAGROUPINFOLIST_GID = "gid";
+constexpr const char* DATAGROUPINFOLIST_UUID = "uuid";
 constexpr const char* DATAGROUPINFOLIST_DIR = "dir";
-constexpr const char* JSON_DATA_APP = "/data/app/el2/";
+constexpr const char* JSON_DATA_APP_DIR_EL2 = "/data/app/el2/";
+constexpr const char* JSON_DATA_APP_DIR_EL3 = "/data/app/el3/";
+constexpr const char* JSON_DATA_APP_DIR_EL4 = "/data/app/el4/";
+constexpr const char* JSON_DATA_APP_DIR_EL5 = "/data/app/el5/";
 constexpr const char* JSON_GROUP = "/group/";
 constexpr const char* VERSION_PREFIX = "v";
 }
@@ -57,13 +63,28 @@ static std::string DumpToJson(const HspList &hspList)
 static std::string DumpToJson(const DataGroupInfoList &dataGroupInfoList)
 {
     nlohmann::json dataGroupInfoListJson;
+    bool hasScreenLockPermission = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+        AAFwk::PermissionConstants::PERMISSION_PROTECT_SCREEN_LOCK_DATA);
     for (auto& dataGroupInfo : dataGroupInfoList) {
-        dataGroupInfoListJson[DATAGROUPINFOLIST_DATAGROUPID].emplace_back(dataGroupInfo.dataGroupId);
-        dataGroupInfoListJson[DATAGROUPINFOLIST_GID].emplace_back(std::to_string(dataGroupInfo.gid));
-        std::string dir = JSON_DATA_APP + std::to_string(dataGroupInfo.userId)
-            + JSON_GROUP + dataGroupInfo.uuid;
-        dataGroupInfoListJson[DATAGROUPINFOLIST_DIR].emplace_back(dir);
+        nlohmann::json dataGroupInfoJson;
+        dataGroupInfoJson[DATAGROUPINFOLIST_DATAGROUPID] = dataGroupInfo.dataGroupId;
+        dataGroupInfoJson[DATAGROUPINFOLIST_GID] = std::to_string(dataGroupInfo.gid);
+        dataGroupInfoJson[DATAGROUPINFOLIST_UUID] = dataGroupInfo.uuid;
+        std::string dir = std::to_string(dataGroupInfo.userId) + JSON_GROUP + dataGroupInfo.uuid;
+        dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL2 + dir;
+        dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
+
+        dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL3 + dir;
+        dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
+
+        dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL4 + dir;
+        dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
+        if (hasScreenLockPermission) {
+            dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL5 + dir;
+            dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
+        }
     }
+    TAG_LOGD(AAFwkTag::APPMGR, "dataGroupInfoListJson %{public}s", dataGroupInfoListJson.dump().c_str());
     return dataGroupInfoListJson.dump();
 }
 
