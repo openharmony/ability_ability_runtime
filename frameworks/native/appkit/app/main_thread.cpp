@@ -3018,11 +3018,20 @@ void MainThread::SchedulePrepareTerminate(const std::string &moduleName,
     int32_t &prepareTermination, bool &isExist)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    if (!application_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
+    wptr<MainThread> weak = this;
+    auto syncTask = [weak, moduleName, &prepareTermination, &isExist] {
+        auto appThread = weak.promote();
+        if (appThread == nullptr || appThread->application_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
+            return;
+        }
+        appThread->application_->SchedulePrepareTerminate(moduleName, prepareTermination, isExist);
+    };
+    if (mainHandler_ == nullptr || !mainHandler_->PostSyncTask(syncTask, "MainThread::SchedulePrepareTerminate")) {
+        TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
         return;
     }
-    application_->SchedulePrepareTerminate(moduleName, prepareTermination, isExist);
+    TAG_LOGD(AAFwkTag::APPKIT, "SchedulePrepareTerminate finish");
 }
 
 void MainThread::HandleScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)
