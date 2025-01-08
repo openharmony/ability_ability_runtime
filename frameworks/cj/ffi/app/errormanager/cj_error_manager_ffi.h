@@ -23,6 +23,8 @@
 extern "C" {
     FFI_EXPORT RetDataI32 FfiOHOSErrorManagerOn(char* onType, CErrorObserver observer);
     FFI_EXPORT int FfiOHOSErrorManagerOff(char* offType, int observerId);
+    FFI_EXPORT int32_t FfiOHOSErrorManagerLoopObserverOn(int64_t timeout, CLoopObserver observer);
+    FFI_EXPORT int32_t FfiOHOSErrorManagerLoopObserverOff();
 }
 
 #endif
