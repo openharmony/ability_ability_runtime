@@ -38,12 +38,12 @@ public:
     std::shared_ptr<AbilityRuntime::ApplicationContext> GetAppContext();
     void FinishTest(const char* msg, int64_t code);
 
-    void AddAbilityMonitor(const std::shared_ptr<CJAbilityMonitor>& monitor);
-    void RemoveAbilityMonitor(const std::shared_ptr<CJAbilityMonitor>& monitor);
+    void AddAbilityMonitor(const std::shared_ptr<CJAbilityMonitor>& abilityMonitor);
+    void RemoveAbilityMonitor(const std::shared_ptr<CJAbilityMonitor>& abilityMonitor);
     std::shared_ptr<AppExecFwk::ACJDelegatorAbilityProperty> WaitAbilityMonitor(
-        const std::shared_ptr<CJAbilityMonitor>& monitor);
+        const std::shared_ptr<CJAbilityMonitor>& abilityMonitor);
     std::shared_ptr<AppExecFwk::ACJDelegatorAbilityProperty> WaitAbilityMonitor(
-        const std::shared_ptr<CJAbilityMonitor>& monitor, int64_t timeout);
+        const std::shared_ptr<CJAbilityMonitor>& abilityMonitor, int64_t timeout);
     void AddAbilityStageMonitor(const std::shared_ptr<CJAbilityStageMonitor>& stageMonitor);
     void RemoveAbilityStageMonitor(const std::shared_ptr<CJAbilityStageMonitor>& stageMonitor);
     std::shared_ptr<AppExecFwk::CJDelegatorAbilityStageProperty> WaitAbilityStageMonitor(
