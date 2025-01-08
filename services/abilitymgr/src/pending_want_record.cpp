@@ -93,7 +93,7 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
     int32_t res = ExecuteOperation(pendingWantManager, senderInfo, want);
     if (sendFinish && res != START_CANCELED) {
         WantParams wantParams = {};
-        senderInfo.finishedReceiver->PerformReceive(want, res, "", wantParams, false, false, 0);
+        senderInfo.finishedReceiver->PerformReceive(want, senderInfo.code, "", wantParams, false, false, 0);
     }
 
     return res;
