@@ -328,7 +328,7 @@ public:
     void SignRestartAppFlag(int32_t uid);
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
-    void UninstallApp(const std::string &bundleName);
+    void UninstallApp(const std::string &bundleName, int32_t uid);
 
     int32_t UpdateKeepAliveEnableState(const std::string &bundleName, const std::string &moduleName,
         const std::string &mainElement, bool updateEnable);
