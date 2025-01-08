@@ -94,6 +94,33 @@ public:
 private:
     std::weak_ptr<UIServiceExtensionContext> context_;
 
+    #ifdef SUPPORT_SCREEN
+    void InitDisplayId(AAFwk::Want &want, AAFwk::StartOptions &startOptions, napi_env &env, NapiCallbackInfo& info)
+    {
+        auto context = context_.lock();
+        if (!context) {
+            TAG_LOGE(AAFwkTag::UISERVC_EXT, "null context");
+            return;
+        }
+
+        auto window = context->GetWindow();
+        if (window == nullptr) {
+            TAG_LOGE(AAFwkTag::UISERVC_EXT, "null window");
+            return;
+        }
+
+        int32_t displayId = 0;
+        if (info.argc > ARGC_ONE && CheckTypeForNapiValue(env, info.argv[1], napi_object)
+            && AppExecFwk::UnwrapInt32ByPropertyName(env, info.argv[1], "displayId", displayId)) {
+            TAG_LOGI(AAFwkTag::UISERVC_EXT, "startOption displayId %{public}d", startOptions.GetDisplayID());
+            return;
+        }
+
+        TAG_LOGI(AAFwkTag::UISERVC_EXT, "window displayId %{public}" PRIu64, window->GetDisplayId());
+        startOptions.SetDisplayID(window->GetDisplayId());
+    }
+#endif
+
     napi_value OnStartAbility(napi_env env, NapiCallbackInfo& info)
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -111,7 +138,9 @@ private:
             ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
             return CreateJsUndefined(env);
         }
-
+#ifdef SUPPORT_SCREEN
+        InitDisplayId(want, startOptions, env, info);
+#endif
         NapiAsyncTask::CompleteCallback complete =
         [weak = context_, want, startOptions, unwrapArgc](napi_env env, NapiAsyncTask& task, int32_t status) {
             TAG_LOGD(AAFwkTag::UI_EXT, "JSUIServiceExtensionContext OnStartAbility");
