@@ -34,6 +34,10 @@ extern "C" {
         std::function<void(char*)> callbackOnUnhandledException;
         std::function<void(CErrorObject)> callbackOnException;
     };
+
+    struct CLoopObserver {
+        void (*callbackOnLoopTimeout)(int64_t);
+    };
 }
 
 #endif
