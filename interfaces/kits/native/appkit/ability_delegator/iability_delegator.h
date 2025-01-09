@@ -68,6 +68,21 @@ public:
      * Notifies TestRunner to run.
      */
     virtual void OnRun();
+
+    /**
+     * return api target version.
+     */
+    uint32_t GetApiTargetVersion();
+
+    /**
+     * set api target version.
+     *
+     * @param apiTargetVersion, app target version.
+     */
+    void SetApiTargetVersion(uint32_t apiTargetVersion);
+
+private:
+    uint32_t apiTargetVersion_ = 0;
 };
 } // namespace AppExecFwk
 } // namespace OHOS
