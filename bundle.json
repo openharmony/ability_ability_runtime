@@ -541,6 +541,15 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/interfaces/inner_api/app_manager:app_state_data"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/connect_server_manager/include",
+              "header_files": [
+                "connect_server_manager.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/connect_server_manager:connect_server_manager"
           }
         ],
         "test": [
