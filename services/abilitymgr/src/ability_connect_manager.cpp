@@ -3381,11 +3381,12 @@ int32_t AbilityConnectManager::ReportAbilityStartInfoToRSS(const AppExecFwk::Abi
     return ERR_OK;
 }
 
-void AbilityConnectManager::UninstallApp(const std::string &bundleName)
+void AbilityConnectManager::UninstallApp(const std::string &bundleName, int32_t uid)
 {
     std::lock_guard lock(serviceMapMutex_);
     for (const auto &[key, abilityRecord]: serviceMap_) {
-        if (abilityRecord && abilityRecord->GetAbilityInfo().bundleName == bundleName) {
+        if (abilityRecord && abilityRecord->GetAbilityInfo().bundleName == bundleName &&
+            abilityRecord->GetUid() == uid) {
             abilityRecord->SetKeepAliveBundle(false);
         }
     }
