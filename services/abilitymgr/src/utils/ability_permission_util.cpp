@@ -260,7 +260,7 @@ int32_t AbilityPermissionUtil::CheckStartRecentAbility(const Want &want, Ability
 }
 
 int32_t AbilityPermissionUtil::CheckStartByCallPermissionOrHasFloatingWindow(
-    PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken)
+    const PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken)
 {
     int32_t permissionRet =
         PermissionVerification::GetInstance()->CheckStartByCallPermission(verificationInfo);
@@ -276,7 +276,7 @@ int32_t AbilityPermissionUtil::CheckStartByCallPermissionOrHasFloatingWindow(
 }
 
 int32_t AbilityPermissionUtil::CheckCallServiceExtensionPermissionOrHasFloatingWindow(
-    PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken)
+    const PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken)
 {
     int32_t permissionRet =
         PermissionVerification::GetInstance()->CheckCallServiceExtensionPermission(verificationInfo);
@@ -292,7 +292,7 @@ int32_t AbilityPermissionUtil::CheckCallServiceExtensionPermissionOrHasFloatingW
 }
 
 int32_t AbilityPermissionUtil::CheckCallAbilityPermissionOrHasFloatingWindow(
-    PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken,
+    const PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken,
     bool isCallByShortcut)
 {
     int32_t permissionRet =
