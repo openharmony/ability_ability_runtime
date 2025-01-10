@@ -298,7 +298,7 @@ ohos_source_set("abilityms_test_source") {
       "icu:shared_icuuc",
       "image_framework:image_native",
       "input:libmmi-client",
-      "libjpeg-turbo:turbojpeg_static",
+      "libjpeg-turbo:turbojpeg",
       "window_manager:libdm",
       "window_manager:libmodal_system_ui_extension_client",
       "window_manager:libwm",

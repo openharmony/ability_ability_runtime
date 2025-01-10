@@ -75,7 +75,7 @@ ohos_fuzztest("AbilityMgrRdbParserUtilFuzzTest") {
     "ipc:ipc_core",
     "json:nlohmann_json_static",
     "jsoncpp:jsoncpp",
-    "libjpeg-turbo:turbojpeg_static",
+    "libjpeg-turbo:turbojpeg",
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
