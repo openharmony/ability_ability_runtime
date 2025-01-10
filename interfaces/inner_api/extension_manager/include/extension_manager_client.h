@@ -61,6 +61,8 @@ public:
      */
     ErrCode DisconnectAbility(const sptr<IRemoteObject> &connect);
 
+    ErrCode Release();
+
 private:
     class ExtensionMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -74,6 +76,7 @@ private:
     sptr<IExtensionManager> GetExtensionManager();
     void Connect();
     void ResetProxy(const wptr<IRemoteObject>& remote);
+    ErrCode RemoveDeathRecipient();
 
     std::mutex mutex_;
     sptr<IExtensionManager> proxy_;
