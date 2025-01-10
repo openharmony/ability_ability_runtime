@@ -42,6 +42,19 @@ namespace {
 constexpr const char* IS_DELEGATOR_CALL = "isDelegatorCall";
 constexpr const char* SETTINGS = "settings";
 constexpr int32_t BASE_USER_RANGE = 200000;
+constexpr int32_t INDEX_PID = 0;
+constexpr int32_t INDEX_TOKENID = 1;
+constexpr int32_t INDEX_COUNT = 2;
+}
+
+StartSelfUIAbilityRecordGuard::StartSelfUIAbilityRecordGuard(pid_t pid, int32_t tokenId) : pid_(pid)
+{
+    AbilityPermissionUtil::GetInstance().AddStartSelfUIAbilityRecord(pid, tokenId);
+}
+
+StartSelfUIAbilityRecordGuard::~StartSelfUIAbilityRecordGuard()
+{
+    AbilityPermissionUtil::GetInstance().RemoveStartSelfUIAbilityRecord(pid_);
 }
 
 AbilityPermissionUtil &AbilityPermissionUtil::GetInstance()
@@ -106,8 +119,7 @@ bool AbilityPermissionUtil::IsDominateScreen(const Want &want, bool isPendingWan
                 TAG_LOGD(AAFwkTag::ABILITYMGR, "not dominate screen, app detail.");
                 return false;
             }
-        } else if (AppUtils::GetInstance().IsStartOptionsWithAnimation() &&
-            PermissionVerification::GetInstance()->VerifyStartSelfUIAbility()) {
+        } else if (IsStartSelfUIAbility()) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "caller from capi.");
             return false;
         }
@@ -327,5 +339,70 @@ int32_t AbilityPermissionUtil::CheckStartCallHasFloatingWindow(const sptr<IRemot
     return CHECK_PERMISSION_FAILED;
 }
 #endif // SUPPORT_SCREEN
+
+void AbilityPermissionUtil::AddStartSelfUIAbilityRecord(pid_t pid, int32_t tokenId)
+{
+    std::lock_guard<ffrt::mutex> guard(startSelfUIAbilityRecordsMutex_);
+    auto iter = startSelfUIAbilityRecords_.begin();
+    for (; iter != startSelfUIAbilityRecords_.end(); iter++) {
+        if ((*iter)[INDEX_PID] == pid) {
+            break;
+        }
+    }
+    if (iter != startSelfUIAbilityRecords_.end()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "found");
+        (*iter)[INDEX_COUNT]++;
+        return;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "create new record");
+    startSelfUIAbilityRecords_.push_back({pid, tokenId, 1});
+}
+
+void AbilityPermissionUtil::RemoveStartSelfUIAbilityRecord(pid_t pid)
+{
+    std::lock_guard<ffrt::mutex> guard(startSelfUIAbilityRecordsMutex_);
+    auto iter = startSelfUIAbilityRecords_.begin();
+    for (; iter != startSelfUIAbilityRecords_.end(); iter++) {
+        if ((*iter)[INDEX_PID] == pid) {
+            break;
+        }
+    }
+    if (iter == startSelfUIAbilityRecords_.end()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not found");
+        return;
+    }
+    if ((*iter)[INDEX_COUNT] == 1) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "last one");
+        startSelfUIAbilityRecords_.erase(iter);
+        return;
+    }
+    (*iter)[INDEX_COUNT]--;
+}
+
+int AbilityPermissionUtil::GetTokenIdByPid(pid_t pid)
+{
+    std::lock_guard<ffrt::mutex> guard(startSelfUIAbilityRecordsMutex_);
+    auto iter = startSelfUIAbilityRecords_.begin();
+    for (; iter != startSelfUIAbilityRecords_.end(); iter++) {
+        if ((*iter)[INDEX_PID] == pid) {
+            return (*iter)[INDEX_TOKENID];
+        }
+    }
+    return -1;
+}
+
+bool AbilityPermissionUtil::IsStartSelfUIAbility()
+{
+    if (!AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
+        return false;
+    }
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    auto tokenId = GetTokenIdByPid(callerPid);
+    if (tokenId < 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid tokenId");
+        return false;
+    }
+    return PermissionVerification::GetInstance()->VerifyStartSelfUIAbility(tokenId);
+}
 } // AAFwk
 } // OHOS

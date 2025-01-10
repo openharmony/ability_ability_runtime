@@ -329,6 +329,16 @@ public:
     void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const;
 
     /**
+     * Get running process information by child process pid.
+     *
+     * @param childPid child process id.
+     * @param info Output parameters, return runningProcessInfo.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    void GetRunningProcessInfoByChildProcessPid(const pid_t childPid,
+        OHOS::AppExecFwk::RunningProcessInfo &info) const;
+
+    /**
      * Set AbilityForegroundingFlag of an app-record to true.
      *
      * @param pid, pid.

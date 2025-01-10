@@ -567,9 +567,9 @@ bool PermissionVerification::VerifySuperviseKiaServicePermission() const
     return false;
 }
 
-bool PermissionVerification::VerifyStartSelfUIAbility() const
+bool PermissionVerification::VerifyStartSelfUIAbility(int tokenId) const
 {
-    if (!IsSACall() && VerifyCallingPermission(PermissionConstants::PERMISSION_NDK_START_SELF_UI_ABILITY)) {
+    if (!IsSACall() && VerifyPermissionByTokenId(tokenId, PermissionConstants::PERMISSION_NDK_START_SELF_UI_ABILITY)) {
         TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
         return true;
     }

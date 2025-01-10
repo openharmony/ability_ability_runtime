@@ -1295,6 +1295,34 @@ int32_t AppMgrProxy::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFw
     return reply.ReadInt32();
 }
 
+int32_t AppMgrProxy::GetRunningProcessInfoByChildProcessPid(const pid_t childPid,
+    OHOS::AppExecFwk::RunningProcessInfo &info)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_INVALID_DATA;
+    }
+
+    if (!data.WriteInt32(static_cast<int32_t>(childPid))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel childPid failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_RUNNING_PROCESS_INFO_BY_CHILD_PROCESS_PID,
+        data, reply, option);
+
+    std::unique_ptr<AppExecFwk::RunningProcessInfo> processInfo(reply.ReadParcelable<AppExecFwk::RunningProcessInfo>());
+    if (processInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "recv process info failded");
+        return ERR_INVALID_DATA;
+    }
+    info = *processInfo;
+    return reply.ReadInt32();
+}
+
 int32_t AppMgrProxy::NotifyAppFault(const FaultData &faultData)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "called");
