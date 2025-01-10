@@ -1002,6 +1002,10 @@ int AbilityManagerService::CheckAbilityCallPermission(const AbilityRequest& abil
     const AppExecFwk::AbilityInfo& abilityInfo, uint32_t specifyTokenId)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Check call ability permission, name is %{public}s.", abilityInfo.name.c_str());
+    if (AbilityPermissionUtil::GetInstance().IsStartSelfUIAbility()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "call from capi, already checked");
+        return ERR_OK;
+    }
     int result = CheckCallAbilityPermission(abilityRequest, specifyTokenId);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "check permission failed");
@@ -10128,6 +10132,10 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
             abilityState == AbilityState::TERMINATING) {
             return ERR_OK;
         }
+    } else if (AbilityPermissionUtil::GetInstance().IsStartSelfUIAbility()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "call from capi, already checked background call");
+        isBackgroundCall = false;
+        return ERR_OK;
     } else {
         auto callerPid = IPCSkeleton::GetCallingPid();
         DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
@@ -12903,38 +12911,24 @@ int32_t AbilityManagerService::QueryKeepAliveApplicationsByEDM(int32_t appType, 
 
 int AbilityManagerService::StartSelfUIAbility(const Want &want)
 {
-    if (!AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not supported");
-        return ERR_CAPABILITY_NOT_SUPPORT;
-    }
-    if (!PermissionVerification::GetInstance()->VerifyStartSelfUIAbility()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "permission denied");
-        return CHECK_PERMISSION_FAILED;
-    }
-    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
-    if (!bundleMgrHelper) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleMgrHelper");
-        return INNER_ERR;
-    }
-    AppExecFwk::AbilityInfo abilityInfo;
-    if (!IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(want,
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, GetUserId(), abilityInfo))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "bundle or ability not exist");
-        return ERR_NOT_ALLOW_IMPLICIT_START;
-    }
+    CHECK_TRUE_RETURN_RET(!AppUtils::GetInstance().IsStartOptionsWithAnimation(),
+        ERR_CAPABILITY_NOT_SUPPORT, "not supported");
 
-    if (abilityInfo.type != AppExecFwk::AbilityType::PAGE) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not UIAbility");
-        return RESOLVE_CALL_ABILITY_TYPE_ERR;
-    }
+    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bundleMgrHelper, INNER_ERR);
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    CHECK_TRUE_RETURN_RET(!IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(want,
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, GetUserId(), abilityInfo)),
+        ERR_NOT_ALLOW_IMPLICIT_START, "bundle or ability not exist");
+
+    CHECK_TRUE_RETURN_RET(abilityInfo.type != AppExecFwk::AbilityType::PAGE,
+        RESOLVE_CALL_ABILITY_TYPE_ERR, "not UIAbility");
 
     auto callingPid = IPCSkeleton::GetCallingPid();
     AppExecFwk::RunningProcessInfo processInfo;
-    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callingPid, processInfo);
-    if (processInfo.bundleNames.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to get process info");
-        return INNER_ERR;
-    }
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByChildProcessPid(callingPid, processInfo);
+    CHECK_TRUE_RETURN_RET(processInfo.bundleNames.empty(), INNER_ERR, "failed to get by child process pid");
 
     bool found = false;
     for (const std::string &bundleName : processInfo.bundleNames) {
@@ -12943,15 +12937,20 @@ int AbilityManagerService::StartSelfUIAbility(const Want &want)
             break;
         }
     }
-    if (!found) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "cannot start other app");
-        return ERR_START_OTHER_APP_FAILED;
-    }
+    CHECK_TRUE_RETURN_RET(!found, ERR_START_OTHER_APP_FAILED, "cannot start other app");
 
-    if (processInfo.state_ != AppExecFwk::AppProcessState::APP_STATE_FOREGROUND) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not foreground");
-        return NOT_TOP_ABILITY;
-    }
+    int32_t appIndex = 0;
+    (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
+    CHECK_TRUE_RETURN_RET(appIndex != processInfo.appCloneIndex, ERR_START_OTHER_APP_FAILED,
+        "cannot start a different app clone");
+
+    auto tokenId = abilityInfo.applicationInfo.accessTokenId;
+    StartSelfUIAbilityRecordGuard startSelfUIAbilityRecordGuard(callingPid, tokenId);
+    CHECK_TRUE_RETURN_RET(!PermissionVerification::GetInstance()->VerifyStartSelfUIAbility(tokenId),
+        CHECK_PERMISSION_FAILED, "permission denied");
+
+    CHECK_TRUE_RETURN_RET(processInfo.state_ != AppExecFwk::AppProcessState::APP_STATE_FOREGROUND,
+        NOT_TOP_ABILITY, "caller not foreground");
 
     return StartAbility(want);
 }

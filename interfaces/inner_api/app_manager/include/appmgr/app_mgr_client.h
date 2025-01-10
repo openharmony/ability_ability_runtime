@@ -366,6 +366,16 @@ public:
     virtual int32_t GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const;
 
     /**
+     * Get running process information by child process pid.
+     *
+     * @param childPid child process id.
+     * @param info Output parameters, return runningProcessInfo.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetRunningProcessInfoByChildProcessPid(const pid_t childPid,
+        OHOS::AppExecFwk::RunningProcessInfo &info) const;
+
+    /**
      * Notify that the ability stage has been updated
      * @param recordId, the app record.
      */

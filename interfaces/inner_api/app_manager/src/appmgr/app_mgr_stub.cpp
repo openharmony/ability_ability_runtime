@@ -225,6 +225,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleGetBundleNameByPid(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_RUNNING_PROCESS_INFO_BY_PID):
             return HandleGetRunningProcessInfoByPid(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_RUNNING_PROCESS_INFO_BY_CHILD_PROCESS_PID):
+            return HandleGetRunningProcessInfoByChildProcessPid(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_ALL_RENDER_PROCESSES):
             return HandleGetAllRenderProcesses(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_PROCESS_MEMORY_BY_PID):
@@ -1166,6 +1168,22 @@ int32_t AppMgrStub::HandleGetRunningProcessInfoByPid(MessageParcel &data, Messag
     RunningProcessInfo processInfo;
     auto pid = static_cast<pid_t>(data.ReadInt32());
     auto result = GetRunningProcessInfoByPid(pid, processInfo);
+    if (!reply.WriteParcelable(&processInfo)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetRunningProcessInfoByChildProcessPid(MessageParcel &data, MessageParcel &reply)
+{
+    RunningProcessInfo processInfo;
+    auto childPid = static_cast<pid_t>(data.ReadInt32());
+    auto result = GetRunningProcessInfoByChildProcessPid(childPid, processInfo);
     if (!reply.WriteParcelable(&processInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed");
         return ERR_INVALID_VALUE;

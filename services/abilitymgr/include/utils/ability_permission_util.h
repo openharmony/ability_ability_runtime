@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "ffrt.h"
 #include "iremote_object.h"
 #include "nocopyable.h"
 #include "permission_verification.h"
@@ -34,6 +35,18 @@ struct AbilityRequest;
  * the struct to open abilities.
  */
 class Want;
+
+class StartSelfUIAbilityRecordGuard {
+public:
+    StartSelfUIAbilityRecordGuard() = delete;
+
+    StartSelfUIAbilityRecordGuard(pid_t pid, int32_t tokenId);
+
+    ~StartSelfUIAbilityRecordGuard();
+
+private:
+    pid_t pid_;
+};
 
 /**
  * @class AbilityPermissionUtil
@@ -124,6 +137,8 @@ public:
      */
     int32_t CheckStartCallHasFloatingWindow(const sptr<IRemoteObject> &callerToken);
 
+    bool IsStartSelfUIAbility();
+
 private:
     /**
      * AbilityPermissionUtil, the private constructor.
@@ -161,6 +176,17 @@ private:
      */
     int32_t UpdateInstanceKey(Want &want, const std::string &originInstanceKey,
         const std::vector<std::string> &instanceKeyArray, const std::string &instanceKey);
+
+    void AddStartSelfUIAbilityRecord(pid_t pid, int32_t tokenId);
+
+    void RemoveStartSelfUIAbilityRecord(pid_t pid);
+
+    int GetTokenIdByPid(pid_t pid);
+
+    ffrt::mutex startSelfUIAbilityRecordsMutex_;
+    std::vector<std::vector<int32_t>> startSelfUIAbilityRecords_;
+
+    friend class StartSelfUIAbilityRecordGuard;
 
     DISALLOW_COPY_AND_MOVE(AbilityPermissionUtil);
 };
