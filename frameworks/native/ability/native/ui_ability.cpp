@@ -42,6 +42,7 @@ constexpr int32_t DEFAULT_DMS_SESSION_ID = 0;
 constexpr char LAUNCHER_BUNDLE_NAME[] = "com.ohos.launcher";
 constexpr char LAUNCHER_ABILITY_NAME[] = "com.ohos.launcher.MainAbility";
 constexpr char SHOW_ON_LOCK_SCREEN[] = "ShowOnLockScreen";
+
 #ifdef WITH_DLP
 constexpr char DLP_PARAMS_SECURITY_FLAG[] = "ohos.dlp.params.securityFlag";
 #endif // WITH_DLP
@@ -197,7 +198,7 @@ void UIAbility::OnStop()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 #ifdef SUPPORT_GRAPHICS
-    TAG_LOGI(AAFwkTag::UIABILITY, "unregisterDisplayInfoChangedListener.");
+    TAG_LOGI(AAFwkTag::UIABILITY, "UnregisterDisplayInfoChangedListener.");
     (void)Rosen::WindowManager::GetInstance().UnregisterDisplayInfoChangedListener(token_, abilityDisplayListener_);
     auto &&window = GetWindow();
     if (window != nullptr) {
@@ -695,7 +696,7 @@ std::string UIAbility::GetContentInfoForRecovery()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null scene");
+        TAG_LOGE(AAFwkTag::UIABILITY, "Scene invalid.");
         return "";
     }
     return scene_->GetContentInfo(Rosen::BackupAndRestoreType::APP_RECOVERY);
@@ -705,7 +706,7 @@ std::string UIAbility::GetContentInfoForDefaultRecovery()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null scene");
+        TAG_LOGE(AAFwkTag::UIABILITY, "Scene invalid.");
         return "";
     }
     return scene_->GetContentInfo(Rosen::BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
@@ -1184,7 +1185,7 @@ std::string UIAbility::GetIdentityToken() const
 bool UIAbility::CheckRecoveryEnabled()
 {
     if (useAppSettedRecoveryValue_.load()) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "use app setted value");
+        TAG_LOGD(AAFwkTag::UIABILITY, "Use app setted value.");
         // Check in app recovery, here return true.
         return true;
     }
@@ -1205,13 +1206,13 @@ bool UIAbility::CheckDefaultRecoveryEnabled()
 bool UIAbility::IsStartByScb()
 {
     if (setting_ == nullptr) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "null setting_");
+        TAG_LOGW(AAFwkTag::UIABILITY, "setting is nullptr.");
         return false;
     }
 
     auto value = setting_->GetProperty(AppExecFwk::AbilityStartSetting::IS_START_BY_SCB_KEY);
     if (value == "true") {
-        TAG_LOGD(AAFwkTag::UIABILITY, "start by scb");
+        TAG_LOGD(AAFwkTag::UIABILITY, "Start by scb.");
         return true;
     }
 

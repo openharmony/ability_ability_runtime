@@ -111,8 +111,8 @@ int32_t AbilityPermissionUtil::CheckMultiInstanceAndAppClone(Want &want, int32_t
     sptr<IRemoteObject> callerToken)
 {
     auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
-    auto isCreating = want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
     auto isSupportMultiInstance = AppUtils::GetInstance().IsSupportMultiInstance();
+    auto isCreating = want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
     if (!isSupportMultiInstance) {
         if (!instanceKey.empty() || isCreating) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Not support multi-instance");
