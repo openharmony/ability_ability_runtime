@@ -388,7 +388,8 @@
             "file.AlbumPickerComponent",
             "file.PhotoPickerComponent",
             "file.RecentPhotoComponent",
-            "multimedia.movingphotoview"
+            "multimedia.movingphotoview",
+            "multimedia.cameraPicker"
         ],
         "FenceExtension": [
             "ability.featureAbility",
