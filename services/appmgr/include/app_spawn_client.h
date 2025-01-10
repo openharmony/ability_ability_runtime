@@ -89,6 +89,7 @@ struct AppSpawnStartMsg {
     bool isolatedNetworkFlag = false;
     bool isolatedSELinuxFlag = false;
     bool isolatedSandboxFlagLegacy = false; // APP_FLAGS_EXTENSION_SANDBOX legacy
+    bool isScreenLockDataProtect = false;
 };
 
 constexpr auto LEN_PID = sizeof(pid_t);
