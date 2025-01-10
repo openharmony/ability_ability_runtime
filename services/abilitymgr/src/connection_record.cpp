@@ -126,7 +126,8 @@ int ConnectionRecord::DisconnectAbility()
     } else {
         TAG_LOGI(AAFwkTag::CONNECTION,
             "current connection count: %{public}zu, %{public}s:%{public}s no need disconnect, just remove",
-            connectNums, targetService_->GetAbilityInfo().bundleName.c_str(), targetService_->GetAbilityInfo().name.c_str());
+            connectNums, targetService_->GetAbilityInfo().bundleName.c_str(),
+            targetService_->GetAbilityInfo().name.c_str());
         targetService_->RemoveConnectRecordFromList(shared_from_this());
         SetConnectState(ConnectionState::DISCONNECTED);
     }
