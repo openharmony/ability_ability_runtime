@@ -19,8 +19,6 @@
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
 #include "nlohmann/json.hpp"
-#include "permission_constants.h"
-#include "permission_verification.h"
 #include "securec.h"
 #include "time_util.h"
 
@@ -132,11 +130,10 @@ AppSpawnClientHandle AppSpawnClient::GetAppSpawnClientHandle() const
     return nullptr;
 }
 
-static std::string DumpDataGroupInfoListToJson(const DataGroupInfoList &dataGroupInfoList)
+static std::string DumpDataGroupInfoListToJson(const DataGroupInfoList &dataGroupInfoList, bool isScreenLockDataProtect)
 {
+    TAG_LOGD(AAFwkTag::APPMGR, "dataGroupInfoList size: %{public}zu", dataGroupInfoList.size());
     nlohmann::json dataGroupInfoListJson;
-    bool hasScreenLockPermission = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
-        AAFwk::PermissionConstants::PERMISSION_PROTECT_SCREEN_LOCK_DATA);
     for (auto& dataGroupInfo : dataGroupInfoList) {
         nlohmann::json dataGroupInfoJson;
         dataGroupInfoJson[DATAGROUPINFOLIST_DATAGROUPID] = dataGroupInfo.dataGroupId;
@@ -151,7 +148,7 @@ static std::string DumpDataGroupInfoListToJson(const DataGroupInfoList &dataGrou
 
         dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL4 + dir;
         dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
-        if (hasScreenLockPermission) {
+        if (isScreenLockDataProtect) {
             dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL5 + dir;
             dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
         }
@@ -338,7 +335,7 @@ int32_t AppSpawnClient::AppspawnSetExtMsg(const AppSpawnStartMsg &startMsg, AppS
 
     if (!startMsg.dataGroupInfoList.empty()) {
         ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_DATA_GROUP,
-            DumpDataGroupInfoListToJson(startMsg.dataGroupInfoList).c_str());
+            DumpDataGroupInfoListToJson(startMsg.dataGroupInfoList, startMsg.isScreenLockDataProtect).c_str());
         if (ret) {
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             return ret;
