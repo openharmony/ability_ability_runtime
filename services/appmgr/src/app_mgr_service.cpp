@@ -1400,6 +1400,7 @@ int32_t AppMgrService::IsApplicationRunning(const std::string &bundleName, bool 
 
 int32_t AppMgrService::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning)
 {
+    isRunning = false;
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
@@ -1409,6 +1410,7 @@ int32_t AppMgrService::IsAppRunning(const std::string &bundleName, int32_t appCl
 int32_t AppMgrService::IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
     bool &isRunning)
 {
+    isRunning = false;
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
