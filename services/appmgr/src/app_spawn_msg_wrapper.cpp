@@ -19,8 +19,6 @@
 
 #include "hilog_tag_wrapper.h"
 #include "nlohmann/json.hpp"
-#include "permission_constants.h"
-#include "permission_verification.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -60,11 +58,9 @@ static std::string DumpToJson(const HspList &hspList)
     return hspListJson.dump();
 }
 
-static std::string DumpToJson(const DataGroupInfoList &dataGroupInfoList)
+static std::string DumpToJson(const DataGroupInfoList &dataGroupInfoList, bool isScreenLockDataProtect)
 {
     nlohmann::json dataGroupInfoListJson;
-    bool hasScreenLockPermission = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
-        AAFwk::PermissionConstants::PERMISSION_PROTECT_SCREEN_LOCK_DATA);
     for (auto& dataGroupInfo : dataGroupInfoList) {
         nlohmann::json dataGroupInfoJson;
         dataGroupInfoJson[DATAGROUPINFOLIST_DATAGROUPID] = dataGroupInfo.dataGroupId;
@@ -79,7 +75,7 @@ static std::string DumpToJson(const DataGroupInfoList &dataGroupInfoList)
 
         dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL4 + dir;
         dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
-        if (hasScreenLockPermission) {
+        if (isScreenLockDataProtect) {
             dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL5 + dir;
             dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
         }
@@ -180,8 +176,8 @@ void AppSpawnMsgWrapper::BuildExtraInfo(const AppSpawnStartMsg &startMsg)
     }
 
     if (!startMsg.dataGroupInfoList.empty()) {
-        extraInfoStr_ += DATA_GROUP_SOCKET_TYPE + DumpToJson(startMsg.dataGroupInfoList) +
-                                DATA_GROUP_SOCKET_TYPE;
+        extraInfoStr_ += DATA_GROUP_SOCKET_TYPE +
+            DumpToJson(startMsg.dataGroupInfoList, startMsg.isScreenLockDataProtect) + DATA_GROUP_SOCKET_TYPE;
     }
 
     if (!startMsg.overlayInfo.empty()) {
