@@ -439,11 +439,8 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
         TAG_LOGD(AAFwkTag::APPKIT, "abilityRecordMgr_ or configuration_ is null");
         return;
     }
-    // Whether the color changes with the system
     bool isUpdateAppColor = IsUpdateColorNeeded(config, level);
-    // Whether the font changes with the system
     bool isUpdateAppFontSize = isUpdateFontSize(config, level);
-    // Whether the language changes with the system
     bool isUpdateAppLanguage = IsUpdateLanguageNeeded(config, level);
     if (!isUpdateAppColor && !isUpdateAppFontSize && !isUpdateAppLanguage && config.GetItemSize() == 0) {
         TAG_LOGD(AAFwkTag::APPKIT, "configuration need not updated");
