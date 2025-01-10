@@ -73,7 +73,7 @@ ohos_fuzztest("DialogSessionManagerFuzzTest") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
-    "libjpeg-turbo:turbojpeg_static",
+    "libjpeg-turbo:turbojpeg",
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",

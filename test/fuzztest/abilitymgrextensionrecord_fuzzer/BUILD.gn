@@ -77,7 +77,7 @@ ohos_fuzztest("AbilityMgrExtensionRecordFuzzTest") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
-    "libjpeg-turbo:turbojpeg_static",
+    "libjpeg-turbo:turbojpeg",
     "napi:ace_napi",
     "safwk:api_cache_manager",
     "samgr:samgr_proxy",
