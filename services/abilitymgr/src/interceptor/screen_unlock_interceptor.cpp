@@ -73,7 +73,7 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
         EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
         return ERR_OK;
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "no startup when device first locked");
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "no startup before device first unlock");
     return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
 }
 } // namespace AAFwk
