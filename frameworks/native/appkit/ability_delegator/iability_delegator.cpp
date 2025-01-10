@@ -62,5 +62,15 @@ void IAbilityDelegator::Prepare() {}
 
 void IAbilityDelegator::OnRun() {}
 
+uint32_t IAbilityDelegator::GetApiTargetVersion()
+{
+    return apiTargetVersion_;
+}
+
+void IAbilityDelegator::SetApiTargetVersion(uint32_t apiTargetVersion)
+{
+    apiTargetVersion_ = apiTargetVersion;
+}
+
 } // namespace AppExecFwk
 } // namespace OHOS
