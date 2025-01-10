@@ -264,19 +264,6 @@ public:
     bool isNativeStart() const;
 
     /**
-     * @brief Setting is need preload module.
-     *
-     * @param isNeedPreloadModule, is need preload module.
-     */
-    void SetIsNeedPreloadModule(bool isNeedPreloadModule);
-    /**
-     * @brief Obtains  is need preload module..
-     *
-     * @return Returns  is need preload module..
-     */
-    bool IsNeedPreloadModule() const;
-
-    /**
      * @brief Setting if allow nweb preload.
      *
      * @param isAllowedNWebPreload, if allow nweb preload.
@@ -288,6 +275,18 @@ public:
      * @return Returns if allow nweb preload.
      */
     bool IsAllowedNWebPreload() const;
+    /**
+     * @brief Setting is need preload module.
+     *
+     * @param isNeedPreloadModule, is need preload module.
+     */
+    void SetIsNeedPreloadModule(bool isNeedPreloadModule);
+    /**
+     * @brief Obtains  is need preload module..
+     *
+     * @return Returns  is need preload module..
+     */
+    bool IsNeedPreloadModule() const;
 
 private:
     ApplicationInfo applicationInfo_;
@@ -305,8 +304,8 @@ private:
     bool isErrorInfoEnhance_ = false;
     std::string appRunningUniqueId_;
     std::string instanceKey_;
-    bool isNeedPreloadModule_ = false;
     bool isAllowedNWebPreload_ = false;
+    bool isNeedPreloadModule_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
