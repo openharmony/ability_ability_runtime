@@ -1307,19 +1307,12 @@ bool AppRunningRecord::IsLastPageAbilityRecord(const sptr<IRemoteObject> &token)
     return pageAbilitySize == 1;
 }
 
-void AppRunningRecord::SetTerminating(std::shared_ptr<AppRunningManager> appRunningMgr)
+void AppRunningRecord::SetTerminating()
 {
     isTerminating = true;
     auto prioObject = GetPriorityObject();
     if (prioObject) {
         AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(prioObject->GetPid());
-    }
-    if (appRunningMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningMgr null");
-        return;
-    }
-    if (appRunningMgr->CheckAppRunningRecordIsLast(shared_from_this())) {
-        UnSetPolicy();
     }
 }
 

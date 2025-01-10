@@ -534,7 +534,7 @@ public:
      * @brief indicates one process will go dying.
      * Then the process won't be reused.
      */
-    void SetTerminating(std::shared_ptr<AppRunningManager> appRunningMgr);
+    void SetTerminating();
 
     /**
      * @brief Whether the process is dying.
