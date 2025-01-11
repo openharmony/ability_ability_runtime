@@ -84,7 +84,12 @@ public:
         /// Indicates that the current value of {@code bundleName} can be replaced
         /// when the <seealso cref="WantAgent"/> is triggered.
         /// </summary>
-        REPLACE_BUNDLE
+        REPLACE_BUNDLE,
+
+        /// <summary>
+        /// Indicates that the existing <seealso cref="WantAgent"/> allow canceled by user.
+        /// </summary>
+        ALLOW_CANCEL_FLAG
     };
 
     /// <summary>
