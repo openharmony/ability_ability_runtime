@@ -9739,7 +9739,8 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
         }
     }
 
-    int result = AAFwk::PermissionVerification::GetInstance()->CheckCallServiceExtensionPermission(verificationInfo);
+    int result = AAFwk::AbilityPermissionUtil::GetInstance().CheckCallServiceExtensionPermissionOrHasFloatingWindow(
+        verificationInfo, abilityRequest.callerToken);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "without start serviceExtension or sataShareExtension permission");
     }
@@ -10051,8 +10052,8 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
         return ERR_INVALID_VALUE;
     }
 
-    int result = AAFwk::PermissionVerification::GetInstance()->CheckCallAbilityPermission(
-        verificationInfo, isCallByShortcut);
+    int result = AAFwk::AbilityPermissionUtil::GetInstance().CheckCallAbilityPermissionOrHasFloatingWindow(
+        verificationInfo, abilityRequest.callerToken, isCallByShortcut);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "without start pageAbility(FA) or ability(Stage) permission");
     }
@@ -10077,7 +10078,8 @@ int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abil
         return ERR_INVALID_VALUE;
     }
 
-    if (AAFwk::PermissionVerification::GetInstance()->CheckStartByCallPermission(verificationInfo) != ERR_OK) {
+    if (AAFwk::AbilityPermissionUtil::GetInstance().CheckStartByCallPermissionOrHasFloatingWindow(
+        verificationInfo, abilityRequest.callerToken) != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "without startAbilityByCall permission");
         return RESOLVE_CALL_NO_PERMISSIONS;
     }
