@@ -3391,7 +3391,7 @@ int32_t AbilityRecord::GetCurrentAccountId() const
         TAG_LOGE(AAFwkTag::ABILITYMGR, "empty QueryActiveOsAccountIds");
         return DEFAULT_USER_ID;
     }
-
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "osActiveAccountId: %{public}d", osActiveAccountIds.front());
     return osActiveAccountIds.front();
 }
 

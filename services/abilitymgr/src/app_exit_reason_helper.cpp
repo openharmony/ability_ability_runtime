@@ -39,8 +39,7 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
     auto uid = IPCSkeleton::GetCallingUid();
     std::string bundleName;
     int32_t appIndex = 0;
-    auto ret = IN_PROCESS_CALL(AbilityUtil::GetBundleManagerHelper()->GetNameAndIndexForUid(uid, bundleName,
-        appIndex));
+    auto ret = IN_PROCESS_CALL(AbilityUtil::GetBundleManagerHelper()->GetNameAndIndexForUid(uid, bundleName, appIndex));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ret:%{public}d", ret);
         return ret;
@@ -63,13 +62,11 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
         CHECK_POINTER_AND_RETURN(missionListManager, ERR_NULL_OBJECT);
         missionListManager->GetActiveAbilityList(uid, abilityList);
     }
-
     ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyAppMgrRecordExitReason(IPCSkeleton::GetCallingPid(),
         exitReason.reason, exitReason.exitMsg);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed,code: %{public}d", ret);
     }
-
     if (abilityList.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityLists empty");
         return ERR_GET_ACTIVE_ABILITY_LIST_EMPTY;
@@ -80,7 +77,8 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get GetOsAccountLocalIdFromUid failed");
         return ERR_INVALID_VALUE;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName: %{public}s, appIndex: %{public}d", bundleName.c_str(), appIndex);
+    TAG_LOGD(AAFwkTag::ABILITYMGR,
+        "userId: %{public}d, bundleName: %{public}s, appIndex: %{public}d", userId, bundleName.c_str(), appIndex);
     uint32_t accessTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, appIndex);
     return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(bundleName,
         accessTokenId, abilityList, exitReason);
@@ -114,7 +112,8 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const std::string &bundleName, 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get GetOsAccountLocalIdFromUid failed");
         return ERR_INVALID_VALUE;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName: %{public}s, appIndex: %{public}d", bundleName.c_str(), appIndex);
+    TAG_LOGD(AAFwkTag::ABILITYMGR,
+        "userId: %{public}d, bundleName: %{public}s, appIndex: %{public}d", userId, bundleName.c_str(), appIndex);
     uint32_t accessTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, appIndex);
     return RecordProcessExitReason(NO_PID, bundleName, uid, accessTokenId, exitReason);
 }
@@ -133,6 +132,7 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const st
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get GetOsAccountLocalIdFromUid failed");
         return ERR_INVALID_VALUE;
     }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "targetUserId: %{public}d", targetUserId);
     std::vector<std::string> abilityLists;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         GetActiveAbilityListFromUIAbilityManager(uid, abilityLists, pid);
@@ -196,6 +196,7 @@ void AppExitReasonHelper::GetActiveAbilityList(int32_t uid, std::vector<std::str
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get GetOsAccountLocalIdFromUid failed");
         return;
     }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "targetUserId: %{public}d", targetUserId);
     CHECK_POINTER(subManagersHelper_);
     if (targetUserId == U0_USER_ID) {
         auto missionListManagers = subManagersHelper_->GetMissionListManagers();
@@ -225,6 +226,7 @@ void AppExitReasonHelper::GetActiveAbilityListFromUIAbilityManager(int32_t uid, 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get GetOsAccountLocalIdFromUid failed");
         return;
     }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "targetUserId: %{public}d", targetUserId);
     if (targetUserId == U0_USER_ID) {
         auto uiAbilityManagers = subManagersHelper_->GetUIAbilityManagers();
         for (auto& item: uiAbilityManagers) {

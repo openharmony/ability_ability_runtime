@@ -4827,6 +4827,7 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
             return nullptr;
         }
     }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "getOsAccountLocalIdFromUid userId: %{public}d", userId);
     //sa caller and has uid，no need find from bms.
     bool isSpecifyUidBySa = (uid != -1) && (AAFwk::PermissionVerification::GetInstance()->IsSACall());
 
@@ -4899,7 +4900,7 @@ void AbilityManagerService::CancelWantSender(const sptr<IWantSender> &sender)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "getOsAccountLocalIdFromUid failed uid=%{public}d", callerUid);
         return;
     }
-
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "getOsAccountLocalIdFromUid userId: %{public}d", userId);
     bool isSystemAppCall = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall();
 
     pendingWantManager->CancelWantSender(isSystemAppCall, sender);
@@ -10522,13 +10523,13 @@ int32_t AbilityManagerService::SetSessionManagerService(const sptr<IRemoteObject
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call setSessionManagerService of WMS");
-    auto ret = Rosen::MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService);
+    bool ret = Rosen::MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService);
     if (ret) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Call SetSessionManagerService of WMS.");
         return ERR_OK;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "SMS setSessionManagerService return false");
-    return ERR_OK;
+    return SET_SMS_FAILED;
 }
 
 bool AbilityManagerService::CheckPrepareTerminateEnable()
