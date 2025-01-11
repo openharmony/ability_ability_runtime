@@ -21,9 +21,9 @@
 namespace OHOS {
 namespace AbilityRuntime {
 AbilityManagerEventSubscriber::AbilityManagerEventSubscriber(
-    const EventFwk::CommonEventSubscribeInfo &subscribeInfo,
+    const EventFwk::CommonEventSubscribeInfo &subscribeInfo, const std::function<void()> &screenUnlockCallback,
     const std::function<void()> &userScreenUnlockCallback)
-    : EventFwk::CommonEventSubscriber(subscribeInfo),
+    : EventFwk::CommonEventSubscriber(subscribeInfo), screenUnlockCallback_(screenUnlockCallback),
     userScreenUnlockCallback_(userScreenUnlockCallback)
 {}
 
@@ -32,27 +32,24 @@ void AbilityManagerEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventDa
     const AAFwk::Want &want = data.GetWant();
     std::string action = want.GetAction();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "The action: %{public}s.", action.c_str());
-    if (userScreenUnlockCallback_ == nullptr) {
+    if (userScreenUnlockCallback_ == nullptr || screenUnlockCallback_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "nullptr callback");
         return;
     }
     std::lock_guard<std::mutex> lock(mutex_);
+    auto handleEvent = [&](const std::string &event) {
+        if (eventSet_.find(event) != eventSet_.end()) {
+            screenUnlockCallback_();
+            eventSet_.clear();
+        } else {
+            eventSet_.insert(action);
+        }
+    };
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
-        if (eventSet_.find(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) != eventSet_.end()) {
-            userScreenUnlockCallback_();
-            eventSet_.clear();
-        } else {
-            eventSet_.insert(action);
-        }
-        return;
-    }
-    if ((action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED)) {
-        if (eventSet_.find(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) != eventSet_.end()) {
-            userScreenUnlockCallback_();
-            eventSet_.clear();
-        } else {
-            eventSet_.insert(action);
-        }
+        handleEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
+        userScreenUnlockCallback_();
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
+        handleEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     }
 }
 } // namespace AbilityRuntime
