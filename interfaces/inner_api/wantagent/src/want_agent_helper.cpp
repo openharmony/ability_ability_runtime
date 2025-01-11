@@ -76,6 +76,9 @@ unsigned int WantAgentHelper::FlagsTransformer(const std::vector<WantAgentConsta
                 wantFlags |= static_cast<unsigned int>(FLAG_UPDATE_CURRENT);
                 TAG_LOGE(AAFwkTag::WANTAGENT, "Invalid flag:REPLACE_BUNDLE");
                 break;
+            case WantAgentConstant::Flags::ALLOW_CANCEL_FLAG:
+                wantFlags |= static_cast<unsigned int>(FLAG_ALLOW_CANCEL);
+                break;
             default:
                 TAG_LOGE(AAFwkTag::WANTAGENT, "flags is error");
                 break;
@@ -449,6 +452,9 @@ std::vector<WantAgentConstant::Flags> WantAgentHelper::ParseFlags(nlohmann::json
     }
     if (static_cast<uint32_t>(flags) & static_cast<uint32_t>(FLAG_IMMUTABLE)) {
         flagsVec.emplace_back(WantAgentConstant::Flags::CONSTANT_FLAG);
+    }
+    if (static_cast<uint32_t>(flags) & static_cast<uint32_t>(FLAG_ALLOW_CANCEL)) {
+        flagsVec.emplace_back(WantAgentConstant::Flags::ALLOW_CANCEL_FLAG);
     }
 
     return flagsVec;
