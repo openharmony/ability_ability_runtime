@@ -313,13 +313,13 @@ int32_t AbilityPermissionUtil::CheckStartCallHasFloatingWindow(const sptr<IRemot
 {
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
-        bool hasFloatingWindow = CHECK_PERMISSION_FAILED;
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "startAbility call from background, checking floatingwindow.");
-        auto err = sceneSessionManager->UIAbilityHasFloatingWindowForeground(callerToken, hasFloatingWindow);
+        bool hasFloatingWindow = false;
+        auto err = sceneSessionManager->HasFloatingWindowForeground(callerToken, hasFloatingWindow);
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+            "startAbility call from background, checking floatingwindow. Ret: %{public}d", static_cast<int32_t>(err));
         if (err != Rosen::WMError::WM_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR,
-                "startAbility call from background, checking floatingwindow err: %{public}d",
-                static_cast<int32_t>(err));
+                "checking floatingwindow err: %{public}d", static_cast<int32_t>(err));
         } else if (hasFloatingWindow) {
             return ERR_OK;
         }
