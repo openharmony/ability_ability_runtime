@@ -124,7 +124,7 @@ int32_t OsAccountManagerWrapper::GetCurrentActiveAccountId()
         TAG_LOGE(AAFwkTag::DEFAULT, "account empty");
         return 0;
     }
-
+    TAG_LOGD(AAFwkTag::DEFAULT, "accountId: %{public}d", accountIds[0]);
     return accountIds[0];
 }
 }  // namespace AppExecFwk

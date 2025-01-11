@@ -661,6 +661,11 @@ enum {
      */
     ERR_UI_ABILITY_IS_STARTING = 2097280,
 
+    /*
+     * Result (2097281) for setSessionManagerService failed.
+     */
+    SET_SMS_FAILED = 2097281,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
