@@ -20,6 +20,7 @@
 
 #include "iremote_object.h"
 #include "nocopyable.h"
+#include "permission_verification.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -86,6 +87,42 @@ public:
     int32_t CheckMultiInstanceKeyForExtension(const AbilityRequest &abilityRequest);
 
     int32_t CheckStartRecentAbility(const Want &want, AbilityRequest &request);
+
+    /**
+     * Check StartByCallPermission, check HasFloatingWindow.
+     * @param verificationInfo verificationInfo.
+     * @param callerToken The caller token.
+     * @return Whether the caller has permission to start.
+     */
+    int32_t CheckStartByCallPermissionOrHasFloatingWindow(
+        const PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken);
+
+    /**
+     * Check CallServiceExtensionPermission, check HasFloatingWindow.
+     * @param verificationInfo verificationInfo.
+     * @param callerToken The caller token.
+     * @return Whether the caller has permission to start.
+     */
+    int32_t CheckCallServiceExtensionPermissionOrHasFloatingWindow(
+        const PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken);
+
+    /**
+     * Check CheckCallAbilityPermission, check HasFloatingWindow.
+     * @param verificationInfo verificationInfo.
+     * @param callerToken The caller token.
+     * @param isCallByShortcut isCallByShortcut.
+     * @return Whether the caller has permission to start.
+     */
+    int32_t CheckCallAbilityPermissionOrHasFloatingWindow(
+        const PermissionVerification::VerificationInfo &verificationInfo, const sptr<IRemoteObject> &callerToken,
+        bool isCallByShortcut);
+
+    /**
+     * Check HasFloatingWindow.
+     * @param callerToken The caller token.
+     * @return Whether the caller has floatingWindow.
+     */
+    int32_t CheckStartCallHasFloatingWindow(const sptr<IRemoteObject> &callerToken);
 
 private:
     /**
