@@ -376,7 +376,20 @@
             "ServiceExtensionContext",
             "UIAbilityContext",
             "nfctech",
-            "tagSession"
+            "tagSession",
+            "file.picker",
+            "core.scan.scanCore",
+            "core.scan.scanBarcode",
+            "core.scan.customScan",
+            "core.scan.detectBarcode",
+            "core.scan.generateBarcode",
+            "file.photoAccessHelper",
+            "file.sendablePhotoAccessHelper",
+            "file.AlbumPickerComponent",
+            "file.PhotoPickerComponent",
+            "file.RecentPhotoComponent",
+            "multimedia.movingphotoview",
+            "multimedia.cameraPicker"
         ],
         "FenceExtension": [
             "ability.featureAbility",
