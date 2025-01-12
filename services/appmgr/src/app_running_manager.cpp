@@ -831,6 +831,21 @@ int32_t AppRunningManager::GetRunningProcessInfoByPid(const pid_t pid, OHOS::App
     return AssignRunningProcessInfoByAppRecord(appRecord, info);
 }
 
+int32_t AppRunningManager::GetRunningProcessInfoByChildProcessPid(const pid_t childPid,
+    OHOS::AppExecFwk::RunningProcessInfo &info)
+{
+    if (childPid <= 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid process pid:%{public}d", childPid);
+        return ERR_INVALID_OPERATION;
+    }
+    auto appRecord = GetAppRunningRecordByPid(childPid);
+    if (appRecord == nullptr) {
+        TAG_LOGI(AAFwkTag::APPMGR, "null appRecord, try get by child pid");
+        appRecord = GetAppRunningRecordByChildProcessPid(childPid);
+    }
+    return AssignRunningProcessInfoByAppRecord(appRecord, info);
+}
+
 int32_t AppRunningManager::AssignRunningProcessInfoByAppRecord(
     std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const
 {

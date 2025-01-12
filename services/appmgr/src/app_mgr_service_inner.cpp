@@ -4233,6 +4233,17 @@ int32_t AppMgrServiceInner::GetRunningProcessInfoByPid(const pid_t pid,
     return appRunningManager_->GetRunningProcessInfoByPid(pid, info);
 }
 
+int32_t AppMgrServiceInner::GetRunningProcessInfoByChildProcessPid(const pid_t childPid,
+    OHOS::AppExecFwk::RunningProcessInfo &info) const
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (!CheckGetRunningInfoPermission()) {
+        return ERR_PERMISSION_DENIED;
+    }
+
+    return appRunningManager_->GetRunningProcessInfoByChildProcessPid(childPid, info);
+}
+
 void AppMgrServiceInner::SetAbilityForegroundingFlagToAppRecord(const pid_t pid) const
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
