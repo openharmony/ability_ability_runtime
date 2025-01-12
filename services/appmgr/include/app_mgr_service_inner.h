@@ -720,6 +720,9 @@ public:
 
     int32_t GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const;
 
+    int32_t GetRunningProcessInfoByChildProcessPid(const pid_t childPid,
+        OHOS::AppExecFwk::RunningProcessInfo &info) const;
+
     /**
      * Set AbilityForegroundingFlag of an app-record to true.
      *

@@ -72,16 +72,6 @@ typedef enum {
      */
     ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE = 16000002,
     /**
-     * @error Starting invisible ability is not allowed.
-     * @since 15
-     */
-    ABILITY_RUNTIME_ERROR_CODE_INVISIBLE = 16000004,
-    /**
-     * @error Cross-user start app is not allowed.
-     * @since 15
-     */
-    ABILITY_RUNTIME_ERROR_CODE_CROSS_USER = 16000006,
-    /**
      * @error The crowdtesting application expires.
      * @since 15
      */
