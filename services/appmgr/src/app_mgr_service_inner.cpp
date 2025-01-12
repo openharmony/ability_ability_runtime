@@ -4829,6 +4829,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
         appRecord->SetTaskHandler(taskHandler_);
         appRecord->SetEventHandler(eventHandler_);
         appRecord->SendEventForSpecifiedAbility();
+        appRecord->SetAppIndex(appIndex);
         uint32_t startFlags = AppspawnUtil::BuildStartFlags(want, abilityInfo);
         StartProcess(appInfo->name, processName, startFlags, appRecord, appInfo->uid, bundleInfo, appInfo->bundleName,
             appIndex, appExistFlag);
