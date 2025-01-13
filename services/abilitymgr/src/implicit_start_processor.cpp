@@ -309,7 +309,7 @@ std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
         }
         type = uri.substr(suffixIndex);
 #ifdef WITH_DLP
-        if (type == ".dlp") {
+        if (Security::DlpPermission::DlpFileKits::IsDlpFileBySuffix(type)) {
             auto suffixDlpIndex = uri.rfind('.', suffixIndex - 1);
             if (suffixDlpIndex == std::string::npos) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, uri: %{public}s", uri.c_str());
