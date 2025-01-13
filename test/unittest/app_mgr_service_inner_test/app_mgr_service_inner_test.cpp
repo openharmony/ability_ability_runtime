@@ -65,6 +65,7 @@ namespace {
 constexpr int32_t RECORD_ID = 1;
 constexpr int32_t APP_DEBUG_INFO_PID = 0;
 constexpr int32_t APP_DEBUG_INFO_UID = 0;
+constexpr const char* PERMISSION_PROTECT_SCREEN_LOCK_DATA_TEST = "ohos.permission.PROTECT_SCREEN_LOCK_DATA";
 }
 static int recordId_ = 0;
 class AppMgrServiceInnerTest : public testing::Test {
@@ -523,6 +524,49 @@ HWTEST_F(AppMgrServiceInnerTest, MakeProcessName_002, TestSize.Level0)
 
     EXPECT_NE(appMgrServiceInner, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "MakeProcessName_002 end");
+}
+
+/**
+ * @tc.name: QueryExtensionSandBox_001
+ * @tc.desc: query extension sandBox without permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    const string moduleName = "entry";
+    const string abilityName = "abilityName";
+    BundleInfo bundleInfo;
+    AppSpawnStartMsg startMsg;
+    DataGroupInfoList dataGroupInfoList;
+    appMgrServiceInner->QueryExtensionSandBox(moduleName, abilityName, bundleInfo, startMsg, dataGroupInfoList,
+        nullptr);
+    EXPECT_FALSE(startMsg.isScreenLockDataProtect);
+    TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_001 end");
+}
+
+/**
+ * @tc.name: QueryExtensionSandBox_002
+ * @tc.desc: query extension sandBox with permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    const string moduleName = "entry";
+    const string abilityName = "abilityName";
+    BundleInfo bundleInfo;
+    bundleInfo.reqPermissions.push_back(PERMISSION_PROTECT_SCREEN_LOCK_DATA_TEST);
+    AppSpawnStartMsg startMsg;
+    DataGroupInfoList dataGroupInfoList;
+    appMgrServiceInner->QueryExtensionSandBox(moduleName, abilityName, bundleInfo, startMsg, dataGroupInfoList,
+        nullptr);
+    EXPECT_TRUE(startMsg.isScreenLockDataProtect);
+    TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_002 end");
 }
 
 /**
