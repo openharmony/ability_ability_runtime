@@ -17,7 +17,9 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 group("cj_ability_packages") {
   deps = [
     "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+    "${ability_runtime_path}/frameworks/cj/ffi/app/app_manager:cj_app_manager_ffi",
     "${ability_runtime_path}/frameworks/cj/ffi/app/errormanager:cj_errormanager_ffi",
+    "${ability_runtime_path}/frameworks/cj/ffi/app/recovery:cj_app_recovery_ffi",
     "${ability_runtime_path}/frameworks/cj/ffi/ark_interop_helper:ark_interop_helper_ffi",
     "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi",
     "${ability_runtime_path}/frameworks/cj/ffi/want_agent:cj_want_agent_ffi",
