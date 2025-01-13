@@ -54,29 +54,6 @@ constexpr uint32_t PROCESS_MODE_RUN_WITH_MAIN_PROCESS =
 int64_t AppRunningRecord::appEventId_ = 0;
 
 
-void MultiUserConfigurationMgr::Insert(const int32_t userId, const Configuration& config)
-{
-    std::lock_guard<std::mutex> guard(multiUserConfigurationMutex_);
-    auto it = multiUserConfiguration_.find(userId);
-    if (it != multiUserConfiguration_.end()) {
-        std::vector<std::string> diffVe;
-        it->second.CompareDifferent(diffVe, config);
-        it->second.Merge(diffVe, config);
-    } else {
-        multiUserConfiguration_[userId] = config;
-    }
-}
-
-Configuration MultiUserConfigurationMgr::GetConfigurationByUserId(const int32_t userId)
-{
-    std::lock_guard<std::mutex> guard(multiUserConfigurationMutex_);
-    auto it = multiUserConfiguration_.find(userId);
-    if (it == multiUserConfiguration_.end()) {
-        return {};
-    }
-    return it->second;
-}
-
 AppRunningRecord::AppRunningRecord(
     const std::shared_ptr<ApplicationInfo> &info, const int32_t recordId, const std::string &processName)
     : appRecordId_(recordId), processName_(processName)

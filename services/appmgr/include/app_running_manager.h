@@ -366,8 +366,6 @@ public:
 
     bool HandleUserRequestClean(const sptr<IRemoteObject> &abilityToken, pid_t &pid, int32_t &uid);
 
-    void SetMultiUserConfigurationMgr(const std::shared_ptr<MultiUserConfigurationMgr>& multiUserConfigurationMgr);
-
     int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 
     bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
@@ -391,7 +389,6 @@ private:
 
     std::mutex updateConfigurationDelayedLock_;
     std::map<const int32_t, bool> updateConfigurationDelayedMap_;
-    std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
