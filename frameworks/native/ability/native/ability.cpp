@@ -1760,7 +1760,7 @@ int Ability::GetCurrentWindowMode()
     }
     auto window = scene_->GetMainWindow();
     if (window != nullptr) {
-        windowMode = static_cast<int>(window->GetMode());
+        windowMode = static_cast<int>(window->GetWindowMode());
     }
     return windowMode;
 }
