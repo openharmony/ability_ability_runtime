@@ -901,6 +901,41 @@ ErrCode AbilityContextImpl::SetMissionIcon(const std::shared_ptr<OHOS::Media::Pi
     return err;
 }
 
+ErrCode AbilityContextImpl::SetAbilityInstanceInfo(const std::string& label,
+    std::shared_ptr<OHOS::Media::PixelMap> icon)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "call");
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto ifaceSession = iface_cast<Rosen::ISession>(GetSessionToken());
+        if (ifaceSession == nullptr) {
+            TAG_LOGW(AAFwkTag::CONTEXT, "null ifaceSession");
+            return ERR_INVALID_VALUE;
+        }
+
+        TAG_LOGI(AAFwkTag::CONTEXT, "SetSessionLabelAndIcon");
+        auto errCode = ifaceSession->SetSessionLabelAndIcon(label, icon);
+        if (errCode != Rosen::WSError::WS_OK) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "SetSessionLabelAndIcon err: %{public}d", static_cast<int32_t>(errCode));
+        } else {
+            auto abilityCallback = abilityCallback_.lock();
+            if (abilityCallback) {
+                abilityCallback->SetMissionLabel(label);
+                abilityCallback->SetMissionIcon(icon);
+            }
+        }
+        if (errCode == Rosen::WSError::WS_ERROR_INVALID_PERMISSION) {
+            return AAFwk::CHECK_PERMISSION_FAILED;
+        } else if (errCode == Rosen::WSError::WS_ERROR_SET_SESSION_LABEL_FAILED) {
+            return AAFwk::INVALID_PARAMETERS_ERR;
+        } else if (errCode == Rosen::WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
+            return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+        }
+
+        return static_cast<int32_t>(errCode);
+    }
+    return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+}
+
 int AbilityContextImpl::GetCurrentWindowMode()
 {
     auto abilityCallback = abilityCallback_.lock();
