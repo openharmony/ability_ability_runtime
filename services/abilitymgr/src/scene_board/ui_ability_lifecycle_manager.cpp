@@ -1785,11 +1785,10 @@ void UIAbilityLifecycleManager::NotifySCBToHandleAtomicServiceException(sptr<Ses
     CHECK_POINTER(sessionInfo);
     CHECK_POINTER(sessionInfo->sessionToken);
     auto session = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call notifySessionException");
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "call notifySessionException, errorReason: %{public}s", errorReason.c_str());
     sessionInfo->errorCode = errorCode;
     sessionInfo->errorReason = errorReason;
-    TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "scb call, NotifySCBToHandleAtomicServiceException reason: %{public}s", errorReason.c_str());
     session->NotifySessionException(sessionInfo);
 }
 
