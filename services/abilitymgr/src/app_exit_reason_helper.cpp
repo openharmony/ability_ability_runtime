@@ -80,6 +80,14 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
         accessTokenId, abilityList, exitReason);
 }
 
+int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason, int32_t pid)
+{
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(static_cast<pid_t>(pid), processInfo);
+    return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+        SetProcessExitDetailInfo(exitReason, processInfo);
+}
+
 int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const ExitReason &exitReason)
 {
     AppExecFwk::ApplicationInfo application;

@@ -40,6 +40,7 @@
 #include "irender_state_observer.h"
 #include "memory_level_info.h"
 #include "page_state_data.h"
+#include "process_memory_state.h"
 #include "render_process_info.h"
 #include "running_process_info.h"
 #include "system_memory_attr.h"
@@ -909,6 +910,18 @@ public:
     virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) {}
 
     virtual int32_t HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
+    {
+        return 0;
+    }
+
+    /**
+     * UpdateProcessMemoryState, call UpdateProcessMemoryState() through proxy object,
+     * update process rss and pss value.
+     *
+     * @param procMemStates, the memory states of all apps.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t UpdateProcessMemoryState(const std::vector<ProcessMemoryState> &procMemState)
     {
         return 0;
     }
