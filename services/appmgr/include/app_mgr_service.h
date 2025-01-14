@@ -968,8 +968,8 @@ private:
     int DumpFfrtInner(const std::string& pidsRaw, std::string& result);
 
 private:
-    std::shared_ptr<AppMgrServiceInner> appMgrServiceInner_;
     AppMgrServiceState appMgrServiceState_;
+    std::shared_ptr<AppMgrServiceInner> appMgrServiceInner_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AMSEventHandler> eventHandler_;
     sptr<ISystemAbilityManager> systemAbilityMgr_;

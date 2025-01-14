@@ -73,17 +73,17 @@ private:
     pid_t hostPid_ = 0;
     int32_t uid_ = 0;
     int32_t hostUid_ = 0;
-    std::string hostBundleName_;
-    std::string renderParam_;
-    std::string processName_;
+    int32_t state_ = 0;
+    ProcessType processType_ = ProcessType::RENDER;
     FdGuard ipcFd_;
     FdGuard sharedFd_;
     FdGuard crashFd_;
-    int32_t state_ = 0;
-    ProcessType processType_ = ProcessType::RENDER;
     std::weak_ptr<AppRunningRecord> host_; // nweb host
     sptr<IRenderScheduler> renderScheduler_ = nullptr;
     sptr<AppDeathRecipient> deathRecipient_ = nullptr;
+    std::string renderParam_;
+    std::string hostBundleName_;
+    std::string processName_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

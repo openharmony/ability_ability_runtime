@@ -67,12 +67,12 @@ private:
 private:
     sptr<AppFreezeDialogConnection> GetConnection();
 
-    std::mutex appFreezeResultMutex_;
-    std::mutex dialogConnectionMutex_;
-    std::string lastFreezePid;
     bool lastFocusStatus = false;
     uint64_t lastFreezeTime = 0;
     sptr<AppFreezeDialogConnection> dialogConnectionCallback_;
+    std::mutex appFreezeResultMutex_;
+    std::mutex dialogConnectionMutex_;
+    std::string lastFreezePid;
 };
 } // namespace AppExecFwk
 } // namespace OHOS

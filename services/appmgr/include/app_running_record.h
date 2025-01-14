@@ -1070,110 +1070,33 @@ private:
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
     bool isStageBasedModel_ = false;
+    bool isFocused_ = false; // if process is focused.
     ApplicationState curState_ = ApplicationState::APP_STATE_CREATE;  // current state of this process
     ApplicationPendingState pendingState_ = ApplicationPendingState::READY;
     ApplicationScheduleState scheduleState_ = ApplicationScheduleState::SCHEDULE_READY;
     WatchdogVisibilityState watchdogVisibilityState_ = WatchdogVisibilityState::WATCHDOG_STATE_READY;
-    bool isFocused_ = false; // if process is focused.
     /**
      * If there is an ability is foregrounding, this flag will be true,
      * and this flag will remain true until this application is background.
      */
     std::atomic_bool isAbilityForegrounding_ = false;
-
-    std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;  // the application's info of this process
-    int32_t appRecordId_ = 0;
-    std::string processName_;  // the name of this process
-    std::string specifiedProcessFlag_; // the flag of specified Process
-    std::string customProcessFlag_; // the flag of custom process
-    std::unordered_set<sptr<IRemoteObject>, RemoteObjHash> foregroundingAbilityTokens_;
-    std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
-    sptr<AppDeathRecipient> appDeathRecipient_ = nullptr;
-    std::shared_ptr<PriorityObject> priorityObject_;
-    std::shared_ptr<AppLifeCycleDeal> appLifeCycleDeal_ = nullptr;
-    std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
-    std::shared_ptr<AMSEventHandler> eventHandler_;
     bool isTerminating = false;
     bool isCaching_ = false;
-    std::string signCode_;  // the sign of this hap
-    std::string jointUserId_;
-    std::map<std::string, std::shared_ptr<ApplicationInfo>> appInfos_;
-    ffrt::mutex appInfosLock_;
-    std::map<std::string, std::vector<std::shared_ptr<ModuleRunningRecord>>> hapModules_;
-    mutable ffrt::mutex hapModulesLock_;
-    int32_t mainUid_;
-    std::string mainBundleName_;
     bool isLauncherApp_;
-    std::string mainAppName_;
-    int restartResidentProcCount_ = 0;
-    std::string appIdentifier_;
-
-    mutable std::mutex specifiedMutex_;
-    int32_t specifiedRequestId_ = -1;
-    AAFwk::Want specifiedWant_;
-    std::string moduleName_;
-    int32_t newProcessRequestId_ = -1;
-    AAFwk::Want newProcessRequestWant_;
-
     bool isDebugApp_ = false;
     bool isNativeDebug_ = false;
     bool isAttachDebug_ = false;
-    std::string perfCmd_;
-    int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
-    int64_t restartTimeMillis_ = 0; // The time of last trying app restart
     bool jitEnabled_ = false;
-    PreloadState preloadState_ = PreloadState::NONE;
-    PreloadMode preloadMode_ = PreloadMode::PRESS_DOWN;
-    std::string preloadModuleName_;
-    int32_t exitReason_ = 0;
-    std::string exitMsg_ = "";
-
-    std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
-
-    std::atomic<bool> isKilling_ = false;
+    bool securityFlag_ = false; // render record
     bool isContinuousTask_ = false;    // Only continuesTask processes can be set to true, please choose carefully
-    std::atomic_bool isSpawned_ = false;
-
-    std::weak_ptr<AppRunningRecord> parentAppRecord_;
-    std::map<pid_t, std::weak_ptr<AppRunningRecord>> childAppRecordMap_;
-
-    // render record
-    std::map<int32_t, std::shared_ptr<RenderRecord>> renderRecordMap_;
-    ffrt::mutex renderRecordMapLock_;
-    std::set<pid_t> renderPidSet_; // Contains all render pid added, whether died or not
-    ffrt::mutex renderPidSetLock_;
-    AppSpawnStartMsg startMsg_;
-    int32_t appIndex_ = 0;
-    std::string instanceKey_;
-    bool securityFlag_ = false;
-    int32_t requestProcCode_ = 0;
-    ProcessChangeReason processChangeReason_ = ProcessChangeReason::REASON_NONE;
-
-    int32_t callerPid_ = -1;
-    int32_t callerUid_ = -1;
-    int32_t callerTokenId_ = -1;
-    int32_t assignTokenId_ = 0;
-    ProcessType processType_ = ProcessType::NORMAL;
-    ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
-
-    std::set<uint32_t> windowIds_;
-    ffrt::mutex windowIdsLock_;
-#ifdef SUPPORT_CHILD_PROCESS
-    std::map<pid_t, std::shared_ptr<ChildProcessRecord>> childProcessRecordMap_;
-    ffrt::mutex childProcessRecordMapLock_;
-#endif //SUPPORT_CHILD_PROCESS
-
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isAssertPause_ = false;
     bool isErrorInfoEnhance_ = false;
     bool isNativeStart_ = false;
     bool isMultiThread_ = false;
     bool enableProcessCache_ = false;
-    SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     bool processCacheBlocked = false; // temporarily block process cache feature
-    sptr<IRemoteObject> browserHost_;
     bool hasGPU_ = false;
-    pid_t gpuPid_ = 0;
     bool isStrictMode_ = false;
     bool networkEnableFlags_ = true;
     bool saEnableFlags_ = true;
@@ -1184,9 +1107,84 @@ private:
     bool isKia_ = false;
     bool isNeedPreloadModule_ = false;
     bool isNeedLimitPrio_ = false;
-    std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;
+    std::atomic<bool> isKilling_ = false;
+    std::atomic_bool isSpawned_ = false;
+
+    int32_t appRecordId_ = 0;
+    int32_t mainUid_;
+    int restartResidentProcCount_ = 0;
+    int32_t specifiedRequestId_ = -1;
+    int32_t newProcessRequestId_ = -1;
+    int32_t exitReason_ = 0;
+    int32_t appIndex_ = 0; // render record
+    int32_t requestProcCode_ = 0; // render record
+    int32_t callerPid_ = -1;
+    int32_t callerUid_ = -1;
+    int32_t callerTokenId_ = -1;
+    int32_t assignTokenId_ = 0;
+    pid_t gpuPid_ = 0;
+    ProcessType processType_ = ProcessType::NORMAL;
+    ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
+    PreloadState preloadState_ = PreloadState::NONE;
+    PreloadMode preloadMode_ = PreloadMode::PRESS_DOWN;
+    SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
+    int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
+    int64_t restartTimeMillis_ = 0; // The time of last trying app restart
+
+    std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;  // the application's info of this process
+    std::string processName_;  // the name of this process
+    std::string specifiedProcessFlag_; // the flag of specified Process
+    std::string customProcessFlag_; // the flag of custom process
+    std::unordered_set<sptr<IRemoteObject>, RemoteObjHash> foregroundingAbilityTokens_;
+    std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
+    sptr<AppDeathRecipient> appDeathRecipient_ = nullptr;
+    std::shared_ptr<PriorityObject> priorityObject_;
+    std::shared_ptr<AppLifeCycleDeal> appLifeCycleDeal_ = nullptr;
+    std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
+    std::shared_ptr<AMSEventHandler> eventHandler_;
+    std::string signCode_;  // the sign of this hap
+    std::string jointUserId_;
+    std::map<std::string, std::shared_ptr<ApplicationInfo>> appInfos_;
+    ffrt::mutex appInfosLock_;
+    std::map<std::string, std::vector<std::shared_ptr<ModuleRunningRecord>>> hapModules_;
+    mutable ffrt::mutex hapModulesLock_;
+    std::string mainBundleName_;
+    std::string mainAppName_;
+    std::string appIdentifier_;
+
+    mutable std::mutex specifiedMutex_;
+    AAFwk::Want specifiedWant_;
+    std::string moduleName_;
+    AAFwk::Want newProcessRequestWant_;
+
+    std::string perfCmd_;
+    std::string preloadModuleName_;
+    std::string exitMsg_ = "";
+
+    std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
+
+    std::weak_ptr<AppRunningRecord> parentAppRecord_;
+    std::map<pid_t, std::weak_ptr<AppRunningRecord>> childAppRecordMap_;
+
+    std::map<int32_t, std::shared_ptr<RenderRecord>> renderRecordMap_; // render record
+    ffrt::mutex renderRecordMapLock_; // render record lock
+    std::set<pid_t> renderPidSet_; // Contains all render pid added, whether died or not
+    ffrt::mutex renderPidSetLock_; // render pid set lock
+    AppSpawnStartMsg startMsg_; // render record
+    std::string instanceKey_; // render record
+    ProcessChangeReason processChangeReason_ = ProcessChangeReason::REASON_NONE; // render record
+
+    std::set<uint32_t> windowIds_;
+    ffrt::mutex windowIdsLock_;
+#ifdef SUPPORT_CHILD_PROCESS
+    std::map<pid_t, std::shared_ptr<ChildProcessRecord>> childProcessRecordMap_;
+    ffrt::mutex childProcessRecordMapLock_;
+#endif //SUPPORT_CHILD_PROCESS
+
+    sptr<IRemoteObject> browserHost_;
+    std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
     std::string killReason_ = "";
 };
 

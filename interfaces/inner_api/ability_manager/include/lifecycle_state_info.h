@@ -59,11 +59,11 @@ struct LifeCycleStateInfo : public Parcelable {
     AbilityLifeCycleState state = AbilityLifeCycleState::ABILITY_STATE_INITIAL;
     bool isNewWant = false;
     int missionId = -1;
-    CallerInfo caller;
-    std::shared_ptr<AbilityStartSetting> setting = nullptr;
-    LaunchParam launchParam;
     uint32_t sceneFlag = 0;
     uint32_t sceneFlagBak = 0;
+    std::shared_ptr<AbilityStartSetting> setting = nullptr;
+    LaunchParam launchParam;
+    CallerInfo caller;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

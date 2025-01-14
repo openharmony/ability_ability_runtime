@@ -22,8 +22,8 @@ namespace AppExecFwk {
 RenderRecord::RenderRecord(pid_t hostPid, const std::string &renderParam,
                            FdGuard &&ipcFd, FdGuard &&sharedFd, FdGuard &&crashFd,
                            const std::shared_ptr<AppRunningRecord> &host)
-    : hostPid_(hostPid), renderParam_(renderParam), ipcFd_(std::move(ipcFd)),
-      sharedFd_(std::move(sharedFd)), crashFd_(std::move(crashFd)), host_(host) {}
+    : hostPid_(hostPid),  ipcFd_(std::move(ipcFd)), sharedFd_(std::move(sharedFd)),
+    crashFd_(std::move(crashFd)), host_(host), renderParam_(renderParam) {}
 
 RenderRecord::~RenderRecord()
 {}

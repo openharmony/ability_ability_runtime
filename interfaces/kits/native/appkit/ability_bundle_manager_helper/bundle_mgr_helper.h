@@ -121,11 +121,11 @@ private:
 
 private:
     DECLARE_DELAYED_SINGLETON(BundleMgrHelper)
-    std::mutex mutex_;
+    bool bmsReady_ = true;
     sptr<IBundleMgr> bundleMgr_;
     sptr<IBundleInstaller> bundleInstaller_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
-    bool bmsReady_ = true;
+    std::mutex mutex_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
