@@ -135,6 +135,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Start_Test_0300, Function | M
     std::shared_ptr<AbilityLocalRecord> abilityRecord = nullptr;
 
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
+    EXPECT_NE(application, nullptr);
     usleep(AbilityBaseTest::TEST_WAIT_TIME);
 }
 
