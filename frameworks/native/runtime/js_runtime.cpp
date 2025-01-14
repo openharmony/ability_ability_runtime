@@ -613,6 +613,7 @@ void JsRuntime::PostPreload(const Options& options)
     uv_loop_s* loop = nullptr;
     napi_get_uv_event_loop(env, &loop);
     panda::JSNApi::SetLoop(vm, loop);
+    DFXJSNApi::RegisterAsyncDetectCallBack(vm);
 }
 
 void JsRuntime::LoadAotFile(const Options& options)
