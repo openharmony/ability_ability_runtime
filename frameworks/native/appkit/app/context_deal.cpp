@@ -237,6 +237,7 @@ int ContextDeal::GetCurrentAccountId() const
 {
     int userId = 0;
     DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->GetOsAccountLocalIdFromProcess(userId);
+    TAG_LOGD(AAFwkTag::APPKIT, "userId: %{public}d", userId);
     return userId;
 }
 

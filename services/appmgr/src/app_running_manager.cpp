@@ -333,6 +333,7 @@ bool AppRunningManager::GetPidsByUserId(int32_t userId, std::list<pid_t> &pids)
             int32_t id = -1;
             if ((DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->
                 GetOsAccountLocalIdFromUid(appRecord->GetUid(), id) == 0) && (id == userId)) {
+                TAG_LOGD(AAFwkTag::APPMGR, "GetOsAccountLocalIdFromUid id: %{public}d", id);
                 pid_t pid = appRecord->GetPid();
                 if (pid > 0) {
                     pids.push_back(pid);
