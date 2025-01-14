@@ -1937,7 +1937,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
         userId, bundleName.c_str(), appCloneIndex);
     auto tokenId = AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, appCloneIndex);
     int32_t result = AccessToken::AccessTokenKit::ClearUserGrantedPermissionState(tokenId);
-    if (result) {
+    if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "clearUserGrantedPermissionState fail, ret:%{public}d", result);
         return AAFwk::ERR_APP_CLONE_INDEX_INVALID;
     }
@@ -6684,7 +6684,7 @@ int32_t AppMgrServiceInner::GetCurrentAccountId() const
         TAG_LOGE(AAFwkTag::APPMGR, "queryActiveOsAccountIds empty");
         return DEFAULT_USER_ID;
     }
-
+    TAG_LOGD(AAFwkTag::APPMGR, "osActiveAccountId: %{public}d", osActiveAccountIds.front());
     return osActiveAccountIds.front();
 }
 
@@ -7531,6 +7531,7 @@ int32_t AppMgrServiceInner::GetChildProcessInfo(const std::shared_ptr<ChildProce
         TAG_LOGE(AAFwkTag::APPMGR, "GetOsAccountLocalIdFromUid failed,errcode=%{public}d", errCode);
         return errCode;
     }
+    TAG_LOGD(AAFwkTag::APPMGR, "GetOsAccountLocalIdFromUid userId: %{public}d", userId);
     info.userId = userId;
     info.pid = childProcessRecord->GetPid();
     info.hostPid = childProcessRecord->GetHostPid();
@@ -8673,20 +8674,24 @@ int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bund
     }
     pidList.clear();
     int32_t callderUserId = -1;
-    if (osAccountMgr->GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), callderUserId) != 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "get caller local id fail");
+    int32_t getOsAccountRet = osAccountMgr->GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), callderUserId);
+    if (getOsAccountRet != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get caller local id fail. ret: %{public}d", getOsAccountRet);
         return AAFwk::INNER_ERR;
     }
+    TAG_LOGD(AAFwkTag::APPMGR, "callderUserId: %{public}d", callderUserId);
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         auto appRecord = item.second;
         if (appRecord == nullptr) {
             continue;
         }
         int32_t procUserId = -1;
-        if (appRecord->GetBundleName() == bundleName &&
-            osAccountMgr->GetOsAccountLocalIdFromUid(appRecord->GetUid(), procUserId) == 0 &&
+        int32_t procGetOsAccountRet = osAccountMgr->GetOsAccountLocalIdFromUid(appRecord->GetUid(), procUserId);
+        if (appRecord->GetBundleName() == bundleName && procGetOsAccountRet == 0 &&
             procUserId == callderUserId && cachePrcoMgr->IsAppSupportProcessCache(appRecord) &&
             appRecord->GetPriorityObject() != nullptr) {
+            TAG_LOGD(AAFwkTag::APPMGR,
+                "procUserId: %{public}d, procGetOsAccountRet: %{public}d", procUserId, procGetOsAccountRet);
             pidList.push_back(appRecord->GetPid());
         }
     }

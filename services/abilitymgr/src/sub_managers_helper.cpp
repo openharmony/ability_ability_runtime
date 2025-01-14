@@ -318,10 +318,13 @@ std::shared_ptr<MissionListManagerInterface> SubManagersHelper::GetMissionListMa
 std::shared_ptr<MissionListManagerInterface> SubManagersHelper::GetMissionListManagerByUid(int32_t uid)
 {
     int32_t userId = INVALID_USER_ID;
-    if (DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->GetOsAccountLocalIdFromUid(
-        uid, userId) != 0) {
+    int32_t getOsAccountRet =
+        DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->GetOsAccountLocalIdFromUid(uid, userId);
+    if (getOsAccountRet != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetOsAccountLocalIdFromUid() failed. ret: %{public}d", getOsAccountRet);
         return nullptr;
     }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "userId: %{public}d", userId);
     if (userId == U0_USER_ID) {
         std::lock_guard<ffrt::mutex> lock(managersMutex_);
         return currentMissionListManager_;
@@ -355,10 +358,13 @@ std::shared_ptr<UIAbilityLifecycleManager> SubManagersHelper::GetUIAbilityManage
 std::shared_ptr<UIAbilityLifecycleManager> SubManagersHelper::GetUIAbilityManagerByUid(int32_t uid)
 {
     int32_t userId = INVALID_USER_ID;
-    if (DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->GetOsAccountLocalIdFromUid(
-        uid, userId) != 0) {
+    int32_t getOsAccountRet =
+        DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->GetOsAccountLocalIdFromUid(uid, userId);
+    if (getOsAccountRet != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetOsAccountLocalIdFromUid() failed. ret: %{public}d", getOsAccountRet);
         return nullptr;
     }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "userId: %{public}d", userId);
     if (userId == U0_USER_ID) {
         std::lock_guard<ffrt::mutex> lock(managersMutex_);
         return currentUIAbilityManager_;
@@ -369,10 +375,13 @@ std::shared_ptr<UIAbilityLifecycleManager> SubManagersHelper::GetUIAbilityManage
 void SubManagersHelper::UninstallApp(const std::string &bundleName, int32_t uid)
 {
     int32_t userId = INVALID_USER_ID;
-    if (DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->GetOsAccountLocalIdFromUid(
-        uid, userId) != 0) {
+    int32_t getOsAccountRet =
+        DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->GetOsAccountLocalIdFromUid(uid, userId);
+    if (getOsAccountRet != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetOsAccountLocalIdFromUid() failed. ret: %{public}d", getOsAccountRet);
         return;
     }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "userId: %{public}d", userId);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         UninstallAppInUIAbilityManagers(userId, bundleName, uid);
     } else {
