@@ -203,18 +203,19 @@ void CJRuntime::StartDebugMode(const DebugOption dOption)
     bool isStartWithDebug = dOption.isStartWithDebug;
     bool isDebugApp = dOption.isDebugApp;
     const std::string bundleName = bundleName_;
+    int32_t instanceId = instanceId_;
     std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
 
     TAG_LOGI(AAFwkTag::CJRUNTIME, "StartDebugMode %{public}s", bundleName_.c_str());
 
     HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
-        [bundleName, isStartWithDebug, isDebugApp](int socketFd, std::string option) {
+        [bundleName, isStartWithDebug, isDebugApp, instanceId](int socketFd, std::string option) {
             TAG_LOGI(AAFwkTag::CJRUNTIME, "hdcRegister callback call, socket fd: %{public}d, option: %{public}s.",
                 socketFd, option.c_str());
             if (option.find(DEBUGGER) == std::string::npos) {
-                if (!isDebugApp) {
-                    ConnectServerManager::Get().StopConnectServer(false);
-                }
+                ConnectServerManager::Get().StopConnectServer(false);
+                TAG_LOGI(AAFwkTag::CJRUNTIME, "start SendInstanceMessageCallback");
+                ConnectServerManager::Get().SendInstanceMessageCallback(instanceId);
                 ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
                 ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
             } else {
