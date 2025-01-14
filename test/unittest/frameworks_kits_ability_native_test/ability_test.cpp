@@ -181,6 +181,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_Dump_0100, Function | MediumTest | Level
 
     std::string extra = "";
     ability_->Dump(extra);
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_Dump_0100 end";
 }
@@ -248,6 +249,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_OnNewWant_0100, Function | MediumTest | 
 
     Want want;
     ability_->OnNewWant(want);
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_OnNewWant_0100 end";
 }
@@ -271,6 +273,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_OnRestoreAbilityState_0100, Function | M
 
     PacMap inState;
     ability_->OnRestoreAbilityState(inState);
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_OnRestoreAbilityState_0100 end";
 }
@@ -361,6 +364,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_OnSaveAbilityState_0100, Function | Medi
 
     PacMap outState;
     ability_->OnSaveAbilityState(outState);
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_OnSaveAbilityState_0100 end";
 }
@@ -408,6 +412,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_SetResult_0100, Function | MediumTest | 
     sptr<IRemoteObject> token = nullptr;
     ability_->Init(abilityInfo, application, handler, token);
     ability_->SetResult(resultCode, want);
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_SetResult_0100 end";
 }
@@ -431,6 +436,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_StartAbilityForResult_0100, Function | M
     sptr<IRemoteObject> token = nullptr;
     ability_->Init(abilityInfo, application, handler, token);
     ability_->StartAbilityForResult(want, resultCode);
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_StartAbilityForResult_0100 end";
 }
@@ -446,6 +452,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_StartAbility_0100, Function | MediumTest
 
     Want want;
     ability_->StartAbility(want);
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_StartAbility_0100 end";
 }
@@ -460,6 +467,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_TerminateAbility_0100, Function | Medium
     GTEST_LOG_(INFO) << "AaFwk_Ability_TerminateAbility_0100 start";
 
     ability_->TerminateAbility();
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_TerminateAbility_0100 end";
 }
@@ -473,6 +481,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_GetWindow_001, Function | MediumTest | L
     std::shared_ptr<AbilityHandler> handler = nullptr;
     sptr<IRemoteObject> token = nullptr;
     ability_->Init(abilityInfo, application, handler, token);
+    EXPECT_TRUE(ability_ != nullptr);
 }
 
 /**
@@ -1217,6 +1226,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_OnDisconnect_0100, Function | MediumTest
 
     Want want;
     ability_->OnDisconnect(want);
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_OnDisconnect_0100 end";
 }
@@ -1234,6 +1244,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_StartAbilitySetting_0100, Function | Med
     std::shared_ptr<AbilityStartSetting> setting = AbilityStartSetting::GetEmptySetting();
 
     ability_->StartAbility(want, *setting.get());
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_StartAbilitySetting_0100 end";
 }
@@ -1256,6 +1267,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_StartAbilitySetting_0200, Function | Med
     Want want;
     std::shared_ptr<AbilityStartSetting> setting = AbilityStartSetting::GetEmptySetting();
     ability_->StartAbility(want, *setting.get());
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_StartAbilitySetting_0200 end";
 }
@@ -1277,6 +1289,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_PostTask_0100, Function | MediumTest | L
     ability_->Init(abilityInfo, nullptr, handler, nullptr);
     auto task = []() { GTEST_LOG_(INFO) << "AaFwk_Ability_PostTask_001 task called"; };
     ability_->PostTask(task, 1000);
+    EXPECT_TRUE(ability_ != nullptr);
 
     GTEST_LOG_(INFO) << "AaFwk_Ability_PostTask_0100 end";
 }

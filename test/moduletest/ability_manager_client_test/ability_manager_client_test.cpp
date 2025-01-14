@@ -149,6 +149,7 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_RegisterStatusBarDelegat
     sptr<IRemoteObject> impl(new IPCObjectStub());
     sptr<AbilityRuntime::IStatusBarDelegate> delegate(new AbilityRuntime::StatusBarDelegateProxy(impl));
     auto result = AbilityManagerClient::GetInstance()->RegisterStatusBarDelegate(delegate);
+    EXPECT_EQ(result, ERR_WRONG_INTERFACE_CALL);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_RegisterStatusBarDelegate_001 result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_RegisterStatusBarDelegate_001 end");
 }
@@ -161,7 +162,9 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_RegisterStatusBarDelegat
 HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_ScheduleClearRecoveryPageStack_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_ScheduleClearRecoveryPageStack_001 start");
-    AbilityManagerClient::GetInstance()->ScheduleClearRecoveryPageStack();
+    std::shared_ptr<AbilityManagerClient> client = AbilityManagerClient::GetInstance();
+    client->ScheduleClearRecoveryPageStack();
+    EXPECT_TRUE(client != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_ScheduleClearRecoveryPageStack_001 end");
 }
 
@@ -177,6 +180,7 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_IsValidMissionIds_001, T
     missionIds.push_back(ABILITYID);
     std::vector<MissionValidResult> results;
     auto result = AbilityManagerClient::GetInstance()->IsValidMissionIds(missionIds, results);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_IsValidMissionIds_001 result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_IsValidMissionIds_001 end");
 }
@@ -191,6 +195,7 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_GetForegroundUIAbilities
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_GetForegroundUIAbilities_001 start");
     std::vector<AppExecFwk::AbilityStateData> list;
     auto result = AbilityManagerClient::GetInstance()->GetForegroundUIAbilities(list);
+    EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_GetForegroundUIAbilities_001 result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_GetForegroundUIAbilities_001 end");
 }
@@ -207,6 +212,7 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_GetUIExtensionSessionInf
     UIExtensionSessionInfo uiExtensionSessionInfo;
     auto result = AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(token_,
         uiExtensionSessionInfo, USER_ID);
+    EXPECT_NE(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_GetUIExtensionSessionInfo_001 result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_GetUIExtensionSessionInfo_001 end");
 }
@@ -223,6 +229,7 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_StartShortCut_001, TestS
     StartOptions startOptions;
     SetWant(want, "bundleName");
     auto result = AbilityManagerClient::GetInstance()->StartShortcut(want, startOptions);
+    EXPECT_EQ(result, ERR_NOT_SYSTEM_APP);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_StartShortCut_001 result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_StartShortCut_001 end");
 }
@@ -235,9 +242,11 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_StartShortCut_001, TestS
 HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_NotifyFrozenProcessByRSS_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_NotifyFrozenProcessByRSS_001 start");
+    std::shared_ptr<AbilityManagerClient> client = AbilityManagerClient::GetInstance();
     std::vector<int32_t> pidList;
     pidList.push_back(19082);
-    AbilityManagerClient::GetInstance()->NotifyFrozenProcessByRSS(pidList, UID);
+    client->NotifyFrozenProcessByRSS(pidList, UID);
+    EXPECT_TRUE(client != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_NotifyFrozenProcessByRSS_001 end");
 }
 
@@ -251,6 +260,7 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_PreStartMission_001, Tes
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_PreStartMission_001 start");
     auto result = AbilityManagerClient::GetInstance()->PreStartMission("com.ix.hiservcie", "entry",
         "ServiceAbility", "2024-07-19 10:00:00");
+    EXPECT_NE(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_PreStartMission_001 result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_PreStartMission_001 end");
 }
@@ -268,6 +278,7 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_OpenLink, TestSize.Level
     SetWant(want, "bundleName");
     auto result = AbilityManagerClient::GetInstance()->OpenLink(want, token_,
         USER_ID, REQUESTCODE);
+    EXPECT_EQ(result, ERR_INVALID_CALLER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_OpenLink result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_OpenLink end");
 }

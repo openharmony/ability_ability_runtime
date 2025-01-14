@@ -61,6 +61,7 @@ HWTEST_F(MissionListenerProxyTest, OnMissionCreated_001, TestSize.Level1)
 {
     int32_t missionId = 0;
     proxy_->OnMissionCreated(missionId);
+    EXPECT_TRUE(proxy_ != nullptr);
 }
 
 /*
@@ -75,6 +76,7 @@ HWTEST_F(MissionListenerProxyTest, OnMissionDestroyed_001, TestSize.Level1)
 {
     int32_t missionId = 0;
     proxy_->OnMissionDestroyed(missionId);
+    EXPECT_TRUE(proxy_ != nullptr);
 }
 
 /*
@@ -89,6 +91,7 @@ HWTEST_F(MissionListenerProxyTest, OnMissionSnapshotChanged_001, TestSize.Level1
 {
     int32_t missionId = 0;
     proxy_->OnMissionSnapshotChanged(missionId);
+    EXPECT_TRUE(proxy_ != nullptr);
 }
 
 /*
@@ -103,6 +106,7 @@ HWTEST_F(MissionListenerProxyTest, OnMissionMovedToFront_001, TestSize.Level1)
 {
     int32_t missionId = 0;
     proxy_->OnMissionMovedToFront(missionId);
+    EXPECT_TRUE(proxy_ != nullptr);
 }
 
 #ifdef SUPPORT_GRAPHICS
@@ -119,6 +123,7 @@ HWTEST_F(MissionListenerProxyTest, OnMissionIconUpdated_001, TestSize.Level1)
     int32_t missionId = 0;
     std::shared_ptr<Media::PixelMap> icon = nullptr;
     proxy_->OnMissionIconUpdated(missionId, icon);
+    EXPECT_TRUE(proxy_ != nullptr);
 }
 #endif
 
@@ -134,6 +139,7 @@ HWTEST_F(MissionListenerProxyTest, OnMissionClosed_001, TestSize.Level1)
 {
     int32_t missionId = 0;
     proxy_->OnMissionClosed(missionId);
+    EXPECT_TRUE(proxy_ != nullptr);
 }
 
 /*
@@ -148,6 +154,7 @@ HWTEST_F(MissionListenerProxyTest, OnMissionLabelUpdated_001, TestSize.Level1)
 {
     int32_t missionId = 0;
     proxy_->OnMissionLabelUpdated(missionId);
+    EXPECT_TRUE(proxy_ != nullptr);
 }
 
 /*

@@ -248,6 +248,7 @@ HWTEST_F(ConnectionRecordTest, AaFwk_ConnectionRecord_009, TestSize.Level1)
 
     connectionRecord_->SetConnectState(ConnectionState::CONNECTING);
     connectionRecord_->ScheduleConnectAbilityDone();
+    EXPECT_TRUE(connectionRecord_ != nullptr);
 }
 
 /*

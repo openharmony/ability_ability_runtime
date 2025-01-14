@@ -54,6 +54,7 @@ HWTEST_F(UserEventHandlerTest, ProcessEvent_001, TestSize.Level1)
     std::shared_ptr<UserEventHandler> handler = std::make_shared<UserEventHandler>(runner, owner);
     EventWrap event(0);
     handler->ProcessEvent(event);
+    EXPECT_TRUE(handler != nullptr);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

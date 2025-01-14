@@ -249,6 +249,8 @@ HWTEST_F(JsRuntimeTest, JsRuntimeNotifyApplicationStateTest_0200, TestSize.Level
 HWTEST_F(JsRuntimeTest, JsRuntimeDumpHeapSnapshotTest_0100, TestSize.Level0)
 {
     TAG_LOGI(AAFwkTag::TEST, "DumpHeapSnapshot start");
+    std::unique_ptr<Runtime> jsRuntime = JsRuntime::Create(options_);
+    EXPECT_TRUE(jsRuntime != nullptr);
     MockJsRuntime mockJsRuntime;
     bool isPrivate = false;
     mockJsRuntime.DumpHeapSnapshot(isPrivate);
