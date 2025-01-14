@@ -68,6 +68,7 @@ constexpr const char* COLLABORATOR_BROKER_RESERVE_UID = "const.sys.abilityms.col
 constexpr const char* MAX_CHILD_PROCESS = "const.max_native_child_process";
 constexpr const char* SUPPORT_MULTI_INSTANCE = "const.abilityms.support_multi_instance";
 constexpr const char* MIGRATE_CLIENT_BUNDLE_NAME = "const.sys.abilityms.migrate_client_bundle_name";
+constexpr const char* CONNECT_SUPPORT_CROSS_USER = "const.abilityms.connect_support_cross_user";
 }
 
 AppUtils::~AppUtils() {}
@@ -461,6 +462,17 @@ std::string AppUtils::GetMigrateClientBundleName()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "migrateClientBundleName_ is %{public}s", migrateClientBundleName_.value.c_str());
     return migrateClientBundleName_.value;
+}
+
+bool AppUtils::IsConnectSupportCrossUser()
+{
+    std::lock_guard guard(isConnectSupportCrossUserMutex_);
+    if (!isConnectSupportCrossUser_.isLoaded) {
+        isConnectSupportCrossUser_.value = system::GetBoolParameter(CONNECT_SUPPORT_CROSS_USER, false);
+        isConnectSupportCrossUser_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isConnectSupportCrossUser_.value);
+    return isConnectSupportCrossUser_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
