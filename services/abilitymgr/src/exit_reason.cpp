@@ -27,12 +27,20 @@ ExitReason::ExitReason(const Reason reason, const std::string &exitMsg)
     this->exitMsg = exitMsg;
 }
 
+ExitReason::ExitReason(const Reason &reason, int32_t subReason, const std::string &exitMsg)
+{
+    this->reason = reason;
+    this->subReason = subReason;
+    this->exitMsg = exitMsg;
+}
+
 bool ExitReason::ReadFromParcel(Parcel &parcel)
 {
     int32_t reasonData;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, reasonData);
     reason = static_cast<Reason>(reasonData);
-
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, reasonData);
+    subReason = reasonData;
     exitMsg = Str16ToStr8(parcel.ReadString16());
     return true;
 }
@@ -55,6 +63,7 @@ ExitReason *ExitReason::Unmarshalling(Parcel &parcel)
 bool ExitReason::Marshalling(Parcel &parcel) const
 {
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(reason));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, subReason);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(exitMsg));
     return true;
 }
