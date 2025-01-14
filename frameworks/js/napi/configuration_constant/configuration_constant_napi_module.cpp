@@ -19,7 +19,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-static napi_status SetEnumItem(napi_env env, napi_value object, const char* name, int32_t value)
+static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* name, int32_t value)
 {
     napi_status status;
     napi_value itemName;
@@ -28,62 +28,62 @@ static napi_status SetEnumItem(napi_env env, napi_value object, const char* name
     NAPI_CALL_BASE(env, status = napi_create_string_utf8(env, name, NAPI_AUTO_LENGTH, &itemName), status);
     NAPI_CALL_BASE(env, status = napi_create_int32(env, value, &itemValue), status);
 
-    NAPI_CALL_BASE(env, status = napi_set_property(env, object, itemName, itemValue), status);
-    NAPI_CALL_BASE(env, status = napi_set_property(env, object, itemValue, itemName), status);
+    NAPI_CALL_BASE(env, status = napi_set_property(env, napiObject, itemName, itemValue), status);
+    NAPI_CALL_BASE(env, status = napi_set_property(env, napiObject, itemValue, itemName), status);
 
     return napi_ok;
 }
 
 static napi_value InitColorModeObject(napi_env env)
 {
-    napi_value object;
-    NAPI_CALL(env, napi_create_object(env, &object));
+    napi_value napiObject;
+    NAPI_CALL(env, napi_create_object(env, &napiObject));
 
-    NAPI_CALL(env, SetEnumItem(env, object, "COLOR_MODE_NOT_SET", Global::Resource::COLOR_MODE_NOT_SET));
-    NAPI_CALL(env, SetEnumItem(env, object, "COLOR_MODE_DARK", Global::Resource::DARK));
-    NAPI_CALL(env, SetEnumItem(env, object, "COLOR_MODE_LIGHT", Global::Resource::LIGHT));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "COLOR_MODE_NOT_SET", Global::Resource::COLOR_MODE_NOT_SET));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "COLOR_MODE_DARK", Global::Resource::DARK));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "COLOR_MODE_LIGHT", Global::Resource::LIGHT));
 
-    return object;
-}
-
-static napi_value InitTimeFormatObject(napi_env env)
-{
-    napi_value object;
-    NAPI_CALL(env, napi_create_object(env, &object));
-
-    NAPI_CALL(env, SetEnumItem(env, object, "HOUR_NOT_SET", Global::Resource::HOUR_NOT_SET));
-    NAPI_CALL(env, SetEnumItem(env, object, "HOUR_12", Global::Resource::HOUR_12));
-    NAPI_CALL(env, SetEnumItem(env, object, "HOUR_24", Global::Resource::HOUR_24));
-
-    return object;
+    return napiObject;
 }
 
 static napi_value InitDirectionObject(napi_env env)
 {
-    napi_value object;
-    NAPI_CALL(env, napi_create_object(env, &object));
+    napi_value napiObject;
+    NAPI_CALL(env, napi_create_object(env, &napiObject));
 
-    NAPI_CALL(env, SetEnumItem(env, object, "DIRECTION_NOT_SET", Global::Resource::DIRECTION_NOT_SET));
-    NAPI_CALL(env, SetEnumItem(env, object, "DIRECTION_VERTICAL", Global::Resource::DIRECTION_VERTICAL));
-    NAPI_CALL(env, SetEnumItem(env, object, "DIRECTION_HORIZONTAL", Global::Resource::DIRECTION_HORIZONTAL));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "DIRECTION_NOT_SET", Global::Resource::DIRECTION_NOT_SET));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "DIRECTION_VERTICAL", Global::Resource::DIRECTION_VERTICAL));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "DIRECTION_HORIZONTAL", Global::Resource::DIRECTION_HORIZONTAL));
 
-    return object;
+    return napiObject;
 }
 
 static napi_value InitScreenDensityObject(napi_env env)
 {
-    napi_value object;
-    NAPI_CALL(env, napi_create_object(env, &object));
+    napi_value napiObject;
+    NAPI_CALL(env, napi_create_object(env, &napiObject));
 
-    NAPI_CALL(env, SetEnumItem(env, object, "SCREEN_DENSITY_NOT_SET", Global::Resource::SCREEN_DENSITY_NOT_SET));
-    NAPI_CALL(env, SetEnumItem(env, object, "SCREEN_DENSITY_SDPI", Global::Resource::SCREEN_DENSITY_SDPI));
-    NAPI_CALL(env, SetEnumItem(env, object, "SCREEN_DENSITY_MDPI", Global::Resource::SCREEN_DENSITY_MDPI));
-    NAPI_CALL(env, SetEnumItem(env, object, "SCREEN_DENSITY_LDPI", Global::Resource::SCREEN_DENSITY_LDPI));
-    NAPI_CALL(env, SetEnumItem(env, object, "SCREEN_DENSITY_XLDPI", Global::Resource::SCREEN_DENSITY_XLDPI));
-    NAPI_CALL(env, SetEnumItem(env, object, "SCREEN_DENSITY_XXLDPI", Global::Resource::SCREEN_DENSITY_XXLDPI));
-    NAPI_CALL(env, SetEnumItem(env, object, "SCREEN_DENSITY_XXXLDPI", Global::Resource::SCREEN_DENSITY_XXXLDPI));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "SCREEN_DENSITY_NOT_SET", Global::Resource::SCREEN_DENSITY_NOT_SET));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "SCREEN_DENSITY_SDPI", Global::Resource::SCREEN_DENSITY_SDPI));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "SCREEN_DENSITY_MDPI", Global::Resource::SCREEN_DENSITY_MDPI));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "SCREEN_DENSITY_LDPI", Global::Resource::SCREEN_DENSITY_LDPI));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "SCREEN_DENSITY_XLDPI", Global::Resource::SCREEN_DENSITY_XLDPI));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "SCREEN_DENSITY_XXLDPI", Global::Resource::SCREEN_DENSITY_XXLDPI));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "SCREEN_DENSITY_XXXLDPI", Global::Resource::SCREEN_DENSITY_XXXLDPI));
 
-    return object;
+    return napiObject;
+}
+
+static napi_value InitTimeFormatObject(napi_env env)
+{
+    napi_value napiObject;
+    NAPI_CALL(env, napi_create_object(env, &napiObject));
+
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "HOUR_NOT_SET", Global::Resource::HOUR_NOT_SET));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "HOUR_12", Global::Resource::HOUR_12));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "HOUR_24", Global::Resource::HOUR_24));
+
+    return napiObject;
 }
 
 /*
