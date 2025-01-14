@@ -59,16 +59,16 @@ public:
     static bool RemoveInsightIntent(AAFwk::Want &want);
     static void UpdateInsightIntentCallerInfo(const WantParams &wantParams, WantParams &insightIntentParam);
 
+    int32_t executeMode_ = -1;
+    int32_t displayId_ = INVALID_DISPLAY_ID;
+    int32_t flags_ = 0;
+    uint64_t insightIntentId_ = 0;
+    std::shared_ptr<WantParams> insightIntentParam_;
     std::string bundleName_;
     std::string moduleName_;
     std::string abilityName_;
     std::string insightIntentName_;
-    std::shared_ptr<WantParams> insightIntentParam_;
-    int32_t executeMode_ = -1;
-    uint64_t insightIntentId_ = 0;
-    int32_t displayId_ = INVALID_DISPLAY_ID;
     std::vector<std::string> uris_;
-    int32_t flags_ = 0;
 };
 } // namespace AppExecFwk
 } // namespace OHOS
