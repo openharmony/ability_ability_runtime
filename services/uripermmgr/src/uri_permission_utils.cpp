@@ -111,7 +111,7 @@ int32_t UPMSUtils::GetCurrentAccountId()
     auto ret = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
         QueryActiveOsAccountIds(osActiveAccountIds);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "QueryActiveOsAccountIds error");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "QueryActiveOsAccountIds error. ret: %{public}d", ret);
         return DEFAULT_USER_ID;
     }
     if (osActiveAccountIds.empty()) {

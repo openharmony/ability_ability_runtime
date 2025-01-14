@@ -41,6 +41,7 @@ private:
     int32_t RecordProcessExitReason(const int32_t pid, const std::string bundleName, const int32_t uid,
         const uint32_t accessTokenId, const ExitReason &exitReason);
     void GetActiveAbilityList(int32_t uid, std::vector<std::string> &abilityLists, const int32_t pid);
+    int32_t GetActiveAbilityList(int32_t uid, std::vector<std::string> &abilityLists);
     void GetActiveAbilityListFromUIAbilityManager(int32_t uid, std::vector<std::string> &abilityLists,
         const int32_t pid);
     bool IsExitReasonValid(const ExitReason &exitReason);
