@@ -116,7 +116,7 @@ int32_t OsAccountManagerWrapper::GetCurrentActiveAccountId()
 
     ErrCode ret = instance->QueryActiveOsAccountIds(accountIds);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Query active id failed");
+        TAG_LOGE(AAFwkTag::DEFAULT, "Query active id failed. ret: %{public}d", ret);
         return 0;
     }
 

@@ -8657,8 +8657,9 @@ int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bund
     }
     pidList.clear();
     int32_t callderUserId = -1;
-    if (osAccountMgr->GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), callderUserId) != 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "get caller local id fail");
+    int32_t getOsAccountRet = osAccountMgr->GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), callderUserId);
+    if (getOsAccountRet != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get caller local id fail. ret: %{public}d", getOsAccountRet);
         return AAFwk::INNER_ERR;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "callderUserId: %{public}d", callderUserId);
@@ -8668,11 +8669,12 @@ int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bund
             continue;
         }
         int32_t procUserId = -1;
-        if (appRecord->GetBundleName() == bundleName &&
-            osAccountMgr->GetOsAccountLocalIdFromUid(appRecord->GetUid(), procUserId) == 0 &&
+        int32_t procGetOsAccountRet = osAccountMgr->GetOsAccountLocalIdFromUid(appRecord->GetUid(), procUserId);
+        if (appRecord->GetBundleName() == bundleName && procGetOsAccountRet == 0 &&
             procUserId == callderUserId && cachePrcoMgr->IsAppSupportProcessCache(appRecord) &&
             appRecord->GetPriorityObject() != nullptr) {
-            TAG_LOGD(AAFwkTag::APPMGR, "procUserId: %{public}d", procUserId);
+            TAG_LOGD(AAFwkTag::APPMGR,
+                "procUserId: %{public}d, procGetOsAccountRet: %{public}d", procUserId, procGetOsAccountRet);
             pidList.push_back(appRecord->GetPid());
         }
     }

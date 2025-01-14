@@ -687,7 +687,7 @@ int ContextImpl::GetCurrentActiveAccountId() const
     }
     ErrCode ret = instance->QueryActiveOsAccountIds(accountIds);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextImpl::GetCurrentActiveAccountId error");
+        TAG_LOGE(AAFwkTag::APPKIT, "ContextImpl::GetCurrentActiveAccountId error. ret: %{public}d", ret);
         return 0;
     }
 
