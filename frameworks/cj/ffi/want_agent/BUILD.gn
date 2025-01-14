@@ -67,6 +67,7 @@ ohos_shared_library("cj_want_agent_ffi") {
     "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
     "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",

@@ -58,6 +58,7 @@ template("delegator") {
       "hilog:libhilog",
       "hitrace:hitrace_meter",
       "ipc:ipc_napi",
+      "ipc:ipc_single",
       "napi:ace_napi",
     ]
 
