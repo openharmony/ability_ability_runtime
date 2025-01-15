@@ -887,7 +887,7 @@ void JsServiceExtension::OnDisplayInfoChange(const sptr<IRemoteObject>& token, R
             }
         };
         if (handler_ != nullptr) {
-            handler_->PostTask(task, "JsServiceExtension:OnChange", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+            handler_->PostTask(task, "JsServiceExtension:OnChange");
         }
     }
 
@@ -923,7 +923,7 @@ void JsServiceExtension::OnChange(Rosen::DisplayId displayId)
             }
         };
         if (handler_ != nullptr) {
-            handler_->PostTask(task, "JsServiceExtension:OnChange", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+            handler_->PostTask(task, "JsServiceExtension:OnChange");
         }
     }
 
