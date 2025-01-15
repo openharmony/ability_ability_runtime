@@ -679,6 +679,7 @@ public:
     AAFwk::Want GetNewProcessRequestWant() const;
     int32_t GetNewProcessRequestId() const;
     void ResetNewProcessRequestId();
+    bool IsDebug();
     void SetDebugApp(bool isDebugApp);
     /**
      * Indicate whether the process is a debugging one
@@ -809,7 +810,7 @@ public:
     int32_t ChangeAppGcState(int32_t state);
 
     void SetAttachDebug(bool isAttachDebug);
-    bool isAttachDebug() const;
+    bool IsAttachDebug() const;
 
     void SetApplicationPendingState(ApplicationPendingState pendingState);
     ApplicationPendingState GetApplicationPendingState() const;
