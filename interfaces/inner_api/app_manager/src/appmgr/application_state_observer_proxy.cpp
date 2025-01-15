@@ -45,7 +45,10 @@ void ApplicationStateObserverProxy::OnForegroundApplicationChanged(const AppStat
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteParcelable(&appStateData);
+    if (!data.WriteParcelable(&appStateData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write profile failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_FOREGROUND_APPLICATION_CHANGED),
         data, reply, option);
@@ -63,7 +66,10 @@ void ApplicationStateObserverProxy::OnAbilityStateChanged(const AbilityStateData
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteParcelable(&abilityStateData);
+    if (!data.WriteParcelable(&abilityStateData)) {
+        TAG_LOGD(AAFwkTag::APPMGR, "write profile failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_ABILITY_STATE_CHANGED),
         data, reply, option);
@@ -81,7 +87,10 @@ void ApplicationStateObserverProxy::OnExtensionStateChanged(const AbilityStateDa
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteParcelable(&abilityStateData);
+    if (!data.WriteParcelable(&abilityStateData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write abilityStateData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_EXTENSION_STATE_CHANGED),
         data, reply, option);
@@ -99,7 +108,10 @@ void ApplicationStateObserverProxy::OnProcessCreated(const ProcessData &processD
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteParcelable(&processData);
+    if (!data.WriteParcelable(&processData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_PROCESS_CREATED),
         data, reply, option);
@@ -118,7 +130,11 @@ void ApplicationStateObserverProxy::OnProcessReused(const ProcessData &processDa
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteParcelable(&processData);
+    if (!data.WriteParcelable(&processData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
+    
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_PROCESS_REUSED),
         data, reply, option);
@@ -136,7 +152,10 @@ void ApplicationStateObserverProxy::OnProcessStateChanged(const ProcessData &pro
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteParcelable(&processData);
+    if (!data.WriteParcelable(&processData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_PROCESS_STATE_CHANGED),
         data, reply, option);
@@ -155,7 +174,10 @@ void ApplicationStateObserverProxy::OnWindowShow(const ProcessData &processData)
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteParcelable(&processData);
+    if (!data.WriteParcelable(&processData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_WINDOW_SHOW),
         data, reply, option);
@@ -173,7 +195,10 @@ void ApplicationStateObserverProxy::OnWindowHidden(const ProcessData &processDat
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteParcelable(&processData);
+    if (!data.WriteParcelable(&processData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_WINDOW_HIDDEN),
         data, reply, option);
@@ -191,7 +216,10 @@ void ApplicationStateObserverProxy::OnProcessDied(const ProcessData &processData
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteParcelable(&processData);
+    if (!data.WriteParcelable(&processData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_PROCESS_DIED),
         data, reply, option);
@@ -210,7 +238,10 @@ void ApplicationStateObserverProxy::OnApplicationStateChanged(const AppStateData
         TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
     }
-    data.WriteParcelable(&appStateData);
+    if (!data.WriteParcelable(&appStateData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write appStateData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_APPLICATION_STATE_CHANGED),
         data, reply, option);
@@ -229,7 +260,10 @@ void ApplicationStateObserverProxy::OnAppStateChanged(const AppStateData &appSta
         TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
     }
-    data.WriteParcelable(&appStateData);
+    if (!data.WriteParcelable(&appStateData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write appStateData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_APP_STATE_CHANGED),
         data, reply, option);
@@ -248,7 +282,10 @@ void ApplicationStateObserverProxy::OnAppStarted(const AppStateData &appStateDat
         TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
     }
-    data.WriteParcelable(&appStateData);
+    if (!data.WriteParcelable(&appStateData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_APP_STARTED),
         data, reply, option);
@@ -267,7 +304,10 @@ void ApplicationStateObserverProxy::OnAppStopped(const AppStateData &appStateDat
         TAG_LOGE(AAFwkTag::APPMGR, "OnAppStopped, WriteInterfaceToken failed");
         return;
     }
-    data.WriteParcelable(&appStateData);
+    if (!data.WriteParcelable(&appStateData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_APP_STOPPED),
         data, reply, option);
@@ -286,7 +326,10 @@ void ApplicationStateObserverProxy::OnPageShow(const PageStateData &pageStateDat
         TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
     }
-    data.WriteParcelable(&pageStateData);
+    if (!data.WriteParcelable(&pageStateData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_PAGE_SHOW),
         data, reply, option);
@@ -305,7 +348,10 @@ void ApplicationStateObserverProxy::OnPageHide(const PageStateData &pageStateDat
         TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
     }
-    data.WriteParcelable(&pageStateData);
+    if (!data.WriteParcelable(&pageStateData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_PAGE_HIDE),
         data, reply, option);
@@ -324,7 +370,10 @@ void ApplicationStateObserverProxy::OnAppCacheStateChanged(const AppStateData &a
         TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
     }
-    data.WriteParcelable(&appStateData);
+    if (!data.WriteParcelable(&appStateData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_APP_CACHE_STATE_CHANGED),
         data, reply, option);
