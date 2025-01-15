@@ -36,7 +36,10 @@ void WantReceiverProxy::Send(const int32_t resultCode)
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteInt32(resultCode);
+    if (!data.WriteInt32(resultCode)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "write resultCode failed");
+        return;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null remote");
@@ -57,13 +60,34 @@ void WantReceiverProxy::PerformReceive(const Want &want, int resultCode, const s
     if (!WriteInterfaceToken(msgData)) {
         return;
     }
-    msgData.WriteParcelable(&want);
-    msgData.WriteInt32(resultCode);
-    msgData.WriteString16(Str8ToStr16(data));
-    msgData.WriteParcelable(&extras);
-    msgData.WriteBool(serialized);
-    msgData.WriteBool(sticky);
-    msgData.WriteInt32(sendingUser);
+    if (!msgData.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "write want failed");
+        return;
+    }
+    if (!msgData.WriteInt32(resultCode)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "write resultCode failed");
+        return;
+    }
+    if (!msgData.WriteString16(Str8ToStr16(data))) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "write data failed");
+        return;
+    }
+    if (!msgData.WriteParcelable(&extras)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "write extras failed");
+        return;
+    }
+    if (!msgData.WriteBool(serialized)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "write serialized failed");
+        return;
+    }
+    if (!msgData.WriteBool(sticky)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "write sticky failed");
+        return;
+    }
+    if (!msgData.WriteInt32(sendingUser)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "write sendingUser failed");
+        return;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null remote");

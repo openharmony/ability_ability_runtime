@@ -39,7 +39,10 @@ bool AmsMgrProxy::IsProcessContainsOnlyUIAbility(const pid_t pid)
     if (!WriteInterfaceToken(data)) {
         return false;
     }
-    data.WriteInt32(static_cast<int32_t>(pid));
+    if (!data.WriteInt32(static_cast<int32_t>(pid))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write pid failed");
+        return false;
+    }
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(
             IAmsMgr::Message::IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION), data, reply, option);
@@ -93,9 +96,14 @@ void AmsMgrProxy::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
     if (!WriteInterfaceToken(data)) {
         return;
     }
-
-    data.WriteParcelable(abilityInfo.get());
-    data.WriteParcelable(appInfo.get());
+    if (!data.WriteParcelable(abilityInfo.get())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write abilityInfo failed");
+        return;
+    }
+    if (!data.WriteParcelable(appInfo.get())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write abilityInfo failed");
+        return;
+    }
     if (!data.WriteParcelable(want.get())) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write want failed");
         return;
@@ -143,13 +151,17 @@ void AmsMgrProxy::UpdateAbilityState(const sptr<IRemoteObject> &token, const Abi
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write data");
         return;
     }
     if (!data.WriteRemoteObject(token.GetRefPtr())) {
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to write token");
         return;
     }
-    data.WriteInt32(static_cast<int32_t>(state));
+    if (!data.WriteInt32(static_cast<int32_t>(state))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write token");
+        return;
+    }
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::UPDATE_ABILITY_STATE), data, reply, option);
     if (ret != NO_ERROR) {
@@ -171,7 +183,10 @@ void AmsMgrProxy::UpdateExtensionState(const sptr<IRemoteObject> &token, const E
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to write token");
         return;
     }
-    data.WriteInt32(static_cast<int32_t>(state));
+    if (!data.WriteInt32(static_cast<int32_t>(state))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write state");
+        return;
+    }
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::UPDATE_EXTENSION_STATE), data, reply, option);
     if (ret != NO_ERROR) {
@@ -777,7 +792,10 @@ int AmsMgrProxy::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Applic
         TAG_LOGE(AAFwkTag::APPMGR, "token write error");
         return ERR_FLATTEN_OBJECT;
     }
-    data.WriteInt32(pid);
+    if (!data.WriteInt32(pid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "pid write error");
+        return ERR_FLATTEN_OBJECT;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IAmsMgr::Message::GET_APPLICATION_INFO_BY_PROCESS_ID), data, reply, option);
     if (ret != NO_ERROR) {

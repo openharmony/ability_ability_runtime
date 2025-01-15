@@ -41,11 +41,17 @@ void AbilityInfoCallbackProxy::NotifyAbilityToken(const sptr<IRemoteObject> toke
     AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wriet data failed");
         return;
     }
-
-    data.WriteRemoteObject(token);
-    data.WriteParcelable(&want);
+    if (!data.WriteRemoteObject(token)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wriet token failed");
+        return;
+    }
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wriet want failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(IAbilityInfoCallback::Notify_ABILITY_TOKEN, data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
@@ -59,10 +65,14 @@ void AbilityInfoCallbackProxy::NotifyRestartSpecifiedAbility(const sptr<IRemoteO
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wriet data failed");
+        return;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wriet token failed");
         return;
     }
 
-    data.WriteRemoteObject(token);
     int32_t ret = SendTransactCmd(IAbilityInfoCallback::Notify_RESTART_SPECIFIED_ABILITY, data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
@@ -77,12 +87,21 @@ void AbilityInfoCallbackProxy::NotifyStartSpecifiedAbility(const sptr<IRemoteObj
     AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wriet data failed");
         return;
     }
-
-    data.WriteRemoteObject(callerToken);
-    data.WriteParcelable(&want);
-    data.WriteInt32(requestCode);
+    if (!data.WriteRemoteObject(callerToken)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wriet callerToken failed");
+        return;
+    }
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wriet want failed");
+        return;
+    }
+    if (!data.WriteInt32(requestCode)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wriet requestCode failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(IAbilityInfoCallback::Notify_START_SPECIFIED_ABILITY, data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest failed, err: %{public}d", ret);
@@ -121,9 +140,14 @@ void AbilityInfoCallbackProxy::NotifyStartAbilityResult(const Want &want, int re
     if (!WriteInterfaceToken(data)) {
         return;
     }
-
-    data.WriteParcelable(&want);
-    data.WriteInt32(result);
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wriet want failed");
+        return;
+    }
+    if (!data.WriteInt32(result)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "wriet result failed");
+        return;
+    }
     int32_t ret = SendTransactCmd(IAbilityInfoCallback::Notify_START_ABILITY_RESULT, data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "err: %{public}d", ret);

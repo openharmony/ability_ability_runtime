@@ -4158,9 +4158,15 @@ int32_t AbilityManagerProxy::IsValidMissionIds(
 
     constexpr int32_t MAX_COUNT = 20;
     int32_t num = static_cast<int32_t>(missionIds.size() > MAX_COUNT ? MAX_COUNT : missionIds.size());
-    data.WriteInt32(num);
+    if (!data.WriteInt32(num)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write num fail");
+        return INNER_ERR;
+    }
     for (auto i = 0; i < num; ++i) {
-        data.WriteInt32(missionIds.at(i));
+        if (!data.WriteInt32(missionIds.at(i))) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write missionId fail");
+            return INNER_ERR;
+        }
     }
 
     auto error = SendRequest(AbilityManagerInterfaceCode::QUERY_MISSION_VAILD, data, reply, option);
