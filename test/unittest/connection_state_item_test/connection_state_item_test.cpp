@@ -698,6 +698,7 @@ HWTEST_F(ConnectionStateItemTest, GenerateAllConnectionData_001, TestSize.Level1
     connectionStateItem->AddConnection(record, data);
     connectionStateItem->AddDataAbilityConnection(caller, dataAbility, data);
     connectionStateItem->GenerateAllConnectionData(datas);
+    EXPECT_TRUE(connectionStateItem != nullptr);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

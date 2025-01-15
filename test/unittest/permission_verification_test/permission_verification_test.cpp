@@ -715,7 +715,8 @@ HWTEST_F(PermissionVerificationTest, CheckObserverCallerPermission_0001, TestSiz
 {
     AAFwk::PermissionVerification::GetInstance()->CheckObserverCallerPermission();
     AAFwk::PermissionVerification::GetInstance()->VerifyStartRecentAbilityPermission();
-    AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
+    EXPECT_EQ(ret, true);
 }
 
 /**

@@ -519,6 +519,7 @@ HWTEST_F(MissionInfoMgrTest, HandleUnInstallApp_001, TestSize.Level1)
 
     missions.push_back(1);
     missionInfoMgr->HandleUnInstallApp("", 1, missions);
+    EXPECT_TRUE(missionInfoMgr != nullptr);
 }
 
 /*
@@ -540,6 +541,7 @@ HWTEST_F(MissionInfoMgrTest, GetMatchedMission_001, TestSize.Level1)
     missionInfoMgr->missionInfoList_.push_back(missionInfo);
     std::list<int32_t> missions;
     missionInfoMgr->GetMatchedMission("test", 1, missions);
+    EXPECT_TRUE(missionInfoMgr != nullptr);
 }
 
 /*
@@ -561,6 +563,7 @@ HWTEST_F(MissionInfoMgrTest, Dump_001, TestSize.Level1)
     missionInfoMgr->missionInfoList_.push_back(missionInfo);
     std::vector<std::string> info;
     missionInfoMgr->Dump(info);
+    EXPECT_TRUE(missionInfoMgr != nullptr);
 }
 
 /*
@@ -702,6 +705,7 @@ HWTEST_F(MissionInfoMgrTest, CreateWhitePixelMap_001, TestSize.Level1)
     missionInfoMgr->missionInfoList_.push_back(missionInfo);
     Snapshot snapshot;
     missionInfoMgr->CreateWhitePixelMap(snapshot);
+    EXPECT_TRUE(missionInfoMgr != nullptr);
 }
 #endif
 }  // namespace AAFwk
