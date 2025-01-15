@@ -93,6 +93,10 @@ ohos_shared_library("libappms") {
     defines += [ "ABILITY_FAULT_AND_EXIT_TEST" ]
   }
 
+  if (target_platform == "pc") {
+    defines += [ "ABILITY_PLATFORM_PC" ]
+  }
+
   configs = [ ":appmgr_config" ]
   cflags = []
   if (target_cpu == "arm") {
