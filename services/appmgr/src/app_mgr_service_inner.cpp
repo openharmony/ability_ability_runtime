@@ -1377,6 +1377,24 @@ int32_t AppMgrServiceInner::ForceKillApplicationInner(const std::string &bundleN
     return result;
 }
 
+int32_t AppMgrServiceInner::WaitProcessesExitAndKill(std::list<pid_t> &pids, const int64_t startTime,
+    const std::string& reason)
+{
+    int32_t result = ERR_OK;
+    if (WaitForRemoteProcessExit(pids, startTime)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "remote process exited successs");
+        return result;
+    }
+    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
+        auto singleRet = KillProcessByPid(*iter, reason);
+        if (singleRet != 0 && singleRet != AAFwk::ERR_KILL_PROCESS_NOT_EXIST) {
+            TAG_LOGE(AAFwkTag::APPMGR, "killApplication fail for pid:%{public}d", *iter);
+            result = singleRet;
+        }
+    }
+    return result;
+}
+
 int32_t AppMgrServiceInner::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called.");
@@ -1437,19 +1455,7 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
         TAG_LOGI(AAFwkTag::APPMGR, "not start");
         return result;
     }
-    if (WaitForRemoteProcessExit(pids, startTime)) {
-        TAG_LOGI(AAFwkTag::APPMGR, "The remote process exited successfully ");
-        return result;
-    }
-    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
-        result = KillProcessByPid(*iter, reason);
-        if (result < 0) {
-            TAG_LOGE(AAFwkTag::APPMGR, "KillApplication failed for bundleName:%{public}s pid:%{public}d",
-                bundleName.c_str(), *iter);
-            return result;
-        }
-    }
-    return result;
+    return WaitProcessesExitAndKill(pids, startTime, reason);
 }
 
 void AppMgrServiceInner::SendProcessExitEventTask(
@@ -1527,19 +1533,7 @@ int32_t AppMgrServiceInner::KillApplicationSelf(const bool clearPageStack, const
         TAG_LOGI(AAFwkTag::APPMGR, "unstart");
         return ERR_OK;
     }
-    if (WaitForRemoteProcessExit(pids, startTime)) {
-        TAG_LOGI(AAFwkTag::APPMGR, "remote process exited successs");
-        return ERR_OK;
-    }
-    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
-        auto result = KillProcessByPid(*iter, reason);
-        if (result < 0) {
-            TAG_LOGE(AAFwkTag::APPMGR, "killApplication fail for bundleName:%{public}s pid:%{public}d",
-                bundleName.c_str(), *iter);
-            return result;
-        }
-    }
-    return ERR_OK;
+    return WaitProcessesExitAndKill(pids, startTime, reason);
 }
 
 int32_t AppMgrServiceInner::KillApplicationByBundleName(const std::string &bundleName, const bool clearPageStack,
@@ -1553,18 +1547,10 @@ int32_t AppMgrServiceInner::KillApplicationByBundleName(const std::string &bundl
         TAG_LOGE(AAFwkTag::APPMGR, "The process corresponding to the package name did not start");
         return result;
     }
-    if (WaitForRemoteProcessExit(pids, startTime)) {
-        TAG_LOGD(AAFwkTag::APPMGR, "The remote process exited successfully ");
-        NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
+    result = WaitProcessesExitAndKill(pids, startTime, reason);
+    if (result < 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "KillApplicationSelf is failed for bundleName:%{public}s", bundleName.c_str);
         return result;
-    }
-    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
-        result = KillProcessByPid(*iter, reason);
-        if (result < 0) {
-            TAG_LOGE(AAFwkTag::APPMGR, "KillApplicationSelf is failed for bundleName:%{public}s, pid: %{public}d",
-                bundleName.c_str(), *iter);
-            return result;
-        }
     }
     NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
     return result;
@@ -1595,7 +1581,6 @@ int32_t AppMgrServiceInner::KillApplicationByUserIdLocked(
         return ERR_NO_INIT;
     }
 
-    int result = ERR_OK;
     int64_t startTime = SystemTimeMillisecond();
     std::list<pid_t> pids;
     if (remoteClientManager_ == nullptr) {
@@ -1615,19 +1600,7 @@ int32_t AppMgrServiceInner::KillApplicationByUserIdLocked(
         TAG_LOGI(AAFwkTag::APPMGR, "The process corresponding to the package name did not start.");
         return result;
     }
-    if (WaitForRemoteProcessExit(pids, startTime)) {
-        TAG_LOGI(AAFwkTag::APPMGR, "The remote process exited successfully ");
-        return result;
-    }
-    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
-        result = KillProcessByPid(*iter, reason);
-        if (result < 0) {
-            TAG_LOGE(AAFwkTag::APPMGR, "KillApplication is fail bundleName: %{public}s pid: %{public}d",
-                bundleName.c_str(), *iter);
-            return result;
-        }
-    }
-    return result;
+    return WaitProcessesExitAndKill(pids, startTime, reason);
 }
 
 int32_t AppMgrServiceInner::ClearUpApplicationData(const std::string &bundleName,
@@ -2323,11 +2296,14 @@ bool AppMgrServiceInner::CheckIsThreadInFoundation(pid_t pid)
 bool AppMgrServiceInner::WaitForRemoteProcessExit(std::list<pid_t> &pids, const int64_t startTime)
 {
     int64_t delayTime = SystemTimeMillisecond() - startTime;
+    if (CheckAllProcessExit(pids)) {
+        return true;
+    }
     while (delayTime < KILL_PROCESS_TIMEOUT_MICRO_SECONDS) {
-        if (CheckAllProcessExist(pids)) {
+        usleep(KILL_PROCESS_DELAYTIME_MICRO_SECONDS);
+        if (CheckAllProcessExit(pids)) {
             return true;
         }
-        usleep(KILL_PROCESS_DELAYTIME_MICRO_SECONDS);
         delayTime = SystemTimeMillisecond() - startTime;
     }
     return false;
@@ -2349,7 +2325,7 @@ bool AppMgrServiceInner::ProcessExist(pid_t pid)
     return false;
 }
 
-bool AppMgrServiceInner::CheckAllProcessExist(std::list<pid_t> &pids)
+bool AppMgrServiceInner::CheckAllProcessExit(std::list<pid_t> &pids)
 {
     for (auto iter = pids.begin(); iter != pids.end();) {
         if (!ProcessExist(*iter)) {
@@ -2705,17 +2681,7 @@ void AppMgrServiceInner::KillProcessesByUserId(int32_t userId)
         TAG_LOGI(AAFwkTag::APPMGR, "The process corresponding to the userId did not start");
         return;
     }
-    if (WaitForRemoteProcessExit(pids, startTime)) {
-        TAG_LOGI(AAFwkTag::APPMGR, "The remote process exited successfully ");
-        return;
-    }
-    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
-        auto result = KillProcessByPid(*iter, "KillProcessesByUserId");
-        if (result < 0) {
-            TAG_LOGE(AAFwkTag::APPMGR, "KillProcessByPid is failed. pid: %{public}d", *iter);
-            return;
-        }
-    }
+    WaitProcessesExitAndKill(pids, startTime, "KillProcessesByUserId");
 }
 
 int32_t AppMgrServiceInner::KillProcessesInBatch(const std::vector<int32_t> &pids)
