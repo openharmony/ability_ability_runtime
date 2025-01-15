@@ -41,6 +41,7 @@ static const int FLAG_NO_CREATE = 1 << 29;
 static const int FLAG_CANCEL_CURRENT = 1 << 28;
 static const int FLAG_UPDATE_CURRENT = 1 << 27;
 static const int FLAG_IMMUTABLE = 1 << 26;
+static const int FLAG_ALLOW_CANCEL = 1 << 20;
 static const int FLAG_INVLID = 0;
 
 static const int INVLID_WANT_AGENT_USER_ID = -1;
