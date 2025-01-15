@@ -264,7 +264,7 @@ void ModuleRunningRecord::TerminateAbility(const std::shared_ptr<AppRunningRecor
     }
 
     if (appLifeCycleDeal_) {
-        if (!(appRecord->IsDebugApp() || appRecord->isAttachDebug())) {
+        if (!(appRecord->IsDebugApp() || appRecord->IsAttachDebug())) {
             SendEvent(AMSEventHandler::TERMINATE_ABILITY_TIMEOUT_MSG,
                 AMSEventHandler::TERMINATE_ABILITY_TIMEOUT, abilityRecord);
         }
