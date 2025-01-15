@@ -3429,7 +3429,7 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
     auto token = bundleInfo.applicationInfo.accessTokenId;
     {
         HITRACE_METER_NAME(HITRACE_TAG_APP, "AccessTokenKit::VerifyAccessToken");
-#ifdef (ABILITY_PLATFORM_PC)
+#ifdef ABILITY_PLATFORM_PC
         std::vectorSecurity::AccessToken::PermissionStateFull reqPermList;
         auto deviceid = bundleInfo.applicationInfo.deviceId;
         Security::AccessToken::AccessTokenKit::GetReqPermissions(token, reqPermList, true);
