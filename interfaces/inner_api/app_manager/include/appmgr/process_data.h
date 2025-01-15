@@ -69,6 +69,8 @@ struct ProcessData : public Parcelable {
     int32_t childUid = -1;
     bool isPreload = false;
     bool isPreloadModule = false;
+    int32_t callerPid = 0;
+    int32_t callerUid = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
