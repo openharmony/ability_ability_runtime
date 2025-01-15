@@ -25,6 +25,9 @@ using OHOS::DelayedSingleton;
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+const int RESULT_CODE = 8521225;
+}
 class ServiceRouterMgrServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -63,6 +66,7 @@ HWTEST_F(ServiceRouterMgrServiceTest, StartUIExtensionAbility_001, Function | Sm
     sptr<SessionInfo> sessionInfo = nullptr;
     int32_t userId = 1;
     auto ret = serviceRouterMgrService_->StartUIExtensionAbility(sessionInfo, userId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "StartUIExtensionAbility_001 result %{public}d", ret);
     TAG_LOGI(AAFwkTag::TEST, "StartUIExtensionAbility_001 end");
 }
@@ -79,6 +83,7 @@ HWTEST_F(ServiceRouterMgrServiceTest, ConnectUIExtensionAbility_001, Function | 
     sptr<SessionInfo> sessionInfo = nullptr;
     int32_t userId = 1;
     auto ret = serviceRouterMgrService_->ConnectUIExtensionAbility(want, connect, sessionInfo, userId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "ConnectUIExtensionAbility_001 result %{public}d", ret);
     TAG_LOGI(AAFwkTag::TEST, "ConnectUIExtensionAbility_001 end");
 }
@@ -93,6 +98,7 @@ HWTEST_F(ServiceRouterMgrServiceTest, QueryPurposeInfos_001, Function | SmallTes
     Want want;
     std::vector<PurposeInfo> purposeInfos;
     auto ret = serviceRouterMgrService_->QueryPurposeInfos(want, "", purposeInfos);
+    EXPECT_EQ(ret, RESULT_CODE);
     TAG_LOGI(AAFwkTag::TEST, "QueryPurposeInfos_001 result %{public}d", ret);
     TAG_LOGI(AAFwkTag::TEST, "QueryPurposeInfos_001 end");
 }
@@ -108,6 +114,7 @@ HWTEST_F(ServiceRouterMgrServiceTest, QueryBusinessAbilityInfos_001, Function | 
     filter.businessType = BusinessType::UNSPECIFIED;
     std::vector<BusinessAbilityInfo> abilityInfos;
     auto ret = serviceRouterMgrService_->QueryBusinessAbilityInfos(filter, abilityInfos);
+    EXPECT_EQ(ret, RESULT_CODE);
     TAG_LOGI(AAFwkTag::TEST, "QueryBusinessAbilityInfos_001 result %{public}d", ret);
     TAG_LOGI(AAFwkTag::TEST, "QueryBusinessAbilityInfos_001 end");
 }

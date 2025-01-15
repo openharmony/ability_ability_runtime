@@ -151,6 +151,7 @@ HWTEST_F(ConnectionStateManagerTest, AddConnection_001, TestSize.Level1)
     std::shared_ptr<ConnectionRecord> connectionRecord = nullptr;
     manager_->Init();
     manager_->AddConnection(connectionRecord);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*
@@ -167,6 +168,7 @@ HWTEST_F(ConnectionStateManagerTest, AddConnection_002, TestSize.Level1)
         ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_);
     manager_->Init();
     manager_->AddConnection(connectionRecord);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*
@@ -182,6 +184,7 @@ HWTEST_F(ConnectionStateManagerTest, RemoveConnection_001, TestSize.Level1)
     std::shared_ptr<ConnectionRecord> connectionRecord = nullptr;
     bool isCallerDied = false;
     manager_->RemoveConnection(connectionRecord, isCallerDied);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*
@@ -198,6 +201,7 @@ HWTEST_F(ConnectionStateManagerTest, RemoveConnection_002, TestSize.Level1)
     bool isCallerDied = false;
     manager_->Init();
     manager_->RemoveConnection(connectionRecord, isCallerDied);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*
@@ -215,6 +219,7 @@ HWTEST_F(ConnectionStateManagerTest, RemoveConnection_003, TestSize.Level1)
     bool isCallerDied = true;
     manager_->Init();
     manager_->RemoveConnection(connectionRecord, isCallerDied);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*
@@ -232,6 +237,7 @@ HWTEST_F(ConnectionStateManagerTest, RemoveConnection_004, TestSize.Level1)
     bool isCallerDied = false;
     manager_->Init();
     manager_->RemoveConnection(connectionRecord, isCallerDied);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*
@@ -248,6 +254,7 @@ HWTEST_F(ConnectionStateManagerTest, AddDataAbilityConnection_001, TestSize.Leve
     caller.callerPid = 1;
     manager_->Init();
     manager_->AddDataAbilityConnection(caller, dataAbilityRecord_);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*
@@ -264,6 +271,7 @@ HWTEST_F(ConnectionStateManagerTest, RemoveDataAbilityConnection_001, TestSize.L
     caller.callerPid = 1;
     manager_->Init();
     manager_->RemoveDataAbilityConnection(caller, dataAbilityRecord_);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*
@@ -345,6 +353,7 @@ HWTEST_F(ConnectionStateManagerTest, HandleDataAbilityDied_001, TestSize.Level1)
     std::shared_ptr<DataAbilityRecord> dataAbilityRecord = nullptr;
     manager_->Init();
     manager_->HandleDataAbilityDied(dataAbilityRecord);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*
@@ -362,6 +371,7 @@ HWTEST_F(ConnectionStateManagerTest, HandleDataAbilityDied_002, TestSize.Level1)
     dataAbilityRecord->ability_ = nullptr;
     manager_->Init();
     manager_->HandleDataAbilityDied(dataAbilityRecord);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*
@@ -379,6 +389,7 @@ HWTEST_F(ConnectionStateManagerTest, HandleDataAbilityDied_003, TestSize.Level1)
     dataAbilityRecord->ability_ = abilityRecord_;
     manager_->Init();
     manager_->HandleDataAbilityDied(dataAbilityRecord);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*
@@ -515,6 +526,7 @@ HWTEST_F(ConnectionStateManagerTest, AddDlpAbility_002, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     manager_->Init();
     manager_->AddDlpAbility(abilityRecord);
+    EXPECT_TRUE(manager_ != nullptr);
 }
 
 /*

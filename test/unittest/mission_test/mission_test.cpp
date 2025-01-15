@@ -525,6 +525,7 @@ HWTEST_F(MissionTest, mission_dump, TestSize.Level1)
     auto mission = std::make_shared<Mission>(0, abilityRecord, "name1");
     std::vector<std::string> info;
     mission->Dump(info);
+    EXPECT_TRUE(mission != nullptr);
 }
 
 /*

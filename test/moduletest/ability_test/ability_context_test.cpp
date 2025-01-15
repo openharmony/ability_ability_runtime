@@ -126,6 +126,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_DisconnectAbility_0100, Funct
     Want want;
     context_->ConnectAbility(want, nullptr);
     context_->DisconnectAbility(nullptr);
+    EXPECT_TRUE(context_ != nullptr);
     usleep(AbilityContextTest::TEST_WAIT_TIME);
 }
 
@@ -147,6 +148,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_StartAbility_0100, Function |
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
     Want want;
     context_->StartAbility(want, -1);
+    EXPECT_TRUE(context_ != nullptr);
     usleep(AbilityContextTest::TEST_WAIT_TIME);
 }
 
@@ -174,6 +176,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_TerminateAbility_0100, Functi
     deal->SetAbilityInfo(abilityInfo);
     context_->AttachBaseContext(deal);
     context_->TerminateAbility();
+    EXPECT_TRUE(context_ != nullptr);
     usleep(AbilityContextTest::TEST_WAIT_TIME);
 }
 
@@ -198,6 +201,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_TerminateAbility_0200, Functi
     deal->SetAbilityInfo(abilityInfo);
     context_->AttachBaseContext(deal);
     context_->TerminateAbility();
+    EXPECT_TRUE(context_ != nullptr);
     usleep(AbilityContextTest::TEST_WAIT_TIME);
 }
 

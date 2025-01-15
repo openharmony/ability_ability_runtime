@@ -2591,7 +2591,6 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetForegroundUIAbilities_0
 HWTEST_F(AbilityManagerProxyTest, RegisterAutoStartupSystemCallback_0100, TestSize.Level1)
 {
     OHOS::sptr<IRemoteObject> callback = nullptr;
-    EXPECT_EQ(callback, nullptr);
     auto res = proxy_->RegisterAutoStartupSystemCallback(callback);
     EXPECT_EQ(res, INNER_ERR);
 }
@@ -2617,7 +2616,6 @@ HWTEST_F(AbilityManagerProxyTest, RegisterAutoStartupSystemCallback_0200, TestSi
 HWTEST_F(AbilityManagerProxyTest, UnregisterAutoStartupSystemCallback_0100, TestSize.Level1)
 {
     OHOS::sptr<IRemoteObject> callback = nullptr;
-    EXPECT_EQ(callback, nullptr);
     auto res = proxy_->UnregisterAutoStartupSystemCallback(callback);
     EXPECT_EQ(res, INNER_ERR);
 }

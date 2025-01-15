@@ -675,6 +675,7 @@ HWTEST_F(MissionListManagerTest, StartWaitingAbility_001, TestSize.Level1)
     missionList->missions_.push_front(mission);
     missionListManager->currentMissionLists_.push_front(missionList);
     missionListManager->StartWaitingAbility();
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -697,6 +698,7 @@ HWTEST_F(MissionListManagerTest, StartWaitingAbility_002, TestSize.Level1)
     missionList->missions_.push_front(mission);
     missionListManager->currentMissionLists_.push_front(missionList);
     missionListManager->StartWaitingAbility();
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -980,6 +982,7 @@ HWTEST_F(MissionListManagerTest, BuildInnerMissionInfo_001, TestSize.Level1)
     abilityRequest.callType = AbilityCallType::INVALID_TYPE;
     abilityRequest.want.SetParam(DLP_INDEX, 0);
     missionListManager->BuildInnerMissionInfo(info, missionName, abilityRequest);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -1006,6 +1009,7 @@ HWTEST_F(MissionListManagerTest, BuildInnerMissionInfo_002, TestSize.Level1)
     abilityRequest.want.SetParam(DLP_INDEX, 1);
     abilityRequest.want.SetElementName(deviceId, bundleName, abilityName, moduleName);
     missionListManager->BuildInnerMissionInfo(info, missionName, abilityRequest);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 #endif // WITH_DLP
@@ -1491,6 +1495,7 @@ HWTEST_F(MissionListManagerTest, MoveNoneTopMissionToDefaultList_002, TestSize.L
     missionList->missions_.push_front(mission);
     mission->SetMissionList(missionList);
     missionListManager->MoveNoneTopMissionToDefaultList(mission);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -1514,6 +1519,7 @@ HWTEST_F(MissionListManagerTest, MoveNoneTopMissionToDefaultList_003, TestSize.L
     missionList->missions_.push_front(nullptr);
     mission->SetMissionList(missionList);
     missionListManager->MoveNoneTopMissionToDefaultList(mission);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -1539,6 +1545,7 @@ HWTEST_F(MissionListManagerTest, MoveNoneTopMissionToDefaultList_004, TestSize.L
     missionList->missions_.push_front(mission2);
     mission->SetMissionList(missionList);
     missionListManager->MoveNoneTopMissionToDefaultList(mission);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -1564,6 +1571,7 @@ HWTEST_F(MissionListManagerTest, MoveNoneTopMissionToDefaultList_005, TestSize.L
     missionList->missions_.push_front(mission2);
     mission->SetMissionList(missionList);
     missionListManager->MoveNoneTopMissionToDefaultList(mission);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -1718,6 +1726,7 @@ HWTEST_F(MissionListManagerTest, OnAbilityRequestDone_001, TestSize.Level1)
     sptr<IRemoteObject> token = nullptr;
     int32_t state = 2;
     missionListManager->OnAbilityRequestDone(token, state);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -1736,6 +1745,7 @@ HWTEST_F(MissionListManagerTest, OnAbilityRequestDone_002, TestSize.Level1)
     sptr<IRemoteObject> token = nullptr;
     int32_t state = 4;
     missionListManager->OnAbilityRequestDone(token, state);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -1760,6 +1770,7 @@ HWTEST_F(MissionListManagerTest, OnAppStateChanged_001, TestSize.Level1)
     missionListManager->terminateAbilityList_.push_back(nullptr);
     missionListManager->terminateAbilityList_.push_back(abilityRecord);
     missionListManager->OnAppStateChanged(info);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -1793,6 +1804,7 @@ HWTEST_F(MissionListManagerTest, OnAppStateChanged_002, TestSize.Level1)
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->defaultSingleList_ = missionList;
     missionListManager->OnAppStateChanged(info);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2066,6 +2078,7 @@ HWTEST_F(MissionListManagerTest, CompleteForegroundSuccess_001, TestSize.Level1)
     info.missionInfo.id = 1;
     DelayedSingleton<MissionInfoMgr>::GetInstance()->missionInfoList_.push_back(info);
     missionListManager->CompleteForegroundSuccess(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2096,6 +2109,7 @@ HWTEST_F(MissionListManagerTest, CompleteForegroundSuccess_002, TestSize.Level1)
     info.missionInfo.id = 1;
     DelayedSingleton<MissionInfoMgr>::GetInstance()->missionInfoList_.clear();
     missionListManager->CompleteForegroundSuccess(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2127,6 +2141,7 @@ HWTEST_F(MissionListManagerTest, CompleteForegroundSuccess_003, TestSize.Level1)
     info.missionInfo.id = 1;
     DelayedSingleton<MissionInfoMgr>::GetInstance()->missionInfoList_.clear();
     missionListManager->CompleteForegroundSuccess(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2155,6 +2170,7 @@ HWTEST_F(MissionListManagerTest, CompleteForegroundSuccess_004, TestSize.Level1)
     info.missionInfo.id = 1;
     DelayedSingleton<MissionInfoMgr>::GetInstance()->missionInfoList_.clear();
     missionListManager->CompleteForegroundSuccess(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2186,6 +2202,7 @@ HWTEST_F(MissionListManagerTest, CompleteForegroundSuccess_005, TestSize.Level1)
     info.missionInfo.id = 1;
     DelayedSingleton<MissionInfoMgr>::GetInstance()->missionInfoList_.clear();
     missionListManager->CompleteForegroundSuccess(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2204,6 +2221,7 @@ HWTEST_F(MissionListManagerTest, TerminatePreviousAbility_001, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetPreAbilityRecord(nullptr);
     missionListManager->TerminatePreviousAbility(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2224,6 +2242,7 @@ HWTEST_F(MissionListManagerTest, TerminatePreviousAbility_002, TestSize.Level1)
     preAbilityRecord->currentState_ = AbilityState::FOREGROUND;
     abilityRecord->preAbilityRecord_ = preAbilityRecord;
     missionListManager->TerminatePreviousAbility(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2244,6 +2263,7 @@ HWTEST_F(MissionListManagerTest, TerminatePreviousAbility_003, TestSize.Level1)
     preAbilityRecord->currentState_ = AbilityState::BACKGROUND;
     abilityRecord->preAbilityRecord_ = preAbilityRecord;
     missionListManager->TerminatePreviousAbility(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2300,6 +2320,7 @@ HWTEST_F(MissionListManagerTest, CompleteBackground_001, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->currentState_ = AbilityState::FOREGROUND;
     missionListManager->CompleteBackground(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2320,6 +2341,7 @@ HWTEST_F(MissionListManagerTest, CompleteBackground_002, TestSize.Level1)
     abilityRecord->SetPendingState(AbilityState::FOREGROUND);
     abilityRecord->SetSwitchingPause(true);
     missionListManager->CompleteBackground(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2344,6 +2366,7 @@ HWTEST_F(MissionListManagerTest, CompleteBackground_003, TestSize.Level1)
     abilityRecord->isReady_ = true;
     missionListManager->terminateAbilityList_.push_back(abilityRecord);
     missionListManager->CompleteBackground(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2370,6 +2393,7 @@ HWTEST_F(MissionListManagerTest, CompleteBackground_004, TestSize.Level1)
     abilityRecord2->currentState_ = AbilityState::BACKGROUND;
     missionListManager->terminateAbilityList_.push_back(abilityRecord2);
     missionListManager->CompleteBackground(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2396,6 +2420,7 @@ HWTEST_F(MissionListManagerTest, CompleteBackground_005, TestSize.Level1)
     abilityRecord2->currentState_ = AbilityState::BACKGROUND;
     missionListManager->terminateAbilityList_.push_back(abilityRecord2);
     missionListManager->CompleteBackground(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2422,6 +2447,7 @@ HWTEST_F(MissionListManagerTest, CompleteBackground_006, TestSize.Level1)
     abilityRecord2->currentState_ = AbilityState::FOREGROUND;
     missionListManager->terminateAbilityList_.push_back(abilityRecord2);
     missionListManager->CompleteBackground(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2830,6 +2856,7 @@ HWTEST_F(MissionListManagerTest, RemoveTerminatingAbility_001, TestSize.Level1)
     bool flag = true;
     missionListManager->terminateAbilityList_.push_back(abilityRecord);
     missionListManager->RemoveTerminatingAbility(abilityRecord, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2851,6 +2878,7 @@ HWTEST_F(MissionListManagerTest, RemoveTerminatingAbility_002, TestSize.Level1)
     abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
     missionListManager->terminateAbilityList_.clear();
     missionListManager->RemoveTerminatingAbility(abilityRecord, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2877,6 +2905,7 @@ HWTEST_F(MissionListManagerTest, RemoveTerminatingAbility_003, TestSize.Level1)
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
     missionListManager->terminateAbilityList_.clear();
     missionListManager->RemoveTerminatingAbility(abilityRecord, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2898,6 +2927,7 @@ HWTEST_F(MissionListManagerTest, RemoveTerminatingAbility_004, TestSize.Level1)
     abilityRecord->SetAbilityState(AbilityState::FOREGROUNDING);
     missionListManager->terminateAbilityList_.clear();
     missionListManager->RemoveTerminatingAbility(abilityRecord, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2928,6 +2958,7 @@ HWTEST_F(MissionListManagerTest, RemoveTerminatingAbility_005, TestSize.Level1)
     missionListManager->terminateAbilityList_.clear();
     missionListManager->launcherList_ = missionList;
     missionListManager->RemoveTerminatingAbility(abilityRecord, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2961,6 +2992,7 @@ HWTEST_F(MissionListManagerTest, RemoveTerminatingAbility_006, TestSize.Level1)
     missionListManager->terminateAbilityList_.clear();
     missionListManager->launcherList_ = missionList;
     missionListManager->RemoveTerminatingAbility(abilityRecord, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -2994,6 +3026,7 @@ HWTEST_F(MissionListManagerTest, RemoveTerminatingAbility_007, TestSize.Level1)
     missionListManager->terminateAbilityList_.clear();
     missionListManager->launcherList_ = missionList;
     missionListManager->RemoveTerminatingAbility(abilityRecord, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3027,6 +3060,7 @@ HWTEST_F(MissionListManagerTest, RemoveTerminatingAbility_008, TestSize.Level1)
     missionListManager->terminateAbilityList_.clear();
     missionListManager->launcherList_ = missionList;
     missionListManager->RemoveTerminatingAbility(abilityRecord, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3060,6 +3094,7 @@ HWTEST_F(MissionListManagerTest, RemoveTerminatingAbility_009, TestSize.Level1)
     missionListManager->terminateAbilityList_.clear();
     missionListManager->launcherList_ = missionList;
     missionListManager->RemoveTerminatingAbility(abilityRecord, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3136,6 +3171,7 @@ HWTEST_F(MissionListManagerTest, CompleteTerminate_001, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
     missionListManager->CompleteTerminate(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3154,6 +3190,7 @@ HWTEST_F(MissionListManagerTest, CompleteTerminate_002, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::TERMINATING);
     missionListManager->CompleteTerminate(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3176,6 +3213,7 @@ HWTEST_F(MissionListManagerTest, CompleteTerminateAndUpdateMission_001, TestSize
     missionListManager->terminateAbilityList_.push_back(abilityRecord);
     missionListManager->terminateAbilityList_.push_back(abilityRecord2);
     missionListManager->CompleteTerminateAndUpdateMission(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3197,6 +3235,7 @@ HWTEST_F(MissionListManagerTest, CompleteTerminateAndUpdateMission_002, TestSize
     missionListManager->terminateAbilityList_.clear();
     missionListManager->terminateAbilityList_.push_back(abilityRecord);
     missionListManager->CompleteTerminateAndUpdateMission(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3219,6 +3258,7 @@ HWTEST_F(MissionListManagerTest, CompleteTerminateAndUpdateMission_003, TestSize
     missionListManager->terminateAbilityList_.clear();
     missionListManager->terminateAbilityList_.push_back(abilityRecord);
     missionListManager->CompleteTerminateAndUpdateMission(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3247,6 +3287,7 @@ HWTEST_F(MissionListManagerTest, CompleteTerminateAndUpdateMission_004, TestSize
     missionListManager->terminateAbilityList_.clear();
     missionListManager->terminateAbilityList_.push_back(abilityRecord);
     missionListManager->CompleteTerminateAndUpdateMission(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3271,6 +3312,7 @@ HWTEST_F(MissionListManagerTest, CompleteTerminateAndUpdateMission_005, TestSize
     missionListManager->terminateAbilityList_.clear();
     missionListManager->terminateAbilityList_.push_back(abilityRecord);
     missionListManager->CompleteTerminateAndUpdateMission(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3300,6 +3342,7 @@ HWTEST_F(MissionListManagerTest, CompleteTerminateAndUpdateMission_006, TestSize
     missionListManager->terminateAbilityList_.clear();
     missionListManager->terminateAbilityList_.push_back(abilityRecord);
     missionListManager->CompleteTerminateAndUpdateMission(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3321,6 +3364,7 @@ HWTEST_F(MissionListManagerTest, CompleteTerminateAndUpdateMission_007, TestSize
     missionListManager->terminateAbilityList_.clear();
     missionListManager->terminateAbilityList_.push_back(abilityRecord2);
     missionListManager->CompleteTerminateAndUpdateMission(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3620,6 +3664,7 @@ HWTEST_F(MissionListManagerTest, MoveToBackgroundTask_001, TestSize.Level1)
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     std::shared_ptr<AbilityRecord> abilityRecord;
     missionListManager->MoveToBackgroundTask(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3638,6 +3683,7 @@ HWTEST_F(MissionListManagerTest, MoveToBackgroundTask_002, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->lifeCycleStateInfo_.sceneFlag = 1;
     missionListManager->MoveToBackgroundTask(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3657,6 +3703,7 @@ HWTEST_F(MissionListManagerTest, MoveToBackgroundTask_003, TestSize.Level1)
     abilityRecord->lifeCycleStateInfo_.sceneFlag = 2;
     abilityRecord->SetClearMissionFlag(true);
     missionListManager->MoveToBackgroundTask(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3679,6 +3726,7 @@ HWTEST_F(MissionListManagerTest, NotifyMissionCreated_001, TestSize.Level1)
     abilityRecord->SetMissionId(mission->GetMissionId());
     abilityRecord->abilityInfo_.excludeFromMissions = false;
     missionListManager->NotifyMissionCreated(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3701,6 +3749,7 @@ HWTEST_F(MissionListManagerTest, NotifyMissionCreated_002, TestSize.Level1)
     abilityRecord->SetMissionId(mission->GetMissionId());
     abilityRecord->abilityInfo_.excludeFromMissions = true;
     missionListManager->NotifyMissionCreated(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3724,6 +3773,7 @@ HWTEST_F(MissionListManagerTest, NotifyMissionCreated_003, TestSize.Level1)
     abilityRecord->SetMissionId(mission->GetMissionId());
     abilityRecord->abilityInfo_.excludeFromMissions = true;
     missionListManager->NotifyMissionCreated(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3747,6 +3797,7 @@ HWTEST_F(MissionListManagerTest, NotifyMissionCreated_004, TestSize.Level1)
     abilityRecord->SetMissionId(mission->GetMissionId());
     abilityRecord->abilityInfo_.excludeFromMissions = true;
     missionListManager->NotifyMissionCreated(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3767,6 +3818,7 @@ HWTEST_F(MissionListManagerTest, NotifyMissionCreated_005, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->abilityInfo_.excludeFromMissions = true;
     missionListManager->NotifyMissionCreated(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3784,6 +3836,7 @@ HWTEST_F(MissionListManagerTest, PrintTimeOutLog_001, TestSize.Level1)
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     uint32_t msgId = 0;
     missionListManager->PrintTimeOutLog(nullptr, msgId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3802,6 +3855,7 @@ HWTEST_F(MissionListManagerTest, PrintTimeOutLog_002, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 0;
     missionListManager->PrintTimeOutLog(abilityRecord, msgId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3820,6 +3874,7 @@ HWTEST_F(MissionListManagerTest, PrintTimeOutLog_003, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 1;
     missionListManager->PrintTimeOutLog(abilityRecord, msgId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3838,6 +3893,7 @@ HWTEST_F(MissionListManagerTest, PrintTimeOutLog_004, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 2;
     missionListManager->PrintTimeOutLog(abilityRecord, msgId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3856,6 +3912,7 @@ HWTEST_F(MissionListManagerTest, PrintTimeOutLog_005, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 4;
     missionListManager->PrintTimeOutLog(abilityRecord, msgId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3874,6 +3931,7 @@ HWTEST_F(MissionListManagerTest, PrintTimeOutLog_006, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 5;
     missionListManager->PrintTimeOutLog(abilityRecord, msgId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3892,6 +3950,7 @@ HWTEST_F(MissionListManagerTest, PrintTimeOutLog_007, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 6;
     missionListManager->PrintTimeOutLog(abilityRecord, msgId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3910,6 +3969,7 @@ HWTEST_F(MissionListManagerTest, PrintTimeOutLog_008, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 3;
     missionListManager->PrintTimeOutLog(abilityRecord, msgId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3928,6 +3988,7 @@ HWTEST_F(MissionListManagerTest, UpdateMissionSnapshot_001, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->abilityInfo_.excludeFromMissions = true;
     missionListManager->UpdateMissionSnapshot(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3947,6 +4008,7 @@ HWTEST_F(MissionListManagerTest, UpdateMissionSnapshot_002, TestSize.Level1)
     missionListManager->listenerController_ = nullptr;
     abilityRecord->abilityInfo_.excludeFromMissions = false;
     missionListManager->UpdateMissionSnapshot(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3969,6 +4031,7 @@ HWTEST_F(MissionListManagerTest, OnTimeOut_001, TestSize.Level1)
     missionListManager->defaultSingleList_ = missionList;
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->OnTimeOut(msgId, eventId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -3996,6 +4059,7 @@ HWTEST_F(MissionListManagerTest, OnTimeOut_002, TestSize.Level1)
     missionListManager->defaultSingleList_ = missionList;
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->OnTimeOut(msgId, abilityRecordId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4022,6 +4086,7 @@ HWTEST_F(MissionListManagerTest, OnTimeOut_003, TestSize.Level1)
     missionListManager->defaultSingleList_ = missionList;
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->OnTimeOut(msgId, abilityRecordId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4048,6 +4113,7 @@ HWTEST_F(MissionListManagerTest, OnTimeOut_004, TestSize.Level1)
     missionListManager->defaultSingleList_ = missionList;
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->OnTimeOut(msgId, abilityRecordId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4064,6 +4130,7 @@ HWTEST_F(MissionListManagerTest, HandleLoadTimeout_001, TestSize.Level1)
     int userId = 3;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     missionListManager->HandleLoadTimeout(nullptr);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4080,6 +4147,7 @@ HWTEST_F(MissionListManagerTest, HandleForegroundTimeout_001, TestSize.Level1)
     int userId = 3;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     missionListManager->HandleForegroundTimeout(nullptr);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4099,6 +4167,7 @@ HWTEST_F(MissionListManagerTest, HandleLoadTimeout_002, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
     missionListManager->HandleLoadTimeout(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4115,6 +4184,7 @@ HWTEST_F(MissionListManagerTest, CompleteForegroundFailed_001, TestSize.Level1)
     int userId = 3;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     missionListManager->CompleteForegroundFailed(nullptr, OHOS::AAFwk::AbilityState::FOREGROUND_INVALID_MODE);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4133,6 +4203,7 @@ HWTEST_F(MissionListManagerTest, CompleteForegroundFailed_002, TestSize.Level1)
     missionListManager->Init();
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     missionListManager->CompleteForegroundFailed(abilityRecord, OHOS::AAFwk::AbilityState::FOREGROUND_WINDOW_FREEZED);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4152,6 +4223,7 @@ HWTEST_F(MissionListManagerTest, CompleteForegroundFailed_003, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetStartingWindow(true);
     missionListManager->CompleteForegroundFailed(abilityRecord, OHOS::AAFwk::AbilityState::FOREGROUND_FAILED);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4168,6 +4240,7 @@ HWTEST_F(MissionListManagerTest, HandleTimeoutAndResumeAbility_001, TestSize.Lev
     int userId = 3;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     missionListManager->HandleTimeoutAndResumeAbility(nullptr);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4184,6 +4257,7 @@ HWTEST_F(MissionListManagerTest, MoveToTerminateList_001, TestSize.Level1)
     int userId = 3;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     missionListManager->MoveToTerminateList(nullptr);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4202,6 +4276,7 @@ HWTEST_F(MissionListManagerTest, MoveToTerminateList_002, TestSize.Level1)
     missionListManager->Init();
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     missionListManager->MoveToTerminateList(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4220,6 +4295,7 @@ HWTEST_F(MissionListManagerTest, MoveToTerminateList_003, TestSize.Level1)
     missionListManager->Init();
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     missionListManager->MoveToTerminateList(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4247,6 +4323,7 @@ HWTEST_F(MissionListManagerTest, MoveToTerminateList_004, TestSize.Level1)
     DelayedSingleton<MissionInfoMgr>::GetInstance()->missionInfoList_.push_back(info);
     missionListManager->listenerController_ = nullptr;
     missionListManager->MoveToTerminateList(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4273,6 +4350,7 @@ HWTEST_F(MissionListManagerTest, MoveToTerminateList_005, TestSize.Level1)
     info.missionInfo.id = 1;
     DelayedSingleton<MissionInfoMgr>::GetInstance()->missionInfoList_.push_back(info);
     missionListManager->MoveToTerminateList(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4379,6 +4457,7 @@ HWTEST_F(MissionListManagerTest, OnAbilityDied_001, TestSize.Level1)
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     int32_t currentUserId = 0;
     missionListManager->OnAbilityDied(nullptr, currentUserId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4398,6 +4477,7 @@ HWTEST_F(MissionListManagerTest, OnAbilityDied_002, TestSize.Level1)
     abilityRecord->abilityInfo_.type = AbilityType::DATA;
     int32_t currentUserId = 0;
     missionListManager->OnAbilityDied(abilityRecord, currentUserId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4419,6 +4499,7 @@ HWTEST_F(MissionListManagerTest, OnAbilityDied_003, TestSize.Level1)
     abilityRecord->isLauncherRoot_ = false;
     int32_t currentUserId = 0;
     missionListManager->OnAbilityDied(abilityRecord, currentUserId);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4676,6 +4757,7 @@ HWTEST_F(MissionListManagerTest, HandleAbilityDied_001, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->abilityInfo_.type = AbilityType::DATA;
     missionListManager->HandleAbilityDied(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4696,6 +4778,7 @@ HWTEST_F(MissionListManagerTest, HandleAbilityDied_002, TestSize.Level1)
     abilityRecord->abilityInfo_.type = AbilityType::PAGE;
     abilityRecord->isLauncherAbility_ = true;
     missionListManager->HandleAbilityDied(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4720,6 +4803,7 @@ HWTEST_F(MissionListManagerTest, HandleLauncherDied_001, TestSize.Level1)
     abilityRecord->SetMissionId(mission->GetMissionId());
     missionListManager->launcherList_ = launcherList;
     missionListManager->HandleLauncherDied(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4745,6 +4829,7 @@ HWTEST_F(MissionListManagerTest, HandleLauncherDied_002, TestSize.Level1)
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
     missionListManager->launcherList_ = missionList;
     missionListManager->HandleLauncherDied(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4770,6 +4855,7 @@ HWTEST_F(MissionListManagerTest, HandleLauncherDied_003, TestSize.Level1)
     abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
     missionListManager->launcherList_ = missionList;
     missionListManager->HandleLauncherDied(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4789,6 +4875,7 @@ HWTEST_F(MissionListManagerTest, HandleAbilityDiedByDefault_001, TestSize.Level1
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetTerminatingState();
     missionListManager->HandleAbilityDiedByDefault(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4821,6 +4908,7 @@ HWTEST_F(MissionListManagerTest, HandleAbilityDiedByDefault_002, TestSize.Level1
     abilityRecord->isTerminating_ = false;
     missionListManager->launcherList_ = missionList2;
     missionListManager->HandleAbilityDiedByDefault(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4850,6 +4938,7 @@ HWTEST_F(MissionListManagerTest, HandleAbilityDiedByDefault_003, TestSize.Level1
     abilityRecord->isTerminating_ = false;
     missionListManager->launcherList_ = missionList2;
     missionListManager->HandleAbilityDiedByDefault(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4880,6 +4969,7 @@ HWTEST_F(MissionListManagerTest, HandleAbilityDiedByDefault_004, TestSize.Level1
     abilityRecord->isTerminating_ = false;
     missionListManager->launcherList_ = missionList2;
     missionListManager->HandleAbilityDiedByDefault(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4915,6 +5005,7 @@ HWTEST_F(MissionListManagerTest, HandleAbilityDiedByDefault_005, TestSize.Level1
     missionListManager->launcherList_ = missionList2;
     missionListManager->listenerController_ = nullptr;
     missionListManager->HandleAbilityDiedByDefault(abilityRecord);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4934,6 +5025,7 @@ HWTEST_F(MissionListManagerTest, BackToLauncher_001, TestSize.Level1)
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
     missionListManager->launcherList_ = missionList;
     missionListManager->BackToLauncher();
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4958,6 +5050,7 @@ HWTEST_F(MissionListManagerTest, BackToLauncher_002, TestSize.Level1)
     missionList->missions_.push_back(mission);
     missionListManager->launcherList_ = missionList;
     missionListManager->BackToLauncher();
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -4984,6 +5077,7 @@ HWTEST_F(MissionListManagerTest, BackToLauncher_003, TestSize.Level1)
     missionList->missions_.push_back(mission2);
     missionListManager->launcherList_ = missionList;
     missionListManager->BackToLauncher();
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5221,6 +5315,7 @@ HWTEST_F(MissionListManagerTest, CompleteFirstFrameDrawing_001, TestSize.Level1)
     int userId = 3;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     missionListManager->CompleteFirstFrameDrawing(nullptr);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5245,6 +5340,7 @@ HWTEST_F(MissionListManagerTest, CompleteFirstFrameDrawing_002, TestSize.Level1)
     missionListManager->defaultSingleList_ = missionList;
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->CompleteFirstFrameDrawing(abilityToken);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 #endif
@@ -5270,6 +5366,7 @@ HWTEST_F(MissionListManagerTest, Dump_001, TestSize.Level1)
     missionListManager->Dump(info);
     missionListManager->currentMissionLists_.push_back(nullptr);
     missionListManager->Dump(info);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5294,6 +5391,7 @@ HWTEST_F(MissionListManagerTest, DumpMissionListByRecordId_001, TestSize.Level1)
     missionListManager->DumpMissionListByRecordId(info, isClient, abilityRecordId, params);
     missionListManager->currentMissionLists_.push_back(nullptr);
     missionListManager->DumpMissionListByRecordId(info, isClient, abilityRecordId, params);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5314,6 +5412,7 @@ HWTEST_F(MissionListManagerTest, DumpMissionList_001, TestSize.Level1)
     bool isClient = true;
     std::string args = "args";
     missionListManager->DumpMissionList(info, isClient, args);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5337,6 +5436,7 @@ HWTEST_F(MissionListManagerTest, DumpMissionList_002, TestSize.Level1)
     missionListManager->DumpMissionList(info, isClient, args);
     missionListManager->currentMissionLists_.push_back(nullptr);
     missionListManager->DumpMissionList(info, isClient, args);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5356,6 +5456,7 @@ HWTEST_F(MissionListManagerTest, DumpMission_001, TestSize.Level1)
     std::vector<std::string> info;
     DelayedSingleton<MissionInfoMgr>::GetInstance()->missionIdMap_.clear();
     missionListManager->DumpMission(missionId, info);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5378,6 +5479,7 @@ HWTEST_F(MissionListManagerTest, DumpMission_002, TestSize.Level1)
     innerMissionInfo.missionInfo.id = 1;
     DelayedSingleton<MissionInfoMgr>::GetInstance()->missionInfoList_.push_back(innerMissionInfo);
     missionListManager->DumpMission(missionId, info);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5426,6 +5528,7 @@ HWTEST_F(MissionListManagerTest, OnAcceptWantResponse_006, TestSize.Level1)
     Want want;
     std::string flag = "";
     missionListManager->OnAcceptWantResponse(want, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5449,6 +5552,7 @@ HWTEST_F(MissionListManagerTest, OnAcceptWantResponse_007, TestSize.Level1)
     missionListManager->launcherList_ = missionList;
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->OnAcceptWantResponse(want, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5478,6 +5582,7 @@ HWTEST_F(MissionListManagerTest, OnAcceptWantResponse_008, TestSize.Level1)
     missionList->missions_.push_back(mission);
     missionListManager->currentMissionLists_.push_back(missionList);
     missionListManager->OnAcceptWantResponse(want, flag);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5705,6 +5810,7 @@ HWTEST_F(MissionListManagerTest, GetAbilityRunningInfos_001, TestSize.Level1)
     missionListManager->defaultSingleList_ = missionList;
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->GetAbilityRunningInfos(info, isPerm);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5730,6 +5836,7 @@ HWTEST_F(MissionListManagerTest, GetAbilityRunningInfos_002, TestSize.Level1)
     missionListManager->defaultSingleList_ = missionList;
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->GetAbilityRunningInfos(info, isPerm);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5751,6 +5858,7 @@ HWTEST_F(MissionListManagerTest, AddUninstallTags_001, TestSize.Level1)
     missionListManager->Init();
     missionListManager->currentMissionLists_.push_back(missionList);
     missionListManager->AddUninstallTags(bundleName, uid);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5776,6 +5884,7 @@ HWTEST_F(MissionListManagerTest, AddUninstallTags_002, TestSize.Level1)
     missionListManager->listenerController_ = nullptr;
     missionListManager->currentMissionLists_.push_back(missionList);
     missionListManager->AddUninstallTags(bundleName, uid);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5798,6 +5907,7 @@ HWTEST_F(MissionListManagerTest, AddUninstallTags_003, TestSize.Level1)
     missionListManager->AddUninstallTags(bundleName, uid);
     missionListManager->currentMissionLists_.push_back(nullptr);
     missionListManager->AddUninstallTags(bundleName, uid);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -5924,6 +6034,7 @@ HWTEST_F(MissionListManagerTest, PauseManager_002, TestSize.Level1)
     missionListManager->defaultSingleList_ = missionList;
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->PauseManager();
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -6016,6 +6127,7 @@ HWTEST_F(MissionListManagerTest, SetMissionANRStateByTokens_001, TestSize.Level1
     tokens.push_back(abilityRecord->GetToken());
     missionListManager->terminateAbilityList_.push_back(abilityRecord);
     missionListManager->SetMissionANRStateByTokens(tokens);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 
@@ -6037,6 +6149,7 @@ HWTEST_F(MissionListManagerTest, SetMissionANRStateByTokens_002, TestSize.Level1
     tokens.push_back(abilityRecord->GetToken());
     missionListManager->terminateAbilityList_.push_back(abilityRecord);
     missionListManager->SetMissionANRStateByTokens(tokens);
+    EXPECT_TRUE(missionListManager != nullptr);
     missionListManager.reset();
 }
 

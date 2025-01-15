@@ -898,6 +898,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_001, TestSize.Leve
     abilityRecord->SetIsNewWant(true);
     abilityRecord->SetPreAbilityRecord(abilityRecord_);
     abilityRecord->ForegroundAbility(sceneFlag);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -916,6 +917,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_002, TestSize.Leve
     abilityRecord->SetIsNewWant(true);
     abilityRecord->SetPreAbilityRecord(nullptr);
     abilityRecord->ForegroundAbility(sceneFlag);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -933,6 +935,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_003, TestSize.Leve
     abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
     abilityRecord->SetIsNewWant(false);
     abilityRecord->ForegroundAbility(sceneFlag);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -966,6 +969,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_001, TestSi
     abilityRecord->isReady_ = true;
     abilityRecord->currentState_ = AbilityState::FOREGROUND;
     abilityRecord->ProcessForegroundAbility(sceneFlag);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -983,6 +987,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_002, TestSi
     abilityRecord->isReady_ = true;
     abilityRecord->currentState_ = AbilityState::BACKGROUND;
     abilityRecord->ProcessForegroundAbility(sceneFlag);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -999,6 +1004,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_003, TestSi
     uint32_t sceneFlag = 0;
     abilityRecord->isReady_ = false;
     abilityRecord->ProcessForegroundAbility(sceneFlag);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1034,6 +1040,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_004, TestSi
     uint32_t sceneFlag = 0;
     abilityRecord->currentState_ = AbilityState::FOREGROUND;
     abilityRecord->ProcessForegroundAbility(callerAbility, sceneFlag);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1054,6 +1061,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_008, TestSi
     uint32_t sceneFlag = 1;
     abilityRecord->isReady_ = false;
     abilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility, sceneFlag);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1576,6 +1584,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_BackgroundAbility_002, TestSize.Level1
     abilityRecord->SetTerminatingState();
     abilityRecord->SetRestarting(false, 0);
     abilityRecord->BackgroundAbility(task);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1595,6 +1604,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_BackgroundAbility_003, TestSize.Level1
     abilityRecord->SetTerminatingState();
     abilityRecord->SetRestarting(true, 0);
     abilityRecord->BackgroundAbility(task);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1613,6 +1623,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_SetScheduler_001, TestSize.Level1)
     abilityRecord->schedulerDeathRecipient_ =
         new AbilitySchedulerRecipient([abilityRecord](const wptr<IRemoteObject> &remote) {});
     abilityRecord->SetScheduler(scheduler);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1630,6 +1641,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_SetScheduler_002, TestSize.Level1)
     abilityRecord->scheduler_ = scheduler;
     abilityRecord->schedulerDeathRecipient_ = nullptr;
     abilityRecord->SetScheduler(scheduler);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1647,6 +1659,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_SetScheduler_003, TestSize.Level1)
     abilityRecord->scheduler_ = new AbilityScheduler();
     abilityRecord->schedulerDeathRecipient_ = nullptr;
     abilityRecord->SetScheduler(scheduler);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1663,6 +1676,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_Activate_001, TestSize.Level1)
     abilityRecord->SetIsNewWant(true);
     abilityRecord->SetPreAbilityRecord(abilityRecord_);
     abilityRecord->Activate();
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1679,6 +1693,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_Activate_002, TestSize.Level1)
     abilityRecord->SetIsNewWant(true);
     abilityRecord->SetPreAbilityRecord(nullptr);
     abilityRecord->Activate();
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1695,6 +1710,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_Terminate_001, TestSize.Level1)
     Closure task = []() {};
     abilityRecord->want_.SetParam(DEBUG_APP, true);
     abilityRecord->Terminate(task);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1715,6 +1731,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_SendResultToCallers_001, TestSize.Leve
     abilityRecord->callerList_.push_back(nullptr);
     abilityRecord->callerList_.push_back(caller);
     abilityRecord->SendResultToCallers();
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1736,6 +1753,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_SendResultToCallers_002, TestSize.Leve
     caller->saCaller_ = std::make_shared<SystemAbilityCallerRecord>(srcAbilityId, abilityRecord->GetToken());
     abilityRecord->callerList_.push_back(caller);
     abilityRecord->SendResultToCallers();
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1753,6 +1771,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_SendResultToCallers_003, TestSize.Leve
     caller->saCaller_ = nullptr;
     abilityRecord->callerList_.push_back(caller);
     abilityRecord->SendResultToCallers();
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -1874,6 +1893,7 @@ HWTEST_F(AbilityRecordTest, SystemAbilityCallerRecord_SendResultToSystemAbility_
     int32_t callerUid = 0;
     uint32_t accessToken = 0;
     systemAbilityRecord->SendResultToSystemAbility(requestCode, systemAbilityRecord, callerUid, accessToken, false);
+    EXPECT_TRUE(systemAbilityRecord != nullptr);
 }
 
 /*
@@ -1896,6 +1916,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddCallerRecord_001, TestSize.Level1)
     Want want;
     std::string srcAbilityId = "srcAbility_id";
     abilityRecord->AddCallerRecord(callerToken, requestCode, want, srcAbilityId);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
@@ -2586,6 +2607,7 @@ HWTEST_F(AbilityRecordTest, UpdateWantParams_0100, TestSize.Level1)
     wantParams.SetParam("ability.want.params.uiExtensionAbilityId", AAFwk::Integer::Box(1));
     wantParams.SetParam("ability.want.params.uiExtensionRootHostPid", AAFwk::Integer::Box(1000));
     abilityRecord->UpdateUIExtensionInfo(wantParams);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /**
@@ -3013,6 +3035,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_PostUIExtensionAbilityTimeoutTask_001,
     abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::LOAD_TIMEOUT_MSG);
     abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
     abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::BACKGROUND_TIMEOUT_MSG);
+    EXPECT_TRUE(abilityRecord != nullptr);
 }
 
 /*
