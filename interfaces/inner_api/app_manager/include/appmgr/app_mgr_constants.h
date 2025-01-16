@@ -112,8 +112,8 @@ enum class PreloadMode {
 
 enum class AppStartReason {
     NONE = 0,
-    PRELOADING = 1,
-    PRELOADED = 2,
+    PRE_MAKE = 1,
+    PRELOAD_MODULE = 2,
     SUGGEST_CACHE = 3,
 };
 

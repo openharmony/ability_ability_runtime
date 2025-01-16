@@ -185,6 +185,7 @@ bool CacheProcessManager::CheckAndNotifyCachedState(const std::shared_ptr<AppRun
         notifyRecord = *(sameAppSet[bundleName][uid].begin());
     }
     appRecord->SetProcessCaching(false);
+    appRecord->SetState(ApplicationState::APP_STATE_CACHED);
     appMgrSptr->OnAppCacheStateChanged(notifyRecord, ApplicationState::APP_STATE_CACHED);
     TAG_LOGI(AAFwkTag::APPMGR, "notified: %{public}s, uid:%{public}d", bundleName.c_str(), uid);
     return true;
@@ -259,6 +260,7 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
         return true;
     }
+    appRecord->SetState(ApplicationState::APP_STATE_READY);
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
     TAG_LOGI(AAFwkTag::APPMGR, "app none cached state is notified: %{public}s, uid: %{public}d, %{public}s",
         appRecord->GetBundleName().c_str(), appRecord->GetUid(), PrintCacheQueue().c_str());
@@ -470,6 +472,7 @@ bool CacheProcessManager::KillProcessByRecord(const std::shared_ptr<AppRunningRe
         return false;
     }
     appRecord->SetProcessCaching(false);
+    appRecord->SetState(ApplicationState::APP_STATE_READY);
     // notify before kill
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
     // this uses ScheduleProcessSecurityExit
@@ -558,6 +561,7 @@ void CacheProcessManager::PrepareActivateCache(const std::shared_ptr<AppRunningR
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
         return;
     }
+    appRecord->SetState(ApplicationState::APP_STATE_READY);
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
 }
 
