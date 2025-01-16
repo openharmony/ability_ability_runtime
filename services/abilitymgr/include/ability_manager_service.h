@@ -1904,6 +1904,10 @@ public:
     virtual int32_t QueryAtomicServiceStartupRule(sptr<IRemoteObject> callerToken,
         const std::string &appId, const std::string &startTime, AtomicServiceStartupRule &rule) override;
 
+    int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
+        bool isPendingWantCaller, int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
+        bool isCallByShortcut = false);
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -2365,10 +2369,6 @@ private:
     int32_t SignRestartAppFlag(int32_t userId, int32_t uid, const std::string &instanceKey,
         AppExecFwk::MultiAppModeType type, bool isAppRecovery = false);
     int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex, int32_t userId);
-
-    int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
-        bool isPendingWantCaller, int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
-        bool isCallByShortcut = false);
 
     int32_t CheckDebugAssertPermission();
     std::shared_ptr<AbilityDebugDeal> ConnectInitAbilityDebugDeal();

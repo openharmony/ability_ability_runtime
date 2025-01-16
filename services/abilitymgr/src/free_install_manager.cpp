@@ -374,8 +374,8 @@ void FreeInstallManager::StartAbilityByFreeInstall(FreeInstallInfo &info, std::s
             result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbilityByFreeInstall(info.want,
                 info.callerToken, info.userId, info.requestCode);
         } else {
-            result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(info.want, *info.startOptions,
-                info.callerToken, info.userId, info.requestCode);
+            result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartUIAbilityForOptionWrap(info.want,
+                *info.startOptions, info.callerToken, false, info.userId, info.requestCode);
         }
     }
     IPCSkeleton::SetCallingIdentity(identity);
