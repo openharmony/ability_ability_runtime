@@ -666,6 +666,9 @@ int AbilityManagerStub::OnRemoteRequestInnerSeventeenth(uint32_t code, MessagePa
     if (interfaceCode == AbilityManagerInterfaceCode::KILL_PROCESS_WITH_PREPARE_TERMINATE) {
         return KillProcessWithPrepareTerminateInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::KILL_PROCESS_WITH_REASON) {
+        return KillProcessWithReasonInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_AUTO_STARTUP_SYSTEM_CALLBACK) {
         return RegisterAutoStartupSystemCallbackInner(data, reply);
     }
@@ -3458,6 +3461,22 @@ int32_t AbilityManagerStub::KillProcessWithPrepareTerminateInner(MessageParcel &
     int32_t result = KillProcessWithPrepareTerminate(pids);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "kill process fail");
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::KillProcessWithReasonInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t pid = data.ReadInt32();
+    std::unique_ptr<ExitReason> reason(data.ReadParcelable<ExitReason>());
+    if (reason == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "reason null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = KillProcessWithReason(pid, *reason);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
 }

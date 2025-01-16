@@ -63,6 +63,7 @@
 #include "istart_specified_ability_response.h"
 #include "kia_interceptor_interface.h"
 #include "kill_process_config.h"
+#include "process_memory_state.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "remote_client_manager.h"
@@ -343,6 +344,14 @@ public:
      */
     virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId,
         const bool clearPageStack = false, const std::string& reason = "KillApplicationByUserId");
+
+    /**
+     * update process rss and pss value.
+     *
+     * @param procMemStates, the memory states of all apps.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t UpdateProcessMemoryState(const std::vector<ProcessMemoryState> &procMemState);
 
     /**
      * ClearUpApplicationData, clear the application data.

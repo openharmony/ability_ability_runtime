@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
+constexpr int32_t MAX_PROCESS_STATE_COUNT = 1000;
 AppMgrProxy::AppMgrProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<IAppMgr>(impl)
 {}
 
@@ -2200,6 +2201,38 @@ int32_t AppMgrProxy::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &ab
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID, data, reply, option);
     result = reply.ReadBool();
     return ERR_OK;
+}
+
+int32_t AppMgrProxy::UpdateProcessMemoryState(const std::vector<ProcessMemoryState> &procMemState)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto size = procMemState.size();
+    if (size == 0 || size > MAX_PROCESS_STATE_COUNT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid size");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
+        return IPC_PROXY_ERR;
+    }
+    if (!data.WriteUint32(size)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (const auto &perState: procMemState) {
+        if (!data.WriteParcelable(&perState)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Write perState failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    int32_t ret = SendTransactCmd(AppMgrInterfaceCode::UPDATE_PROCESS_MEMORY_STATE, data, reply);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -4669,6 +4669,32 @@ int32_t AbilityManagerProxy::KillProcessWithPrepareTerminate(const std::vector<i
     return ret;
 }
 
+int32_t AbilityManagerProxy::KillProcessWithReason(int32_t pid, const ExitReason &reason)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+    if (!data.WriteInt32(pid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel pid failed");
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+    if (!data.WriteParcelable(&reason)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write reason failed");
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+    int32_t ret =
+        SendRequest(AbilityManagerInterfaceCode::KILL_PROCESS_WITH_REASON, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t AbilityManagerProxy::RegisterAutoStartupSystemCallback(const sptr<IRemoteObject> &callback)
 {
     MessageParcel data;

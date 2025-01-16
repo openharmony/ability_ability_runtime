@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,29 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_EXIT_REASON_H
-#define OHOS_ABILITY_RUNTIME_EXIT_REASON_H
+#ifndef OHOS_ABILITY_RUNTIME_PROCESS_MEMORY_STATE_H
+#define OHOS_ABILITY_RUNTIME_PROCESS_MEMORY_STATE_H
 
-#include <string>
+#include <vector>
 
-#include "ability_state.h"
 #include "parcel.h"
 
 namespace OHOS {
-namespace AAFwk {
-struct ExitReason : public Parcelable {
-    ExitReason() = default;
-    ExitReason(const Reason reason, const std::string &exitMsg);
-    ExitReason(const Reason &reason, int32_t subReason, const std::string &exitMsg);
-
-    Reason reason = Reason::REASON_UNKNOWN;
-    int32_t subReason = -1;
-    std::string exitMsg = "";
+namespace AppExecFwk {
+struct ProcessMemoryState : public Parcelable {
+    int32_t pid = 0;
+    int32_t rssValue = 0;
+    int32_t pssValue = 0;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
-    static ExitReason *Unmarshalling(Parcel &parcel);
+    static ProcessMemoryState *Unmarshalling(Parcel &parcel);
 };
-}  // namespace AAFwk
+}  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_EXIT_REASON_H
+
+#endif  // OHOS_ABILITY_RUNTIME_PROCESS_MEMORY_STATE_H

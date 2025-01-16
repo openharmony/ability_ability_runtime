@@ -1535,6 +1535,11 @@ public:
         return 0;
     }
 
+    virtual int32_t KillProcessWithReason(int32_t pid, const ExitReason &reason)
+    {
+        return 0;
+    }
+
     /**
      * @brief Register auto start up callback for system api.
      * @param callback The point of JsAbilityAutoStartupCallBack.
