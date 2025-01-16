@@ -58,7 +58,7 @@ constexpr int32_t DECIMAL_BASE = 10;
     auto timestamp = millis.count();
     std::time_t tt = static_cast<std::time_t>(timestamp / SEC_TO_MILLISEC);
     std::tm t{};
-    localtime_r(&tt, &t);
+    localtime_noenv_r(&tt, &t);
     char buffer[MAX_TIME_BUFF] = {0};
     std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &t);
     auto remainder = timestamp % SEC_TO_MILLISEC;
