@@ -33,28 +33,28 @@ namespace AAFwk {
 class AbilityManagerService;
 
 struct FreeInstallInfo {
-    Want want;
+    bool isInstalled = false;
+    bool isPreStartMissionCalled = false;
+    bool isStartUIAbilityBySCBCalled = false;
+    bool isFreeInstallFinished = false;
+    bool isOpenAtomicServiceShortUrl = false;
+    uint32_t specifyTokenId = 0;
     int32_t userId = -1;
     int32_t requestCode = -1;
+    int resultCode = 0;
     std::shared_ptr<std::promise<int32_t>> promise;
-    bool isInstalled = false;
     std::string identity;
     sptr<IRemoteObject> callerToken = nullptr;
     sptr<IRemoteObject> dmsCallback = nullptr;
-    bool isPreStartMissionCalled = false;
-    bool isStartUIAbilityBySCBCalled = false;
-    uint32_t specifyTokenId = 0;
-    bool isFreeInstallFinished = false;
-    int resultCode = 0;
-    bool isOpenAtomicServiceShortUrl = false;
     std::shared_ptr<Want> originalWant = nullptr;
     std::shared_ptr<StartOptions> startOptions = nullptr;
+    Want want;
 };
 
 struct FreeInstallParams {
     bool isAsync = false;
-    uint32_t specifyTokenId = 0;
     bool isOpenAtomicServiceShortUrl = false;
+    uint32_t specifyTokenId = 0;
     std::shared_ptr<Want> originalWant = nullptr;
     std::shared_ptr<StartOptions> startOptions = nullptr;
 };

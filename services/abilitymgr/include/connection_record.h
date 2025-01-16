@@ -150,6 +150,9 @@ public:
     Want GetConnectWant() const;
 private:
     static int64_t connectRecordId;
+    int32_t callerUid_ = 0;                             // caller uid
+    int32_t callerPid_ = 0;                             // caller pid
+    uint32_t callerTokenId_ = 0;                        // caller pid
     int recordId_ = 0;                                  // record id
     ConnectionState state_;                         // service connection state
     sptr<IRemoteObject> callerToken_ = nullptr;               // from:caller token
@@ -157,9 +160,6 @@ private:
 
     mutable std::mutex callbackMutex_;
     sptr<IAbilityConnection> connCallback_ = nullptr;         // service connect callback
-    int32_t callerUid_ = 0;                             // caller uid
-    int32_t callerPid_ = 0;                             // caller pid
-    uint32_t callerTokenId_ = 0;                        // caller pid
     std::string callerName_;                        // caller bundleName or processName
 
     Want connectWant_;

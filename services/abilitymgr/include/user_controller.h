@@ -139,11 +139,11 @@ private:
     void HandleUserSwitchDone(int32_t userId);
 
 private:
-    ffrt::mutex userLock_;
     int32_t currentUserId_ = USER_ID_NO_HEAD;
-    std::unordered_map<int32_t, std::shared_ptr<UserItem>> userItems_;
-    std::shared_ptr<UserEventHandler> eventHandler_;
     int32_t freezingNewUserId_ = -1;
+    std::shared_ptr<UserEventHandler> eventHandler_;
+    std::unordered_map<int32_t, std::shared_ptr<UserItem>> userItems_;
+    ffrt::mutex userLock_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

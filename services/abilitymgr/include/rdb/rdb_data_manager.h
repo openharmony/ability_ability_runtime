@@ -32,12 +32,12 @@ constexpr static int32_t ABILITY_RDB_VERSION = 1;
 } // namespace
 
 struct AmsRdbConfig {
+    int32_t version{ ABILITY_RDB_VERSION };
     std::string dbPath{ ABILITY_RDB_PATH };
     std::string dbName{ ABILITY_RDB_NAME };
     std::string tableName;
     std::string journalMode;
     std::string syncMode;
-    int32_t version{ ABILITY_RDB_VERSION };
 };
 
 class RdbDataManager final {
@@ -56,9 +56,9 @@ public:
     void ClearCache();
 
 private:
-    std::mutex rdbMutex_;
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_;
     AmsRdbConfig amsRdbConfig_;
+    std::mutex rdbMutex_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

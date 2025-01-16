@@ -52,16 +52,16 @@ struct DialogPosition {
     DialogAlign align = DialogAlign::CENTER;
 };
 struct DialogAppInfo {
+    bool visible = true;
+    bool isAppLink = false;
     int32_t abilityIconId = 0;
     int32_t abilityLabelId = 0;
     int32_t bundleIconId = 0;
     int32_t bundleLabelId = 0;
+    int32_t appIndex = 0;
     std::string bundleName = {};
     std::string abilityName = {};
     std::string moduleName = {};
-    bool visible = true;
-    bool isAppLink = false;
-    int32_t appIndex = 0;
     AppExecFwk::MultiAppModeData multiAppMode;
 };
 /**

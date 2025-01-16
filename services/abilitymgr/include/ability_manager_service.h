@@ -2437,38 +2437,8 @@ private:
 
     void StartKeepAliveAppsInner(int32_t userId);
 
-    sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
-    std::shared_ptr<TaskHandlerWrap> taskHandler_;
-    std::shared_ptr<AbilityEventHandler> eventHandler_;
-    ServiceRunningState state_;
-
-    std::shared_ptr<FreeInstallManager> freeInstallManager_;
-
-    std::shared_ptr<SubManagersHelper> subManagersHelper_;
-
-    std::shared_ptr<UserController> userController_;
-    sptr<AppExecFwk::IAbilityController> abilityController_ = nullptr;
     bool controllerIsAStabilityTest_ = false;
-    std::unordered_set<int32_t> windowVisibleList_;
-
-    ffrt::mutex globalLock_;
-    ffrt::mutex bgtaskObserverMutex_;
-    ffrt::mutex abilityTokenLock_;
-    ffrt::mutex preStartSessionMapLock_;
-    ffrt::mutex windowVisibleListLock_;
-
-    std::multimap<std::string, std::string> timeoutMap_;
-    std::map<std::string, sptr<SessionInfo>> preStartSessionMap_;
-
-    static sptr<AbilityManagerService> instance_;
-    int32_t uniqueId_ = 0;
-    ffrt::mutex iAcquireShareDataMapLock_;
-    std::map<int32_t, std::pair<int64_t, const sptr<IAcquireShareDataCallback>>> iAcquireShareDataMap_;
-    // first is callstub, second is ability token
-    std::map<sptr<IRemoteObject>, sptr<IRemoteObject>> callStubTokenMap_;
-#ifdef SUPPORT_GRAPHICS
-    sptr<WindowFocusChangedListener> focusListener_;
-#endif // SUPPORT_GRAPHICS
+    bool isParamStartAbilityEnable_ = false;
     // Component StartUp rule switch
     bool startUpNewRule_ = true;
     /** It only takes effect when startUpNewRule_ is TRUE
@@ -2486,12 +2456,37 @@ private:
      *  FALSE: white list unable.
      */
     bool whiteListassociatedWakeUpFlag_ = true;
+    bool isPrepareTerminateEnable_ = false;
+    bool shouldBlockAllAppStart_ = false;
+
+    int32_t uniqueId_ = 0;
+    std::unordered_set<int32_t> windowVisibleList_;
+
+    sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
+    std::shared_ptr<TaskHandlerWrap> taskHandler_;
+    std::shared_ptr<AbilityEventHandler> eventHandler_;
+    ServiceRunningState state_;
+
+    std::shared_ptr<FreeInstallManager> freeInstallManager_;
+    std::shared_ptr<SubManagersHelper> subManagersHelper_;
+    std::shared_ptr<UserController> userController_;
+    sptr<AppExecFwk::IAbilityController> abilityController_ = nullptr;
+
+    std::multimap<std::string, std::string> timeoutMap_;
+    std::map<std::string, sptr<SessionInfo>> preStartSessionMap_;
+
+    static sptr<AbilityManagerService> instance_;
+    std::map<int32_t, std::pair<int64_t, const sptr<IAcquireShareDataCallback>>> iAcquireShareDataMap_;
+    // first is callstub, second is ability token
+    std::map<sptr<IRemoteObject>, sptr<IRemoteObject>> callStubTokenMap_;
+#ifdef SUPPORT_GRAPHICS
+    sptr<WindowFocusChangedListener> focusListener_;
+#endif // SUPPORT_GRAPHICS
 
     std::shared_ptr<AbilityRuntime::AbilityManagerEventSubscriber> screenSubscriber_;
 
     std::shared_ptr<AbilityAutoStartupService> abilityAutoStartupService_;
 
-    std::mutex whiteListMutex_;
     std::map<std::string, std::list<std::string>> whiteListMap_;
 
     std::list<std::string> exportWhiteList_;
@@ -2502,8 +2497,6 @@ private:
 
     bool IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
         const std::string &calleeAbilityName);
-
-    bool isParamStartAbilityEnable_ = false;
 
     std::string GetConfigFileAbsolutePath(const std::string &relativePath);
 
@@ -2534,31 +2527,35 @@ private:
     sptr<AbilityBundleEventCallback> abilityBundleEventCallback_;
 
 #ifdef SUPPORT_SCREEN
-    int32_t ShowPickerDialog(const Want& want, int32_t userId, const sptr<IRemoteObject> &token);
+    bool isAnimationEnabled_ = true; //only use on mission list
     bool CheckWindowMode(int32_t windowMode, const std::vector<AppExecFwk::SupportWindowMode>& windowModes) const;
+    int32_t ShowPickerDialog(const Want& want, int32_t userId, const sptr<IRemoteObject> &token);
     void InitFocusListener();
     void RegisterFocusListener();
     void InitPrepareTerminateConfig();
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
-    bool isAnimationEnabled_ = true; //only use on mission list
 #endif
     std::shared_ptr<AbilityInterceptorExecuter> interceptorExecuter_;
     std::shared_ptr<AbilityInterceptorExecuter> afterCheckExecuter_;
 
     std::unordered_map<int32_t, int64_t> appRecoveryHistory_; // uid:time
-    bool isPrepareTerminateEnable_ = false;
     std::multimap<int, std::shared_ptr<StartAbilityHandler>, std::greater<int>> startAbilityChain_;
-
-    ffrt::mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<IAbilityManagerCollaborator>> collaboratorMap_;
 
-    ffrt::mutex abilityDebugDealLock_;
     std::shared_ptr<AbilityDebugDeal> abilityDebugDeal_;
     std::shared_ptr<AppExitReasonHelper> appExitReasonHelper_;
 
+    ffrt::mutex globalLock_;
+    ffrt::mutex bgtaskObserverMutex_;
+    ffrt::mutex abilityTokenLock_;
+    ffrt::mutex preStartSessionMapLock_;
+    ffrt::mutex windowVisibleListLock_;
+    ffrt::mutex iAcquireShareDataMapLock_;
+    ffrt::mutex collaboratorMapLock_;
+    ffrt::mutex abilityDebugDealLock_;
     ffrt::mutex shouldBlockAllAppStartMutex_;
-    bool shouldBlockAllAppStart_ = false;
+    std::mutex whiteListMutex_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

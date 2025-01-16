@@ -131,11 +131,11 @@ private:
 private:
     int32_t userId_;
     static std::atomic_int32_t extensionRecordId_;
-    std::mutex mutex_;
     std::set<int32_t> extensionRecordIdSet_;
+    std::mutex mutex_;
+    std::mutex preloadUIExtensionMapMutex_;
     ExtensionAbilityRecordMap extensionRecords_;
     ExtensionAbilityRecordMap terminateRecords_;
-    std::mutex preloadUIExtensionMapMutex_;
     PreLoadUIExtensionMapType preloadUIExtensionMap_;
 
     void SetCachedFocusedCallerToken(int32_t extensionRecordId, sptr<IRemoteObject> &focusedCallerToken);

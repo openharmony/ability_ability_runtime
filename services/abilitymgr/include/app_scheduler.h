@@ -645,12 +645,12 @@ protected:
     virtual void NotifyAppPreCache(int32_t pid, int32_t userId) override;
 
 private:
-    std::mutex lock_;
     bool isInit_  {false};
+    AppAbilityState appAbilityState_ = AppAbilityState::ABILITY_STATE_UNDEFINED;
     std::weak_ptr<AppStateCallback> callback_;
     std::unique_ptr<AppExecFwk::AppMgrClient> appMgrClient_;
-    AppAbilityState appAbilityState_ = AppAbilityState::ABILITY_STATE_UNDEFINED;
     sptr<StartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
+    std::mutex lock_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

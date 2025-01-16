@@ -42,9 +42,9 @@ struct StartAbilityInfo {
         return abilityInfo.applicationInfo.bundleName;
     }
 
+    int32_t status = ERR_OK;
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
-    int32_t status = ERR_OK;
     std::string customProcess;
 };
 

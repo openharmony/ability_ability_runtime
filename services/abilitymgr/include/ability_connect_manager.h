@@ -647,37 +647,31 @@ private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     const std::string TASK_ON_ABILITY_DIED = "OnAbilityDiedTask";
 
-    ffrt::mutex serialMutex_;
+    int userId_;
+    uint32_t sceneBoardTokenId_ = 0;
 
-    std::mutex connectMapMutex_;
-    ConnectMapType connectMap_;
-
-    ffrt::mutex serviceMapMutex_;
+    ConnectMapType connectMap_;    
     ServiceMapType serviceMap_;
-    std::list<std::shared_ptr<AbilityRecord>> terminatingExtensionList_;
-
-    std::mutex recipientMapMutex_;
-    RecipientMapType recipientMap_;
-
-    std::mutex uiExtRecipientMapMutex_;
+    RecipientMapType recipientMap_;  
     RecipientMapType uiExtRecipientMap_;
-
+    UIExtensionMapType uiExtensionMap_;
+    WindowExtensionMapType windowExtensionMap_;
+    
+    std::list<std::shared_ptr<AbilityRecord>> terminatingExtensionList_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<EventHandlerWrap> eventHandler_;
-    int userId_;
     std::vector<AbilityRequest> restartResidentTaskList_;
-
-    std::mutex startServiceReqListLock_;
     std::unordered_map<std::string, std::shared_ptr<std::list<AbilityRequest>>> startServiceReqList_;
-
-    std::mutex uiExtensionMapMutex_;
-    UIExtensionMapType uiExtensionMap_;
-
-    std::mutex windowExtensionMapMutex_;
-    WindowExtensionMapType windowExtensionMap_;
-
+ 
     std::unique_ptr<UIExtensionAbilityConnectManager> uiExtensionAbilityRecordMgr_ = nullptr;
-    uint32_t sceneBoardTokenId_ = 0;
+    ffrt::mutex serialMutex_;
+    std::mutex connectMapMutex_;
+    ffrt::mutex serviceMapMutex_;
+    std::mutex recipientMapMutex_;
+    std::mutex uiExtRecipientMapMutex_;
+    std::mutex uiExtensionMapMutex_;
+    std::mutex windowExtensionMapMutex_;
+    std::mutex startServiceReqListLock_;
 
     DISALLOW_COPY_AND_MOVE(AbilityConnectManager);
 };
