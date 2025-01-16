@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1218,13 +1218,18 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "windowLeft=%{public}d,windowTop=%{public}d,"
         "windowHeight=%{public}d,windowWidth=%{public}d,windowMode=%{public}d,"
-        "supportWindowModes.size=%{public}zu",
+        "supportWindowModes.size=%{public}zu,minWindowWidth=%{public}d,"
+        "minWindowHeight=%{public}d,maxWindowWidth=%{public}d,maxWindowHeight=%{public}d",
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_MODE, 0),
-        (sessionInfo->supportWindowModes).size());
+        (sessionInfo->supportWindowModes).size(),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MIN_WINDOW_WIDTH, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MIN_WINDOW_HEIGHT, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MAX_WINDOW_WIDTH, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MAX_WINDOW_HEIGHT, 0));
     TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex:%{public}d, instanceKey:%{public}s",
         (sessionInfo->want).GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0), sessionInfo->instanceKey.c_str());
     auto abilityRecord = GetAbilityRecordByToken(abilityRequest.callerToken);
@@ -2072,11 +2077,17 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call"
         "windowLeft=%{public}d,windowTop=%{public}d,"
-        "windowHeight=%{public}d,windowWidth=%{public}d",
+        "windowHeight=%{public}d,windowWidth=%{public}d,"
+        "minWindowWidth=%{public}d,minWindowHeight=%{public}d,"
+        "maxWindowWidth=%{public}d,mixWindowHeight=%{public}d",
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
-        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0));
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MIN_WINDOW_WIDTH, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MIN_WINDOW_HEIGHT, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MAX_WINDOW_WIDTH, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MAX_WINDOW_HEIGHT, 0));
     auto tmpSceneSession = iface_cast<Rosen::ISession>(rootSceneSession_);
     if (callerAbility != nullptr) {
         auto callerSessionInfo = callerAbility->GetSessionInfo();
