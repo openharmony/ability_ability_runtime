@@ -51,15 +51,15 @@ private:
     bool DoWork();
     bool CheckCommand();
 private:
-    std::string cmd_;
-    int64_t timeoutSec_ = 0;
-    ShellCommandResult cmdResult_;
     bool isDone_ = false;
-
+    int64_t timeoutSec_ = 0;
+    
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
-    std::condition_variable cvWork_;
+    std::string cmd_;
     std::mutex mtxWork_;
     std::mutex mtxCopy_;
+    std::condition_variable cvWork_;
+    ShellCommandResult cmdResult_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

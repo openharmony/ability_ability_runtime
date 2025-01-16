@@ -27,12 +27,12 @@ namespace OHOS {
 namespace AAFwk {
 struct WantSenderInfo : public Parcelable {
     int32_t type;
-    std::string bundleName;
-    std::string resultWho;
     int32_t requestCode;
-    std::vector<WantsInfo> allWants;
     uint32_t flags;
     int32_t userId;
+    std::string bundleName;
+    std::string resultWho;
+    std::vector<WantsInfo> allWants;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

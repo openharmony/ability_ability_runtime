@@ -23,8 +23,8 @@ namespace OHOS {
 namespace AppExecFwk {
 ChildProcessRecord::ChildProcessRecord(pid_t hostPid, const ChildProcessRequest &request,
     const std::shared_ptr<AppRunningRecord> hostRecord)
-    : hostPid_(hostPid), childProcessCount_(request.childProcessCount), childProcessType_(request.childProcessType),
-    hostRecord_(hostRecord), isStartWithDebug_(request.isStartWithDebug)
+    : isStartWithDebug_(request.isStartWithDebug), hostPid_(hostPid), childProcessCount_(request.childProcessCount),
+    childProcessType_(request.childProcessType), hostRecord_(hostRecord)
 {
     srcEntry_ = request.srcEntry;
     if (childProcessType_ == CHILD_PROCESS_TYPE_NATIVE_ARGS) {
@@ -40,8 +40,9 @@ ChildProcessRecord::ChildProcessRecord(pid_t hostPid, const ChildProcessRequest 
 ChildProcessRecord::ChildProcessRecord(pid_t hostPid, const std::string &libName,
     const std::shared_ptr<AppRunningRecord> hostRecord, const sptr<IRemoteObject> &mainProcessCb,
     int32_t childProcessCount, bool isStartWithDebug)
-    : hostPid_(hostPid), childProcessCount_(childProcessCount), childProcessType_(CHILD_PROCESS_TYPE_NATIVE),
-    srcEntry_(libName), hostRecord_(hostRecord), mainProcessCb_(mainProcessCb), isStartWithDebug_(isStartWithDebug)
+    : isStartWithDebug_(isStartWithDebug), hostPid_(hostPid), childProcessCount_(childProcessCount),
+    childProcessType_(CHILD_PROCESS_TYPE_NATIVE), hostRecord_(hostRecord), mainProcessCb_(mainProcessCb),
+    srcEntry_(libName)
 {
     MakeProcessName(hostRecord);
 }

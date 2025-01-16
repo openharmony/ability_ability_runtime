@@ -26,11 +26,30 @@ using HiSysEvent = OHOS::HiviewDFX::HiSysEvent;
 namespace OHOS {
 namespace AAFwk {
 struct EventInfo {
+    bool isPreload = false;
     int32_t pid = -1;
     int32_t userId = -1;
     int32_t extensionType = -1;
-    uint32_t versionCode = 0;
+    int32_t abilityNumber = 0;
+    int32_t abilityType = -1;
+    int32_t callerUid = -1;
+    int32_t exitResult = -1;
+    int32_t bundleType = -1;
+    int32_t startType = 0;
+    int32_t startReason = 0;
+    int32_t appUid = -1;
     int32_t errCode = -1;
+    int32_t callerState = -1;
+    int32_t processType = -1;
+    int32_t callerPid = -1;
+    int64_t duration = 0;
+    int32_t reason = -1;
+    int32_t subReason = -1;
+    int32_t exitReason = -1;
+    int32_t preloadMode = 0;
+    uint32_t versionCode = 0;
+    uint32_t callerVersionCode = -1;
+    int64_t time = 0;
     std::string versionName;
     std::string bundleName;
     std::string moduleName;
@@ -38,27 +57,8 @@ struct EventInfo {
     std::string processName;
     std::string callerProcessName;
     std::string callerBundleName;
-    int32_t abilityNumber = 0;
-    int32_t abilityType = -1;
-    int64_t time = 0;
-    int32_t callerUid = -1;
-    int32_t exitResult = -1;
-    int32_t bundleType = -1;
-    int32_t startType = 0;
-    int32_t startReason = 0;
-    int32_t appUid = -1;
-    int32_t callerState = -1;
-    uint32_t callerVersionCode = -1;
     std::string callerVersionName;
     std::string uri;
-    int32_t processType = -1;
-    int32_t callerPid = -1;
-    int64_t duration = 0;
-    int32_t reason = -1;
-    int32_t subReason = -1;
-    int32_t exitReason = -1;
-    bool isPreload = false;
-    int32_t preloadMode = 0;
 };
 
 enum class EventName {
