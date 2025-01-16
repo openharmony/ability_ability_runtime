@@ -1642,6 +1642,8 @@ private:
 
 #ifdef ABILITY_PLATFORM_PC
     int CheckPermissionForPC(const BundleInfo &bundleInfo);
+    bool CilulateCheckDeviceStatus(Security::AccessToken::PermissionStateFull &status,
+        std::string deviceid);
 #endif //ABILITY_PLATFORM_PC
 
     int StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
