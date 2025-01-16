@@ -3902,7 +3902,7 @@ bool AppMgrServiceInner::SendProcessStartFailedEvent(std::shared_ptr<AppRunningR
     return true;
 }
 
-void SendPreloadAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
+void AppMgrServiceInner::SendPreloadAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
     const std::shared_ptr<AbilityInfo> &abilityInfo)
 {
     if (!appRecord) {
@@ -3920,7 +3920,7 @@ void SendPreloadAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &app
     } else if (preloadMode == PreloadMode::PRELOAD_MODULE) {
         SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::PRELOAD_MODULE);
     } else {
-        TAG_LOGD(AAFwkTag::APPMGR, "app preload mode: %{public}s", static_cast<int32_t>(preloadMode));
+        TAG_LOGD(AAFwkTag::APPMGR, "app preload mode: %{public}d", static_cast<int32_t>(preloadMode));
     }
 }
 
