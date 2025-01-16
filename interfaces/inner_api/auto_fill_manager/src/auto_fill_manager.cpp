@@ -228,7 +228,7 @@ bool AutoFillManager::IsNeed2SaveRequest(const AbilityBase::ViewData& viewData, 
             return true;
         }
         if (AbilityBase::AutoFillType::FULL_STREET_ADDRESS <= it->autoFillType &&
-            it->autoFillType <= AbilityBase::AutoFillType::FORMAT_ADDRESS &&
+            it->autoFillType <= AbilityBase::AutoFillType::LICENSE_CHASSIS_NUMBER &&
             it->enableAutoFill && !it->value.empty()) {
             isSmartAutoFill = true;
             ret = true;
@@ -244,7 +244,7 @@ bool AutoFillManager::ConvertAutoFillWindowType(const AutoFill::AutoFillRequest 
     autoFillWindowType = AutoFill::AutoFillWindowType::MODAL_WINDOW;
     AbilityBase::AutoFillType autoFillType = request.autoFillType;
     if (autoFillType >= AbilityBase::AutoFillType::FULL_STREET_ADDRESS &&
-        autoFillType <= AbilityBase::AutoFillType::FORMAT_ADDRESS) {
+        autoFillType <= AbilityBase::AutoFillType::LICENSE_CHASSIS_NUMBER) {
         autoFillWindowType = AutoFill::AutoFillWindowType::POPUP_WINDOW;
         isSmartAutoFill = true;
     } else if (autoFillType == AbilityBase::AutoFillType::PASSWORD ||
