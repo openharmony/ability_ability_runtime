@@ -650,9 +650,9 @@ private:
     int userId_;
     uint32_t sceneBoardTokenId_ = 0;
 
-    ConnectMapType connectMap_;    
+    ConnectMapType connectMap_;
     ServiceMapType serviceMap_;
-    RecipientMapType recipientMap_;  
+    RecipientMapType recipientMap_;
     RecipientMapType uiExtRecipientMap_;
     UIExtensionMapType uiExtensionMap_;
     WindowExtensionMapType windowExtensionMap_;

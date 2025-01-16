@@ -1312,7 +1312,6 @@ private:
      */
     std::shared_ptr<AbilityResult> result_ = {};
 
-
     // service(ability) can be connected by multi-pages(abilities), so need to store this service's connections
     mutable ffrt::mutex connRecordListMutex_;
     std::list<std::shared_ptr<ConnectionRecord>> connRecordList_ = {};

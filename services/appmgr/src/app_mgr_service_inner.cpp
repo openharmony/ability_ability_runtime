@@ -7916,7 +7916,7 @@ void AppMgrServiceInner::SetAppAssertionPauseState(bool flag)
         return;
     }
     appRecord->SetAssertionPauseFlag(flag);
-    auto isDebugStart = appRecord->IsDebugApp() || appRecord->isAttachDebug();
+    auto isDebugStart = appRecord->IsDebugApp() || appRecord->IsAttachDebug();
     if (!isDebugStart) {
         std::vector<AppDebugInfo> debugInfos;
         debugInfos.emplace_back(MakeAppDebugInfo(appRecord, flag));
