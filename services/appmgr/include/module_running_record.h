@@ -173,16 +173,16 @@ private:
     ModuleRecordState GetState() const;
 
 private:
-    mutable ffrt::mutex abilitiesMutex_;
-    std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilities_;
-    std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> terminateAbilities_;
+    int32_t appIndex_ = 0;
+    ModuleRecordState owenState_ = ModuleRecordState::UNKNOWN_STATE;
     std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
     std::shared_ptr<AppLifeCycleDeal> appLifeCycleDeal_;
     std::shared_ptr<ApplicationInfo> appInfo_;  // the application's info
     std::shared_ptr<AMSEventHandler> eventHandler_;
     std::string moduleName_;
-    int32_t appIndex_ = 0;
-    ModuleRecordState owenState_ = ModuleRecordState::UNKNOWN_STATE;
+    mutable ffrt::mutex abilitiesMutex_;
+    std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilities_;
+    std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> terminateAbilities_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

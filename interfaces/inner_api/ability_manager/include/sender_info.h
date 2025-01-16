@@ -29,11 +29,11 @@ namespace OHOS {
 namespace AAFwk {
 struct SenderInfo : public Parcelable {
     int32_t code;
-    Want want;
-    std::string resolvedType;
     sptr<IWantReceiver> finishedReceiver;
-    std::string requiredPermission;
     sptr<StartOptions> startOptions;
+    std::string resolvedType;
+    std::string requiredPermission;
+    Want want;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

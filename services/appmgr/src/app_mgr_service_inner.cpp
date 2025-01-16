@@ -1676,6 +1676,20 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
     return WaitProcessesExitAndKill(pids, startTime, reason);
 }
 
+int32_t AppMgrServiceInner::UpdateProcessMemoryState(const std::vector<ProcessMemoryState> &procMemState)
+{
+    for (const auto &state : procMemState) {
+        auto appRecord = GetAppRunningRecordByPid(state.pid);
+        if (!appRecord) {
+            TAG_LOGW(AAFwkTag::APPMGR, "no appRecord, pid:%{public}d", state.pid);
+            continue;
+        }
+        appRecord->SetRssValue(state.rssValue);
+        appRecord->SetPssValue(state.pssValue);
+    }
+    return ERR_OK;
+}
+
 void AppMgrServiceInner::SendProcessExitEventTask(
     const std::shared_ptr<AppRunningRecord> &appRecord, time_t exitTime, int32_t count)
 {

@@ -27,7 +27,7 @@ using namespace std::chrono_literals;
 namespace OHOS {
 namespace AAFwk {
 ShellCommandExecutor::ShellCommandExecutor(const std::string& cmd, const int64_t timeoutSec)
-    : cmd_(cmd), timeoutSec_(timeoutSec)
+    : timeoutSec_(timeoutSec), cmd_(cmd)
 {
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::Create());
 }

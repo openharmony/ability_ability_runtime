@@ -396,7 +396,7 @@ bool ExtensionAbilityThread::ScheduleAbilityTransaction(
         }
         abilityThread->HandleExtensionTransaction(want, lifeCycleStateInfo, sessionInfo);
     };
-    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
     if (!ret) {
         TAG_LOGE(AAFwkTag::EXT, "PostTask error");
         return false;
@@ -420,7 +420,7 @@ void ExtensionAbilityThread::ScheduleConnectAbility(const Want &want)
         }
         abilityThread->HandleConnectExtension(want);
     };
-    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
     if (!ret) {
         TAG_LOGE(AAFwkTag::EXT, "PostTask error");
     }
@@ -443,7 +443,7 @@ void ExtensionAbilityThread::ScheduleDisconnectAbility(const Want &want)
         }
         abilityThread->HandleDisconnectExtension(want);
     };
-    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
     if (!ret) {
         TAG_LOGE(AAFwkTag::EXT, "PostTask error");
     }
@@ -474,7 +474,7 @@ void ExtensionAbilityThread::ScheduleCommandAbilityInner(const Want &want, bool 
         }
         abilityThread->HandleCommandExtension(want, restart, startId);
     };
-    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
     if (!ret) {
         TAG_LOGE(AAFwkTag::EXT, "PostTask error");
     }
@@ -491,7 +491,7 @@ void ExtensionAbilityThread::ScheduleInsightIntentInner(const Want &want)
         }
         abilityThread->HandleInsightIntent(want);
     };
-    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
     if (!ret) {
         TAG_LOGE(AAFwkTag::EXT, "PostTask error");
     }
@@ -514,7 +514,7 @@ void ExtensionAbilityThread::ScheduleCommandAbilityWindow(
         }
         abilityThread->HandleCommandExtensionWindow(want, sessionInfo, winCmd);
     };
-    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
     if (!ret) {
         TAG_LOGE(AAFwkTag::EXT, "PostTask error");
     }
@@ -543,7 +543,7 @@ void ExtensionAbilityThread::SendResult(int requestCode, int resultCode, const W
         }
         abilityThread->extensionImpl_->SendResult(requestCode, resultCode, want);
     };
-    bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    bool ret = abilityHandler_->PostTask(task);
     if (!ret) {
         TAG_LOGE(AAFwkTag::EXT, "PostTask error");
     }

@@ -26,10 +26,10 @@
 namespace OHOS {
 namespace AppExecFwk {
 struct ChildProcessRequest : public Parcelable {
-    std::string srcEntry;
+    bool isStartWithDebug = false;
     int32_t childProcessType = CHILD_PROCESS_TYPE_JS;
     int32_t childProcessCount = 0;
-    bool isStartWithDebug = false;
+    std::string srcEntry;
     ChildProcessArgs args;
     ChildProcessOptions options;
 

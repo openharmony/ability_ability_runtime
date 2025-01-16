@@ -26,8 +26,10 @@ namespace AAFwk {
 struct ExitReason : public Parcelable {
     ExitReason() = default;
     ExitReason(const Reason reason, const std::string &exitMsg);
+    ExitReason(const Reason &reason, int32_t subReason, const std::string &exitMsg);
 
     Reason reason = Reason::REASON_UNKNOWN;
+    int32_t subReason = -1;
     std::string exitMsg = "";
 
     bool ReadFromParcel(Parcel &parcel);

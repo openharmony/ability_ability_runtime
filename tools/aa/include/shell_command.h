@@ -50,8 +50,9 @@ protected:
     static constexpr int MIN_ARGUMENT_NUMBER = 2;
     static constexpr int MAX_ARGUMENT_NUMBER = 4096;
 
-    int argc_ = 0;
     char** argv_ = nullptr;
+    int argc_ = 0;
+    std::string resultReceiver_ = "";
 
     std::string cmd_;
     std::vector<std::string> argList_;
@@ -59,8 +60,6 @@ protected:
     std::string name_;
     std::map<std::string, std::function<int()>> commandMap_;
     std::map<int32_t, std::string> messageMap_;
-
-    std::string resultReceiver_ = "";
 };
 }  // namespace AAFwk
 }  // namespace OHOS

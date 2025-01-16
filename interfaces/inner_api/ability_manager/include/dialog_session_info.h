@@ -28,15 +28,15 @@
 namespace OHOS {
 namespace AAFwk {
 struct DialogAbilityInfo {
-    std::string bundleName;
-    std::string moduleName;
-    std::string abilityName;
+    bool visible = true;
     int32_t bundleIconId = 0;
     int32_t bundleLabelId = 0;
     int32_t abilityIconId = 0;
     int32_t abilityLabelId = 0;
-    bool visible = true;
     int32_t appIndex = 0;
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
     AppExecFwk::MultiAppModeData multiAppMode;
 
     std::string GetURI() const;

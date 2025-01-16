@@ -26,10 +26,10 @@ namespace AppExecFwk {
  * Defines app debug struct info.
  */
 struct AppDebugInfo : public Parcelable {
-    std::string bundleName;
+    bool isDebugStart = false; // Can only be used by app services, isAttachDebug is true when isDebugStart is false.
     int32_t pid;
     int32_t uid;
-    bool isDebugStart = false; // Can only be used by app services, isAttachDebug is true when isDebugStart is false.
+    std::string bundleName;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

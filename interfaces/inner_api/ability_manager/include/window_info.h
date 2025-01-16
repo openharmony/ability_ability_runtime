@@ -39,24 +39,25 @@ enum class TransitionReason : uint32_t {
 };
 
 struct AbilityTransitionInfo : public Parcelable {
-    std::string bundleName_;
-    std::string abilityName_;
-    uint32_t mode_ = 0;
-    std::vector<AppExecFwk::SupportWindowMode> windowModes_;
-    sptr<IRemoteObject> abilityToken_ = nullptr;
-    uint64_t displayId_ = 0;
     bool isShowWhenLocked_ = false;
     bool isRecent_ = false;
-    double maxWindowRatio_;
-    double minWindowRatio_;
+    uint32_t mode_ = 0;
     uint32_t maxWindowWidth_;
     uint32_t minWindowWidth_;
     uint32_t maxWindowHeight_;
     uint32_t minWindowHeight_;
+    uint32_t apiCompatibleVersion_ = 0;
     int32_t missionId_;
     TransitionReason reason_ = TransitionReason::ABILITY_TRANSITION;
+    uint64_t displayId_ = 0;
+    double maxWindowRatio_;
+    double minWindowRatio_;
+    sptr<IRemoteObject> abilityToken_ = nullptr;
+    std::string bundleName_;
+    std::string abilityName_;
+    std::vector<AppExecFwk::SupportWindowMode> windowModes_;
+    
     AppExecFwk::DisplayOrientation orientation_ = AppExecFwk::DisplayOrientation::UNSPECIFIED;
-    uint32_t apiCompatibleVersion_ = 0;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {

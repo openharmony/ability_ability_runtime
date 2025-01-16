@@ -274,7 +274,6 @@ struct AbilityRequest {
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
     AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
     AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
-    std::pair<bool, LaunchReason> IsContinuation() const
     std::string specifiedFlag;
     std::string customProcess;
     std::string reservedBundleName;
@@ -283,6 +282,7 @@ struct AbilityRequest {
     Want want;
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo appInfo;
+    std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
         if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {

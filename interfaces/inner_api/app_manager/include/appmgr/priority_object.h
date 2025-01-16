@@ -150,13 +150,13 @@ public:
     static PriorityObject *Unmarshalling(Parcel &parcel);
 
 private:
+    bool visibleStatus_ = false;
+    bool perceptibleStatus_ = false;
     pid_t pid_ = 0;
     int32_t maxAdj_ = 0;
     int32_t curAdj_ = 0;
     int32_t curCgroup_ = 0;
     int32_t timeLevel_ = 0;
-    bool visibleStatus_ = false;
-    bool perceptibleStatus_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

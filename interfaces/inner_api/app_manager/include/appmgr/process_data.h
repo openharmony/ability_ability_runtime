@@ -47,30 +47,30 @@ struct ProcessData : public Parcelable {
      */
     static ProcessData *Unmarshalling(Parcel &parcel);
 
+    bool isContinuousTask = false;
+    bool isKeepAlive = false;
+    bool isFocused = false;
+    bool isPreload = false;
+    bool isPreloadModule = false;
+    bool isTestMode = false; // Indicates whether the process is started by aa test
     std::string bundleName;
     int32_t pid = 0;
     int32_t uid = 0; // host uid
     int32_t hostPid = 0;
     int32_t gpuPid = 0;
     int32_t renderUid = -1;
-    AppProcessState state;
-    bool isContinuousTask = false;
-    bool isKeepAlive = false;
-    bool isFocused = false;
     int32_t requestProcCode = 0;
     int32_t processChangeReason = 0;
-    std::string processName;
-    ProcessType processType = ProcessType::NORMAL;
-    ExtensionAbilityType extensionType = ExtensionAbilityType::UNSPECIFIED;
-    uint32_t accessTokenId = 0;
-    bool isTestMode = false; // Indicates whether the process is started by aa test
-    int32_t exitReason = 0;
-    std::string exitMsg = "";
     int32_t childUid = -1;
-    bool isPreload = false;
-    bool isPreloadModule = false;
     int32_t callerPid = -1;
     int32_t callerUid = -1;
+    uint32_t accessTokenId = 0;
+    int32_t exitReason = 0;
+    std::string processName;
+    AppProcessState state;
+    ProcessType processType = ProcessType::NORMAL;
+    ExtensionAbilityType extensionType = ExtensionAbilityType::UNSPECIFIED;
+    std::string exitMsg = "";
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

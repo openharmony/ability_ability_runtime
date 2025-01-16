@@ -111,11 +111,11 @@ protected:
     }
     bool RemoveTask(const std::string &name, const TaskHandle &taskHandle);
 protected:
+    bool printTaskLog_ = false;
     // this is used only for compatibility
     std::unordered_map<std::string, TaskHandle> tasks_;
     std::unique_ptr<ffrt::mutex> tasksMutex_;
 
-    bool printTaskLog_ = false;
     std::string queueName_;
 };
 

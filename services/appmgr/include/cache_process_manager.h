@@ -58,14 +58,14 @@ private:
     bool IsAppSupportProcessCacheInnerFirst(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool IsProcessSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool warmStartProcesEnable_ = false;
-    int32_t maxProcCacheNum_ = 0;
-    int32_t allowedCacheNum_ = 0;
-    std::deque<std::shared_ptr<AppRunningRecord>> cachedAppRecordQueue_;
-    ffrt::recursive_mutex cacheQueueMtx;
-    std::weak_ptr<AppMgrServiceInner> appMgr_;
     bool shouldCheckApi = true;
     // whether the feature should check setSupportedProcessCache value or not
     bool shouldCheckSupport = true;
+    int32_t maxProcCacheNum_ = 0;
+    int32_t allowedCacheNum_ = 0;
+    std::weak_ptr<AppMgrServiceInner> appMgr_;
+    std::deque<std::shared_ptr<AppRunningRecord>> cachedAppRecordQueue_;
+    ffrt::recursive_mutex cacheQueueMtx;
     // bundleName->uid->record
     std::map<std::string, std::map<int32_t, std::set<std::shared_ptr<AppRunningRecord>>>> sameAppSet;
     // stores records that are servcie extension

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_APP_JSHEAP_MEM_INFO_H
-#define OHOS_ABILITY_RUNTIME_APP_JSHEAP_MEM_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_NAPI_COMMON_WANT_AGENT_H
+#define OHOS_ABILITY_RUNTIME_NAPI_COMMON_WANT_AGENT_H
 
-#include "parcel.h"
-#include "iremote_object.h"
+#include "want_agent.h"
+#include "napi/native_api.h"
 
 namespace OHOS {
 namespace AppExecFwk {
-struct JsHeapDumpInfo : public Parcelable {
-    bool needGc = false;
-    bool needSnapshot = false;
-    bool needLeakobj = false;
-    uint32_t pid = 0;
-    uint32_t tid = 0;
-    virtual bool Marshalling(Parcel &parcel) const override;
-    static JsHeapDumpInfo *Unmarshalling(Parcel &parcel);
-};
+
+napi_value WrapWantAgent(napi_env env, AbilityRuntime::WantAgent::WantAgent *wantAgent, napi_finalize finalizeCb);
+void UnwrapWantAgent(napi_env env, napi_value jsParam, void **result);
+
 } // namespace AppExecFwk
 } // namespace OHOS
-
-#endif // OHOS_ABILITY_RUNTIME_APP_JSHEAP_MEM_INFO_H
+#endif  // OHOS_ABILITY_RUNTIME_NAPI_COMMON_WANT_AGENT_H

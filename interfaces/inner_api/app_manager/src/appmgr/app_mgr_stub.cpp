@@ -39,6 +39,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
+constexpr int32_t MAX_PROCESS_STATE_COUNT = 1000;
 
 AppMgrStub::AppMgrStub() {}
 
@@ -367,6 +368,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleKillAppSelfWithInstanceKey(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID):
             return HandleUpdateInstanceKeyBySpecifiedId(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_PROCESS_MEMORY_STATE):
+            return HandleUpdateProcessMemoryState(data, reply);
     }
     return INVALID_FD;
 }
@@ -1809,6 +1812,29 @@ int32_t AppMgrStub::HandleHasAppRecord(MessageParcel &data, MessageParcel &reply
         reply.WriteBool(exist);
     }
     return ret;
+}
+
+ErrCode AppMgrStub::HandleUpdateProcessMemoryState(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleUpdateProcessMemoryState,callingPid=%{public}d", IPCSkeleton::GetCallingPid());
+    std::vector<ProcessMemoryState> states;
+    auto size = data.ReadUint32();
+    if (size <= 0 || size > MAX_PROCESS_STATE_COUNT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid size");
+        return ERR_INVALID_VALUE;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        std::unique_ptr<ProcessMemoryState> tmpState(data.ReadParcelable<ProcessMemoryState>());
+        if (tmpState == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "tmpState is nullptr.");
+            return ERR_INVALID_VALUE;
+        }
+        states.emplace_back(*tmpState);
+    }
+    auto ret = UpdateProcessMemoryState(states);
+    reply.WriteInt32(ret);
+    return NO_ERROR;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

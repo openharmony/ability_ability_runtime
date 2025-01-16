@@ -46,12 +46,12 @@ struct ConnectionData : public Parcelable {
 
     int32_t extensionPid = -1;
     int32_t extensionUid = 0;
+    int32_t callerUid;
+    int32_t callerPid;
+    AppExecFwk::ExtensionAbilityType extensionType;
     std::string extensionBundleName;
     std::string extensionModuleName;
     std::string extensionName;
-    AppExecFwk::ExtensionAbilityType extensionType;
-    int32_t callerUid;
-    int32_t callerPid;
     std::string callerName;
 };
 }  // namespace AbilityRuntime

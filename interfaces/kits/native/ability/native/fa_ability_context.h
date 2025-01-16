@@ -193,17 +193,17 @@ protected:
     sptr<IRemoteObject> GetToken() override;
     sptr<IRemoteObject> GetSessionToken();
 
-    sptr<IRemoteObject> token_;
-    AAFwk::Want resultWant_;
     int resultCode_ = -1;
+    int32_t abilityRecordId_ = 0;
+    sptr<IRemoteObject> token_;
+    sptr<IRemoteObject> sessionToken_;
     std::string callingDeviceId_;
     std::string callingBundleName_;
     std::string callingAbilityName_;
     std::string callingModuleName_;
     std::map<sptr<AAFwk::IAbilityConnection>, sptr<IRemoteObject>> abilityConnectionMap_;
     std::mutex sessionTokenMutex_;
-    sptr<IRemoteObject> sessionToken_;
-    int32_t abilityRecordId_ = 0;
+    AAFwk::Want resultWant_;
 
 private:
     /**
