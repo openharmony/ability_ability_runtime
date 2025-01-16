@@ -3430,29 +3430,10 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
     {
         HITRACE_METER_NAME(HITRACE_TAG_APP, "AccessTokenKit::VerifyAccessToken");
 #ifdef ABILITY_PLATFORM_PC
-        std::vectorSecurity::AccessToken::PermissionStateFull reqPermList;
-        auto deviceid = bundleInfo.applicationInfo.deviceId;
-        Security::AccessToken::AccessTokenKit::GetReqPermissions(token, reqPermList, true);
-        bool granted = std::any_of(
-            reqPermList.begin(), reqPermList.end(),
-            [deviceid](const Security::AccessToken::PermissionStateFull &status) {
-                if (status.permissionName == PERMISSION_INTERNET &&
-                    status.grantStatus.size() == status.resDeviceID.size()) {
-                    for (size_t i = 0; i < status.resDeviceID.size(); i++) {
-                        if (status.resDeviceID[i] == deviceid &&
-                            status.grantStatus[i] == Security::AccessToken::PERMISSION_GRANTED) {
-                            return true;
-                        }
-                    }
-                }
-            return false;
-        });
-        int result = granted ? Security::AccessToken::PERMISSION_GRANTED : Security::AccessToken::PERMISSION_DENIED;
-        TAG_LOGI(AAFwkTag::APPMGR, "GetInternetPermission, ret %{public}d, uid %{public}d, token %{public}d", result,
-            bundleInfo.uid, token);
+        int result = CheckPermissionForPC(bundleInfo);
 #else
         int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_INTERNET, false);
-#endif
+#endif //ABILITY_PLATFORM_PC
         if (result != Security::AccessToken::PERMISSION_GRANTED) {
             setAllowInternet = 1;
             allowInternet = 0;
@@ -3480,6 +3461,32 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
             }
         }
     }
+}
+
+int AppMgrServiceInner::CheckPermissionForPC(const BundleInfo &bundleInfo)
+{
+    auto token = bundleInfo.applicationInfo.accessTokenId;
+    std::vectorSecurity::AccessToken::PermissionStateFull reqPermList;
+    auto deviceid = bundleInfo.applicationInfo.deviceId;
+    Security::AccessToken::AccessTokenKit::GetReqPermissions(token, reqPermList, true);
+    bool granted = std::any_of(
+        reqPermList.begin(), reqPermList.end(),
+        [deviceid](const Security::AccessToken::PermissionStateFull &status) {
+            if (status.permissionName == PERMISSION_INTERNET &&
+                status.grantStatus.size() == status.resDeviceID.size()) {
+                for (size_t i = 0; i < status.resDeviceID.size(); i++) {
+                    if (status.resDeviceID[i] == deviceid &&
+                        status.grantStatus[i] == Security::AccessToken::PERMISSION_GRANTED) {
+                        return true;
+                    }
+                }
+            }
+        return false;
+    });
+    int result = granted ? Security::AccessToken::PERMISSION_GRANTED : Security::AccessToken::PERMISSION_DENIED;
+    TAG_LOGI(AAFwkTag::APPMGR, "GetInternetPermission, ret %{public}d, uid %{public}d, token %{public}d", result,
+        bundleInfo.uid, token);
+    return result;
 }
 
 int32_t AppMgrServiceInner::CreatNewStartMsg(const Want &want, const AbilityInfo &abilityInfo,
