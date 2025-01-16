@@ -752,7 +752,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
         };
 
-    if (clearMissionFlag && appRecord->IsDebugApp()) {
+    if (clearMissionFlag && appRecord->IsDebug()) {
         killProcess();
         return;
     }
