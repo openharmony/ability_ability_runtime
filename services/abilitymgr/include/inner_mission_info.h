@@ -40,19 +40,18 @@ enum class StartMethod {
  * InnerMissionInfo is used to save informations about mission information.
  */
 struct InnerMissionInfo {
-    MissionInfo missionInfo;
-    std::string missionName;
-    std::string missionAffinity;
+    bool isTemporary;
+    bool hasRecoverInfo;
     int32_t launchMode;
     int32_t startMethod;
-    std::string bundleName;
-    int32_t uid;
-    bool isTemporary;
-    std::string specifiedFlag;
-    bool hasRecoverInfo;
     int32_t collaboratorType = 0;
-
+    int32_t uid;
+    std::string bundleName;
+    std::string specifiedFlag;
     std::string ToJsonStr() const;
+    std::string missionName;
+    std::string missionAffinity;
+    MissionInfo missionInfo;
     bool FromJsonStr(const std::string &jsonStr);
     void Dump(std::vector<std::string> &info) const;
     bool CheckJsonNode(nlohmann::json &value, const std::string &node, JsonType jsonType);

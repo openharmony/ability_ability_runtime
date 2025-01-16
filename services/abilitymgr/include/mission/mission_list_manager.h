@@ -544,20 +544,20 @@ private:
 
     void SendKeyEvent(const AbilityRequest &abilityRequest);
 
+    bool isPrepareTerminateEnable_ = false;
     int userId_;
-    mutable ffrt::mutex managerLock_;
-    // launcher list is also in currentMissionLists_
-    std::list<std::shared_ptr<MissionList>> currentMissionLists_;
     // only manager the ability of standard in the default list
     std::shared_ptr<MissionList> defaultStandardList_;
     // only manager the ability of singleton in the default list for the fast search
     std::shared_ptr<MissionList> defaultSingleList_;
     std::shared_ptr<MissionList> launcherList_;
+    std::shared_ptr<MissionListenerController> listenerController_;
+    // launcher list is also in currentMissionLists_
+    std::list<std::shared_ptr<MissionList>> currentMissionLists_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
 
     std::queue<AbilityRequest> waitingAbilityQueue_;
-    std::shared_ptr<MissionListenerController> listenerController_;
-    bool isPrepareTerminateEnable_ = false;
+    mutable ffrt::mutex managerLock_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

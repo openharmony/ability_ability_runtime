@@ -36,15 +36,15 @@ struct IdentityNode {
     {}
 };
 
-struct AddInfoParam {
-    AppExecFwk::AbilityInfo info;
-    int32_t userId = 0;
+struct AddInfoParam {    
     bool isExtension = false;
     bool isMoreHapList = false;
     bool withDefault = false;
+    bool isExistDefaultApp = false;
+    int32_t userId = 0;
     std::string typeName;
     std::vector<std::string> infoNames;
-    bool isExistDefaultApp = false;
+    AppExecFwk::AbilityInfo info;
 };
 
 struct GenerateRequestParam {

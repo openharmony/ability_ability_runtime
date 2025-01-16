@@ -34,9 +34,9 @@ public:
 
     static const uint32_t TIME_OUT_SECONDS;
 private:
+    bool isCanceled_ = false;
     int32_t id_ = -1;
     std::string tag_;
-    bool isCanceled_ = false;
 };
 }
 }

@@ -53,12 +53,12 @@ public:
 
     int32_t RegisterStateObserver(const std::string &hostBundleName);
 
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord_ = nullptr;
-    std::string hostBundleName_;
+    bool isHostSpecified_ = false;
     int32_t extensionRecordId_ = INVALID_EXTENSION_RECORD_ID;
     uint32_t processMode_ = 0;
-    bool isHostSpecified_ = false;
     pid_t hostPid_ = 0;
+    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord_ = nullptr;
+    std::string hostBundleName_;
 private:
     sptr<IRemoteObject> rootCallerToken_ = nullptr;
     sptr<IRemoteObject> focusedCallerToken_ = nullptr;

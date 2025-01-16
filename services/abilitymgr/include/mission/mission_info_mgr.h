@@ -211,12 +211,12 @@ private:
 
 private:
     int32_t currentMissionId_ = MIN_MISSION_ID;
+    sptr<ISnapshotHandler> snapshotHandler_;
+    std::shared_ptr<TaskDataPersistenceMgr> taskDataPersistenceMgr_;
     std::unordered_map<int32_t, bool> missionIdMap_; // key:distributed missionid, vaule: has been saved
     std::list<InnerMissionInfo> missionInfoList_;
-    std::shared_ptr<TaskDataPersistenceMgr> taskDataPersistenceMgr_;
-    sptr<ISnapshotHandler> snapshotHandler_;
-    mutable ffrt::mutex mutex_;
     std::unordered_map<int32_t, uint32_t> savingSnapshot_;
+    mutable ffrt::mutex mutex_;
     ffrt::mutex savingSnapshotLock_;
     ffrt::condition_variable waitSavingCondition_;
 };

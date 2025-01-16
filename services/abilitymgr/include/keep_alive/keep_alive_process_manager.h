@@ -29,11 +29,11 @@ namespace AAFwk {
 using AbilityKeepAliveService = AbilityRuntime::AbilityKeepAliveService;
 
 struct KeepAliveAbilityInfo {
+    int32_t userId = 0;
+    int32_t appCloneIndex = 0;
     std::string bundleName;
     std::string moduleName;
     std::string abilityName;
-    int32_t userId = 0;
-    int32_t appCloneIndex = 0;
 };
 
 class CheckStatusBarTask {

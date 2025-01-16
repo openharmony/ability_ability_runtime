@@ -60,16 +60,16 @@ public:
 
 private:
     int32_t type_ = {};
-    std::string bundleName_ = {};
-    std::string requestWho_ = {};
     int32_t requestCode_ = {};
-    Want requestWant_ = {};
-    std::string requestResolvedType_ = {};
-    std::vector<WantsInfo> allWantsInfos_ = {};
     int32_t flags_ = {};
     int32_t code_ = {};
     int32_t userId_ = {};
     int32_t appIndex_ = 0;
+    std::string requestResolvedType_ = {};
+    std::string bundleName_ = {};
+    std::string requestWho_ = {};
+    std::vector<WantsInfo> allWantsInfos_ = {};
+    Want requestWant_ = {};
     std::mutex wantsInfosMutex_;
     std::mutex requestWantMutex_;
 };

@@ -96,10 +96,10 @@ public:
     bool GetMissionSnapshot(int missionId, MissionSnapshot& missionSnapshot, bool isLowResolution);
 
 private:
-    std::unordered_map<int, std::shared_ptr<MissionDataStorage>> missionDataStorageMgr_;
+    int32_t currentUserId_ = -1;
     std::shared_ptr<MissionDataStorage> currentMissionDataStorage_;
     std::shared_ptr<TaskHandlerWrap> handler_;
-    int32_t currentUserId_ = -1;
+    std::unordered_map<int, std::shared_ptr<MissionDataStorage>> missionDataStorageMgr_;
     ffrt::mutex mutex_;
 };
 }  // namespace AAFwk

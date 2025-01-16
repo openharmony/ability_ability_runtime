@@ -65,12 +65,12 @@ private:
     int32_t GetDiedCallerPid(const sptr<IRemoteObject> &remote);
 
 private:
+    sptr<IAbilityScheduler> scheduler_ {};
+    sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_;  // caller binderDied Recipient
+    std::list<ClientInfo> clients_ {};
     ffrt::condition_variable loadedCond_ {};
     AbilityRequest request_ {};
     AbilityRecordPtr ability_ {};
-    sptr<IAbilityScheduler> scheduler_ {};
-    std::list<ClientInfo> clients_ {};
-    sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_;  // caller binderDied Recipient
 };
 }  // namespace AAFwk
 }  // namespace OHOS
