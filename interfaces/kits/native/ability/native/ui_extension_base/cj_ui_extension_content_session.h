@@ -34,7 +34,7 @@ public:
     static sptr<CJUIExtensionContentSession> Create(sptr<AAFwk::SessionInfo> sessionInfo,
         sptr<Rosen::Window> uiWindow, std::weak_ptr<AbilityRuntime::Context> context);
 
-    int32_t LoadContent(const std::string& path, int storage);
+    int32_t LoadContent(const std::string& path);
     int32_t TerminateSelf();
     int32_t TerminateSelfWithResult(AAFwk::Want* want, int32_t resultCode);
     int32_t SetWindowPrivacyMode(bool isPrivacyMode);
