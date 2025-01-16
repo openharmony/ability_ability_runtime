@@ -67,7 +67,8 @@ struct RunningProcessInfo : public Parcelable {
     std::int32_t appCloneIndex = -1;
     std::string instanceKey = "";
     AppExecFwk::MultiAppModeType appMode = AppExecFwk::MultiAppModeType::UNSPECIFIED;
-
+    std::int32_t rssValue = 0;
+    std::int32_t pssValue = 0;
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     static RunningProcessInfo *Unmarshalling(Parcel &parcel);

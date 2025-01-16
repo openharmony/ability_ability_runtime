@@ -878,6 +878,8 @@ int32_t AppRunningManager::AssignRunningProcessInfoByAppRecord(
     }
     info.appCloneIndex = appRecord->GetAppIndex();
     info.instanceKey = appRecord->GetInstanceKey();
+    info.rssValue = appRecord->GetRssValue();
+    info.pssValue = appRecord->GetPssValue();
     return ERR_OK;
 }
 

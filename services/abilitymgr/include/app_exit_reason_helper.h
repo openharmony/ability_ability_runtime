@@ -31,6 +31,7 @@ public:
     ~AppExitReasonHelper() = default;
 
     int32_t RecordAppExitReason(const ExitReason &exitReason);
+    int32_t RecordAppExitReason(const ExitReason &exitReason, int32_t pid);
     int32_t RecordAppExitReason(const std::string &bundleName, int32_t uid, int32_t appIndex,
         const ExitReason &exitReason);
     int32_t RecordProcessExtensionExitReason(
