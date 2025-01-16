@@ -28,9 +28,9 @@ struct VerificationInfo {
     bool visible = false;
     bool isBackgroundCall = true;
     bool associatedWakeUp = false;
+    bool withContinuousTask = false;
     uint32_t accessTokenId = 0;
     int32_t apiTargetVersion = 0;
-    bool withContinuousTask = false;
     uint32_t specifyTokenId = 0;
 };
 

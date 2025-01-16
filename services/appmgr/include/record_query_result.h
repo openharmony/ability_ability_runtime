@@ -26,12 +26,12 @@ struct RecordQueryResult {
         error = ERR_OK;
         appRecordId = 0;
     }
-    // if app not exists, create and set |appRecordId|
-    int32_t appRecordId = 0;
     // if ability not exists, create and set |abilityRecordId|
     bool appExists = false;
     bool abilityExists = false;
     ErrCode error = ERR_OK;
+    // if app not exists, create and set |appRecordId|
+    int32_t appRecordId = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

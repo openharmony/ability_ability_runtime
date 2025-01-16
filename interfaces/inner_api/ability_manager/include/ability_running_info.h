@@ -29,13 +29,13 @@ namespace AAFwk {
  */
 struct AbilityRunningInfo : public Parcelable {
 public:
-    AppExecFwk::ElementName ability;
+    int32_t appCloneIndex = -1;
     int pid;
     int uid;
-    std::string processName;
     int64_t startTime;
     int abilityState;
-    int32_t appCloneIndex = -1;
+    AppExecFwk::ElementName ability;
+    std::string processName;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

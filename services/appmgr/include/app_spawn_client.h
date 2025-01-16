@@ -45,51 +45,51 @@ const int32_t MAX_PROC_NAME_LEN = 256;
 const int32_t START_FLAG_BASE = 1;
 const int32_t MAX_COST_TIME = 500;
 struct AppSpawnStartMsg {
-    int32_t uid;
-    int32_t gid;
-    std::vector<int32_t> gids;
-    std::string procName;
-    std::string soPath;
-    uint32_t accessTokenId;
-    std::string apl;
-    std::string bundleName;
-    std::string renderParam; // only nweb spawn need this param.
-    int32_t pid;
-    int32_t code = 0; // 0: default, MSG_APP_SPAWN; 1: MSG_SPAWN_NATIVE_PROCESS; 2: MSG_GET_RENDER_TERMINATION_STATUS
-    uint32_t flags;
-    int32_t bundleIndex;   // when dlp launch another app used, default is 0
     uint8_t setAllowInternet;
     uint8_t allowInternet; // hap socket allowed
     uint8_t reserved1;
     uint8_t reserved2;
-    uint64_t accessTokenIdEx;
-    uint32_t hapFlags = 0; // whether is pre installed hap
-    HspList hspList; // list of harmony shared package
-    std::string overlayInfo; // overlay hap resource path list
-    DataGroupInfoList dataGroupInfoList; // list of harmony shared package
-    uint32_t mountPermissionFlags;
-    std::set<std::string> permissions;
-    std::map<std::string, std::string> appEnv; // environment variable to be set to the process
-    std::string ownerId;
-    std::string provisionType;
     bool atomicServiceFlag = false;
-    std::string atomicAccount = "";
     bool isolatedExtension = false; // whether is isolatedExtension
-    std::string extensionSandboxPath;
     bool strictMode = false; // whether is strict mode
-    std::string processType = "";
-    int32_t maxChildProcess = 0;
-#ifdef SUPPORT_CHILD_PROCESS
-    int32_t childProcessType = CHILD_PROCESS_TYPE_NOT_CHILD;
-#endif // SUPPORT_CHILD_PROCESS
-    std::map<std::string, int32_t> fds;
     bool isolationMode = false;
-    JITPermissionsList jitPermissionsList; // list of JIT permissions
-    std::string extensionTypeName;
     bool isolatedNetworkFlag = false;
     bool isolatedSELinuxFlag = false;
     bool isolatedSandboxFlagLegacy = false; // APP_FLAGS_EXTENSION_SANDBOX legacy
     bool isScreenLockDataProtect = false;
+    int32_t uid;
+    int32_t gid;
+    int32_t pid;
+    int32_t code = 0; // 0: default, MSG_APP_SPAWN; 1: MSG_SPAWN_NATIVE_PROCESS; 2: MSG_GET_RENDER_TERMINATION_STATUS
+    int32_t bundleIndex;   // when dlp launch another app used, default is 0
+    int32_t maxChildProcess = 0;
+#ifdef SUPPORT_CHILD_PROCESS
+    int32_t childProcessType = CHILD_PROCESS_TYPE_NOT_CHILD;
+#endif // SUPPORT_CHILD_PROCESS
+    uint32_t accessTokenId;
+    uint32_t flags;
+    uint32_t hapFlags = 0; // whether is pre installed hap
+    uint32_t mountPermissionFlags;
+    uint64_t accessTokenIdEx;
+    std::vector<int32_t> gids;
+    std::string procName;
+    std::string soPath;
+    std::string apl;
+    std::string bundleName;
+    std::string renderParam; // only nweb spawn need this param.
+    std::string overlayInfo; // overlay hap resource path list
+    std::string ownerId;
+    std::string provisionType;
+    std::string atomicAccount = "";
+    std::string extensionSandboxPath;
+    std::string processType = "";
+    std::string extensionTypeName;
+    HspList hspList; // list of harmony shared package
+    std::set<std::string> permissions;
+    std::map<std::string, std::string> appEnv; // environment variable to be set to the process
+    std::map<std::string, int32_t> fds;
+    DataGroupInfoList dataGroupInfoList; // list of harmony shared package
+    JITPermissionsList jitPermissionsList; // list of JIT permissions
 };
 
 constexpr auto LEN_PID = sizeof(pid_t);
@@ -114,19 +114,19 @@ struct StartFlags {
 };
 
 struct CreateStartMsgParam {
-    uint32_t startFlags = 0;
-    int32_t uid = -1;
-    int32_t bundleIndex = 0;
-    BundleInfo bundleInfo;
-    BundleType bundleType = BundleType::APP;
-    std::shared_ptr<AAFwk::Want> want = nullptr;
-    std::string moduleName;
-    std::string abilityName;
-    std::string processName;
     bool strictMode = false;
     bool networkEnableFlags = true;
     bool saEnableFlags = true;
     ExtensionAbilityType extensionAbilityType = ExtensionAbilityType::UNSPECIFIED;
+    uint32_t startFlags = 0;
+    int32_t uid = -1;
+    int32_t bundleIndex = 0;
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    std::string moduleName;
+    std::string abilityName;
+    std::string processName;
+    BundleInfo bundleInfo;
+    BundleType bundleType = BundleType::APP;
 };
 
 union AppSpawnPidMsg {

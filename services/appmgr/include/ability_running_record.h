@@ -150,19 +150,19 @@ public:
     bool IsSceneBoard() const;
 
 private:
-    int64_t eventId_ = 0;
     bool isTerminating_ = false;
-    AbilityState state_ = AbilityState::ABILITY_STATE_CREATE;
     bool isFocused_ = false;
+    bool isSingleUser_ = false;
+    bool isUserRequestCleaning_ = false;
+    int32_t uiExtensionAbilityId_ = 0;
+    int32_t ownerUserId_ = -1;
+    int32_t abilityRecordId_ = 0;
+    AbilityState state_ = AbilityState::ABILITY_STATE_CREATE;
+    int64_t eventId_ = 0;
     std::shared_ptr<AbilityInfo> info_;
     std::shared_ptr<AAFwk::Want> want_ = nullptr;
     sptr<IRemoteObject> token_;
-    int32_t abilityRecordId_ = 0;
-    int32_t uiExtensionAbilityId_ = 0;
     sptr<IRemoteObject> preToken_;
-    int32_t ownerUserId_ = -1;
-    bool isSingleUser_ = false;
-    bool isUserRequestCleaning_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

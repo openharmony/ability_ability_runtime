@@ -126,16 +126,16 @@ private:
     void HandleOnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
 
 private:
-    std::shared_ptr<AAFwk::TaskHandlerWrap> handler_;
     int32_t dummyCode_ = 0;
-    ffrt::mutex observerLock_;
+    std::shared_ptr<AAFwk::TaskHandlerWrap> handler_;
     AppStateObserverMap appStateObserverMap_;
-    ffrt::mutex appForegroundObserverLock_;
     AppForegroundStateObserverSet appForegroundStateObserverSet_;
-    ffrt::mutex abilityforegroundObserverLock_;
     AbilityforegroundObserverSet abilityforegroundObserverSet_;
-    ffrt::mutex recipientMapMutex_;
     std::map<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> recipientMap_;
+    ffrt::mutex observerLock_;
+    ffrt::mutex appForegroundObserverLock_;
+    ffrt::mutex abilityforegroundObserverLock_;
+    ffrt::mutex recipientMapMutex_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
