@@ -591,6 +591,7 @@ group("unittest") {
       "ui_extension_utils_test:unittest",
       "unlock_screen_test:unittest",
       "update_caller_info_util_test:unittest",
+      "uri_utils_test:unittest",
       "user_controller_test:unittest",
       "user_event_handler_test:unittest",
       "user_record_manager_test:unittest",
