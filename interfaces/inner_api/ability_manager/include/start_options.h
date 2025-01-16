@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,10 @@ public:
     bool windowTopUsed_ = false;
     bool windowWidthUsed_ = false;
     bool windowHeightUsed_ = false;
+    bool minWindowWidthUsed_ = false;
+    bool minWindowHeightUsed_ = false;
+    bool maxWindowWidthUsed_ = false;
+    bool maxWindowHeightUsed_ = false;
     std::shared_ptr<ProcessOptions> processOptions = nullptr;
     std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
@@ -70,6 +74,18 @@ public:
 
     void SetWindowHeight(int32_t windowHeight);
     int32_t GetWindowHeight() const;
+
+    void SetMinWindowWidth(int32_t minWindowWidth);
+    int32_t GetMinWindowWidth() const;
+
+    void SetMinWindowHeight(int32_t minWindowHeight);
+    int32_t GetMinWindowHeight() const;
+
+    void SetMaxWindowWidth(int32_t maxWindowWidth);
+    int32_t GetMaxWindowWidth() const;
+
+    void SetMaxWindowHeight(int32_t maxWindowHeight);
+    int32_t GetMaxWindowHeight() const;
 private:
     bool withAnimation_ = true;
     bool windowFocused_ = true;
@@ -79,6 +95,10 @@ private:
     int32_t windowTop_ = 0;
     int32_t windowWidth_ = 0;
     int32_t windowHeight_ = 0;
+    int32_t minWindowWidth_ = 0;
+    int32_t minWindowHeight_ = 0;
+    int32_t maxWindowWidth_ = 0;
+    int32_t maxWindowHeight_ = 0;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
