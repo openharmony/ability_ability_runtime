@@ -3475,11 +3475,8 @@ int AppMgrServiceInner::CheckPermissionForPC(const BundleInfo &bundleInfo)
         [deviceid](const Security::AccessToken::PermissionStateFull &status) {
             if (status.permissionName == PERMISSION_INTERNET &&
                 status.grantStatus.size() == status.resDeviceID.size()) {
-                for (size_t i = 0; i < status.resDeviceID.size(); i++) {
-                    if (status.resDeviceID[i] == deviceid &&
-                        status.grantStatus[i] == Security::AccessToken::PERMISSION_GRANTED) {
-                        return true;
-                    }
+                if (CilulateCheckDeviceStatus(status, deviceId)) {
+                    return true;
                 }
             }
         return false;
@@ -3488,6 +3485,18 @@ int AppMgrServiceInner::CheckPermissionForPC(const BundleInfo &bundleInfo)
     TAG_LOGI(AAFwkTag::APPMGR, "GetInternetPermission, ret %{public}d, uid %{public}d, token %{public}d", result,
         bundleInfo.uid, token);
     return result;
+}
+
+bool AppMgrServiceInner::CilulateCheckDeviceStatus(Security::AccessToken::PermissionStateFull &status,
+    )
+{
+    for (size_t i = 0; i < status.resDeviceID.size(); i++) {
+        if (status.resDeviceID[i] == deviceid &&
+            status.grantStatus[i] == Security::AccessToken::PERMISSION_GRANTED) {
+            return true;
+        }
+    }
+    return false;
 }
 #endif //ABILITY_PLATFORM_PC
 
