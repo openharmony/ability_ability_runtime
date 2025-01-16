@@ -207,10 +207,10 @@ private:
 
     void PrintTokenInfo() const;
 
+    bool skipCommandExtensionWithIntent_ = false;
     int lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
     sptr<IRemoteObject> token_;
     std::shared_ptr<Extension> extension_;
-    bool skipCommandExtensionWithIntent_ = false;
     AppExecFwk::ExtensionAbilityType extensionType_ = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
 
 class ExtensionWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {

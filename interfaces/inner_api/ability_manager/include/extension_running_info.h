@@ -32,9 +32,9 @@ public:
     AppExecFwk::ElementName extension;
     int pid;
     int uid;
+    int64_t startTime;
     AppExecFwk::ExtensionAbilityType type = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
     std::string processName;
-    int64_t startTime;
     std::vector<std::string> clientPackage;
 
     bool ReadFromParcel(Parcel &parcel);

@@ -151,6 +151,13 @@
             "multimedia.audio",
             "multimedia.media"
         ],
+        "AssetAccelerationExtension": [
+            "backgroundTaskManager",
+            "resourceschedule.backgroundTaskManager",
+            "multimedia.camera",
+            "multimedia.audio",
+            "multimedia.media"
+        ],
         "DataShareExtension": [],
         "PushExtension": [
             "notification",

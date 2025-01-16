@@ -63,6 +63,9 @@ public:
 
     bool GetUIExtensionAbilityExitReason(const std::string &keyEx, AAFwk::ExitReason &exitReason);
 
+    int32_t SetProcessExitDetailInfo(const AAFwk::ExitReason &exitReason,
+        const AppExecFwk::RunningProcessInfo &processInfo);
+
 private:
     DistributedKv::Status GetKvStore();
     bool CheckKvStore();
@@ -71,6 +74,8 @@ private:
     void ConvertAppExitReasonInfoFromValue(const DistributedKv::Value &value, AAFwk::ExitReason &exitReason,
         int64_t &time_stamp, std::vector<std::string> &abilityList);
     void ConvertAccessTokenIdFromValue(const DistributedKv::Value &value, uint32_t &accessTokenId);
+    DistributedKv::Value ConvertProcessExitDetailInfoToValue(const AAFwk::ExitReason &exitReason,
+        const AppExecFwk::RunningProcessInfo &processInfo);
     void UpdateAppExitReason(uint32_t accessTokenId, const std::vector<std::string> &abilityList,
         const AAFwk::ExitReason &exitReason);
     void InnerDeleteAppExitReason(const std::string &keyName);
@@ -90,6 +95,7 @@ private:
 
     DistributedKv::Key GetSessionIdKey(const int32_t sessionId);
     DistributedKv::Value ConvertAccessTokenIdToValue(uint32_t accessTokenId);
+    DistributedKv::Status RestoreKvStore(DistributedKv::Status status);
 
     const DistributedKv::AppId appId_ { "app_exit_reason_storage" };
     const DistributedKv::StoreId storeId_ { "app_exit_reason_infos" };

@@ -63,6 +63,7 @@
 #include "istart_specified_ability_response.h"
 #include "kia_interceptor_interface.h"
 #include "kill_process_config.h"
+#include "process_memory_state.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "remote_client_manager.h"
@@ -343,6 +344,14 @@ public:
      */
     virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId,
         const bool clearPageStack = false, const std::string& reason = "KillApplicationByUserId");
+
+    /**
+     * update process rss and pss value.
+     *
+     * @param procMemStates, the memory states of all apps.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t UpdateProcessMemoryState(const std::vector<ProcessMemoryState> &procMemState);
 
     /**
      * ClearUpApplicationData, clear the application data.
@@ -1935,6 +1944,12 @@ private:
         const std::shared_ptr<AppRunningRecord> &appRecord, const int32_t pid, const int32_t callerUid);
     int32_t SubmitDfxFaultTask(const FaultData &faultData, const std::string &bundleName,
         const std::shared_ptr<AppRunningRecord> &appRecord, const int32_t pid);
+    
+    bool isInitAppWaitingDebugListExecuted_ = false;
+    std::atomic<bool> sceneBoardAttachFlag_ = true;
+    std::atomic<int32_t> willKillPidsNum_ = 0;
+    int32_t currentUserId_ = 0;
+    int32_t lastRenderUid_ = Constants::START_UID_FOR_RENDER_PROCESS;
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
@@ -1960,12 +1975,9 @@ private:
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
     std::map<std::string, bool> waitingDebugBundleList_;
     ffrt::mutex waitingDebugLock_;
-    bool isInitAppWaitingDebugListExecuted_ = false;
     std::unordered_set<int32_t> renderUidSet_;
     std::string supportIsolationMode_ {"false"};
     std::string supportServiceExtMultiProcess_ {"false"};
-    int32_t currentUserId_ = 0;
-    int32_t lastRenderUid_ = Constants::START_UID_FOR_RENDER_PROCESS;
     sptr<IAbilityDebugResponse> abilityDebugResponse_;
     std::shared_ptr<AppDebugManager> appDebugManager_;
     ffrt::mutex killedProcessMapLock_;
@@ -1979,13 +1991,11 @@ private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> dfxTaskHandler_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> otherTaskHandler_;
     std::shared_ptr<AppPreloader> appPreloader_;
-    std::atomic<bool> sceneBoardAttachFlag_ = true;
 
     std::mutex loadTaskListMutex_;
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
     sptr<IKiaInterceptor> kiaInterceptor_;
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
-    std::atomic<int32_t> willKillPidsNum_ = 0;
     std::shared_ptr<AAFwk::TaskHandlerWrap> delayKillTaskHandler_;
     std::unordered_set<std::string> nwebPreloadSet_ {};
 

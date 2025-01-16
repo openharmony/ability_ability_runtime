@@ -65,6 +65,12 @@ bool RunningProcessInfo::ReadFromParcel(Parcel &parcel)
     int32_t appModeType;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, appModeType);
     appMode = static_cast<AppExecFwk::MultiAppModeType>(appModeType);
+    int32_t rssData;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, rssData);
+    rssValue = static_cast<int32_t>(rssData);
+    int32_t pssData;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, pssData);
+    pssValue = static_cast<int32_t>(pssData);
     return true;
 }
 
@@ -101,6 +107,8 @@ bool RunningProcessInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, appCloneIndex);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(instanceKey));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(appMode));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(rssValue));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(pssValue));
     return true;
 }
 }  // namespace AppExecFwk

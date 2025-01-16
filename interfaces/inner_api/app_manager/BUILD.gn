@@ -102,6 +102,7 @@ ohos_shared_library("app_manager") {
     "src/appmgr/priority_object.cpp",
     "src/appmgr/process_data.cpp",
     "src/appmgr/process_info.cpp",
+    "src/appmgr/process_memory_state.cpp",
     "src/appmgr/profile.cpp",
     "src/appmgr/quick_fix_callback_proxy.cpp",
     "src/appmgr/quick_fix_callback_stub.cpp",

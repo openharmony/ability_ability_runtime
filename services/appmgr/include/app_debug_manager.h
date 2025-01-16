@@ -37,9 +37,9 @@ public:
 
 private:
     void GetIncrementAppDebugInfos(const std::vector<AppDebugInfo> &infos, std::vector<AppDebugInfo> &incrementInfos);
-    std::mutex mutex_;
     std::set<sptr<IAppDebugListener>> listeners_;
     std::vector<AppDebugInfo> debugInfos_;
+    std::mutex mutex_;
 };
 } // namespace AppExecFwk
 } // namespace OHOS

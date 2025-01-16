@@ -10745,6 +10745,29 @@ int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector
     return uiAbilityManager->TryPrepareTerminateByPids(pids);
 }
 
+int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReason &reason)
+{
+    auto isShellCall = PermissionVerification::GetInstance()->IsShellCall();
+    auto isCallingPerm = PermissionVerification::GetInstance()->VerifyCallingPermission(
+        AAFwk::PermissionConstants::PERMISSION_KILL_APP_PROCESSES);
+    if (!isCallingPerm && !isShellCall) {
+        TAG_LOGE(AAFwkTag::APPMGR, "permission verification fail");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, reason:%{public}d, subReason:%{public}d, killMsg:%{public}s",
+        pid, reason.reason, reason.subReason, reason.exitMsg.c_str());
+    CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
+    auto ret = appExitReasonHelper_->RecordAppExitReason(reason, pid);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "RecordAppExitReason failed, ret:%{public}d", ret);
+        return ret;
+    }
+    std::vector<int32_t> pidToBeKilled = { pid };
+    IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByPids(pidToBeKilled));
+    return ERR_OK;
+}
+
 int32_t AbilityManagerService::RegisterAutoStartupSystemCallback(const sptr<IRemoteObject> &callback)
 {
     if (abilityAutoStartupService_ == nullptr) {

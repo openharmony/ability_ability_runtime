@@ -1546,6 +1546,8 @@ public:
 
     virtual int32_t KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids) override;
 
+    virtual int32_t KillProcessWithReason(int32_t pid, const ExitReason &reason) override;
+
     /**
      * @brief Register auto start up callback for system api.
      * @param callback The point of JsAbilityAutoStartupCallBack.

@@ -1002,6 +1002,15 @@ public:
     ErrCode KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids);
 
     /**
+     * kill the process with reason
+     *
+     * @param pid id of process.
+     * @param  reason, kill process reason.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode KillProcessWithReason(int32_t pid, const ExitReason &reason);
+
+    /**
      * @brief Register auto start up callback for system api.
      * @param callback The point of JsAbilityAutoStartupCallBack.
      * @return Returns ERR_OK on success, others on failure.
@@ -1666,11 +1675,11 @@ private:
     void HandleDlpApp(Want &want);
 
     static std::once_flag singletonFlag_;
-    std::recursive_mutex mutex_;
-    std::mutex topAbilityMutex_;
     static std::shared_ptr<AbilityManagerClient> instance_;
     sptr<IAbilityManager> proxy_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
+    std::recursive_mutex mutex_;
+    std::mutex topAbilityMutex_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -85,12 +85,12 @@ private:
     void TryNotifyOneWaitingThread();
     void TryNotifyOneWaitingThreadInner();
 
-    std::mutex assertResultMutex_;
-    std::condition_variable assertResultCV_;
     int32_t reqeustCount_ = 0;
     sptr<AssertDialogConnection> GetConnection();
-    std::mutex dialogConnectionMutex_;
     sptr<AssertDialogConnection> dialogConnectionCallback_;
+    std::mutex assertResultMutex_;
+    std::mutex dialogConnectionMutex_;
+    std::condition_variable assertResultCV_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

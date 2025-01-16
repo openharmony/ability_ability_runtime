@@ -56,20 +56,20 @@ struct AppStateData : public Parcelable {
      */
     static bool IsUIExtension(const AppExecFwk::ExtensionAbilityType type);
 
-    std::string bundleName;
-    int32_t pid = -1;
-    int32_t uid = 0;
-    int32_t state = 0;
-    uint32_t accessTokenId = 0;
     bool isFocused = false;
-    ExtensionAbilityType extensionType = ExtensionAbilityType::UNSPECIFIED;
-    std::vector<int32_t> renderPids;
-    std::string callerBundleName;
     bool isSplitScreenMode = false;
     bool isFloatingWindowMode = false;
     bool isSpecifyTokenId = false;
-    int32_t appIndex = 0;
     bool isPreloadModule = false;
+    int32_t pid = -1;
+    int32_t uid = 0;
+    int32_t state = 0;
+    int32_t appIndex = 0;
+    uint32_t accessTokenId = 0;
+    ExtensionAbilityType extensionType = ExtensionAbilityType::UNSPECIFIED;
+    std::vector<int32_t> renderPids;
+    std::string bundleName;
+    std::string callerBundleName;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

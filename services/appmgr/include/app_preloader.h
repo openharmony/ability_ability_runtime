@@ -26,13 +26,13 @@
 namespace OHOS {
 namespace AppExecFwk {
 struct PreloadRequest {
+    int32_t appIndex = 0; // not used
+    AppExecFwk::PreloadMode preloadMode;
     std::shared_ptr<AbilityInfo> abilityInfo = nullptr;
     std::shared_ptr<ApplicationInfo> appInfo = nullptr;
     std::shared_ptr<AAFwk::Want> want = nullptr;
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
-    int32_t appIndex = 0; // not used
-    AppExecFwk::PreloadMode preloadMode;
 };
 
 class AppPreloader {

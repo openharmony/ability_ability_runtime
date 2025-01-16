@@ -45,12 +45,12 @@ struct DlpStateData : public Parcelable {
 
     int32_t targetPid = 0;
     int32_t targetUid = 0;
-    std::string targetBundleName;
-    std::string targetModuleName;
-    std::string targetAbilityName;
     int32_t callerUid = 0;
     int32_t callerPid = 0;
     std::string callerName;
+    std::string targetBundleName;
+    std::string targetModuleName;
+    std::string targetAbilityName;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -1748,6 +1748,14 @@ ErrCode AbilityManagerClient::KillProcessWithPrepareTerminate(const std::vector<
     return abms->KillProcessWithPrepareTerminate(pids);
 }
 
+ErrCode AbilityManagerClient::KillProcessWithReason(int32_t pid, const ExitReason &reason)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call, pid:%{public}d", pid);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->KillProcessWithReason(pid, reason);
+}
+
 ErrCode AbilityManagerClient::RegisterAutoStartupSystemCallback(sptr<IRemoteObject> callback)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");

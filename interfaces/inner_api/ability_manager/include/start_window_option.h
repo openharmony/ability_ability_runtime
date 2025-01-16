@@ -33,8 +33,8 @@ public:
     static StartWindowOption *Unmarshalling(Parcel &parcel);
 
     bool hasStartWindow = false;
-    std::string startWindowBackgroundColor;
     std::shared_ptr<Media::PixelMap> startWindowIcon = nullptr;
+    std::string startWindowBackgroundColor;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

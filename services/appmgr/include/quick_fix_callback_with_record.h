@@ -43,11 +43,11 @@ private:
     void ProcessCallback(int32_t resultCode, int32_t recordId);
     bool IsRecordExist(const int32_t recordId);
     bool IsRecordListEmpty();
+    std::atomic<int32_t> finalResult = 0;
 
     sptr<IQuickFixCallback> callback_ = nullptr;
     std::mutex mutex_;
     std::list<int32_t> recordIds_;
-    std::atomic<int32_t> finalResult = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
