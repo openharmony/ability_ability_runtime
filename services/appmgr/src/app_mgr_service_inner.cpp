@@ -3488,7 +3488,7 @@ int AppMgrServiceInner::CheckPermissionForPC(const BundleInfo &bundleInfo)
 }
 
 bool AppMgrServiceInner::CilulateCheckDeviceStatus(Security::AccessToken::PermissionStateFull &status,
-    )
+    std::string deviceid)
 {
     for (size_t i = 0; i < status.resDeviceID.size(); i++) {
         if (status.resDeviceID[i] == deviceid &&
