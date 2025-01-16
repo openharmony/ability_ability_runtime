@@ -440,8 +440,7 @@ bool MainThread::ScheduleForegroundApplication()
         }
         appThread->HandleForegroundApplication();
     };
-    if (!mainHandler_->PostTask(task, "MainThread:ForegroundApplication", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:ForegroundApplication")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
     auto tmpWatchdog = watchdog_;
@@ -471,8 +470,7 @@ void MainThread::ScheduleBackgroundApplication()
         }
         appThread->HandleBackgroundApplication();
     };
-    if (!mainHandler_->PostTask(task, "MainThread:BackgroundApplication", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:BackgroundApplication")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 
@@ -503,8 +501,7 @@ void MainThread::ScheduleTerminateApplication(bool isLastProcess)
         }
         appThread->HandleTerminateApplication(isLastProcess);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:TerminateApplication", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:TerminateApplication")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -550,8 +547,7 @@ void MainThread::ScheduleMemoryLevel(const int level)
         }
         appThread->HandleMemoryLevel(level);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:MemoryLevel", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:MemoryLevel")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -619,8 +615,7 @@ void MainThread::ScheduleProcessSecurityExit()
         }
         appThread->HandleProcessSecurityExit();
     };
-    bool result = mainHandler_->PostTask(task, "MainThread:ProcessSecurityExit", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    bool result = mainHandler_->PostTask(task, "MainThread:ProcessSecurityExit");
     if (!result) {
         TAG_LOGE(AAFwkTag::APPKIT, "post task failed");
     }
@@ -673,8 +668,7 @@ void MainThread::ScheduleLaunchApplication(const AppLaunchData &data, const Conf
         appThread->HandleInitAssertFaultTask(data.GetDebugApp(), data.GetApplicationInfo().debug);
         appThread->HandleLaunchApplication(data, config);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:LaunchApplication", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:LaunchApplication")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -715,7 +709,7 @@ void MainThread::ScheduleAbilityStage(const HapModuleInfo &abilityStage)
         }
         appThread->HandleAbilityStage(abilityStage);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:AbilityStage", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:AbilityStage")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -755,8 +749,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
         }
         appThread->HandleLaunchAbility(abilityRecord);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:LaunchAbility", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:LaunchAbility")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -782,8 +775,7 @@ void MainThread::ScheduleCleanAbility(const sptr<IRemoteObject> &token, bool isC
         }
         appThread->HandleCleanAbility(token, isCacheProcess);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:CleanAbility", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:CleanAbility")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -820,8 +812,7 @@ void MainThread::ScheduleConfigurationUpdated(const Configuration &config)
         }
         appThread->HandleConfigurationUpdated(config);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:ConfigurationUpdated", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:ConfigurationUpdated")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -3010,8 +3001,7 @@ void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &
         }
         appThread->HandleScheduleAcceptWant(want, moduleName);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:AcceptWant", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:AcceptWant")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -3067,8 +3057,7 @@ void MainThread::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::s
         }
         appThread->HandleScheduleNewProcessRequest(want, moduleName);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:ScheduleNewProcessRequest", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:ScheduleNewProcessRequest")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -3236,7 +3225,7 @@ int32_t MainThread::ScheduleNotifyAppFault(const FaultData &faultData)
         }
         appThread->NotifyAppFault(faultData);
     };
-    mainHandler_->PostTask(task, "MainThread:NotifyAppFault", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    mainHandler_->PostTask(task, "MainThread:NotifyAppFault");
     return NO_ERROR;
 }
 
@@ -3563,8 +3552,7 @@ void MainThread::ScheduleCacheProcess()
         TAG_LOGE(AAFwkTag::APPKIT, "null handler");
         return;
     }
-    if (!mainHandler_->PostTask(task, "MainThread:ScheduleCacheProcess", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+    if (!mainHandler_->PostTask(task, "MainThread:ScheduleCacheProcess")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }

@@ -964,7 +964,7 @@ private:
             };
         napi_value lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
         napi_value result = nullptr;
-        NapiAsyncTask::ScheduleHighQos("JSServiceExtensionConnection::OnDisconnectAbility",
+        NapiAsyncTask::Schedule("JSServiceExtensionConnection::OnDisconnectAbility",
             env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
         return result;
     }
@@ -1150,7 +1150,7 @@ private:
 
         napi_value lastParam = (info.argc <= ARGC_ONE) ? nullptr : info.argv[ARGC_ONE];
         napi_value result = nullptr;
-        NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnStopExtensionAbility",
+        NapiAsyncTask::Schedule("JSServiceExtensionContext::OnStopExtensionAbility",
             env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
         return result;
     }
@@ -1189,7 +1189,7 @@ private:
 
         napi_value lastParam = (info.argc <= ARGC_TWO) ? nullptr : info.argv[ARGC_TWO];
         napi_value result = nullptr;
-        NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnStopExtensionAbilityWithAccount",
+        NapiAsyncTask::Schedule("JSServiceExtensionContext::OnStopExtensionAbilityWithAccount",
             env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
         return result;
     }
@@ -1501,7 +1501,7 @@ void JSServiceExtensionConnection::OnAbilityConnectDone(const AppExecFwk::Elemen
 
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::ScheduleHighQos("JSServiceExtensionConnection::OnAbilityConnectDone",
+    NapiAsyncTask::Schedule("JSServiceExtensionConnection::OnAbilityConnectDone",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
@@ -1552,7 +1552,7 @@ void JSServiceExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::Ele
         });
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::ScheduleHighQos("JSServiceExtensionConnection::OnAbilityDisconnectDone",
+    NapiAsyncTask::Schedule("JSServiceExtensionConnection::OnAbilityDisconnectDone",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
