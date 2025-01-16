@@ -55,14 +55,20 @@ sptr<CJUIExtensionContentSession> CJUIExtensionContentSession::Create(sptr<AAFwk
     return FFI::FFIData::Create<CJUIExtensionContentSession>(sessionInfo, uiWindow, context);
 }
 
-int32_t CJUIExtensionContentSession::LoadContent(const std::string& path, int storage)
+int32_t CJUIExtensionContentSession::LoadContent(const std::string& path)
 {
     if (sessionInfo_->isAsyncModalBinding && isFirstTriggerBindModal_) {
         TAG_LOGD(AAFwkTag::UI_EXT, "Trigger binding UIExtension modal window");
         uiWindow_->TriggerBindModalUIExtension();
         isFirstTriggerBindModal_ = false;
     }
-    (void)storage;
+    Rosen::WMError ret = uiWindow_->NapiSetUIContent(path, nullptr, nullptr,
+        Rosen::BackupAndRestoreType::NONE, sessionInfo_->parentToken);
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "NapiSetUIContent failed, ret=%{public}d", ret);
+        return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "NapiSetUIContent success");
     return SUCCESS_CODE;
 }
 
@@ -174,7 +180,7 @@ void CJUIExtensionContentSession::InitDisplayId(AAFwk::Want &want)
 #endif // SUPPORT_SCREEN
 
 extern "C" {
-CJ_EXPORT int32_t FFICJExtSessionLoadContent(int64_t sessionId, const char* path, int storage)
+CJ_EXPORT int32_t FFICJExtSessionLoadContent(int64_t sessionId, const char* path)
 {
     if (path == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "input param path is nullptr");
@@ -186,7 +192,7 @@ CJ_EXPORT int32_t FFICJExtSessionLoadContent(int64_t sessionId, const char* path
         return ERR_INVALID_INSTANCE_CODE;
     }
 
-    return session->LoadContent(std::string(path), storage);
+    return session->LoadContent(std::string(path));
 }
 
 CJ_EXPORT int32_t FFICJExtSessionTerminateSelf(int64_t sessionId)
