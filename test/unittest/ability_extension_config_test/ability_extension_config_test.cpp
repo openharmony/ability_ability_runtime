@@ -146,16 +146,96 @@ HWTEST_F(AbilityExtensionConfigTest, LoadExtensionConfig_001, TestSize.Level1)
 }
 
 /*
+ * @tc.number    : CheckServiceExtensionUriValid_001
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function CheckServiceExtensionUriValid
+ */
+HWTEST_F(AbilityExtensionConfigTest, CheckServiceExtensionUriValid_001, TestSize.Level1)
+{
+    auto result = extensionConfig_->CheckServiceExtensionUriValid("http://aaa/bb/");
+    EXPECT_EQ(result, false);
+    result = extensionConfig_->CheckServiceExtensionUriValid("http://aaa/bb/cc/");
+    EXPECT_EQ(result, false);
+    result = extensionConfig_->CheckServiceExtensionUriValid("http://aaa//cc/");
+    EXPECT_EQ(result, false);
+    result = extensionConfig_->CheckServiceExtensionUriValid("/bundleName/moduleName/abilityName");
+    EXPECT_EQ(result, true);
+    result = extensionConfig_->CheckServiceExtensionUriValid("deviceName/bundleName/moduleName/abilityName");
+    EXPECT_EQ(result, true);
+    AppExecFwk::ElementName targetElementName;
+    EXPECT_EQ(targetElementName.ParseURI("deviceName/bundleName/moduleName/abilityName"), true);
+    EXPECT_EQ(targetElementName.GetBundleName(), "bundleName");
+    EXPECT_EQ(targetElementName.GetModuleName(), "moduleName");
+    EXPECT_EQ(targetElementName.GetAbilityName(), "abilityName");
+}
+
+/*
+ * @tc.number    : IsExtensionStartServiceEnable_001
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function IsExtensionStartServiceEnable
+ */
+HWTEST_F(AbilityExtensionConfigTest, IsExtensionStartServiceEnable_001, TestSize.Level1)
+{
+    auto extType = "form";
+    extensionConfig_->serviceEnableFlags_[extType] = false;
+    bool enable = extensionConfig_->IsExtensionStartServiceEnable(extType, "aaa");
+    EXPECT_EQ(enable, false);
+}
+
+/*
+ * @tc.number    : IsExtensionStartServiceEnable_002
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function IsExtensionStartServiceEnable
+ */
+HWTEST_F(AbilityExtensionConfigTest, IsExtensionStartServiceEnable_002, TestSize.Level1)
+{
+    auto extType = "form";
+    extensionConfig_->serviceEnableFlags_[extType] = true;
+    bool enable = extensionConfig_->IsExtensionStartServiceEnable(extType, "bbb");
+    EXPECT_EQ(enable, true);
+}
+
+/*
+ * @tc.number    : IsExtensionStartServiceEnable_003
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function IsExtensionStartServiceEnable
+ */
+HWTEST_F(AbilityExtensionConfigTest, IsExtensionStartServiceEnable_003, TestSize.Level1)
+{
+    json jsOnFile;
+    auto extType = "form";
+    jsOnFile[EXTENSION_SERVICE_STARTUP_ENABLE_FLAG] = true;
+    jsOnFile[EXTENSION_SERVICE_BLOCKED_LIST_NAME] = {"aa", "bb", "/bundle/module/ability"};
+    extensionConfig_->LoadExtensionServiceBlockedList(jsOnFile, extType);
+    // uri not valid
+    bool enable = extensionConfig_->IsExtensionStartServiceEnable(extType, "bb");
+    EXPECT_EQ(enable, true);
+}
+
+/*
+ * @tc.number    : IsExtensionStartServiceEnable_004
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function IsExtensionStartServiceEnable
+ */
+HWTEST_F(AbilityExtensionConfigTest, IsExtensionStartServiceEnable_004, TestSize.Level1)
+{
+    json jsOnFile;
+    auto extType = "form";
+    jsOnFile[EXTENSION_SERVICE_STARTUP_ENABLE_FLAG] = true;
+    jsOnFile[EXTENSION_SERVICE_BLOCKED_LIST_NAME] = {"aa", "bb", "/bundle/module/ability"};
+    extensionConfig_->LoadExtensionServiceBlockedList(jsOnFile, extType);
+    // uri is valid
+    bool enable = extensionConfig_->IsExtensionStartServiceEnable(extType, "/bundle/module/ability");
+    EXPECT_EQ(enable, false);
+}
+
+/*
  * @tc.number    : ReadFileInfoJson_001
  * @tc.name      : AbilityExtensionConfigTest
- * @tc.desc      : Test Function ReadFileInfoJson CheckServiceExtensionUriValid IsExtensionStartServiceEnable
+ * @tc.desc      : Test Function ReadFileInfoJson
  */
 HWTEST_F(AbilityExtensionConfigTest, ReadFileInfoJson_001, TestSize.Level1)
 {
-    extensionConfig_->IsExtensionStartServiceEnable("aa", "http://aaa/bb/cc/");
-    extensionConfig_->CheckServiceExtensionUriValid("http://aaa/bb/");
-    extensionConfig_->CheckServiceExtensionUriValid("http://aaa/bb/cc/");
-    extensionConfig_->CheckServiceExtensionUriValid("http://aaa//cc/");
     nlohmann::json jsOne;
     auto result = extensionConfig_->ReadFileInfoJson("d://dddd", jsOne);
     EXPECT_EQ(result, false);
