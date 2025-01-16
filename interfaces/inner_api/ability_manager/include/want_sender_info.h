@@ -30,9 +30,9 @@ struct WantSenderInfo : public Parcelable {
     int32_t requestCode;
     uint32_t flags;
     int32_t userId;
-    std::vector<WantsInfo> allWants;
     std::string bundleName;
     std::string resultWho;
+    std::vector<WantsInfo> allWants;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

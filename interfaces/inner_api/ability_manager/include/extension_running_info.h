@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,8 +33,8 @@ public:
     AppExecFwk::ElementName extension;
     int pid;
     int uid;
-    int64_t startTime;
     AppExecFwk::ExtensionAbilityType type = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
+    int64_t startTime;
     std::string processName;
     std::vector<std::string> clientPackage;
 

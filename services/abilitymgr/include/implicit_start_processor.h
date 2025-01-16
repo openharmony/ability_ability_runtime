@@ -36,7 +36,7 @@ struct IdentityNode {
     {}
 };
 
-struct AddInfoParam {    
+struct AddInfoParam {
     bool isExtension = false;
     bool isMoreHapList = false;
     bool withDefault = false;

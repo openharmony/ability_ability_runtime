@@ -215,7 +215,13 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
         if (IsUIExtensionAbility(targetService)) {
             targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
         }
-        LoadAbility(targetService);
+        auto updateRecordCallback = [mgr = shared_from_this()](
+            const std::shared_ptr<AbilityRecord>& targetService) {
+            if (mgr != nullptr) {
+                mgr->UpdateUIExtensionInfo(targetService, AAFwk::DEFAULT_INVAL_VALUE);
+            }
+        };
+        LoadAbility(targetService, updateRecordCallback);
     } else if (targetService->IsAbilityState(AbilityState::ACTIVE) && !IsUIExtensionAbility(targetService)) {
         // It may have been started through connect
         targetService->SetWant(abilityRequest.want);
@@ -652,7 +658,13 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
 
     if (!isLoadedAbility) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "targetService has not been loaded");
-        LoadAbility(targetService);
+        auto updateRecordCallback = [mgr = shared_from_this()](
+            const std::shared_ptr<AbilityRecord>& targetService) {
+            if (mgr != nullptr) {
+                mgr->UpdateUIExtensionInfo(targetService, AAFwk::DEFAULT_INVAL_VALUE);
+            }
+        };
+        LoadAbility(targetService, updateRecordCallback);
     } else if (targetService->IsAbilityState(AbilityState::ACTIVE)) {
         targetService->SetWant(abilityRequest.want);
         HandleActiveAbility(targetService, connectRecord);

@@ -229,7 +229,6 @@ private:
 
     sptr<InnerAppStateObserver> appStateObserver_;
     std::shared_ptr<TaskHandlerWrap> handler_;
-
 };
 }  // namespace AAFwk
 }  // namespace OHOS

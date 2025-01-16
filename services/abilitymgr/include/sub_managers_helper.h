@@ -100,7 +100,6 @@ private:
     std::mutex missionListWrapMutex_;
     ffrt::mutex managersMutex_;
     void* missionLibHandle_ = nullptr;
-
 };
 }  // namespace AAFwk
 }  // namespace OHOS
