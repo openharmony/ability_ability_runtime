@@ -1756,6 +1756,9 @@ private:
     bool SendProcessStartFailedEvent(std::shared_ptr<AppRunningRecord> appRecord, ProcessStartFailedReason reason,
         int32_t subReason);
 
+    void SendPreloadAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
+        const std::shared_ptr<AbilityInfo> &abilityInfo);
+
     void SendAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
         const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType, const AppStartReason reason);
 
