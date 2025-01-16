@@ -66,6 +66,7 @@ group("napi_packages") {
     "${ability_runtime_napi_path}/feature_ability:featureability_napi",
     "${ability_runtime_napi_path}/inner/napi_ability_common:napi_ability_common",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_napi_path}/inner/napi_wantagent_common:napi_wantagent_common",
     "${ability_runtime_napi_path}/insight_intent/insight_intent:insightintent_napi",
     "${ability_runtime_napi_path}/insight_intent/insight_intent_driver:insightintentdriver_napi",
     "${ability_runtime_napi_path}/insight_intent/insight_intent_executor:insightintentexecutor_napi",
