@@ -609,6 +609,7 @@ void SourceMap::GetPackageName(const SourceMapData& targetMap, std::string& pack
         auto last = packageInfo.rfind('|');
         if (last != std::string::npos) {
             packageName = packageInfo.substr(FLAG_PACKAGE_INFO_SIZE, last - FLAG_PACKAGE_INFO_SIZE);
+            return;
         }
     }
     if (!entryPackageInfo.empty()) {
