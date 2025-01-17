@@ -39,6 +39,42 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t INDEX_ONE = 1;
 
+void* DetachNewApplicationContext(napi_env, void* nativeObject, void*)
+{
+    auto* origContext = static_cast<std::weak_ptr<ApplicationContext> *>(nativeObject);
+    if (origContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "origContext is null");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "New detached application context");
+    auto* detachNewContext = new(std::nothrow) std::weak_ptr<ApplicationContext>(*origContext);
+    return detachNewContext;
+}
+
+void* DetachNewBaseContext(napi_env, void* nativeObject, void*)
+{
+    auto* origContext = static_cast<std::weak_ptr<Context> *>(nativeObject);
+    if (origContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "origContext is null");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "New detached base context");
+    auto* detachNewContext = new(std::nothrow) std::weak_ptr<Context>(*origContext);
+    return detachNewContext;
+}
+
+void DetachFinalizeApplicationContext(void* detachedObject, void*)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Finalizer detached application context");
+    delete static_cast<std::weak_ptr<ApplicationContext> *>(detachedObject);
+}
+
+void DetachFinalizeBaseContext(void* detachedObject, void*)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Finalizer detached base context");
+    delete static_cast<std::weak_ptr<Context> *>(detachedObject);
+}
+
 class JsBaseContext {
 public:
     explicit JsBaseContext(std::weak_ptr<Context>&& context) : context_(std::move(context)) {}
@@ -831,7 +867,9 @@ napi_value AttachBaseContext(napi_env env, void* value, void* hint)
         return nullptr;
     }
     auto workContext = new (std::nothrow) std::weak_ptr<Context>(ptr);
-    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachBaseContext, workContext, nullptr);
+    napi_coerce_to_native_binding_object(
+        env, contextObj, DetachNewBaseContext, AttachBaseContext, workContext, nullptr);
+    napi_add_detached_finalizer(env, contextObj, DetachFinalizeBaseContext, nullptr);
     auto res = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr base context is called");
@@ -871,7 +909,8 @@ napi_value AttachApplicationContext(napi_env env, void* value, void* hint)
     }
     auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(ptr);
     napi_coerce_to_native_binding_object(
-        env, contextObj, DetachCallbackFunc, AttachApplicationContext, workContext, nullptr);
+        env, contextObj, DetachNewApplicationContext, AttachApplicationContext, workContext, nullptr);
+    napi_add_detached_finalizer(env, contextObj, DetachFinalizeApplicationContext, nullptr);
     auto res = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr application context is called");
