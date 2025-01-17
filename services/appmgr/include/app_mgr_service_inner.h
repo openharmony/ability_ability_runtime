@@ -1640,11 +1640,11 @@ private:
     void GetChildrenProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<ChildProcessInfo> &info);
 #endif // SUPPORT_CHILD_PROCESS
 
-#ifdef ABILITY_PLATFORM_PC
+#ifdef ABILITY_PLATFORM_CHECK_PERMISSION
     int CheckPermissionForPC(const BundleInfo &bundleInfo);
     bool CilulateCheckDeviceStatus(Security::AccessToken::PermissionStateFull &status,
         std::string deviceid);
-#endif //ABILITY_PLATFORM_PC
+#endif //ABILITY_PLATFORM_CHECK_PERMISSION
 
     int StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid, bool isGPU = false);
