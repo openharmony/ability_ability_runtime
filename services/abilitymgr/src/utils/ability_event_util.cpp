@@ -20,10 +20,11 @@
 namespace OHOS {
 namespace AAFwk {
 
-void AbilityEventUtil::HandleModuleInfoUpdated(const std::string &bundleName, const int uid)
+void AbilityEventUtil::HandleModuleInfoUpdated(const std::string &bundleName, const int uid,
+    const std::string& moduelName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "HandleModuleInfoUpdated start.");
-    DelayedSingleton<AppScheduler>::GetInstance()->UpdateApplicationInfoInstalled(bundleName, uid);
+    DelayedSingleton<AppScheduler>::GetInstance()->UpdateApplicationInfoInstalled(bundleName, uid, moduelName);
 }
 
 } // namespace AAFwk

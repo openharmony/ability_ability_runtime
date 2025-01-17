@@ -122,7 +122,7 @@ public:
      *
      * @return
      */
-    virtual void ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &) = 0;
+    virtual void ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &, const std::string &) = 0;
 
     /**
      * ScheduleAbilityStageInfo, call ScheduleAbilityStageInfo() through proxy project,

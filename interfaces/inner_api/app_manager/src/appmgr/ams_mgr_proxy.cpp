@@ -479,7 +479,8 @@ int32_t AmsMgrProxy::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid)
+int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
+    const std::string &moduleName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "start.");
     MessageParcel data;
@@ -494,6 +495,10 @@ int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleNam
     }
     if (!data.WriteInt32(uid)) {
         TAG_LOGE(AAFwkTag::APPMGR, "uid write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(moduleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "moduleName WriteString failed");
         return ERR_FLATTEN_OBJECT;
     }
     int32_t ret =

@@ -274,12 +274,13 @@ int32_t AppSchedulerHost::HandleScheduleUpdateApplicationInfoInstalled(MessagePa
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::unique_ptr<ApplicationInfo> appInfo(data.ReadParcelable<ApplicationInfo>());
+    auto moduleName = data.ReadString();
     if (!appInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<ApplicationInfo> failed");
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
-    ScheduleUpdateApplicationInfoInstalled(*appInfo);
+    ScheduleUpdateApplicationInfoInstalled(*appInfo, moduleName);
     return NO_ERROR;
 }
 

@@ -212,7 +212,7 @@ public:
      * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
      *
      */
-    void ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo) override;
+    void ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleName) override;
 
     /**
      * Notify application to launch ability stage.
@@ -418,7 +418,7 @@ private:
      * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
      *
      */
-    void HandleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
+    void HandleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleName);
 
     /**
      *

@@ -43,7 +43,7 @@ void AppLifeCycleDeal::LaunchApplication(const AppLaunchData &launchData, const 
     }
 }
 
-void AppLifeCycleDeal::UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo)
+void AppLifeCycleDeal::UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleName)
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
@@ -51,7 +51,7 @@ void AppLifeCycleDeal::UpdateApplicationInfoInstalled(const ApplicationInfo &app
         return;
     }
 
-    appThread->ScheduleUpdateApplicationInfoInstalled(appInfo);
+    appThread->ScheduleUpdateApplicationInfoInstalled(appInfo, moduleName);
 }
 
 void AppLifeCycleDeal::AddAbilityStage(const HapModuleInfo &abilityStage)

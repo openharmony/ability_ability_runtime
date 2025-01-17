@@ -39,7 +39,7 @@ public:
     MOCK_METHOD1(ScheduleConfigurationUpdated, void(const Configuration&));
     MOCK_METHOD0(ScheduleProcessSecurityExit, void());
     MOCK_METHOD1(ScheduleAbilityStage, void(const HapModuleInfo&));
-    MOCK_METHOD1(ScheduleUpdateApplicationInfoInstalled, void(const ApplicationInfo&));
+    MOCK_METHOD2(ScheduleUpdateApplicationInfoInstalled, void(const ApplicationInfo&, const std::string&));
     MOCK_METHOD2(ScheduleAcceptWant, void(const AAFwk::Want& want, const std::string& moduleName));
     MOCK_METHOD3(SchedulePrepareTerminate, void(const std::string &moduleName,
         int32_t &prepareTermination, bool &isExist));
