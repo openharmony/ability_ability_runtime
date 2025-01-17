@@ -3430,7 +3430,7 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
     {
         HITRACE_METER_NAME(HITRACE_TAG_APP, "AccessTokenKit::VerifyAccessToken");
 #ifdef ABILITY_PLATFORM_CHECK_PERMISSION
-        int result = CheckPermissionForPC(bundleInfo);
+        int result = CheckStablePermission(bundleInfo);
 #else
         int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_INTERNET, false);
 #endif //ABILITY_PLATFORM_CHECK_PERMISSION
@@ -3464,7 +3464,7 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
 }
 
 #ifdef ABILITY_PLATFORM_CHECK_PERMISSION
-int AppMgrServiceInner::CheckPermissionForPC(const BundleInfo &bundleInfo)
+int AppMgrServiceInner::CheckStablePermission(const BundleInfo &bundleInfo)
 {
     auto token = bundleInfo.applicationInfo.accessTokenId;
     std::vectorSecurity::AccessToken::PermissionStateFull reqPermList;
