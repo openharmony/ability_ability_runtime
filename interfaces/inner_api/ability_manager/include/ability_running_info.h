@@ -32,8 +32,8 @@ public:
     int32_t appCloneIndex = -1;
     int pid;
     int uid;
-    int64_t startTime;
     int abilityState;
+    int64_t startTime;
     AppExecFwk::ElementName ability;
     std::string processName;
 

@@ -55,8 +55,8 @@ private:
     std::unordered_map<std::string, bool> serviceEnableFlags_;
     std::unordered_map<std::string, std::unordered_set<std::string>> serviceBlockedLists_;
     std::unordered_map<std::string, bool> networkEnableFlags_;
-    std::mutex networkEnableMutex_;
     std::unordered_map<std::string, bool> saEnableFlags_;
+    std::mutex networkEnableMutex_;
     std::mutex saEnableMutex_;
 };
 } // OHOS

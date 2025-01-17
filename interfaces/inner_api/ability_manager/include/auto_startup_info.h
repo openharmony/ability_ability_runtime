@@ -28,15 +28,15 @@ namespace AbilityRuntime {
  */
 struct AutoStartupInfo : public Parcelable {
 public:
+    int32_t appCloneIndex = 0;
+    int32_t userId = -1;
+    // Only use in count, don't mashall and unmashall
+    int32_t retryCount = 0;
     std::string bundleName;
     std::string abilityName;
     std::string moduleName;
     std::string abilityTypeName;
     std::string accessTokenId;
-    int32_t appCloneIndex = 0;
-    int32_t userId = -1;
-    // Only use in count, don't mashall and unmashall
-    int32_t retryCount = 0;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
@@ -44,9 +44,9 @@ public:
 };
 
 struct AutoStartupStatus {
-    int32_t code = -1;
     bool isAutoStartup = false;
     bool isEdmForce = false;
+    int32_t code = -1;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

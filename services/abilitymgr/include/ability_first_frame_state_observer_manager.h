@@ -43,10 +43,10 @@ protected:
     void RemoveObserverDeathRecipient(const sptr<IRemoteBroker> &observer);
 
 private:
-    ffrt::mutex observerLock_;
+    bool isNotifyAllBundles_;
     AbilityFirstFrameStateObserverMap observerMap_;
     std::map<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> recipientMap_;
-    bool isNotifyAllBundles_;
+    ffrt::mutex observerLock_;
 };
 
 class AbilityFirstFrameStateObserverManager {

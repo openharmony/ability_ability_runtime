@@ -28,13 +28,13 @@ class IRemoteObject;
 namespace AAFwk {
 struct StartAbilityParams {
     StartAbilityParams(Want &reqWant) : want(reqWant) {}
-    Want &want;
-    sptr<IRemoteObject> callerToken;
-    sptr<IRemoteObject> asCallerSourceToken;
+    bool isStartAsCaller = false;
     int32_t userId = -1;
     int requestCode = 0;
-    bool isStartAsCaller = false;
+    sptr<IRemoteObject> callerToken;
+    sptr<IRemoteObject> asCallerSourceToken;
     const StartOptions* startOptions = nullptr;
+    Want &want;
 
     int32_t GetValidUserId()
     {
@@ -64,8 +64,8 @@ private:
 #endif // WITH_DLP
     std::optional<bool> sandboxExternalAuth;
     std::optional<bool> isCallerSysApp;
-    std::optional<std::shared_ptr<AbilityRecord>> callerRecord;
     std::optional<int32_t> callerAppIndex;
+    std::optional<std::shared_ptr<AbilityRecord>> callerRecord;
 };
 
 class StartAbilityHandler {

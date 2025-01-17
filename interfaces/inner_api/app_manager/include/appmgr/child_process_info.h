@@ -30,6 +30,10 @@ constexpr int32_t CHILD_PROCESS_TYPE_ARK = 2;
 constexpr int32_t CHILD_PROCESS_TYPE_NATIVE_ARGS = 3;
 
 struct ChildProcessInfo : public Parcelable {
+    bool jitEnabled = false;
+    bool isDebugApp = true;
+    bool isStartWithDebug = false;
+    bool isStartWithNative = false;
     int32_t pid = 0;
     int32_t hostPid = 0;
     int32_t uid = -1;
@@ -41,10 +45,6 @@ struct ChildProcessInfo : public Parcelable {
     std::string srcEntry;
     std::string entryFunc;
     std::string entryParams;
-    bool jitEnabled = false;
-    bool isDebugApp = true;
-    bool isStartWithDebug = false;
-    bool isStartWithNative = false;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

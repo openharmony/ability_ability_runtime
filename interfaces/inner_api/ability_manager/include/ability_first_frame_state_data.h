@@ -48,11 +48,11 @@ struct AbilityFirstFrameStateData : public Parcelable {
      */
     static AbilityFirstFrameStateData *Unmarshalling(Parcel &parcel);
 
+    bool coldStart = false;
+    int32_t appIndex;
     std::string bundleName;
     std::string moduleName;
     std::string abilityName;
-    int32_t appIndex;
-    bool coldStart = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

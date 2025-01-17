@@ -1675,11 +1675,11 @@ private:
     void HandleDlpApp(Want &want);
 
     static std::once_flag singletonFlag_;
-    std::recursive_mutex mutex_;
-    std::mutex topAbilityMutex_;
     static std::shared_ptr<AbilityManagerClient> instance_;
     sptr<IAbilityManager> proxy_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
+    std::recursive_mutex mutex_;
+    std::mutex topAbilityMutex_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

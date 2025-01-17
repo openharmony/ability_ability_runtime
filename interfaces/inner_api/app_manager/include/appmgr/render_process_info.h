@@ -26,13 +26,13 @@
 namespace OHOS {
 namespace AppExecFwk {
 struct RenderProcessInfo : public Parcelable {
-    std::string bundleName_;
-    std::string processName_;
     std::int32_t pid_;
     std::int32_t uid_;
     std::int32_t hostUid_;
     std::int32_t hostPid_;
     std::int32_t state_;
+    std::string bundleName_;
+    std::string processName_;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

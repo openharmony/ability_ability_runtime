@@ -50,12 +50,6 @@ enum class WeightReasonCode {
 };
 
 struct RunningProcessInfo : public Parcelable {
-    std::string processName_;
-    std::int32_t pid_;
-    std::int32_t uid_;
-    AppProcessState state_;
-    std::vector<std::string> bundleNames;
-    std::int64_t startTimeMillis_;
     bool isContinuousTask = false;
     bool isKeepAlive = false;
     bool isFocused = false;
@@ -63,12 +57,19 @@ struct RunningProcessInfo : public Parcelable {
     bool isAbilityForegrounding = false;
     bool isTestMode = false;
     bool isStrictMode = false;
+    std::int32_t pid_;
+    std::int32_t uid_;
     std::int32_t bundleType = 0;
     std::int32_t appCloneIndex = -1;
-    std::string instanceKey = "";
-    AppExecFwk::MultiAppModeType appMode = AppExecFwk::MultiAppModeType::UNSPECIFIED;
     std::int32_t rssValue = 0;
     std::int32_t pssValue = 0;
+    AppProcessState state_;
+    std::int64_t startTimeMillis_;
+    std::vector<std::string> bundleNames;
+    std::string processName_;
+    std::string instanceKey = "";
+    AppExecFwk::MultiAppModeType appMode = AppExecFwk::MultiAppModeType::UNSPECIFIED;
+ 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     static RunningProcessInfo *Unmarshalling(Parcel &parcel);

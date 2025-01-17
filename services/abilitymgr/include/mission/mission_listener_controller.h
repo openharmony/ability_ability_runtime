@@ -150,10 +150,10 @@ private:
     };
 
 private:
-    ffrt::mutex listenerLock_;
+    sptr<IRemoteObject::DeathRecipient> listenerDeathRecipient_;
     std::shared_ptr<TaskHandlerWrap> handler_;
     std::vector<sptr<IMissionListener>> missionListeners_;
-    sptr<IRemoteObject::DeathRecipient> listenerDeathRecipient_;
+    ffrt::mutex listenerLock_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

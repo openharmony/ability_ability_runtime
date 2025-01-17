@@ -121,12 +121,12 @@ public:
         uint32_t devLruCapacity_ = 0;
         uint32_t procLruCapacity_ = 0;
         uint32_t devLruCnt_ = 0;
-        std::mutex mutex_;
         std::map<uint32_t, ProcRecordsInfo> procLruMap_;
         std::list<std::shared_ptr<AbilityRecord>> devRecLru_;
         std::shared_ptr<AbilityRecord> AddToProcLru(std::shared_ptr<AbilityRecord> abilityRecord);
         std::shared_ptr<AbilityRecord> AddToDevLru(std::shared_ptr<AbilityRecord> abilityRecord,
             std::shared_ptr<AbilityRecord> rec);
+        std::mutex mutex_;
         void RemoveAbilityRecInDevList(std::shared_ptr<AbilityRecord> abilityRecord);
         void RemoveAbilityRecInProcList(std::shared_ptr<AbilityRecord> abilityRecord);
         std::shared_ptr<AbilityRecord> GetAbilityRecInProcList(const AbilityRequest &abilityRequest);

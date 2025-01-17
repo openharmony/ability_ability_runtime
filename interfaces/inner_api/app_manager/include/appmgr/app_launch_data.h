@@ -300,23 +300,23 @@ public:
     bool IsAllowedNWebPreload() const;
 
 private:
-    ApplicationInfo applicationInfo_;
-    Profile profile_;
-    ProcessInfo processInfo_;
-    int32_t recordId_ = 0;
-    int32_t uId_ = 0;
-    int32_t appIndex_ = 0;
-    std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
     bool debugApp_ = false;
-    std::string perfCmd_;
     bool jitEnabled_ = false;
     bool isNativeStart_ = false;
     bool isMultiThread_ = false;
     bool isErrorInfoEnhance_ = false;
-    std::string appRunningUniqueId_;
-    std::string instanceKey_;
     bool isNeedPreloadModule_ = false;
     bool isAllowedNWebPreload_ = false;
+    int32_t recordId_ = 0;
+    int32_t uId_ = 0;
+    int32_t appIndex_ = 0;
+    std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
+    ApplicationInfo applicationInfo_;
+    Profile profile_;
+    ProcessInfo processInfo_;
+    std::string perfCmd_;
+    std::string appRunningUniqueId_;
+    std::string instanceKey_;
     std::string preloadModuleName_;
 };
 }  // namespace AppExecFwk

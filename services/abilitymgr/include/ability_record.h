@@ -156,13 +156,13 @@ private:
  */
 struct CallerAbilityInfo {
 public:
-    std::string callerBundleName;
-    std::string callerAbilityName;
     int32_t callerTokenId = 0;
     int32_t callerUid = 0;
     int32_t callerPid = 0;
-    std::string callerNativeName;
     int32_t callerAppCloneIndex = 0;
+    std::string callerNativeName;
+    std::string callerBundleName;
+    std::string callerAbilityName;
 };
 
 /**
@@ -243,52 +243,45 @@ enum CollaboratorType {
 };
 
 struct AbilityRequest {
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo appInfo;
-    int32_t uid = 0;
-    int requestCode = -1;
     bool restart = false;
-    int32_t restartCount = -1;
-    int64_t restartTime = 0;
     bool startRecent = false;
+    bool uriReservedFlag = false;
+    bool isFromIcon = false;
+    bool isShellCall = false;
+    // ERMS embedded atomic service
+    bool isQueryERMS = false;
+    bool isEmbeddedAllowed = false;
+    bool callSpecifiedFlagTimeout = false;
+    int32_t restartCount = -1;
+    int32_t uid = 0;
     int32_t collaboratorType = CollaboratorType::DEFAULT_TYPE;
-
-    // call ability
-    int callerUid = -1;
-    AbilityCallType callType = AbilityCallType::INVALID_TYPE;
-    sptr<IRemoteObject> callerToken = nullptr;
     int32_t callerTokenRecordId = -1;
-    sptr<IRemoteObject> asCallerSourceToken = nullptr;
+    int32_t userId = -1;
     uint32_t callerAccessTokenId = -1;
+    uint32_t specifyTokenId = 0;
+    int callerUid = -1;         // call ability
+    int requestCode = -1;
+    AbilityCallType callType = AbilityCallType::INVALID_TYPE;           // call ability
+    int64_t restartTime = 0;
+    sptr<IRemoteObject> callerToken = nullptr;          // call ability
+    sptr<IRemoteObject> asCallerSourceToken = nullptr;          // call ability
     sptr<IAbilityConnection> connect = nullptr;
-
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+    sptr<IRemoteObject> abilityInfoCallback = nullptr;
+    sptr<SessionInfo> sessionInfo;
     std::shared_ptr<AbilityStartSetting> startSetting = nullptr;
     std::shared_ptr<ProcessOptions> processOptions = nullptr;
     std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
-    std::string specifiedFlag;
-    int32_t userId = -1;
-    bool callSpecifiedFlagTimeout = false;
-    sptr<IRemoteObject> abilityInfoCallback = nullptr;
-
+    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
     AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
     AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
+    std::string specifiedFlag;
     std::string customProcess;
-
-    sptr<SessionInfo> sessionInfo;
-    uint32_t specifyTokenId = 0;
-    bool uriReservedFlag = false;
     std::string reservedBundleName;
-    bool isFromIcon = false;
-    bool isShellCall = false;
-
-    // ERMS embedded atomic service
-    bool isQueryERMS = false;
     std::string appId;
     std::string startTime;
-    bool isEmbeddedAllowed = false;
-
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo appInfo;
     std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
@@ -1252,24 +1245,64 @@ private:
 #endif
 
     static int64_t abilityRecordId;
-    int recordId_ = 0;                                // record id
+    bool isReady_ = false;                            // is ability thread attached?
+    bool isWindowStarted_ = false;                     // is window hotstart or coldstart?
+    bool isWindowAttached_ = false;                   // Is window of this ability attached?
+    bool isLauncherAbility_ = false;                  // is launcher?
+    bool isLoading_ = false;        // is loading?
+    bool isTerminating_ = false;              // is terminating ?
+    bool isCreateByConnect_ = false;          // is created by connect ability mode?
+    bool isUninstall_ = false;
+    bool isLauncherRoot_ = false;
+    bool isSwitchingPause_ = false;
+    /**
+     * When this ability startAbilityForResult another ability, if another ability is terminated,
+     * this ability will move to foreground, during this time, isAbilityForegrounding_ is true,
+     * isAbilityForegrounding_ will be set to false when this ability is background
+     */
+    bool isAbilityForegrounding_ = false;
+    bool isRestarting_ = false;     // is restarting ?
+    bool isStartedByCall_ = false;       // new version
+    bool isStartToBackground_ = false;         // new version
+    bool isStartToForeground_ = false;        // new version
+    bool minimizeReason_ = false;           // new version
+    bool clearMissionFlag_ = false;
+    bool keepAliveBundle_ = false;
+    bool isNeedBackToOtherMissionStack_ = false;
+    bool lockedState_ = false;
+    bool isAttachDebug_ = false;
+    bool isAssertDebug_ = false;
+    bool isAppAutoStartup_ = false;
+    bool isConnected = false;
+    bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
+    bool isLaunching_ = true;
+    bool securityFlag_ = false;
+    std::atomic_bool isCallerSetProcess_ = false;       // new version
+    std::atomic_bool backgroundAbilityWindowDelayed_ = false;
+
     int32_t uiExtensionAbilityId_ = 0;                // uiextension ability id
+    int32_t uid_ = 0;
+    int32_t pid_ = 0;
+    int32_t missionId_ = -1;
+    int32_t ownerMissionUserId_ = -1;
+    uint32_t extensionProcessMode_ = 0;       // new version
+    int32_t appIndex_ = 0;          // new version
+    int32_t restartCount_ = -1;
+    int32_t restartMax_ = -1;
+    int32_t collaboratorType_ = 0;
+    uint32_t callerAccessTokenId_ = -1;
+    uint32_t specifyTokenId_ = 0;
+
+    int recordId_ = 0;                                // record id
+    int requestCode_ = -1;  // requestCode_: >= 0 for-result start mode; <0 for normal start mode in default.
+    int startId_ = 0;  // service(ability) start id
+
     AppExecFwk::AbilityInfo abilityInfo_ = {};             // the ability info get from BMS
     std::weak_ptr<AbilityRecord> preAbilityRecord_ = {};   // who starts this ability record
     std::weak_ptr<AbilityRecord> nextAbilityRecord_ = {};  // ability that started by this ability
     int64_t startTime_ = 0;                           // records first time of ability start
     int64_t restartTime_ = 0;                         // the time of last trying restart
-    bool isReady_ = false;                            // is ability thread attached?
-    bool isWindowStarted_ = false;                     // is window hotstart or coldstart?
-    bool isWindowAttached_ = false;                   // Is window of this ability attached?
-    bool isLauncherAbility_ = false;                  // is launcher?
-
     sptr<IAbilityScheduler> scheduler_ = {};       // kit scheduler
-    bool isLoading_ = false;        // is loading?
-    bool isTerminating_ = false;              // is terminating ?
-    bool isCreateByConnect_ = false;          // is created by connect ability mode?
-
-    int requestCode_ = -1;  // requestCode_: >= 0 for-result start mode; <0 for normal start mode in default.
     sptr<IRemoteObject::DeathRecipient> schedulerDeathRecipient_ = {};  // scheduler binderDied Recipient
 
     /**
@@ -1279,56 +1312,24 @@ private:
      */
     std::shared_ptr<AbilityResult> result_ = {};
 
-    /**
-     * When this ability startAbilityForResult another ability, if another ability is terminated,
-     * this ability will move to foreground, during this time, isAbilityForegrounding_ is true,
-     * isAbilityForegrounding_ will be set to false when this ability is background
-     */
-    bool isAbilityForegrounding_ = false;
-
     // service(ability) can be connected by multi-pages(abilities), so need to store this service's connections
     mutable ffrt::mutex connRecordListMutex_;
     std::list<std::shared_ptr<ConnectionRecord>> connRecordList_ = {};
     // service(ability) onConnect() return proxy of service ability
     sptr<IRemoteObject> connRemoteObject_ = {};
-    int startId_ = 0;  // service(ability) start id
 
     // page(ability) can be started by multi-pages(abilities), so need to store this ability's caller
     std::list<std::shared_ptr<CallerRecord>> callerList_ = {};
 
-    bool isUninstall_ = false;
-
-    bool isLauncherRoot_ = false;
-
     PacMap stateDatas_;             // ability saved ability state data
     WindowConfig windowConfig_;
-    bool isRestarting_ = false;     // is restarting ?
     AppState appState_ = AppState::BEGIN;
 
-    int32_t uid_ = 0;
-    int32_t pid_ = 0;
-    int32_t missionId_ = -1;
-    int32_t ownerMissionUserId_ = -1;
-    bool isSwitchingPause_ = false;
-
-    // new version
-    std::shared_ptr<CallContainer> callContainer_ = nullptr;
-    bool isStartedByCall_ = false;
-    bool isStartToBackground_ = false;
-    bool isStartToForeground_ = false;
-    std::atomic_bool isCallerSetProcess_ = false;
-    std::string customProcessFlag_ = "";
-    uint32_t extensionProcessMode_ = 0;
-    int32_t appIndex_ = 0;
-    bool minimizeReason_ = false;
-
-    bool clearMissionFlag_ = false;
-    bool keepAliveBundle_ = false;
-    int32_t restartCount_ = -1;
-    int32_t restartMax_ = -1;
+    std::shared_ptr<CallContainer> callContainer_ = nullptr;       // new version
+    std::string customProcessFlag_ = "";        // new version
     std::string specifiedFlag_;
     std::string uri_;
-    ffrt::mutex lock_;
+
     mutable ffrt::mutex dumpInfoLock_;
     mutable ffrt::mutex dumpLock_;
     mutable ffrt::mutex resultLock_;
@@ -1346,35 +1347,23 @@ private:
 
 #ifdef SUPPORT_SCREEN
     bool isStartingWindow_ = false;
-    uint32_t bgColor_ = 0;
-    std::shared_ptr<Media::PixelMap> startingWindowBg_ = nullptr;
-
     bool isCompleteFirstFrameDrawing_ = false;
     bool coldStart_ = false;
+    uint32_t bgColor_ = 0;
+    std::shared_ptr<Media::PixelMap> startingWindowBg_ = nullptr;
 #endif
 
-    uint32_t callerAccessTokenId_ = -1;
-    bool isNeedBackToOtherMissionStack_ = false;
     std::weak_ptr<AbilityRecord> otherMissionStackAbilityRecord_; // who starts this ability record by SA
-    int32_t collaboratorType_ = 0;
-    std::string missionAffinity_ = "";
-    bool lockedState_ = false;
-    bool isAttachDebug_ = false;
-    bool isAssertDebug_ = false;
-    bool isAppAutoStartup_ = false;
-    bool isConnected = false;
-    std::atomic_bool backgroundAbilityWindowDelayed_ = false;
-
-    bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
-    uint32_t specifyTokenId_ = 0;
 
     std::shared_ptr<Want> connectWant_ = nullptr;
     std::shared_ptr<CallerAbilityInfo> saCallerInfo_ = nullptr;
-    ffrt::mutex connectWantLock_;
-    bool isLaunching_ = true;
     LaunchDebugInfo launchDebugInfo_;
+    
     std::string instanceKey_ = "";
-    bool securityFlag_ = false;
+    std::string missionAffinity_ = "";
+
+    ffrt::mutex lock_;
+    ffrt::mutex connectWantLock_;
     std::mutex collaborateWantLock_;
 };
 }  // namespace AAFwk

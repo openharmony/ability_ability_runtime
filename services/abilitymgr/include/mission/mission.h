@@ -218,19 +218,19 @@ public:
     }
 
 private:
-    int32_t missionId_;
-    int32_t startMethod_;
-    std::shared_ptr<AbilityRecord> abilityRecord_;
-    std::string missionName_;
-    std::string specifiedFlag_;
-    std::weak_ptr<MissionList> ownerMissionList_;
     bool lockedState_ = false;
     bool isMovingToFront_ = false;
     bool isANRState_ = false;
     bool needNotify_ = true;
     bool needNotifyUpdateLabel_ = false;
-    std::string missionTime_ = "0";
     bool unclearable_ = false;
+    int32_t missionId_;
+    int32_t startMethod_;
+    std::weak_ptr<MissionList> ownerMissionList_;
+    std::shared_ptr<AbilityRecord> abilityRecord_;
+    std::string missionName_;
+    std::string specifiedFlag_;
+    std::string missionTime_ = "0";
 };
 }  // namespace AAFwk
 }  // namespace OHOS

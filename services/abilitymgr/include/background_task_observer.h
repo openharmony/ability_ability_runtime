@@ -57,11 +57,11 @@ private:
     sptr<AppExecFwk::IAppMgr> GetAppManager();
 
 private:
+    sptr<OHOS::AppExecFwk::IAppMgr> appManager_ = nullptr;
     std::list<int> bgTaskUids_;
-    std::mutex bgTaskMutex_;
     std::list<int> efficiencyUids_;
     std::mutex efficiencyMutex_;
-    sptr<OHOS::AppExecFwk::IAppMgr> appManager_ = nullptr;
+    std::mutex bgTaskMutex_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
