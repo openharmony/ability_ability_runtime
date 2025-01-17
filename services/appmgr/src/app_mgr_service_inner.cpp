@@ -3476,7 +3476,7 @@ int AppMgrServiceInner::CheckStablePermission(const BundleInfo &bundleInfo)
         [deviceid](const Security::AccessToken::PermissionStateFull &status) {
             if (status.permissionName == PERMISSION_INTERNET &&
                 status.grantStatus.size() == status.resDeviceID.size()) {
-                if (CilulateCheckDeviceStatus(status, deviceId)) {
+                if (CirculateCheckDeviceStatus(status, deviceId)) {
                     return true;
                 }
             }
@@ -3488,7 +3488,7 @@ int AppMgrServiceInner::CheckStablePermission(const BundleInfo &bundleInfo)
     return result;
 }
 
-bool AppMgrServiceInner::CilulateCheckDeviceStatus(Security::AccessToken::PermissionStateFull &status,
+bool AppMgrServiceInner::CirculateCheckDeviceStatus(Security::AccessToken::PermissionStateFull &status,
     std::string deviceid)
 {
     for (size_t i = 0; i < status.resDeviceID.size(); i++) {
