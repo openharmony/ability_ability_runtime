@@ -2229,7 +2229,7 @@ int32_t AppMgrProxy::UpdateProcessMemoryState(const std::vector<ProcessMemorySta
     }
     if (!SendTransactCmd(AppMgrInterfaceCode::UPDATE_PROCESS_MEMORY_STATE, data, reply)) {
         TAG_LOGE(AAFwkTag::APPMGR, "SendRequest err");
-        return ERR_NULL_OBJECT;
+        return IPC_PROXY_ERR;
     }
     return reply.ReadInt32();
 }
