@@ -3466,6 +3466,7 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
 #ifdef ABILITY_PLATFORM_CHECK_PERMISSION
 int AppMgrServiceInner::CheckStablePermission(const BundleInfo &bundleInfo)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, "AccessTokenKit::CheckStablePermission");
     auto token = bundleInfo.applicationInfo.accessTokenId;
     std::vectorSecurity::AccessToken::PermissionStateFull reqPermList;
     auto deviceid = bundleInfo.applicationInfo.deviceId;
