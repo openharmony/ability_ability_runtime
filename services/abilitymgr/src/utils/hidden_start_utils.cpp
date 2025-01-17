@@ -24,13 +24,9 @@
 
 namespace OHOS {
 namespace AAFwk {
-namespace {
-constexpr const char* TASK_MANAGER_SERVICE = "task_manager_service";
-}
-
 bool HiddenStartUtils::IsHiddenStart(const Want &want, const StartOptions &options)
 {
-    if (!PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(TASK_MANAGER_SERVICE)) {
+    if (!PermissionVerification::GetInstance()->VerifyStartUIAbilityToHiddenPermission()) {
         return false;
     }
 
