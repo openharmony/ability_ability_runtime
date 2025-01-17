@@ -2048,6 +2048,7 @@ private:
     void DumpMissionInfosInner(const std::string &args, std::vector<std::string> &info);
 
     bool JudgeMultiUserConcurrency(const int32_t userId);
+    bool CheckCrossUser(const int32_t userId, AppExecFwk::ExtensionAbilityType extensionType);
     /**
      * dumpsys info
      *
