@@ -93,8 +93,8 @@ ohos_shared_library("libappms") {
     defines += [ "ABILITY_FAULT_AND_EXIT_TEST" ]
   }
 
-  if (ability_runtime_pc_check_permission) {
-    defines += [ "ABILITY_PLATFORM_PC" ]
+  if (ability_runtime_check_device_permission) {
+    defines += [ "ABILITY_PLATFORM_CHECK_PERMISSION" ]
   }
 
   configs = [ ":appmgr_config" ]
