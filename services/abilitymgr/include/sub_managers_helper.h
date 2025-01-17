@@ -85,22 +85,21 @@ private:
 
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
-
-    ffrt::mutex managersMutex_;
-    std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> connectManagers_;
     std::shared_ptr<AbilityConnectManager> currentConnectManager_;
-    std::unordered_map<int, std::shared_ptr<DataAbilityManager>> dataAbilityManagers_;
     std::shared_ptr<DataAbilityManager> currentDataAbilityManager_;
-    std::unordered_map<int, std::shared_ptr<PendingWantManager>> pendingWantManagers_;
     std::shared_ptr<PendingWantManager> currentPendingWantManager_;
-    std::unordered_map<int, std::shared_ptr<MissionListManagerInterface>> missionListManagers_;
     std::shared_ptr<MissionListManagerInterface> currentMissionListManager_;
-    std::unordered_map<int, std::shared_ptr<UIAbilityLifecycleManager>> uiAbilityManagers_;
     std::shared_ptr<UIAbilityLifecycleManager> currentUIAbilityManager_;
+    std::shared_ptr<MissionListWrap> missionListWrap_;
+    std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> connectManagers_;
+    std::unordered_map<int, std::shared_ptr<DataAbilityManager>> dataAbilityManagers_;
+    std::unordered_map<int, std::shared_ptr<PendingWantManager>> pendingWantManagers_;
+    std::unordered_map<int, std::shared_ptr<MissionListManagerInterface>> missionListManagers_;
+    std::unordered_map<int, std::shared_ptr<UIAbilityLifecycleManager>> uiAbilityManagers_;
 
     std::mutex missionListWrapMutex_;
+    ffrt::mutex managersMutex_;
     void* missionLibHandle_ = nullptr;
-    std::shared_ptr<MissionListWrap> missionListWrap_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

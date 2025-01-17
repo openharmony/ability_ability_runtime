@@ -48,10 +48,10 @@ enum class KeepAliveAppType : int32_t {
  */
 struct KeepAliveInfo : public Parcelable {
 public:
-    std::string bundleName;
     int32_t userId = -1;
     KeepAliveAppType appType = KeepAliveAppType::UNSPECIFIED;
     KeepAliveSetter setter = KeepAliveSetter::UNSPECIFIED;
+    std::string bundleName;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

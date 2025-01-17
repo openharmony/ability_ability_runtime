@@ -478,12 +478,12 @@ protected:
     PacMap &GetRestoreData();
 
     bool isStageBasedModel_ = false;
+    bool notifyForegroundByWindow_ = false;
+    bool notifyForegroundByAbility_ = false;
     int lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
     sptr<IRemoteObject> token_;
     std::shared_ptr<Ability> ability_;
     std::shared_ptr<AbilityHandler> handler_;
-    bool notifyForegroundByWindow_ = false;
-    bool notifyForegroundByAbility_ = false;
     std::mutex notifyForegroundLock_;
 
 private:

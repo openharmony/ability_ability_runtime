@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,8 +34,8 @@ public:
     int pid;
     int uid;
     AppExecFwk::ExtensionAbilityType type = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
-    std::string processName;
     int64_t startTime;
+    std::string processName;
     std::vector<std::string> clientPackage;
 
     bool ReadFromParcel(Parcel &parcel);

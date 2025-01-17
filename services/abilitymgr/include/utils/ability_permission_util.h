@@ -183,8 +183,8 @@ private:
 
     int GetTokenIdByPid(pid_t pid);
 
-    ffrt::mutex startSelfUIAbilityRecordsMutex_;
     std::vector<std::vector<int32_t>> startSelfUIAbilityRecords_;
+    ffrt::mutex startSelfUIAbilityRecordsMutex_;
 
     friend class StartSelfUIAbilityRecordGuard;
 

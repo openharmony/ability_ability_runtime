@@ -24,8 +24,8 @@ int64_t CallRecord::callRecordId = 0;
 
 CallRecord::CallRecord(const int32_t callerUid, const std::shared_ptr<AbilityRecord> &targetService,
     const sptr<IAbilityConnection> &connCallback, const sptr<IRemoteObject> &callToken)
-    : callerUid_(callerUid),
-      state_(CallState::INIT),
+    : state_(CallState::INIT),
+      callerUid_(callerUid),
       service_(targetService),
       connCallback_(connCallback),
       callerToken_(callToken)

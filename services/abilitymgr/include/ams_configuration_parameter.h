@@ -164,24 +164,26 @@ private:
 
 private:
     bool nonConfigFile_ {false};
+    bool supportBackToCaller_ {true};
+    bool supportSceneboardCrashReboot_{true};
+
     int maxRootLauncherRestartNum_ = 0;
     int maxResidentRestartNum_ = 0;
     int restartIntervalTime_ {120000};
-    std::string orientation_ {""};
     int missionSaveTime_ {12 * 60 * 60 * 1000};
     int anrTime_ {5000};
     int amsTime_ {5000};
     int bootAnimationTime_ {5};
     int timeoutUnitTime_ {1000};
+    int multiUserType_ {0};
+
+    std::vector<std::string> residentWhiteList_;
+    std::string orientation_ {""};
     std::string bundleName_ {""};
     std::string abilityName_ {""};
     std::string pickerType_ {""};
-    nlohmann::json pickerJsonObject_ = nlohmann::json::object();
     std::map<std::string, std::string> picker_;
-    int multiUserType_ {0};
-    bool supportBackToCaller_ {true};
-    bool supportSceneboardCrashReboot_{true};
-    std::vector<std::string> residentWhiteList_;
+    nlohmann::json pickerJsonObject_ = nlohmann::json::object();
 };
 }  // namespace AAFwk
 }  // namespace OHOS

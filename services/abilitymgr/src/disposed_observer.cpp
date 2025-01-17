@@ -28,7 +28,7 @@ constexpr const char* INTERCEPT_MISSION_ID = "intercept_missionId";
 
 DisposedObserver::DisposedObserver(const AppExecFwk::DisposedRule &disposedRule,
     const std::shared_ptr<DisposedRuleInterceptor> &interceptor)
-    : disposedRule_(disposedRule), interceptor_(interceptor)
+    : interceptor_(interceptor), disposedRule_(disposedRule)
 {}
 
 void DisposedObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData &abilityStateData)

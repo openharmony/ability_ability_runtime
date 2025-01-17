@@ -216,6 +216,7 @@ private:
     void InitAppStateObserver();
 
 private:
+    int32_t retry_ = 0;
     std::shared_ptr<ConnectionObserverController> observerController_;
 
     ffrt::mutex stateLock_;
@@ -228,8 +229,6 @@ private:
 
     sptr<InnerAppStateObserver> appStateObserver_;
     std::shared_ptr<TaskHandlerWrap> handler_;
-
-    int32_t retry_ = 0;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -52,13 +52,13 @@ struct AppProcessData : public Parcelable {
      */
     static AppProcessData *Unmarshalling(Parcel &parcel);
 
-    std::string processName;
+    bool isFocused = false;
+    int32_t appIndex = 0;
     ApplicationState appState = ApplicationState::APP_STATE_CREATE;
     pid_t pid = 0;
     std::vector<AppData> appDatas;
-    bool isFocused = false;
     std::vector<int32_t> renderPids;
-    int32_t appIndex = 0;
+    std::string processName;
     std::string instanceKey = "";
     std::string bundleName = "";
 };

@@ -49,22 +49,22 @@ struct AbilityStateData : public Parcelable {
      */
     static AbilityStateData *Unmarshalling(Parcel &parcel);
 
-    std::string moduleName;
-    std::string bundleName;
-    std::string abilityName;
-    int32_t abilityState = 0;
-    pid_t pid = 0;
-    int32_t uid = 0;
-    sptr<IRemoteObject> token;
-    int32_t abilityType = 0;
     bool isFocused = false;
-    std::string callerBundleName;
-    std::string callerAbilityName;
     bool isAtomicService = false;
+    int32_t uid = 0;
     int32_t abilityRecordId = 0;
     int32_t appCloneIndex = -1;
     int32_t extensionAbilityType = -1;
     int32_t processType = 0;
+    int32_t abilityType = 0;
+    int32_t abilityState = 0;
+    pid_t pid = 0;
+    sptr<IRemoteObject> token;
+    std::string moduleName;
+    std::string bundleName;
+    std::string abilityName;
+    std::string callerBundleName;
+    std::string callerAbilityName;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

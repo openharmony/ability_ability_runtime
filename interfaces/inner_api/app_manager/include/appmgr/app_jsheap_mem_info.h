@@ -22,11 +22,11 @@
 namespace OHOS {
 namespace AppExecFwk {
 struct JsHeapDumpInfo : public Parcelable {
-    uint32_t pid = 0;
-    uint32_t tid = 0;
     bool needGc = false;
     bool needSnapshot = false;
     bool needLeakobj = false;
+    uint32_t pid = 0;
+    uint32_t tid = 0;
     virtual bool Marshalling(Parcel &parcel) const override;
     static JsHeapDumpInfo *Unmarshalling(Parcel &parcel);
 };
