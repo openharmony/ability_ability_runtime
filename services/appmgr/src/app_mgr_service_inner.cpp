@@ -3463,7 +3463,7 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
     }
 }
 
-#ifdef ABILITY_PLATFORM_PC
+#ifdef ABILITY_PLATFORM_CHECK_PERMISSION
 int AppMgrServiceInner::CheckPermissionForPC(const BundleInfo &bundleInfo)
 {
     auto token = bundleInfo.applicationInfo.accessTokenId;
@@ -3498,7 +3498,7 @@ bool AppMgrServiceInner::CilulateCheckDeviceStatus(Security::AccessToken::Permis
     }
     return false;
 }
-#endif //ABILITY_PLATFORM_PC
+#endif //ABILITY_PLATFORM_CHECK_PERMISSION
 
 int32_t AppMgrServiceInner::CreatNewStartMsg(const Want &want, const AbilityInfo &abilityInfo,
     const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, AppSpawnStartMsg &startMsg)
