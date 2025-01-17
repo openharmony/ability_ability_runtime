@@ -3429,11 +3429,11 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
     auto token = bundleInfo.applicationInfo.accessTokenId;
     {
         HITRACE_METER_NAME(HITRACE_TAG_APP, "AccessTokenKit::VerifyAccessToken");
-#ifdef ABILITY_PLATFORM_PC
+#ifdef ABILITY_PLATFORM_CHECK_PERMISSION
         int result = CheckPermissionForPC(bundleInfo);
 #else
         int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_INTERNET, false);
-#endif //ABILITY_PLATFORM_PC
+#endif //ABILITY_PLATFORM_CHECK_PERMISSION
         if (result != Security::AccessToken::PERMISSION_GRANTED) {
             setAllowInternet = 1;
             allowInternet = 0;
