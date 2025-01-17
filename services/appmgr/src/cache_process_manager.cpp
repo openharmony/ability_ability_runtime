@@ -255,12 +255,12 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
     HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_START_APP", HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_VERSION_CODE, appInfo->versionCode, EVENT_KEY_VERSION_NAME, appInfo->versionName,
         EVENT_KEY_BUNDLE_NAME, appInfo->bundleName, EVENT_KEY_CACHE_STATE, "processCacheLaunch");
+    appRecord->SetState(ApplicationState::APP_STATE_READY);
     auto appMgrSptr = appMgr_.lock();
     if (appMgrSptr == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
         return true;
     }
-    appRecord->SetState(ApplicationState::APP_STATE_READY);
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
     TAG_LOGI(AAFwkTag::APPMGR, "app none cached state is notified: %{public}s, uid: %{public}d, %{public}s",
         appRecord->GetBundleName().c_str(), appRecord->GetUid(), PrintCacheQueue().c_str());
@@ -556,12 +556,12 @@ void CacheProcessManager::PrepareActivateCache(const std::shared_ptr<AppRunningR
         return;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s needs activate.", appRecord->GetBundleName().c_str());
+    appRecord->SetState(ApplicationState::APP_STATE_READY);
     auto appMgrSptr = appMgr_.lock();
     if (appMgrSptr == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
         return;
     }
-    appRecord->SetState(ApplicationState::APP_STATE_READY);
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
 }
 
