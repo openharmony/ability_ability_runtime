@@ -3393,7 +3393,11 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
     auto token = bundleInfo.applicationInfo.accessTokenId;
     {
         HITRACE_METER_NAME(HITRACE_TAG_APP, "AccessTokenKit::VerifyAccessToken");
+#ifdef ABILITY_PLATFORM_CHECK_PERMISSION
+        int result = CheckStablePermission(bundleInfo);
+#else
         int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_INTERNET, false);
+#endif //ABILITY_PLATFORM_CHECK_PERMISSION
         if (result != Security::AccessToken::PERMISSION_GRANTED) {
             setAllowInternet = 1;
             allowInternet = 0;
@@ -3422,6 +3426,44 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
         }
     }
 }
+
+#ifdef ABILITY_PLATFORM_CHECK_PERMISSION
+int AppMgrServiceInner::CheckStablePermission(const BundleInfo &bundleInfo)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, "AccessTokenKit::CheckStablePermission");
+    auto token = bundleInfo.applicationInfo.accessTokenId;
+    std::vectorSecurity::AccessToken::PermissionStateFull reqPermList;
+    auto deviceid = bundleInfo.applicationInfo.deviceId;
+    Security::AccessToken::AccessTokenKit::GetReqPermissions(token, reqPermList, true);
+    bool granted = std::any_of(
+        reqPermList.begin(), reqPermList.end(),
+        [deviceid](const Security::AccessToken::PermissionStateFull &status) {
+            if (status.permissionName == PERMISSION_INTERNET &&
+                status.grantStatus.size() == status.resDeviceID.size()) {
+                if (CheckDeviceStatus(status, deviceId)) {
+                    return true;
+                }
+            }
+        return false;
+    });
+    int result = granted ? Security::AccessToken::PERMISSION_GRANTED : Security::AccessToken::PERMISSION_DENIED;
+    TAG_LOGI(AAFwkTag::APPMGR, "GetInternetPermission, ret %{public}d, uid %{public}d, token %{public}d", result,
+        bundleInfo.uid, token);
+    return result;
+}
+
+bool AppMgrServiceInner::CheckDeviceStatus(Security::AccessToken::PermissionStateFull &status,
+    std::string deviceid)
+{
+    for (size_t i = 0; i < status.resDeviceID.size(); i++) {
+        if (status.resDeviceID[i] == deviceid &&
+            status.grantStatus[i] == Security::AccessToken::PERMISSION_GRANTED) {
+            return true;
+        }
+    }
+    return false;
+}
+#endif //ABILITY_PLATFORM_CHECK_PERMISSION
 
 int32_t AppMgrServiceInner::CreatNewStartMsg(const Want &want, const AbilityInfo &abilityInfo,
     const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, AppSpawnStartMsg &startMsg)
