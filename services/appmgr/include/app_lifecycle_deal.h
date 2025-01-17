@@ -49,7 +49,7 @@ public:
      *
      * @return
      */
-    void UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
+    void UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleName);
 
     /**
      * AddAbilityStageInfo, call ScheduleAbilityStageInfo() through proxy project,

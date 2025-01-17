@@ -746,7 +746,8 @@ HWTEST_F(AppRunningManagerTest, ProcessUpdateApplicationInfoInstalled_0100, Test
     ASSERT_NE(appRunningManager, nullptr);
 
     ApplicationInfo appInfo;
-    EXPECT_EQ(appRunningManager->ProcessUpdateApplicationInfoInstalled(appInfo), 0);
+    std::string moduleName;
+    EXPECT_EQ(appRunningManager->ProcessUpdateApplicationInfoInstalled(appInfo, moduleName), 0);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

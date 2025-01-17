@@ -112,6 +112,8 @@ public:
     virtual void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const {}
     virtual void SetDeviceDisconnectCallback(const std::function<bool()> &cb) = 0;
     virtual void UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName) = 0;
+    virtual void UpdatePkgContextInfoJsonEx(const std::string& moduleName, const std::string& hapPath,
+        const std::string& packageName) {}
     Runtime(const Runtime&) = delete;
     Runtime(Runtime&&) = delete;
     Runtime& operator=(const Runtime&) = delete;

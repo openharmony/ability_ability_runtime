@@ -1637,5 +1637,22 @@ void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hap
         panda::JSNApi::SetPkgNameList(vm, packageNameList_);
     }
 }
+
+void JsRuntime::UpdatePkgContextInfoJsonEx(const std::string& moduleName, const std::string& hapPath,
+    const std::string& packageName)
+{
+    std::map<std::string, std::string> pkgContextInfoJsonStringMap;
+    pkgContextInfoJsonStringMap[moduleName] = hapPath;
+    std::map<std::string, std::string> packageNameList;
+    packageNameList[moduleName] = packageName;
+    auto vm = GetEcmaVm();
+    std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
+    std::map<std::string, std::string> pkgAliasMap;
+    JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(pkgContextInfoJsonStringMap, pkgContextInfoMap, pkgAliasMap);
+    panda::JSNApi::UpdatePkgContextInfoList(vm, pkgContextInfoMap);
+    panda::JSNApi::UpdatePkgAliasList(vm, pkgAliasMap);
+    panda::JSNApi::UpdatePkgNameList(vm, packageNameList);
+}
+
 } // namespace AbilityRuntime
 } // namespace OHOS
