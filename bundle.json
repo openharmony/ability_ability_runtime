@@ -29,7 +29,7 @@
         "ability_runtime_app_no_response_dialog",
         "ability_runtime_app_no_response_bundlename",
         "ability_runtime_start_window_options_with_pixelmap",
-        "ability_runtime_check_device_permission"
+        "ability_runtime_check_internet_permission"
       ],
       "adapted_system_type": [
           "standard"
