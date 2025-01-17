@@ -1642,7 +1642,7 @@ private:
 
 #ifdef ABILITY_PLATFORM_CHECK_PERMISSION
     int CheckStablePermission(const BundleInfo &bundleInfo);
-    bool CilulateCheckDeviceStatus(Security::AccessToken::PermissionStateFull &status,
+    bool CheckDeviceStatus(Security::AccessToken::PermissionStateFull &status,
         std::string deviceid);
 #endif //ABILITY_PLATFORM_CHECK_PERMISSION
 
