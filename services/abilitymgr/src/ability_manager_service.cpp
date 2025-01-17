@@ -87,7 +87,9 @@
 #include "input_manager.h"
 #include "ability_first_frame_state_observer_manager.h"
 #include "session_manager_lite.h"
+#include "session/host/include/zidl/session_interface.h"
 #include "window_focus_changed_listener.h"
+#include "wm_common.h"
 #endif
 
 using OHOS::AppExecFwk::ElementName;
@@ -3541,6 +3543,58 @@ int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &
     TAG_LOGD(AAFwkTag::ABILITYMGR, "UIExtension persistentId: %{public}d, element: %{public}s.",
         extensionSessionInfo->persistentId, extensionSessionInfo->want.GetElement().GetURI().c_str());
     connectManager->TerminateAbilityWindowLocked(targetRecord, extensionSessionInfo);
+    return ERR_OK;
+}
+
+int AbilityManagerService::CloseUIExtensionAbilityBySCB(const sptr<IRemoteObject> token)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "close uiextensionability by scb");
+    CHECK_POINTER_AND_RETURN(token, ERR_INVALID_VALUE);
+
+    if (!IsCallerSceneBoard()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "permission deny");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    if (!VerificationAllToken(token)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "verificationAllToken failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    if (!UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "target ability %{public}s not an uiextensionability",
+            abilityRecord->GetURI().c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    auto sessionInfo = abilityRecord->GetSessionInfo();
+    if (sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "target session info is null, ability: %{public}s",
+            abilityRecord->GetURI().c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    std::shared_ptr<AbilityConnectManager> connectManager;
+    std::shared_ptr<AbilityRecord> targetRecord;
+    GetConnectManagerAndUIExtensionBySessionInfo(sessionInfo, connectManager, targetRecord);
+    if (connectManager == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null, ability: %{public}s", abilityRecord->GetURI().c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<Rosen::ISession> sessionProxy = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
+    if (sessionProxy == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get session proxy failed, ability: %{public}s",
+            abilityRecord->GetURI().c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    // notify caller sync detach
+    sessionProxy->NotifyExtensionDetachToDisplay();
+    connectManager->TerminateAbilityWindowLocked(abilityRecord, sessionInfo);
     return ERR_OK;
 }
 
@@ -9759,12 +9813,6 @@ bool AbilityManagerService::CheckUIExtensionCallerPidByHostWindowId(const Abilit
         return true;
     }
 
-    auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-    CHECK_POINTER_AND_RETURN(callerAbility, false);
-    if (callerAbility->IsSceneBoard()) {
-        return true;
-    }
-
     auto sessionInfo = abilityRequest.sessionInfo;
     CHECK_POINTER_AND_RETURN(sessionInfo, false);
     auto hostWindowId = sessionInfo->hostWindowId;
@@ -9772,8 +9820,26 @@ bool AbilityManagerService::CheckUIExtensionCallerPidByHostWindowId(const Abilit
     CHECK_POINTER_AND_RETURN(sceneSessionManager, false);
     pid_t hostPid = 0;
     // If host window id is scb, it will return with error.
-    auto ret = sceneSessionManager->CheckWindowId(hostWindowId, hostPid);
+    auto tokenId = abilityRequest.appInfo.accessTokenId;
+    auto element = abilityRequest.want.GetElement();
+    auto extType = abilityRequest.abilityInfo.extensionAbilityType;
+    {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "Rosen::SceneSessionManager::CheckUIExtensionCreation");
+        auto ret = sceneSessionManager->CheckUIExtensionCreation(hostWindowId, tokenId, element, extType, hostPid);
+        if (ret == Rosen::WMError::WM_ERROR_INVALID_PERMISSION) {
+            // If check permission failed, means target ability can't show on lock screen.
+            TAG_LOGE(AAFwkTag::UI_EXT, "Check fail, tokenId: %{public}d, element: %{public}s, ret: %{public}d",
+                tokenId, element.GetURI().c_str(), ret);
+            return false;
+        }
+    }
+
     TAG_LOGD(AAFwkTag::UI_EXT, "get pid %{public}d by windowId %{public}d", hostPid, hostWindowId);
+    auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    CHECK_POINTER_AND_RETURN(callerAbility, false);
+    if (callerAbility->IsSceneBoard()) {
+        return true;
+    }
     if (hostPid != 0 && callerAbility->GetPid() == hostPid) {
         return true;
     }

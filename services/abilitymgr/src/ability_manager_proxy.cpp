@@ -1020,6 +1020,34 @@ int AbilityManagerProxy::TerminateUIExtensionAbility(const sptr<SessionInfo> &ex
     return reply.ReadInt32();
 }
 
+int AbilityManagerProxy::CloseUIExtensionAbilityBySCB(const sptr<IRemoteObject> token)
+{
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "input invalid");
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write object fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteBool(true) || !data.WriteRemoteObject(token)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag and token fail");
+        return INNER_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto error = SendRequest(AbilityManagerInterfaceCode::CLOSE_UI_EXTENSION_ABILITY_BY_SCB, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
 int AbilityManagerProxy::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
 {
     int error;
