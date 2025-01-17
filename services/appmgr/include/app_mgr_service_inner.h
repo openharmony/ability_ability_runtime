@@ -1660,6 +1660,12 @@ private:
     void GetChildrenProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<ChildProcessInfo> &info);
 #endif // SUPPORT_CHILD_PROCESS
 
+#ifdef ABILITY_PLATFORM_CHECK_PERMISSION
+    int CheckStablePermission(const BundleInfo &bundleInfo);
+    bool CheckDeviceStatus(Security::AccessToken::PermissionStateFull &status,
+        std::string deviceid);
+#endif //ABILITY_PLATFORM_CHECK_PERMISSION
+
     int StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid, bool isGPU = false);
 
