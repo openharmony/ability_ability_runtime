@@ -116,7 +116,7 @@ class AbilityContext extends Context {
   startAbilityForResultWithAccount(want, accountId, options, callback) {
     return this.__context_impl__.startAbilityForResultWithAccount(want, accountId, options, callback);
   }
-  
+
   startUIServiceExtensionAbility(want, callback) {
     return this.__context_impl__.startUIServiceExtensionAbility(want, callback);
   }
@@ -195,6 +195,10 @@ class AbilityContext extends Context {
 
   setMissionIcon(icon, callback) {
     return this.__context_impl__.setMissionIcon(icon, callback);
+  }
+
+  setAbilityInstanceInfo(label, callback) {
+    return this.__context_impl__.setAbilityInstanceInfo(label, callback);
   }
 
   requestDialogService(want, resultCallback) {
