@@ -256,6 +256,13 @@ public:
      */
     std::string GetMigrateClientBundleName();
 
+    /**
+     * IsConnectSupportCrossUser, check if it support cross-user.
+     *
+     * @return Whether it supports cross-user.
+     */
+    bool IsConnectSupportCrossUser();
+
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.
@@ -297,6 +304,8 @@ private:
     volatile DeviceConfiguration<bool> isLaunchEmbededUIAbility_ = {false, false};
     volatile DeviceConfiguration<bool> isSupportNativeChildProcess_ = {false, false};
     volatile DeviceConfiguration<bool> isSupportMultiInstance_ = {false, false};
+    std::mutex isConnectSupportCrossUserMutex_;
+    volatile DeviceConfiguration<bool> isConnectSupportCrossUser_ = {false, false};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
     std::mutex residentProcessInExtremeMemoryMutex_;
