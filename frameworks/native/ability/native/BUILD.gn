@@ -2241,7 +2241,7 @@ ohos_shared_library("form_edit_extension_module") {
     cfi_vcall_icall_only = true
     debug = false
   }
-  
+
   sources = [ "${ability_runtime_native_path}/ability/native/form_edit_extension_ability/form_edit_extension_module_loader.cpp" ]
 
   configs = [
