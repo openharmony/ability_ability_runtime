@@ -23,7 +23,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-constexpr const uint32_t MAX_BUF_SIZE = (1U << 19);
 void ResHelper::ReportLoadAbcCompletedInfoToRss(int32_t uid, std::string bundleName)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
