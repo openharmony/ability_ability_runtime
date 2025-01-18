@@ -32,7 +32,18 @@ MultiUserConfigurationMgr::MultiUserConfigurationMgr()
 void MultiUserConfigurationMgr::InitConfiguration(std::shared_ptr<AppExecFwk::Configuration> config)
 {
     std::lock_guard<std::mutex> guard(multiUserConfigurationMutex_);
+    if (config == nullptr || globalConfiguration_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "config null");
+        return;
+    }
+    std::vector<std::string> diffVe;
+    config->CompareDifferent(diffVe, *globalConfiguration_);
+    if (diffVe.size() != 0) {
+        config->Merge(diffVe, *globalConfiguration_);
+    }
     globalConfiguration_ = config;
+
+    UpdateMultiUserConfigurationForGlobal(*globalConfiguration_);
 }
 
 std::shared_ptr<AppExecFwk::Configuration> MultiUserConfigurationMgr::GetConfigurationByUserId(const int32_t userId)
@@ -57,7 +68,7 @@ void MultiUserConfigurationMgr::HandleConfiguration(
     if (userId == -1) {
         if (globalConfiguration_ == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "globalConfiguration_ null");
-            return ;
+            return;
         }
         {
             HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "globalConfiguration_->CompareDifferent");
@@ -67,16 +78,7 @@ void MultiUserConfigurationMgr::HandleConfiguration(
             HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "globalConfiguration_->Merge");
             globalConfiguration_->Merge(changeKeyV, config);
         }
-        // update all user config
-        {
-            for (auto& userConfig : multiUserConfiguration_) {
-                std::vector<std::string> diffVe;
-                userConfig.second.CompareDifferent(diffVe, config);
-                if (diffVe.size() != 0) {
-                    userConfig.second.Merge(diffVe, config);
-                }
-            }
-        }
+        UpdateMultiUserConfiguration(config);
     } else {
         auto it = multiUserConfiguration_.find(userId);
         if (it != multiUserConfiguration_.end()) {
@@ -87,7 +89,7 @@ void MultiUserConfigurationMgr::HandleConfiguration(
         } else {
             if (globalConfiguration_ == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "globalConfiguration_ null");
-                return ;
+                return;
             }
             Configuration userConfig = *globalConfiguration_;
             userConfig.CompareDifferent(changeKeyV, config);
@@ -99,6 +101,30 @@ void MultiUserConfigurationMgr::HandleConfiguration(
         if (userId != USER0 && userId == MultiUserConfigurationMgr::GetForegroundOsAccountLocalId()) {
             multiUserConfiguration_[USER0] = multiUserConfiguration_[userId];
         }
+    }
+}
+
+void MultiUserConfigurationMgr::UpdateMultiUserConfiguration(const Configuration& config)
+{
+    for (auto& userConfig : multiUserConfiguration_) {
+        std::vector<std::string> diffVe;
+        userConfig.second.CompareDifferent(diffVe, config);
+        if (diffVe.size() != 0) {
+            userConfig.second.Merge(diffVe, config);
+        }
+    }
+}
+
+void MultiUserConfigurationMgr::UpdateMultiUserConfigurationForGlobal(const Configuration& globalConfig)
+{
+    for (auto& userConfig : multiUserConfiguration_) {
+        Configuration globalCfg = globalConfig;
+        std::vector<std::string> diffVe;
+        globalCfg.CompareDifferent(diffVe, userConfig.second);
+        if (diffVe.size() != 0) {
+            globalCfg.Merge(diffVe, userConfig.second);
+        }
+        userConfig.second = globalCfg;
     }
 }
 
