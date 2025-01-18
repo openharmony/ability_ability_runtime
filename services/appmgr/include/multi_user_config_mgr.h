@@ -33,6 +33,9 @@ public:
     void HandleConfiguration(const int32_t userId, const Configuration& config, std::vector<std::string>& changeKeyV);
 
 private:
+    void UpdateMultiUserConfiguration(const Configuration& config);
+    void UpdateMultiUserConfigurationForGlobal(const Configuration& globalConfig);
+
     std::map<int32_t, Configuration> multiUserConfiguration_;
     std::mutex multiUserConfigurationMutex_;
     std::shared_ptr<AppExecFwk::Configuration> globalConfiguration_;
