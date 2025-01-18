@@ -1544,7 +1544,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         runtime->SetStopPreloadSoCallback([uid = bundleInfo.applicationInfo.uid,
             bundleName = appInfo.bundleName]()-> void {
                 TAG_LOGD(AAFwkTag::APPKIT, "runtime callback and report load abc completed info to rss.");
-                HITRACE_METER_NAME(HITRACE_TAG_APP, "ReportLoadAbcCompletedInfoToRss");
                 ResHelper::ReportLoadAbcCompletedInfoToRss(uid, bundleName);
             });
         AbilityRuntime::Runtime::DebugOption debugOption;
