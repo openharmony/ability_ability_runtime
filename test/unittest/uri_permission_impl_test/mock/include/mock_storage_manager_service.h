@@ -283,6 +283,11 @@ public:
         return E_OK;
     }
 
+    int32_t GetUserNeedActiveStatus(uint32_t userId, bool &needActive) override
+    {
+        return E_OK;
+    }
+
     virtual int32_t MountDfsDocs(int32_t userId, const std::string &relativePath,
         const std::string &networkId, const std::string &deviceId) override
     {
