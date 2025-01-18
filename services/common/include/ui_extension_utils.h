@@ -65,7 +65,8 @@ inline std::unordered_set<AppExecFwk::ExtensionAbilityType> GetUiExtensionSet()
         AppExecFwk::ExtensionAbilityType::PHOTO_EDITOR,
         AppExecFwk::ExtensionAbilityType::SYSPICKER_AUDIOPICKER,
         AppExecFwk::ExtensionAbilityType::SYS_VISUAL,
-        AppExecFwk::ExtensionAbilityType::RECENT_PHOTO
+        AppExecFwk::ExtensionAbilityType::RECENT_PHOTO,
+        AppExecFwk::ExtensionAbilityType::FORM_EDIT
     };
 }
 
@@ -103,7 +104,8 @@ inline bool IsSystemUIExtension(const AppExecFwk::ExtensionAbilityType type)
         AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH,
         AppExecFwk::ExtensionAbilityType::HMS_ACCOUNT,
         AppExecFwk::ExtensionAbilityType::SYS_VISUAL,
-        AppExecFwk::ExtensionAbilityType::RECENT_PHOTO
+        AppExecFwk::ExtensionAbilityType::RECENT_PHOTO,
+        AppExecFwk::ExtensionAbilityType::FORM_EDIT
     };
     return systemUiExtensionSet.find(type) != systemUiExtensionSet.end();
 }
@@ -118,7 +120,8 @@ inline bool IsSystemCallerNeeded(const AppExecFwk::ExtensionAbilityType type)
         AppExecFwk::ExtensionAbilityType::SHARE,
         AppExecFwk::ExtensionAbilityType::ACTION,
         AppExecFwk::ExtensionAbilityType::STATUS_BAR_VIEW,
-        AppExecFwk::ExtensionAbilityType::VOIP
+        AppExecFwk::ExtensionAbilityType::VOIP,
+        AppExecFwk::ExtensionAbilityType::FORM_EDIT
     };
     return uiExtensionStartingSet.find(type) != uiExtensionStartingSet.end();
 }
