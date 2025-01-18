@@ -214,8 +214,8 @@ void CJRuntime::StartDebugMode(const DebugOption dOption)
                 socketFd, option.c_str());
             if (option.find(DEBUGGER) == std::string::npos) {
                 ConnectServerManager::Get().StopConnectServer(false);
-                TAG_LOGI(AAFwkTag::CJRUNTIME, "start SendInstanceMessageCallback");
-                ConnectServerManager::Get().SendInstanceMessageCallback(instanceId);
+                TAG_LOGI(AAFwkTag::CJRUNTIME, "start SendInstanceMessage");
+                ConnectServerManager::Get().SendInstanceMessage(instanceId, instanceId, bundleName);
                 ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
                 ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
             } else {
