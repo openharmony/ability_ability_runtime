@@ -138,6 +138,35 @@ void JsAutoFillManager::OnRequestAutoSaveDone(int32_t instanceId)
     }
 }
 
+
+void SetAutoFillTypePropertyPartTwo(napi_env env, napi_value objValue)
+{
+    napi_set_named_property(env, objValue, "PASSPORT_NUMBER",
+        CreateJsValue(env, AbilityBase::AutoFillType::PASSPORT_NUMBER));
+    napi_set_named_property(env, objValue, "VALIDITY",
+        CreateJsValue(env, AbilityBase::AutoFillType::VALIDITY));
+    napi_set_named_property(env, objValue, "ISSUE_AT",
+        CreateJsValue(env, AbilityBase::AutoFillType::ISSUE_AT));
+    napi_set_named_property(env, objValue, "ORGANIZATION",
+        CreateJsValue(env, AbilityBase::AutoFillType::ORGANIZATION));
+    napi_set_named_property(env, objValue, "TAX_ID",
+        CreateJsValue(env, AbilityBase::AutoFillType::TAX_ID));
+    napi_set_named_property(env, objValue, "ADDRESS_CITY_AND_STATE",
+        CreateJsValue(env, AbilityBase::AutoFillType::ADDRESS_CITY_AND_STATE));
+    napi_set_named_property(env, objValue, "FLIGHT_NUMBER",
+        CreateJsValue(env, AbilityBase::AutoFillType::FLIGHT_NUMBER));
+    napi_set_named_property(env, objValue, "LICENSE_NUMBER",
+        CreateJsValue(env, AbilityBase::AutoFillType::LICENSE_NUMBER));
+    napi_set_named_property(env, objValue, "LICENSE_FILE_NUMBER",
+        CreateJsValue(env, AbilityBase::AutoFillType::LICENSE_FILE_NUMBER));
+    napi_set_named_property(env, objValue, "LICENSE_PLATE",
+        CreateJsValue(env, AbilityBase::AutoFillType::LICENSE_PLATE));
+    napi_set_named_property(env, objValue, "ENGINE_NUMBER",
+        CreateJsValue(env, AbilityBase::AutoFillType::ENGINE_NUMBER));
+    napi_set_named_property(env, objValue, "LICENSE_CHASSIS_NUMBER",
+        CreateJsValue(env, AbilityBase::AutoFillType::LICENSE_CHASSIS_NUMBER));
+}
+
 napi_value CreateJsAutoFillType(napi_env env)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
@@ -186,6 +215,7 @@ napi_value CreateJsAutoFillType(napi_env env)
         CreateJsValue(env, AbilityBase::AutoFillType::DETAIL_INFO_WITHOUT_STREET));
     napi_set_named_property(env, objValue, "FORMAT_ADDRESS",
         CreateJsValue(env, AbilityBase::AutoFillType::FORMAT_ADDRESS));
+    SetAutoFillTypePropertyPartTwo(env, objValue);
     return objValue;
 }
 
