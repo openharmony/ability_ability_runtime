@@ -34,7 +34,7 @@ void ReportLoadAbcCompletedInfoToRss(int32_t uid, std::string bundleName)
         { "bundleName", bundleName }
     };
     bool isColdStart = true;
-    TAG_LOGD(AAFwkTag::APPKIT, "runtime callback and report load abc completed info to rss.");
+    TAG_LOGD(AAFwkTag::APPKIT, "report load abc completed info to rss.");
     ResourceSchedule::ResSchedClient::GetInstance()::ReportData(resType, isColdStart, eventParams);
 #endif
 }
