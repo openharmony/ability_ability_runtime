@@ -158,6 +158,7 @@ constexpr int REGISTER_PID_VISIBILITY_DELAY = 5000;
 // Max render process number limitation for phone device.
 constexpr int PHONE_MAX_RENDER_PROCESS_NUM = 40;
 constexpr int PROCESS_RESTART_MARGIN_MICRO_SECONDS = 2000;
+constexpr int32_t DFX_TASKWORKER_NUM = 2;
 constexpr const int32_t API10 = 10;
 constexpr const int32_t API15 = 15;
 constexpr const int32_t API_VERSION_MOD = 100;
@@ -395,7 +396,8 @@ void AppMgrServiceInner::Init()
     ParseServiceExtMultiProcessWhiteList();
     DelayedSingleton<AppStateObserverManager>::GetInstance()->Init();
     DelayedSingleton<RenderStateObserverManager>::GetInstance()->Init();
-    dfxTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("dfx_freeze_task_queue");
+    dfxTaskHandler_ = AAFwk::TaskHandlerWrap::CreateConcurrentQueueHandler(
+        "dfx_freeze_task_queue", DFX_TASKWORKER_NUM, AAFwk::TaskQoS::USER_INITIATED);
     dfxTaskHandler_->SetPrintTaskLog(true);
     otherTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("other_app_mgr_task_queue");
     otherTaskHandler_->SetPrintTaskLog(true);
