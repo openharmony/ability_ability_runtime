@@ -67,7 +67,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t NotifyMtpUnmounted(const std::string &id, const std::string &path) override
+    virtual int32_t NotifyMtpUnmounted(const std::string &id, const std::string &path, const bool isBadRemove) override
     {
         return E_OK;
     }
@@ -277,7 +277,7 @@ public:
     {
         return E_OK;
     }
-    
+
     virtual int32_t UpdateKeyContext(uint32_t userId, bool needRemoveTmpKey = false) override
     {
         return E_OK;
@@ -309,7 +309,7 @@ public:
         std::vector<int32_t> retVec(size, -1);
         return retVec;
     }
-    
+
     virtual int32_t DeleteShareFile(uint32_t tokenId, const std::vector<std::string> &sharePathList) override
     {
         return E_OK;
@@ -331,7 +331,7 @@ public:
     {
         return E_OK;
     }
-        
+
     virtual int32_t MountMediaFuse(int32_t userId, int32_t &devFd) override
     {
         return E_OK;
