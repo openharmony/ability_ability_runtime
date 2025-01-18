@@ -421,7 +421,7 @@ private:
         std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions = nullptr);
     int SendSessionInfoToSCB(std::shared_ptr<AbilityRecord> &callerAbility, sptr<SessionInfo> &sessionInfo);
     int StartAbilityBySpecifed(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &callerAbility,
-        int32_t requestId);
+        int32_t requestId, const std::string &flag);
 
     void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void SetReceiverInfo(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord) const;

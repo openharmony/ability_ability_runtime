@@ -1921,7 +1921,7 @@ void UIAbilityLifecycleManager::HandleLegacyAcceptWantDone(AbilityRequest &abili
         }
     }
     NotifyStartSpecifiedAbility(abilityRequest, want);
-    StartAbilityBySpecifed(abilityRequest, callerAbility, requestId);
+    StartAbilityBySpecifed(abilityRequest, callerAbility, requestId, flag);
 }
 
 void UIAbilityLifecycleManager::OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want, int32_t requestId)
@@ -1960,7 +1960,8 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const AAFwk::Wan
     AbilityRequest abilityRequest = it->second;
     auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified) {
-        AddSpecifiedRequest(std::make_shared<SpecifiedRequest>(requestId, abilityRequest));
+        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(
+            abilityRequest.want, abilityRequest.abilityInfo, requestId);
         return;
     }
     specifiedRequestMap_.erase(it);
@@ -2104,7 +2105,7 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
 }
 
 int UIAbilityLifecycleManager::StartAbilityBySpecifed(const AbilityRequest &abilityRequest,
-    std::shared_ptr<AbilityRecord> &callerAbility, int32_t requestId)
+    std::shared_ptr<AbilityRecord> &callerAbility, int32_t requestId, const std::string &flag)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     sptr<SessionInfo> sessionInfo = new SessionInfo();
@@ -2116,6 +2117,8 @@ int UIAbilityLifecycleManager::StartAbilityBySpecifed(const AbilityRequest &abil
     sessionInfo->instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
     sessionInfo->isFromIcon = abilityRequest.isFromIcon;
     sessionInfo->requestId = requestId;
+    sessionInfo->specifiedFlag = flag;
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "specified flag:%{public}s", flag.c_str());
     PutSpecifiedFlag(requestId, abilityRequest.specifiedFlag);
     SendSessionInfoToSCB(callerAbility, sessionInfo);
     return ERR_OK;
