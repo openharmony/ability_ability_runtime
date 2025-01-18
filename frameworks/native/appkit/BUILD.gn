@@ -294,7 +294,7 @@ ohos_shared_library("appkit_native") {
 
   if (resource_schedule_service_enable == true) {
     external_deps += [ "resource_schedule_service:ressched_client" ]
-    defines += [ "-RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
+    defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
   }
 
   cflags_cc = []
