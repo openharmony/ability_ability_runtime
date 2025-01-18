@@ -35,7 +35,7 @@ void ReportLoadAbcCompletedInfoToRss(int32_t uid, std::string bundleName)
     };
     bool isColdStart = true;
     TAG_LOGD(AAFwkTag::APPKIT, "report load abc completed info to rss.");
-    ResourceSchedule::ResSchedClient::GetInstance()::ReportData(resType, isColdStart, eventParams);
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, isColdStart, eventParams);
 #endif
 }
 }  // namespace AppExecFwk
