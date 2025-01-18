@@ -27,23 +27,9 @@
 
 using namespace OHOS::AbilityRuntime;
 
-#ifdef APP_USE_ARM64
-#define APP_LIB_NAME "arm64"
-#elif defined(APP_USE_ARM)
-#define APP_LIB_NAME "arm"
-#elif defined(APP_USE_X86_64)
-#define APP_LIB_NAME "x86_64"
-#else
-#error unsupported platform
-#endif
 
 namespace {
 const std::string DEBUGGER = "@Debugger";
-const std::string SANDBOX_LIB_PATH = "/data/storage/el1/bundle/libs/" APP_LIB_NAME;
-const std::string CJ_RT_PATH = SANDBOX_LIB_PATH + "/runtime";
-const std::string CJ_LIB_PATH = SANDBOX_LIB_PATH + "/ohos";
-const std::string CJ_SYSLIB_PATH = "/system/lib64:/system/lib64/platformsdk:/system/lib64/module:/system/lib64/ndk";
-const std::string CJ_CHIPSDK_PATH = "/system/lib64/chipset-pub-sdk";
 } // namespace
 
 #define LIB_NAME "libcj_environment.z.so"
@@ -95,10 +81,8 @@ void CJRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths)
         TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");
         return;
     }
-    cjEnv->initCJChipSDKNS(CJ_CHIPSDK_PATH);
+
     cjEnv->initCJAppNS(appPath);
-    cjEnv->initCJSDKNS(CJ_RT_PATH + ":" + CJ_LIB_PATH);
-    cjEnv->initCJSysNS(CJ_SYSLIB_PATH);
 }
 
 bool CJRuntime::Initialize(const Options& options)
