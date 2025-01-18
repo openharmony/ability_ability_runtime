@@ -2176,6 +2176,16 @@ config("form_edit_extension_config") {
 }
 
 ohos_shared_library("form_edit_extension") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
   configs = [ ":form_edit_extension_config" ]
 
   sources = [
@@ -2222,6 +2232,16 @@ ohos_shared_library("form_edit_extension") {
 }
 
 ohos_shared_library("form_edit_extension_module") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  
   sources = [ "${ability_runtime_native_path}/ability/native/form_edit_extension_ability/form_edit_extension_module_loader.cpp" ]
 
   configs = [
