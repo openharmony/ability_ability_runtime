@@ -4699,19 +4699,37 @@ void AbilityManagerService::CancelWantSender(const sptr<IWantSender> &sender)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "GetOsAccountLocalIdFromUid failed. uid=%{public}d", callerUid);
         return;
     }
-    bool isSystemApp = false;
-    if (record->GetKey() != nullptr && !record->GetKey()->GetBundleName().empty()) {
-        AppExecFwk::BundleInfo bundleInfo;
-        bool bundleMgrResult = IN_PROCESS_CALL(bms->GetBundleInfo(record->GetKey()->GetBundleName(),
-            AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId));
-        if (!bundleMgrResult) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "GetBundleInfo is fail.");
-            return;
-        }
-        isSystemApp = bundleInfo.applicationInfo.isSystemApp;
+
+    bool isSystemAppCall = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall();
+    pendingWantManager->CancelWantSender(isSystemAppCall, sender);
+}
+
+void AbilityManagerService::CancelWantSenderByFlags(const sptr<IWantSender> &sender, uint32_t flags)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    auto pendingWantManager = GetCurrentPendingWantManager();
+    CHECK_POINTER(pendingWantManager);
+    CHECK_POINTER(sender);
+
+    sptr<IRemoteObject> obj = sender->AsObject();
+    if (!obj || obj->IsProxyObject()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "obj is nullptr or obj is a proxy obj.");
+        return;
     }
 
-    pendingWantManager->CancelWantSender(isSystemApp, sender);
+    auto bms = GetBundleManager();
+    CHECK_POINTER(bms);
+
+    sptr<PendingWantRecord> record = iface_cast<PendingWantRecord>(obj);
+
+    if (flags != 0 && record->GetKey() != nullptr && static_cast<uint32_t>(record->GetKey()->GetFlags()) != flags) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "cancel quit, flags=%{public}u not match wantAgent flags=%{public}d",
+                flags, record->GetKey()->GetFlags());
+        return;
+    }
+
+    bool isSystemAppCall = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall();
+    pendingWantManager->CancelWantSender(isSystemAppCall, sender);
 }
 
 int AbilityManagerService::GetPendingWantUid(const sptr<IWantSender> &target)

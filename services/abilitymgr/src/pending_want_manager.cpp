@@ -122,7 +122,9 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
         rec->SetCallerUid(callingUid);
         pendingKey->SetCode(PendingRecordIdCreate());
         wantRecords_.insert(std::make_pair(pendingKey, rec));
-        TAG_LOGD(AAFwkTag::WANTAGENT, "wantRecords_ size %{public}zu", wantRecords_.size());
+        TAG_LOGI(AAFwkTag::WANTAGENT,
+            "wantRecords_ size %{public}zu, bundleName=%{public}s, flags=%{public}d, type=%{public}d",
+            wantRecords_.size(), pendingKey->GetBundleName().c_str(), pendingKey->GetFlags(), pendingKey->GetType());
         return rec;
     }
     return nullptr;
@@ -214,7 +216,7 @@ int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target, const Sende
     return record->SenderInner(info);
 }
 
-void PendingWantManager::CancelWantSender(const bool isSystemApp, const sptr<IWantSender> &sender)
+void PendingWantManager::CancelWantSender(const bool isSystemAppCall, const sptr<IWantSender> &sender)
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "begin");
 
@@ -224,7 +226,7 @@ void PendingWantManager::CancelWantSender(const bool isSystemApp, const sptr<IWa
     }
 
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall && !isSystemApp) {
+    if (!isSaCall && !isSystemAppCall) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "is not allowed to send");
         return;
     }
