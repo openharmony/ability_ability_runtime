@@ -292,7 +292,7 @@ ohos_shared_library("appkit_native") {
     defines += [ "APP_NO_RESPONSE_DIALOG" ]
   }
 
-  if (resource_schedule_service_enable == true) {
+  if (resource_schedule_service_enable) {
     external_deps += [ "resource_schedule_service:ressched_client" ]
     defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
   }
