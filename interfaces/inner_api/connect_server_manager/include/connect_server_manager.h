@@ -61,7 +61,6 @@ public:
     void RegisterConnectServerCallback(const ServerConnectCallback &connectServerCallback);
     void RegisterSendInstanceMessageCallback(const SendInstanceMessageCallBack &sendInstanceMessageCallback);
     void RegisterAddInstanceCallback(const AddInstanceCallBack &addInstanceCallback);
-    void SendInstanceMessageCallback(const int32_t instanceId);
 
 private:
     ConnectServerManager() = default;
@@ -85,7 +84,7 @@ private:
     ConnectServerManager(ConnectServerManager&&) = delete;
     ConnectServerManager& operator=(const ConnectServerManager&) = delete;
     ConnectServerManager& operator=(ConnectServerManager&&) = delete;
-
+    void SendInstanceMessageCallback(const int32_t instanceId);
     void AddInstanceCallback(const int32_t instanceId);
 };
 } // namespace OHOS::AbilityRuntime
