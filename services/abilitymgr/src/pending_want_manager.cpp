@@ -123,8 +123,9 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
         pendingKey->SetCode(PendingRecordIdCreate());
         wantRecords_.insert(std::make_pair(pendingKey, rec));
         TAG_LOGI(AAFwkTag::WANTAGENT,
-            "wantRecords_ size %{public}zu, bundleName=%{public}s, flags=%{public}d, type=%{public}d",
-            wantRecords_.size(), pendingKey->GetBundleName().c_str(), pendingKey->GetFlags(), pendingKey->GetType());
+            "wantRecords_ size %{public}zu, bundleName=%{public}s, flags=%{public}d, type=%{public}d, code=%{public}d",
+            wantRecords_.size(), pendingKey->GetBundleName().c_str(), pendingKey->GetFlags(), pendingKey->GetType(),
+            pendingKey->GetCode());
         return rec;
     }
     return nullptr;
@@ -132,7 +133,7 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
 
 void PendingWantManager::MakeWantSenderCanceledLocked(PendingWantRecord &record)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "begin");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "cancel");
 
     record.SetCanceled();
     for (auto &callback : record.GetCancelCallbacks()) {
@@ -556,7 +557,7 @@ int32_t PendingWantManager::GetPendingRequestWant(const sptr<IWantSender> &targe
 
     auto record = GetPendingWantRecordByCode(targetRecord->GetKey()->GetCode());
     if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "record is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null record, request code=%{public}d", targetRecord->GetKey()->GetCode());
         return ERR_INVALID_VALUE;
     }
     want.reset(new (std::nothrow) Want(record->GetKey()->GetRequestWant()));
