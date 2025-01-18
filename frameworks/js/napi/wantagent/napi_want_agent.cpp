@@ -611,7 +611,7 @@ void JsWantAgent::SetOnGetUidCallback(std::shared_ptr<WantAgent> wantAgent,
 
 napi_value JsWantAgent::OnCancel(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
     WantAgent* pWantAgent = nullptr;
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
@@ -1343,6 +1343,8 @@ napi_value WantAgentFlagsInit(napi_env env)
         CreateJsValue(env, static_cast<int32_t>(NUMBER_OF_PARAMETERS_EIGHT)));
     napi_set_named_property(env, objValue, "REPLACE_BUNDLE",
         CreateJsValue(env, static_cast<int32_t>(NUMBER_OF_PARAMETERS_NINE)));
+    napi_set_named_property(env, objValue, "ALLOW_CANCEL_FLAG",
+        CreateJsValue(env, static_cast<int32_t>(NUMBER_OF_PARAMETERS_TEN)));
 
     return objValue;
 }
