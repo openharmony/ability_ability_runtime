@@ -108,17 +108,35 @@ ErrCode WantAgentClient::SendWantSender(sptr<IWantSender> target, const SenderIn
     return reply.ReadInt32();
 }
 
-ErrCode WantAgentClient::CancelWantSender(const sptr<IWantSender> &sender)
+ErrCode WantAgentClient::CancelWantSender(const sptr<IWantSender> &sender, uint32_t flags)
 {
     CHECK_POINTER_AND_RETURN(sender, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
     ErrCode error;
+    MessageParcel data;
     MessageParcel reply;
-    if (!SendRequest(static_cast<int32_t>(AbilityManagerInterfaceCode::CANCEL_PENDING_WANT_SENDER),
-        abms, sender->AsObject(), reply, error)) {
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+
+    if (!data.WriteRemoteObject(sender->AsObject())) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "sender write failed");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
     }
+
+    if (!data.WriteUint32(flags)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "flags write failed");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+
+    error = abms->SendRequest(static_cast<int32_t>(AbilityManagerInterfaceCode::CANCEL_PENDING_WANT_SENDER),
+        data, reply, option);
+    if (error != NO_ERROR) {
+        return ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY;
+    }
+
     return ERR_OK;
 }
 

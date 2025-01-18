@@ -1077,4 +1077,117 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_5300, Function | MediumTest | Leve
     EXPECT_TRUE(result == nullptr);
     GTEST_LOG_(INFO) << "WantAgentHelper::FromString end";
 }
+
+/*
+ * @tc.number    : WantAgentHelper_5400
+ * @tc.name      : WantAgentHelper Cancel by flags FLAG_ONE_SHOT
+ * @tc.desc      : 1.wantAgentInfo.wants_ not empty
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
+ *                 3.wantAgentInfo.wants_[0] is not nullptr
+ *                 4.wantAgentInfo.extraInfo_ is not nullptr
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_5400, Function | MediumTest | Level1)
+{
+    std::shared_ptr<WantAgentHelper> wantAgentHelper = std::make_shared<WantAgentHelper>();
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    ElementName element("device", "bundleName", "abilityName");
+    want->SetElement(element);
+    WantAgentInfo wantAgentInfo;
+    wantAgentInfo.wants_.emplace_back(want);
+    wantAgentInfo.flags_.emplace_back(WantAgentConstant::Flags::ONE_TIME_FLAG);
+    wantAgentInfo.operationType_ = WantAgentConstant::OperationType::START_ABILITY;
+    wantAgentInfo.requestCode_ = 10;
+    bool value = true;
+    std::string key = "key";
+    std::shared_ptr<WantParams> wParams = std::make_shared<WantParams>();
+    wParams->SetParam(key, Boolean::Box(value));
+    wantAgentInfo.extraInfo_ = wParams;
+    auto wantAgent = wantAgentHelper->GetWantAgent(wantAgentInfo);
+    EXPECT_NE(wantAgent, nullptr);
+    auto type = wantAgentHelper->GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::START_ABILITY);
+
+    WantAgentHelper::Cancel(wantAgent, FLAG_UPDATE_CURRENT);
+    type = WantAgentHelper::GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::START_ABILITY);
+
+    WantAgentHelper::Cancel(wantAgent, FLAG_ONE_SHOT);
+    type = WantAgentHelper::GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::UNKNOWN_TYPE);
+}
+
+/*
+ * @tc.number    : WantAgentHelper_5500
+ * @tc.name      : WantAgentHelper Cancel again
+ * @tc.desc      : 1.wantAgentInfo.wants_ not empty
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
+ *                 3.wantAgentInfo.wants_[0] is not nullptr
+ *                 4.wantAgentInfo.extraInfo_ is not nullptr
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_5500, Function | MediumTest | Level1)
+{
+    std::shared_ptr<WantAgentHelper> wantAgentHelper = std::make_shared<WantAgentHelper>();
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    ElementName element("device", "bundleName", "abilityName");
+    want->SetElement(element);
+    WantAgentInfo wantAgentInfo;
+    wantAgentInfo.wants_.emplace_back(want);
+    wantAgentInfo.flags_.emplace_back(WantAgentConstant::Flags::ONE_TIME_FLAG);
+    wantAgentInfo.operationType_ = WantAgentConstant::OperationType::START_ABILITY;
+    wantAgentInfo.requestCode_ = 10;
+    bool value = true;
+    std::string key = "key";
+    std::shared_ptr<WantParams> wParams = std::make_shared<WantParams>();
+    wParams->SetParam(key, Boolean::Box(value));
+    wantAgentInfo.extraInfo_ = wParams;
+    auto wantAgent = wantAgentHelper->GetWantAgent(wantAgentInfo);
+    EXPECT_NE(wantAgent, nullptr);
+    auto type = wantAgentHelper->GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::START_ABILITY);
+
+    WantAgentHelper::Cancel(wantAgent);
+    type = WantAgentHelper::GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::UNKNOWN_TYPE);
+
+    WantAgentHelper::Cancel(wantAgent, FLAG_ONE_SHOT);
+    type = WantAgentHelper::GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::UNKNOWN_TYPE);
+}
+
+/*
+ * @tc.number    : WantAgentHelper_5600
+ * @tc.name      : WantAgentHelper Cancel by flags FLAG_UPDATE_CURRENT
+ * @tc.desc      : 1.wantAgentInfo.wants_ not empty
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
+ *                 3.wantAgentInfo.wants_[0] is not nullptr
+ *                 4.wantAgentInfo.extraInfo_ is not nullptr
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_5600, Function | MediumTest | Level1)
+{
+    std::shared_ptr<WantAgentHelper> wantAgentHelper = std::make_shared<WantAgentHelper>();
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    ElementName element("device", "bundleName", "abilityName");
+    want->SetElement(element);
+    WantAgentInfo wantAgentInfo;
+    wantAgentInfo.wants_.emplace_back(want);
+    wantAgentInfo.operationType_ = WantAgentConstant::OperationType::START_ABILITY;
+    wantAgentInfo.requestCode_ = 10;
+    bool value = true;
+    std::string key = "key";
+    std::shared_ptr<WantParams> wParams = std::make_shared<WantParams>();
+    wParams->SetParam(key, Boolean::Box(value));
+    wantAgentInfo.extraInfo_ = wParams;
+    auto wantAgent = wantAgentHelper->GetWantAgent(wantAgentInfo);
+    EXPECT_NE(wantAgent, nullptr);
+    auto type = wantAgentHelper->GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::START_ABILITY);
+
+    WantAgentHelper::Cancel(wantAgent, FLAG_ONE_SHOT);
+    type = WantAgentHelper::GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::START_ABILITY);
+
+    WantAgentHelper::Cancel(wantAgent, FLAG_UPDATE_CURRENT);
+    type = WantAgentHelper::GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::UNKNOWN_TYPE);
+}
 }  // namespace OHOS::AbilityRuntime::WantAgent

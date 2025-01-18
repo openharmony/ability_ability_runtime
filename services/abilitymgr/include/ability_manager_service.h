@@ -926,6 +926,8 @@ public:
 
     virtual int GetConnectionData(std::vector<AbilityRuntime::ConnectionData> &connectionData) override;
 
+    virtual void CancelWantSenderByFlags(const sptr<IWantSender> &sender, uint32_t flags) override;
+
     virtual int LockMissionForCleanup(int32_t missionId) override;
 
     virtual int UnlockMissionForCleanup(int32_t missionId) override;

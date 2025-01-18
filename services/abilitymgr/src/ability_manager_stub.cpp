@@ -1796,7 +1796,11 @@ int AbilityManagerStub::CancelWantSenderInner(MessageParcel &data, MessageParcel
         TAG_LOGE(AAFwkTag::ABILITYMGR, "wantSender is nullptr");
         return ERR_INVALID_VALUE;
     }
-    CancelWantSender(wantSender);
+
+    uint32_t flags = data.ReadUint32();
+
+    CancelWantSenderByFlags(wantSender, flags);
+
     return NO_ERROR;
 }
 
@@ -2698,6 +2702,11 @@ int AbilityManagerStub::GetConnectionData(std::vector<AbilityRuntime::Connection
 {
     // should implement in child
     return NO_ERROR;
+}
+
+void AbilityManagerStub::CancelWantSenderByFlags(const sptr<IWantSender> &sender, uint32_t flags)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST
