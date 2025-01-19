@@ -42,8 +42,6 @@ public:
     static const size_t CONTEXT_TYPE_ID;
 
     FormEditErrorCode OnStartSceneBoard(const AAFwk::Want &want);
-
-
 private:
     std::shared_ptr<AAFwk::Want> want_;
 };
