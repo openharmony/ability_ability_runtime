@@ -111,6 +111,7 @@ public:
     virtual void DoCleanWorkAfterStageCleaned() {}
     virtual void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const {}
     virtual void SetDeviceDisconnectCallback(const std::function<bool()> &cb) = 0;
+    virtual void SetStopPreloadSoCallback(const std::function<void()> &callback) {}
     virtual void UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName) = 0;
     virtual void UpdatePkgContextInfoJsonEx(const std::string& moduleName, const std::string& hapPath,
         const std::string& packageName) {}

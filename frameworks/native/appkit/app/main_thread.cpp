@@ -82,6 +82,7 @@
 #include "ohos_application.h"
 #include "overlay_module_info.h"
 #include "parameters.h"
+#include "res_helper.h"
 #include "resource_manager.h"
 #include "runtime.h"
 #include "sys_mgr_client.h"
@@ -1540,6 +1541,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             processName = processInfo_->GetProcessName();
             TAG_LOGD(AAFwkTag::APPKIT, "pid is %{public}d, processName is %{public}s", pid, processName.c_str());
         }
+        runtime->SetStopPreloadSoCallback([uid = bundleInfo.applicationInfo.uid,
+            bundleName = appInfo.bundleName]()-> void {
+                TAG_LOGD(AAFwkTag::APPKIT, "runtime callback and report load abc completed info to rss.");
+                ResHelper::ReportLoadAbcCompletedInfoToRss(uid, bundleName);
+            });
         AbilityRuntime::Runtime::DebugOption debugOption;
         debugOption.isStartWithDebug = appLaunchData.GetDebugApp();
         debugOption.processName = processName;

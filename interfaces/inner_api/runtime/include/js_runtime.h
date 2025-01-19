@@ -142,7 +142,7 @@ public:
     std::unique_ptr<NativeReference> LoadSystemModule(
         const std::string& moduleName, const napi_value* argv = nullptr, size_t argc = 0);
     void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override;
-    void SetStopPreloadSoCallback(const std::function<void()> &callback);
+    void SetStopPreloadSoCallback(const std::function<void()> &callback) override;
     void UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName) override;
     void UpdatePkgContextInfoJsonEx(const std::string& moduleName, const std::string& hapPath,
         const std::string& packageName) override;
