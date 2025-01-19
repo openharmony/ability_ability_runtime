@@ -48,7 +48,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string strParam(data, size);
     int intParam = static_cast<int>(GetU32Data(data));
     auto abilityEventUtil = std::make_shared<AbilityEventUtil>();
-    abilityEventUtil->HandleModuleInfoUpdated(strParam, intParam);
+    abilityEventUtil->HandleModuleInfoUpdated(strParam, intParam, "");
 
     return true;
 }

@@ -3051,9 +3051,10 @@ HWTEST_F(AmsAppRunningRecordTest, SetState_001, TestSize.Level1)
 HWTEST_F(AmsAppRunningRecordTest, UpdateApplicationInfoInstalled_001, TestSize.Level1)
 {
     std::shared_ptr<ApplicationInfo> appInfo;
+    std::string moduleName;
     std::shared_ptr<AppRunningRecord> appRunningRecord =
         std::make_shared<AppRunningRecord>(appInfo, AppRecordId::Create(), GetTestProcessName());
-    appRunningRecord->UpdateApplicationInfoInstalled(*appInfo);
+    appRunningRecord->UpdateApplicationInfoInstalled(*appInfo, moduleName);
     EXPECT_NE(appRunningRecord, nullptr);
 }
 

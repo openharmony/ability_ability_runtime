@@ -582,7 +582,8 @@ int32_t AmsMgrStub::HandleUpdateApplicationInfoInstalled(MessageParcel &data, Me
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
     int uid = data.ReadInt32();
-    int32_t result = UpdateApplicationInfoInstalled(bundleName, uid);
+    std::string moduleName = data.ReadString();
+    int32_t result = UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

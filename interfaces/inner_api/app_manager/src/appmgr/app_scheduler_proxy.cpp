@@ -288,7 +288,8 @@ void AppSchedulerProxy::ScheduleLaunchApplication(const AppLaunchData &launchDat
     }
 }
 
-void AppSchedulerProxy::ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo)
+void AppSchedulerProxy::ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo,
+    const std::string& moduleName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "AppSchedulerProxy ScheduleUpdateApplicationInfoInstalled begin");
     MessageParcel data;
@@ -297,6 +298,9 @@ void AppSchedulerProxy::ScheduleUpdateApplicationInfoInstalled(const Application
     }
     if (!data.WriteParcelable(&appInfo)) {
         return ;
+    }
+    if (!data.WriteString(moduleName)) {
+        return;
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);

@@ -350,7 +350,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     appLifeCycleDeal_->LaunchApplication(launchData, config);
 }
 
-void AppRunningRecord::UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo)
+void AppRunningRecord::UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleName)
 {
     if (!isStageBasedModel_) {
         TAG_LOGI(AAFwkTag::APPMGR, "Current version than supports");
@@ -361,7 +361,7 @@ void AppRunningRecord::UpdateApplicationInfoInstalled(const ApplicationInfo &app
         TAG_LOGE(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
         return;
     }
-    appLifeCycleDeal_->UpdateApplicationInfoInstalled(appInfo);
+    appLifeCycleDeal_->UpdateApplicationInfoInstalled(appInfo, moduleName);
 }
 
 void AppRunningRecord::AddAbilityStage()
