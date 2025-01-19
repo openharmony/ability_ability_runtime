@@ -44,7 +44,7 @@ FormEditErrorCode FormEditExtensionContext::OnStartSceneBoard(const AAFwk::Want 
     wantToHost.SetAction(Constants::FORM_PUBLISH_ACTION);
 
     TAG_LOGI(AAFwkTag::UI_EXT, "OnStartSceneBoard wantToHost: %{public}s", wantToHost.ToString().c_str());
-    ErrCode err = AppExecFwk::FormMgr::GetInstance().RequestOpenFormView(wantToHost);  
+    ErrCode err = AppExecFwk::FormMgr::GetInstance().StartAbilityByFms(wantToHost);  
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "ret = %{public}d", err);
         return FormEditErrorCode::ERROR_CODE_INTERNAL_ERROR;
