@@ -86,7 +86,6 @@ void JsFormEditExtensionImpl::BindContext()
         TAG_LOGE(AAFwkTag::UI_EXT, "jsobj_ is nullptr");
         return;
     }
-
     napi_env env = jsRuntime_.GetNapiEnv();
     napi_value obj = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
@@ -128,14 +127,12 @@ void JsFormEditExtensionImpl::BindContext()
                 return;
             }
             delete static_cast<std::weak_ptr<FormEditExtensionContext> *>(data);
-        },
-        nullptr, nullptr);
+        }, nullptr, nullptr);
     if (status != napi_ok && workContext != nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "napi_wrap Failed: %{public}d", status);
         delete workContext;
         return;
     }
-
     TAG_LOGD(AAFwkTag::UI_EXT, "Bind context end");
 }
 
