@@ -45,7 +45,6 @@ protected:
 
 private:
     using JsUIExtensionBase::SetContext;
-    void CheckContextParam();
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

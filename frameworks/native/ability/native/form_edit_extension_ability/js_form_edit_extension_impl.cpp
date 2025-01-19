@@ -81,7 +81,37 @@ JsFormEditExtensionImpl::JsFormEditExtensionImpl(const std::unique_ptr<Runtime> 
 
 void JsFormEditExtensionImpl::BindContext()
 {
-    CheckContextParam();
+    HandleScope handleScope(jsRuntime_);
+    if (jsObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "jsobj_ is nullptr");
+        return;
+    }
+    napi_env env = jsRuntime_.GetNapiEnv();
+    napi_value obj = jsObj_->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, obj, napi_object)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "obj is not object");
+        return;
+    }
+    if (context_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Context is nullptr");
+        return;
+    }
+    napi_value contextObj = JsFormEditExtensionContext::CreateJsFormEditExtensionContext(env, context_);
+    if (contextObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Create js ui extension context error");
+        return;
+    }
+    shellContextRef_ =
+        JsRuntime::LoadSystemModuleByEngine(env, "application.FormEditExtensionContext", &contextObj, ARGC_ONE);
+    if (shellContextRef_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Fail to get loadSystemModuleByEngine");
+        return;
+    }
+    contextObj = shellContextRef_->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Fail to get context native object");
+        return;
+    }
     auto workContext = new (std::nothrow) std::shared_ptr<FormEditExtensionContext>(context_);
     napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachUIExtensionContext, workContext,
                                          nullptr);
@@ -101,45 +131,6 @@ void JsFormEditExtensionImpl::BindContext()
         delete workContext;
         return;
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "Bind context end");
 }
-
-void JsFormEditExtensionImpl::CheckContextParam()
-{
-    HandleScope handleScope(jsRuntime_);
-    if (jsObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "jsobj_ is nullptr");
-        return;
-    }
-    napi_env env = jsRuntime_.GetNapiEnv();
-    napi_value obj = jsObj_->GetNapiValue();
-    if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "obj is not object");
-        return;
-    }
-    if (context_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Context is nullptr");
-        return;
-    }
-    TAG_LOGD(AAFwkTag::UI_EXT, "BindContext CreateJsFormEditExtensionContext");
-    napi_value contextObj = JsFormEditExtensionContext::CreateJsFormEditExtensionContext(env, context_);
-    if (contextObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Create js ui extension context error");
-        return;
-    }
-
-    shellContextRef_ =
-        JsRuntime::LoadSystemModuleByEngine(env, "application.FormEditExtensionContext", &contextObj, ARGC_ONE);
-    if (shellContextRef_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Fail to get loadSystemModuleByEngine");
-        return;
-    }
-    contextObj = shellContextRef_->GetNapiValue();
-    if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Fail to get context native object");
-        return;
-    }
-}
-
 } // namespace AbilityRuntime
 } // namespace OHOS
