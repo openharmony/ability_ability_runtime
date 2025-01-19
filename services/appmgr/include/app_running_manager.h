@@ -263,7 +263,7 @@ public:
      * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
      *
      */
-    int32_t ProcessUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
+    int32_t ProcessUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleName);
 
     bool ProcessExitByBundleNameAndUid(
         const std::string &bundleName, const int uid, std::list<pid_t> &pids, const KillProcessConfig &config = {});

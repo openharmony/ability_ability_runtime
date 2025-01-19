@@ -1495,7 +1495,8 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     NotifyAppRunningStatusEvent(appRecord->GetBundleName(), uid, AbilityRuntime::RunningStatus::APP_RUNNING_STOP);
 }
 
-int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid)
+int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(
+    const std::string &bundleName, const int uid, const std::string &moduleName)
 {
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
@@ -1530,7 +1531,7 @@ int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bu
     }
 
     TAG_LOGD(AAFwkTag::APPMGR, "uid value is %{public}d", uid);
-    result = appRunningManager_->ProcessUpdateApplicationInfoInstalled(appInfo);
+    result = appRunningManager_->ProcessUpdateApplicationInfoInstalled(appInfo, moduleName);
     if (result != ERR_OK) {
         TAG_LOGI(AAFwkTag::APPMGR, "process corresponding package name unstart");
     }

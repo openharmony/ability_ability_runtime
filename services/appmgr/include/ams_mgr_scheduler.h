@@ -150,7 +150,8 @@ public:
      * @param  uid, uid.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid) override;
+    virtual int32_t UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
+        const std::string &moduleName) override;
 
     /**
      * KillApplication, call KillApplication() through proxy object, kill the application.

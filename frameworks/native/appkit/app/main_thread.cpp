@@ -680,17 +680,17 @@ void MainThread::ScheduleLaunchApplication(const AppLaunchData &data, const Conf
  * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
  *
  */
-void MainThread::ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo)
+void MainThread::ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleName)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "ScheduleUpdateApplicationInfoInstalled");
     wptr<MainThread> weak = this;
-    auto task = [weak, appInfo]() {
+    auto task = [weak, appInfo, moduleName]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
-        appThread->HandleUpdateApplicationInfoInstalled(appInfo);
+        appThread->HandleUpdateApplicationInfoInstalled(appInfo, moduleName);
     };
     if (!mainHandler_->PostTask(task, "MainThread:UpdateApplicationInfoInstalled")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
@@ -2026,7 +2026,7 @@ void MainThread::ChangeToLocalPath(const std::string &bundleName,
     }
 }
 
-void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo)
+void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& appInfo, const std::string& moduleName)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!application_) {
@@ -2034,6 +2034,31 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo &app
         return;
     }
     application_->UpdateApplicationInfoInstalled(appInfo);
+
+    auto& runtime = application_->GetRuntime();
+    if (runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        return;
+    }
+
+    auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
+        return;
+    }
+
+    AbilityInfo abilityInfo;
+    abilityInfo.bundleName = appInfo.bundleName;
+    abilityInfo.package = moduleName;
+    HapModuleInfo hapModuleInfo;
+    if (bundleMgrHelper->GetHapModuleInfo(abilityInfo, hapModuleInfo) == false) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GetHapModuleInfo failed");
+        return;
+    }
+    runtime->UpdatePkgContextInfoJsonEx(hapModuleInfo.moduleName, hapModuleInfo.hapPath, hapModuleInfo.packageName);
+    TAG_LOGI(AAFwkTag::APPKIT,
+        "UpdatePkgContextInfoJsonEx moduleName: %{public}s, hapPath: %{public}s, packageName: %{public}s",
+        hapModuleInfo.moduleName.c_str(), hapModuleInfo.hapPath.c_str(), hapModuleInfo.packageName.c_str());
 }
 
 void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)

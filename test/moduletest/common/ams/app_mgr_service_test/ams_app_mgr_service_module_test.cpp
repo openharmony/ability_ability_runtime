@@ -72,7 +72,7 @@ public:
     {}
     void ScheduleAbilityStage(const HapModuleInfo&) override
     {}
-    void ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo&) override
+    void ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo&, const std::string&) override
     {}
     void ScheduleAcceptWant(const AAFwk::Want& want, const std::string& moduleName) override
     {}

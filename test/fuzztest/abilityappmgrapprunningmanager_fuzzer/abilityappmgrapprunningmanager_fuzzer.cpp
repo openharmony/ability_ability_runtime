@@ -82,7 +82,8 @@ void DoSomethingInterestingWithMyAPIadda(const char* data, size_t size)
     bool clearMissionFlag = *data % ENABLE;
     manager->TerminateAbility(token, clearMissionFlag, appMgrServiceInner);
     ApplicationInfo appInfos;
-    manager->ProcessUpdateApplicationInfoInstalled(appInfos);
+    std::string moduleName;
+    manager->ProcessUpdateApplicationInfoInstalled(appInfos, moduleName);
     std::list<pid_t> pids;
     KillProcessConfig config;
     config.clearPageStack = *data % ENABLE;

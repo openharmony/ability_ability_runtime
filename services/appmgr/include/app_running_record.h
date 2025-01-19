@@ -346,7 +346,7 @@ public:
      *
      * @return
      */
-    void UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
+    void UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleName);
 
     /**
      * LaunchAbility, Notify application to launch ability.

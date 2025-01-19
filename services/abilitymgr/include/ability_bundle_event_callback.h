@@ -45,7 +45,7 @@ public:
     void OnReceiveEvent(const EventFwk::CommonEventData eventData) override;
 
 private:
-    void HandleUpdatedModuleInfo(const std::string &bundleName, int32_t uid);
+    void HandleUpdatedModuleInfo(const std::string &bundleName, int32_t uid, const std::string &moduleName);
     void HandleAppUpgradeCompleted(int32_t uid);
     void HandleRemoveUriPermission(uint32_t tokenId);
     void HandleRestartResidentProcessDependedOnWeb();

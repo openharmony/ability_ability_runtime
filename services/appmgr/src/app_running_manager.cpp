@@ -346,7 +346,8 @@ bool AppRunningManager::GetPidsByUserId(int32_t userId, std::list<pid_t> &pids)
     return (!pids.empty());
 }
 
-int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo)
+int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(
+    const ApplicationInfo& appInfo, const std::string& moduleName)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     int32_t result = ERR_OK;
@@ -358,7 +359,7 @@ int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(const Applicati
         auto appInfoList = appRecord->GetAppInfoList();
         for (auto iter : appInfoList) {
             if (iter->bundleName == appInfo.bundleName && iter->uid == appInfo.uid) {
-                appRecord->UpdateApplicationInfoInstalled(appInfo);
+                appRecord->UpdateApplicationInfoInstalled(appInfo, moduleName);
                 break;
             }
         }

@@ -674,7 +674,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_UpdateApplicationI
      * @tc.steps: step1. amsMgrScheduler isReady false
      * @tc.expected: step1. expect taskHandler_ time 0
      */
-    auto ret = amsMgrScheduler->UpdateApplicationInfoInstalled("", 0);
+    auto ret = amsMgrScheduler->UpdateApplicationInfoInstalled("", 0, "");
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_UpdateApplicationInfoInstalled_001 end");
 }
@@ -691,13 +691,13 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_UpdateApplicationI
     auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("UpdateApplicationInfoInstalled_002");
     std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
         std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler);
-    EXPECT_CALL(*appMgrServiceInner, UpdateApplicationInfoInstalled(_, _)).WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*appMgrServiceInner, UpdateApplicationInfoInstalled(_, _, _)).WillRepeatedly(Return(ERR_OK));
 
     /**
      * @tc.steps: step1. amsMgrScheduler isReady
      * @tc.expected: step1. expect taskHandler times at least 1
      */
-    auto ret = amsMgrScheduler->UpdateApplicationInfoInstalled("", 0);
+    auto ret = amsMgrScheduler->UpdateApplicationInfoInstalled("", 0, "");
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_UpdateApplicationInfoInstalled_002 end");
 }

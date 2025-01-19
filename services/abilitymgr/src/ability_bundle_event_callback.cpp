@@ -47,6 +47,7 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
     // action contains the change type of haps.
     std::string action = want.GetAction();
     std::string bundleName = want.GetElement().GetBundleName();
+    std::string moduleName = want.GetElement().GetModuleName();
     auto tokenId = static_cast<uint32_t>(want.GetIntParam(KEY_TOKEN, 0));
     int uid = want.GetIntParam(KEY_UID, 0);
     // verify data
@@ -59,7 +60,7 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
         // uninstall bundle
         HandleRemoveUriPermission(tokenId);
-        HandleUpdatedModuleInfo(bundleName, uid);
+        HandleUpdatedModuleInfo(bundleName, uid, moduleName);
         if (abilityAutoStartupService_ == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "OnReceiveEvent failed, abilityAutoStartupService is nullptr");
             return;
@@ -67,13 +68,13 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
         abilityAutoStartupService_->DeleteAutoStartupData(bundleName, tokenId);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
         // install or uninstall module/bundle
-        HandleUpdatedModuleInfo(bundleName, uid);
+        HandleUpdatedModuleInfo(bundleName, uid, moduleName);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
         if (bundleName == NEW_WEB_BUNDLE_NAME || bundleName == OLD_WEB_BUNDLE_NAME ||
             bundleName == system::GetParameter(ARKWEB_CORE_PACKAGE_NAME, "false")) {
             HandleRestartResidentProcessDependedOnWeb();
         }
-        HandleUpdatedModuleInfo(bundleName, uid);
+        HandleUpdatedModuleInfo(bundleName, uid, moduleName);
         HandleAppUpgradeCompleted(uid);
         if (abilityAutoStartupService_ == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "OnReceiveEvent failed, abilityAutoStartupService is nullptr");
@@ -94,16 +95,17 @@ void AbilityBundleEventCallback::HandleRemoveUriPermission(uint32_t tokenId)
 #endif // SUPPORT_UPMS
 }
 
-void AbilityBundleEventCallback::HandleUpdatedModuleInfo(const std::string &bundleName, int32_t uid)
+void AbilityBundleEventCallback::HandleUpdatedModuleInfo(const std::string &bundleName, int32_t uid,
+    const std::string &moduleName)
 {
     wptr<AbilityBundleEventCallback> weakThis = this;
-    auto task = [weakThis, bundleName, uid]() {
+    auto task = [weakThis, bundleName, uid, moduleName]() {
         sptr<AbilityBundleEventCallback> sharedThis = weakThis.promote();
         if (sharedThis == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "sharedThis is nullptr.");
             return;
         }
-        sharedThis->abilityEventHelper_.HandleModuleInfoUpdated(bundleName, uid);
+        sharedThis->abilityEventHelper_.HandleModuleInfoUpdated(bundleName, uid, moduleName);
     };
     taskHandler_->SubmitTask(task);
 }

@@ -117,7 +117,7 @@ public:
      *
      * @return
      */
-    virtual void ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &) override;
+    virtual void ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &, const std::string &) override;
 
     /**
      * Notify application to launch ability stage.
