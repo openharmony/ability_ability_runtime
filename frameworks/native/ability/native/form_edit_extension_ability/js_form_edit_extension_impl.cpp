@@ -81,6 +81,31 @@ JsFormEditExtensionImpl::JsFormEditExtensionImpl(const std::unique_ptr<Runtime> 
 
 void JsFormEditExtensionImpl::BindContext()
 {
+    CheckContextParam();
+    auto workContext = new (std::nothrow) std::shared_ptr<FormEditExtensionContext>(context_);
+    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachUIExtensionContext, workContext,
+                                         nullptr);
+    context_->Bind(jsRuntime_, shellContextRef_.get());
+    napi_set_named_property(env, obj, "context", contextObj);
+    napi_status status = napi_wrap(env, contextObj, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer called");
+            if (data == nullptr) {
+                TAG_LOGE(AAFwkTag::UI_EXT, "Finalizer for weak_ptr is nullptr");
+                return;
+            }
+            delete static_cast<std::weak_ptr<FormEditExtensionContext> *>(data);
+        }, nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "Bind context end");
+}
+
+void JsFormEditExtensionImpl::CheckContextParam() 
+{
     HandleScope handleScope(jsRuntime_);
     if (jsObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "jsobj_ is nullptr");
@@ -114,26 +139,6 @@ void JsFormEditExtensionImpl::BindContext()
         TAG_LOGE(AAFwkTag::UI_EXT, "Fail to get context native object");
         return;
     }
-    auto workContext = new (std::nothrow) std::shared_ptr<FormEditExtensionContext>(context_);
-    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachUIExtensionContext, workContext,
-                                         nullptr);
-    context_->Bind(jsRuntime_, shellContextRef_.get());
-    napi_set_named_property(env, obj, "context", contextObj);
-    napi_status status = napi_wrap(env, contextObj, workContext,
-        [](napi_env, void *data, void *) {
-            TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer called");
-            if (data == nullptr) {
-                TAG_LOGE(AAFwkTag::UI_EXT, "Finalizer for weak_ptr is nullptr");
-                return;
-            }
-            delete static_cast<std::weak_ptr<FormEditExtensionContext> *>(data);
-        }, nullptr, nullptr);
-    if (status != napi_ok && workContext != nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "napi_wrap Failed: %{public}d", status);
-        delete workContext;
-        return;
-    }
-    TAG_LOGD(AAFwkTag::UI_EXT, "Bind context end");
 }
 
 } // namespace AbilityRuntime
