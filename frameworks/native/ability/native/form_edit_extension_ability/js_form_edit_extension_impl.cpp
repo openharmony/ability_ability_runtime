@@ -104,7 +104,7 @@ void JsFormEditExtensionImpl::BindContext()
     TAG_LOGD(AAFwkTag::UI_EXT, "Bind context end");
 }
 
-void JsFormEditExtensionImpl::CheckContextParam() 
+void JsFormEditExtensionImpl::CheckContextParam()
 {
     HandleScope handleScope(jsRuntime_);
     if (jsObj_ == nullptr) {
