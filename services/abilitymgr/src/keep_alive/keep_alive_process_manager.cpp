@@ -94,12 +94,14 @@ void KeepAliveProcessManager::StartKeepAliveProcessWithMainElementPerBundle(cons
     auto ret = StartKeepAliveMainAbility(info);
     if (ret == ERR_OK) {
         TAG_LOGI(AAFwkTag::KEEP_ALIVE, "start ok");
-        AfterStartKeepAliveApp(bundleInfo, userId);
+        AfterStartKeepAliveApp(bundleInfo.name, bundleInfo.applicationInfo.accessTokenId,
+            bundleInfo.uid, userId);
         return;
     }
 
     TAG_LOGE(AAFwkTag::KEEP_ALIVE, "StartKeepAliveMainAbility failed:%{public}d, retry", ret);
-    ffrt::submit([bundleInfo, userId, info, ret]() mutable {
+    ffrt::submit([bundleName = bundleInfo.name, accessTokenId = bundleInfo.applicationInfo.accessTokenId,
+        uid = bundleInfo.uid, userId, info, ret]() mutable {
         for (int tried = 0; tried < MAX_RETRY_TIMES && ret != ERR_OK; tried++) {
             usleep(RETRY_INTERVAL_MICRO_SECONDS);
             TAG_LOGI(AAFwkTag::KEEP_ALIVE, "retry attempt:%{public}d", tried + 1);
@@ -108,10 +110,10 @@ void KeepAliveProcessManager::StartKeepAliveProcessWithMainElementPerBundle(cons
         }
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::KEEP_ALIVE, "reach max retry, failed:%{public}d, unsetting keep-alive", ret);
-            KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleInfo.name, userId, false, true, true);
+            KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, false, true, true);
             return;
         }
-        KeepAliveProcessManager::GetInstance().AfterStartKeepAliveApp(bundleInfo, userId);
+        KeepAliveProcessManager::GetInstance().AfterStartKeepAliveApp(bundleName, accessTokenId, uid, userId);
     });
 }
 
@@ -133,13 +135,13 @@ int32_t KeepAliveProcessManager::StartKeepAliveMainAbility(const KeepAliveAbilit
     return ret;
 }
 
-void KeepAliveProcessManager::AfterStartKeepAliveApp(const AppExecFwk::BundleInfo &bundleInfo, int32_t userId)
+void KeepAliveProcessManager::AfterStartKeepAliveApp(const std::string &bundleName,
+    uint32_t accessTokenId, int32_t uid, int32_t userId)
 {
-    auto task = [accessTokenId = bundleInfo.applicationInfo.accessTokenId, uid = bundleInfo.uid,
-        bundleName = bundleInfo.name, userId]() {
+    auto task = [bundleName, accessTokenId, uid, userId]() {
         bool isStatusBarCreated =
             DelayedSingleton<AbilityManagerService>::GetInstance()->IsInStatusBar(accessTokenId, uid);
-        (void)KeepAliveProcessManager::GetInstance().RemoveCheckStatusBarTask(uid);
+        (void)KeepAliveProcessManager::GetInstance().RemoveCheckStatusBarTask(uid, false);
         if (isStatusBarCreated) {
             TAG_LOGI(AAFwkTag::KEEP_ALIVE, "status bar is created");
             return;
@@ -151,18 +153,17 @@ void KeepAliveProcessManager::AfterStartKeepAliveApp(const AppExecFwk::BundleInf
 
     std::lock_guard<ffrt::mutex> lock(checkStatusBarTasksMutex_);
     auto iter = std::find_if(checkStatusBarTasks_.begin(), checkStatusBarTasks_.end(),
-        [uid = bundleInfo.uid](const std::shared_ptr<CheckStatusBarTask> &curTask) {
-        if (curTask != nullptr) {
-            return curTask->uid_ == uid;
-        }
-        return false;
+        [uid](const std::shared_ptr<CheckStatusBarTask> &curTask) {
+        return curTask != nullptr && curTask->GetUid() == uid;
     });
     if (iter != checkStatusBarTasks_.end()) {
         TAG_LOGI(AAFwkTag::KEEP_ALIVE, "exists same task, canceling");
-        (*iter)->Cancel();
+        if (*iter != nullptr) {
+            (*iter)->Cancel();
+        }
         checkStatusBarTasks_.erase(iter);
     }
-    auto checkStatusBarTask = std::make_shared<CheckStatusBarTask>(bundleInfo.uid, std::move(task));
+    auto checkStatusBarTask = std::make_shared<CheckStatusBarTask>(uid, std::move(task));
     checkStatusBarTasks_.push_back(checkStatusBarTask);
     ffrt::task_attr attr;
     attr.delay(CREATE_STATUS_BAR_TIMEOUT_MICRO_SECONDS);
@@ -173,32 +174,20 @@ void KeepAliveProcessManager::AfterStartKeepAliveApp(const AppExecFwk::BundleInf
         }, attr);
 }
 
-void KeepAliveProcessManager::RemoveCheckStatusBarTask(int32_t uid)
+void KeepAliveProcessManager::RemoveCheckStatusBarTask(int32_t uid, bool shouldCancel)
 {
     std::lock_guard<ffrt::mutex> lock(checkStatusBarTasksMutex_);
     auto iter = std::find_if(checkStatusBarTasks_.begin(), checkStatusBarTasks_.end(),
         [uid](const std::shared_ptr<CheckStatusBarTask> &curTask) {
-        return curTask->uid_ == uid;
+        return curTask != nullptr && curTask->GetUid() == uid;
     });
     if (iter == checkStatusBarTasks_.end()) {
         TAG_LOGI(AAFwkTag::KEEP_ALIVE, "not exist");
         return;
     }
-    checkStatusBarTasks_.erase(iter);
-}
-
-void KeepAliveProcessManager::CancelAndRemoveCheckStatusBarTask(int32_t uid)
-{
-    std::lock_guard<ffrt::mutex> lock(checkStatusBarTasksMutex_);
-    auto iter = std::find_if(checkStatusBarTasks_.begin(), checkStatusBarTasks_.end(),
-        [uid](const std::shared_ptr<CheckStatusBarTask> &curTask) {
-        return curTask->uid_ == uid;
-    });
-    if (iter == checkStatusBarTasks_.end()) {
-        TAG_LOGI(AAFwkTag::KEEP_ALIVE, "not exist");
-        return;
+    if (*iter != nullptr && shouldCancel) {
+        (*iter)->Cancel();
     }
-    (*iter)->Cancel();
     checkStatusBarTasks_.erase(iter);
 }
 
@@ -248,7 +237,9 @@ int32_t KeepAliveProcessManager::SetApplicationKeepAlive(const std::string &bund
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveDkv(bundleName, updateEnable, 0));
     if (!updateEnable && localEnable) {
         TAG_LOGI(AAFwkTag::KEEP_ALIVE, "unsetting keep-alive");
-        if (!isInner) { CancelAndRemoveCheckStatusBarTask(bundleInfo.uid); }
+        if (!isInner) {
+            RemoveCheckStatusBarTask(bundleInfo.uid, true);
+        }
         std::vector<AppExecFwk::BundleInfo> bundleInfos{ bundleInfo };
         KeepAliveUtils::NotifyDisableKeepAliveProcesses(bundleInfos, userId);
     }
