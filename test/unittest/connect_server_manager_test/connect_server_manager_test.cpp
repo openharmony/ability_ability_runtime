@@ -242,8 +242,8 @@ HWTEST_F(ConnectServerManagerTest, RegisterConnectServerCallbackTest_0100, TestS
     bool isDebugApp = false;
     ConnectServerManager &connectServerManager = AbilityRuntime::ConnectServerManager::Get();
     connectServerManager.SendDebuggerInfo(needBreakPoint, isDebugApp);
-    auto ConnectServerCallback = []() {};
-    ServerConnectCallback connectServerCallback = ConnectServerCallback;
+    auto connectServerCB = []() {};
+    ServerConnectCallback connectServerCallback = connectServerCB;
     connectServerManager.connectServerCallbacks_.clear();
     connectServerManager.RegisterConnectServerCallback(connectServerCallback);
     EXPECT_FALSE(connectServerManager.connectServerCallbacks_.empty());
@@ -277,8 +277,8 @@ HWTEST_F(ConnectServerManagerTest, RegisterSendInstanceMessageCallbackTest_0100,
 HWTEST_F(ConnectServerManagerTest, RegisterAddInstanceCallbackTest_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "RegisterAddInstanceCallbackTest_0100 is start");
-    auto AddInstanceCB = [](int32_t) {};
-    AddInstanceCallBack addInstanceCallback = AddInstanceCB;
+    auto addInstanceCB = [](int32_t) {};
+    AddInstanceCallBack addInstanceCallback = addInstanceCB;
     ConnectServerManager &connectServerManager = AbilityRuntime::ConnectServerManager::Get();
     connectServerManager.addInstanceCallbacks_.clear();
     connectServerManager.RegisterAddInstanceCallback(addInstanceCallback);
