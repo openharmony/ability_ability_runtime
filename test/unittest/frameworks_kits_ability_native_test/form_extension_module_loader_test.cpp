@@ -31,6 +31,17 @@ constexpr char FORM_EXTENSION_MODULE_LIB_PATH[] = "/system/lib64/extensionabilit
 constexpr char FORM_EXTENSION_MODULE_LIB_PATH[] = "/system/lib64/extensionability/libform_extension_module.z.so";
 #endif
 
+class ExtensionModuleLoaderTest : public ExtensionModuleLoader {
+public:
+    ExtensionModuleLoaderTest() = default;
+    ~ExtensionModuleLoaderTest() = default;
+
+    Extension* Create(const std::unique_ptr<Runtime>& runtime) const override
+    {
+        return nullptr;
+    }
+};
+
 class FormExtensionModuleLoaderTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -107,6 +118,22 @@ HWTEST_F(FormExtensionModuleLoaderTest, FormExtensionModuleLoader_0300, TestSize
     if (iter != params.end()) {
         EXPECT_STREQ(iter->second.c_str(), "FormExtension");
     }
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: FormExtensionModuleLoader_0400
+ * @tc.desc: GetParams
+ * @tc.type: FUNC
+ * @tc.require: issueIBIYD4
+ */
+HWTEST_F(FormExtensionModuleLoaderTest, FormExtensionModuleLoader_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "start");
+
+    auto params = std::make_shared<ExtensionModuleLoaderTest>();
+    EXPECT_EQ(params->GetParams().size(), 0);
+
     TAG_LOGI(AAFwkTag::TEST, "end");
 }
 } // namespace AbilityRuntime
