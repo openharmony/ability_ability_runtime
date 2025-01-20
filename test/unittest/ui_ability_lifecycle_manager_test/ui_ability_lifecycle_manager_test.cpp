@@ -2425,7 +2425,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartAbilityBySpecifed_001, TestSize.Lev
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     AbilityRequest request;
     std::shared_ptr<AbilityRecord> callerAbility = nullptr;
-    uiAbilityLifecycleManager->StartAbilityBySpecifed(request, callerAbility, 0);
+    uiAbilityLifecycleManager->StartAbilityBySpecifed(request, callerAbility, 0, "");
     uiAbilityLifecycleManager.reset();
 }
 

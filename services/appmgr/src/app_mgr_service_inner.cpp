@@ -8808,7 +8808,7 @@ bool AppMgrServiceInner::HasAppRecord(const AAFwk::Want &want, const AbilityInfo
 
     auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
     auto appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid,
-        bundleInfo, specifiedProcessFlag, nullptr, instanceKey, abilityInfo.process);
+        bundleInfo, "", nullptr, instanceKey);
     return appRecord != nullptr;
 }
 } // namespace AppExecFwk
