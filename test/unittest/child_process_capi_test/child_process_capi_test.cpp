@@ -77,5 +77,20 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_CreateNativeChildProcess_001, TestSize
     EXPECT_NE(ret, NCP_ERR_NOT_SUPPORTED);
 }
 
+/**
+ * @tc.number: OH_Ability_StartNativeChildProcess_001
+ * @tc.desc: Test API OH_Ability_StartNativeChildProcess_001 works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessCapiTest, OH_Ability_StartNativeChildProcess_001, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "OH_Ability_StartNativeChildProcess_001 begin";
+    NativeChildProcess_Args args;
+    NativeChildProcess_Options options;
+    int32_t pid = 0;
+    auto ret = OH_Ability_StartNativeChildProcess(nullptr, args, options, &pid);
+    EXPECT_EQ(ret, NCP_ERR_INVALID_PARAM);
+    GTEST_LOG_(INFO) << "OH_Ability_StartNativeChildProcess_001 begin";
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
