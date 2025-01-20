@@ -21,16 +21,13 @@ ohos_unittest("ability_cj_want_agent_ffi_test") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/frameworks/cj/ffi",
-    "${ability_runtime_path}/frameworks/cj/ffi/want_agent",
+    "${ability_runtime_path}/frameworks/cj/ffi/want_agent/include",
     "${ability_runtime_services_path}/common/include",
   ]
 
-  sources = [
-    "${ability_runtime_path}/frameworks/cj/ffi/want_agent/cj_want_agent_ffi.cpp",
-    "ability_cj_want_agent_ffi_test.cpp",
-  ]
+  sources = [ "ability_cj_want_agent_ffi_test.cpp" ]
 
-  configs = [ "${c_utils_base_path}:utils_config" ]
+  configs = []
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -41,6 +38,7 @@ ohos_unittest("ability_cj_want_agent_ffi_test") {
     "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+    "${ability_runtime_path}/frameworks/cj/ffi/want_agent:cj_want_agent_ffi",
   ]
 
   external_deps = [

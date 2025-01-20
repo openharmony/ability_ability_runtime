@@ -40,10 +40,8 @@ public:
 
 class MockIAutoFillExtensionCallback : public IAutoFillExtensionCallback {
 public:
-    MockIAutoFillExtensionCallback()
-    {}
-    virtual ~MockIAutoFillExtensionCallback()
-    {}
+    MockIAutoFillExtensionCallback() {}
+    virtual ~MockIAutoFillExtensionCallback() {}
     int32_t OnReloadInModal(const sptr<AAFwk::SessionInfo> &sessionInfo, const CustomData &customData) override
     {
         return 0;
