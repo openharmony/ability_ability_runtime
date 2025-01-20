@@ -24,6 +24,10 @@ namespace AAFwk {
 bool ExtensionPermissionsUtil::CheckSAPermission(const AppExecFwk::ExtensionAbilityType &extensionType)
 {
     auto checkRet = false;
+    if (extensionType == AppExecFwk::ExtensionAbilityType::ASSET_ACCELERATION) {
+        return PermissionVerification::GetInstance()->VerifyCallingPermission(
+            "ohos.permission.CONNECT_ASSET_ACCELERATION_EXTENSION");
+    }
     if (!PermissionVerification::GetInstance()->IsSACall()) {
         return true;
     }
