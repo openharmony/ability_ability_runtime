@@ -41,7 +41,7 @@ FormEditErrorCode FormEditExtensionContext::OnStartSceneBoard(const AAFwk::Want 
     std::string requestMehod = "openFormEditSecPageView";
     wantToHost.SetParam(Constants::PARAM_PAGE_ROUTER_SERVICE_CODE, Constants::PAGE_ROUTER_SERVICE_CODE_FORM_EDIT);
     wantToHost.SetParam(Constants::PARMA_REQUEST_METHOD, requestMehod);
-    wantToHost.SetAction(Constants::FORM_PUBLISH_ACTION);
+    wantToHost.SetAction(Constants::FORM_PAGE_ACTION);
     
     ErrCode err = AppExecFwk::FormMgr::GetInstance().StartAbilityByFms(wantToHost);
     if (err != ERR_OK) {
