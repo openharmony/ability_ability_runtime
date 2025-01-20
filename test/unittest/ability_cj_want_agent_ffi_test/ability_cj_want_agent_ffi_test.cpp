@@ -198,7 +198,7 @@ HWTEST_F(CjWantAgentFfiTest, CjWantAgentFfiTestOnSendFinished_0010, TestSize.Lev
     AAFwk::WantParams resultExtras;
     cjtriggerCompletecb->SetWantAgentInstance(1);
     FfiWantAgent::CJCompleteData mydata;
-    auto cb = [&mydata_](const FfiWantAgent::CJCompleteData &data) -> void {
+    auto cb = [&mydata](const FfiWantAgent::CJCompleteData &data) -> void {
         mydata.finalCode = data.finalCode;
     };
     cjtriggerCompletecb->SetCallbackInfo(cb);
