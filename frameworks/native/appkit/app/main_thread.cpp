@@ -154,6 +154,7 @@ constexpr char EVENT_KEY_TYPE[] = "TYPE";
 constexpr char EVENT_KEY_HAPPEN_TIME[] = "HAPPEN_TIME";
 constexpr char EVENT_KEY_REASON[] = "REASON";
 constexpr char EVENT_KEY_JSVM[] = "JSVM";
+constexpr char EVENT_KEY_CANGJIE[] = "CANGJIE";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
 constexpr char EVENT_KEY_PNAME[] = "PNAME";
 constexpr char EVENT_KEY_APP_RUNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
@@ -164,6 +165,9 @@ constexpr char KILL_REASON[] = "Kill Reason:Js Error";
 const int32_t JSCRASH_TYPE = 3;
 const std::string JSVM_TYPE = "ARK";
 const std::string SIGNAL_HANDLER = "OS_SignalHandler";
+
+const int32_t CJERROR_TYPE = 9;
+const std::string CANGJIE_TYPE = "CJNATIVE";
 
 constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 
@@ -1264,15 +1268,16 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
             std::string errName = errorObj.name ? errorObj.name : "[none]";
             std::string errMsg = errorObj.message ? errorObj.message : "[none]";
             std::string errStack = errorObj.stack ? errorObj.stack : "[none]";
-            HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "CJ_ERROR",
+            std::string errSummary = summary + "\nException info: " + errMsg + "\n" + "Stacktrace:\n" + errStack;
+            HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::CJ_RUNTIME, "CJ_ERROR",
                 OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
                 EVENT_KEY_PACKAGE_NAME, bundleName,
                 EVENT_KEY_VERSION, std::to_string(versionCode),
-                EVENT_KEY_TYPE, JSCRASH_TYPE,
+                EVENT_KEY_TYPE, CJERROR_TYPE,
                 EVENT_KEY_HAPPEN_TIME, timet,
                 EVENT_KEY_REASON, errName,
                 EVENT_KEY_JSVM, JSVM_TYPE,
-                EVENT_KEY_SUMMARY, summary);
+                EVENT_KEY_SUMMARY, errSummary);
             ErrorObject appExecErrorObj = {
                 .name = errName,
                 .message = errMsg,
