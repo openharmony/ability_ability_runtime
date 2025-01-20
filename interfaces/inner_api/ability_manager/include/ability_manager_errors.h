@@ -385,7 +385,7 @@ enum {
     ERR_RESTART_APP_INCORRECT_ABILITY,
 
     /**
-     * Result(2097225) for restart too frequently. Try again at least 10s later.
+     * Result(2097225) for restart too frequently. Try again at least 3s later.
      */
     ERR_RESTART_APP_FREQUENT,
 
