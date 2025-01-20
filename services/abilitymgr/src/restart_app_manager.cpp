@@ -31,10 +31,10 @@ RestartAppManager &RestartAppManager::GetInstance()
 bool RestartAppManager::IsRestartAppFrequent(int32_t uid, time_t time)
 {
     std::lock_guard<ffrt::mutex> lock(restartAppMapLock_);
-    constexpr int64_t MIN_RESTART_TIME = 10;
+    constexpr int64_t MIN_RESTART_TIME = 3;
     auto it = restartAppHistory_.find(uid);
     if ((it != restartAppHistory_.end()) && (it->second + MIN_RESTART_TIME > time)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Restart too frequently. Try again at least 10s later.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Restart too frequently. Try again at least 3s later.");
         return true;
     }
     return false;
