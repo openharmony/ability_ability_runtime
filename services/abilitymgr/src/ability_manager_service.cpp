@@ -4722,12 +4722,15 @@ void AbilityManagerService::CancelWantSenderByFlags(const sptr<IWantSender> &sen
 
     sptr<PendingWantRecord> record = iface_cast<PendingWantRecord>(obj);
 
-    if (flags != 0 && record->GetKey() != nullptr && static_cast<uint32_t>(record->GetKey()->GetFlags()) != flags) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "cancel quit, flags=%{public}u not match wantAgent flags=%{public}d",
+    if (flags != 0 && record->GetKey() != nullptr &&
+        (static_cast<uint32_t>(record->GetKey()->GetFlags()) & flags) == 0) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "flags=%{public}u not match wantAgent flags=%{public}d",
                 flags, record->GetKey()->GetFlags());
         return;
     }
 
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "code=%{public}d cancel by flags=%{public}u",
+        record->GetKey() != nullptr ? record->GetKey()->GetCode() : -1, flags);
     bool isSystemAppCall = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall();
     pendingWantManager->CancelWantSender(isSystemAppCall, sender);
 }
