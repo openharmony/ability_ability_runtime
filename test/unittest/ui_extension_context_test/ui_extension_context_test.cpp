@@ -464,5 +464,21 @@ HWTEST_F(UIExtensionContextTest, GetScreenMode_0100, TestSize.Level1)
     EXPECT_EQ(ans, screenMode);
     TAG_LOGI(AAFwkTag::TEST, "GetScreenMode_0100 end");
 }
+
+/**
+ * @tc.number: StartServiceExtensionAbility_0100
+ * @tc.name: StartServiceExtensionAbility
+ * @tc.desc: StartServiceExtensionAbility.
+ */
+HWTEST_F(UIExtensionContextTest, StartServiceExtensionAbility_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartServiceExtensionAbility_0100 start");
+    auto context = std::make_shared<UIExtensionContext>();
+    EXPECT_NE(context, nullptr);
+    const AAFwk::Want want;
+    auto ret = context->StartServiceExtensionAbility(want, -1);
+    EXPECT_NE(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "StartServiceExtensionAbility_0100 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

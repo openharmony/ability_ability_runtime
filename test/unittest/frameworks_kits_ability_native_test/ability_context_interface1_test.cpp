@@ -483,6 +483,7 @@ HWTEST_F(AbilityContextInterfaceTest, AaFwk_AbilityContext_GetMissionId_0100, Fu
     contextDeal->SetLifeCycleStateInfo(lifeInfo);
 
     EXPECT_EQ(testValue, abilityContext->GetMissionId());
+    abilityContext->ChangeAbilityVisibility(true);
 
     GTEST_LOG_(INFO) << "AaFwk_AbilityContext_GetMissionId_0100 end";
 }
