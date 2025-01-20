@@ -6808,7 +6808,7 @@ int32_t AbilityManagerService::UninstallAppInner(const std::string &bundleName, 
         appExitReasonHelper_->RecordAppExitReason(bundleName, uid, appIndex, exitReason);
     } else {
         IN_PROCESS_CALL_WITHOUT_RET(
-            KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, false, true));
+            KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, false, true, false));
     }
     IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppExecFwk::AppMgrClient>::
         GetInstance()->SetKeepAliveEnableState(bundleName, false, uid));
@@ -7844,7 +7844,7 @@ int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callb
     }
     for (const auto &bundleInfo : bundleInfos) {
         IN_PROCESS_CALL_WITHOUT_RET(KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(
-            bundleInfo.name, userId, false, true));
+            bundleInfo.name, userId, false, true, false));
     }
     return 0;
 }
@@ -12929,20 +12929,20 @@ bool AbilityManagerService::IsInStatusBar(uint32_t accessTokenId, int32_t uid)
 int32_t AbilityManagerService::SetApplicationKeepAlive(const std::string &bundleName, int32_t userId, bool flag)
 {
     return KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(
-        bundleName, userId, flag);
+        bundleName, userId, flag, false, false);
 }
 
 int32_t AbilityManagerService::QueryKeepAliveApplications(int32_t appType, int32_t userId,
     std::vector<KeepAliveInfo> &list)
 {
     return KeepAliveProcessManager::GetInstance().QueryKeepAliveApplications(
-        appType, userId, list);
+        appType, userId, list, false);
 }
 
 int32_t AbilityManagerService::SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId, bool flag)
 {
     return KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(
-        bundleName, userId, flag, true);
+        bundleName, userId, flag, true, false);
 }
 
 int32_t AbilityManagerService::QueryKeepAliveApplicationsByEDM(int32_t appType, int32_t userId,
