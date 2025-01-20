@@ -129,6 +129,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     NotifyAbilityToken(uiAbilityRecord->GetToken(), abilityRequest);
     if (HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag)) {
         AddCallerRecord(abilityRequest, sessionInfo, uiAbilityRecord);
+        uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
         return ERR_OK;
     }
 
