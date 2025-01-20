@@ -189,5 +189,101 @@ HWTEST_F(ConnectServerManagerTest, ConnectServerManagerTest_0800, TestSize.Level
     EXPECT_TRUE(result);
     TAG_LOGI(AAFwkTag::TEST, "ConnectServerManagerTest_0800 is end");
 }
+
+/*
+ * @tc.number    : SendInstanceMessageTest_0100
+ * @tc.name      : ConnectServerManager
+ * @tc.desc      : Test Function ConnectServerManager::SendInstanceMessage
+ */
+HWTEST_F(ConnectServerManagerTest, SendInstanceMessageTest_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendInstanceMessageTest_0100 is start");
+    ConnectServerManager &connectServerManager = AbilityRuntime::ConnectServerManager::Get();
+    std::string message = "Message";
+    connectServerManager.SendStateProfilerMessage(message);
+    int32_t tid = 1;
+    int32_t instanceId = 1;
+    const std::string instanceName = "instanceName";
+    connectServerManager.SetConnectedCallback();
+    bool result = connectServerManager.SendInstanceMessage(tid, instanceId, instanceName);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "SendInstanceMessageTest_0100 is end");
+}
+
+/*
+ * @tc.number    : GetDebuggerPostTaskTest_0100
+ * @tc.name      : ConnectServerManager
+ * @tc.desc      : Test Function ConnectServerManager::GetDebuggerPostTask
+ */
+HWTEST_F(ConnectServerManagerTest, GetDebuggerPostTaskTest_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetDebuggerPostTaskTest_0100 is start");
+    auto setStateProfilerStatus = [](bool) {};
+    auto setSwitchStatus = [](bool) {};
+    auto createLayoutInfo = [](int32_t) {};
+    int32_t instanceId = 1;
+    ConnectServerManager &connectServerManager = AbilityRuntime::ConnectServerManager::Get();
+    connectServerManager.SetSwitchCallback(setSwitchStatus, createLayoutInfo, instanceId);
+    connectServerManager.SetProfilerCallBack(setStateProfilerStatus);
+    int32_t tid = 1;
+    EXPECT_EQ(connectServerManager.GetDebuggerPostTask(tid), nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "GetDebuggerPostTaskTest_0100 is end");
+}
+
+/*
+ * @tc.number    : RegisterConnectServerCallbackTest_0100
+ * @tc.name      : ConnectServerManager
+ * @tc.desc      : Test Function ConnectServerManager::RegisterConnectServerCallback
+ */
+HWTEST_F(ConnectServerManagerTest, RegisterConnectServerCallbackTest_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RegisterConnectServerCallbackTest_0100 is start");
+    bool needBreakPoint = false;
+    bool isDebugApp = false;
+    ConnectServerManager &connectServerManager = AbilityRuntime::ConnectServerManager::Get();
+    connectServerManager.SendDebuggerInfo(needBreakPoint, isDebugApp);
+    auto ConnectServerCallback = []() {};
+    ServerConnectCallback connectServerCallback = ConnectServerCallback;
+    connectServerManager.connectServerCallbacks_.clear();
+    connectServerManager.RegisterConnectServerCallback(connectServerCallback);
+    EXPECT_FALSE(connectServerManager.connectServerCallbacks_.empty());
+    TAG_LOGI(AAFwkTag::TEST, "RegisterConnectServerCallbackTest_0100 is end");
+}
+
+/*
+ * @tc.number    : RegisterSendInstanceMessageCallbackTest_0100
+ * @tc.name      : ConnectServerManager
+ * @tc.desc      : Test Function ConnectServerManager::RegisterSendInstanceMessageCallback
+ */
+HWTEST_F(ConnectServerManagerTest, RegisterSendInstanceMessageCallbackTest_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RegisterSendInstanceMessageCallbackTest_0100 is start");
+    std::string jsonArrayStr = "jsonArrayStr";
+    ConnectServerManager &connectServerManager = AbilityRuntime::ConnectServerManager::Get();
+    connectServerManager.SetRecordResults(jsonArrayStr);
+    auto sendInstanceMessageCB = [](int32_t) {};
+    SendInstanceMessageCallBack sendInstanceMessageCallback = sendInstanceMessageCB;
+    connectServerManager.sendInstanceMessageCallbacks_.clear();
+    connectServerManager.RegisterSendInstanceMessageCallback(sendInstanceMessageCallback);
+    EXPECT_FALSE(connectServerManager.sendInstanceMessageCallbacks_.empty());
+    TAG_LOGI(AAFwkTag::TEST, "RegisterSendInstanceMessageCallbackTest_0100 is end");
+}
+
+/*
+ * @tc.number    : RegisterAddInstanceCallbackTest_0100
+ * @tc.name      : ConnectServerManager
+ * @tc.desc      : Test Function ConnectServerManager::RegisterAddInstanceCallback
+ */
+HWTEST_F(ConnectServerManagerTest, RegisterAddInstanceCallbackTest_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RegisterAddInstanceCallbackTest_0100 is start");
+    auto AddInstanceCB = [](int32_t) {};
+    AddInstanceCallBack addInstanceCallback = AddInstanceCB;
+    ConnectServerManager &connectServerManager = AbilityRuntime::ConnectServerManager::Get();
+    connectServerManager.addInstanceCallbacks_.clear();
+    connectServerManager.RegisterAddInstanceCallback(addInstanceCallback);
+    EXPECT_FALSE(connectServerManager.addInstanceCallbacks_.empty());
+    TAG_LOGI(AAFwkTag::TEST, "RegisterAddInstanceCallbackTest_0100 is end");
+}
 } // namespace AAFwk
 } // namespace OHOS
