@@ -132,7 +132,12 @@ void PendingWantRecord::BuildSendWant(SenderInfo &senderInfo, Want &want)
     if (key_->GetAllWantsInfos().size() != 0) {
         want = key_->GetRequestWant();
     }
-    bool immutable = (static_cast<uint32_t>(key_->GetFlags()) & static_cast<uint32_t>(Flags::CONSTANT_FLAG)) != 0;
+    uint32_t flags = static_cast<uint32_t>(key_->GetFlags());
+    bool immutable = false;
+    if (((flags & static_cast<uint32_t>(Flags::CONSTANT_FLAG)) != 0) ||
+        ((flags & static_cast<uint32_t>(Flags::ALLOW_CANCEL_FLAG)) != 0)) {
+        immutable = true;
+    }
     senderInfo.resolvedType = key_->GetRequestResolvedType();
     if (!immutable) {
         want.AddFlags(key_->GetFlags());

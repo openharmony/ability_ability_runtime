@@ -48,6 +48,7 @@ const uint8_t NUMBER_OF_PARAMETERS_SIX = 6;
 const uint8_t NUMBER_OF_PARAMETERS_SEVEN = 7;
 const uint8_t NUMBER_OF_PARAMETERS_EIGHT = 8;
 const uint8_t NUMBER_OF_PARAMETERS_NINE = 9;
+const uint8_t NUMBER_OF_PARAMETERS_TEN = 10;
 
 class TriggerCompleteCallBack;
 
