@@ -34,15 +34,7 @@ void ChildCallbackManager::RemoveRemoteObject(sptr<IRemoteObject> nativeCallback
 {
     if (nativeCallback) {
         std::lock_guard<std::mutex> lock(mutex_);
-        auto iter = callbackStubs_.begin();
-        while (iter != callbackStubs_.end()) {
-            if (*iter == nativeCallback) {
-                iter = callbackStubs_.erase(iter);
-                break;
-            } else {
-                iter++;
-            }
-        }
+        callbackStubs_.erase(nativeCallback);
     }
 }
 
