@@ -134,6 +134,20 @@ HWTEST_F(WantAgentTest, WantAgent_0500, Function | MediumTest | Level1)
 }
 
 /*
+ * @tc.number    : WantAgent_0600
+ * @tc.name      : IsMultithreadingSupported test
+ * @tc.desc      : 1.GetIsMultithreadingSupported and SetIsMultithreadingSupported
+ */
+HWTEST_F(WantAgentTest, WantAgent_0600, Function | MediumTest | Level1)
+{
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(nullptr);
+    EXPECT_NE(wantAgent, nullptr);
+    EXPECT_FALSE(wantAgent->GetIsMultithreadingSupported());
+    wantAgent->SetIsMultithreadingSupported(true);
+    EXPECT_TRUE(wantAgent->GetIsMultithreadingSupported());
+}
+
+/*
  * @tc.number    : ProcessOptionsTest_0100
  * @tc.name      : Marshalling
  * @tc.desc      : Marshalling
@@ -236,6 +250,19 @@ HWTEST_F(WantAgentTest, ProcessOptionsTest_0800, TestSize.Level1)
     auto option = std::make_shared<ProcessOptions>();
     ProcessMode value = ProcessMode::UNSPECIFIED;
     bool ret = option->IsAttachToStatusBarMode(value);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.number    : ProcessOptionsTest_0900
+ * @tc.name      : IsAttachToStatusBarItemMode
+ * @tc.desc      : IsAttachToStatusBarItemMode
+ */
+HWTEST_F(WantAgentTest, ProcessOptionsTest_0900, TestSize.Level1)
+{
+    auto option = std::make_shared<ProcessOptions>();
+    ProcessMode value = ProcessMode::UNSPECIFIED;
+    bool ret = option->IsAttachToStatusBarItemMode(value);
     EXPECT_EQ(ret, false);
 }
 }  // namespace OHOS::AbilityRuntime::WantAgent
