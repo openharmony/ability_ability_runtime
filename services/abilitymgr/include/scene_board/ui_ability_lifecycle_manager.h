@@ -341,7 +341,7 @@ public:
 
     bool IsCallerInStatusBar(const std::string &instanceKey);
 
-    bool IsInStatusBar(uint32_t accessTokenId);
+    bool IsInStatusBar(uint32_t accessTokenId, bool isMultiInstance);
 
     int32_t TryPrepareTerminateByPids(const std::vector<int32_t>& pids);
 
