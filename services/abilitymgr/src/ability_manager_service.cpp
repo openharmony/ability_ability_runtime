@@ -12969,19 +12969,22 @@ int AbilityManagerService::StartSelfUIAbility(const Want &want)
     DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByChildProcessPid(callingPid, processInfo);
     CHECK_TRUE_RETURN_RET(processInfo.bundleNames.empty(), INNER_ERR, "failed to get by child process pid");
 
-    bool found = false;
-    for (const std::string &bundleName : processInfo.bundleNames) {
-        if (bundleName == want.GetBundle()) {
-            found = true;
-            break;
+    auto iter = std::find_if(processInfo.bundleNames.begin(), processInfo.bundleNames.end(),
+        [targetBundleName = want.GetBundle()](const std::string &bundleName) {
+            return bundleName == targetBundleName;
+        });
+    CHECK_TRUE_RETURN_RET(iter == processInfo.bundleNames.end(), ERR_START_OTHER_APP_FAILED, "cannot start other app");
+
+    if (processInfo.appMode == AppExecFwk::MultiAppModeType::APP_CLONE) {
+        if (want.HasParameter(Want::PARAM_APP_CLONE_INDEX_KEY)) {
+            int32_t appIndex = 0;
+            CHECK_TRUE_RETURN_RET(AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex) ||
+                appIndex != processInfo.appCloneIndex, ERR_START_OTHER_APP_FAILED, "cannot start a different clone");
+        } else {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "set appIndex: %{public}d", processInfo.appCloneIndex);
+            (const_cast<Want &>(want)).SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, processInfo.appCloneIndex);
         }
     }
-    CHECK_TRUE_RETURN_RET(!found, ERR_START_OTHER_APP_FAILED, "cannot start other app");
-
-    int32_t appIndex = 0;
-    (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
-    CHECK_TRUE_RETURN_RET(appIndex != processInfo.appCloneIndex, ERR_START_OTHER_APP_FAILED,
-        "cannot start a different app clone");
 
     auto tokenId = abilityInfo.applicationInfo.accessTokenId;
     StartSelfUIAbilityRecordGuard startSelfUIAbilityRecordGuard(callingPid, tokenId);
