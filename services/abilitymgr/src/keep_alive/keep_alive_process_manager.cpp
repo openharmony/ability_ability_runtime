@@ -262,6 +262,45 @@ bool KeepAliveProcessManager::IsRunningAppInStatusBar(const AppExecFwk::BundleIn
         bundleInfo.applicationInfo.accessTokenId, bundleInfo.uid, isMultiInstance);
 }
 
+void KeepAliveProcessManager::OnAppStateChanged(const AppInfo &info)
+{
+    if (info.state != AppState::BEGIN) {
+        TAG_LOGD(AAFwkTag::KEEP_ALIVE, "Not a state of concern. state: %{public}d", info.state);
+        return;
+    }
+
+    if (info.pid <= 0) {
+        TAG_LOGD(AAFwkTag::KEEP_ALIVE, "The obtained application pid is incorrect. state: %{public}d", info.pid);
+        return;
+    }
+
+    // user 0
+    int32_t uid = 0;
+    auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
+    if (appScheduler == nullptr) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "app scheduler error");
+        return;
+    }
+    std::string bundleName;
+    appScheduler->GetBundleNameByPid(info.pid, bundleName, uid);
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "get bundle name by pid failed");
+        return;
+    }
+
+    bool localEnable = IsKeepAliveBundle(bundleName, -1);
+    if (!localEnable) {
+        return;
+    }
+
+    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+    if (appMgrClient == nullptr) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "appMgrClient is null");
+        return;
+    }
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveDkv(bundleName, localEnable, uid));
+}
+
 bool KeepAliveProcessManager::IsKeepAliveBundle(const std::string &bundleName, int32_t userId)
 {
     if (!system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
