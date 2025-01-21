@@ -20,6 +20,7 @@
 namespace OHOS {
 namespace AAFwk {
 bool AbilityManagerService::isInStatusBarResult = false;
+bool AbilityManagerService::isSupportStatusBarResult = true;
 int32_t AbilityManagerService::userId_ = 0;
 int32_t AbilityManagerService::startAbilityResult = ERR_OK;
 
@@ -30,6 +31,11 @@ AbilityManagerService::~AbilityManagerService() {}
 bool AbilityManagerService::IsInStatusBar(uint32_t accessTokenId, int32_t uid)
 {
     return isInStatusBarResult;
+}
+
+bool AbilityManagerService::IsSupportStatusBar(int32_t uid)
+{
+    return isSupportStatusBarResult;
 }
 
 int32_t AbilityManagerService::GetUserId() const

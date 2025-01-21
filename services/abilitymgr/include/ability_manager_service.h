@@ -1846,6 +1846,8 @@ public:
 
     bool IsInStatusBar(uint32_t accessTokenId, int32_t uid);
 
+    bool IsSupportStatusBar(int32_t uid);
+
     /**
      * Set keep-alive flag for application under a specific user.
      * @param bundleName Bundle name.
