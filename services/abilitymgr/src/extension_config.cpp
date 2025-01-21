@@ -35,11 +35,6 @@ constexpr const char* EXTENSION_SERVICE_BLOCKED_LIST_NAME = "service_blocked_lis
 constexpr const char* EXTENSION_SERVICE_STARTUP_ENABLE_FLAG = "service_startup_enable_flag";
 constexpr const char* EXTENSION_NETWORK_ENABLE_FLAG = "network_acesss_enable_flag";
 constexpr const char* EXTENSION_SA_ENABLE_FLAG = "sa_acesss_enable_flag";
-
-constexpr const bool EXTENSION_NETWORK_ENABLE_FLAG_DEFAULT = true;
-constexpr const bool EXTENSION_SA_ENABLE_FLAG_DEFAULT = true;
-
-const int32_t DEFAULT_EXTENSION_AUTO_DISCONNECT_TIME = -1;
 }
 
 std::string ExtensionConfig::GetExtensionConfigPath() const
@@ -66,32 +61,35 @@ void ExtensionConfig::LoadExtensionConfiguration()
 
 int32_t ExtensionConfig::GetExtensionAutoDisconnectTime(const std::string &extensionTypeName)
 {
-    if (extensionAutoDisconnectTimeMap_.find(extensionTypeName) != extensionAutoDisconnectTimeMap_.end()) {
-        return extensionAutoDisconnectTimeMap_[extensionTypeName];
+    std::lock_guard lock(configMapMutex_);
+    if (configMap_.find(extensionTypeName) != configMap_.end()) {
+        return configMap_[extensionTypeName].extensionAutoDisconnectTime;
     }
     return DEFAULT_EXTENSION_AUTO_DISCONNECT_TIME;
 }
 
 bool ExtensionConfig::IsExtensionStartThirdPartyAppEnable(const std::string &extensionTypeName)
 {
-    if (thirdPartyAppEnableFlags_.find(extensionTypeName) != thirdPartyAppEnableFlags_.end()) {
-        return thirdPartyAppEnableFlags_[extensionTypeName];
+    std::lock_guard lock(configMapMutex_);
+    if (configMap_.find(extensionTypeName) != configMap_.end()) {
+        return configMap_[extensionTypeName].thirdPartyAppEnableFlag;
     }
-    return true;
+    return EXTENSION_THIRD_PARTY_APP_ENABLE_FLAG_DEFAULT;
 }
 
 bool ExtensionConfig::IsExtensionStartServiceEnable(const std::string &extensionTypeName, const std::string &targetUri)
 {
     AppExecFwk::ElementName targetElementName;
-    if (serviceEnableFlags_.find(extensionTypeName) != serviceEnableFlags_.end() &&
-        !serviceEnableFlags_[extensionTypeName]) {
+    std::lock_guard lock(configMapMutex_);
+    if (configMap_.find(extensionTypeName) != configMap_.end() &&
+        !configMap_[extensionTypeName].serviceEnableFlag) {
         return false;
     }
     if (!targetElementName.ParseURI(targetUri) ||
-        serviceBlockedLists_.find(extensionTypeName) == serviceBlockedLists_.end()) {
-        return true;
+        configMap_.find(extensionTypeName) == configMap_.end()) {
+        return EXTENSION_START_SERVICE_ENABLE_FLAG_DEFAULT;
     }
-    for (const auto& iter : serviceBlockedLists_[extensionTypeName]) {
+    for (const auto& iter : configMap_[extensionTypeName].serviceBlockedList) {
         AppExecFwk::ElementName iterElementName;
         if (iterElementName.ParseURI(iter) &&
             iterElementName.GetBundleName() == targetElementName.GetBundleName() &&
@@ -99,7 +97,7 @@ bool ExtensionConfig::IsExtensionStartServiceEnable(const std::string &extension
             return false;
         }
     }
-    return true;
+    return EXTENSION_START_SERVICE_ENABLE_FLAG_DEFAULT;
 }
 
 void ExtensionConfig::LoadExtensionConfig(const nlohmann::json &object)
@@ -114,6 +112,7 @@ void ExtensionConfig::LoadExtensionConfig(const nlohmann::json &object)
         if (!jsonObject.contains(EXTENSION_TYPE_NAME) || !jsonObject.at(EXTENSION_TYPE_NAME).is_string()) {
             continue;
         }
+        std::lock_guard lock(configMapMutex_);
         std::string extensionTypeName = jsonObject.at(EXTENSION_TYPE_NAME).get<std::string>();
         LoadExtensionAutoDisconnectTime(jsonObject, extensionTypeName);
         LoadExtensionThirdPartyAppBlockedList(jsonObject, extensionTypeName);
@@ -131,7 +130,7 @@ void ExtensionConfig::LoadExtensionAutoDisconnectTime(const nlohmann::json &obje
         return;
     }
     int32_t extensionAutoDisconnectTime = object.at(EXTENSION_AUTO_DISCONNECT_TIME).get<int32_t>();
-    extensionAutoDisconnectTimeMap_[extensionTypeName] = extensionAutoDisconnectTime;
+    configMap_[extensionTypeName].extensionAutoDisconnectTime = extensionAutoDisconnectTime;
 }
 
 void ExtensionConfig::LoadExtensionThirdPartyAppBlockedList(const nlohmann::json &object,
@@ -143,9 +142,10 @@ void ExtensionConfig::LoadExtensionThirdPartyAppBlockedList(const nlohmann::json
         TAG_LOGE(AAFwkTag::ABILITYMGR, "third Party config null");
         return;
     }
-    thirdPartyAppEnableFlags_[extensionTypeName] = object.at(EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME).get<bool>();
+    bool flag = object.at(EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME).get<bool>();
+    configMap_[extensionTypeName].thirdPartyAppEnableFlag = flag;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "The %{public}s extension's third party app blocked flag is %{public}d",
-        extensionTypeName.c_str(), thirdPartyAppEnableFlags_[extensionTypeName]);
+        extensionTypeName.c_str(), flag);
 }
 
 void ExtensionConfig::LoadExtensionServiceBlockedList(const nlohmann::json &object, std::string extensionTypeName)
@@ -158,7 +158,7 @@ void ExtensionConfig::LoadExtensionServiceBlockedList(const nlohmann::json &obje
     }
     bool serviceEnableFlag = object.at(EXTENSION_SERVICE_STARTUP_ENABLE_FLAG).get<bool>();
     if (!serviceEnableFlag) {
-        serviceEnableFlags_[extensionTypeName] = serviceEnableFlag;
+        configMap_[extensionTypeName].serviceEnableFlag = serviceEnableFlag;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s Service startup is blocked.", extensionTypeName.c_str());
         return;
     }
@@ -178,7 +178,7 @@ void ExtensionConfig::LoadExtensionServiceBlockedList(const nlohmann::json &obje
             serviceBlockedList.emplace(serviceUri);
         }
     }
-    serviceBlockedLists_[extensionTypeName] = serviceBlockedList;
+    configMap_[extensionTypeName].serviceBlockedList = serviceBlockedList;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "The size of %{public}s extension's service blocked list is %{public}zu",
         extensionTypeName.c_str(), serviceBlockedList.size());
 }
@@ -191,10 +191,10 @@ void ExtensionConfig::LoadExtensionNetworkEnable(const nlohmann::json &object,
         TAG_LOGW(AAFwkTag::ABILITYMGR, "network enable flag null");
         return;
     }
-    std::lock_guard lock(networkEnableMutex_);
-    networkEnableFlags_[extensionTypeName] = object.at(EXTENSION_NETWORK_ENABLE_FLAG).get<bool>();
+    bool flag = object.at(EXTENSION_NETWORK_ENABLE_FLAG).get<bool>();
+    configMap_[extensionTypeName].networkEnableFlag = flag;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "The %{public}s extension's network enable flag is %{public}d",
-        extensionTypeName.c_str(), networkEnableFlags_[extensionTypeName]);
+        extensionTypeName.c_str(), flag);
 }
 
 void ExtensionConfig::LoadExtensionSAEnable(const nlohmann::json &object,
@@ -205,26 +205,26 @@ void ExtensionConfig::LoadExtensionSAEnable(const nlohmann::json &object,
         TAG_LOGW(AAFwkTag::ABILITYMGR, "sa enable flag null");
         return;
     }
-    std::lock_guard lock(saEnableMutex_);
-    saEnableFlags_[extensionTypeName] = object.at(EXTENSION_SA_ENABLE_FLAG).get<bool>();
+    bool flag = object.at(EXTENSION_SA_ENABLE_FLAG).get<bool>();
+    configMap_[extensionTypeName].saEnableFlag = flag;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "The %{public}s extension's sa enable flag is %{public}d",
-        extensionTypeName.c_str(), saEnableFlags_[extensionTypeName]);
+        extensionTypeName.c_str(), flag);
 }
 
 bool ExtensionConfig::IsExtensionNetworkEnable(const std::string &extensionTypeName)
 {
-    std::lock_guard lock(networkEnableMutex_);
-    if (networkEnableFlags_.find(extensionTypeName) != networkEnableFlags_.end()) {
-        return networkEnableFlags_[extensionTypeName];
+    std::lock_guard lock(configMapMutex_);
+    if (configMap_.find(extensionTypeName) != configMap_.end()) {
+        return configMap_[extensionTypeName].networkEnableFlag;
     }
     return EXTENSION_NETWORK_ENABLE_FLAG_DEFAULT;
 }
 
 bool ExtensionConfig::IsExtensionSAEnable(const std::string &extensionTypeName)
 {
-    std::lock_guard lock(saEnableMutex_);
-    if (saEnableFlags_.find(extensionTypeName) != saEnableFlags_.end()) {
-        return saEnableFlags_[extensionTypeName];
+    std::lock_guard lock(configMapMutex_);
+    if (configMap_.find(extensionTypeName) != configMap_.end()) {
+        return configMap_[extensionTypeName].saEnableFlag;
     }
     return EXTENSION_SA_ENABLE_FLAG_DEFAULT;
 }
