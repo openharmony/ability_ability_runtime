@@ -74,6 +74,7 @@ constexpr const char* TASK_ATTACH_CHILD_PROCESS = "AttachChildProcessTask";
 constexpr const char* TASK_EXIT_CHILD_PROCESS_SAFELY = "ExitChildProcessSafelyTask";
 #endif // SUPPORT_CHILD_PROCESS
 constexpr const char* FOUNDATION_PROCESS = "foundation";
+constexpr const char* RSS_PROCESS_NAME = "resource_schedule_service";
 constexpr int32_t USER_UID = 2000;
 constexpr const char* HIVIEW_PROCESS_NAME = "hiview";
 }  // namespace
@@ -1133,8 +1134,9 @@ int32_t AppMgrService::NotifyHotReloadPage(const std::string &bundleName, const 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 int32_t AppMgrService::SetContinuousTaskProcess(int32_t pid, bool isContinuousTask)
 {
-    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not foundation");
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(RSS_PROCESS_NAME) &&
+        !AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not rss or foundation");
         return ERR_INVALID_OPERATION;
     }
     if (!IsReady()) {
