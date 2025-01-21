@@ -50,13 +50,14 @@ bool StatusBarDelegateManager::IsCallerInStatusBar(const std::string &instanceKe
     return isExist;
 }
 
-bool StatusBarDelegateManager::IsInStatusBar(uint32_t accessTokenId)
+bool StatusBarDelegateManager::IsInStatusBar(uint32_t accessTokenId, bool isMultiInstance)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto statusBarDelegate = GetStatusBarDelegate();
     CHECK_POINTER_AND_RETURN(statusBarDelegate, false);
     bool isExist = false;
-    auto ret = statusBarDelegate->CheckIfStatusBarItemExists(accessTokenId, "app_instance_0", isExist);
+    std::string instanceKey = isMultiInstance ? "app_instance_0" : "";
+    auto ret = statusBarDelegate->CheckIfStatusBarItemExists(accessTokenId, instanceKey, isExist);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ret: %{public}d", ret);
         return false;
