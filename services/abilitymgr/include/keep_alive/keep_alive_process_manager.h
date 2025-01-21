@@ -130,7 +130,8 @@ private:
     int32_t CheckPermissionForEDM();
     void StartKeepAliveProcessWithMainElementPerBundle(const AppExecFwk::BundleInfo &bundleInfo,
         int32_t userId);
-    void AfterStartKeepAliveApp(const std::string &bundleName, uint32_t accessTokenId, int32_t uid, int32_t userId);
+    void AfterStartKeepAliveApp(const std::string &bundleName, uint32_t accessTokenId, int32_t uid, int32_t userId,
+        bool isMultiInstance);
     bool IsRunningAppInStatusBar(const AppExecFwk::BundleInfo &bundleInfo);
 
     ffrt::mutex checkStatusBarTasksMutex_;
