@@ -18,6 +18,8 @@
 #include <utility>
 #include "application_context.h"
 #include "context/application_context.h"
+#include "securec.h"
+#include "want_manager.h"
 
 namespace OHOS::AbilityRuntime {
 namespace {
@@ -1818,5 +1820,27 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_004, Test
     cloudFileDir = contextImpl->GetCloudFileDir();
     ASSERT_EQ(writeLength, cloudFileDir.length());
     ASSERT_STREQ(buffer, cloudFileDir.c_str());
+}
+
+/**
+ * @tc.number: StartSelfUIAbility_001
+ * @tc.desc: Function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, StartSelfUIAbility_001, TestSize.Level0)
+{
+    AbilityBase_Want want;
+    char bundleName[] = "com.example.myapplication";
+    want.element.bundleName = bundleName;
+
+    char abilityName[] = "com.test.Ability";
+    want.element.abilityName = abilityName;
+
+    char moduleName[] = "com.test.module";
+    want.element.moduleName = moduleName;
+    want.params = std::map<std::string, std::string>();
+    want.fds = std::map<std::string, int32_t>();
+    AbilityRuntime_ErrorCode errCode = OH_AbilityRuntime_StartSelfUIAbility(&want);
+    ASSERT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED);
 }
 } // namespace OHOS::AbilityRuntime
