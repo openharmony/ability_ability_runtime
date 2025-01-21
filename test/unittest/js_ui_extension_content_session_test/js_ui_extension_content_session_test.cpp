@@ -20,6 +20,7 @@
 #include "context_impl.h"
 #include "js_runtime_lite.h"
 #include "js_ui_extension_content_session.h"
+#include "napi_common_want_agent.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "napi_common_util.h"
@@ -1649,6 +1650,51 @@ HWTEST_F(JsUIExtensionContentSessionTest, SetCallbackForTerminateWithResultTest_
     JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
 
     GTEST_LOG_(INFO) << "SetCallbackForTerminateWithResultTest_0100 end";
+}
+
+/**
+ * @tc.number: WrapWantAgentTest_0100
+ * @tc.name: WrapWantAgent test
+ * @tc.desc: WrapWantAgent test
+ */
+HWTEST_F(JsUIExtensionContentSessionTest, WrapWantAgentTest_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "WrapWantAgentTest_0100 start";
+
+    OHOS::AbilityRuntime::Runtime::Options options;
+    std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
+    EXPECT_EQ(err, napi_status::napi_ok);
+    napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
+    EXPECT_NE(OHOS::AppExecFwk::WrapWantAgent(env, nullptr, nullptr), nullptr);
+    JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+
+    GTEST_LOG_(INFO) << "WrapWantAgentTest_0100 end";
+}
+
+/**
+ * @tc.number: UnwrapWantAgentTest_0100
+ * @tc.name: UnwrapWantAgent test
+ * @tc.desc: UnwrapWantAgent test
+ */
+HWTEST_F(JsUIExtensionContentSessionTest, UnwrapWantAgentTest_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "UnwrapWantAgentTest_0100 start";
+
+    OHOS::AbilityRuntime::Runtime::Options options;
+    std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
+    EXPECT_EQ(err, napi_status::napi_ok);
+    napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
+    std::string test = "test";
+    void* myPointer = static_cast<void*>(&test);
+    void** result = reinterpret_cast<void**>(&myPointer);
+    napi_value jSObject = AppExecFwk::CreateJSObject(env);
+    OHOS::AppExecFwk::UnwrapWantAgent(env, jSObject, result);
+    EXPECT_EQ(myPointer, nullptr);
+    JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+
+    GTEST_LOG_(INFO) << "UnwrapWantAgentTest_0100 end";
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
