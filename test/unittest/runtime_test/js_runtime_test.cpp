@@ -1557,6 +1557,7 @@ HWTEST_F(JsRuntimeTest, JsRuntimePreloadMainAbility_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "PreloadMainAbility_0100 start");
     std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(options_);
     EXPECT_TRUE(jsRuntime != nullptr);
+    jsRuntime->DoCleanWorkAfterStageCleaned();
     std::string moduleName = TEST_MODULE_NAME;
     std::string srcPath = TEST_MODULE_PATH;
     std::string hapPath = TEST_HAP_PATH;
