@@ -29,6 +29,7 @@ int32_t BatchUri::Init(const std::vector<Uri> &uriVec, uint32_t mode, const std:
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec is empty.");
         return 0;
     }
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "uri type: %{public}s.", uriVec[0].ToString().c_str());
     totalUriCount = static_cast<int32_t>(uriVec.size());
     validUriCount = 0;
     result = std::vector<bool>(totalUriCount, false);
