@@ -249,5 +249,24 @@ HWTEST_F(FormHostClientTest, AaFwk_FormHostClient_OnShareFormResponse_0100, Func
     EXPECT_TRUE(instance_ != nullptr);
     GTEST_LOG_(INFO) << "AaFwk_FormHostClient_OnShareFormResponse_0100 end";
 }
+
+/**
+ * @tc.number: AaFwk_FormHostClient_OnLockForm_0100
+ * @tc.name: OnLockForm
+ * @tc.desc: Verify that the return value of OnLockForm is correct.
+ */
+HWTEST_F(FormHostClientTest, AaFwk_FormHostClient_OnLockForm_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_FormHostClient_OnLockForm_0100 start";
+    FormJsInfo formInfo;
+    formInfo.formId = -1;
+    std::shared_ptr<FormCallbackInterfaceTest> callback = std::make_shared<FormCallbackInterfaceTest>();
+    ASSERT_NE(callback, nullptr);
+    instance_->AddForm(callback, formInfo);
+    std::vector<int64_t> formIds = {1};
+    instance_->OnLockForm(formIds, true);
+
+    GTEST_LOG_(INFO) << "AaFwk_FormHostClient_OnLockForm_0100 end";
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
