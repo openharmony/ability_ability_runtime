@@ -43,6 +43,8 @@ class AbilityManagerService : public std::enable_shared_from_this<AbilityManager
 public:
     bool IsInStatusBar(uint32_t accessTokenId, int32_t uid);
 
+    bool IsSupportStatusBar(int32_t uid);
+
     /**
      * get the user id.
      *
@@ -68,6 +70,7 @@ public:
 
 public:
     static bool isInStatusBarResult;
+    static bool isSupportStatusBarResult;
     static int32_t userId_;
     static int32_t startAbilityResult;
 };

@@ -65,6 +65,14 @@ bool StatusBarDelegateManager::IsInStatusBar(uint32_t accessTokenId)
     return isExist;
 }
 
+bool StatusBarDelegateManager::IsSupportStatusBar()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto statusBarDelegate = GetStatusBarDelegate();
+    CHECK_POINTER_AND_RETURN(statusBarDelegate, false);
+    return true;
+}
+
 int32_t StatusBarDelegateManager::DoProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
