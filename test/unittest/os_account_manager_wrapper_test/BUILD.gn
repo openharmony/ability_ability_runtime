@@ -46,6 +46,7 @@ ohos_unittest("os_account_manager_wrapper_test") {
     "c_utils:utils",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "os_account:os_account_innerkits",
   ]
 }
 
