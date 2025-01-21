@@ -104,13 +104,6 @@ public:
     void StartKeepAliveProcessWithMainElement(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
 
     /**
-     * Once one process created, query keep-alive status from db and update then
-     *
-     * @param appInfo The App info.
-     */
-    void OnAppStateChanged(const AppInfo &info);
-
-    /**
      * Check if it is a keep-alive bundle under the specified user.
      *
      * @param bundleName, The bundle name of the keep-alive process.
@@ -138,7 +131,8 @@ private:
     int32_t CheckPermissionForEDM();
     void StartKeepAliveProcessWithMainElementPerBundle(const AppExecFwk::BundleInfo &bundleInfo,
         int32_t userId);
-    void AfterStartKeepAliveApp(const std::string &bundleName, uint32_t accessTokenId, int32_t uid, int32_t userId);
+    void AfterStartKeepAliveApp(const std::string &bundleName, uint32_t accessTokenId, int32_t uid, int32_t userId,
+        bool isMultiInstance);
     bool IsRunningAppInStatusBar(const AppExecFwk::BundleInfo &bundleInfo);
 
     ffrt::mutex checkStatusBarTasksMutex_;

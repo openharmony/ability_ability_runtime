@@ -29,25 +29,25 @@ namespace AAFwk {
 namespace AbilityUtil {
 #define CHECK_POINTER_CONTINUE(object)                         \
     if (!object) {                                             \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "nullptr"); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "object nullptr"); \
         continue;                                              \
     }
 
 #define CHECK_POINTER_IS_NULLPTR(object)                       \
     if (object == nullptr) {                                   \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "nullptr"); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "object nullptr"); \
         return;                                                \
     }
 
 #define CHECK_POINTER(object)                                  \
     if (!object) {                                             \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "nullptr"); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "object nullptr"); \
         return;                                                \
     }
 
 #define CHECK_POINTER_LOG(object, log)                      \
     if (!object) {                                          \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s:", log); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "nullptr %{public}s:", log); \
         return;                                             \
     }
 
@@ -59,19 +59,19 @@ namespace AbilityUtil {
 
 #define CHECK_POINTER_AND_RETURN(object, value)                \
     if (!object) {                                             \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "nullptr"); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "object nullptr"); \
         return value;                                          \
     }
 
 #define CHECK_POINTER_AND_RETURN_LOG(object, value, log)    \
     if (!object) {                                          \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s:", log); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "nullptr %{public}s:", log); \
         return value;                                       \
     }
 
 #define CHECK_POINTER_RETURN_BOOL(object)                      \
     if (!object) {                                             \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "nullptr"); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "object nullptr"); \
         return false;                                          \
     }
 
