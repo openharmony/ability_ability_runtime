@@ -43,6 +43,7 @@ private:
     int HandleRevokeUriPermissionManually(MessageParcel &data, MessageParcel &reply);
     int HandleVerifyUriPermission(MessageParcel &data, MessageParcel &reply);
     int HandleClearPermissionTokenByMap(MessageParcel &data, MessageParcel &reply);
+    int32_t ReadBatchUris(MessageParcel &data, std::vector<Uri> &uriVec);
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     int HandleActive(MessageParcel &data, MessageParcel &reply);
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
