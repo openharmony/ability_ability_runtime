@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -159,6 +159,30 @@ void UnwrapStartOptionsWindowOptions(napi_env env, napi_value param, AAFwk::Star
     if (UnwrapInt32ByPropertyName(env, param, "windowHeight", windowHeight)) {
         startOptions.SetWindowHeight(windowHeight);
         startOptions.windowHeightUsed_ = true;
+    }
+
+    int32_t minWindowWidth = 0;
+    if (UnwrapInt32ByPropertyName(env, param, "minWindowWidth", minWindowWidth)) {
+        startOptions.SetMinWindowWidth(minWindowWidth);
+        startOptions.minWindowWidthUsed_ = true;
+    }
+
+    int32_t minWindowHeight = 0;
+    if (UnwrapInt32ByPropertyName(env, param, "minWindowHeight", minWindowHeight)) {
+        startOptions.SetMinWindowHeight(minWindowHeight);
+        startOptions.minWindowHeightUsed_ = true;
+    }
+
+    int32_t maxWindowWidth = 0;
+    if (UnwrapInt32ByPropertyName(env, param, "maxWindowWidth", maxWindowWidth)) {
+        startOptions.SetMaxWindowWidth(maxWindowWidth);
+        startOptions.maxWindowWidthUsed_ = true;
+    }
+
+    int32_t maxWindowHeight = 0;
+    if (UnwrapInt32ByPropertyName(env, param, "maxWindowHeight", maxWindowHeight)) {
+        startOptions.SetMaxWindowHeight(maxWindowHeight);
+        startOptions.maxWindowHeightUsed_ = true;
     }
 }
 
