@@ -21,9 +21,11 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-CJEmbeddedUIExtension *CJEmbeddedUIExtension::Create(const std::unique_ptr<Runtime> &runtime)
+extern "C" __attribute__((visibility("default"))) EmbeddedUIExtension* OHOS_ABILITY_CJEmbeddedUIExtension(
+    void* runtimePtr)
 {
-    return new CJEmbeddedUIExtension(runtime);
+    std::unique_ptr<Runtime>* runtime = reinterpret_cast<std::unique_ptr<Runtime>*>(runtimePtr);
+    return new (std::nothrow) CJEmbeddedUIExtension(*runtime);
 }
 
 CJEmbeddedUIExtension::CJEmbeddedUIExtension(const std::unique_ptr<Runtime> &runtime)

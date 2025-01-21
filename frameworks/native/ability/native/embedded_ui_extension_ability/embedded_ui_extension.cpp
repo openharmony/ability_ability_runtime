@@ -17,7 +17,7 @@
 
 #include "hilog_tag_wrapper.h"
 #include "js_embedded_ui_extension.h"
-#include "cj_embedded_ui_extension.h"
+#include "cj_embedded_ui_extension_instance.h"
 #include "runtime.h"
 #include "ui_extension_context.h"
 
@@ -33,7 +33,7 @@ EmbeddedUIExtension *EmbeddedUIExtension::Create(const std::unique_ptr<Runtime> 
         case Runtime::Language::JS:
             return JsEmbeddedUIExtension::Create(runtime);
         case Runtime::Language::CJ:
-            return CJEmbeddedUIExtension::Create(runtime);
+            return CreateCJEmbeddedUIExtension(runtime);
         default:
             return new (std::nothrow) EmbeddedUIExtension();
     }

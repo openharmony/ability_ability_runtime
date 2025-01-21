@@ -520,21 +520,74 @@ ohos_shared_library("extensionkit_native") {
   ]
 
   if (cj_frontend) {
-    sources += [
-      "${ability_runtime_native_path}/ability/native/cj_extension_common.cpp",
-      "${ability_runtime_native_path}/ability/native/cj_ui_extension_object.cpp",
-    ]
-
-    include_dirs +=
-        [ "${ability_runtime_path}/cj_environment/interfaces/inner_api" ]
-
-    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
-
-    external_deps += [
-      "napi:cj_bind_ffi",
-      "napi:cj_bind_native",
+    sources += [ "${ability_runtime_native_path}/ability/native/cj_extension_common_instance.cpp" ]
+  }
+  if (ability_runtime_graphics) {
+    external_deps += [ "ability_base:session_info" ]
+    public_external_deps += [
+      "graphic_2d:color_manager",
+      "image_framework:image_native",
+      "window_manager:libdm",
     ]
   }
+
+  innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("cj_extensionkit_native") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  defines = [ "AMS_LOG_TAG = \"Ability\"" ]
+  defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
+  include_dirs = [
+    "${ability_runtime_path}/cj_environment/interfaces/inner_api",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
+  ]
+
+  sources = [
+    "${ability_runtime_native_path}/ability/native/cj_extension_common.cpp",
+    "${ability_runtime_native_path}/ability/native/cj_ui_extension_object.cpp",
+  ]
+
+  deps = [
+    ":configuration_helper",
+    ":extensionkit_native",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability:cj_ability_context_native",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+  ]
+
+  public_deps = [ ":abilitykit_utils" ]
+
+  public_external_deps = [ "bundle_framework:appexecfwk_core" ]
+
   if (ability_runtime_graphics) {
     external_deps += [ "ability_base:session_info" ]
     public_external_deps += [
@@ -1478,27 +1531,80 @@ ohos_shared_library("ui_extension") {
   ]
 
   if (cj_frontend) {
-    sources += [
-      "${ability_runtime_native_path}/ability/native/ui_extension_base/cj_ui_extension_base.cpp",
-      "${ability_runtime_native_path}/ability/native/ui_extension_base/cj_ui_extension_content_session.cpp",
-      "${ability_runtime_native_path}/ability/native/ui_extension_base/cj_ui_extension_context.cpp",
-    ]
-
-    include_dirs += [
-      "${ability_runtime_path}/cj_environment/interfaces/inner_api",
-      "${ability_runtime_path}/frameworks/cj/ffi",
-    ]
-
-    deps += [
-      ":extensionkit_native",
-      "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
-    ]
-
-    external_deps += [
-      "napi:cj_bind_ffi",
-      "napi:cj_bind_native",
-    ]
+    sources += [ "${ability_runtime_native_path}/ability/native/ui_extension_base/cj_ui_extension_base_instance.cpp" ]
   }
+  if (ability_runtime_graphics) {
+    defines = [ "SUPPORT_SCREEN" ]
+    external_deps += [
+      "ace_engine:ace_uicontent",
+      "window_manager:libdm",
+      "window_manager:libwm",
+    ]
+
+    public_external_deps = [ "window_manager:scene_session_manager" ]
+  }
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("cj_ui_extension") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  include_dirs = [
+    "${ability_runtime_path}/cj_environment/interfaces/inner_api",
+    "${ability_runtime_path}/frameworks/cj/ffi",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection",
+  ]
+
+  sources = [
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/cj_ui_extension_base.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/cj_ui_extension_content_session.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/cj_ui_extension_context.cpp",
+  ]
+
+  deps = [
+    ":abilitykit_native",
+    ":cj_extensionkit_native",
+    ":extensionkit_native",
+    ":ui_extension",
+    ":ui_service_extension_connection",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability:cj_ability_context_native",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/ability/native:insight_intent_executor",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:app_context_utils",
+    "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+    "window_manager:embeddablewindowstage_kit",
+    "window_manager:extensionwindow_napi",
+    "window_manager:windowstage_kit",
+  ]
 
   if (ability_runtime_graphics) {
     defines = [ "SUPPORT_SCREEN" ]
@@ -1594,10 +1700,54 @@ ohos_shared_library("share_extension") {
   ]
 
   if (cj_frontend) {
-    sources += [ "${ability_runtime_native_path}/ability/native/share_extension_ability/cj_share_extension.cpp" ]
-
-    external_deps += [ "napi:cj_bind_native" ]
+    sources += [ "${ability_runtime_native_path}/ability/native/share_extension_ability/cj_share_extension_instance.cpp" ]
   }
+  if (ability_runtime_graphics) {
+    external_deps += [ "window_manager:libwm" ]
+  }
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("cj_share_extension") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  configs = [ ":share_extension_config" ]
+
+  sources = [ "${ability_runtime_native_path}/ability/native/share_extension_ability/cj_share_extension.cpp" ]
+
+  deps = [
+    ":abilitykit_native",
+    ":cj_ui_extension",
+    ":share_extension",
+    ":ui_extension",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability:cj_ability_context_native",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/appkit:app_context",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_napi",
+    "napi:cj_bind_native",
+  ]
+
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
   }
@@ -1650,10 +1800,53 @@ ohos_shared_library("action_extension") {
   ]
 
   if (cj_frontend) {
-    sources += [ "${ability_runtime_native_path}/ability/native/action_extension_ability/cj_action_extension.cpp" ]
-
-    external_deps += [ "napi:cj_bind_native" ]
+    sources += [ "${ability_runtime_native_path}/ability/native/action_extension_ability/cj_action_extension_instance.cpp" ]
   }
+  if (ability_runtime_graphics) {
+    external_deps += [ "window_manager:libwm" ]
+  }
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("cj_action_extension") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  configs = [ ":action_extension_config" ]
+
+  sources = [ "${ability_runtime_native_path}/ability/native/action_extension_ability/cj_action_extension.cpp" ]
+
+  deps = [
+    ":abilitykit_native",
+    ":action_extension",
+    ":cj_ui_extension",
+    ":ui_extension",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability:cj_ability_context_native",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/appkit:app_context",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "napi:cj_bind_native",
+  ]
+
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
   }
@@ -1870,15 +2063,57 @@ ohos_shared_library("embedded_ui_extension") {
   ]
 
   if (cj_frontend) {
-    sources += [ "${ability_runtime_native_path}/ability/native/embedded_ui_extension_ability/cj_embedded_ui_extension.cpp" ]
-
-    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
-
-    external_deps += [
-      "napi:cj_bind_ffi",
-      "napi:cj_bind_native",
-    ]
+    sources += [ "${ability_runtime_native_path}/ability/native/embedded_ui_extension_ability/cj_embedded_ui_extension_instance.cpp" ]
   }
+
+  if (ability_runtime_graphics) {
+    external_deps += [ "window_manager:libwm" ]
+  }
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("cj_embedded_ui_extension") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  configs = [ ":embedded_ui_extension_config" ]
+
+  sources = [ "${ability_runtime_native_path}/ability/native/embedded_ui_extension_ability/cj_embedded_ui_extension.cpp" ]
+
+  deps = [
+    ":abilitykit_native",
+    ":cj_ui_extension",
+    ":embedded_ui_extension",
+    ":ui_extension",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability:cj_ability_context_native",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+  ]
 
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
@@ -2095,20 +2330,64 @@ ohos_shared_library("photo_editor_extension") {
   ]
 
   if (cj_frontend) {
-    sources += [
-      "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/cj_photo_editor_extension.cpp",
-      "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/cj_photo_editor_extension_context.cpp",
-      "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/cj_photo_editor_extension_impl.cpp",
-    ]
-
-    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
-
-    external_deps += [
-      "image_framework:cj_image_ffi",
-      "napi:cj_bind_ffi",
-      "napi:cj_bind_native",
-    ]
+    sources += [ "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/cj_photo_editor_extension_instance.cpp" ]
   }
+
+  if (ability_runtime_graphics) {
+    external_deps += [ "window_manager:libwm" ]
+  }
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("cj_photo_editor_extension") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  configs = [ ":photo_editor_extension_config" ]
+
+  sources = [
+    "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/cj_photo_editor_extension.cpp",
+    "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/cj_photo_editor_extension_context.cpp",
+    "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/cj_photo_editor_extension_impl.cpp",
+  ]
+
+  deps = [
+    ":abilitykit_native",
+    ":cj_extensionkit_native",
+    ":cj_ui_extension",
+    ":photo_editor_extension",
+    ":ui_extension",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability:cj_ability_context_native",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "app_file_service:fileuri_native",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "image_framework:cj_image_ffi",
+    "image_framework:image",
+    "image_framework:image_native",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+  ]
 
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
