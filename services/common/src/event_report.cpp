@@ -657,7 +657,8 @@ void EventReport::SendStartAbilityOtherExtensionEvent(const EventName &eventName
         EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
         EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
         EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType,
-        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+        // Historical reason: Word spelling error during event definition
+        "CALLER_BUNLED_NAME", eventInfo.callerBundleName);
 }
 
 std::string EventReport::ConvertEventName(const EventName &eventName)
