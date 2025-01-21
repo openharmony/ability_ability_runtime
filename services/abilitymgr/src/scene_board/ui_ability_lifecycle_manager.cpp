@@ -2728,11 +2728,11 @@ bool UIAbilityLifecycleManager::IsCallerInStatusBar(const std::string &instanceK
     return statusBarDelegateManager->IsCallerInStatusBar(instanceKey);
 }
 
-bool UIAbilityLifecycleManager::IsInStatusBar(uint32_t accessTokenId)
+bool UIAbilityLifecycleManager::IsInStatusBar(uint32_t accessTokenId, bool isMultiInstance)
 {
     auto statusBarDelegateManager = GetStatusBarDelegateManager();
     CHECK_POINTER_AND_RETURN(statusBarDelegateManager, false);
-    return statusBarDelegateManager->IsInStatusBar(accessTokenId);
+    return statusBarDelegateManager->IsInStatusBar(accessTokenId, isMultiInstance);
 }
 
 int32_t UIAbilityLifecycleManager::DoProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord)

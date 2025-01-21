@@ -27,7 +27,7 @@ AbilityManagerService::AbilityManagerService() {}
 
 AbilityManagerService::~AbilityManagerService() {}
 
-bool AbilityManagerService::IsInStatusBar(uint32_t accessTokenId, int32_t uid)
+bool AbilityManagerService::IsInStatusBar(uint32_t accessTokenId, int32_t uid, bool isMultiInstance)
 {
     return isInStatusBarResult;
 }
