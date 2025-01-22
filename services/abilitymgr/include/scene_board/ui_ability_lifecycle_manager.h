@@ -35,13 +35,14 @@ struct AbilityRunningInfo;
 struct MissionValidResult;
 
 struct SpecifiedRequest {
-    int32_t requestId = 0;
-    AbilityRequest abilityRequest;
     bool preCreateProcessName = false;
     bool isCold = false;
+    bool isSpecifiedProcess = false;
+    int32_t requestId = 0;
     int32_t persistentId = 0;
     uint32_t sceneFlag = 0;
     uint32_t callingTokenId = 0;
+    AbilityRequest abilityRequest;
 
     SpecifiedRequest(int32_t requestId, AbilityRequest request) : requestId(requestId), abilityRequest(request) {}
 };
@@ -492,7 +493,6 @@ private:
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<IRemoteObject> rootSceneSession_;
     int32_t requestId_ = 0;
-    std::map<int32_t, AbilityRequest> specifiedRequestMap_;
     sptr<ISessionHandler> handler_;
     ffrt::mutex statusBarDelegateManagerLock_;
     std::shared_ptr<StatusBarDelegateManager> statusBarDelegateManager_;
