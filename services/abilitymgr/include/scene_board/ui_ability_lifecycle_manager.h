@@ -343,6 +343,8 @@ public:
 
     bool IsInStatusBar(uint32_t accessTokenId, bool isMultiInstance);
 
+    bool IsSupportStatusBar();
+    
     int32_t TryPrepareTerminateByPids(const std::vector<int32_t>& pids);
 
     int ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);

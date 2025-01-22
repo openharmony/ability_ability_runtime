@@ -2736,6 +2736,13 @@ bool UIAbilityLifecycleManager::IsInStatusBar(uint32_t accessTokenId, bool isMul
     return statusBarDelegateManager->IsInStatusBar(accessTokenId, isMultiInstance);
 }
 
+bool UIAbilityLifecycleManager::IsSupportStatusBar()
+{
+    auto statusBarDelegateManager = GetStatusBarDelegateManager();
+    CHECK_POINTER_AND_RETURN(statusBarDelegateManager, false);
+    return statusBarDelegateManager->IsSupportStatusBar();
+}
+
 int32_t UIAbilityLifecycleManager::DoProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     auto statusBarDelegateManager = GetStatusBarDelegateManager();
