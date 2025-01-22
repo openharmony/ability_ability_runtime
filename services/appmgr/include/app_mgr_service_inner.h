@@ -1653,6 +1653,8 @@ private:
         RunningMultiAppInfo &info);
     int32_t GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
         std::vector<std::string> &instanceKeys, int32_t userId);
+    void AddAbilityStageForSpecified(std::shared_ptr<AppRunningRecord> appRecord);
+
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
