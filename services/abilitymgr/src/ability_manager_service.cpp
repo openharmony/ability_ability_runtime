@@ -6384,6 +6384,10 @@ void AbilityManagerService::OnAppStateChanged(const AppInfo &info)
     auto residentProcessMgr = DelayedSingleton<ResidentProcessManager>::GetInstance();
     CHECK_POINTER(residentProcessMgr);
     residentProcessMgr->OnAppStateChanged(info);
+
+    if (system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
+        KeepAliveProcessManager::GetInstance().OnAppStateChanged(info);
+    }
 }
 
 std::shared_ptr<AbilityEventHandler> AbilityManagerService::GetEventHandler()

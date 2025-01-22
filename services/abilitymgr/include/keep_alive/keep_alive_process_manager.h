@@ -104,6 +104,13 @@ public:
     void StartKeepAliveProcessWithMainElement(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
 
     /**
+     * Once one process created, query keep-alive status from db and update then
+     *
+     * @param appInfo The App info.
+     */
+    void OnAppStateChanged(const AppInfo &info);
+
+    /**
      * Check if it is a keep-alive bundle under the specified user.
      *
      * @param bundleName, The bundle name of the keep-alive process.
