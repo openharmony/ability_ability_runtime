@@ -359,23 +359,23 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
         return StartWithPersistentIdByDistributed(abilityRequest, persistentId);
     }
 
-    auto abilityInfo = abilityRequest.abilityInfo;
+    const auto &abilityInfo = abilityRequest.abilityInfo;
     bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
+    auto requestId = GetRequestId();
     // When 'processMode' is set to new process mode, the priority is higher than 'isolationProcess'.
     bool isNewProcessMode = abilityRequest.processOptions &&
         ProcessOptions::IsNewProcessMode(abilityRequest.processOptions->processMode);
     if (!isNewProcessMode && abilityInfo.isolationProcess && AppUtils::GetInstance().IsStartSpecifiedProcess()
         && isUIAbility) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess");
-        specifiedRequestMap_.emplace(specifiedRequestId_, abilityRequest);
-        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedProcess(abilityRequest.want, abilityInfo,
-            specifiedRequestId_);
-        ++specifiedRequestId_;
+        auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
+        specifiedRequest->isSpecifiedProcess = true;
+        AddSpecifiedRequest(specifiedRequest);
         return ERR_OK;
     }
-    auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
+    auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified) {
-        auto specifiedRequest = std::make_shared<SpecifiedRequest>(specifiedRequestId_++, abilityRequest);
+        auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
         specifiedRequest->preCreateProcessName = true;
         AddSpecifiedRequest(specifiedRequest);
         return ERR_OK;
@@ -396,7 +396,7 @@ int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const Ab
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    auto abilityInfo = abilityRequest.abilityInfo;
+    const auto &abilityInfo = abilityRequest.abilityInfo;
     bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
     // When 'processMode' is set to new process mode, the priority is higher than 'isolationProcess'.
     bool isNewProcessMode = abilityRequest.processOptions &&
@@ -404,15 +404,14 @@ int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const Ab
     if (!isNewProcessMode && abilityInfo.isolationProcess && AppUtils::GetInstance().IsStartSpecifiedProcess()
         && isUIAbility) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess");
-        specifiedRequestMap_.emplace(specifiedRequestId_, abilityRequest);
-        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedProcess(abilityRequest.want, abilityInfo,
-            specifiedRequestId_);
-        ++specifiedRequestId_;
+        auto specifiedRequest = std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest);
+        specifiedRequest->isSpecifiedProcess = true;
+        AddSpecifiedRequest(specifiedRequest);
         return ERR_OK;
     }
-    auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
+    auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified) {
-        auto specifiedRequest = std::make_shared<SpecifiedRequest>(specifiedRequestId_++, abilityRequest);
+        auto specifiedRequest = std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest);
         specifiedRequest->preCreateProcessName = true;
         AddSpecifiedRequest(specifiedRequest);
         return ERR_OK;
@@ -1662,16 +1661,10 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnAcceptWantResponse, %{public}d", requestId);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    std::lock_guard guard(sessionLock_);
     auto request = GetSpecifiedRequest(requestId);
     if (request == nullptr) {
-        auto it = specifiedRequestMap_.find(requestId);
-        if (it == specifiedRequestMap_.end()) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "no request");
-            return;
-        }
-        HandleLegacyAcceptWantDone(it->second, requestId, flag, want);
-        specifiedRequestMap_.erase(it);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "no request");
         return;
     }
     auto nextRequest = PopAndGetNextSpecified(requestId);
@@ -1728,11 +1721,13 @@ void UIAbilityLifecycleManager::HandleLegacyAcceptWantDone(AbilityRequest &abili
 
 void UIAbilityLifecycleManager::OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want, int32_t requestId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "SpecifiedAbilityTimeout %{public}d", requestId);
     std::lock_guard lock(sessionLock_);
-
     auto curRequest = GetSpecifiedRequest(requestId);
-    if (curRequest && curRequest->persistentId != 0) {
+    if (curRequest == nullptr) {
+        return;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SpecifiedAbilityTimeout %{public}d", requestId);
+    if (curRequest->persistentId != 0) {
         auto iter = sessionAbilityMap_.find(curRequest->persistentId);
         if (iter != sessionAbilityMap_.end() && iter->second != nullptr) {
             auto abilityRecord = iter->second;
@@ -1750,23 +1745,30 @@ void UIAbilityLifecycleManager::OnStartSpecifiedAbilityTimeoutResponse(const AAF
 void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const AAFwk::Want &want, const std::string &flag,
     int32_t requestId)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessResponse, %{public}d, %{public}s",
+        requestId, want.GetElement().GetURI().c_str());
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    auto it = specifiedRequestMap_.find(requestId);
-    if (it == specifiedRequestMap_.end()) {
+    std::lock_guard guard(sessionLock_);
+    auto request = GetSpecifiedRequest(requestId);
+    if (request == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "no request");
         return;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s.", want.GetElement().GetURI().c_str());
-    it->second.want.SetParam(PARAM_SPECIFIED_PROCESS_FLAG, flag);
-    AbilityRequest abilityRequest = it->second;
-    auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
-    if (isSpecified) {
-        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(
-            abilityRequest.want, abilityRequest.abilityInfo, requestId);
+
+    auto &abilityRequest = request->abilityRequest;
+    abilityRequest.want.SetParam(PARAM_SPECIFIED_PROCESS_FLAG, flag);
+    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
+        request->isSpecifiedProcess = false;
+        StartSpecifiedRequest(*request);
         return;
     }
-    specifiedRequestMap_.erase(it);
+    auto nextRequest = PopAndGetNextSpecified(requestId);
+    if (nextRequest) {
+        TaskHandlerWrap::GetFfrtHandler()->SubmitTask([nextRequest, pThis = shared_from_this()]() {
+            std::lock_guard lock(pThis->sessionLock_);
+            pThis->StartSpecifiedRequest(*nextRequest);
+            });
+    }
     auto sessionInfo = CreateSessionInfo(abilityRequest);
     sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->persistentId = GetPersistentIdByAbilityRequest(abilityRequest, sessionInfo->reuse);
@@ -1780,13 +1782,17 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const AAFwk::Wan
 
 void UIAbilityLifecycleManager::OnStartSpecifiedProcessTimeoutResponse(const AAFwk::Want &want, int32_t requestId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    specifiedRequestMap_.erase(requestId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessTimeoutResponse %{public}d", requestId);
+    std::lock_guard guard(sessionLock_);
+    auto nextRequest = PopAndGetNextSpecified(requestId);
+    if (nextRequest) {
+        StartSpecifiedRequest(*nextRequest);
+    }
 }
 
 void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     AbilityRequest abilityRequest;
     int result = DelayedSingleton<AbilityManagerService>::GetInstance()->GenerateAbilityRequest(
@@ -1797,7 +1803,7 @@ void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want)
     }
     abilityRequest.isFromIcon = true;
     std::lock_guard guard(sessionLock_);
-    AddSpecifiedRequest(std::make_shared<SpecifiedRequest>(specifiedRequestId_++, abilityRequest));
+    AddSpecifiedRequest(std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest));
 }
 
 void UIAbilityLifecycleManager::NotifyRestartSpecifiedAbility(const AbilityRequest &request,
@@ -2671,7 +2677,7 @@ void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(int32_t sessionId) con
 int UIAbilityLifecycleManager::StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest,
     int32_t persistentId)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartWithPersistentIdByDistributed, called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartWithPersistentIdByDistributed, called");
     auto sessionInfo = CreateSessionInfo(abilityRequest);
     sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->persistentId = persistentId;
@@ -2757,22 +2763,37 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest: %{public}d", specifiedRequest.requestId);
     auto &request = specifiedRequest.abilityRequest;
-    if (specifiedRequest.preCreateProcessName) {
-        PreCreateProcessName(request);
-    }
-    if (!IsSpecifiedModuleLoaded(request)) {
-        specifiedRequest.isCold = true;
-        auto sessionInfo = CreateSessionInfo(request);
-        sessionInfo->requestCode = request.requestCode;
-        sessionInfo->userId = userId_;
-        sessionInfo->tmpSpecifiedId = specifiedRequest.requestId;
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest cold");
-        NotifySCBPendingActivation(sessionInfo, request);
-        sessionInfo->want.RemoveAllFd();
+
+    if (specifiedRequest.isSpecifiedProcess) {
+        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedProcess(request.want,
+            request.abilityInfo, specifiedRequest.requestId);
+    } else {
+        if (specifiedRequest.preCreateProcessName) {
+            PreCreateProcessName(request);
+        }
+
+        if (!IsSpecifiedModuleLoaded(request)) {
+            specifiedRequest.isCold = true;
+            auto sessionInfo = CreateSessionInfo(request);
+            sessionInfo->requestCode = request.requestCode;
+            sessionInfo->userId = userId_;
+            sessionInfo->tmpSpecifiedId = specifiedRequest.requestId;
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest cold");
+            NotifySCBPendingActivation(sessionInfo, request);
+            sessionInfo->want.RemoveAllFd();
+        }
+        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(request.want,
+            request.abilityInfo, specifiedRequest.requestId);
     }
 
-    DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(request.want,
-        request.abilityInfo, specifiedRequest.requestId);
+    auto timeoutTask = [requestId = specifiedRequest.requestId, wThis = weak_from_this()]() {
+        auto pThis = wThis.lock();
+        if (pThis) {
+            pThis->OnStartSpecifiedAbilityTimeoutResponse(Want(), requestId);
+        }
+    };
+    TaskHandlerWrap::GetFfrtHandler()->SubmitTaskJust(timeoutTask, "SpecifiedFinalTimeout",
+        GlobalConstant::TIMEOUT_UNIT_TIME * GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE);
 }
 
 std::shared_ptr<SpecifiedRequest> UIAbilityLifecycleManager::PopAndGetNextSpecified(int32_t requestId)
@@ -2834,6 +2855,7 @@ bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(AbilityRequest &ability
 bool UIAbilityLifecycleManager::HandleColdAcceptWantDone(const AAFwk::Want &want, const std::string &flag,
     const SpecifiedRequest &specifiedRequest)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto iter = sessionAbilityMap_.find(specifiedRequest.persistentId);
     if (iter == sessionAbilityMap_.end() || !(iter->second) ||
         !(iter->second->GetSpecifiedFlag().empty())) {

@@ -35,13 +35,14 @@ struct AbilityRunningInfo;
 struct MissionValidResult;
 
 struct SpecifiedRequest {
-    int32_t requestId = 0;
-    AbilityRequest abilityRequest;
     bool preCreateProcessName = false;
     bool isCold = false;
+    bool isSpecifiedProcess = false;
+    int32_t requestId = 0;
     int32_t persistentId = 0;
     uint32_t sceneFlag = 0;
     uint32_t callingTokenId = 0;
+    AbilityRequest abilityRequest;
 
     SpecifiedRequest(int32_t requestId, AbilityRequest request) : requestId(requestId), abilityRequest(request) {}
 };
@@ -440,6 +441,13 @@ private:
     void CheckCallerFromBackground(std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> &sessionInfo);
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         bool &isColdStart);
+    inline int32_t GetRequestId()
+    {
+        if (requestId_ == 0 || requestId_ == INT32_MAX) {
+            requestId_ = 1;
+        }
+        return requestId_++;
+    }
 
     void AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request);
     void StartSpecifiedRequest(SpecifiedRequest &specifiedRequest);
@@ -459,8 +467,7 @@ private:
     std::unordered_map<int64_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<IRemoteObject> rootSceneSession_;
-    int32_t specifiedRequestId_ = 0;
-    std::map<int32_t, AbilityRequest> specifiedRequestMap_;
+    int32_t requestId_ = 0;
     sptr<ISessionHandler> handler_;
     ffrt::mutex statusBarDelegateManagerLock_;
     std::shared_ptr<StatusBarDelegateManager> statusBarDelegateManager_;
