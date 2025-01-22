@@ -61,6 +61,7 @@ private:
         void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
 
     private:
+        bool WriteWantElement(MessageParcel &data);
         AAFwk::Want want_;
     };
 

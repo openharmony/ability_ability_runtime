@@ -122,8 +122,14 @@ void AbilitySchedulerProxy::SendResult(int requestCode, int resultCode, const Wa
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteInt32(requestCode);
-    data.WriteInt32(resultCode);
+    if (!data.WriteInt32(requestCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write requestCode failed");
+        return;
+    }
+    if (!data.WriteInt32(resultCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write resultCode failed");
+        return;
+    }
     if (!data.WriteParcelable(&resultWant)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to WriteParcelable");
         return;
