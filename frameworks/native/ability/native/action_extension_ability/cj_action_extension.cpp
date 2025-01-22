@@ -21,9 +21,11 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-CJActionExtension *CJActionExtension::Create(const std::unique_ptr<Runtime> &runtime)
+extern "C" __attribute__((visibility("default"))) ActionExtension* OHOS_ABILITY_CJActionExtension(
+    void* runtimePtr)
 {
-    return new CJActionExtension(runtime);
+    std::unique_ptr<Runtime>* runtime = reinterpret_cast<std::unique_ptr<Runtime>*>(runtimePtr);
+    return new (std::nothrow) CJActionExtension(*runtime);
 }
 
 CJActionExtension::CJActionExtension(const std::unique_ptr<Runtime> &runtime)
