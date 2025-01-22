@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,11 @@
 #include "status_bar_delegate_proxy.h"
 #include "ui_extension/ui_extension_session_info.h"
 #include "want.h"
+#include "mock_iqueryermsobserver.h"
 
 using namespace testing;
 using namespace testing::ext;
+using AtomicServiceStartupRule = OHOS::AbilityRuntime::AtomicServiceStartupRule;
 
 namespace OHOS {
 namespace AAFwk {
@@ -281,6 +283,56 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_OpenLink, TestSize.Level
     EXPECT_EQ(result, ERR_INVALID_CALLER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_OpenLink result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_OpenLink end");
+}
+
+/**
+ * @tc.name: StartSelfUIAbility_0100
+ * @tc.desc: OpenLink
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, StartSelfUIAbility_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSelfUIAbility_0100 start");
+    AAFwk::Want want;
+    auto result = AbilityManagerClient::GetInstance()->StartSelfUIAbility(want);
+    sptr<IRemoteObject> token_(new IPCObjectStub());
+    AbilityManagerClient::GetInstance()->SubmitSaveRecoveryInfo(token_);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "StartSelfUIAbility_0100 end");
+}
+
+/**
+ * @tc.name: AddQueryERMSObserver_0100
+ * @tc.desc: OpenLink
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, AddQueryERMSObserver_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AddQueryERMSObserver_0100start");
+
+    sptr<IRemoteObject> callertoken(new IPCObjectStub());
+    sptr<AbilityRuntime::IQueryERMSObserver> observer(new AbilityRuntime::IQueryERMSObserverMock());
+    auto result = AbilityManagerClient::GetInstance()->AddQueryERMSObserver(callertoken, observer);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AddQueryERMSObserver_0100 end");
+}
+
+/**
+ * @tc.name: QueryAtomicServiceStartupRule_0100
+ * @tc.desc: OpenLink
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, QueryAtomicServiceStartupRule_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryAtomicServiceStartupRule_0100 start");
+    sptr<IRemoteObject> callertoken(new IPCObjectStub());
+    std::string appId = "0100";
+    std::string startTime = "12:00";
+    AtomicServiceStartupRule rule;
+    auto result = AbilityManagerClient::GetInstance()->QueryAtomicServiceStartupRule(callertoken,
+        appId, startTime, rule);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "QueryAtomicServiceStartupRule_0100 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

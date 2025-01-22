@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "account_error_no.h"
 #include "os_account_manager_wrapper.h"
 
 using namespace testing;
@@ -86,8 +87,6 @@ HWTEST_F(OsAccountManagerWrapperTest, IsOsAccountExists_0100, TestSize.Level0)
     EXPECT_EQ(isOsAccountExists, false);
 }
 
-#ifndef OS_ACCOUNT_PART_ENABLED
-#define OS_ACCOUNT_PART_ENABLED
 /**
  * @tc.name: CreateOsAccount_0100
  * @tc.desc: Create os account.
@@ -97,7 +96,7 @@ HWTEST_F(OsAccountManagerWrapperTest, CreateOsAccount_0100, TestSize.Level0)
 {
     int account = ACCOUNT_VALUE;
     int ret = DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->CreateOsAccount(ACCOUNT_NAME, account);
-    EXPECT_EQ(ret, RESULT_OK);
+    EXPECT_EQ(ret, ERR_ACCOUNT_COMMON_NAME_HAD_EXISTED);
 }
 
 /**
@@ -109,10 +108,10 @@ HWTEST_F(OsAccountManagerWrapperTest, RemoveOsAccount_0100, TestSize.Level0)
 {
     int account = ACCOUNT_VALUE;
     int ret = DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->CreateOsAccount(ACCOUNT_NAME, account);
+    EXPECT_EQ(ret, ERR_ACCOUNT_COMMON_NAME_HAD_EXISTED);
     ret = DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->RemoveOsAccount(account);
-    EXPECT_EQ(ret, RESULT_OK);
+    EXPECT_EQ(ret, ERR_ACCOUNT_COMMON_ACCOUNT_NOT_EXIST_ERROR);
 }
-#endif // OS_ACCOUNT_PART_ENABLED
 
 /**
  * @tc.name: GetCurrentActiveAccountId_0100

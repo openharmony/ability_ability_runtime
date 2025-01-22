@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -263,6 +263,11 @@ HWTEST_F(AutoFillManagerTest, AutoFillManager_RemoveTaskAndExtensionCallback_010
     EXPECT_EQ(manager.extensionCallbacks_.size(), 1);
     manager.RemoveAutoFillExtensionCallback(eventId);
     EXPECT_EQ(manager.extensionCallbacks_.size(), 0);
+    uint32_t taskId = 1;
+    manager.taskHandles_.emplace(taskId, nullptr);
+    EXPECT_EQ(manager.taskHandles_.size(), 1);
+    manager.RemoveTask(taskId);
+    EXPECT_EQ(manager.taskHandles_.size(), 0);
 
     TAG_LOGI(AAFwkTag::TEST, "AutoFillManager_RemoveTaskAndExtensionCallback_Test end");
 }
