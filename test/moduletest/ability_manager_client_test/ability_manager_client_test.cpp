@@ -334,5 +334,19 @@ HWTEST_F(AbilityManagerClientTest, QueryAtomicServiceStartupRule_0100, TestSize.
     EXPECT_NE(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "QueryAtomicServiceStartupRule_0100 end");
 }
+
+/**
+ * @tc.name: KillProcessWithReason_0100
+ * @tc.desc: OpenLink
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, KillProcessWithReason_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessWithReason_0100 start");
+    int32_t pid = 1;
+    AAFwk::ExitReason reason;
+    auto result = AbilityManagerClient::GetInstance()->KillProcessWithReason(pid, reason);
+    EXPECT_EQ(result, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
