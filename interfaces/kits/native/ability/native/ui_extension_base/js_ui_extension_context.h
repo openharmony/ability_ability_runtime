@@ -49,6 +49,7 @@ public:
     static napi_value DisconnectUIServiceExtension(napi_env env, napi_callback_info info);
     static napi_value StartServiceExtensionAbility(napi_env env, napi_callback_info info);
     static napi_value StartServiceExtensionAbilityWithAccount(napi_env env, napi_callback_info info);
+    static napi_value SetColorMode(napi_env env, napi_callback_info info);
 
 protected:
     virtual napi_value OnStartAbility(napi_env env, NapiCallbackInfo& info);
@@ -72,6 +73,7 @@ protected:
     virtual napi_value OnDisconnectUIServiceExtension(napi_env env, NapiCallbackInfo& info);
     void SetCallbackForTerminateWithResult(int32_t resultCode, AAFwk::Want& want,
         NapiAsyncTask::CompleteCallback& complete);
+    virtual napi_value OnSetColorMode(napi_env env, NapiCallbackInfo& info);
 
 protected:
     std::weak_ptr<UIExtensionContext> context_;

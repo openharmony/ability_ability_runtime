@@ -99,6 +99,10 @@ class UIExtensionContext extends ExtensionContext {
   startServiceExtensionAbilityWithAccount(want, accountId) {
     return this.__context_impl__.startServiceExtensionAbilityWithAccount(want, accountId);
   }
+
+  setColorMode(colorMode) {
+    this.__context_impl__.setColorMode(colorMode);
+  };
 }
 
 export default UIExtensionContext;
