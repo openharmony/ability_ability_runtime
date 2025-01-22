@@ -2006,10 +2006,22 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
         TAG_LOGE(AAFwkTag::ABILITYMGR, "writeParcelable failed");
         return;
     }
-    data.WriteInt32(callerUid);
-    data.WriteInt32(requestCode);
-    data.WriteUint32(accessToken);
-    data.WriteInt32(resultCode);
+    if (!data.WriteInt32(callerUid)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerUid failed");
+        return;
+    }
+    if (!data.WriteInt32(requestCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write requestCode failed");
+        return;
+    }
+    if (!data.WriteUint32(accessToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write accessToken failed");
+        return;
+    }
+    if (!data.WriteInt32(resultCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write resultCode failed");
+        return;
+    }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     int result = callerToken->SendRequest(ISystemAbilityTokenCallback::SEND_RESULT, data, reply, option);
