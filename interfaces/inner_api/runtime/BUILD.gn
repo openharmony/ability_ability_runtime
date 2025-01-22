@@ -37,6 +37,7 @@ config("runtime_config") {
 
 config("runtime_public_config") {
   visibility = [ ":*" ]
+  visibility += [ "${ability_runtime_napi_path}/inner/napi_common:napi_common" ]
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_business_error",
     "include",
