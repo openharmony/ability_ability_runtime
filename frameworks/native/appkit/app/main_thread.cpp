@@ -175,6 +175,12 @@ const std::string SYSTEM_DEFAULT_FONTSIZE_SCALE = "1.0";
 const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
 
+#if defined(NWEB)
+constexpr int32_t PRELOAD_DELAY_TIME = 2000;  //millisecond
+constexpr int32_t CACHE_EFFECTIVE_RANGE = 60 * 60 * 24 * 3; // second
+const std::string WEB_CACHE_DIR = "/web";
+#endif
+
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
 const std::string NWEB_SURFACE_NODE_NAME = "nwebPreloadSurface";
 const std::string BLANK_URL = "about:blank";
@@ -1784,28 +1790,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
 #if defined(NWEB)
-    // start nwebspawn process
-    std::weak_ptr<OHOSApplication> weakApp = application_;
-    wptr<IAppMgr> weakMgr = appMgr_;
-    std::thread([weakApp, weakMgr] {
-        auto app = weakApp.lock();
-        auto appmgr = weakMgr.promote();
-        if (app == nullptr || appmgr == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null app or appmgr");
-            return;
-        }
-
-        if (prctl(PR_SET_NAME, "preStartNWeb") < 0) {
-            TAG_LOGW(AAFwkTag::APPKIT, "Set thread name failed with %{public}d", errno);
-        }
-
-        std::string nwebPath = app->GetAppContext()->GetCacheDir() + "/web";
-        bool isFirstStartUpWeb = (access(nwebPath.c_str(), F_OK) != 0);
-        if (!isFirstStartUpWeb) {
-            appmgr->PreStartNWebSpawnProcess();
-        }
-        OHOS::NWeb::NWebHelper::TryPreReadLib(isFirstStartUpWeb, app->GetAppContext()->GetBundleCodeDir());
-    }).detach();
+    if (!isSystemApp) {
+        PreLoadWebLib();
+    }
 #endif
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
     if (appLaunchData.IsAllowedNWebPreload()) {
@@ -1816,6 +1803,45 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         PreloadModule(entryHapModuleInfo, application_->GetRuntime());
     }
 }
+
+#if defined(NWEB)
+void MainThread::PreLoadWebLib()
+{
+    auto task = [this]() {
+        std::weak_ptr<OHOSApplication> weakApp = application_;
+        std::thread([weakApp] {
+            auto app = weakApp.lock();
+            if (app == nullptr) {
+                TAG_LOGW(AAFwkTag::APPKIT, "null app");
+                return;
+            }
+
+            if (prctl(PR_SET_NAME, "preStartNWeb") < 0) {
+                TAG_LOGW(AAFwkTag::APPKIT, "Set thread name failed with %{public}d", errno);
+            }
+
+            std::string nwebPath = app->GetAppContext()->GetCacheDir() + WEB_CACHE_DIR;
+            struct stat file_stat;
+            if (stat(nwebPath.c_str(), &file_stat) == -1) {
+                TAG_LOGW(AAFwkTag::APPKIT, "can not get file_stat");
+                return;
+            }
+
+            time_t current_time = time(nullptr);
+            double time_difference = difftime(current_time, file_stat.st_mtime);
+            if (time_difference > CACHE_EFFECTIVE_RANGE) {
+                TAG_LOGW(AAFwkTag::APPKIT, "web page started more than %{public}d seconds", CACHE_EFFECTIVE_RANGE);
+                return;
+            }
+
+            bool isFirstStartUpWeb = (access(nwebPath.c_str(), F_OK) != 0);
+            TAG_LOGD(AAFwkTag::APPKIT, "TryPreReadLib pre dlopen web so");
+            OHOS::NWeb::NWebHelper::TryPreReadLib(isFirstStartUpWeb, app->GetAppContext()->GetBundleCodeDir());
+        }).detach();
+    };
+    mainHandler_->PostTask(task, "MainThread::NWEB_PRELOAD_SO", PRELOAD_DELAY_TIME);
+}
+#endif
 
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
 void MainThread::HandleNWebPreload()
