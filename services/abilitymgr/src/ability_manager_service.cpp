@@ -12926,6 +12926,14 @@ bool AbilityManagerService::IsInStatusBar(uint32_t accessTokenId, int32_t uid, b
     return uiAbilityManager->IsInStatusBar(accessTokenId, isMultiInstance);
 }
 
+bool AbilityManagerService::IsSupportStatusBar(int32_t uid)
+{
+    auto uiAbilityManager = GetUIAbilityManagerByUid(uid);
+    CHECK_POINTER_AND_RETURN(uiAbilityManager, false);
+
+    return uiAbilityManager->IsSupportStatusBar();
+}
+
 int32_t AbilityManagerService::SetApplicationKeepAlive(const std::string &bundleName, int32_t userId, bool flag)
 {
     return KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(
