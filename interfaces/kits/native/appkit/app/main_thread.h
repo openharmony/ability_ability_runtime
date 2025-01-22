@@ -651,6 +651,10 @@ private:
     void HandleNWebPreload();
 #endif
 
+#if defined(NWEB)
+    void PreLoadWebLib();
+#endif
+
     class MainHandler : public EventHandler {
     public:
         MainHandler(const std::shared_ptr<EventRunner> &runner, const sptr<MainThread> &thread);
