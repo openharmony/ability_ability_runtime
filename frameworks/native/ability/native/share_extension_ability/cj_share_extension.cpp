@@ -21,9 +21,12 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-CJShareExtension *CJShareExtension::Create(const std::unique_ptr<Runtime> &runtime)
+
+extern "C" __attribute__((visibility("default"))) ShareExtension* OHOS_ABILITY_CJShareExtension(
+    void* runtimePtr)
 {
-    return new CJShareExtension(runtime);
+    std::unique_ptr<Runtime>* runtime = reinterpret_cast<std::unique_ptr<Runtime>*>(runtimePtr);
+    return new (std::nothrow) CJShareExtension(*runtime);
 }
 
 CJShareExtension::CJShareExtension(const std::unique_ptr<Runtime> &runtime)
