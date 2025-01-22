@@ -1392,7 +1392,6 @@ group("extension_blocklist_config") {
 group("extension_module") {
   deps = [
     ":embedded_ui_extension_module",
-    ":form_edit_extension_module",
     ":service_extension_module",
     ":ui_extension_module",
   ]
@@ -2155,119 +2154,6 @@ ohos_shared_library("photo_editor_extension_module") {
 
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
-  }
-
-  relative_install_dir = "extensionability/"
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
-config("form_edit_extension_config") {
-  visibility = [ ":*" ]
-  include_dirs = [
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/form_edit_extension_ability",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
-  ]
-}
-
-ohos_shared_library("form_edit_extension") {
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    cfi_vcall_icall_only = true
-    debug = false
-  }
-
-  configs = [ ":form_edit_extension_config" ]
-
-  sources = [
-    "${ability_runtime_native_path}/ability/native/form_edit_extension_ability/form_edit_extension.cpp",
-    "${ability_runtime_native_path}/ability/native/form_edit_extension_ability/form_edit_extension_context.cpp",
-    "${ability_runtime_native_path}/ability/native/form_edit_extension_ability/js_form_edit_extension.cpp",
-    "${ability_runtime_native_path}/ability/native/form_edit_extension_ability/js_form_edit_extension_context.cpp",
-    "${ability_runtime_native_path}/ability/native/form_edit_extension_ability/js_form_edit_extension_impl.cpp",
-  ]
-
-  deps = [
-    ":abilitykit_native",
-    ":ui_extension",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
-    "${ability_runtime_innerkits_path}/runtime:runtime",
-    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
-    "${ability_runtime_native_path}/ability:ability_context_native",
-    "${ability_runtime_native_path}/ability/native:ability_business_error",
-    "${ability_runtime_native_path}/appkit:app_context",
-  ]
-
-  external_deps = [
-    "ability_base:want",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "ffrt:libffrt",
-    "form_fwk:fmskit_native",
-    "form_fwk:fmskit_provider_client",
-    "form_fwk:form_manager",
-    "form_fwk:formutil_napi",
-    "hilog:libhilog",
-    "hitrace:hitrace_meter",
-    "ipc:ipc_napi",
-    "napi:ace_napi",
-  ]
-
-  if (ability_runtime_graphics) {
-    external_deps += [ "window_manager:libwm" ]
-  }
-
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
-ohos_shared_library("form_edit_extension_module") {
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    cfi_vcall_icall_only = true
-    debug = false
-  }
-
-  sources = [ "${ability_runtime_native_path}/ability/native/form_edit_extension_ability/form_edit_extension_module_loader.cpp" ]
-
-  configs = [
-    ":ability_config",
-    ":form_edit_extension_config",
-  ]
-
-  deps = [
-    ":form_edit_extension",
-    "${ability_runtime_innerkits_path}/runtime:runtime",
-  ]
-
-  external_deps = [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_base:want",
-    "bundle_framework:appexecfwk_core",
-    "hilog:libhilog",
-    "napi:ace_napi",
-  ]
-
-  if (ability_runtime_graphics) {
-    external_deps += [
-      "form_fwk:form_manager",
-      "window_manager:libwm",
-    ]
   }
 
   relative_install_dir = "extensionability/"
