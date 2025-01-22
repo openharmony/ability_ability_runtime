@@ -72,6 +72,11 @@ void ResourceConfigHelper::SetThemeIcon(std::string themeIcon)
     themeIcon_ = themeIcon;
 }
 
+void ResourceConfigHelper::SetISAbilityColor(bool isSetColorMode)
+{
+    isSetColorMode_ = isSetColorMode;
+}
+
 void ResourceConfigHelper::UpdateResConfig(
     const AppExecFwk::Configuration &configuration, std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
 {
@@ -126,7 +131,7 @@ void ResourceConfigHelper::UpdateResConfig(std::unique_ptr<Global::Resource::Res
     if (!hasPointerDevice_.empty()) {
         resConfig->SetInputDevice(AppExecFwk::ConvertHasPointerDevice(hasPointerDevice_));
     }
-    if (ApplicationConfigurationManager::GetInstance().ColorModeHasSetByApplication()) {
+    if (ApplicationConfigurationManager::GetInstance().ColorModeHasSetByApplication() || isSetColorMode_) {
         TAG_LOGD(AAFwkTag::ABILITY, "set app true");
         resConfig->SetAppColorMode(true);
     }

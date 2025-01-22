@@ -272,7 +272,10 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
     }
 #ifdef SUPPORT_GRAPHICS
     auto diffConfiguration = std::make_shared<AppExecFwk::Configuration>(config);
-    Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
+    auto ignoreWindowContext = AbilityRuntime::ApplicationConfigurationManager::GetInstance().
+        GetIgnoreContext();
+    TAG_LOGI(AAFwkTag::APPKIT, "ignoreWindowContext size %{public}zu", ignoreWindowContext.size());
+    Rosen::Window::UpdateConfigurationForAll(diffConfiguration, ignoreWindowContext);
 #endif
     abilityRuntimeContext_->DispatchConfigurationUpdated(*configuration_);
     abilityRuntimeContext_->SetConfiguration(configuration_);

@@ -33,6 +33,8 @@
 #include "ui_content.h"
 #endif // SUPPORT_SCREEN
 #include "want_params_wrapper.h"
+#include "configuration_convertor.h"
+#include "application_configuration_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -475,7 +477,61 @@ std::shared_ptr<AppExecFwk::HapModuleInfo> AbilityContextImpl::GetHapModuleInfo(
 
 std::shared_ptr<Global::Resource::ResourceManager> AbilityContextImpl::GetResourceManager() const
 {
+    if (abilityResourceMgr_) {
+        return abilityResourceMgr_;
+    }
     return stageContext_ ? stageContext_->GetResourceManager() : nullptr;
+}
+
+void AbilityContextImpl::SetAbilityResourceManager(
+    std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr)
+{
+    abilityResourceMgr_ = abilityResourceMgr;
+}
+
+void AbilityContextImpl::RegisterAbilityConfigUpdateCallback(
+    AbilityConfigUpdateCallback abilityConfigUpdateCallback)
+{
+    abilityConfigUpdateCallback_ = abilityConfigUpdateCallback;
+}
+
+std::shared_ptr<AppExecFwk::Configuration> AbilityContextImpl::GetAbilityConfiguration() const
+{
+    return abilityConfiguration_;
+}
+
+void AbilityContextImpl::SetAbilityConfiguration(const AppExecFwk::Configuration &config)
+{
+    if (!abilityConfiguration_) {
+        abilityConfiguration_ = std::make_shared<AppExecFwk::Configuration>(config);
+        TAG_LOGI(AAFwkTag::CONTEXT, "abilityConfiguration: %{public}s", abilityConfiguration_->GetName().c_str());
+        return;
+    }
+    std::vector<std::string> changeKeyV;
+    abilityConfiguration_->CompareDifferent(changeKeyV, config);
+    if (!changeKeyV.empty()) {
+        abilityConfiguration_->Merge(changeKeyV, config);
+    }
+    TAG_LOGI(AAFwkTag::CONTEXT, "abilityConfiguration: %{public}s", abilityConfiguration_->GetName().c_str());
+}
+
+void AbilityContextImpl::SetAbilityColorMode(int32_t colorMode)
+{
+    TAG_LOGI(AAFwkTag::CONTEXT, "SetAbilityColorMode colorMode: %{public}d", colorMode);
+    if (colorMode < -1 || colorMode > 1) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "colorMode error");
+        return;
+    }
+    AppExecFwk::Configuration config;
+
+    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, AppExecFwk::GetColorModeStr(colorMode));
+    config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP,
+        AppExecFwk::ConfigurationInner::IS_SET_BY_APP);
+    if (!abilityConfigUpdateCallback_) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "abilityConfigUpdateCallback_ nullptr");
+        return;
+    }
+    abilityConfigUpdateCallback_(config);
 }
 
 std::shared_ptr<Context> AbilityContextImpl::CreateBundleContext(const std::string& bundleName)

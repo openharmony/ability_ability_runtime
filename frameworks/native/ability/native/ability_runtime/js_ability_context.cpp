@@ -407,6 +407,11 @@ napi_value JsAbilityContext::SetRestoreEnabled(napi_env env, napi_callback_info 
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnSetRestoreEnabled);
 }
 
+napi_value JsAbilityContext::SetColorMode(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnSetColorMode);
+}
+
 void JsAbilityContext::ClearFailedCallConnection(
     const std::weak_ptr<AbilityContext>& abilityContext, const std::shared_ptr<CallerCallBack> &callback)
 {
@@ -2035,6 +2040,7 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
     BindNativeFunction(env, object, "disconnectUIServiceExtensionAbility", moduleName,
         JsAbilityContext::DisconnectUIServiceExtension);
     BindNativeFunction(env, object, "setRestoreEnabled", moduleName, JsAbilityContext::SetRestoreEnabled);
+    BindNativeFunction(env, object, "setColorMode", moduleName, JsAbilityContext::SetColorMode);
 
 #ifdef SUPPORT_GRAPHICS
     BindNativeFunction(env, object, "setMissionLabel", moduleName, JsAbilityContext::SetMissionLabel);
@@ -2834,6 +2840,32 @@ napi_value JsAbilityContext::OnSetRestoreEnabled(napi_env env, NapiCallbackInfo&
     }
 
     abilityContext->SetRestoreEnabled(enabled);
+    return CreateJsUndefined(env);
+}
+
+napi_value JsAbilityContext::OnSetColorMode(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "OnSetColorMode called");
+    // only support one params
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params.");
+        return CreateJsUndefined(env);
+    }
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "context is already released");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+
+    int32_t colorMode = -1;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], colorMode)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse colorMode failed");
+        ThrowInvalidParamError(env, "Parse param colorMode failed, colorMode must be number.");
+        return CreateJsUndefined(env);
+    }
+    context->SetAbilityColorMode(colorMode);
     return CreateJsUndefined(env);
 }
 

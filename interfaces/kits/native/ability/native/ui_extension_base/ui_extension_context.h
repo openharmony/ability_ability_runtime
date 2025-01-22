@@ -31,6 +31,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using RuntimeTask = std::function<void(int, const AAFwk::Want &, bool)>;
+using AbilityConfigUpdateCallback = std::function<void(AppExecFwk::Configuration &config)>;
 /**
  * @brief context supply for UIExtension
  *
@@ -150,6 +151,13 @@ public:
     virtual int GenerateCurRequestCode();
 
     virtual ErrCode ReportDrawnCompleted();
+
+    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const override;
+    void SetAbilityResourceManager(std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr);
+    void RegisterAbilityConfigUpdateCallback(AbilityConfigUpdateCallback abilityConfigUpdateCallback);
+    std::shared_ptr<AppExecFwk::Configuration> GetAbilityConfiguration() const;
+    void SetAbilityConfiguration(const AppExecFwk::Configuration &config);
+    void SetAbilityColorMode(int32_t colorMode);
 #ifdef SUPPORT_SCREEN
     void SetWindow(sptr<Rosen::Window> window);
 
@@ -189,6 +197,9 @@ private:
     static std::mutex requestCodeMutex_;
     std::mutex mutexlock_;
     int32_t screenMode_ = AAFwk::IDLE_SCREEN_MODE;
+    std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr_ = nullptr;
+    AbilityConfigUpdateCallback abilityConfigUpdateCallback_ = nullptr;
+    std::shared_ptr<AppExecFwk::Configuration> abilityConfiguration_ = nullptr;
     /**
      * @brief Get Current Ability Type
      *

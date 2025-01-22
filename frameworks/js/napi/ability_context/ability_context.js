@@ -236,6 +236,10 @@ class AbilityContext extends Context {
   setRestoreEnabled(enabled) {
     this.__context_impl__.setRestoreEnabled(enabled);
   }
+
+  setColorMode(colorMode) {
+    this.__context_impl__.setColorMode(colorMode);
+  };
 }
 
 export default AbilityContext;
