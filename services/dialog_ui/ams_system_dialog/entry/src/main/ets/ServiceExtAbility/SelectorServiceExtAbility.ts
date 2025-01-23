@@ -39,7 +39,12 @@ export default class SelectorServiceExtensionAbility extends extension {
     globalThis.defaultAppManager = defaultAppManager;
     globalThis.bundleManager = bundleManager;
     let options = {name:'dialogStore'};
-    globalThis.preferences = dataPreferences.getPreferencesSync(this.context, options);
+    try {
+      globalThis.preferences = dataPreferences.getPreferencesSync(this.context, options);
+      console.info(TAG, 'getPreferencesSync success');
+    } catch (error) {
+      console.error('Failed to getPreferencesSync callback. Code: ' + JSON.stringify(error));
+    }
   }
 
   async getPhoneShowHapList() {
@@ -175,8 +180,13 @@ export default class SelectorServiceExtensionAbility extends extension {
     } catch (exception) {
       console.error('Failed to register callback. Code: ' + JSON.stringify(exception));
     }
-    let displayClass = display.getDefaultDisplaySync();
-    console.debug(TAG, 'onRequest display is' + JSON.stringify(displayClass));
+    try {
+      let displayClass = display.getDefaultDisplaySync();
+      console.info(TAG, 'getDefaultDisplaySync success');
+      console.debug(TAG, 'onRequest display is' + JSON.stringify(displayClass));
+    } catch (error) {
+      console.error('Failed to getDefaultDisplaySync callback. Code: ' + JSON.stringify(error));
+    }
     console.debug(TAG, 'onRequest, want: ' + JSON.stringify(want));
     console.debug(TAG, 'onRequest, params: ' + JSON.stringify(globalThis.params));
     console.debug(TAG, 'onRequest, position: ' + JSON.stringify(globalThis.position));
@@ -281,12 +291,17 @@ export default class SelectorServiceExtensionAbility extends extension {
       console.debug(TAG, 'device is not phone');
       return;
     }
-    let displayClass = display.getDefaultDisplaySync();
-    console.debug(TAG, 'display is' + JSON.stringify(displayClass));
-    if (displayClass.orientation === display.Orientation.PORTRAIT || displayClass.orientation === display.Orientation.PORTRAIT_INVERTED) {
-      globalThis.position = globalThis.verticalPosition;
-    } else {
-      globalThis.position = globalThis.landScapePosition;
+    try {
+      let displayClass = display.getDefaultDisplaySync();
+      console.info(TAG, 'getDefaultDisplaySync success');
+      console.debug(TAG, 'display is' + JSON.stringify(displayClass));
+      if (displayClass.orientation === display.Orientation.PORTRAIT || displayClass.orientation === display.Orientation.PORTRAIT_INVERTED) {
+        globalThis.position = globalThis.verticalPosition;
+      } else {
+        globalThis.position = globalThis.landScapePosition;
+      }
+    } catch (error) {
+      console.error('Failed to getDefaultDisplaySync callback. Code: ' + JSON.stringify(error));
     }
     let navigationBarRect = {
       left: globalThis.position.offsetX,
