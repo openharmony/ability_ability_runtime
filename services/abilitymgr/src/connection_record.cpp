@@ -30,11 +30,13 @@ const int DISCONNECT_TIMEOUT_MULTIPLE = 1;
 #endif
 
 ConnectionRecord::ConnectionRecord(const sptr<IRemoteObject> &callerToken,
-    const std::shared_ptr<AbilityRecord> &targetService, const sptr<IAbilityConnection> &connCallback)
+    const std::shared_ptr<AbilityRecord> &targetService, const sptr<IAbilityConnection> &connCallback,
+    std::shared_ptr<AbilityConnectManager> abilityConnectManager)
     : state_(ConnectionState::INIT),
       callerToken_(callerToken),
       targetService_(targetService),
-      connCallback_(connCallback)
+      connCallback_(connCallback),
+      abilityConnectManager_(abilityConnectManager)
 {
     recordId_ = connectRecordId++;
 }
@@ -43,9 +45,11 @@ ConnectionRecord::~ConnectionRecord()
 {}
 
 std::shared_ptr<ConnectionRecord> ConnectionRecord::CreateConnectionRecord(const sptr<IRemoteObject> &callerToken,
-    const std::shared_ptr<AbilityRecord> &targetService, const sptr<IAbilityConnection> &connCallback)
+    const std::shared_ptr<AbilityRecord> &targetService, const sptr<IAbilityConnection> &connCallback,
+    std::shared_ptr<AbilityConnectManager> abilityConnectManager)
 {
-    auto connRecord = std::make_shared<ConnectionRecord>(callerToken, targetService, connCallback);
+    auto connRecord = std::make_shared<ConnectionRecord>(
+        callerToken, targetService, connCallback, abilityConnectManager);
     CHECK_POINTER_AND_RETURN(connRecord, nullptr);
     connRecord->SetConnectState(ConnectionState::INIT);
     return connRecord;
@@ -160,13 +164,63 @@ void ConnectionRecord::CompleteConnect()
     }
 
     if (callback && handler) {
-        handler->SubmitTask([callback, element, remoteObject] {
+        handler->SubmitTask([callback, element, remoteObject, weakConnectionRecord = weak_from_this(),
+            weakConnectManager = abilityConnectManager_] {
             TAG_LOGD(AAFwkTag::CONNECTION, "OnAbilityConnectDone");
-            callback->OnAbilityConnectDone(element, remoteObject, ERR_OK);
-            });
+            auto ret = ConnectionRecord::CallOnAbilityConnectDone(callback, element, remoteObject, ERR_OK);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::CONNECTION, "OnAbilityConnectDone failed");
+                auto connectionRecord = weakConnectionRecord.lock();
+                CHECK_POINTER(connectionRecord);
+                auto abilityConnectManager = weakConnectManager.lock();
+                CHECK_POINTER(abilityConnectManager);
+                abilityConnectManager->HandleExtensionDisconnectTask(connectionRecord);
+            }
+        });
     }
     DelayedSingleton<ConnectionStateManager>::GetInstance()->AddConnection(shared_from_this());
     TAG_LOGI(AAFwkTag::CONNECTION, "connectState:%{public}d", state_);
+}
+
+int32_t ConnectionRecord::CallOnAbilityConnectDone(sptr<IAbilityConnection> callback,
+    const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode)
+{
+    CHECK_POINTER_AND_RETURN(callback, ERR_INVALID_VALUE);
+    sptr<IRemoteObject> obj = callback->AsObject();
+    CHECK_POINTER_AND_RETURN(obj, ERR_INVALID_VALUE);
+    if (!obj->IsProxyObject()) {
+        callback->OnAbilityConnectDone(element, remoteObject, ERR_OK);
+        return ERR_OK;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    if (!data.WriteInterfaceToken(IAbilityConnection::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "WriteInterfaceToken fail");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteParcelable(&element)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "element error");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteRemoteObject(remoteObject)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "remoteObject error");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(resultCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "resultCode error");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret = obj->SendRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail. ret: %{public}d", ret);
+    }
+    return ret;
 }
 
 void ConnectionRecord::CompleteDisconnect(int resultCode, bool isCallerDied, bool isTargetDied)
