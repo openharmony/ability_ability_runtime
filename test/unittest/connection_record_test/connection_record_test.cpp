@@ -97,7 +97,7 @@ void ConnectionRecordTest::SetUp(void)
     std::string bundleName = "com.ix.hiservcie";
     AbilityRequest abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName);
     service_ = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    connectionRecord_ = std::make_shared<ConnectionRecord>(service_->GetToken(), service_, callback_);
+    connectionRecord_ = std::make_shared<ConnectionRecord>(service_->GetToken(), service_, callback_, nullptr);
 }
 
 void ConnectionRecordTest::TearDown(void)
