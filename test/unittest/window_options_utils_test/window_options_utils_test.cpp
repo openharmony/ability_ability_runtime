@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,38 @@ HWTEST_F(WindowOptionsUtilsTest, SetWindowPositionAndSize_001, TestSize.Level1)
     Window_->SetWindowPositionAndSize(want, callerToken, startOptions);
     EXPECT_NE(nullptr, Window_);
     TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_001 end");
+}
+
+/*
+ * Feature: WindowOptionsUtils
+ * Function: SetWindowPositionAndSize
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetWindowPositionAndSize
+ */
+HWTEST_F(WindowOptionsUtilsTest, SetWindowPositionAndSize_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_002 start");
+    Want want;
+    sptr<IRemoteObject> callerToken;
+    StartOptions startOptions;
+    const int32_t minLength = 300;
+    const int32_t maxLength = 500;
+    startOptions.SetMinWindowWidth(minLength);
+    startOptions.minWindowWidthUsed_ = true;
+    startOptions.SetMinWindowHeight(minLength);
+    startOptions.minWindowHeightUsed_ = true;
+    startOptions.SetMaxWindowWidth(maxLength);
+    startOptions.maxWindowWidthUsed_ = true;
+    startOptions.SetMaxWindowHeight(maxLength);
+    startOptions.maxWindowHeightUsed_ = true;
+    auto Window_ = std::make_shared<WindowOptionsUtils>();
+    ASSERT_NE(nullptr, Window_);
+    Window_->SetWindowPositionAndSize(want, callerToken, startOptions);
+    EXPECT_EQ(startOptions.GetMinWindowWidth(), minLength);
+    EXPECT_EQ(startOptions.GetMinWindowHeight(), minLength);
+    EXPECT_EQ(startOptions.GetMaxWindowWidth(), maxLength);
+    EXPECT_EQ(startOptions.GetMaxWindowHeight(), maxLength);
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_002 end");
 }
 
 /*
