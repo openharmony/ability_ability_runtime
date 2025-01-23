@@ -220,6 +220,14 @@ int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target, const Sende
         return ERR_INVALID_VALUE;
     }
     sptr<PendingWantRecord> record = iface_cast<PendingWantRecord>(obj);
+    if (!CheckPermission(record)) {
+        if (senderInfo.finishedReceiver != nullptr) {
+            Want want;
+            WantParams wantParams = {};
+            senderInfo.finishedReceiver->PerformReceive(want, senderInfo.code, "", wantParams, false, false, 0);
+        }
+        return ERR_INVALID_VALUE;
+    }
     SenderInfo info = senderInfo;
     return record->SenderInner(info);
 }
@@ -307,9 +315,6 @@ int32_t PendingWantManager::PendingWantStartAbility(const Want &want, const sptr
     const sptr<IRemoteObject> &callerToken, int32_t requestCode, const int32_t callerUid, int32_t callerTokenId)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "begin");
-    if (!CheckCallerPermission()) {
-        return ERR_INVALID_VALUE;
-    }
     int32_t result = DeviceIdDetermine(want, startOptions, callerToken, requestCode, callerUid, callerTokenId);
     return result;
 }
@@ -332,10 +337,6 @@ int32_t PendingWantManager::PendingWantStartAbilitys(const std::vector<WantsInfo
     const int32_t callerUid, int32_t callerTokenId)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "begin");
-
-    if (!CheckCallerPermission()) {
-        return ERR_INVALID_VALUE;
-    }
     int32_t result = ERR_OK;
     for (const auto &item : wantsInfo) {
         auto res = DeviceIdDetermine(item.want, startOptions, callerToken, requestCode, callerUid, callerTokenId);
@@ -639,6 +640,26 @@ void PendingWantManager::ClearPendingWantRecordTask(const std::string &bundleNam
     }
 }
 
+bool PendingWantManager::CheckPermission(sptr<PendingWantRecord> record)
+{
+    if (record == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "record is nullptr");
+        return false;
+    }
+    int32_t type = static_cast<int32_t>(OperationType::UNKNOWN_TYPE);
+    if (record->GetCanceled() != true) {
+        type = record->GetKey()->GetType();
+    }
+
+    if (type == static_cast<int32_t>(OperationType::START_ABILITY) ||
+        type == static_cast<int32_t>(OperationType::START_ABILITIES) ||
+        type == static_cast<int32_t>(OperationType::START_SERVICE) ||
+        type == static_cast<int32_t>(OperationType::START_FOREGROUND_SERVICE)) {
+        return CheckCallerPermission();
+    }
+    return true;
+}
+
 bool PendingWantManager::CheckCallerPermission()
 {
     auto callerPid = IPCSkeleton::GetCallingPid();
@@ -677,7 +698,7 @@ bool PendingWantManager::CheckWindowState(int32_t pid)
     }
     for (auto &windowState : windowStates) {
         if (!windowState.isPcOrPadEnableActivation_ && !windowState.isForegroundInteractive_) {
-            TAG_LOGD(AAFwkTag::WANTAGENT, "window interactive");
+            TAG_LOGI(AAFwkTag::WANTAGENT, "window interactive");
             return false;
         }
     }
