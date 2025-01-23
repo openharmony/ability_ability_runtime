@@ -1025,6 +1025,8 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
         icu::Locale preferredLocale =
             icu::Locale::forLanguageTag(Global::I18n::PreferredLanguage::GetAppPreferredLanguage(), status);
         resConfig->SetPreferredLocaleInfo(preferredLocale);
+        AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(
+            AbilityRuntime::SetLevel::Application);
     }
 #endif
     std::string colormode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
