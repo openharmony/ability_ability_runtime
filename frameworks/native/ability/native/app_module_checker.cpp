@@ -21,7 +21,8 @@
 #include <string>
 
 bool AppModuleChecker::CheckModuleLoadable(const char *moduleName,
-                                           std::unique_ptr<ApiAllowListChecker> &apiAllowListChecker)
+                                           std::unique_ptr<ApiAllowListChecker> &apiAllowListChecker,
+                                           bool isAppModule)
 {
     apiAllowListChecker = nullptr;
     TAG_LOGD(AAFwkTag::ABILITY, "check blocklist, moduleName:%{public}s, processExtensionType_:%{public}d",

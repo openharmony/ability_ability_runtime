@@ -36,7 +36,7 @@ public:
     ~AppModuleChecker() override = default;
 
     bool CheckModuleLoadable(const char* moduleName,
-        std::unique_ptr<ApiAllowListChecker>& apiAllowListChecker) override;
+        std::unique_ptr<ApiAllowListChecker>& apiAllowListChecker, bool isAppModule) override;
     bool DiskCheckOnly() override;
 protected:
     int32_t processExtensionType_{EXTENSION_TYPE_UNKNOWN};
