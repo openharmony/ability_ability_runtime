@@ -5938,6 +5938,7 @@ void AppMgrServiceInner::FreeWindowVisibilityChangedListener()
         return;
     }
     WindowManager::GetInstance().UnregisterVisibilityChangedListener(windowVisibilityChangedListener_);
+    windowVisibilityChangedListener_  = nullptr;
 }
 
 void AppMgrServiceInner::HandleWindowVisibilityChanged(
@@ -5998,6 +5999,7 @@ void AppMgrServiceInner::FreeWindowPidVisibilityChangedListener()
         return;
     }
     WindowManager::GetInstance().UnregisterWindowPidVisibilityChangedListener(windowPidVisibilityChangedListener_);
+    windowPidVisibilityChangedListener_ = nullptr;
 }
 
 void AppMgrServiceInner::HandleWindowPidVisibilityChanged(
