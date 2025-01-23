@@ -61,7 +61,9 @@ struct PhonePage {
     private dialogController?: CustomDialogController;
     private tipsDialogBottomOffset: number = 0;
     private listener = mediaquery.matchMediaSync('(orientation: landscape)');
-
+    @State panelAlign:DialogAlignment = DialogAlignment.Bottom;
+    // alignment: DeviceInfoUtil.isTable() || (display.isFoldable() &&
+    // display.getFoldDisplayMode() === display.FoldDisplayMode.FOLD_DISPLAY_MODE_FULL)
     aboutToAppear() {
         console.info(TAG, `aboutToAppear`);
         if (!storage || !storage.get(localStorageKeyConstants.CALLER_WANT)) {
@@ -72,7 +74,16 @@ struct PhonePage {
         const context: Context = getContext(this);
         this.defaultStatusBarHeight = 137;
         this.rowTopPadding = 16;
-        const displayData: display.Display = display.getDefaultDisplaySync();
+        let displayData: display.Display;
+        try {
+            displayData = display.getDefaultDisplaySync();
+            this.panelAlign = DeviceInfoUtil.isTable() || (display.isFoldable() &&
+                display.getFoldDisplayMode() === display.FoldDisplayMode.FOLD_DISPLAY_MODE_FULL) ?
+            DialogAlignment.Center : DialogAlignment.Bottom;
+        } catch (err) {
+            console.error(TAG, `Invalid display or screen`);
+            return;
+        }
         const displayWidth = displayData.width / displayData.densityPixels;
         if (displayWidth < FOUR_COLUMN_WIDTH) {
             this.maxLengthOneLine = TargetsUpperLimitOneLine.BREAKPOINT_4_COLUMN;
@@ -99,18 +110,26 @@ struct PhonePage {
     registerBreakpointSystem() {
         const context: Context = getContext(this);
         (mediaSyncFacade['BREAK_POINT_SYSTEM'] as BreakpointSystem).register((columnType: ColumnType) => {
+            let displayData: display.Display;
+            try {
+                displayData = display.getDefaultDisplaySync()
+                this.panelAlign = DeviceInfoUtil.isTable() || (display.isFoldable() &&
+                    display.getFoldDisplayMode() === display.FoldDisplayMode.FOLD_DISPLAY_MODE_FULL) ?
+                DialogAlignment.Center : DialogAlignment.Bottom;
+            } catch (err) {
+                console.error(TAG, `Invalid display or screen`);
+                return;
+            }
             if (columnType === ColumnType.BREAKPOINT_8_COLUMN || columnType === ColumnType.BREAKPOINT_12_COLUMN) {
                 this.maxLengthOneLine = TargetsUpperLimitOneLine.BREAKPOINT_8_12_COLUMN;
-                const displayData: display.Display = display.getDefaultDisplaySync();
                 if (DeviceInfoUtil.isTable()) {
                     this.panelTopPadding = (displayData.height / displayData.densityPixels - this.statusBarHeight) *
-                    (this.isLandscape ? 0.1 : 0.2) + this.statusBarHeight;
+                        (this.isLandscape ? 0.1 : 0.2) + this.statusBarHeight;
                 }
                 this.panelHeight =
                     displayData.height / displayData.densityPixels - this.statusBarHeight - this.panelTopPadding;
             } else {
                 this.maxLengthOneLine = TargetsUpperLimitOneLine.BREAKPOINT_4_COLUMN;
-                const displayData: display.Display = display.getDefaultDisplaySync();
                 this.panelTopPadding = 8;
                 this.panelHeight =
                     displayData.height / displayData.densityPixels - this.statusBarHeight - this.panelTopPadding;
@@ -170,7 +189,7 @@ struct PhonePage {
             maskColor: $r('sys.color.ohos_id_color_mask_thin'),
             alignment: DeviceInfoUtil.isTable() || (display.isFoldable() &&
                 display.getFoldDisplayMode() === display.FoldDisplayMode.FOLD_DISPLAY_MODE_FULL) ?
-                DialogAlignment.Center : DialogAlignment.Bottom,
+            DialogAlignment.Center : DialogAlignment.Bottom,
             offset: { dx: 0, dy: DeviceInfoUtil.isTable() ? 0 : this.tipsDialogBottomOffset },
             cancel: () => {
                 const session: UIExtensionContentSession =
