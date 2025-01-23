@@ -41,7 +41,6 @@ export default class SelectorServiceExtensionAbility extends extension {
     let options = {name:'dialogStore'};
     try {
       globalThis.preferences = dataPreferences.getPreferencesSync(this.context, options);
-      console.info(TAG, 'getPreferencesSync success');
     } catch (error) {
       console.error('Failed to getPreferencesSync callback. Code: ' + JSON.stringify(error));
     }
@@ -182,7 +181,6 @@ export default class SelectorServiceExtensionAbility extends extension {
     }
     try {
       let displayClass = display.getDefaultDisplaySync();
-      console.info(TAG, 'getDefaultDisplaySync success');
       console.debug(TAG, 'onRequest display is' + JSON.stringify(displayClass));
     } catch (error) {
       console.error('Failed to getDefaultDisplaySync callback. Code: ' + JSON.stringify(error));
@@ -293,7 +291,6 @@ export default class SelectorServiceExtensionAbility extends extension {
     }
     try {
       let displayClass = display.getDefaultDisplaySync();
-      console.info(TAG, 'getDefaultDisplaySync success');
       console.debug(TAG, 'display is' + JSON.stringify(displayClass));
       if (displayClass.orientation === display.Orientation.PORTRAIT || displayClass.orientation === display.Orientation.PORTRAIT_INVERTED) {
         globalThis.position = globalThis.verticalPosition;
