@@ -145,8 +145,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 
     // fuzz for ConnectionRecord
     std::shared_ptr<AbilityRecord> targetService = GetFuzzAbilityRecord();
-    auto connectionRecord = std::make_shared<ConnectionRecord>(token, targetService, connect);
-    connectionRecord->CreateConnectionRecord(token, targetService, connect);
+    auto connectionRecord = std::make_shared<ConnectionRecord>(token, targetService, connect, nullptr);
+    connectionRecord->CreateConnectionRecord(token, targetService, connect, nullptr);
     ConnectionState state = ConnectionState::CONNECTED;
     connectionRecord->SetConnectState(state);
     connectionRecord->GetConnectState();
