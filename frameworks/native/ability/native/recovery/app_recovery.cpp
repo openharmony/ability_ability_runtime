@@ -186,8 +186,11 @@ bool AppRecovery::ScheduleSaveAppState(StateReason reason, uintptr_t ability)
 #ifdef SUPPORT_SCREEN
         OHOS::AbilityRuntime::JsUIAbility& jsAbility = static_cast<AbilityRuntime::JsUIAbility&>(*abilityPtr);
         AbilityRuntime::JsRuntime& runtime = const_cast<AbilityRuntime::JsRuntime&>(jsAbility.GetJsRuntime());
-        auto& nativeEngine = runtime.GetNativeEngine();
-        nativeEngine.AllowCrossThreadExecution();
+        panda::ecmascript::EcmaVM* vm = runtime.GetEcmaVm();
+        if (!panda::JSNApi::CheckAndSetAllowCrossThreadExecution(vm)) {
+            TAG_LOGE(AAFwkTag::RECOVERY, "VM is in gc process");
+            return false;
+        }
 #endif
         AppRecovery::GetInstance().DoSaveAppState(reason, ability);
         return true;
