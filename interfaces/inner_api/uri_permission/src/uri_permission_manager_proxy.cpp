@@ -24,27 +24,6 @@ namespace AAFwk {
 namespace {
 const int MAX_URI_COUNT = 500;
 const uint32_t CYCLE_LIMIT = 1000;
-constexpr size_t MAX_IPC_RAW_DATA_SIZE = 128 * 1024 * 1024; // 128M
-
-bool WriteUriByRawData(MessageParcel &data, const std::vector<std::string> &uriVec)
-{
-    MessageParcel tempParcel;
-    tempParcel.SetMaxCapacity(MAX_IPC_RAW_DATA_SIZE);
-    if (!tempParcel.WriteStringVector(uriVec)) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write uris failed");
-        return false;
-    }
-    size_t dataSize = tempParcel.GetDataSize();
-    if (!data.WriteInt32(static_cast<int32_t>(dataSize))) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write data size failed");
-        return false;
-    }
-    if (!data.WriteRawData(reinterpret_cast<uint8_t *>(tempParcel.GetData()), dataSize)) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write raw data failed");
-        return false;
-    }
-    return true;
-}
 }
 
 UriPermissionManagerProxy::UriPermissionManagerProxy(const sptr<IRemoteObject> &impl)
@@ -60,8 +39,8 @@ bool UriPermissionManagerProxy::WriteBatchUris(MessageParcel &data, const std::v
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Write uri size failed");
         return false;
     }
-    if (!WriteUriByRawData(data, uriStrVec)) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write uri by raw data failed");
+    if (!data.WriteStringVector(uriStrVec)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write uris failed");
         return false;
     }
     return true;
@@ -296,8 +275,8 @@ std::vector<bool> UriPermissionManagerProxy::CheckUriAuthorization(const std::ve
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Write uris size failed");
         return result;
     }
-    if (!WriteUriByRawData(data, uriVec)) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write raw data uris failed");
+    if (!data.WriteStringVector(uriVec)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write uris failed");
         return result;
     }
     if (!data.WriteUint32(flag)) {
