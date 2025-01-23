@@ -61,9 +61,7 @@ struct PhonePage {
     private dialogController?: CustomDialogController;
     private tipsDialogBottomOffset: number = 0;
     private listener = mediaquery.matchMediaSync('(orientation: landscape)');
-    @State panelAlign:DialogAlignment = DialogAlignment.Bottom;
-    // alignment: DeviceInfoUtil.isTable() || (display.isFoldable() &&
-    // display.getFoldDisplayMode() === display.FoldDisplayMode.FOLD_DISPLAY_MODE_FULL)
+    @State dialogAlign:DialogAlignment = DialogAlignment.Bottom;
     aboutToAppear() {
         console.info(TAG, `aboutToAppear`);
         if (!storage || !storage.get(localStorageKeyConstants.CALLER_WANT)) {
@@ -77,7 +75,7 @@ struct PhonePage {
         let displayData: display.Display;
         try {
             displayData = display.getDefaultDisplaySync();
-            this.panelAlign = DeviceInfoUtil.isTable() || (display.isFoldable() &&
+            this.dialogAlign = DeviceInfoUtil.isTable() || (display.isFoldable() &&
                 display.getFoldDisplayMode() === display.FoldDisplayMode.FOLD_DISPLAY_MODE_FULL) ?
             DialogAlignment.Center : DialogAlignment.Bottom;
         } catch (err) {
@@ -113,7 +111,7 @@ struct PhonePage {
             let displayData: display.Display;
             try {
                 displayData = display.getDefaultDisplaySync()
-                this.panelAlign = DeviceInfoUtil.isTable() || (display.isFoldable() &&
+                this.dialogAlign = DeviceInfoUtil.isTable() || (display.isFoldable() &&
                     display.getFoldDisplayMode() === display.FoldDisplayMode.FOLD_DISPLAY_MODE_FULL) ?
                 DialogAlignment.Center : DialogAlignment.Bottom;
             } catch (err) {
@@ -187,9 +185,7 @@ struct PhonePage {
             autoCancel: false,
             backgroundColor: $r('sys.color.ohos_id_color_dialog_bg'),
             maskColor: $r('sys.color.ohos_id_color_mask_thin'),
-            alignment: DeviceInfoUtil.isTable() || (display.isFoldable() &&
-                display.getFoldDisplayMode() === display.FoldDisplayMode.FOLD_DISPLAY_MODE_FULL) ?
-            DialogAlignment.Center : DialogAlignment.Bottom,
+            alignment: this.dialogAlign,
             offset: { dx: 0, dy: DeviceInfoUtil.isTable() ? 0 : this.tipsDialogBottomOffset },
             cancel: () => {
                 const session: UIExtensionContentSession =
