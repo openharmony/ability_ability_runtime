@@ -73,7 +73,7 @@ public:
     SourceMap() = default;
     ~SourceMap() = default;
 
-    void Init(bool isModular, const std::string& hapPath);
+    void Init(bool& hasFile, const std::string& hapPath);
     std::string TranslateBySourceMap(const std::string& stackStr);
     bool TranslateUrlPositionBySourceMap(std::string& url, int& line, int& column, std::string& packageName);
     static ErrorPos GetErrorPos(const std::string& rawStack);

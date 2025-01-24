@@ -1303,11 +1303,22 @@ HWTEST_F(JsRuntimeTest, InitSourceMap_0100, TestSize.Level0)
     AbilityRuntime::Runtime::Options options;
     options.preload = true;
     auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
-    auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>("", true, true);
+    auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>("");
     jsRuntime->InitSourceMap(operatorObj);
     ASSERT_NE(jsRuntime, nullptr);
     jsRuntime.reset();
     TAG_LOGI(AAFwkTag::TEST, "InitSourceMap_0100 end");
+}
+
+HWTEST_F(JsRuntimeTest, InitSourceMap_0200, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "InitSourceMap_0200 start");
+
+    auto mapObj = std::make_shared<JsEnv::SourceMap>();
+    bool hasFile = false;
+    mapObj->Init(hasFile, TEST_HAP_PATH);
+    EXPECT_FALSE(hasFile);
+    TAG_LOGI(AAFwkTag::TEST, "InitSourceMap_0200 end");
 }
 
 /**
