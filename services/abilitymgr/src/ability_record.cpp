@@ -1629,8 +1629,11 @@ void AbilityRecord::Inactivate()
     CHECK_POINTER(lifecycleDeal_);
 
     if (!IsDebug()) {
-        int inactiveTimeout =
-            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * INACTIVE_TIMEOUT_MULTIPLE;
+        bool useOldMultiple = abilityInfo_.name == AbilityConfig::LAUNCHER_ABILITY_NAME ||
+            abilityInfo_.name == AbilityConfig::CALLUI_ABILITY_NAME;
+        uint32_t timeoutMultiple = useOldMultiple ? INACTIVE_TIMEOUT_MULTIPLE : INACTIVE_TIMEOUT_MULTIPLE_NEW;
+        uint32_t inactiveTimeout =
+            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * timeoutMultiple;
         SendEvent(AbilityManagerService::INACTIVE_TIMEOUT_MSG, inactiveTimeout);
     }
 
