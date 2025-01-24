@@ -238,15 +238,23 @@ void UIAbilityImpl::ExecuteInsightIntentDone(uint64_t intentId, const InsightInt
     }
 }
 #ifdef SUPPORT_SCREEN
-bool UIAbilityImpl::PrepareTerminateAbility()
+void UIAbilityImpl::PrepareTerminateAbility(std::function<void(bool)> callback, bool &isAsync, bool &prepareTermination)
 {
-    if (ability_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
-        return false;
+    if (ability_ == nullptr || callback == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_ or callback");
+        return;
     }
-    bool ret = ability_->OnPrepareTerminate();
-    TAG_LOGI(AAFwkTag::UIABILITY, "end ret: %{public}d", ret);
-    return ret;
+    auto *callbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<bool>::Create();
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null callbackInfo");
+        return;
+    }
+    callbackInfo->Push(callback);
+    ability_->OnPrepareTerminate(callbackInfo, isAsync, prepareTermination);
+    TAG_LOGD(AAFwkTag::ABILITY, "end, isAsync=%{public}d", isAsync);
+    if (!isAsync) {
+        AppExecFwk::AbilityTransactionCallbackInfo<bool>::Destroy(callbackInfo);
+    }
 }
 #endif
 void UIAbilityImpl::SendResult(int requestCode, int resultCode, const AAFwk::Want &resultData)

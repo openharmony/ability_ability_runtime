@@ -2066,8 +2066,11 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_PrepareTerminateAbility_0100, TestSiz
     InsightIntentExecuteResult result;
     abilityImpl_->ExecuteInsightIntentDone(intentId, result);
     abilityImpl_->ability_ = nullptr;
-    bool ret = abilityImpl_->PrepareTerminateAbility();
-    EXPECT_EQ(ret, false);
+    bool isAsync = false;
+    bool prepareTermination = false;
+    abilityImpl_->PrepareTerminateAbility(nullptr, isAsync, prepareTermination);
+    EXPECT_EQ(isAsync, false);
+    EXPECT_EQ(prepareTermination, false);
     GTEST_LOG_(INFO) << "AbilityRuntime_PrepareTerminateAbility_0100 end";
 }
 
@@ -2081,8 +2084,11 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_PrepareTerminateAbility_0200, TestSiz
     GTEST_LOG_(INFO) << "AbilityRuntime_PrepareTerminateAbility_0200 start";
     ASSERT_NE(abilityImpl_, nullptr);
     abilityImpl_->ability_ = std::make_shared<UIAbility>();
-    bool ret = abilityImpl_->PrepareTerminateAbility();
-    EXPECT_EQ(ret, false);
+    bool isAsync = false;
+    bool prepareTermination = false;
+    abilityImpl_->PrepareTerminateAbility(nullptr, isAsync, prepareTermination);
+    EXPECT_EQ(isAsync, false);
+    EXPECT_EQ(prepareTermination, false);
     GTEST_LOG_(INFO) << "AbilityRuntime_PrepareTerminateAbility_0200 end";
 }
 
