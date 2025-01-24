@@ -42,7 +42,7 @@ export default class SelectorServiceExtensionAbility extends extension {
     try {
       globalThis.preferences = dataPreferences.getPreferencesSync(this.context, options);
     } catch (error) {
-      console.error('Failed to getPreferencesSync callback. Code: ' + JSON.stringify(error));
+      console.error(TAG, 'Failed to getPreferencesSync callback. Code: ' + JSON.stringify(error));
     }
   }
 
@@ -183,7 +183,7 @@ export default class SelectorServiceExtensionAbility extends extension {
       let displayClass = display.getDefaultDisplaySync();
       console.debug(TAG, 'onRequest display is' + JSON.stringify(displayClass));
     } catch (error) {
-      console.error('Failed to getDefaultDisplaySync callback. Code: ' + JSON.stringify(error));
+      console.error(TAG, 'Failed to getDefaultDisplaySync callback. Code: ' + JSON.stringify(error));
     }
     console.debug(TAG, 'onRequest, want: ' + JSON.stringify(want));
     console.debug(TAG, 'onRequest, params: ' + JSON.stringify(globalThis.params));
@@ -298,7 +298,7 @@ export default class SelectorServiceExtensionAbility extends extension {
         globalThis.position = globalThis.landScapePosition;
       }
     } catch (error) {
-      console.error('Failed to getDefaultDisplaySync callback. Code: ' + JSON.stringify(error));
+      console.error(TAG, 'Failed to getDefaultDisplaySync callback. Code: ' + JSON.stringify(error));
     }
     let navigationBarRect = {
       left: globalThis.position.offsetX,
