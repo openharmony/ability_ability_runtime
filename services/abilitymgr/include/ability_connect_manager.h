@@ -562,6 +562,7 @@ private:
     void ProcessPreload(const std::shared_ptr<AbilityRecord> &record) const;
 
     void HandleInactiveTimeout(const std::shared_ptr<AbilityRecord> &ability);
+    void CleanActivatingTimeoutAbility(std::shared_ptr<AbilityRecord> abilityRecord);
     void MoveToTerminatingMap(const std::shared_ptr<AbilityRecord>& abilityRecord);
 
     void DoForegroundUIExtension(std::shared_ptr<AbilityRecord> abilityRecord, const AbilityRequest &abilityRequest);
