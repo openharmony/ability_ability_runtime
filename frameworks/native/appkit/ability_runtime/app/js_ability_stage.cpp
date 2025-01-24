@@ -72,6 +72,26 @@ void RegisterStopPreloadSoCallback(JsRuntime& jsRuntime)
         startupManager->StopAutoPreloadSoTask();
     });
 }
+
+napi_value OnPrepareTerminatePromiseCallback(napi_env env, napi_callback_info info)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "OnPrepareTerminatePromiseCallback begin");
+    void *data = nullptr;
+    size_t argc = ARGC_MAX_COUNT;
+    napi_value argv[ARGC_MAX_COUNT] = {nullptr};
+    NAPI_CALL_NO_THROW(napi_get_cb_info(env, info, &argc, argv, nullptr, &data), nullptr);
+    auto *callbackInfo = static_cast<AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *>(data);
+    int prepareTermination = 0;
+    if (callbackInfo == nullptr || (argc > 0 && !ConvertFromJsValue(env, argv[0], prepareTermination))) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo or unwrap prepareTermination result failed");
+        return nullptr;
+    }
+    callbackInfo->Call(prepareTermination);
+    AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Destroy(callbackInfo);
+    data = nullptr;
+    TAG_LOGI(AAFwkTag::APPKIT, "OnPrepareTerminatePromiseCallback end");
+    return nullptr;
+}
 } // namespace
 
 bool JsAbilityStage::UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleInfo)
@@ -233,10 +253,11 @@ void JsAbilityStage::OnDestroy() const
     napi_call_function(env, obj, methodOnDestroy, 0, nullptr, nullptr);
 }
 
-bool JsAbilityStage::OnPrepareTerminate(int32_t &prepareTermination) const
+bool JsAbilityStage::OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo,
+    bool &isAsync, int &prepareTermination) const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    AbilityStage::OnPrepareTerminate(prepareTermination);
+    AbilityStage::OnPrepareTerminate(callbackInfo, isAsync, prepareTermination);
 
     if (!jsAbilityStageObj_) {
         TAG_LOGW(AAFwkTag::APPKIT, "Not found AbilityStage.js");
@@ -252,19 +273,102 @@ bool JsAbilityStage::OnPrepareTerminate(int32_t &prepareTermination) const
         return false;
     }
 
+    napi_value methodOnPrepareTerminateAsync = nullptr;
     napi_value methodOnPrepareTerminate = nullptr;
+    napi_get_named_property(env, obj, "onPrepareTerminationAsync", &methodOnPrepareTerminateAsync);
     napi_get_named_property(env, obj, "onPrepareTermination", &methodOnPrepareTerminate);
-    if (methodOnPrepareTerminate == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "onPrepareTermination is unimplemented");
+
+    PrepareTerminateParam param = { env, obj, methodOnPrepareTerminateAsync, methodOnPrepareTerminate, callbackInfo };
+    return OnPrepareTerminateInner(param, isAsync, prepareTermination);
+}
+
+bool JsAbilityStage::OnPrepareTerminateInner(PrepareTerminateParam param, bool &isAsync, int &prepareTermination) const
+{
+    isAsync = false;
+    if (param.asyncFunc == nullptr && param.syncFunc == nullptr) {
+        TAG_LOGW(AAFwkTag::APPKIT, "neither onPrepareTermination is implemented");
         return false;
     }
-    TAG_LOGI(AAFwkTag::APPKIT, "onPrepareTermination is implemented");
+
+    if (CallOnPrepareTerminateAsync(param.env, param.obj, param.callbackInfo, param.asyncFunc, isAsync)) {
+        TAG_LOGI(AAFwkTag::APPKIT, "async func implemented");
+        return true;
+    }
+    return CallOnPrepareTerminate(param.env, param.obj, param.syncFunc, prepareTermination);
+}
+
+bool JsAbilityStage::CallOnPrepareTerminate(napi_env env, napi_value obj, napi_value methodOnPrepareTerminate,
+    int &prepareTermination) const
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "sync call");
+    if (methodOnPrepareTerminate == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "methodOnPrepareTerminate nullptr");
+        return false;
+    }
+    if (!CheckTypeForNapiValue(env, obj, napi_object)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Fail to get AbilityStage object");
+        return false;
+    }
     napi_value result = nullptr;
     napi_call_function(env, obj, methodOnPrepareTerminate, 0, nullptr, &result);
     if (!ConvertFromJsValue(env, result, prepareTermination)) {
         TAG_LOGE(AAFwkTag::APPKIT, "Fail to unwrap prepareTermination result");
+    }
+    return true;
+}
+
+bool JsAbilityStage::CallOnPrepareTerminateAsync(napi_env env, napi_value obj,
+    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo,
+    napi_value methodOnPrepareTerminateAsync, bool &isAsync) const
+{
+    isAsync = false;
+    if (methodOnPrepareTerminateAsync == nullptr || callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "methodOnPrepareTerminateAsync or callbackInfo nullptr");
         return false;
     }
+    if (!CheckTypeForNapiValue(env, obj, napi_object)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Fail to get AbilityStage object");
+        return false;
+    }
+    napi_value result = nullptr;
+    napi_call_function(env, obj, methodOnPrepareTerminateAsync, 0, nullptr, &result);
+    bool isPromise = false;
+    napi_is_promise(env, result, &isPromise);
+    if (!isPromise) {
+        TAG_LOGI(AAFwkTag::APPKIT, "result not promise");
+        return false;
+    }
+    TAG_LOGI(AAFwkTag::APPKIT, "async call");
+    bool callResult = false;
+    do {
+        if (!CheckTypeForNapiValue(env, result, napi_object)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "convert value error");
+            break;
+        }
+        napi_value then = nullptr;
+        napi_get_named_property(env, result, "then", &then);
+        if (then == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null then");
+            break;
+        }
+        bool isCallable = false;
+        napi_is_callable(env, then, &isCallable);
+        if (!isCallable) {
+            TAG_LOGE(AAFwkTag::APPKIT, "not callable property then");
+            break;
+        }
+        napi_value promiseCallback = nullptr;
+        napi_create_function(env, "promiseCallback", strlen("promiseCallback"),
+            OnPrepareTerminatePromiseCallback, callbackInfo, &promiseCallback);
+        napi_value argv[1] = { promiseCallback };
+        napi_call_function(env, result, then, 1, argv, nullptr);
+        callResult = true;
+    } while (false);
+    if (!callResult) {
+        TAG_LOGE(AAFwkTag::APPKIT, "call promise error");
+        return true;
+    }
+    isAsync = true;
     return true;
 }
 

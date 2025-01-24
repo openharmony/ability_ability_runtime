@@ -102,6 +102,26 @@ napi_value OnContinuePromiseCallback(napi_env env, napi_callback_info info)
 
     return nullptr;
 }
+
+napi_value OnPrepareTerminatePromiseCallback(napi_env env, napi_callback_info info)
+{
+    TAG_LOGI(AAFwkTag::UIABILITY, "OnPrepareTerminatePromiseCallback begin");
+    void *data = nullptr;
+    size_t argc = ARGC_MAX_COUNT;
+    napi_value argv[ARGC_MAX_COUNT] = {nullptr};
+    NAPI_CALL_NO_THROW(napi_get_cb_info(env, info, &argc, argv, nullptr, &data), nullptr);
+    auto *callbackInfo = static_cast<AppExecFwk::AbilityTransactionCallbackInfo<bool> *>(data);
+    bool prepareTermination = false;
+    if (callbackInfo == nullptr || (argc > 0 && !ConvertFromJsValue(env, argv[0], prepareTermination))) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null callbackInfo or unwrap prepareTermination result failed");
+        return nullptr;
+    }
+    callbackInfo->Call(prepareTermination);
+    AppExecFwk::AbilityTransactionCallbackInfo<bool>::Destroy(callbackInfo);
+    data = nullptr;
+    TAG_LOGI(AAFwkTag::UIABILITY, "OnPrepareTerminatePromiseCallback end");
+    return nullptr;
+}
 } // namespace
 
 napi_value AttachJsAbilityContext(napi_env env, void *value, void *extValue)
@@ -731,21 +751,41 @@ bool JsUIAbility::OnBackPress()
     return ret;
 }
 
-bool JsUIAbility::OnPrepareTerminate()
+void JsUIAbility::OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo,
+    bool &isAsync, bool &prepareTermination)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
-    UIAbility::OnPrepareTerminate();
+    UIAbility::OnPrepareTerminate(callbackInfo, isAsync, prepareTermination);
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
-    napi_value jsValue = CallObjectMethod("onPrepareToTerminate", nullptr, 0, true);
-    bool ret = false;
-    if (!ConvertFromJsValue(env, jsValue, ret)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "get js value failed");
-        return false;
+    napi_value onPrepareToTerminateAsyncResult = nullptr;
+    napi_value onPrepareToTerminateResult = nullptr;
+    onPrepareToTerminateAsyncResult = CallObjectMethod("onPrepareToTerminateAsync", nullptr, 0, true);
+    if (onPrepareToTerminateAsyncResult == nullptr) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "onPrepareToTerminateAsync not implemented, call onPrepareToTerminate");
+        onPrepareToTerminateResult = CallObjectMethod("onPrepareToTerminate", nullptr, 0, true);
     }
-    TAG_LOGD(AAFwkTag::UIABILITY, "end ret: %{public}d", ret);
-    return ret;
+
+    if (onPrepareToTerminateAsyncResult == nullptr && onPrepareToTerminateResult == nullptr) {
+        TAG_LOGW(AAFwkTag::UIABILITY, "neither is implemented");
+        return;
+    }
+    if (onPrepareToTerminateResult != nullptr) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "sync call");
+        prepareTermination = false;
+        if (!ConvertFromJsValue(env, onPrepareToTerminateResult, prepareTermination)) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "get js value failed");
+        }
+        return;
+    }
+    TAG_LOGI(AAFwkTag::UIABILITY, "async call");
+    if (!CheckPromise(onPrepareToTerminateAsyncResult) ||
+        !CallPromise(onPrepareToTerminateAsyncResult, callbackInfo)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "check or call promise error");
+        return;
+    }
+    isAsync = true;
 }
 
 std::unique_ptr<NativeReference> JsUIAbility::CreateAppWindowStage()
@@ -1627,6 +1667,36 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
         callbackInfo, &promiseCallback);
     napi_value argv[2] = { promiseCallback, promiseCallback };
     napi_call_function(env, result, then, PROMISE_CALLBACK_PARAM_NUM, argv, nullptr);
+    TAG_LOGI(AAFwkTag::UIABILITY, "end");
+    return true;
+}
+
+bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo)
+{
+    TAG_LOGI(AAFwkTag::UIABILITY, "called");
+    auto env = jsRuntime_.GetNapiEnv();
+    if (!CheckTypeForNapiValue(env, result, napi_object)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "convert error");
+        return false;
+    }
+    napi_value then = nullptr;
+    napi_get_named_property(env, result, "then", &then);
+    if (then == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null then");
+        return false;
+    }
+    bool isCallable = false;
+    napi_is_callable(env, then, &isCallable);
+    if (!isCallable) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "not callable");
+        return false;
+    }
+    HandleScope handleScope(jsRuntime_);
+    napi_value promiseCallback = nullptr;
+    napi_create_function(env, "promiseCallback", strlen("promiseCallback"),
+        OnPrepareTerminatePromiseCallback, callbackInfo, &promiseCallback);
+    napi_value argv[1] = { promiseCallback };
+    napi_call_function(env, result, then, 1, argv, nullptr);
     TAG_LOGI(AAFwkTag::UIABILITY, "end");
     return true;
 }

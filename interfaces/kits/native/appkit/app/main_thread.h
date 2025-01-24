@@ -381,6 +381,9 @@ private:
 
     void HandleJsHeapMemory(const OHOS::AppExecFwk::JsHeapDumpInfo &info);
 
+    void HandleSchedulePrepareTerminate(const std::string &moduleName,
+        std::shared_ptr<int32_t> prepareTerminationPtr, bool &isExist);
+
     void PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleInfo,
         const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
 
@@ -766,6 +769,11 @@ private:
     void *handleAppLib_ = nullptr;  // the handler of ACE Library.
     constexpr static std::string applicationLibraryPath = "/hos/lib/libapplication_native.z.so";
 #endif  // APPLICATION_LIBRARY_LOADER
+
+    std::atomic_bool isPrepareTerminateDone_ = false;
+    std::mutex mutex_;
+    std::condition_variable cv_;
+
     DISALLOW_COPY_AND_MOVE(MainThread);
 };
 }  // namespace AppExecFwk

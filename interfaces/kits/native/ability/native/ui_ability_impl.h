@@ -47,9 +47,12 @@ public:
 
     /**
      * @brief Prepare terminate the ability.
-     * @return Return true if ability need be terminated; return false if ability need stop terminating.
+     *
+     * @param callback The callback to be run if onPrepareToTerminateAsync is implemented.
+     * @param isAsync The returned flag indicates if onPrepareToTerminateAsync is implemented.
+     * @param prepareTermination The returned value indicates if the ability needs be terminated.
      */
-    bool PrepareTerminateAbility();
+    void PrepareTerminateAbility(std::function<void(bool)> callback, bool &isAsync, bool &prepareTermination);
 
     /**
      * @brief Save data and states of an ability when it is restored by the system. and Calling information back to
