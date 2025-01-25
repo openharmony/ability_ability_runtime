@@ -17,6 +17,7 @@
 
 #include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -105,19 +106,10 @@ int UriPermissionManagerStub::HandleGrantUriPermission(MessageParcel &data, Mess
 
 int UriPermissionManagerStub::HandleBatchGrantUriPermission(MessageParcel &data, MessageParcel &reply)
 {
-    auto size = data.ReadUint32();
-    if (size == 0 || size > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec is empty or exceed maximum size %{public}d.", MAX_URI_COUNT);
-        return ERR_URI_LIST_OUT_OF_RANGE;
-    }
     std::vector<Uri> uriVec;
-    for (uint32_t i = 0; i < size; i++) {
-        std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
-        if (!uri) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "To read uri failed.");
-            return ERR_DEAD_OBJECT;
-        }
-        uriVec.emplace_back(*uri);
+    auto ret = ReadBatchUris(data, uriVec);
+    if (ret != ERR_OK) {
+        return ret;
     }
     auto flag = data.ReadUint32();
     auto targetBundleName = data.ReadString();
@@ -131,19 +123,10 @@ int UriPermissionManagerStub::HandleBatchGrantUriPermission(MessageParcel &data,
 
 int32_t UriPermissionManagerStub::HandleGrantUriPermissionPrivileged(MessageParcel &data, MessageParcel &reply)
 {
-    auto size = data.ReadUint32();
-    if (size == 0 || size > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec is empty or exceed maximum size %{public}d.", MAX_URI_COUNT);
-        return ERR_URI_LIST_OUT_OF_RANGE;
-    }
     std::vector<Uri> uriVec;
-    for (uint32_t i = 0; i < size; i++) {
-        std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
-        if (!uri) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "To read uri failed.");
-            return ERR_DEAD_OBJECT;
-        }
-        uriVec.emplace_back(*uri);
+    auto ret = ReadBatchUris(data, uriVec);
+    if (ret != ERR_OK) {
+        return ret;
     }
     auto flag = data.ReadUint32();
     auto targetBundleName = data.ReadString();
@@ -191,9 +174,9 @@ int32_t UriPermissionManagerStub::HandleCheckUriAuthorization(MessageParcel &dat
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
     std::vector<std::string> uriVec;
-    for (uint32_t i = 0; i < size; i++) {
-        auto uri = data.ReadString();
-        uriVec.emplace_back(uri);
+    if (!data.ReadStringVector(&uriVec)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "read uris failed");
+        return ERR_DEAD_OBJECT;
     }
     auto flag = data.ReadUint32();
     auto tokenId = data.ReadUint32();
@@ -241,5 +224,24 @@ int UriPermissionManagerStub::HandleActive(MessageParcel &data, MessageParcel &r
     return res;
 }
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+
+int32_t UriPermissionManagerStub::ReadBatchUris(MessageParcel &data, std::vector<Uri> &uriVec)
+{
+    uint32_t size = data.ReadUint32();
+    if (size == 0 || size > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "out of range: %{public}u", size);
+        return ERR_URI_LIST_OUT_OF_RANGE;
+    }
+    std::vector<std::string> uris;
+    if (!data.ReadStringVector(&uris)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "read uris failed");
+        return ERR_DEAD_OBJECT;
+    }
+    for (auto &uri : uris) {
+        uriVec.emplace_back(uri);
+    }
+    return ERR_OK;
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS
