@@ -1260,7 +1260,10 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
         TAG_LOGE(AAFwkTag::APPMGR, "wrong app state:%{public}d", appRecord->GetState());
         return;
     }
-
+    if (multiUserConfigurationMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "multiUserConfigurationMgr_ null");
+        return;
+    }
     int32_t userId = appRecord->GetUid() / BASE_USER_RANGE;
     auto config = multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
     if (config == nullptr) {
@@ -4990,12 +4993,30 @@ void AppMgrServiceInner::HandleStartSpecifiedProcessTimeout(std::shared_ptr<AppR
     appRecord->ResetNewProcessRequestId();
 }
 
-std::vector<std::string> AppMgrServiceInner::DealWithUserConfiguration(
-    const Configuration& config, const int32_t userId)
+int32_t AppMgrServiceInner::DealWithUserConfiguration(const Configuration& config, const int32_t userId,
+    int32_t &notifyUserId)
 {
+    if (multiUserConfigurationMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "multiUserConfigurationMgr_ null");
+        return ERR_INVALID_VALUE;
+    }
     std::vector<std::string> changeKeyV;
-    multiUserConfigurationMgr_->HandleConfiguration(userId, config, changeKeyV);
-    return changeKeyV;
+    bool isNotifyUser0 = false;
+    multiUserConfigurationMgr_->HandleConfiguration(userId, config, changeKeyV, isNotifyUser0);
+    TAG_LOGI(AAFwkTag::APPMGR,
+        "changeKeyV size: %{public}zu Config: %{public}s userId: %{public}d, NotifyUser0: %{public}d",
+        changeKeyV.size(), config.GetName().c_str(), userId, static_cast<int32_t>(isNotifyUser0));
+
+    if (!config.GetItem(AAFwk::GlobalConfigurationKey::THEME).empty() || !changeKeyV.empty()) {
+        notifyUserId = userId;
+        return ERR_OK;
+    } else if (isNotifyUser0) {
+        notifyUserId = U0_USER_ID;
+        return ERR_OK;
+    } else {
+        TAG_LOGE(AAFwkTag::APPMGR, "changeKeyV empty");
+        return ERR_INVALID_VALUE;
+    }
 }
 
 int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, const int32_t userId)
@@ -5010,16 +5031,15 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
     if (ret != ERR_OK) {
         return ret;
     }
-    std::vector<std::string> changeKeyV = DealWithUserConfiguration(config, userId);
-    TAG_LOGI(AAFwkTag::APPMGR, "changeKeyV size: %{public}zu Config: %{public}s userId: %{public}d", changeKeyV.size(),
-        config.GetName().c_str(), userId);
-    if (config.GetItem(AAFwk::GlobalConfigurationKey::THEME).empty() && changeKeyV.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "changeKeyV empty");
-        return ERR_INVALID_VALUE;
+    int32_t notifyUserId;
+    ret = DealWithUserConfiguration(config, userId, notifyUserId);
+    if (ret != ERR_OK) {
+        return ret;
     }
+
     // all app
-    int32_t result = appRunningManager_->UpdateConfiguration(config, userId);
-    HandleConfigurationChange(config, userId);
+    int32_t result = appRunningManager_->UpdateConfiguration(config, notifyUserId);
+    HandleConfigurationChange(config, notifyUserId);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "update error");
         return result;
@@ -5027,7 +5047,7 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
     // notify
     std::lock_guard<ffrt::mutex> notifyLock(configurationObserverLock_);
     for (auto &item : configurationObservers_) {
-        if (item.observer != nullptr && (userId == -1 || item.userId == 0 || item.userId == userId)) {
+        if (item.observer != nullptr && (notifyUserId == -1 || item.userId == 0 || item.userId == notifyUserId)) {
             item.observer->OnConfigurationUpdated(config);
         }
     }
@@ -5150,12 +5170,20 @@ void AppMgrServiceInner::InitGlobalConfiguration()
     globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::DEVICE_TYPE, deviceType);
     globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, "1.0");
     globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE, "1.0");
+    if (multiUserConfigurationMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "multiUserConfigurationMgr_ null");
+        return;
+    }
     multiUserConfigurationMgr_->InitConfiguration(globalConfiguration);
     TAG_LOGI(AAFwkTag::APPMGR, "InitGlobalConfiguration Config: %{public}s", globalConfiguration->GetName().c_str());
 }
 
 std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration()
 {
+    if (multiUserConfigurationMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "multiUserConfigurationMgr_ null");
+        return nullptr;
+    }
     int32_t userId = 0;
     auto errNo = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
     if (errNo != 0) {
