@@ -630,7 +630,8 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     }
 
     // 4. Other cases , need to connect the service ability
-    auto connectRecord = ConnectionRecord::CreateConnectionRecord(callerToken, targetService, connect);
+    auto connectRecord = ConnectionRecord::CreateConnectionRecord(
+        callerToken, targetService, connect, shared_from_this());
     CHECK_POINTER_AND_RETURN(connectRecord, ERR_INVALID_VALUE);
     connectRecord->AttachCallerInfo();
     connectRecord->SetConnectState(ConnectionState::CONNECTING);

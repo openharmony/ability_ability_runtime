@@ -165,7 +165,7 @@ HWTEST_F(ConnectionStateManagerTest, AddConnection_001, TestSize.Level1)
 HWTEST_F(ConnectionStateManagerTest, AddConnection_002, TestSize.Level1)
 {
     auto connectionRecord =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_);
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
     manager_->Init();
     manager_->AddConnection(connectionRecord);
     EXPECT_TRUE(manager_ != nullptr);
@@ -215,7 +215,7 @@ HWTEST_F(ConnectionStateManagerTest, RemoveConnection_002, TestSize.Level1)
 HWTEST_F(ConnectionStateManagerTest, RemoveConnection_003, TestSize.Level1)
 {
     auto connectionRecord =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_);
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
     bool isCallerDied = true;
     manager_->Init();
     manager_->RemoveConnection(connectionRecord, isCallerDied);
@@ -233,7 +233,7 @@ HWTEST_F(ConnectionStateManagerTest, RemoveConnection_003, TestSize.Level1)
 HWTEST_F(ConnectionStateManagerTest, RemoveConnection_004, TestSize.Level1)
 {
     auto connectionRecord =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_);
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
     bool isCallerDied = false;
     manager_->Init();
     manager_->RemoveConnection(connectionRecord, isCallerDied);
@@ -623,7 +623,7 @@ HWTEST_F(ConnectionStateManagerTest, GetConnectionData_001, TestSize.Level1)
 HWTEST_F(ConnectionStateManagerTest, AddConnectionInner_001, TestSize.Level1)
 {
     std::shared_ptr<ConnectionRecord> connectionRecord =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_);
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
     ConnectionData data;
     connectionRecord->callerPid_ = 0;
     manager_->connectionStates_[0] = nullptr;
@@ -642,7 +642,7 @@ HWTEST_F(ConnectionStateManagerTest, AddConnectionInner_001, TestSize.Level1)
 HWTEST_F(ConnectionStateManagerTest, RemoveConnectionInner_001, TestSize.Level1)
 {
     std::shared_ptr<ConnectionRecord> connectionRecord =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_);
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
     ConnectionData data;
     connectionRecord->callerPid_ = 0;
     manager_->connectionStates_[0] = nullptr;
@@ -662,7 +662,7 @@ HWTEST_F(ConnectionStateManagerTest, HandleCallerDied_001, TestSize.Level1)
 {
     EXPECT_NE(manager_, nullptr);
     std::shared_ptr<ConnectionRecord> connectionRecord =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_);
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
     EXPECT_NE(connectionRecord, nullptr);
     int32_t callerUid = 0;
     int32_t callerPid = 0;
