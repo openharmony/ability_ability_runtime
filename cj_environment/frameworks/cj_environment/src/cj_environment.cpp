@@ -17,7 +17,7 @@
 
 #include <string>
 #include <filesystem>
-
+#include <mutex>
 #include "cj_hilog.h"
 #include "cj_invoker.h"
 #ifdef __OHOS__
@@ -206,6 +206,12 @@ void CJEnvironment::PreloadLibs()
 
 void CJEnvironment::SetAppPath(const std::string& appPath)
 {
+    static bool isInited = false;
+    static std::mutex initMutex;
+    std::lock_guard<std::mutex> lock(initMutex);
+    if (isInited) {
+        return;
+    }
     auto mode = DetectAppNSMode();
     if (instance_) {
         if (instance_->nsMode_ == mode) {
@@ -216,6 +222,7 @@ void CJEnvironment::SetAppPath(const std::string& appPath)
     }
     instance_ = new CJEnvironment(mode);
     instance_->InitCJNS(appPath);
+    isInited = true;
 }
 
 CJEnvironment::CJEnvironment(NSMode mode) : nsMode_(mode)
@@ -327,6 +334,15 @@ void CJEnvironment::InitCJChipSDKNS(const std::string& path)
 #endif
 }
 
+void CJEnvironment::InitNewCJChipSDKNS(const std::string& path)
+{
+#ifdef __OHOS__
+    LOGI("InitCJChipSDKNS: %{public}s", path.c_str());
+    Dl_namespace chip_sdk;
+    DynamicInitNewNamespace(&chip_sdk, path.c_str(), CJEnvironment::cjChipSDKNSName);
+#endif
+}
+
 // Init app namespace
 void CJEnvironment::InitCJAppNS(const std::string& path)
 {
@@ -350,12 +366,15 @@ void CJEnvironment::InitCJAppNS(const std::string& path)
 void CJEnvironment::InitNewCJAppNS(const std::string& path)
 {
 #ifdef __OHOS__
-    LOGI("InitNewCJAppNS: %{public}s", path.c_str());
+    LOGI("InitCJAppNS: %{public}s", path.c_str());
     Dl_namespace ns;
     DynamicInitNewNamespace(&ns, path.c_str(), CJEnvironment::cjNewAppNSName);
     Dl_namespace sdk;
     if (nsMode_ == NSMode::APP) {
+        Dl_namespace chip_sdk;
         dlns_get(CJEnvironment::cjSDKNSName, &sdk);
+        dlns_get(CJEnvironment::cjChipSDKNSName, &chip_sdk);
+        dlns_inherit(&ns, &chip_sdk, "libssl_openssl.z.so");
     } else {
         dlns_get(CJEnvironment::cjNewSDKNSName, &sdk);
     }
@@ -376,7 +395,7 @@ void CJEnvironment::InitCJSDKNS(const std::string& path)
 void CJEnvironment::InitNewCJSDKNS(const std::string& path)
 {
 #ifdef __OHOS__
-    LOGI("InitNewCJSDKNS: %{public}s", path.c_str());
+    LOGI("InitCJSDKNS: %{public}s", path.c_str());
     Dl_namespace ns;
     DynamicInitNewNamespace(&ns, path.c_str(), cjNewSDKNSName);
 #endif
@@ -582,6 +601,7 @@ void CJEnvironment::InitRuntimeNS()
 {
 #ifdef __OHOS__
     if (nsMode_ == NSMode::APP) {
+        InitNewCJChipSDKNS(CJ_CHIPSDK_PATH);
         InitCJSDKNS(CJ_RT_PATH + ":" + CJ_LIB_PATH);
     } else {
         InitNewCJSDKNS(CJ_SDK_PATH);
