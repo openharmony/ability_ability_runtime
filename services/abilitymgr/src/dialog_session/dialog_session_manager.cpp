@@ -478,13 +478,13 @@ int32_t DialogSessionManager::HandleErmsResultBySCB(AbilityRequest &abilityReque
 bool DialogSessionManager::IsCreateCloneSelectorDialog(const std::string &bundleName, int32_t userId)
 {
     if (StartAbilityUtils::isWantWithAppCloneIndex) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "want with app clone index");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "no clone index");
         StartAbilityUtils::isWantWithAppCloneIndex = false;
         return false;
     }
     auto appIndexes = StartAbilityUtils::GetCloneAppIndexes(bundleName, userId);
     if (appIndexes.empty()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "application not create clone index");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not create clone index");
         return false;
     }
     return true;
