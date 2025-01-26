@@ -30,7 +30,8 @@ public:
     MultiUserConfigurationMgr();
     std::shared_ptr<AppExecFwk::Configuration> GetConfigurationByUserId(const int32_t userId);
     void InitConfiguration(std::shared_ptr<AppExecFwk::Configuration> config);
-    void HandleConfiguration(const int32_t userId, const Configuration& config, std::vector<std::string>& changeKeyV);
+    void HandleConfiguration(const int32_t userId, const Configuration& config, std::vector<std::string>& changeKeyV,
+        bool &isNotifyUser0);
 
 private:
     void UpdateMultiUserConfiguration(const Configuration& config);
