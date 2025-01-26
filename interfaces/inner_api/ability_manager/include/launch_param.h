@@ -19,6 +19,7 @@
 #include <string>
 
 #include "parcel.h"
+#include "last_exit_detail_info.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -53,7 +54,9 @@ enum LastExitReason {
     LASTEXITREASON_APP_FREEZE,
     LASTEXITREASON_PERFORMANCE_CONTROL,
     LASTEXITREASON_RESOURCE_CONTROL,
-    LASTEXITREASON_UPGRADE
+    LASTEXITREASON_UPGRADE,
+    LASTEXITREASON_USER_REQUEST,
+    LASTEXITREASON_SIGNAL
 };
 
 /**
@@ -75,6 +78,7 @@ struct LaunchParam : public Parcelable {
     LastExitReason lastExitReason = LastExitReason::LASTEXITREASON_NORMAL;
     std::string launchReasonMessage = "";
     std::string lastExitMessage = "";
+    LastExitDetailInfo lastExitDetailInfo = {};
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

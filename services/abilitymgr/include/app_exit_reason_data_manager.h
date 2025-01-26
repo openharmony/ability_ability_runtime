@@ -34,10 +34,12 @@ public:
     virtual ~AppExitReasonDataManager();
 
     int32_t SetAppExitReason(const std::string &bundleName, uint32_t accessTokenId,
-        const std::vector<std::string> &abilityList, const AAFwk::ExitReason &exitReason);
+        const std::vector<std::string> &abilityList, const AAFwk::ExitReason &exitReason,
+        const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg, bool cacheFlag = false);
 
     int32_t GetAppExitReason(const std::string &bundleName, uint32_t accessTokenId, const std::string &abilityName,
-        bool &isSetReason, AAFwk::ExitReason &exitReason);
+        bool &isSetReason, AAFwk::ExitReason &exitReason, AppExecFwk::RunningProcessInfo &processInfo,
+        int64_t &time_stamp, bool &withKillMsg);
 
     int32_t DeleteAppExitReason(const std::string &bundleName, int32_t uid, int32_t appIndex);
 
@@ -59,25 +61,27 @@ public:
     uint32_t GetTokenIdBySessionID(const int32_t sessionId);
 
     int32_t SetUIExtensionAbilityExitReason(const std::string &bundleName,
-        const std::vector<std::string> &extensionList, const AAFwk::ExitReason &exitReason);
+        const std::vector<std::string> &extensionList, const AAFwk::ExitReason &exitReason,
+        const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg);
 
-    bool GetUIExtensionAbilityExitReason(const std::string &keyEx, AAFwk::ExitReason &exitReason);
+    bool GetUIExtensionAbilityExitReason(const std::string &keyEx, AAFwk::ExitReason &exitReason,
+        AppExecFwk::RunningProcessInfo &processInfo, int64_t &time_stamp, bool &withKillMsg);
 
-    int32_t SetProcessExitDetailInfo(const AAFwk::ExitReason &exitReason,
-        const AppExecFwk::RunningProcessInfo &processInfo);
+    int32_t UpdateSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName);
 
 private:
     DistributedKv::Status GetKvStore();
     bool CheckKvStore();
     DistributedKv::Value ConvertAppExitReasonInfoToValue(
-        const std::vector<std::string> &abilityList, const AAFwk::ExitReason &exitReason);
+        const std::vector<std::string> &abilityList, const AAFwk::ExitReason &exitReason,
+        const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg);
     void ConvertAppExitReasonInfoFromValue(const DistributedKv::Value &value, AAFwk::ExitReason &exitReason,
-        int64_t &time_stamp, std::vector<std::string> &abilityList);
+        int64_t &time_stamp, std::vector<std::string> &abilityList, AppExecFwk::RunningProcessInfo &processInfo,
+        bool &withKillMsg);
+    void ConvertReasonFromValue(const nlohmann::json &jsonObject, AAFwk::ExitReason &exitReason, bool &withKillMsg);
     void ConvertAccessTokenIdFromValue(const DistributedKv::Value &value, uint32_t &accessTokenId);
-    DistributedKv::Value ConvertProcessExitDetailInfoToValue(const AAFwk::ExitReason &exitReason,
-        const AppExecFwk::RunningProcessInfo &processInfo);
     void UpdateAppExitReason(uint32_t accessTokenId, const std::vector<std::string> &abilityList,
-        const AAFwk::ExitReason &exitReason);
+        const AAFwk::ExitReason &exitReason, const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg);
     void InnerDeleteAppExitReason(const std::string &keyName);
     void InnerDeleteSessionId(const int32_t sessionId);
     void InnerAddSessionId(const int32_t sessionId, uint32_t accessTokenId);
@@ -91,7 +95,8 @@ private:
     void InnerDeleteAbilityRecoverInfo(uint32_t accessTokenId);
     DistributedKv::Key GetAbilityRecoverInfoKey(uint32_t accessTokenId);
     DistributedKv::Value ConvertAppExitReasonInfoToValueOfExtensionName(
-        const std::string &extensionListName, const AAFwk::ExitReason &exitReason);
+        const std::string &extensionListName, const AAFwk::ExitReason &exitReason,
+        const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg);
 
     DistributedKv::Key GetSessionIdKey(const int32_t sessionId);
     DistributedKv::Value ConvertAccessTokenIdToValue(uint32_t accessTokenId);

@@ -57,7 +57,7 @@ AppRunningManager::~AppRunningManager()
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, const BundleInfo &bundleInfo,
-    const std::string &instanceKey, const std::string &customProcessFlag)
+    const std::string &instanceKey, const std::string &customProcessFlag, int32_t persistentId)
 {
     if (!appInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "param error");

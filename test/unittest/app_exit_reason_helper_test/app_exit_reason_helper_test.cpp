@@ -154,7 +154,8 @@ HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReason_0200, TestSize.Level1)
     int32_t uid = 0;
     uint32_t accessTokenId = 0;
     AAFwk::ExitReason exitReason;
-    int32_t result = appExitReasonHelper_->RecordProcessExitReason(pid, bundleName, uid, accessTokenId, exitReason);
+    int32_t result = appExitReasonHelper_->RecordProcessExitReason(pid, bundleName, uid, accessTokenId,
+        exitReason, {});
     EXPECT_NE(result, ERR_OK);
 }
 
@@ -180,7 +181,7 @@ HWTEST_F(AppExitReasonHelperTest, RecordProcessExtensionExitReason_0100, TestSiz
     int32_t pid = 0;
     std::string bundleName("test");
     AAFwk::ExitReason exitReason;
-    int32_t result = appExitReasonHelper_->RecordProcessExtensionExitReason(pid, bundleName, exitReason);
+    int32_t result = appExitReasonHelper_->RecordProcessExtensionExitReason(pid, bundleName, exitReason, {}, false);
     EXPECT_NE(result, ERR_OK);
 }
 

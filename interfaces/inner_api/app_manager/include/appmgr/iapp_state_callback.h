@@ -22,6 +22,7 @@
 #include "app_mgr_constants.h"
 #include "app_process_data.h"
 #include "bundle_info.h"
+#include "last_exit_detail_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -82,6 +83,10 @@ public:
      */
     virtual void NotifyAppPreCache(int32_t pid, int32_t userId) {}
 
+    virtual void OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+        const std::string &bundleName, const std::vector<std::string> &abilityNames,
+        const std::vector<std::string> &uiExtensionNames) {}
+
     enum class Message {
         TRANSACT_ON_APP_STATE_CHANGED = 0,
         TRANSACT_ON_ABILITY_REQUEST_DONE,
@@ -89,7 +94,8 @@ public:
         TRANSACT_ON_NOTIFY_START_RESIDENT_PROCESS,
         TRANSACT_ON_APP_REMOTE_DIED,
         TRANSACT_ON_APP_PRE_CACHE,
-        TRANSACT_ON_NOTIFY_START_KEEP_ALIVE_PROCESS
+        TRANSACT_ON_NOTIFY_START_KEEP_ALIVE_PROCESS,
+        TRANSACT_ON_CACHE_EXIT_INFO
     };
 };
 }  // namespace AppExecFwk

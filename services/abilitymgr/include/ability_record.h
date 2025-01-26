@@ -990,7 +990,8 @@ public:
 
     void SetLaunchReason(const LaunchReason &reason);
     void SetLaunchReasonMessage(const std::string &launchReasonMessage);
-    void SetLastExitReason(const ExitReason &exitReason);
+    void SetLastExitReason(const ExitReason &exitReason, const AppExecFwk::RunningProcessInfo &processsInfo,
+        const int64_t timestamp, bool withKillReason);
     void ContinueAbility(const std::string &deviceId, uint32_t versionCode);
     void NotifyContinuationResult(int32_t result);
 

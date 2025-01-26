@@ -251,14 +251,18 @@ void AbilityConnectManager::SetLastExitReason(
     }
 
     ExitReason exitReason = { REASON_UNKNOWN, "" };
+    AppExecFwk::RunningProcessInfo processInfo;
+    int64_t time_stamp = 0;
+    bool withKillMsg = false;
     const std::string keyEx = targetRecord->GetAbilityInfo().bundleName + SEPARATOR +
                               targetRecord->GetAbilityInfo().moduleName + SEPARATOR +
                               targetRecord->GetAbilityInfo().name;
-    if (!appExitReasonDataMgr->GetUIExtensionAbilityExitReason(keyEx, exitReason)) {
+    if (!appExitReasonDataMgr->GetUIExtensionAbilityExitReason(keyEx, exitReason, processInfo, time_stamp,
+        withKillMsg)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "There is no record of UIExtensionAbility's last exit reason in the database.");
         return;
     }
-    targetRecord->SetLastExitReason(exitReason);
+    targetRecord->SetLastExitReason(exitReason, processInfo, time_stamp, withKillMsg);
 }
 
 void AbilityConnectManager::DoForegroundUIExtension(std::shared_ptr<AbilityRecord> abilityRecord,
