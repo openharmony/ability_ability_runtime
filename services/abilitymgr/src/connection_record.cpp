@@ -144,7 +144,7 @@ void ConnectionRecord::CompleteConnect()
     SetConnectState(ConnectionState::CONNECTED);
     CHECK_POINTER(targetService_);
     targetService_->SetAbilityState(AbilityState::ACTIVE);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "CompleteConnect,%{public}s", targetService_->GetAbilityInfo().name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Connect,%{public}s", targetService_->GetAbilityInfo().name.c_str());
     const AppExecFwk::AbilityInfo &abilityInfo = targetService_->GetAbilityInfo();
     AppExecFwk::ElementName element(targetService_->GetWant().GetDeviceId(), abilityInfo.bundleName,
         abilityInfo.name, abilityInfo.moduleName);

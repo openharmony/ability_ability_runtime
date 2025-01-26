@@ -1549,7 +1549,7 @@ AppExecFwk::ElementName AbilityManagerClient::GetTopAbility(bool isNeedLocalDevi
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "get sceneSessionManager failed");
                 return elementName;
             }
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, GetTopAbility element");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "call GetTopAbility");
             (void)sceneSessionManager->GetFocusSessionElement(elementName);
             return elementName;
         }
