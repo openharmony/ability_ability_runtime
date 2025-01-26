@@ -95,6 +95,7 @@ public:
     void InitNewCJSDKNS(const std::string& path);
     void InitCJSysNS(const std::string& path);
     void InitCJChipSDKNS(const std::string& path);
+    void InitNewCJChipSDKNS(const std::string& path);
     void InitRuntimeNS();
     void InitCJNS(const std::string& path);
     static NSMode DetectAppNSMode();
