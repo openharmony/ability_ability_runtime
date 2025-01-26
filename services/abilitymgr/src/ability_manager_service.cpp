@@ -15,6 +15,8 @@
 
 #include "ability_manager_service.h"
 
+#include <sys/epoll.h>
+
 #include "ability_background_connection.h"
 #include "ability_connect_manager.h"
 #include "ability_manager_radar.h"
@@ -24,16 +26,20 @@
 #include "app_exit_reason_data_manager.h"
 #include "application_util.h"
 #include "app_mgr_util.h"
+#include "appspawn.h"
 #include "recovery_info_timer.h"
 #include "assert_fault_callback_death_mgr.h"
 #include "concurrent_task_client.h"
 #include "connection_state_manager.h"
+#include "c/executor_task.h"
 #include "display_manager.h"
 #include "display_util.h"
 #include "distributed_client.h"
 #ifdef WITH_DLP
 #include "dlp_utils.h"
 #endif // WITH_DLP
+#include "ffrt.h"
+#include "ffrt_inner.h"
 #include "freeze_util.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
@@ -210,6 +216,8 @@ const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
     "share", "action"
 };
 std::atomic<bool> g_isDmsAlive = false;
+constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
+constexpr const char* APPSPAWN_STARTED = "startup.service.ctl.appspawn.pid";
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
@@ -280,6 +288,7 @@ constexpr const char* WHITE_LIST = "white_list";
 constexpr const char* SUPPORT_COLLABORATE_INDEX = "ohos.extra.param.key.supportCollaborateIndex";
 constexpr const char* COLLABORATE_KEY = "ohos.dms.collabToken";
 constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
+constexpr int32_t CLEAR_REASON_DELAY_TIME = 3000;  // 3s
 
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<AbilityManagerService>::GetInstance().get());
@@ -346,6 +355,7 @@ bool AbilityManagerService::Init()
 {
     HiviewDFX::Watchdog::GetInstance().InitFfrtWatchdog(); // For ffrt watchdog available in foundation
     taskHandler_ = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
+    delayClearReasonHandler_ = TaskHandlerWrap::CreateQueueHandler("delay_clear_reason_queue");
     eventHandler_ = std::make_shared<AbilityEventHandler>(taskHandler_, weak_from_this());
     freeInstallManager_ = std::make_shared<FreeInstallManager>(weak_from_this());
     CHECK_POINTER_RETURN_BOOL(freeInstallManager_);
@@ -379,6 +389,7 @@ bool AbilityManagerService::Init()
 
     SubscribeScreenUnlockedEvent();
     appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(subManagersHelper_);
+    InitAppSpawnMsgPipe();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "init success");
     return true;
 }
@@ -412,6 +423,117 @@ void AbilityManagerService::InitInterceptor()
         TAG_LOGI(AAFwkTag::ABILITYMGR, "add BlockAllAppStartInterceptor");
         interceptorExecuter_->AddInterceptor("BlockAllAppStart", std::make_shared<BlockAllAppStartInterceptor>());
     }
+}
+
+static void ProcessSignalData(void *token, uint32_t event)
+{
+    int rFd = *(reinterpret_cast<int*>(token));
+    // read data from appspawn
+    char buffer[PIPE_MSG_READ_BUFFER] = {0};
+    std::string readResult = "";
+    int count = read(rFd, buffer, PIPE_MSG_READ_BUFFER - 1);
+    if (count == -1) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "read pipe failed");
+    } else if (count == 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write end closed");
+        close(rFd);
+    } else {
+        int32_t pid = -1;
+        int32_t signal = -1;
+        int32_t uid = 0;
+        std::string bundleName = "";
+        std::string bufferStr = buffer;
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "buffer read: %{public}s", bufferStr.c_str());
+        nlohmann::json jsonObject = nlohmann::json::parse(bufferStr, nullptr, false);
+        if (jsonObject.is_discarded()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "parse json string failed");
+            return;
+        }
+        if (!jsonObject.contains("pid") || !jsonObject.contains("signal") || !jsonObject.contains("uid")
+            || !jsonObject.contains("bundleName")) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "info lost!");
+            return;
+        }
+        pid = jsonObject["pid"];
+        signal = jsonObject["signal"];
+        uid = jsonObject["uid"];
+        bundleName = jsonObject["bundleName"];
+        if (signal == 0) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "ignore signal 0, pid: %{public}d", pid);
+            return;
+        }
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "To update reason detail info because of SIGNAL");
+        if(DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->UpdateSignalReason(
+            pid, uid, signal, bundleName) != 0) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "UpdateSignalReason failed");
+        }
+    }
+}
+
+static void CloseSpawnWriteFd(void *token, uint32_t event)
+{
+    int rFd = *(reinterpret_cast<int*>(token));
+    int ret = SpawnListenCloseSet();
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SpawnListenCloseSet failed");
+    }
+    close(rFd);
+}
+
+static void AppSpawnStartCallback(const char *key, const char *value, void *context)
+{
+    auto weak = static_cast<std::weak_ptr<AbilityManagerService>*>(context);
+    if (weak == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "context null");
+        return;
+    }
+    auto ams = weak->lock();
+    if (ams == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "AbilityManagerService null");
+        return;
+    }
+    int rFd = ams->GetRfd();
+    int wFd = ams->GetWfd();
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "rFd is: %{public}d, wFd is: %{public}d", rFd, wFd);
+    // send fd
+    int ret = SpawnListenFdSet(wFd);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "send fd to appspawn failed, ret: %{public}d", ret);
+        close(rFd);
+        close(wFd);
+        return;
+    }
+    // set flag
+    ret = SpawnListenCloseSet();
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SpawnListenCloseSet failed");
+    }
+}
+
+void AbilityManagerService::InitAppSpawnMsgPipe()
+{
+    int pipeFd[2];
+    if (pipe(pipeFd) != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "create pipe failed");
+        return;
+    }
+    rFd_ = pipeFd[0];
+    wFd_ = pipeFd[1];
+    *ptrRFd_ = rFd_;
+    auto context = new (std::nothrow) std::weak_ptr<AbilityManagerService>(shared_from_this());
+    int ret = WatchParameter(APPSPAWN_STARTED, AppSpawnStartCallback, context);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "watch parameter ret: %{public}d", ret);
+        return;
+    }
+    ffrt_qos_t taskQos = 0;
+    ret = ffrt_epoll_ctl(taskQos, EPOLL_CTL_ADD, rFd_, EPOLLIN, static_cast<void*>(ptrRFd_.get()), ProcessSignalData);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ffrt_epoll_ctl failed, ret: %{public}d", ret);
+        close(rFd_);
+        return;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Listen signal msg ...");
 }
 
 void AbilityManagerService::InitInterceptorForScreenUnlock()
@@ -10744,18 +10866,20 @@ int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector
 
 int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReason &reason)
 {
+    bool supportShell = AmsConfigurationParameter::GetInstance().IsSupportAAKillWithReason();
     auto isShellCall = PermissionVerification::GetInstance()->IsShellCall();
     auto isCallingPerm = PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_KILL_APP_PROCESSES);
-    if (!isCallingPerm && !isShellCall) {
+    if (!isCallingPerm && !(supportShell && isShellCall)) {
         TAG_LOGE(AAFwkTag::APPMGR, "permission verification fail");
         return ERR_PERMISSION_DENIED;
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, reason:%{public}d, subReason:%{public}d, killMsg:%{public}s",
         pid, reason.reason, reason.subReason, reason.exitMsg.c_str());
+    bool withKillMsg = reason.exitMsg.empty() ? false : true;
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
-    auto ret = appExitReasonHelper_->RecordAppExitReason(reason, pid);
+    auto ret = appExitReasonHelper_->RecordAppExitReason(reason, pid, withKillMsg);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "RecordAppExitReason failed, ret:%{public}d", ret);
         return ret;
@@ -11358,6 +11482,22 @@ void AbilityManagerService::OnAppRemoteDied(const std::vector<sptr<IRemoteObject
             abilityRecord->GetAbilityInfo().name.c_str(), abilityRecord->GetAbilityInfo().bundleName.c_str());
         abilityRecord->OnProcessDied();
     }
+}
+
+void AbilityManagerService::OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+    const std::string &bundleName, const std::vector<std::string> &abilityNames,
+    const std::vector<std::string> &uiExtensionNames)
+{
+    if (appExitReasonHelper_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appExitReasonHelper_ null");
+        return;
+    }
+    appExitReasonHelper_->CacheAppExitReason(accessTokenId, exitInfo, bundleName, abilityNames, uiExtensionNames);
+    auto delayClearReason = [ bundleName, accessTokenId ]() {
+        (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+            DeleteAppExitReason(bundleName, accessTokenId);
+    };
+    delayClearReasonHandler_->SubmitTaskJust(delayClearReason, "delayClearReason", CLEAR_REASON_DELAY_TIME);
 }
 
 int32_t AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
