@@ -823,6 +823,18 @@ public:
     {
         return taskHandler_;
     }
+    std::shared_ptr<TaskHandlerWrap> GetDelayClearReasonHandler() const
+    {
+        return delayClearReasonHandler_;
+    }
+    int GetRfd() const
+    {
+        return rFd_;
+    }
+    int GetWfd() const
+    {
+        return wFd_;
+    }
 
     /**
      * GetEventHandler, get the ability manager service's handler.
@@ -1909,6 +1921,11 @@ public:
         bool isPendingWantCaller, int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
         bool isCallByShortcut = false);
 
+    std::shared_ptr<AppExitReasonHelper> GetAppExitReasonHelper()
+    {
+        return appExitReasonHelper_;
+    }
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1956,6 +1973,10 @@ protected:
      * @param abilityTokens abilities in died process.
      */
     void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
+
+    void OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+        const std::string &bundleName, const std::vector<std::string> &abilityNames,
+        const std::vector<std::string> &uiExtensionNames) override;
 
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
@@ -2360,6 +2381,7 @@ private:
     void InitInterceptor();
     void InitInterceptorForScreenUnlock();
     void InitPushTask();
+    void InitAppSpawnMsgPipe();
     void InitDeepLinkReserve();
 
     bool CheckSenderWantInfo(int32_t callerUid, const WantSenderInfo &wantSenderInfo);
@@ -2466,6 +2488,7 @@ private:
 
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
+    std::shared_ptr<TaskHandlerWrap> delayClearReasonHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
     ServiceRunningState state_;
 
@@ -2547,7 +2570,10 @@ private:
 
     std::shared_ptr<AbilityDebugDeal> abilityDebugDeal_;
     std::shared_ptr<AppExitReasonHelper> appExitReasonHelper_;
-
+    int rFd_ = -1;
+    int wFd_ = -1;
+    std::shared_ptr<int> ptrRFd_ = std::make_shared<int>(-1);
+    
     ffrt::mutex globalLock_;
     ffrt::mutex bgtaskObserverMutex_;
     ffrt::mutex abilityTokenLock_;
