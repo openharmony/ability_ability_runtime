@@ -48,7 +48,8 @@ public:
 
     void OnDestroy() const override;
 
-    bool OnPrepareTerminate(int &prepareTermination) const override;
+    bool OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo,
+        bool &isAsync, int &prepareTermination) const override;
 
     std::string OnAcceptWant(const AAFwk::Want &want) override;
 
@@ -76,6 +77,22 @@ private:
     std::unique_ptr<NativeReference> LoadJsSrcEntry(const std::string &srcEntry);
 
     bool LoadJsStartupConfig(const std::string &srcEntry);
+
+    struct PrepareTerminateParam {
+        napi_env env;
+        napi_value obj;
+        napi_value asyncFunc;
+        napi_value syncFunc;
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo;
+    };
+    bool OnPrepareTerminateInner(PrepareTerminateParam param, bool &isAsync, int &prepareTermination) const;
+
+    bool CallOnPrepareTerminate(napi_env env, napi_value obj, napi_value methodOnPrepareTerminate,
+        int &prepareTermination) const;
+
+    bool CallOnPrepareTerminateAsync(napi_env env, napi_value obj,
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo,
+        napi_value methodOnPrepareTerminateAsync, bool &isAsync) const;
 
     int32_t RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo);
 

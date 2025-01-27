@@ -379,21 +379,17 @@ bool UIAbilityThread::SchedulePrepareTerminateAbility()
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityHandler_");
         return false;
     }
-    if (getpid() == gettid()) {
-        bool ret = abilityImpl_->PrepareTerminateAbility();
-        TAG_LOGI(AAFwkTag::UIABILITY, "ret: %{public}d", ret);
-        return ret;
-    }
     isPrepareTerminateAbilityDone_.store(false);
     wptr<UIAbilityThread> weak = this;
-    auto task = [weak]() {
+    std::shared_ptr<bool> prepareTerminatePtr = std::make_shared<bool>(false);
+    auto task = [weak, prepareTerminatePtr]() {
         TAG_LOGI(AAFwkTag::UIABILITY, "prepare terminate task");
         auto abilityThread = weak.promote();
         if (abilityThread == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilityThread");
             return;
         }
-        abilityThread->HandlePrepareTermianteAbility();
+        abilityThread->HandlePrepareTermianteAbility(prepareTerminatePtr);
     };
     bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:PrepareTerminateAbility");
     if (!ret) {
@@ -646,17 +642,35 @@ void UIAbilityThread::OnExecuteIntent(const Want &want)
     abilityHandler_->PostTask(task, "UIAbilityThread:OnExecuteIntent");
 }
 
-void UIAbilityThread::HandlePrepareTermianteAbility()
+void UIAbilityThread::HandlePrepareTermianteAbility(std::shared_ptr<bool> prepareTerminatePtr)
 {
+    if (prepareTerminatePtr == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null prepareTerminatePtr");
+        return;
+    }
+    wptr<UIAbilityThread> weak = this;
+    auto callback = [weak] (bool prepareTermination) {
+        auto abilityThread = weak.promote();
+        if (abilityThread == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null AbilityThread");
+            return;
+        }
+        TAG_LOGI(AAFwkTag::UIABILITY, "in callback, prepareTermination=%{public}d", prepareTermination);
+        abilityThread->isPrepareTerminate_ = prepareTermination;
+        abilityThread->isPrepareTerminateAbilityDone_.store(true);
+        abilityThread->cv_.notify_all();
+    };
     std::unique_lock<std::mutex> lock(mutex_);
     if (abilityImpl_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
         return;
     }
-    isPrepareTerminate_ = abilityImpl_->PrepareTerminateAbility();
-    TAG_LOGI(AAFwkTag::UIABILITY, "end ret: %{public}d", isPrepareTerminate_);
-    isPrepareTerminateAbilityDone_.store(true);
-    cv_.notify_all();
+    bool isAsync = false;
+    abilityImpl_->PrepareTerminateAbility(callback, isAsync, *prepareTerminatePtr);
+    if (!isAsync) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "sync call");
+        callback(*prepareTerminatePtr);
+    }
 }
 #ifdef SUPPORT_SCREEN
 int UIAbilityThread::CreateModalUIExtension(const Want &want)
