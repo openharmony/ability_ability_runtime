@@ -1648,18 +1648,6 @@ HWTEST_F(AbilityManagerClientBranchTest, ReportDrawnCompleted_0200, TestSize.Lev
     EXPECT_EQ(result, ERR_OK);
 }
 
-/**
- * @tc.number: GetElementNameByToken_0100
- * @tc.name: GetElementNameByToken
- * @tc.desc: Token is nullptr, empty element name is returned
- */
-HWTEST_F(AbilityManagerClientBranchTest, GetElementNameByToken_0100, TestSize.Level1)
-{
-    sptr<IRemoteObject> token = nullptr;
-    ElementName element = {};
-    auto result = AbilityManagerClient::GetInstance()->GetElementNameByToken(token);
-    EXPECT_EQ(result, element);
-}
 
 /**
  * @tc.name: AbilityManagerClient_StartAbilityByUIContentSession_0100
