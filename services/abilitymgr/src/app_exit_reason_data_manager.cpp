@@ -383,7 +383,7 @@ int32_t AppExitReasonDataManager::DeleteAbilityRecoverInfo(
     DistributedKv::Value value;
     DistributedKv::Status status = kvStorePtr_->Get(key, value);
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "DeleteAbilityRecoverInfo get error: %{public}d", status);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed:%{public}d", status);
         return ERR_INVALID_VALUE;
     }
 

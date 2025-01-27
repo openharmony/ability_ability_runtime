@@ -51,7 +51,7 @@ bool CrowdTestInterceptor::CheckCrowdtest(const Want &want, int32_t userId)
     // get crowdtest status and time
     AppExecFwk::ApplicationInfo appInfo;
     if (!StartAbilityUtils::GetApplicationInfo(want.GetBundle(), userId, appInfo)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to get application info.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetAppInfo failed");
         return false;
     }
 
@@ -59,7 +59,7 @@ bool CrowdTestInterceptor::CheckCrowdtest(const Want &want, int32_t userId)
     int64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
     if (appCrowdtestDeadline > 0 && appCrowdtestDeadline < now) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "The application is expired, expired time is %{public}s",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "expired time: %{public}s",
             std::to_string(appCrowdtestDeadline).c_str());
         return true;
     }

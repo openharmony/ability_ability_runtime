@@ -87,7 +87,7 @@ bool ControlInterceptor::CheckControl(const Want &want, int32_t userId,
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "GetAppRunningControlRule");
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     if (identity == "") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get identity failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getId fail");
     }
     auto ret = appControlMgr->GetAppRunningControlRule(bundleName, userId, controlRule);
     if (ret == ERR_BUNDLE_MANAGER_PERMISSION_DENIED) {

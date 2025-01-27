@@ -657,7 +657,7 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
     ConnectListType connectRecordList;
     GetConnectRecordListFromMap(connect, connectRecordList);
     if (connectRecordList.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Can't find the connect list from connect map by callback.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "recordList empty");
         return CONNECTION_NOT_EXIST;
     }
 
@@ -676,7 +676,7 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
             if (connectRecord->GetCallerTokenId() != IPCSkeleton::GetCallingTokenID() &&
                 static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID() != IPCSkeleton::GetCallingTokenID())) {
                 TAG_LOGW(
-                    AAFwkTag::ABILITYMGR, "The caller is inconsistent with the caller stored in the connectRecord.");
+                    AAFwkTag::ABILITYMGR, "inconsistent caller");
                 continue;
             }
 
@@ -687,7 +687,7 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
             }
 
             if (result != ERR_OK) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "Disconnect ability fail , ret = %{public}d.", result);
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "fail , ret = %{public}d.", result);
                 break;
             } else {
                 EventInfo eventInfo = BuildEventInfo(abilityRecord);
@@ -1046,9 +1046,9 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
             abilityRecord->IsAbilityState(AbilityState::BACKGROUNDING))) {
             // uiextension ability support connect and start, so the ability state maybe others
             TAG_LOGI(
-                AAFwkTag::ABILITYMGR, "Disconnect when ability state is %{public}d", abilityRecord->GetAbilityState());
+                AAFwkTag::ABILITYMGR, "Disconnect when ability state: %{public}d", abilityRecord->GetAbilityState());
         } else {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "The service ability state is not active ,state: %{public}d",
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "ability not active, state: %{public}d",
                 abilityRecord->GetAbilityState());
             return INVALID_CONNECTION_STATE;
         }
@@ -1063,7 +1063,7 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
     }
 
     std::string element = abilityRecord->GetURI();
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ScheduleDisconnectAbilityDoneLocked called, service:%{public}s.",
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "schedule disconnect %{public}s.",
         element.c_str());
 
     // complete disconnect and remove record from conn map
@@ -1071,10 +1071,9 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
     abilityRecord->RemoveConnectRecordFromList(connect);
     if (abilityRecord->IsConnectListEmpty() && abilityRecord->GetStartId() == 0) {
         if (IsUIExtensionAbility(abilityRecord) && CheckUIExtensionAbilitySessionExist(abilityRecord)) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "There exist ui extension component, don't terminate when disconnect.");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "don't terminate uiservice");
         } else {
-            TAG_LOGI(AAFwkTag::ABILITYMGR,
-                "Service ability has no any connection, and not started, need terminate or cache.");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "need terminate or cache");
             TerminateOrCacheAbility(abilityRecord);
         }
     }
@@ -2872,7 +2871,7 @@ void AbilityConnectManager::HandleProcessFrozen(const std::vector<int32_t> &pidL
         TAG_LOGE(AAFwkTag::ABILITYMGR, "taskHandler null");
         return;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleProcessFrozen: %{public}d", uid);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "uid:%{public}d", uid);
     std::unordered_set<int32_t> pidSet(pidList.begin(), pidList.end());
     std::lock_guard lock(serviceMapMutex_);
     auto weakThis = weak_from_this();

@@ -2508,9 +2508,9 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
 void AbilityManagerService::ReportAbilityAssociatedStartInfoToRSS(
     const AppExecFwk::AbilityInfo &abilityInfo, int64_t type, const sptr<IRemoteObject> &callerToken)
 {
-    CHECK_POINTER_LOG(callerToken, "associated start caller token is nullptr");
+    CHECK_POINTER_LOG(callerToken, "null callerToken");
     auto callerAbility = Token::GetAbilityRecordByToken(callerToken);
-    CHECK_POINTER_LOG(callerAbility, "associated start caller ability is nullptr");
+    CHECK_POINTER_LOG(callerAbility, "null callerAbility");
     int32_t callerUid = callerAbility->GetUid();
     int32_t callerPid = callerAbility->GetPid();
     ResSchedUtil::GetInstance().ReportAbilityAssociatedStartInfoToRSS(abilityInfo, type, callerUid, callerPid);
@@ -2889,7 +2889,7 @@ void AbilityManagerService::SetAutoFillElementName(const sptr<SessionInfo> &exte
     } else if (extensionSessionInfo->want.GetStringParam(UIEXTENSION_TYPE_KEY) == AUTO_FILL_SMART_TPYE) {
         SplitStr(KEY_SMART_AUTO_FILL_ABILITY, "/", argList);
     } else {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "It is not autofill type.");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "not autofill");
         return;
     }
 
@@ -3772,7 +3772,7 @@ int AbilityManagerService::ConnectAbilityCommon(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "Connect ability called, element uri: %{public}s.", want.GetElement().GetURI().c_str());
+        "elementuri: %{public}s.", want.GetElement().GetURI().c_str());
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
     if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE && IsCrossUserCall(userId)) {
@@ -4569,7 +4569,7 @@ int AbilityManagerService::GetPendingWantUserId(const sptr<IWantSender> &target)
 
 std::string AbilityManagerService::GetPendingWantBundleName(const sptr<IWantSender> &target)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Get pending want bundle name.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     AbilityManagerXCollie abilityManagerXCollie("AbilityManagerService::GetPendingWantBundleName");
     auto pendingWantManager = GetCurrentPendingWantManager();
     CHECK_POINTER_AND_RETURN(pendingWantManager, "");
@@ -5751,7 +5751,7 @@ int AbilityManagerService::ScheduleConnectAbilityDone(
 int AbilityManagerService::ScheduleDisconnectAbilityDone(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Schedule disconnect ability done.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     if (!VerificationAllToken(token)) {
         return ERR_INVALID_VALUE;
     }
@@ -8774,7 +8774,7 @@ ErrCode AbilityManagerService::ProcessMultiParam(std::vector<std::string>& argsS
             cmd.append(" ");
         }
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s, isClient:%{public}d, userID is : %{public}d, cmd is : %{public}s",
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s, isClient:%{public}d, userID:%{public}d, cmd:%{public}s",
         __func__, isClient, userID, cmd.c_str());
 
     std::vector<std::string> dumpResults;
@@ -11541,7 +11541,7 @@ void AbilityManagerService::GetRunningMultiAppIndex(const std::string &bundleNam
     }
     auto ret = IN_PROCESS_CALL(appMgr->GetRunningMultiAppInfoByBundleName(bundleName, runningMultiAppInfo));
     if (ret != ERR_OK) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "GetRunningMultiAppInfo failed bundleName = %{public}s",
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "failed bundleName = %{public}s",
             bundleName.c_str());
     }
     for (auto &item : runningMultiAppInfo.runningAppClones) {
