@@ -688,6 +688,13 @@ bool UIAbility::OnPrepareTerminate()
     return false;
 }
 
+void UIAbility::OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo,
+    bool &isAsync, bool &prepareTermination)
+{
+    TAG_LOGI(AAFwkTag::UIABILITY, "called");
+    return;
+}
+
 const sptr<Rosen::Window> UIAbility::GetWindow()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");

@@ -52,7 +52,8 @@ void AbilityStage::OnCreate(const AAFwk::Want &want) const
 void AbilityStage::OnDestroy() const
 {}
 
-bool AbilityStage::OnPrepareTerminate(int &prepareTermination) const
+bool AbilityStage::OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo,
+    bool &isAsync, int &prepareTermination) const
 {
     return false;
 }

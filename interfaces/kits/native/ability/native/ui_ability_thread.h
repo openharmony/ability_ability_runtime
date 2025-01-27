@@ -172,7 +172,7 @@ private:
     void HandleAbilityTransaction(const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo,
         sptr<AAFwk::SessionInfo> sessionInfo = nullptr);
     void HandleShareData(const int32_t &requestCode);
-    void HandlePrepareTermianteAbility();
+    void HandlePrepareTermianteAbility(std::shared_ptr<bool> prepareTerminatePtr);
     void HandleUpdateConfiguration(const AppExecFwk::Configuration &config);
     void AddLifecycleEvent(uint32_t state, std::string &methodName) const;
 
