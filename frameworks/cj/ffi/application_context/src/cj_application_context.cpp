@@ -31,6 +31,7 @@ using namespace OHOS::AbilityRuntime;
 
 std::vector<std::shared_ptr<CjAbilityLifecycleCallback>> CJApplicationContext::callbacks_;
 CJApplicationContext* CJApplicationContext::cjApplicationContext_ = nullptr;
+std::mutex CJApplicationContext::contexMutex_;
 
 CJApplicationContext* CJApplicationContext::GetInstance()
 {
@@ -40,10 +41,12 @@ CJApplicationContext* CJApplicationContext::GetInstance()
 CJApplicationContext* CJApplicationContext::GetCJApplicationContext(
     std::weak_ptr<AbilityRuntime::ApplicationContext> &&applicationContext)
 {
-    if (cjApplicationContext_) {
-        return cjApplicationContext_;
+    if (cjApplicationContext_ == nullptr) {
+        std::lock_guard<std::mutex> lock(contexMutex_);
+        if (cjApplicationContext_ == nullptr) {
+            cjApplicationContext_ = FFIData::Create<CJApplicationContext>(applicationContext);
+        }
     }
-    cjApplicationContext_ = FFIData::Create<CJApplicationContext>(applicationContext);
     return cjApplicationContext_;
 }
 

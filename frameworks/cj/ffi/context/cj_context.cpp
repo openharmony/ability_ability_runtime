@@ -22,6 +22,7 @@
 #include "cj_ability_runtime_error.h"
 #include "bundle_manager_convert.h"
 #include "hilog_tag_wrapper.h"
+#include "js_context_utils.h"
 
 namespace OHOS {
 namespace FfiContext {
@@ -229,6 +230,59 @@ CJ_EXPORT int64_t FfiContextCreateModuleContext(int64_t id, int32_t type, char* 
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         return -1;
     }
+    return cjContext->GetID();
+}
+
+CJ_EXPORT napi_value FfiConvertBaseContext2Napi(napi_env env, int64_t id)
+{
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
+    auto cjContext = FFIData::GetData<CJContext>(id);
+    if (cjContext == nullptr || cjContext->GetContext() == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "cj context null ptr");
+        return undefined;
+    }
+
+    napi_value result = CreateJsBaseContext(env, cjContext->GetContext());
+    if (result == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null object");
+        return undefined;
+    }
+
+    napi_value falseValue = nullptr;
+    napi_get_boolean((napi_env)env, true, &falseValue);
+    napi_set_named_property((napi_env)env, result, "stageMode", falseValue);
+
+    return result;
+}
+
+CJ_EXPORT int64_t FfiCreateBaseContextFromNapi(napi_env env, napi_value baseContext)
+{
+    if (env == nullptr || baseContext == nullptr) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    napi_valuetype type;
+    if (napi_typeof(env, baseContext, &type) || type != napi_object) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    std::weak_ptr<Context>* context = nullptr;
+    napi_status status = napi_unwrap(env, baseContext, reinterpret_cast<void**>(&context));
+    if (status != napi_ok) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    if (context == nullptr || (*context).lock() == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    auto cjContext = FFI::FFIData::Create<CJContext>((*context).lock());
+    if (cjContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cjContext");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
     return cjContext->GetID();
 }
 }
