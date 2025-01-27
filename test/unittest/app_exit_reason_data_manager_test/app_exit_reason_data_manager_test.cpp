@@ -113,8 +113,23 @@ HWTEST_F(
     extensionList.push_back("testEntryUIExtAbility");
     AAFwk::ExitReason exitReason = { AAFwk::REASON_JS_ERROR, "Js Error." };
     auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetUIExtensionAbilityExitReason(
-        bundleName, extensionList, exitReason, {}, false);
+        bundleName, extensionList, exitReason);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AppExitReasonDataManager_GetUIExtensionAbilityExitReason_001
+ * @tc.desc: GetUIExtensionAbilityExitReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    AppExitReasonDataManagerTest, AppExitReasonDataManager_GetUIExtensionAbilityExitReason_001, TestSize.Level1)
+{
+    std::string keyEx = "com.test.demotestnoEntryUIExtAbility";
+    AAFwk::ExitReason exitReason = { AAFwk::REASON_UNKNOWN, "" };
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetUIExtensionAbilityExitReason(
+        keyEx, exitReason);
+    EXPECT_EQ(result, false);
 }
 
 /**

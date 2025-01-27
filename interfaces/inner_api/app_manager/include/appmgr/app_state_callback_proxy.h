@@ -76,10 +76,6 @@ public:
      */
     virtual void NotifyAppPreCache(int32_t pid, int32_t userId) override;
 
-    virtual void OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
-        const std::string &bundleName, const std::vector<std::string> &abilityNames,
-        const std::vector<std::string> &uiExtensionNames) override;
-
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     static inline BrokerDelegator<AppStateCallbackProxy> delegator_;
