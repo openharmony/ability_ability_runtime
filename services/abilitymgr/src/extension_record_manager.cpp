@@ -578,7 +578,7 @@ std::shared_ptr<AAFwk::AbilityRecord> ExtensionRecordManager::GetUIExtensionRoot
     }
 
     if (rootCallerToken == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get root caller record failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get record failed");
         return nullptr;
     }
 

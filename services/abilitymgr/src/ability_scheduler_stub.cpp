@@ -740,7 +740,7 @@ int AbilitySchedulerStub::UpdateSessionTokenInner(MessageParcel &data, MessagePa
 
 void AbilitySchedulerRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "recv AbilitySchedulerRecipient death notice");
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "call");
 
     if (handler_) {
         handler_(remote);
