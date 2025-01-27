@@ -455,12 +455,6 @@ public:
         return {};
     }
 
-    virtual AppExecFwk::ElementName GetElementNameByToken(sptr<IRemoteObject> token,
-        bool isNeedLocalDeviceId = true)
-    {
-        return {};
-    }
-
     /**
      * TerminateAbility, terminate the special ability.
      *

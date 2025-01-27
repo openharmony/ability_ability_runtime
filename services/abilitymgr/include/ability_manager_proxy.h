@@ -600,16 +600,6 @@ public:
     virtual AppExecFwk::ElementName GetTopAbility(bool isNeedLocalDeviceId = true) override;
 
     /**
-     * Get element name by token.
-     *
-     * @param token ability's token.
-     * @param isNeedLocalDeviceId is need local device id.
-     * @return Returns front desk focus ability elementName by token.
-     */
-    virtual AppExecFwk::ElementName GetElementNameByToken(sptr<IRemoteObject> token,
-        bool isNeedLocalDeviceId = true) override;
-
-    /**
      * Kill the process immediately.
      *
      * @param bundleName.
