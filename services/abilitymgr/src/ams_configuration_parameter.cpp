@@ -177,6 +177,7 @@ void AmsConfigurationParameter::LoadUIExtensionPickerConfig(const std::string &f
 
 int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
 {
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
     int ret[2] = {0};
     if (filePath.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "empty file path");
@@ -217,7 +218,6 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
     LoadSystemConfiguration(amsJson);
     LoadBackToCallerConfig(amsJson);
     LoadSupportSCBCrashRebootConfig(amsJson);
-    LoadSupportAAKillWithReasonConfig(amsJson);
     SetPickerJsonObject(amsJson);
     LoadResidentWhiteListConfig(amsJson);
     amsJson.clear();
@@ -286,26 +286,9 @@ int32_t AmsConfigurationParameter::LoadBackToCallerConfig(nlohmann::json& Object
     return READ_FAIL;
 }
 
-int32_t AmsConfigurationParameter::LoadSupportAAKillWithReasonConfig(nlohmann::json& Object)
-{
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "load SupportAAKillWithReason config");
-    if (Object.contains(AmsConfig::SUPPORT_AA_KILL_WITH_REASON) &&
-        Object.at(AmsConfig::SUPPORT_AA_KILL_WITH_REASON).is_boolean()) {
-        supportAAKillWithReason_ = Object.at(AmsConfig::SUPPORT_AA_KILL_WITH_REASON).get<bool>();
-        return READ_OK;
-    }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "load SupportAAKillWithReason failed");
-    return READ_FAIL;
-}
-
 bool AmsConfigurationParameter::IsSupportBackToCaller() const
 {
     return supportBackToCaller_;
-}
-
-bool AmsConfigurationParameter::IsSupportAAKillWithReason() const
-{
-    return supportAAKillWithReason_;
 }
 
 int32_t AmsConfigurationParameter::LoadSupportSCBCrashRebootConfig(nlohmann::json& Object)

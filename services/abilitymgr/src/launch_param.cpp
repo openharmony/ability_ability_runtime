@@ -35,13 +35,6 @@ bool LaunchParam::ReadFromParcel(Parcel &parcel)
     lastExitReason = static_cast<LastExitReason>(reason);
 
     lastExitMessage = Str16ToStr8(parcel.ReadString16());
-
-    std::unique_ptr<LastExitDetailInfo> detailInfo(parcel.ReadParcelable<LastExitDetailInfo>());
-    if (detailInfo == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "detailInfo null");
-    }
-    lastExitDetailInfo = *detailInfo;
-
     return true;
 }
 
@@ -75,11 +68,6 @@ bool LaunchParam::Marshalling(Parcel &parcel) const
     }
     if (!parcel.WriteString16(Str8ToStr16(lastExitMessage))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write lastExitMessage failed");
-        return false;
-    }
-    // write lastExitDetailInfo
-    if (!parcel.WriteParcelable(&lastExitDetailInfo)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write lastExitDetailInfo failed");
         return false;
     }
     return true;
