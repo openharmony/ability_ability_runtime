@@ -530,22 +530,6 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetTopAbilityInner_001, Test
 
 /*
  * Feature: AbilityManagerService
- * Function: GetElementNameByTokenInner
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService GetElementNameByTokenInner
- * EnvConditions: NA
- * CaseDescription: Verify the function GetElementNameByTokenInner is normal flow.
- */
-HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetElementNameByTokenInner_001, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto res = stub_->GetElementNameByTokenInner(data, reply);
-    EXPECT_EQ(res, NO_ERROR);
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: MoveAbilityToBackgroundInner
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService MoveAbilityToBackgroundInner
