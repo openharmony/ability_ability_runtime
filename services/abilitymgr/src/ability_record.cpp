@@ -126,7 +126,7 @@ std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemote
 
     std::string descriptor = Str16ToStr8(token->GetObjectDescriptor());
     if (descriptor != "ohos.aafwk.AbilityToken") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Input token is not an AbilityToken, token->GetObjectDescriptor(): %{public}s",
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "descriptor:%{public}s",
             descriptor.c_str());
         return nullptr;
     }
@@ -134,7 +134,7 @@ std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemote
     // Double check if token is valid
     sptr<IAbilityToken> theToken = iface_cast<IAbilityToken>(token);
     if (!theToken) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Input token iface_cast error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Input error.");
         return nullptr;
     }
     std::u16string castDescriptor = theToken->GetDescriptor();
@@ -1877,17 +1877,17 @@ void AbilityRecord::SaveResultToCallers(const int resultCode, const Want *result
 {
     auto callerRecordList = GetCallerRecordList();
     if (callerRecordList.empty()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "callerRecordList is empty.");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "callerRecordList empty.");
         return;
     }
     auto latestCaller = callerRecordList.back();
     for (auto caller : callerRecordList) {
         if (caller == nullptr) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "Caller record is nullptr.");
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "null caller");
             continue;
         }
         if (caller == latestCaller) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "Caller record is the latest.");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "latestCaller");
             SaveResult(resultCode, resultWant, caller);
             continue;
         }
@@ -2045,7 +2045,7 @@ void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int 
     std::string srcAbilityId, uint32_t callingTokenId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Add caller record, callingTokenId is %{public}u", callingTokenId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call, callingTokenId: %{public}u", callingTokenId);
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (abilityRecord == nullptr) {
         RecordSaCallerInfo(want);
