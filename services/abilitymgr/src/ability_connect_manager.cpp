@@ -60,11 +60,13 @@ const std::string SEPARATOR = ":";
 const int LOAD_TIMEOUT_MULTIPLE = 150;
 const int CONNECT_TIMEOUT_MULTIPLE = 45;
 const int COMMAND_TIMEOUT_MULTIPLE = 75;
+const int COMMAND_TIMEOUT_MULTIPLE_NEW = 75;
 const int COMMAND_WINDOW_TIMEOUT_MULTIPLE = 75;
 #else
 const int LOAD_TIMEOUT_MULTIPLE = 10;
 const int CONNECT_TIMEOUT_MULTIPLE = 10;
 const int COMMAND_TIMEOUT_MULTIPLE = 5;
+const int COMMAND_TIMEOUT_MULTIPLE_NEW = 21;
 const int COMMAND_WINDOW_TIMEOUT_MULTIPLE = 5;
 #endif
 const int32_t AUTO_DISCONNECT_INFINITY = -1;
@@ -1697,13 +1699,16 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
 
 void AbilityConnectManager::HandleCommandTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleCommandTimeoutTask start");
     CHECK_POINTER(abilityRecord);
     if (abilityRecord->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Handle root launcher command timeout.");
         // terminate the timeout root launcher.
         DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
+        return;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "HandleCommandTimeoutTask end");
+    CleanActivatingTimeoutAbility(abilityRecord);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleCommandTimeoutTask end");
 }
 
 void AbilityConnectManager::HandleConnectTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord)
@@ -1910,8 +1915,11 @@ void AbilityConnectManager::CommandAbility(const std::shared_ptr<AbilityRecord> 
                 abilityRecord->GetAbilityInfo().name.c_str());
             connectManager->HandleCommandTimeoutTask(abilityRecord);
         };
-        int commandTimeout =
-            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * COMMAND_TIMEOUT_MULTIPLE;
+        bool useOldMultiple = abilityRecord->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME ||
+            abilityRecord->GetAbilityInfo().name == AbilityConfig::CALLUI_ABILITY_NAME;
+        uint32_t timeoutMultiple = useOldMultiple ? COMMAND_TIMEOUT_MULTIPLE : COMMAND_TIMEOUT_MULTIPLE_NEW;
+        uint32_t commandTimeout =
+            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * timeoutMultiple;
         taskHandler_->SubmitTask(timeoutTask, taskName, commandTimeout);
         // scheduling command ability
         abilityRecord->CommandAbility();
@@ -2219,20 +2227,40 @@ void AbilityConnectManager::HandleInactiveTimeout(const std::shared_ptr<AbilityR
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Handle root launcher inactive timeout.");
         // terminate the timeout root launcher.
         DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(ability->GetToken());
+        return;
     }
-    if (ability->GetAbilityInfo().name == AbilityConfig::CALLUI_ABILITY_NAME && ability->GetStartId() == 0) {
-        HandleConnectTimeoutTask(ability);
-        EventInfo eventInfo;
-        eventInfo.userId = userId_;
-        eventInfo.bundleName = ability->GetAbilityInfo().bundleName;
-        eventInfo.moduleName = ability->GetAbilityInfo().moduleName;
-        eventInfo.abilityName = ability->GetAbilityInfo().name;
-        eventInfo.abilityName = ability->GetAbilityInfo().name;
-        eventInfo.errCode = CONNECTION_TIMEOUT;
-        EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
+    CleanActivatingTimeoutAbility(ability);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleInactiveTimeout end");
+}
+
+void AbilityConnectManager::CleanActivatingTimeoutAbility(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    CHECK_POINTER(abilityRecord);
+    if (abilityRecord->IsAbilityState(AbilityState::ACTIVE)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "ability is active, no need handle.");
+        return;
+    }
+    if (IsUIExtensionAbility(abilityRecord)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "UIExt, no need handle.");
+        return;
+    }
+    auto connectList = abilityRecord->GetConnectRecordList();
+    std::lock_guard guard(serialMutex_);
+    for (const auto &connectRecord : connectList) {
+        CHECK_POINTER_CONTINUE(connectRecord);
+        connectRecord->CompleteDisconnect(ERR_OK, false, true);
+        abilityRecord->RemoveConnectRecordFromList(connectRecord);
+        RemoveConnectionRecordFromMap(connectRecord);
     }
 
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleInactiveTimeout end");
+    TerminateRecord(abilityRecord);
+    if (!IsAbilityNeedKeepAlive(abilityRecord)) {
+        return;
+    }
+    if (!abilityRecord->IsSceneBoard() ||
+        DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId() == userId_) {
+        RestartAbility(abilityRecord, userId_);
+    }
 }
 
 bool AbilityConnectManager::IsAbilityNeedKeepAlive(const std::shared_ptr<AbilityRecord> &abilityRecord)
