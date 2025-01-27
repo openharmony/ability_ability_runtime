@@ -84,7 +84,7 @@ HWTEST_F(AppModuleCheckTest, CheckModuleLoadable_001, TestSize.Level1)
     };
     appModuleChecker_ = std::make_shared<AppModuleChecker>(EXTENSION_TYPE, std::move(blocklist));
     std::unique_ptr<ApiAllowListChecker> apiAllowListChecker(nullptr);
-    bool ret = appModuleChecker_->CheckModuleLoadable("module4", apiAllowListChecker);
+    bool ret = appModuleChecker_->CheckModuleLoadable("module4", apiAllowListChecker, false);
     EXPECT_TRUE(ret);
     GTEST_LOG_(INFO) << "CheckModuleLoadable_001 end";
 }
@@ -103,7 +103,7 @@ HWTEST_F(AppModuleCheckTest, CheckModuleLoadable_002, TestSize.Level1)
     };
     appModuleChecker_ = std::make_shared<AppModuleChecker>(EXTENSION_TYPE1, std::move(blocklist));
     std::unique_ptr<ApiAllowListChecker> apiAllowListChecker(nullptr);
-    bool ret = appModuleChecker_->CheckModuleLoadable("module4", apiAllowListChecker);
+    bool ret = appModuleChecker_->CheckModuleLoadable("module4", apiAllowListChecker, false);
     EXPECT_TRUE(ret);
     GTEST_LOG_(INFO) << "CheckModuleLoadable_002 end";
 }
@@ -122,7 +122,7 @@ HWTEST_F(AppModuleCheckTest, CheckModuleLoadable_003, TestSize.Level1)
     };
     appModuleChecker_ = std::make_shared<AppModuleChecker>(EXTENSION_TYPE1, std::move(blocklist));
     std::unique_ptr<ApiAllowListChecker> apiAllowListChecker(nullptr);
-    bool ret = appModuleChecker_->CheckModuleLoadable("module2", apiAllowListChecker);
+    bool ret = appModuleChecker_->CheckModuleLoadable("module2", apiAllowListChecker, false);
     EXPECT_FALSE(ret);
     GTEST_LOG_(INFO) << "CheckModuleLoadable_003 end";
 }
