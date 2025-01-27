@@ -614,14 +614,13 @@ void AppRunningRecord::AddModules(
     }
 
     for (auto &iter : moduleInfos) {
-        AddModule(appInfo, nullptr, nullptr, iter, nullptr, 0, 0);
+        AddModule(appInfo, nullptr, nullptr, iter, nullptr, 0);
     }
 }
 
 void AppRunningRecord::AddModule(std::shared_ptr<ApplicationInfo> appInfo,
     std::shared_ptr<AbilityInfo> abilityInfo, sptr<IRemoteObject> token,
-    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId,
-    int32_t persistentId)
+    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 
@@ -656,7 +655,7 @@ void AppRunningRecord::AddModule(std::shared_ptr<ApplicationInfo> appInfo,
         TAG_LOGE(AAFwkTag::APPMGR, "null abilityInfo or token");
         return;
     }
-    moduleRecord->AddAbility(token, abilityInfo, want, abilityRecordId, persistentId);
+    moduleRecord->AddAbility(token, abilityInfo, want, abilityRecordId);
 
     return;
 }
