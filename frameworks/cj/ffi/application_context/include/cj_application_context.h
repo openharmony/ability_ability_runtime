@@ -110,6 +110,7 @@ private:
     std::recursive_mutex callbackLock_;
     static std::vector<std::shared_ptr<CjAbilityLifecycleCallback>> callbacks_;
     static CJApplicationContext* cjApplicationContext_;
+    static std::mutex contexMutex_;
 };
 
 }
