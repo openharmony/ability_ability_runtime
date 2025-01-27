@@ -118,6 +118,7 @@ declare_args() {
   include_app_domain_verify = true
   ability_runtime_start_window_options_with_pixelmap = false
   ability_runtime_check_internet_permission = false
+  ability_runtime_media_library_enable = true
 
   if (!defined(global_parts_info) ||
       defined(global_parts_info.account_os_account)) {
@@ -204,5 +205,10 @@ declare_args() {
     app_mgr_service_hicollie_enable = true
   } else {
     app_mgr_service_hicollie_enable = false
+  }
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.multimedia_media_library)) {
+    ability_runtime_media_library_enable = false
   }
 }
