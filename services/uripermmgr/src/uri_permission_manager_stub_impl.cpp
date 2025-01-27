@@ -24,7 +24,9 @@
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#ifdef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
 #include "media_permission_manager.h"
+#endif // ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
 #include "parameter.h"
 #include "permission_constants.h"
 #include "permission_verification.h"
@@ -45,6 +47,9 @@ constexpr uint32_t FLAG_WRITE_URI = Want::FLAG_AUTH_WRITE_URI_PERMISSION;
 constexpr uint32_t FLAG_READ_URI = Want::FLAG_AUTH_READ_URI_PERMISSION;
 constexpr const char* CLOUND_DOCS_URI_MARK = "?networkid=";
 constexpr const char* FOUNDATION_PROCESS = "foundation";
+#ifndef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
+constexpr int32_t CAPABILITY_NOT_SUPPORT = 801;
+#endif // ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
 }
 
 bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId)
@@ -246,6 +251,7 @@ int32_t UriPermissionManagerStubImpl::GrantBatchMediaUriPermissionImpl(const std
     uint32_t flag, uint32_t callerTokenId, uint32_t targetTokenId, int32_t hideSensitiveType)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+#ifdef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
     if (mediaUris.empty()) {
         return INNER_ERR;
     }
@@ -257,6 +263,9 @@ int32_t UriPermissionManagerStubImpl::GrantBatchMediaUriPermissionImpl(const std
     }
     TAG_LOGD(AAFwkTag::URIPERMMGR, "Grant media uri permission success");
     return ERR_OK;
+#else
+    return CAPABILITY_NOT_SUPPORT;
+#endif // ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
 }
 
 int32_t UriPermissionManagerStubImpl::GrantBatchUriPermissionImpl(const std::vector<std::string> &uriVec,
@@ -476,12 +485,14 @@ std::vector<bool> UriPermissionManagerStubImpl::CheckUriPermission(TokenIdPermis
         // bundle uri
         result[i] = (authority == callerAlterableBundleName);
     }
+#ifdef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
     if (!mediaUris.empty()) {
         auto mediaUriResult = MediaPermissionManager::GetInstance().CheckUriPermission(mediaUris, tokenId, flag);
         for (size_t i = 0; i < mediaUriResult.size(); i++) {
             result[mediaUriIndexs[i]] = mediaUriResult[i];
         }
     }
+#endif // ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
     CheckProxyUriPermission(tokenIdPermission, uriVec, flag, result);
     return result;
 }
@@ -690,8 +701,12 @@ int32_t UriPermissionManagerStubImpl::DeleteShareFile(uint32_t targetTokenId, co
 int32_t UriPermissionManagerStubImpl::RevokeMediaUriPermissionManually(uint32_t callerTokenId, uint32_t targetTokenId,
     Uri &uri)
 {
+#ifdef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
     std::string uriStr = uri.ToString();
     return MediaPermissionManager::GetInstance().RevokeUriPermission(callerTokenId, targetTokenId, uriStr);
+#else
+    return CAPABILITY_NOT_SUPPORT;
+#endif // ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
 }
 
 template<typename T>
