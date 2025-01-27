@@ -230,15 +230,6 @@ void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abili
     callback->OnAppRemoteDied(abilityTokens);
 }
 
-void AppScheduler::OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
-    const std::string &bundleName, const std::vector<std::string> &abilityNames,
-    const std::vector<std::string> &uiExtensionNames)
-{
-    auto callback = callback_.lock();
-    CHECK_POINTER(callback);
-    callback->OnCacheExitInfo(accessTokenId, exitInfo, bundleName, abilityNames, uiExtensionNames);
-}
-
 void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
     auto callback = callback_.lock();

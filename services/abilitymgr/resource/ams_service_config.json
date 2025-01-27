@@ -15,6 +15,5 @@
         "system_orientation": "vertical"
     },
     "supportBackToCaller": true,
-    "supportSCBCrashReboot": true,
-    "supportAAKillWithReason": false
+    "supportSCBCrashReboot": true
 }

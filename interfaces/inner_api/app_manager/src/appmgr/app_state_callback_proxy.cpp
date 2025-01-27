@@ -195,46 +195,6 @@ void AppStateCallbackProxy::OnAppRemoteDied(const std::vector<sptr<IRemoteObject
     }
 }
 
-void AppStateCallbackProxy::OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
-    const std::string &bundleName, const std::vector<std::string> &abilityNames,
-    const std::vector<std::string> &uiExtensionNames)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
-        return;
-    }
-    if (!data.WriteUint32(accessTokenId)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "accessTokenId write failed");
-        return;
-    }
-    if (!data.WriteParcelable(&exitInfo)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "exitInfo write failed");
-        return;
-    }
-    if (!data.WriteString(bundleName)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "bundleName write failed");
-        return;
-    }
-    if (!data.WriteStringVector(abilityNames)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityNames write failed");
-        return;
-    }
-    if (!data.WriteStringVector(uiExtensionNames)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "uiExtensionNames write failed");
-        return;
-    }
-    auto ret = SendTransactCmd(
-        static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_CACHE_EXIT_INFO),
-        data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
-    }
-
-}
-
 void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
     MessageParcel data;

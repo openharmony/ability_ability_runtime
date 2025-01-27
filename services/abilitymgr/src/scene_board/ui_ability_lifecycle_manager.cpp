@@ -2315,17 +2315,13 @@ void UIAbilityLifecycleManager::SetLastExitReason(std::shared_ptr<AbilityRecord>
     ExitReason exitReason;
     bool isSetReason;
     auto accessTokenId = abilityRecord->GetAbilityInfo().applicationInfo.accessTokenId;
-    AppExecFwk::RunningProcessInfo processInfo;
-    int64_t time_stamp = 0;
-    bool withKillMsg = false;
     DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
-        abilityRecord->GetAbilityInfo().bundleName, accessTokenId, abilityName, isSetReason, exitReason,
-        processInfo, time_stamp, withKillMsg);
+        abilityRecord->GetAbilityInfo().bundleName, accessTokenId, abilityName, isSetReason, exitReason);
 
     if (isSetReason) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Set last exit reason, ability: %{public}s, reason: %{public}d.",
             abilityName.c_str(), exitReason.reason);
-        abilityRecord->SetLastExitReason(exitReason, processInfo, time_stamp, withKillMsg);
+        abilityRecord->SetLastExitReason(exitReason);
     }
 }
 
