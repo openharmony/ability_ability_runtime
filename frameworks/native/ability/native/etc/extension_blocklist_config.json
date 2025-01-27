@@ -373,6 +373,7 @@
             "telephony.radio",
             "telephony.sim",
             "telephony.sms",
+            "telephony.voipCall",
             "update",
             "userIAM.faceAuth",
             "userIAM.userAuth",
