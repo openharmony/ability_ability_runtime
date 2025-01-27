@@ -2296,7 +2296,7 @@ void UIAbilityLifecycleManager::Dump(std::vector<std::string> &info)
 void UIAbilityLifecycleManager::DumpMissionList(
     std::vector<std::string> &info, bool isClient, const std::string &args)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Call start.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Call");
     std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> sessionAbilityMapLocked;
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
