@@ -1516,23 +1516,31 @@ bool AppRunningRecord::IsStartSpecifiedAbility() const
     return specifiedRequestId_ != -1;
 }
 
-void AppRunningRecord::SchedulePrepareTerminate(int32_t &prepareTermination, bool &isExist)
+void AppRunningRecord::SchedulePrepareTerminate(const std::string &moduleName,
+    int32_t &prepareTermination, bool &isExist)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (appLifeCycleDeal_ == nullptr) {
         TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
         return;
     }
-    std::lock_guard<ffrt::mutex> hapModulesLock(hapModulesLock_);
-    for (const auto &iter : hapModules_) {
-        for (const auto &moduleRecord : iter.second) {
-            if (moduleRecord == nullptr) {
-                TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
-                continue;
+    bool found = false;
+    {
+        std::lock_guard<ffrt::mutex> hapModulesLock(hapModulesLock_);
+        for (const auto &iter : hapModules_) {
+            for (const auto &moduleRecord : iter.second) {
+                if (moduleRecord != nullptr && moduleName == moduleRecord->GetModuleName()) {
+                    found = true;
+                    break;
+                }
             }
-            appLifeCycleDeal_->SchedulePrepareTerminate(moduleRecord->GetModuleName(), prepareTermination, isExist);
         }
     }
+    if (!found) {
+        TAG_LOGE(AAFwkTag::APPMGR, "moduleName not exist");
+        return;
+    }
+    appLifeCycleDeal_->SchedulePrepareTerminate(moduleName, prepareTermination, isExist);
 }
 
 void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)

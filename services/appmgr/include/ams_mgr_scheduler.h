@@ -269,7 +269,8 @@ public:
      */
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) override;
 
-    virtual void PrepareTerminateApp(const pid_t pid, int32_t &prepareTermination, bool &isExist) override;
+    virtual void PrepareTerminateApp(const pid_t pid, const std::string &moduleName,
+        int32_t &prepareTermination, bool &isExist) override;
 
     /**
      * Start specified process.

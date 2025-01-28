@@ -685,7 +685,8 @@ void AmsMgrProxy::SetAbilityForegroundingFlagToAppRecord(const pid_t pid)
     }
 }
 
-void AmsMgrProxy::PrepareTerminateApp(const pid_t pid, int32_t &prepareTermination, bool &isExist)
+void AmsMgrProxy::PrepareTerminateApp(const pid_t pid, const std::string &moduleName,
+    int32_t &prepareTermination, bool &isExist)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -696,6 +697,10 @@ void AmsMgrProxy::PrepareTerminateApp(const pid_t pid, int32_t &prepareTerminati
     }
     if (!data.WriteInt32(pid)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write PrepareTerminateApp pid failed.");
+        return;
+    }
+    if (!data.WriteString(moduleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write PrepareTerminateApp moduleName failed.");
         return;
     }
     auto ret = SendTransactCmd(

@@ -4928,7 +4928,8 @@ void AppMgrServiceInner::ScheduleAcceptWantDone(
     }
 }
 
-void AppMgrServiceInner::SchedulePrepareTerminate(const pid_t pid, int32_t &prepareTermination, bool &isExist)
+void AppMgrServiceInner::SchedulePrepareTerminate(const pid_t pid, const std::string &moduleName,
+    int32_t &prepareTermination, bool &isExist)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto appRecord = GetAppRunningRecordByPid(pid);
@@ -4936,7 +4937,7 @@ void AppMgrServiceInner::SchedulePrepareTerminate(const pid_t pid, int32_t &prep
         TAG_LOGE(AAFwkTag::APPMGR, "get appRecord fail");
         return;
     }
-    appRecord->SchedulePrepareTerminate(prepareTermination, isExist);
+    appRecord->SchedulePrepareTerminate(moduleName, prepareTermination, isExist);
 }
 
 void AppMgrServiceInner::HandleStartSpecifiedAbilityTimeOut(std::shared_ptr<AppRunningRecord> appRecord)

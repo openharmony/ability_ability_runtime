@@ -2760,27 +2760,55 @@ int32_t UIAbilityLifecycleManager::DoCallerProcessAttachment(std::shared_ptr<Abi
     return statusBarDelegateManager->DoCallerProcessAttachment(abilityRecord);
 }
 
-std::vector<sptr<IRemoteObject>> UIAbilityLifecycleManager::PrepareTerminateAppAndGetRemaining(
-    int32_t pid, std::vector<sptr<IRemoteObject>> tokens)
+bool UIAbilityLifecycleManager::CheckPrepareTerminateTokens(const std::vector<sptr<IRemoteObject>> &tokens,
+    uint32_t &tokenId, std::map<std::string, std::vector<sptr<IRemoteObject>>> &tokensPerModuleName)
 {
     if (!AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not supported device");
+        return false;
+    }
+    if (tokens.empty()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "empty tokens");
+        return false;
+    }
+    for (auto token: tokens) {
+        auto abilityRecord = Token::GetAbilityRecordByToken(token);
+        if (abilityRecord == nullptr) {
+            continue;
+        }
+        tokenId = abilityRecord->GetApplicationInfo().accessTokenId;
+        auto moduleName = abilityRecord->GetAbilityInfo().moduleName;
+        if (tokensPerModuleName.find(moduleName) == tokensPerModuleName.end()) {
+            tokensPerModuleName[moduleName] = {};
+        }
+        tokensPerModuleName[moduleName].push_back(token);
+    }
+    if (tokenId == 0 || !AAFwk::PermissionVerification::GetInstance()->VerifyPrepareTerminatePermission(tokenId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid tokenId or no permission ohos.permission.PREPARE_APP_TERMINATE");
+        return false;
+    }
+    return true;
+}
+
+std::vector<sptr<IRemoteObject>> UIAbilityLifecycleManager::PrepareTerminateAppAndGetRemaining(
+    int32_t pid, const std::vector<sptr<IRemoteObject>> &tokens)
+{
+    uint32_t tokenId = 0;
+    std::map<std::string, std::vector<sptr<IRemoteObject>>> tokensPerModuleName;
+    if (!CheckPrepareTerminateTokens(tokens, tokenId, tokensPerModuleName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckPrepareTerminateTokens failed");
         return tokens;
     }
     std::vector<sptr<IRemoteObject>> remainingTokens;
-    for (const auto& token: tokens) {
-        auto abilityRecord = Token::GetAbilityRecordByToken(token);
-        if (!CheckPrepareTerminateEnable(abilityRecord)) {
-            remainingTokens.emplace_back(token);
-            continue;
-        }
+    for (const auto& [moduleName, _tokens] : tokensPerModuleName) {
         auto prepareTermination = std::make_shared<int32_t>(0);
         auto isExist = std::make_shared<bool>(false);
         // execute onPrepareTerminate until timeout
         auto promise = std::make_shared<std::promise<bool>>();
         auto future = promise->get_future();
-        auto task = [promise, pid, prepareTermination, isExist]() {
-            DelayedSingleton<AppScheduler>::GetInstance()->PrepareTerminateApp(pid, *prepareTermination, *isExist);
+        auto task = [promise, pid, _moduleName = moduleName, prepareTermination, isExist]() {
+            DelayedSingleton<AppScheduler>::GetInstance()->PrepareTerminateApp(pid, _moduleName,
+                *prepareTermination, *isExist);
             promise->set_value(true);
         };
         ffrt::submit(task);
@@ -2788,27 +2816,23 @@ std::vector<sptr<IRemoteObject>> UIAbilityLifecycleManager::PrepareTerminateAppA
             GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME));
         if (status == std::future_status::timeout) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareTermination timeout");
-            remainingTokens.emplace_back(token);
-            continue;
-        }
-        if (!future.get() || prepareTermination == nullptr || isExist == nullptr) {
+            remainingTokens.insert(remainingTokens.end(), _tokens.begin(), _tokens.end());
+        } else if (!future.get() || prepareTermination == nullptr || isExist == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "PrepareTerminateApp error");
-            remainingTokens.emplace_back(token);
-            continue;
-        }
-        if (!*isExist) {
+            remainingTokens.insert(remainingTokens.end(), _tokens.begin(), _tokens.end());
+        } else if (!*isExist) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareTermination is not exist");
-            remainingTokens.emplace_back(token);
-            continue;
-        }
-        if (static_cast<AppExecFwk::PrepareTermination>(*prepareTermination)
-            == AppExecFwk::PrepareTermination::CANCEL) {
+            remainingTokens.insert(remainingTokens.end(), _tokens.begin(), _tokens.end());
+        } else if (static_cast<AppExecFwk::PrepareTermination>(*prepareTermination) ==
+            AppExecFwk::PrepareTermination::CANCEL) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "PrepareTerminate cancel");
-            continue;
+        } else {
+            // Terminate immediately by default
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "PrepareTerminate immediately");
+            for (auto token: _tokens) {
+                TerminateSession(Token::GetAbilityRecordByToken(token));
+            }
         }
-        // Terminate immediately by default
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "PrepareTerminate immediately");
-        TerminateSession(Token::GetAbilityRecordByToken(token));
     }
     return remainingTokens;
 }
