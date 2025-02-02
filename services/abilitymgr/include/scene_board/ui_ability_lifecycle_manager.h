@@ -439,7 +439,7 @@ private:
      * @return Returns the tokens that still need to execute PrepareTerminate.
      */
     std::vector<sptr<IRemoteObject>> PrepareTerminateAppAndGetRemaining(
-        int32_t pid, std::vector<sptr<IRemoteObject>> tokens);
+        int32_t pid, const std::vector<sptr<IRemoteObject>> &tokens);
 
     bool GetContentAndTypeId(uint32_t msgId, std::string &msgContent, int &typeId) const;
 
@@ -486,6 +486,8 @@ private:
         const std::string &flag, const AAFwk::Want &want);
     std::shared_ptr<SpecifiedRequest> GetSpecifiedRequest(int32_t requestId);
     void PutSpecifiedFlag(int32_t requestId, const std::string &flag);
+    bool CheckPrepareTerminateTokens(const std::vector<sptr<IRemoteObject>> &tokens,
+        uint32_t &tokenId, std::map<std::string, std::vector<sptr<IRemoteObject>>> &tokensPerModuleName);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;

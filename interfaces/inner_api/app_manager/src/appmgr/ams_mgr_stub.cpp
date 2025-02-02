@@ -499,9 +499,10 @@ int32_t AmsMgrStub::HandlePrepareTerminateApp(MessageParcel &data, MessageParcel
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto pid = static_cast<pid_t>(data.ReadInt32());
+    auto moduleName = data.ReadString();
     int32_t prepareTermination = 0;
     bool isExist = false;
-    PrepareTerminateApp(pid, prepareTermination, isExist);
+    PrepareTerminateApp(pid, moduleName, prepareTermination, isExist);
     if (!reply.WriteInt32(prepareTermination)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write prepareTermination failed.");
         return ERR_INVALID_VALUE;

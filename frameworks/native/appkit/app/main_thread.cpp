@@ -3098,6 +3098,7 @@ void MainThread::SchedulePrepareTerminate(const std::string &moduleName,
         return appThread->isPrepareTerminateDone_.load();
     };
     std::unique_lock<std::mutex> lock(mutex_);
+    isPrepareTerminateDone_ = false;
     if (!cv_.wait_for(lock, std::chrono::milliseconds(AbilityRuntime::GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME),
         condition)) {
         TAG_LOGW(AAFwkTag::APPKIT, "wait timeout");
