@@ -491,6 +491,9 @@ int AbilityManagerStub::OnRemoteRequestInnerThirteenth(uint32_t code, MessagePar
     MessageParcel &reply, MessageOption &option)
 {
     AbilityManagerInterfaceCode interfaceCode = static_cast<AbilityManagerInterfaceCode>(code);
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_ELEMENT_NAME_BY_TOKEN) {
+        return GetElementNameByTokenInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::DUMP_ABILITY_INFO_DONE) {
         return DumpAbilityInfoDoneInner(data, reply);
     }
@@ -927,6 +930,18 @@ int AbilityManagerStub::GetTopAbilityInner(MessageParcel &data, MessageParcel &r
     AppExecFwk::ElementName result = GetTopAbility(isNeedLocalDeviceId);
     if (result.GetDeviceID().empty()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "GetTopAbilityInner is nullptr");
+    }
+    reply.WriteParcelable(&result);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::GetElementNameByTokenInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    bool isNeedLocalDeviceId = data.ReadBool();
+    AppExecFwk::ElementName result = GetElementNameByToken(token, isNeedLocalDeviceId);
+    if (result.GetDeviceID().empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "GetElementNameByTokenInner is nullptr");
     }
     reply.WriteParcelable(&result);
     return NO_ERROR;

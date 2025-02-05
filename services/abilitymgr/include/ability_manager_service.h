@@ -1340,6 +1340,9 @@ public:
 
     virtual AppExecFwk::ElementName GetTopAbility(bool isNeedLocalDeviceId = true) override;
 
+    virtual AppExecFwk::ElementName GetElementNameByToken(sptr<IRemoteObject> token,
+        bool isNeedLocalDeviceId = true) override;
+
     /**
      * AtomicServiceStatusCallback OnInstallFinished callback.
      *
