@@ -1578,6 +1578,42 @@ HWTEST_F(AbilityManagerServiceSixthTest, VerifyAccountPermission_001, TestSize.L
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest VerifyAccountPermission_001 end");
 }
 
+/*
+ * Feature: AbilityManagerService
+ * Function: GetElementNameByToken
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetElementNameByToken
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, GetElementNameByToken_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest GetElementNameByToken_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    AppExecFwk::ElementName elementName = {};
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    const std::string mainAbility = "ability";
+    int32_t userId = DEFAULT_INVALID_USER_ID;
+    auto ret = abilityMs->GetElementNameByToken(nullptr, false);
+    EXPECT_EQ(ret, elementName);
+
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    ret = abilityMs->GetElementNameByToken(token, false);
+    EXPECT_EQ(ret, elementName);
+    Want want1;
+    want1.SetElementName("device1", TEST_BUNDLE_NAME, "ability1", "entry");
+    auto abilityRecord1 = std::make_shared<AbilityRecord>(want1, abilityInfo, applicationInfo);
+    abilityRecord1->Init();
+    auto token1 = abilityRecord1->token_;
+    ret = abilityMs->GetElementNameByToken(token, false);
+    EXPECT_EQ(ret, elementName);
+    ret = abilityMs->GetElementNameByToken(token, true);
+    EXPECT_EQ(ret, elementName);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest GetElementNameByToken_001 end");
+}
 
 /*
  * Feature: AbilityManagerService
