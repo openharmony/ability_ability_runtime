@@ -579,6 +579,7 @@ ohos_shared_library("cj_extensionkit_native") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
@@ -1599,6 +1600,7 @@ ohos_shared_library("cj_ui_extension") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
     "window_manager:embeddablewindowstage_kit",
@@ -1844,6 +1846,7 @@ ohos_shared_library("cj_action_extension") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "ipc:ipc_napi",
     "napi:cj_bind_native",
   ]
 
@@ -2111,6 +2114,7 @@ ohos_shared_library("cj_embedded_ui_extension") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "ipc:ipc_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
   ]
@@ -2385,6 +2389,7 @@ ohos_shared_library("cj_photo_editor_extension") {
     "image_framework:cj_image_ffi",
     "image_framework:image",
     "image_framework:image_native",
+    "ipc:ipc_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
   ]
