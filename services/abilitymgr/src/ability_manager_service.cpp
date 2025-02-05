@@ -9161,6 +9161,32 @@ AppExecFwk::ElementName AbilityManagerService::GetTopAbility(bool isNeedLocalDev
     return elementName;
 }
 
+AppExecFwk::ElementName AbilityManagerService::GetElementNameByToken(sptr<IRemoteObject> token,
+    bool isNeedLocalDeviceId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s start.", __func__);
+    AppExecFwk::ElementName elementName = {};
+#ifdef SUPPORT_GRAPHICS
+    if (!token) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "token null");
+        return elementName;
+    }
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    if (abilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s abilityRecord null", __func__);
+        return elementName;
+    }
+    elementName = abilityRecord->GetElementName();
+    bool isDeviceEmpty = elementName.GetDeviceID().empty();
+    std::string localDeviceId;
+    if (isDeviceEmpty && isNeedLocalDeviceId && GetLocalDeviceId(localDeviceId)) {
+        elementName.SetDeviceID(localDeviceId);
+    }
+#endif
+    return elementName;
+}
+
 int AbilityManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Dump begin fd: %{public}d", fd);
