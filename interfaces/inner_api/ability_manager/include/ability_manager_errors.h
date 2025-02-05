@@ -709,6 +709,36 @@ enum {
     ERR_EXTENSION_START_ABILITY_CONTROLEED = 2097305,
 
     /**
+     * Result (2097312) for interceptor executer is nullptr.
+     */
+    ERR_NULL_INTERCEPTOR_EXECUTER = 2097312,
+
+    /**
+     * Result (2097313) for after check executer is nullptr.
+     */
+    ERR_NULL_AFTER_CHECK_EXECUTER = 2097313,
+
+    /**
+     * Result (2097314) for mission list manager is nullptr.
+     */
+    ERR_NULL_MISSION_LIST_MANAGER = 2097314,
+
+    /**
+     * Result (2097315) for invalid ability type.
+     */
+    ERR_ABILITY_TYPE_INVALID = 2097315,
+
+    /**
+     * Result (2097316) for ui ability manager is nullptr.
+     */
+    ERR_NULL_UI_ABILITY_MANAGER = 2097316,
+
+    /**
+     * Result (2097317) for session info is nullptr.
+     */
+    ERR_NULL_SESSION_INFO = 2097317,
+
+    /**
      * Native error(3000000) for target bundle not exist.
      */
     ERR_CODE_NOT_EXIST = 3000000,

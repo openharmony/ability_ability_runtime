@@ -1375,6 +1375,7 @@ int AbilityRecord::TerminateAbility()
     AAFwk::EventInfo eventInfo;
     eventInfo.bundleName = GetAbilityInfo().bundleName;
     eventInfo.abilityName = GetAbilityInfo().name;
+    eventInfo.appIndex = abilityInfo_.applicationInfo.appIndex;
     if (clearMissionFlag_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "deleteAbilityRecoverInfo before clearMission");
         (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
