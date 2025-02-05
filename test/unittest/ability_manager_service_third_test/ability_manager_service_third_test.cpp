@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1249,7 +1249,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityByFreeInstall_001, TestSize
     int32_t userId = 0;
     int32_t requestCode = 0;
     auto result = abilityMs->StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
 /*
@@ -1315,7 +1315,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityWithSpecifyTokenIdInner_001
     sptr<IRemoteObject> callerToken = nullptr;
     int requestCode = 0;
     EXPECT_EQ(abilityMs_->StartAbilityWithSpecifyTokenIdInner(want, callerToken, USER_ID_U100, false, requestCode),
-        ERR_INVALID_VALUE);
+        ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
 /*
@@ -1493,7 +1493,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, ImplicitStartAbilityAsCaller_001, TestS
     int requestCode = 0;
     auto result = abilityMs->ImplicitStartAbilityAsCaller(want, callerToken, asCallerSourceToken, userId,
         requestCode);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
 /*
@@ -1512,7 +1512,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityAsCallerDetails_001, TestSi
     bool isImplicit = true;
     auto result = abilityMs->StartAbilityAsCallerDetails(want, callerToken, asCallerSourceToken, userId,
         requestCode, isImplicit);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
 /*
@@ -1551,7 +1551,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityAsCallerDetails_003, TestSi
     bool isImplicit = true;
     auto result = abilityMs->StartAbilityAsCallerDetails(want, callerToken, asCallerSourceToken, userId,
         requestCode, isImplicit);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
 /*
@@ -1615,7 +1615,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityWrap_001, TestSize.Level1)
     bool isImplicit = true;
     auto result = abilityMs->StartAbilityWrap(want, callerToken, requestCode, false, userId, isStartAsCaller,
         specifyToken, isForegroundToRestartApp, isImplicit);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
 /*
@@ -1646,7 +1646,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, ImplicitStartAbility_001, TestSize.Leve
     int32_t userId = 0;
     int requestCode = 0;
     auto result = abilityMs->ImplicitStartAbility(want, abilityStartSetting, callerToken, userId, requestCode);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
 /*
@@ -1663,7 +1663,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, ImplicitStartAbility_002, TestSize.Leve
     int32_t userId = 0;
     int requestCode = 0;
     auto result = abilityMs->ImplicitStartAbility(want, startOptions, callerToken, userId, requestCode);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
 /*
@@ -1683,7 +1683,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartUIAbilityForOptionWrap_001, TestSi
     bool isImplicit = true;
     auto result = abilityMs->StartUIAbilityForOptionWrap(want, startOptions, callerToken, false, userId, requestCode,
         callerTokenId, isImplicit);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
 /*
@@ -1704,7 +1704,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityForOptionWrap_001, TestSize
     bool isImplicit = true;
     auto result = abilityMs->StartAbilityForOptionWrap(want, startOptions, callerToken, false, userId, requestCode,
         isStartAsCaller, callerTokenId, isImplicit);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
 /*
@@ -1725,7 +1725,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityForOptionInner_001, TestSiz
     bool isImplicit = true;
     auto result = abilityMs->StartAbilityForOptionInner(want, startOptions, callerToken, false, userId, requestCode,
         isStartAsCaller, specifyTokenId, isImplicit);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
 /*

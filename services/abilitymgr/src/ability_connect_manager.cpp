@@ -2002,9 +2002,7 @@ void AbilityConnectManager::TerminateAbilityWindowLocked(const std::shared_ptr<A
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "ability:%{public}s, persistentId:%{public}d, abilityState:%{public}s",
         abilityRecord->GetURI().c_str(), sessionInfo->persistentId, abilitystateStr.c_str());
-    EventInfo eventInfo;
-    eventInfo.bundleName = abilityRecord->GetAbilityInfo().bundleName;
-    eventInfo.abilityName = abilityRecord->GetAbilityInfo().name;
+    EventInfo eventInfo = BuildEventInfo(abilityRecord);
     EventReport::SendAbilityEvent(EventName::TERMINATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     std::lock_guard guard(serialMutex_);
     eventInfo.errCode = TerminateAbilityInner(abilityRecord->GetToken());
@@ -3421,6 +3419,7 @@ EventInfo AbilityConnectManager::BuildEventInfo(const std::shared_ptr<AbilityRec
         eventInfo.bundleName = abilityInfo.bundleName;
         eventInfo.moduleName = abilityInfo.moduleName;
         eventInfo.abilityName = abilityInfo.name;
+        eventInfo.appIndex = abilityInfo.applicationInfo.appIndex;
     }
     return eventInfo;
 }
