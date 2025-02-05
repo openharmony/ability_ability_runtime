@@ -119,6 +119,35 @@ AppExecFwk::ElementName AbilityManagerProxy::GetTopAbility(bool isNeedLocalDevic
     return result;
 }
 
+AppExecFwk::ElementName AbilityManagerProxy::GetElementNameByToken(sptr<IRemoteObject> token,
+    bool isNeedLocalDeviceId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return {};
+    }
+    if (!data.WriteRemoteObject(token)) {
+        return {};
+    }
+    if (!data.WriteBool(isNeedLocalDeviceId)) {
+        return {};
+    }
+    int error = SendRequest(AbilityManagerInterfaceCode::GET_ELEMENT_NAME_BY_TOKEN, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return {};
+    }
+    std::unique_ptr<AppExecFwk::ElementName> name(reply.ReadParcelable<AppExecFwk::ElementName>());
+    if (!name) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "read info fail");
+        return {};
+    }
+    AppExecFwk::ElementName result = *name;
+    return result;
+}
+
 int AbilityManagerProxy::StartAbility(const Want &want, const AbilityStartSetting &abilityStartSetting,
     const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
 {
