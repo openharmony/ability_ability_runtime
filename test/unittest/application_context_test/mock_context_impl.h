@@ -89,6 +89,10 @@ public:
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration() const override;
 
     std::string GetGroupDir(std::string groupId) override;
+
+#ifdef SUPPORT_GRAPHICS
+    std::shared_ptr<Context> CreateDisplayContext(uint64_t displayId) override;
+#endif
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

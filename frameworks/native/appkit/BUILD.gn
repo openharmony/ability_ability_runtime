@@ -204,6 +204,7 @@ ohos_shared_library("appkit_native") {
       "ace_engine:ace_forward_compatibility",
       "graphic_2d:librender_service_client",
       "i18n:intl_util",
+      "window_manager:libdm",
       "window_manager:libwm",
     ]
 

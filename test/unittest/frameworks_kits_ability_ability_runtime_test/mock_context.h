@@ -107,6 +107,10 @@ public:
 
     std::string GetGroupDir(std::string groupId) override;
 
+#ifdef SUPPORT_GRAPHICS
+    std::shared_ptr<Context> CreateDisplayContext(uint64_t displayId) override;
+#endif
+
     int32_t mode_ = 0;
 };
 }  // namespace AbilityRuntime

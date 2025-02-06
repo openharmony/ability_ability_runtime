@@ -196,5 +196,12 @@ int32_t MockContext::GetSystemPreferencesDir(const std::string &groupId, bool ch
 {
     return 0;
 }
+
+#ifdef SUPPORT_GRAPHICS
+std::shared_ptr<Context> MockContext::CreateDisplayContext(uint64_t displayId)
+{
+    return nullptr;
+}
+#endif
 }  // namespace AbilityRuntime
 }  // namespace OHOS

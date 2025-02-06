@@ -31,6 +31,9 @@ namespace AAFwk {
 class Want;
 }
 namespace AbilityRuntime {
+#ifdef SUPPORT_GRAPHICS
+using GetDisplayConfigCallback = std::function<bool(uint64_t displayId, float &density, std::string &directionStr)>;
+#endif
 class ContextImpl : public Context {
 public:
     ContextImpl() = default;
@@ -386,6 +389,19 @@ public:
      */
     Global::Resource::DeviceType GetDeviceType() const override;
 
+#ifdef SUPPORT_GRAPHICS
+    /**
+     * @brief Create a context by displayId. This Context updates the density and direction properties
+     * based on the displayId, while other property values remain the same as in the original Context.
+     *
+     * @param displayId Indicates the displayId.
+     *
+     * @return Returns the context with the specified displayId.
+     */
+    std::shared_ptr<Context> CreateDisplayContext(uint64_t displayId) override;
+    void RegisterGetDisplayConfig(GetDisplayConfigCallback getDisplayConfigCallback);
+#endif
+
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
 
     void PrintTokenInfo() const;
@@ -395,6 +411,7 @@ public:
     static const int EL_DEFAULT = 1;
 
 protected:
+    // Adding a new attribute requires adding a copy in the ShallowCopySelf function
     sptr<IRemoteObject> token_;
 
 private:
@@ -471,7 +488,14 @@ private:
         std::shared_ptr<Context> inputContext = nullptr);
     ErrCode GetOverlayMgrProxy();
     void UnsubscribeToOverlayEvents();
+    void ShallowCopySelf(std::shared_ptr<ContextImpl> &contextImpl);
+    bool UpdateDisplayConfiguration(std::shared_ptr<ContextImpl> &contextImpl, uint64_t displayId,
+        float density, std::string direction);
+#ifdef SUPPORT_GRAPHICS
+    bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
+#endif
 
+    // Adding a new attribute requires adding a copy in the ShallowCopySelf function
     static Global::Resource::DeviceType deviceType_;
     std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo_ = nullptr;
     std::shared_ptr<Context> parentContext_ = nullptr;
@@ -493,6 +517,11 @@ private:
     volatile bool resetFlag_ = false;
 
     std::shared_ptr<AppExecFwk::OverlayEventSubscriber> overlaySubscriber_;
+    std::string processName_;
+#ifdef SUPPORT_GRAPHICS
+    static std::mutex getDisplayConfigCallbackMutex_;
+    static GetDisplayConfigCallback getDisplayConfigCallback_;
+#endif
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

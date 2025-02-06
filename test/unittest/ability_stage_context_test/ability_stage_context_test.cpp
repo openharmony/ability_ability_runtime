@@ -15,8 +15,11 @@
 
 #include <gtest/gtest.h>
 
-#include "hilog_tag_wrapper.h"
+#define private public
 #include "ability_stage_context.h"
+#undef private
+
+#include "hilog_tag_wrapper.h"
 #include "application_context.h"
 
 using namespace testing;
@@ -183,5 +186,40 @@ HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_0400, TestSize.Level1)
     EXPECT_EQ(abilityStageContext->GetDeviceType(), Global::Resource::DeviceType::DEVICE_PHONE);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
+
+#ifdef SUPPORT_GRAPHICS
+/**
+ * @tc.name: AbilityStageContextTest_CreateDisplayContext_0100
+ * @tc.desc: Ability stage CreateDisplayContext test.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_CreateDisplayContext_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    auto abilityStageContext = std::make_shared<AbilityStageContext>();
+    ASSERT_NE(abilityStageContext, nullptr);
+    abilityStageContext->contextImpl_ = nullptr;
+    auto displayContext = abilityStageContext->CreateDisplayContext(0);
+    EXPECT_EQ(displayContext, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: AbilityStageContextTest_CreateDisplayContext_0200
+ * @tc.desc: Ability stage CreateDisplayContext test.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_CreateDisplayContext_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    auto abilityStageContext = std::make_shared<AbilityStageContext>();
+    ASSERT_NE(abilityStageContext, nullptr);
+    auto displayContext = abilityStageContext->CreateDisplayContext(0);
+    EXPECT_EQ(displayContext, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+#endif
 } // namespace AbilityRuntime
 } // namespace OHOS

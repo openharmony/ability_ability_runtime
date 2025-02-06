@@ -1613,6 +1613,34 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_OpenAtomicService_0100, Fu
     context_->OpenAtomicService(want, options, requestCode, std::move(task));
     EXPECT_TRUE(context_ != nullptr);
 }
+
+#ifdef SUPPORT_GRAPHICS
+/**
+ * @tc.number: Ability_Context_Impl_CreateDisplayContext_0100
+ * @tc.name: CreateDisplayContext
+ * @tc.desc: Verify that function CreateDisplayContext.
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_CreateDisplayContext_0100, Function | MediumTest | Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetStageContext(mock_);
+    auto displayContext = context_->CreateDisplayContext(0);
+    EXPECT_EQ(displayContext, nullptr);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_CreateDisplayContext_0200
+ * @tc.name: CreateDisplayContext
+ * @tc.desc: Verify that function CreateDisplayContext.
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_CreateDisplayContext_0200, Function | MediumTest | Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetStageContext(nullptr);
+    auto displayContext = context_->CreateDisplayContext(0);
+    EXPECT_EQ(displayContext, nullptr);
+}
+#endif
 } // namespace AppExecFwk
 } // namespace OHOS
 
