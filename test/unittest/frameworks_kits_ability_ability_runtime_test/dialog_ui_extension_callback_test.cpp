@@ -70,6 +70,8 @@ public:
     {
         return nullptr;
     }
+
+    void SetContinueState(int32_t state) {}
 };
 
 class DialogUIExtensionCallbackTest : public testing::Test {
