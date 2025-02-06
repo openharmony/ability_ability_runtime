@@ -1866,5 +1866,20 @@ void JsUIAbility::OnAfterFocusedCommon(bool isFocused)
         applicationContext->DispatchWindowStageUnfocus(GetJsAbility(), GetJsWindowStage());
     }
 }
+
+void JsUIAbility::SetContinueState(int32_t state)
+{
+    if (scene_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "windowScene is nullptr.");
+        return;
+    }
+    auto window = scene_->GetMainWindow();
+    if (window == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "window is nullptr.");
+        return;
+    }
+    window->SetContinueState(state);
+    TAG_LOGI(AAFwkTag::UIABILITY, "window SetContinueState, state: %{public}d.", state);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
