@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-void ResHelper::ReportLoadAbcCompletedInfoToRss(const int32_t uid, const int32_t pid, std::string bundleName)
+void ResHelper::ReportLoadAbcCompletedInfoToRss(int32_t uid, int32_t pid, const std::string &bundleName)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::RES_TYPE_RECV_ABC_LOAD_COMPLETED;
