@@ -29,6 +29,9 @@
 #ifdef APP_DOMAIN_VERIFY_ENABLED
 #include "app_domain_verify_mgr_client.h"
 #endif // APP_DOMAIN_VERIFY_ENABLED
+#ifdef SUPPORT_SCREEN
+#include "utils/ability_permission_util.h"
+#endif // SUPPORT_SCREEN
 
 namespace OHOS {
 namespace AAFwk {
@@ -113,6 +116,14 @@ int ImplicitStartProcessor::CheckImplicitCallPermission(const AbilityRequest& ab
         TAG_LOGD(AAFwkTag::ABILITYMGR, "hap not background");
         return ERR_OK;
     }
+#ifdef SUPPORT_SCREEN
+    int32_t HasFloatingWindowRet =
+        AbilityPermissionUtil::GetInstance().CheckStartCallHasFloatingWindow(abilityRequest.callerToken);
+    if (HasFloatingWindowRet == ERR_OK) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "has floatingwindow");
+        return ERR_OK;
+    }
+#endif // SUPPORT_SCREEN
     auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyBackgroundCallPermission(isBackgroundCall);
     if (!ret) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckImplicitCallPermission failed");
