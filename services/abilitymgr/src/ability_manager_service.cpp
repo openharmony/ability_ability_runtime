@@ -11334,6 +11334,21 @@ void AbilityManagerService::OnAppRemoteDied(const std::vector<sptr<IRemoteObject
     }
 }
 
+void AbilityManagerService::OnStartProcessFailed(sptr<IRemoteObject> token)
+{
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    CHECK_POINTER_LOG(abilityRecord, "Null record.");
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "NotifStartProcessFailed, ability:%{public}s, bundle:%{public}s",
+        abilityRecord->GetAbilityInfo().name.c_str(), abilityRecord->GetAbilityInfo().bundleName.c_str());
+
+    if (abilityRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::EXTENSION) {
+        auto connectManager = GetConnectManagerByToken(token);
+        CHECK_POINTER(connectManager);
+        connectManager->OnLoadAbilityFailed(abilityRecord);
+        return;
+    }
+}
+
 int32_t AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
 {
     auto accessTokenId = IPCSkeleton::GetCallingTokenID();
