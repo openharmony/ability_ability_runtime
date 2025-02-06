@@ -26,6 +26,7 @@ ohos_shared_library("napi_common") {
   public_configs = [
     ":napi_common_public_config",
     "${ability_runtime_native_path}/ability/native:ability_public_config",
+    "${ability_runtime_innerkits_path}/runtime:runtime_public_config",
     "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits_public_config",
   ]
 
