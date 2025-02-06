@@ -23,13 +23,14 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-void ResHelper::ReportLoadAbcCompletedInfoToRss(int32_t uid, std::string bundleName)
+void ResHelper::ReportLoadAbcCompletedInfoToRss(const int32_t uid, const int32_t pid, std::string bundleName)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::RES_TYPE_RECV_ABC_LOAD_COMPLETED;
     std::unordered_map<std::string, std::string> eventParams {
         { "name", "abc_load_completed" },
         { "uid", std::to_string(uid) },
+        { "pid", std::to_string(pid) },
         { "bundleName", bundleName }
     };
     bool isColdStart = true;
