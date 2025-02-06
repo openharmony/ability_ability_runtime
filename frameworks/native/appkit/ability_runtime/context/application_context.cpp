@@ -807,6 +807,17 @@ void ApplicationContext::RegisterAppFontObserver(AppConfigUpdateCallback appFont
     appFontCallback_ = appFontCallback;
 }
 
+#ifdef SUPPORT_GRAPHICS
+void ApplicationContext::RegisterGetDisplayConfig(GetDisplayConfigCallback getDisplayConfigCallback)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl_");
+        return;
+    }
+    contextImpl_->RegisterGetDisplayConfig(getDisplayConfigCallback);
+}
+#endif
+
 std::string ApplicationContext::GetAppRunningUniqueId() const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "GetAppRunningUniqueId is %{public}s", appRunningUniqueId_.c_str());
@@ -863,5 +874,12 @@ void ApplicationContext::SetCurrentInstanceKey(const std::string& instanceKey)
     TAG_LOGD(AAFwkTag::APPKIT, "setCurrentInstanceKey is %{public}s", instanceKey.c_str());
     instanceKey_ = instanceKey;
 }
+
+#ifdef SUPPORT_GRAPHICS
+std::shared_ptr<Context> ApplicationContext::CreateDisplayContext(uint64_t displayId)
+{
+    return contextImpl_ ? contextImpl_->CreateDisplayContext(displayId) : nullptr;
+}
+#endif
 }  // namespace AbilityRuntime
 }  // namespace OHOS

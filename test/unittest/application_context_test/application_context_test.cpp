@@ -1535,5 +1535,37 @@ HWTEST_F(ApplicationContextTest, SetMnc_0100, TestSize.Level1)
     context_->SetMnc("mnc");
     EXPECT_TRUE(context_ != nullptr);
 }
+
+#ifdef SUPPORT_GRAPHICS
+/**
+ * @tc.number:CreateDisplayContext_0100
+ * @tc.name: CreateDisplayContext
+ * @tc.desc: CreateDisplayContext fail with null contextImpl
+ */
+HWTEST_F(ApplicationContextTest, CreateDisplayContext_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateDisplayContext_0100 start";
+    ASSERT_NE(context_, nullptr);
+    context_->AttachContextImpl(nullptr);
+    auto displayContext = context_->CreateDisplayContext(0);
+    EXPECT_EQ(displayContext, nullptr);
+    GTEST_LOG_(INFO) << "CreateDisplayContext_0100 end";
+}
+
+/**
+ * @tc.number:CreateDisplayContext_0200
+ * @tc.name: CreateDisplayContext
+ * @tc.desc: CreateDisplayContext success
+ */
+HWTEST_F(ApplicationContextTest, CreateDisplayContext_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateDisplayContext_0200 start";
+    ASSERT_NE(context_, nullptr);
+    context_->AttachContextImpl(mock_);
+    auto displayContext = context_->CreateDisplayContext(0);
+    EXPECT_EQ(displayContext, nullptr);
+    GTEST_LOG_(INFO) << "CreateDisplayContext_0200 end";
+}
+#endif
 }  // namespace AbilityRuntime
 }  // namespace OHOS
