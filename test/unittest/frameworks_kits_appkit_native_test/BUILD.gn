@@ -1027,6 +1027,52 @@ ohos_unittest("native_lib_util_test") {
   ]
 }
 
+ohos_unittest("startup_manager_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../../cfi_blocklist.txt"
+  }
+  include_dirs = []
+  module_out_path = module_output_path
+  cflags_cc = [
+    "-Wno-unused-const-variable",
+    "-Wno-unused-private-field",
+  ]
+  sources = [
+    "${ability_runtime_native_path}/appkit/app_startup/app_startup_task.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/preload_so_startup_task.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/startup_config.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/startup_listener.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/startup_manager.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/startup_task.cpp",
+    "startup_manager_test.cpp",
+  ]
+
+  configs = [ ":module_context_config" ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/appkit:appkit_native",
+  ]
+
+  external_deps = [
+    "ability_base:extractortool",
+    "ability_runtime:runtime",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "faultloggerd:libfaultloggerd",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
+    "napi:ace_napi",
+  ]
+}
+
 ###############################################################################
 
 group("unittest") {
@@ -1054,6 +1100,7 @@ group("unittest") {
     ":idle_time_test",
     ":native_lib_util_test",
     ":overlay_event_subscriber_test",
+    ":startup_manager_test",
   ]
 
   deps += [ "ability_delegator:unittest" ]
