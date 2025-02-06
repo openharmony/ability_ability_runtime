@@ -217,6 +217,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleIsProcessAttached(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_IN_BATCH):
             return HandleKillProcessesInBatch(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::SEND_APP_SPAWN_UNINSTALL_DEBUG_HAP_MSG):
+            return HandleSendAppSpawnUninstallDebugHapMsg(data);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -888,6 +890,14 @@ int32_t AmsMgrStub::HandleIsProcessAttached(MessageParcel &data, MessageParcel &
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
         return ERR_INVALID_VALUE;
     }
+    return NO_ERROR;
+}
+
+ErrCode AmsMgrStub::HandleSendAppSpawnUninstallDebugHapMsg(MessageParcel &data)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    auto userId = data.ReadInt32();
+    SendAppSpawnUninstallDebugHapMsg(userId);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

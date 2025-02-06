@@ -70,5 +70,17 @@ HWTEST_F(AppSpawnClientTest, PreStartNWebSpawnProcessImpl_002, TestSize.Level0)
     int ret = asc->PreStartNWebSpawnProcess();
     EXPECT_EQ(ret, ERR_OK);
 }
+/**
+ * @tc.name: SendAppSpawnUninstallDebugHapMsg_001
+ * @tc.desc: SendAppSpawnUninstallDebugHapMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSpawnClientTest, SendAppSpawnUninstallDebugHapMsg_001, TestSize.Level0)
+{
+    auto appSpawnClient = std::make_shared<AppSpawnClient>(false);
+    int32_t userId = 0;
+    auto ret = appSpawnClient->SendAppSpawnUninstallDebugHapMsg(userId);
+    ASSERT_EQ(ret, ERR_OK);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

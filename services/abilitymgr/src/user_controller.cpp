@@ -26,6 +26,7 @@ namespace AAFwk {
 using namespace OHOS::AppExecFwk;
 namespace {
 const int64_t USER_SWITCH_TIMEOUT = 3 * 1000; // 3s
+constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 }
 
 UserItem::UserItem(int32_t id) : userId_(id)
@@ -223,6 +224,10 @@ int32_t UserController::LogoutUser(int32_t userId)
         SetCurrentUserId(0);
     }
     appScheduler->KillProcessesByUserId(userId);
+    if (system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
+        appScheduler->SendAppSpawnUninstallDebugHapMsg(userId);
+    }
     ClearAbilityUserItems(userId);
     return 0;
 }

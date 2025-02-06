@@ -855,6 +855,14 @@ public:
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     * @return Returns RESULT_OK on success, others on failure.
+     */
+    virtual AppMgrResultCode SendAppSpawnUninstallDebugHapMsg(int32_t userId);
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**
