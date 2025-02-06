@@ -288,7 +288,22 @@ CJ_EXPORT napi_value FfiConvertApplicationContext2Napi(napi_env env, int64_t id)
         TAG_LOGE(AAFwkTag::CONTEXT, "null object");
         return undefined;
     }
-
+    auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(
+        cjApplicationContext->GetApplicationContext());
+    if (workContext != nullptr) {
+        auto res = napi_wrap(env, result, workContext,
+            [](napi_env, void *data, void *) {
+              TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr application context is called");
+              delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
+              data = nullptr;
+            },
+            nullptr, nullptr);
+        if (res != napi_ok && workContext != nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "napi_wrap failed:%{public}d", res);
+            delete workContext;
+            return undefined;
+        }
+    }
     napi_value falseValue = nullptr;
     napi_get_boolean((napi_env)env, true, &falseValue);
     napi_set_named_property((napi_env)env, result, "stageMode", falseValue);
