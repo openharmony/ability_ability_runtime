@@ -203,6 +203,13 @@ public:
     bool VerifyMsg(const AppSpawnStartMsg &startMsg);
 
     /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     */
+    int32_t SendAppSpawnUninstallDebugHapMsg(int32_t userId);
+
+    /**
      * Start request to nwebspawn process.
      */
     virtual int32_t PreStartNWebSpawnProcess();

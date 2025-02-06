@@ -348,6 +348,13 @@ public:
 
     virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     */
+    virtual void SendAppSpawnUninstallDebugHapMsg(int32_t userId) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);

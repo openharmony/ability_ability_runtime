@@ -77,6 +77,8 @@ public:
     MOCK_METHOD0(IsMemorySizeSufficent, bool());
     MOCK_METHOD4(StartNativeChildProcess, int32_t(const pid_t hostPid,
         const std::string &libName, int32_t childProcessCount, const sptr<IRemoteObject> &callback));
+    MOCK_METHOD1(SendAppSpawnUninstallDebugHapMsg, void(int32_t userId));
+
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)
     {}
 
