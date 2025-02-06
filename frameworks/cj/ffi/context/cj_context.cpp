@@ -248,11 +248,21 @@ CJ_EXPORT napi_value FfiConvertBaseContext2Napi(napi_env env, int64_t id)
         TAG_LOGE(AAFwkTag::CONTEXT, "null object");
         return undefined;
     }
-
+    auto workContext = new (std::nothrow) std::weak_ptr<Context>(cjContext->GetContext());
+    auto res = napi_wrap(env, result, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr base context is called");
+            delete static_cast<std::weak_ptr<Context> *>(data);
+        },
+        nullptr, nullptr);
+    if (res != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "napi_wrap failed:%{public}d", res);
+        delete workContext;
+        return undefined;
+    }
     napi_value falseValue = nullptr;
     napi_get_boolean((napi_env)env, true, &falseValue);
     napi_set_named_property((napi_env)env, result, "stageMode", falseValue);
-
     return result;
 }
 
@@ -282,7 +292,6 @@ CJ_EXPORT int64_t FfiCreateBaseContextFromNapi(napi_env env, napi_value baseCont
         TAG_LOGE(AAFwkTag::CONTEXT, "null cjContext");
         return ERR_INVALID_INSTANCE_CODE;
     }
-
     return cjContext->GetID();
 }
 }

@@ -40,6 +40,10 @@ public:
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo();
     RetHapModuleInfo GetRetHapModuleInfo();
     CConfiguration GetConfiguration();
+    std::shared_ptr<Context> GetContext()
+    {
+        return abilityStageContext_.lock();
+    }
 
 private:
     std::weak_ptr<AbilityRuntime::Context> abilityStageContext_;
