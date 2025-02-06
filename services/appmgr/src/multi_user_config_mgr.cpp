@@ -62,9 +62,10 @@ std::shared_ptr<AppExecFwk::Configuration> MultiUserConfigurationMgr::GetConfigu
 }
 
 void MultiUserConfigurationMgr::HandleConfiguration(
-    const int32_t userId, const Configuration& config, std::vector<std::string>& changeKeyV)
+    const int32_t userId, const Configuration& config, std::vector<std::string>& changeKeyV, bool &isNotifyUser0)
 {
     std::lock_guard<std::mutex> guard(multiUserConfigurationMutex_);
+    isNotifyUser0 = false;
     if (userId == -1) {
         if (globalConfiguration_ == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "globalConfiguration_ null");
@@ -99,7 +100,12 @@ void MultiUserConfigurationMgr::HandleConfiguration(
             multiUserConfiguration_[userId] = userConfig;
         }
         if (userId != USER0 && userId == MultiUserConfigurationMgr::GetForegroundOsAccountLocalId()) {
-            multiUserConfiguration_[USER0] = multiUserConfiguration_[userId];
+            std::vector<std::string> diff;
+            multiUserConfiguration_[USER0].CompareDifferent(diff, multiUserConfiguration_[userId]);
+            if (diff.size() != 0) {
+                multiUserConfiguration_[USER0].Merge(diff, multiUserConfiguration_[userId]);
+                isNotifyUser0 = true;
+            }
         }
     }
 }
