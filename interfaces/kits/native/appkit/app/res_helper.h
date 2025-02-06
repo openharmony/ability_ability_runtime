@@ -25,7 +25,7 @@ public:
     ResHelper();
     ~ResHelper();
     
-    static void ReportLoadAbcCompletedInfoToRss(int32_t uid, std::string bundleName);
+    static void ReportLoadAbcCompletedInfoToRss(int32_t uid, int32_t pid, const std::string &bundleName);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
