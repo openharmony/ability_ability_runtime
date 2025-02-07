@@ -18,6 +18,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 ohos_unittest("cj_application_context_test") {
   module_out_path = "ability_runtime/cj_application_context_test"
   include_dirs = [
+    "${ability_runtime_napi_path}/ability_auto_startup_callback",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_delegator",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
@@ -48,8 +49,10 @@ ohos_unittest("cj_application_context_test") {
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:auto_startup_callback",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",

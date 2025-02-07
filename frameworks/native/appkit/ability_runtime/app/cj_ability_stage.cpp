@@ -19,6 +19,7 @@
 #include "hilog_tag_wrapper.h"
 #include "securec.h"
 #include "ability_delegator_registry.h"
+#include "js_ability_stage_context.h"
 
 using namespace OHOS::AbilityRuntime;
 
@@ -98,6 +99,69 @@ CJ_EXPORT int64_t FFIAbilityGetAbilityStageContext(AbilityStageHandle abilitySta
         return ERR_INVALID_INSTANCE_CODE;
     }
     return cjStageContext->GetID();
+}
+
+CJ_EXPORT napi_value FfiConvertAbilityStageContext2Napi(napi_env env, int64_t id)
+{
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
+    auto cjAbilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
+    if (cjAbilityStageContext == nullptr || cjAbilityStageContext->GetContext() == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "cj context null ptr");
+        return undefined;
+    }
+
+    napi_value result = CreateJsAbilityStageContext(env, cjAbilityStageContext->GetContext());
+    if (result == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null object");
+        return undefined;
+    }
+    auto workContext = new (std::nothrow) std::weak_ptr<OHOS::AbilityRuntime::Context>(
+        cjAbilityStageContext->GetContext());
+    napi_status status = napi_wrap(env, result, workContext,
+        [](napi_env, void* data, void*) {
+            TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr ability stage context is called");
+            delete static_cast<std::weak_ptr<OHOS::AbilityRuntime::Context>*>(data);
+        },
+        nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGD(AAFwkTag::APPKIT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return undefined;
+    }
+    napi_value falseValue = nullptr;
+    napi_get_boolean((napi_env)env, true, &falseValue);
+    napi_set_named_property((napi_env)env, result, "stageMode", falseValue);
+    return result;
+}
+
+CJ_EXPORT int64_t FfiCreateAbilityStageContextFromNapi(napi_env env, napi_value stageContext)
+{
+    if (env == nullptr || stageContext == nullptr) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    napi_valuetype type;
+    if (napi_typeof(env, stageContext, &type) || type != napi_object) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    std::weak_ptr<Context>* context = nullptr;
+    napi_status status = napi_unwrap(env, stageContext, reinterpret_cast<void**>(&context));
+    if (status != napi_ok) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    if (context == nullptr || (*context).lock() == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    auto cjContext = OHOS::FFI::FFIData::Create<CJAbilityStageContext>((*context).lock());
+    if (cjContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cjContext");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    return cjContext->GetID();
 }
 }
 
