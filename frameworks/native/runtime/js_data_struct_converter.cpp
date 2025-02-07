@@ -67,6 +67,25 @@ napi_value CreateJsApplicationInfo(napi_env env, const AppExecFwk::ApplicationIn
     return object;
 }
 
+napi_value CreateLastExitDetailInfo(napi_env env, const AAFwk::LastExitDetailInfo &lastExitDetailInfo)
+{
+    napi_value object = nullptr;
+    napi_create_object(env, &object);
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null object");
+        return nullptr;
+    }
+    napi_set_named_property(env, object, "pid", CreateJsValue(env, lastExitDetailInfo.pid));
+    napi_set_named_property(env, object, "processName", CreateJsValue(env, lastExitDetailInfo.processName));
+    napi_set_named_property(env, object, "uid", CreateJsValue(env, lastExitDetailInfo.uid));
+    napi_set_named_property(env, object, "exitSubReason", CreateJsValue(env, lastExitDetailInfo.exitSubReason));
+    napi_set_named_property(env, object, "exitMsg", CreateJsValue(env, lastExitDetailInfo.exitMsg));
+    napi_set_named_property(env, object, "rss", CreateJsValue(env, lastExitDetailInfo.rss));
+    napi_set_named_property(env, object, "pss", CreateJsValue(env, lastExitDetailInfo.pss));
+    napi_set_named_property(env, object, "timestamp", CreateJsValue(env, lastExitDetailInfo.timestamp));
+
+    return object;
+}
 napi_value CreateJsLaunchParam(napi_env env, const AAFwk::LaunchParam& launchParam)
 {
     napi_value object = nullptr;
@@ -79,6 +98,8 @@ napi_value CreateJsLaunchParam(napi_env env, const AAFwk::LaunchParam& launchPar
     napi_set_named_property(env, object, "launchReasonMessage", CreateJsValue(env, launchParam.launchReasonMessage));
     napi_set_named_property(env, object, "lastExitReason", CreateJsValue(env, launchParam.lastExitReason));
     napi_set_named_property(env, object, "lastExitMessage", CreateJsValue(env, launchParam.lastExitMessage));
+    napi_set_named_property(env, object, "lastExitDetailInfo", CreateLastExitDetailInfo(
+        env, launchParam.lastExitDetailInfo));
     return object;
 }
 

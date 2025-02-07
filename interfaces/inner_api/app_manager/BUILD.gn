@@ -52,6 +52,7 @@ ohos_shared_library("app_manager") {
   ]
 
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/last_exit_detail_info.cpp",
     "${ability_runtime_services_path}/appdfr/src/appfreeze_manager.cpp",
     "src/appmgr/ability_controller_proxy.cpp",
     "src/appmgr/ability_controller_stub.cpp",
