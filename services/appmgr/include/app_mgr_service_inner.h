@@ -684,6 +684,8 @@ public:
 
     void HandleTimeOut(const AAFwk::EventWrap &event);
 
+    void CacheExitInfo(const std::shared_ptr<AppRunningRecord> &appRecord);
+
     void DecreaseWillKillPidsNum()
     {
         willKillPidsNum_ -= 1;
@@ -1527,7 +1529,8 @@ private:
      */
     void StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
         std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AppRunningRecord> appRecord,
-        const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
+        const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId,
+        int32_t persistentId = 0);
 
     int32_t StartPerfProcess(const std::shared_ptr<AppRunningRecord> &appRecord, const std::string& perfCmd,
         const std::string& debugCmd, bool isSandboxApp);
