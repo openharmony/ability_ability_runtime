@@ -58,6 +58,8 @@ int AppStateCallbackHost::OnRemoteRequest(
             return HandleNotifyAppPreCache(data, reply);
         case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_START_KEEP_ALIVE_PROCESS):
             return HandleNotifyStartKeepAliveProcess(data, reply);
+        case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_START_PROCESS_FAILED):
+            return HandleOnStartProcessFailed(data, reply);
     }
 
     TAG_LOGD(AAFwkTag::APPMGR, "AppStateCallbackHost::OnRemoteRequest end");
@@ -97,6 +99,12 @@ void AppStateCallbackHost::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
+
+void AppStateCallbackHost::OnStartProcessFailed(sptr<IRemoteObject> token)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+}
+
 
 int32_t AppStateCallbackHost::HandleOnAppStateChanged(MessageParcel &data, MessageParcel &reply)
 {
@@ -192,6 +200,17 @@ int32_t AppStateCallbackHost::HandleOnAppRemoteDied(MessageParcel &data, Message
         abilityTokens.emplace_back(obj);
     }
     OnAppRemoteDied(abilityTokens);
+    return NO_ERROR;
+}
+
+int32_t AppStateCallbackHost::HandleOnStartProcessFailed(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (!token) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null token");
+        return ERR_INVALID_VALUE;
+    }
+    OnStartProcessFailed(token);
     return NO_ERROR;
 }
 
