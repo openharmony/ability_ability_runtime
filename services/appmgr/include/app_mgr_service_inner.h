@@ -1341,6 +1341,17 @@ private:
      */
     bool WaitForRemoteProcessExit(std::list<pid_t> &pids, const int64_t startTime);
 
+     /**
+     * WaitProcessesExitAndKill, Wait for the process to exit normally, and kill it if time out.
+     *
+     * @param pids, process number collection to exit.
+     * @param startTime, execution process security exit start time.
+     * @param reason caller function name
+     *
+     * @return ERR_OK, return back success, others fail.
+     */
+    int32_t WaitProcessesExitAndKill(std::list<pid_t> &pids, const int64_t startTime, const std::string& reason);
+
     /**
      * ProcessExist, Judge whether the process exists.
      *
@@ -1351,13 +1362,13 @@ private:
     bool ProcessExist(pid_t pid);
 
     /**
-     * CheckAllProcessExist, Determine whether all processes exist .
+     * CheckAllProcessExit, Determine whether all processes exits .
      *
      * @param pids, process number collection to exit.
      *
-     * @return true, Returns that a process exists and all other processes do not exist.
+     * @return true, Returns that no process exist in the list.
      */
-    bool CheckAllProcessExist(std::list<pid_t> &pids);
+    bool CheckAllProcessExit(std::list<pid_t> &pids);
 
     /**
      * SystemTimeMillisecond, Get system time.
