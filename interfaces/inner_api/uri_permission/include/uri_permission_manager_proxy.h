@@ -53,6 +53,7 @@ public:
 private:
     static inline BrokerDelegator<UriPermissionManagerProxy> delegator_;
     int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    bool WriteBatchUris(MessageParcel &data, const std::vector<Uri> &uriVec);
 };
 }  // namespace AAFwk
 }  // namespace OHOS
