@@ -1549,7 +1549,7 @@ int32_t AppMgrServiceInner::KillApplicationByBundleName(const std::string &bundl
     }
     result = WaitProcessesExitAndKill(pids, startTime, reason);
     if (result < 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "KillApplicationSelf is failed for bundleName:%{public}s", bundleName.c_str);
+        TAG_LOGE(AAFwkTag::APPMGR, "KillApplicationSelf is failed for bundleName:%{public}s", bundleName.c_str());
         return result;
     }
     NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
@@ -1598,7 +1598,7 @@ int32_t AppMgrServiceInner::KillApplicationByUserIdLocked(
     TAG_LOGI(AAFwkTag::APPMGR, "uid value is %{public}d", uid);
     if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, uid, pids, clearPageStack)) {
         TAG_LOGI(AAFwkTag::APPMGR, "The process corresponding to the package name did not start.");
-        return result;
+        return ERR_OK;
     }
     return WaitProcessesExitAndKill(pids, startTime, reason);
 }
