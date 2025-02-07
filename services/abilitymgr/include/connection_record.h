@@ -24,6 +24,7 @@
 
 namespace OHOS {
 namespace AAFwk {
+class AbilityConnectManager;
 /**
  * @enum ConnectionState
  * ConnectionState defines the state of connect ability.
@@ -36,7 +37,7 @@ enum class ConnectionState { INIT, CONNECTING, CONNECTED, DISCONNECTING, DISCONN
 class ConnectionRecord : public std::enable_shared_from_this<ConnectionRecord> {
 public:
     ConnectionRecord(const sptr<IRemoteObject> &callerToken, const std::shared_ptr<AbilityRecord> &targetService,
-        const sptr<IAbilityConnection> &connCallback);
+        const sptr<IAbilityConnection> &connCallback, std::shared_ptr<AbilityConnectManager> abilityConnectManager);
     virtual ~ConnectionRecord();
 
     /**
@@ -48,8 +49,11 @@ public:
      * @return Return the connect record.
      */
     static std::shared_ptr<ConnectionRecord> CreateConnectionRecord(const sptr<IRemoteObject> &callerToken,
-        const std::shared_ptr<AbilityRecord> &targetService, const sptr<IAbilityConnection> &connCallback);
+        const std::shared_ptr<AbilityRecord> &targetService, const sptr<IAbilityConnection> &connCallback,
+        std::shared_ptr<AbilityConnectManager> abilityConnectManager);
 
+    static int32_t CallOnAbilityConnectDone(sptr<IAbilityConnection> callback,
+        const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode);
     /**
      * set the connect state.
      *
@@ -163,6 +167,7 @@ private:
     std::string callerName_;                        // caller bundleName or processName
 
     Want connectWant_;
+    std::weak_ptr<AbilityConnectManager> abilityConnectManager_;
 
     DISALLOW_COPY_AND_MOVE(ConnectionRecord);
 };
