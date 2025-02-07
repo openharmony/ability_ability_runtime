@@ -51,7 +51,7 @@ int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNative
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Alloc callbackStub obj faild");
         return NCP_ERR_INTERNAL;
     }
-
+    
     ChildProcessManager &mgr = ChildProcessManager::GetInstance();
     auto cpmErr = mgr.StartNativeChildProcessByAppSpawnFork(strLibName, callbackStub);
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
