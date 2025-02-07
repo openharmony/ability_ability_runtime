@@ -267,6 +267,8 @@ public:
      */
     int32_t GetActiveUIExtensionList(const std::string &bundleName, std::vector<std::string> &extensionList);
 
+    void OnLoadAbilityFailed(std::shared_ptr<AbilityRecord> abilityRecord);
+
     /**
      * OnAbilityDied.
      *
@@ -462,6 +464,7 @@ private:
         std::shared_ptr<ConnectionRecord> &connectRecord);
     void HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo);
     void TerminateOrCacheAbility(std::shared_ptr<AbilityRecord> abilityRecord);
+    void CancelLoadTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord);
 
     /**
      * IsAbilityConnected.

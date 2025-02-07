@@ -114,6 +114,8 @@ public:
      * @param abilityTokens abilities in died process.
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
+    
+    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) {}
 };
 
 class StartSpecifiedAbilityResponse : public AppExecFwk::StartSpecifiedAbilityResponseStub {
@@ -638,6 +640,8 @@ protected:
      * @param abilityTokens abilities in died process.
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
+
+    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) override;
 
     /**
      * @brief Notify abilityms app process pre cache

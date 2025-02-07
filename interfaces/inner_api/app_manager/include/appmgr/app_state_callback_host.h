@@ -75,6 +75,8 @@ public:
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
+    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) override;
+
     /**
      * @brief Notify abilityms app process pre cache
      * @param pid process pid.
@@ -89,6 +91,7 @@ private:
     int32_t HandleNotifyStartResidentProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyStartKeepAliveProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnAppRemoteDied(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnStartProcessFailed(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyAppPreCache(MessageParcel &data, MessageParcel &reply);
 
     DISALLOW_COPY_AND_MOVE(AppStateCallbackHost);
