@@ -1678,6 +1678,8 @@ private:
     std::unordered_set<std::string> nwebPreloadSet_ {};
     ffrt::mutex killedBundleSetMutex_;
     std::set<std::string> killedBundleSet_;
+
+    std::mutex childProcessRecordMapMutex_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

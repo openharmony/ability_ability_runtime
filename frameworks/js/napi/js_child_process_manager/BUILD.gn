@@ -35,6 +35,8 @@ ohos_shared_library("childprocessmanager_napi") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_capi",
+    "ipc:ipc_core",
     "napi:ace_napi",
   ]
 
