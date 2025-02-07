@@ -39,6 +39,10 @@ public:
     int32_t SaveEditedContentWithUri(const std::string& uri, AAFwk::Want& want);
     int32_t SaveEditedContentWithImage(std::shared_ptr<Media::PixelMap> image, const Media::PackOption& packOption,
         AAFwk::Want& want);
+    std::shared_ptr<PhotoEditorExtensionContext> GetContext()
+    {
+        return context_.lock();
+    }
 private:
     std::weak_ptr<PhotoEditorExtensionContext> context_;
     std::weak_ptr<AAFwk::Want> want_;

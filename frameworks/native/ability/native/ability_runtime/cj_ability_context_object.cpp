@@ -949,7 +949,19 @@ EXPORT napi_value FfiConvertUIAbilityContext2Napi(napi_env env, int64_t id)
         TAG_LOGE(AAFwkTag::CONTEXT, "null object");
         return undefined;
     }
-
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(
+        cjContext->GetAbilityContext());
+    napi_status status = napi_wrap(env, result, workContext,
+        [](napi_env, void* data, void*) {
+            TAG_LOGD(AAFwkTag::ABILITY, "finalizer for weak_ptr ability context is called");
+            delete static_cast<std::weak_ptr<AbilityRuntime::AbilityContext> *>(data);
+        },
+        nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return undefined;
+    }
     napi_value falseValue = nullptr;
     napi_get_boolean((napi_env)env, true, &falseValue);
     napi_set_named_property((napi_env)env, result, "stageMode", falseValue);
@@ -968,18 +980,16 @@ EXPORT int64_t FfiCreateUIAbilityContextFromNapi(napi_env env, napi_value uiAbil
         return ERR_INVALID_INSTANCE_CODE;
     }
 
-    JsAbilityContext* jsAbilityContext = nullptr;
-    napi_status status = napi_unwrap(env, uiAbilityContext, reinterpret_cast<void**>(&jsAbilityContext));
+    std::weak_ptr<AbilityContext>* context = nullptr;
+    napi_status status = napi_unwrap(env, uiAbilityContext, reinterpret_cast<void**>(&context));
     if (status != napi_ok) {
         return ERR_INVALID_INSTANCE_CODE;
     }
-
-    auto context = jsAbilityContext->GetAbilityContext();
-    if (context == nullptr) {
+    if (context == nullptr || (*context).lock() == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         return ERR_INVALID_INSTANCE_CODE;
     }
-    auto cjContext = FFI::FFIData::Create<CJAbilityContext>(context);
+    auto cjContext = FFI::FFIData::Create<CJAbilityContext>((*context).lock());
     if (cjContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null cjContext");
         return ERR_INVALID_INSTANCE_CODE;

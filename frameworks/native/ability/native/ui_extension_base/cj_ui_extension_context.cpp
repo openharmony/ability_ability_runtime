@@ -32,6 +32,7 @@
 #include "cj_ability_connect_callback_object.h"
 #include "cj_ui_extension_base.h"
 #include "ability_business_error.h"
+#include "js_ui_extension_context.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -674,6 +675,69 @@ CJ_EXPORT int32_t FFICJUIExtCtxOpenLink(int64_t id, char* cLink, CJOpenLinkOptio
     AAFwk::Want want;
     AAFwk::OpenLinkOptions options = UnwrapOpenLinkOptions(cOpenLinkOptions, want);
     return cjContext->impl->OpenLink(std::string(cLink), options, want, requestCode, *cbInfo);
+}
+
+CJ_EXPORT napi_value FfiConvertUIExtCtx2Napi(napi_env env, int64_t id)
+{
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
+    auto cjUIExtCtx = OHOS::FFI::FFIData::GetData<CJUIExtensionContext>(id);
+    if (cjUIExtCtx == nullptr || cjUIExtCtx->impl == nullptr || (cjUIExtCtx->impl->context_).lock() == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "cj context null ptr");
+        return undefined;
+    }
+    auto ptr = (cjUIExtCtx->impl->context_).lock();
+    napi_value result = JsUIExtensionContext::CreateJsUIExtensionContext(env, ptr);
+    if (result == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null object");
+        return undefined;
+    }
+    auto workContext = new (std::nothrow) std::weak_ptr<UIExtensionContext>(ptr);
+    napi_status status = napi_wrap(env, result, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer for weak_ptr ui extension context is called");
+            delete static_cast<std::weak_ptr<UIExtensionContext> *>(data);
+        },
+        nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return undefined;
+    }
+
+    napi_value falseValue = nullptr;
+    napi_get_boolean((napi_env)env, true, &falseValue);
+    napi_set_named_property((napi_env)env, result, "stageMode", falseValue);
+    return result;
+}
+
+CJ_EXPORT int64_t FfiCreateUIExtCtxFromNapi(napi_env env, napi_value cjUIExtContext)
+{
+    if (env == nullptr || cjUIExtContext == nullptr) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    napi_valuetype type;
+    if (napi_typeof(env, cjUIExtContext, &type) || type != napi_object) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    std::weak_ptr<UIExtensionContext>* context = nullptr;
+    napi_status status = napi_unwrap(env, cjUIExtContext, reinterpret_cast<void**>(&context));
+    if (status != napi_ok) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    if (context == nullptr || (*context).lock() == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    auto cjContext = OHOS::FFI::FFIData::Create<CJUIExtensionContext>((*context).lock());
+    if (cjContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cjContext");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    return cjContext->GetID();
 }
 }
 }  // namespace AbilityRuntime
