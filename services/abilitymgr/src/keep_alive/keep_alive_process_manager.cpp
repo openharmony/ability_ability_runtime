@@ -145,7 +145,7 @@ void KeepAliveProcessManager::AfterStartKeepAliveApp(const std::string &bundleNa
     uint32_t accessTokenId, int32_t uid, int32_t userId, bool isMultiInstance)
 {
     // not support statusbar and don't need check after 5s
-    if (DelayedSingleton<AbilityManagerService>::GetInstance()->IsSupportStatusBar(uid)) {
+    if (!DelayedSingleton<AbilityManagerService>::GetInstance()->IsSupportStatusBar(uid)) {
         TAG_LOGI(AAFwkTag::KEEP_ALIVE, "not support statusBar, don't need check when keep alive");
         return;
     }
