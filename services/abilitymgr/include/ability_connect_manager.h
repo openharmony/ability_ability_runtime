@@ -501,6 +501,8 @@ private:
     void GetOrCreateServiceRecord(const AbilityRequest &abilityRequest, const bool isCreatedByConnect,
         std::shared_ptr<AbilityRecord> &targetAbilityRecord, bool &isLoadedAbility);
 
+    void RemoveServiceFromMapSafe(const std::string &serviceKey);
+
     /**
      * GetConnectRecordListFromMap.
      *
