@@ -2760,7 +2760,7 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
     if (specifiedRequest.preCreateProcessName) {
         PreCreateProcessName(request);
     }
-    if (!HasAppRecord(request)) {
+    if (!IsSpecifiedModuleLoaded(request)) {
         specifiedRequest.isCold = true;
         auto sessionInfo = CreateSessionInfo(request);
         sessionInfo->requestCode = request.requestCode;
@@ -2790,11 +2790,11 @@ std::shared_ptr<SpecifiedRequest> UIAbilityLifecycleManager::PopAndGetNextSpecif
             }
         }
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "unknown request: %{}d", requestId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "unknown request: %{public}d", requestId);
     return nullptr;
 }
 
-bool UIAbilityLifecycleManager::HasAppRecord(const AbilityRequest &abilityRequest)
+bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &abilityRequest)
 {
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
@@ -2802,7 +2802,8 @@ bool UIAbilityLifecycleManager::HasAppRecord(const AbilityRequest &abilityReques
         return false;
     }
     bool appExist = false;
-    auto ret = IN_PROCESS_CALL(appMgr->HasAppRecord(abilityRequest.want, abilityRequest.abilityInfo, appExist));
+    auto ret = IN_PROCESS_CALL(appMgr->IsSpecifiedModuleLoaded(abilityRequest.want,
+        abilityRequest.abilityInfo, appExist));
     return ret == ERR_OK && appExist;
 }
 

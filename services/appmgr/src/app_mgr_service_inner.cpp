@@ -8052,16 +8052,12 @@ int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bund
     return ERR_OK;
 }
 
-bool AppMgrServiceInner::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo)
+bool AppMgrServiceInner::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo)
 {
     if (!CheckRemoteClient() || !appRunningManager_) {
         return false;
     }
     auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
-    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(appInfo->uid))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
-        return false;
-    }
     int32_t appIndex = 0;
     (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
     BundleInfo bundleInfo;
@@ -8074,10 +8070,18 @@ bool AppMgrServiceInner::HasAppRecord(const AAFwk::Want &want, const AbilityInfo
     std::string processName;
     MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, "", processName);
 
-    auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
     auto appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid,
         bundleInfo, "");
-    return appRecord != nullptr;
+    if (appRecord == nullptr) {
+        return false;
+    }
+
+    auto moduleRecord = appRecord->GetModuleRecordByModuleName(appInfo->bundleName, hapModuleInfo.moduleName);
+    if (moduleRecord == nullptr) {
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "IsSpecifiedModuleLoaded state %{public}d", moduleRecord->GetModuleRecordState());
+    return moduleRecord->IsLoaded();
 }
 
 void AppMgrServiceInner::SendAppSpawnUninstallDebugHapMsg(int32_t userId)

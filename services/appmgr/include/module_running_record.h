@@ -166,12 +166,22 @@ public:
 
     bool IsAllAbilityReadyToCleanedByUserRequest();
 
+    void SetLoaded()
+    {
+        isLoaded_ = true;
+    }
+
+    bool IsLoaded() const
+    {
+        return isLoaded_;
+    }
 private:
     void SendEvent(uint32_t msg, int64_t timeOut, const std::shared_ptr<AbilityRunningRecord> &abilityRecord);
 
     ModuleRecordState GetState() const;
 
 private:
+    bool isLoaded_ = false;
     mutable ffrt::mutex abilitiesMutex_;
     std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilities_;
     std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> terminateAbilities_;

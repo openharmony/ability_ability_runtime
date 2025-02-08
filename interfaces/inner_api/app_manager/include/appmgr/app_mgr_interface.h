@@ -808,7 +808,7 @@ public:
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName, std::vector<int32_t> &pidList) = 0;
 
-    virtual int32_t HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
+    virtual int32_t IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
     {
         return 0;
     }

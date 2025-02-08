@@ -1242,7 +1242,7 @@ public:
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName, std::vector<int32_t> &pidList);
 
-    bool HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
+    bool IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
 
     /**
      * Send appSpawn uninstall debug hap message.
