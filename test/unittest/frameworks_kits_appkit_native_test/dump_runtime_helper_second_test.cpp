@@ -19,6 +19,8 @@
 #undef private
 
 #include "app_loader.h"
+#include "js_runtime.h"
+#include "js_runtime_utils.h"
 #include "ohos_application.h"
 
 using namespace testing::ext;

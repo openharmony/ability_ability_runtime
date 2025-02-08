@@ -1382,5 +1382,43 @@ bool WrapJsWantParamsArray(napi_env env, napi_value object, const std::string &k
         return false;
     }
 }
+
+template<class TBase, class T, class NativeT>
+bool InnerWrapWantParamsArray(napi_env env, napi_value object, const std::string &key, sptr<AAFwk::IArray> &ao)
+{
+    if (ao == nullptr) {
+        return false;
+    }
+    long size = 0;
+    if (ao->GetLength(size) != ERR_OK) {
+        return false;
+    }
+    std::vector<NativeT> natArray;
+    for (long i = 0; i < size; i++) {
+        sptr<AAFwk::IInterface> iface = nullptr;
+        if (ao->Get(i, iface) == ERR_OK) {
+            TBase *iValue = TBase::Query(iface);
+            if (iValue != nullptr) {
+                natArray.push_back(T::Unbox(iValue));
+            }
+        }
+    }
+    napi_set_named_property(env, object, key.c_str(), OHOS::AbilityRuntime::CreateNativeArray(env, natArray));
+    return true;
+}
+
+template<class TBase, class T, class NativeT>
+bool InnerWrapJsWantParams(napi_env env, napi_value object, const std::string &key, const AAFwk::WantParams &wantParams)
+{
+    auto value = wantParams.GetParam(key);
+    TBase *ao = TBase::Query(value);
+    if (ao != nullptr) {
+        NativeT natValue = T::Unbox(ao);
+        napi_value propertyValue = OHOS::AbilityRuntime::CreateJsValue(env, natValue);
+        napi_set_named_property(env, object, key.c_str(), propertyValue);
+        return true;
+    }
+    return false;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
