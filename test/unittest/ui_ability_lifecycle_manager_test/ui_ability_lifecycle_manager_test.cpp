@@ -32,6 +32,7 @@
 #include "session_info.h"
 #include "startup_util.h"
 #include "ability_manager_service.h"
+#include "ability_scheduler_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2857,6 +2858,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsAbilityStarted_002, TestSize.Level1)
     abilityRequest.sessionInfo = sessionInfo;
     auto targetRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, targetRecord);
+    EXPECT_EQ(uiAbilityLifecycleManager->IsAbilityStarted(abilityRequest, targetRecord), false);
+    sptr<IAbilityScheduler> scheduler = new AbilitySchedulerMock();
+    targetRecord->SetScheduler(scheduler);
     EXPECT_EQ(uiAbilityLifecycleManager->IsAbilityStarted(abilityRequest, targetRecord), true);
 }
 

@@ -8838,16 +8838,12 @@ void AppMgrServiceInner::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
     }
 }
 
-bool AppMgrServiceInner::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo)
+bool AppMgrServiceInner::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo)
 {
     if (!CheckRemoteClient() || !appRunningManager_) {
         return false;
     }
     auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
-    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(appInfo->uid))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
-        return false;
-    }
     int32_t appIndex = 0;
     (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
     BundleInfo bundleInfo;
@@ -8857,14 +8853,22 @@ bool AppMgrServiceInner::HasAppRecord(const AAFwk::Want &want, const AbilityInfo
     }
 
     auto abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
-    auto specifiedProcessFlag = GetSpecifiedProcessFlag(abilityInfo, want);
     std::string processName;
-    MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, specifiedProcessFlag, processName, false);
-
+    MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, "", processName, false);
     auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
-    auto appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid,
-        bundleInfo, "", nullptr, instanceKey);
-    return appRecord != nullptr;
+    auto customProcessFlag = abilityInfo.process;
+    auto appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
+        processName, appInfo->uid, bundleInfo, "", nullptr, instanceKey, customProcessFlag);
+    if (appRecord == nullptr) {
+        return false;
+    }
+
+    auto moduleRecord = appRecord->GetModuleRecordByModuleName(appInfo->bundleName, hapModuleInfo.moduleName);
+    if (moduleRecord == nullptr) {
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "IsSpecifiedModuleLoaded state %{public}d", moduleRecord->GetModuleRecordState());
+    return moduleRecord->IsLoaded();
 }
 } // namespace AppExecFwk
 }  // namespace OHOS

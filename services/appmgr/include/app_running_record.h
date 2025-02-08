@@ -647,7 +647,7 @@ public:
      * Called when one specified request is finished to set the request id to -1
      */
     void ResetSpecifiedRequestId();
-    
+
     void SchedulePrepareTerminate(const std::string &moduleName, int32_t &prepareTermination, bool &isExist);
 
     /**
@@ -1074,6 +1074,7 @@ private:
 
     void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record, bool isExtensionDebug = false);
     uint32_t GetAddStageTimeout() const;
+    void SetModuleLoaded(const std::string &moduleName) const;
 
 private:
     class RemoteObjHash {
