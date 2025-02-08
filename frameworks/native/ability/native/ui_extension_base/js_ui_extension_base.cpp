@@ -728,11 +728,11 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
             TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
             return false;
         }
-        if (!CallJsOnSessionCreate(want, sessionInfo, uiWindow, componentId)) {
+        uiWindow->UpdateExtensionConfig(sharedWant);
+        if (!CallJsOnSessionCreate(*sharedWant, sessionInfo, uiWindow, componentId)) {
             return false;
         }
-        uiWindowMap_[componentId] = uiWindow;
-        uiWindow->UpdateExtensionConfig(sharedWant);
+        uiWindowMap_[componentId] = uiWindow;        
 #ifdef SUPPORT_GRAPHICS
         if (context_->GetWindow() == nullptr) {
             context_->SetWindow(uiWindow);
