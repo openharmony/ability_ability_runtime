@@ -238,8 +238,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleGetProcessMemoryByPid(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::IS_TERMINATING_BY_PID):
             return HandleIsTerminatingByPid(data, reply);
-        case static_cast<uint32_t>(AppMgrInterfaceCode::HAS_APP_RECORD):
-            return HandleHasAppRecord(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::IS_SPECIFIED_MODULE_LOADED):
+            return HandleIsSpecifiedModuleLoaded(data, reply);
     }
     return INVALID_FD;
 }
@@ -1805,7 +1805,7 @@ int32_t AppMgrStub::HandleUpdateInstanceKeyBySpecifiedId(MessageParcel &data, Me
     return NO_ERROR;
 }
 
-int32_t AppMgrStub::HandleHasAppRecord(MessageParcel &data, MessageParcel &reply)
+int32_t AppMgrStub::HandleIsSpecifiedModuleLoaded(MessageParcel &data, MessageParcel &reply)
 {
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
@@ -1819,7 +1819,7 @@ int32_t AppMgrStub::HandleHasAppRecord(MessageParcel &data, MessageParcel &reply
     }
 
     bool exist = false;
-    auto ret = HasAppRecord(*want, *abilityInfo, exist);
+    auto ret = IsSpecifiedModuleLoaded(*want, *abilityInfo, exist);
     if (ret == ERR_OK) {
         reply.WriteBool(exist);
     }
