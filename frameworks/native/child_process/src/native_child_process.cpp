@@ -19,6 +19,8 @@
 #include "hilog_tag_wrapper.h"
 #include "native_child_callback.h"
 #include "child_process_manager.h"
+#include "child_callback_manager.h"
+#include "child_process_manager_error_utils.h"
 
 using namespace OHOS;
 using namespace OHOS::AbilityRuntime;
@@ -26,46 +28,8 @@ using namespace OHOS::AbilityRuntime;
 namespace {
 
 std::mutex g_mutexCallBackObj;
-sptr<IRemoteObject> g_CallbackStub;
-OH_Ability_OnNativeChildProcessStarted g_Callback = nullptr;
 constexpr size_t MAX_KEY_SIZE = 20;
 constexpr size_t MAX_FD_SIZE = 16;
-
-const std::map<ChildProcessManagerErrorCode, Ability_NativeChildProcess_ErrCode> CPM_ERRCODE_MAP = {
-    { ChildProcessManagerErrorCode::ERR_OK, NCP_NO_ERROR },
-    { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED, NCP_ERR_MULTI_PROCESS_DISABLED },
-    { ChildProcessManagerErrorCode::ERR_ALREADY_IN_CHILD_PROCESS, NCP_ERR_ALREADY_IN_CHILD },
-    { ChildProcessManagerErrorCode::ERR_GET_APP_MGR_FAILED, NCP_ERR_SERVICE_ERROR },
-    { ChildProcessManagerErrorCode::ERR_APP_MGR_FAILED_INNER, NCP_ERR_SERVICE_ERROR },
-    { ChildProcessManagerErrorCode::ERR_UNSUPPORT_NATIVE_CHILD_PROCESS, NCP_ERR_NOT_SUPPORTED },
-    { ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES, NCP_ERR_MAX_CHILD_PROCESSES_REACHED },
-    { ChildProcessManagerErrorCode::ERR_LIB_LOADING_FAILED, NCP_ERR_LIB_LOADING_FAILED },
-    { ChildProcessManagerErrorCode::ERR_CONNECTION_FAILED, NCP_ERR_CONNECTION_FAILED },
-    { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW, NCP_ERR_MULTI_PROCESS_DISABLED },
-};
-
-Ability_NativeChildProcess_ErrCode CvtChildProcessManagerErrCode(ChildProcessManagerErrorCode cpmErr)
-{
-    auto it = CPM_ERRCODE_MAP.find(cpmErr);
-    if (it == CPM_ERRCODE_MAP.end()) {
-        return NCP_ERR_INTERNAL;
-    }
-
-    return it->second;
-}
-
-void OnNativeChildProcessStartedWapper(int errCode, OHIPCRemoteProxy *ipcProxy)
-{
-    std::unique_lock autoLock(g_mutexCallBackObj);
-    if (g_Callback != nullptr) {
-        g_Callback(CvtChildProcessManagerErrCode(static_cast<ChildProcessManagerErrorCode>(errCode)), ipcProxy);
-        g_Callback = nullptr;
-    } else {
-        TAG_LOGW(AAFwkTag::PROCESSMGR, "Remote call twice?");
-    }
-
-    g_CallbackStub.clear();
-}
 
 } // Anonymous namespace
 
@@ -81,14 +45,8 @@ int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNative
         TAG_LOGE(AAFwkTag::PROCESSMGR, "relative path not allow");
         return NCP_ERR_INVALID_PARAM;
     }
-    
-    std::unique_lock autoLock(g_mutexCallBackObj);
-    if (g_Callback != nullptr || g_CallbackStub != nullptr) {
-        TAG_LOGW(AAFwkTag::PROCESSMGR, "Another native process starting");
-        return NCP_ERR_BUSY;
-    }
-    
-    sptr<IRemoteObject> callbackStub(new (std::nothrow) NativeChildCallback(OnNativeChildProcessStartedWapper));
+
+    sptr<IRemoteObject> callbackStub(new (std::nothrow) NativeChildCallback(onProcessStarted));
     if (!callbackStub) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Alloc callbackStub obj faild");
         return NCP_ERR_INTERNAL;
@@ -97,11 +55,10 @@ int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNative
     ChildProcessManager &mgr = ChildProcessManager::GetInstance();
     auto cpmErr = mgr.StartNativeChildProcessByAppSpawnFork(strLibName, callbackStub);
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
-        return CvtChildProcessManagerErrCode(cpmErr);
+        return ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(cpmErr);
     }
 
-    g_Callback = onProcessStarted;
-    g_CallbackStub = callbackStub;
+    ChildCallbackManager::GetInstance().AddRemoteObject(callbackStub);
     return NCP_NO_ERROR;
 }
 
@@ -154,7 +111,7 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
     ChildProcessManager &mgr = ChildProcessManager::GetInstance();
     auto cpmErr = mgr.StartChildProcessWithArgs(entryName, *pid, childProcessType, childArgs, childProcessOptions);
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
-        return CvtChildProcessManagerErrCode(cpmErr);
+        return ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(cpmErr);
     }
     return NCP_NO_ERROR;
 }
