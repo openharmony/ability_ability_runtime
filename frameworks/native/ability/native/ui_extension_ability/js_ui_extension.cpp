@@ -754,8 +754,8 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
         }
 #endif // SUPPORT_GRAPHICS
     } else {
-      auto& uiWindow = uiWindowMap_[compId];
-      uiWindow->UpdateExtensionConfig(sharedWant);
+        auto &uiWindow = uiWindowMap_[compId];
+        uiWindow->UpdateExtensionConfig(sharedWant);
     }
     return true;
 }
