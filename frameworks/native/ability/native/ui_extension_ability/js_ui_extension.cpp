@@ -724,9 +724,10 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
             TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
             return false;
         }
+        uiWindow->UpdateExtensionConfig(sharedWant);
         HandleScope handleScope(jsRuntime_);
         napi_env env = jsRuntime_.GetNapiEnv();
-        napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
+        napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, *sharedWant);
         napi_value nativeContentSession = JsUIExtensionContentSession::CreateJsUIExtensionContentSession(
             env, sessionInfo, uiWindow, context, abilityResultListeners_);
         napi_ref ref = nullptr;
@@ -746,8 +747,7 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
             napi_value argv[] = {napiWant, nativeContentSession};
             CallObjectMethod("onSessionCreate", argv, ARGC_TWO);
         }
-        uiWindowMap_[compId] = uiWindow;
-        uiWindow->UpdateExtensionConfig(sharedWant);
+        uiWindowMap_[compId] = uiWindow;        
 #ifdef SUPPORT_GRAPHICS
         if (context->GetWindow() == nullptr) {
             context->SetWindow(uiWindow);
