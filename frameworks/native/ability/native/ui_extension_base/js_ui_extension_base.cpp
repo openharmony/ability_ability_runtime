@@ -732,7 +732,7 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         if (!CallJsOnSessionCreate(*sharedWant, sessionInfo, uiWindow, componentId)) {
             return false;
         }
-        uiWindowMap_[componentId] = uiWindow;        
+        uiWindowMap_[componentId] = uiWindow;
 #ifdef SUPPORT_GRAPHICS
         if (context_->GetWindow() == nullptr) {
             context_->SetWindow(uiWindow);
