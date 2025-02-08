@@ -95,23 +95,22 @@ static uint32_t BuildStartFlags(const AAFwk::Want &want, const AbilityInfo &abil
 static void SetJITPermissions(uint32_t accessTokenId, JITPermissionsList &jitPermissionsList)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(
-        accessTokenId,
+    std::vector<std::string> tmpPermissionList = {
         JIT_PERMISSION_ALLOW_WRITABLE_CODE_MEMORY,
-        false) == Security::AccessToken::PERMISSION_GRANTED) {
-        jitPermissionsList.emplace_back(JIT_PERMISSION_ALLOW_WRITABLE_CODE_MEMORY);
-    }
-    if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(
-        accessTokenId,
         JIT_PERMISSION_DISABLE_CODE_MEMORY_PROTECTION,
-        false) == Security::AccessToken::PERMISSION_GRANTED) {
-        jitPermissionsList.emplace_back(JIT_PERMISSION_DISABLE_CODE_MEMORY_PROTECTION);
+        JIT_PERMISSION_ALLOW_EXECUTABLE_FORT_MEMORY
+    };
+
+    std::vector<int32_t> permStateList;
+    auto result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(accessTokenId, tmpPermissionList,
+        permStateList, true);
+    if (result != ERR_OK || permStateList.size() != tmpPermissionList.size()) {
+        return;
     }
-    if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(
-        accessTokenId,
-        JIT_PERMISSION_ALLOW_EXECUTABLE_FORT_MEMORY,
-        false) == Security::AccessToken::PERMISSION_GRANTED) {
-        jitPermissionsList.emplace_back(JIT_PERMISSION_ALLOW_EXECUTABLE_FORT_MEMORY);
+    for (int i = 0; i < permStateList.size(); i++) {
+        if (permStateList[i] == Security::AccessToken::PERMISSION_GRANTED) {
+            jitPermissionsList.emplace_back(tmpPermissionList[i]);
+        }
     }
 }
 }  // namespace AppspawnUtil
