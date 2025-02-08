@@ -146,6 +146,8 @@ bool OHOSJsEnvironmentImpl::InitLoop(NativeEngine* engine, bool isStage)
         TAG_LOGD(AAFwkTag::JSRUNTIME, "uv_register_task_to_event, isStage: %{public}d", isStage);
         if (isStage && (eventHandler_->GetEventRunner()).get() == AppExecFwk::EventRunner::GetMainEventRunner().get()) {
             uv_register_task_to_event(uvLoop, PostTaskToHandler, nullptr);
+            // send signal here to trigger uv tasks generated during initialization.
+            uv_async_send(&uvLoop->wq_async);
         }
     }
 
