@@ -13,29 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_NATIVE_CHILD_CALLBACK_H
-#define OHOS_ABILITY_RUNTIME_NATIVE_CHILD_CALLBACK_H
+#ifndef OHOS_ABILITY_RUNTIME_CHILD_CALLBACK_MANAGER_H
+#define OHOS_ABILITY_RUNTIME_CHILD_CALLBACK_MANAGER_H
 
-#include "native_child_notify_stub.h"
-#include "native_child_process.h"
-#include "child_callback_manager.h"
+#include "iremote_stub.h"
+#include "nocopyable.h"
+#include <mutex>
+#include <set>
 
 namespace OHOS {
 namespace AbilityRuntime {
 
-class NativeChildCallback : public OHOS::AppExecFwk::NativeChildNotifyStub {
+class ChildCallbackManager {
 public:
-    explicit NativeChildCallback(OH_Ability_OnNativeChildProcessStarted cb);
-    ~NativeChildCallback() = default;
+    static ChildCallbackManager &GetInstance();
+    ~ChildCallbackManager() = default;
 
-    void OnNativeChildStarted(const sptr<IRemoteObject> &nativeChild) override;
-    void OnError(int32_t errCode) override;
+    void AddRemoteObject(sptr<IRemoteObject> nativeCallback);
+    void RemoveRemoteObject(sptr<IRemoteObject> nativeCallback);
 
 private:
-    OH_Ability_OnNativeChildProcessStarted callback_ = nullptr;
+    std::mutex mutex_;
+    std::set<sptr<IRemoteObject>> callbackStubs_;
+
+    ChildCallbackManager() = default;
+    DISALLOW_COPY_AND_MOVE(ChildCallbackManager);
 };
+
 
 } // namespace AbilityRuntime
 } // namespace OHOS
 
-#endif // OHOS_ABILITY_RUNTIME_NATIVE_CHILD_CALLBACK_H
+#endif // OHOS_ABILITY_RUNTIME_CHILD_CALLBACK_MANAGER_H

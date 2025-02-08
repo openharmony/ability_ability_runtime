@@ -48,6 +48,9 @@ void NativeChildCallback::OnNativeChildStarted(const sptr<IRemoteObject> &native
     }
 
     callback_(static_cast<int32_t>(ChildProcessManagerErrorCode::ERR_OK), ipcProxy);
+    callback_ = nullptr;
+
+    ChildCallbackManager::GetInstance().RemoveRemoteObject(this);
 }
 
 void NativeChildCallback::OnError(int32_t errCode)
@@ -59,6 +62,9 @@ void NativeChildCallback::OnError(int32_t errCode)
 
     TAG_LOGI(AAFwkTag::PROCESSMGR, "Native child process start err %{public}d", errCode);
     callback_(errCode, nullptr);
+    
+    callback_ = nullptr;
+    ChildCallbackManager::GetInstance().RemoveRemoteObject(this);
 }
 
 } // namespace AbilityRuntime
