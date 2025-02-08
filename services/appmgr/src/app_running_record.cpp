@@ -577,6 +577,7 @@ void AppRunningRecord::AddAbilityStageDone()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s and eventId %{public}d", mainBundleName_.c_str(),
         static_cast<int>(eventId_));
+    SetModuleLoaded(moduleName_);
 
     if (!eventHandler_) {
         TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ null");
@@ -607,6 +608,17 @@ void AppRunningRecord::AddAbilityStageDone()
     }
 
     AddAbilityStage();
+}
+
+void AppRunningRecord::SetModuleLoaded(const std::string &moduleName) const
+{
+    auto moduleRecordList = GetAllModuleRecord();
+    for (const auto &item : moduleRecordList) {
+        if (item && item->GetModuleName() == moduleName) {
+            item->SetLoaded();
+            break;
+        }
+    }
 }
 
 void AppRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningRecord> &ability)
@@ -1683,6 +1695,7 @@ void AppRunningRecord::ScheduleAcceptWantDone()
     }
 
     eventHandler_->RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG, eventId_);
+    SetModuleLoaded(moduleName_);
 }
 
 void AppRunningRecord::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)
@@ -1707,6 +1720,7 @@ void AppRunningRecord::ScheduleNewProcessRequestDone()
     }
 
     eventHandler_->RemoveEvent(AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG, eventId_);
+    SetModuleLoaded(moduleName_);
 }
 
 void AppRunningRecord::ApplicationTerminated()
