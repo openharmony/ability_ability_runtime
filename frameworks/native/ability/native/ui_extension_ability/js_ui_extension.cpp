@@ -747,7 +747,7 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
             napi_value argv[] = {napiWant, nativeContentSession};
             CallObjectMethod("onSessionCreate", argv, ARGC_TWO);
         }
-        uiWindowMap_[compId] = uiWindow;        
+        uiWindowMap_[compId] = uiWindow;
 #ifdef SUPPORT_GRAPHICS
         if (context->GetWindow() == nullptr) {
             context->SetWindow(uiWindow);
