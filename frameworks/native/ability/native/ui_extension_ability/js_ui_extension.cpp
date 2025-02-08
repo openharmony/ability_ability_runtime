@@ -715,6 +715,7 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
     TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ", element: %{public}s",
         sessionInfo->uiExtensionComponentId, want.GetElement().GetURI().c_str());
+    std::shared_ptr<AAFwk::Want> sharedWant = std::make_shared<AAFwk::Want>();
     auto compId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(compId) == uiWindowMap_.end()) {
         auto context = GetContext();
@@ -746,11 +747,15 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
             CallObjectMethod("onSessionCreate", argv, ARGC_TWO);
         }
         uiWindowMap_[compId] = uiWindow;
+        uiWindow->UpdateExtensionConfig(sharedWant);
 #ifdef SUPPORT_GRAPHICS
         if (context->GetWindow() == nullptr) {
             context->SetWindow(uiWindow);
         }
 #endif // SUPPORT_GRAPHICS
+    } else {
+      auto& uiWindow = uiWindowMap_[compId];
+      uiWindow->UpdateExtensionConfig(sharedWant);
     }
     return true;
 }
