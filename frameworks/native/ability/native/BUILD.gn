@@ -1298,6 +1298,7 @@ ohos_shared_library("data_ability_helper") {
     "data_share:datashare_consumer",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
     "relational_store:native_dataability",
     "relational_store:rdb_data_ability_adapter",
@@ -1646,6 +1647,7 @@ ohos_shared_library("ui_extension_module") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
     "window_manager:libwm",
   ]
@@ -1698,6 +1700,7 @@ ohos_shared_library("share_extension") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
   ]
 
@@ -1798,6 +1801,7 @@ ohos_shared_library("action_extension") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
   ]
 
@@ -2062,6 +2066,7 @@ ohos_shared_library("embedded_ui_extension") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
   ]
 
@@ -2330,6 +2335,7 @@ ohos_shared_library("photo_editor_extension") {
     "image_framework:image",
     "image_framework:image_native",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
   ]
 
