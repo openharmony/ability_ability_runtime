@@ -781,7 +781,7 @@ public:
 
     virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) override;
 
-    int32_t HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result) override;
+    int32_t IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result) override;
 
     /**
      * UpdateProcessMemoryState, call UpdateProcessMemoryState() through proxy object,

@@ -440,6 +440,7 @@ void AppRunningRecord::AddAbilityStageDone()
     RemoveEvent(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG);
+    SetModuleLoaded(moduleName_);
 
     // Should proceed to the next notification
     if (IsStartSpecifiedAbility()) {
@@ -454,6 +455,17 @@ void AppRunningRecord::AddAbilityStageDone()
     }
 
     AddAbilityStage();
+}
+
+void AppRunningRecord::SetModuleLoaded(const std::string &moduleName) const
+{
+    auto moduleRecordList = GetAllModuleRecord();
+    for (const auto &item : moduleRecordList) {
+        if (item && item->GetModuleName() == moduleName) {
+            item->SetLoaded();
+            break;
+        }
+    }
 }
 
 void AppRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningRecord> &ability)
@@ -1560,6 +1572,7 @@ void AppRunningRecord::ScheduleAcceptWantDone()
     TAG_LOGI(AAFwkTag::APPMGR, "ScheduleAcceptWantDone, bundle %{public}s", mainBundleName_.c_str());
     RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG);
+    SetModuleLoaded(moduleName_);
 }
 
 void AppRunningRecord::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)
@@ -1579,6 +1592,7 @@ void AppRunningRecord::ScheduleNewProcessRequestDone()
     TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s", mainBundleName_.c_str());
     RemoveEvent(AMSEventHandler::START_SPECIFIED_PROCESS_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG);
+    SetModuleLoaded(moduleName_);
 }
 
 void AppRunningRecord::ApplicationTerminated()

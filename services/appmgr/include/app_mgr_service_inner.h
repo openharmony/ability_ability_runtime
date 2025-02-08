@@ -1457,7 +1457,7 @@ public:
      */
     void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
 
-    bool HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
+    bool IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
