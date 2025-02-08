@@ -229,6 +229,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleGetProcessMemoryByPid(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::IS_TERMINATING_BY_PID):
             return HandleIsTerminatingByPid(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::HAS_APP_RECORD):
+            return HandleHasAppRecord(data, reply);
     }
     return INVALID_FD;
 }
@@ -1692,6 +1694,27 @@ int32_t AppMgrStub::GetSupportedProcessCachePids(const std::string &bundleName,
     std::vector<int32_t> &pidList)
 {
     return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleHasAppRecord(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    std::unique_ptr<AbilityInfo> abilityInfo(data.ReadParcelable<AbilityInfo>());
+    if (abilityInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+
+    bool exist = false;
+    auto ret = HasAppRecord(*want, *abilityInfo, exist);
+    if (ret == ERR_OK) {
+        reply.WriteBool(exist);
+    }
+    return ret;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
