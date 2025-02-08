@@ -707,7 +707,7 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return false;
     }
-    std::shared_ptr<AAFwk::Want> sharedWant = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<AAFwk::Want> sharedWant = std::make_shared<AAFwk::Want>(want);
     auto componentId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
         if (context_ == nullptr || context_->GetAbilityInfo() == nullptr) {
@@ -739,7 +739,11 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         }
 #endif // SUPPORT_GRAPHICS
     } else {
-        auto &uiWindow = uiWindowMap_[componentId];
+        auto uiWindow = uiWindowMap_[componentId];
+        if (uiWindow == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
+            return false;
+        }
         uiWindow->UpdateExtensionConfig(sharedWant);
     }
     return true;
