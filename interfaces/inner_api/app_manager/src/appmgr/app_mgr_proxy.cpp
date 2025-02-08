@@ -2061,5 +2061,22 @@ int32_t AppMgrProxy::GetSupportedProcessCachePids(const std::string &bundleName,
     }
     return reply.ReadInt32();
 }
+
+int32_t AppMgrProxy::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &want);
+    PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &abilityInfo);
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::HAS_APP_RECORD, data, reply, option);
+    result = reply.ReadBool();
+    return ERR_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
