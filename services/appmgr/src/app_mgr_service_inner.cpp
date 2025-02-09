@@ -5162,7 +5162,7 @@ void AppMgrServiceInner::InitGlobalConfiguration()
 
 #ifdef SUPPORT_SCREEN
     // Currently only this interface is known
-    auto language = OHOS::Global::I18n::LocaleConfig::GetSystemLocale();
+    auto language = OHOS::Global::I18n::LocaleConfig::GetEffectiveLanguage();
     TAG_LOGI(AAFwkTag::APPMGR, "current global language: %{public}s", language.c_str());
     globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
     std::string sysHour = OHOS::Global::I18n::LocaleConfig::GetSystemHour();
