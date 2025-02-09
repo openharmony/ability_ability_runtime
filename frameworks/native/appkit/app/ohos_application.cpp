@@ -696,8 +696,8 @@ void OHOSApplication::ScheduleAcceptWant(const AAFwk::Want &want, const std::str
     }
 }
 
-void OHOSApplication::SchedulePrepareTerminate(const std::string &moduleName, std::function<void(int)> callback,
-    bool &isAsync, int32_t &prepareTermination, bool &isExist)
+void OHOSApplication::SchedulePrepareTerminate(const std::string &moduleName,
+    std::function<void(AppExecFwk::OnPrepareTerminationResult)> callback, bool &isAsync)
 {
     isAsync = false;
     if (callback == nullptr) {
@@ -710,17 +710,17 @@ void OHOSApplication::SchedulePrepareTerminate(const std::string &moduleName, st
         return;
     }
 
-    auto *callbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Create();
+    auto *callbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult>::Create();
     if (callbackInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
         return;
     }
     callbackInfo->Push(callback);
-    isExist = iter->second->OnPrepareTerminate(callbackInfo, isAsync, prepareTermination);
-    TAG_LOGI(AAFwkTag::APPKIT, "end SchedulePrepareTerminate, isExist=%{public}d,isAsync=%{public}d",
-        isExist, isAsync);
-    if (!isAsync) {
-        AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Destroy(callbackInfo);
+    if (!iter->second->OnPrepareTerminate(callbackInfo, isAsync)) {
+        TAG_LOGI(AAFwkTag::APPKIT, "not exist");
+        AppExecFwk::OnPrepareTerminationResult result = { 0, false };
+        callbackInfo->Call(result);
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult>::Destroy(callbackInfo);
     }
 }
 

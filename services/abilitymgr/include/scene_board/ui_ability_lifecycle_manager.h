@@ -266,7 +266,7 @@ public:
 
     void GetActiveAbilityList(int32_t uid, std::vector<std::string> &abilityList, int32_t pid = NO_PID);
 
-    bool PrepareTerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    bool PrepareTerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool isSCBCall);
     void SetSessionHandler(const sptr<ISessionHandler> &handler);
 
     /**
@@ -369,6 +369,10 @@ public:
     int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     void EnableListForSCBRecovery();
+
+    void PrepareTerminateAbilityDone(std::shared_ptr<AbilityRecord> abilityRecord, bool isTerminate);
+
+    void TryPrepareTerminateByPidsDone(const std::string &moduleName, int32_t prepareTermination, bool isExist);
 
 private:
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse) const;
@@ -509,6 +513,22 @@ private:
 
     std::map<std::string, std::list<std::shared_ptr<SpecifiedRequest>>> specifiedRequestList_;
     std::map<int32_t, std::string> specifiedFlagMap_;
+
+    struct PrepareTerminateByPidRecord {
+        pid_t pid_;
+        std::string moduleName_;
+        std::atomic_bool isTryPrepareTerminateByPidsDone_;
+        int32_t prepareTermination_;
+        bool isExist_;
+
+        PrepareTerminateByPidRecord(pid_t pid, const std::string &moduleName, bool done,
+            int32_t prepareTermination, bool isExist) : pid_(pid), moduleName_(moduleName),
+            isTryPrepareTerminateByPidsDone_(done), prepareTermination_(prepareTermination),
+            isExist_(isExist) {}
+    };
+    std::mutex isTryPrepareTerminateByPidsDoneMutex_;
+    std::condition_variable isTryPrepareTerminateByPidsCv_;
+    std::vector<std::shared_ptr<PrepareTerminateByPidRecord>> prepareTerminateByPidRecords_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -2325,9 +2325,10 @@ void UIAbilityLifecycleManager::SetLastExitReason(std::shared_ptr<AbilityRecord>
     }
 }
 
-bool UIAbilityLifecycleManager::PrepareTerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
+bool UIAbilityLifecycleManager::PrepareTerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    bool isSCBCall)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbility");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null ability record");
@@ -2338,20 +2339,15 @@ bool UIAbilityLifecycleManager::PrepareTerminateAbility(const std::shared_ptr<Ab
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Not support prepare terminate.");
         return false;
     }
-    // execute onPrepareToTerminate until timeout
-    auto promise = std::make_shared<std::promise<bool>>();
-    auto future = promise->get_future();
-    auto task = [promise, abilityRecord]() {
-        promise->set_value(abilityRecord->PrepareTerminateAbility());
-    };
-    ffrt::submit(task);
-    std::future_status status = future.wait_for(std::chrono::milliseconds(
-        GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME));
-    if (status == std::future_status::timeout) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareToTerminate timeout");
-        return false;
-    }
-    return future.get();
+    return abilityRecord->PrepareTerminateAbility(false);
+}
+
+void UIAbilityLifecycleManager::PrepareTerminateAbilityDone(std::shared_ptr<AbilityRecord> abilityRecord,
+    bool isTerminate)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbilityDone");
+    CHECK_POINTER(abilityRecord);
+    abilityRecord->PrepareTerminateAbilityDone(isTerminate);
 }
 
 bool UIAbilityLifecycleManager::CheckPrepareTerminateEnable(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -2801,29 +2797,39 @@ std::vector<sptr<IRemoteObject>> UIAbilityLifecycleManager::PrepareTerminateAppA
     }
     std::vector<sptr<IRemoteObject>> remainingTokens;
     for (const auto& [moduleName, _tokens] : tokensPerModuleName) {
-        auto prepareTermination = std::make_shared<int32_t>(0);
-        auto isExist = std::make_shared<bool>(false);
         // execute onPrepareTerminate until timeout
-        auto promise = std::make_shared<std::promise<bool>>();
-        auto future = promise->get_future();
-        auto task = [promise, pid, _moduleName = moduleName, prepareTermination, isExist]() {
-            DelayedSingleton<AppScheduler>::GetInstance()->PrepareTerminateApp(pid, _moduleName,
-                *prepareTermination, *isExist);
-            promise->set_value(true);
+        std::unique_lock<std::mutex> lock(isTryPrepareTerminateByPidsDoneMutex_);
+        auto iter = std::find_if(prepareTerminateByPidRecords_.begin(), prepareTerminateByPidRecords_.end(),
+            [pid, _moduleName = moduleName](const std::shared_ptr<PrepareTerminateByPidRecord> &record) {
+            return record->pid_ == pid && record->moduleName_ == _moduleName;
+        });
+        if (iter != prepareTerminateByPidRecords_.end()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "record with (pid=%{public}d,moduleName=%{public}s) already exists",
+                pid, moduleName.c_str());
+            continue;
+        }
+        std::shared_ptr<PrepareTerminateByPidRecord> record = std::make_shared<PrepareTerminateByPidRecord>(
+            pid, moduleName, false, 0, false);
+        prepareTerminateByPidRecords_.push_back(record);
+        auto condition = [record] {
+            if (record == nullptr) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "null record");
+                return false;
+            }
+            return record->isTryPrepareTerminateByPidsDone_.load();
+        };
+        auto task = [pid, _moduleName = moduleName]() {
+            DelayedSingleton<AppScheduler>::GetInstance()->PrepareTerminateApp(pid, _moduleName);
         };
         ffrt::submit(task);
-        std::future_status status = future.wait_for(std::chrono::milliseconds(
-            GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME));
-        if (status == std::future_status::timeout) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareTermination timeout");
+        if (!isTryPrepareTerminateByPidsCv_.wait_for(lock,
+            std::chrono::milliseconds(GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME), condition)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "wait timeout");
             remainingTokens.insert(remainingTokens.end(), _tokens.begin(), _tokens.end());
-        } else if (!future.get() || prepareTermination == nullptr || isExist == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "PrepareTerminateApp error");
+        } else if (!record->isExist_) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareTermination/onPrepareTerminationAsync not exist");
             remainingTokens.insert(remainingTokens.end(), _tokens.begin(), _tokens.end());
-        } else if (!*isExist) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareTermination is not exist");
-            remainingTokens.insert(remainingTokens.end(), _tokens.begin(), _tokens.end());
-        } else if (static_cast<AppExecFwk::PrepareTermination>(*prepareTermination) ==
+        } else if (static_cast<AppExecFwk::PrepareTermination>(record->prepareTermination_) ==
             AppExecFwk::PrepareTermination::CANCEL) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "PrepareTerminate cancel");
         } else {
@@ -2849,7 +2855,7 @@ int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<i
             DelayedSingleton<AppScheduler>::GetInstance()->GetAbilityRecordsByProcessID(pid, tokens));
         for (const auto &token : PrepareTerminateAppAndGetRemaining(pid, tokens)) {
             auto abilityRecord = Token::GetAbilityRecordByToken(token);
-            if (PrepareTerminateAbility(abilityRecord)) {
+            if (PrepareTerminateAbility(abilityRecord, true)) {
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "terminate blocked");
                 continue;
             }
@@ -2861,6 +2867,33 @@ int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<i
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "end.");
     return ERR_OK;
+}
+
+void UIAbilityLifecycleManager::TryPrepareTerminateByPidsDone(const std::string &moduleName,
+    int32_t prepareTermination, bool isExist)
+{
+    auto pid = IPCSkeleton::GetCallingPid();
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call TryPrepareTerminateByPidsDone, pid=%{public}d", pid);
+    std::unique_lock<std::mutex> lock(isTryPrepareTerminateByPidsDoneMutex_);
+    auto iter = std::find_if(prepareTerminateByPidRecords_.begin(), prepareTerminateByPidRecords_.end(),
+        [pid, _moduleName = moduleName](const std::shared_ptr<PrepareTerminateByPidRecord> &record) {
+        return record->pid_ == pid && record->moduleName_ == _moduleName;
+    });
+    if (iter == prepareTerminateByPidRecords_.end()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "record with (pid=%{public}d,moduleName=%{public}s) not exist",
+            pid, moduleName.c_str());
+        return;
+    }
+    if ((*iter) == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "record is nullptr");
+        prepareTerminateByPidRecords_.erase(iter);
+        return;
+    }
+    (*iter)->prepareTermination_ = prepareTermination;
+    (*iter)->isExist_ = isExist;
+    (*iter)->isTryPrepareTerminateByPidsDone_.store(true);
+    isTryPrepareTerminateByPidsCv_.notify_one();
+    prepareTerminateByPidRecords_.erase(iter);
 }
 
 void UIAbilityLifecycleManager::BatchCloseUIAbility(

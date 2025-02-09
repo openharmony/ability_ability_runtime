@@ -6059,5 +6059,67 @@ int32_t AbilityManagerProxy::StartSelfUIAbility(const Want &want)
     }
     return reply.ReadInt32();
 }
+
+void AbilityManagerProxy::PrepareTerminateAbilityDone(const sptr<IRemoteObject> &token, bool isTerminate)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token fail");
+        return;
+    }
+    if (token) {
+        if (!data.WriteBool(true) || !data.WriteRemoteObject(token)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+            return;
+        }
+    } else {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null token");
+        if (!data.WriteBool(false)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write fail");
+            return;
+        }
+    }
+    if (!data.WriteBool(isTerminate)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "weite isTerminate fail");
+        return;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::PREPARE_TERMINATE_ABILITY_DONE, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+    }
+}
+
+void AbilityManagerProxy::KillProcessWithPrepareTerminateDone(const std::string &moduleName,
+    int32_t prepareTermination, bool isExist)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token fail");
+        return;
+    }
+    if (!data.WriteString(moduleName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "weite moduleName fail");
+        return;
+    }
+    if (!data.WriteInt32(prepareTermination)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "weite prepareTermination fail");
+        return;
+    }
+    if (!data.WriteBool(isExist)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "weite isExist fail");
+        return;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::KILL_PROCESS_WITH_PREPARE_TERMINATE_DONE,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+    }
+}
 } // namespace AAFwk
 } // namespace OHOS

@@ -3065,81 +3065,51 @@ void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &
     }
 }
 
-void MainThread::SchedulePrepareTerminate(const std::string &moduleName,
-    int32_t &prepareTermination, bool &isExist)
+void MainThread::SchedulePrepareTerminate(const std::string &moduleName)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    wptr<MainThread> weak = this;
-    std::shared_ptr<int32_t> prepareTerminatePtr = std::make_shared<int32_t>(0);
-    std::shared_ptr<bool> isExistPtr = std::make_shared<bool>(false);
-    if (prepareTerminatePtr == nullptr || isExistPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null, prepareTerminatePtr=%{public}d or isExistPtr=%{public}d",
-            (prepareTerminatePtr == nullptr), (isExistPtr == nullptr));
+    TAG_LOGD(AAFwkTag::APPKIT, "SchedulePrepareTerminate called");
+    if (getpid() == gettid()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "in app main thread");
+        HandleSchedulePrepareTerminate(moduleName);
         return;
     }
-    auto asyncTask = [weak, moduleName, prepareTerminatePtr, isExistPtr] {
+    wptr<MainThread> weak = this;
+    auto asyncTask = [weak, moduleName] {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
-        appThread->HandleSchedulePrepareTerminate(moduleName, prepareTerminatePtr, *isExistPtr);
+        appThread->HandleSchedulePrepareTerminate(moduleName);
     };
     if (mainHandler_ == nullptr || !mainHandler_->PostTask(asyncTask, "MainThread::SchedulePrepareTerminate")) {
         TAG_LOGE(AAFwkTag::APPKIT, "post asynctask failed");
-        return;
     }
-
-    auto condition = [weak] {
-        auto appThread = weak.promote();
-        if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
-            return false;
-        }
-        return appThread->isPrepareTerminateDone_.load();
-    };
-    std::unique_lock<std::mutex> lock(mutex_);
-    isPrepareTerminateDone_ = false;
-    if (!cv_.wait_for(lock, std::chrono::milliseconds(AbilityRuntime::GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME),
-        condition)) {
-        TAG_LOGW(AAFwkTag::APPKIT, "wait timeout");
-        return;
-    }
-    prepareTermination = *prepareTerminatePtr;
-    isExist = *isExistPtr;
-    TAG_LOGI(AAFwkTag::APPKIT, "end, prepareTermination=%{public}d,isExist=%{public}d", prepareTermination, isExist);
 }
 
-void MainThread::HandleSchedulePrepareTerminate(const std::string &moduleName,
-    std::shared_ptr<int32_t> prepareTerminationPtr, bool &isExist)
+void MainThread::HandleSchedulePrepareTerminate(const std::string &moduleName)
 {
-    if (prepareTerminationPtr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null prepareTerminationPtr");
-        return;
-    }
-    std::unique_lock<std::mutex> lock(mutex_);
     if (!application_) {
         TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
 
     wptr<MainThread> weak = this;
-    auto callback = [weak, prepareTerminationPtr] (int prepareTermination) {
+    auto callback = [weak, _moduleName = moduleName] (AppExecFwk::OnPrepareTerminationResult result) {
         auto appThread = weak.promote();
-        if (appThread == nullptr || prepareTerminationPtr == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null appThread or prepareTerminationPtr");
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
-        TAG_LOGI(AAFwkTag::APPKIT, "in callback, prepareTermination=%{public}d", prepareTermination);
-        *prepareTerminationPtr = prepareTermination;
-        appThread->isPrepareTerminateDone_.store(true);
-        appThread->cv_.notify_all();
+        TAG_LOGI(AAFwkTag::APPKIT, "in callback, prepareTermination=%{public}d, isExist=%{public}d",
+            result.prepareTermination, result.isExist);
+        AbilityManagerClient::GetInstance()->KillProcessWithPrepareTerminateDone(_moduleName,
+            result.prepareTermination, result.isExist);
     };
     bool isAsync = false;
-    application_->SchedulePrepareTerminate(moduleName, callback, isAsync, *prepareTerminationPtr, isExist);
+    application_->SchedulePrepareTerminate(moduleName, callback, isAsync);
     if (!isAsync) {
-        TAG_LOGI(AAFwkTag::APPKIT, "sync call, isExist=%{public}d", isExist);
-        callback(*prepareTerminationPtr);
+        TAG_LOGI(AAFwkTag::APPKIT, "sync call");
     }
 }
 

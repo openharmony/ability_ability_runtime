@@ -467,11 +467,8 @@ public:
      *
      * @param pid Process ID
      * @param moduleName Module name
-     * @param prepareTelrmination PrepareTermination Enum
-     * @param isExist whether this callback event exist
      */
-    virtual void PrepareTerminateApp(const pid_t pid, const std::string &moduleName,
-        int32_t &prepareTermination, bool &isExist);
+    virtual void PrepareTerminateApp(const pid_t pid, const std::string &moduleName);
 
     /**
      * Start specified process.

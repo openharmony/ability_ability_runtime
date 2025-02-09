@@ -500,17 +500,7 @@ int32_t AmsMgrStub::HandlePrepareTerminateApp(MessageParcel &data, MessageParcel
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto pid = static_cast<pid_t>(data.ReadInt32());
     auto moduleName = data.ReadString();
-    int32_t prepareTermination = 0;
-    bool isExist = false;
-    PrepareTerminateApp(pid, moduleName, prepareTermination, isExist);
-    if (!reply.WriteInt32(prepareTermination)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write prepareTermination failed.");
-        return ERR_INVALID_VALUE;
-    }
-    if (!reply.WriteBool(isExist)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write isExist failed.");
-        return ERR_INVALID_VALUE;
-    }
+    PrepareTerminateApp(pid, moduleName);
     return NO_ERROR;
 }
 

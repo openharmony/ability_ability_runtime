@@ -355,17 +355,7 @@ int32_t AppSchedulerHost::HandleSchedulePrepareTerminate(MessageParcel &data, Me
 {
     HITRACE_METER(HITRACE_TAG_APP);
     auto moduleName = data.ReadString();
-    int32_t prepareTermination = 0;
-    bool isExist = false;
-    SchedulePrepareTerminate(moduleName, prepareTermination, isExist);
-    if (!reply.WriteInt32(prepareTermination)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write HandleSchedulePrepareTerminate prepareTermination failed.");
-        return ERR_INVALID_VALUE;
-    }
-    if (!reply.WriteBool(isExist)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write HandleSchedulePrepareTerminate isExist failed.");
-        return ERR_INVALID_VALUE;
-    }
+    SchedulePrepareTerminate(moduleName);
     return NO_ERROR;
 }
 

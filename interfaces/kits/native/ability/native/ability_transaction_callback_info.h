@@ -21,6 +21,11 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+struct OnPrepareTerminationResult {
+    int32_t prepareTermination;
+    bool isExist;
+};
+
 template<typename T = void>
 class AbilityTransactionCallbackInfo {
 public:
