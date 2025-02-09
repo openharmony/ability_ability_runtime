@@ -172,16 +172,12 @@ private:
     void HandleAbilityTransaction(const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo,
         sptr<AAFwk::SessionInfo> sessionInfo = nullptr);
     void HandleShareData(const int32_t &requestCode);
-    void HandlePrepareTermianteAbility(std::shared_ptr<bool> prepareTerminatePtr);
+    bool HandlePrepareTermianteAbility();
     void HandleUpdateConfiguration(const AppExecFwk::Configuration &config);
     void AddLifecycleEvent(uint32_t state, std::string &methodName) const;
 
     std::shared_ptr<UIAbilityImpl> abilityImpl_ = nullptr;
     std::shared_ptr<UIAbility> currentAbility_ = nullptr;
-    bool isPrepareTerminate_ = false;
-    std::atomic_bool isPrepareTerminateAbilityDone_ = false;
-    std::mutex mutex_;
-    std::condition_variable cv_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

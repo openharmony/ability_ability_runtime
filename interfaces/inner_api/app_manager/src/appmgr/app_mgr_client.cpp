@@ -704,8 +704,7 @@ void AppMgrClient::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecF
     amsService->StartSpecifiedAbility(want, abilityInfo, requestId);
 }
 
-void AppMgrClient::PrepareTerminateApp(const pid_t pid, const std::string &moduleName,
-    int32_t &prepareTermination, bool &isExist)
+void AppMgrClient::PrepareTerminateApp(const pid_t pid, const std::string &moduleName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -718,7 +717,7 @@ void AppMgrClient::PrepareTerminateApp(const pid_t pid, const std::string &modul
         TAG_LOGE(AAFwkTag::APPMGR, "amsService is nullptr");
         return;
     }
-    amsService->PrepareTerminateApp(pid, moduleName, prepareTermination, isExist);
+    amsService->PrepareTerminateApp(pid, moduleName);
 }
 
 void AppMgrClient::SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid)

@@ -76,8 +76,7 @@ public:
     {}
     void ScheduleAcceptWant(const AAFwk::Want& want, const std::string& moduleName) override
     {}
-    void SchedulePrepareTerminate(const std::string &moduleName,
-        int32_t &prepareTermination, bool &isExist) override
+    void SchedulePrepareTerminate(const std::string &moduleName) override
     {}
     void ScheduleNewProcessRequest(const AAFwk::Want& want, const std::string& moduleName) override
     {}

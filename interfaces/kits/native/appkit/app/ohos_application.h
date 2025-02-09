@@ -183,8 +183,8 @@ public:
 
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName, std::string &flag);
 
-    void SchedulePrepareTerminate(const std::string &moduleName, std::function<void(int)> callback,
-        bool &isAsync, int32_t &prepareTermination, bool &isExist);
+    void SchedulePrepareTerminate(const std::string &moduleName,
+        std::function<void(AppExecFwk::OnPrepareTerminationResult)> callback, bool &isAsync);
 
     void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName, std::string &flag);
 

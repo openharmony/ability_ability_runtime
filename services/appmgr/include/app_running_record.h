@@ -648,7 +648,7 @@ public:
      */
     void ResetSpecifiedRequestId();
 
-    void SchedulePrepareTerminate(const std::string &moduleName, int32_t &prepareTermination, bool &isExist);
+    void SchedulePrepareTerminate(const std::string &moduleName);
 
     /**
      * call the scheduler to go acceptWant procedure
