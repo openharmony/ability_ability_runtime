@@ -314,12 +314,13 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
     const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto&& abilityRecord = Token::GetAbilityRecordByToken(token);
+    int32_t processAttachResult = DoProcessAttachment(abilityRecord);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     if (!IsContainsAbilityInner(token)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "Not in running list");
         return ERR_INVALID_VALUE;
     }
-    auto&& abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "lifecycle name: %{public}s", abilityRecord->GetAbilityInfo().name.c_str());
     SetLastExitReason(abilityRecord);
@@ -331,7 +332,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
     FreezeUtil::GetInstance().DeleteLifecycleEvent(token);
 
     abilityRecord->SetScheduler(scheduler);
-    if (DoProcessAttachment(abilityRecord) != ERR_OK) {
+    if (processAttachResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "process attachment failed, close ability");
         TerminateSession(abilityRecord);
         return ERR_INVALID_VALUE;
@@ -2897,9 +2898,12 @@ void UIAbilityLifecycleManager::TerminateSession(std::shared_ptr<AbilityRecord> 
 int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    auto abilityRecord = GetAbilityRecordByToken(token);
-    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    std::shared_ptr<AbilityRecord> abilityRecord;
+    {
+        std::lock_guard<ffrt::mutex> guard(sessionLock_);
+        abilityRecord = GetAbilityRecordByToken(token);
+        CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    }
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
     auto tokenID = abilityRecord->GetApplicationInfo().accessTokenId;
     if (callingTokenId != tokenID) {
