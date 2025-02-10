@@ -591,7 +591,8 @@ void MainThread::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocI
 void MainThread::ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info)
 {
     TAG_LOGI(AAFwkTag::APPKIT, "pid: %{public}d, tid: %{public}d, needGc: %{public}d, needSnapshot: %{public}d,\n"
-        "needLeakobj: %{public}d", info.pid, info.tid, info.needGc, info.needSnapshot, info.needLeakobj);
+        "needLeakobj: %{public}d, needBinary: %{public}d",
+        info.pid, info.tid, info.needGc, info.needSnapshot, info.needLeakobj, info.needBinary);
     wptr<MainThread> weak = this;
     auto task = [weak, info]() {
         auto appThread = weak.promote();

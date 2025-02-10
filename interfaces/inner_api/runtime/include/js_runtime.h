@@ -84,7 +84,7 @@ public:
     void DestroyHeapProfiler() override;
     void ForceFullGC() override;
     void ForceFullGC(uint32_t tid) override;
-    void DumpHeapSnapshot(uint32_t tid, bool isFullGC) override;
+    void DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary = false) override;
     void AllowCrossThreadExecution() override;
     void GetHeapPrepare() override;
     void NotifyApplicationState(bool isBackground) override;
