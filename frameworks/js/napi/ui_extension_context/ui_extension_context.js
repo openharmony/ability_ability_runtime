@@ -99,6 +99,10 @@ class UIExtensionContext extends ExtensionContext {
   startServiceExtensionAbilityWithAccount(want, accountId) {
     return this.__context_impl__.startServiceExtensionAbilityWithAccount(want, accountId);
   }
+
+  setHostPageOverlayForbidden(isNotAllow) {
+    return this.__context_impl__.setHostPageOverlayForbidden(isNotAllow);
+  }
 }
 
 export default UIExtensionContext;
