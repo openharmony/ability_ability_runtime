@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -405,5 +405,28 @@ bool AbilityPermissionUtil::IsStartSelfUIAbility()
     }
     return PermissionVerification::GetInstance()->VerifyStartSelfUIAbility(tokenId);
 }
-} // AAFwk
+
+int32_t AbilityPermissionUtil::CheckPrepareTerminateEnable(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    if (!AppUtils::GetInstance().IsPrepareTerminateEnabled()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "prepare terminate not supported");
+        return ERR_INVALID_VALUE; // ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+    }
+    if (abilityRecord == nullptr || abilityRecord->IsTerminating()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ability record not exist/ on terminating");
+        return ERR_INVALID_VALUE;
+    }
+    auto type = abilityRecord->GetAbilityInfo().type;
+    bool isStageBasedModel = abilityRecord->GetAbilityInfo().isStageBasedModel;
+    if (!isStageBasedModel || type != AppExecFwk::AbilityType::PAGE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ability mode not support.");
+        return RESOLVE_CALL_ABILITY_TYPE_ERR;
+    }
+    auto tokenId = abilityRecord->GetApplicationInfo().accessTokenId;
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyPrepareTerminatePermission(tokenId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, please apply permission ohos.permission.PREPARE_APP_TERMINATE");
+        return ERR_INVALID_VALUE; // CHECK_PERMISSION_FAILED;
+    }
+    return ERR_OK;
+}} // AAFwk
 } // OHOS

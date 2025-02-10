@@ -2339,8 +2339,6 @@ private:
 
     void ReleaseAbilityTokenMap(const sptr<IRemoteObject> &token);
 
-    bool CheckPrepareTerminateEnable();
-
     bool CheckCollaboratorType(int32_t type);
 
     bool CheckUserIdActive(int32_t userId);
@@ -2493,7 +2491,6 @@ private:
      *  FALSE: white list unable.
      */
     bool whiteListassociatedWakeUpFlag_ = true;
-    bool isPrepareTerminateEnable_ = false;
     bool shouldBlockAllAppStart_ = false;
 
     int32_t uniqueId_ = 0;
@@ -2570,7 +2567,6 @@ private:
     int32_t ShowPickerDialog(const Want& want, int32_t userId, const sptr<IRemoteObject> &token);
     void InitFocusListener();
     void RegisterFocusListener();
-    void InitPrepareTerminateConfig();
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
 #endif

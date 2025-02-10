@@ -293,7 +293,7 @@ bool JsAbilityStage::CallOnPrepareTerminate(napi_env env,
         return false;
     }
     napi_value result = CallObjectMethod("onPrepareTermination", nullptr, 0);
-    if (result == nullptr || !CheckTypeForNapiValue(env, result, napi_object)) {
+    if (result == nullptr) {
         TAG_LOGI(AAFwkTag::APPKIT, "onPrepareTermination unimplemented");
         return false;
     }
@@ -684,8 +684,16 @@ napi_value JsAbilityStage::CallObjectMethod(const char* name, napi_value const *
     }
 
     napi_value result = nullptr;
+    TryCatch tryCatch(env);
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    napi_call_function(env, obj, method, argc, argv, &result);
+    napi_status withResultStatus = napi_call_function(env, obj, method, argc, argv, &result);
+    if (withResultStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::APPKIT, "JsAbilityStage call js, withResult failed: %{public}d", withResultStatus);
+    }
+    if (tryCatch.HasCaught()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "exception occurred");
+        reinterpret_cast<NativeEngine*>(env)->HandleUncaughtException();
+    }
     return handleEscape.Escape(result);
 }
 

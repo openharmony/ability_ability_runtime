@@ -17,6 +17,7 @@
 #include "json_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "nlohmann/json.hpp"
+#include "parameter.h"
 #include "parameters.h"
 #ifdef SUPPORT_GRAPHICS
 #include "scene_board_judgement.h"
@@ -69,6 +70,9 @@ constexpr const char* MAX_CHILD_PROCESS = "const.max_native_child_process";
 constexpr const char* SUPPORT_MULTI_INSTANCE = "const.abilityms.support_multi_instance";
 constexpr const char* MIGRATE_CLIENT_BUNDLE_NAME = "const.sys.abilityms.migrate_client_bundle_name";
 constexpr const char* CONNECT_SUPPORT_CROSS_USER = "const.abilityms.connect_support_cross_user";
+// Support prepare terminate
+constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
+constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 }
 
 AppUtils::~AppUtils() {}
@@ -473,6 +477,18 @@ bool AppUtils::IsConnectSupportCrossUser()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isConnectSupportCrossUser_.value);
     return isConnectSupportCrossUser_.value;
+}
+
+bool AppUtils::IsPrepareTerminateEnabled()
+{
+    char value[PREPARE_TERMINATE_ENABLE_SIZE] = "false";
+    int retSysParam = GetParameter(PREPARE_TERMINATE_ENABLE_PARAMETER, "false", value, PREPARE_TERMINATE_ENABLE_SIZE);
+    TAG_LOGI(AAFwkTag::DEFAULT,
+        "isPrepareTerminateEnable, %{public}s value=%{public}s", PREPARE_TERMINATE_ENABLE_PARAMETER, value);
+    if (retSysParam > 0 && !std::strcmp(value, "true")) {
+        return true;
+    }
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

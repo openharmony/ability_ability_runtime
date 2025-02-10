@@ -148,9 +148,6 @@ constexpr const char* WHITE_LIST_ASS_WAKEUP_FLAG = "component.startup.whitelist.
 
 // White list app
 constexpr const char* BUNDLE_NAME_SETTINGSDATA = "com.ohos.settingsdata";
-// Support prepare terminate
-constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
-constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 // UIExtension type
 constexpr const char* UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
 constexpr const char* UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
@@ -444,10 +441,6 @@ void AbilityManagerService::InitPushTask()
 
     auto initStartupFlagTask = [aams = shared_from_this()]() { aams->InitStartupFlag(); };
     taskHandler_->SubmitTask(initStartupFlagTask, "InitStartupFlag");
-#ifdef SUPPORT_SCREEN
-    auto initPrepareTerminateConfigTask = [aams = shared_from_this()]() { aams->InitPrepareTerminateConfig(); };
-    taskHandler_->SubmitTask(initPrepareTerminateConfigTask, "InitPrepareTerminateConfig");
-#endif // SUPPORT_SCREEN
 
     auto initExtensionConfigTask = []() {
         DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
@@ -9527,34 +9520,24 @@ bool AbilityManagerService::CheckWindowMode(int32_t windowMode,
 int AbilityManagerService::PrepareTerminateAbility(const sptr<IRemoteObject> &token,
     sptr<IPrepareTerminateCallback> &callback)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbility");
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "callback null");
         return ERR_INVALID_VALUE;
     }
-    if (!CheckPrepareTerminateEnable()) {
-        callback->DoPrepareTerminate();
-        return ERR_INVALID_VALUE;
-    }
 
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
-    if (abilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "record null");
+    auto err = AbilityPermissionUtil::GetInstance().CheckPrepareTerminateEnable(abilityRecord);
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckPrepareTerminateEnable failed: %{public}d", err);
         callback->DoPrepareTerminate();
-        return ERR_INVALID_VALUE;
+        return err;
     }
 
     if (!JudgeSelfCalled(abilityRecord)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not self call");
         callback->DoPrepareTerminate();
         return CHECK_PERMISSION_FAILED;
-    }
-
-    auto type = abilityRecord->GetAbilityInfo().type;
-    if (type != AppExecFwk::AbilityType::PAGE) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "only support PAGE");
-        callback->DoPrepareTerminate();
-        return RESOLVE_CALL_ABILITY_TYPE_ERR;
     }
 
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
@@ -9671,18 +9654,6 @@ void AbilityManagerService::RegisterFocusListener()
     }
     Rosen::WindowManager::GetInstance().RegisterFocusChangedListener(focusListener_);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "register focus listener success");
-}
-
-void AbilityManagerService::InitPrepareTerminateConfig()
-{
-    char value[PREPARE_TERMINATE_ENABLE_SIZE] = "false";
-    int retSysParam = GetParameter(PREPARE_TERMINATE_ENABLE_PARAMETER, "false", value, PREPARE_TERMINATE_ENABLE_SIZE);
-    TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "checkPrepareTerminateEnable, %{public}s value=%{public}s", PREPARE_TERMINATE_ENABLE_PARAMETER,
-        value);
-    if (retSysParam > 0 && !std::strcmp(value, "true")) {
-        isPrepareTerminateEnable_ = true;
-    }
 }
 
 int AbilityManagerService::RegisterAbilityFirstFrameStateObserver(
@@ -10663,19 +10634,6 @@ int32_t AbilityManagerService::SetSessionManagerService(const sptr<IRemoteObject
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "SMS setSessionManagerService return false");
     return SET_SMS_FAILED;
-}
-
-bool AbilityManagerService::CheckPrepareTerminateEnable()
-{
-    if (!isPrepareTerminateEnable_) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Only support PC.");
-        return false;
-    }
-    if (!AAFwk::PermissionVerification::GetInstance()->VerifyPrepareTerminatePermission()) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "failed, please apply permission ohos.permission.PREPARE_APP_TERMINATE");
-        return false;
-    }
-    return true;
 }
 
 void AbilityManagerService::StartSpecifiedAbilityBySCB(const Want &want)
