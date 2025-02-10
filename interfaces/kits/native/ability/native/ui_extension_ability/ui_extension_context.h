@@ -160,7 +160,7 @@ public:
 
     using SelfType = UIExtensionContext;
     static const size_t CONTEXT_TYPE_ID;
-
+    int32_t isNotAllow = -1;
 protected:
     bool IsContext(size_t contextTypeId) override
     {

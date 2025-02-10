@@ -87,6 +87,10 @@ class UIExtensionContext extends ExtensionContext {
   openAtomicService(appId, options, callback) {
     return this.__context_impl__.openAtomicService(appId, options, callback);
   }
+
+  setHostPageOverlayForbidden(isNotAllow) {
+    return this.__context_impl__.setHostPageOverlayForbidden(isNotAllow);
+  }
 }
 
 export default UIExtensionContext;
