@@ -51,8 +51,9 @@ public:
     virtual ~AbilityStage() = default;
     virtual void OnCreate(const AAFwk::Want &want) const;
     virtual void OnDestroy() const;
-    virtual bool OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo,
-        bool &isAsync, int &prepareTermination) const;
+    virtual bool OnPrepareTerminate(
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
+        bool &isAsync) const;
     virtual std::string OnAcceptWant(const AAFwk::Want &want);
     virtual std::string OnNewProcessRequest(const AAFwk::Want &want);
     virtual void Init(const std::shared_ptr<Context> &context,

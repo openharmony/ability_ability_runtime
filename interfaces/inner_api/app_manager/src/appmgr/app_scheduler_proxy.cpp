@@ -452,13 +452,12 @@ void AppSchedulerProxy::ScheduleAcceptWant(const AAFwk::Want &want, const std::s
     }
 }
 
-void AppSchedulerProxy::SchedulePrepareTerminate(const std::string &moduleName,
-    int32_t &prepareTermination, bool &isExist)
+void AppSchedulerProxy::SchedulePrepareTerminate(const std::string &moduleName)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "token write error");
         return;
@@ -478,8 +477,6 @@ void AppSchedulerProxy::SchedulePrepareTerminate(const std::string &moduleName,
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest SchedulePrepareTerminate err: %{public}d", ret);
         return;
     }
-    prepareTermination = reply.ReadInt32();
-    isExist = reply.ReadBool();
     TAG_LOGD(AAFwkTag::APPMGR, "Get SchedulePrepareTerminate reply success");
 }
 

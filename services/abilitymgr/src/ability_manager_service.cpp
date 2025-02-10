@@ -9543,22 +9543,70 @@ int AbilityManagerService::PrepareTerminateAbility(const sptr<IRemoteObject> &to
         return RESOLVE_CALL_ABILITY_TYPE_ERR;
     }
 
-    auto timeoutTask = [&callback]() {
-        callback->DoPrepareTerminate();
-    };
-    if (taskHandler_) {
-        taskHandler_->SubmitTask(timeoutTask, "PrepareTermiante_" + std::to_string(abilityRecord->GetAbilityRecordId()),
-            GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME);
-    }
-
-    bool res = abilityRecord->PrepareTerminateAbility();
+    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+    CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
+    bool res = uiAbilityManager->PrepareTerminateAbility(abilityRecord, false);
     if (!res) {
         callback->DoPrepareTerminate();
+        return ERR_OK;
     }
+    std::lock_guard<std::mutex> guard(prepareTermiationCallbackMutex_);
+    auto abilityRecordId = std::to_string(abilityRecord->GetAbilityRecordId());
+    if (prepareTermiationCallbacks_.find(abilityRecordId) != prepareTermiationCallbacks_.end()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "abilityRecordId=%{public}s already exists", abilityRecordId.c_str());
+        return ERR_OK;
+    }
+    prepareTermiationCallbacks_[abilityRecordId] = callback;
+
+    auto timeoutTask = [callback]() {
+        if (callback != nullptr) {
+            callback->DoPrepareTerminate();
+        }
+    };
     if (taskHandler_) {
-        taskHandler_->CancelTask("PrepareTermiante_" + std::to_string(abilityRecord->GetAbilityRecordId()));
+        taskHandler_->SubmitTask(timeoutTask, "PrepareTermiante_" + abilityRecordId,
+            GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME);
     }
     return ERR_OK;
+}
+
+void AbilityManagerService::PrepareTerminateAbilityDone(const sptr<IRemoteObject> &token, bool isTerminate)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbilityDone, isTerminate=%{public}d", isTerminate);
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null token");
+        return;
+    }
+    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+    CHECK_POINTER(uiAbilityManager);
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    CHECK_POINTER(abilityRecord);
+    auto abilityRecordId = std::to_string(abilityRecord->GetAbilityRecordId());
+    std::lock_guard<std::mutex> guard(prepareTermiationCallbackMutex_);
+    auto iter = prepareTermiationCallbacks_.find(abilityRecordId);
+    if (iter == prepareTermiationCallbacks_.end()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, abilityRecordId=%{public}s not found", abilityRecordId.c_str());
+        uiAbilityManager->PrepareTerminateAbilityDone(abilityRecord, isTerminate);
+        return;
+    }
+    if (iter->second != nullptr && !isTerminate) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "abilityRecordId=%{public}s, calling callback", abilityRecordId.c_str());
+        iter->second->DoPrepareTerminate();
+    }
+    prepareTermiationCallbacks_.erase(iter);
+    if (taskHandler_) {
+        taskHandler_->CancelTask("PrepareTermiante_" + abilityRecordId);
+    }
+}
+
+void AbilityManagerService::KillProcessWithPrepareTerminateDone(const std::string &moduleName,
+    int32_t prepareTermination, bool isExist)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call KillProcessWithPrepareTerminateDone, moduleName=%{public}s, "
+        "prepareTermination=%{public}d, isExist=%{public}d", moduleName.c_str(), prepareTermination, isExist);
+    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+    CHECK_POINTER(uiAbilityManager);
+    uiAbilityManager->TryPrepareTerminateByPidsDone(moduleName, prepareTermination, isExist);
 }
 
 void AbilityManagerService::HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo)
@@ -10827,7 +10875,7 @@ int AbilityManagerService::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> 
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
     auto abilityRecord = uiAbilityManager->GetUIAbilityRecordBySessionInfo(sessionInfo);
-    isTerminate = uiAbilityManager->PrepareTerminateAbility(abilityRecord);
+    isTerminate = uiAbilityManager->PrepareTerminateAbility(abilityRecord, true);
 
     return ERR_OK;
 }

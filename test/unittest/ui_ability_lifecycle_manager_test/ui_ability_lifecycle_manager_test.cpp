@@ -3304,7 +3304,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrepareTerminateAbility_001, TestSize.Le
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
-    bool boolValue = uiAbilityLifecycleManager->PrepareTerminateAbility(abilityRecord);
+    bool boolValue = uiAbilityLifecycleManager->PrepareTerminateAbility(abilityRecord, false);
     EXPECT_FALSE(boolValue);
 }
 
@@ -3318,7 +3318,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrepareTerminateAbility_002, TestSize.Le
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
-    bool boolValue = uiAbilityLifecycleManager->PrepareTerminateAbility(abilityRecord);
+    bool boolValue = uiAbilityLifecycleManager->PrepareTerminateAbility(abilityRecord, false);
     EXPECT_FALSE(boolValue);
 }
 

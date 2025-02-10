@@ -252,10 +252,8 @@ public:
      * @brief Called when ability prepare terminate.
      * @param callbackInfo The callbackInfo is used when onPrepareToTerminateAsync is implemented.
      * @param isAsync The returned flag indicates if onPrepareToTerminateAsync is implemented.
-     * @param prepareTermination The flag indicates if the ability needs to stop terminating.
      */
-    void OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo,
-        bool &isAsync, bool &prepareTermination) override;
+    void OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo, bool &isAsync) override;
 
     /**
      * @brief Get JsWindow Stage
