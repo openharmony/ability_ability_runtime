@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,11 +97,13 @@ public:
     /**
      * KillProcessesByUserId, call KillProcessesByUserId() through proxy object,
      * kill the processes by user id.
+     * Send appSpawn uninstall debug hap message.
      *
      * @param userId, the user id.
+     * @param isNeedSendAppSpawnMsg, true send appSpawn message otherwise not send.
      * @return Returns RESULT_OK on success, others on failure.
      */
-    virtual AppMgrResultCode KillProcessesByUserId(int32_t userId);
+    virtual AppMgrResultCode KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg = false);
 
     /**
      * KillApplication, call KillApplication() through proxy object, kill the application.
@@ -185,14 +187,6 @@ public:
     void GetRunningProcessInfoByToken(const sptr<IRemoteObject>& token, AppExecFwk::RunningProcessInfo& info);
 
     void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo& info) const;
-
-    /**
-     * Send appSpawn uninstall debug hap message.
-     *
-     * @param userId, The user id.
-     * @return Returns RESULT_OK on success, others on failure.
-     */
-    virtual AppMgrResultCode SendAppSpawnUninstallDebugHapMsg(int32_t userId);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
