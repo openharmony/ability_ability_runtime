@@ -376,11 +376,10 @@ void StartSpecifiedAbilityResponse::OnAcceptWantResponse(
     DelayedSingleton<AbilityManagerService>::GetInstance()->OnAcceptWantResponse(want, flag, requestId);
 }
 
-void AppScheduler::PrepareTerminateApp(const pid_t pid, const std::string &moduleName,
-    int32_t &prepareTermination, bool &isExist)
+void AppScheduler::PrepareTerminateApp(const pid_t pid, const std::string &moduleName)
 {
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->PrepareTerminateApp(pid, moduleName, prepareTermination, isExist);
+    appMgrClient_->PrepareTerminateApp(pid, moduleName);
 }
 
 void StartSpecifiedAbilityResponse::OnTimeoutResponse(const AAFwk::Want &want, int32_t requestId)

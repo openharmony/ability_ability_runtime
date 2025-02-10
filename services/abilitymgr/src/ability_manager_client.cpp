@@ -2106,5 +2106,22 @@ ErrCode AbilityManagerClient::StartSelfUIAbility(const Want &want)
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->StartSelfUIAbility(want);
 }
+
+void AbilityManagerClient::PrepareTerminateAbilityDone(sptr<IRemoteObject> token, bool isTerminate)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbilityDone");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    return abms->PrepareTerminateAbilityDone(token, isTerminate);
+}
+
+void AbilityManagerClient::KillProcessWithPrepareTerminateDone(const std::string &moduleName,
+    int32_t prepareTermination, bool isExist)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call KillProcessWithPrepareTerminateDone");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    return abms->KillProcessWithPrepareTerminateDone(moduleName, prepareTermination, isExist);
+}
 } // namespace AAFwk
 } // namespace OHOS

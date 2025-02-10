@@ -1290,14 +1290,60 @@ void AbilityRecord::BackgroundAbility(const Closure &task)
     isLaunching_ = false;
 }
 
-bool AbilityRecord::PrepareTerminateAbility()
+bool AbilityRecord::PrepareTerminateAbility(bool isSCBCall)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     if (lifecycleDeal_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null lifecycleDeal_");
         return false;
     }
-    return lifecycleDeal_->PrepareTerminateAbility();
+    if (!isSCBCall) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "triggered by user clicking window x");
+        return lifecycleDeal_->PrepareTerminateAbility();
+    }
+    // execute onPrepareToTerminate until timeout
+    std::unique_lock<std::mutex> lock(isPrepareTerminateAbilityMutex_);
+    isPrepareTerminateAbilityCalled_.store(true);
+    isPrepareTerminate_ = false;
+    isPrepareTerminateAbilityDone_.store(false);
+    auto condition = [weak = weak_from_this()] {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null self");
+            return false;
+        }
+        return self->isPrepareTerminateAbilityDone_.load();
+    };
+    auto task = [weak = weak_from_this()]() {
+        auto self = weak.lock();
+        if (self == nullptr || !self->lifecycleDeal_ || !self->lifecycleDeal_->PrepareTerminateAbility()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "PrepareTerminateAbility error");
+            self->isPrepareTerminateAbilityDone_.store(true);
+            self->isPrepareTerminateAbilityCalled_.store(false);
+            self->isPrepareTerminateAbilityCv_.notify_all();
+        }
+    };
+    ffrt::submit(task);
+    if (!isPrepareTerminateAbilityCv_.wait_for(lock,
+        std::chrono::milliseconds(GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME), condition)) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "wait timeout");
+        return false;
+    }
+    return isPrepareTerminate_;
+}
+
+void AbilityRecord::PrepareTerminateAbilityDone(bool isTerminate)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbilityDone");
+    std::unique_lock<std::mutex> lock(isPrepareTerminateAbilityMutex_);
+    if (!isPrepareTerminateAbilityCalled_.load()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "prepare terminate not called");
+        return;
+    }
+    isPrepareTerminate_ = isTerminate;
+    isPrepareTerminateAbilityDone_.store(true);
+    isPrepareTerminateAbilityCalled_.store(false);
+    isPrepareTerminateAbilityCv_.notify_one();
 }
 
 int AbilityRecord::TerminateAbility()

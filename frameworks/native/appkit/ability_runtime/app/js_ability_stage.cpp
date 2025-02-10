@@ -80,14 +80,16 @@ napi_value OnPrepareTerminatePromiseCallback(napi_env env, napi_callback_info in
     size_t argc = ARGC_MAX_COUNT;
     napi_value argv[ARGC_MAX_COUNT] = {nullptr};
     NAPI_CALL_NO_THROW(napi_get_cb_info(env, info, &argc, argv, nullptr, &data), nullptr);
-    auto *callbackInfo = static_cast<AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *>(data);
+    auto *callbackInfo =
+        static_cast<AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *>(data);
     int prepareTermination = 0;
     if (callbackInfo == nullptr || (argc > 0 && !ConvertFromJsValue(env, argv[0], prepareTermination))) {
         TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo or unwrap prepareTermination result failed");
         return nullptr;
     }
-    callbackInfo->Call(prepareTermination);
-    AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Destroy(callbackInfo);
+    AppExecFwk::OnPrepareTerminationResult result = { prepareTermination, true };
+    callbackInfo->Call(result);
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult>::Destroy(callbackInfo);
     data = nullptr;
     TAG_LOGI(AAFwkTag::APPKIT, "OnPrepareTerminatePromiseCallback end");
     return nullptr;
@@ -253,11 +255,12 @@ void JsAbilityStage::OnDestroy() const
     napi_call_function(env, obj, methodOnDestroy, 0, nullptr, nullptr);
 }
 
-bool JsAbilityStage::OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo,
-    bool &isAsync, int &prepareTermination) const
+bool JsAbilityStage::OnPrepareTerminate(
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
+    bool &isAsync) const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    AbilityStage::OnPrepareTerminate(callbackInfo, isAsync, prepareTermination);
+    AbilityStage::OnPrepareTerminate(callbackInfo, isAsync);
 
     if (!jsAbilityStageObj_) {
         TAG_LOGW(AAFwkTag::APPKIT, "Not found AbilityStage.js");
@@ -273,78 +276,62 @@ bool JsAbilityStage::OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackIn
         return false;
     }
 
-    napi_value methodOnPrepareTerminateAsync = nullptr;
-    napi_value methodOnPrepareTerminate = nullptr;
-    napi_get_named_property(env, obj, "onPrepareTerminationAsync", &methodOnPrepareTerminateAsync);
-    napi_get_named_property(env, obj, "onPrepareTermination", &methodOnPrepareTerminate);
-
-    PrepareTerminateParam param = { env, obj, methodOnPrepareTerminateAsync, methodOnPrepareTerminate, callbackInfo };
-    return OnPrepareTerminateInner(param, isAsync, prepareTermination);
-}
-
-bool JsAbilityStage::OnPrepareTerminateInner(PrepareTerminateParam param, bool &isAsync, int &prepareTermination) const
-{
-    isAsync = false;
-    if (param.asyncFunc == nullptr && param.syncFunc == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "neither onPrepareTermination is implemented");
-        return false;
-    }
-
-    if (CallOnPrepareTerminateAsync(param.env, param.obj, param.callbackInfo, param.asyncFunc, isAsync)) {
-        TAG_LOGI(AAFwkTag::APPKIT, "async func implemented");
+    if (CallOnPrepareTerminateAsync(env, callbackInfo, isAsync)) {
+        TAG_LOGI(AAFwkTag::APPKIT, "onPrepareTerminationAsync is implemented");
         return true;
     }
-    return CallOnPrepareTerminate(param.env, param.obj, param.syncFunc, prepareTermination);
+    isAsync = false;
+    return CallOnPrepareTerminate(env, callbackInfo);
 }
 
-bool JsAbilityStage::CallOnPrepareTerminate(napi_env env, napi_value obj, napi_value methodOnPrepareTerminate,
-    int &prepareTermination) const
+bool JsAbilityStage::CallOnPrepareTerminate(napi_env env,
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo) const
 {
     TAG_LOGI(AAFwkTag::APPKIT, "sync call");
-    if (methodOnPrepareTerminate == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "methodOnPrepareTerminate nullptr");
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "callbackInfo nullptr");
         return false;
     }
-    if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Fail to get AbilityStage object");
+    napi_value result = CallObjectMethod("onPrepareTermination", nullptr, 0);
+    if (result == nullptr || !CheckTypeForNapiValue(env, result, napi_object)) {
+        TAG_LOGI(AAFwkTag::APPKIT, "onPrepareTermination unimplemented");
         return false;
     }
-    napi_value result = nullptr;
-    napi_call_function(env, obj, methodOnPrepareTerminate, 0, nullptr, &result);
+    int32_t prepareTermination = 0;
     if (!ConvertFromJsValue(env, result, prepareTermination)) {
         TAG_LOGE(AAFwkTag::APPKIT, "Fail to unwrap prepareTermination result");
     }
+    AppExecFwk::OnPrepareTerminationResult prepareTerminationResult = { prepareTermination, true };
+    callbackInfo->Call(prepareTerminationResult);
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult>::Destroy(callbackInfo);
     return true;
 }
 
-bool JsAbilityStage::CallOnPrepareTerminateAsync(napi_env env, napi_value obj,
-    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo,
-    napi_value methodOnPrepareTerminateAsync, bool &isAsync) const
+bool JsAbilityStage::CallOnPrepareTerminateAsync(napi_env env,
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
+    bool &isAsync) const
 {
     isAsync = false;
-    if (methodOnPrepareTerminateAsync == nullptr || callbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "methodOnPrepareTerminateAsync or callbackInfo nullptr");
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "callbackInfo nullptr");
         return false;
     }
-    if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Fail to get AbilityStage object");
+    napi_value result = CallObjectMethod("onPrepareTerminationAsync", nullptr, 0);
+    if (result == nullptr || !CheckTypeForNapiValue(env, result, napi_object)) {
+        TAG_LOGI(AAFwkTag::APPKIT, "onPrepareTerminationAsync unimplemented");
         return false;
     }
-    napi_value result = nullptr;
-    napi_call_function(env, obj, methodOnPrepareTerminateAsync, 0, nullptr, &result);
+    TAG_LOGD(AAFwkTag::APPKIT, "onPrepareTerminationAsync implemented");
     bool isPromise = false;
     napi_is_promise(env, result, &isPromise);
     if (!isPromise) {
         TAG_LOGI(AAFwkTag::APPKIT, "result not promise");
-        return false;
+        // the async func is implemented but the user's returned value is wrong
+        return true;
     }
     TAG_LOGI(AAFwkTag::APPKIT, "async call");
     bool callResult = false;
     do {
-        if (!CheckTypeForNapiValue(env, result, napi_object)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "convert value error");
-            break;
-        }
         napi_value then = nullptr;
         napi_get_named_property(env, result, "then", &then);
         if (then == nullptr) {
@@ -672,7 +659,7 @@ bool JsAbilityStage::LoadJsStartupConfig(const std::string &srcEntry)
     return true;
 }
 
-napi_value JsAbilityStage::CallObjectMethod(const char* name, napi_value const * argv, size_t argc)
+napi_value JsAbilityStage::CallObjectMethod(const char* name, napi_value const * argv, size_t argc) const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "call %{public}s", name);
     if (!jsAbilityStageObj_) {
@@ -680,7 +667,7 @@ napi_value JsAbilityStage::CallObjectMethod(const char* name, napi_value const *
         return nullptr;
     }
 
-    HandleScope handleScope(jsRuntime_);
+    HandleEscape handleEscape(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
@@ -699,7 +686,7 @@ napi_value JsAbilityStage::CallObjectMethod(const char* name, napi_value const *
     napi_value result = nullptr;
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     napi_call_function(env, obj, method, argc, argv, &result);
-    return result;
+    return handleEscape.Escape(result);
 }
 
 std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> JsAbilityStage::CreateStageProperty() const

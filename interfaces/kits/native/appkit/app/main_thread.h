@@ -278,8 +278,7 @@ public:
 
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
 
-    void SchedulePrepareTerminate(const std::string &moduleName,
-        int32_t &prepareTermination, bool &isExist) override;
+    void SchedulePrepareTerminate(const std::string &moduleName) override;
 
     void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) override;
 
@@ -381,8 +380,7 @@ private:
 
     void HandleJsHeapMemory(const OHOS::AppExecFwk::JsHeapDumpInfo &info);
 
-    void HandleSchedulePrepareTerminate(const std::string &moduleName,
-        std::shared_ptr<int32_t> prepareTerminationPtr, bool &isExist);
+    void HandleSchedulePrepareTerminate(const std::string &moduleName);
 
     void PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleInfo,
         const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
@@ -769,10 +767,6 @@ private:
     void *handleAppLib_ = nullptr;  // the handler of ACE Library.
     constexpr static std::string applicationLibraryPath = "/hos/lib/libapplication_native.z.so";
 #endif  // APPLICATION_LIBRARY_LOADER
-
-    std::atomic_bool isPrepareTerminateDone_ = false;
-    std::mutex mutex_;
-    std::condition_variable cv_;
 
     DISALLOW_COPY_AND_MOVE(MainThread);
 };

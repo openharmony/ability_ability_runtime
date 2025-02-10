@@ -752,11 +752,11 @@ bool JsUIAbility::OnBackPress()
 }
 
 void JsUIAbility::OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo,
-    bool &isAsync, bool &prepareTermination)
+    bool &isAsync)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
-    UIAbility::OnPrepareTerminate(callbackInfo, isAsync, prepareTermination);
+    UIAbility::OnPrepareTerminate(callbackInfo, isAsync);
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     napi_value onPrepareToTerminateAsyncResult = nullptr;
@@ -773,10 +773,11 @@ void JsUIAbility::OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<
     }
     if (onPrepareToTerminateResult != nullptr) {
         TAG_LOGI(AAFwkTag::UIABILITY, "sync call");
-        prepareTermination = false;
-        if (!ConvertFromJsValue(env, onPrepareToTerminateResult, prepareTermination)) {
+        bool isTerminate = false;
+        if (!ConvertFromJsValue(env, onPrepareToTerminateResult, isTerminate)) {
             TAG_LOGE(AAFwkTag::UIABILITY, "get js value failed");
         }
+        callbackInfo->Call(isTerminate);
         return;
     }
     TAG_LOGI(AAFwkTag::UIABILITY, "async call");

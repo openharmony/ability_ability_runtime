@@ -589,6 +589,12 @@ enum class AbilityManagerInterfaceCode {
 
     // start seld uiability
     NDK_START_SELF_UI_ABILITY = 6132,
+
+    // prepare terminate done
+    PREPARE_TERMINATE_ABILITY_DONE = 6133,
+
+    // kill process with prepare terminate done
+    KILL_PROCESS_WITH_PREPARE_TERMINATE_DONE = 6134,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
