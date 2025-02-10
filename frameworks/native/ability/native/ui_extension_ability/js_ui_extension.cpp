@@ -786,6 +786,11 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
     option->SetDensity(sessionInfo->density);
     option->SetIsDensityFollowHost(sessionInfo->isDensityFollowHost);
     option->SetDisplayId(sessionInfo->displayId);
+    if (context->isNotAllow != -1) {
+        bool isNotAllow = context->isNotAllow == 1 ? true : false;
+        TAG_LOGD(AAFwkTag::UI_EXT, "isNotAllow: %{public}d", isNotAllow);
+        option->SetConstrainedModal(isNotAllow);
+    }
     HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
 }

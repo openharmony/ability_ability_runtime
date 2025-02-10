@@ -512,6 +512,11 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
         option->SetDensity(sessionInfo->density);
         option->SetIsDensityFollowHost(sessionInfo->isDensityFollowHost);
         option->SetDisplayId(sessionInfo->displayId);
+        if (context->isNotAllow != -1) {
+            bool isNotAllow = context->isNotAllow == 1 ? true : false;
+            TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "isNotAllow: %{public}d", isNotAllow);
+            option->SetConstrainedModal(isNotAllow);
+        }
         sptr<Rosen::Window> uiWindow;
         {
             HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
