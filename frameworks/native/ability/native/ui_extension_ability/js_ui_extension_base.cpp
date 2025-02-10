@@ -650,6 +650,11 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         option->SetRealParentId(sessionInfo->realHostWindowId);
         option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
         option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
+        if (context_->isNotAllow != -1) {
+            bool isNotAllow = context_->isNotAllow == 1 ? true : false;
+            TAG_LOGD(AAFwkTag::UI_EXT, "isNotAllow: %{public}d", isNotAllow);
+            option->SetConstrainedModal(isNotAllow);
+        }
         auto uiWindow = Rosen::Window::Create(option, context_, sessionInfo->sessionToken);
         if (uiWindow == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "create ui window error");
