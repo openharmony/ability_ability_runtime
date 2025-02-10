@@ -196,7 +196,7 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             system::GetBoolParameter("const.debuggable", false) == true;
         // Don't start any server if (system not in debuggable mode) and app is release version
         // Starting ConnectServer in release app on debuggable system is only for debug mode, not for profiling mode.
-        if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+        if ((!isSystemDebuggable) && appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "not support release app");
             return;
         }
