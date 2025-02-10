@@ -1200,12 +1200,16 @@ void JsRuntime::DumpHeapSnapshot(bool isPrivate)
     nativeEngine->DumpHeapSnapshot(true, DumpFormat::JSON, isPrivate, false);
 }
 
-void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC)
+void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary)
 {
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
     panda::ecmascript::DumpSnapShotOption dumpOption;
-    dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
+    if (isBinary) {
+        dumpOption.dumpFormat = panda::ecmascript::DumpFormat::BINARY;
+    } else {
+        dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
+    }
     dumpOption.isVmMode = true;
     dumpOption.isPrivate = false;
     dumpOption.captureNumericValue = true;
