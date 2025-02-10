@@ -182,6 +182,12 @@ public:
      */
     int32_t OnShare(WantParams &wantParams) override;
 
+    /**
+     * @brief Set the continueState of an application to window.
+     * @param state Indicates the continueState of an application.
+     */
+    void SetContinueState(int32_t state) override;
+
 #ifdef SUPPORT_SCREEN
 public:
     /**
