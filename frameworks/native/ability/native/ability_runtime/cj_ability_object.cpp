@@ -30,6 +30,9 @@ namespace {
 // It is assigned by the global variable REGISTER_ABILITY on the cj side which invokes RegisterCJAbilityFuncs.
 // And it is never released.
 CJAbilityFuncs* g_cjAbilityFuncs = nullptr;
+
+const char* CJ_ABILITY_LIBNAME = "libcj_ability_ffi.z.so";
+const char* FUNC_CONVERT_CONFIGURATION = "OHOS_ConvertConfiguration";
 } // namespace
 
 void RegisterCJAbilityFuncs(void (*registerFunc)(CJAbilityFuncs*))
@@ -52,6 +55,45 @@ void RegisterCJAbilityFuncs(void (*registerFunc)(CJAbilityFuncs*))
 
 namespace OHOS {
 namespace AbilityRuntime {
+char* CreateCStringFromString(const std::string& source)
+{
+    if (source.size() == 0) {
+        return nullptr;
+    }
+    size_t length = source.size() + 1;
+    auto res = static_cast<char*>(malloc(length));
+    if (res == nullptr) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "null res");
+        return nullptr;
+    }
+    if (strcpy_s(res, length, source.c_str()) != 0) {
+        free(res);
+        TAG_LOGE(AAFwkTag::DEFAULT, "Strcpy failed");
+        return nullptr;
+    }
+    return res;
+}
+
+CConfiguration CallConvertConfig(std::shared_ptr<AppExecFwk::Configuration> configuration)
+{
+    CConfiguration cCfg;
+    void* handle = dlopen(CJ_ABILITY_LIBNAME, RTLD_LAZY);
+    if (handle == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
+        return cCfg;
+    }
+    using ConvertConfigFunc = CConfiguration (*)(void*);
+    auto func = reinterpret_cast<ConvertConfigFunc>(dlsym(handle, FUNC_CONVERT_CONFIGURATION));
+    if (func == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null func");
+        dlclose(handle);
+        return cCfg;
+    }
+    cCfg = func(configuration.get());
+    dlclose(handle);
+    return cCfg;
+}
+
 std::shared_ptr<CJAbilityObject> CJAbilityObject::LoadModule(const std::string& name)
 {
     if (g_cjAbilityFuncs == nullptr) {
@@ -180,7 +222,7 @@ void CJAbilityObject::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::C
         TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
         return;
     }
-    auto cfg = CreateCConfiguration(*configuration);
+    auto cfg = CallConvertConfig(configuration);
     return g_cjAbilityFuncs->cjAbilityOnConfigurationUpdate(id_, cfg);
 }
 
