@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -217,10 +217,12 @@ public:
     /**
      * KillProcessesByUserId, call KillProcessesByUserId() through proxy object,
      * kill the process by user id.
+     * Send appSpawn uninstall debug hap message.
      *
      * @param userId, the user id.
+     * @param isNeedSendAppSpawnMsg, true send appSpawn message otherwise not send.
      */
-    void KillProcessesByUserId(int32_t userId);
+    void KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg = false);
 
     /**
      * KillProcessesByPids, only in process call is allowed,
@@ -589,13 +591,6 @@ public:
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
     bool IsCallerKilling(const std::string& callerKey) const;
-
-    /**
-     * Send appSpawn uninstall debug hap message.
-     *
-     * @param userId, the user id.
-     */
-    void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
 
 protected:
     /**
