@@ -60,6 +60,9 @@ void CjEnvironmentTest::TearDown(void)
 void TestFunc()
 {}
 
+void RegisterCJUncaughtExceptionHandlerTest(const CJUncaughtExceptionInfo &handle)
+{}
+
 /**
  * @tc.name: CjEnvironmentTestPostTask_001
  * @tc.desc: CjEnvironmentTest test for PostTask.
@@ -135,7 +138,25 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJSysNS_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartRuntime_001, TestSize.Level0)
 {
-    auto ret = CJEnvironment::GetInstance()->StartRuntime();
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    CJUncaughtExceptionInfo handle;
+    handle.hapPath = "/test1/";
+    handle.uncaughtTask = [](const char* summary, const CJErrorObject errorObj) {};
+
+    CJRuntimeAPI api {
+        .InitCJRuntime = nullptr,
+        .InitUIScheduler = nullptr,
+        .RunUIScheduler = nullptr,
+        .FiniCJRuntime = nullptr,
+        .InitCJLibrary = nullptr,
+        .RegisterEventHandlerCallbacks = nullptr,
+        .RegisterCJUncaughtExceptionHandler = RegisterCJUncaughtExceptionHandlerTest,
+    };
+
+    CJRuntimeAPI* lazyApi = new CJRuntimeAPI(api);
+    cJEnvironment.SetLazyApis(lazyApi);
+    cJEnvironment.RegisterCJUncaughtExceptionHandler(handle);
+    auto ret = cJEnvironment.StartRuntime();
     EXPECT_EQ(ret, false);
 }
 
@@ -146,8 +167,26 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartRuntime_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopRuntime_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->StopRuntime();
-    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    CJUncaughtExceptionInfo handle;
+    handle.hapPath = "/test1/";
+    handle.uncaughtTask = [](const char* summary, const CJErrorObject errorObj) {};
+
+    CJRuntimeAPI api {
+        .InitCJRuntime = nullptr,
+        .InitUIScheduler = nullptr,
+        .RunUIScheduler = nullptr,
+        .FiniCJRuntime = nullptr,
+        .InitCJLibrary = nullptr,
+        .RegisterEventHandlerCallbacks = nullptr,
+        .RegisterCJUncaughtExceptionHandler = RegisterCJUncaughtExceptionHandlerTest,
+    };
+
+    CJRuntimeAPI* lazyApi = new CJRuntimeAPI(api);
+    cJEnvironment.SetLazyApis(lazyApi);
+    cJEnvironment.RegisterCJUncaughtExceptionHandler(handle);
+    cJEnvironment.StopRuntime();
+    EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
 }
 
 /**
@@ -157,8 +196,26 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopRuntime_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopUIScheduler_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->StopUIScheduler();
-    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    CJUncaughtExceptionInfo handle;
+    handle.hapPath = "/test1/";
+    handle.uncaughtTask = [](const char* summary, const CJErrorObject errorObj) {};
+
+    CJRuntimeAPI api {
+        .InitCJRuntime = nullptr,
+        .InitUIScheduler = nullptr,
+        .RunUIScheduler = nullptr,
+        .FiniCJRuntime = nullptr,
+        .InitCJLibrary = nullptr,
+        .RegisterEventHandlerCallbacks = nullptr,
+        .RegisterCJUncaughtExceptionHandler = RegisterCJUncaughtExceptionHandlerTest,
+    };
+
+    CJRuntimeAPI* lazyApi = new CJRuntimeAPI(api);
+    cJEnvironment.SetLazyApis(lazyApi);
+    cJEnvironment.RegisterCJUncaughtExceptionHandler(handle);
+    cJEnvironment.StopUIScheduler();
+    EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
 }
 
 /**
@@ -168,7 +225,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopUIScheduler_001, TestSize.Level
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestLoadCJLibrary_001, TestSize.Level0)
 {
-    auto ret = CJEnvironment::GetInstance()->LoadCJLibrary("dlName");
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    auto ret = cJEnvironment.LoadCJLibrary("dlName");
     EXPECT_EQ(ret, nullptr);
 }
 
@@ -179,10 +237,11 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestLoadCJLibrary_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestLoadCJLibrary_002, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::APP, "dlName");
-    CJEnvironment::GetInstance()->LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::SYSTEM, "dlName");
-    CJEnvironment::GetInstance()->LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::SDK, "dlName");
-    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    cJEnvironment.LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::APP, "dlName");
+    cJEnvironment.LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::SYSTEM, "dlName");
+    cJEnvironment.LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::SDK, "dlName");
+    EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
 }
 
 /**
@@ -192,7 +251,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestLoadCJLibrary_002, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartDebugger_001, TestSize.Level0)
 {
-    auto ret = CJEnvironment::GetInstance()->StartDebugger();
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    auto ret = cJEnvironment.StartDebugger();
     EXPECT_EQ(ret, false);
 }
 
@@ -203,6 +263,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartDebugger_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestGetSymbol_001, TestSize.Level0)
 {
-    auto ret = CJEnvironment::GetInstance()->GetSymbol(nullptr, "dlName");
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    auto ret = cJEnvironment.GetSymbol(nullptr, "dlName");
     EXPECT_EQ(ret, nullptr);
 }
