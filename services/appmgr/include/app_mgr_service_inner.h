@@ -1244,6 +1244,13 @@ public:
 
     bool HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
 
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     */
+    void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);

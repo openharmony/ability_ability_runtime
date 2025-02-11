@@ -42,6 +42,7 @@ public:
             const int32_t visibility, const int32_t perceptibility, const int32_t connectionState));
     MOCK_METHOD1(KillProcessByAbilityToken, AppMgrResultCode(const sptr<IRemoteObject>& token));
     MOCK_METHOD1(KillProcessesByUserId, AppMgrResultCode(int32_t userId));
+    MOCK_METHOD1(SendAppSpawnUninstallDebugHapMsg, AppMgrResultCode(int32_t userId));
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

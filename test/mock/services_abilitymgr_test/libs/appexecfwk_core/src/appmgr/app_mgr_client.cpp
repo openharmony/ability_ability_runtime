@@ -111,5 +111,10 @@ void AppMgrClient::AbilityAttachTimeOut(const sptr<IRemoteObject>& token)
 
 void AppMgrClient::PrepareTerminate(const sptr<IRemoteObject>& token, bool clearMissionFlag)
 {}
+
+AppMgrResultCode AppMgrClient::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
+{
+    return AppMgrResultCode::RESULT_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

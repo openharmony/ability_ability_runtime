@@ -103,6 +103,7 @@ private:
     int32_t HandleCleanAbilityByUserRequest(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsProcessContainsOnlyUIAbility(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsProcessAttached(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSendAppSpawnUninstallDebugHapMsg(MessageParcel &data);
     DISALLOW_COPY_AND_MOVE(AmsMgrStub);
 };
 }  // namespace AppExecFwk
