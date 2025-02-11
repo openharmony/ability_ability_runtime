@@ -6121,5 +6121,59 @@ void AbilityManagerProxy::KillProcessWithPrepareTerminateDone(const std::string 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
     }
 }
+
+int32_t AbilityManagerProxy::RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
+{
+    if (!observer) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer null");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "RegisterHiddenStartObserver start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(observer->AsObject())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::REGISTER_HIDDEN_START_OBSERVER,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
+{
+    if (!observer) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer null");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "UnregisterHiddenStartObserver start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(observer->AsObject())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::UNREGISTER_HIDDEN_START_OBSERVER,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
 } // namespace AAFwk
 } // namespace OHOS

@@ -462,6 +462,7 @@ private:
     int StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest, int32_t persistentId);
     void CheckCallerFromBackground(std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> &sessionInfo);
     int32_t DoCallerProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord);
+    int32_t DoCallerProcessDetachment(std::shared_ptr<AbilityRecord> abilityRecord);
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         bool &isColdStart);
     std::shared_ptr<AbilityRecord> FindRecordFromTmpMap(const AbilityRequest &abilityRequest);
