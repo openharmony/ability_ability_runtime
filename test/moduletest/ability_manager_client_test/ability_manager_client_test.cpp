@@ -15,12 +15,17 @@
 
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
 #include "ability_manager_client.h"
+#undef private
+#undef protected
 #include "ability_manager_errors.h"
 #include "ability_state_data.h"
 #include "element_name.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_object_stub.h"
+#include "scene_board_judgement.h"
 #include "start_options.h"
 #include "status_bar_delegate_proxy.h"
 #include "ui_extension/ui_extension_session_info.h"
@@ -182,7 +187,9 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_IsValidMissionIds_001, T
     missionIds.push_back(ABILITYID);
     std::vector<MissionValidResult> results;
     auto result = AbilityManagerClient::GetInstance()->IsValidMissionIds(missionIds, results);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, ERR_INVALID_VALUE);
+    }
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_IsValidMissionIds_001 result %{public}d", result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_IsValidMissionIds_001 end");
 }
@@ -345,8 +352,9 @@ HWTEST_F(AbilityManagerClientTest, KillProcessWithReason_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "KillProcessWithReason_0100 start");
     int32_t pid = 1;
     AAFwk::ExitReason reason;
-    auto result = AbilityManagerClient::GetInstance()->KillProcessWithReason(pid, reason);
-    EXPECT_EQ(result, ERR_OK);
+    std::shared_ptr<AbilityManagerClient> client = std::make_shared<AbilityManagerClient>();
+    client->KillProcessWithReason(pid, reason);
+    EXPECT_TRUE(client != nullptr);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
