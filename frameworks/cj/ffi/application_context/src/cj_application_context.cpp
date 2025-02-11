@@ -21,6 +21,7 @@
 #include "running_process_info.h"
 #include "cj_utils_ffi.h"
 #include "cj_lambda.h"
+#include "cj_macro.h"
 #include "hilog_tag_wrapper.h"
 #include "cj_ability_runtime_error.h"
 
@@ -685,5 +686,88 @@ void CJApplicationContext::OnSetSupportedProcessCacheSelf(bool isSupported, int3
     }
 }
 
+extern "C" {
+CJ_EXPORT void OHOS_CjAppCtxFunc(int32_t type, int64_t id)
+{
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
+        return;
+    }
+    auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null appContext");
+        return;
+    }
+    switch (CjAppCtxFuncType(type)) {
+        case CjAppCtxFuncType::ON_ABILITY_WILL_CREATE:
+            return appContext->DispatchOnAbilityWillCreate(id);
+        case CjAppCtxFuncType::ON_ABILITY_CREATE:
+            return appContext->DispatchOnAbilityCreate(id);
+        case CjAppCtxFuncType::ON_ABILITY_WILL_DESTROY:
+            return appContext->DispatchOnAbilityWillDestroy(id);
+        case CjAppCtxFuncType::ON_ABILITY_DESTROY:
+            return appContext->DispatchOnAbilityDestroy(id);
+        case CjAppCtxFuncType::ON_ABILITY_WILL_FOREGROUND:
+            return appContext->DispatchOnAbilityWillForeground(id);
+        case CjAppCtxFuncType::ON_ABILITY_FOREGROUND:
+            return appContext->DispatchOnAbilityForeground(id);
+        case CjAppCtxFuncType::ON_ABILITY_WILL_BACKGROUND:
+            return appContext->DispatchOnAbilityWillBackground(id);
+        case CjAppCtxFuncType::ON_ABILITY_BACKGROUND:
+            return appContext->DispatchOnAbilityBackground(id);
+        case CjAppCtxFuncType::ON_ABILITY_WILL_CONTINUE:
+            return appContext->DispatchOnAbilityWillContinue(id);
+        case CjAppCtxFuncType::ON_ABILITY_CONTINUE:
+            return appContext->DispatchOnAbilityContinue(id);
+        case CjAppCtxFuncType::ON_ABILITY_WILL_SAVE_STATE:
+            return appContext->DispatchOnAbilityWillSaveState(id);
+        case CjAppCtxFuncType::ON_ABILITY_SAVE_STATE:
+            return appContext->DispatchOnAbilitySaveState(id);
+        case CjAppCtxFuncType::ON_WILL_NEW_WANT:
+            return appContext->DispatchOnWillNewWant(id);
+        case CjAppCtxFuncType::ON_NEW_WANT:
+            return appContext->DispatchOnNewWant(id);
+        default:
+            TAG_LOGE(AAFwkTag::APPKIT, "invalid type: %{public}d", type);
+            return;
+    }
+}
+
+CJ_EXPORT void OHOS_CjAppCtxWindowFunc(int32_t type, int64_t id, void* window)
+{
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
+        return;
+    }
+    auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null appContext");
+        return;
+    }
+    switch (CjAppCtxFuncType(type)) {
+        case CjAppCtxFuncType::ON_WINDOWSTAGE_WILL_CREATE:
+            return appContext->DispatchOnWindowStageWillCreate(id, window);
+        case CjAppCtxFuncType::ON_WINDOWSTAGE_CREATE:
+            return appContext->DispatchOnWindowStageCreate(id, window);
+        case CjAppCtxFuncType::ON_WINDOWSTAGE_WILL_RESTORE:
+            return appContext->DispatchOnWindowStageWillRestore(id, window);
+        case CjAppCtxFuncType::ON_WINDOWSTAGE_RESTORE:
+            return appContext->DispatchOnWindowStageRestore(id, window);
+        case CjAppCtxFuncType::ON_WINDOWSTAGE_WILL_DESTROY:
+            return appContext->DispatchOnWindowStageWillDestroy(id, window);
+        case CjAppCtxFuncType::ON_WINDOWSTAGE_DESTROY:
+            return appContext->DispatchOnWindowStageDestroy(id, window);
+        case CjAppCtxFuncType::WINDOWSTAGE_FOCUS:
+            return appContext->DispatchWindowStageFocus(id, window);
+        case CjAppCtxFuncType::WINDOWSTAGE_UNFOCUS:
+            return appContext->DispatchWindowStageUnfocus(id, window);
+        default:
+            TAG_LOGE(AAFwkTag::APPKIT, "invalid type: %{public}d", type);
+            return;
+    }
+}
+}
 }
 }

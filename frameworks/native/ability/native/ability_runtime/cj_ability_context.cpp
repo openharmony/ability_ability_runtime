@@ -533,6 +533,26 @@ void CjUIExtensionCallback::OnRelease(int32_t code)
     uiContent_->CloseModalUIExtension(sessionId_);
 }
 #endif // SUPPORT_SCREEN
+
+char* CreateCStringFromString(const std::string& source)
+{
+    if (source.size() == 0) {
+        return nullptr;
+    }
+    size_t length = source.size() + 1;
+    auto res = static_cast<char*>(malloc(length));
+    if (res == nullptr) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "null res");
+        return nullptr;
+    }
+    if (strcpy_s(res, length, source.c_str()) != 0) {
+        free(res);
+        TAG_LOGE(AAFwkTag::DEFAULT, "Strcpy failed");
+        return nullptr;
+    }
+    return res;
+}
+
 void CjUIExtensionCallback::CallCjError(int32_t number)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "call");
