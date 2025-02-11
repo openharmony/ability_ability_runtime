@@ -2340,7 +2340,7 @@ bool UIAbilityLifecycleManager::PrepareTerminateAbility(const std::shared_ptr<Ab
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Not support prepare terminate.");
         return false;
     }
-    return abilityRecord->PrepareTerminateAbility(false);
+    return abilityRecord->PrepareTerminateAbility(isSCBCall);
 }
 
 void UIAbilityLifecycleManager::PrepareTerminateAbilityDone(std::shared_ptr<AbilityRecord> abilityRecord,
