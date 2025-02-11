@@ -38,6 +38,7 @@ private:
 
     int32_t HandleCheckIfStatusBarItemExists(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAttachPidToStatusBarItem(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleDetachPidToStatusBarItem(MessageParcel &data, MessageParcel &reply);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
