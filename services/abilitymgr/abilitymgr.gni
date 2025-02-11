@@ -137,6 +137,7 @@ abilityms_files = [
   "src/keep_alive/keep_alive_process_manager.cpp",
 
   "src/ability_manager_event_subscriber.cpp",
+  "src/ability_record_death_manager.cpp",
 
   "src/exit_info_data_manager.cpp",
 

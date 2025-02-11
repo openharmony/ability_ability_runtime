@@ -38,6 +38,7 @@
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "irender_state_observer.h"
+#include "killed_process_info.h"
 #include "memory_level_info.h"
 #include "page_state_data.h"
 #include "process_memory_state.h"
@@ -922,6 +923,19 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t UpdateProcessMemoryState(const std::vector<ProcessMemoryState> &procMemState)
+    {
+        return 0;
+    }
+
+    /**
+     * Get killed process info by process id and uid.
+     *
+     * @param pid Process id.
+     * @param uid Process uid.
+     * @param info result KilledProcessInfo.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &info)
     {
         return 0;
     }

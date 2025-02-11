@@ -397,14 +397,15 @@ void AppExitReasonDataManager::ConvertReasonFromValue(const nlohmann::json &json
     if (jsonObject.contains(JSON_KEY_SUB_KILL_REASON) && jsonObject[JSON_KEY_SUB_KILL_REASON].is_number_integer()) {
         exitReason.subReason = jsonObject.at(JSON_KEY_SUB_KILL_REASON).get<int32_t>();
     }
-    if (jsonObject.contains(JSON_KEY_EXIT_MSG) && jsonObject[JSON_KEY_EXIT_MSG].is_string()
-        && !jsonObject[JSON_KEY_EXIT_MSG].empty()) {
+    if (jsonObject.contains(JSON_KEY_EXIT_MSG) && jsonObject[JSON_KEY_EXIT_MSG].is_string()) {
         exitReason.exitMsg = jsonObject.at(JSON_KEY_EXIT_MSG).get<std::string>();
     }
-    if (jsonObject.contains(JSON_KEY_KILL_MSG) && jsonObject[JSON_KEY_KILL_MSG].is_string()
-        && !jsonObject[JSON_KEY_KILL_MSG].empty()) {
-        exitReason.exitMsg = jsonObject.at(JSON_KEY_KILL_MSG).get<std::string>();
-        withKillMsg = true;
+    if (jsonObject.contains(JSON_KEY_KILL_MSG) && jsonObject[JSON_KEY_KILL_MSG].is_string()) {
+        auto killMsg = jsonObject.at(JSON_KEY_KILL_MSG).get<std::string>();
+        if (!killMsg.empty()) {
+            exitReason.exitMsg = killMsg;
+            withKillMsg = true;
+        }
     }
 }
 
