@@ -345,7 +345,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_AddConnectRecordToList, TestSize.Lev
     // test2 for adding new connection record to empty list
     OHOS::sptr<IAbilityConnection> callback1 = new AbilityConnectCallback();
     auto newConnRecord1 =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback1);
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback1, nullptr);
     abilityRecord_->AddConnectRecordToList(newConnRecord1);
     connList = abilityRecord_->GetConnectRecordList();
     EXPECT_EQ(1, static_cast<int>(connList.size()));
@@ -353,7 +353,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_AddConnectRecordToList, TestSize.Lev
     // test3 for adding new connection record to non-empty list
     OHOS::sptr<IAbilityConnection> callback2 = new AbilityConnectCallback();
     auto newConnRecord2 =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback2);
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback2, nullptr);
     abilityRecord_->AddConnectRecordToList(newConnRecord2);
     connList = abilityRecord_->GetConnectRecordList();
     EXPECT_EQ(2, static_cast<int>(connList.size()));
@@ -370,7 +370,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_AddConnectRecordToList, TestSize.Lev
 
     // test6 for delete no-match member from list
     auto newConnRecord3 =
-        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback2);
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback2, nullptr);
     abilityRecord_->RemoveConnectRecordFromList(newConnRecord3);
     connList = abilityRecord_->GetConnectRecordList();
     EXPECT_EQ(2, static_cast<int>(connList.size()));
@@ -1976,9 +1976,9 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetConnectingRecordList_001, TestSize.
     EXPECT_NE(abilityRecord, nullptr);
     OHOS::sptr<IAbilityConnection> callback = new AbilityConnectCallback();
     std::shared_ptr<ConnectionRecord> connection1 =
-        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback);
+        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback, nullptr);
     std::shared_ptr<ConnectionRecord> connection2 =
-        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback);
+        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback, nullptr);
     connection1->SetConnectState(ConnectionState::CONNECTING);
     connection2->SetConnectState(ConnectionState::CONNECTED);
     abilityRecord->connRecordList_.push_back(connection1);
@@ -2039,7 +2039,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_DumpService_001, TestSize.Level1)
     bool isClient = false;
     OHOS::sptr<IAbilityConnection> callback = new AbilityConnectCallback();
     std::shared_ptr<ConnectionRecord> connection =
-        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback);
+        std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback, nullptr);
     abilityRecord->isLauncherRoot_ = true;
     abilityRecord->connRecordList_.push_back(nullptr);
     abilityRecord->connRecordList_.push_back(connection);
