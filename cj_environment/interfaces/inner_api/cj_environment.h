@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_CJ_ENVIRONMENT_H
 
 #include "cj_envsetup.h"
+#include "cj_invoker.h"
 
 #include <string>
 #include <functional>
@@ -59,6 +60,8 @@ public:
     
     bool StartRuntime();
     void StopRuntime();
+    void RegisterArkVMInRuntime(unsigned long long externalVM);
+    void RegisterStackInfoCallbacks(UpdateStackInfoFuncType uFunc);
     void RegisterCJUncaughtExceptionHandler(const CJUncaughtExceptionInfo& handle);
     bool IsUISchedulerStarted()
     {

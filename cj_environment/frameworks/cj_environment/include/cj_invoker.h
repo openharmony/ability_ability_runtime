@@ -25,6 +25,7 @@
 namespace OHOS {
 using PostTaskType = bool(*)(void*);
 using HasHigherPriorityType = bool(*)();
+using UpdateStackInfoFuncType = void(*)(unsigned long long, void*, unsigned int);
 
 struct CJUncaughtExceptionInfo;
 
@@ -36,6 +37,8 @@ struct CJRuntimeAPI {
     int (*InitCJLibrary)(const char*);
     void (*RegisterEventHandlerCallbacks)(PostTaskType, HasHigherPriorityType);
     void (*RegisterCJUncaughtExceptionHandler)(const CJUncaughtExceptionInfo& handle);
+    void (*RegisterArkVMInRuntime)(unsigned long long);
+    void (*RegisterStackInfoCallbacks)(UpdateStackInfoFuncType);
 };
 }
 
