@@ -184,7 +184,8 @@ void JsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
 void JsUIExtension::RegisterAbilityConfigUpdateCallback()
 {
     auto context = GetContext();
-    std::weak_ptr<JsUIExtension> abilityWptr = weak_from_this();
+    auto uiExtensionAbility = std::static_pointer_cast<JsUIExtension>(shared_from_this());
+    std::weak_ptr<JsUIExtension> abilityWptr = uiExtensionAbility;
     context->RegisterAbilityConfigUpdateCallback(
         [abilityWptr, abilityContext = context](AppExecFwk::Configuration &config) {
         std::shared_ptr<JsUIExtension> abilitySptr = abilityWptr.lock();
