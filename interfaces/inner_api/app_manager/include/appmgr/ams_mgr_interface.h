@@ -398,6 +398,13 @@ public:
         return false;
     }
 
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     */
+    virtual void SendAppSpawnUninstallDebugHapMsg(int32_t userId) = 0;
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -452,6 +459,7 @@ public:
         IS_PROCESS_ATTACHED,
         ENABLE_START_PROCESS_FLAG_BY_USER_ID,
         KILL_PROCESSES_IN_BATCH,
+        SEND_APP_SPAWN_UNINSTALL_DEBUG_HAP_MSG,
     };
 };
 }  // namespace AppExecFwk

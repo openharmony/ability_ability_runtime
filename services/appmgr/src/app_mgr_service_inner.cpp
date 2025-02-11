@@ -8079,5 +8079,22 @@ bool AppMgrServiceInner::HasAppRecord(const AAFwk::Want &want, const AbilityInfo
         bundleInfo, "");
     return appRecord != nullptr;
 }
+
+void AppMgrServiceInner::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
+{
+    if (remoteClientManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null remoteClientManager_");
+        return;
+    }
+    auto spawnClient = remoteClientManager_->GetSpawnClient();
+    if (spawnClient == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null spawnClient");
+        return;
+    }
+    auto errCode = spawnClient->SendAppSpawnUninstallDebugHapMsg(userId);
+    if (FAILED(errCode)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SendAppSpawnUninstallDebugHapMsg failed, errCode %{public}08x", errCode);
+    }
+}
 } // namespace AppExecFwk
 }  // namespace OHOS

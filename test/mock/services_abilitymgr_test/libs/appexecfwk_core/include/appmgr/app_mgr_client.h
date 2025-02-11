@@ -199,6 +199,14 @@ public:
 
     void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo& info) const;
 
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, The user id.
+     * @return Returns RESULT_OK on success, others on failure.
+     */
+    virtual AppMgrResultCode SendAppSpawnUninstallDebugHapMsg(int32_t userId);
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
 

@@ -1577,5 +1577,23 @@ HWTEST_F(AmsMgrSchedulerTest, AttachedToStatusBar_002, TestSize.Level0)
     sptr<IRemoteObject> token;
     amsMgrScheduler->AttachedToStatusBar(token);
 }
+
+/*
+ * Feature: AmsMgrScheduler
+ * Function: SendAppSpawnUninstallDebugHapMsg
+ * SubFunction: NA
+ * FunctionPoints: AmsMgrScheduler SendAppSpawnUninstallDebugHapMsg
+ * EnvConditions: NA
+ * CaseDescription: SubmitTask
+ */
+HWTEST_F(AmsMgrSchedulerTest, SendAppSpawnUninstallDebugHapMsg_001, TestSize.Level0)
+{
+    auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
+    amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
+    amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
+    ASSERT_NE(amsMgrScheduler, nullptr);
+    int32_t userId = 0;
+    amsMgrScheduler->SendAppSpawnUninstallDebugHapMsg(userId);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -486,6 +486,13 @@ public:
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     */
+    void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
+
 protected:
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.
