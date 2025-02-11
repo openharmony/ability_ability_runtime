@@ -1914,8 +1914,8 @@ void AbilityConnectManager::CommandAbility(const std::shared_ptr<AbilityRecord> 
         };
         bool useOldMultiple = abilityRecord->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME ||
             abilityRecord->GetAbilityInfo().name == AbilityConfig::CALLUI_ABILITY_NAME;
-        uint32_t timeoutMultiple = useOldMultiple ? COMMAND_TIMEOUT_MULTIPLE : COMMAND_TIMEOUT_MULTIPLE_NEW;
-        uint32_t commandTimeout =
+        auto timeoutMultiple = useOldMultiple ? COMMAND_TIMEOUT_MULTIPLE : COMMAND_TIMEOUT_MULTIPLE_NEW;
+        auto commandTimeout =
             AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * timeoutMultiple;
         taskHandler_->SubmitTask(timeoutTask, taskName, commandTimeout);
         // scheduling command ability
