@@ -23,6 +23,7 @@
 #include "window_stage_impl.h"
 #include "cj_ability_object.h"
 #endif
+#include "cj_application_context.h"
 
 namespace OHOS {
 
@@ -295,6 +296,10 @@ private:
     void AddLifecycleEventAfterCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
     bool CheckSatisfyTargetAPIVersion(int32_t targetAPIVersion);
     bool BackPressDefaultValue();
+    void CallAppCtxFunc(CjAppCtxFuncType type, int64_t id);
+    void CallAppCtxWindowFunc(CjAppCtxFuncType type, int64_t id, sptr<Rosen::CJWindowStageImpl> window);
+
+    void* cjAppHandle_ = nullptr;
 
     CJRuntime &cjRuntime_;
     std::shared_ptr<CJAbilityObject> cjAbilityObj_;

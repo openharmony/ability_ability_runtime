@@ -394,12 +394,10 @@ ohos_shared_library("abilitykit_native") {
     public_configs += [ "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi_public_config" ]
     deps += [
       "${ability_runtime_innerkits_path}/ability_manager:process_options",
-      "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
       "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi",
     ]
     external_deps += [
       "ace_engine:ace_uicontent",
-      "bundle_framework:cj_bundle_manager_ffi",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
     ]
@@ -754,13 +752,12 @@ ohos_shared_library("uiabilitykit_native") {
     ]
 
     include_dirs += [
-      "${ability_runtime_path}/frameworks/cj/ffi",
       "${ability_runtime_path}/cj_environment/interfaces/inner_api",
+      "${ability_runtime_path}/frameworks/cj/ffi",
+      "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
     ]
-    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
     defines = [ "CJ_FRONTEND" ]
     external_deps += [
-      "bundle_framework:cj_bundle_manager_ffi",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
       "window_manager:cj_window_ffi",
