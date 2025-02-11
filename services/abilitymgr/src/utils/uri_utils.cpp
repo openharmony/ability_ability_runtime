@@ -488,7 +488,7 @@ void UriUtils::GrantUriPermissionForServiceExtension(const AbilityRequest &abili
         auto &want = const_cast<Want &>(abilityRequest.want);
         auto callerTokenId = abilityRequest.specifyTokenId > 0 ? abilityRequest.specifyTokenId :
             static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
-        GrantUriPermission(want, abilityInfo.bundleName, abilityInfo.appIndex, false, callerTokenId,
+        GrantUriPermission(want, abilityInfo.bundleName, abilityInfo.applicationInfo.appIndex, false, callerTokenId,
             abilityRequest.collaboratorType);
     }
 }
@@ -501,7 +501,7 @@ void UriUtils::GrantUriPermissionForUIOrServiceExtension(const AbilityRequest &a
         auto &want = const_cast<Want &>(abilityRequest.want);
         auto callerTokenId = abilityRequest.specifyTokenId > 0 ? abilityRequest.specifyTokenId :
             static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
-        GrantUriPermission(want, abilityInfo.bundleName, abilityInfo.appIndex, false, callerTokenId,
+        GrantUriPermission(want, abilityInfo.bundleName, abilityInfo.applicationInfo.appIndex, false, callerTokenId,
             abilityRequest.collaboratorType);
     }
 }
