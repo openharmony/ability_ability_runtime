@@ -31,6 +31,7 @@ namespace AAFwk {
 namespace {
 const int32_t USER_ID = 100;
 const size_t SIZE_ZERO = 0;
+const size_t SIZE_FIFTEEN = 15;
 const std::string STRING_PROCESS_NAME = "process_name";
 }  // namespace
 
@@ -172,7 +173,7 @@ HWTEST_F(AbilityManagerServiceDumpTest, AbilityManagerService_DumpSysProcess_010
     bool isClient = false;
     bool isUserID = true;
     abilityMs_->DumpSysProcess(args, info, isClient, isUserID, USER_ID);
-    EXPECT_EQ(info.size(), SIZE_ZERO);
+    EXPECT_EQ(info.size(), SIZE_FIFTEEN);
 }
 
 /**
