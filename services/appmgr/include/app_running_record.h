@@ -55,17 +55,6 @@ class AppMgrServiceInner;
 class AppRunningRecord;
 class AppRunningManager;
 
-class MultiUserConfigurationMgr {
-public:
-    void Insert(const int32_t userId, const Configuration& config);
-
-    Configuration GetConfigurationByUserId(const int32_t userId);
-
-private:
-    std::map<int32_t, Configuration> multiUserConfiguration_;
-    std::mutex multiUserConfigurationMutex_;
-};
-
 /**
  * @class RenderRecord
  * Record nweb render process info.
@@ -888,6 +877,16 @@ public:
     bool IsUnSetPermission();
     
     void UnSetPolicy();
+
+    inline void ResetDelayConfiguration()
+    {
+        delayConfiguration_ = std::make_shared<Configuration>();
+    }
+
+    inline std::shared_ptr<Configuration> GetDelayConfiguration()
+    {
+        return delayConfiguration_;
+    }
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1051,6 +1050,7 @@ private:
     bool isNeedLimitPrio_ = false;
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;
+    std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
 };
 
 }  // namespace AppExecFwk

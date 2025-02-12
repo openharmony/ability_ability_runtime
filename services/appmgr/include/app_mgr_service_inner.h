@@ -68,6 +68,7 @@
 #include "want.h"
 #include "app_jsheap_mem_info.h"
 #include "running_multi_info.h"
+#include "multi_user_config_mgr.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -1639,7 +1640,7 @@ private:
     void CheckCleanAbilityByUserRequest(const std::shared_ptr<AppRunningRecord> &appRecord,
         const std::shared_ptr<AbilityRunningRecord> &abilityRecord, const AbilityState state);
     void GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids);
-    void DealMultiUserConfig(const Configuration &config, const int32_t userId);
+    int32_t DealWithUserConfiguration(const Configuration &config, const int32_t userId, int32_t &notifyUserId);
     int32_t KillProcessByPidInner(const pid_t pid, const std::string& reason,
         const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord);
     bool IsAllowedNWebPreload(const std::string &processName);
@@ -1656,7 +1657,6 @@ private:
     std::shared_ptr<AppRunningManager> appRunningManager_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AMSEventHandler> eventHandler_;
-    std::shared_ptr<Configuration> configuration_;
     ffrt::mutex userTestLock_;
     ffrt::mutex appStateCallbacksLock_;
     ffrt::mutex renderUidSetLock_;

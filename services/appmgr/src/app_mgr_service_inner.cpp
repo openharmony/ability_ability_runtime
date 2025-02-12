@@ -54,6 +54,7 @@
 #include "iremote_object.h"
 #include "iservice_registry.h"
 #include "itest_observer.h"
+#include "os_account_manager.h"
 #ifdef SUPPORT_GRAPHICS
 #include "locale_config.h"
 #endif
@@ -265,7 +266,8 @@ constexpr int32_t NWEB_PRELOAD_DELAY = 3000;
 
 // Max child process number limitation for pc device.
 constexpr int32_t PC_MAX_CHILD_PROCESS_NUM = 50;
-
+constexpr int32_t USER100 = 100;
+constexpr int32_t USER0 = 100;
 int32_t GetUserIdByUid(int32_t uid)
 {
     return uid / BASE_USER_RANGE;
@@ -308,15 +310,12 @@ using OHOS::AppExecFwk::Constants::PERMISSION_NOT_GRANTED;
 AppMgrServiceInner::AppMgrServiceInner()
     : remoteClientManager_(std::make_shared<RemoteClientManager>()),
       appRunningManager_(std::make_shared<AppRunningManager>()),
-      configuration_(std::make_shared<Configuration>()),
       appDebugManager_(std::make_shared<AppDebugManager>()),
       appRunningStatusModule_(std::make_shared<AbilityRuntime::AppRunningStatusModule>()),
       securityModeManager_(std::make_shared<AdvancedSecurityModeManager>()),
       appPreloader_(std::make_shared<AppPreloader>(remoteClientManager_)),
       multiUserConfigurationMgr_(std::make_shared<MultiUserConfigurationMgr>())
-{
-    appRunningManager_->SetMultiUserConfigurationMgr(multiUserConfigurationMgr_);
-}
+{}
 
 void AppMgrServiceInner::Init()
 {
@@ -335,9 +334,6 @@ void AppMgrServiceInner::Init()
     delayKillTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("delay_kill_task_queue");
     if (securityModeManager_) {
         securityModeManager_->Init();
-    }
-    if (configuration_) {
-        appRunningManager_->initConfig(*configuration_);
     }
     otherTaskHandler_->SubmitTask([pThis = shared_from_this()]() {
         pThis->nwebPreloadSet_ = AAFwk::ResSchedUtil::GetInstance().GetNWebPreloadSet();
@@ -1066,24 +1062,23 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
     std::string traceName = __PRETTY_FUNCTION__ + connector + bundleName;
     HITRACE_METER_NAME(HITRACE_TAG_APP, traceName);
 
-    if (!configuration_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "configuration_ is null");
-        return;
-    }
-
     if (appRecord->GetState() != ApplicationState::APP_STATE_CREATE) {
         TAG_LOGE(AAFwkTag::APPMGR, "wrong app state:%{public}d", appRecord->GetState());
         return;
     }
-
-    if (int32_t userId = appRecord->GetUid() / BASE_USER_RANGE; userId != 0) {
-        auto config = multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
-        std::vector<std::string> diffVe;
-        configuration_->CompareDifferent(diffVe, config);
-        configuration_->Merge(diffVe, config);
+    if (multiUserConfigurationMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "multiUserConfigurationMgr_ null");
+        return;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "LaunchApplication configuration:%{public}s", configuration_->GetName().c_str());
-    appRecord->LaunchApplication(*configuration_);
+    int32_t userId = appRecord->GetUid() / BASE_USER_RANGE;
+    auto config = multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
+    if (config == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "config null");
+        return;
+    }
+
+    TAG_LOGD(AAFwkTag::APPMGR, "LaunchApplication configuration:%{public}s", config->GetName().c_str());
+    appRecord->LaunchApplication(*config);
     appRecord->SetState(ApplicationState::APP_STATE_READY);
     int restartResidentProcCount = MAX_RESTART_COUNT;
     appRecord->SetRestartResidentProcCount(restartResidentProcCount);
@@ -4544,25 +4539,29 @@ void AppMgrServiceInner::HandleStartSpecifiedProcessTimeout(const int64_t eventI
     appRecord->ResetNewProcessRequestId();
 }
 
-void AppMgrServiceInner::DealMultiUserConfig(const Configuration &config, const int32_t userId)
+int32_t AppMgrServiceInner::DealWithUserConfiguration(const Configuration& config, const int32_t userId,
+    int32_t &notifyUserId)
 {
-    if (userId != -1) {
-        multiUserConfigurationMgr_->Insert(userId, config);
-    } else if (GetUserIdByUid(IPCSkeleton::GetCallingUid()) > 0) {
-        Configuration configTmp;
-        if (!config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE).empty()) {
-            configTmp.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
-                config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE));
-        }
-        if (!config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE).empty()) {
-            configTmp.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE,
-                config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE));
-        }
-        if (!config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE).empty()) {
-            configTmp.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE,
-                config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE));
-        }
-        multiUserConfigurationMgr_->Insert(GetUserIdByUid(IPCSkeleton::GetCallingUid()), configTmp);
+    if (multiUserConfigurationMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "multiUserConfigurationMgr_ null");
+        return ERR_INVALID_VALUE;
+    }
+    std::vector<std::string> changeKeyV;
+    bool isNotifyUser0 = false;
+    multiUserConfigurationMgr_->HandleConfiguration(userId, config, changeKeyV, isNotifyUser0);
+    TAG_LOGI(AAFwkTag::APPMGR,
+        "changeKeyV size: %{public}zu Config: %{public}s userId: %{public}d, NotifyUser0: %{public}d",
+        changeKeyV.size(), config.GetName().c_str(), userId, static_cast<int32_t>(isNotifyUser0));
+
+    if (!config.GetItem(AAFwk::GlobalConfigurationKey::THEME).empty() || !changeKeyV.empty()) {
+        notifyUserId = userId;
+        return ERR_OK;
+    } else if (isNotifyUser0) {
+        notifyUserId = USER0;
+        return ERR_OK;
+    } else {
+        TAG_LOGE(AAFwkTag::APPMGR, "changeKeyV empty");
+        return ERR_INVALID_VALUE;
     }
 }
 
@@ -4578,24 +4577,15 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
     if (ret != ERR_OK) {
         return ret;
     }
-    DealMultiUserConfig(config, userId);
-    std::vector<std::string> changeKeyV;
-    {
-        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "configuration_->CompareDifferent");
-        configuration_->CompareDifferent(changeKeyV, config);
+    int32_t notifyUserId;
+    ret = DealWithUserConfiguration(config, userId, notifyUserId);
+    if (ret != ERR_OK) {
+        return ret;
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "changeKeyV size :%{public}zu", changeKeyV.size());
-    if (config.GetItem(AAFwk::GlobalConfigurationKey::THEME).empty() && changeKeyV.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "changeKeyV is empty");
-        return ERR_INVALID_VALUE;
-    }
-    {
-        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "configuration_->Merge");
-        configuration_->Merge(changeKeyV, config);
-    }
+
     // all app
-    int32_t result = appRunningManager_->UpdateConfiguration(config, userId);
-    HandleConfigurationChange(config, userId);
+    int32_t result = appRunningManager_->UpdateConfiguration(config, notifyUserId);
+    HandleConfigurationChange(config, notifyUserId);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "update error, not notify");
         return result;
@@ -4603,7 +4593,7 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
     // notify
     std::lock_guard<ffrt::mutex> notifyLock(configurationObserverLock_);
     for (auto &item : configurationObservers_) {
-        if (item.observer != nullptr && (userId == -1 || item.userId == 0 || item.userId == userId)) {
+        if (item.observer != nullptr && (notifyUserId == -1 || item.userId == 0 || item.userId == notifyUserId)) {
             item.observer->OnConfigurationUpdated(config);
         }
     }
@@ -4694,41 +4684,62 @@ int32_t AppMgrServiceInner::UnregisterConfigurationObserver(const sptr<IConfigur
 
 void AppMgrServiceInner::InitGlobalConfiguration()
 {
-    if (!configuration_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "configuration_ is null");
+    std::shared_ptr<AppExecFwk::Configuration> globalConfiguration = std::make_shared<Configuration>();
+    if (!globalConfiguration) {
+        TAG_LOGE(AAFwkTag::APPMGR, "globalConfiguration null");
         return;
     }
 
 #ifdef SUPPORT_GRAPHICS
     // Currently only this interface is known
     auto language = OHOS::Global::I18n::LocaleConfig::GetSystemLocale();
-    TAG_LOGI(AAFwkTag::APPMGR, "current global language : %{public}s", language.c_str());
-    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
+
+    TAG_LOGI(AAFwkTag::APPMGR, "current global language: %{public}s", language.c_str());
+    globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
+
     std::string sysHour = OHOS::Global::I18n::LocaleConfig::GetSystemHour();
     TAG_LOGI(AAFwkTag::APPMGR, "current 24 hour clock: %{public}s", sysHour.c_str());
-    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_HOUR, sysHour);
+    globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_HOUR, sysHour);
 #endif
 
     // Assign to default colorMode "light"
-    TAG_LOGI(AAFwkTag::APPMGR, "current global colorMode is : %{public}s", ConfigurationInner::COLOR_MODE_LIGHT);
-    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_LIGHT);
+
+    TAG_LOGI(AAFwkTag::APPMGR, "current global colorMode: %{public}s", ConfigurationInner::COLOR_MODE_LIGHT);
+    globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_LIGHT);
 
     // Get input pointer device
     std::string hasPointerDevice = system::GetParameter(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, "false");
-    TAG_LOGI(AAFwkTag::APPMGR, "current hasPointerDevice is %{public}s", hasPointerDevice.c_str());
-    configuration_->AddItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, hasPointerDevice);
+    TAG_LOGI(AAFwkTag::APPMGR, "current hasPointerDevice: %{public}s", hasPointerDevice.c_str());
+    globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, hasPointerDevice);
 
     // Get DeviceType
     auto deviceType = GetDeviceType();
-    TAG_LOGI(AAFwkTag::APPMGR, "current deviceType is %{public}s", deviceType);
-    configuration_->AddItem(AAFwk::GlobalConfigurationKey::DEVICE_TYPE, deviceType);
-    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, "1.0");
-    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE, "1.0");
+    TAG_LOGI(AAFwkTag::APPMGR, "current deviceType: %{public}s", deviceType);
+    globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::DEVICE_TYPE, deviceType);
+    globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, "1.0");
+    globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE, "1.0");
+    if (multiUserConfigurationMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "multiUserConfigurationMgr_ null");
+        return;
+    }
+    multiUserConfigurationMgr_->InitConfiguration(globalConfiguration);
+    TAG_LOGI(AAFwkTag::APPMGR, "InitGlobalConfiguration Config: %{public}s", globalConfiguration->GetName().c_str());
 }
 
 std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration()
 {
-    return configuration_;
+    if (multiUserConfigurationMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "multiUserConfigurationMgr_ null");
+        return nullptr;
+    }
+    int32_t userId = 0;
+    auto errNo = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (errNo != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetForegroundOsAccountLocalId failed: %{public}d", errNo);
+        userId = USER100;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "GetForegroundOsAccountLocalId userId: %{public}d", userId);
+    return multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
 }
 
 void AppMgrServiceInner::KillApplicationByRecord(const std::shared_ptr<AppRunningRecord> &appRecord)
