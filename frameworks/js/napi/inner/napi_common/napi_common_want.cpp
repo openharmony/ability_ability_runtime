@@ -1110,10 +1110,66 @@ napi_value WrapWant(napi_env env, const Want &want)
     SetPropertyValueByPropertyName(env, jsObject, "parameters", jsValue);
 
     jsValue = nullptr;
+    jsValue = WrapWantParamsFD(env, want.GetParams());
+    SetPropertyValueByPropertyName(env, jsObject, "fds", jsValue);
+
+    jsValue = nullptr;
     jsValue = WrapArrayStringToJS(env, want.GetEntities());
     SetPropertyValueByPropertyName(env, jsObject, "entities", jsValue);
 
     return jsObject;
+}
+
+napi_value WrapWantParamsFD(napi_env env, const AAFwk::WantParams &wantParams)
+{
+    napi_value jsObject = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &jsObject));
+    auto paramList = wantParams.GetParams();
+    WantParams fds;
+    for (auto it = paramList.begin(); it != paramList.end(); it++) {
+        if (AAFwk::IWantParams::Query(it->second) == nullptr) {
+            TAG_LOGW(AAFwkTag::JSNAPI, "not wantpram");
+            continue;
+        }
+        auto value = wantParams.GetParam(it->first);
+        AAFwk::IWantParams *o = AAFwk::IWantParams::Query(value);
+        if (o == nullptr) {
+            return jsObject;
+        }
+        AAFwk::WantParams wp = AAFwk::WantParamWrapper::Unbox(o);
+        auto valueMap = wp.GetParams();
+        if (valueMap.size() != PROPERTIES_SIZE) {
+            TAG_LOGD(AAFwkTag::JSNAPI, "not fd");
+            return jsObject;
+        }
+
+        //type
+        auto typeIt = valueMap.find(TYPE_PROPERTY);
+        if (typeIt == valueMap.end()) {
+            return jsObject;
+        }
+        AAFwk::IString *strValue = AAFwk::IString::Query(typeIt->second);
+        if (strValue == nullptr) {
+            return jsObject;
+        }
+        std::string typeString = AAFwk::String::Unbox(strValue);
+        if (typeString != FD) {
+            TAG_LOGD(AAFwkTag::JSNAPI, "not fd");
+            return jsObject;
+        }
+
+        // value
+        auto valueIt = valueMap.find(VALUE_PROPERTY);
+        if (valueIt == valueMap.end()) {
+            return jsObject;
+        }
+        AAFwk::IInteger *intValue = AAFwk::IInteger::Query(valueIt->second);
+        if (intValue == nullptr) {
+            return jsObject;
+        }
+        fds.SetParam(it->first, intValue);
+    }
+    return WrapWantParams(env, fds);
 }
 
 bool UnwrapWant(napi_env env, napi_value param, Want &want)
