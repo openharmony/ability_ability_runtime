@@ -94,7 +94,7 @@ ErrCode AppSpawnClient::OpenConnection()
     ret = AppSpawnClientInit(serviceName_.c_str(), &handle);
     int64_t costTime = AbilityRuntime::TimeUtil::SystemTimeMillisecond() - startTime;
     if (costTime > MAX_COST_TIME) {
-        TAG_LOGW(AAFwkTag::APPMGR, "appspawnclientInit cost %{public}" PRId64 "ms!", costTime);
+        TAG_LOGE(AAFwkTag::APPMGR, "appspawnclientInit cost %{public}" PRId64 "ms!", costTime);
     }
 
     if (FAILED(ret)) {
@@ -575,7 +575,7 @@ int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pi
 
     int64_t costTime = AbilityRuntime::TimeUtil::SystemTimeMillisecond() - startTime;
     if (costTime > MAX_COST_TIME) {
-        TAG_LOGW(AAFwkTag::APPMGR, "StartProcess cost %{public}" PRId64 "ms!", costTime);
+        TAG_LOGE(AAFwkTag::APPMGR, "StartProcess cost %{public}" PRId64 "ms!", costTime);
     }
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "appspawn send msg fail");
