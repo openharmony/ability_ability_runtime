@@ -824,6 +824,10 @@ public:
         return taskHandler_;
     }
 
+    std::shared_ptr<TaskHandlerWrap> GetDelayClearReasonHandler() const
+    {
+        return delayClearReasonHandler_;
+    }
     /**
      * GetEventHandler, get the ability manager service's handler.
      *
@@ -1929,6 +1933,10 @@ public:
      */
     virtual void KillProcessWithPrepareTerminateDone(const std::string &moduleName,
         int32_t prepareTermination, bool isExist) override;
+    std::shared_ptr<AppExitReasonHelper> GetAppExitReasonHelper()
+    {
+        return appExitReasonHelper_;
+    }
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1979,6 +1987,10 @@ protected:
     void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
     void OnStartProcessFailed(sptr<IRemoteObject> token) override;
+
+    void OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+        const std::string &bundleName, const std::vector<std::string> &abilityNames,
+        const std::vector<std::string> &uiExtensionNames) override;
 
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
@@ -2489,6 +2501,7 @@ private:
 
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
+    std::shared_ptr<TaskHandlerWrap> delayClearReasonHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
     ServiceRunningState state_;
 
@@ -2570,7 +2583,7 @@ private:
 
     std::shared_ptr<AbilityDebugDeal> abilityDebugDeal_;
     std::shared_ptr<AppExitReasonHelper> appExitReasonHelper_;
-
+    
     ffrt::mutex globalLock_;
     ffrt::mutex bgtaskObserverMutex_;
     ffrt::mutex abilityTokenLock_;
