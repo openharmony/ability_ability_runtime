@@ -97,6 +97,17 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.aafwk.AbilityManager")
 
     /**
+     * StartSelfUIAbility with want, start self uiability only on 2-in-1 devices.
+     *
+     * @param want, the want of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartSelfUIAbility(const Want &want)
+    {
+        return 0;
+    }
+
+    /**
      * StartAbility with want, send want to ability manager service.
      *
      * @param want, the want of the ability to start.
