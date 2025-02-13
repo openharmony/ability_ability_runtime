@@ -760,6 +760,9 @@ int AbilityManagerStub::OnRemoteRequestInnerNineteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::UPDATE_ASSOCIATE_CONFIG_LIST) {
         return UpdateAssociateConfigListInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::NDK_START_SELF_UI_ABILITY) {
+        return StartSelfUIAbilityInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4101,6 +4104,21 @@ int32_t AbilityManagerStub::UpdateAssociateConfigListInner(MessageParcel &data, 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "update associate config fail");
     }
     reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::StartSelfUIAbilityInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<Want> want = data.ReadParcelable<Want>();
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = StartSelfUIAbility(*want);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
+        return INNER_ERR;
+    }
     return NO_ERROR;
 }
 } // namespace AAFwk
