@@ -49,8 +49,7 @@ using SendMessage = void (*)(const std::string&);
 using StopServer = void (*)(const std::string&);
 using StoreMessage = void (*)(int32_t, const std::string&);
 using SetProfilerCallback = void (*)(const std::function<void(bool)> &setStateProfilerStatus);
-using SetSwitchCallBack = void (*)(const std::function<void(bool)> &setSwitchStatus,
-    const std::function<void(int32_t)> &createLayoutInfo, int32_t instanceId);
+using SetSwitchCallBack = void (*)(const std::function<void(int32_t)> &createLayoutInfo, int32_t instanceId);
 using SetConnectCallback = void (*)(const std::function<void(bool)>);
 using RemoveMessage = void (*)(int32_t);
 using WaitForConnection = bool (*)();
@@ -205,8 +204,7 @@ void ConnectServerManager::SetConnectedCallback()
     });
 }
 
-void ConnectServerManager::SetSwitchCallback(const std::function<void(bool)> &setSwitchStatus,
-    const std::function<void(int32_t)> &createLayoutInfo, int32_t instanceId)
+void ConnectServerManager::SetSwitchCallback(const std::function<void(int32_t)> &createLayoutInfo, int32_t instanceId)
 {
     LoadConnectServerDebuggerSo();
     auto setSwitchCallBack = reinterpret_cast<SetSwitchCallBack>(
@@ -215,7 +213,7 @@ void ConnectServerManager::SetSwitchCallback(const std::function<void(bool)> &se
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null setSwitchCallBack");
         return;
     }
-    setSwitchCallBack(setSwitchStatus, createLayoutInfo, instanceId);
+    setSwitchCallBack(createLayoutInfo, instanceId);
 }
 
 void ConnectServerManager::SetProfilerCallBack(const std::function<void(bool)> &setStateProfilerStatus)
