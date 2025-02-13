@@ -2009,5 +2009,13 @@ ErrCode AbilityManagerClient::UpdateAssociateConfigList(const std::map<std::stri
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->UpdateAssociateConfigList(configs, exportConfigs, flag);
 }
+
+ErrCode AbilityManagerClient::StartSelfUIAbility(const Want &want)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->StartSelfUIAbility(want);
+}
 } // namespace AAFwk
 } // namespace OHOS

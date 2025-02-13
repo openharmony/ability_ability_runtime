@@ -12617,5 +12617,11 @@ int32_t AbilityManagerService::UpdateAssociateConfigList(const std::map<std::str
     }
     return ERR_OK;
 }
+
+int AbilityManagerService::StartSelfUIAbility(const Want &want)
+{
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "not supported");
+    return ERR_CAPABILITY_NOT_SUPPORT;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
