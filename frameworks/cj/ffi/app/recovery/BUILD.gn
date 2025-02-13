@@ -47,6 +47,7 @@ ohos_shared_library("cj_app_recovery_ffi") {
 
   external_deps = [
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:cj_bind_ffi",
