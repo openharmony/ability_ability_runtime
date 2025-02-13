@@ -60,6 +60,9 @@ bool LoadParam::Marshalling(Parcel &parcel) const
     if (!parcel.WriteParcelable(&extensionLoadParam)) {
         return false;
     }
+    if (!parcel.WriteInt32(persistentId)) {
+        return false;
+    }
     return true;
 }
 
@@ -87,6 +90,7 @@ bool LoadParam::ReadFromParcel(Parcel &parcel)
         return false;
     }
     extensionLoadParam = *extensionParamRead;
+    persistentId = parcel.ReadInt32();
     return true;
 }
 

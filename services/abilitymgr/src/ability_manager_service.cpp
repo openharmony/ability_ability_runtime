@@ -15,6 +15,8 @@
 
 #include "ability_manager_service.h"
 
+#include <sys/epoll.h>
+
 #include "ability_background_connection.h"
 #include "ability_connect_manager.h"
 #include "ability_manager_radar.h"
@@ -28,12 +30,15 @@
 #include "assert_fault_callback_death_mgr.h"
 #include "concurrent_task_client.h"
 #include "connection_state_manager.h"
+#include "c/executor_task.h"
 #include "display_manager.h"
 #include "display_util.h"
 #include "distributed_client.h"
 #ifdef WITH_DLP
 #include "dlp_utils.h"
 #endif // WITH_DLP
+#include "ffrt.h"
+#include "ffrt_inner.h"
 #include "freeze_util.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
@@ -210,6 +215,8 @@ const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
     "share", "action"
 };
 std::atomic<bool> g_isDmsAlive = false;
+constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
+constexpr const char* APPSPAWN_STARTED = "startup.service.ctl.appspawn.pid";
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
@@ -280,6 +287,7 @@ constexpr const char* WHITE_LIST = "white_list";
 constexpr const char* SUPPORT_COLLABORATE_INDEX = "ohos.extra.param.key.supportCollaborateIndex";
 constexpr const char* COLLABORATE_KEY = "ohos.dms.collabToken";
 constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
+constexpr int32_t CLEAR_REASON_DELAY_TIME = 3000;  // 3s
 
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<AbilityManagerService>::GetInstance().get());
@@ -351,6 +359,7 @@ bool AbilityManagerService::Init()
 {
     HiviewDFX::Watchdog::GetInstance().InitFfrtWatchdog(); // For ffrt watchdog available in foundation
     taskHandler_ = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
+    delayClearReasonHandler_ = TaskHandlerWrap::CreateQueueHandler("delay_clear_reason_queue");
     eventHandler_ = std::make_shared<AbilityEventHandler>(taskHandler_, weak_from_this());
     freeInstallManager_ = std::make_shared<FreeInstallManager>(weak_from_this());
     CHECK_POINTER_RETURN_BOOL(freeInstallManager_);
@@ -10797,18 +10806,20 @@ int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector
 
 int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReason &reason)
 {
+    bool supportShell = AmsConfigurationParameter::GetInstance().IsSupportAAKillWithReason();
     auto isShellCall = PermissionVerification::GetInstance()->IsShellCall();
     auto isCallingPerm = PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_KILL_APP_PROCESSES);
-    if (!isCallingPerm && !isShellCall) {
+    if (!isCallingPerm && !(supportShell && isShellCall)) {
         TAG_LOGE(AAFwkTag::APPMGR, "permission verification fail");
         return ERR_PERMISSION_DENIED;
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, reason:%{public}d, subReason:%{public}d, killMsg:%{public}s",
         pid, reason.reason, reason.subReason, reason.exitMsg.c_str());
+    bool withKillMsg = reason.exitMsg.empty() ? false : true;
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
-    auto ret = appExitReasonHelper_->RecordAppExitReason(reason, pid);
+    auto ret = appExitReasonHelper_->RecordAppExitReason(reason, pid, withKillMsg);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "RecordAppExitReason failed, ret:%{public}d", ret);
         return ret;
@@ -11426,6 +11437,22 @@ void AbilityManagerService::OnStartProcessFailed(sptr<IRemoteObject> token)
         connectManager->OnLoadAbilityFailed(abilityRecord);
         return;
     }
+}
+
+void AbilityManagerService::OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+    const std::string &bundleName, const std::vector<std::string> &abilityNames,
+    const std::vector<std::string> &uiExtensionNames)
+{
+    if (appExitReasonHelper_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appExitReasonHelper_ null");
+        return;
+    }
+    appExitReasonHelper_->CacheAppExitReason(accessTokenId, exitInfo, bundleName, abilityNames, uiExtensionNames);
+    auto delayClearReason = [ bundleName, accessTokenId ]() {
+        (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+            DeleteAppExitReason(bundleName, accessTokenId);
+    };
+    delayClearReasonHandler_->SubmitTaskJust(delayClearReason, "delayClearReason", CLEAR_REASON_DELAY_TIME);
 }
 
 int32_t AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
