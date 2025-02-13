@@ -187,9 +187,9 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_005, TestSize.Level1)
  */
 HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_006, TestSize.Level1)
 {
-    std::string ret = appfreezeManager->CatcherStacktrace(0);
+    std::string ret = appfreezeManager->CatcherStacktrace(0, "");
     printf("ret: %s\n", ret.c_str());
-    ret = appfreezeManager->CatcherStacktrace(2);
+    ret = appfreezeManager->CatcherStacktrace(2, "");
     printf("ret: %s\n", ret.c_str());
     EXPECT_TRUE(!ret.empty());
     appfreezeManager->ClearOldInfo();
@@ -268,6 +268,17 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CatchStack_001, TestSize.Lev
     EXPECT_TRUE(!appfreezeManager->catchStackMap_.empty());
     appfreezeManager->DeleteStack(pid);
     EXPECT_TRUE(appfreezeManager->catchStackMap_.empty());
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_GetFormatTime_001
+ * @tc.name: GetFormatTime
+ * @tc.desc: Verify that function GetFormatTime.
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFormatTime_001, TestSize.Level1)
+{
+    std::string ret = appfreezeManager->GetFormatTime();
+    EXPECT_TRUE(!ret.empty());
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

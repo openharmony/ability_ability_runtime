@@ -137,6 +137,7 @@ ohos_shared_library("app_manager") {
 
   external_deps = [
     "c_utils:utils",
+    "faultloggerd:libbacktrace_local",
     "faultloggerd:libdfx_dumpcatcher",
     "faultloggerd:libfaultloggerd",
     "ffrt:libffrt",
