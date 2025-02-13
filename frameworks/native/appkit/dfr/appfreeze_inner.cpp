@@ -20,6 +20,7 @@
 #include "ability_state.h"
 #include "appfreeze_manager.h"
 #include "app_recovery.h"
+#include "backtrace_local.h"
 #include "exit_reason.h"
 #include "ffrt.h"
 #include "freeze_util.h"
@@ -98,6 +99,16 @@ void AppfreezeInner::GetMainHandlerDump(std::string& msgContent)
     }
 }
 
+std::string AppfreezeInner::GetFormatTime()
+{
+    auto now = std::chrono::system_clock::now();
+    auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    auto start = millisecs.count();
+    std::string timeStamp = "\nTimestamp:" + AbilityRuntime::TimeUtil::FormatTime("%Y-%m-%d %H:%M:%S") +
+        ":" + std::to_string(start % AbilityRuntime::TimeUtil::SEC_TO_MILLISEC) + "\n";
+    return timeStamp;
+}
+
 void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string& msgContent)
 {
     faultData.errorObject.message += msgContent;
@@ -105,6 +116,13 @@ void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string
     faultData.notifyApp = false;
     faultData.waitSaveState = false;
     faultData.forceExit = false;
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    faultData.errorObject.stack = GetFormatTime();
+    std::string stack = "";
+    if (!HiviewDFX::GetBacktraceStringByTidWithMix(stack, pid, 0, true)) {
+        stack = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + stack;
+    }
+    faultData.errorObject.stack += stack + "\n" + GetFormatTime();
     bool isExit = IsExitApp(faultData.errorObject.name);
     if (isExit) {
         faultData.forceExit = true;
