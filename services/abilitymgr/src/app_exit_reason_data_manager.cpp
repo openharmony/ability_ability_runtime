@@ -320,11 +320,9 @@ DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValue(
     std::chrono::milliseconds nowMs =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     std::string killMsg = "";
-    std::string exitMsg = "";
+    std::string exitMsg = exitReason.exitMsg;
     if (withKillMsg) {
         killMsg = exitReason.exitMsg;
-    } else {
-        exitMsg = exitReason.exitMsg;
     }
     nlohmann::json jsonObject = nlohmann::json {
         { JSON_KEY_PID, processInfo.pid_ },
@@ -915,13 +913,10 @@ DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValueOf
     std::chrono::milliseconds nowMs =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     std::string killMsg = "";
-    std::string exitMsg = "";
+    std::string exitMsg = exitReason.exitMsg;
     if (withKillMsg) {
         killMsg = exitReason.exitMsg;
-    } else {
-        exitMsg = exitReason.exitMsg;
     }
-
     nlohmann::json jsonObject = nlohmann::json {
         { JSON_KEY_PID, processInfo.pid_ },
         { JSON_KEY_UID, processInfo.uid_ },
