@@ -2510,7 +2510,7 @@ int32_t AbilityManagerService::RecordProcessExitReason(const int32_t pid, const 
     }
 
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
-    return appExitReasonHelper_->RecordProcessExitReason(pid, exitReason);
+    return appExitReasonHelper_->RecordProcessExitReason(pid, exitReason, false);
 }
 
 int32_t AbilityManagerService::ForceExitApp(const int32_t pid, const ExitReason &exitReason)
@@ -10817,10 +10817,9 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, reason:%{public}d, subReason:%{public}d, killMsg:%{public}s",
         pid, reason.reason, reason.subReason, reason.exitMsg.c_str());
-    bool withKillMsg = reason.exitMsg.empty() ? false : true;
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
-    auto ret = appExitReasonHelper_->RecordAppExitReason(reason, pid, withKillMsg);
-    if (ret != ERR_OK) {
+    auto ret = appExitReasonHelper_->RecordProcessExitReason(pid, reason, true);
+    if (ret != ERR_OK && ret != ERR_GET_ACTIVE_ABILITY_LIST_EMPTY) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "RecordAppExitReason failed, ret:%{public}d", ret);
         return ret;
     }

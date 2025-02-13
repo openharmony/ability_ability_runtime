@@ -99,7 +99,7 @@ HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReason_0100, TestSize.Level1)
 
     int32_t pid = 0;
     AAFwk::ExitReason exitReason;
-    int32_t result = appExitReasonHelper_->RecordProcessExitReason(pid, exitReason);
+    int32_t result = appExitReasonHelper_->RecordProcessExitReason(pid, exitReason, false);
     EXPECT_NE(result, ERR_OK);
 }
 
@@ -155,7 +155,7 @@ HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReason_0200, TestSize.Level1)
     uint32_t accessTokenId = 0;
     AAFwk::ExitReason exitReason;
     int32_t result = appExitReasonHelper_->RecordProcessExitReason(pid, bundleName, uid, accessTokenId,
-        exitReason, {});
+        exitReason, {}, false);
     EXPECT_NE(result, ERR_OK);
 }
 
