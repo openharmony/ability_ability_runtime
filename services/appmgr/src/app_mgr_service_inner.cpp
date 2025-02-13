@@ -2961,7 +2961,7 @@ void AppMgrServiceInner::KillProcessByAbilityToken(const sptr<IRemoteObject> &to
     }
 }
 
-void AppMgrServiceInner::KillProcessesByUserId(int32_t userId)
+void AppMgrServiceInner::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg)
 {
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
@@ -2972,9 +2972,17 @@ void AppMgrServiceInner::KillProcessesByUserId(int32_t userId)
     std::list<pid_t> pids;
     if (!appRunningManager_->GetPidsByUserId(userId, pids)) {
         TAG_LOGI(AAFwkTag::APPMGR, "process corresponding uId unstart");
+        if (isNeedSendAppSpawnMsg) {
+            TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
+            SendAppSpawnUninstallDebugHapMsg(userId);
+        }
         return;
     }
-    WaitProcessesExitAndKill(pids, startTime, "KillProcessesByUserId");
+    int result = WaitProcessesExitAndKill(pids, startTime, "KillProcessesByUserId");
+    if (result == ERR_OK && isNeedSendAppSpawnMsg) {
+        TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
+        SendAppSpawnUninstallDebugHapMsg(userId);
+    }
 }
 
 int32_t AppMgrServiceInner::KillProcessesInBatch(const std::vector<int32_t> &pids)
