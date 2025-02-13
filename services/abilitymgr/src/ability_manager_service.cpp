@@ -328,13 +328,18 @@ void AbilityManagerService::OnStart()
     }
 
     SetParameter(BOOTEVENT_APPFWK_READY, "true");
-    AddSystemAbilityListener(BACKGROUND_TASK_MANAGER_SERVICE_ID);
-    AddSystemAbilityListener(DISTRIBUTED_SCHED_SA_ID);
-    AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    bool bgTaskMgr = AddSystemAbilityListener(BACKGROUND_TASK_MANAGER_SERVICE_ID);
+    bool distributedMgr = AddSystemAbilityListener(DISTRIBUTED_SCHED_SA_ID);
+    bool bundleMgr = AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
 #ifdef SUPPORT_SCREEN
-    AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
+    if (!AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "OnStart, add listener err");
+    }
 #endif
-    AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID);
+    bool windowMgr = AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID);
+    if (!bgTaskMgr || !distributedMgr || !bundleMgr || !windowMgr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "OnStart, add listeners err");
+    }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "onStart success");
     auto pid = getpid();
     std::unordered_map<std::string, std::string> payload;
