@@ -49,6 +49,7 @@ group("moduletest") {
       "ability_caller_fw_module_test:moduletest",
       "ability_delegator_test:moduletest",
       "ability_manager_client_test:moduletest",
+      "ability_manager_client_test2:moduletest",
       "ability_manager_service_dump_test:moduletest",
       "ability_record_test:moduletest",
       "ability_test:moduletest",
