@@ -486,7 +486,7 @@ void AbilityContextTest::TearDown(void)
  */
 HWTEST_F(AbilityContextTest, AbilityContext_ChangeAbilityVisibility_0100, Function | MediumTest | Level1)
 {
-    MockAbilityContext  MockAbilityContext;
+    MockAbilityContext  mockAbilityContext;
     EXPECT_EQ(MockAbilityContext.ChangeAbilityVisibility(true), 0);
 }
 } // namespace AppExecFwk
