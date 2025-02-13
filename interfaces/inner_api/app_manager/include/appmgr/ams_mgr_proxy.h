@@ -237,10 +237,9 @@ public:
      * Prepare terminate application
      *
      * @param pid Process ID
-     * @param prepareTelrmination PrepareTermination Enum
-     * @param isExist whether this callback event exist
+     * @param moduleName Module name
      */
-    virtual void PrepareTerminateApp(const pid_t pid, int32_t &prepareTermination, bool &isExist) override;
+    virtual void PrepareTerminateApp(const pid_t pid, const std::string &moduleName) override;
 
     /**
      * Start specified ability.

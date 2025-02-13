@@ -77,16 +77,10 @@ void CjRuntimeTest::TearDown(void)
 HWTEST_F(CjRuntimeTest, CjRuntimeCreate_001, TestSize.Level1)
 {
     options_.preload = true;
-    options_.lang = CJRuntime::Language::CJ;
+    options_.lang = CJRuntime::Language::JS;
     std::unique_ptr<CJRuntime> runtime = std::make_unique<cjMockRuntime>();
-    AppLibPathMap appLibPaths{};
-    CJRuntime::SetAppLibPath(appLibPaths);
     auto cjRuntime = runtime->Create(options_);
     EXPECT_EQ(cjRuntime, nullptr);
-    std::vector<std::string> paths = {"/data/test/"};
-    appLibPaths.emplace("", paths);
-    CJRuntime::SetAppLibPath(appLibPaths);
-    cjRuntime = runtime->Create(options_);
 }
 
 /**
@@ -101,24 +95,6 @@ HWTEST_F(CjRuntimeTest, CjRuntimeCreate_002, TestSize.Level1)
     std::unique_ptr<CJRuntime> runtime = std::make_unique<cjMockRuntime>();
     auto cjRuntime = runtime->Create(options_);
     EXPECT_TRUE(cjRuntime == nullptr);
-}
-
-/**
- * @tc.name: CjRuntimeSetAppLibPath_001
- * @tc.desc: Interface SetAppLibPath Test
- * @tc.type: FUNC
- */
-HWTEST_F(CjRuntimeTest, CjRuntimeSetAppLibPath_001, TestSize.Level0)
-{
-    std::string appLibPathKey = TEST_BUNDLE_NAME + TEST_MODULE_NAME;
-    std::string libPath = TEST_LIB_PATH;
-
-    AppLibPathMap appLibPaths{};
-    CJRuntime::SetAppLibPath(appLibPaths);
-
-    appLibPaths[appLibPathKey].emplace_back(libPath);
-    EXPECT_NE(appLibPaths.size(), 0);
-    CJRuntime::SetAppLibPath(appLibPaths);
 }
 
 /**

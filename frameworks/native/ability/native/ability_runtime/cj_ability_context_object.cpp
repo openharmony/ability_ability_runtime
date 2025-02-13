@@ -19,7 +19,6 @@
 
 #include "ability_business_error.h"
 #include "accesstoken_kit.h"
-#include "bundle_manager_convert.h"
 #include "cj_ability_connect_callback_object.h"
 #include "cj_ability_context.h"
 #include "cj_common_ffi.h"
@@ -38,7 +37,6 @@
 #include "uri.h"
 
 using namespace OHOS::FFI;
-using namespace OHOS::CJSystemapi::BundleManager;
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -54,6 +52,12 @@ constexpr int32_t BASE_REQUEST_CODE_NUM = 10;
 CJAbilityCallbacks* g_cjAbilityCallbacks = nullptr;
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 const std::string APP_LINKING_ONLY = "appLinkingOnly";
+
+const char* CJ_ABILITY_LIBNAME = "libcj_ability_ffi.z.so";
+const char* FUNC_CONVERT_CONFIGURATION = "OHOS_ConvertConfiguration";
+const char* CJ_BUNDLE_MGR_LIBNAME = "libcj_bundle_manager_ffi.z.so";
+const char* FUNC_CONVERT_ABILITY_INFO = "OHOS_ConvertAbilityInfo";
+const char* FUNC_CONVERT_HAP_INFO = "OHOS_ConvertHapInfo";
 } // namespace
 
 int64_t RequestCodeFromStringToInt64(const std::string& requestCode)
@@ -584,6 +588,26 @@ int32_t FFIAbilityContextSetMissionContinueState(int64_t id, int32_t intState)
     return static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCod));
 }
 
+CConfiguration CallConvertConfig(std::shared_ptr<AppExecFwk::Configuration> configuration)
+{
+    CConfiguration cCfg;
+    void* handle = dlopen(CJ_ABILITY_LIBNAME, RTLD_LAZY);
+    if (handle == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
+        return cCfg;
+    }
+    using ConvertConfigFunc = CConfiguration (*)(void*);
+    auto func = reinterpret_cast<ConvertConfigFunc>(dlsym(handle, FUNC_CONVERT_CONFIGURATION));
+    if (func == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null func");
+        dlclose(handle);
+        return cCfg;
+    }
+    cCfg = func(configuration.get());
+    dlclose(handle);
+    return cCfg;
+}
+
 CConfiguration FFIAbilityContextPropConfiguration(int64_t id, int32_t* errCode)
 {
     CConfiguration cCfg;
@@ -599,7 +623,27 @@ CConfiguration FFIAbilityContextPropConfiguration(int64_t id, int32_t* errCode)
         return cCfg;
     }
     *errCode = SUCCESS_CODE;
-    return CreateCConfiguration(*configuration);
+    return CallConvertConfig(configuration);
+}
+
+RetAbilityInfo CallConvertAbilityInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
+{
+    RetAbilityInfo retInfo;
+    void* handle = dlopen(CJ_BUNDLE_MGR_LIBNAME, RTLD_LAZY);
+    if (handle == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
+        return retInfo;
+    }
+    using ConvertAbilityInfoFunc = RetAbilityInfo (*)(void*);
+    auto func = reinterpret_cast<ConvertAbilityInfoFunc>(dlsym(handle, FUNC_CONVERT_ABILITY_INFO));
+    if (func == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null func");
+        dlclose(handle);
+        return retInfo;
+    }
+    retInfo = func(abilityInfo.get());
+    dlclose(handle);
+    return retInfo;
 }
 
 RetAbilityInfo FFIAbilityContextPropAbilityInfo(int64_t id, int32_t* errCode)
@@ -617,7 +661,27 @@ RetAbilityInfo FFIAbilityContextPropAbilityInfo(int64_t id, int32_t* errCode)
         return ret;
     }
     *errCode = SUCCESS_CODE;
-    return Convert::ConvertAbilityInfo(*abilityInfo);
+    return CallConvertAbilityInfo(abilityInfo);
+}
+
+RetHapModuleInfo CallConvertHapInfo(std::shared_ptr<AppExecFwk::HapModuleInfo> hapInfo)
+{
+    RetHapModuleInfo retInfo;
+    void* handle = dlopen(CJ_BUNDLE_MGR_LIBNAME, RTLD_LAZY);
+    if (handle == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
+        return retInfo;
+    }
+    using ConvertHapInfoFunc = RetHapModuleInfo (*)(void*);
+    auto func = reinterpret_cast<ConvertHapInfoFunc>(dlsym(handle, FUNC_CONVERT_HAP_INFO));
+    if (func == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null func");
+        dlclose(handle);
+        return retInfo;
+    }
+    retInfo = func(hapInfo.get());
+    dlclose(handle);
+    return retInfo;
 }
 
 RetHapModuleInfo FFIAbilityContextPropCurrentHapModuleInfo(int64_t id, int32_t* errCode)
@@ -635,7 +699,7 @@ RetHapModuleInfo FFIAbilityContextPropCurrentHapModuleInfo(int64_t id, int32_t* 
         return ret;
     }
     *errCode = SUCCESS_CODE;
-    return Convert::ConvertHapModuleInfo(*hapModuleInfo);
+    return CallConvertHapInfo(hapModuleInfo);
 }
 
 int32_t FFIAbilityContextStartAbilityByType(int64_t id, char* cType, char* cWantParams,
@@ -949,7 +1013,19 @@ EXPORT napi_value FfiConvertUIAbilityContext2Napi(napi_env env, int64_t id)
         TAG_LOGE(AAFwkTag::CONTEXT, "null object");
         return undefined;
     }
-
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(
+        cjContext->GetAbilityContext());
+    napi_status status = napi_wrap(env, result, workContext,
+        [](napi_env, void* data, void*) {
+            TAG_LOGD(AAFwkTag::ABILITY, "finalizer for weak_ptr ability context is called");
+            delete static_cast<std::weak_ptr<AbilityRuntime::AbilityContext> *>(data);
+        },
+        nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return undefined;
+    }
     napi_value falseValue = nullptr;
     napi_get_boolean((napi_env)env, true, &falseValue);
     napi_set_named_property((napi_env)env, result, "stageMode", falseValue);
@@ -968,18 +1044,16 @@ EXPORT int64_t FfiCreateUIAbilityContextFromNapi(napi_env env, napi_value uiAbil
         return ERR_INVALID_INSTANCE_CODE;
     }
 
-    JsAbilityContext* jsAbilityContext = nullptr;
-    napi_status status = napi_unwrap(env, uiAbilityContext, reinterpret_cast<void**>(&jsAbilityContext));
+    std::weak_ptr<AbilityContext>* context = nullptr;
+    napi_status status = napi_unwrap(env, uiAbilityContext, reinterpret_cast<void**>(&context));
     if (status != napi_ok) {
         return ERR_INVALID_INSTANCE_CODE;
     }
-
-    auto context = jsAbilityContext->GetAbilityContext();
-    if (context == nullptr) {
+    if (context == nullptr || (*context).lock() == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         return ERR_INVALID_INSTANCE_CODE;
     }
-    auto cjContext = FFI::FFIData::Create<CJAbilityContext>(context);
+    auto cjContext = FFI::FFIData::Create<CJAbilityContext>((*context).lock());
     if (cjContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null cjContext");
         return ERR_INVALID_INSTANCE_CODE;

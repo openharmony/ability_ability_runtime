@@ -157,7 +157,7 @@ HWTEST_F(CjUIAbilityTest, CJRuntime_Init_0100, Function | MediumTest | Level1)
 HWTEST_F(CjUIAbilityTest, CJUIAbility_Create_0100, TestSize.Level1)
 {
     AbilityRuntime::Runtime::Options options;
-    options.lang = AbilityRuntime::Runtime::Language::CJ;
+    options.lang = AbilityRuntime::Runtime::Language::JS;
     auto runtime = AbilityRuntime::Runtime::Create(options);
     auto ability = AbilityRuntime::CJUIAbility::Create(runtime);
     EXPECT_NE(ability, nullptr);

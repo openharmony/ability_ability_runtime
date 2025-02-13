@@ -92,6 +92,8 @@ public:
     {
         return nullptr;
     }
+
+    void SetContinueState(int32_t state) {}
 };
 
 class AbilityContextImplTest : public testing::Test {
@@ -235,13 +237,26 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_01
 
     AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
     auto ret = context_->SetMissionContinueState(state);
-    EXPECT_NE(ret, 0);
+    EXPECT_NE(ret, ERR_OK);
 
     g_mockAbilityMs->SetCommonMockResult(true);
     ret = context_->SetMissionContinueState(state);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_EQ(ret, ERR_OK);
     }
+
+    std::shared_ptr<MyAbilityCallback> abilityCallback = std::make_shared<MyAbilityCallback>();
+    ret = context_->SetMissionContinueState(state);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_OK);
+    }
+
+    wptr<IRemoteObject> token(new IPCObjectStub());
+    context_->SetWeakSessionToken(token);
+    context_->SetMissionContinueState(state);
+    abilityCallback.reset();
+    context_->RegisterAbilityCallback(abilityCallback);
+    AAFwk::AbilityManagerClient::GetInstance()->proxy_ = nullptr;
 }
 
 /**
@@ -258,7 +273,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_02
 
     AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
     auto ret = context_->SetMissionContinueState(state);
-    EXPECT_NE(ret, 0);
+    EXPECT_NE(ret, ERR_OK);
 
     g_mockAbilityMs->SetCommonMockResult(true);
     ret = context_->SetMissionContinueState(state);
@@ -266,9 +281,18 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_02
         EXPECT_EQ(ret, ERR_OK);
     }
 
+    std::shared_ptr<MyAbilityCallback> abilityCallback = std::make_shared<MyAbilityCallback>();
+    ret = context_->SetMissionContinueState(state);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_OK);
+    }
+    
     wptr<IRemoteObject> token(new IPCObjectStub());
     context_->SetWeakSessionToken(token);
     context_->SetMissionContinueState(state);
+    abilityCallback.reset();
+    context_->RegisterAbilityCallback(abilityCallback);
+    AAFwk::AbilityManagerClient::GetInstance()->proxy_ = nullptr;
 }
 
 /**
@@ -285,7 +309,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_03
 
     AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_MAX;
     auto ret = context_->SetMissionContinueState(state);
-    EXPECT_NE(ret, 0);
+    EXPECT_NE(ret, ERR_OK);
 
     g_mockAbilityMs->SetCommonMockResult(true);
     ret = context_->SetMissionContinueState(state);
@@ -293,9 +317,18 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_03
         EXPECT_EQ(ret, ERR_OK);
     }
 
+    std::shared_ptr<MyAbilityCallback> abilityCallback = std::make_shared<MyAbilityCallback>();
+    ret = context_->SetMissionContinueState(state);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_OK);
+    }
+    
     wptr<IRemoteObject> token(new IPCObjectStub());
     context_->SetWeakSessionToken(token);
     context_->SetMissionContinueState(state);
+    abilityCallback.reset();
+    context_->RegisterAbilityCallback(abilityCallback);
+    AAFwk::AbilityManagerClient::GetInstance()->proxy_ = nullptr;
 }
 
 /**

@@ -137,7 +137,7 @@ void CJAbilityStageObject::OnConfigurationUpdated(const std::shared_ptr<AppExecF
         return;
     }
 
-    g_cjAbilityStageFuncs.AbilityStageOnConfigurationUpdated2(id_, CreateCConfiguration(*configuration));
+    g_cjAbilityStageFuncs.AbilityStageOnConfigurationUpdated2(id_, CallConvertConfig(configuration));
 }
 
 void CJAbilityStageObject::OnMemoryLevel(int32_t level) const

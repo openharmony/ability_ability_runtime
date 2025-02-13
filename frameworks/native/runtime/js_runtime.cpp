@@ -176,6 +176,7 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
 
     bool isStartWithDebug = dOption.isStartWithDebug;
     bool isDebugApp = dOption.isDebugApp;
+    std::string appProvisionType = dOption.appProvisionType;
     TAG_LOGD(AAFwkTag::JSRUNTIME, "Ark VM is starting debug mode [%{public}s]", isStartWithDebug ? "break" : "normal");
     StartDebuggerInWorkerModule(isDebugApp, dOption.isStartWithNative);
     const std::string bundleName = bundleName_;
@@ -183,11 +184,15 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
     auto weak = jsEnv_;
     std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
     HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp, [bundleName,
-            isStartWithDebug, instanceId, weak, isDebugApp] (int socketFd, std::string option) {
+            isStartWithDebug, instanceId, weak, isDebugApp, appProvisionType] (int socketFd, std::string option) {
             TAG_LOGI(AAFwkTag::JSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s",
                 socketFd, option.c_str());
         if (weak == nullptr) {
                 TAG_LOGE(AAFwkTag::JSRUNTIME, "null weak");
+            return;
+        }
+        if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "not support release app");
             return;
         }
         if (option.find(DEBUGGER) == std::string::npos) {
@@ -201,7 +206,7 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
-    if (isDebugApp) {
+    if (isDebugApp && appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
         ConnectServerManager::Get().StartConnectServer(bundleName_, -1, true);
     }
 
@@ -313,16 +318,21 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
 
     bool isStartWithDebug = dOption.isStartWithDebug;
     bool isDebugApp = dOption.isDebugApp;
+    std::string appProvisionType = dOption.appProvisionType;
     StartDebuggerInWorkerModule(isDebugApp, dOption.isStartWithNative);
     const std::string bundleName = bundleName_;
     auto weak = jsEnv_;
     uint32_t instanceId = instanceId_;
     std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
     HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
-        [bundleName, isStartWithDebug, instanceId, weak, isDebugApp](int socketFd, std::string option) {
+        [bundleName, isStartWithDebug, instanceId, weak, isDebugApp, appProvisionType](int socketFd, std::string option) {
         TAG_LOGI(AAFwkTag::JSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s", socketFd, option.c_str());
         if (weak == nullptr) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "null weak");
+            return;
+        }
+        if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "not support release app");
             return;
         }
         if (option.find(DEBUGGER) == std::string::npos) {
@@ -342,7 +352,7 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
 
 void JsRuntime::DebuggerConnectionManager(bool isDebugApp, bool isStartWithDebug, const DebugOption dOption)
 {
-    if (isDebugApp) {
+    if (isDebugApp && dOption.appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
         ConnectServerManager::Get().StartConnectServer(bundleName_, 0, true);
     }
     ConnectServerManager::Get().StoreInstanceMessage(getproctid(), instanceId_);
@@ -729,17 +739,7 @@ bool JsRuntime::Initialize(const Options& options)
     }
 
     if (!options.preload) {
-        std::string loadPath = ExtractorUtil::GetLoadFilePath(options.hapPath);
-        bool newCreate = false;
-        std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
-        bool hasFile = false;
-        if (!extractor) {
-            TAG_LOGD(AAFwkTag::JSRUNTIME, "Get extractor failed. hapPath[%{private}s]", loadPath.c_str());
-        } else {
-            hasFile = extractor->HasEntry(MERGE_SOURCE_MAP_PATH);
-        }
-        auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.bundleName, isModular,
-                                                                      hasFile);
+        auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.bundleName);
         InitSourceMap(operatorObj);
 
         if (options.isUnique) {

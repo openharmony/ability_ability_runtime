@@ -1846,6 +1846,8 @@ public:
 
     bool IsInStatusBar(uint32_t accessTokenId, int32_t uid, bool isMultiInstance);
 
+    bool IsSupportStatusBar(int32_t uid);
+
     /**
      * Set keep-alive flag for application under a specific user.
      * @param bundleName Bundle name.
@@ -1910,6 +1912,24 @@ public:
         bool isPendingWantCaller, int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
         bool isCallByShortcut = false);
 
+    /**
+     * PrepareTerminateAbilityDone, called when PrepareTerminateAbility call is done.
+     *
+     * @param token, the token of the ability to terminate.
+     * @param callback callback.
+     */
+    virtual void PrepareTerminateAbilityDone(const sptr<IRemoteObject> &token, bool isTerminate) override;
+
+    /**
+     * KillProcessWithPrepareTerminateDone, called when KillProcessWithPrepareTerminate call is done.
+     *
+     * @param moduleName, the module name of the application.
+     * @param prepareTermination, the result of prepareTermination call of the module.
+     * @param isExist, whether the prepareTerminate functions are implemented.
+     */
+    virtual void KillProcessWithPrepareTerminateDone(const std::string &moduleName,
+        int32_t prepareTermination, bool isExist) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1957,6 +1977,8 @@ protected:
      * @param abilityTokens abilities in died process.
      */
     void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
+
+    void OnStartProcessFailed(sptr<IRemoteObject> token) override;
 
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
@@ -2559,6 +2581,9 @@ private:
     ffrt::mutex abilityDebugDealLock_;
     ffrt::mutex shouldBlockAllAppStartMutex_;
     std::mutex whiteListMutex_;
+
+    std::mutex prepareTermiationCallbackMutex_;
+    std::map<std::string, sptr<IPrepareTerminateCallback>> prepareTermiationCallbacks_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

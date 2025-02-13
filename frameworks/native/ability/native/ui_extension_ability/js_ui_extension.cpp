@@ -773,6 +773,7 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
     TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ", element: %{public}s",
         sessionInfo->uiExtensionComponentId, want.GetElement().GetURI().c_str());
+    std::shared_ptr<AAFwk::Want> sharedWant = std::make_shared<AAFwk::Want>(want);
     auto compId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(compId) == uiWindowMap_.end()) {
         auto context = GetContext();
@@ -781,9 +782,10 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
             TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
             return false;
         }
+        uiWindow->UpdateExtensionConfig(sharedWant);
         HandleScope handleScope(jsRuntime_);
         napi_env env = jsRuntime_.GetNapiEnv();
-        napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
+        napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, *sharedWant);
         napi_value nativeContentSession = JsUIExtensionContentSession::CreateJsUIExtensionContentSession(
             env, sessionInfo, uiWindow, context, abilityResultListeners_);
         napi_ref ref = nullptr;
@@ -809,6 +811,13 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
             context->SetWindow(uiWindow);
         }
 #endif // SUPPORT_GRAPHICS
+    } else {
+        auto uiWindow = uiWindowMap_[compId];
+        if (uiWindow == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
+            return false;
+        }
+        uiWindow->UpdateExtensionConfig(sharedWant);
     }
     return true;
 }
@@ -835,6 +844,11 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
     option->SetDensity(sessionInfo->density);
     option->SetIsDensityFollowHost(sessionInfo->isDensityFollowHost);
     option->SetDisplayId(sessionInfo->displayId);
+    if (context->isNotAllow != -1) {
+        bool isNotAllow = context->isNotAllow == 1 ? true : false;
+        TAG_LOGD(AAFwkTag::UI_EXT, "isNotAllow: %{public}d", isNotAllow);
+        option->SetConstrainedModal(isNotAllow);
+    }
     HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
 }

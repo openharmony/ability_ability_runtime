@@ -21,6 +21,7 @@
 #include "pixel_map_impl.h"
 #include "image_ffi.h"
 #include "hilog_tag_wrapper.h"
+#include "js_photo_editor_extension_context.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -139,6 +140,74 @@ CJ_EXPORT int32_t FFIPhotoExtCtxSaveEditedContentWithImage(int64_t id, int64_t i
 
     return cjContext->SaveEditedContentWithImage(pixelMapImpl->GetRealPixelMap(), ParseCPackOption(option),
         *actualWant);
+}
+
+CJ_EXPORT napi_value FfiConvertPhotoExtCtx2Napi(napi_env env, int64_t id)
+{
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
+    auto cjPhotoExtCtx = OHOS::FFI::FFIData::GetData<CJPhotoEditorExtensionContext>(id);
+    if (cjPhotoExtCtx == nullptr || cjPhotoExtCtx->GetContext() == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "cj context null ptr");
+        return undefined;
+    }
+
+    napi_value result = JsPhotoEditorExtensionContext::CreateJsPhotoEditorExtensionContext(
+        env, cjPhotoExtCtx->GetContext());
+    if (result == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null object");
+        return undefined;
+    }
+    auto workContext = new (std::nothrow) std::weak_ptr<PhotoEditorExtensionContext>(cjPhotoExtCtx->GetContext());
+    napi_status status = napi_wrap(
+        env, result, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer called");
+            if (data == nullptr) {
+                TAG_LOGE(AAFwkTag::UI_EXT, "null data");
+                return;
+            }
+            delete static_cast<std::weak_ptr<PhotoEditorExtensionContext> *>(data);
+        },
+        nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return undefined;
+    }
+    napi_value falseValue = nullptr;
+    napi_get_boolean((napi_env)env, true, &falseValue);
+    napi_set_named_property((napi_env)env, result, "stageMode", falseValue);
+    return result;
+}
+
+CJ_EXPORT int64_t FfiCreatePhotoExtCtxFromNapi(napi_env env, napi_value cjPhotoContext)
+{
+    if (env == nullptr || cjPhotoContext == nullptr) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    napi_valuetype type;
+    if (napi_typeof(env, cjPhotoContext, &type) || type != napi_object) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    std::weak_ptr<PhotoEditorExtensionContext>* context = nullptr;
+    napi_status status = napi_unwrap(env, cjPhotoContext, reinterpret_cast<void**>(&context));
+    if (status != napi_ok) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    if (context == nullptr || (*context).lock() == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    auto cjContext = OHOS::FFI::FFIData::Create<CJPhotoEditorExtensionContext>((*context).lock());
+    if (cjContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cjContext");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    return cjContext->GetID();
 }
 }
 } // namespace AbilityRuntime

@@ -118,7 +118,7 @@ HWTEST_F(UIServiceExtensionTest, Init_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "Init_0100 start");
 
     Runtime::Options options;
-    options.lang = Runtime::Language::CJ;
+    options.lang = Runtime::Language::JS;
     auto runtime = Runtime::Create(options);
     auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
 

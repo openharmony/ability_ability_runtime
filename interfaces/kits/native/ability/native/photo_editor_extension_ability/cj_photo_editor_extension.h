@@ -46,15 +46,6 @@ public:
     virtual void Init(const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &record,
                       const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
                       std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token) override;
-
-    /**
-     * @brief Create CJPhotoEditorExtension.
-     *
-     * @param runtime The runtime.
-     * @return The CJPhotoEditorExtension instance.
-     */
-    static CJPhotoEditorExtension *Create(const std::unique_ptr<Runtime> &runtime);
-
 private:
     std::shared_ptr<CJPhotoEditorExtensionImpl> impl_ = nullptr;
 };

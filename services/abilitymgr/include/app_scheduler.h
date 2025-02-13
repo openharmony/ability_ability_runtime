@@ -114,6 +114,8 @@ public:
      * @param abilityTokens abilities in died process.
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
+    
+    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) {}
 };
 
 class StartSpecifiedAbilityResponse : public AppExecFwk::StartSpecifiedAbilityResponseStub {
@@ -169,10 +171,9 @@ public:
      * Prepare terminate application
      *
      * @param pid Process ID
-     * @param prepareTelrmination PrepareTermination Enum
-     * @param isExist whether this callback event exist
+     * @param moduleName Module name
      */
-    void PrepareTerminateApp(const pid_t pid, int32_t &prepareTermination, bool &isExist);
+    void PrepareTerminateApp(const pid_t pid, const std::string &moduleName);
 
     /**
      * move ability to foreground.
@@ -636,6 +637,8 @@ protected:
      * @param abilityTokens abilities in died process.
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
+
+    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) override;
 
     /**
      * @brief Notify abilityms app process pre cache

@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-#include "bundle_manager_convert.h"
+#include "cj_bundle_info.h"
 #include "cj_common_ffi.h"
 #include "cj_utils_ffi.h"
 #include "cj_context.h"
@@ -30,7 +30,6 @@ namespace OHOS {
 namespace AbilityRuntime {
 
 class Context;
-using OHOS::CJSystemapi::BundleManager::RetHapModuleInfo;
 
 class CJAbilityStageContext : public FfiContext::CJContext {
 public:
@@ -40,10 +39,16 @@ public:
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo();
     RetHapModuleInfo GetRetHapModuleInfo();
     CConfiguration GetConfiguration();
+    std::shared_ptr<Context> GetContext()
+    {
+        return abilityStageContext_.lock();
+    }
 
 private:
     std::weak_ptr<AbilityRuntime::Context> abilityStageContext_;
 };
+
+CConfiguration CallConvertConfig(std::shared_ptr<AppExecFwk::Configuration> configuration);
 }
 }
 #endif //OHOS_ABILITY_RUNTIME_CJ_ABILITY_STAGE_CONTEXT_H

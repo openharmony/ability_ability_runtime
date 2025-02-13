@@ -343,7 +343,7 @@ HWTEST_F(AbilityConnectManagerTest, HandleActiveAbility_001, TestSize.Level1)
     sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
     OHOS::sptr<IAbilityConnection> callback1 = new AbilityConnectCallback();
     std::shared_ptr<ConnectionRecord> connectRecord =
-        std::make_shared<ConnectionRecord>(callerToken, abilityRecord, callback1);
+        std::make_shared<ConnectionRecord>(callerToken, abilityRecord, callback1, nullptr);
     std::shared_ptr<AbilityRecord> targetService = nullptr;
     connectManager->HandleActiveAbility(targetService, connectRecord);
     abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI_SERVICE;
@@ -378,7 +378,7 @@ HWTEST_F(AbilityConnectManagerTest, HandleActiveAbility_002, TestSize.Level1)
     want.SetParam(PARAM_RESV_CALLER_APP_ID, std::string("app"));
     abilityRecord->SetWant(want);
     OHOS::sptr<IAbilityConnection> callback1 = new AbilityConnectCallback();
-    auto connectRecord = std::make_shared<ConnectionRecord>(callerToken, abilityRecord, callback1);
+    auto connectRecord = std::make_shared<ConnectionRecord>(callerToken, abilityRecord, callback1, nullptr);
     abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI;
     connectManager->HandleActiveAbility(abilityRecord, connectRecord);
     EXPECT_EQ(abilityRecord->GetWant().GetStringParam(PARAM_RESV_CALLER_APP_ID), "app"); // no remove signatureInfo
@@ -417,7 +417,7 @@ HWTEST_F(AbilityConnectManagerTest, HandleActiveAbility_003, TestSize.Level1)
     //AbilityRequest abilityRequest;
     sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
     OHOS::sptr<IAbilityConnection> callback1 = new AbilityConnectCallback();
-    auto connectRecord = std::make_shared<ConnectionRecord>(callerToken, abilityRecord, callback1);
+    auto connectRecord = std::make_shared<ConnectionRecord>(callerToken, abilityRecord, callback1, nullptr);
     auto mockTaskHandler = MockTaskHandlerWrap::CreateQueueHandler("HandleActiveAbility003");
     EXPECT_CALL(*mockTaskHandler, SubmitTaskInner(_, _)).Times(0);
     connectManager->taskHandler_ = mockTaskHandler;

@@ -167,12 +167,22 @@ public:
 
     bool IsAllAbilityReadyToCleanedByUserRequest();
 
+    void SetLoaded()
+    {
+        isLoaded_ = true;
+    }
+
+    bool IsLoaded() const
+    {
+        return isLoaded_;
+    }
 private:
     void SendEvent(uint32_t msg, int64_t timeOut, const std::shared_ptr<AbilityRunningRecord> &abilityRecord);
 
     ModuleRecordState GetState() const;
 
 private:
+    bool isLoaded_ = false;
     int32_t appIndex_ = 0;
     ModuleRecordState owenState_ = ModuleRecordState::UNKNOWN_STATE;
     std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;

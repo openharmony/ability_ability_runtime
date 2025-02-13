@@ -19,6 +19,7 @@
 
 #include "ability_manager_client.h"
 #include "ability_manager_errors.h"
+#include "accesstoken_kit.h"
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -38,6 +39,7 @@
 #include "open_link_options.h"
 #include "open_link/napi_common_open_link_options.h"
 #include "start_options.h"
+#include "tokenid_kit.h"
 #include "uri.h"
 #include "ui_extension_servicehost_stub_impl.h"
 #include "ui_service_extension_connection_constants.h"
@@ -193,6 +195,11 @@ napi_value JsUIExtensionContext::StartServiceExtensionAbilityWithAccount(napi_en
 napi_value JsUIExtensionContext::SetColorMode(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnSetColorMode);
+}
+
+napi_value JsUIExtensionContext::SetHostPageOverlayForbidden(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnSetHostPageOverlayForbidden);
 }
 
 napi_value JsUIExtensionContext::OnStartAbility(napi_env env, NapiCallbackInfo& info)
@@ -1110,6 +1117,39 @@ napi_value JsUIExtensionContext::OnStartServiceExtensionAbility(napi_env env, Na
     return result;
 }
 
+napi_value JsUIExtensionContext::OnSetHostPageOverlayForbidden(napi_env env, NapiCallbackInfo& info)
+{
+    if (info.argc < ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "failed, not enough params.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    bool isNotAllow = false;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], isNotAllow)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "parse isNotAllow failed, not boolean");
+        ThrowInvalidParamError(env, "Parse param isNotAllow failed, must be a boolean.");
+        return CreateJsUndefined(env);
+    }
+
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGW(AAFwkTag::UI_EXT, "context is released");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return CreateJsUndefined(env);
+    }
+
+    context->isNotAllow = isNotAllow ? 1 : 0;
+    TAG_LOGD(AAFwkTag::UI_EXT, "SetHostPageOverlayForbidden ok, isNotAllow: %{public}d", isNotAllow);
+    return CreateJsUndefined(env);
+}
+
 napi_value JsUIExtensionContext::OnStartServiceExtensionAbilityWithAccount(napi_env env, NapiCallbackInfo& info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -1219,6 +1259,7 @@ napi_value JsUIExtensionContext::CreateJsUIExtensionContext(napi_env env,
     BindNativeFunction(env, objValue, "startServiceExtensionAbilityWithAccount", moduleName,
         StartServiceExtensionAbilityWithAccount);
     BindNativeFunction(env, objValue, "setColorMode", moduleName, SetColorMode);
+    BindNativeFunction(env, objValue, "setHostPageOverlayForbidden", moduleName, SetHostPageOverlayForbidden);
 
     return objValue;
 }

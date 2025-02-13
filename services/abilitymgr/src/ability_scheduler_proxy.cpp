@@ -122,8 +122,14 @@ void AbilitySchedulerProxy::SendResult(int requestCode, int resultCode, const Wa
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    data.WriteInt32(requestCode);
-    data.WriteInt32(resultCode);
+    if (!data.WriteInt32(requestCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write requestCode failed");
+        return;
+    }
+    if (!data.WriteInt32(resultCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write resultCode failed");
+        return;
+    }
     if (!data.WriteParcelable(&resultWant)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to WriteParcelable");
         return;
@@ -206,7 +212,7 @@ bool AbilitySchedulerProxy::SchedulePrepareTerminateAbility()
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to write interface");
         return false;
@@ -217,7 +223,7 @@ bool AbilitySchedulerProxy::SchedulePrepareTerminateAbility()
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, err: %{public}d", err);
         return false;
     }
-    return reply.ReadBool();
+    return true;
 }
 
 void AbilitySchedulerProxy::ScheduleCommandAbilityWindow(const Want &want, const sptr<SessionInfo> &sessionInfo,

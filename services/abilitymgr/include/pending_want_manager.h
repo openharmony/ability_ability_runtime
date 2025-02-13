@@ -189,6 +189,7 @@ private:
     bool CheckCallerPermission();
 
     bool CheckWindowState(int32_t pid);
+    bool CheckPermission(sptr<PendingWantRecord> record);
 
 private:
     std::shared_ptr<TaskHandlerWrap> taskHandler_;

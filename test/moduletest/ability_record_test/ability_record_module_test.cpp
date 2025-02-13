@@ -426,7 +426,7 @@ HWTEST_F(AbilityRecordModuleTest, ConnectionRecord_001, TestSize.Level2)
     EXPECT_TRUE(abilityRecord);
     EXPECT_TRUE(abilityRecord->IsConnectListEmpty());
 
-    auto connectionRecord = ConnectionRecord::CreateConnectionRecord(nullptr, nullptr, nullptr);
+    auto connectionRecord = ConnectionRecord::CreateConnectionRecord(nullptr, nullptr, nullptr, nullptr);
     EXPECT_TRUE(connectionRecord);
 
     for (int i = 0; i < COUNT; ++i) {

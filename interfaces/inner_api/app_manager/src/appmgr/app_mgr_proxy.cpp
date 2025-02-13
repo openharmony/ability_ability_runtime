@@ -754,7 +754,10 @@ int AppMgrProxy::GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IR
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    data.WriteInt32(pid);
+    if (!data.WriteInt32(pid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write pid failed");
+        return ERR_FLATTEN_OBJECT;
+    }
     if (!SendTransactCmd(AppMgrInterfaceCode::APP_GET_ABILITY_RECORDS_BY_PROCESS_ID, data, reply)) {
         return ERR_NULL_OBJECT;
     }
@@ -2186,7 +2189,7 @@ void AppMgrProxy::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::strin
     PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID, data, reply, option);
 }
 
-int32_t AppMgrProxy::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
+int32_t AppMgrProxy::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2198,7 +2201,7 @@ int32_t AppMgrProxy::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &ab
     PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &want);
     PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &abilityInfo);
 
-    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID, data, reply, option);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::IS_SPECIFIED_MODULE_LOADED, data, reply, option);
     result = reply.ReadBool();
     return ERR_OK;
 }

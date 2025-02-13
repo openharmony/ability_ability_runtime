@@ -1591,6 +1591,24 @@ public:
     virtual int32_t QueryAtomicServiceStartupRule(sptr<IRemoteObject> callerToken,
         const std::string &appId, const std::string &startTime, AtomicServiceStartupRule &rule) override;
 
+    /**
+     * PrepareTerminateAbilityDone, called when PrepareTerminateAbility call is done.
+     *
+     * @param token, the token of the ability to terminate.
+     * @param callback callback.
+     */
+    virtual void PrepareTerminateAbilityDone(const sptr<IRemoteObject> &token, bool isTerminate) override;
+
+    /**
+     * KillProcessWithPrepareTerminateDone, called when KillProcessWithPrepareTerminate call is done.
+     *
+     * @param moduleName, the module name of the application.
+     * @param prepareTermination, the result of prepareTermination call of the module.
+     * @param isExist, whether the prepareTerminate functions are implemented.
+     */
+    virtual void KillProcessWithPrepareTerminateDone(const std::string &moduleName,
+        int32_t prepareTermination, bool isExist) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

@@ -440,6 +440,7 @@ void AppRunningRecord::AddAbilityStageDone()
     RemoveEvent(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG);
+    SetModuleLoaded(moduleName_);
 
     // Should proceed to the next notification
     if (IsStartSpecifiedAbility()) {
@@ -454,6 +455,17 @@ void AppRunningRecord::AddAbilityStageDone()
     }
 
     AddAbilityStage();
+}
+
+void AppRunningRecord::SetModuleLoaded(const std::string &moduleName) const
+{
+    auto moduleRecordList = GetAllModuleRecord();
+    for (const auto &item : moduleRecordList) {
+        if (item && item->GetModuleName() == moduleName) {
+            item->SetLoaded();
+            break;
+        }
+    }
 }
 
 void AppRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningRecord> &ability)
@@ -1516,23 +1528,30 @@ bool AppRunningRecord::IsStartSpecifiedAbility() const
     return specifiedRequestId_ != -1;
 }
 
-void AppRunningRecord::SchedulePrepareTerminate(int32_t &prepareTermination, bool &isExist)
+void AppRunningRecord::SchedulePrepareTerminate(const std::string &moduleName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (appLifeCycleDeal_ == nullptr) {
         TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
         return;
     }
-    std::lock_guard<ffrt::mutex> hapModulesLock(hapModulesLock_);
-    for (const auto &iter : hapModules_) {
-        for (const auto &moduleRecord : iter.second) {
-            if (moduleRecord == nullptr) {
-                TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
-                continue;
+    bool found = false;
+    {
+        std::lock_guard<ffrt::mutex> hapModulesLock(hapModulesLock_);
+        for (const auto &iter : hapModules_) {
+            for (const auto &moduleRecord : iter.second) {
+                if (moduleRecord != nullptr && moduleName == moduleRecord->GetModuleName()) {
+                    found = true;
+                    break;
+                }
             }
-            appLifeCycleDeal_->SchedulePrepareTerminate(moduleRecord->GetModuleName(), prepareTermination, isExist);
         }
     }
+    if (!found) {
+        TAG_LOGE(AAFwkTag::APPMGR, "moduleName not exist");
+        return;
+    }
+    appLifeCycleDeal_->SchedulePrepareTerminate(moduleName);
 }
 
 void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)
@@ -1552,6 +1571,7 @@ void AppRunningRecord::ScheduleAcceptWantDone()
     TAG_LOGI(AAFwkTag::APPMGR, "ScheduleAcceptWantDone, bundle %{public}s", mainBundleName_.c_str());
     RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG);
+    SetModuleLoaded(moduleName_);
 }
 
 void AppRunningRecord::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)
@@ -1571,6 +1591,7 @@ void AppRunningRecord::ScheduleNewProcessRequestDone()
     TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s", mainBundleName_.c_str());
     RemoveEvent(AMSEventHandler::START_SPECIFIED_PROCESS_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG);
+    SetModuleLoaded(moduleName_);
 }
 
 void AppRunningRecord::ApplicationTerminated()

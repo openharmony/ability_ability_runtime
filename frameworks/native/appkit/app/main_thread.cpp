@@ -176,6 +176,12 @@ const std::string SYSTEM_DEFAULT_FONTSIZE_SCALE = "1.0";
 const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
 
+#if defined(NWEB)
+constexpr int32_t PRELOAD_DELAY_TIME = 2000;  //millisecond
+constexpr int32_t CACHE_EFFECTIVE_RANGE = 60 * 60 * 24 * 3; // second
+const std::string WEB_CACHE_DIR = "/web";
+#endif
+
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
 const std::string NWEB_SURFACE_NODE_NAME = "nwebPreloadSurface";
 const std::string BLANK_URL = "about:blank";
@@ -749,6 +755,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
             return;
         }
         appThread->HandleLaunchAbility(abilityRecord);
+        OHOS::AppExecFwk::EventHandler::SetVsyncLazyMode(true);
     };
     if (!mainHandler_->PostTask(task, "MainThread:LaunchAbility")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
@@ -1015,7 +1022,7 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
 #if defined(SUPPORT_GRAPHICS) && defined(SUPPORT_APP_PREFERRED_LANGUAGE)
     UErrorCode status = U_ZERO_ERROR;
-    icu::Locale systemLocale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLocale(), status);
+    icu::Locale systemLocale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetEffectiveLanguage(), status);
     resConfig->SetLocaleInfo(systemLocale);
 
     if (Global::I18n::PreferredLanguage::IsSetAppPreferredLanguage()) {
@@ -1541,16 +1548,17 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             processName = processInfo_->GetProcessName();
             TAG_LOGD(AAFwkTag::APPKIT, "pid is %{public}d, processName is %{public}s", pid, processName.c_str());
         }
-        runtime->SetStopPreloadSoCallback([uid = bundleInfo.applicationInfo.uid,
+        runtime->SetStopPreloadSoCallback([uid = bundleInfo.applicationInfo.uid, currentPid = pid,
             bundleName = appInfo.bundleName]()-> void {
                 TAG_LOGD(AAFwkTag::APPKIT, "runtime callback and report load abc completed info to rss.");
-                ResHelper::ReportLoadAbcCompletedInfoToRss(uid, bundleName);
+                ResHelper::ReportLoadAbcCompletedInfoToRss(uid, currentPid, bundleName);
             });
         AbilityRuntime::Runtime::DebugOption debugOption;
         debugOption.isStartWithDebug = appLaunchData.GetDebugApp();
         debugOption.processName = processName;
         debugOption.isDebugApp = appInfo.debug;
         debugOption.isStartWithNative = appLaunchData.isNativeStart();
+        debugOption.appProvisionType = applicationInfo_->appProvisionType;
         if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
             perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
             TAG_LOGD(AAFwkTag::APPKIT, "perfCmd is %{public}s", perfCmd.c_str());
@@ -1783,28 +1791,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
 #if defined(NWEB)
-    // start nwebspawn process
-    std::weak_ptr<OHOSApplication> weakApp = application_;
-    wptr<IAppMgr> weakMgr = appMgr_;
-    std::thread([weakApp, weakMgr] {
-        auto app = weakApp.lock();
-        auto appmgr = weakMgr.promote();
-        if (app == nullptr || appmgr == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null app or appmgr");
-            return;
-        }
-
-        if (prctl(PR_SET_NAME, "preStartNWeb") < 0) {
-            TAG_LOGW(AAFwkTag::APPKIT, "Set thread name failed with %{public}d", errno);
-        }
-
-        std::string nwebPath = app->GetAppContext()->GetCacheDir() + "/web";
-        bool isFirstStartUpWeb = (access(nwebPath.c_str(), F_OK) != 0);
-        if (!isFirstStartUpWeb) {
-            appmgr->PreStartNWebSpawnProcess();
-        }
-        OHOS::NWeb::NWebHelper::TryPreReadLib(isFirstStartUpWeb, app->GetAppContext()->GetBundleCodeDir());
-    }).detach();
+    if (!isSystemApp) {
+        PreLoadWebLib();
+    }
 #endif
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
     if (appLaunchData.IsAllowedNWebPreload()) {
@@ -1815,6 +1804,45 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         PreloadModule(entryHapModuleInfo, application_->GetRuntime());
     }
 }
+
+#if defined(NWEB)
+void MainThread::PreLoadWebLib()
+{
+    auto task = [this]() {
+        std::weak_ptr<OHOSApplication> weakApp = application_;
+        std::thread([weakApp] {
+            auto app = weakApp.lock();
+            if (app == nullptr) {
+                TAG_LOGW(AAFwkTag::APPKIT, "null app");
+                return;
+            }
+
+            if (prctl(PR_SET_NAME, "preStartNWeb") < 0) {
+                TAG_LOGW(AAFwkTag::APPKIT, "Set thread name failed with %{public}d", errno);
+            }
+
+            std::string nwebPath = app->GetAppContext()->GetCacheDir() + WEB_CACHE_DIR;
+            struct stat file_stat;
+            if (stat(nwebPath.c_str(), &file_stat) == -1) {
+                TAG_LOGW(AAFwkTag::APPKIT, "can not get file_stat");
+                return;
+            }
+
+            time_t current_time = time(nullptr);
+            double time_difference = difftime(current_time, file_stat.st_mtime);
+            if (time_difference > CACHE_EFFECTIVE_RANGE) {
+                TAG_LOGW(AAFwkTag::APPKIT, "web page started more than %{public}d seconds", CACHE_EFFECTIVE_RANGE);
+                return;
+            }
+
+            bool isFirstStartUpWeb = (access(nwebPath.c_str(), F_OK) != 0);
+            TAG_LOGD(AAFwkTag::APPKIT, "TryPreReadLib pre dlopen web so");
+            OHOS::NWeb::NWebHelper::TryPreReadLib(isFirstStartUpWeb, app->GetAppContext()->GetBundleCodeDir());
+        }).detach();
+    };
+    mainHandler_->PostTask(task, "MainThread::NWEB_PRELOAD_SO", PRELOAD_DELAY_TIME);
+}
+#endif
 
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
 void MainThread::HandleNWebPreload()
@@ -3037,24 +3065,52 @@ void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &
     }
 }
 
-void MainThread::SchedulePrepareTerminate(const std::string &moduleName,
-    int32_t &prepareTermination, bool &isExist)
+void MainThread::SchedulePrepareTerminate(const std::string &moduleName)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    wptr<MainThread> weak = this;
-    auto syncTask = [weak, moduleName, &prepareTermination, &isExist] {
-        auto appThread = weak.promote();
-        if (appThread == nullptr || appThread->application_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
-            return;
-        }
-        appThread->application_->SchedulePrepareTerminate(moduleName, prepareTermination, isExist);
-    };
-    if (mainHandler_ == nullptr || !mainHandler_->PostSyncTask(syncTask, "MainThread::SchedulePrepareTerminate")) {
-        TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
+    TAG_LOGD(AAFwkTag::APPKIT, "SchedulePrepareTerminate called");
+    if (getpid() == gettid()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "in app main thread");
+        HandleSchedulePrepareTerminate(moduleName);
         return;
     }
-    TAG_LOGD(AAFwkTag::APPKIT, "SchedulePrepareTerminate finish");
+    wptr<MainThread> weak = this;
+    auto asyncTask = [weak, moduleName] {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            return;
+        }
+        appThread->HandleSchedulePrepareTerminate(moduleName);
+    };
+    if (mainHandler_ == nullptr || !mainHandler_->PostTask(asyncTask, "MainThread::SchedulePrepareTerminate")) {
+        TAG_LOGE(AAFwkTag::APPKIT, "post asynctask failed");
+    }
+}
+
+void MainThread::HandleSchedulePrepareTerminate(const std::string &moduleName)
+{
+    if (!application_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
+        return;
+    }
+
+    wptr<MainThread> weak = this;
+    auto callback = [weak, _moduleName = moduleName] (AppExecFwk::OnPrepareTerminationResult result) {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            return;
+        }
+        TAG_LOGI(AAFwkTag::APPKIT, "in callback, prepareTermination=%{public}d, isExist=%{public}d",
+            result.prepareTermination, result.isExist);
+        AbilityManagerClient::GetInstance()->KillProcessWithPrepareTerminateDone(_moduleName,
+            result.prepareTermination, result.isExist);
+    };
+    bool isAsync = false;
+    application_->SchedulePrepareTerminate(moduleName, callback, isAsync);
+    if (!isAsync) {
+        TAG_LOGI(AAFwkTag::APPKIT, "sync call");
+    }
 }
 
 void MainThread::HandleScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)

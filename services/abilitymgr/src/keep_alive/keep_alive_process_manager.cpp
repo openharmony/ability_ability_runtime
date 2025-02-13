@@ -90,6 +90,7 @@ void KeepAliveProcessManager::StartKeepAliveProcessWithMainElementPerBundle(cons
         .abilityName = mainElementName,
         .userId = userId,
         .appCloneIndex = bundleInfo.appIndex,
+        .uid = bundleInfo.uid,
     };
     auto isMultiInstance =
         bundleInfo.applicationInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
@@ -131,7 +132,9 @@ int32_t KeepAliveProcessManager::StartKeepAliveMainAbility(const KeepAliveAbilit
     StartOptions options;
     options.processOptions = std::make_shared<ProcessOptions>();
     options.processOptions->isRestartKeepAlive = true;
-    options.processOptions->startupVisibility = StartupVisibility::STARTUP_HIDE;
+    options.processOptions->startupVisibility =
+        DelayedSingleton<AbilityManagerService>::GetInstance()->IsSupportStatusBar(info.uid) ?
+        StartupVisibility::STARTUP_HIDE : StartupVisibility::STARTUP_SHOW;
     auto ret = IN_PROCESS_CALL(DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want,
         options, nullptr, info.userId, DEFAULT_INVAL_VALUE));
     MainElementUtils::UpdateMainElement(info.bundleName, info.moduleName, info.abilityName, true, info.userId);
@@ -141,6 +144,12 @@ int32_t KeepAliveProcessManager::StartKeepAliveMainAbility(const KeepAliveAbilit
 void KeepAliveProcessManager::AfterStartKeepAliveApp(const std::string &bundleName,
     uint32_t accessTokenId, int32_t uid, int32_t userId, bool isMultiInstance)
 {
+    // not support statusbar and don't need check after 5s
+    if (!DelayedSingleton<AbilityManagerService>::GetInstance()->IsSupportStatusBar(uid)) {
+        TAG_LOGI(AAFwkTag::KEEP_ALIVE, "not support statusBar, don't need check when keep alive");
+        return;
+    }
+
     auto task = [bundleName, accessTokenId, uid, userId, isMultiInstance]() {
         bool isStatusBarCreated =
             DelayedSingleton<AbilityManagerService>::GetInstance()->IsInStatusBar(accessTokenId, uid, isMultiInstance);
@@ -221,13 +230,15 @@ int32_t KeepAliveProcessManager::SetApplicationKeepAlive(const std::string &bund
         std::string mainElementName;
         CHECK_TRUE_RETURN_RET(!MainElementUtils::CheckMainUIAbility(bundleInfo, mainElementName),
             ERR_NO_MAIN_ABILITY, "bundle has no main uiability");
-        CHECK_TRUE_RETURN_RET(!MainElementUtils::CheckStatusBarAbility(bundleInfo),
-            ERR_NO_STATUS_BAR_ABILITY, "app has no status bar");
-        bool isRunning = false;
-        result = IN_PROCESS_CALL(appMgrClient->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning));
-        CHECK_RET_RETURN_RET(result, "IsAppRunning failed");
-        CHECK_TRUE_RETURN_RET((isRunning && !IsRunningAppInStatusBar(bundleInfo)),
-            ERR_NOT_ATTACHED_TO_STATUS_BAR, "app is not attached to status bar");
+        if (DelayedSingleton<AbilityManagerService>::GetInstance()->IsSupportStatusBar(bundleInfo.uid)) {
+            CHECK_TRUE_RETURN_RET(!MainElementUtils::CheckStatusBarAbility(bundleInfo),
+                ERR_NO_STATUS_BAR_ABILITY, "app has no status bar");
+            bool isRunning = false;
+            result = IN_PROCESS_CALL(appMgrClient->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning));
+            CHECK_RET_RETURN_RET(result, "IsAppRunning failed");
+            CHECK_TRUE_RETURN_RET((isRunning && !IsRunningAppInStatusBar(bundleInfo)),
+                ERR_NOT_ATTACHED_TO_STATUS_BAR, "app is not attached to status bar");
+        }
     }
 
     KeepAliveInfo info;

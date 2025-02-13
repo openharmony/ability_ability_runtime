@@ -44,7 +44,7 @@ public:
     MOCK_METHOD0(IsReady, bool());
     MOCK_METHOD1(AbilityAttachTimeOut, void(const sptr<IRemoteObject>& token));
     MOCK_METHOD2(PrepareTerminate, void(const sptr<IRemoteObject>& token, bool clearMissionFlag));
-    MOCK_METHOD3(PrepareTerminateApp, void(const pid_t, int32_t &PrepareTermination, bool &isExist));
+    MOCK_METHOD2(PrepareTerminateApp, void(const pid_t, const std::string &moduleName));
     MOCK_METHOD2(GetRunningProcessInfoByToken,
         void(const sptr<IRemoteObject>& token, OHOS::AppExecFwk::RunningProcessInfo& info));
     MOCK_METHOD1(SetAbilityForegroundingFlagToAppRecord, void(const pid_t pid));

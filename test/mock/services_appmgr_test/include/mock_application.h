@@ -41,8 +41,7 @@ public:
     MOCK_METHOD1(ScheduleAbilityStage, void(const HapModuleInfo&));
     MOCK_METHOD2(ScheduleUpdateApplicationInfoInstalled, void(const ApplicationInfo&, const std::string&));
     MOCK_METHOD2(ScheduleAcceptWant, void(const AAFwk::Want& want, const std::string& moduleName));
-    MOCK_METHOD3(SchedulePrepareTerminate, void(const std::string &moduleName,
-        int32_t &prepareTermination, bool &isExist));
+    MOCK_METHOD1(SchedulePrepareTerminate, void(const std::string &moduleName));
     MOCK_METHOD2(ScheduleNewProcessRequest, void(const AAFwk::Want& want, const std::string& moduleName));
     MOCK_METHOD3(ScheduleNotifyLoadRepairPatch, int32_t(const std::string& bundleName,
         const sptr<IQuickFixCallback>& callback, const int32_t recordId));

@@ -74,7 +74,7 @@ constexpr const char* TASK_ATTACH_CHILD_PROCESS = "AttachChildProcessTask";
 constexpr const char* TASK_EXIT_CHILD_PROCESS_SAFELY = "ExitChildProcessSafelyTask";
 #endif // SUPPORT_CHILD_PROCESS
 constexpr const char* FOUNDATION_PROCESS = "foundation";
-constexpr const char* RSS_PROCESS_NAME = "resource_schedule_service";
+constexpr const char* BS_PROCESS_NAME = "bgtaskmgr_service";
 constexpr int32_t USER_UID = 2000;
 constexpr const char* HIVIEW_PROCESS_NAME = "hiview";
 }  // namespace
@@ -1134,7 +1134,7 @@ int32_t AppMgrService::NotifyHotReloadPage(const std::string &bundleName, const 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 int32_t AppMgrService::SetContinuousTaskProcess(int32_t pid, bool isContinuousTask)
 {
-    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(RSS_PROCESS_NAME) &&
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(BS_PROCESS_NAME) &&
         !AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not rss or foundation");
         return ERR_INVALID_OPERATION;
@@ -1761,7 +1761,7 @@ void AppMgrService::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::str
     appMgrServiceInner_->UpdateInstanceKeyBySpecifiedId(specifiedId, instanceKey);
 }
 
-int32_t AppMgrService::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
+int32_t AppMgrService::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
@@ -1776,7 +1776,7 @@ int32_t AppMgrService::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &
         TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
         return ERR_INVALID_VALUE;
     }
-    result = appMgrServiceInner_->HasAppRecord(want, abilityInfo);
+    result = appMgrServiceInner_->IsSpecifiedModuleLoaded(want, abilityInfo);
     return ERR_OK;
 }
 

@@ -4219,7 +4219,7 @@ int MissionListManager::PrepareClearMissionLocked(int missionId, const std::shar
             prepareTerminateTimeout);
     }
 
-    bool res = abilityRecord->PrepareTerminateAbility();
+    bool res = abilityRecord->PrepareTerminateAbility(false);
     if (res) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "stop terminating");
         handler->CancelTask("PrepareTermiante_" + std::to_string(abilityRecord->GetAbilityRecordId()));

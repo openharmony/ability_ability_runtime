@@ -152,6 +152,27 @@ void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::SetReqeustAppFr
     want_ = want;
 }
 
+bool ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::WriteWantElement(MessageParcel &data)
+{
+    if (!data.WriteString16(u"bundleName")) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write bundleName failed");
+        return false;
+    }
+    if (!data.WriteString16(Str8ToStr16(want_.GetElement().GetBundleName()))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write element bundlename failed");
+        return false;
+    }
+    if (!data.WriteString16(u"abilityName")) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write abilityName failed");
+        return false;
+    }
+    if (!data.WriteString16(Str8ToStr16(want_.GetElement().GetAbilityName()))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write element abilityName failed");
+        return false;
+    }
+    return true;
+}
+
 void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remote, int resultCode)
 {
@@ -164,18 +185,27 @@ void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::OnAbilityConnec
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE);
-    data.WriteString16(u"bundleName");
-    data.WriteString16(Str8ToStr16(want_.GetElement().GetBundleName()));
-    data.WriteString16(u"abilityName");
-    data.WriteString16(Str8ToStr16(want_.GetElement().GetAbilityName()));
-    data.WriteString16(u"parameters");
+    if (!data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write MESSAGE_PARCEL_KEY_SIZE failed");
+        return;
+    }
+    if (!WriteWantElement(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write element failed");
+        return;
+    }
+    if (!data.WriteString16(u"parameters")) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write parameters failed");
+        return;
+    }
     nlohmann::json param;
     param[UIEXTENSION_TYPE_KEY.c_str()] = want_.GetStringParam(UIEXTENSION_TYPE_KEY);
     param[APP_FREEZE_PID.c_str()] = want_.GetStringParam(APP_FREEZE_PID);
     param[START_BUNDLE_NAME.c_str()] = want_.GetStringParam(START_BUNDLE_NAME);
     std::string paramStr = param.dump();
-    data.WriteString16(Str8ToStr16(paramStr));
+    if (!data.WriteString16(Str8ToStr16(paramStr))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write paramStr failed");
+        return;
+    }
     uint32_t code = !Rosen::SceneBoardJudgement::IsSceneBoardEnabled() ?
         COMMAND_START_DIALOG :
         AAFwk::IAbilityConnection::ON_ABILITY_CONNECT_DONE;

@@ -47,6 +47,7 @@ ohos_shared_library("cj_context_ffi") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
   ]
 

@@ -871,13 +871,19 @@ ErrCode AbilityContextImpl::GetMissionId(int32_t &missionId)
 
 ErrCode AbilityContextImpl::SetMissionContinueState(const AAFwk::ContinueState &state)
 {
-    TAG_LOGI(AAFwkTag::CONTEXT, "called, stage: %{public}d", state);
+    TAG_LOGI(AAFwkTag::CONTEXT, "called, state: %{public}d", state);
     auto sessionToken = GetSessionToken();
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->SetMissionContinueState(token_, state, sessionToken);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "failed: %{public}d", err);
+        return err;
     }
-    return err;
+    auto abilityCallback = abilityCallback_.lock();
+    if (abilityCallback) {
+        abilityCallback->SetContinueState(static_cast<int32_t>(state));
+        TAG_LOGI(AAFwkTag::CONTEXT, "SetContinueState, state: %{public}d.", state);
+    }
+    return ERR_OK;
 }
 
 void AbilityContextImpl::InsertResultCallbackTask(int requestCode, RuntimeTask &&task)
