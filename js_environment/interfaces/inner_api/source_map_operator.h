@@ -29,8 +29,8 @@ enum InitStatus { NOT_EXECUTED, EXECUTED_SUCCESSFULLY };
 }
 class SourceMapOperator : public std::enable_shared_from_this<SourceMapOperator> {
 public:
-    SourceMapOperator(const std::string bundleName, bool isModular, bool hasFile)
-        : bundleName_(bundleName), isModular_(isModular), hasFile_(hasFile), initStatus_(NOT_EXECUTED) {}
+    SourceMapOperator(const std::string bundleName)
+        : bundleName_(bundleName), initStatus_(NOT_EXECUTED) {}
 
     ~SourceMapOperator() = default;
 
@@ -45,7 +45,7 @@ public:
                 sourceMapOperator->sourceMapObj_->GetHapPath(sourceMapOperator->bundleName_, hapList);
                 for (auto &hapInfo : hapList) {
                     if (!hapInfo.empty()) {
-                        sourceMapOperator->sourceMapObj_->Init(sourceMapOperator->isModular_, hapInfo);
+                        sourceMapOperator->sourceMapObj_->Init(sourceMapOperator->hasFile_, hapInfo);
                     }
                 }
                 sourceMapOperator->initStatus_ = EXECUTED_SUCCESSFULLY;
@@ -93,7 +93,6 @@ public:
     }
 private:
     const std::string bundleName_;
-    bool isModular_ = false;
     bool hasFile_ = false;
     std::shared_ptr<SourceMap> sourceMapObj_;
     InitStatus initStatus_;

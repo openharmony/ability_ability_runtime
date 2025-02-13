@@ -4158,9 +4158,15 @@ int32_t AbilityManagerProxy::IsValidMissionIds(
 
     constexpr int32_t MAX_COUNT = 20;
     int32_t num = static_cast<int32_t>(missionIds.size() > MAX_COUNT ? MAX_COUNT : missionIds.size());
-    data.WriteInt32(num);
+    if (!data.WriteInt32(num)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write num fail");
+        return INNER_ERR;
+    }
     for (auto i = 0; i < num; ++i) {
-        data.WriteInt32(missionIds.at(i));
+        if (!data.WriteInt32(missionIds.at(i))) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write missionId fail");
+            return INNER_ERR;
+        }
     }
 
     auto error = SendRequest(AbilityManagerInterfaceCode::QUERY_MISSION_VAILD, data, reply, option);
@@ -6052,6 +6058,68 @@ int32_t AbilityManagerProxy::StartSelfUIAbility(const Want &want)
         return error;
     }
     return reply.ReadInt32();
+}
+
+void AbilityManagerProxy::PrepareTerminateAbilityDone(const sptr<IRemoteObject> &token, bool isTerminate)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token fail");
+        return;
+    }
+    if (token) {
+        if (!data.WriteBool(true) || !data.WriteRemoteObject(token)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+            return;
+        }
+    } else {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null token");
+        if (!data.WriteBool(false)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write fail");
+            return;
+        }
+    }
+    if (!data.WriteBool(isTerminate)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "weite isTerminate fail");
+        return;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::PREPARE_TERMINATE_ABILITY_DONE, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+    }
+}
+
+void AbilityManagerProxy::KillProcessWithPrepareTerminateDone(const std::string &moduleName,
+    int32_t prepareTermination, bool isExist)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token fail");
+        return;
+    }
+    if (!data.WriteString(moduleName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "weite moduleName fail");
+        return;
+    }
+    if (!data.WriteInt32(prepareTermination)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "weite prepareTermination fail");
+        return;
+    }
+    if (!data.WriteBool(isExist)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "weite isExist fail");
+        return;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::KILL_PROCESS_WITH_PREPARE_TERMINATE_DONE,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+    }
 }
 } // namespace AAFwk
 } // namespace OHOS

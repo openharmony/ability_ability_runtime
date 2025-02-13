@@ -34,7 +34,6 @@ namespace {
 #ifdef SUPPORT_GRAPHICS
 constexpr static char ABILITY_NAME[] = "UIAbility";
 #endif
-const int32_t PREPARE_TO_TERMINATE_TIMEOUT_MILLISECONDS = 3000;
 }
 UIAbilityThread::UIAbilityThread() : abilityImpl_(nullptr), currentAbility_(nullptr) {}
 
@@ -371,20 +370,14 @@ void UIAbilityThread::ScheduleShareData(const int32_t &uniqueId)
 
 bool UIAbilityThread::SchedulePrepareTerminateAbility()
 {
-    if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
-        return true;
-    }
     if (abilityHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityHandler_");
         return false;
     }
     if (getpid() == gettid()) {
-        bool ret = abilityImpl_->PrepareTerminateAbility();
-        TAG_LOGI(AAFwkTag::UIABILITY, "ret: %{public}d", ret);
-        return ret;
+        TAG_LOGE(AAFwkTag::UIABILITY, "in app main thread");
+        return HandlePrepareTermianteAbility();
     }
-    isPrepareTerminateAbilityDone_.store(false);
     wptr<UIAbilityThread> weak = this;
     auto task = [weak]() {
         TAG_LOGI(AAFwkTag::UIABILITY, "prepare terminate task");
@@ -400,21 +393,36 @@ bool UIAbilityThread::SchedulePrepareTerminateAbility()
         TAG_LOGE(AAFwkTag::UIABILITY, "postTask error");
         return false;
     }
+    return false;
+}
 
-    std::unique_lock<std::mutex> lock(mutex_);
-    auto condition = [weak] {
+bool UIAbilityThread::HandlePrepareTermianteAbility()
+{
+    wptr<UIAbilityThread> weak = this;
+    auto callback = [weak, token = token_] (bool prepareTermination) {
         auto abilityThread = weak.promote();
         if (abilityThread == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityThread");
-            return false;
+            TAG_LOGE(AAFwkTag::UIABILITY, "null AbilityThread");
+            return;
         }
-        return abilityThread->isPrepareTerminateAbilityDone_.load();
+        TAG_LOGI(AAFwkTag::UIABILITY, "in callback, prepareTermination=%{public}d", prepareTermination);
+        AbilityManagerClient::GetInstance()->PrepareTerminateAbilityDone(token, prepareTermination);
     };
-    if (!cv_.wait_for(lock, std::chrono::milliseconds(PREPARE_TO_TERMINATE_TIMEOUT_MILLISECONDS), condition)) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "wait timeout");
+    if (abilityImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
+        return true;
     }
-    TAG_LOGI(AAFwkTag::UIABILITY, "ret: %{public}d", isPrepareTerminate_);
-    return isPrepareTerminate_;
+    bool isAsync = false;
+    bool isSuccess = abilityImpl_->PrepareTerminateAbility(callback, isAsync);
+    if (!isSuccess) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "PrepareTerminateAbility failed");
+        callback(false);
+        return false;
+    }
+    if (!isAsync) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "sync call");
+    }
+    return true;
 }
 
 void UIAbilityThread::SendResult(int requestCode, int resultCode, const Want &want)
@@ -646,18 +654,6 @@ void UIAbilityThread::OnExecuteIntent(const Want &want)
     abilityHandler_->PostTask(task, "UIAbilityThread:OnExecuteIntent");
 }
 
-void UIAbilityThread::HandlePrepareTermianteAbility()
-{
-    std::unique_lock<std::mutex> lock(mutex_);
-    if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
-        return;
-    }
-    isPrepareTerminate_ = abilityImpl_->PrepareTerminateAbility();
-    TAG_LOGI(AAFwkTag::UIABILITY, "end ret: %{public}d", isPrepareTerminate_);
-    isPrepareTerminateAbilityDone_.store(true);
-    cv_.notify_all();
-}
 #ifdef SUPPORT_SCREEN
 int UIAbilityThread::CreateModalUIExtension(const Want &want)
 {

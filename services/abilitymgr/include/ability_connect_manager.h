@@ -267,6 +267,8 @@ public:
      */
     int32_t GetActiveUIExtensionList(const std::string &bundleName, std::vector<std::string> &extensionList);
 
+    void OnLoadAbilityFailed(std::shared_ptr<AbilityRecord> abilityRecord);
+
     /**
      * OnAbilityDied.
      *
@@ -334,6 +336,11 @@ public:
 
     int32_t UpdateKeepAliveEnableState(const std::string &bundleName, const std::string &moduleName,
         const std::string &mainElement, bool updateEnable);
+
+    /**
+     * Handle extension disconnect task.
+     */
+    void HandleExtensionDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t CONNECT_TIMEOUT_MSG = 1;
@@ -457,6 +464,7 @@ private:
         std::shared_ptr<ConnectionRecord> &connectRecord);
     void HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo);
     void TerminateOrCacheAbility(std::shared_ptr<AbilityRecord> abilityRecord);
+    void CancelLoadTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord);
 
     /**
      * IsAbilityConnected.
@@ -492,6 +500,8 @@ private:
      */
     void GetOrCreateServiceRecord(const AbilityRequest &abilityRequest, const bool isCreatedByConnect,
         std::shared_ptr<AbilityRecord> &targetAbilityRecord, bool &isLoadedAbility);
+
+    void RemoveServiceFromMapSafe(const std::string &serviceKey);
 
     /**
      * GetConnectRecordListFromMap.
@@ -562,6 +572,7 @@ private:
     void ProcessPreload(const std::shared_ptr<AbilityRecord> &record) const;
 
     void HandleInactiveTimeout(const std::shared_ptr<AbilityRecord> &ability);
+    void CleanActivatingTimeoutAbility(std::shared_ptr<AbilityRecord> abilityRecord);
     void MoveToTerminatingMap(const std::shared_ptr<AbilityRecord>& abilityRecord);
 
     void DoForegroundUIExtension(std::shared_ptr<AbilityRecord> abilityRecord, const AbilityRequest &abilityRequest);
@@ -591,11 +602,6 @@ private:
      * Remove the extension's disconnect task.
      */
     void RemoveExtensionDelayDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
-
-    /**
-     * Handle extension disconnect task.
-     */
-    void HandleExtensionDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
 
 private:
     void TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord);

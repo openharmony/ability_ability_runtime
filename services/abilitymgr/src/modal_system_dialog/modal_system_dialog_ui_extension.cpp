@@ -66,10 +66,18 @@ void ModalSystemDialogUIExtension::DialogConnection::OnAbilityConnectDone(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE);
-    data.WriteString16(u"parameters");
-    data.WriteString16(Str8ToStr16(commandStr_));
-
+    if (!data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write MESSAGE_PARCEL_KEY_SIZE fail");
+        return;
+    }
+    if (!data.WriteString16(u"parameters")) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write parameters fail");
+        return;
+    }
+    if (!data.WriteString16(Str8ToStr16(commandStr_))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write commandStr_ fail");
+        return;
+    }
     auto ret = remote->SendRequest(AAFwk::IAbilityConnection::ON_CONNECT_SYSTEM_COMMON_DIALOG, data, reply, option);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "show dialog failed");

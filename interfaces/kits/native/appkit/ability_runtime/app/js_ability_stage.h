@@ -48,7 +48,9 @@ public:
 
     void OnDestroy() const override;
 
-    bool OnPrepareTerminate(int &prepareTermination) const override;
+    bool OnPrepareTerminate(
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
+        bool &isAsync) const override;
 
     std::string OnAcceptWant(const AAFwk::Want &want) override;
 
@@ -62,7 +64,7 @@ public:
         const std::shared_ptr<Context> &stageContext) override;
 
 private:
-    napi_value CallObjectMethod(const char* name, napi_value const * argv = nullptr, size_t argc = 0);
+    napi_value CallObjectMethod(const char* name, napi_value const * argv = nullptr, size_t argc = 0) const;
 
     std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> CreateStageProperty() const;
 
@@ -76,6 +78,13 @@ private:
     std::unique_ptr<NativeReference> LoadJsSrcEntry(const std::string &srcEntry);
 
     bool LoadJsStartupConfig(const std::string &srcEntry);
+
+    bool CallOnPrepareTerminate(napi_env env,
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo) const;
+
+    bool CallOnPrepareTerminateAsync(napi_env env,
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
+        bool &isAsync) const;
 
     int32_t RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo);
 

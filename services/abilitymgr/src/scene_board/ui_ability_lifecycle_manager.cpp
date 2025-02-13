@@ -314,12 +314,13 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
     const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto&& abilityRecord = Token::GetAbilityRecordByToken(token);
+    int32_t processAttachResult = DoProcessAttachment(abilityRecord);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     if (!IsContainsAbilityInner(token)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "Not in running list");
         return ERR_INVALID_VALUE;
     }
-    auto&& abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "lifecycle name: %{public}s", abilityRecord->GetAbilityInfo().name.c_str());
     SetLastExitReason(abilityRecord);
@@ -331,7 +332,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
     FreezeUtil::GetInstance().DeleteLifecycleEvent(token);
 
     abilityRecord->SetScheduler(scheduler);
-    if (DoProcessAttachment(abilityRecord) != ERR_OK) {
+    if (processAttachResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "process attachment failed, close ability");
         TerminateSession(abilityRecord);
         return ERR_INVALID_VALUE;
@@ -463,7 +464,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
         return StartWithPersistentIdByDistributed(abilityRequest, persistentId);
     }
 
-    auto abilityInfo = abilityRequest.abilityInfo;
+    const auto &abilityInfo = abilityRequest.abilityInfo;
     bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
     auto requestId = GetRequestId();
     // When 'processMode' is set to new process mode, the priority is higher than 'isolationProcess'.
@@ -472,12 +473,12 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     if (!isNewProcessMode && abilityInfo.isolationProcess && AppUtils::GetInstance().IsStartSpecifiedProcess()
         && isUIAbility) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess");
-        specifiedRequestMap_.emplace(requestId, abilityRequest);
-        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedProcess(abilityRequest.want, abilityInfo,
-            requestId);
+        auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
+        specifiedRequest->isSpecifiedProcess = true;
+        AddSpecifiedRequest(specifiedRequest);
         return ERR_OK;
     }
-    auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
+    auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified) {
         auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
         specifiedRequest->preCreateProcessName = true;
@@ -486,7 +487,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     }
 
     auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SINGLETON && (callerAbility == nullptr ||
+    if (abilityInfo.launchMode == AppExecFwk::LaunchMode::SINGLETON && (callerAbility == nullptr ||
         callerAbility->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD >= API16)) {
         if (HasAbilityRequest(abilityRequest)) {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "multi start request");
@@ -521,7 +522,7 @@ int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const Ab
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    auto abilityInfo = abilityRequest.abilityInfo;
+    const auto &abilityInfo = abilityRequest.abilityInfo;
     bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
     // When 'processMode' is set to new process mode, the priority is higher than 'isolationProcess'.
     bool isNewProcessMode = abilityRequest.processOptions &&
@@ -529,13 +530,12 @@ int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const Ab
     if (!isNewProcessMode && abilityInfo.isolationProcess && AppUtils::GetInstance().IsStartSpecifiedProcess()
         && isUIAbility) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess");
-        auto requestId = GetRequestId();
-        specifiedRequestMap_.emplace(requestId, abilityRequest);
-        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedProcess(abilityRequest.want, abilityInfo,
-            requestId);
+        auto specifiedRequest = std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest);
+        specifiedRequest->isSpecifiedProcess = true;
+        AddSpecifiedRequest(specifiedRequest);
         return ERR_OK;
     }
-    auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
+    auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified) {
         auto specifiedRequest = std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest);
         specifiedRequest->preCreateProcessName = true;
@@ -1867,16 +1867,10 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnAcceptWantResponse, %{public}d", requestId);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    std::lock_guard guard(sessionLock_);
     auto request = GetSpecifiedRequest(requestId);
     if (request == nullptr) {
-        auto it = specifiedRequestMap_.find(requestId);
-        if (it == specifiedRequestMap_.end()) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "no request");
-            return;
-        }
-        HandleLegacyAcceptWantDone(it->second, requestId, flag, want);
-        specifiedRequestMap_.erase(it);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "no request");
         return;
     }
     auto nextRequest = PopAndGetNextSpecified(requestId);
@@ -1935,7 +1929,6 @@ void UIAbilityLifecycleManager::OnStartSpecifiedAbilityTimeoutResponse(const AAF
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "SpecifiedAbilityTimeout %{public}d", requestId);
     std::lock_guard lock(sessionLock_);
-
     auto curRequest = GetSpecifiedRequest(requestId);
     if (curRequest && curRequest->persistentId != 0) {
         auto iter = sessionAbilityMap_.find(curRequest->persistentId);
@@ -1955,23 +1948,30 @@ void UIAbilityLifecycleManager::OnStartSpecifiedAbilityTimeoutResponse(const AAF
 void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const AAFwk::Want &want, const std::string &flag,
     int32_t requestId)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessResponse, %{public}d, %{public}s",
+        requestId, want.GetElement().GetURI().c_str());
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    auto it = specifiedRequestMap_.find(requestId);
-    if (it == specifiedRequestMap_.end()) {
+    std::lock_guard guard(sessionLock_);
+    auto request = GetSpecifiedRequest(requestId);
+    if (request == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "no request");
         return;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s", want.GetElement().GetURI().c_str());
-    it->second.want.SetParam(PARAM_SPECIFIED_PROCESS_FLAG, flag);
-    AbilityRequest abilityRequest = it->second;
-    auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
-    if (isSpecified) {
-        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(
-            abilityRequest.want, abilityRequest.abilityInfo, requestId);
+
+    auto &abilityRequest = request->abilityRequest;
+    abilityRequest.want.SetParam(PARAM_SPECIFIED_PROCESS_FLAG, flag);
+    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
+        request->isSpecifiedProcess = false;
+        StartSpecifiedRequest(*request);
         return;
     }
-    specifiedRequestMap_.erase(it);
+    auto nextRequest = PopAndGetNextSpecified(requestId);
+    if (nextRequest) {
+        TaskHandlerWrap::GetFfrtHandler()->SubmitTask([nextRequest, pThis = shared_from_this()]() {
+            std::lock_guard lock(pThis->sessionLock_);
+            pThis->StartSpecifiedRequest(*nextRequest);
+            });
+    }
     auto sessionInfo = CreateSessionInfo(abilityRequest);
     sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->persistentId = GetPersistentIdByAbilityRequest(abilityRequest, sessionInfo->reuse);
@@ -1985,13 +1985,17 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const AAFwk::Wan
 
 void UIAbilityLifecycleManager::OnStartSpecifiedProcessTimeoutResponse(const AAFwk::Want &want, int32_t requestId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    specifiedRequestMap_.erase(requestId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessTimeoutResponse %{public}d", requestId);
+    std::lock_guard guard(sessionLock_);
+    auto nextRequest = PopAndGetNextSpecified(requestId);
+    if (nextRequest) {
+        StartSpecifiedRequest(*nextRequest);
+    }
 }
 
 void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     AbilityRequest abilityRequest;
     int result = DelayedSingleton<AbilityManagerService>::GetInstance()->GenerateAbilityRequest(
@@ -2322,9 +2326,10 @@ void UIAbilityLifecycleManager::SetLastExitReason(std::shared_ptr<AbilityRecord>
     }
 }
 
-bool UIAbilityLifecycleManager::PrepareTerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
+bool UIAbilityLifecycleManager::PrepareTerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    bool isSCBCall)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbility");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null ability record");
@@ -2335,20 +2340,15 @@ bool UIAbilityLifecycleManager::PrepareTerminateAbility(const std::shared_ptr<Ab
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Not support prepare terminate.");
         return false;
     }
-    // execute onPrepareToTerminate until timeout
-    auto promise = std::make_shared<std::promise<bool>>();
-    auto future = promise->get_future();
-    auto task = [promise, abilityRecord]() {
-        promise->set_value(abilityRecord->PrepareTerminateAbility());
-    };
-    ffrt::submit(task);
-    std::future_status status = future.wait_for(std::chrono::milliseconds(
-        GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME));
-    if (status == std::future_status::timeout) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareToTerminate timeout");
-        return false;
-    }
-    return future.get();
+    return abilityRecord->PrepareTerminateAbility(isSCBCall);
+}
+
+void UIAbilityLifecycleManager::PrepareTerminateAbilityDone(std::shared_ptr<AbilityRecord> abilityRecord,
+    bool isTerminate)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbilityDone");
+    CHECK_POINTER(abilityRecord);
+    abilityRecord->PrepareTerminateAbilityDone(isTerminate);
 }
 
 bool UIAbilityLifecycleManager::CheckPrepareTerminateEnable(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -2736,6 +2736,13 @@ bool UIAbilityLifecycleManager::IsInStatusBar(uint32_t accessTokenId, bool isMul
     return statusBarDelegateManager->IsInStatusBar(accessTokenId, isMultiInstance);
 }
 
+bool UIAbilityLifecycleManager::IsSupportStatusBar()
+{
+    auto statusBarDelegateManager = GetStatusBarDelegateManager();
+    CHECK_POINTER_AND_RETURN(statusBarDelegateManager, false);
+    return statusBarDelegateManager->IsSupportStatusBar();
+}
+
 int32_t UIAbilityLifecycleManager::DoProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     auto statusBarDelegateManager = GetStatusBarDelegateManager();
@@ -2750,55 +2757,89 @@ int32_t UIAbilityLifecycleManager::DoCallerProcessAttachment(std::shared_ptr<Abi
     return statusBarDelegateManager->DoCallerProcessAttachment(abilityRecord);
 }
 
-std::vector<sptr<IRemoteObject>> UIAbilityLifecycleManager::PrepareTerminateAppAndGetRemaining(
-    int32_t pid, std::vector<sptr<IRemoteObject>> tokens)
+bool UIAbilityLifecycleManager::CheckPrepareTerminateTokens(const std::vector<sptr<IRemoteObject>> &tokens,
+    uint32_t &tokenId, std::map<std::string, std::vector<sptr<IRemoteObject>>> &tokensPerModuleName)
 {
     if (!AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not supported device");
+        return false;
+    }
+    if (tokens.empty()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "empty tokens");
+        return false;
+    }
+    for (auto token: tokens) {
+        auto abilityRecord = Token::GetAbilityRecordByToken(token);
+        if (abilityRecord == nullptr) {
+            continue;
+        }
+        tokenId = abilityRecord->GetApplicationInfo().accessTokenId;
+        auto moduleName = abilityRecord->GetAbilityInfo().moduleName;
+        if (tokensPerModuleName.find(moduleName) == tokensPerModuleName.end()) {
+            tokensPerModuleName[moduleName] = {};
+        }
+        tokensPerModuleName[moduleName].push_back(token);
+    }
+    if (tokenId == 0 || !AAFwk::PermissionVerification::GetInstance()->VerifyPrepareTerminatePermission(tokenId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid tokenId or no permission ohos.permission.PREPARE_APP_TERMINATE");
+        return false;
+    }
+    return true;
+}
+
+std::vector<sptr<IRemoteObject>> UIAbilityLifecycleManager::PrepareTerminateAppAndGetRemaining(
+    int32_t pid, const std::vector<sptr<IRemoteObject>> &tokens)
+{
+    uint32_t tokenId = 0;
+    std::map<std::string, std::vector<sptr<IRemoteObject>>> tokensPerModuleName;
+    if (!CheckPrepareTerminateTokens(tokens, tokenId, tokensPerModuleName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckPrepareTerminateTokens failed");
         return tokens;
     }
     std::vector<sptr<IRemoteObject>> remainingTokens;
-    for (const auto& token: tokens) {
-        auto abilityRecord = Token::GetAbilityRecordByToken(token);
-        if (!CheckPrepareTerminateEnable(abilityRecord)) {
-            remainingTokens.emplace_back(token);
+    for (const auto& [moduleName, _tokens] : tokensPerModuleName) {
+        // execute onPrepareTerminate until timeout
+        std::unique_lock<std::mutex> lock(isTryPrepareTerminateByPidsDoneMutex_);
+        auto iter = std::find_if(prepareTerminateByPidRecords_.begin(), prepareTerminateByPidRecords_.end(),
+            [pid, _moduleName = moduleName](const std::shared_ptr<PrepareTerminateByPidRecord> &record) {
+            return record->pid_ == pid && record->moduleName_ == _moduleName;
+        });
+        if (iter != prepareTerminateByPidRecords_.end()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "record with (pid=%{public}d,moduleName=%{public}s) already exists",
+                pid, moduleName.c_str());
             continue;
         }
-        auto prepareTermination = std::make_shared<int32_t>(0);
-        auto isExist = std::make_shared<bool>(false);
-        // execute onPrepareTerminate until timeout
-        auto promise = std::make_shared<std::promise<bool>>();
-        auto future = promise->get_future();
-        auto task = [promise, pid, prepareTermination, isExist]() {
-            DelayedSingleton<AppScheduler>::GetInstance()->PrepareTerminateApp(pid, *prepareTermination, *isExist);
-            promise->set_value(true);
+        std::shared_ptr<PrepareTerminateByPidRecord> record = std::make_shared<PrepareTerminateByPidRecord>(
+            pid, moduleName, false, 0, false);
+        prepareTerminateByPidRecords_.push_back(record);
+        auto condition = [record] {
+            if (record == nullptr) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "null record");
+                return false;
+            }
+            return record->isTryPrepareTerminateByPidsDone_.load();
+        };
+        auto task = [pid, _moduleName = moduleName]() {
+            DelayedSingleton<AppScheduler>::GetInstance()->PrepareTerminateApp(pid, _moduleName);
         };
         ffrt::submit(task);
-        std::future_status status = future.wait_for(std::chrono::milliseconds(
-            GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME));
-        if (status == std::future_status::timeout) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareTermination timeout");
-            remainingTokens.emplace_back(token);
-            continue;
-        }
-        if (!future.get() || prepareTermination == nullptr || isExist == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "PrepareTerminateApp error");
-            remainingTokens.emplace_back(token);
-            continue;
-        }
-        if (!*isExist) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareTermination is not exist");
-            remainingTokens.emplace_back(token);
-            continue;
-        }
-        if (static_cast<AppExecFwk::PrepareTermination>(*prepareTermination)
-            == AppExecFwk::PrepareTermination::CANCEL) {
+        if (!isTryPrepareTerminateByPidsCv_.wait_for(lock,
+            std::chrono::milliseconds(GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME), condition)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "wait timeout");
+            remainingTokens.insert(remainingTokens.end(), _tokens.begin(), _tokens.end());
+        } else if (!record->isExist_) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareTermination/onPrepareTerminationAsync not exist");
+            remainingTokens.insert(remainingTokens.end(), _tokens.begin(), _tokens.end());
+        } else if (static_cast<AppExecFwk::PrepareTermination>(record->prepareTermination_) ==
+            AppExecFwk::PrepareTermination::CANCEL) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "PrepareTerminate cancel");
-            continue;
+        } else {
+            // Terminate immediately by default
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "PrepareTerminate immediately");
+            for (auto token: _tokens) {
+                TerminateSession(Token::GetAbilityRecordByToken(token));
+            }
         }
-        // Terminate immediately by default
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "PrepareTerminate immediately");
-        TerminateSession(Token::GetAbilityRecordByToken(token));
     }
     return remainingTokens;
 }
@@ -2815,7 +2856,7 @@ int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<i
             DelayedSingleton<AppScheduler>::GetInstance()->GetAbilityRecordsByProcessID(pid, tokens));
         for (const auto &token : PrepareTerminateAppAndGetRemaining(pid, tokens)) {
             auto abilityRecord = Token::GetAbilityRecordByToken(token);
-            if (PrepareTerminateAbility(abilityRecord)) {
+            if (PrepareTerminateAbility(abilityRecord, true)) {
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "terminate blocked");
                 continue;
             }
@@ -2827,6 +2868,33 @@ int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<i
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "end.");
     return ERR_OK;
+}
+
+void UIAbilityLifecycleManager::TryPrepareTerminateByPidsDone(const std::string &moduleName,
+    int32_t prepareTermination, bool isExist)
+{
+    auto pid = IPCSkeleton::GetCallingPid();
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call TryPrepareTerminateByPidsDone, pid=%{public}d", pid);
+    std::unique_lock<std::mutex> lock(isTryPrepareTerminateByPidsDoneMutex_);
+    auto iter = std::find_if(prepareTerminateByPidRecords_.begin(), prepareTerminateByPidRecords_.end(),
+        [pid, _moduleName = moduleName](const std::shared_ptr<PrepareTerminateByPidRecord> &record) {
+        return record->pid_ == pid && record->moduleName_ == _moduleName;
+    });
+    if (iter == prepareTerminateByPidRecords_.end()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "record with (pid=%{public}d,moduleName=%{public}s) not exist",
+            pid, moduleName.c_str());
+        return;
+    }
+    if ((*iter) == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "record is nullptr");
+        prepareTerminateByPidRecords_.erase(iter);
+        return;
+    }
+    (*iter)->prepareTermination_ = prepareTermination;
+    (*iter)->isExist_ = isExist;
+    (*iter)->isTryPrepareTerminateByPidsDone_.store(true);
+    isTryPrepareTerminateByPidsCv_.notify_one();
+    prepareTerminateByPidRecords_.erase(iter);
 }
 
 void UIAbilityLifecycleManager::BatchCloseUIAbility(
@@ -2863,9 +2931,12 @@ void UIAbilityLifecycleManager::TerminateSession(std::shared_ptr<AbilityRecord> 
 int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    auto abilityRecord = GetAbilityRecordByToken(token);
-    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    std::shared_ptr<AbilityRecord> abilityRecord;
+    {
+        std::lock_guard<ffrt::mutex> guard(sessionLock_);
+        abilityRecord = GetAbilityRecordByToken(token);
+        CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    }
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
     auto tokenID = abilityRecord->GetApplicationInfo().accessTokenId;
     if (callingTokenId != tokenID) {
@@ -3001,7 +3072,7 @@ void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(int32_t sessionId) con
 int UIAbilityLifecycleManager::StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest,
     int32_t persistentId)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartWithPersistentIdByDistributed, called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartWithPersistentIdByDistributed, called");
     auto sessionInfo = CreateSessionInfo(abilityRequest);
     sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->persistentId = persistentId;
@@ -3139,22 +3210,43 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest: %{public}d", specifiedRequest.requestId);
     auto &request = specifiedRequest.abilityRequest;
-    if (specifiedRequest.preCreateProcessName) {
-        PreCreateProcessName(request);
-    }
-    if (!HasAppRecord(request)) {
-        specifiedRequest.isCold = true;
-        auto sessionInfo = CreateSessionInfo(request);
-        sessionInfo->requestCode = request.requestCode;
-        sessionInfo->userId = userId_;
-        sessionInfo->requestId = specifiedRequest.requestId;
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest cold");
-        NotifySCBPendingActivation(sessionInfo, request);
-        sessionInfo->want.RemoveAllFd();
+
+    if (specifiedRequest.isSpecifiedProcess) {
+        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedProcess(request.want,
+            request.abilityInfo, specifiedRequest.requestId);
+    } else {
+        if (specifiedRequest.preCreateProcessName) {
+            PreCreateProcessName(request);
+        }
+
+        if (!IsSpecifiedModuleLoaded(request)) {
+            specifiedRequest.isCold = true;
+            auto sessionInfo = CreateSessionInfo(request);
+            sessionInfo->requestCode = request.requestCode;
+            sessionInfo->userId = userId_;
+            sessionInfo->requestId = specifiedRequest.requestId;
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest cold");
+            NotifySCBPendingActivation(sessionInfo, request);
+            sessionInfo->want.RemoveAllFd();
+        }
+        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(request.want,
+            request.abilityInfo, specifiedRequest.requestId);
     }
 
-    DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(request.want,
-        request.abilityInfo, specifiedRequest.requestId);
+    auto timeoutTask = [requestId = specifiedRequest.requestId, wThis = weak_from_this()]() {
+        auto pThis = wThis.lock();
+        if (pThis) {
+            std::lock_guard guard(pThis->sessionLock_);
+            auto nextRequest = pThis->PopAndGetNextSpecified(requestId);
+            if (nextRequest) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "Specified timeout: %{public}d", requestId);
+                pThis->StartSpecifiedRequest(*nextRequest);
+            }
+        }
+    };
+    TaskHandlerWrap::GetFfrtHandler()->SubmitTaskJust(timeoutTask, "SpecifiedFinalTimeout",
+        AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+        GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE);
 }
 
 std::shared_ptr<SpecifiedRequest> UIAbilityLifecycleManager::PopAndGetNextSpecified(int32_t requestId)
@@ -3172,11 +3264,11 @@ std::shared_ptr<SpecifiedRequest> UIAbilityLifecycleManager::PopAndGetNextSpecif
             }
         }
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "unknown request: %{}d", requestId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "unknown request: %{public}d", requestId);
     return nullptr;
 }
 
-bool UIAbilityLifecycleManager::HasAppRecord(const AbilityRequest &abilityRequest)
+bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &abilityRequest)
 {
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
@@ -3184,7 +3276,8 @@ bool UIAbilityLifecycleManager::HasAppRecord(const AbilityRequest &abilityReques
         return false;
     }
     bool appExist = false;
-    auto ret = IN_PROCESS_CALL(appMgr->HasAppRecord(abilityRequest.want, abilityRequest.abilityInfo, appExist));
+    auto ret = IN_PROCESS_CALL(appMgr->IsSpecifiedModuleLoaded(abilityRequest.want,
+        abilityRequest.abilityInfo, appExist));
     return ret == ERR_OK && appExist;
 }
 
@@ -3215,6 +3308,7 @@ bool UIAbilityLifecycleManager::HandleStartSpecifiedCold(AbilityRequest &ability
 bool UIAbilityLifecycleManager::HandleColdAcceptWantDone(const AAFwk::Want &want, const std::string &flag,
     const SpecifiedRequest &specifiedRequest)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto iter = sessionAbilityMap_.find(specifiedRequest.persistentId);
     if (iter == sessionAbilityMap_.end() || !(iter->second) ||
         !(iter->second->GetSpecifiedFlag().empty())) {

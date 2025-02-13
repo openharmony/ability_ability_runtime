@@ -1015,7 +1015,7 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     UErrorCode status = U_ZERO_ERROR;
-    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLocale(), status);
+    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetEffectiveLanguage(), status);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     resConfig->SetLocaleInfo(locale);
     AppExecFwk::Configuration cfg;
@@ -1290,14 +1290,60 @@ void AbilityRecord::BackgroundAbility(const Closure &task)
     isLaunching_ = false;
 }
 
-bool AbilityRecord::PrepareTerminateAbility()
+bool AbilityRecord::PrepareTerminateAbility(bool isSCBCall)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     if (lifecycleDeal_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null lifecycleDeal_");
         return false;
     }
-    return lifecycleDeal_->PrepareTerminateAbility();
+    if (!isSCBCall) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "triggered by user clicking window x");
+        return lifecycleDeal_->PrepareTerminateAbility();
+    }
+    // execute onPrepareToTerminate until timeout
+    std::unique_lock<std::mutex> lock(isPrepareTerminateAbilityMutex_);
+    isPrepareTerminateAbilityCalled_.store(true);
+    isPrepareTerminate_ = false;
+    isPrepareTerminateAbilityDone_.store(false);
+    auto condition = [weak = weak_from_this()] {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null self");
+            return false;
+        }
+        return self->isPrepareTerminateAbilityDone_.load();
+    };
+    auto task = [weak = weak_from_this()]() {
+        auto self = weak.lock();
+        if (self == nullptr || !self->lifecycleDeal_ || !self->lifecycleDeal_->PrepareTerminateAbility()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "PrepareTerminateAbility error");
+            self->isPrepareTerminateAbilityDone_.store(true);
+            self->isPrepareTerminateAbilityCalled_.store(false);
+            self->isPrepareTerminateAbilityCv_.notify_all();
+        }
+    };
+    ffrt::submit(task);
+    if (!isPrepareTerminateAbilityCv_.wait_for(lock,
+        std::chrono::milliseconds(GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME), condition)) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "wait timeout");
+        return false;
+    }
+    return isPrepareTerminate_;
+}
+
+void AbilityRecord::PrepareTerminateAbilityDone(bool isTerminate)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbilityDone");
+    std::unique_lock<std::mutex> lock(isPrepareTerminateAbilityMutex_);
+    if (!isPrepareTerminateAbilityCalled_.load()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "prepare terminate not called");
+        return;
+    }
+    isPrepareTerminate_ = isTerminate;
+    isPrepareTerminateAbilityDone_.store(true);
+    isPrepareTerminateAbilityCalled_.store(false);
+    isPrepareTerminateAbilityCv_.notify_one();
 }
 
 int AbilityRecord::TerminateAbility()
@@ -1629,8 +1675,11 @@ void AbilityRecord::Inactivate()
     CHECK_POINTER(lifecycleDeal_);
 
     if (!IsDebug()) {
-        int inactiveTimeout =
-            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * INACTIVE_TIMEOUT_MULTIPLE;
+        bool useOldMultiple = abilityInfo_.name == AbilityConfig::LAUNCHER_ABILITY_NAME ||
+            abilityInfo_.name == AbilityConfig::CALLUI_ABILITY_NAME;
+        auto timeoutMultiple = useOldMultiple ? INACTIVE_TIMEOUT_MULTIPLE : INACTIVE_TIMEOUT_MULTIPLE_NEW;
+        auto inactiveTimeout =
+            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * timeoutMultiple;
         SendEvent(AbilityManagerService::INACTIVE_TIMEOUT_MSG, inactiveTimeout);
     }
 
@@ -2006,10 +2055,22 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
         TAG_LOGE(AAFwkTag::ABILITYMGR, "writeParcelable failed");
         return;
     }
-    data.WriteInt32(callerUid);
-    data.WriteInt32(requestCode);
-    data.WriteUint32(accessToken);
-    data.WriteInt32(resultCode);
+    if (!data.WriteInt32(callerUid)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerUid failed");
+        return;
+    }
+    if (!data.WriteInt32(requestCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write requestCode failed");
+        return;
+    }
+    if (!data.WriteUint32(accessToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write accessToken failed");
+        return;
+    }
+    if (!data.WriteInt32(resultCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write resultCode failed");
+        return;
+    }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     int result = callerToken->SendRequest(ISystemAbilityTokenCallback::SEND_RESULT, data, reply, option);

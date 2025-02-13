@@ -44,8 +44,14 @@ bool AbilityControllerProxy::AllowAbilityStart(const Want &want, const std::stri
     if (!WriteInterfaceToken(data)) {
         return true;
     }
-    data.WriteParcelable(&want);
-    data.WriteString(bundleName);
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "write want failed");
+        return true;
+    }
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "write bundleName failed");
+        return true;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IAbilityController::Message::TRANSACT_ON_ALLOW_ABILITY_START),
         data, reply, option);
@@ -64,7 +70,10 @@ bool AbilityControllerProxy::AllowAbilityBackground(const std::string &bundleNam
     if (!WriteInterfaceToken(data)) {
         return true;
     }
-    data.WriteString(bundleName);
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "write bundleName failed");
+        return true;
+    }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IAbilityController::Message::TRANSACT_ON_ALLOW_ABILITY_BACKGROUND),
         data, reply, option);

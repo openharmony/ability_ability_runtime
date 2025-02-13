@@ -96,11 +96,6 @@ void CjTestRunnerTest::SetUp()
     options_.preload = true;
     options_.lang = CJRuntime::Language::CJ;
     std::unique_ptr<CJRuntime> runtime = std::make_unique<cjMockRuntime>();
-    AppLibPathMap appLibPaths{};
-    std::vector<std::string> paths = {"/data/test/"};
-    appLibPaths.emplace("", paths);
-    CJRuntime::SetAppLibPath(appLibPaths);
-    runtime_ = runtime->Create(options_);
 }
 
 void CjTestRunnerTest::TearDown()
@@ -127,10 +122,11 @@ HWTEST_F(CjTestRunnerTest, CjTestRunnerTestCreate_Failed_RuntimeNull_001, TestSi
     }
     std::shared_ptr<AbilityDelegatorArgs> abilityArgs = std::make_shared<AbilityDelegatorArgs>(want);
 
-    std::unique_ptr<Runtime> runtime = static_cast<std::unique_ptr<Runtime>>(std::move(runtime_));
+    Runtime::Options options;
+    std::unique_ptr<Runtime> runtime = Runtime::Create(options);
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
         runtime,
         abilityArgs,
         true);
-    EXPECT_TRUE(runtime == nullptr);
+    EXPECT_TRUE(runtime != nullptr);
 }

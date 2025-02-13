@@ -442,9 +442,17 @@ public:
     /**
      * prepare terminate ability.
      *
+     * @param isSCBCall, if the call is from SCB.
      * @return Returns true on stop terminating; returns false on terminate.
      */
-    bool PrepareTerminateAbility();
+    bool PrepareTerminateAbility(bool isSCBCall);
+
+    /**
+     * prepare terminate ability done.
+     *
+     * @param isTerminate, the result of the onPrepareToTerminate/onPrepareToTerminateAsync.
+     */
+    void PrepareTerminateAbilityDone(bool isTerminate);
 
     /**
      * terminate ability.
@@ -1365,6 +1373,12 @@ private:
     ffrt::mutex lock_;
     ffrt::mutex connectWantLock_;
     std::mutex collaborateWantLock_;
+
+    std::mutex isPrepareTerminateAbilityMutex_;
+    std::condition_variable isPrepareTerminateAbilityCv_;
+    std::atomic_bool isPrepareTerminateAbilityCalled_ = false;
+    std::atomic_bool isPrepareTerminateAbilityDone_ = false;
+    bool isPrepareTerminate_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

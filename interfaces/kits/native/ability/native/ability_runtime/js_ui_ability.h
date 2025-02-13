@@ -182,6 +182,12 @@ public:
      */
     int32_t OnShare(WantParams &wantParams) override;
 
+    /**
+     * @brief Set the continueState of an application to window.
+     * @param state Indicates the continueState of an application.
+     */
+    void SetContinueState(int32_t state) override;
+
 #ifdef SUPPORT_SCREEN
 public:
     /**
@@ -244,9 +250,10 @@ public:
 
     /**
      * @brief Called when ability prepare terminate.
-     * @return Return true if ability need to stop terminating; return false if ability need to terminate.
+     * @param callbackInfo The callbackInfo is used when onPrepareToTerminateAsync is implemented.
+     * @param isAsync The returned flag indicates if onPrepareToTerminateAsync is implemented.
      */
-    bool OnPrepareTerminate() override;
+    void OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo, bool &isAsync) override;
 
     /**
      * @brief Get JsWindow Stage
@@ -324,6 +331,7 @@ private:
     bool CheckPromise(napi_value result);
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo);
+    bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo);
     std::unique_ptr<NativeReference> CreateAppWindowStage();
     std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     sptr<IRemoteObject> SetNewRuleFlagToCallee(napi_env env, napi_value remoteJsObj);

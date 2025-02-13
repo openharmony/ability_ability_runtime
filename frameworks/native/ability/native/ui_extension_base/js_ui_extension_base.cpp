@@ -748,7 +748,11 @@ sptr<Rosen::WindowOption> JsUIExtensionBase::CreateWindowOption(const sptr<AAFwk
     option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
     option->SetDensity(sessionInfo->density);
     option->SetIsDensityFollowHost(sessionInfo->isDensityFollowHost);
-
+    if (context_->isNotAllow != -1) {
+        bool isNotAllow = context_->isNotAllow == 1 ? true : false;
+        TAG_LOGD(AAFwkTag::UI_EXT, "isNotAllow: %{public}d", isNotAllow);
+        option->SetConstrainedModal(isNotAllow);
+    }
     return option;
 }
 
@@ -764,6 +768,7 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return false;
     }
+    std::shared_ptr<AAFwk::Want> sharedWant = std::make_shared<AAFwk::Want>(want);
     auto componentId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
         if (context_ == nullptr || context_->GetAbilityInfo() == nullptr) {
@@ -784,7 +789,8 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
             TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
             return false;
         }
-        if (!CallJsOnSessionCreate(want, sessionInfo, uiWindow, componentId)) {
+        uiWindow->UpdateExtensionConfig(sharedWant);
+        if (!CallJsOnSessionCreate(*sharedWant, sessionInfo, uiWindow, componentId)) {
             return false;
         }
         uiWindowMap_[componentId] = uiWindow;
@@ -793,6 +799,13 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
             context_->SetWindow(uiWindow);
         }
 #endif // SUPPORT_GRAPHICS
+    } else {
+        auto uiWindow = uiWindowMap_[componentId];
+        if (uiWindow == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
+            return false;
+        }
+        uiWindow->UpdateExtensionConfig(sharedWant);
     }
     return true;
 }

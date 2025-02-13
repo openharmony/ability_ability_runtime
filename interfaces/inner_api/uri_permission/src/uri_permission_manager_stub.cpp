@@ -23,53 +23,6 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 const int MAX_URI_COUNT = 500;
-constexpr size_t MAX_IPC_RAW_DATA_SIZE = 128 * 1024 * 1024;
-
-bool GetData(void *&buffer, size_t size, const void *data)
-{
-    if (data == nullptr) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "null data");
-        return false;
-    }
-    if (size == 0 || size > MAX_IPC_RAW_DATA_SIZE) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "size invalid: %{public}zu", size);
-        return false;
-    }
-    buffer = malloc(size);
-    if (buffer == nullptr) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "malloc buffer failed");
-        return false;
-    }
-    if (memcpy_s(buffer, size, data, size) != EOK) {
-        free(buffer);
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "memcpy failed");
-        return false;
-    }
-    return true;
-}
-
-bool ReadBatchUriByRawData(MessageParcel &data, std::vector<std::string> &uriVec)
-{
-    size_t dataSize = static_cast<size_t>(data.ReadInt32());
-    if (dataSize == 0) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "parcel no data");
-        return false;
-    }
-    
-    void *buffer = nullptr;
-    if (!GetData(buffer, dataSize, data.ReadRawData(dataSize))) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "read raw data failed: %{public}zu", dataSize);
-        return false;
-    }
-
-    MessageParcel tempParcel;
-    if (!tempParcel.ParseFrom(reinterpret_cast<uintptr_t>(buffer), dataSize)) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "failed to parseFrom");
-        return false;
-    }
-    tempParcel.ReadStringVector(&uriVec);
-    return true;
-}
 }
 
 int UriPermissionManagerStub::OnRemoteRequest(
@@ -124,7 +77,7 @@ int32_t UriPermissionManagerStub::ReadBatchUris(MessageParcel &data, std::vector
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
     std::vector<std::string> uris;
-    if (!ReadBatchUriByRawData(data, uris)) {
+    if (!data.ReadStringVector(&uris)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "read uris failed");
         return ERR_DEAD_OBJECT;
     }
@@ -228,7 +181,8 @@ int32_t UriPermissionManagerStub::HandleCheckUriAuthorization(MessageParcel &dat
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
     std::vector<std::string> uriVec;
-    if (!ReadBatchUriByRawData(data, uriVec)) {
+    if (!data.ReadStringVector(&uriVec)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "read uris failed");
         return ERR_DEAD_OBJECT;
     }
     auto flag = data.ReadUint32();

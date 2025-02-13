@@ -856,7 +856,7 @@ public:
      */
     void ScheduleAcceptWantDone(const int32_t recordId, const AAFwk::Want &want, const std::string &flag);
 
-    void SchedulePrepareTerminate(const pid_t pid, int32_t &prepareTermination, bool &isExist);
+    void SchedulePrepareTerminate(const pid_t pid, const std::string &moduleName);
 
     void ScheduleNewProcessRequestDone(const int32_t recordId, const AAFwk::Want &want, const std::string &flag);
 
@@ -1456,7 +1456,7 @@ public:
      */
     void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
 
-    bool HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
+    bool IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -1548,7 +1548,7 @@ private:
      *
      * @return
      */
-    void StartProcess(const std::string &appName, const std::string &processName, uint32_t startFlags,
+    int32_t StartProcess(const std::string &appName, const std::string &processName, uint32_t startFlags,
                       std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
                       const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag = true,
                       bool isPreload = false,  AppExecFwk::PreloadMode preloadMode = AppExecFwk::PreloadMode::PRE_MAKE,
@@ -1862,7 +1862,7 @@ private:
     int32_t CreateStartMsg(const CreateStartMsgParam &param, AppSpawnStartMsg &startMsg);
 
     void SetStartMsgStrictMode(AppSpawnStartMsg &startMsg, const CreateStartMsgParam &param);
-    
+
     void SetAppRunningRecordStrictMode(std::shared_ptr<AppRunningRecord> appRecord,
         std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
 
@@ -1894,6 +1894,8 @@ private:
     void NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord> appRecord);
 
     void NotifyLoadAbilityFailed(sptr<IRemoteObject> token);
+
+    void NotifyStartProcessFailed(sptr<IRemoteObject> token);
 private:
     /**
      * Notify application status.
@@ -1930,7 +1932,7 @@ private:
     void GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids);
     void MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
-    std::vector<std::string> DealWithUserConfiguration(const Configuration &config, const int32_t userId);
+    int32_t DealWithUserConfiguration(const Configuration &config, const int32_t userId, int32_t &notifyUserId);
     bool CheckIsDebugApp(const std::string &bundleName);
     int32_t MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia, std::string &watermarkBusinessName,
         bool &isWatermarkEnabled, bool &isFileUri, std::string &processName);
@@ -1954,7 +1956,8 @@ private:
         const std::shared_ptr<AppRunningRecord> &appRecord, const int32_t pid, const int32_t callerUid);
     int32_t SubmitDfxFaultTask(const FaultData &faultData, const std::string &bundleName,
         const std::shared_ptr<AppRunningRecord> &appRecord, const int32_t pid);
-    
+    void AddAbilityStageForSpecified(std::shared_ptr<AppRunningRecord> appRecord);
+
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
     std::atomic<int32_t> willKillPidsNum_ = 0;

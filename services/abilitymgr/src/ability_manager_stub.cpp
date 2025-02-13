@@ -798,6 +798,12 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentieth(uint32_t code, MessageParc
     if (interfaceCode == AbilityManagerInterfaceCode::NDK_START_SELF_UI_ABILITY) {
         return StartSelfUIAbilityInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::PREPARE_TERMINATE_ABILITY_DONE) {
+        return PrepareTerminateAbilityDoneInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::KILL_PROCESS_WITH_PREPARE_TERMINATE_DONE) {
+        return KillProcessWithPrepareTerminateDoneInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4311,6 +4317,28 @@ int32_t AbilityManagerStub::StartSelfUIAbilityInner(MessageParcel &data, Message
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
         return INNER_ERR;
     }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::PrepareTerminateAbilityDoneInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbilityDoneInner");
+    sptr<IRemoteObject> token = nullptr;
+    if (data.ReadBool()) {
+        token = data.ReadRemoteObject();
+    }
+    bool isTerminate = data.ReadBool();
+    PrepareTerminateAbilityDone(token, isTerminate);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::KillProcessWithPrepareTerminateDoneInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call KillProcessWithPrepareTerminateDoneInner");
+    std::string moduleName = data.ReadString();
+    int32_t prepareTermination = data.ReadInt32();
+    bool isExist = data.ReadBool();
+    KillProcessWithPrepareTerminateDone(moduleName, prepareTermination, isExist);
     return NO_ERROR;
 }
 } // namespace AAFwk

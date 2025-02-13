@@ -140,7 +140,7 @@ int AbilityConnectionStub::OnRemoteRequest(
             auto resultCode = data.ReadInt32();
             TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityConnectionStub ON_ABILITY_CONNECT_DONE");
             OnAbilityConnectDone(*element, remoteObject, resultCode);
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilityConnectionStub ON_ABILITY_CONNECT_DONE end,%{public}s",
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "ON_ABILITY_CONNECT_DONE end,%{public}s",
                 abilityName.c_str());
             return NO_ERROR;
         }
@@ -148,7 +148,7 @@ int AbilityConnectionStub::OnRemoteRequest(
             auto resultCode = data.ReadInt32();
             TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityConnectionStub ON_ABILITY_DISCONNECT_DONE");
             OnAbilityDisconnectDone(*element, resultCode);
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilityConnectionStub ON_ABILITY_DISCONNECT_DONE end,%{public}s",
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "ON_ABILITY_DISCONNECT_DONE end,%{public}s",
                 abilityName.c_str());
             return NO_ERROR;
         }

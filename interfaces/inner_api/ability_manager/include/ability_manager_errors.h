@@ -666,6 +666,21 @@ enum {
      */
     SET_SMS_FAILED = 2097281,
 
+    /*
+     * Result (2097282) for get appSpawn client failed.
+     */
+    ERR_GET_SPAWN_CLIENT_FAILED = 2097282,
+
+    /*
+     * Result (2097283) for create start msg failed.
+     */
+    ERR_CREATE_START_MSG_FAILED = 2097283,
+
+    /*
+     * Result (2097284) for create apawn process failed.
+     */
+    ERR_SAPAWN_PROCESS_FAILED = 2097284,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */

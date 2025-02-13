@@ -17,11 +17,11 @@
 #define OHOS_ABILITY_RUNTIME_CJ_ABILITY_CONTEXT_BROKER_H
 
 #include "ability_context_impl.h"
-#include "bundle_manager_ffi.h"
 #include "cj_ability_context_utils.h"
 #include "cj_common_ffi.h"
 #include "cj_want_ffi.h"
 #include "cj_utils_ffi.h"
+#include "cj_bundle_info.h"
 
 extern "C" {
 using VectorStringHandle = void*;
@@ -72,9 +72,9 @@ CJ_EXPORT int32_t FFIAbilityContextBackToCallerAbilityWithResult(int64_t id,
 CJ_EXPORT int32_t FFIAbilityContextSetMissionContinueState(int64_t id, int32_t state);
 CJ_EXPORT OHOS::AbilityRuntime::CConfiguration FFIAbilityContextPropConfiguration(
     int64_t id, int32_t *errCode);
-CJ_EXPORT OHOS::CJSystemapi::BundleManager::RetAbilityInfo FFIAbilityContextPropAbilityInfo(
+CJ_EXPORT OHOS::AbilityRuntime::RetAbilityInfo FFIAbilityContextPropAbilityInfo(
     int64_t id, int32_t *errCode);
-CJ_EXPORT OHOS::CJSystemapi::BundleManager::RetHapModuleInfo FFIAbilityContextPropCurrentHapModuleInfo(
+CJ_EXPORT OHOS::AbilityRuntime::RetHapModuleInfo FFIAbilityContextPropCurrentHapModuleInfo(
     int64_t id, int32_t *errCode);
 CJ_EXPORT int32_t FFIAbilityContextStartAbilityByType(int64_t id, char* cType, char* cWantParams,
     void (*onError)(int32_t, char*, char*), void (*onResult)(CJAbilityResult));

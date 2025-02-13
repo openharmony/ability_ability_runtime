@@ -298,7 +298,7 @@ int32_t AppSpawnClient::SetStrictMode(const AppSpawnStartMsg &startMsg, const Ap
         }
     }
     if (startMsg.isolatedSELinuxFlag) {
-        TAG_LOGD(AAFwkTag::APPMGR, "Set isolatedSELinux,extType:%{public}s:", startMsg.extensionTypeName.c_str());
+        TAG_LOGD(AAFwkTag::APPMGR, "Set isolatedSELinux,extType:%{public}s", startMsg.extensionTypeName.c_str());
         ret = AppSpawnReqMsgSetAppFlag(reqHandle, APP_FLAGS_ISOLATED_SELINUX_LABEL);
         if (ret != 0) {
             TAG_LOGE(AAFwkTag::APPMGR, "Set isolatedSELinuxFlag fail, ret: %{public}d", ret);

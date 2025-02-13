@@ -27,6 +27,21 @@
 
 namespace OHOS {
 namespace AAFwk {
+constexpr static int32_t DEFAULT_EXTENSION_AUTO_DISCONNECT_TIME = -1;
+constexpr static bool EXTENSION_NETWORK_ENABLE_FLAG_DEFAULT = true;
+constexpr static bool EXTENSION_SA_ENABLE_FLAG_DEFAULT = true;
+constexpr static bool EXTENSION_THIRD_PARTY_APP_ENABLE_FLAG_DEFAULT = true;
+constexpr static bool EXTENSION_START_SERVICE_ENABLE_FLAG_DEFAULT = true;
+
+struct ExtensionConfigItem {
+    bool networkEnableFlag = EXTENSION_NETWORK_ENABLE_FLAG_DEFAULT;
+    bool saEnableFlag = EXTENSION_SA_ENABLE_FLAG_DEFAULT;
+    bool thirdPartyAppEnableFlag = EXTENSION_THIRD_PARTY_APP_ENABLE_FLAG_DEFAULT;
+    bool serviceEnableFlag = EXTENSION_START_SERVICE_ENABLE_FLAG_DEFAULT;
+    int32_t extensionAutoDisconnectTime = DEFAULT_EXTENSION_AUTO_DISCONNECT_TIME;
+    std::unordered_set<std::string> serviceBlockedList;
+};
+
 class ExtensionConfig : public DelayedSingleton<ExtensionConfig> {
 public:
     explicit ExtensionConfig() = default;
@@ -50,14 +65,8 @@ private:
 
     bool CheckServiceExtensionUriValid(const std::string &uri);
 
-    std::map<std::string, int32_t> extensionAutoDisconnectTimeMap_;
-    std::unordered_map<std::string, bool> thirdPartyAppEnableFlags_;
-    std::unordered_map<std::string, bool> serviceEnableFlags_;
-    std::unordered_map<std::string, std::unordered_set<std::string>> serviceBlockedLists_;
-    std::unordered_map<std::string, bool> networkEnableFlags_;
-    std::unordered_map<std::string, bool> saEnableFlags_;
-    std::mutex networkEnableMutex_;
-    std::mutex saEnableMutex_;
+    std::unordered_map<std::string, ExtensionConfigItem> configMap_;
+    std::mutex configMapMutex_;
 };
 } // OHOS
 } // AAFwk

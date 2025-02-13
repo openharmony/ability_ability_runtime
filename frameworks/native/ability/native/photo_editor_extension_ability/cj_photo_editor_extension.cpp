@@ -20,9 +20,11 @@
 namespace OHOS {
 namespace AbilityRuntime {
 
-CJPhotoEditorExtension *CJPhotoEditorExtension::Create(const std::unique_ptr<Runtime> &runtime)
+extern "C" __attribute__((visibility("default"))) PhotoEditorExtension* OHOS_ABILITY_CJPhotoEditorExtension(
+    void* runtimePtr)
 {
-    return new (std::nothrow) CJPhotoEditorExtension(runtime);
+    std::unique_ptr<Runtime>* runtime = reinterpret_cast<std::unique_ptr<Runtime>*>(runtimePtr);
+    return new (std::nothrow) CJPhotoEditorExtension(*runtime);
 }
 
 CJPhotoEditorExtension::CJPhotoEditorExtension(const std::unique_ptr<Runtime> &runtime)

@@ -17,7 +17,7 @@
 
 #include "hilog_tag_wrapper.h"
 #include "js_share_extension.h"
-#include "cj_share_extension.h"
+#include "cj_share_extension_instance.h"
 #include "runtime.h"
 #include "ui_extension_context.h"
 
@@ -33,7 +33,7 @@ ShareExtension *ShareExtension::Create(const std::unique_ptr<Runtime> &runtime)
         case Runtime::Language::JS:
             return JsShareExtension::Create(runtime);
         case Runtime::Language::CJ:
-            return CJShareExtension::Create(runtime);
+            return CreateCJShareExtension(runtime);
         default:
             return new ShareExtension();
     }

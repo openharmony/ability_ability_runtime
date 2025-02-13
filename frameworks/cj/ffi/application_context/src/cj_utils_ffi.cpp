@@ -18,6 +18,7 @@
 
 #include "securec.h"
 #include "hilog_tag_wrapper.h"
+#include "cj_macro.h"
 
 char* CreateCStringFromString(const std::string& source)
 {
@@ -138,6 +139,18 @@ CConfiguration CreateCConfiguration(const OHOS::AppExecFwk::Configuration &confi
     cfg.mcc = CreateCStringFromString(configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
     cfg.mnc = CreateCStringFromString(configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
     return cfg;
+}
+
+extern "C" {
+CJ_EXPORT CConfiguration OHOS_ConvertConfiguration(void* param)
+{
+    CConfiguration cCfg;
+    auto config = reinterpret_cast<AppExecFwk::Configuration*>(param);
+    if (config == nullptr) {
+        return cCfg;
+    }
+    return CreateCConfiguration(*config);
+}
 }
 }
 }

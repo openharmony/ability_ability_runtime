@@ -19,9 +19,11 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <stack>
 #include <string>
 
 #include "ability_local_record.h"
+#include "ability_transaction_callback_info.h"
 #include "configuration.h"
 #include "hap_module_info.h"
 #include "want.h"
@@ -33,6 +35,7 @@ class OHOSApplication;
 namespace AbilityRuntime {
 class Context;
 class Runtime;
+
 /**
  * @brief the hap level entity
  *
@@ -48,7 +51,9 @@ public:
     virtual ~AbilityStage() = default;
     virtual void OnCreate(const AAFwk::Want &want) const;
     virtual void OnDestroy() const;
-    virtual bool OnPrepareTerminate(int &prepareTermination) const;
+    virtual bool OnPrepareTerminate(
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
+        bool &isAsync) const;
     virtual std::string OnAcceptWant(const AAFwk::Want &want);
     virtual std::string OnNewProcessRequest(const AAFwk::Want &want);
     virtual void Init(const std::shared_ptr<Context> &context,

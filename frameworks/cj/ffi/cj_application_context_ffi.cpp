@@ -24,6 +24,7 @@
 #include "cj_utils_ffi.h"
 #include "hilog_tag_wrapper.h"
 #include "running_process_info.h"
+#include "js_application_context_utils.h"
 
 namespace OHOS {
 namespace ApplicationContextCJ {
@@ -270,6 +271,74 @@ void FfiCJApplicationContextSetSupportedProcessCache(int64_t id, bool isSupporte
         return;
     }
     return context->OnSetSupportedProcessCacheSelf(isSupported, errCode);
+}
+
+CJ_EXPORT napi_value FfiConvertApplicationContext2Napi(napi_env env, int64_t id)
+{
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
+    auto cjApplicationContext = FFIData::GetData<CJApplicationContext>(id);
+    if (cjApplicationContext == nullptr || cjApplicationContext->GetApplicationContext() == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "cj context null ptr");
+        return undefined;
+    }
+
+    napi_value result = JsApplicationContextUtils::CreateJsApplicationContext(env);
+    if (result == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null object");
+        return undefined;
+    }
+    auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(
+        cjApplicationContext->GetApplicationContext());
+    if (workContext != nullptr) {
+        auto res = napi_wrap(env, result, workContext,
+            [](napi_env, void *data, void *) {
+              TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr application context is called");
+              delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
+              data = nullptr;
+            },
+            nullptr, nullptr);
+        if (res != napi_ok && workContext != nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "napi_wrap failed:%{public}d", res);
+            delete workContext;
+            return undefined;
+        }
+    }
+    napi_value falseValue = nullptr;
+    napi_get_boolean((napi_env)env, true, &falseValue);
+    napi_set_named_property((napi_env)env, result, "stageMode", falseValue);
+
+    return result;
+}
+
+CJ_EXPORT int64_t FfiCreateApplicationContextFromNapi(napi_env env, napi_value appContext)
+{
+    if (env == nullptr || appContext == nullptr) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    napi_valuetype type;
+    if (napi_typeof(env, appContext, &type) || type != napi_object) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    std::weak_ptr<ApplicationContext>* context = nullptr;
+    napi_status status = napi_unwrap(env, appContext, reinterpret_cast<void**>(&context));
+    if (status != napi_ok) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    if (context == nullptr || (*context).lock() == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    auto cjContext = FFI::FFIData::Create<CJApplicationContext>((*context).lock());
+    if (cjContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cjContext");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    return cjContext->GetID();
 }
 }
 } // namespace ApplicationContextCJ

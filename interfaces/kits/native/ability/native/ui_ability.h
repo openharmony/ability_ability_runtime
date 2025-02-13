@@ -423,6 +423,13 @@ public:
     virtual bool OnPrepareTerminate();
 
     /**
+     * @brief Called when ability prepare terminate.
+     * @param callbackInfo The callbackInfo is used when onPrepareToTerminateAsync is implemented.
+     * @param isAsync The returned flag indicates if onPrepareToTerminateAsync is implemented.
+     */
+    virtual void OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo, bool &isAsync);
+
+    /**
      * @brief Inflates UI controls by using windowOption.
      * @param windowOption Indicates the window option defined by the user.
      */
