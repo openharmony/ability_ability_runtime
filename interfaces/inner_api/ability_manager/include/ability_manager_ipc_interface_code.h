@@ -561,6 +561,9 @@ enum class AbilityManagerInterfaceCode {
 
     // update associate config list
     UPDATE_ASSOCIATE_CONFIG_LIST = 6120,
+
+    // start seld uiability
+    NDK_START_SELF_UI_ABILITY = 6132,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
