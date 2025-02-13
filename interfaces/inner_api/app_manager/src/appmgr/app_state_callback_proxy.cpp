@@ -166,6 +166,28 @@ void AppStateCallbackProxy::OnAppRemoteDied(const std::vector<sptr<IRemoteObject
     }
 }
 
+void AppStateCallbackProxy::OnStartProcessFailed(sptr<IRemoteObject> token)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteRemoteObject(token.GetRefPtr())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write token failed");
+        return;
+    }
+    auto ret = SendTransactCmd(
+        static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_START_PROCESS_FAILED),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+    }
+}
+
 void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
     MessageParcel data;
