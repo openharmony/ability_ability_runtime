@@ -106,6 +106,8 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_services_path}/abilitymgr/src/user_callback_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/window_config.cpp",
+    "src/hidden_start_observer_proxy.cpp",
+    "src/hidden_start_observer_stub.cpp",
     "src/status_bar_delegate/status_bar_delegate_proxy.cpp",
     "src/status_bar_delegate/status_bar_delegate_stub.cpp",
     "src/window_manager_service_handler_proxy.cpp",

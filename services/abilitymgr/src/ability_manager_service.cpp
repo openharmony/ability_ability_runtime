@@ -111,6 +111,7 @@
 #ifdef SUPPORT_SCREEN
 #include "utils/dms_util.h"
 #endif
+#include "hidden_start_observer_manager.h"
 
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
@@ -13071,6 +13072,24 @@ bool AbilityManagerService::CheckCrossUser(const int32_t userId, AppExecFwk::Ext
         return true;    
     }
     return false;
+}
+
+int32_t AbilityManagerService::RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
+{
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyStartUIAbilityToHiddenPermission()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "RegisterHiddenStartObserver permission verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+    return HiddenStartObserverManager::GetInstance().RegisterObserver(observer);
+}
+
+int32_t AbilityManagerService::UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
+{
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyStartUIAbilityToHiddenPermission()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "UnregisterHiddenStartObserver permission verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+    return HiddenStartObserverManager::GetInstance().UnregisterObserver(observer);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
