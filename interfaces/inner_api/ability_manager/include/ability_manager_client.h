@@ -439,7 +439,7 @@ public:
      * @param sessionInfo the session info of the ability to terminate.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo);
+    ErrCode CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit = false);
 
     /**
      * SendResultToAbility with want, return resultWant from ability manager service.
@@ -1594,7 +1594,7 @@ public:
      * @param sessionInfo the session info of the ability to clean.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo);
+    ErrCode CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit = false);
 
     /**
      * Open link of ability and atomic service.

@@ -470,7 +470,7 @@ ErrCode AbilityManagerClient::CloseAbility(sptr<IRemoteObject> token, int result
     return abms->CloseAbility(token, resultCode, resultWant);
 }
 
-ErrCode AbilityManagerClient::CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
+ErrCode AbilityManagerClient::CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr) {
@@ -2005,7 +2005,7 @@ void AbilityManagerClient::NotifyFrozenProcessByRSS(const std::vector<int32_t> &
     return abms->NotifyFrozenProcessByRSS(pidList, uid);
 }
 
-ErrCode AbilityManagerClient::CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
+ErrCode AbilityManagerClient::CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr) {
