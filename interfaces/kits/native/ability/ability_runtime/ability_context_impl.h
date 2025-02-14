@@ -262,6 +262,15 @@ public:
      */
     ErrCode SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &icon) override;
 
+     /**
+     * @brief Set ability label and icon of this ability.
+     *
+     * @param label the label of this ability.
+     * @param icon the icon of this ability.
+     * @return Returns ERR_OK if success.
+     */
+    ErrCode SetAbilityInstanceInfo(const std::string& label, std::shared_ptr<OHOS::Media::PixelMap> icon) override;
+
     /**
      * @brief get current window mode.
      *
