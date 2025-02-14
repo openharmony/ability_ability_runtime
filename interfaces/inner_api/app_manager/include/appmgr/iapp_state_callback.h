@@ -70,6 +70,12 @@ public:
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 
     /**
+     * @brief Notify abilityms start process failed when load ability
+     * @param token Failed ability token.
+     */
+    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) {}
+
+    /**
      * @brief Notify abilityms app process pre cache
      * @param pid process pid.
      * @param userId userId Designation User ID.
@@ -82,7 +88,8 @@ public:
         TRANSACT_ON_NOTIFY_CONFIG_CHANGE,
         TRANSACT_ON_NOTIFY_START_RESIDENT_PROCESS,
         TRANSACT_ON_APP_REMOTE_DIED,
-        TRANSACT_ON_APP_PRE_CACHE
+        TRANSACT_ON_APP_PRE_CACHE,
+        TRANSACT_ON_START_PROCESS_FAILED
     };
 };
 }  // namespace AppExecFwk

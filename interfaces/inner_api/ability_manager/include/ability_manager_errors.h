@@ -646,6 +646,21 @@ enum {
      */
     ERR_INVALID_EXTENSION_TYPE = 2097277,
 
+    /*
+     * Result (2097282) for get appSpawn client failed.
+     */
+    ERR_GET_SPAWN_CLIENT_FAILED = 2097282,
+
+    /*
+     * Result (2097283) for create start msg failed.
+     */
+    ERR_CREATE_START_MSG_FAILED = 2097283,
+
+    /*
+     * Result (2097284) for create spawn process failed.
+     */
+    ERR_SPAWN_PROCESS_FAILED = 2097284,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
