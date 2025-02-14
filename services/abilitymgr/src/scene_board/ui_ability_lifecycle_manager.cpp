@@ -37,6 +37,7 @@
 #ifdef SUPPORT_GRAPHICS
 #include "ability_first_frame_state_observer_manager.h"
 #endif
+#include "hidden_start_observer_manager.h"
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
@@ -2738,6 +2739,13 @@ int32_t UIAbilityLifecycleManager::DoCallerProcessAttachment(std::shared_ptr<Abi
     return statusBarDelegateManager->DoCallerProcessAttachment(abilityRecord);
 }
 
+int32_t UIAbilityLifecycleManager::DoCallerProcessDetachment(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    auto statusBarDelegateManager = GetStatusBarDelegateManager();
+    CHECK_POINTER_AND_RETURN(statusBarDelegateManager, ERR_INVALID_VALUE);
+    return statusBarDelegateManager->DoCallerProcessDetachment(abilityRecord);
+}
+
 bool UIAbilityLifecycleManager::CheckPrepareTerminateTokens(const std::vector<sptr<IRemoteObject>> &tokens,
     uint32_t &tokenId, std::map<std::string, std::vector<sptr<IRemoteObject>>> &tokensPerModuleName)
 {
@@ -2955,22 +2963,34 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     auto sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
 
-    if (!IsCallerInStatusBar(abilityRecord->GetInstanceKey()) && sessionInfo->processOptions != nullptr &&
-        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
-        !sessionInfo->processOptions->isRestartKeepAlive) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not add to status bar");
-        return ERR_START_OPTIONS_CHECK_FAILED;
-    }
-    if (sessionInfo->processOptions == nullptr ||
-        (!ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode) &&
-        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
-        !sessionInfo->processOptions->isRestartKeepAlive)) {
-        auto ret = DoCallerProcessAttachment(abilityRecord);
-        if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller attach to status bar failed, ret: %{public}d", ret);
+    do {
+        if (HiddenStartObserverManager::GetInstance().IsHiddenStart(abilityRecord->GetApplicationInfo().uid)) {
+            auto ret = DoCallerProcessDetachment(abilityRecord);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "caller detach to status bar failed, ret: %{public}d", ret);
+                return ERR_START_OPTIONS_CHECK_FAILED;
+            }
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "Hidden start allowed by observer.");
+            break;
+        }
+        if (!IsCallerInStatusBar(abilityRecord->GetInstanceKey()) && sessionInfo->processOptions != nullptr &&
+            !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
+            !sessionInfo->processOptions->isRestartKeepAlive) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not add to status bar");
             return ERR_START_OPTIONS_CHECK_FAILED;
         }
-    }
+        if (sessionInfo->processOptions == nullptr ||
+            (!ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode) &&
+            !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
+            !sessionInfo->processOptions->isRestartKeepAlive)) {
+            auto ret = DoCallerProcessAttachment(abilityRecord);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "caller attach to status bar failed, ret: %{public}d", ret);
+                return ERR_START_OPTIONS_CHECK_FAILED;
+            }
+        }
+    } while (false);
+
     auto callerSessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(callerSessionInfo, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(callerSessionInfo->sessionToken, ERR_INVALID_VALUE);

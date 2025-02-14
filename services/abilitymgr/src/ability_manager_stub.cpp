@@ -804,6 +804,12 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentieth(uint32_t code, MessageParc
     if (interfaceCode == AbilityManagerInterfaceCode::KILL_PROCESS_WITH_PREPARE_TERMINATE_DONE) {
         return KillProcessWithPrepareTerminateDoneInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_HIDDEN_START_OBSERVER) {
+        return RegisterHiddenStartObserverInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::UNREGISTER_HIDDEN_START_OBSERVER) {
+        return UnregisterHiddenStartObserverInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4339,6 +4345,36 @@ int32_t AbilityManagerStub::KillProcessWithPrepareTerminateDoneInner(MessageParc
     int32_t prepareTermination = data.ReadInt32();
     bool isExist = data.ReadBool();
     KillProcessWithPrepareTerminateDone(moduleName, prepareTermination, isExist);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::RegisterHiddenStartObserverInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto callback = iface_cast<IHiddenStartObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = RegisterHiddenStartObserver(callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::UnregisterHiddenStartObserverInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto callback = iface_cast<IHiddenStartObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = UnregisterHiddenStartObserver(callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
     return NO_ERROR;
 }
 } // namespace AAFwk
