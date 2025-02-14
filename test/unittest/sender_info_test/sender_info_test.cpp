@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,6 +98,33 @@ HWTEST_F(SenderInfoTest, SenderInfoTest_0100, TestSize.Level1)
     EXPECT_EQ(callBackPtr->performReceiveCount, 10);
     EXPECT_EQ(unInfo->requiredPermission, "xiaoming");
     delete unInfo;
+}
+
+/*
+ * @tc.number    : SenderInfoTest_0200
+ * @tc.name      : ReadFromParcel
+ * @tc.desc      : ReadFromParcel
+ */
+HWTEST_F(SenderInfoTest, SenderInfoTest_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SenderInfoTest_0200 is start";
+    int32_t code = 5;
+    SenderInfo info;
+    Parcel parcel;
+    parcel.WriteInt32(code);
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    Parcelable *parcelable = &want;
+    parcel.WriteParcelable(parcelable);
+    std::string resolvedType = "nihao";
+    parcel.WriteString16(Str8ToStr16(resolvedType));
+    parcel.WriteBool(false);
+    std::string requiredPermission = "xiaoming";
+    parcel.WriteString16(Str8ToStr16(requiredPermission));
+    parcel.WriteBool(true);
+    EXPECT_TRUE(info.ReadFromParcel(parcel));
+    GTEST_LOG_(INFO) << "SenderInfoTest_0200 is end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS
