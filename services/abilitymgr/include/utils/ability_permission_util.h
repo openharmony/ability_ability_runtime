@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "ability_record.h"
 #include "ffrt.h"
 #include "iremote_object.h"
 #include "nocopyable.h"
@@ -138,6 +139,8 @@ public:
     int32_t CheckStartCallHasFloatingWindow(const sptr<IRemoteObject> &callerToken);
 
     bool IsStartSelfUIAbility();
+
+    int32_t CheckPrepareTerminateEnable(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
 private:
     /**
