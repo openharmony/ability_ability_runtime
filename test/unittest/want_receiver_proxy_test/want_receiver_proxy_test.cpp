@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,6 +86,21 @@ HWTEST_F(WantReceiverProxyTest, WantReceiverProxyTest_002, TestSize.Level1)
     proxy_->PerformReceive(want, 0, data, wantParams, true, true, 0);
 
     EXPECT_EQ(IWantReceiver::WANT_RECEIVER_PERFORM_RECEIVE, mock_->code_);
+}
+
+/*
+ * Feature: WantReceiverProxy
+ * Function: WriteInterfaceToken
+ * SubFunction: NA
+ * FunctionPoints: WantReceiverProxy WriteInterfaceToken
+ * EnvConditions: NA
+ * CaseDescription: Verify that the return value of WriteInterfaceToken is normal
+ */
+HWTEST_F(WantReceiverProxyTest, WantReceiverProxyTest_003, TestSize.Level1)
+{
+    MessageParcel data;
+    auto ret = proxy_->WriteInterfaceToken(data);
+    EXPECT_EQ(ret, true);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
