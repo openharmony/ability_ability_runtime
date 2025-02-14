@@ -560,6 +560,7 @@ ohos_shared_library("cj_extensionkit_native") {
   ]
 
   deps = [
+    ":abilitykit_utils",
     ":configuration_helper",
     ":extensionkit_native",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
@@ -584,8 +585,6 @@ ohos_shared_library("cj_extensionkit_native") {
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
   ]
-
-  public_deps = [ ":abilitykit_utils" ]
 
   public_external_deps = [ "bundle_framework:appexecfwk_core" ]
 
