@@ -174,10 +174,14 @@ public:
      */
     void ConfigurationUpdated();
 
+    void OnAbilityConfigurationUpdated(const AppExecFwk::Configuration& configuration);
+
 private:
     virtual void BindContext(napi_env env, napi_value obj, std::shared_ptr<AAFwk::Want> want);
     void CreateJSContext(napi_env env, napi_value &contextObj,
         std::shared_ptr<UIExtensionContext> context, int32_t screenMode);
+
+    void RegisterAbilityConfigUpdateCallback();
 
     napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
         bool withResult = false);

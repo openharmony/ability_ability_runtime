@@ -19,6 +19,9 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <map>
+#include "context.h"
+#include "resource_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -42,13 +45,21 @@ public:
     SetLevel GetFontSetLevel() const;
     std::string SetColorModeSetLevel(SetLevel colorModeSetLevel, const std::string &value);
     SetLevel GetColorModeSetLevel() const;
+    std::string GetColorMode();
     bool ColorModeHasSetByApplication() const;
+    void AddIgnoreContext(std::shared_ptr<Context> context,
+        std::shared_ptr<Global::Resource::ResourceManager> resourceManager);
+    void DeleteIgnoreContext(std::shared_ptr<Context> context);
+    std::vector<std::shared_ptr<Context>> GetIgnoreContext();
+    std::vector<std::shared_ptr<Global::Resource::ResourceManager>> GetIgnoreResource();
 
 private:
     SetLevel languageSetLevel_ = SetLevel::System;
     SetLevel colorModeSetLevel_ = SetLevel::System;
     SetLevel fontSetLevel_ = SetLevel::System;
-    std::vector<std::string> colorModeVal_ = std::vector<std::string>(static_cast<uint8_t>(SetLevel::SetLevelCount));
+    std::vector<std::string> colorModeVal_ =
+        std::vector<std::string>(static_cast<uint8_t>(SetLevel::SetLevelCount));
+    std::map<std::shared_ptr<Context>, std::shared_ptr<Global::Resource::ResourceManager>> ignoreContext_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

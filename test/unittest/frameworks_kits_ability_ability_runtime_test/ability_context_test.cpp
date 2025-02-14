@@ -26,6 +26,26 @@ using namespace OHOS::AbilityRuntime;
 
 class MockAbilityContext : public AbilityContext {
 public:
+    virtual void RegisterAbilityConfigUpdateCallback(AbilityConfigUpdateCallback abilityConfigUpdateCallback)
+    {
+        return;
+    }
+    virtual std::shared_ptr<AppExecFwk::Configuration> GetAbilityConfiguration() const
+    {
+        return nullptr;
+    }
+    virtual void SetAbilityConfiguration(const AppExecFwk::Configuration &config)
+    {
+        return;
+    }
+    virtual void SetAbilityColorMode(int32_t colorMode)
+    {
+        return;
+    }
+    virtual void SetAbilityResourceManager(std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr)
+    {
+        return;
+    }
     virtual std::string GetBundleName() const
     {
         return "MockAbilityContext for tdd";

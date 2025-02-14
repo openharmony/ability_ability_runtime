@@ -170,6 +170,10 @@ public:
      */
     void ConfigurationUpdated();
 
+    void OnAbilityConfigurationUpdated(const AppExecFwk::Configuration& configuration);
+
+    void RegisterAbilityConfigUpdateCallback();
+
 protected:
     napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
         bool withResult = false);
@@ -207,7 +211,7 @@ protected:
 
 private:
     sptr<Rosen::WindowOption> CreateWindowOption(const sptr<AAFwk::SessionInfo> &sessionInfo);
-    
+
 #ifdef SUPPORT_GRAPHICS
 private:
     class JsUIExtensionBaseDisplayListener : public OHOS::Rosen::IDisplayInfoChangedListener {

@@ -30,6 +30,7 @@
 #include "native_engine/native_value.h"
 #include "start_options.h"
 #include "want.h"
+#include <functional>
 
 #ifdef SUPPORT_GRAPHICS
 #ifdef SUPPORT_SCREEN
@@ -46,6 +47,7 @@ namespace AbilityRuntime {
 using RuntimeTask = std::function<void(int, const AAFwk::Want&, bool)>;
 using PermissionRequestTask = std::function<void(const std::vector<std::string>&, const std::vector<int>&)>;
 using RequestDialogResultTask = std::function<void(int32_t resultCode, const AAFwk::Want&)>;
+using AbilityConfigUpdateCallback = std::function<void(AppExecFwk::Configuration &config)>;
 class LocalCallContainer;
 constexpr int32_t DEFAULT_INVAL_VALUE = -1;
 class AbilityContext : public Context {
@@ -360,6 +362,11 @@ public:
 
     virtual void SetRestoreEnabled(bool enabled) = 0;
     virtual bool GetRestoreEnabled() = 0;
+    virtual void RegisterAbilityConfigUpdateCallback(AbilityConfigUpdateCallback abilityConfigUpdateCallback) = 0;
+    virtual std::shared_ptr<AppExecFwk::Configuration> GetAbilityConfiguration() const = 0;
+    virtual void SetAbilityConfiguration(const AppExecFwk::Configuration &config) = 0;
+    virtual void SetAbilityColorMode(int32_t colorMode) = 0;
+    virtual void SetAbilityResourceManager(std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr) = 0;
 
     virtual std::shared_ptr<AAFwk::Want> GetWant() = 0;
 
