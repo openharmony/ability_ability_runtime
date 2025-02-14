@@ -114,6 +114,12 @@ void ResSchedUtil::ReportAbilityIntentExemptionInfoToRSS(int32_t callerUid, int3
 #endif
 }
 
+bool ResSchedUtil::NeedReportByPidWhenConnect(const AbilityInfo &abilityInfo)
+{
+    return abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::REMOTE_NOTIFICATION ||
+           abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::BACKUP;
+}
+
 void ResSchedUtil::ReportEventToRSS(const int32_t uid, const std::string &bundleName, const std::string &reason,
     const int32_t pid, const int32_t callerPid)
 {
