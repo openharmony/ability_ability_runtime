@@ -4306,8 +4306,8 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
         return ERR_INVALID_VALUE;
     }
 
-    if (targetExtensionType != AppExecFwk::ExtensionAbilityType::REMOTE_NOTIFICATION) {
-        // this extension type is reported in connectManager instead of here
+    if (!ResSchedUtil::GetInstance().NeedReportByPidWhenConnect(abilityInfo)) {
+        // these extension type is reported in connectManager instead of here
         ReportEventToRSS(abilityInfo, callerToken);
     }
     UriUtils::GetInstance().CheckUriPermissionForServiceExtension(const_cast<Want &>(abilityRequest.want),

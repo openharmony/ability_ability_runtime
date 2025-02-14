@@ -571,7 +571,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     if (ret != ERR_OK) {
         return ret;
     }
-    if (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::REMOTE_NOTIFICATION) {
+    if (ResSchedUtil::GetInstance().NeedReportByPidWhenConnect(abilityRequest.abilityInfo)) {
         ReportEventToRSS(abilityRequest.abilityInfo, targetService, callerToken);
     }
     // 2. get target connectRecordList, and check whether this callback has been connected.
