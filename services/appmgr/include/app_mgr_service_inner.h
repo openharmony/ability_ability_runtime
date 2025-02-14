@@ -1318,7 +1318,7 @@ private:
      *
      * @return
      */
-    void StartProcess(const std::string &appName, const std::string &processName, uint32_t startFlags,
+    int32_t StartProcess(const std::string &appName, const std::string &processName, uint32_t startFlags,
                       std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
                       const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag = true,
                       bool isPreload = false,  AppExecFwk::PreloadMode preloadMode = AppExecFwk::PreloadMode::PRE_MAKE,
@@ -1607,6 +1607,8 @@ private:
     AAFwk::EventInfo BuildEventInfo(std::shared_ptr<AppRunningRecord> appRecord) const;
 
     void NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord> appRecord);
+
+    void NotifyStartProcessFailed(sptr<IRemoteObject> token);
 private:
     /**
      * Notify application status.

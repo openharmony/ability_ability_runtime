@@ -786,15 +786,8 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
     }
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetURI();
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Ability: %{public}s", element.c_str());
-    if (taskHandler_ != nullptr) {
-        int recordId = abilityRecord->GetRecordId();
-        std::string taskName = std::string("LoadTimeout_") + std::to_string(recordId);
-        taskHandler_->CancelTask(taskName);
-    }
-    if (eventHandler_) {
-        eventHandler_->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
-    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", element.c_str());
+    CancelLoadTimeoutTask(abilityRecord);
     if (abilityRecord->IsSceneBoard()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Attach Ability: %{public}s", element.c_str());
         sceneBoardTokenId_ = abilityRecord->GetAbilityInfo().applicationInfo.accessTokenId;
@@ -2023,6 +2016,26 @@ int32_t AbilityConnectManager::GetActiveUIExtensionList(
 {
     CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_NULL_OBJECT);
     return uiExtensionAbilityRecordMgr_->GetActiveUIExtensionList(bundleName, extensionList);
+}
+
+void AbilityConnectManager::OnLoadAbilityFailed(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    CancelLoadTimeoutTask(abilityRecord);
+    HandleStartTimeoutTask(abilityRecord);
+}
+
+void AbilityConnectManager::CancelLoadTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    CHECK_POINTER(abilityRecord);
+    if (taskHandler_ != nullptr) {
+        auto recordId = abilityRecord->GetRecordId();
+        std::string taskName = std::string("LoadTimeout_") + std::to_string(recordId);
+        taskHandler_->CancelTask(taskName);
+    }
+
+    if (eventHandler_) {
+        eventHandler_->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+    }
 }
 
 void AbilityConnectManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)

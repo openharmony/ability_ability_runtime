@@ -850,9 +850,11 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     appRecord->SetStrictMode(strictMode);
     int32_t maxChildProcess = 0;
     PresetMaxChildProcess(abilityInfo, maxChildProcess);
-    StartProcess(abilityInfo->applicationName, processName, startFlags, appRecord, appInfo->uid,
+    if (StartProcess(abilityInfo->applicationName, processName, startFlags, appRecord, appInfo->uid,
         bundleInfo, appInfo->bundleName, bundleIndex, appExistFlag, isPreload, preloadMode, abilityInfo->moduleName,
-        abilityInfo->name, strictMode, maxChildProcess, token, want, abilityInfo->extensionAbilityType);
+        abilityInfo->name, strictMode, maxChildProcess, token, want, abilityInfo->extensionAbilityType) != ERR_OK) {
+        NotifyStartProcessFailed(token);
+    }
     if (isShellCall) {
         std::string perfCmd = (want == nullptr) ? "" : want->GetStringParam(PERF_CMD);
         bool isSandboxApp = (want == nullptr) ? false : want->GetBoolParam(ENTER_SANDBOX, false);
@@ -1047,6 +1049,17 @@ void AppMgrServiceInner::NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord>
     for (const auto &item : appStateCallbacks_) {
         if (item.callback != nullptr) {
             item.callback->OnAppRemoteDied(abilityTokens);
+        }
+    }
+}
+
+void AppMgrServiceInner::NotifyStartProcessFailed(sptr<IRemoteObject> token)
+{
+    CHECK_POINTER_AND_RETURN_LOG(token, "token null.");
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->OnStartProcessFailed(token);
         }
     }
 }
@@ -3351,8 +3364,8 @@ void AppMgrServiceInner::QueryExtensionSandBox(const std::string &moduleName, co
     }
 }
 
-void AppMgrServiceInner::StartProcess(const std::string &appName, const std::string &processName, uint32_t startFlags,
-    std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
+int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::string &processName,
+    uint32_t startFlags, std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
     const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag, bool isPreload,
     AppExecFwk::PreloadMode preloadMode, const std::string &moduleName, const std::string &abilityName,
     bool strictMode, int32_t maxChildProcess, sptr<IRemoteObject> token, std::shared_ptr<AAFwk::Want> want,
@@ -3362,7 +3375,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     TAG_LOGD(AAFwkTag::APPMGR, "bundleName: %{public}s, isPreload: %{public}d", bundleName.c_str(), isPreload);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord is null");
-        return;
+        return ERR_INVALID_VALUE;
     }
     bool isCJApp = IsCjApplication(bundleInfo);
     if (!remoteClientManager_ || !remoteClientManager_->GetSpawnClient()) {
@@ -3372,7 +3385,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
             SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::GET_SPAWN_CLIENT_FAILED,
                 PROCESS_START_FAILED_SUB_REASON_UNKNOWN);
         }
-        return;
+        return AAFwk::ERR_GET_SPAWN_CLIENT_FAILED;
     }
 
     AppSpawnStartMsg startMsg;
@@ -3387,7 +3400,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         if (!isCJApp) {
             SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::CREATE_START_MSG_FAILED, ret);
         }
-        return;
+        return AAFwk::ERR_CREATE_START_MSG_FAILED;
     };
 
     SetProcessJITState(appRecord);
@@ -3398,7 +3411,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         if (!remoteClientManager_->GetCJSpawnClient()) {
             TAG_LOGE(AAFwkTag::APPMGR, "cj appSpawnClient is null");
             appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
-            return;
+            return AAFwk::ERR_GET_SPAWN_CLIENT_FAILED;
         }
         SendCreateAtomicServiceProcessEvent(appRecord, bundleType, moduleName, abilityName);
         errCode = remoteClientManager_->GetCJSpawnClient()->StartProcess(startMsg, pid);
@@ -3413,7 +3426,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
             SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED,
                 static_cast<int32_t>(errCode));
         }
-        return;
+        return AAFwk::ERR_SPAWN_PROCESS_FAILED;
     }
 
     #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
@@ -3446,6 +3459,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     PerfProfile::GetInstance().SetAppForkEndTime(GetTickCount());
     SendProcessStartEvent(appRecord, isPreload, preloadMode);
     ProcessAppDebug(appRecord, appRecord->IsDebugApp());
+    return ERR_OK;
 }
 
 void AppMgrServiceInner::SetProcessJITState(const std::shared_ptr<AppRunningRecord> appRecord)

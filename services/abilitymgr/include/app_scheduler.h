@@ -100,6 +100,8 @@ public:
     virtual void NotifyAppPreCache(int32_t pid, int32_t userId) {}
 
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
+    
+    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) {}
 };
 
 class StartSpecifiedAbilityResponse : public AppExecFwk::StartSpecifiedAbilityResponseStub {
@@ -524,7 +526,8 @@ protected:
 
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
-    
+    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) override;
+
     virtual void NotifyAppPreCache(int32_t pid, int32_t userId) override;
 
 private:
