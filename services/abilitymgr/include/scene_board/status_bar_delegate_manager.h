@@ -34,6 +34,7 @@ public:
     bool IsSupportStatusBar();
     int32_t DoProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord);
     int32_t DoCallerProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord);
+    int32_t DoCallerProcessDetachment(std::shared_ptr<AbilityRecord> abilityRecord);
 
 private:
     DISALLOW_COPY_AND_MOVE(StatusBarDelegateManager);

@@ -114,7 +114,9 @@ void AppMgrService::OnStart()
         return;
     }
     appMgrServiceState_.serviceRunningState = ServiceRunningState::STATE_RUNNING;
-    AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID);
+    if (!AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "OnStart, add listener err");
+    }
     TAG_LOGI(AAFwkTag::APPMGR, "start service success");
     PerfProfile::GetInstance().SetAmsLoadEndTime(GetTickCount());
     PerfProfile::GetInstance().Dump();

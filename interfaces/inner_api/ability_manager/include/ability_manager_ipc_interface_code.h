@@ -595,6 +595,12 @@ enum class AbilityManagerInterfaceCode {
 
     // kill process with prepare terminate done
     KILL_PROCESS_WITH_PREPARE_TERMINATE_DONE = 6134,
+
+    // register hidden start observer
+    REGISTER_HIDDEN_START_OBSERVER = 6135,
+
+    // Unregister hidden start observer
+    UNREGISTER_HIDDEN_START_OBSERVER = 6136,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

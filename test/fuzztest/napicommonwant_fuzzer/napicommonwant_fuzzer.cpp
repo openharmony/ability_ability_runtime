@@ -31,13 +31,15 @@
 #include "double_wrapper.h"
 #include "float_wrapper.h"
 #include "int_wrapper.h"
+#include "js_environment.h"
+#include "js_runtime.h"
+#include "js_runtime_lite.h"
 #include "long_wrapper.h"
+#include "remote_object_wrapper.h"
+#include "runtime.h"
 #include "short_wrapper.h"
 #include "string_wrapper.h"
 #include "zchar_wrapper.h"
-#include "remote_object_wrapper.h"
-#include "js_runtime_lite.h"
-#include "js_environment.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -145,7 +147,7 @@ void NapiCommonWantFuzztest2(bool boolParam, std::string &stringParam, int32_t i
 void NapiCommonWantFuzztest3(bool boolParam, std::string &stringParam, int32_t int32Param)
 {
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    AbilityRuntime::JsRuntime::Options options;
+    AbilityRuntime::Runtime::Options options;
     auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     ElementName elementName1;
@@ -189,7 +191,7 @@ void NapiCommonWantFuzztest4(bool boolParam, std::string &stringParam, int32_t i
 {
     napi_value param = nullptr;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    AbilityRuntime::JsRuntime::Options options;
+    AbilityRuntime::Runtime::Options options;
     auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     Want want;
@@ -236,7 +238,7 @@ void NapiCommonWantFuzztest5(bool boolParam, std::string &stringParam, int32_t i
 {
     napi_value param = nullptr;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    AbilityRuntime::JsRuntime::Options options;
+    AbilityRuntime::Runtime::Options options;
     auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     napi_value nullObject = nullptr;
@@ -290,7 +292,7 @@ void NapiCommonWantFuzztest6(bool boolParam, std::string &stringParam, int32_t i
 {
     napi_value param = nullptr;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    AbilityRuntime::JsRuntime::Options options;
+    AbilityRuntime::Runtime::Options options;
     auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     napi_value nullObject = nullptr;
