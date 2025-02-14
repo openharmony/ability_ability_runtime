@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -218,13 +218,13 @@ AppMgrResultCode AppMgrClient::KillProcessByAbilityToken(const sptr<IRemoteObjec
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::KillProcessesByUserId(int32_t userId)
+AppMgrResultCode AppMgrClient::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            amsService->KillProcessesByUserId(userId);
+            amsService->KillProcessesByUserId(userId, isNeedSendAppSpawnMsg);
             return AppMgrResultCode::RESULT_OK;
         }
     }
@@ -1461,26 +1461,6 @@ AppMgrResultCode AppMgrClient::IsAppRunningByBundleNameAndUserId(const std::stri
         return AppMgrResultCode(service->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning));
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-}
-
-AppMgrResultCode AppMgrClient::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
-{
-    if (mgrHolder_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null mgrHolder_");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-    }
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null service");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-    }
-    sptr<IAmsMgr> amsService = service->GetAmsMgr();
-    if (amsService == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null amsService");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-    }
-    amsService->SendAppSpawnUninstallDebugHapMsg(userId);
-    return AppMgrResultCode::RESULT_OK;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

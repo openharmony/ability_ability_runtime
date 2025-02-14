@@ -56,6 +56,7 @@
 #include "iservice_registry.h"
 #include "itest_observer.h"
 #include "killing_process_manager.h"
+#include "last_exit_detail_info.h"
 #include "os_account_manager.h"
 #ifdef SUPPORT_SCREEN
 #include "locale_config.h"
@@ -767,7 +768,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessReused(appRecord);
         }
         StartAbility(loadParam->token, loadParam->preToken, abilityInfo, appRecord, hapModuleInfo, want,
-            loadParam->abilityRecordId);
+            loadParam->abilityRecordId, loadParam->persistentId);
         if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
             AddUIExtensionLauncherItem(want, appRecord, loadParam->token);
         }
@@ -2688,7 +2689,8 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
     appRecord->SetEmptyKeepAliveAppState(false);
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
-    appRecord->AddModule(appInfo, abilityInfo, loadParam->token, hapModuleInfo, want, loadParam->abilityRecordId);
+    appRecord->AddModule(appInfo, abilityInfo, loadParam->token, hapModuleInfo, want,
+        loadParam->abilityRecordId, loadParam->persistentId);
     appRecord->SetIsKia(isKia);
     SetAppRunningRecordStrictMode(appRecord, loadParam);
     if (want) {
@@ -2959,7 +2961,7 @@ void AppMgrServiceInner::KillProcessByAbilityToken(const sptr<IRemoteObject> &to
     }
 }
 
-void AppMgrServiceInner::KillProcessesByUserId(int32_t userId)
+void AppMgrServiceInner::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg)
 {
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
@@ -2970,9 +2972,17 @@ void AppMgrServiceInner::KillProcessesByUserId(int32_t userId)
     std::list<pid_t> pids;
     if (!appRunningManager_->GetPidsByUserId(userId, pids)) {
         TAG_LOGI(AAFwkTag::APPMGR, "process corresponding uId unstart");
+        if (isNeedSendAppSpawnMsg) {
+            TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
+            SendAppSpawnUninstallDebugHapMsg(userId);
+        }
         return;
     }
-    WaitProcessesExitAndKill(pids, startTime, "KillProcessesByUserId");
+    int result = WaitProcessesExitAndKill(pids, startTime, "KillProcessesByUserId");
+    if (result == ERR_OK && isNeedSendAppSpawnMsg) {
+        TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
+        SendAppSpawnUninstallDebugHapMsg(userId);
+    }
 }
 
 int32_t AppMgrServiceInner::KillProcessesInBatch(const std::vector<int32_t> &pids)
@@ -3043,7 +3053,8 @@ void AppMgrServiceInner::AttachPidToParent(const sptr<IRemoteObject> &token, con
 
 void AppMgrServiceInner::StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
     std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AppRunningRecord> appRecord,
-    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId)
+    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId,
+    int32_t persistentId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPMGR, "start ability, %{public}s-%{public}s",
@@ -3076,7 +3087,7 @@ void AppMgrServiceInner::StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObj
     }
 
     auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo->applicationInfo);
-    appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want, abilityRecordId);
+    appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want, abilityRecordId, persistentId);
     auto moduleRecord = appRecord->GetModuleRecordByModuleName(appInfo->bundleName, hapModuleInfo.moduleName);
     if (!moduleRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "add moduleRecord fail");
@@ -4027,6 +4038,78 @@ void AppMgrServiceInner::SendAppStartupTypeEvent(const std::shared_ptr<AppRunnin
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_STARTUP_TYPE, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
+static bool GetAbilityNames(
+    const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> &abilityRecordList,
+    std::vector<std::string> &abilityNames, std::vector<std::string> &uiExtensionNames,
+    std::string &bundleName)
+{
+    std::string abilityName = "";
+    std::string moduleName = "";
+    int32_t persistentId = 0;
+    for (auto it = abilityRecordList.begin(); it != abilityRecordList.end(); ++it) {
+        if (it->second == nullptr) {
+            continue;
+        }
+        auto abilityInfo = it->second->GetAbilityInfo();
+        if (abilityInfo == nullptr) {
+            continue;
+        }
+        abilityName = it->second->GetName();
+        moduleName = it->second->GetModuleName();
+        bundleName = it->second->GetBundleName();
+        if (abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
+            persistentId = it->second->GetPersistentId();
+            abilityNames.push_back(abilityName + std::to_string(persistentId));
+        } else if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+            uiExtensionNames.push_back(moduleName + ":" + abilityName);
+        }
+    }
+    if (abilityNames.empty() && uiExtensionNames.empty()) {
+        TAG_LOGI(AAFwkTag::APPMGR, "no ability or uiextension");
+        return false;
+    }
+    return true;
+}
+
+void AppMgrServiceInner::CacheExitInfo(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+        return;
+    }
+    if (appRecord->GetReasonExist()) {
+        TAG_LOGI(AAFwkTag::APPMGR, "exit info exist");
+        return;
+    }
+    AAFwk::LastExitDetailInfo exitInfo = {};
+    exitInfo.pid = appRecord->GetPid();
+    exitInfo.uid = appRecord->GetUid();
+    exitInfo.rss = appRecord->GetRssValue();
+    exitInfo.pss = appRecord->GetPssValue();
+    exitInfo.processName = appRecord->GetProcessName();
+    std::vector<std::string> abilityNames;
+    std::vector<std::string> uiExtensionNames;
+    std::string bundleName = "";
+    auto applicationInfo = appRecord->GetApplicationInfo();
+    if (applicationInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "applicationInfo null");
+        return;
+    }
+    uint32_t accessTokenId = applicationInfo->accessTokenId;
+    auto abilityRecordList = appRecord->GetAbilities();
+    if (!GetAbilityNames(abilityRecordList, abilityNames, uiExtensionNames, bundleName)) {
+        return;
+    }
+    {
+        std::lock_guard lock(appStateCallbacksLock_);
+        for (const auto &item : appStateCallbacks_) {
+            if (item.callback != nullptr) {
+                item.callback->OnCacheExitInfo(accessTokenId, exitInfo, bundleName, abilityNames, uiExtensionNames);
+            }
+        }
+    }
+}
+
 void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool isRenderProcess, bool isChildProcess)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "On remote died.");
@@ -4055,6 +4138,7 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
     for (const auto &token : appRecord->GetAbilities()) {
         abilityTokens.emplace_back(token.first);
     }
+    CacheExitInfo(appRecord);
     {
         std::lock_guard lock(appStateCallbacksLock_);
         for (const auto &item : appStateCallbacks_) {
@@ -5337,6 +5421,7 @@ int32_t AppMgrServiceInner::NotifyAppMgrRecordExitReason(int32_t pid, int32_t re
     }
     appRecord->SetExitReason(reason);
     appRecord->SetExitMsg(exitMsg);
+    appRecord->SetReasonExist(true);
     return ERR_OK;
 }
 

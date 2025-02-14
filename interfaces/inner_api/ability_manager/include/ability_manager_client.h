@@ -30,6 +30,7 @@
 #include "ui_extension_window_command.h"
 #include "want.h"
 #include "intent_exemption_info.h"
+#include "ihidden_start_observer.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -439,7 +440,7 @@ public:
      * @param sessionInfo the session info of the ability to terminate.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo);
+    ErrCode CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit = false);
 
     /**
      * SendResultToAbility with want, return resultWant from ability manager service.
@@ -1594,7 +1595,7 @@ public:
      * @param sessionInfo the session info of the ability to clean.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo);
+    ErrCode CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit = false);
 
     /**
      * Open link of ability and atomic service.
@@ -1673,6 +1674,20 @@ public:
      * @param isExist, whether the prepareTerminate functions are implemented.
      */
     void KillProcessWithPrepareTerminateDone(const std::string &moduleName, int32_t prepareTermination, bool isExist);
+
+    /**
+     * Register hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer);
+
+    /**
+     * Unregister hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer);
 
 private:
     AbilityManagerClient();

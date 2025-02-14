@@ -263,6 +263,13 @@ public:
      */
     bool IsConnectSupportCrossUser();
 
+    /**
+     * IsPrepareTerminateEnabled, check if it supports prepare terminate.
+     *
+     * @return Whether it supports prepare terminate.
+     */
+    bool IsPrepareTerminateEnabled();
+
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.

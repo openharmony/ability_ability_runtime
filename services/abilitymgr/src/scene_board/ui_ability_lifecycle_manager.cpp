@@ -16,6 +16,7 @@
 #include "scene_board/ui_ability_lifecycle_manager.h"
 
 #include "ability_manager_service.h"
+#include "ability_permission_util.h"
 #include "appfreeze_manager.h"
 #include "app_exit_reason_data_manager.h"
 #include "app_mgr_util.h"
@@ -36,6 +37,7 @@
 #ifdef SUPPORT_GRAPHICS
 #include "ability_first_frame_state_observer_manager.h"
 #endif
+#include "hidden_start_observer_manager.h"
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
@@ -2316,13 +2318,17 @@ void UIAbilityLifecycleManager::SetLastExitReason(std::shared_ptr<AbilityRecord>
     ExitReason exitReason;
     bool isSetReason;
     auto accessTokenId = abilityRecord->GetAbilityInfo().applicationInfo.accessTokenId;
+    AppExecFwk::RunningProcessInfo processInfo;
+    int64_t time_stamp = 0;
+    bool withKillMsg = false;
     DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
-        abilityRecord->GetAbilityInfo().bundleName, accessTokenId, abilityName, isSetReason, exitReason);
+        abilityRecord->GetAbilityInfo().bundleName, accessTokenId, abilityName, isSetReason, exitReason,
+        processInfo, time_stamp, withKillMsg);
 
     if (isSetReason) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Set last exit reason, ability: %{public}s, reason: %{public}d.",
             abilityName.c_str(), exitReason.reason);
-        abilityRecord->SetLastExitReason(exitReason);
+        abilityRecord->SetLastExitReason(exitReason, processInfo, time_stamp, withKillMsg);
     }
 }
 
@@ -2331,15 +2337,11 @@ bool UIAbilityLifecycleManager::PrepareTerminateAbility(const std::shared_ptr<Ab
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbility");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (abilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null ability record");
-        return false;
-    }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "abilityInfoName:%{public}s", abilityRecord->GetAbilityInfo().name.c_str());
-    if (!CheckPrepareTerminateEnable(abilityRecord)) {
+    if (AbilityPermissionUtil::GetInstance().CheckPrepareTerminateEnable(abilityRecord) != ERR_OK) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Not support prepare terminate.");
         return false;
     }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "abilityInfoName:%{public}s", abilityRecord->GetAbilityInfo().name.c_str());
     return abilityRecord->PrepareTerminateAbility(isSCBCall);
 }
 
@@ -2349,26 +2351,6 @@ void UIAbilityLifecycleManager::PrepareTerminateAbilityDone(std::shared_ptr<Abil
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbilityDone");
     CHECK_POINTER(abilityRecord);
     abilityRecord->PrepareTerminateAbilityDone(isTerminate);
-}
-
-bool UIAbilityLifecycleManager::CheckPrepareTerminateEnable(const std::shared_ptr<AbilityRecord> &abilityRecord)
-{
-    if (abilityRecord == nullptr || abilityRecord->IsTerminating()) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "ability record not exist/ on terminating");
-        return false;
-    }
-    auto type = abilityRecord->GetAbilityInfo().type;
-    bool isStageBasedModel = abilityRecord->GetAbilityInfo().isStageBasedModel;
-    if (!isStageBasedModel || type != AppExecFwk::AbilityType::PAGE) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "ability mode not support.");
-        return false;
-    }
-    auto tokenId = abilityRecord->GetApplicationInfo().accessTokenId;
-    if (!AAFwk::PermissionVerification::GetInstance()->VerifyPrepareTerminatePermission(tokenId)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "failed, please apply permission ohos.permission.PREPARE_APP_TERMINATE");
-        return false;
-    }
-    return true;
 }
 
 void UIAbilityLifecycleManager::SetSessionHandler(const sptr<ISessionHandler> &handler)
@@ -2757,6 +2739,13 @@ int32_t UIAbilityLifecycleManager::DoCallerProcessAttachment(std::shared_ptr<Abi
     return statusBarDelegateManager->DoCallerProcessAttachment(abilityRecord);
 }
 
+int32_t UIAbilityLifecycleManager::DoCallerProcessDetachment(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    auto statusBarDelegateManager = GetStatusBarDelegateManager();
+    CHECK_POINTER_AND_RETURN(statusBarDelegateManager, ERR_INVALID_VALUE);
+    return statusBarDelegateManager->DoCallerProcessDetachment(abilityRecord);
+}
+
 bool UIAbilityLifecycleManager::CheckPrepareTerminateTokens(const std::vector<sptr<IRemoteObject>> &tokens,
     uint32_t &tokenId, std::map<std::string, std::vector<sptr<IRemoteObject>>> &tokensPerModuleName)
 {
@@ -2787,6 +2776,72 @@ bool UIAbilityLifecycleManager::CheckPrepareTerminateTokens(const std::vector<sp
     return true;
 }
 
+void UIAbilityLifecycleManager::HandleAbilityStageOnPrepareTerminationTimeout(
+    int32_t pid, const std::string &moduleName, const std::vector<sptr<IRemoteObject>> &tokens)
+{
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "handle abilityStage.onPrepareTermination timeout, token size=%{public}zu",
+        tokens.size());
+    for (auto token: tokens) {
+        TerminateSession(Token::GetAbilityRecordByToken(token));
+    }
+    auto iter = std::find_if(prepareTerminateByPidRecords_.begin(), prepareTerminateByPidRecords_.end(),
+        [pid, _moduleName = moduleName](const std::shared_ptr<PrepareTerminateByPidRecord> &record) {
+        return record->pid_ == pid && record->moduleName_ == _moduleName;
+    });
+    if (iter != prepareTerminateByPidRecords_.end()) {
+        prepareTerminateByPidRecords_.erase(iter);
+    }
+}
+
+std::vector<sptr<IRemoteObject>> UIAbilityLifecycleManager::PrepareTerminateAppAndGetRemainingInner(
+    int32_t pid, const std::string &moduleName, const std::vector<sptr<IRemoteObject>> &tokens)
+{
+    std::vector<sptr<IRemoteObject>> remainingTokens;
+    // execute onPrepareTerminate until timeout
+    std::unique_lock<std::mutex> lock(isTryPrepareTerminateByPidsDoneMutex_);
+    auto iter = std::find_if(prepareTerminateByPidRecords_.begin(), prepareTerminateByPidRecords_.end(),
+        [pid, _moduleName = moduleName](const std::shared_ptr<PrepareTerminateByPidRecord> &record) {
+        return record->pid_ == pid && record->moduleName_ == _moduleName;
+    });
+    if (iter != prepareTerminateByPidRecords_.end()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "record with (pid=%{public}d,moduleName=%{public}s) already exists",
+            pid, moduleName.c_str());
+        return remainingTokens;
+    }
+    std::shared_ptr<PrepareTerminateByPidRecord> record = std::make_shared<PrepareTerminateByPidRecord>(
+        pid, moduleName, false, 0, false);
+    prepareTerminateByPidRecords_.push_back(record);
+    auto condition = [record] {
+        if (record == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null record");
+            return false;
+        }
+        return record->isTryPrepareTerminateByPidsDone_.load();
+    };
+    auto task = [pid, _moduleName = moduleName]() {
+        DelayedSingleton<AppScheduler>::GetInstance()->PrepareTerminateApp(pid, _moduleName);
+    };
+    ffrt::submit(task);
+    if (!isTryPrepareTerminateByPidsCv_.wait_for(lock,
+        std::chrono::milliseconds(GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME), condition)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "wait timeout, kill immediately");
+        HandleAbilityStageOnPrepareTerminationTimeout(pid, moduleName, tokens);
+    } else if (!record->isExist_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareTermination/onPrepareTerminationAsync not exist");
+        remainingTokens.insert(remainingTokens.end(), tokens.begin(), tokens.end());
+    } else if (static_cast<AppExecFwk::PrepareTermination>(record->prepareTermination_) ==
+        AppExecFwk::PrepareTermination::CANCEL) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "PrepareTerminate cancel");
+    } else {
+        // Terminate immediately by default
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "PrepareTerminate immediately");
+        for (auto token: tokens) {
+            TerminateSession(Token::GetAbilityRecordByToken(token));
+        }
+    }
+    return remainingTokens;
+}
+
 std::vector<sptr<IRemoteObject>> UIAbilityLifecycleManager::PrepareTerminateAppAndGetRemaining(
     int32_t pid, const std::vector<sptr<IRemoteObject>> &tokens)
 {
@@ -2798,47 +2853,9 @@ std::vector<sptr<IRemoteObject>> UIAbilityLifecycleManager::PrepareTerminateAppA
     }
     std::vector<sptr<IRemoteObject>> remainingTokens;
     for (const auto& [moduleName, _tokens] : tokensPerModuleName) {
-        // execute onPrepareTerminate until timeout
-        std::unique_lock<std::mutex> lock(isTryPrepareTerminateByPidsDoneMutex_);
-        auto iter = std::find_if(prepareTerminateByPidRecords_.begin(), prepareTerminateByPidRecords_.end(),
-            [pid, _moduleName = moduleName](const std::shared_ptr<PrepareTerminateByPidRecord> &record) {
-            return record->pid_ == pid && record->moduleName_ == _moduleName;
-        });
-        if (iter != prepareTerminateByPidRecords_.end()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "record with (pid=%{public}d,moduleName=%{public}s) already exists",
-                pid, moduleName.c_str());
-            continue;
-        }
-        std::shared_ptr<PrepareTerminateByPidRecord> record = std::make_shared<PrepareTerminateByPidRecord>(
-            pid, moduleName, false, 0, false);
-        prepareTerminateByPidRecords_.push_back(record);
-        auto condition = [record] {
-            if (record == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "null record");
-                return false;
-            }
-            return record->isTryPrepareTerminateByPidsDone_.load();
-        };
-        auto task = [pid, _moduleName = moduleName]() {
-            DelayedSingleton<AppScheduler>::GetInstance()->PrepareTerminateApp(pid, _moduleName);
-        };
-        ffrt::submit(task);
-        if (!isTryPrepareTerminateByPidsCv_.wait_for(lock,
-            std::chrono::milliseconds(GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME), condition)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "wait timeout");
-            remainingTokens.insert(remainingTokens.end(), _tokens.begin(), _tokens.end());
-        } else if (!record->isExist_) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareTermination/onPrepareTerminationAsync not exist");
-            remainingTokens.insert(remainingTokens.end(), _tokens.begin(), _tokens.end());
-        } else if (static_cast<AppExecFwk::PrepareTermination>(record->prepareTermination_) ==
-            AppExecFwk::PrepareTermination::CANCEL) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "PrepareTerminate cancel");
-        } else {
-            // Terminate immediately by default
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "PrepareTerminate immediately");
-            for (auto token: _tokens) {
-                TerminateSession(Token::GetAbilityRecordByToken(token));
-            }
+        auto _remainingTokens = PrepareTerminateAppAndGetRemainingInner(pid, moduleName, _tokens);
+        if (!_remainingTokens.empty()) {
+            remainingTokens.insert(remainingTokens.end(), _remainingTokens.begin(), _remainingTokens.end());
         }
     }
     return remainingTokens;
@@ -2946,22 +2963,34 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     auto sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
 
-    if (!IsCallerInStatusBar(abilityRecord->GetInstanceKey()) && sessionInfo->processOptions != nullptr &&
-        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
-        !sessionInfo->processOptions->isRestartKeepAlive) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not add to status bar");
-        return ERR_START_OPTIONS_CHECK_FAILED;
-    }
-    if (sessionInfo->processOptions == nullptr ||
-        (!ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode) &&
-        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
-        !sessionInfo->processOptions->isRestartKeepAlive)) {
-        auto ret = DoCallerProcessAttachment(abilityRecord);
-        if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller attach to status bar failed, ret: %{public}d", ret);
+    do {
+        if (HiddenStartObserverManager::GetInstance().IsHiddenStart(abilityRecord->GetApplicationInfo().uid)) {
+            auto ret = DoCallerProcessDetachment(abilityRecord);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "caller detach to status bar failed, ret: %{public}d", ret);
+                return ERR_START_OPTIONS_CHECK_FAILED;
+            }
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "Hidden start allowed by observer.");
+            break;
+        }
+        if (!IsCallerInStatusBar(abilityRecord->GetInstanceKey()) && sessionInfo->processOptions != nullptr &&
+            !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
+            !sessionInfo->processOptions->isRestartKeepAlive) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not add to status bar");
             return ERR_START_OPTIONS_CHECK_FAILED;
         }
-    }
+        if (sessionInfo->processOptions == nullptr ||
+            (!ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode) &&
+            !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
+            !sessionInfo->processOptions->isRestartKeepAlive)) {
+            auto ret = DoCallerProcessAttachment(abilityRecord);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "caller attach to status bar failed, ret: %{public}d", ret);
+                return ERR_START_OPTIONS_CHECK_FAILED;
+            }
+        }
+    } while (false);
+
     auto callerSessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(callerSessionInfo, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(callerSessionInfo->sessionToken, ERR_INVALID_VALUE);

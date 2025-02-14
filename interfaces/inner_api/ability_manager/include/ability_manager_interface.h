@@ -69,6 +69,7 @@
 #include "window_manager_service_handler.h"
 #include "ability_first_frame_state_observer_interface.h"
 #endif
+#include "ihidden_start_observer.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -2028,6 +2029,26 @@ public:
     virtual void KillProcessWithPrepareTerminateDone(const std::string &moduleName,
         int32_t prepareTermination, bool isExist)
     {}
+
+    /**
+     * Register hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
+    {
+        return 0;
+    }
+
+    /**
+     * Unregister hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
+    {
+        return 0;
+    }
 };
 }  // namespace AAFwk
 }  // namespace OHOS

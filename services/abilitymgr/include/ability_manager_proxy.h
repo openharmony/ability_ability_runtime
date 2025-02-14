@@ -1609,6 +1609,20 @@ public:
     virtual void KillProcessWithPrepareTerminateDone(const std::string &moduleName,
         int32_t prepareTermination, bool isExist) override;
 
+    /**
+     * Register hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer) override;
+
+    /**
+     * Unregister hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

@@ -824,6 +824,10 @@ public:
         return taskHandler_;
     }
 
+    std::shared_ptr<TaskHandlerWrap> GetDelayClearReasonHandler() const
+    {
+        return delayClearReasonHandler_;
+    }
     /**
      * GetEventHandler, get the ability manager service's handler.
      *
@@ -1039,8 +1043,7 @@ public:
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
         bool isImplicit = false,
-        bool isUIAbilityOnly = false,
-        bool isAppCloneSelector = false);
+        bool isUIAbilityOnly = false);
 
     int StartAbilityInner(
         const Want &want,
@@ -1052,8 +1055,7 @@ public:
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
         bool isImplicit = false,
-        bool isUIAbilityOnly = false,
-        bool isAppCloneSelector = false);
+        bool isUIAbilityOnly = false);
 
     int32_t StartExtensionAbilityInner(
         const Want &want,
@@ -1128,8 +1130,7 @@ public:
         sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
-        bool isImplicit = false,
-        bool isAppCloneSelector = false);
+        bool isImplicit = false);
 
     int ImplicitStartAbilityAsCaller(
         const Want &want,
@@ -1929,6 +1930,24 @@ public:
      */
     virtual void KillProcessWithPrepareTerminateDone(const std::string &moduleName,
         int32_t prepareTermination, bool isExist) override;
+    std::shared_ptr<AppExitReasonHelper> GetAppExitReasonHelper()
+    {
+        return appExitReasonHelper_;
+    }
+
+    /**
+     * Register hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer) override;
+
+    /**
+     * Unregister hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer) override;
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1979,6 +1998,10 @@ protected:
     void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
     void OnStartProcessFailed(sptr<IRemoteObject> token) override;
+
+    void OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+        const std::string &bundleName, const std::vector<std::string> &abilityNames,
+        const std::vector<std::string> &uiExtensionNames) override;
 
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
@@ -2327,8 +2350,6 @@ private:
 
     void ReleaseAbilityTokenMap(const sptr<IRemoteObject> &token);
 
-    bool CheckPrepareTerminateEnable();
-
     bool CheckCollaboratorType(int32_t type);
 
     bool CheckUserIdActive(int32_t userId);
@@ -2481,7 +2502,6 @@ private:
      *  FALSE: white list unable.
      */
     bool whiteListassociatedWakeUpFlag_ = true;
-    bool isPrepareTerminateEnable_ = false;
     bool shouldBlockAllAppStart_ = false;
 
     int32_t uniqueId_ = 0;
@@ -2489,6 +2509,7 @@ private:
 
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
+    std::shared_ptr<TaskHandlerWrap> delayClearReasonHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
     ServiceRunningState state_;
 
@@ -2557,7 +2578,6 @@ private:
     int32_t ShowPickerDialog(const Want& want, int32_t userId, const sptr<IRemoteObject> &token);
     void InitFocusListener();
     void RegisterFocusListener();
-    void InitPrepareTerminateConfig();
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
 #endif
@@ -2570,7 +2590,7 @@ private:
 
     std::shared_ptr<AbilityDebugDeal> abilityDebugDeal_;
     std::shared_ptr<AppExitReasonHelper> appExitReasonHelper_;
-
+    
     ffrt::mutex globalLock_;
     ffrt::mutex bgtaskObserverMutex_;
     ffrt::mutex abilityTokenLock_;

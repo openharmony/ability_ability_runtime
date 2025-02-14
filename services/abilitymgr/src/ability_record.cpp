@@ -33,6 +33,7 @@
 #include "hitrace_meter.h"
 #include "image_source.h"
 #include "keep_alive_process_manager.h"
+#include "last_exit_detail_info.h"
 #include "multi_instance_utils.h"
 #include "os_account_manager_wrapper.h"
 #include "ui_service_extension_connection_constants.h"
@@ -355,6 +356,10 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     loadParam.instanceKey = instanceKey_;
     loadParam.isCallerSetProcess = IsCallerSetProcess();
     loadParam.customProcessFlag = customProcessFlag_;
+    auto sessionInfo = GetSessionInfo();
+    if (sessionInfo != nullptr) {
+        loadParam.persistentId = sessionInfo->persistentId;
+    }
     want_.RemoveParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED);
     if (KeepAliveProcessManager::GetInstance().IsKeepAliveBundle(abilityInfo_.applicationInfo.bundleName, -1)) {
         want_.SetParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED, true);
@@ -2988,10 +2993,26 @@ void AbilityRecord::SetLaunchReasonMessage(const std::string &launchReasonMessag
     lifeCycleStateInfo_.launchParam.launchReasonMessage = launchReasonMessage;
 }
 
-void AbilityRecord::SetLastExitReason(const ExitReason &exitReason)
+void AbilityRecord::SetLastExitReason(const ExitReason &exitReason, const AppExecFwk::RunningProcessInfo &processInfo,
+    const int64_t timestamp, bool withKillMsg)
 {
+    std::string exitMsg = exitReason.exitMsg;
+    std::string killMsg = "";
+    if (withKillMsg) {
+        killMsg = exitReason.exitMsg;
+    }
+    LastExitDetailInfo lastExitDetailInfo = {};
+    lastExitDetailInfo.pid = processInfo.pid_;
+    lastExitDetailInfo.uid = processInfo.uid_;
+    lastExitDetailInfo.exitSubReason = exitReason.subReason;
+    lastExitDetailInfo.rss = processInfo.rssValue;
+    lastExitDetailInfo.pss = processInfo.pssValue;
+    lastExitDetailInfo.timestamp = timestamp;
+    lastExitDetailInfo.processName = processInfo.processName_;
+    lastExitDetailInfo.exitMsg = killMsg;
     lifeCycleStateInfo_.launchParam.lastExitReason = CovertAppExitReasonToLastReason(exitReason.reason);
-    lifeCycleStateInfo_.launchParam.lastExitMessage = exitReason.exitMsg;
+    lifeCycleStateInfo_.launchParam.lastExitMessage = exitMsg;
+    lifeCycleStateInfo_.launchParam.lastExitDetailInfo = lastExitDetailInfo;
 }
 
 LastExitReason AbilityRecord::CovertAppExitReasonToLastReason(const Reason exitReason)
@@ -3011,6 +3032,10 @@ LastExitReason AbilityRecord::CovertAppExitReasonToLastReason(const Reason exitR
             return LASTEXITREASON_RESOURCE_CONTROL;
         case REASON_UPGRADE:
             return LASTEXITREASON_UPGRADE;
+        case REASON_USER_REQUEST:
+            return LASTEXITREASON_USER_REQUEST;
+        case REASON_SIGNAL:
+            return LASTEXITREASON_SIGNAL;
         case REASON_UNKNOWN:
         default:
             return LASTEXITREASON_UNKNOWN;
