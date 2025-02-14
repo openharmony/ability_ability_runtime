@@ -78,9 +78,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
         infos->RecordAppExitReason(jsonStr, uid, appIndex, exitReason);
         int32_t pid = static_cast<int32_t>(GetU32Data(data));
         infos->RecordProcessExtensionExitReason(pid, jsonStr, exitReason, {}, false);
-        infos->RecordProcessExitReason(pid, exitReason);
+        infos->RecordProcessExitReason(pid, exitReason, false);
         uint32_t accessTokenId = static_cast<uint32_t>(GetU32Data(data));
-        infos->RecordProcessExitReason(pid, jsonStr, uid, accessTokenId, exitReason, {});
+        infos->RecordProcessExitReason(pid, jsonStr, uid, accessTokenId, exitReason, {}, false);
         std::vector<std::string> abilityLists;
         infos->GetActiveAbilityList(uid, abilityLists, pid);
         infos->GetActiveAbilityListFromUIAbilityManager(uid, abilityLists, pid);

@@ -2996,12 +2996,10 @@ void AbilityRecord::SetLaunchReasonMessage(const std::string &launchReasonMessag
 void AbilityRecord::SetLastExitReason(const ExitReason &exitReason, const AppExecFwk::RunningProcessInfo &processInfo,
     const int64_t timestamp, bool withKillMsg)
 {
+    std::string exitMsg = exitReason.exitMsg;
     std::string killMsg = "";
-    std::string exitMsg = "";
     if (withKillMsg) {
         killMsg = exitReason.exitMsg;
-    } else {
-        exitMsg = exitReason.exitMsg;
     }
     LastExitDetailInfo lastExitDetailInfo = {};
     lastExitDetailInfo.pid = processInfo.pid_;
