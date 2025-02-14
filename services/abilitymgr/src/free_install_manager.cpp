@@ -399,7 +399,8 @@ void FreeInstallManager::StartAbilityByPreInstall(int32_t recordId, FreeInstallI
     if (result == ERR_OK) {
         result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartUIAbilityByPreInstall(info);
     }
-    if (result != ERR_OK && info.isStartUIAbilityBySCBCalled) {
+    if (result != ERR_OK && result != ATOMIC_SERVICE_MINIMIZED && info.isStartUIAbilityBySCBCalled) {
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "StartUIAbilityByPreInstall failed: %{public}d", result);
         DelayedSingleton<AbilityManagerService>::GetInstance()->NotifySCBToHandleAtomicServiceException(
             info.want.GetStringParam(KEY_SESSION_ID),
             result, "start ability failed");
