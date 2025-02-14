@@ -433,8 +433,6 @@ private:
     void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void SetReceiverInfo(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord) const;
 
-    bool CheckPrepareTerminateEnable(const std::shared_ptr<AbilityRecord> &abilityRecord);
-
     /**
      * @brief Execute PrepareTerminateApp when it is implemented
      *
@@ -492,6 +490,10 @@ private:
     void PutSpecifiedFlag(int32_t requestId, const std::string &flag);
     bool CheckPrepareTerminateTokens(const std::vector<sptr<IRemoteObject>> &tokens,
         uint32_t &tokenId, std::map<std::string, std::vector<sptr<IRemoteObject>>> &tokensPerModuleName);
+    void HandleAbilityStageOnPrepareTerminationTimeout(int32_t pid, const std::string &moduleName,
+        const std::vector<sptr<IRemoteObject>> &tokens);
+    std::vector<sptr<IRemoteObject>> PrepareTerminateAppAndGetRemainingInner(int32_t pid, const std::string &moduleName,
+        const std::vector<sptr<IRemoteObject>> &tokens);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
