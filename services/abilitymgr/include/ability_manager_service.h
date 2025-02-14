@@ -1043,8 +1043,7 @@ public:
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
         bool isImplicit = false,
-        bool isUIAbilityOnly = false,
-        bool isAppCloneSelector = false);
+        bool isUIAbilityOnly = false);
 
     int StartAbilityInner(
         const Want &want,
@@ -1056,8 +1055,7 @@ public:
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
         bool isImplicit = false,
-        bool isUIAbilityOnly = false,
-        bool isAppCloneSelector = false);
+        bool isUIAbilityOnly = false);
 
     int32_t StartExtensionAbilityInner(
         const Want &want,
@@ -1132,8 +1130,7 @@ public:
         sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
-        bool isImplicit = false,
-        bool isAppCloneSelector = false);
+        bool isImplicit = false);
 
     int ImplicitStartAbilityAsCaller(
         const Want &want,
