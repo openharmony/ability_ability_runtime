@@ -295,9 +295,14 @@ int32_t AbilityRecord::GetUid()
     return uid_;
 }
 
-int32_t AbilityRecord::GetPid()
+pid_t AbilityRecord::GetPid()
 {
     return pid_;
+}
+
+void AbilityRecord::SetPid(pid_t pid)
+{
+    pid_ = pid;
 }
 
 void AbilityRecord::LoadUIAbility()
@@ -1546,7 +1551,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         if (schedulerObject == nullptr || !schedulerObject->AddDeathRecipient(schedulerDeathRecipient_)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "AddDeathRecipient failed");
         }
-        pid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid()); // set pid when ability attach to service.
+        SetPid(IPCSkeleton::GetCallingPid()); // set pid when ability attach to service.
         AfterLoaded();
         // add collaborator mission bind pid
         NotifyMissionBindPid();
@@ -1566,7 +1571,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
             }
         }
         scheduler_ = scheduler;
-        pid_ = 0;
+        SetPid(0);
     }
 }
 
