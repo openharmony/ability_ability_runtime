@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_SHELL_COMMAND_H
 
 #include <map>
+#include <sstream>
 #include <string>
 #include <functional>
 #include <vector>
@@ -27,9 +28,12 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 const std::string HELP_MSG_NO_OPTION = "error: you must specify an option at least.";
+const std::string AA_TOOL_URL = "https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/tools/aa-tool.md";
 
 const int OFFSET_REQUIRED_ARGUMENT = 2;
 }  // namespace
+
+struct AaToolErrorInfo;
 
 class ShellCommand {
 public:
@@ -60,6 +64,28 @@ protected:
     std::string name_;
     std::map<std::string, std::function<int()>> commandMap_;
     std::map<int32_t, std::string> messageMap_;
+};
+
+struct AaToolErrorInfo {
+    std::string code;
+    std::string message;
+    std::string cause;
+    std::vector<std::string> solutions;
+
+    std::string ToString()
+    {
+        std::ostringstream oss;
+
+        oss << "Error Code:" << code << "  Error Message:" << message << "\n";
+        oss << "Error cause: " << cause << "\n";
+        oss << "  Try the following:\n";
+        for (const auto& solution : solutions) {
+            oss << "  > " << solution << "\n";
+        }
+        oss << "  > MoreInfo: " << AA_TOOL_URL;
+
+        return oss.str();
+    }
 };
 }  // namespace AAFwk
 }  // namespace OHOS
