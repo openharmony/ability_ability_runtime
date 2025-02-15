@@ -104,6 +104,8 @@ public:
      */
     virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) override;
 
+    virtual Status NotifyProcessDialog(const std::string &progressKey, const sptr<IRemoteObject> &observer) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     bool WriteParam(MessageParcel &data, const Uri &uri, sptr<IDataAbilityObserver> dataObserver);

@@ -46,6 +46,7 @@ public:
         UNREGISTER_OBSERVER_EXT,
         UNREGISTER_OBSERVER_ALL_EXT,
         NOTIFY_CHANGE_EXT,
+        NOTIFY_PROCESS,
         TRANS_BUTT,
     };
     /**
@@ -115,6 +116,15 @@ public:
      * @return Returns SUCCESS on success, others on failure.
      */
     virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) = 0;
+
+    /**
+     * Notifies the registered observers of a change to the data resource specified by Uris.
+     *
+     * @param changeInfo Indicates the info of the data to operate.
+     *
+     * @return Returns SUCCESS on success, others on failure.
+     */
+    virtual Status NotifyProcessDialog(const std::string &progressKey, const sptr<IRemoteObject> &observer) = 0;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

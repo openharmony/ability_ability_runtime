@@ -36,7 +36,8 @@ const DataObsManagerStub::RequestFuncType DataObsManagerStub::HANDLES[TRANS_BUTT
     &DataObsManagerStub::RegisterObserverExtInner,
     &DataObsManagerStub::UnregisterObserverExtInner,
     &DataObsManagerStub::UnregisterObserverExtALLInner,
-    &DataObsManagerStub::NotifyChangeExtInner
+    &DataObsManagerStub::NotifyChangeExtInner,
+    &DataObsManagerStub::NotifyProcessDialogInner
 };
 
 DataObsManagerStub::DataObsManagerStub() {}
@@ -152,6 +153,21 @@ int32_t DataObsManagerStub::NotifyChangeExtInner(MessageParcel &data, MessagePar
     }
 
     reply.WriteInt32(NotifyChangeExt(changeInfo));
+    return SUCCESS;
+}
+
+int32_t DataObsManagerStub::NotifyProcessDialogInner(MessageParcel &data, MessageParcel &reply)
+{
+    // ChangeInfo changeInfo;
+    // if (!ChangeInfo::Unmarshalling(changeInfo, data)) {
+    //     LOG_ERROR("Failed to unmarshall changeInfo.");
+    //     return IPC_STUB_INVALID_DATA_ERR;
+    // }
+
+
+    std::string key = data.ReadString();
+    auto remote = data.ReadRemoteObject();
+    reply.WriteInt32(NotifyProcessDialog(key, remote));
     return SUCCESS;
 }
 }  // namespace AAFwk

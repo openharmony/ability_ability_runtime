@@ -105,6 +105,8 @@ public:
      */
     Status NotifyChangeExt(const ChangeInfo &changeInfo);
 
+    Status NotifyProcessDialog(const std::string &progressKey, const sptr<IRemoteObject> &observer);
+
 private:
     class SystemAbilityStatusChangeListener;
     /**
