@@ -325,6 +325,10 @@ public:
 
     void CleanEmptyAbilityStage();
 
+#ifdef SUPPORT_GRAPHICS
+    bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
+#endif
+
 private:
     void UpdateAppContextResMgr(const Configuration &config);
     bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);

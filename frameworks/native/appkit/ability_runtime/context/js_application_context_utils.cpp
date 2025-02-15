@@ -983,6 +983,89 @@ napi_value JsApplicationContextUtils::OnGetAllRunningInstanceKeys(napi_env env, 
     return result;
 }
 
+napi_value JsApplicationContextUtils::CreateDisplayContext(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnCreateDisplayContext, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnCreateDisplayContext(napi_env env, NapiCallbackInfo &info)
+{
+#ifdef SUPPORT_GRAPHICS
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not enough params");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is already released");
+        return CreateJsUndefined(env);
+    }
+
+    int64_t displayId = -1;
+    if (!ConvertFromJsValue(env, info.argv[0], displayId)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "parse displayId failed");
+        ThrowInvalidParamError(env, "parse param displayId failed, displayId must be number.");
+        return CreateJsUndefined(env);
+    }
+    if (displayId < 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "displayId is invalid, less than 0");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    uint64_t validDisplayId = static_cast<uint64_t>(displayId);
+
+    auto context = applicationContext->CreateDisplayContext(validDisplayId);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "failed to create context");
+        return CreateJsUndefined(env);
+    }
+    return CreateJsContext(env, context);
+#else
+    return CreateJsUndefined(env);
+#endif
+}
+
+napi_value JsApplicationContextUtils::CreateJsContext(napi_env env, const std::shared_ptr<Context> &context)
+{
+    napi_value value = CreateJsBaseContext(env, context, true);
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
+    if (systemModule == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid systemModule");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    napi_value contextObj = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "failed to get context native object");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    auto workContext = new (std::nothrow) std::weak_ptr<Context>(context);
+    auto status = napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachBaseContext,
+        workContext, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::APPKIT, "coerce context failed: %{public}d", status);
+        delete workContext;
+        return CreateJsUndefined(env);
+    }
+    auto res = napi_wrap(env, contextObj, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr module context is called");
+            delete static_cast<std::weak_ptr<Context> *>(data);
+        },
+        nullptr, nullptr);
+    if (res != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "napi_wrap failed:%{public}d", res);
+        delete workContext;
+        return CreateJsUndefined(env);
+    }
+    return contextObj;
+}
+
 void JsApplicationContextUtils::Finalizer(napi_env env, void *data, void *hint)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
@@ -1662,6 +1745,8 @@ void JsApplicationContextUtils::BindNativeApplicationContextOne(napi_env env, na
     BindNativeFunction(env, object, "setFont", MD_NAME, JsApplicationContextUtils::SetFont);
     BindNativeFunction(env, object, "clearUpApplicationData", MD_NAME,
         JsApplicationContextUtils::ClearUpApplicationData);
+    BindNativeFunction(env, object, "createDisplayContext", MD_NAME,
+        JsApplicationContextUtils::CreateDisplayContext);
 }
 
 void JsApplicationContextUtils::BindNativeApplicationContextTwo(napi_env env, napi_value object)
