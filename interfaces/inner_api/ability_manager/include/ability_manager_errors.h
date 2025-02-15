@@ -681,6 +681,12 @@ enum {
      */
     ERR_SAPAWN_PROCESS_FAILED = 2097284,
 
+    /*
+     * Result (2097285 - 2097295) for record exit reason failed.
+     */
+    ERR_RECORD_SIGNAL_REASON_FAILED = 2097285,
+    ERR_GET_EXIT_INFO_FAILED = 2097286,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */

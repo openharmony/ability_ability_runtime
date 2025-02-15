@@ -138,6 +138,8 @@ abilityms_files = [
 
   "src/ability_manager_event_subscriber.cpp",
 
+  "src/exit_info_data_manager.cpp",
+
   #utils
   "src/utils/ability_event_util.cpp",
   "src/utils/ability_permission_util.cpp",
