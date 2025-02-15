@@ -988,6 +988,9 @@ public:
     virtual int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE) override;
 
+    virtual int StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
+        const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg) override;
+
     /**
      * As abilityRequest is prepared, just execute starting ability procedure.
      * By now, this is only used by start_ability_sandbox_savefile.

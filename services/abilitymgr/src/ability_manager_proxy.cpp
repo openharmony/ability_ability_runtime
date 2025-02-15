@@ -3592,6 +3592,13 @@ int AbilityManagerProxy::UnRegisterMissionListener(const std::string &deviceId,
 int AbilityManagerProxy::StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
     const sptr<IRemoteObject> &callerToken, int32_t accountId)
 {
+    std::string errMsg;
+    return StartAbilityByCallWithErrMsg(want, connect, callerToken, accountId, errMsg);
+}
+
+int AbilityManagerProxy::StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
+    const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg)
+{
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerProxy::StartAbilityByCall begin.");
     int error;
     MessageParcel data;
@@ -3636,6 +3643,7 @@ int AbilityManagerProxy::StartAbilityByCall(const Want &want, const sptr<IAbilit
         return error;
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerProxy::StartAbilityByCall end.");
+    errMsg = reply.ReadString();
     return reply.ReadInt32();
 }
 
