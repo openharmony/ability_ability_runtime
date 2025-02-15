@@ -1729,7 +1729,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartUIAbilityByPreInstall_001, TestSiz
     sessionInfo->isMinimizedDuringFreeInstall = true;
     abilityMs->preStartSessionMap_.emplace(value, sessionInfo);
     ret = abilityMs->StartUIAbilityByPreInstall(taskInfo);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ATOMIC_SERVICE_MINIMIZED);
     sessionInfo->isMinimizedDuringFreeInstall = false;
     ret = abilityMs->StartUIAbilityByPreInstall(taskInfo);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
