@@ -31,6 +31,9 @@
 #include "task_handler_wrap.h"
 #include "uri.h"
 
+#include "ability_manager_interface.h"
+#include "refbase.h"
+
 namespace OHOS {
 namespace AAFwk {
 enum class DataObsServiceRunningState { STATE_NOT_START, STATE_RUNNING };
@@ -57,6 +60,7 @@ public:
     virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
     virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver) override;
     virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) override;
+    virtual Status NotifyProcessDialog(const std::string &progressKey, const sptr<IRemoteObject> &observer) override;
 
     /**
      * @brief DataObs hidumper.
@@ -71,6 +75,8 @@ private:
     void Dump(const std::vector<std::u16string>& args, std::string& result) const;
     void ShowHelp(std::string& result) const;
     Status DeepCopyChangeInfo(const ChangeInfo &src, ChangeInfo &dst) const;
+    void GetFocusedAppInfo(int32_t &windowId, sptr<IRemoteObject> &abilityToken) const;
+    sptr<IAbilityManager> GetAbilityManagerService() const;
 private:
     static constexpr std::uint32_t TASK_COUNT_MAX = 50;
     ffrt::mutex taskCountMutex_;

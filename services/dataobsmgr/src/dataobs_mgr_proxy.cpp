@@ -239,6 +239,51 @@ Status DataObsManagerProxy::NotifyChangeExt(const ChangeInfo &changeInfo)
     return reply.ReadInt32(res) ? static_cast<Status>(res) : IPC_ERROR;
 }
 
+Status DataObsManagerProxy::NotifyProcessDialog(const std::string &progressKey, const sptr<IRemoteObject> &observer)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        return IPC_PARCEL_ERROR;
+    }
+
+    // if (!ChangeInfo::Marshalling(progressKey, observer, data)) {
+    //     TAG_LOGE(AAFwkTag::DBOBSMGR,
+    //         "changeInfo marshalling error, changeType:%{public}ud, num:%{public}zu,"
+    //         "null data:%{public}d, size:%{public}ud",
+    //         changeInfo.changeType_, changeInfo.uris_.size(), changeInfo.data_ == nullptr, changeInfo.size_);
+    //     return INVALID_PARAM;
+    // }
+
+    if (!data.WriteString(progressKey)) {
+        // TAG_LOGE(AAFwkTag::DBOBSMGR, "write uri error");
+        return INVALID_PARAM;
+    }
+
+    if (observer == nullptr) {
+        // TAG_LOGE(AAFwkTag::DBOBSMGR, "null dataObserver");
+        return INVALID_PARAM;
+    }
+
+    if (!data.WriteRemoteObject(observer)) {
+        // TAG_LOGE(AAFwkTag::DBOBSMGR, "write dataObserver error");
+        return INVALID_PARAM;
+    }
+
+    auto error = SendTransactCmd(IDataObsMgr::NOTIFY_PROCESS, data, reply, option);
+    if (error != NO_ERROR) {
+        // TAG_LOGE(AAFwkTag::DBOBSMGR,
+        //     "sendRequest error: %{public}d, changeType:%{public}ud, num:%{public}zu,"
+        //     "null data:%{public}d, size:%{public}ud",
+        //     error, changeInfo.changeType_, changeInfo.uris_.size(), changeInfo.data_ == nullptr, changeInfo.size_);
+        return IPC_ERROR;
+    }
+    int32_t res = IPC_ERROR;
+    return reply.ReadInt32(res) ? static_cast<Status>(res) : IPC_ERROR;
+}
+
 int32_t DataObsManagerProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {

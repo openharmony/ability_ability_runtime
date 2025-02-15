@@ -45,9 +45,13 @@ ohos_shared_library("dataobsms") {
   deps = [
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
     "${ability_runtime_services_path}/common:task_handler_wrap",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits"
   ]
 
+  defines = []
   external_deps = [
+    "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",
     "ffrt:libffrt",
@@ -57,6 +61,13 @@ ohos_shared_library("dataobsms") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (window_manager_use_sceneboard) {
+    external_deps += [ "window_manager:libwm_lite" ]
+    defines += [ "SCENE_BOARD_ENABLE" ]
+  } else {
+    external_deps += [ "window_manager:libwm" ]
+  }
 
   subsystem_name = "ability"
   part_name = "ability_runtime"
