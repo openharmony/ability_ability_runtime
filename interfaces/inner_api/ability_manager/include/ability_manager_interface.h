@@ -1048,7 +1048,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int LogoutUser(int32_t userId)
+    virtual int LogoutUser(int32_t userId, sptr<IUserCallback> callback = nullptr)
     {
         return 0;
     }

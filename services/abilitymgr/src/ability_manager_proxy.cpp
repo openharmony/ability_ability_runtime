@@ -3112,7 +3112,7 @@ int AbilityManagerProxy::StopUser(int userId, const sptr<IUserCallback> &callbac
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::LogoutUser(int32_t userId)
+int AbilityManagerProxy::LogoutUser(int32_t userId, sptr<IUserCallback> callback)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3124,6 +3124,16 @@ int AbilityManagerProxy::LogoutUser(int32_t userId)
     if (!data.WriteInt32(userId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail");
         return ERR_INVALID_VALUE;
+    }
+    if (callback == nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "callback is nullptr");
+        data.WriteBool(false);
+    } else {
+        data.WriteBool(true);
+        if (!data.WriteRemoteObject(callback->AsObject())) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write IUserCallback fail");
+            return ERR_INVALID_VALUE;
+        }
     }
     int error = SendRequest(AbilityManagerInterfaceCode::LOGOUT_USER, data, reply, option);
     if (error != NO_ERROR) {

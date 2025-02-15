@@ -30,6 +30,8 @@ public:
     void OnStopUserDone(int userId, int errcode) override
     {}
     void OnStartUserDone(int userId, int errcode) override {}
+
+    void OnLogoutUserDone(int userId, int errcode) override {}
 };
 
 class StopUserCallbackStubTest : public testing::Test {
@@ -79,7 +81,7 @@ HWTEST_F(StopUserCallbackStubTest, StopUserCallbackStubTest_002, TestSize.Level1
 {
     GTEST_LOG_(INFO) << "StopUserCallbackStubTest_002 start";
     std::shared_ptr<UserCallbackStub> backStub = std::make_shared<MockStopUserCallbackStub>();
-    uint32_t code = 2;
+    uint32_t code = 3;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;

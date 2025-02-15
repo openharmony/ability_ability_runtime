@@ -29,6 +29,11 @@ void UserCallbackProxy::OnStartUserDone(int userId, int errcode)
     SendRequestCommon(userId, errcode, IUserCallback::UserCallbackCmd::ON_START_USER_DONE);
 }
 
+void UserCallbackProxy::OnLogoutUserDone(int userId, int errcode)
+{
+    SendRequestCommon(userId, errcode, IUserCallback::UserCallbackCmd::ON_LOGOUT_USER_DONE);
+}
+
 void UserCallbackProxy::SendRequestCommon(int userId, int errcode, IUserCallback::UserCallbackCmd cmd)
 {
     MessageParcel data;

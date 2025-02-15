@@ -37,6 +37,14 @@ int UserCallbackStub::OnStartUserDoneInner(MessageParcel &data, MessageParcel &r
     return NO_ERROR;
 }
 
+int UserCallbackStub::OnLogoutUserDoneInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto accountId = data.ReadInt32();
+    auto errCode = data.ReadInt32();
+    OnLogoutUserDone(accountId, errCode);
+    return NO_ERROR;
+}
+
 int UserCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
@@ -54,6 +62,9 @@ int UserCallbackStub::OnRemoteRequest(
                 break;
             case UserCallbackCmd::ON_START_USER_DONE:
                 return OnStartUserDoneInner(data, reply);
+                break;
+            case UserCallbackCmd::ON_LOGOUT_USER_DONE:
+                return OnLogoutUserDoneInner(data, reply);
                 break;
         }
     }

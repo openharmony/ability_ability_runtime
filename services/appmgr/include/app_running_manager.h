@@ -36,6 +36,7 @@
 #include "record_query_result.h"
 #include "refbase.h"
 #include "running_process_info.h"
+#include "simple_process_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -272,6 +273,7 @@ public:
     bool ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, const std::string &instanceKey, std::list<pid_t> &pids,
         bool clearPageStack);
     bool GetPidsByUserId(int32_t userId, std::list<pid_t> &pids);
+    bool GetProcessInfosByUserId(int32_t userId, std::list<SimpleProcessInfo> &processInfos);
 
     void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
 
