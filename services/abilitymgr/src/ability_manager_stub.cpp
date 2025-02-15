@@ -2325,10 +2325,11 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     }
 
     int32_t accountId = data.ReadInt32();
-    int32_t result = StartAbilityByCall(*want, callback, callerToken, accountId);
+    std::string errMsg = "";
+    int32_t result = StartAbilityByCallWithErrMsg(*want, callback, callerToken, accountId, errMsg);
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "resolve call ability ret = %d", result);
-
+    reply.WriteString(errMsg);
     reply.WriteInt32(result);
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerStub::StartAbilityByCallInner end.");
