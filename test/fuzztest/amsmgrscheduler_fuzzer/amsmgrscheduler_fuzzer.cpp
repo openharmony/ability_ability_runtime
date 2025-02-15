@@ -98,7 +98,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     sptr<IAppStateCallback> callback;
     amsMgrScheduler->RegisterAppStateCallback(callback);
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
-    amsMgrScheduler->KillProcessesByUserId(userId);
+    amsMgrScheduler->KillProcessesByUserId(userId, false, nullptr);
     std::string bundleName(data, size);
     int accountId = static_cast<int>(GetU32Data(data));
     amsMgrScheduler->KillProcessWithAccount(bundleName, accountId);

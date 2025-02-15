@@ -1647,6 +1647,60 @@ int32_t AppMgrServiceInner::WaitProcessesExitAndKill(std::list<pid_t> &pids, con
     return result;
 }
 
+void AppMgrServiceInner::DoAllProcessExitCallback(std::list<SimpleProcessInfo> &processInfos,
+    int32_t userId, sptr<AAFwk::IUserCallback> callback)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "DoAllProcessExitCallback call");
+    if (callback == nullptr) {
+        return;
+    }
+    if (ProcessUtil::IsAllProcessKilled(processInfos)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "all process exit");
+        callback->OnLogoutUserDone(userId, ERR_OK);
+        return;
+    }
+    auto checkProcessExistCallback = [processInfos, userId, callback] () mutable {
+        TAG_LOGI(AAFwkTag::APPMGR, "checkProcessExistCallback call");
+        if (callback == nullptr) {
+            return;
+        }
+        if (ProcessUtil::IsAllProcessKilled(processInfos)) {
+            TAG_LOGI(AAFwkTag::APPMGR, "all process exit");
+            callback->OnLogoutUserDone(userId, ERR_OK);
+            return;
+        }
+        TAG_LOGI(AAFwkTag::APPMGR, "not all process exit");
+        callback->OnLogoutUserDone(userId, AAFwk::KILL_PROCESS_FAILED);
+    };
+    if (taskHandler_) {
+        taskHandler_->SubmitTaskJust(checkProcessExistCallback, "DelayCheckProcessExit",
+            AMSEventHandler::DELAY_CHECK_ALL_PROCESSES_EXITED);
+    }
+}
+
+int32_t AppMgrServiceInner::WaitProcessesExitAndKill(std::list<SimpleProcessInfo> &processInfos,
+    const int64_t startTime, const std::string& reason, int32_t userId, sptr<AAFwk::IUserCallback> callback)
+{
+    int32_t result = ERR_OK;
+    ProcessUtil::UpdateProcessNameByProcFile(processInfos);
+    if (WaitForRemoteProcessExit(processInfos, startTime)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "remote process exited successs");
+        if (callback) {
+            callback->OnLogoutUserDone(userId, ERR_OK);
+        }
+        return result;
+    }
+    for (auto iter = processInfos.begin(); iter != processInfos.end(); ++iter) {
+        auto singleRet = KillProcessByPid((*iter).pid, reason);
+        if (singleRet != 0 && singleRet != AAFwk::ERR_KILL_PROCESS_NOT_EXIST) {
+            TAG_LOGE(AAFwkTag::APPMGR, "killApplication fail for pid:%{public}d", (*iter).pid);
+            result = singleRet;
+        }
+    }
+    DoAllProcessExitCallback(processInfos, userId, callback);
+    return result;
+}
+
 int32_t AppMgrServiceInner::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
@@ -1735,7 +1789,7 @@ void AppMgrServiceInner::SendProcessExitEventTask(
         return;
     }
     auto pid = appRecord->GetPid();
-    auto exitResult = !ProcessExist(pid);
+    auto exitResult = !ProcessUtil::ProcessExist(pid);
     constexpr int32_t EXIT_SUCESS = 0;
     constexpr int32_t EXIT_FAILED = -1;
     AAFwk::EventInfo eventInfo;
@@ -2525,7 +2579,7 @@ void AppMgrServiceInner::GetChildrenProcesses(const std::shared_ptr<AppRunningRe
 
 int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string& reason)
 {
-    if (!ProcessExist(pid)) {
+    if (!ProcessUtil::ProcessExist(pid)) {
         TAG_LOGI(AAFwkTag::APPMGR, "null killProcessByPid, pid: %{public}d", pid);
         return AAFwk::ERR_KILL_PROCESS_NOT_EXIST;
     }
@@ -2602,12 +2656,12 @@ bool AppMgrServiceInner::CheckIsThreadInFoundation(pid_t pid)
 bool AppMgrServiceInner::WaitForRemoteProcessExit(std::list<pid_t> &pids, const int64_t startTime)
 {
     int64_t delayTime = SystemTimeMillisecond() - startTime;
-    if (CheckAllProcessExit(pids)) {
+    if (ProcessUtil::CheckAllProcessExit(pids)) {
         return true;
     }
     while (delayTime < KILL_PROCESS_TIMEOUT_MICRO_SECONDS) {
         usleep(KILL_PROCESS_DELAYTIME_MICRO_SECONDS);
-        if (CheckAllProcessExit(pids)) {
+        if (ProcessUtil::CheckAllProcessExit(pids)) {
             return true;
         }
         delayTime = SystemTimeMillisecond() - startTime;
@@ -2615,33 +2669,18 @@ bool AppMgrServiceInner::WaitForRemoteProcessExit(std::list<pid_t> &pids, const 
     return false;
 }
 
-bool AppMgrServiceInner::ProcessExist(pid_t pid)
+bool AppMgrServiceInner::WaitForRemoteProcessExit(std::list<SimpleProcessInfo> &processInfos, const int64_t startTime)
 {
-    char pid_path[128] = {0};
-    struct stat stat_buf;
-    if (!pid) {
-        return false;
-    }
-    if (snprintf_s(pid_path, sizeof(pid_path), sizeof(pid_path) - 1, "/proc/%d/status", pid) < 0) {
-        return false;
-    }
-    if (stat(pid_path, &stat_buf) == 0) {
+    int64_t delayTime = SystemTimeMillisecond() - startTime;
+    if (ProcessUtil::CheckAllProcessExit(processInfos)) {
         return true;
     }
-    return false;
-}
-
-bool AppMgrServiceInner::CheckAllProcessExit(std::list<pid_t> &pids)
-{
-    for (auto iter = pids.begin(); iter != pids.end();) {
-        if (!ProcessExist(*iter)) {
-            iter = pids.erase(iter);
-        } else {
-            iter++;
+    while (delayTime < KILL_PROCESS_TIMEOUT_MICRO_SECONDS) {
+        usleep(KILL_PROCESS_DELAYTIME_MICRO_SECONDS);
+        if (ProcessUtil::CheckAllProcessExit(processInfos)) {
+            return true;
         }
-    }
-    if (pids.empty()) {
-        return true;
+        delayTime = SystemTimeMillisecond() - startTime;
     }
     return false;
 }
@@ -2961,24 +3000,40 @@ void AppMgrServiceInner::KillProcessByAbilityToken(const sptr<IRemoteObject> &to
     }
 }
 
-void AppMgrServiceInner::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg)
+void AppMgrServiceInner::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg,
+    sptr<AAFwk::IUserCallback> callback)
 {
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
         return;
     }
-
+    int32_t result = ERR_OK;
     int64_t startTime = SystemTimeMillisecond();
-    std::list<pid_t> pids;
-    if (!appRunningManager_->GetPidsByUserId(userId, pids)) {
-        TAG_LOGI(AAFwkTag::APPMGR, "process corresponding uId unstart");
-        if (isNeedSendAppSpawnMsg) {
-            TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
-            SendAppSpawnUninstallDebugHapMsg(userId);
+    if (callback == nullptr) {
+        std::list<pid_t> pids;
+        if (!appRunningManager_->GetPidsByUserId(userId, pids)) {
+            TAG_LOGI(AAFwkTag::APPMGR, "process corresponding uId unstart");
+            if (isNeedSendAppSpawnMsg) {
+                TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
+                SendAppSpawnUninstallDebugHapMsg(userId);
+            }
+            return;
         }
-        return;
+        result = WaitProcessesExitAndKill(pids, startTime, "KillProcessesByUserId");
+    } else {
+        // for logout user to callback
+        std::list<SimpleProcessInfo> processInfos;
+        if (!appRunningManager_->GetProcessInfosByUserId(userId, processInfos)) {
+            TAG_LOGI(AAFwkTag::APPMGR, "process corresponding uId unstart");
+            callback->OnLogoutUserDone(userId, ERR_OK);
+            if (isNeedSendAppSpawnMsg) {
+                TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
+                SendAppSpawnUninstallDebugHapMsg(userId);
+            }
+            return;
+        }
+        result = WaitProcessesExitAndKill(processInfos, startTime, "KillProcessesByUserId", userId, callback);
     }
-    int result = WaitProcessesExitAndKill(pids, startTime, "KillProcessesByUserId");
     if (result == ERR_OK && isNeedSendAppSpawnMsg) {
         TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
         SendAppSpawnUninstallDebugHapMsg(userId);
@@ -5609,7 +5664,7 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
         for (auto iter : renderRecordMap) {
             if (iter.second != nullptr) {
                 renderPid = iter.second->GetPid();
-                if (ProcessExist(renderPid)) {
+                if (ProcessUtil::ProcessExist(renderPid)) {
                     TAG_LOGW(AAFwkTag::APPMGR,
                         "render process repeat, renderPid:%{public}d", renderPid);
                     return ERR_ALREADY_EXIST_RENDER;

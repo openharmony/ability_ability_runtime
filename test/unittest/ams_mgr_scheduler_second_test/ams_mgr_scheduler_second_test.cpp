@@ -313,8 +313,8 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_KillProcessesByUse
      * @tc.steps: step1. amsMgrScheduler isReady false
      * @tc.expected: step1. expect taskHandler_ time(0)
      */
-    amsMgrScheduler->KillProcessesByUserId(-1);
-    amsMgrScheduler->KillProcessesByUserId(-1, true);
+    amsMgrScheduler->KillProcessesByUserId(-1, false, nullptr);
+    amsMgrScheduler->KillProcessesByUserId(-1, true, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_KillProcessesByUserId_001 end");
 }
 
@@ -335,7 +335,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_KillProcessesByUse
     MyFlag::flag_ = 0;
     EXPECT_CALL(*taskHandler_, SubmitTaskInner(_, _)).Times(0);
     IPCSkeleton::SetCallingUid(-1);
-    amsMgrScheduler->KillProcessesByUserId(-1);
+    amsMgrScheduler->KillProcessesByUserId(-1, false, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_KillProcessesByUserId_002 end");
 }
 
@@ -357,7 +357,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_KillProcessesByUse
     MyFlag::flag_ = 0;
     EXPECT_CALL(*taskHandler_, SubmitTaskInner(_, _)).Times(0);
     IPCSkeleton::SetCallingUid(Constants::FOUNDATION_UID);
-    amsMgrScheduler->KillProcessesByUserId(-1);
+    amsMgrScheduler->KillProcessesByUserId(-1, false, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_KillProcessesByUserId_003 end");
 }
 
@@ -380,7 +380,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_KillProcessesByUse
     MockNativeToken::SetNativeToken();
     MyFlag::flag_ = 1;
     EXPECT_CALL(*taskHandler_, SubmitTaskInner(_, _)).Times(AtLeast(1)).WillRepeatedly(Return(nullptr));
-    amsMgrScheduler->KillProcessesByUserId(-1);
+    amsMgrScheduler->KillProcessesByUserId(-1, false, nullptr);
     MyFlag::flag_ = 0;
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_KillProcessesByUserId_004 end");
 }

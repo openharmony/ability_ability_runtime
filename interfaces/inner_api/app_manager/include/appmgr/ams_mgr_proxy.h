@@ -93,7 +93,8 @@ public:
      * @param isNeedSendAppSpawnMsg, true send appSpawn message otherwise not send.
      * @return
      */
-    virtual void KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg = false) override;
+    virtual void KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg = false,
+        sptr<AAFwk::IUserCallback> callback = nullptr) override;
 
     /**
      * KillProcessesByPids, only in process call is allowed,

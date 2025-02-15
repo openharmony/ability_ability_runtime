@@ -32,7 +32,8 @@ public:
     MOCK_METHOD2(UpdateAbilityState, AppMgrResultCode(const sptr<IRemoteObject>& token, const AbilityState state));
     MOCK_METHOD3(KillApplication, AppMgrResultCode(const std::string&, const bool clearPageStack, int32_t));
     MOCK_METHOD1(KillProcessByAbilityToken, AppMgrResultCode(const sptr<IRemoteObject>& token));
-    MOCK_METHOD2(KillProcessesByUserId, AppMgrResultCode(int32_t userId, bool isNeedSendAppSpawnMsg));
+    MOCK_METHOD3(KillProcessesByUserId, AppMgrResultCode(int32_t userId, bool isNeedSendAppSpawnMsg,
+        sptr<AAFwk::IUserCallback> callback));
     MOCK_METHOD1(AbilityAttachTimeOut, void(const sptr<IRemoteObject>& token));
     MOCK_METHOD2(GetRunningProcessInfoByToken, void((const sptr<IRemoteObject>& token,
         AppExecFwk::RunningProcessInfo& info)));
