@@ -1622,13 +1622,14 @@ std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
     return systemKitsMap;
 }
 
-void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName)
+void JsRuntime::SetPkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName)
 {
     auto iterator = pkgContextInfoJsonStringMap_.find(moduleName);
     if (iterator == pkgContextInfoJsonStringMap_.end()) {
         pkgContextInfoJsonStringMap_[moduleName] = hapPath;
         packageNameList_[moduleName] = packageName;
         auto vm = GetEcmaVm();
+        CHECK_POINTER_AND_RETURN(vm,);
         std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
         std::map<std::string, std::string> pkgAliasMap;
         JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(
@@ -1639,7 +1640,7 @@ void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hap
     }
 }
 
-void JsRuntime::UpdatePkgContextInfoJsonEx(const std::string& moduleName, const std::string& hapPath,
+void JsRuntime::UpdatePkgContextInfoJson(const std::string& moduleName, const std::string& hapPath,
     const std::string& packageName)
 {
     std::map<std::string, std::string> pkgContextInfoJsonStringMap;
@@ -1647,6 +1648,7 @@ void JsRuntime::UpdatePkgContextInfoJsonEx(const std::string& moduleName, const 
     std::map<std::string, std::string> packageNameList;
     packageNameList[moduleName] = packageName;
     auto vm = GetEcmaVm();
+    CHECK_POINTER_AND_RETURN(vm,);
     std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
     std::map<std::string, std::string> pkgAliasMap;
     JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(pkgContextInfoJsonStringMap, pkgContextInfoMap, pkgAliasMap);
