@@ -857,6 +857,11 @@ enum NativeFreeInstallError {
      */
     CONTINUE_FREE_INSTALL_FAILED = 29360205,
 
+    /*
+     * Result(29360206) for atomic service minimized.
+     */
+    ATOMIC_SERVICE_MINIMIZED = 29360206,
+
     /**
      * Undefine error code.
      */
