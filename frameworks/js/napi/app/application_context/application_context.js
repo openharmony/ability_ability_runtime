@@ -208,7 +208,11 @@ class ApplicationContext {
   getAllRunningInstanceKeys() {
     return this.__context_impl__.getAllRunningInstanceKeys();
   }
-  
+
+  createDisplayContext(displayId) {
+    return this.__context_impl__.createDisplayContext(displayId);
+  }
+
   set area(mode) {
     return this.__context_impl__.switchArea(mode);
   }

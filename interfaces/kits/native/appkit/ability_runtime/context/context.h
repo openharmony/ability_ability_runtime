@@ -268,6 +268,18 @@ public:
      */
     virtual Global::Resource::DeviceType GetDeviceType() const = 0;
 
+#ifdef SUPPORT_GRAPHICS
+    /**
+     * @brief Create a context by displayId. This Context updates the density and direction properties
+     * based on the displayId, while other property values remain the same as in the original Context.
+     *
+     * @param displayId Indicates the displayId.
+     *
+     * @return Returns the context with the specified displayId.
+     */
+    virtual std::shared_ptr<Context> CreateDisplayContext(uint64_t displayId) = 0;
+#endif
+
     /**
      * @brief Getting derived class
      *
