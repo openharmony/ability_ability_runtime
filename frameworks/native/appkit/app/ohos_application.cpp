@@ -36,6 +36,7 @@
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "runtime.h"
+#include "js_runtime.h"
 #include "startup_manager.h"
 #include "system_ability_definition.h"
 #include "syspara/parameter.h"
@@ -394,8 +395,8 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             TAG_LOGE(AAFwkTag::APPKIT, "null hapModuleInfo");
             return nullptr;
         }
-        if (runtime_) {
-            runtime_->UpdatePkgContextInfoJson(
+        if (runtime_ && (runtime_->GetLanguage() == AbilityRuntime::Runtime::Language::JS)) {
+            static_cast<AbilityRuntime::JsRuntime&>(*runtime_).SetPkgContextInfoJson(
                 hapModuleInfo->moduleName, hapModuleInfo->hapPath, hapModuleInfo->packageName);
         }
         SetAppEnv(hapModuleInfo->appEnvironments);

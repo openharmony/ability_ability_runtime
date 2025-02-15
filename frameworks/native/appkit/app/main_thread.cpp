@@ -2073,7 +2073,7 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& app
         return;
     }
     application_->UpdateApplicationInfoInstalled(appInfo);
-
+#ifndef CJ_FRONTEND
     auto& runtime = application_->GetRuntime();
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
@@ -2094,10 +2094,11 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& app
         TAG_LOGE(AAFwkTag::APPKIT, "GetHapModuleInfo failed");
         return;
     }
-    runtime->UpdatePkgContextInfoJsonEx(hapModuleInfo.moduleName, hapModuleInfo.hapPath, hapModuleInfo.packageName);
+    runtime->UpdatePkgContextInfoJson(hapModuleInfo.moduleName, hapModuleInfo.hapPath, hapModuleInfo.packageName);
     TAG_LOGI(AAFwkTag::APPKIT,
-        "UpdatePkgContextInfoJsonEx moduleName: %{public}s, hapPath: %{public}s, packageName: %{public}s",
+        "UpdatePkgContextInfoJson moduleName: %{public}s, hapPath: %{public}s, packageName: %{public}s",
         hapModuleInfo.moduleName.c_str(), hapModuleInfo.hapPath.c_str(), hapModuleInfo.packageName.c_str());
+#endif
 }
 
 void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
