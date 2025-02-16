@@ -1008,7 +1008,8 @@ public:
 
     void SetUid(int32_t uid);
     int32_t GetUid();
-    int32_t GetPid();
+    pid_t GetPid();
+    void SetPid(pid_t pid);
     void SetSwitchingPause(bool state);
     bool IsSwitchingPause();
     void SetOwnerMissionUserId(int32_t userId);
@@ -1291,7 +1292,7 @@ private:
 
     int32_t uiExtensionAbilityId_ = 0;                // uiextension ability id
     int32_t uid_ = 0;
-    int32_t pid_ = 0;
+    pid_t pid_ = 0;
     int32_t missionId_ = -1;
     int32_t ownerMissionUserId_ = -1;
     uint32_t extensionProcessMode_ = 0;       // new version

@@ -316,13 +316,16 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
     const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    if (!IsContainsAbilityInner(token)) {
+    if (!IsContainsAbility(token)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "Not in running list");
         return ERR_INVALID_VALUE;
     }
     auto&& abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    abilityRecord->SetPid(IPCSkeleton::GetCallingPid());
+    int32_t processAttachResult = DoProcessAttachment(abilityRecord);
+
+    std::lock_guard<ffrt::mutex> guard(sessionLock_);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "lifecycle name: %{public}s", abilityRecord->GetAbilityInfo().name.c_str());
     SetLastExitReason(abilityRecord);
 
