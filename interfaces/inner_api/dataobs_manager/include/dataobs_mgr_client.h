@@ -108,13 +108,13 @@ public:
     /**
      * Notifies the process observer with the given progress key and cancel observer.
      *
-     * @param progressKey Identifies the progress of a specific task.
+     * @param key Identifies the progress of a specific task.
 
      * @param observer Observer for monitoring the ongoing process.
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    Status NotifyProcessObserver(const std::string &progressKey, const sptr<IRemoteObject> &cancelObserver);
+    Status NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer);
 
 private:
     class SystemAbilityStatusChangeListener;

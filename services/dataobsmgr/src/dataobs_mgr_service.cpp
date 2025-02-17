@@ -341,8 +341,7 @@ sptr<IRemoteObject> DataObsMgrService::GetAbilityManagerService() const
     return remoteObject;
 }
 
-Status DataObsMgrService::NotifyProcessObserver(const std::string &progressKey,
-    const sptr<IRemoteObject> &cancelObserver)
+Status DataObsMgrService::NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer)
 {
     auto remote = GetAbilityManagerService();
     if (remote == nullptr) {
@@ -360,10 +359,10 @@ Status DataObsMgrService::NotifyProcessObserver(const std::string &progressKey,
     want.SetAction(PROGRESS_ABILITY);
     want.SetParam("promptText", PROMPT_TEXT);
     want.SetParam("remoteDeviceName", std::string());
-    want.SetParam("progressKey", progressKey);
+    want.SetParam("progressKey", key);
     want.SetParam("isRemote", false);
     want.SetParam("windowId", windowId);
-    want.SetParam("ipcCallback", cancelObserver);
+    want.SetParam("ipcCallback", observer);
     if (callerToken != nullptr) {
         want.SetParam("tokenKey", callerToken);
     } else {

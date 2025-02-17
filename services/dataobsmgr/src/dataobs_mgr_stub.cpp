@@ -159,8 +159,8 @@ int32_t DataObsManagerStub::NotifyChangeExtInner(MessageParcel &data, MessagePar
 int32_t DataObsManagerStub::NotifyProcessObserverInner(MessageParcel &data, MessageParcel &reply)
 {
     std::string key = data.ReadString();
-    auto cancelObserver = data.ReadRemoteObject();
-    reply.WriteInt32(NotifyProcessObserver(key, cancelObserver));
+    auto observer = data.ReadRemoteObject();
+    reply.WriteInt32(NotifyProcessObserver(key, observer));
     return SUCCESS;
 }
 }  // namespace AAFwk
