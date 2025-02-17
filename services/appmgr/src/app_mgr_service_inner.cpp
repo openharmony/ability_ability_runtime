@@ -6333,9 +6333,9 @@ void AppMgrServiceInner::ParseInfoToAppfreeze(const FaultData &faultData, int32_
     TAG_LOGW(AAFwkTag::APPMGR,
         "name: %{public}s, faultType: %{public}d, uid: %{public}d, pid: %{public}d, bundleName: %{public}s,"
         " processName: %{public}s, faultData.forceExit:%{public}d, faultData.waitSaveState:%{public}d,"
-        " isOccurException:%{public}d",
+        " isOccurException:%{public}d, stuckTimeout:%{public}u",
         faultData.errorObject.name.c_str(), faultData.faultType, uid, pid, bundleName.c_str(),
-        processName.c_str(), faultData.forceExit, faultData.waitSaveState, isOccurException);
+        processName.c_str(), faultData.forceExit, faultData.waitSaveState, isOccurException, faultData.stuckTimeout);
 }
 
 
