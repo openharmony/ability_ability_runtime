@@ -284,9 +284,6 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_UpdateConfiguration_0200, Test
     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_LIGHT);
     auto ret = appRunningManager->UpdateConfiguration(config);
     EXPECT_EQ(ret, ERR_OK);
-    EXPECT_NE(appRunningManager->configuration_, nullptr);
-    EXPECT_EQ(appRunningManager->configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE),
-        ConfigurationInner::COLOR_MODE_LIGHT);
 }
 
 /**

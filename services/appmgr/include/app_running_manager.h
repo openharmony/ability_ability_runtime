@@ -264,7 +264,6 @@ public:
     void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
     int32_t GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info);
 
-    void initConfig(const Configuration &config);
     void ClipStringContent(const std::regex &re, const std::string &source, std::string &afterCutStr);
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByRenderPid(const pid_t pid);
     std::shared_ptr<RenderRecord> OnRemoteRenderDied(const wptr<IRemoteObject> &remote);
@@ -347,8 +346,6 @@ public:
 
     bool HandleUserRequestClean(const sptr<IRemoteObject> &abilityToken, pid_t &pid, int32_t &uid);
 
-    void SetMultiUserConfigurationMgr(const std::shared_ptr<MultiUserConfigurationMgr>& multiUserConfigurationMgr);
-
     bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
 
 private:
@@ -367,10 +364,8 @@ private:
     std::mutex uiExtensionMapLock_;
     std::map<int32_t, std::pair<pid_t, pid_t>> uiExtensionLauncherMap_;
 
-    std::shared_ptr<Configuration> configuration_;
     std::mutex updateConfigurationDelayedLock_;
     std::map<const int32_t, bool> updateConfigurationDelayedMap_;
-    std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
