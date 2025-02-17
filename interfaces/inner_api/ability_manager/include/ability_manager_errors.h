@@ -677,9 +677,9 @@ enum {
     ERR_CREATE_START_MSG_FAILED = 2097283,
 
     /*
-     * Result (2097284) for create apawn process failed.
+     * Result (2097284) for create spawn process failed.
      */
-    ERR_SAPAWN_PROCESS_FAILED = 2097284,
+    ERR_SPAWN_PROCESS_FAILED = 2097284,
 
     /**
      * Native error(3000000) for target bundle not exist.
