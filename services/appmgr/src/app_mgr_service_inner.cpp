@@ -3795,7 +3795,7 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
             SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED,
                 static_cast<int32_t>(errCode));
         }
-        return AAFwk::ERR_SAPAWN_PROCESS_FAILED;
+        return AAFwk::ERR_SPAWN_PROCESS_FAILED;
     }
 
     #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
