@@ -22,6 +22,7 @@
 #include "string_ex.h"
 
 #include "ability_connect_callback_stub.h"
+#include "ability_manager_interface.h"
 #include "ability_manager_proxy.h"
 #include "dataobs_mgr_errors.h"
 #include "hilog_tag_wrapper.h"
@@ -325,7 +326,7 @@ void DataObsMgrService::GetFocusedAppInfo(int32_t &windowId, sptr<IRemoteObject>
     abilityToken = info.abilityToken_;
 }
 
-sptr<IAbilityManager> DataObsMgrService::GetAbilityManagerService() const
+sptr<IRemoteObject> DataObsMgrService::GetAbilityManagerService() const
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
@@ -337,17 +338,18 @@ sptr<IAbilityManager> DataObsMgrService::GetAbilityManagerService() const
         TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to get ability manager service.");
         return nullptr;
     }
-    return iface_cast<IAbilityManager>(remoteObject);
+    return remoteObject;
 }
 
 Status DataObsMgrService::NotifyProcessObserver(const std::string &progressKey,
     const sptr<IRemoteObject> &cancelObserver)
-{
-    auto abilityManager = GetAbilityManagerService();
-    if (abilityManager == nullptr) {
+{   
+    auto remote = GetAbilityManagerService();
+    if (remote == nullptr) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "Get ability manager failed.");
         return DATAOBS_PROXY_INNER_ERR;
     }
+    auto abilityManager = iface_cast<IAbilityManager>(remote);
 
     int32_t windowId;
     sptr<IRemoteObject> callerToken;
