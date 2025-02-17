@@ -239,8 +239,7 @@ Status DataObsManagerProxy::NotifyChangeExt(const ChangeInfo &changeInfo)
     return reply.ReadInt32(res) ? static_cast<Status>(res) : IPC_ERROR;
 }
 
-Status DataObsManagerProxy::NotifyProcessObserver(const std::string &progressKey,
-    const sptr<IRemoteObject> &cancelObserver)
+Status DataObsManagerProxy::NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -249,24 +248,19 @@ Status DataObsManagerProxy::NotifyProcessObserver(const std::string &progressKey
         return IPC_PARCEL_ERROR;
     }
 
-    if (!data.WriteString(progressKey)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "write progressKey error");
+    if (!data.WriteString(key)) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "write key error");
         return INVALID_PARAM;
     }
 
-    if (cancelObserver == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "null cancelObserver");
-        return INVALID_PARAM;
-    }
-    if (!data.WriteRemoteObject(cancelObserver)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "write cancelObserver error");
+    if (!data.WriteRemoteObject(observer)) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "write observer error");
         return INVALID_PARAM;
     }
 
     auto error = SendTransactCmd(IDataObsMgr::NOTIFY_PROCESS, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR,
-            "sendRequest error: %{public}d, progressKey:%{public}s", error, progressKey.c_str());
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error: %{public}d, key:%{public}s", error, key.c_str());
         return IPC_ERROR;
     }
     int32_t res = IPC_ERROR;

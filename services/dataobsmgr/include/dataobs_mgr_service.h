@@ -57,8 +57,7 @@ public:
     virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
     virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver) override;
     virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) override;
-    virtual Status NotifyProcessObserver(const std::string &progressKey,
-        const sptr<IRemoteObject> &cancelObserver) override;
+    virtual Status NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer) override;
 
     /**
      * @brief DataObs hidumper.
