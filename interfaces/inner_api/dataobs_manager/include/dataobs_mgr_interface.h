@@ -118,9 +118,11 @@ public:
     virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) = 0;
 
     /**
-     * Notifies the registered observers of a change to the data resource specified by Uris.
+     * Notifies the process observer with the given progress key and cancel observer.
      *
-     * @param changeInfo Indicates the info of the data to operate.
+     * @param progressKey Identifies the progress of a specific task.
+
+     * @param observer Observer for monitoring the ongoing process.
      *
      * @return Returns SUCCESS on success, others on failure.
      */

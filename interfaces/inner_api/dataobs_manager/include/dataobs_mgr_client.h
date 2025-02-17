@@ -110,7 +110,7 @@ public:
      *
      * @param progressKey Identifies the progress of a specific task.
 
-     * @param observer observer for monitoring the ongoing process.
+     * @param observer Observer for monitoring the ongoing process.
      *
      * @return Returns SUCCESS on success, others on failure.
      */
