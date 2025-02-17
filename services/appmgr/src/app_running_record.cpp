@@ -1801,6 +1801,15 @@ AppSpawnStartMsg AppRunningRecord::GetStartMsg()
     return startMsg_;
 }
 
+bool AppRunningRecord::IsDebug()
+{
+    if (IsDebugApp() || isNativeDebug_ || !perfCmd_.empty() || IsAttachDebug() || IsAssertionPause()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "debugApp, no need to handle");
+        return true;
+    }
+    return false;
+}
+
 void AppRunningRecord::SetDebugApp(bool isDebugApp)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "value is %{public}d", isDebugApp);
@@ -2145,7 +2154,7 @@ void AppRunningRecord::SetAttachDebug(const bool &isAttachDebug)
     isAttachDebug_ ? appLifeCycleDeal_->AttachAppDebug() : appLifeCycleDeal_->DetachAppDebug();
 }
 
-bool AppRunningRecord::isAttachDebug() const
+bool AppRunningRecord::IsAttachDebug() const
 {
     return isAttachDebug_;
 }
