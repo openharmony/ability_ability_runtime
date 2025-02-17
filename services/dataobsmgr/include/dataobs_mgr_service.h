@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include "cpp/mutex.h"
 
+#include "ability_manager_interface.h"
 #include "dataobs_mgr_inner.h"
 #include "dataobs_mgr_inner_ext.h"
 #include "dataobs_mgr_inner_pref.h"
@@ -30,9 +31,6 @@
 #include "system_ability.h"
 #include "task_handler_wrap.h"
 #include "uri.h"
-
-#include "ability_manager_interface.h"
-#include "refbase.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -60,7 +58,8 @@ public:
     virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
     virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver) override;
     virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) override;
-    virtual Status NotifyProcessDialog(const std::string &progressKey, const sptr<IRemoteObject> &observer) override;
+    virtual Status NotifyProcessObserver(const std::string &progressKey,
+        const sptr<IRemoteObject> &cancelObserver) override;
 
     /**
      * @brief DataObs hidumper.

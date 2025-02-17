@@ -21,18 +21,17 @@
 #include <unistd.h>
 #include "string_ex.h"
 
+#include "ability_connect_callback_stub.h"
+#include "ability_manager_proxy.h"
 #include "dataobs_mgr_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
+#include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
+#include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "common_utils.h"
 #include "securec.h"
-
-#include "ability_connect_callback_stub.h"
-#include "ability_manager_proxy.h"
-#include "in_process_call_wrapper.h"
-#include "iservice_registry.h"
 #ifdef SCENE_BOARD_ENABLE
 #include "window_manager_lite.h"
 #else
@@ -41,9 +40,9 @@
 
 namespace OHOS {
 namespace AAFwk {
-static constexpr const char *DEFAULT_LABEL = "unknown";
-static constexpr const char *PASTEBOARD_DIALOG_APP = "com.ohos.pasteboarddialog";
-static constexpr const char *PASTEBOARD_PROGRESS_ABILITY = "PasteboardProgressAbility";
+static constexpr const char *DIALOG_APP = "com.ohos.pasteboarddialog";
+static constexpr const char *PROGRESS_ABILITY = "PasteboardProgressAbility";
+static constexpr const char *PROMPT_TEXT = "PromptText_PasteBoard_Local";
 
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<DataObsMgrService>::GetInstance().get());
@@ -330,23 +329,24 @@ sptr<IAbilityManager> DataObsMgrService::GetAbilityManagerService() const
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
-        // ZLOGE("Failed to get ability manager.");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to get ability manager.");
         return nullptr;
     }
     sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
     if (!remoteObject) {
-        // ZLOGE("Failed to get ability manager service.");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to get ability manager service.");
         return nullptr;
     }
     return iface_cast<IAbilityManager>(remoteObject);
 }
 
-Status DataObsMgrService::NotifyProcessDialog(const std::string &progressKey, const sptr<IRemoteObject> &observer)
+Status DataObsMgrService::NotifyProcessObserver(const std::string &progressKey,
+    const sptr<IRemoteObject> &cancelObserver)
 {
     auto abilityManager = GetAbilityManagerService();
     if (abilityManager == nullptr) {
-        // ZLOGE("Get ability manager failed.");
-        return SUCCESS;
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "Get ability manager failed.");
+        return DATAOBS_PROXY_INNER_ERR;
     }
 
     int32_t windowId;
@@ -354,24 +354,24 @@ Status DataObsMgrService::NotifyProcessDialog(const std::string &progressKey, co
     GetFocusedAppInfo(windowId, callerToken);
 
     Want want;
-    want.SetElementName(PASTEBOARD_DIALOG_APP, PASTEBOARD_PROGRESS_ABILITY);
-    want.SetAction(PASTEBOARD_PROGRESS_ABILITY);
-    want.SetParam("promptText", std::string("PromptText_PasteBoard_Local"));
+    want.SetElementName(DIALOG_APP, PROGRESS_ABILITY);
+    want.SetAction(PROGRESS_ABILITY);
+    want.SetParam("promptText", PROMPT_TEXT);
     want.SetParam("remoteDeviceName", std::string());
     want.SetParam("progressKey", progressKey);
     want.SetParam("isRemote", false);
     want.SetParam("windowId", windowId);
-    want.SetParam("ipcCallback", observer);
+    want.SetParam("ipcCallback", cancelObserver);
     if (callerToken != nullptr) {
         want.SetParam("tokenKey", callerToken);
     } else {
-        // ZLOGW("CallerToken is nullptr.");
+        TAG_LOGW(AAFwkTag::DBOBSMGR, "CallerToken is nullptr.");
     }
 
     int32_t status = IN_PROCESS_CALL(abilityManager->StartAbility(want));
-
     if (status != SUCCESS) {
-        // ZLOGE("ShowProgress fail, status:%{public}d", status);
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "ShowProgress fail, status:%{public}d", status);
+        return DATAOBS_PROXY_INNER_ERR;
     }
     return SUCCESS;
 }

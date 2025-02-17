@@ -69,6 +69,13 @@ public:
         return SUCCESS;
     }
 
+    Status NotifyProcessObserver(const std::string &progressKey,
+        const sptr<IRemoteObject> &cancelObserver) override
+    {
+        onChangeCall_++;
+        return SUCCESS;
+    }
+
     void OnStart() {}
     void OnStop() {}
 
