@@ -10894,14 +10894,8 @@ int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const Start
 
     int32_t appIndex = 0;
     appIndex = !AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex) ? 0 : appIndex;
-    bool isStartupVisibilityHide =
-        (startOptions.processOptions->startupVisibility == StartupVisibility::STARTUP_HIDE);
-    bool hasStartBackgroundAbilityPermission = PermissionVerification::GetInstance()->
-        VerifyStartUIAbilityToHiddenPermission();
-    bool canStartupHide = (ProcessOptions::IsNoAttachmentMode(startOptions.processOptions->processMode) &&
-        isStartupVisibilityHide && hasStartBackgroundAbilityPermission);
-    CHECK_TRUE_RETURN_RET(!CheckCallingTokenId(element.GetBundleName(), userId, appIndex) &&
-        !canStartupHide, ERR_NOT_SELF_APPLICATION, "not self application no start hidden permission");
+    CHECK_TRUE_RETURN_RET(!CheckCallingTokenId(element.GetBundleName(), userId, appIndex),
+        ERR_NOT_SELF_APPLICATION, "not self application");
 
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
@@ -10910,9 +10904,8 @@ int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const Start
     AppExecFwk::RunningProcessInfo processInfo;
     DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
     CHECK_TRUE_RETURN_RET((ProcessOptions::IsAttachToStatusBarMode(startOptions.processOptions->processMode) &&
-        !uiAbilityManager->IsCallerInStatusBar(processInfo.instanceKey)) &&
-        !canStartupHide, ERR_START_OPTIONS_CHECK_FAILED,
-        "not in status bar no start hidden permission");
+        !uiAbilityManager->IsCallerInStatusBar(processInfo.instanceKey)), ERR_START_OPTIONS_CHECK_FAILED,
+        "not in status bar");
 
     auto abilityRecords = uiAbilityManager->GetAbilityRecordsByName(element);
     CHECK_TRUE_RETURN_RET(!abilityRecords.empty() && abilityRecords[0] &&

@@ -49,7 +49,8 @@ int32_t HiddenStartUtils::CheckHiddenStartSupported(const Want &want, const Star
     }
 
     if (options.processOptions == nullptr ||
-        options.processOptions->processMode != ProcessMode::NEW_HIDDEN_PROCESS) {
+        (!ProcessOptions::IsNewHiddenProcessMode(options.processOptions->processMode) &&
+        !ProcessOptions::IsNoAttachmentMode(options.processOptions->processMode))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "this processMode is not supported in hidden start");
         return ERR_INVALID_VALUE;
     }

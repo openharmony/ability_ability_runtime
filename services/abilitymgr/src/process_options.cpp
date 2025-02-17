@@ -108,5 +108,10 @@ bool ProcessOptions::IsAttachToStatusBarItemMode(ProcessMode value)
 {
     return (value == ProcessMode::ATTACH_TO_STATUS_BAR_ITEM);
 }
+
+bool ProcessOptions::IsNewHiddenProcessMode(ProcessMode value)
+{
+    return (value == ProcessMode::NEW_HIDDEN_PROCESS);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
