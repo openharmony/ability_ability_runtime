@@ -94,6 +94,7 @@ ohos_unittest("AmsRecentAppListTest") {
     "kv_store:distributeddata_inner",
     "kv_store:distributeddata_mgr",
     "memory_utils:libmeminfo",
+    "os_account:os_account_innerkits",
     "resource_schedule_service:ressched_client",
     "window_manager:libwm",
     "window_manager:libwsutils",

@@ -79,6 +79,7 @@ ohos_unittest("AmsAppLifeCycleTest") {
     "kv_store:distributeddata_inner",
     "memmgr:memmgrclient",
     "memory_utils:libmeminfo",
+    "os_account:os_account_innerkits",
     "resource_schedule_service:ressched_client",
   ]
 
