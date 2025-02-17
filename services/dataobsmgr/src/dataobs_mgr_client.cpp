@@ -230,13 +230,14 @@ Status DataObsMgrClient::NotifyChangeExt(const ChangeInfo &changeInfo)
     return dataObsManger->NotifyChangeExt(changeInfo);
 }
 
-Status DataObsMgrClient::NotifyProcessDialog(const std::string &progressKey, const sptr<IRemoteObject> &observer)
+Status DataObsMgrClient::NotifyProcessObserver(const std::string &progressKey,
+    const sptr<IRemoteObject> &cancelObserver)
 {
     auto [errCode, dataObsManger] = GetObsMgr();
     if (errCode != SUCCESS) {
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
-    return dataObsManger->NotifyProcessDialog(progressKey, observer);
+    return dataObsManger->NotifyProcessObserver(progressKey, cancelObserver);
 }
 
 void DataObsMgrClient::ResetService()

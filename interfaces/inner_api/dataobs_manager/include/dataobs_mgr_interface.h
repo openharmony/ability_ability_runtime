@@ -124,7 +124,7 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status NotifyProcessDialog(const std::string &progressKey, const sptr<IRemoteObject> &observer) = 0;
+    virtual Status NotifyProcessObserver(const std::string &progressKey, const sptr<IRemoteObject> &observer) = 0;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
