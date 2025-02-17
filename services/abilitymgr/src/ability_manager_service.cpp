@@ -4509,8 +4509,8 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
     }
 
     SetAbilityRequestSessionInfo(abilityRequest, targetExtensionType);
-    if (targetExtensionType != AppExecFwk::ExtensionAbilityType::REMOTE_NOTIFICATION) {
-        // this extension type is reported in connectManager instead of here
+    if (!ResSchedUtil::GetInstance().NeedReportByPidWhenConnect(abilityInfo)) {
+        // these extension type is reported in connectManager instead of here
         ReportEventToRSS(abilityInfo, callerToken);
     }
     return connectManager->ConnectAbilityLocked(abilityRequest, connect, callerToken, sessionInfo, connectInfo);
