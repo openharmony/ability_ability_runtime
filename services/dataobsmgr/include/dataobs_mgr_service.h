@@ -22,7 +22,6 @@
 #include <unordered_map>
 #include "cpp/mutex.h"
 
-#include "ability_manager_interface.h"
 #include "dataobs_mgr_inner.h"
 #include "dataobs_mgr_inner_ext.h"
 #include "dataobs_mgr_inner_pref.h"
@@ -75,7 +74,7 @@ private:
     void ShowHelp(std::string& result) const;
     Status DeepCopyChangeInfo(const ChangeInfo &src, ChangeInfo &dst) const;
     void GetFocusedAppInfo(int32_t &windowId, sptr<IRemoteObject> &abilityToken) const;
-    sptr<IAbilityManager> GetAbilityManagerService() const;
+    sptr<IRemoteObject> GetAbilityManagerService() const;
 private:
     static constexpr std::uint32_t TASK_COUNT_MAX = 50;
     ffrt::mutex taskCountMutex_;
