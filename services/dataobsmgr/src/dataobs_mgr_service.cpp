@@ -343,7 +343,7 @@ sptr<IRemoteObject> DataObsMgrService::GetAbilityManagerService() const
 
 Status DataObsMgrService::NotifyProcessObserver(const std::string &progressKey,
     const sptr<IRemoteObject> &cancelObserver)
-{   
+{
     auto remote = GetAbilityManagerService();
     if (remote == nullptr) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "Get ability manager failed.");
