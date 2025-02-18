@@ -258,7 +258,7 @@ int AppfreezeInner::NotifyANR(const FaultData& faultData)
     }
 
     int32_t pid = static_cast<int32_t>(getpid());
-    TAG_LOGI(AAFwkTag::APPDFR, "NotifyAppFault:%{public}s, pid:%{public}d, bundleName:%{public}s",
+    TAG_LOGW(AAFwkTag::APPDFR, "NotifyAppFault:%{public}s, pid:%{public}d, bundleName:%{public}s",
         faultData.errorObject.name.c_str(), pid, applicationInfo->bundleName.c_str());
 
     int ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
