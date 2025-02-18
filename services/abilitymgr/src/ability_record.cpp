@@ -2015,7 +2015,7 @@ void AbilityRecord::SaveResult(int resultCode, const Want *resultWant, std::shar
             callerSystemAbilityRecord->SetResult(*newWant, resultCode);
         } else {
             callerSystemAbilityRecord->SetResultToSystemAbility(callerSystemAbilityRecord, *newWant,
-                 resultCode);
+                resultCode);
         }
     }
 }
