@@ -2423,7 +2423,12 @@ int AbilityManagerStub::StopUserInner(MessageParcel &data, MessageParcel &reply)
 int AbilityManagerStub::LogoutUserInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t userId = data.ReadInt32();
-    int result = LogoutUser(userId);
+    sptr<IUserCallback> callback = nullptr;
+    bool isWithCallback = data.ReadBool();
+    if (isWithCallback) {
+        callback = iface_cast<IUserCallback>(data.ReadRemoteObject());
+    }
+    int result = LogoutUser(userId, callback);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "logoutUser fail");
         return ERR_INVALID_VALUE;

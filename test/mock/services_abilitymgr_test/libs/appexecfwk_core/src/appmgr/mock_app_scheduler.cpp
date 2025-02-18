@@ -72,7 +72,8 @@ void AppScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject>& token)
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::KillProcessByAbilityToken()");
 }
 
-void AppScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg)
+void AppScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg,
+    sptr<AAFwk::IUserCallback> callback)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::KillProcessesByUserId()");
 }

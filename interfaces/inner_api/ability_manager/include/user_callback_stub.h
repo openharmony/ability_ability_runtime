@@ -42,6 +42,7 @@ private:
 
     int OnStopUserDoneInner(MessageParcel &data, MessageParcel &reply);
     int OnStartUserDoneInner(MessageParcel &data, MessageParcel &reply);
+    int OnLogoutUserDoneInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

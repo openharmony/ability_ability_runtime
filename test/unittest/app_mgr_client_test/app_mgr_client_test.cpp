@@ -381,10 +381,10 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessesByUserId_001, TestSize.Leve
     auto result = appMgrClient->ConnectAppMgrService();
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
-    int ret = appMgrClient->KillProcessesByUserId(ERROR_USER_ID);
+    int ret = appMgrClient->KillProcessesByUserId(ERROR_USER_ID, false, nullptr);
     EXPECT_EQ(ret, AppMgrResultCode::RESULT_OK);
 
-    ret = appMgrClient->KillProcessesByUserId(ERROR_USER_ID, true);
+    ret = appMgrClient->KillProcessesByUserId(ERROR_USER_ID, true, nullptr);
     EXPECT_EQ(ret, AppMgrResultCode::RESULT_OK);
 }
 

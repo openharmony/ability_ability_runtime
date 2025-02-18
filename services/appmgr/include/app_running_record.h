@@ -48,6 +48,7 @@
 #include "app_spawn_client.h"
 #include "app_malloc_info.h"
 #include "app_jsheap_mem_info.h"
+#include "simple_process_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -685,6 +686,7 @@ public:
     void AddRenderRecord(const std::shared_ptr<RenderRecord> &record);
     void RemoveRenderRecord(const std::shared_ptr<RenderRecord> &record);
     void RemoveRenderPid(pid_t pid);
+    void GetRenderProcessInfos(std::list<SimpleProcessInfo> &processInfos);
     bool ConstainsRenderPid(pid_t renderPid);
     std::shared_ptr<RenderRecord> GetRenderRecordByPid(const pid_t pid);
     std::map<int32_t, std::shared_ptr<RenderRecord>> GetRenderRecordMap();
@@ -816,6 +818,7 @@ public:
     std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(pid_t pid);
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
     int32_t GetChildProcessCount();
+    void GetChildProcessInfos(std::list<SimpleProcessInfo> &processInfos);
 #endif //SUPPORT_CHILD_PROCESS
 
     void SetPreloadState(PreloadState state);

@@ -306,8 +306,13 @@ ErrCode AmsMgrStub::HandleKillProcessesByUserId(MessageParcel &data, MessageParc
 {
     HITRACE_METER(HITRACE_TAG_APP);
     int32_t userId = data.ReadInt32();
+    sptr<AAFwk::IUserCallback> callback = nullptr;
+    bool isWithCallback = data.ReadBool();
+    if (isWithCallback) {
+        callback = iface_cast<AAFwk::IUserCallback>(data.ReadRemoteObject());
+    }
 
-    KillProcessesByUserId(userId);
+    KillProcessesByUserId(userId, callback);
     return NO_ERROR;
 }
 

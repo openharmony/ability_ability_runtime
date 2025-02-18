@@ -558,8 +558,8 @@ HWTEST_F(AppSchedulerTest, AppScheduler_KillProcessesByUserId_001, TestSize.Leve
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::make_unique<AppExecFwk::AppMgrClient>();
     ASSERT_NE(DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_, nullptr);
     int32_t userId = 0;
-    DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByUserId(userId);
-    DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByUserId(userId, true);
+    DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByUserId(userId, false, nullptr);
+    DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByUserId(userId, true, nullptr);
 }
 
 /*

@@ -546,8 +546,8 @@ HWTEST_F(AmsMgrSchedulerTest, KillProcessesByUserId_001, TestSize.Level0)
     auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
     ASSERT_NE(amsMgrScheduler, nullptr);
     int32_t userId = 0;
-    amsMgrScheduler->KillProcessesByUserId(userId);
-    amsMgrScheduler->KillProcessesByUserId(userId, true);
+    amsMgrScheduler->KillProcessesByUserId(userId, false, nullptr);
+    amsMgrScheduler->KillProcessesByUserId(userId, true, nullptr);
 }
 
 /*
@@ -566,7 +566,7 @@ HWTEST_F(AmsMgrSchedulerTest, KillProcessesByUserId_002, TestSize.Level0)
     ASSERT_NE(amsMgrScheduler, nullptr);
     int32_t userId = 0;
     AAFwk::MyFlag::flag_ = 0;
-    amsMgrScheduler->KillProcessesByUserId(userId);
+    amsMgrScheduler->KillProcessesByUserId(userId, false, nullptr);
     AAFwk::MyFlag::flag_ = 1;
 }
 
@@ -586,7 +586,7 @@ HWTEST_F(AmsMgrSchedulerTest, KillProcessesByUserId_003, TestSize.Level0)
     ASSERT_NE(amsMgrScheduler, nullptr);
     int32_t userId = 0;
     AAFwk::MyFlag::flag_ = 1;
-    amsMgrScheduler->KillProcessesByUserId(userId);
+    amsMgrScheduler->KillProcessesByUserId(userId, false, nullptr);
 }
 
 /*

@@ -1908,7 +1908,7 @@ HWTEST_F(AbilityManagerClientBranchTest, LogoutUser_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "LogoutUser_0100 start";
     int userId = 1;
-    auto result = client_->LogoutUser(userId);
+    auto result = client_->LogoutUser(userId, nullptr);
 
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "LogoutUser_0100 end";

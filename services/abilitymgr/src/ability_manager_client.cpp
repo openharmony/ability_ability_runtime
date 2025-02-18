@@ -1202,11 +1202,11 @@ ErrCode AbilityManagerClient::StopUser(int accountId, sptr<IUserCallback> callba
     return abms->StopUser(accountId, callback);
 }
 
-ErrCode AbilityManagerClient::LogoutUser(int32_t accountId)
+ErrCode AbilityManagerClient::LogoutUser(int32_t accountId, sptr<IUserCallback> callback)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->LogoutUser(accountId);
+    return abms->LogoutUser(accountId, callback);
 }
 
 ErrCode AbilityManagerClient::RegisterSnapshotHandler(sptr<ISnapshotHandler> handler)
