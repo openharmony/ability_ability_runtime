@@ -35,7 +35,7 @@ public:
 
     int32_t SetAppExitReason(const std::string &bundleName, uint32_t accessTokenId,
         const std::vector<std::string> &abilityList, const AAFwk::ExitReason &exitReason,
-        const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg, bool cacheFlag = false);
+        const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg);
 
     int32_t GetAppExitReason(const std::string &bundleName, uint32_t accessTokenId, const std::string &abilityName,
         bool &isSetReason, AAFwk::ExitReason &exitReason, AppExecFwk::RunningProcessInfo &processInfo,
@@ -67,7 +67,7 @@ public:
     bool GetUIExtensionAbilityExitReason(const std::string &keyEx, AAFwk::ExitReason &exitReason,
         AppExecFwk::RunningProcessInfo &processInfo, int64_t &time_stamp, bool &withKillMsg);
 
-    int32_t UpdateSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName);
+    int32_t RecordSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName);
 
 private:
     DistributedKv::Status GetKvStore();

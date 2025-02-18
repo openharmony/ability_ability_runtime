@@ -37,6 +37,7 @@
 #ifdef WITH_DLP
 #include "dlp_utils.h"
 #endif // WITH_DLP
+#include "exit_info_data_manager.h"
 #include "ffrt.h"
 #include "ffrt_inner.h"
 #include "freeze_util.h"
@@ -11394,14 +11395,20 @@ void AbilityManagerService::OnCacheExitInfo(uint32_t accessTokenId, const AAFwk:
     const std::string &bundleName, const std::vector<std::string> &abilityNames,
     const std::vector<std::string> &uiExtensionNames)
 {
-    if (appExitReasonHelper_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "appExitReasonHelper_ null");
+    ExitCacheInfo cacheInfo = {};
+    cacheInfo.exitInfo = exitInfo;
+    cacheInfo.bundleName = bundleName;
+    cacheInfo.abilityNames = abilityNames;
+    cacheInfo.uiExtensionNames = uiExtensionNames;
+    if (!ExitInfoDataManager::GetInstance().AddExitInfo(accessTokenId, cacheInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "AddExitInfo failed");
         return;
     }
-    appExitReasonHelper_->CacheAppExitReason(accessTokenId, exitInfo, bundleName, abilityNames, uiExtensionNames);
-    auto delayClearReason = [ bundleName, accessTokenId ]() {
-        (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
-            DeleteAppExitReason(bundleName, accessTokenId);
+    auto delayClearReason = [ accessTokenId ]() {
+        if (!ExitInfoDataManager::GetInstance().DeleteExitInfo(accessTokenId)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "DeleteExitInfo failed");
+            return;
+        }
     };
     delayClearReasonHandler_->SubmitTaskJust(delayClearReason, "delayClearReason", CLEAR_REASON_DELAY_TIME);
 }

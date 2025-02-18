@@ -17,7 +17,9 @@
 
 #include <cstdint>
 
+#include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
+#include "exit_info_data_manager.h"
 #include "os_account_manager_wrapper.h"
 
 namespace OHOS {
@@ -95,7 +97,7 @@ bool AppExitReasonDataManager::CheckKvStore()
 
 int32_t AppExitReasonDataManager::SetAppExitReason(const std::string &bundleName, uint32_t accessTokenId,
     const std::vector<std::string> &abilityList, const AAFwk::ExitReason &exitReason,
-    const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg, bool cacheFlag)
+    const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg)
 {
     if (bundleName.empty() || accessTokenId == Security::AccessToken::INVALID_TOKENID) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid value");
@@ -103,9 +105,6 @@ int32_t AppExitReasonDataManager::SetAppExitReason(const std::string &bundleName
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName: %{public}s, tokenId: %{private}u", bundleName.c_str(), accessTokenId);
     std::string keyStr = std::to_string(accessTokenId);
-    if (cacheFlag) {
-        keyStr += std::to_string(processInfo.uid_);
-    }
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
@@ -268,7 +267,7 @@ void AppExitReasonDataManager::UpdateAppExitReason(uint32_t accessTokenId, const
     }
 }
 
-int32_t AppExitReasonDataManager::UpdateSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName)
+int32_t AppExitReasonDataManager::RecordSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName)
 {
     std::vector<DistributedKv::Entry> allEntries;
     DistributedKv::Status status = DistributedKv::SUCCESS;
@@ -288,27 +287,35 @@ int32_t AppExitReasonDataManager::UpdateSignalReason(int32_t pid, int32_t uid, i
         }
         return ERR_INVALID_VALUE;
     }
+    uint32_t accessTokenId = 0;
+    ExitCacheInfo cacheInfo = {};
+    if (!ExitInfoDataManager::GetInstance().GetExitInfo(pid, uid, accessTokenId, cacheInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not found, pid: %{public}d, uid: %{public}d", pid, uid);
+        return AAFwk::ERR_GET_EXIT_INFO_FAILED;
+    }
     auto ret = 0;
     AAFwk::ExitReason exitReason = {};
-    int64_t time_stamp = 0;
-    std::vector<std::string> abilityList;
+    exitReason.reason = AAFwk::REASON_SIGNAL;
+    exitReason.subReason = signal;
     AppExecFwk::RunningProcessInfo processInfo = {};
-    bool withKillMsg = false;
-    int32_t accessTokenId = 0;
+    processInfo.pid_ = cacheInfo.exitInfo.pid;
+    processInfo.uid_ = cacheInfo.exitInfo.uid;
+    processInfo.rssValue = cacheInfo.exitInfo.rss;
+    processInfo.pssValue = cacheInfo.exitInfo.pss;
+    processInfo.processName_ = cacheInfo.exitInfo.processName;
+
     for (const auto &item : allEntries) {
-        size_t pos = item.key.ToString().find(std::to_string(uid));
-        if (pos != std::string::npos) {
-            accessTokenId = std::stoi(item.key.ToString().substr(0, pos));
-            ConvertAppExitReasonInfoFromValue(item.value, exitReason, time_stamp, abilityList, processInfo,
-                withKillMsg);
-            exitReason = { AAFwk::REASON_SIGNAL, "signal:" + std::to_string(signal) };
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "key: %{public}s", item.key.ToString().c_str());
-            ret = SetAppExitReason(bundleName, accessTokenId, abilityList, exitReason, processInfo, false, false);
-            if (ret != 0) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAppExitReason failed, ret: %{public}d", ret);
-                return ERR_INVALID_VALUE;
-            }
+        if (item.key.ToString() == std::to_string(accessTokenId)) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "record exist, not record signal reason any more");
+            return 0;
         }
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "key: %{public}s", std::to_string(accessTokenId).c_str());
+    ret = SetAppExitReason(cacheInfo.bundleName, accessTokenId, cacheInfo.abilityNames, exitReason,
+        processInfo, false);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAppExitReason failed, ret: %{public}d", ret);
+        return AAFwk::ERR_RECORD_SIGNAL_REASON_FAILED;
     }
     return ret;
 }

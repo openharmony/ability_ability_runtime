@@ -33,6 +33,7 @@ ohos_moduletest("running_infos_module_test") {
     "${ability_runtime_services_path}/abilitymgr/src/app_exit_reason_data_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/assert_fault_callback_death_mgr.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/assert_fault_proxy.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/exit_info_data_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_ability_handler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_ability_handler/start_ability_sandbox_savefile.cpp",
