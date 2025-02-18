@@ -584,10 +584,6 @@ bool AppfreezeManager::IsProcessDebug(int32_t pid, std::string bundleName)
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
     auto it = appfreezeFilterMap_.find(bundleName);
     if (it != appfreezeFilterMap_.end() && it->second.pid == pid) {
-        if (g_betaVersion || g_developMode) {
-            TAG_LOGI(AAFwkTag::APPDFR, "filtration current device is beta or development do not report appfreeze");
-            return true;
-        }
         if (it->second.state == AppFreezeState::APPFREEZE_STATE_CANCELED) {
             TAG_LOGI(AAFwkTag::APPDFR, "filtration only once");
             return false;
@@ -706,7 +702,7 @@ bool AppfreezeManager::CancelAppFreezeDetect(int32_t pid, const std::string& bun
     AppFreezeInfo info;
     info.pid = pid;
     info.state = AppFreezeState::APPFREEZE_STATE_CANCELING;
-    appfreezeFilterMap_.emplace(bundleName, info);
+    appfreezeFilterMap_[bundleName] = info;
     return true;
 }
 
