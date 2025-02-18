@@ -45,6 +45,7 @@ private:
     int32_t UnregisterObserverExtInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterObserverExtALLInner(MessageParcel &data, MessageParcel &reply);
     int32_t NotifyChangeExtInner(MessageParcel &data, MessageParcel &reply);
+    int32_t NotifyProcessObserverInner(MessageParcel &data, MessageParcel &reply);
 
     using RequestFuncType = int32_t (DataObsManagerStub::*)(MessageParcel &data, MessageParcel &reply);
     static const RequestFuncType HANDLES[TRANS_BUTT];

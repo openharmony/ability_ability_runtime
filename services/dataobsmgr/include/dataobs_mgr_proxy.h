@@ -104,6 +104,17 @@ public:
      */
     virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) override;
 
+    /**
+     * Notifies the process observer with the given progress key and cancel observer.
+     *
+     * @param key Identifies the progress of a specific task.
+
+     * @param observer Observer for monitoring the ongoing process.
+     *
+     * @return Returns SUCCESS on success, others on failure.
+     */
+    virtual Status NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     bool WriteParam(MessageParcel &data, const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
