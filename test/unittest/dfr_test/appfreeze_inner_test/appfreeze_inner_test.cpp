@@ -256,5 +256,16 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_AppfreezeHandleOverReportCount_001, 
     appfreezeInner->AppfreezeHandleOverReportCount(isSixSecondEvent);
     EXPECT_TRUE(!isSixSecondEvent);
 }
+
+/**
+ * @tc.number: AppfreezeInner_GetFormatTime_001
+ * @tc.name: GetFormatTime
+ * @tc.desc: Verify that function GetFormatTime.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_GetFormatTime_001, TestSize.Level1)
+{
+    std::string ret = appfreezeInner->GetFormatTime();
+    EXPECT_TRUE(!ret.empty());
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
