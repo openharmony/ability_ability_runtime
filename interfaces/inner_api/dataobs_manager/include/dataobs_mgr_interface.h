@@ -46,6 +46,7 @@ public:
         UNREGISTER_OBSERVER_EXT,
         UNREGISTER_OBSERVER_ALL_EXT,
         NOTIFY_CHANGE_EXT,
+        NOTIFY_PROCESS,
         TRANS_BUTT,
     };
     /**
@@ -115,6 +116,17 @@ public:
      * @return Returns SUCCESS on success, others on failure.
      */
     virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) = 0;
+
+    /**
+     * Notifies the process observer with the given progress key and cancel observer.
+     *
+     * @param key Identifies the progress of a specific task.
+
+     * @param observer Observer for monitoring the ongoing process.
+     *
+     * @return Returns SUCCESS on success, others on failure.
+     */
+    virtual Status NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer) = 0;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

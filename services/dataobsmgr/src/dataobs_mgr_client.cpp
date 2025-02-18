@@ -230,6 +230,19 @@ Status DataObsMgrClient::NotifyChangeExt(const ChangeInfo &changeInfo)
     return dataObsManger->NotifyChangeExt(changeInfo);
 }
 
+Status DataObsMgrClient::NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer)
+{
+    if (key.empty() || observer == nullptr) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "Null observer, key:%{public}s", key.c_str());
+        return INVALID_PARAM;
+    }
+    auto [errCode, dataObsManger] = GetObsMgr();
+    if (errCode != SUCCESS) {
+        return DATAOBS_SERVICE_NOT_CONNECTED;
+    }
+    return dataObsManger->NotifyProcessObserver(key, observer);
+}
+
 void DataObsMgrClient::ResetService()
 {
     std::lock_guard<std::mutex> lock(mutex_);
