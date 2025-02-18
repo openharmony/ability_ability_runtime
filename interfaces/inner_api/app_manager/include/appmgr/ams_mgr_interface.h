@@ -27,6 +27,7 @@
 #include "iremote_object.h"
 #include "istart_specified_ability_response.h"
 #include "running_process_info.h"
+#include "user_callback.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -101,9 +102,11 @@ public:
      *
      * @param userId, the user id.
      * @param isNeedSendAppSpawnMsg, true send appSpawn message otherwise not send.
+     * @param callback, callback function for logout user.
      * @return
      */
-    virtual void KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg = false) = 0;
+    virtual void KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg = false,
+        sptr<AAFwk::IUserCallback> callback = nullptr) = 0;
 
     /**
      * KillProcessesByPids, only in process call is allowed,

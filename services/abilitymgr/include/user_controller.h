@@ -90,7 +90,7 @@ public:
      * @param userId id of Logout user.
      * @return 0 if the user has been successfully Logout.
      */
-    int32_t LogoutUser(int32_t userId);
+    int32_t LogoutUser(int32_t userId, sptr<IUserCallback> callback = nullptr);
 
     int32_t GetCurrentUserId();
 

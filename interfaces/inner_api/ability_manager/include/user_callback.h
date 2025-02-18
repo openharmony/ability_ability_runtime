@@ -38,12 +38,23 @@ public:
      */
     virtual void OnStartUserDone(int userId, int errcode) = 0;
 
+    /**
+     * @brief OnLogoutUserDone.
+     *
+     * @param userId userId.
+     * @param errcode errcode.
+     */
+    virtual void OnLogoutUserDone(int userId, int errcode) {}
+
     enum UserCallbackCmd {
         // ipc id for OnStopUserDone
         ON_STOP_USER_DONE = 0,
 
         // ipc id for OnStartUserDone
         ON_START_USER_DONE = 1,
+
+        // ipc id for OnLogoutUserDone
+        ON_LOGOUT_USER_DONE = 2,
 
         // maximum of enum
         CMD_MAX

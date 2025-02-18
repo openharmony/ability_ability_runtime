@@ -218,15 +218,20 @@ AppMgrResultCode AppMgrClient::KillProcessByAbilityToken(const sptr<IRemoteObjec
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg)
+AppMgrResultCode AppMgrClient::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg,
+    sptr<AAFwk::IUserCallback> callback)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            amsService->KillProcessesByUserId(userId, isNeedSendAppSpawnMsg);
+            amsService->KillProcessesByUserId(userId, isNeedSendAppSpawnMsg, callback);
             return AppMgrResultCode::RESULT_OK;
         }
+    }
+    if (callback) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        callback->OnLogoutUserDone(userId, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }

@@ -46,6 +46,14 @@ public:
      * @param errcode errcode.
      */
     virtual void OnStartUserDone(int userId, int errcode) override;
+
+    /**
+     * @brief OnLogoutUserDone.
+     *
+     * @param userId userId.
+     * @param errcode errcode.
+     */
+    virtual void OnLogoutUserDone(int userId, int errcode) override;
 private:
     void SendRequestCommon(int userId, int errcode, IUserCallback::UserCallbackCmd cmd);
 

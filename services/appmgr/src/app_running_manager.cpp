@@ -346,6 +346,34 @@ bool AppRunningManager::GetPidsByUserId(int32_t userId, std::list<pid_t> &pids)
     return (!pids.empty());
 }
 
+bool AppRunningManager::GetProcessInfosByUserId(int32_t userId, std::list<SimpleProcessInfo> &processInfos)
+{
+    auto appRunningMap = GetAppRunningRecordMap();
+    for (const auto &item : appRunningMap) {
+        const auto &appRecord = item.second;
+        if (appRecord == nullptr) {
+            continue;
+        }
+        int32_t id = -1;
+        if ((DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->
+            GetOsAccountLocalIdFromUid(appRecord->GetUid(), id) == 0) && (id == userId)) {
+            TAG_LOGD(AAFwkTag::APPMGR, "GetOsAccountLocalIdFromUid id: %{public}d", id);
+            pid_t pid = appRecord->GetPid();
+            if (pid > 0) {
+                auto processInfo = SimpleProcessInfo(pid, appRecord->GetProcessName());
+                processInfos.emplace_back(processInfo);
+                appRecord->GetRenderProcessInfos(processInfos);
+                #ifdef SUPPORT_CHILD_PROCESS
+                appRecord->GetChildProcessInfos(processInfos);
+                #endif // SUPPORT_CHILD_PROCESS
+                appRecord->ScheduleProcessSecurityExit();
+            }
+        }
+    }
+
+    return (!processInfos.empty());
+}
+
 int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(
     const ApplicationInfo& appInfo, const std::string& moduleName)
 {

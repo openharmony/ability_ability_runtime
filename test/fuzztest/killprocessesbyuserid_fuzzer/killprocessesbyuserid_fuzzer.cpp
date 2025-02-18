@@ -44,7 +44,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
 
-    if (appMgrClient->KillProcessesByUserId(userId) != AppMgrResultCode::RESULT_OK) {
+    if (appMgrClient->KillProcessesByUserId(userId, false, nullptr) != AppMgrResultCode::RESULT_OK) {
         return false;
     }
 

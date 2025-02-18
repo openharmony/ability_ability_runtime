@@ -140,7 +140,7 @@ public:
         return 0;
     }
 
-    virtual int LogoutUser(int32_t userId) override
+    virtual int LogoutUser(int32_t userId, sptr<IUserCallback> callback = nullptr) override
     {
         return 0;
     }

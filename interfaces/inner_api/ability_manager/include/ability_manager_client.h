@@ -980,7 +980,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode LogoutUser(int32_t accountId);
+    ErrCode LogoutUser(int32_t accountId, sptr<IUserCallback> callback = nullptr);
 
     /**
      * @brief Register the snapshot handler
