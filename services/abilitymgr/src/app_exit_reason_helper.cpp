@@ -202,28 +202,6 @@ int32_t AppExitReasonHelper::RecordProcessExtensionExitReason(
         processInfo, withKillMsg);
 }
 
-void AppExitReasonHelper::CacheAppExitReason(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
-    const std::string &bundleName, const std::vector<std::string> &abilityNames,
-    const std::vector<std::string> &uiExtensionNames)
-{
-    auto appExitReasonDataMgr = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance();
-    if (appExitReasonDataMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appExitReasonDataMgr");
-        return;
-    }
-    ExitReason exitReason = {};
-    AppExecFwk::RunningProcessInfo processInfo = {};
-    processInfo.pid_ = exitInfo.pid;
-    processInfo.uid_ = exitInfo.uid;
-    processInfo.rssValue = exitInfo.rss;
-    processInfo.pssValue = exitInfo.pss;
-    processInfo.processName_ = exitInfo.processName;
-    appExitReasonDataMgr->SetUIExtensionAbilityExitReason(bundleName, uiExtensionNames,
-        exitReason, processInfo, false);
-    appExitReasonDataMgr->SetAppExitReason(bundleName, accessTokenId, abilityNames, exitReason,
-        processInfo, false, true);
-}
-
 void AppExitReasonHelper::GetActiveAbilityList(int32_t uid, std::vector<std::string> &abilityLists,
     const int32_t pid)
 {

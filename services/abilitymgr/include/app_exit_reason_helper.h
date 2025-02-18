@@ -37,9 +37,6 @@ public:
         const int32_t pid, const std::string &bundleName, const ExitReason &exitReason,
         const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg);
     int32_t RecordProcessExitReason(const int32_t pid, const ExitReason &exitReason, bool fromKillWithReason);
-    void CacheAppExitReason(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
-        const std::string &bundleName, const std::vector<std::string> &abilityNames,
-        const std::vector<std::string> &uiExtensionNames);
 
 private:
     int32_t RecordProcessExitReason(const int32_t pid, const std::string bundleName, const int32_t uid,
