@@ -2011,6 +2011,7 @@ void AbilityRecord::SaveResult(int resultCode, const Want *resultWant, std::shar
                 PermissionVerification::GetInstance()->VerifyPermissionByTokenId(
                     abilityInfo_.applicationInfo.accessTokenId,
                     PermissionConstants::PERMISSION_ACCESS_AMS_FROM_FUSION)) {
+            want_.RemoveParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME);
             callerSystemAbilityRecord->SetResult(*newWant, resultCode);
         } else {
             callerSystemAbilityRecord->SetResultToSystemAbility(callerSystemAbilityRecord, *newWant,
