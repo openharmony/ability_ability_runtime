@@ -2728,14 +2728,16 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
         }
         bool isColdStart = true;
         int32_t pid = 0;
+        int32_t warmStartType = -1;
         for (auto const &info : runningProcessInfos) {
             if (info.uid_ == abilityInfo.applicationInfo.uid) {
-                isColdStart = false;
+                isColdStart = info.preloadMode_ == AppExecFwk::preloadMode::PRESS_DOWN;
                 pid = info.pid_;
+                warmStartType = static_cast<int32_t>(info.preloadMode_);
                 break;
             }
         }
-        ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart);
+        ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, warmStartType);
     }
 }
 
