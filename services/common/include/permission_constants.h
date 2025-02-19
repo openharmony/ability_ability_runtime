@@ -71,7 +71,7 @@ constexpr const char* PERMISSION_MANAGE_APP_KEEP_ALIVE = "ohos.permission.MANAGE
 constexpr const char* PERMISSION_MANAGE_APP_KEEP_ALIVE_INTERNAL = "ohos.permission.MANAGE_APP_KEEP_ALIVE_INTERNAL";
 constexpr const char* PERMISSION_SET_LAUNCH_REASON_MESSAGE = "ohos.permission.SET_LAUNCH_REASON_MESSAGE";
 constexpr const char* PERMISSION_NDK_START_SELF_UI_ABILITY = "ohos.permission.NDK_START_SELF_UI_ABILITY";
-constexpr const char* PERMISSION_ACCESS_AMS_FROM_FUSION = "ohos.permission.ACCESS_AMS_FROM_FUSION";
+constexpr const char* PERMISSION_ACCESS_AMS = "ohos.permission.FUSION_ACCESS";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS
