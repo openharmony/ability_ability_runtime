@@ -61,6 +61,7 @@ public:
     std::string GetCacheExtensionTypeList();
     bool IsAllowStartAbilityWithoutCallerToken(const std::string& bundleName, const std::string& abilityName);
     int32_t MaxChildProcess();
+    bool IsConnectSupportCrossUser();
 
 private:
     void LoadResidentProcessInExtremeMemory();
@@ -83,6 +84,8 @@ private:
     volatile DeviceConfiguration<bool> isLaunchEmbededUIAbility_ = {false, false};
     volatile DeviceConfiguration<bool> isSupportNativeChildProcess_ = {false, false};
     volatile DeviceConfiguration<bool> isSupportMultiInstance_ = {false, false};
+    std::mutex isConnectSupportCrossUserMutex_;
+    volatile DeviceConfiguration<bool> isConnectSupportCrossUser_ = {false, false};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
     std::mutex residentProcessInExtremeMemoryMutex_;
