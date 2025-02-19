@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -590,7 +590,7 @@ enum class AbilityManagerInterfaceCode {
     // query atomic service startup rule
     QUERY_ATOMIC_SERVICE_STARTUP_RULE = 6131,
 
-    // start seld uiability
+    // start self uiability
     NDK_START_SELF_UI_ABILITY = 6132,
 
     // prepare terminate done
@@ -607,6 +607,9 @@ enum class AbilityManagerInterfaceCode {
 
     // Query preload uiextension record
     QUERY_PRELOAD_UIEXTENSION_RECORD = 6137,
+
+    // start self uiability with startOptions
+    START_SELF_UI_ABILITY_WITH_START_OPTIONS = 6138,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
