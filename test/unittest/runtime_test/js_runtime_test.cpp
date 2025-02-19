@@ -1493,8 +1493,8 @@ HWTEST_F(JsRuntimeTest, RegisterQuickFixQueryFunc_0200, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdatePkgContextInfoJsonandUpdatePkgContextInfoJsonEx_0100
- * @tc.desc: JsRuntime test for UpdatePkgContextInfoJson and UpdatePkgContextInfoJsonEx.
+ * @tc.name: SetPkgContextInfoJsonandUpdatePkgContextInfoJson_0100
+ * @tc.desc: JsRuntime test for SetPkgContextInfoJson and UpdatePkgContextInfoJson.
  * @tc.type: FUNC
  */
 HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0100, TestSize.Level1)
@@ -1508,10 +1508,10 @@ HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0100, TestSize.Level1)
     jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
     panda::RuntimeOption options;
     jsRuntime->jsEnv_->vm_ = panda::JSNApi::CreateJSVM(options);
-    jsRuntime->UpdatePkgContextInfoJsonEx(moduleName, hapPath, packageName);
+    jsRuntime->UpdatePkgContextInfoJson(moduleName, hapPath, packageName);
 
     jsRuntime->pkgContextInfoJsonStringMap_.insert(std::make_pair(moduleName, "test2"));
-    jsRuntime->UpdatePkgContextInfoJson(moduleName, hapPath, packageName);
+    jsRuntime->SetPkgContextInfoJson(moduleName, hapPath, packageName);
     EXPECT_EQ(jsRuntime->pkgContextInfoJsonStringMap_[moduleName], "test2");
     TAG_LOGI(AAFwkTag::TEST, "UpdatePkgContextInfoJson_0100 end");
 }
