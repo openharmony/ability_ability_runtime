@@ -2129,6 +2129,15 @@ ErrCode AbilityManagerClient::StartSelfUIAbility(const Want &want)
     return abms->StartSelfUIAbility(want);
 }
 
+ErrCode AbilityManagerClient::StartSelfUIAbilityWithStartOptions(const Want &want,
+    const StartOptions &options)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->StartSelfUIAbilityWithStartOptions(want, options);
+}
+
 void AbilityManagerClient::PrepareTerminateAbilityDone(sptr<IRemoteObject> token, bool isTerminate)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call PrepareTerminateAbilityDone");

@@ -411,7 +411,8 @@
               "header_files": [
                 "ability_runtime_common.h",
                 "application_context.h",
-                "context_constant.h"
+                "context_constant.h",
+                "start_options.h"
               ]
             },
             "name": "//foundation/ability/ability_runtime/frameworks/c/ability_runtime:ability_runtime"
