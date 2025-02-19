@@ -576,5 +576,16 @@ bool PermissionVerification::VerifyStartSelfUIAbility(int tokenId) const
     TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
     return false;
 }
+
+bool PermissionVerification::VerifyFusionAccessPermission() const
+{
+    auto callerToken = GetCallingTokenID();
+    if (VerifyPermissionByTokenId(callerToken, PermissionConstants::PERMISSION_ACCESS_AMS_FROM_FUSION)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+        return true;
+    }
+    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
+    return false;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
