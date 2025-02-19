@@ -97,7 +97,6 @@ ohos_unittest("continuation_register_manager_proxy_test") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
-    "node:node_header_notice",
     "resource_management:global_resmgr",
   ]
 
