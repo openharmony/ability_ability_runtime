@@ -1320,8 +1320,8 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         if (abilityRecord != nullptr &&
                 PermissionVerification::GetInstance()->VerifyFusionAccessPermission() &&
                 abilityRequest.want.GetBoolParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME, false)) {
-            abilityRequest.want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, "");
-            abilityRequest.want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, "");
+            abilityRequest.want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, std::string(""));
+            abilityRequest.want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, std::string(""));
         }
         auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
