@@ -1330,6 +1330,7 @@ private:
 
     // page(ability) can be started by multi-pages(abilities), so need to store this ability's caller
     std::list<std::shared_ptr<CallerRecord>> callerList_ = {};
+    mutable ffrt::mutex callerListLock_;
 
     PacMap stateDatas_;             // ability saved ability state data
     WindowConfig windowConfig_;

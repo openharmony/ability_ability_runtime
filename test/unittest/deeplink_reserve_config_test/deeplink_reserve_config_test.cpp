@@ -46,11 +46,11 @@ void DeepLinkReserveConfigTest::TearDown()
 
 /*
  * Feature: deepLinkReserveConfig
- * Function: isLinkReserved
+ * Function: IsLinkReserved
  * SubFunction: NA
- * FunctionPoints: deepLinkReserveConfig isLinkReserved
+ * FunctionPoints: deepLinkReserveConfig IsLinkReserved
  * EnvConditions: NA
- * CaseDescription: Verify that the deepLinkReserveConfig isLinkReserved is normal.
+ * CaseDescription: Verify that the deepLinkReserveConfig IsLinkReserved is normal.
  */
 HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfigTest_0200, TestSize.Level1)
 {
@@ -80,7 +80,7 @@ HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfigTest_0200, TestSi
     deepLinkReserveConfig.LoadReservedUriList(DEFAULT_CONFIG);
     std::string linkString = "http://www.xxx.com:80/pathRegex";
     std::string bundleName = "just a test";
-    auto ans = deepLinkReserveConfig.isLinkReserved(linkString, bundleName);
+    auto ans = deepLinkReserveConfig.IsLinkReserved(linkString, bundleName);
     EXPECT_EQ(ans, true);
     GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfigTest_0200 end";
 }

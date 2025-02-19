@@ -1035,7 +1035,7 @@ bool ImplicitStartProcessor::IsActionImplicitStart(const Want &want, bool findDe
     }
 
     std::string bundleName = "";
-    if (DeepLinkReserveConfig::GetInstance().isLinkReserved(want.GetUriString(),
+    if (DeepLinkReserveConfig::GetInstance().IsLinkReserved(want.GetUriString(),
         bundleName)) {
         return false;
     }
