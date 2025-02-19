@@ -2516,6 +2516,7 @@ void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecor
     appRecord->GetBundleNames(info.bundleNames);
     info.processType_ = appRecord->GetProcessType();
     info.extensionType_ = appRecord->GetExtensionType();
+    info.preloadMode_ = appRecord->GetPreloadMode();
     if (appRecord->GetUserTestInfo() != nullptr && system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         info.isTestMode = true;
     }

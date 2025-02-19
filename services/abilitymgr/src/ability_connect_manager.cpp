@@ -3442,7 +3442,7 @@ int32_t AbilityConnectManager::ReportAbilityStartInfoToRSS(const AppExecFwk::Abi
         }
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilityStartInfoToRSS, abilityName:%{public}s", abilityInfo.name.c_str());
-    ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart);
+    ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, -1); // -1代表与预加载无关
     return ERR_OK;
 }
 
