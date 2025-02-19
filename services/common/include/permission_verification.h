@@ -119,6 +119,8 @@ struct VerificationInfo {
 
     bool VerifyStartSelfUIAbility(int tokenId) const;
 
+    bool VerifyFusionAccessPermission() const;
+
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);
 
