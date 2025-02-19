@@ -2603,9 +2603,9 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
         }
         ret = kill(pid, SIGNAL_KILL);
         if (reason == "OnRemoteDied") {
-            TAG_LOGI(AAFwkTag::APPMGR, "application is dead, double check, pid=%{public}d", pid);
+            TAG_LOGW(AAFwkTag::APPMGR, "application is dead, double check, pid=%{public}d", pid);
         } else {
-            TAG_LOGI(AAFwkTag::APPMGR, "kill pid %{public}d, ret:%{public}d, %{public}s",
+            TAG_LOGW(AAFwkTag::APPMGR, "kill pid %{public}d, ret:%{public}d, %{public}s",
                 pid, ret, killReason.c_str());
         }
     }
@@ -2639,8 +2639,8 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
         EVENT_KEY_PROCESS_NAME, eventInfo.processName, EVENT_KEY_MESSAGE, newReason,
         EVENT_KEY_FOREGROUND, foreground);
     TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
-        "%{public}d, processName=%{public}s, msg=%{public}s, FOREGROUND = %{public}d",
-        result, pid, eventInfo.processName.c_str(), newReason.c_str(), foreground);
+        "%{public}d, processName=%{public}s, msg=%{public}s, FOREGROUND=%{public}d, ret=%{public}d",
+        result, pid, eventInfo.processName.c_str(), newReason.c_str(), foreground, ret);
     return ret;
 }
 
@@ -6541,7 +6541,7 @@ int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleN
 {
     auto killAppTask = [pid, bundleName, faultData, isNeedExit, innerService = shared_from_this()]() {
         if (isNeedExit || (faultData.forceExit && !faultData.waitSaveState)) {
-            TAG_LOGI(AAFwkTag::APPMGR, "faultData: %{public}s,pid: %{public}d will exit because %{public}s",
+            TAG_LOGW(AAFwkTag::APPMGR, "faultData: %{public}s,pid: %{public}d will exit because %{public}s",
                 bundleName.c_str(), pid, innerService->FaultTypeToString(faultData.faultType).c_str());
             innerService->KillProcessByPid(pid, faultData.errorObject.name);
             return;
