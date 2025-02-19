@@ -580,7 +580,7 @@ bool PermissionVerification::VerifyStartSelfUIAbility(int tokenId) const
 bool PermissionVerification::VerifyFusionAccessPermission() const
 {
     auto callerToken = GetCallingTokenID();
-    if (VerifyPermissionByTokenId(callerToken, PermissionConstants::PERMISSION_ACCESS_AMS_FROM_FUSION)) {
+    if (VerifyPermissionByTokenId(callerToken, PermissionConstants::PERMISSION_FUSION_ACCESS)) {
         TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
         return true;
     }
