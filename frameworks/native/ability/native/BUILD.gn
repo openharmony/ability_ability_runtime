@@ -357,7 +357,6 @@ ohos_shared_library("abilitykit_native") {
     "ipc:rpc",
     "json:nlohmann_json_static",
     "napi:ace_napi",
-    "node:node_header_notice",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
     "window_manager:windowstage_kit",
@@ -736,7 +735,6 @@ ohos_shared_library("uiabilitykit_native") {
     "bundle_framework:appexecfwk_core",
     "libuv:uv",
     "napi:ace_napi",
-    "node:node_header_notice",
     "window_manager:libwm",
     "window_manager:libwsutils",
   ]
