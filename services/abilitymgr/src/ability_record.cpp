@@ -2007,12 +2007,16 @@ void AbilityRecord::SaveResult(int resultCode, const Want *resultWant, std::shar
             std::make_shared<AbilityResult>(caller->GetRequestCode(), resultCode, *newWant));
     } else {
         std::shared_ptr<SystemAbilityCallerRecord> callerSystemAbilityRecord = caller->GetSaCaller();
-        if (want_.GetBoolParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME, false)) {
-            want_.RemoveParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME);
-            callerSystemAbilityRecord->SetResult(*newWant, resultCode);
-        } else {
-            callerSystemAbilityRecord->SetResultToSystemAbility(callerSystemAbilityRecord, *newWant,
-                resultCode);
+        if (callerSystemAbilityRecord != nullptr) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "caller is system ability");
+            Want* newWant = const_cast<Want*>(resultWant);
+            if (want_.GetBoolParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME, false)) {
+                want_.RemoveParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME);
+                callerSystemAbilityRecord->SetResult(*newWant, resultCode);
+            } else {
+                callerSystemAbilityRecord->SetResultToSystemAbility(callerSystemAbilityRecord, *newWant,
+                    resultCode);
+            }
         }
     }
 }
