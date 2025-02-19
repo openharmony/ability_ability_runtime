@@ -217,6 +217,7 @@ void JsRuntime::DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug
 {
     ConnectServerManager::Get().StoreInstanceMessage(getproctid(), instanceId_);
     EcmaVM* vm = GetEcmaVm();
+    CHECK_POINTER(jsEnv_);
     auto dTask = jsEnv_->GetDebuggerPostTask();
     panda::JSNApi::DebugOption option = {ARK_DEBUGGER_LIB_PATH, isDebugApp ? isStartWithDebug : false};
     ConnectServerManager::Get().StoreDebuggerInfo(getproctid(), reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
@@ -364,6 +365,7 @@ void JsRuntime::DebuggerConnectionManager(bool isDebugApp, bool isStartWithDebug
         interval = JsperfProfilerCommandParse(dOption.perfCmd, DEFAULT_INTER_VAL);
     }
     EcmaVM* vm = GetEcmaVm();
+    CHECK_POINTER(jsEnv_);
     auto dTask = jsEnv_->GetDebuggerPostTask();
     panda::JSNApi::DebugOption option = {ARK_DEBUGGER_LIB_PATH, isDebugApp ? isStartWithDebug : false};
     ConnectServerManager::Get().StoreDebuggerInfo(getproctid(), reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
@@ -547,7 +549,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "ModuleName %{public}s", moduleName.c_str());
     if (env == nullptr) {
-        TAG_LOGI(AAFwkTag::JSRUNTIME, "null env");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
         return nullptr;
     }
 
@@ -890,6 +892,7 @@ void JsRuntime::InitSourceMap(const std::string hqfFilePath)
         return;
     }
     std::string str(soureMapBuffer.begin(), soureMapBuffer.end());
+    CHECK_POINTER(jsEnv_);
     auto sourceMapOperator = jsEnv_->GetSourceMapOperator();
     if (sourceMapOperator != nullptr) {
         auto sourceMapObj = sourceMapOperator->GetSourceMapObj();

@@ -71,6 +71,7 @@ ErrCode AbilityJumpInterceptor::DoProcess(AbilityInterceptorParam param)
             controlRule.callerPkg.c_str(), controlRule.targetPkg.c_str());
         auto sysDialogScheduler = DelayedSingleton<SystemDialogScheduler>::GetInstance();
         Want targetWant = param.want;
+        CHECK_POINTER_AND_RETURN(sysDialogScheduler, ERR_INVALID_VALUE);
         Want dialogWant = sysDialogScheduler->GetJumpInterceptorDialogWant(targetWant);
         AbilityUtil::ParseJumpInterceptorWant(dialogWant, controlRule.callerPkg);
         LoadAppLabelInfo(dialogWant, controlRule, param.userId);

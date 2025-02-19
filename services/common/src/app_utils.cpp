@@ -275,7 +275,8 @@ void AppUtils::LoadResidentProcessInExtremeMemory()
         TAG_LOGE(AAFwkTag::ABILITYMGR, "resident process failed");
         return;
     }
-    if (!object.contains(RESIDENT_PROCESS_IN_EXTREME_MEMORY)) {
+    if (!object.contains(RESIDENT_PROCESS_IN_EXTREME_MEMORY) ||
+        !object.at(RESIDENT_PROCESS_IN_EXTREME_MEMORY).is_array()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "resident process invalid");
         return;
     }
@@ -315,7 +316,8 @@ void AppUtils::LoadAllowNativeChildProcessApps()
         TAG_LOGE(AAFwkTag::ABILITYMGR, "load child process config failed");
         return;
     }
-    if (!object.contains(KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS)) {
+    if (!object.contains(KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS) ||
+        !object.at(KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS).is_array()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get key invalid");
         return;
     }
@@ -385,7 +387,8 @@ void AppUtils::LoadStartAbilityWithoutCallerToken()
         TAG_LOGE(AAFwkTag::DEFAULT, "token list failed");
         return;
     }
-    if (!object.contains(START_ABILITY_WITHOUT_CALLERTOKEN_TITLE)) {
+    if (!object.contains(START_ABILITY_WITHOUT_CALLERTOKEN_TITLE) ||
+        !object.at(START_ABILITY_WITHOUT_CALLERTOKEN_TITLE).is_array()) {
         TAG_LOGE(AAFwkTag::DEFAULT, "token config invalid");
         return;
     }

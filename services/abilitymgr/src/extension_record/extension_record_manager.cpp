@@ -700,6 +700,7 @@ void ExtensionRecordManager::TerminateTimeout(int32_t extensionRecordId)
 void ExtensionRecordManager::GetCallerTokenList(
     const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::list<sptr<IRemoteObject>> &callerList)
 {
+    CHECK_POINTER(abilityRecord);
     auto extensionRecordId = abilityRecord->GetUIExtensionAbilityId();
     auto sessionInfo = abilityRecord->GetSessionInfo();
     if (!sessionInfo) {
