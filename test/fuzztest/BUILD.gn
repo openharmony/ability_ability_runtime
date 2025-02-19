@@ -305,7 +305,6 @@ group("fuzztest") {
     "prepareterminate_fuzzer:fuzztest",
     "prestartnwebspawnprocess_fuzzer:fuzztest",
     "registerabilitylifecyclecallback_fuzzer:fuzztest",
-    "registerapplicationstateobserver_fuzzer:fuzztest",
     "registerconfigurationobserver_fuzzer:fuzztest",
     "registerenvironmentcallback_fuzzer:fuzztest",
     "registermissionlistener_fuzzer:fuzztest",
