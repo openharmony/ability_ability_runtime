@@ -713,6 +713,11 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
     option->SetRealParentId(sessionInfo->realHostWindowId);
     option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
     option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
+    if (context->isNotAllow != -1) {
+        bool isNotAllow = context->isNotAllow == 1 ? true : false;
+        TAG_LOGD(AAFwkTag::UI_EXT, "isNotAllow: %{public}d", isNotAllow);
+        option->SetConstrainedModal(isNotAllow);
+    }
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
 }
 
