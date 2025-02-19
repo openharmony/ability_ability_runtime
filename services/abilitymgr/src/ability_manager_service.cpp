@@ -167,7 +167,6 @@ constexpr const char* KEY_VISIBLE_ID = "ohos.anco.param.visible";
 constexpr const char* START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
 constexpr const char* BUNDLE_NAME_DIALOG = "com.ohos.amsdialog";
 constexpr const char* STR_PHONE = "phone";
-constexpr const char* BROKER_NAME = "broker";
 constexpr const char* PARAM_RESV_ANCO_CALLER_UID = "ohos.anco.param.callerUid";
 constexpr const char* PARAM_RESV_ANCO_CALLER_BUNDLENAME = "ohos.anco.param.callerBundleName";
 constexpr const char* PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME = "ohos.anco.param.isNeedUpdateName";
@@ -1097,7 +1096,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     if (callerToken != nullptr && !VerificationAllToken(callerToken) && !isSendDialogResult) {
         auto isSpecificSA = AAFwk::PermissionVerification::GetInstance()->
             CheckSpecificSystemAbilityAccessPermission(DMS_PROCESS_NAME) ||
-            AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(BROKER_NAME);
+            AAFwk::PermissionVerification::GetInstance()->VerifyFusionAccessPermission();
         if (!isSpecificSA) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s verificationAllToken failed", __func__);
             return ERR_INVALID_CALLER;
@@ -1319,9 +1318,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             abilityRequest.want.RemoveParam(DMS_PERSISTENT_ID);
         }
         if (abilityRecord != nullptr &&
-                PermissionVerification::GetInstance()->VerifyPermissionByTokenId(
-                abilityInfo_.applicationInfo.accessTokenId,
-                PermissionConstants::PERMISSION_ACCESS_AMS_FROM_FUSION) &&
+                PermissionVerification::GetInstance()->VerifyFusionAccessPermission() &&
                 abilityRequest.want.GetBoolParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME, false)) {
             abilityRequest.want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, "");
             abilityRequest.want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, "");
