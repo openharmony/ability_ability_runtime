@@ -48,6 +48,7 @@ ohos_fuzztest("AmsManagerFuzzTest") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
+    "hilog:libhilog",
     "hisysevent:libhisysevent",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
