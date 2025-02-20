@@ -89,6 +89,7 @@ const std::string UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbili
 const std::string UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
 constexpr const char* PARAM_SEND_RESULT_CALLER_BUNDLENAME = "ohos.anco.param.sendResultCallderBundleName";
 constexpr const char* PARAM_SEND_RESULT_CALLER_TOKENID = "ohos.anco.param.sendResultCallerTokenId";
+constexpr const char* PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME = "ohos.anco.param.isNeedUpdateName";
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 // Developer mode param
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
@@ -2009,8 +2010,13 @@ void AbilityRecord::SaveResult(int resultCode, const Want *resultWant, std::shar
         if (callerSystemAbilityRecord != nullptr) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "caller is system ability");
             Want* newWant = const_cast<Want*>(resultWant);
-            callerSystemAbilityRecord->SetResultToSystemAbility(callerSystemAbilityRecord, *newWant,
-                resultCode);
+            if (want_.GetBoolParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME, false)) {
+                want_.RemoveParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME);
+                callerSystemAbilityRecord->SetResult(*newWant, resultCode);
+            } else {
+                callerSystemAbilityRecord->SetResultToSystemAbility(callerSystemAbilityRecord, *newWant,
+                    resultCode);
+            }
         }
     }
 }
@@ -2211,7 +2217,8 @@ bool AbilityRecord::IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken, 
     }
     AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t result = AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
-    if (result == ERR_OK && nativeTokenInfo.processName == DMS_PROCESS_NAME) {
+    if (result == ERR_OK && (nativeTokenInfo.processName == DMS_PROCESS_NAME ||
+        want_.GetBoolParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME, false))) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "system ability call");
         return true;
     }
