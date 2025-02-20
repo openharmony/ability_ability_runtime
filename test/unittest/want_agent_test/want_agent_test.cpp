@@ -135,16 +135,27 @@ HWTEST_F(WantAgentTest, WantAgent_0500, Function | MediumTest | Level1)
 
 /*
  * @tc.number    : WantAgent_0600
- * @tc.name      : IsMultithreadingSupported test
- * @tc.desc      : 1.GetIsMultithreadingSupported and SetIsMultithreadingSupported
+ * @tc.name      : SetIsMultithreadingSupported test
+ * @tc.desc      : SetIsMultithreadingSupported
  */
 HWTEST_F(WantAgentTest, WantAgent_0600, Function | MediumTest | Level1)
 {
-    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(nullptr);
-    EXPECT_NE(wantAgent, nullptr);
-    EXPECT_FALSE(wantAgent->GetIsMultithreadingSupported());
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>();
     wantAgent->SetIsMultithreadingSupported(true);
-    EXPECT_TRUE(wantAgent->GetIsMultithreadingSupported());
+    EXPECT_EQ(wantAgent->isMultithreadingSupported_, true);
+}
+
+/*
+ * @tc.number    : WantAgent_0700
+ * @tc.name      : GetIsMultithreadingSupported test
+ * @tc.desc      : GetIsMultithreadingSupported
+ */
+HWTEST_F(WantAgentTest, WantAgent_0700, Function | MediumTest | Level1)
+{
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>();
+    wantAgent->isMultithreadingSupported_ = true;
+    bool test = wantAgent->GetIsMultithreadingSupported();
+    EXPECT_EQ(test, true);
 }
 
 /*

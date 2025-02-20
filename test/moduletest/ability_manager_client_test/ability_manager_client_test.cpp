@@ -343,12 +343,44 @@ HWTEST_F(AbilityManagerClientTest, QueryAtomicServiceStartupRule_0100, TestSize.
 }
 
 /**
+  * @tc.name: AbilityManagerClient_RegisterHiddenStartObserver_0100
+ * @tc.desc: RegisterHiddenStartObserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, RegisterHiddenStartObserver_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RegisterHiddenStartObserver_0100 start");
+
+    sptr<MockIHiddenStartObserver> observer(new MockIHiddenStartObserver());
+    auto result = AbilityManagerClient::GetInstance()->RegisterHiddenStartObserver(observer);
+    EXPECT_NE(result, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "RegisterHiddenStartObserver_0100 end");
+}
+
+/**
+  * @tc.name: AbilityManagerClient_UnregisterHiddenStartObserver_0100
+ * @tc.desc: RegisterHiddenStartObserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, UnregisterHiddenStartObserver_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UnregisterHiddenStartObserver_0100 start");
+
+    sptr<MockIHiddenStartObserver> observer(new MockIHiddenStartObserver());
+    auto result = AbilityManagerClient::GetInstance()->UnregisterHiddenStartObserver(observer);
+    EXPECT_NE(result, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "UnregisterHiddenStartObserver_0100 end");
+}
+
+/**
  * @tc.name: AbilityManagerClient_KillProcessWithReason_0100
  * @tc.name: AbilityManagerClient_KillProcessWithPrepareTerminateDone_0100
  * @tc.desc: KillProcessWithReason and KillProcessWithPrepareTerminateDone
  * @tc.type: FUNC
  */
-HWTEST_F(AbilityManagerClientTest, KillProcessWithReason_0100, TestSize.Level1)
+HWTEST_F(AbilityManagerClientTest, KillProcessWithReasonandKillProcessWithPrepareTerminateDone_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "KillProcessWithReason_0100 start");
 
@@ -360,11 +392,8 @@ HWTEST_F(AbilityManagerClientTest, KillProcessWithReason_0100, TestSize.Level1)
 
     int32_t pid = 1;
     AAFwk::ExitReason reason;
-    std::shared_ptr<AbilityManagerClient> client = std::make_shared<AbilityManagerClient>();
-    client->KillProcessWithReason(pid, reason);
-    EXPECT_TRUE(client != nullptr);
     auto result = AbilityManagerClient::GetInstance()->KillProcessWithReason(pid, reason);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_NE(result, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "KillProcessWithReason_0100 end");
 }

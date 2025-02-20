@@ -32,7 +32,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace AAFwk {
 
-class AbilityManagerClientTest2 : public testing::Test {
+class AbilityManagerClientOtherTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -40,16 +40,16 @@ public:
     void TearDown() override;
 };
 
-void AbilityManagerClientTest2::SetUpTestCase(void)
+void AbilityManagerClientOtherTest::SetUpTestCase(void)
 {}
 
-void AbilityManagerClientTest2::TearDownTestCase(void)
+void AbilityManagerClientOtherTest::TearDownTestCase(void)
 {}
 
-void AbilityManagerClientTest2::SetUp()
+void AbilityManagerClientOtherTest::SetUp()
 {}
 
-void AbilityManagerClientTest2::TearDown()
+void AbilityManagerClientOtherTest::TearDown()
 {}
 
 /**
@@ -57,7 +57,7 @@ void AbilityManagerClientTest2::TearDown()
  * @tc.desc: OpenLink
  * @tc.type: FUNC
  */
-HWTEST_F(AbilityManagerClientTest2, ForceTimeoutForTest_0100, TestSize.Level1)
+HWTEST_F(AbilityManagerClientOtherTest, ForceTimeoutForTest_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartSelfUIAbility_0100 start");
     std::string abilityName = "com.example.abilityName";
