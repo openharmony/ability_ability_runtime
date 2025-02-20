@@ -1450,6 +1450,23 @@ HWTEST_F(JsRuntimeTest, DumpHeapSnapshot_0200, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DumpHeapSnapshot_0300
+ * @tc.desc: JsRuntime test for DumpHeapSnapshot.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, DumpHeapSnapshot_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DumpHeapSnapshot_0300 start");
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    uint32_t tid = 1;
+    bool isFullGC = true;
+    bool isBinary = true;
+    jsRuntime->DumpHeapSnapshot(tid, isFullGC, isBinary);
+    EXPECT_TRUE(jsRuntime != nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "DumpHeapSnapshot end");
+}
+
+/**
  * @tc.name: AllowCrossThreadExecution_0200
  * @tc.desc: JsRuntime test for AllowCrossThreadExecution.
  * @tc.type: FUNC
