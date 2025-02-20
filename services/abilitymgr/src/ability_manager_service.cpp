@@ -20,6 +20,7 @@
 #include "ability_background_connection.h"
 #include "ability_connect_manager.h"
 #include "ability_manager_radar.h"
+#include "ability_start_by_call_helper.h"
 #include "accesstoken_kit.h"
 #include "ability_manager_xcollie.h"
 #include "app_utils.h"
@@ -7619,26 +7620,39 @@ int AbilityManagerService::ReleaseRemoteAbility(const sptr<IRemoteObject> &conne
 int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
     const sptr<IRemoteObject> &callerToken, int32_t accountId)
 {
+    std::string errMsg;
+    return StartAbilityByCallWithErrMsg(want, connect, callerToken, accountId, errMsg);
+}
+
+int AbilityManagerService::StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
+    const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg)
+{
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
-    CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
-    CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
+    int paramCheckResult = AbilityStartByCallHelper::CheckParam(connect, errMsg);
+    if (paramCheckResult != ERR_OK) {
+        return paramCheckResult;
+    }
+
     if (IsCrossUserCall(accountId)) {
         CHECK_CALLER_IS_SYSTEM_APP;
     }
 
     if (VerifyAccountPermission(accountId) == CHECK_PERMISSION_FAILED) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: permission verification failed", __func__);
+        errMsg = "verify account permission failed";
         return CHECK_PERMISSION_FAILED;
     }
 
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (abilityRecord && !JudgeSelfCalled(abilityRecord)) {
+        errMsg = "verify account permission failed";
         return CHECK_PERMISSION_FAILED;
     }
 
     AbilityUtil::RemoveWantKey(const_cast<Want &>(want));
     int32_t appIndex = 0;
     if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
+        errMsg = "app index is error";
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     auto checkRet = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
@@ -7708,6 +7722,7 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
     result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
         afterCheckExecuter_->DoProcess(afterCheckParam);
     if (result != ERR_OK) {
+        errMsg = "afterCheckParam is nullptr";
         TAG_LOGE(AAFwkTag::ABILITYMGR, "afterCheckExecuter_ null or doProcess error");
         return result;
     }
@@ -7724,6 +7739,7 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
     auto missionListMgr = GetMissionListManagerByUserId(oriValidUserId);
     if (missionListMgr == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListMgr null designated user id=%{public}d", oriValidUserId);
+        errMsg = "userId is not invalid";
         return ERR_INVALID_VALUE;
     }
     ReportEventToRSS(abilityRequest.abilityInfo, callerToken);

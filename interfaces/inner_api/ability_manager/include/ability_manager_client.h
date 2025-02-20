@@ -891,6 +891,9 @@ public:
     ErrCode StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect,
         sptr<IRemoteObject> callToken, int32_t accountId = DEFAULT_INVAL_VALUE);
 
+    int32_t StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
+        sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg);
+
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
      *
