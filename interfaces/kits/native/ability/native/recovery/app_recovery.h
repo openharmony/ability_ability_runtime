@@ -19,6 +19,7 @@
 #include <memory>
 #include <mutex>
 #include <vector>
+#include <functional>
 
 #include "ability_info.h"
 #include "ability_recovery.h"
@@ -33,6 +34,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 class AppRecovery {
+using FreezeFunction = std::function<void()>;
 public:
     static AppRecovery& GetInstance();
     void EnableAppRecovery(uint16_t restartFlag, uint16_t saveFlag, uint16_t saveMode);
@@ -54,7 +56,8 @@ public:
     uint16_t GetSaveModeFlag() const;
     void DeleteInValidMissionFiles();
     void ClearPageStack(std::string bundleName);
-
+    void SetFreezeCallback(FreezeFunction freezeCallback);
+    bool IsNeedSaveAppState(StateReason reason);
 private:
     AppRecovery();
     ~AppRecovery();
@@ -76,6 +79,7 @@ private:
     std::vector<std::shared_ptr<AbilityRecovery>> abilityRecoverys_;
     std::shared_ptr<AAFwk::Want> want_ = nullptr;
     std::atomic<bool> useAppSettedValue_ = false; // If the value is true means app call appRecovery.enableAppRecovery
+    FreezeFunction freezeCallback = nullptr;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
