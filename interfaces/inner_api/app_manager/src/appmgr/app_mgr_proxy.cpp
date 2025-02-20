@@ -15,6 +15,7 @@
 
 #include "app_mgr_proxy.h"
 
+#include "ability_manager_errors.h"
 #include "appexecfwk_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -2235,6 +2236,29 @@ int32_t AppMgrProxy::UpdateProcessMemoryState(const std::vector<ProcessMemorySta
         return IPC_PROXY_ERR;
     }
     return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
+        return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, uid);
+    
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_KILLED_PROCESS_INFO, data, reply, option);
+    std::unique_ptr<KilledProcessInfo> infoReply(reply.ReadParcelable<KilledProcessInfo>());
+    if (infoReply == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "KilledProcessInfo ReadParcelable nullptr");
+        return AAFwk::ERR_READ_RESULT_PARCEL_FAILED;
+    }
+
+    info = *infoReply;
+    return ERR_OK;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

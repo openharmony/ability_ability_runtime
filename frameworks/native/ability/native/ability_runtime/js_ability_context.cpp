@@ -2572,7 +2572,7 @@ napi_value JsAbilityContext::OnSetAbilityInstanceInfo(napi_env env, NapiCallback
     };
 
     napi_value result = nullptr;
-    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnSetMissionLabel",
+    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnSetAbilityInstanceInfo",
         env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
     return result;
 }

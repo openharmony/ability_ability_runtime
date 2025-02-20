@@ -524,6 +524,7 @@ enum class AbilityManagerInterfaceCode {
     RECORD_PROCESS_EXIT_REASON = 6003,
     UPGRADE_APP = 6004,
     MOVE_UI_ABILITY_TO_BACKGROUND = 6005,
+    RECORD_PROCESS_EXIT_REASON_PLUS = 6006,
 
     // ipc id for register auto startup system callback
     REGISTER_AUTO_STARTUP_SYSTEM_CALLBACK = 6101,

@@ -447,6 +447,9 @@ int AbilityManagerStub::OnRemoteRequestInnerEleventh(uint32_t code, MessageParce
     if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_SESSION_HANDLER) {
         return RegisterSessionHandlerInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::RECORD_PROCESS_EXIT_REASON_PLUS) {
+        return RecordProcessExitReasonPlusInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -3348,6 +3351,23 @@ int32_t AbilityManagerStub::RecordProcessExitReasonInner(MessageParcel &data, Me
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
         return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::RecordProcessExitReasonPlusInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t pid = data.ReadInt32();
+    int32_t uid = data.ReadInt32();
+    std::unique_ptr<ExitReason> exitReason(data.ReadParcelable<ExitReason>());
+    if (!exitReason) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "exitReason null");
+        return ERR_READ_EXIT_REASON_FAILED;
+    }
+    int32_t result = RecordProcessExitReason(pid, uid, *exitReason);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }
