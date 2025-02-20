@@ -12172,7 +12172,7 @@ int32_t AbilityManagerService::StartUIAbilityByPreInstall(const FreeInstallInfo 
 
     if (sessionInfo == nullptr || sessionInfo->isMinimizedDuringFreeInstall) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo is nullptr or ability is already minimized");
-        return ERR_INVALID_VALUE;
+        return ATOMIC_SERVICE_MINIMIZED;
     }
 
     bool isColdStart = true;
