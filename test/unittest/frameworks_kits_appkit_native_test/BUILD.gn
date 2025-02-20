@@ -897,6 +897,8 @@ ohos_unittest("dump_runtime_helper_test") {
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
     "napi:ace_napi",
+    "ffrt:libffrt",
+    "storage_service:storage_manager_acl",
   ]
 }
 
@@ -990,6 +992,8 @@ ohos_unittest("dump_runtime_helper_second_test") {
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
     "napi:ace_napi",
+    "ffrt:libffrt",
+    "storage_service:storage_manager_acl",
   ]
 }
 
