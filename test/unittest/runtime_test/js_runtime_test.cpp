@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,7 +85,7 @@ void JsRuntimeTest::TearDown()
 HWTEST_F(JsRuntimeTest, JsperfProfilerCommandParse_100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "JsperfProfilerCommandParse_100 start");
-    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options_);
+    auto jsRuntime = std::make_shared<AbilityRuntime::JsRuntime>();
     std::string command = "";
     constexpr int32_t defaultVal = 500;
     constexpr int32_t emptyVal = 0;
@@ -106,8 +106,8 @@ HWTEST_F(JsRuntimeTest, JsperfProfilerCommandParse_100, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsRuntimeTest_0100
- * @tc.desc: JsRuntime Test
+ * @tc.name: JsRuntimeTestCreate_0100
+ * @tc.desc: JsRuntime Test for Create
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
@@ -115,21 +115,21 @@ HWTEST_F(JsRuntimeTest, JsRuntimeTest_0100, TestSize.Level0)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test_0100 start");
     options_.preload = true;
-    std::unique_ptr<Runtime> jsRuntime = JsRuntime::Create(options_);
-    EXPECT_TRUE(jsRuntime != nullptr);
+    std::unique_ptr<JsRuntime> jsRuntime1 = JsRuntime::Create(options_);
+    EXPECT_TRUE(jsRuntime1 != nullptr);
 
-    jsRuntime = nullptr;
     options_.preload = false;
-    jsRuntime = JsRuntime::Create(options_);
-    EXPECT_TRUE(jsRuntime != nullptr);
-    jsRuntime.reset();
+    std::unique_ptr<JsRuntime> jsRuntime2 = JsRuntime::Create(options_);
+    EXPECT_TRUE(jsRuntime2 != nullptr);
+    jsRuntime1.reset();
+    jsRuntime2.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TAG_LOGI(AAFwkTag::TEST, "Test_0100 end");
 }
 
 /**
- * @tc.name: JsRuntimeTest_0200
- * @tc.desc: JsRuntime Test
+ * @tc.name: JsRuntimeTestSetAppLibPath_0100
+ * @tc.desc: JsRuntime Test ofr SetAppLibPath
  * @tc.type: FUNC
  * @tc.require: issueI581RO
  */
@@ -143,8 +143,8 @@ HWTEST_F(JsRuntimeTest, JsRuntimeTest_0200, TestSize.Level0)
     JsRuntime::SetAppLibPath(appLibPaths);
 
     appLibPaths[appLibPathKey].emplace_back(libPath);
-    EXPECT_NE(appLibPaths.size(), 0);
     JsRuntime::SetAppLibPath(appLibPaths);
+    EXPECT_NE(appLibPaths.size(), 0);
     TAG_LOGI(AAFwkTag::TEST, "Test_0200 end");
 }
 
@@ -191,12 +191,11 @@ HWTEST_F(JsRuntimeTest, JsRuntimeUtilsTest_0100, TestSize.Level0)
 HWTEST_F(JsRuntimeTest, JsRuntimeGetLanguageTest_0100, TestSize.Level0)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetLanguageTest_0100 start");
-    options_.preload = true;
-    std::unique_ptr<Runtime> jsRuntime = JsRuntime::Create(options_);
-    EXPECT_TRUE(jsRuntime != nullptr);
 
-    JsRuntime::Language language = jsRuntime->GetLanguage();
-    EXPECT_TRUE(language == JsRuntime::Language::JS);
+    std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(options_);
+    EXPECT_TRUE(jsRuntime != nullptr);
+    Runtime::Language language = jsRuntime->GetLanguage();
+    EXPECT_TRUE(language ==JsRuntime::Language::JS);
     jsRuntime.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TAG_LOGI(AAFwkTag::TEST, "GetLanguageTest_0100 end");
@@ -211,9 +210,8 @@ HWTEST_F(JsRuntimeTest, JsRuntimeNotifyApplicationStateTest_0100, TestSize.Level
 {
     TAG_LOGI(AAFwkTag::TEST, "NotifyApplicationState start");
 
-    std::unique_ptr<JsRuntime> jsRuntime = std::make_unique<MockJsRuntime>();
+    std::unique_ptr<JsRuntime> jsRuntime = std::make_unique<AbilityRuntime::JsRuntime>();
     EXPECT_TRUE(jsRuntime != nullptr);
-
     bool isBackground = false;
     jsRuntime->NotifyApplicationState(isBackground);
 
@@ -231,13 +229,12 @@ HWTEST_F(JsRuntimeTest, JsRuntimeNotifyApplicationStateTest_0200, TestSize.Level
     TAG_LOGI(AAFwkTag::TEST, "NotifyApplicationState start");
 
     std::unique_ptr<Runtime> jsRuntime = JsRuntime::Create(options_);
-    EXPECT_TRUE(jsRuntime != nullptr);
-
     bool isBackground = true;
     jsRuntime->NotifyApplicationState(isBackground);
-
+    EXPECT_TRUE(jsRuntime != nullptr);
     jsRuntime.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
     TAG_LOGI(AAFwkTag::TEST, "NotifyApplicationState end");
 }
 
@@ -431,6 +428,45 @@ HWTEST_F(JsRuntimeTest, RuntimeSavePreloadedTest_0100, TestSize.Level0)
     runtime.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TAG_LOGI(AAFwkTag::TEST, "SavePreloaded end");
+}
+
+/**
+ * @tc.name: RuntimeUpdatePkgContextInfoJsonExTest_0100
+ * @tc.desc: Runtime test for UpdatePkgContextInfoJsonEx.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RuntimeUpdatePkgContextInfoJsonExTest_0100, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UpdatePkgContextInfoJsonEx start");
+
+    auto runtime = AbilityRuntime::Runtime::Create(options_);
+    std::string moduleName = TEST_MODULE_NAME;
+    std::string hapPath = TEST_HAP_PATH;
+    std::string packageName = "com.ohos.example.packageName";
+    runtime->UpdatePkgContextInfoJsonEx(moduleName, hapPath, packageName);
+    EXPECT_TRUE(runtime != nullptr);
+
+    runtime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "SavePreloaded end");
+}
+
+/**
+ * @tc.name: RuntimeSetStopPreloadSoCallbackTest_0100
+ * @tc.desc: Runtime test for SetStopPreloadSoCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RuntimeSetStopPreloadSoCallbackTest_0100, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetStopPreloadSoCallback start");
+
+    auto runtime = AbilityRuntime::Runtime::Create(options_);
+    runtime->SetStopPreloadSoCallback(nullptr);
+    EXPECT_TRUE(runtime != nullptr);
+
+    runtime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "SetStopPreloadSoCallback end");
 }
 
 /**
@@ -1021,6 +1057,7 @@ HWTEST_F(JsRuntimeTest, PostSyncTask_0100, TestSize.Level0)
     TAG_LOGI(AAFwkTag::TEST, "PostSyncTask_0100 start");
     auto jsRuntime = AbilityRuntime::JsRuntime::Create(options_);
     ASSERT_NE(jsRuntime, nullptr);
+    ASSERT_NE(jsRuntime->jsEnv_, nullptr);
 
     std::string taskName = "syncTask001";
     bool taskExecuted = false;
@@ -1493,25 +1530,22 @@ HWTEST_F(JsRuntimeTest, RegisterQuickFixQueryFunc_0200, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetPkgContextInfoJsonandUpdatePkgContextInfoJson_0100
- * @tc.desc: JsRuntime test for SetPkgContextInfoJson and UpdatePkgContextInfoJson.
+ * @tc.name: UpdatePkgContextInfoJsonandUpdatePkgContextInfoJsonEx_0100
+ * @tc.desc: JsRuntime test for UpdatePkgContextInfoJson and UpdatePkgContextInfoJsonEx.
  * @tc.type: FUNC
  */
-HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0100, TestSize.Level1)
+HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJsonandUpdatePkgContextInfoJsonEx_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "UpdatePkgContextInfoJson_0100 start");
-    auto jsRuntime = std::make_unique<JsRuntime>();
-    EXPECT_NE(jsRuntime, nullptr);
+    std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(options_);
+    EXPECT_TRUE(jsRuntime != nullptr);
     std::string moduleName = "moduleName";
     std::string hapPath = TEST_HAP_PATH;
     std::string packageName = "packageName";
-    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
-    panda::RuntimeOption options;
-    jsRuntime->jsEnv_->vm_ = panda::JSNApi::CreateJSVM(options);
-    jsRuntime->UpdatePkgContextInfoJson(moduleName, hapPath, packageName);
+    jsRuntime->UpdatePkgContextInfoJsonEx(moduleName, hapPath, packageName);
 
     jsRuntime->pkgContextInfoJsonStringMap_.insert(std::make_pair(moduleName, "test2"));
-    jsRuntime->SetPkgContextInfoJson(moduleName, hapPath, packageName);
+    jsRuntime->UpdatePkgContextInfoJson(moduleName, hapPath, packageName);
     EXPECT_EQ(jsRuntime->pkgContextInfoJsonStringMap_[moduleName], "test2");
     TAG_LOGI(AAFwkTag::TEST, "UpdatePkgContextInfoJson_0100 end");
 }
@@ -1521,7 +1555,7 @@ HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0100, TestSize.Level1)
  * @tc.desc: JsRuntime test for JsRuntimePreloadModule and DoCleanWorkAfterStageCleaned.
  * @tc.type: FUNC
  */
-HWTEST_F(JsRuntimeTest, JsRuntimePreloadModule_0100, TestSize.Level1)
+HWTEST_F(JsRuntimeTest, JsRuntimePreloadModuleandDoCleanWorkAfterStageCleaned_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "PreloadModule_0100 start");
     std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(options_);
@@ -1543,12 +1577,11 @@ HWTEST_F(JsRuntimeTest, JsRuntimePreloadModule_0100, TestSize.Level1)
  * @tc.desc: JsRuntime test for JsRuntimePreloadMainAbility and SetStopPreloadSoCallback.
  * @tc.type: FUNC
  */
-HWTEST_F(JsRuntimeTest, JsRuntimePreloadMainAbility_0100, TestSize.Level1)
+HWTEST_F(JsRuntimeTest, JsRuntimePreloadMainAbilityandSetStopPreloadSoCallback_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "PreloadMainAbility_0100 start");
     std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(options_);
     EXPECT_TRUE(jsRuntime != nullptr);
-    jsRuntime->DoCleanWorkAfterStageCleaned();
     std::string moduleName = TEST_MODULE_NAME;
     std::string srcPath = TEST_MODULE_PATH;
     std::string hapPath = TEST_HAP_PATH;
@@ -1556,10 +1589,7 @@ HWTEST_F(JsRuntimeTest, JsRuntimePreloadMainAbility_0100, TestSize.Level1)
     bool isEsMode = true;
     jsRuntime->PreloadMainAbility(moduleName, srcPath, hapPath, isEsMode, srcEntrance);
 
-    auto callBack = []() {return;};
-    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
-    panda::RuntimeOption options;
-    jsRuntime->jsEnv_->vm_ = panda::JSNApi::CreateJSVM(options);
+    auto callBack = []() {};
     jsRuntime->SetStopPreloadSoCallback(callBack);
     EXPECT_EQ(jsRuntime->preloadList_.size(), 1);
     jsRuntime.reset();
