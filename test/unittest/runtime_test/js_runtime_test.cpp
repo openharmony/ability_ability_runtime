@@ -431,45 +431,6 @@ HWTEST_F(JsRuntimeTest, RuntimeSavePreloadedTest_0100, TestSize.Level0)
 }
 
 /**
- * @tc.name: RuntimeUpdatePkgContextInfoJsonExTest_0100
- * @tc.desc: Runtime test for UpdatePkgContextInfoJsonEx.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, RuntimeUpdatePkgContextInfoJsonExTest_0100, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "UpdatePkgContextInfoJsonEx start");
-
-    auto runtime = AbilityRuntime::Runtime::Create(options_);
-    std::string moduleName = TEST_MODULE_NAME;
-    std::string hapPath = TEST_HAP_PATH;
-    std::string packageName = "com.ohos.example.packageName";
-    runtime->UpdatePkgContextInfoJsonEx(moduleName, hapPath, packageName);
-    EXPECT_TRUE(runtime != nullptr);
-
-    runtime.reset();
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    TAG_LOGI(AAFwkTag::TEST, "SavePreloaded end");
-}
-
-/**
- * @tc.name: RuntimeSetStopPreloadSoCallbackTest_0100
- * @tc.desc: Runtime test for SetStopPreloadSoCallback.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, RuntimeSetStopPreloadSoCallbackTest_0100, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "SetStopPreloadSoCallback start");
-
-    auto runtime = AbilityRuntime::Runtime::Create(options_);
-    runtime->SetStopPreloadSoCallback(nullptr);
-    EXPECT_TRUE(runtime != nullptr);
-
-    runtime.reset();
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    TAG_LOGI(AAFwkTag::TEST, "SetStopPreloadSoCallback end");
-}
-
-/**
  * @tc.name: RuntimeSetModuleLoadCheckerTest_0100
  * @tc.desc: Runtime test for SetModuleLoadChecker.
  * @tc.type: FUNC
@@ -1530,11 +1491,11 @@ HWTEST_F(JsRuntimeTest, RegisterQuickFixQueryFunc_0200, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdatePkgContextInfoJsonandUpdatePkgContextInfoJsonEx_0100
- * @tc.desc: JsRuntime test for UpdatePkgContextInfoJson and UpdatePkgContextInfoJsonEx.
+ * @tc.name: UpdatePkgContextInfoJson_0100
+ * @tc.desc: JsRuntime test for UpdatePkgContextInfoJson.
  * @tc.type: FUNC
  */
-HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJsonandUpdatePkgContextInfoJsonEx_0100, TestSize.Level1)
+HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "UpdatePkgContextInfoJson_0100 start");
     std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(options_);
@@ -1542,8 +1503,6 @@ HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJsonandUpdatePkgContextInfoJsonEx_01
     std::string moduleName = "moduleName";
     std::string hapPath = TEST_HAP_PATH;
     std::string packageName = "packageName";
-    jsRuntime->UpdatePkgContextInfoJsonEx(moduleName, hapPath, packageName);
-
     jsRuntime->pkgContextInfoJsonStringMap_.insert(std::make_pair(moduleName, "test2"));
     jsRuntime->UpdatePkgContextInfoJson(moduleName, hapPath, packageName);
     EXPECT_EQ(jsRuntime->pkgContextInfoJsonStringMap_[moduleName], "test2");
@@ -1597,4 +1556,3 @@ HWTEST_F(JsRuntimeTest, JsRuntimePreloadMainAbilityandSetStopPreloadSoCallback_0
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
-
