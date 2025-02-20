@@ -1162,7 +1162,7 @@ private:
     ProcessType processType_ = ProcessType::NORMAL;
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
     PreloadState preloadState_ = PreloadState::NONE;
-    PreloadMode preloadMode_ = PreloadMode::PRESS_DOWN;
+    PreloadMode preloadMode_ = PreloadMode::PRELOAD_NONE;
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
     int64_t restartTimeMillis_ = 0; // The time of last trying app restart
