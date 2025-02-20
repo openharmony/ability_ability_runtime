@@ -2217,8 +2217,8 @@ bool AbilityRecord::IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken, 
     }
     AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t result = AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
-    if (result == ERR_OK && nativeTokenInfo.processName == DMS_PROCESS_NAME ||
-        want_.GetBoolParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME, false)) {
+    if (result == ERR_OK && (nativeTokenInfo.processName == DMS_PROCESS_NAME ||
+        want_.GetBoolParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME, false))) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "system ability call");
         return true;
     }
