@@ -31,6 +31,7 @@
 #include "ui_extension/ui_extension_session_info.h"
 #include "want.h"
 #include "mock_iqueryermsobserver.h"
+#include "mock_ihidden_start_observer.h"
 
 using namespace testing;
 using namespace testing::ext;
