@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ability_stage_constant.h"
 #include "ability_window_configuration.h"
 #include "hilog_tag_wrapper.h"
 #include "launch_param.h"
@@ -166,6 +167,19 @@ static napi_value InitMemoryLevelObject(napi_env env)
     return object;
 }
 
+static napi_value InitAbilityStagePrepareTerminationObject(napi_env env)
+{
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    napi_value object;
+    NAPI_CALL(env, napi_create_object(env, &object));
+
+    NAPI_CALL(env, SetEnumItem(env, object, "TERMINATE_IMMEDIATELY",
+        static_cast<int32_t>(AppExecFwk::PrepareTermination::TERMINATE_IMMEDIATELY)));
+    NAPI_CALL(env, SetEnumItem(env, object, "CANCEL",
+        static_cast<int32_t>(AppExecFwk::PrepareTermination::CANCEL)));
+    return object;
+}
+
 /*
  * The module initialization.
  */
@@ -219,6 +233,12 @@ static napi_value AbilityConstantInit(napi_env env, napi_value exports)
         return nullptr;
     }
 
+    napi_value prepareTermination = InitAbilityStagePrepareTerminationObject(env);
+    if (prepareTermination == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null prepareTermination");
+        return nullptr;
+    }
+
     napi_property_descriptor exportObjs[] = {
         DECLARE_NAPI_PROPERTY("LaunchReason", launchReason),
         DECLARE_NAPI_PROPERTY("LastExitReason", lastExitReason),
@@ -228,6 +248,7 @@ static napi_value AbilityConstantInit(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("MemoryLevel", memoryLevel),
         DECLARE_NAPI_PROPERTY("OnSaveResult", saveResult),
         DECLARE_NAPI_PROPERTY("StateType", stateType),
+        DECLARE_NAPI_PROPERTY("PrepareTermination", prepareTermination),
     };
     napi_status status = napi_define_properties(env, exports, sizeof(exportObjs) / sizeof(exportObjs[0]), exportObjs);
     if (status != napi_ok) {
