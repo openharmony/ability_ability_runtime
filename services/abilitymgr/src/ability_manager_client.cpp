@@ -1093,6 +1093,16 @@ ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbility
     return abms->StartAbilityByCall(want, connect, callToken, accountId);
 }
 
+ErrCode AbilityManagerClient::StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
+    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s, userId:%{public}d",
+        want.GetElement().GetURI().c_str(), accountId);
+    return abms->StartAbilityByCallWithErrMsg(want, connect, callToken, accountId, errMsg);
+}
+
 void AbilityManagerClient::CallRequestDone(sptr<IRemoteObject> token, sptr<IRemoteObject> callStub)
 {
     auto abms = GetAbilityManager();
