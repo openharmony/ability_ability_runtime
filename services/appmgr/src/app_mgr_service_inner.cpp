@@ -9010,5 +9010,29 @@ bool AppMgrServiceInner::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const 
     TAG_LOGD(AAFwkTag::APPMGR, "IsSpecifiedModuleLoaded state %{public}d", moduleRecord->GetModuleRecordState());
     return moduleRecord->IsLoaded();
 }
+
+int32_t AppMgrServiceInner::GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &info)
+{
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager null");
+        return AAFwk::ERR_NULL_APP_RUNNING_MANAGER;
+    }
+    auto appRecord = appRunningManager_->QueryAppRecordPlus(pid, uid);
+    if (appRecord == nullptr) {
+        TAG_LOGI(AAFwkTag::APPMGR, "appRecord not found");
+        return AAFwk::ERR_NO_APP_RECORD;
+    }
+    info.pid = pid;
+    info.uid = uid;
+    auto appInfo = appRecord->GetApplicationInfo();
+    if (appInfo) {
+        info.accessTokenId = appInfo->accessTokenId;
+    } else {
+        TAG_LOGW(AAFwkTag::APPMGR, "appInfo null");
+    }
+    info.bundleName = appRecord->GetBundleName();
+    info.processName = appRecord->GetProcessName();
+    return ERR_OK;
+}
 } // namespace AppExecFwk
 }  // namespace OHOS

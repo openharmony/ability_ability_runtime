@@ -382,6 +382,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleUpdateInstanceKeyBySpecifiedId(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_PROCESS_MEMORY_STATE):
             return HandleUpdateProcessMemoryState(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_KILLED_PROCESS_INFO):
+            return HandleGetKilledProcessInfo(data, reply);
     }
     return INVALID_FD;
 }
@@ -1848,5 +1850,18 @@ ErrCode AppMgrStub::HandleUpdateProcessMemoryState(MessageParcel &data, MessageP
     reply.WriteInt32(ret);
     return NO_ERROR;
 }
+
+int32_t AppMgrStub::HandleGetKilledProcessInfo(MessageParcel &data, MessageParcel &reply)
+{
+    int pid = data.ReadInt32();
+    int uid = data.ReadInt32();
+    KilledProcessInfo info;
+    auto ret = GetKilledProcessInfo(pid, uid, info);
+    if (ret == ERR_OK && !reply.WriteParcelable(&info)) {
+        ret = IPC_STUB_ERR;
+    }
+    return ret;
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS
