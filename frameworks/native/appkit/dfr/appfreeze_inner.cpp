@@ -88,25 +88,17 @@ bool AppfreezeInner::IsHandleAppfreeze()
 
 void AppfreezeInner::GetMainHandlerDump(std::string& msgContent)
 {
+    msgContent = "\nMain handler dump start time: " + AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
     auto mainHandler = appMainHandler_.lock();
     if (mainHandler == nullptr) {
-        msgContent += "mainHandler is destructed!";
+        msgContent += "mainHandler is destructed!\n";
     } else {
         MainHandlerDumper handlerDumper;
         msgContent += "mainHandler dump is:\n";
         mainHandler->Dump(handlerDumper);
         msgContent += handlerDumper.GetDumpInfo();
     }
-}
-
-std::string AppfreezeInner::GetFormatTime()
-{
-    auto now = std::chrono::system_clock::now();
-    auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-    auto start = millisecs.count();
-    std::string timeStamp = "\nTimestamp:" + AbilityRuntime::TimeUtil::FormatTime("%Y-%m-%d %H:%M:%S") +
-        ":" + std::to_string(start % AbilityRuntime::TimeUtil::SEC_TO_MILLISEC) + "\n";
-    return timeStamp;
+    msgContent += "Main handler dump end time: " + AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
 }
 
 void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string& msgContent)
@@ -117,12 +109,14 @@ void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string
     faultData.waitSaveState = false;
     faultData.forceExit = false;
     int32_t pid = IPCSkeleton::GetCallingPid();
-    faultData.errorObject.stack = GetFormatTime();
+    faultData.errorObject.stack = "\nDump tid stack start time: " +
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
     std::string stack = "";
     if (!HiviewDFX::GetBacktraceStringByTidWithMix(stack, pid, 0, true)) {
         stack = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + stack;
     }
-    faultData.errorObject.stack += stack + "\n" + GetFormatTime();
+    faultData.errorObject.stack += stack + "\nDump tid stack end time: " +
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
     bool isExit = IsExitApp(faultData.errorObject.name);
     if (isExit) {
         faultData.forceExit = true;
@@ -196,7 +190,6 @@ bool AppfreezeInner::IsExitApp(const std::string& name)
 int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
 {
     HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeInner::AcquireStack name:%s", info.errorObject.name.c_str());
-    std::string stack = "";
     std::string msgContent;
     GetMainHandlerDump(msgContent);
 
@@ -210,7 +203,6 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
                 FreezeUtil::GetInstance().GetLifecycleEvent(it->token) + "\nclient actions for app:\n" +
                 FreezeUtil::GetInstance().GetAppLifecycleEvent(0) + "\n";
         }
-        faultData.errorObject.stack = stack;
         faultData.errorObject.name = it->errorObject.name;
         faultData.timeoutMarkers = it->timeoutMarkers;
         faultData.eventId = it->eventId;

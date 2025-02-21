@@ -269,16 +269,5 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CatchStack_001, TestSize.Lev
     appfreezeManager->DeleteStack(pid);
     EXPECT_TRUE(appfreezeManager->catchStackMap_.empty());
 }
-
-/**
- * @tc.number: AppfreezeManagerTest_GetFormatTime_001
- * @tc.name: GetFormatTime
- * @tc.desc: Verify that function GetFormatTime.
- */
-HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFormatTime_001, TestSize.Level1)
-{
-    std::string ret = appfreezeManager->GetFormatTime();
-    EXPECT_TRUE(!ret.empty());
-}
 }  // namespace AppExecFwk
 }  // namespace OHOS
