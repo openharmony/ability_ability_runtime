@@ -393,7 +393,7 @@ bool UIAbilityThread::SchedulePrepareTerminateAbility()
         TAG_LOGE(AAFwkTag::UIABILITY, "postTask error");
         return false;
     }
-    return false;
+    return true;
 }
 
 bool UIAbilityThread::HandlePrepareTermianteAbility()

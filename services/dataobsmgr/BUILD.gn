@@ -43,6 +43,7 @@ ohos_shared_library("dataobsms") {
   configs = [ ":dataobsms_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
     "${ability_runtime_services_path}/common:task_handler_wrap",
   ]
@@ -52,11 +53,20 @@ ohos_shared_library("dataobsms") {
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  defines = []
+  if (window_manager_use_sceneboard) {
+    external_deps += [ "window_manager:libwm_lite" ]
+    defines += [ "SCENE_BOARD_ENABLE" ]
+  } else {
+    external_deps += [ "window_manager:libwm" ]
+  }
 
   subsystem_name = "ability"
   part_name = "ability_runtime"
@@ -74,18 +84,30 @@ ohos_static_library("dataobsms_static") {
 
   configs = [ ":dataobsms_config" ]
 
-  deps = [ "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager" ]
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
+  ]
 
   external_deps = [
     "ability_base:zuri",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  defines = []
+  if (window_manager_use_sceneboard) {
+    external_deps += [ "window_manager:libwm_lite" ]
+    defines += [ "SCENE_BOARD_ENABLE" ]
+  } else {
+    external_deps += [ "window_manager:libwm" ]
+  }
 
   subsystem_name = "ability"
   part_name = "ability_runtime"

@@ -1387,17 +1387,30 @@ void JsUIAbility::OnConfigurationUpdated(const Configuration &configuration)
 
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
+    auto abilityConfig = abilityContext_->GetAbilityConfiguration();
     auto fullConfig = abilityContext_->GetConfiguration();
     if (fullConfig == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null fullConfig");
         return;
     }
 
-    TAG_LOGD(AAFwkTag::UIABILITY, "fullConfig: %{public}s", fullConfig->GetName().c_str());
-    napi_value napiConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, *fullConfig);
+    auto realConfig = AppExecFwk::Configuration(*fullConfig);
+
+    if (abilityConfig != nullptr) {
+        std::vector<std::string> changeKeyV;
+        realConfig.CompareDifferent(changeKeyV, *abilityConfig);
+        if (!changeKeyV.empty()) {
+            realConfig.Merge(changeKeyV, *abilityConfig);
+        }
+    }
+
+    TAG_LOGD(AAFwkTag::UIABILITY, "realConfig: %{public}s", realConfig.GetName().c_str());
+    napi_value napiConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, realConfig);
+
     CallObjectMethod("onConfigurationUpdated", &napiConfiguration, 1);
     CallObjectMethod("onConfigurationUpdate", &napiConfiguration, 1);
-    JsAbilityContext::ConfigurationUpdated(env, shellContextRef_, fullConfig);
+    auto realConfigPtr = std::make_shared<Configuration>(realConfig);
+    JsAbilityContext::ConfigurationUpdated(env, shellContextRef_, realConfigPtr);
 }
 
 void JsUIAbility::OnMemoryLevel(int level)

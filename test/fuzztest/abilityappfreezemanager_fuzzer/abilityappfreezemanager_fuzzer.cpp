@@ -76,8 +76,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string ret(data, size);
     freeze->FindStackByPid(ret, pid);
     std::string faultType(data, size);
-    freeze->CatchJsonStacktrace(pid, faultType);
-    freeze->CatcherStacktrace(pid);
+    freeze->CatchJsonStacktrace(pid, faultType, stack);
+    freeze->CatcherStacktrace(pid, stack);
     std::string memoryContent(data, size);
     freeze->AcquireStack(faultData, appInfo, memoryContent);
     std::string binderInfo(data, size);

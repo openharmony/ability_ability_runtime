@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "iremote_object.h"
 #include "istart_specified_ability_response.h"
 #include "running_process_info.h"
+#include "user_callback.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -97,11 +98,15 @@ public:
     /**
      * KillProcessesByUserId, call KillProcessesByUserId() through proxy object,
      * kill the processes by userId.
+     * Send appSpawn uninstall debug hap message.
      *
      * @param userId, the user id.
+     * @param isNeedSendAppSpawnMsg, true send appSpawn message otherwise not send.
+     * @param callback, callback function for logout user.
      * @return
      */
-    virtual void KillProcessesByUserId(int32_t userId) = 0;
+    virtual void KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg = false,
+        sptr<AAFwk::IUserCallback> callback = nullptr) = 0;
 
     /**
      * KillProcessesByPids, only in process call is allowed,
@@ -472,13 +477,6 @@ public:
         return false;
     }
 
-    /**
-     * Send appSpawn uninstall debug hap message.
-     *
-     * @param userId, the user id.
-     */
-    virtual void SendAppSpawnUninstallDebugHapMsg(int32_t userId) = 0;
-
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -534,7 +532,6 @@ public:
         ENABLE_START_PROCESS_FLAG_BY_USER_ID,
         SET_KEEP_ALIVE_DKV,
         KILL_PROCESSES_IN_BATCH,
-        SEND_APP_SPAWN_UNINSTALL_DEBUG_HAP_MSG,
         PREPARE_TERMINATE_APP,
         // Add enumeration values above
         END

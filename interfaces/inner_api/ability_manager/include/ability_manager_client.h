@@ -30,6 +30,7 @@
 #include "ui_extension_window_command.h"
 #include "want.h"
 #include "intent_exemption_info.h"
+#include "ihidden_start_observer.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -439,7 +440,7 @@ public:
      * @param sessionInfo the session info of the ability to terminate.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo);
+    ErrCode CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit = false);
 
     /**
      * SendResultToAbility with want, return resultWant from ability manager service.
@@ -890,6 +891,9 @@ public:
     ErrCode StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect,
         sptr<IRemoteObject> callToken, int32_t accountId = DEFAULT_INVAL_VALUE);
 
+    int32_t StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
+        sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg);
+
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
      *
@@ -979,7 +983,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode LogoutUser(int32_t accountId);
+    ErrCode LogoutUser(int32_t accountId, sptr<IUserCallback> callback = nullptr);
 
     /**
      * @brief Register the snapshot handler
@@ -1322,6 +1326,15 @@ public:
     int32_t RecordProcessExitReason(const int32_t pid, const ExitReason &exitReason);
 
     /**
+     * Record the exit reason of a killed process.
+     * @param pid The process id.
+     * @param uid The process uid.
+     * @param exitReason The reason of process exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RecordProcessExitReason(int32_t pid, int32_t uid, const ExitReason &exitReason);
+
+    /**
      * Set rootSceneSession by SCB.
      *
      * @param rootSceneSession Indicates root scene session of SCB.
@@ -1594,7 +1607,7 @@ public:
      * @param sessionInfo the session info of the ability to clean.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo);
+    ErrCode CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit = false);
 
     /**
      * Open link of ability and atomic service.
@@ -1673,6 +1686,20 @@ public:
      * @param isExist, whether the prepareTerminate functions are implemented.
      */
     void KillProcessWithPrepareTerminateDone(const std::string &moduleName, int32_t prepareTermination, bool isExist);
+
+    /**
+     * Register hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer);
+
+    /**
+     * Unregister hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer);
 
 private:
     AbilityManagerClient();

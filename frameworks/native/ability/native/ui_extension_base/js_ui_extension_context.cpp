@@ -192,6 +192,11 @@ napi_value JsUIExtensionContext::StartServiceExtensionAbilityWithAccount(napi_en
     GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnStartServiceExtensionAbilityWithAccount);
 }
 
+napi_value JsUIExtensionContext::SetColorMode(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnSetColorMode);
+}
+
 napi_value JsUIExtensionContext::SetHostPageOverlayForbidden(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnSetHostPageOverlayForbidden);
@@ -1196,6 +1201,33 @@ napi_value JsUIExtensionContext::OnStartServiceExtensionAbilityWithAccount(napi_
     return result;
 }
 
+napi_value JsUIExtensionContext::OnSetColorMode(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    // only support one params
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params.");
+        return CreateJsUndefined(env);
+    }
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+
+    int32_t colorMode = 0;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], colorMode)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse colorMode failed");
+        ThrowInvalidParamError(env, "Parse param colorMode failed, colorMode must be number.");
+        return CreateJsUndefined(env);
+    }
+    context->SetAbilityColorMode(colorMode);
+    return CreateJsUndefined(env);
+}
+
+
 napi_value JsUIExtensionContext::CreateJsUIExtensionContext(napi_env env,
     std::shared_ptr<UIExtensionContext> context)
 {
@@ -1226,6 +1258,7 @@ napi_value JsUIExtensionContext::CreateJsUIExtensionContext(napi_env env,
     BindNativeFunction(env, objValue, "startServiceExtensionAbility", moduleName, StartServiceExtensionAbility);
     BindNativeFunction(env, objValue, "startServiceExtensionAbilityWithAccount", moduleName,
         StartServiceExtensionAbilityWithAccount);
+    BindNativeFunction(env, objValue, "setColorMode", moduleName, SetColorMode);
     BindNativeFunction(env, objValue, "setHostPageOverlayForbidden", moduleName, SetHostPageOverlayForbidden);
 
     return objValue;

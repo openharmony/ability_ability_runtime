@@ -4159,12 +4159,15 @@ void MissionListManager::SetLastExitReason(std::shared_ptr<AbilityRecord> &abili
     ExitReason exitReason;
     bool isSetReason;
     auto accessTokenId = abilityRecord->GetAbilityInfo().applicationInfo.accessTokenId;
+    AppExecFwk::RunningProcessInfo processInfo;
+    int64_t time_stamp = 0;
+    bool withKillMsg = false;
     DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
         abilityRecord->GetAbilityInfo().bundleName, accessTokenId, abilityRecord->GetAbilityInfo().name,
-        isSetReason, exitReason);
+        isSetReason, exitReason, processInfo, time_stamp, withKillMsg);
 
     if (isSetReason) {
-        abilityRecord->SetLastExitReason(exitReason);
+        abilityRecord->SetLastExitReason(exitReason, processInfo, time_stamp, withKillMsg);
     }
 }
 

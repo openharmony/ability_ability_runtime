@@ -1374,36 +1374,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, VerifyAccountPermission_001, TestSize.L
 
 /*
  * Feature: AbilityManagerService
- * Function: CheckPrepareTerminateEnable
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CheckPrepareTerminateEnable
- * @tc.require: issueI7SX12
- */
-HWTEST_F(AbilityManagerServiceFirstTest, CheckPrepareTerminateEnable_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->isPrepareTerminateEnable_ = false;
-    bool res = abilityMs_->CheckPrepareTerminateEnable();
-    EXPECT_FALSE(res);
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: CheckPrepareTerminateEnable
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CheckPrepareTerminateEnable
- * @tc.require: issueI7SX12
- */
-HWTEST_F(AbilityManagerServiceFirstTest, CheckPrepareTerminateEnable_002, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->isPrepareTerminateEnable_ = true;
-    bool res = abilityMs_->CheckPrepareTerminateEnable();
-    EXPECT_TRUE(res);
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: ConnectRemoteAbility
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService ConnectRemoteAbility

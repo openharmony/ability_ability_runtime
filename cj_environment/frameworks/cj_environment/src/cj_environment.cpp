@@ -59,6 +59,8 @@ const char RUN_UISCHEDULER_SYMBOL_NAME[] = "RunUIScheduler";
 const char FINI_CJRUNTIME_SYMBOL_NAME[] = "FiniCJRuntime";
 const char INIT_CJLIBRARY_SYMBOL_NAME[] = "InitCJLibrary";
 const char REGISTER_EVENTHANDLER_CALLBACKS_NAME[] = "RegisterEventHandlerCallbacks";
+const char REGISTER_ARKVM_SYMBOL_NAME[] = "RegisterArkVMInRuntime";
+const char REGISTER_STACKINFO_CALLBACKS_NAME[] = "RegisterStackInfoCallbacks";
 
 using InitCJRuntimeType = int(*)(const struct RuntimeParam*);;
 using InitUISchedulerType = void*(*)();
@@ -66,6 +68,8 @@ using RunUISchedulerType = int(*)(unsigned long long);
 using FiniCJRuntimeType = int(*)();
 using InitCJLibraryType = int(*)(const char*);
 using RegisterEventHandlerType = void(*)(PostTaskType, HasHigherPriorityType);
+using RegisterArkVMType = void(*)(unsigned long long);
+using RegisterStackInfoType = void(*)(UpdateStackInfoFuncType);
 
 #ifdef __OHOS__
 const char REGISTER_UNCAUGHT_EXCEPTION_NAME[] = "RegisterUncaughtExceptionHandler";
@@ -142,6 +146,32 @@ bool LoadSymbolRegisterEventHandlerCallbacks(void* handle, CJRuntimeAPI& apis)
     return true;
 }
 
+bool LoadSymbolRegisterStackInfoCallbacks(void* handle, CJRuntimeAPI& apis)
+{
+    auto symbol = DynamicFindSymbol(handle, REGISTER_STACKINFO_CALLBACKS_NAME);
+    if (symbol == nullptr) {
+        LOGE("runtime api not found: %{public}s", REGISTER_STACKINFO_CALLBACKS_NAME);
+        // return true for compatible.
+        apis.RegisterStackInfoCallbacks = nullptr;
+        return true;
+    }
+    apis.RegisterStackInfoCallbacks = reinterpret_cast<RegisterStackInfoType>(symbol);
+    return true;
+}
+
+bool LoadSymbolRegisterArkVM(void* handle, CJRuntimeAPI& apis)
+{
+    auto symbol = DynamicFindSymbol(handle, REGISTER_ARKVM_SYMBOL_NAME);
+    if (symbol == nullptr) {
+        LOGE("runtime api not found: %{public}s", REGISTER_ARKVM_SYMBOL_NAME);
+        // return true for compatible.
+        apis.RegisterArkVMInRuntime = nullptr;
+        return true;
+    }
+    apis.RegisterArkVMInRuntime = reinterpret_cast<RegisterArkVMType>(symbol);
+    return true;
+}
+
 #ifdef __OHOS__
 bool LoadSymbolRegisterCJUncaughtExceptionHandler(void* handle, CJRuntimeAPI& apis)
 {
@@ -199,9 +229,18 @@ void CJEnvironment::InitSpawnEnv()
 void CJEnvironment::PreloadLibs()
 {
     LOGI("start Preloadlibs");
-    LoadCJLibrary(SDK, "libohos.ability.so");
-    LoadCJLibrary(SDK, "libohos.component.so");
-    LoadCJLibrary(SDK, "libohos.window.so");
+    auto lib = LoadCJLibrary(SDK, "libohos.ability.so");
+    if (lib) {
+        preloadLibs_.emplace_back(lib);
+    }
+    lib = LoadCJLibrary(SDK, "libohos.component.so");
+    if (lib) {
+        preloadLibs_.emplace_back(lib);
+    }
+    lib = LoadCJLibrary(SDK, "libohos.window.so");
+    if (lib) {
+        preloadLibs_.emplace_back(lib);
+    }
 }
 
 void CJEnvironment::SetAppPath(const std::string& appPath)
@@ -236,6 +275,10 @@ CJEnvironment::~CJEnvironment()
     StopRuntime();
 
     delete lazyApis_;
+
+    for (auto lib : preloadLibs_) {
+        dlclose(lib);
+    }
 }
 
 CJEnvironment* CJEnvironment::GetInstance()
@@ -268,12 +311,15 @@ bool CJEnvironment::LoadRuntimeApis()
         return false;
     }
 #undef RTLIB_NAME
+    preloadLibs_.emplace_back(dso);
     if (!LoadSymbolInitCJRuntime(dso, *lazyApis_) ||
         !LoadSymbolInitUIScheduler(dso, *lazyApis_) ||
         !LoadSymbolRunUIScheduler(dso, *lazyApis_) ||
         !LoadSymbolFiniCJRuntime(dso, *lazyApis_) ||
         !LoadSymbolInitCJLibrary(dso, *lazyApis_) ||
-        !LoadSymbolRegisterEventHandlerCallbacks(dso, *lazyApis_)) {
+        !LoadSymbolRegisterEventHandlerCallbacks(dso, *lazyApis_) ||
+        !LoadSymbolRegisterStackInfoCallbacks(dso, *lazyApis_) ||
+        !LoadSymbolRegisterArkVM(dso, *lazyApis_)) {
         LOGE("load symbol failed");
         return false;
     }
@@ -285,6 +331,22 @@ bool CJEnvironment::LoadRuntimeApis()
 #endif
     isRuntimeApiLoaded = true;
     return true;
+}
+
+void CJEnvironment::RegisterArkVMInRuntime(unsigned long long externalVM)
+{
+    if (lazyApis_->RegisterArkVMInRuntime == nullptr) {
+        return;
+    }
+    lazyApis_->RegisterArkVMInRuntime(externalVM);
+}
+
+void CJEnvironment::RegisterStackInfoCallbacks(UpdateStackInfoFuncType uFunc)
+{
+    if (lazyApis_->RegisterStackInfoCallbacks == nullptr) {
+        return;
+    }
+    lazyApis_->RegisterStackInfoCallbacks(uFunc);
 }
 
 void CJEnvironment::RegisterCJUncaughtExceptionHandler(const CJUncaughtExceptionInfo& handle)
@@ -661,6 +723,12 @@ CJEnvMethods* CJEnvironment::CreateEnvMethods()
         },
         .startDebugger = []() {
             return CJEnvironment::GetInstance()->StartDebugger();
+        },
+        .registerArkVMInRuntime = [](unsigned long long arkVM) {
+            CJEnvironment::GetInstance()->RegisterArkVMInRuntime(arkVM);
+        },
+        .registerStackInfoCallbacks = [](UpdateStackInfoFuncType uFunc) {
+            CJEnvironment::GetInstance()->RegisterStackInfoCallbacks(uFunc);
         },
         .registerCJUncaughtExceptionHandler = [](const CJUncaughtExceptionInfo& handle) {
             return CJEnvironment::GetInstance()->RegisterCJUncaughtExceptionHandler(handle);

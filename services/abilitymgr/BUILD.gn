@@ -164,6 +164,7 @@ ohos_shared_library("abilityms") {
     "config_policy:configpolicy_util",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
+    "faultloggerd:libbacktrace_local",
     "ffrt:libffrt",
     "hicollie:libhicollie",
     "hilog:libhilog",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -193,19 +193,28 @@ int32_t UserController::StopUser(int32_t userId)
     return 0;
 }
 
-int32_t UserController::LogoutUser(int32_t userId)
+int32_t UserController::LogoutUser(int32_t userId, sptr<IUserCallback> callback)
 {
     if (userId < 0 || userId == USER_ID_NO_HEAD) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "userId invalid:%{public}d", userId);
+        if (callback) {
+            callback->OnLogoutUserDone(userId, INVALID_USERID_VALUE);
+        }
         return INVALID_USERID_VALUE;
     }
     if (!IsExistOsAccount(userId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null account:%{public}d", userId);
+        if (callback) {
+            callback->OnLogoutUserDone(userId, INVALID_USERID_VALUE);
+        }
         return INVALID_USERID_VALUE;
     }
     auto abilityManagerService = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (!abilityManagerService) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityManagerService");
+        if (callback) {
+            callback->OnLogoutUserDone(userId, -1);
+        }
         return -1;
     }
     abilityManagerService->RemoveLauncherDeathRecipient(userId);
@@ -216,6 +225,9 @@ int32_t UserController::LogoutUser(int32_t userId)
     auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
     if (!appScheduler) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null appScheduler");
+        if (callback) {
+            callback->OnLogoutUserDone(userId, INVALID_USERID_VALUE);
+        }
         return INVALID_USERID_VALUE;
     }
     abilityManagerService->ClearUserData(userId);
@@ -223,11 +235,7 @@ int32_t UserController::LogoutUser(int32_t userId)
     if (IsCurrentUser(userId)) {
         SetCurrentUserId(0);
     }
-    appScheduler->KillProcessesByUserId(userId);
-    if (system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        TAG_LOGI(AAFwkTag::APPMGR, "developer mode, send uninstall debug hap messages");
-        appScheduler->SendAppSpawnUninstallDebugHapMsg(userId);
-    }
+    appScheduler->KillProcessesByUserId(userId, system::GetBoolParameter(DEVELOPER_MODE_STATE, false), callback);
     ClearAbilityUserItems(userId);
     return 0;
 }

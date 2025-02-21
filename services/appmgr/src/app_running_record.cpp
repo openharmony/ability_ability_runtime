@@ -626,13 +626,14 @@ void AppRunningRecord::AddModules(
     }
 
     for (auto &iter : moduleInfos) {
-        AddModule(appInfo, nullptr, nullptr, iter, nullptr, 0);
+        AddModule(appInfo, nullptr, nullptr, iter, nullptr, 0, 0);
     }
 }
 
 void AppRunningRecord::AddModule(std::shared_ptr<ApplicationInfo> appInfo,
     std::shared_ptr<AbilityInfo> abilityInfo, sptr<IRemoteObject> token,
-    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId)
+    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId,
+    int32_t persistentId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 
@@ -667,7 +668,7 @@ void AppRunningRecord::AddModule(std::shared_ptr<ApplicationInfo> appInfo,
         TAG_LOGE(AAFwkTag::APPMGR, "null abilityInfo or token");
         return;
     }
-    moduleRecord->AddAbility(token, abilityInfo, want, abilityRecordId);
+    moduleRecord->AddAbility(token, abilityInfo, want, abilityRecordId, persistentId);
 
     return;
 }
@@ -1667,6 +1668,18 @@ void AppRunningRecord::RemoveRenderPid(pid_t renderPid)
     renderPidSet_.erase(renderPid);
 }
 
+void AppRunningRecord::GetRenderProcessInfos(std::list<SimpleProcessInfo> &processInfos)
+{
+    std::lock_guard renderRecordMapLock(renderRecordMapLock_);
+    for (auto &item : renderRecordMap_) {
+        auto renderRecord = item.second;
+        if (renderRecord && renderRecord->GetPid() > 0) {
+            auto processInfo = SimpleProcessInfo(renderRecord->GetPid(), renderRecord->GetProcessName());
+            processInfos.emplace_back(processInfo);
+        }
+    }
+}
+
 bool AppRunningRecord::ConstainsRenderPid(pid_t renderPid)
 {
     std::lock_guard renderPidSetLock(renderPidSetLock_);
@@ -2182,6 +2195,18 @@ int32_t AppRunningRecord::GetChildProcessCount()
 {
     std::lock_guard lock(childProcessRecordMapLock_);
     return childProcessRecordMap_.size();
+}
+
+void AppRunningRecord::GetChildProcessInfos(std::list<SimpleProcessInfo> &processInfos)
+{
+    std::lock_guard lock(childProcessRecordMapLock_);
+    for (auto &iter : childProcessRecordMap_) {
+        auto childRecord = iter.second;
+        if (childRecord && childRecord->GetPid() > 0) {
+            auto processInfo = SimpleProcessInfo(childRecord->GetPid(), childRecord->GetProcessName());
+            processInfos.emplace_back(processInfo);
+        }
+    }
 }
 #endif //SUPPORT_CHILD_PROCESS
 

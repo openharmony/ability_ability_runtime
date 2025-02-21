@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -546,7 +546,8 @@ HWTEST_F(AmsMgrSchedulerTest, KillProcessesByUserId_001, TestSize.Level0)
     auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
     ASSERT_NE(amsMgrScheduler, nullptr);
     int32_t userId = 0;
-    amsMgrScheduler->KillProcessesByUserId(userId);
+    amsMgrScheduler->KillProcessesByUserId(userId, false, nullptr);
+    amsMgrScheduler->KillProcessesByUserId(userId, true, nullptr);
 }
 
 /*
@@ -565,7 +566,7 @@ HWTEST_F(AmsMgrSchedulerTest, KillProcessesByUserId_002, TestSize.Level0)
     ASSERT_NE(amsMgrScheduler, nullptr);
     int32_t userId = 0;
     AAFwk::MyFlag::flag_ = 0;
-    amsMgrScheduler->KillProcessesByUserId(userId);
+    amsMgrScheduler->KillProcessesByUserId(userId, false, nullptr);
     AAFwk::MyFlag::flag_ = 1;
 }
 
@@ -585,7 +586,7 @@ HWTEST_F(AmsMgrSchedulerTest, KillProcessesByUserId_003, TestSize.Level0)
     ASSERT_NE(amsMgrScheduler, nullptr);
     int32_t userId = 0;
     AAFwk::MyFlag::flag_ = 1;
-    amsMgrScheduler->KillProcessesByUserId(userId);
+    amsMgrScheduler->KillProcessesByUserId(userId, false, nullptr);
 }
 
 /*
@@ -1489,24 +1490,6 @@ HWTEST_F(AmsMgrSchedulerTest, AttachedToStatusBar_002, TestSize.Level0)
     ASSERT_NE(amsMgrScheduler, nullptr);
     sptr<IRemoteObject> token;
     amsMgrScheduler->AttachedToStatusBar(token);
-}
-
-/*
- * Feature: AmsMgrScheduler
- * Function: SendAppSpawnUninstallDebugHapMsg
- * SubFunction: NA
- * FunctionPoints: AmsMgrScheduler SendAppSpawnUninstallDebugHapMsg
- * EnvConditions: NA
- * CaseDescription: SubmitTask
- */
-HWTEST_F(AmsMgrSchedulerTest, SendAppSpawnUninstallDebugHapMsg_001, TestSize.Level0)
-{
-    auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
-    amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
-    amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
-    ASSERT_NE(amsMgrScheduler, nullptr);
-    int32_t userId = 0;
-    amsMgrScheduler->SendAppSpawnUninstallDebugHapMsg(userId);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

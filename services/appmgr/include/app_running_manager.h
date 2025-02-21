@@ -36,6 +36,7 @@
 #include "record_query_result.h"
 #include "refbase.h"
 #include "running_process_info.h"
+#include "simple_process_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -61,7 +62,7 @@ public:
      */
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(const std::shared_ptr<ApplicationInfo> &appInfo,
         const std::string &processName, const BundleInfo &bundleInfo, const std::string &instanceKey,
-        const std::string &customProcessFlag = "");
+        const std::string &customProcessFlag = "", int32_t persistentId = 0);
 
     /**
      * CheckAppRunningRecordIsExist, Get process record by application name and process Name.
@@ -272,6 +273,7 @@ public:
     bool ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, const std::string &instanceKey, std::list<pid_t> &pids,
         bool clearPageStack);
     bool GetPidsByUserId(int32_t userId, std::list<pid_t> &pids);
+    bool GetProcessInfosByUserId(int32_t userId, std::list<SimpleProcessInfo> &processInfos);
 
     void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
 
@@ -371,7 +373,7 @@ public:
     bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
-
+    std::shared_ptr<AppRunningRecord> QueryAppRecordPlus(int32_t pid, int32_t uid);
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     int32_t AssignRunningProcessInfoByAppRecord(
@@ -379,10 +381,13 @@ private:
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
     void NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
         const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner);
+    void AddRecordToDeadList(std::shared_ptr<AppRunningRecord> appRecord);
+    void RemoveTimeoutDeadAppRecord();
 
 private:
     std::mutex runningRecordMapMutex_;
     std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> appRunningRecordMap_;
+    std::list<std::pair<int64_t, std::shared_ptr<AppRunningRecord>>> deadAppRecordList_; // dead time and record
 
     std::mutex uiExtensionMapLock_;
     std::map<int32_t, std::pair<pid_t, pid_t>> uiExtensionLauncherMap_;

@@ -276,7 +276,7 @@ int DialogSessionManager::SendDialogResult(const Want &want, const std::string &
         return INNER_ERR;
     }
     int ret = abilityMgr->StartAbilityAsCallerDetails(targetWant, callerToken, callerToken, dialogCallerInfo->userId,
-        dialogCallerInfo->requestCode, false, dialogCallerInfo->type == SelectorType::APP_CLONE_SELECTOR);
+        dialogCallerInfo->requestCode, false);
     if (ret == ERR_OK) {
         ClearDialogContext(dialogSessionId);
         abilityMgr->RemoveSelectorIdentity(dialogCallerInfo->targetWant.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));

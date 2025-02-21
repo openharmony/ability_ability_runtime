@@ -33,6 +33,7 @@
 #include "hitrace_meter.h"
 #include "image_source.h"
 #include "keep_alive_process_manager.h"
+#include "last_exit_detail_info.h"
 #include "multi_instance_utils.h"
 #include "os_account_manager_wrapper.h"
 #include "ui_service_extension_connection_constants.h"
@@ -88,6 +89,7 @@ const std::string UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbili
 const std::string UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
 constexpr const char* PARAM_SEND_RESULT_CALLER_BUNDLENAME = "ohos.anco.param.sendResultCallderBundleName";
 constexpr const char* PARAM_SEND_RESULT_CALLER_TOKENID = "ohos.anco.param.sendResultCallerTokenId";
+constexpr const char* PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME = "ohos.anco.param.isNeedUpdateName";
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 // Developer mode param
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
@@ -294,9 +296,14 @@ int32_t AbilityRecord::GetUid()
     return uid_;
 }
 
-int32_t AbilityRecord::GetPid()
+pid_t AbilityRecord::GetPid()
 {
     return pid_;
+}
+
+void AbilityRecord::SetPid(pid_t pid)
+{
+    pid_ = pid;
 }
 
 void AbilityRecord::LoadUIAbility()
@@ -355,6 +362,10 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     loadParam.instanceKey = instanceKey_;
     loadParam.isCallerSetProcess = IsCallerSetProcess();
     loadParam.customProcessFlag = customProcessFlag_;
+    auto sessionInfo = GetSessionInfo();
+    if (sessionInfo != nullptr) {
+        loadParam.persistentId = sessionInfo->persistentId;
+    }
     want_.RemoveParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED);
     if (KeepAliveProcessManager::GetInstance().IsKeepAliveBundle(abilityInfo_.applicationInfo.bundleName, -1)) {
         want_.SetParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED, true);
@@ -1541,7 +1552,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         if (schedulerObject == nullptr || !schedulerObject->AddDeathRecipient(schedulerDeathRecipient_)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "AddDeathRecipient failed");
         }
-        pid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid()); // set pid when ability attach to service.
+        SetPid(IPCSkeleton::GetCallingPid()); // set pid when ability attach to service.
         AfterLoaded();
         // add collaborator mission bind pid
         NotifyMissionBindPid();
@@ -1561,7 +1572,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
             }
         }
         scheduler_ = scheduler;
-        pid_ = 0;
+        SetPid(0);
     }
 }
 
@@ -1999,8 +2010,13 @@ void AbilityRecord::SaveResult(int resultCode, const Want *resultWant, std::shar
         if (callerSystemAbilityRecord != nullptr) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "caller is system ability");
             Want* newWant = const_cast<Want*>(resultWant);
-            callerSystemAbilityRecord->SetResultToSystemAbility(callerSystemAbilityRecord, *newWant,
-                resultCode);
+            if (want_.GetBoolParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME, false)) {
+                want_.RemoveParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME);
+                callerSystemAbilityRecord->SetResult(*newWant, resultCode);
+            } else {
+                callerSystemAbilityRecord->SetResultToSystemAbility(callerSystemAbilityRecord, *newWant,
+                    resultCode);
+            }
         }
     }
 }
@@ -2201,7 +2217,8 @@ bool AbilityRecord::IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken, 
     }
     AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t result = AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
-    if (result == ERR_OK && nativeTokenInfo.processName == DMS_PROCESS_NAME) {
+    if (result == ERR_OK && (nativeTokenInfo.processName == DMS_PROCESS_NAME ||
+        want_.GetBoolParam(PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME, false))) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "system ability call");
         return true;
     }
@@ -2988,10 +3005,26 @@ void AbilityRecord::SetLaunchReasonMessage(const std::string &launchReasonMessag
     lifeCycleStateInfo_.launchParam.launchReasonMessage = launchReasonMessage;
 }
 
-void AbilityRecord::SetLastExitReason(const ExitReason &exitReason)
+void AbilityRecord::SetLastExitReason(const ExitReason &exitReason, const AppExecFwk::RunningProcessInfo &processInfo,
+    const int64_t timestamp, bool withKillMsg)
 {
+    std::string exitMsg = exitReason.exitMsg;
+    std::string killMsg = "";
+    if (withKillMsg) {
+        killMsg = exitReason.exitMsg;
+    }
+    LastExitDetailInfo lastExitDetailInfo = {};
+    lastExitDetailInfo.pid = processInfo.pid_;
+    lastExitDetailInfo.uid = processInfo.uid_;
+    lastExitDetailInfo.exitSubReason = exitReason.subReason;
+    lastExitDetailInfo.rss = processInfo.rssValue;
+    lastExitDetailInfo.pss = processInfo.pssValue;
+    lastExitDetailInfo.timestamp = timestamp;
+    lastExitDetailInfo.processName = processInfo.processName_;
+    lastExitDetailInfo.exitMsg = killMsg;
     lifeCycleStateInfo_.launchParam.lastExitReason = CovertAppExitReasonToLastReason(exitReason.reason);
-    lifeCycleStateInfo_.launchParam.lastExitMessage = exitReason.exitMsg;
+    lifeCycleStateInfo_.launchParam.lastExitMessage = exitMsg;
+    lifeCycleStateInfo_.launchParam.lastExitDetailInfo = lastExitDetailInfo;
 }
 
 LastExitReason AbilityRecord::CovertAppExitReasonToLastReason(const Reason exitReason)
@@ -3011,6 +3044,10 @@ LastExitReason AbilityRecord::CovertAppExitReasonToLastReason(const Reason exitR
             return LASTEXITREASON_RESOURCE_CONTROL;
         case REASON_UPGRADE:
             return LASTEXITREASON_UPGRADE;
+        case REASON_USER_REQUEST:
+            return LASTEXITREASON_USER_REQUEST;
+        case REASON_SIGNAL:
+            return LASTEXITREASON_SIGNAL;
         case REASON_UNKNOWN:
         default:
             return LASTEXITREASON_UNKNOWN;

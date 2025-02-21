@@ -85,6 +85,8 @@ static napi_value InitLastExitReasonObject(napi_env env)
     NAPI_CALL(env, SetEnumItem(env, object, "PERFORMANCE_CONTROL", LASTEXITREASON_PERFORMANCE_CONTROL));
     NAPI_CALL(env, SetEnumItem(env, object, "RESOURCE_CONTROL", LASTEXITREASON_RESOURCE_CONTROL));
     NAPI_CALL(env, SetEnumItem(env, object, "UPGRADE", LASTEXITREASON_UPGRADE));
+    NAPI_CALL(env, SetEnumItem(env, object, "USER_REQUEST", LASTEXITREASON_USER_REQUEST));
+    NAPI_CALL(env, SetEnumItem(env, object, "SIGNAL", LASTEXITREASON_SIGNAL));
 
     return object;
 }

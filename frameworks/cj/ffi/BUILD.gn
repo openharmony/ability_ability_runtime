@@ -35,6 +35,7 @@ ohos_shared_library("cj_ability_ffi") {
   }
   include_dirs = [
     "${ability_runtime_napi_path}/ability_auto_startup_callback",
+    "${ability_runtime_path}/interfaces/inner_api/runtime/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_delegator/",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",

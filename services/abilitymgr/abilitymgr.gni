@@ -55,6 +55,7 @@ abilityms_files = [
   "src/ams_configuration_parameter.cpp",
   "src/recovery_info_timer.cpp",
   "src/modal_system_dialog/modal_system_dialog_ui_extension.cpp",
+  "src/hidden_start_observer_manager.cpp",
   "src/interceptor/ability_interceptor_executer.cpp",
   "src/interceptor/ability_jump_interceptor.cpp",
   "src/interceptor/block_all_app_start_interceptor.cpp",
@@ -136,6 +137,9 @@ abilityms_files = [
   "src/keep_alive/keep_alive_process_manager.cpp",
 
   "src/ability_manager_event_subscriber.cpp",
+  "src/ability_record_death_manager.cpp",
+
+  "src/exit_info_data_manager.cpp",
 
   #utils
   "src/utils/ability_event_util.cpp",

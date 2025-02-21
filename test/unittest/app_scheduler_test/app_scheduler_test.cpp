@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -558,7 +558,8 @@ HWTEST_F(AppSchedulerTest, AppScheduler_KillProcessesByUserId_001, TestSize.Leve
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::make_unique<AppExecFwk::AppMgrClient>();
     ASSERT_NE(DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_, nullptr);
     int32_t userId = 0;
-    DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByUserId(userId);
+    DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByUserId(userId, false, nullptr);
+    DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByUserId(userId, true, nullptr);
 }
 
 /*
@@ -1136,19 +1137,6 @@ HWTEST_F(AppSchedulerTest, AppScheduler_RegisterAbilityDebugResponse_001, TestSi
     sptr<AppExecFwk::IAbilityDebugResponse> response = nullptr;
     int res = DelayedSingleton<AppScheduler>::GetInstance()->RegisterAbilityDebugResponse(response);
     EXPECT_EQ(res, INNER_ERR);
-}
-
-/**
- * @tc.name: AppScheduler_SendAppSpawnUninstallDebugHapMsg_001
- * @tc.desc: SendAppSpawnUninstallDebugHapMsg
- * @tc.type: FUNC
- */
-HWTEST_F(AppSchedulerTest, AppScheduler_SendAppSpawnUninstallDebugHapMsg_001, TestSize.Level1)
-{
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::make_unique<AppExecFwk::AppMgrClient>();
-    ASSERT_NE(DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_, nullptr);
-    int32_t userId = 0;
-    DelayedSingleton<AppScheduler>::GetInstance()->SendAppSpawnUninstallDebugHapMsg(userId);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

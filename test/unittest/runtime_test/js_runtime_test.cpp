@@ -1059,32 +1059,6 @@ HWTEST_F(JsRuntimeTest, ReInitJsEnvImpl_0100, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsRuntimeStartProfilerTest_0100
- * @tc.desc: JsRuntime test for StartProfiler.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, JsRuntimeStartProfilerTest_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "StartProfilerTest_0100 start");
-    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options_);
-
-    bool needBreakPoint = false;
-    uint32_t instanceId = 1;
-    jsRuntime->StartDebugger(needBreakPoint, instanceId);
-
-    AbilityRuntime::Runtime::DebugOption debugOption;
-    debugOption.perfCmd = "profile jsperf 100";
-    debugOption.isStartWithDebug = false;
-    debugOption.processName = "test";
-    debugOption.isDebugApp = true;
-    debugOption.isStartWithNative = false;
-    jsRuntime->StartProfiler(debugOption);
-    ASSERT_NE(jsRuntime, nullptr);
-    jsRuntime.reset();
-    TAG_LOGI(AAFwkTag::TEST, "StartProfilerTest_0100 end");
-}
-
-/**
  * @tc.name: PostTask_0100
  * @tc.desc: Js runtime post task.
  * @tc.type: FUNC
@@ -1476,6 +1450,23 @@ HWTEST_F(JsRuntimeTest, DumpHeapSnapshot_0200, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DumpHeapSnapshot_0300
+ * @tc.desc: JsRuntime test for DumpHeapSnapshot.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, DumpHeapSnapshot_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DumpHeapSnapshot_0300 start");
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    uint32_t tid = 1;
+    bool isFullGC = true;
+    bool isBinary = true;
+    jsRuntime->DumpHeapSnapshot(tid, isFullGC, isBinary);
+    EXPECT_TRUE(jsRuntime != nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "DumpHeapSnapshot end");
+}
+
+/**
  * @tc.name: AllowCrossThreadExecution_0200
  * @tc.desc: JsRuntime test for AllowCrossThreadExecution.
  * @tc.type: FUNC
@@ -1519,8 +1510,8 @@ HWTEST_F(JsRuntimeTest, RegisterQuickFixQueryFunc_0200, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdatePkgContextInfoJson_0100
- * @tc.desc: JsRuntime test for UpdatePkgContextInfoJson.
+ * @tc.name: SetPkgContextInfoJsonandUpdatePkgContextInfoJson_0100
+ * @tc.desc: JsRuntime test for SetPkgContextInfoJson and UpdatePkgContextInfoJson.
  * @tc.type: FUNC
  */
 HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0100, TestSize.Level1)
@@ -1529,17 +1520,22 @@ HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0100, TestSize.Level1)
     auto jsRuntime = std::make_unique<JsRuntime>();
     EXPECT_NE(jsRuntime, nullptr);
     std::string moduleName = "moduleName";
-    jsRuntime->pkgContextInfoJsonStringMap_.insert(std::make_pair(moduleName, "test2"));
     std::string hapPath = TEST_HAP_PATH;
     std::string packageName = "packageName";
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    panda::RuntimeOption options;
+    jsRuntime->jsEnv_->vm_ = panda::JSNApi::CreateJSVM(options);
     jsRuntime->UpdatePkgContextInfoJson(moduleName, hapPath, packageName);
+
+    jsRuntime->pkgContextInfoJsonStringMap_.insert(std::make_pair(moduleName, "test2"));
+    jsRuntime->SetPkgContextInfoJson(moduleName, hapPath, packageName);
     EXPECT_EQ(jsRuntime->pkgContextInfoJsonStringMap_[moduleName], "test2");
     TAG_LOGI(AAFwkTag::TEST, "UpdatePkgContextInfoJson_0100 end");
 }
 
 /**
- * @tc.name: JsRuntimePreloadModule_0100
- * @tc.desc: JsRuntime test for JsRuntimePreloadModule.
+ * @tc.name: JsRuntimePreloadModuleandDoCleanWorkAfterStageCleaned_0100
+ * @tc.desc: JsRuntime test for JsRuntimePreloadModule and DoCleanWorkAfterStageCleaned.
  * @tc.type: FUNC
  */
 HWTEST_F(JsRuntimeTest, JsRuntimePreloadModule_0100, TestSize.Level1)
@@ -1547,6 +1543,7 @@ HWTEST_F(JsRuntimeTest, JsRuntimePreloadModule_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "PreloadModule_0100 start");
     std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(options_);
     EXPECT_TRUE(jsRuntime != nullptr);
+    jsRuntime->DoCleanWorkAfterStageCleaned();
     std::string moduleName = TEST_MODULE_NAME;
     std::string srcPath = TEST_LIB_PATH;
     std::string hapPath = TEST_HAP_PATH;
@@ -1559,8 +1556,8 @@ HWTEST_F(JsRuntimeTest, JsRuntimePreloadModule_0100, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsRuntimePreloadMainAbility_0100
- * @tc.desc: JsRuntime test for JsRuntimePreloadMainAbility.
+ * @tc.name: JsRuntimePreloadMainAbilityandSetStopPreloadSoCallback_0100
+ * @tc.desc: JsRuntime test for JsRuntimePreloadMainAbility and SetStopPreloadSoCallback.
  * @tc.type: FUNC
  */
 HWTEST_F(JsRuntimeTest, JsRuntimePreloadMainAbility_0100, TestSize.Level1)
@@ -1575,9 +1572,16 @@ HWTEST_F(JsRuntimeTest, JsRuntimePreloadMainAbility_0100, TestSize.Level1)
     std::string srcEntrance = TEST_LIB_PATH;
     bool isEsMode = true;
     jsRuntime->PreloadMainAbility(moduleName, srcPath, hapPath, isEsMode, srcEntrance);
+
+    auto callBack = []() {return;};
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    panda::RuntimeOption options;
+    jsRuntime->jsEnv_->vm_ = panda::JSNApi::CreateJSVM(options);
+    jsRuntime->SetStopPreloadSoCallback(callBack);
     EXPECT_EQ(jsRuntime->preloadList_.size(), 1);
     jsRuntime.reset();
     TAG_LOGI(AAFwkTag::TEST, "PreloadMainAbility_0100 end");
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
+

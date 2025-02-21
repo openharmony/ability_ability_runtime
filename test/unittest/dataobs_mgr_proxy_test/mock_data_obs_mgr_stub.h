@@ -44,6 +44,7 @@ public:
     MOCK_METHOD2(UnregisterObserverExt, Status(const Uri&, sptr<IDataAbilityObserver>));
     MOCK_METHOD1(UnregisterObserverExt, Status(sptr<IDataAbilityObserver>));
     MOCK_METHOD1(NotifyChangeExt, Status(const ChangeInfo&));
+    MOCK_METHOD2(NotifyProcessObserver, Status(const std::string&, const sptr<IRemoteObject>&));
 };
 
 class MockDataAbilityObserverStub : public AAFwk::DataAbilityObserverStub {
