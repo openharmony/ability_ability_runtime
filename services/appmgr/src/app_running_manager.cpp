@@ -1375,7 +1375,8 @@ bool AppRunningManager::IsApplicationUnfocused(const std::string &bundleName)
     return true;
 }
 
-void AppRunningManager::SetAttachAppDebug(const std::string &bundleName, const bool &isAttachDebug)
+void AppRunningManager::SetAttachAppDebug(const std::string &bundleName, const bool &isAttachDebug,
+    bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto appRunningMap = GetAppRunningRecordMap();
@@ -1386,7 +1387,7 @@ void AppRunningManager::SetAttachAppDebug(const std::string &bundleName, const b
         }
         if (appRecord->GetBundleName() == bundleName) {
             TAG_LOGD(AAFwkTag::APPMGR, "The application: %{public}s will be set debug mode.", bundleName.c_str());
-            appRecord->SetAttachDebug(isAttachDebug);
+            appRecord->SetAttachDebug(isAttachDebug, isDebugFromLocal);
         }
     }
 }

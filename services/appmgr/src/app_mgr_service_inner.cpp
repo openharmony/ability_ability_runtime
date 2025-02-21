@@ -193,6 +193,7 @@ constexpr const char* SERVICE_EXT_MULTI_PROCESS_WHITE_LIST = "component.startup.
 constexpr const char* SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 constexpr const char* DEBUG_APP = "debugApp";
 constexpr const char* NATIVE_DEBUG = "nativeDebug";
+constexpr const char* DEBUG_FROM = "ohos.param.debugFrom";
 constexpr const char* SERVICE_EXTENSION = ":ServiceExtension";
 constexpr const char* KEEP_ALIVE = ":KeepAlive";
 constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
@@ -2670,7 +2671,8 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
     const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, bool isKia)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (want != nullptr && (want->GetBoolParam(DEBUG_APP, false) || want->GetBoolParam(NATIVE_DEBUG, false))) {
+    if (want != nullptr && (want->GetBoolParam(DEBUG_APP, false) || want->GetBoolParam(NATIVE_DEBUG, false) ||
+        want->GetBoolParam(DEBUG_FROM, false))) {
         if (appInfo != nullptr && appInfo->appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
             TAG_LOGE(AAFwkTag::APPMGR, "release app not support debug");
             return nullptr;
@@ -2696,6 +2698,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
     if (want) {
         appRecord->SetDebugApp(want->GetBoolParam(DEBUG_APP, false));
         appRecord->SetNativeDebug(want->GetBoolParam("nativeDebug", false));
+        appRecord->SetDebugFromLocal(want->GetBoolParam(DEBUG_FROM, false));
         if (want->GetBoolParam(COLD_START, false)) {
             appRecord->SetDebugApp(true);
         }
@@ -2714,6 +2717,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
         appRecord->SetCallerTokenId(want->GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, -1));
         appRecord->SetAssignTokenId(want->GetIntParam("specifyTokenId", 0));
         appRecord->SetNativeStart(want->GetBoolParam("native", false));
+        appRecord->SetDebugFromLocal(want->GetBoolParam(DEBUG_FROM, false));
     }
     return appRecord;
 }
@@ -3906,8 +3910,9 @@ void AppMgrServiceInner::ProcessAppDebug(const std::shared_ptr<AppRunningRecord>
     }
 
     auto bundleName = appRecord->GetBundleName();
+    auto isDebugFromLocal = appRecord->GetDebugFromLocal();
     if (appDebugManager_->IsAttachDebug(bundleName)) {
-        appRecord->SetAttachDebug(true);
+        appRecord->SetAttachDebug(true, isDebugFromLocal);
         startDebug(false);
     }
 }
@@ -4809,6 +4814,9 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
     auto isDebug = want.GetBoolParam(DEBUG_APP, false);
     TAG_LOGI(AAFwkTag::APPMGR, "setDebug: %{public}s", (isDebug ? "true" : "false"));
     appRecord->SetDebugApp(isDebug);
+    bool isDebugFromLocal = want.GetBoolParam(DEBUG_FROM, false);
+    TAG_LOGI(AAFwkTag::APPMGR, "SetDebugFromLocal: %{public}d", isDebugFromLocal);
+    appRecord->SetDebugFromLocal(isDebugFromLocal);
     if (want.GetBoolParam(COLD_START, false)) {
         appRecord->SetDebugApp(true);
     }
@@ -4960,6 +4968,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
             appRecord->SetCallerUid(wantPtr->GetIntParam(Want::PARAM_RESV_CALLER_UID, -1));
             appRecord->SetCallerTokenId(wantPtr->GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, -1));
             appRecord->SetDebugApp(wantPtr->GetBoolParam(DEBUG_APP, false));
+            appRecord->SetDebugFromLocal(wantPtr->GetBoolParam(DEBUG_FROM, false));
             if (appRecord->IsDebugApp()) {
                 ProcessAppDebug(appRecord, true);
             }
@@ -7022,7 +7031,7 @@ int32_t AppMgrServiceInner::UnregisterAppDebugListener(const sptr<IAppDebugListe
     return appDebugManager_->UnregisterAppDebugListener(listener);
 }
 
-int32_t AppMgrServiceInner::AttachAppDebug(const std::string &bundleName)
+int32_t AppMgrServiceInner::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
@@ -7040,7 +7049,7 @@ int32_t AppMgrServiceInner::AttachAppDebug(const std::string &bundleName)
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
         return ERR_NO_INIT;
     }
-    appRunningManager_->SetAttachAppDebug(bundleName, true);
+    appRunningManager_->SetAttachAppDebug(bundleName, true, isDebugFromLocal);
 
     auto debugInfos = appRunningManager_->GetAppDebugInfosByBundleName(bundleName, false);
     if (!debugInfos.empty() && appDebugManager_ != nullptr) {
@@ -7067,7 +7076,7 @@ int32_t AppMgrServiceInner::DetachAppDebug(const std::string &bundleName)
 
     auto debugInfos = appRunningManager_->GetAppDebugInfosByBundleName(bundleName, true);
     if (!debugInfos.empty()) {
-        appRunningManager_->SetAttachAppDebug(bundleName, false);
+        appRunningManager_->SetAttachAppDebug(bundleName, false, false);
         if (appDebugManager_ != nullptr) {
             appDebugManager_->StopDebug(debugInfos);
         }

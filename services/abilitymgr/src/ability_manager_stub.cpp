@@ -3611,8 +3611,8 @@ int32_t AbilityManagerStub::AttachAppDebugInner(MessageParcel &data, MessageParc
         TAG_LOGE(AAFwkTag::ABILITYMGR, "empty bundleName");
         return ERR_INVALID_VALUE;
     }
-
-    auto result = AttachAppDebug(bundleName);
+    bool isDebugFromLocal = data.ReadBool();
+    auto result = AttachAppDebug(bundleName, isDebugFromLocal);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
         return ERR_INVALID_VALUE;
@@ -3628,7 +3628,8 @@ int32_t AbilityManagerStub::DetachAppDebugInner(MessageParcel &data, MessageParc
         return ERR_INVALID_VALUE;
     }
 
-    auto result = DetachAppDebug(bundleName);
+    bool isDebugFromLocal = data.ReadBool();
+    auto result = DetachAppDebug(bundleName, isDebugFromLocal);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
         return ERR_INVALID_VALUE;

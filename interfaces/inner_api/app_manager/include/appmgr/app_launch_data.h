@@ -299,6 +299,19 @@ public:
      */
     bool IsAllowedNWebPreload() const;
 
+    /**
+     * @brief Setting debug mode.
+     *
+     * @param ideDebugMode, false:old debug, true:local debug.
+     */
+    void SetDebugFromLocal(bool isDebugFromLocal);
+    /**
+     * @brief Get debug mode.
+     *
+     * @return Returns debug mode.
+     */
+    bool GetDebugFromLocal() const;
+
 private:
     bool debugApp_ = false;
     bool jitEnabled_ = false;
@@ -318,6 +331,7 @@ private:
     std::string appRunningUniqueId_;
     std::string instanceKey_;
     std::string preloadModuleName_;
+    bool isDebugFromLocal_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

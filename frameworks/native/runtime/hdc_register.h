@@ -25,9 +25,14 @@ using HdcRegisterCallback = std::function<void(int socketFd, std::string option)
 
 class HdcRegister final {
 public:
+    enum DebugRegisterMode {
+        HDC_DEBUG_REG = 0,
+        LOCAL_DEBUG_REG,
+        BOTH_REG,
+    };
     static HdcRegister& Get();
     void StartHdcRegister(const std::string& bundleName, const std::string& processName, bool debugApp,
-        HdcRegisterCallback callback);
+        DebugRegisterMode debugMode, HdcRegisterCallback callback);
 
 private:
     HdcRegister() = default;
@@ -35,7 +40,8 @@ private:
 
     void StopHdcRegister();
 
-    void* registerHandler_ = nullptr;
+    void* registerHdcHandler_ = nullptr;
+    void* registerLocalHandler_ = nullptr;
 
     HdcRegister(const HdcRegister&) = delete;
     HdcRegister(HdcRegister&&) = delete;

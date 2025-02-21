@@ -1406,14 +1406,14 @@ public:
      * @param bundleName The application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode AttachAppDebug(const std::string &bundleName);
+    ErrCode AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal = false);
 
     /**
      * @brief Detach app debug.
      * @param bundleName The application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode DetachAppDebug(const std::string &bundleName);
+    ErrCode DetachAppDebug(const std::string &bundleName, bool isDebugFromLocal = false);
 
     /**
      * @brief Check if ability controller can start.

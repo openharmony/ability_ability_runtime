@@ -231,6 +231,7 @@ void CJRuntime::StartDebugMode(const DebugOption dOption)
     TAG_LOGI(AAFwkTag::CJRUNTIME, "StartDebugMode %{public}s", bundleName_.c_str());
 
     HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
+        HdcRegister::DebugRegisterMode::HDC_DEBUG_REG,
         [bundleName, isStartWithDebug, isDebugApp, instanceId](int socketFd, std::string option) {
             TAG_LOGI(AAFwkTag::CJRUNTIME, "hdcRegister callback call, socket fd: %{public}d, option: %{public}s.",
                 socketFd, option.c_str());

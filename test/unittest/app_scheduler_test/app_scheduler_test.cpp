@@ -1111,7 +1111,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_AttachAppDebug_001, TestSize.Level1)
 {
     AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     std::string bundleName = "bundleName";
-    int res = DelayedSingleton<AppScheduler>::GetInstance()->AttachAppDebug(bundleName);
+    int res = DelayedSingleton<AppScheduler>::GetInstance()->AttachAppDebug(bundleName, false);
     EXPECT_EQ(res, ERR_OK);
 }
 

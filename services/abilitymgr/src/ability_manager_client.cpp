@@ -146,6 +146,7 @@ ErrCode AbilityManagerClient::StartAbility(const Want &want, int requestCode, in
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbility ability:%{public}s, userId:%{public}d, appCloneIndex:%{public}d",
         want.GetElement().GetURI().c_str(), userId, want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
+
     HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbility(want, userId, requestCode);
 }
@@ -1829,20 +1830,20 @@ ErrCode AbilityManagerClient::UnregisterAppDebugListener(sptr<AppExecFwk::IAppDe
     return abms->UnregisterAppDebugListener(listener);
 }
 
-ErrCode AbilityManagerClient::AttachAppDebug(const std::string &bundleName)
+ErrCode AbilityManagerClient::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->AttachAppDebug(bundleName);
+    return abms->AttachAppDebug(bundleName, isDebugFromLocal);
 }
 
-ErrCode AbilityManagerClient::DetachAppDebug(const std::string &bundleName)
+ErrCode AbilityManagerClient::DetachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->DetachAppDebug(bundleName);
+    return abms->DetachAppDebug(bundleName, isDebugFromLocal);
 }
 
 ErrCode AbilityManagerClient::ExecuteIntent(uint64_t key, sptr<IRemoteObject> callerToken,

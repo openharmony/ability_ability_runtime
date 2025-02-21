@@ -1278,14 +1278,14 @@ public:
      * @param bundleName The application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t AttachAppDebug(const std::string &bundleName) override;
+    int32_t AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal) override;
 
     /**
      * @brief Detach app debug.
      * @param bundleName The application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t DetachAppDebug(const std::string &bundleName) override;
+    int32_t DetachAppDebug(const std::string &bundleName, bool isDebugFromLocal) override;
 
     /**
      * @brief Execute intent.

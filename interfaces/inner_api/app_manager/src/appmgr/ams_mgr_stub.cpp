@@ -646,8 +646,9 @@ int32_t AmsMgrStub::HandleAttachAppDebug(MessageParcel &data, MessageParcel &rep
         TAG_LOGE(AAFwkTag::APPMGR, "Bundle name is empty.");
         return ERR_INVALID_VALUE;
     }
+    auto isDebugFromLocal = data.ReadBool();
 
-    auto result = AttachAppDebug(bundleName);
+    auto result = AttachAppDebug(bundleName, isDebugFromLocal);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;

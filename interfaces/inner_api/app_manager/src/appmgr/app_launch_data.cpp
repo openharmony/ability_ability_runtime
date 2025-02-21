@@ -130,6 +130,11 @@ bool AppLaunchData::MarshallingExtend(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write preloadModuleName.");
         return false;
     }
+
+    if (!parcel.WriteBool(isDebugFromLocal_)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write isDebugFromLocal");
+        return false;
+    }
     return true;
 }
 
@@ -180,6 +185,7 @@ bool AppLaunchData::ReadFromParcel(Parcel &parcel)
     isNeedPreloadModule_ = parcel.ReadBool();
     isAllowedNWebPreload_ = parcel.ReadBool();
     preloadModuleName_ = parcel.ReadString();
+    isDebugFromLocal_ = parcel.ReadBool();
     return true;
 }
 
@@ -289,6 +295,16 @@ void AppLaunchData::SetNWebPreload(const bool isAllowedNWebPreload)
 bool AppLaunchData::IsAllowedNWebPreload() const
 {
     return isAllowedNWebPreload_;
+}
+
+void AppLaunchData::SetDebugFromLocal(bool isDebugFromLocal)
+{
+    isDebugFromLocal_ = isDebugFromLocal;
+}
+
+bool AppLaunchData::GetDebugFromLocal() const
+{
+    return isDebugFromLocal_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -908,7 +908,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_AttachAppDebug_001, TestSize.Level1)
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
     std::string bundleName = "bundleName";
-    auto resultCode = appMgrClient->AttachAppDebug(bundleName);
+    auto resultCode = appMgrClient->AttachAppDebug(bundleName, false);
     EXPECT_EQ(resultCode, ERR_OK);
 }
 
