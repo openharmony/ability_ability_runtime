@@ -53,6 +53,12 @@ ohos_unittest("app_exit_reason_data_manager_new_test") {
     "image_framework:image_native",
     "kv_store:distributeddata_inner",
   ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
   cflags_cc = []
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,7 +63,9 @@
 #include "istart_specified_ability_response.h"
 #include "kia_interceptor_interface.h"
 #include "kill_process_config.h"
+#include "killed_process_info.h"
 #include "process_memory_state.h"
+#include "process_util.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "remote_client_manager.h"
@@ -75,6 +77,7 @@
 #include "app_jsheap_mem_info.h"
 #include "running_multi_info.h"
 #include "multi_user_config_mgr.h"
+#include "user_callback.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -184,11 +187,14 @@ public:
 
     /**
      * KillProcessesByUserId, kill the processes by userId.
+     * Send appSpawn uninstall debug hap message.
      *
      * @param userId, the user id.
+     * @param isNeedSendAppSpawnMsg, true send appSpawn message otherwise not send.
      * @return
      */
-    virtual void KillProcessesByUserId(int32_t userId);
+    virtual void KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg = false,
+        sptr<AAFwk::IUserCallback> callback = nullptr);
 
     /**
      * KillProcessesByPids, only in process call is allowed,
@@ -683,6 +689,8 @@ public:
     void OnRemoteDied(const wptr<IRemoteObject> &remote, bool isRenderProcess = false, bool isChildProcess = false);
 
     void HandleTimeOut(const AAFwk::EventWrap &event);
+
+    void CacheExitInfo(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     void DecreaseWillKillPidsNum()
     {
@@ -1449,14 +1457,8 @@ public:
 
     void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
 
-    /**
-     * Send appSpawn uninstall debug hap message.
-     *
-     * @param userId, the user id.
-     */
-    void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
-
     bool IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
+    int32_t GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &info);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -1527,7 +1529,8 @@ private:
      */
     void StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
         std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AppRunningRecord> appRecord,
-        const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
+        const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId,
+        int32_t persistentId = 0);
 
     int32_t StartPerfProcess(const std::shared_ptr<AppRunningRecord> &appRecord, const std::string& perfCmd,
         const std::string& debugCmd, bool isSandboxApp);
@@ -1579,6 +1582,8 @@ private:
      */
     bool WaitForRemoteProcessExit(std::list<pid_t> &pids, const int64_t startTime);
 
+    bool WaitForRemoteProcessExit(std::list<SimpleProcessInfo> &processInfos, const int64_t startTime);
+
      /**
      * WaitProcessesExitAndKill, Wait for the process to exit normally, and kill it if time out.
      *
@@ -1590,23 +1595,11 @@ private:
      */
     int32_t WaitProcessesExitAndKill(std::list<pid_t> &pids, const int64_t startTime, const std::string& reason);
 
-    /**
-     * ProcessExist, Judge whether the process exists.
-     *
-     * @param pids, process number collection to exit.
-     *
-     * @return true, return back existed，others non-existent.
-     */
-    bool ProcessExist(pid_t pid);
+    int32_t WaitProcessesExitAndKill(std::list<SimpleProcessInfo> &processInfos, const int64_t startTime,
+        const std::string& reason, int32_t userId, sptr<AAFwk::IUserCallback> callback);
 
-    /**
-     * CheckAllProcessExit, Determine whether all processes exits .
-     *
-     * @param pids, process number collection to exit.
-     *
-     * @return true, Returns that no process exist in the list.
-     */
-    bool CheckAllProcessExit(std::list<pid_t> &pids);
+    void DoAllProcessExitCallback(std::list<SimpleProcessInfo> &processInfos, int32_t userId,
+        sptr<AAFwk::IUserCallback> callback);
 
     /**
      * SystemTimeMillisecond, Get system time.
@@ -1957,6 +1950,7 @@ private:
     int32_t SubmitDfxFaultTask(const FaultData &faultData, const std::string &bundleName,
         const std::shared_ptr<AppRunningRecord> &appRecord, const int32_t pid);
     void AddAbilityStageForSpecified(std::shared_ptr<AppRunningRecord> appRecord);
+    void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
 
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;

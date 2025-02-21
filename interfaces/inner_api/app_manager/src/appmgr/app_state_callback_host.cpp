@@ -60,6 +60,8 @@ int AppStateCallbackHost::OnRemoteRequest(
             return HandleNotifyStartKeepAliveProcess(data, reply);
         case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_START_PROCESS_FAILED):
             return HandleOnStartProcessFailed(data, reply);
+        case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_CACHE_EXIT_INFO):
+            return HandleOnCacheExitInfo(data, reply);
     }
 
     TAG_LOGD(AAFwkTag::APPMGR, "AppStateCallbackHost::OnRemoteRequest end");
@@ -105,6 +107,12 @@ void AppStateCallbackHost::OnStartProcessFailed(sptr<IRemoteObject> token)
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
 
+void AppStateCallbackHost::OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+    const std::string &bundleName, const std::vector<std::string> &abilityNames,
+    const std::vector<std::string> &uiExtensionNames)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+}
 
 int32_t AppStateCallbackHost::HandleOnAppStateChanged(MessageParcel &data, MessageParcel &reply)
 {
@@ -227,6 +235,24 @@ int32_t AppStateCallbackHost::HandleNotifyAppPreCache(MessageParcel &data, Messa
         return ERR_INVALID_VALUE;
     }
     NotifyAppPreCache(pid, userId);
+    return NO_ERROR;
+}
+
+int32_t AppStateCallbackHost::HandleOnCacheExitInfo(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t accessTokenId = data.ReadUint32();
+    std::unique_ptr<AAFwk::LastExitDetailInfo> exitInfo(data.ReadParcelable<AAFwk::LastExitDetailInfo>());
+    if (exitInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "To read exitInfo failed");
+        return ERR_DEAD_OBJECT;
+    }
+    std::string bundleName = data.ReadString();
+    std::vector<std::string> abilityNames;
+    data.ReadStringVector(&abilityNames);
+    std::vector<std::string> uiExtensionNames;
+    data.ReadStringVector(&uiExtensionNames);
+    OnCacheExitInfo(accessTokenId, *exitInfo, bundleName, abilityNames, uiExtensionNames);
+
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

@@ -3112,7 +3112,7 @@ int AbilityManagerProxy::StopUser(int userId, const sptr<IUserCallback> &callbac
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::LogoutUser(int32_t userId)
+int AbilityManagerProxy::LogoutUser(int32_t userId, sptr<IUserCallback> callback)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3124,6 +3124,16 @@ int AbilityManagerProxy::LogoutUser(int32_t userId)
     if (!data.WriteInt32(userId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail");
         return ERR_INVALID_VALUE;
+    }
+    if (callback == nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "callback is nullptr");
+        data.WriteBool(false);
+    } else {
+        data.WriteBool(true);
+        if (!data.WriteRemoteObject(callback->AsObject())) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write IUserCallback fail");
+            return ERR_INVALID_VALUE;
+        }
     }
     int error = SendRequest(AbilityManagerInterfaceCode::LOGOUT_USER, data, reply, option);
     if (error != NO_ERROR) {
@@ -3592,6 +3602,13 @@ int AbilityManagerProxy::UnRegisterMissionListener(const std::string &deviceId,
 int AbilityManagerProxy::StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
     const sptr<IRemoteObject> &callerToken, int32_t accountId)
 {
+    std::string errMsg;
+    return StartAbilityByCallWithErrMsg(want, connect, callerToken, accountId, errMsg);
+}
+
+int AbilityManagerProxy::StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
+    const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg)
+{
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerProxy::StartAbilityByCall begin.");
     int error;
     MessageParcel data;
@@ -3636,6 +3653,7 @@ int AbilityManagerProxy::StartAbilityByCall(const Want &want, const sptr<IAbilit
         return error;
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerProxy::StartAbilityByCall end.");
+    errMsg = reply.ReadString();
     return reply.ReadInt32();
 }
 
@@ -4426,6 +4444,31 @@ int32_t AbilityManagerProxy::RecordProcessExitReason(const int32_t pid, const Ex
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Parcelable, &exitReason);
 
     int32_t error = SendRequest(AbilityManagerInterfaceCode::RECORD_PROCESS_EXIT_REASON, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request err:%{public}d", error);
+        return error;
+    }
+
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "end.");
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::RecordProcessExitReason(int32_t pid, int32_t uid, const ExitReason &exitReason)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "start.");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, pid);
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, uid);
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Parcelable, &exitReason);
+
+    int32_t error = SendRequest(AbilityManagerInterfaceCode::RECORD_PROCESS_EXIT_REASON_PLUS, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request err:%{public}d", error);
         return error;
@@ -6120,6 +6163,60 @@ void AbilityManagerProxy::KillProcessWithPrepareTerminateDone(const std::string 
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
     }
+}
+
+int32_t AbilityManagerProxy::RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
+{
+    if (!observer) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer null");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "RegisterHiddenStartObserver start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(observer->AsObject())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::REGISTER_HIDDEN_START_OBSERVER,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
+{
+    if (!observer) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer null");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "UnregisterHiddenStartObserver start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(observer->AsObject())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::UNREGISTER_HIDDEN_START_OBSERVER,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
 }
 } // namespace AAFwk
 } // namespace OHOS

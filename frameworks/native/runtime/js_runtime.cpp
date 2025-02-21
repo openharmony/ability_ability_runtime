@@ -191,7 +191,12 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
                 TAG_LOGE(AAFwkTag::JSRUNTIME, "null weak");
             return;
         }
-        if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+        // system is debuggable when const.secure is false and const.debuggable is true
+        bool isSystemDebuggable = system::GetBoolParameter("const.secure", true) == false &&
+            system::GetBoolParameter("const.debuggable", false) == true;
+        // Don't start any server if (system not in debuggable mode) and app is release version
+        // Starting ConnectServer in release app on debuggable system is only for debug mode, not for profiling mode.
+        if ((!isSystemDebuggable) && appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "not support release app");
             return;
         }
@@ -201,6 +206,10 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
             ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
         } else {
+            if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "not support release app");
+                return;
+            }
             // if has old debugger server, stop it
             weak->StopDebugger(option);
             weak->StartDebugger(option, socketFd, isDebugApp);
@@ -1190,12 +1199,16 @@ void JsRuntime::DumpHeapSnapshot(bool isPrivate)
     nativeEngine->DumpHeapSnapshot(true, DumpFormat::JSON, isPrivate, false);
 }
 
-void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC)
+void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary)
 {
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
     panda::ecmascript::DumpSnapShotOption dumpOption;
-    dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
+    if (isBinary) {
+        dumpOption.dumpFormat = panda::ecmascript::DumpFormat::BINARY;
+    } else {
+        dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
+    }
     dumpOption.isVmMode = true;
     dumpOption.isPrivate = false;
     dumpOption.captureNumericValue = true;
@@ -1622,13 +1635,14 @@ std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
     return systemKitsMap;
 }
 
-void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName)
+void JsRuntime::SetPkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName)
 {
     auto iterator = pkgContextInfoJsonStringMap_.find(moduleName);
     if (iterator == pkgContextInfoJsonStringMap_.end()) {
         pkgContextInfoJsonStringMap_[moduleName] = hapPath;
         packageNameList_[moduleName] = packageName;
         auto vm = GetEcmaVm();
+        CHECK_POINTER_AND_RETURN(vm,);
         std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
         std::map<std::string, std::string> pkgAliasMap;
         JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(
@@ -1639,7 +1653,7 @@ void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hap
     }
 }
 
-void JsRuntime::UpdatePkgContextInfoJsonEx(const std::string& moduleName, const std::string& hapPath,
+void JsRuntime::UpdatePkgContextInfoJson(const std::string& moduleName, const std::string& hapPath,
     const std::string& packageName)
 {
     std::map<std::string, std::string> pkgContextInfoJsonStringMap;
@@ -1647,6 +1661,7 @@ void JsRuntime::UpdatePkgContextInfoJsonEx(const std::string& moduleName, const 
     std::map<std::string, std::string> packageNameList;
     packageNameList[moduleName] = packageName;
     auto vm = GetEcmaVm();
+    CHECK_POINTER_AND_RETURN(vm,);
     std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
     std::map<std::string, std::string> pkgAliasMap;
     JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(pkgContextInfoJsonStringMap, pkgContextInfoMap, pkgAliasMap);

@@ -17,13 +17,8 @@
 #include "gmock/gmock.h"
 #include <memory>
 #include <string>
-
-#define private public
-#define protected public
 #include "app_exit_reason_data_manager.h"
 #include "mock_single_kv_store.h"
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -166,17 +161,17 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_DeleteAppExitRea
 HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_GetAppExitReason_001, TestSize.Level1)
 {
     bool isSetReason = false;
-    int64_t time_stamp = 0;
+    int64_t stamp = 0;
     bool withKillMsg = false;
     AppExecFwk::RunningProcessInfo processInfo;
     AAFwk::ExitReason exitReason = {AAFwk::REASON_JS_ERROR, "Js Error."};
     auto tempKv = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_;
     auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason("", ACCESS_TOKEN_ID,
-        ABILITY_NAME, isSetReason, exitReason, processInfo, time_stamp, withKillMsg);
+        ABILITY_NAME, isSetReason, exitReason, processInfo, stamp, withKillMsg);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 
     result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason(BUNDLE_NAME, 0, ABILITY_NAME,
-        isSetReason, exitReason, processInfo, time_stamp, withKillMsg);
+        isSetReason, exitReason, processInfo, stamp, withKillMsg);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 
     DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = nullptr;
@@ -184,13 +179,13 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_GetAppExitReason
         const_cast<DistributedKv::StoreId &>(DelayedSingleton<AppExitReasonDataManager>::GetInstance()->storeId_);
     tempStoreId.storeId = "app_**exit_reason_infos";
     result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason(BUNDLE_NAME, ACCESS_TOKEN_ID,
-        ABILITY_NAME, isSetReason, exitReason, processInfo, time_stamp, withKillMsg);
+        ABILITY_NAME, isSetReason, exitReason, processInfo, stamp, withKillMsg);
     EXPECT_EQ(result, ERR_NO_INIT);
 
     tempStoreId.storeId = "app_exit_reason_infos";
     DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = tempKv;
     result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason(BUNDLE_NAME, ACCESS_TOKEN_ID,
-        ABILITY_NAME, isSetReason, exitReason, processInfo, time_stamp, withKillMsg);
+        ABILITY_NAME, isSetReason, exitReason, processInfo, stamp, withKillMsg);
     EXPECT_EQ(result, ERR_OK);
 }
 

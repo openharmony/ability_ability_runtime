@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+#include <iterator>
+#include <memory>
 #include <string>
 #include <vector>
 #include "application_configuration_manager.h"
@@ -71,6 +74,19 @@ std::string ApplicationConfigurationManager::SetColorModeSetLevel(SetLevel color
     return colorModeVal_[static_cast<uint8_t>(colorModeSetLevel_)];
 }
 
+std::string ApplicationConfigurationManager::GetColorMode()
+{
+    for (int i = static_cast<uint8_t>(SetLevel::SetLevelCount) - 1; i >= 0; i--) {
+        if (!colorModeVal_[i].empty() &&
+            colorModeVal_[i].compare(AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO) != 0) {
+            colorModeSetLevel_ = static_cast<SetLevel>(i);
+            break;
+        }
+    }
+
+    return colorModeVal_[static_cast<uint8_t>(colorModeSetLevel_)];
+}
+
 SetLevel ApplicationConfigurationManager::GetColorModeSetLevel() const
 {
     return colorModeSetLevel_;
@@ -79,6 +95,37 @@ SetLevel ApplicationConfigurationManager::GetColorModeSetLevel() const
 bool ApplicationConfigurationManager::ColorModeHasSetByApplication() const
 {
     return !colorModeVal_[static_cast<uint8_t>(SetLevel::Application)].empty();
+}
+
+void ApplicationConfigurationManager::AddIgnoreContext(
+    std::shared_ptr<Context> context, std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
+{
+    ignoreContext_.insert(std::make_pair(context, resourceManager));
+}
+
+void ApplicationConfigurationManager::DeleteIgnoreContext(std::shared_ptr<Context> context)
+{
+    ignoreContext_.erase(context);
+}
+
+std::vector<std::shared_ptr<Context>> ApplicationConfigurationManager::GetIgnoreContext()
+{
+    std::vector<std::shared_ptr<Context>> keys;
+    std::transform(ignoreContext_.begin(), ignoreContext_.end(), std::back_inserter(keys),
+        [](const auto& pair) {
+            return pair.first;
+        });
+    return keys;
+}
+
+std::vector<std::shared_ptr<Global::Resource::ResourceManager>> ApplicationConfigurationManager::GetIgnoreResource()
+{
+    std::vector<std::shared_ptr<Global::Resource::ResourceManager>> values;
+    std::transform(ignoreContext_.begin(), ignoreContext_.end(), std::back_inserter(values),
+        [](const auto& pair) {
+            return pair.second;
+        });
+    return values;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

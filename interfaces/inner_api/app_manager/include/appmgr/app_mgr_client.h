@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,11 +120,14 @@ public:
     /**
      * KillProcessesByUserId, call KillProcessesByUserId() through proxy object,
      * kill the processes by user id.
+     * Send appSpawn uninstall debug hap message.
      *
      * @param userId, the user id.
+     * @param isNeedSendAppSpawnMsg, true send appSpawn message otherwise not send.
      * @return Returns RESULT_OK on success, others on failure.
      */
-    virtual AppMgrResultCode KillProcessesByUserId(int32_t userId);
+    virtual AppMgrResultCode KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg = false,
+        sptr<AAFwk::IUserCallback> callback = nullptr);
 
     /**
      * KillProcessesByPids, only in process call is allowed,
@@ -938,14 +941,6 @@ public:
      */
     virtual AppMgrResultCode IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
         bool &isRunning);
-
-    /**
-     * Send appSpawn uninstall debug hap message.
-     *
-     * @param userId, the user id.
-     * @return Returns RESULT_OK on success, others on failure.
-     */
-    virtual AppMgrResultCode SendAppSpawnUninstallDebugHapMsg(int32_t userId);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,5 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef BASE_ABILITYRUNTIME_MOCK_IHIDDENSTARTOBSERVER_H
+#define BASE_ABILITYRUNTIME_MOCK_IHIDDENSTARTOBSERVER_H
 
-FUZZ
+#include "ihidden_start_observer.h"
+
+namespace OHOS {
+namespace AAFwk {
+    class MockIHiddenStartObserver : public IHiddenStartObserver {
+    public:
+        bool IsHiddenStart(int32_t uid) override
+        {
+            return true;
+        }
+        sptr<IRemoteObject> AsObject() override
+        {
+            return nullptr;
+        }
+    };
+} // namespace AAFwk
+} // namespace OHOS
+#endif

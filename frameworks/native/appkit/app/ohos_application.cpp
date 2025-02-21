@@ -36,6 +36,7 @@
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "runtime.h"
+#include "js_runtime.h"
 #include "startup_manager.h"
 #include "system_ability_definition.h"
 #include "syspara/parameter.h"
@@ -272,7 +273,10 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
     }
 #ifdef SUPPORT_GRAPHICS
     auto diffConfiguration = std::make_shared<AppExecFwk::Configuration>(config);
-    Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
+    auto ignoreWindowContext = AbilityRuntime::ApplicationConfigurationManager::GetInstance().
+        GetIgnoreContext();
+    TAG_LOGI(AAFwkTag::APPKIT, "ignoreWindowContext size %{public}zu", ignoreWindowContext.size());
+    Rosen::Window::UpdateConfigurationForAll(diffConfiguration, ignoreWindowContext);
 #endif
     abilityRuntimeContext_->DispatchConfigurationUpdated(*configuration_);
     abilityRuntimeContext_->SetConfiguration(configuration_);
@@ -391,8 +395,8 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             TAG_LOGE(AAFwkTag::APPKIT, "null hapModuleInfo");
             return nullptr;
         }
-        if (runtime_) {
-            runtime_->UpdatePkgContextInfoJson(
+        if (runtime_ && (runtime_->GetLanguage() == AbilityRuntime::Runtime::Language::JS)) {
+            static_cast<AbilityRuntime::JsRuntime&>(*runtime_).SetPkgContextInfoJson(
                 hapModuleInfo->moduleName, hapModuleInfo->hapPath, hapModuleInfo->packageName);
         }
         SetAppEnv(hapModuleInfo->appEnvironments);

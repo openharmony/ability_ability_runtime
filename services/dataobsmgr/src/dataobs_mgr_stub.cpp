@@ -36,7 +36,8 @@ const DataObsManagerStub::RequestFuncType DataObsManagerStub::HANDLES[TRANS_BUTT
     &DataObsManagerStub::RegisterObserverExtInner,
     &DataObsManagerStub::UnregisterObserverExtInner,
     &DataObsManagerStub::UnregisterObserverExtALLInner,
-    &DataObsManagerStub::NotifyChangeExtInner
+    &DataObsManagerStub::NotifyChangeExtInner,
+    &DataObsManagerStub::NotifyProcessObserverInner
 };
 
 DataObsManagerStub::DataObsManagerStub() {}
@@ -152,6 +153,14 @@ int32_t DataObsManagerStub::NotifyChangeExtInner(MessageParcel &data, MessagePar
     }
 
     reply.WriteInt32(NotifyChangeExt(changeInfo));
+    return SUCCESS;
+}
+
+int32_t DataObsManagerStub::NotifyProcessObserverInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::string key = data.ReadString();
+    auto observer = data.ReadRemoteObject();
+    reply.WriteInt32(NotifyProcessObserver(key, observer));
     return SUCCESS;
 }
 }  // namespace AAFwk

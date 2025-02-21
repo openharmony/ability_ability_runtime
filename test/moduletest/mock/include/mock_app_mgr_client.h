@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,8 @@ public:
     MOCK_METHOD2(UpdateAbilityState, AppMgrResultCode(const sptr<IRemoteObject>& token, const AbilityState state));
     MOCK_METHOD3(KillApplication, AppMgrResultCode(const std::string&, const bool clearPageStack, int32_t));
     MOCK_METHOD1(KillProcessByAbilityToken, AppMgrResultCode(const sptr<IRemoteObject>& token));
-    MOCK_METHOD1(KillProcessesByUserId, AppMgrResultCode(int32_t userId));
+    MOCK_METHOD3(KillProcessesByUserId, AppMgrResultCode(int32_t userId, bool isNeedSendAppSpawnMsg,
+        sptr<AAFwk::IUserCallback> callback));
     MOCK_METHOD1(AbilityAttachTimeOut, void(const sptr<IRemoteObject>& token));
     MOCK_METHOD2(GetRunningProcessInfoByToken, void((const sptr<IRemoteObject>& token,
         AppExecFwk::RunningProcessInfo& info)));
@@ -40,7 +41,6 @@ public:
     MOCK_METHOD1(GetAllRunningInstanceKeysBySelf, AppMgrResultCode(std::vector<std::string> &instanceKeys));
     MOCK_METHOD3(GetAllRunningInstanceKeysByBundleName, AppMgrResultCode(const std::string &bundleName,
         std::vector<std::string> &instanceKeys, int32_t userId));
-    MOCK_METHOD1(SendAppSpawnUninstallDebugHapMsg, AppMgrResultCode(int32_t userId));
 
     AppMgrResultCode GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo>& info, int32_t userId);
 

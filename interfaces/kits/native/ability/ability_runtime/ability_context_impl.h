@@ -19,6 +19,7 @@
 #include "ability_context.h"
 
 #include <uv.h>
+#include <vector>
 
 #include "context_impl.h"
 #include "configuration.h"
@@ -53,6 +54,11 @@ public:
     std::string GetBundleName() const override;
     std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo() const override;
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const override;
+    void SetAbilityResourceManager(std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr) override;
+    void RegisterAbilityConfigUpdateCallback(AbilityConfigUpdateCallback abilityConfigUpdateCallback) override;
+    std::shared_ptr<AppExecFwk::Configuration> GetAbilityConfiguration() const override;
+    void SetAbilityConfiguration(const AppExecFwk::Configuration &config) override;
+    void SetAbilityColorMode(int32_t colorMode) override;
     std::shared_ptr<Context> CreateBundleContext(const std::string &bundleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;
@@ -326,6 +332,9 @@ private:
     std::mutex uiExtensionMutex_;
     std::map<int32_t, Want> uiExtensionMap_;
     std::atomic<bool> restoreEnabled_ = false;
+    std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr_ = nullptr;
+    AbilityConfigUpdateCallback abilityConfigUpdateCallback_ = nullptr;
+    std::shared_ptr<AppExecFwk::Configuration> abilityConfiguration_ = nullptr;
 
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);

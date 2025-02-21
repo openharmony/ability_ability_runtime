@@ -67,12 +67,13 @@ public:
     void DestroyHeapProfiler() override {};
     void ForceFullGC() override {};
     void ForceFullGC(uint32_t tid) override {};
-    void DumpHeapSnapshot(uint32_t tid, bool isFullGC) override {};
+    void DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary = false) override {};
     void DumpCpuProfile() override {};
     void AllowCrossThreadExecution() override {};
     void GetHeapPrepare() override {};
     void RegisterUncaughtExceptionHandler(const CJUncaughtExceptionInfo& uncaughtExceptionInfo);
-    void UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName) override {};
+    static bool RegisterCangjieCallback();
+
 private:
     bool StartDebugger();
     bool LoadCJAppLibrary(const AppLibPathVec& appLibPaths);

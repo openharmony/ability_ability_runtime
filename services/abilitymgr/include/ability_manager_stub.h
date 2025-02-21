@@ -247,6 +247,7 @@ private:
     int32_t ForceExitAppInner(MessageParcel &data, MessageParcel &reply);
     int32_t RecordAppExitReasonInner(MessageParcel &data, MessageParcel &reply);
     int32_t RecordProcessExitReasonInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RecordProcessExitReasonPlusInner(MessageParcel &data, MessageParcel &reply);
     int32_t SetResidentProcessEnableInner(MessageParcel &data, MessageParcel &reply);
 
     int SetRootSceneSessionInner(MessageParcel &data, MessageParcel &reply);
@@ -318,6 +319,8 @@ private:
     int32_t QueryAtomicServiceStartupRuleInner(MessageParcel &data, MessageParcel &reply);
     int32_t PrepareTerminateAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
     int32_t KillProcessWithPrepareTerminateDoneInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RegisterHiddenStartObserverInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UnregisterHiddenStartObserverInner(MessageParcel &data, MessageParcel &reply);
 
     int OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);

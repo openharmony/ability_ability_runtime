@@ -57,6 +57,7 @@ public:
     virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
     virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver) override;
     virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) override;
+    virtual Status NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer) override;
 
     /**
      * @brief DataObs hidumper.
@@ -71,6 +72,8 @@ private:
     void Dump(const std::vector<std::u16string>& args, std::string& result) const;
     void ShowHelp(std::string& result) const;
     Status DeepCopyChangeInfo(const ChangeInfo &src, ChangeInfo &dst) const;
+    void GetFocusedAppInfo(int32_t &windowId, sptr<IRemoteObject> &abilityToken) const;
+    sptr<IRemoteObject> GetAbilityManagerService() const;
 private:
     static constexpr std::uint32_t TASK_COUNT_MAX = 50;
     ffrt::mutex taskCountMutex_;

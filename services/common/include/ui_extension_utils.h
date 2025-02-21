@@ -104,8 +104,7 @@ inline bool IsSystemUIExtension(const AppExecFwk::ExtensionAbilityType type)
         AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH,
         AppExecFwk::ExtensionAbilityType::HMS_ACCOUNT,
         AppExecFwk::ExtensionAbilityType::SYS_VISUAL,
-        AppExecFwk::ExtensionAbilityType::RECENT_PHOTO,
-        AppExecFwk::ExtensionAbilityType::FORM_EDIT
+        AppExecFwk::ExtensionAbilityType::RECENT_PHOTO
     };
     return systemUiExtensionSet.find(type) != systemUiExtensionSet.end();
 }

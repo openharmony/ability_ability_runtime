@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -151,11 +151,13 @@ void AppScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
     appMgrClient_->KillProcessByAbilityToken(token);
 }
 
-void AppScheduler::KillProcessesByUserId(int32_t userId)
+void AppScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg,
+    sptr<AAFwk::IUserCallback> callback)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "user id: %{public}d", userId);
+    TAG_LOGI(
+        AAFwkTag::ABILITYMGR, "user id: %{public}d isNeedSendAppSpawnMsg: %{public}d", userId, isNeedSendAppSpawnMsg);
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->KillProcessesByUserId(userId);
+    appMgrClient_->KillProcessesByUserId(userId, isNeedSendAppSpawnMsg, callback);
 }
 
 void AppScheduler::KillProcessesByPids(std::vector<int32_t> &pids)
@@ -235,6 +237,15 @@ void AppScheduler::OnStartProcessFailed(sptr<IRemoteObject> token)
     auto callback = callback_.lock();
     CHECK_POINTER(callback);
     callback->OnStartProcessFailed(token);
+}
+
+void AppScheduler::OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+    const std::string &bundleName, const std::vector<std::string> &abilityNames,
+    const std::vector<std::string> &uiExtensionNames)
+{
+    auto callback = callback_.lock();
+    CHECK_POINTER(callback);
+    callback->OnCacheExitInfo(accessTokenId, exitInfo, bundleName, abilityNames, uiExtensionNames);
 }
 
 void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
@@ -683,12 +694,6 @@ bool AppScheduler::IsCallerKilling(const std::string& callerKey) const
         return false;
     }
     return appMgrClient_->IsCallerKilling(callerKey);
-}
-
-void AppScheduler::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
-{
-    CHECK_POINTER(appMgrClient_);
-    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->SendAppSpawnUninstallDebugHapMsg(userId));
 }
 
 void AppScheduler::SetProcessCacheStatus(int32_t pid, bool isSupport)

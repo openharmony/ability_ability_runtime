@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -251,7 +251,8 @@ void AmsMgrProxy::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
     TAG_LOGD(AAFwkTag::APPMGR, "end");
 }
 
-void AmsMgrProxy::KillProcessesByUserId(int32_t userId)
+void AmsMgrProxy::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg,
+    sptr<AAFwk::IUserCallback> callback)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -263,6 +264,20 @@ void AmsMgrProxy::KillProcessesByUserId(int32_t userId)
     if (!data.WriteInt32(userId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "parcel WriteInt32 failed");
         return;
+    }
+    if (!data.WriteBool(isNeedSendAppSpawnMsg)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel WriteBool failed");
+        return;
+    }
+    if (callback == nullptr) {
+        TAG_LOGD(AAFwkTag::APPMGR, "callback is nullptr");
+        data.WriteBool(false);
+    } else {
+        data.WriteBool(true);
+        if (!data.WriteRemoteObject(callback->AsObject())) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write IUserCallback fail");
+            return;
+        }
     }
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_BY_USERID), data, reply, option);
@@ -1443,26 +1458,6 @@ bool AmsMgrProxy::IsCallerKilling(const std::string& callerKey)
         return false;
     }
     return reply.ReadBool();
-}
-
-void AmsMgrProxy::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
-        return;
-    }
-    if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WriteInt32 failed");
-        return;
-    }
-    int32_t ret = SendTransactCmd(
-        static_cast<uint32_t>(IAmsMgr::Message::SEND_APP_SPAWN_UNINSTALL_DEBUG_HAP_MSG), data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::APPMGR, "SendTransactCmd failed, errCode %{public}d", ret);
-    }
 }
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -470,7 +470,7 @@ ErrCode AbilityManagerClient::CloseAbility(sptr<IRemoteObject> token, int result
     return abms->CloseAbility(token, resultCode, resultWant);
 }
 
-ErrCode AbilityManagerClient::CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
+ErrCode AbilityManagerClient::CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr) {
@@ -1093,6 +1093,16 @@ ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbility
     return abms->StartAbilityByCall(want, connect, callToken, accountId);
 }
 
+ErrCode AbilityManagerClient::StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
+    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s, userId:%{public}d",
+        want.GetElement().GetURI().c_str(), accountId);
+    return abms->StartAbilityByCallWithErrMsg(want, connect, callToken, accountId, errMsg);
+}
+
 void AbilityManagerClient::CallRequestDone(sptr<IRemoteObject> token, sptr<IRemoteObject> callStub)
 {
     auto abms = GetAbilityManager();
@@ -1202,11 +1212,11 @@ ErrCode AbilityManagerClient::StopUser(int accountId, sptr<IUserCallback> callba
     return abms->StopUser(accountId, callback);
 }
 
-ErrCode AbilityManagerClient::LogoutUser(int32_t accountId)
+ErrCode AbilityManagerClient::LogoutUser(int32_t accountId, sptr<IUserCallback> callback)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->LogoutUser(accountId);
+    return abms->LogoutUser(accountId, callback);
 }
 
 ErrCode AbilityManagerClient::RegisterSnapshotHandler(sptr<ISnapshotHandler> handler)
@@ -1672,6 +1682,15 @@ ErrCode AbilityManagerClient::RecordProcessExitReason(const int32_t pid, const E
     return abms->RecordProcessExitReason(pid, exitReason);
 }
 
+ErrCode AbilityManagerClient::RecordProcessExitReason(int32_t pid, int32_t uid, const ExitReason &exitReason)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "[EXIT_REASON_TAG] pid:%{public}d, reason:%{public}d, exitMsg: %{public}s",
+        pid, exitReason.reason, exitReason.exitMsg.c_str());
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RecordProcessExitReason(pid, uid, exitReason);
+}
+
 void AbilityManagerClient::SetRootSceneSession(sptr<IRemoteObject> rootSceneSession)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
@@ -2005,7 +2024,7 @@ void AbilityManagerClient::NotifyFrozenProcessByRSS(const std::vector<int32_t> &
     return abms->NotifyFrozenProcessByRSS(pidList, uid);
 }
 
-ErrCode AbilityManagerClient::CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
+ErrCode AbilityManagerClient::CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr) {
@@ -2122,6 +2141,22 @@ void AbilityManagerClient::KillProcessWithPrepareTerminateDone(const std::string
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     return abms->KillProcessWithPrepareTerminateDone(moduleName, prepareTermination, isExist);
+}
+
+ErrCode AbilityManagerClient::RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call RegisterHiddenStartObserver");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RegisterHiddenStartObserver(observer);
+}
+
+ErrCode AbilityManagerClient::UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call UnregisterHiddenStartObserver");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->UnregisterHiddenStartObserver(observer);
 }
 } // namespace AAFwk
 } // namespace OHOS

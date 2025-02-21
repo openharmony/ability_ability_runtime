@@ -116,8 +116,8 @@ private:
     std::set<int> GetBinderPeerPids(std::string& stack, int pid, std::set<int>& asyncPids,
         AppfreezeManager::TerminalBinder& terminalBinder) const;
     void FindStackByPid(std::string& ret, int pid) const;
-    std::string CatchJsonStacktrace(int pid, const std::string& faultType) const;
-    std::string CatcherStacktrace(int pid) const;
+    std::string CatchJsonStacktrace(int pid, const std::string& faultType, const std::string& stack) const;
+    std::string CatcherStacktrace(int pid, const std::string& stack) const;
     int AcquireStack(const FaultData& faultData, const AppInfo& appInfo, const std::string& memoryContent);
     int NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo,
         const std::string& binderInfo, const std::string& memoryContent);
@@ -128,6 +128,7 @@ private:
     void ClearOldInfo();
     void CollectFreezeSysMemory(std::string& memoryContent);
     int MergeNotifyInfo(FaultData& faultNotifyData, const AppfreezeManager::AppInfo& appInfo);
+    std::string GetFormatTime();
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;

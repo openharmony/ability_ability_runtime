@@ -804,6 +804,9 @@ public:
     virtual int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE) override;
 
+    virtual int StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
+        const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg) override;
+
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
      *
@@ -845,7 +848,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int LogoutUser(int32_t userId) override;
+    virtual int LogoutUser(int32_t userId, sptr<IUserCallback> callback) override;
 
     virtual int SetMissionContinueState(const sptr<IRemoteObject> &token, const AAFwk::ContinueState &state) override;
 
@@ -1139,6 +1142,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t RecordProcessExitReason(const int32_t pid, const ExitReason &exitReason) override;
+
+     /**
+     * Record the exit reason of a killed process.
+     * @param pid The process id.
+     * @param uid The process uid.
+     * @param exitReason The reason of process exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RecordProcessExitReason(int32_t pid, int32_t uid, const ExitReason &exitReason) override;
 
     /**
      * Set rootSceneSession by SCB.
@@ -1608,6 +1620,20 @@ public:
      */
     virtual void KillProcessWithPrepareTerminateDone(const std::string &moduleName,
         int32_t prepareTermination, bool isExist) override;
+
+    /**
+     * Register hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer) override;
+
+    /**
+     * Unregister hidden start observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer) override;
 
 private:
     template <typename T>

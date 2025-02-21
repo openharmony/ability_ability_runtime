@@ -48,6 +48,8 @@ public:
     void OnStopUserDone(int userId, int errcode) override
     {}
     void OnStartUserDone(int userId, int errcode) override {}
+
+    void OnLogoutUserDone(int userId, int errcode) override {}
 };
 const std::u16string APPMGR_INTERFACE_TOKEN = u"ohos.aafwk.AppManager";
 uint32_t GetU32Data(const char* ptr)

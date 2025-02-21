@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1189,7 +1189,7 @@ HWTEST_F(AppMgrServiceInnerTest, ProcessExist_001, TestSize.Level0)
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     pid_t pid = 0;
-    bool result = appMgrServiceInner->ProcessExist(pid);
+    bool result = ProcessUtil::ProcessExist(pid);
     EXPECT_FALSE(result);
 
     TAG_LOGI(AAFwkTag::TEST, "ProcessExist_001 end");
@@ -1594,10 +1594,12 @@ HWTEST_F(AppMgrServiceInnerTest, KillProcessesByUserId_001, TestSize.Level0)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    appMgrServiceInner->KillProcessesByUserId(0);
+    appMgrServiceInner->KillProcessesByUserId(0, false, nullptr);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->KillProcessesByUserId(0);
+    appMgrServiceInner->KillProcessesByUserId(0, false, nullptr);
+
+    appMgrServiceInner->KillProcessesByUserId(0, true, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "KillProcessesByUserId_001 end");
 }

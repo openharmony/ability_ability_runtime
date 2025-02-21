@@ -128,5 +128,23 @@ int32_t StatusBarDelegateManager::DoCallerProcessAttachment(std::shared_ptr<Abil
 
     return ERR_OK;
 }
+
+int32_t StatusBarDelegateManager::DoCallerProcessDetachment(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    auto statusBarDelegate = GetStatusBarDelegate();
+    CHECK_POINTER_AND_RETURN(statusBarDelegate, ERR_INVALID_VALUE);
+    auto accessTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
+    auto ret = statusBarDelegate->DetachPidToStatusBarItem(accessTokenId, abilityRecord->GetPid(),
+        abilityRecord->GetInstanceKey());
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ret: %{public}d", ret);
+        return ret;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "caller process detach success");
+
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

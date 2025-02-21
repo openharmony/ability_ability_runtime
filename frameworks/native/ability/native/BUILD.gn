@@ -208,6 +208,7 @@ ohos_shared_library("configuration_helper") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_innerkits_path}/wantagent/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
@@ -299,6 +300,7 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/appkit/app/context_container.cpp",
     "${ability_runtime_native_path}/appkit/app/context_deal.cpp",
     "${ability_runtime_native_path}/appkit/app/sys_mgr_client.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/last_exit_detail_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
   ]
   configs = [ ":ability_config" ]
@@ -355,7 +357,6 @@ ohos_shared_library("abilitykit_native") {
     "ipc:rpc",
     "json:nlohmann_json_static",
     "napi:ace_napi",
-    "node:node_header_notice",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
     "window_manager:windowstage_kit",
@@ -481,6 +482,7 @@ ohos_shared_library("extensionkit_native") {
     "${ability_runtime_native_path}/ability/native/js_extension_common.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/extension_context.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/ui_holder_extension_context.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/last_exit_detail_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
   ]
 
@@ -558,6 +560,7 @@ ohos_shared_library("cj_extensionkit_native") {
   ]
 
   deps = [
+    ":abilitykit_utils",
     ":configuration_helper",
     ":extensionkit_native",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
@@ -582,8 +585,6 @@ ohos_shared_library("cj_extensionkit_native") {
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
   ]
-
-  public_deps = [ ":abilitykit_utils" ]
 
   public_external_deps = [ "bundle_framework:appexecfwk_core" ]
 
@@ -734,7 +735,6 @@ ohos_shared_library("uiabilitykit_native") {
     "bundle_framework:appexecfwk_core",
     "libuv:uv",
     "napi:ace_napi",
-    "node:node_header_notice",
     "window_manager:libwm",
     "window_manager:libwsutils",
   ]
@@ -898,6 +898,7 @@ ohos_shared_library("form_extension") {
 ohos_shared_library("form_extension_module") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
+    "${ability_runtime_path}/interfaces/inner_api/runtime/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
   ]
 
@@ -1320,6 +1321,7 @@ ohos_shared_library("data_ability_helper") {
 ohos_shared_library("service_extension_module") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
+    "${ability_runtime_path}/interfaces/inner_api/runtime/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
   ]
 
@@ -1506,6 +1508,7 @@ ohos_shared_library("ui_extension") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:insight_intent_executor",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",

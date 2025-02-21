@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,7 +65,8 @@ AppMgrResultCode AppMgrClient::KillProcessByAbilityToken(const sptr<IRemoteObjec
     return AppMgrResultCode::RESULT_OK;
 }
 
-AppMgrResultCode AppMgrClient::KillProcessesByUserId(int32_t userId)
+AppMgrResultCode AppMgrClient::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg,
+    sptr<AAFwk::IUserCallback> callback)
 {
     return AppMgrResultCode::RESULT_OK;
 }
@@ -104,10 +105,5 @@ void AppMgrClient::AbilityAttachTimeOut(const sptr<IRemoteObject>& token)
 
 void AppMgrClient::PrepareTerminate(const sptr<IRemoteObject>& token, bool clearMissionFlag)
 {}
-
-AppMgrResultCode AppMgrClient::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
-{
-    return AppMgrResultCode::RESULT_OK;
-}
 }  // namespace AppExecFwk
 }  // namespace OHOS

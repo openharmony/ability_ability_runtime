@@ -253,14 +253,18 @@ void AbilityConnectManager::SetLastExitReason(
     }
 
     ExitReason exitReason = { REASON_UNKNOWN, "" };
+    AppExecFwk::RunningProcessInfo processInfo;
+    int64_t time_stamp = 0;
+    bool withKillMsg = false;
     const std::string keyEx = targetRecord->GetAbilityInfo().bundleName + SEPARATOR +
                               targetRecord->GetAbilityInfo().moduleName + SEPARATOR +
                               targetRecord->GetAbilityInfo().name;
-    if (!appExitReasonDataMgr->GetUIExtensionAbilityExitReason(keyEx, exitReason)) {
+    if (!appExitReasonDataMgr->GetUIExtensionAbilityExitReason(keyEx, exitReason, processInfo, time_stamp,
+        withKillMsg)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "There is no record of UIExtensionAbility's last exit reason in the database.");
         return;
     }
-    targetRecord->SetLastExitReason(exitReason);
+    targetRecord->SetLastExitReason(exitReason, processInfo, time_stamp, withKillMsg);
 }
 
 void AbilityConnectManager::DoForegroundUIExtension(std::shared_ptr<AbilityRecord> abilityRecord,
@@ -625,7 +629,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     if (ret != ERR_OK) {
         return ret;
     }
-    if (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::REMOTE_NOTIFICATION) {
+    if (ResSchedUtil::GetInstance().NeedReportByPidWhenConnect(abilityRequest.abilityInfo)) {
         ReportEventToRSS(abilityRequest.abilityInfo, targetService, callerToken);
     }
     // 2. get target connectRecordList, and check whether this callback has been connected.
@@ -3438,7 +3442,7 @@ int32_t AbilityConnectManager::ReportAbilityStartInfoToRSS(const AppExecFwk::Abi
         }
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilityStartInfoToRSS, abilityName:%{public}s", abilityInfo.name.c_str());
-    ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart);
+    ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, -1); // -1代表与预加载无关
     return ERR_OK;
 }
 

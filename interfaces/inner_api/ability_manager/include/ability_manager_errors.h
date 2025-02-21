@@ -681,6 +681,25 @@ enum {
      */
     ERR_SAPAWN_PROCESS_FAILED = 2097284,
 
+    /*
+     * Result (2097285 - 2097295) for record exit reason failed.
+     */
+    ERR_RECORD_SIGNAL_REASON_FAILED = 2097285,
+    ERR_GET_EXIT_INFO_FAILED = 2097286,
+    ERR_NO_PERMISSION_CALLER = 2097287,
+    ERR_NULL_APP_EXIT_REASON_HELPER = 2097288,
+    ERR_READ_EXIT_REASON_FAILED = 2097289,
+
+    ERR_WRITE_INTERFACE_TOKEN_FAILED = 2097296,
+    ERR_WRITE_RESULT_CODE_FAILED = 2097297,
+    ERR_READ_RESULT_PARCEL_FAILED = 2097298,
+    ERR_NO_ALLOW_OUTSIDE_CALL = 2097299,
+    ERR_APP_MGR_SERVICE_NOT_READY = 2097300,
+    ERR_NULL_APP_RUNNING_MANAGER = 2097301,
+    ERR_NULL_APP_MGR_SERVICE_INNER = 2097302,
+    ERR_NULL_APP_MGR_PROXY = 2097303,
+    ERR_NO_APP_RECORD = 2097304,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
@@ -856,6 +875,11 @@ enum NativeFreeInstallError {
      * Result(29360205) for continue freeinstall failed.
      */
     CONTINUE_FREE_INSTALL_FAILED = 29360205,
+
+    /*
+     * Result(29360206) for atomic service minimized.
+     */
+    ATOMIC_SERVICE_MINIMIZED = 29360206,
 
     /**
      * Undefine error code.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,8 @@ public:
     MOCK_METHOD2(UpdateAbilityState, void(const sptr<IRemoteObject>& token, const AbilityState state));
     MOCK_METHOD0(Reset, void());
     MOCK_METHOD1(KillProcessByAbilityToken, void(const sptr<IRemoteObject>& token));
-    MOCK_METHOD1(KillProcessesByUserId, void(int32_t userId));
+    MOCK_METHOD3(KillProcessesByUserId, void(int32_t userId, bool isNeedSendAppSpawnMsg,
+        sptr<AAFwk::IUserCallback> callback));
     MOCK_METHOD4(KillProcessWithAccount, int(const std::string&, const int, const bool clearPageStack, int32_t));
     MOCK_METHOD1(KillProcessesInBatch, int(const std::vector<int32_t> &pids));
     MOCK_METHOD3(UpdateApplicationInfoInstalled, int(const std::string&, const int uid, const std::string&));
@@ -67,7 +68,6 @@ public:
     MOCK_METHOD1(IsWaitingDebugApp, bool(const std::string &bundleName));
     MOCK_METHOD0(ClearNonPersistWaitingDebugFlag, void());
     MOCK_METHOD0(IsMemorySizeSufficent, bool());
-    MOCK_METHOD1(SendAppSpawnUninstallDebugHapMsg, void(int32_t userId));
 
     MockAmsMgrScheduler() : AmsMgrStub() {};
     virtual ~MockAmsMgrScheduler() {};
