@@ -103,6 +103,8 @@ public:
         const std::string& hapPath, bool isEsMode, bool useCommonTrunk) override;
     bool PopPreloadObj(const std::string& key, std::unique_ptr<NativeReference>& obj);
     void StartDebugMode(const DebugOption debugOption) override;
+    void SetDebugOption(const DebugOption debugOption) override;
+    void StartLocalDebugMode(bool isDebugFromLocal) override;
     void DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug);
     void StopDebugMode();
     bool LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath) override;
@@ -172,6 +174,7 @@ private:
     std::map<std::string, std::unique_ptr<NativeReference>> preloadList_;
 
     static std::atomic<bool> hasInstance;
+    DebugOption debugOption_;
 
 private:
     bool CreateJsEnv(const Options& options);

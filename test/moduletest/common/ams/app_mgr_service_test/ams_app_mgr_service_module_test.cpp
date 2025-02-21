@@ -104,7 +104,7 @@ public:
         return 0;
     }
 
-    void AttachAppDebug() override
+    void AttachAppDebug(bool isDebugFromLocal) override
     {}
 
     void DetachAppDebug() override

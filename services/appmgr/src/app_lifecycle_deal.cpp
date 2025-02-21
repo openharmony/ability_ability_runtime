@@ -325,7 +325,7 @@ int32_t AppLifeCycleDeal::ChangeAppGcState(int32_t state)
     return appThread->ScheduleChangeAppGcState(state);
 }
 
-int32_t AppLifeCycleDeal::AttachAppDebug()
+int32_t AppLifeCycleDeal::AttachAppDebug(bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto appThread = GetApplicationClient();
@@ -333,7 +333,7 @@ int32_t AppLifeCycleDeal::AttachAppDebug()
         TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return ERR_INVALID_VALUE;
     }
-    appThread->AttachAppDebug();
+    appThread->AttachAppDebug(isDebugFromLocal);
     return ERR_OK;
 }
 

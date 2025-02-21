@@ -2550,7 +2550,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_AttachAppDebug_0100, TestS
 {
     EXPECT_NE(proxy_, nullptr);
     std::string bundleName = "bundleName";
-    auto result = proxy_->AttachAppDebug(bundleName);
+    auto result = proxy_->AttachAppDebug(bundleName, false);
     EXPECT_EQ(result, NO_ERROR);
 }
 
@@ -2563,7 +2563,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_DetachAppDebug_0100, TestS
 {
     EXPECT_NE(proxy_, nullptr);
     std::string bundleName = "bundleName";
-    auto result = proxy_->DetachAppDebug(bundleName);
+    auto result = proxy_->DetachAppDebug(bundleName, false);
     EXPECT_EQ(result, NO_ERROR);
 }
 

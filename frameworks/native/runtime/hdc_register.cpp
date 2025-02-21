@@ -37,37 +37,64 @@ HdcRegister& HdcRegister::Get()
 }
 
 void HdcRegister::StartHdcRegister(const std::string& bundleName, const std::string& processName, bool debugApp,
-    HdcRegisterCallback callback)
+    DebugRegisterMode debugMode, HdcRegisterCallback callback)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
 
-    registerHandler_ = dlopen("libhdc_register.z.so", RTLD_LAZY);
-    if (registerHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null registerHandler_");
-        return;
+    if (debugMode == BOTH_REG) {
+        registerLocalHandler_ = dlopen("libda_register.z.so", RTLD_LAZY);
+        registerHdcHandler_ = dlopen("libhdc_register.z.so", RTLD_LAZY);
+    } else if (debugMode == LOCAL_DEBUG_REG) {
+        registerLocalHandler_ = dlopen("libda_register.z.so", RTLD_LAZY);
+    } else {
+        registerHdcHandler_ = dlopen("libhdc_register.z.so", RTLD_LAZY);
     }
-    auto startRegister = reinterpret_cast<StartRegister>(dlsym(registerHandler_, "StartConnect"));
-    if (startRegister == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null StartConnect");
-        return;
+    if (registerLocalHandler_ != nullptr) {
+        auto startRegister = reinterpret_cast<StartRegister>(dlsym(registerLocalHandler_, "StartConnect"));
+        if (startRegister != nullptr) {
+            startRegister(processName, bundleName, debugApp, callback);
+        }
+    } else {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null registerLocalHandler_");
     }
-    startRegister(processName, bundleName, debugApp, callback);
+    if (registerHdcHandler_ != nullptr) {
+        auto startRegister = reinterpret_cast<StartRegister>(dlsym(registerHdcHandler_, "StartConnect"));
+        if (startRegister != nullptr) {
+            startRegister(processName, bundleName, debugApp, callback);
+        }
+    } else {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null registerHdcHandler_");
+    }
 }
 
 void HdcRegister::StopHdcRegister()
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
-    if (registerHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null registerHandler_");
-        return;
-    }
-    auto stopRegister = reinterpret_cast<StopRegister>(dlsym(registerHandler_, "StopConnect"));
-    if (stopRegister != nullptr) {
-        stopRegister();
+
+    if (registerLocalHandler_ != nullptr) {
+        auto stopRegister = reinterpret_cast<StopRegister>(dlsym(registerLocalHandler_, "StopConnect"));
+        if (stopRegister != nullptr) {
+            stopRegister();
+        } else {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null StopConnect");
+        }
+        dlclose(registerLocalHandler_);
+        registerLocalHandler_ = nullptr;
     } else {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null StopConnect");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null registerLocalHandler_");
     }
-    dlclose(registerHandler_);
-    registerHandler_ = nullptr;
+
+    if (registerHdcHandler_ != nullptr) {
+        auto stopRegister = reinterpret_cast<StopRegister>(dlsym(registerHdcHandler_, "StopConnect"));
+        if (stopRegister != nullptr) {
+            stopRegister();
+        } else {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null StopConnect");
+        }
+        dlclose(registerHdcHandler_);
+        registerHdcHandler_ = nullptr;
+    } else {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null registerHdcHandler_");
+    }
 }
 } // namespace OHOS::AbilityRuntime

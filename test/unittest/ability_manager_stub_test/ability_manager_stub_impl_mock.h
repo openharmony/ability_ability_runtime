@@ -433,8 +433,8 @@ public:
     MOCK_METHOD2(PrepareTerminateAbilityBySCB, int32_t(const sptr<SessionInfo> &sessionInfo, bool &isPrepareTerminate));
     MOCK_METHOD1(RegisterAppDebugListener, int32_t(sptr<AppExecFwk::IAppDebugListener> listener));
     MOCK_METHOD1(UnregisterAppDebugListener, int32_t(sptr<AppExecFwk::IAppDebugListener> listener));
-    MOCK_METHOD1(AttachAppDebug, int32_t(const std::string &bundleName));
-    MOCK_METHOD1(DetachAppDebug, int32_t(const std::string &bundleName));
+    MOCK_METHOD2(AttachAppDebug, int32_t(const std::string &bundleName, bool isDebugFromLocal));
+    MOCK_METHOD2(DetachAppDebug, int32_t(const std::string &bundleName, bool isDebugFromLocal));
     MOCK_METHOD1(IsAbilityControllerStart, bool(const Want& want));
     MOCK_METHOD3(ExecuteIntent, int32_t(uint64_t key, const sptr<IRemoteObject> &callerToken,
         const InsightIntentExecuteParam &param));

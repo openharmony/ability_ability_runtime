@@ -227,7 +227,7 @@ int32_t AppScheduler::UnregisterAppDebugListener(const sptr<AppExecFwk::IAppDebu
     return 0;
 }
 
-int32_t AppScheduler::AttachAppDebug(const std::string &bundleName)
+int32_t AppScheduler::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     return 0;
 }
