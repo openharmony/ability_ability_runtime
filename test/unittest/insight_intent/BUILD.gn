@@ -16,7 +16,9 @@ group("unittest") {
 
   deps = [
     "insight_intent_execute_callback_stub_test:unittest",
+    "insight_intent_execute_manager_second_test:unittest",
     "insight_intent_execute_manager_test:unittest",
+    "insight_intent_execute_param_second_test:unittest",
     "insight_intent_execute_param_test:unittest",
     "insight_intent_execute_result_test:unittest",
     "insight_intent_utils_test:unittest",
