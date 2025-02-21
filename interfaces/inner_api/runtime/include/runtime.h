@@ -71,6 +71,7 @@ public:
         std::string bundleName = "";
         std::string perfCmd;
         std::string processName = "";
+        std::string appProvisionType = "";
         bool isDebugApp = true;
         bool isStartWithDebug = false;
         bool isStartWithNative = false;

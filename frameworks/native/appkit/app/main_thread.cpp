@@ -1531,6 +1531,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         debugOption.processName = processName;
         debugOption.isDebugApp = appInfo.debug;
         debugOption.isStartWithNative = appLaunchData.isNativeStart();
+        debugOption.appProvisionType = applicationInfo_->appProvisionType;
         if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
             perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
             TAG_LOGD(AAFwkTag::APPKIT, "perfCmd is %{public}s", perfCmd.c_str());
