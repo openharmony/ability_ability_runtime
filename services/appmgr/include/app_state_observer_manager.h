@@ -18,8 +18,8 @@
 
 #include <map>
 #include <mutex>
-#include <set>
 #include <string>
+#include <unordered_map>
 
 #include "ability_foreground_state_observer_interface.h"
 #include "app_foreground_state_observer_interface.h"
@@ -39,9 +39,14 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-using AppStateObserverMap = std::map<sptr<IApplicationStateObserver>, std::vector<std::string>>;
-using AppForegroundStateObserverSet = std::set<sptr<IAppForegroundStateObserver>>;
-using AbilityforegroundObserverSet = std::set<sptr<IAbilityForegroundStateObserver>>;
+struct AppStateObserverInfo {
+    int32_t uid = 0;
+    std::vector<std::string> bundleNames;
+};
+
+using AppStateObserverMap = std::map<sptr<IApplicationStateObserver>, AppStateObserverInfo>;
+using AppForegroundStateObserverMap = std::map<sptr<IAppForegroundStateObserver>, int32_t>;
+using AbilityForegroundObserverMap = std::map<sptr<IAbilityForegroundStateObserver>, int32_t>;
 
 enum class ObserverType {
     APPLICATION_STATE_OBSERVER,
@@ -107,8 +112,8 @@ private:
     void AddObserverDeathRecipient(const sptr<IRemoteBroker> &observer, const ObserverType &type);
     void RemoveObserverDeathRecipient(const sptr<IRemoteBroker> &observer);
     AppStateObserverMap GetAppStateObserverMapCopy();
-    AppForegroundStateObserverSet GetAppForegroundStateObserverSetCopy();
-    AbilityforegroundObserverSet GetAbilityforegroundObserverSetCopy();
+    AppForegroundStateObserverMap GetAppForegroundStateObserverMapCopy();
+    AbilityForegroundObserverMap GetAbilityForegroundObserverMapCopy();
     ProcessData WrapProcessData(const std::shared_ptr<AppRunningRecord> &appRecord);
     ProcessData WrapRenderProcessData(const std::shared_ptr<RenderRecord> &renderRecord);
 #ifdef SUPPORT_CHILD_PROCESS
@@ -124,18 +129,22 @@ private:
     void HandleOnPageShow(const PageStateData pageStateData);
     void HandleOnPageHide(const PageStateData pageStateData);
     void HandleOnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
+    void AddObserverCount(int32_t uid);
+    void DecreaseObserverCount(int32_t uid);
 
 private:
-    int32_t dummyCode_ = 0;
     std::shared_ptr<AAFwk::TaskHandlerWrap> handler_;
     AppStateObserverMap appStateObserverMap_;
-    AppForegroundStateObserverSet appForegroundStateObserverSet_;
-    AbilityforegroundObserverSet abilityforegroundObserverSet_;
+    AppForegroundStateObserverMap appForegroundStateObserverMap_;
+    AbilityForegroundObserverMap abilityForegroundObserverMap_;
     std::map<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> recipientMap_;
+    std::unordered_map<int32_t, int32_t> observerCountMap_;  // <uid, count>
+    int32_t observerAmount_ = 0;
     ffrt::mutex observerLock_;
     ffrt::mutex appForegroundObserverLock_;
-    ffrt::mutex abilityforegroundObserverLock_;
+    ffrt::mutex abilityForegroundObserverLock_;
     ffrt::mutex recipientMapMutex_;
+    ffrt::mutex observerCountMapMutex_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
