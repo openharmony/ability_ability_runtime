@@ -275,7 +275,7 @@ public:
      */
     void AddModule(std::shared_ptr<ApplicationInfo> appInfo, std::shared_ptr<AbilityInfo> abilityInfo,
         sptr<IRemoteObject> token, const HapModuleInfo &hapModuleInfo,
-        std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId, int32_t persistentId = 0);
+        std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
 
     /**
      * @brief Batch adding modules whose stages will be loaded

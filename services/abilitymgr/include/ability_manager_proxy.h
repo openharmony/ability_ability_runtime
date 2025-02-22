@@ -383,7 +383,8 @@ public:
      * @param sceneFlag the reason info of the ability to terminate.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, uint32_t sceneFlag = 0) override;
+    virtual int CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool isUserRequestedExit,
+        uint32_t sceneFlag = 0) override;
 
     /**
      * SendResultToAbility with want, return want from ability manager service.(Only used for dms)
@@ -1498,7 +1499,8 @@ public:
      * @param sceneFlag the reason info of the ability to terminate.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t CleanUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, uint32_t sceneFlag = 0) override;
+    virtual int32_t CleanUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool isUserRequestedExit,
+        uint32_t sceneFlag = 0) override;
 
     /**
      * Open link of ability and atomic service.

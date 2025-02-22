@@ -62,7 +62,7 @@ public:
      */
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(const std::shared_ptr<ApplicationInfo> &appInfo,
         const std::string &processName, const BundleInfo &bundleInfo, const std::string &instanceKey,
-        const std::string &customProcessFlag = "", int32_t persistentId = 0);
+        const std::string &customProcessFlag = "");
 
     /**
      * CheckAppRunningRecordIsExist, Get process record by application name and process Name.

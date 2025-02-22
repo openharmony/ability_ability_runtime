@@ -767,7 +767,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessReused(appRecord);
         }
         StartAbility(loadParam->token, loadParam->preToken, abilityInfo, appRecord, hapModuleInfo, want,
-            loadParam->abilityRecordId, loadParam->persistentId);
+            loadParam->abilityRecordId);
         if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
             AddUIExtensionLauncherItem(want, appRecord, loadParam->token);
         }
@@ -2738,8 +2738,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
     appRecord->SetEmptyKeepAliveAppState(false);
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
-    appRecord->AddModule(appInfo, abilityInfo, loadParam->token, hapModuleInfo, want,
-        loadParam->abilityRecordId, loadParam->persistentId);
+    appRecord->AddModule(appInfo, abilityInfo, loadParam->token, hapModuleInfo, want, loadParam->abilityRecordId);
     appRecord->SetIsKia(isKia);
     SetAppRunningRecordStrictMode(appRecord, loadParam);
     if (want) {
@@ -3120,8 +3119,7 @@ void AppMgrServiceInner::AttachPidToParent(const sptr<IRemoteObject> &token, con
 
 void AppMgrServiceInner::StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
     std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AppRunningRecord> appRecord,
-    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId,
-    int32_t persistentId)
+    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER_AND_RETURN_LOG(abilityInfo, "abilityInfo null");
@@ -3155,7 +3153,7 @@ void AppMgrServiceInner::StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObj
     }
 
     auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo->applicationInfo);
-    appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want, abilityRecordId, persistentId);
+    appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want, abilityRecordId);
     auto moduleRecord = appRecord->GetModuleRecordByModuleName(appInfo->bundleName, hapModuleInfo.moduleName);
     if (!moduleRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "add moduleRecord fail");
@@ -4122,7 +4120,6 @@ static bool GetAbilityNames(
 {
     std::string abilityName = "";
     std::string moduleName = "";
-    int32_t persistentId = 0;
     for (auto it = abilityRecordList.begin(); it != abilityRecordList.end(); ++it) {
         if (it->second == nullptr) {
             continue;
@@ -4135,8 +4132,7 @@ static bool GetAbilityNames(
         moduleName = it->second->GetModuleName();
         bundleName = it->second->GetBundleName();
         if (abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
-            persistentId = it->second->GetPersistentId();
-            abilityNames.push_back(abilityName + std::to_string(persistentId));
+            abilityNames.push_back(abilityName);
         } else if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
             uiExtensionNames.push_back(moduleName + ":" + abilityName);
         }

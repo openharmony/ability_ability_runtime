@@ -482,7 +482,7 @@ ErrCode AbilityManagerClient::CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo,
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CloseUIAbilityBySCB persistentId: %{public}d", sessionInfo->persistentId);
-    return abms->CloseUIAbilityBySCB(sessionInfo, sceneFlag);
+    return abms->CloseUIAbilityBySCB(sessionInfo, isUserRequestedExit, sceneFlag);
 }
 
 ErrCode AbilityManagerClient::MinimizeAbility(sptr<IRemoteObject> token, bool fromUser)
@@ -2037,7 +2037,7 @@ ErrCode AbilityManagerClient::CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo,
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "scb call, CleanUIAbilityBySCB");
-    return abms->CleanUIAbilityBySCB(sessionInfo, sceneFlag);
+    return abms->CleanUIAbilityBySCB(sessionInfo, isUserRequestedExit, sceneFlag);
 }
 
 ErrCode AbilityManagerClient::PreStartMission(const std::string& bundleName, const std::string& moduleName,
