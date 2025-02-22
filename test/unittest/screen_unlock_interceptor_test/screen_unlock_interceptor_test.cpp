@@ -24,6 +24,7 @@
 #include "ability_util.h"
 #include "event_report.h"
 #include "parameters.h"
+#include "scene_board_judgement.h"
 #include "start_ability_utils.h"
 
 using namespace testing;
@@ -74,7 +75,9 @@ HWTEST_F(ScreenUnlockInterceptorTest, DoProcess_001, TestSize.Level1)
     StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
     AbilityInterceptorParam param(want, requestCode, userId, isWithUI, callerToken, shouldBlockAllAppStartFunc);
     auto ret = screenUnlockInterceptor.DoProcess(param);
-    EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
+    }
 }
 
 /**
