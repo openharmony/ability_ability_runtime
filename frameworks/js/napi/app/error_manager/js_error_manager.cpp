@@ -718,12 +718,7 @@ private:
             ThrowInvalidCallerError(env);
             return CreateJsUndefined(env);
         }
-        if (argc != ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
-            ThrowInvalidNumParametersError(env);
-            return CreateJsUndefined(env);
-        }
-        return OnOffFreeze(env, argv[INDEX_ONE]);
+        return argc == ARGC_TWO ? OnOffFreeze(env, argv[INDEX_ONE]) : OnOffFreeze(env, nullptr);
     }
 
     napi_value OnOff(napi_env env, size_t argc, napi_value* argv)
