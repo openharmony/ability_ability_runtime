@@ -44,10 +44,7 @@ ErrCode AbilityJumpInterceptor::DoProcess(AbilityInterceptorParam param)
     }
     // get bms
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
-    if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleMgrHelper");
-        return ERR_OK;
-    }
+    CHECK_POINTER_AND_RETURN(bundleMgrHelper, ERR_OK);
     AppExecFwk::AbilityInfo targetAbilityInfo;
     if (StartAbilityUtils::startAbilityInfo != nullptr &&
         StartAbilityUtils::startAbilityInfo->abilityInfo.bundleName == param.want.GetBundle() &&
