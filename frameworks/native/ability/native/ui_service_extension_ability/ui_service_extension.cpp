@@ -38,14 +38,14 @@ using namespace OHOS::AppExecFwk;
 UIServiceExtension* UIServiceExtension::Create(const std::unique_ptr<Runtime>& runtime)
 {
     if (!runtime) {
-        return new(std::nothrow) UIServiceExtension();
+        return new (std::nothrow) UIServiceExtension();
     }
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "UIServiceExtension Create runtime");
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
             return JsUIServiceExtension::Create(runtime);
         default:
-            return new(std::nothrow) UIServiceExtension();
+            return new (std::nothrow) UIServiceExtension();
     }
 }
 
