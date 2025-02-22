@@ -117,7 +117,7 @@ JsUIServiceExtension* JsUIServiceExtension::Create(const std::unique_ptr<Runtime
     if (runtime == nullptr) {
         return nullptr;
     }
-    return new(std::nothrow) JsUIServiceExtension(static_cast<AbilityRuntime::JsRuntime&>(*runtime));
+    return new (std::nothrow) JsUIServiceExtension(static_cast<AbilityRuntime::JsRuntime&>(*runtime));
 }
 
 JsUIServiceExtension::JsUIServiceExtension(AbilityRuntime::JsRuntime& jsRuntime) : jsRuntime_(jsRuntime) {}
