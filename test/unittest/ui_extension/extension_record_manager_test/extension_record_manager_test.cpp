@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "ability_manager_client.h"
 #include "ability_record.h"
 #include "extension_record.h"
+#include "extension_record_factory.h"
 #define private public
 #include "extension_record_manager.h"
 #undef private
@@ -32,6 +33,12 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+    constexpr int32_t EXTENSION_RECORD_KEY_0 = 0;
+    constexpr int32_t EXTENSION_RECORD_KEY_1 = 1;
+    constexpr int32_t EXTENSION_RECORD_KEY_2 = 2;
+    constexpr const char *SEPARATOR = ":";
+} // namespace
 class ExtensionRecordManagerTest : public testing::Test {
 public:
 
@@ -273,7 +280,7 @@ HWTEST_F(ExtensionRecordManagerTest, AddPreloadUIExtensionRecord_0100, TestSize.
 
 
     extRecordMgr->AddPreloadUIExtensionRecord(abilityRecord);
-    int32_t  extId = 12;
+    int32_t extId = 12;
     abilityRecord->SetUIExtensionAbilityId(extId);
     auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
 
@@ -308,6 +315,168 @@ HWTEST_F(ExtensionRecordManagerTest, CreateExtensionRecord_0100, TestSize.Level1
     auto result = extRecordMgr->CreateExtensionRecord(abilityRequest, bundleName, extRecord, extRecordId);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::PHOTO_EDITOR;
+}
+
+/**
+ * @tc.name: IsHostSpecifiedProcessValid_0100
+ * @tc.desc: IsHostSpecifiedProcessValid
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, IsHostSpecifiedProcessValid_0100, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    AAFwk::AbilityRequest abilityRequest;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+    std::string process = "testProcess";
+
+    bool result = extRecordMgr->IsHostSpecifiedProcessValid(abilityRequest, extRecord, process);
+    EXPECT_FALSE(result);
+
+    std::shared_ptr<ExtensionRecord> nullExtRecord = std::make_shared<ExtensionRecord>(nullptr);
+    extRecordMgr->extensionRecords_.insert({EXTENSION_RECORD_KEY_0, nullptr});
+    extRecordMgr->extensionRecords_.insert({EXTENSION_RECORD_KEY_1, nullExtRecord});
+    extRecordMgr->extensionRecords_.insert({EXTENSION_RECORD_KEY_2, extRecord});
+    result = extRecordMgr->IsHostSpecifiedProcessValid(abilityRequest, extRecord, process);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsHostSpecifiedProcessValid_0200
+ * @tc.desc: IsHostSpecifiedProcessValid
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, IsHostSpecifiedProcessValid_0200, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+    std::string process = "testProcess";
+
+    bool result = extRecordMgr->IsHostSpecifiedProcessValid(abilityRequest, extRecord, process);
+    EXPECT_FALSE(result);
+
+    extRecord->abilityRecord_->SetProcessName(process);
+    extRecordMgr->extensionRecords_.insert({EXTENSION_RECORD_KEY_0, extRecord});
+    result = extRecordMgr->IsHostSpecifiedProcessValid(abilityRequest, extRecord, process);
+    EXPECT_TRUE(result);
+
+    abilityRequest.abilityInfo.name = "ability";
+    result = extRecordMgr->IsHostSpecifiedProcessValid(abilityRequest, extRecord, process);
+    EXPECT_FALSE(result);
+
+    abilityRequest.abilityInfo.bundleName = "testBundleName";
+    result = extRecordMgr->IsHostSpecifiedProcessValid(abilityRequest, extRecord, process);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: UpdateProcessName_0100
+ * @tc.desc: UpdateProcessName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, UpdateProcessName_0100, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.bundleName = "testBundleName";
+    abilityRequest.abilityInfo.name = "testInfoName";
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+
+    int32_t result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_INSTANCE;
+    std::string process = abilityRequest.abilityInfo.bundleName + SEPARATOR + abilityRequest.abilityInfo.name
+        + SEPARATOR + std::to_string(abilityRecord->GetUIExtensionAbilityId());
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(abilityRecord->GetProcessName(), process);
+    EXPECT_EQ(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_TYPE;
+    process = abilityRequest.abilityInfo.bundleName + SEPARATOR + abilityRequest.abilityInfo.name;
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(abilityRecord->GetProcessName(), process);
+    EXPECT_EQ(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_CUSTOM;
+    process = abilityRequest.abilityInfo.bundleName + abilityRequest.customProcess;
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(abilityRecord->GetProcessName(), process);
+    EXPECT_EQ(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_HOST_SPECIFIED;
+    process = abilityRequest.want.GetStringParam(PROCESS_MODE_HOST_SPECIFIED_KEY);
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    extRecord->abilityRecord_->SetProcessName(process);
+    extRecordMgr->extensionRecords_.insert({EXTENSION_RECORD_KEY_0, extRecord});
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(abilityRecord->GetProcessName(), process);
+    EXPECT_EQ(result, ERR_OK);
+
+    extRecord->processMode_ = PROCESS_MODE_RUN_WITH_MAIN_PROCESS;
+    process = abilityRequest.abilityInfo.bundleName;
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(abilityRecord->GetProcessName(), process);
+    EXPECT_EQ(result, ERR_OK);
+
+    abilityRequest.appInfo.process = "testProcess";
+    process = abilityRequest.appInfo.process;
+    result = extRecordMgr->UpdateProcessName(abilityRequest, extRecord);
+    EXPECT_EQ(abilityRecord->GetProcessName(), process);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: IsPreloadExtensionRecord_0100
+ * @tc.desc: IsPreloadExtensionRecord
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, IsPreloadExtensionRecord_0100, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    AAFwk::AbilityRequest abilityRequest;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+    std::string hostBundleName = "testHostBundleName";
+    bool isLoaded = false;
+
+    bool result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    EXPECT_FALSE(result);
+
+    std::string deviceId = "testDeviceId";
+    std::string bundleName = "testBundleName";
+    std::string abilityName = "testAbilityName";
+    std::string moduleName = "testModuleName";
+    abilityRequest.want.SetElementName(deviceId, bundleName, abilityName, moduleName);
+    auto extensionRecordMapKey = std::make_tuple(abilityName, bundleName, moduleName, hostBundleName);
+    std::vector<std::shared_ptr<ExtensionRecord>> nullExtensions;
+    std::vector<std::shared_ptr<ExtensionRecord>> extensions;
+
+    extensions.push_back(extRecord);
+    extRecordMgr->preloadUIExtensionMap_.insert({extensionRecordMapKey, extensions});
+    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    EXPECT_TRUE(isLoaded);
+    EXPECT_TRUE(result);
+
+    extRecordMgr->preloadUIExtensionMap_[extensionRecordMapKey] = nullExtensions;
+    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    EXPECT_FALSE(result);
+
+    nullExtensions.push_back(nullptr);
+    extRecordMgr->preloadUIExtensionMap_[extensionRecordMapKey] = nullExtensions;
+    result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
+    EXPECT_FALSE(result);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
