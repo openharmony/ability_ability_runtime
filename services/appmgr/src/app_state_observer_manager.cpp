@@ -28,10 +28,13 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-const std::string THREAD_NAME = "AppStateObserverManager";
 const std::string XIAOYI_BUNDLE_NAME = "com.huawei.hmos.vassistant";
-const int BUNDLE_NAME_LIST_MAX_SIZE = 128;
-constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
+constexpr int BUNDLE_NAME_LIST_MAX_SIZE = 128;
+constexpr int OBSERVER_SINGLE_COUNT_LOG = 40;
+constexpr int OBSERVER_SINGLE_STEP_LOG = 10;
+constexpr int OBSERVER_UID_COUNT_LOG = 3;
+constexpr int OBSERVER_AMOUNT_COUNT_LOG = 70;
+constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 } // namespace
 AppStateObserverManager::AppStateObserverManager()
 {
@@ -70,9 +73,13 @@ int32_t AppStateObserverManager::RegisterApplicationStateObserver(
         TAG_LOGE(AAFwkTag::APPMGR, "observer exist");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<ffrt::mutex> lockRegister(observerLock_);
-    appStateObserverMap_.emplace(observer, bundleNameList);
-    TAG_LOGD(AAFwkTag::APPMGR, "appStateObserverMap_ size:%{public}zu", appStateObserverMap_.size());
+    std::lock_guard lockRegister(observerLock_);
+    appStateObserverMap_.emplace(observer, AppStateObserverInfo{IPCSkeleton::GetCallingUid(), bundleNameList});
+    if (appStateObserverMap_.size() >= OBSERVER_SINGLE_COUNT_LOG &&
+        appStateObserverMap_.size() % OBSERVER_SINGLE_STEP_LOG == 0) {
+        TAG_LOGW(AAFwkTag::APPMGR, "appStateObserverMap_ size:%{public}zu", appStateObserverMap_.size());
+    }
+    AddObserverCount(IPCSkeleton::GetCallingUid());
     AddObserverDeathRecipient(observer, ObserverType::APPLICATION_STATE_OBSERVER);
     return ERR_OK;
 }
@@ -85,14 +92,15 @@ int32_t AppStateObserverManager::UnregisterApplicationStateObserver(const sptr<I
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
-    std::lock_guard<ffrt::mutex> lockUnregister(observerLock_);
+    std::lock_guard lockUnregister(observerLock_);
     if (observer == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return ERR_INVALID_VALUE;
     }
-    std::map<sptr<IApplicationStateObserver>, std::vector<std::string>>::iterator it;
-    for (it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
+
+    for (auto it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
         if (it->first->AsObject() == observer->AsObject()) {
+            DecreaseObserverCount(it->second.uid);
             appStateObserverMap_.erase(it);
             TAG_LOGD(AAFwkTag::APPMGR, "appStateObserverMap_ size:%{public}zu", appStateObserverMap_.size());
             RemoveObserverDeathRecipient(observer);
@@ -119,9 +127,14 @@ int32_t AppStateObserverManager::RegisterAppForegroundStateObserver(const sptr<I
         return ERR_INVALID_VALUE;
     }
 
-    std::lock_guard<ffrt::mutex> lockRegister(appForegroundObserverLock_);
-    appForegroundStateObserverSet_.emplace(observer);
+    std::lock_guard lockRegister(appForegroundObserverLock_);
+    appForegroundStateObserverMap_.emplace(observer, IPCSkeleton::GetCallingUid());
     AddObserverDeathRecipient(observer, ObserverType::APP_FOREGROUND_STATE_OBSERVER);
+    AddObserverCount(IPCSkeleton::GetCallingUid());
+    if (appForegroundStateObserverMap_.size() >= OBSERVER_SINGLE_COUNT_LOG &&
+        appForegroundStateObserverMap_.size() % OBSERVER_SINGLE_STEP_LOG == 0) {
+        TAG_LOGW(AAFwkTag::APPMGR, "appForegroundObserver size:%{public}zu", appForegroundStateObserverMap_.size());
+    }
     return ERR_OK;
 }
 
@@ -137,10 +150,11 @@ int32_t AppStateObserverManager::UnregisterAppForegroundStateObserver(const sptr
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
-    std::lock_guard<ffrt::mutex> lockUnregister(appForegroundObserverLock_);
-    for (auto &it : appForegroundStateObserverSet_) {
+    std::lock_guard lockUnregister(appForegroundObserverLock_);
+    for (const auto &[it, uid] : appForegroundStateObserverMap_) {
         if (it != nullptr && it->AsObject() == observer->AsObject()) {
-            appForegroundStateObserverSet_.erase(it);
+            DecreaseObserverCount(uid);
+            appForegroundStateObserverMap_.erase(it);
             RemoveObserverDeathRecipient(observer);
             return ERR_OK;
         }
@@ -162,13 +176,18 @@ int32_t AppStateObserverManager::RegisterAbilityForegroundStateObserver(
         return ERR_PERMISSION_DENIED;
     }
     if (IsAbilityForegroundObserverExist(observer)) {
-        TAG_LOGD(AAFwkTag::APPMGR, "Observer exist.");
+        TAG_LOGW(AAFwkTag::APPMGR, "Observer exist.");
         return ERR_OK;
     }
 
-    std::lock_guard<ffrt::mutex> lockRegister(abilityforegroundObserverLock_);
-    abilityforegroundObserverSet_.emplace(observer);
+    std::lock_guard lockRegister(abilityForegroundObserverLock_);
+    abilityForegroundObserverMap_.emplace(observer, IPCSkeleton::GetCallingUid());
     AddObserverDeathRecipient(observer, ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER);
+    AddObserverCount(IPCSkeleton::GetCallingUid());
+    if (abilityForegroundObserverMap_.size() >= OBSERVER_SINGLE_COUNT_LOG &&
+        abilityForegroundObserverMap_.size() % OBSERVER_SINGLE_STEP_LOG == 0) {
+        TAG_LOGW(AAFwkTag::APPMGR, "abilityForegroundObserver size:%{public}zu", abilityForegroundObserverMap_.size());
+    }
     return ERR_OK;
 }
 
@@ -185,10 +204,11 @@ int32_t AppStateObserverManager::UnregisterAbilityForegroundStateObserver(
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
-    std::lock_guard<ffrt::mutex> lockUnregister(abilityforegroundObserverLock_);
-    for (auto &it : abilityforegroundObserverSet_) {
+    std::lock_guard lockUnregister(abilityForegroundObserverLock_);
+    for (const auto &[it, uid] : abilityForegroundObserverMap_) {
         if (it != nullptr && it->AsObject() == observer->AsObject()) {
-            abilityforegroundObserverSet_.erase(it);
+            DecreaseObserverCount(uid);
+            abilityForegroundObserverMap_.erase(it);
             RemoveObserverDeathRecipient(observer);
             return ERR_OK;
         }
@@ -253,7 +273,6 @@ void AppStateObserverManager::OnAppStateChanged(
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnAppStateChanged come.");
-        self->dummyCode_ = __LINE__;
         self->HandleAppStateChanged(appRecord, state, needNotifyApp, isFromWindowFocusChanged);
     };
     handler_->SubmitTask(task);
@@ -475,6 +494,7 @@ void AppStateObserverManager::StateChangedNotifyObserver(
 
 void AppStateObserverManager::HandleOnAppStarted(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
@@ -486,9 +506,9 @@ void AppStateObserverManager::HandleOnAppStarted(const std::shared_ptr<AppRunnin
         data.bundleName.c_str(), data.uid, data.state);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), data.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnAppStarted(data);
         }
     }
@@ -496,6 +516,7 @@ void AppStateObserverManager::HandleOnAppStarted(const std::shared_ptr<AppRunnin
 
 void AppStateObserverManager::HandleOnAppStopped(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
@@ -506,9 +527,9 @@ void AppStateObserverManager::HandleOnAppStopped(const std::shared_ptr<AppRunnin
         data.bundleName.c_str(), data.uid, data.state);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), data.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnAppStopped(data);
         }
     }
@@ -517,34 +538,31 @@ void AppStateObserverManager::HandleOnAppStopped(const std::shared_ptr<AppRunnin
 void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
     const ApplicationState state, bool needNotifyApp, bool isFromWindowFocusChanged)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (appRecord == nullptr) {
         return;
     }
-    dummyCode_ = __LINE__;
     if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
         if (needNotifyApp && !isFromWindowFocusChanged) {
             AppStateData data = WrapAppStateData(appRecord, state);
             appRecord->GetSplitModeAndFloatingMode(data.isSplitScreenMode, data.isFloatingWindowMode);
-            dummyCode_ = __LINE__;
-            auto appForegroundStateObserverSetCopy = GetAppForegroundStateObserverSetCopy();
-            for (auto it : appForegroundStateObserverSetCopy) {
-                if (it != nullptr) {
-                    it->OnAppStateChanged(data);
+            auto appForegroundStateObserverMap = GetAppForegroundStateObserverMapCopy();
+            for (const auto &[observer, uid] : appForegroundStateObserverMap) {
+                if (observer != nullptr) {
+                    observer->OnAppStateChanged(data);
                 }
             }
         }
-        dummyCode_ = __LINE__;
         if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType()) &&
             !AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
             AppStateData data = WrapAppStateData(appRecord, state);
             TAG_LOGD(AAFwkTag::APPMGR, "name:%{public}s, uid:%{public}d, state:%{public}d, notify:%{public}d",
                 data.bundleName.c_str(), data.uid, data.state, needNotifyApp);
-            dummyCode_ = __LINE__;
             auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
             for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-                std::vector<std::string>::iterator iter =
-                    std::find(it->second.begin(), it->second.end(), data.bundleName);
-                bool valid = (it->second.empty() || iter != it->second.end()) && it->first != nullptr;
+                const auto &bundleNames = it->second.bundleNames;
+                auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+                bool valid = (bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr;
                 if (valid) {
                     it->first->OnForegroundApplicationChanged(data);
                 }
@@ -554,17 +572,15 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
             }
         }
     }
-    dummyCode_ = __LINE__;
     if (state == ApplicationState::APP_STATE_CREATE || state == ApplicationState::APP_STATE_TERMINATED) {
         AppStateData data = WrapAppStateData(appRecord, state);
         TAG_LOGD(AAFwkTag::APPMGR, "OnApplicationStateChanged, name:%{public}s, uid:%{public}d, state:%{public}d",
             data.bundleName.c_str(), data.uid, data.state);
-        dummyCode_ = __LINE__;
         auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
         for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-            std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-                it->second.end(), data.bundleName);
-            if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+            const auto &bundleNames = it->second.bundleNames;
+            auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+            if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
                 it->first->OnApplicationStateChanged(data);
             }
         }
@@ -574,6 +590,7 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
 void AppStateObserverManager::HandleStateChangedNotifyObserver(
     const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR,
         "Handle state change, module:%{public}s, bundle:%{public}s, ability:%{public}s, state:%{public}d,"
         "pid:%{public}d ,uid:%{public}d, abilityType:%{public}d, isAbility:%{public}d, callerBundleName:%{public}s,"
@@ -585,9 +602,9 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(
         abilityStateData.isAtomicService);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), abilityStateData.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), abilityStateData.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             if (isAbility) {
                 it->first->OnAbilityStateChanged(abilityStateData);
             } else {
@@ -599,10 +616,10 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(
     if ((abilityStateData.abilityState == static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND) ||
             abilityStateData.abilityState == static_cast<int32_t>(AbilityState::ABILITY_STATE_BACKGROUND)) &&
         isAbility && !isFromWindowFocusChanged) {
-        auto abilityforegroundObserverSetCopy = GetAbilityforegroundObserverSetCopy();
-        for (auto &it : abilityforegroundObserverSetCopy) {
-            if (it != nullptr) {
-                it->OnAbilityStateChanged(abilityStateData);
+        auto abilityForegroundObserverMap = GetAbilityForegroundObserverMapCopy();
+        for (auto &[observer, uid] : abilityForegroundObserverMap) {
+            if (observer != nullptr) {
+                observer->OnAbilityStateChanged(abilityStateData);
             }
         }
     }
@@ -611,6 +628,7 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(
 void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord,
     bool isPreload)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
@@ -633,6 +651,7 @@ void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<Ap
 
 void AppStateObserverManager::HandleOnProcessResued(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
@@ -643,9 +662,9 @@ void AppStateObserverManager::HandleOnProcessResued(const std::shared_ptr<AppRun
 
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), data.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnProcessReused(data);
         }
     }
@@ -654,6 +673,7 @@ void AppStateObserverManager::HandleOnProcessResued(const std::shared_ptr<AppRun
 void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &renderRecord,
     const bool isPreload)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!renderRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null renderRecord");
         return;
@@ -670,6 +690,7 @@ void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr
 #ifdef SUPPORT_CHILD_PROCESS
 void AppStateObserverManager::HandleOnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!childRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null childRecord");
         return;
@@ -691,9 +712,9 @@ void AppStateObserverManager::HandleOnProcessCreated(const ProcessData &data)
 {
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), data.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnProcessCreated(data);
         }
     }
@@ -701,6 +722,7 @@ void AppStateObserverManager::HandleOnProcessCreated(const ProcessData &data)
 
 void AppStateObserverManager::HandleOnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
@@ -716,9 +738,9 @@ void AppStateObserverManager::HandleOnProcessStateChanged(const std::shared_ptr<
         data.bundleName.c_str(), data.pid, data.uid, data.state, data.isContinuousTask, data.gpuPid);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), data.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnProcessStateChanged(data);
         }
     }
@@ -726,6 +748,7 @@ void AppStateObserverManager::HandleOnProcessStateChanged(const std::shared_ptr<
 
 void AppStateObserverManager::HandleOnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
         return;
@@ -737,9 +760,9 @@ void AppStateObserverManager::HandleOnWindowShow(const std::shared_ptr<AppRunnin
         data.bundleName.c_str(), data.pid, data.uid, data.state, data.isContinuousTask, data.gpuPid);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), data.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnWindowShow(data);
         }
     }
@@ -747,6 +770,7 @@ void AppStateObserverManager::HandleOnWindowShow(const std::shared_ptr<AppRunnin
 
 void AppStateObserverManager::HandleOnWindowHidden(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
         return;
@@ -758,9 +782,9 @@ void AppStateObserverManager::HandleOnWindowHidden(const std::shared_ptr<AppRunn
         data.bundleName.c_str(), data.pid, data.uid, data.state, data.isContinuousTask, data.gpuPid);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), data.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnWindowHidden(data);
         }
     }
@@ -768,6 +792,7 @@ void AppStateObserverManager::HandleOnWindowHidden(const std::shared_ptr<AppRunn
 
 void AppStateObserverManager::HandleOnAppProcessDied(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
@@ -781,6 +806,7 @@ void AppStateObserverManager::HandleOnAppProcessDied(const std::shared_ptr<AppRu
 
 void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<RenderRecord> &renderRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!renderRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null renderRecord");
         return;
@@ -795,6 +821,7 @@ void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<Re
 #ifdef SUPPORT_CHILD_PROCESS
 void AppStateObserverManager::HandleOnChildProcessDied(std::shared_ptr<ChildProcessRecord> childRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!childRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null childRecord");
         return;
@@ -816,9 +843,9 @@ void AppStateObserverManager::HandleOnProcessDied(const ProcessData &data)
 {
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), data.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnProcessDied(data);
         }
     }
@@ -897,7 +924,7 @@ bool AppStateObserverManager::ObserverExist(const sptr<IRemoteBroker> &observer)
         TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return false;
     }
-    std::lock_guard<ffrt::mutex> lockRegister(observerLock_);
+    std::lock_guard lockRegister(observerLock_);
     for (auto it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
         if (it->first->AsObject() == observer->AsObject()) {
             return true;
@@ -912,8 +939,8 @@ bool AppStateObserverManager::IsAbilityForegroundObserverExist(const sptr<IRemot
         TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return false;
     }
-    std::lock_guard<ffrt::mutex> lockRegister(abilityforegroundObserverLock_);
-    for (auto &it : abilityforegroundObserverSet_) {
+    std::lock_guard lockRegister(abilityForegroundObserverLock_);
+    for (const auto &[it, uid] : abilityForegroundObserverMap_) {
         if (it != nullptr && it->AsObject() == observer->AsObject()) {
             return true;
         }
@@ -927,8 +954,8 @@ bool AppStateObserverManager::IsAppForegroundObserverExist(const sptr<IRemoteBro
         TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return false;
     }
-    std::lock_guard<ffrt::mutex> lockRegister(appForegroundObserverLock_);
-    for (auto &it : appForegroundStateObserverSet_) {
+    std::lock_guard lockRegister(appForegroundObserverLock_);
+    for (const auto &[it, uid] : appForegroundStateObserverMap_) {
         if (it != nullptr && it->AsObject() == observer->AsObject()) {
             return true;
         }
@@ -996,22 +1023,56 @@ void AppStateObserverManager::RemoveObserverDeathRecipient(const sptr<IRemoteBro
     }
 }
 
+void AppStateObserverManager::AddObserverCount(int32_t uid)
+{
+    std::lock_guard lock(observerCountMapMutex_);
+    auto it = observerCountMap_.find(uid);
+    if (it == observerCountMap_.end()) {
+        observerCountMap_.emplace(uid, 1);
+    } else {
+        it->second++;
+        if (it->second > OBSERVER_UID_COUNT_LOG) {
+            TAG_LOGW(AAFwkTag::APPMGR, "too many observer uid: %{public}d, count: %{public}d", uid, it->second);
+        }
+        observerAmount_++;
+        if (observerAmount_ % OBSERVER_AMOUNT_COUNT_LOG == 0) {
+            for (const auto &[uid, count] : observerCountMap_) {
+                TAG_LOGW(AAFwkTag::APPMGR, "observer overview uid: %{public}d, count: %{public}d", uid, count);
+            }
+        }
+    }
+}
+
+void AppStateObserverManager::DecreaseObserverCount(int32_t uid)
+{
+    std::lock_guard lock(observerCountMapMutex_);
+    auto it = observerCountMap_.find(uid);
+    if (it == observerCountMap_.end()) {
+        return;
+    }
+    it->second--;
+    if (it->second <= 0) {
+        observerCountMap_.erase(it);
+    }
+    observerAmount_--;
+}
+
 AppStateObserverMap AppStateObserverManager::GetAppStateObserverMapCopy()
 {
-    std::lock_guard<ffrt::mutex> lock(observerLock_);
+    std::lock_guard lock(observerLock_);
     return appStateObserverMap_;
 }
 
-AppForegroundStateObserverSet AppStateObserverManager::GetAppForegroundStateObserverSetCopy()
+AppForegroundStateObserverMap AppStateObserverManager::GetAppForegroundStateObserverMapCopy()
 {
-    std::lock_guard<ffrt::mutex> lock(appForegroundObserverLock_);
-    return appForegroundStateObserverSet_;
+    std::lock_guard lock(appForegroundObserverLock_);
+    return appForegroundStateObserverMap_;
 }
 
-AbilityforegroundObserverSet AppStateObserverManager::GetAbilityforegroundObserverSetCopy()
+AbilityForegroundObserverMap AppStateObserverManager::GetAbilityForegroundObserverMapCopy()
 {
-    std::lock_guard<ffrt::mutex> lock(abilityforegroundObserverLock_);
-    return abilityforegroundObserverSet_;
+    std::lock_guard lock(abilityForegroundObserverLock_);
+    return abilityForegroundObserverMap_;
 }
 
 void AppStateObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote, const ObserverType &type)
@@ -1121,11 +1182,12 @@ void AppStateObserverManager::OnPageHide(const PageStateData pageStateData)
 
 void AppStateObserverManager::HandleOnPageShow(const PageStateData pageStateData)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), pageStateData.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), pageStateData.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnPageShow(pageStateData);
         }
     }
@@ -1133,11 +1195,12 @@ void AppStateObserverManager::HandleOnPageShow(const PageStateData pageStateData
 
 void AppStateObserverManager::HandleOnPageHide(const PageStateData pageStateData)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), pageStateData.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), pageStateData.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnPageHide(pageStateData);
         }
     }
@@ -1166,6 +1229,7 @@ void AppStateObserverManager::OnAppCacheStateChanged(const std::shared_ptr<AppRu
 void AppStateObserverManager::HandleOnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
     ApplicationState state)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
@@ -1177,9 +1241,9 @@ void AppStateObserverManager::HandleOnAppCacheStateChanged(const std::shared_ptr
         data.bundleName.c_str(), data.uid, data.state);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), data.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnAppCacheStateChanged(data);
         }
     }
