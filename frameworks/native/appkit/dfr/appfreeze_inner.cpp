@@ -26,6 +26,7 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "hisysevent.h"
 #include "parameter.h"
 #include "xcollie/watchdog.h"
 #include "time_util.h"
@@ -234,7 +235,9 @@ void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent)
 #ifdef APP_NO_RESPONSE_DIALOG
         isSixSecondEvent.store(false);
 #endif
-    } else {
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::RELIABILITY, "LOWMEM_DUMP",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "MSG", "THREAD_BLOCK_6S");
+} else {
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
         isSixSecondEvent.store(true);
     }
