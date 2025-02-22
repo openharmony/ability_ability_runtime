@@ -2972,9 +2972,7 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
         abilityRecord = GetAbilityRecordByToken(token);
     }
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    auto tokenID = abilityRecord->GetApplicationInfo().accessTokenId;
-    if (callingTokenId != tokenID) {
+    if (IPCSkeleton::GetCallingTokenID() != abilityRecord->GetApplicationInfo().accessTokenId) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not self");
         return ERR_NATIVE_NOT_SELF_APPLICATION;
     }
@@ -2983,7 +2981,8 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
 
     do {
         if (HiddenStartObserverManager::GetInstance().IsHiddenStart(abilityRecord->GetApplicationInfo().uid)) {
-            if (DoCallerProcessDetachment(abilityRecord) != ERR_OK) {
+            auto ret = DoCallerProcessDetachment(abilityRecord);
+            if (ret != ERR_OK) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "caller detach to status bar failed, ret: %{public}d", ret);
                 return ERR_START_OPTIONS_CHECK_FAILED;
             }
@@ -3000,7 +2999,8 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
             (!ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode) &&
             !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
             !sessionInfo->processOptions->isRestartKeepAlive)) {
-            if (DoCallerProcessAttachment(abilityRecord) != ERR_OK) {
+            auto ret = DoCallerProcessAttachment(abilityRecord);
+            if (ret != ERR_OK) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "caller attach to status bar failed, ret: %{public}d", ret);
                 return ERR_START_OPTIONS_CHECK_FAILED;
             }
