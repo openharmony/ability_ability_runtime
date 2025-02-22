@@ -365,7 +365,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_001, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStarted(appRecord);
 }
 
@@ -385,7 +385,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_002, TestSize.Level0)
     std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStarted(appRecord);
 }
 
@@ -407,7 +407,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_003, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStarted(appRecord);
 }
 
@@ -428,7 +428,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_004, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStarted(appRecord);
 }
 
@@ -450,7 +450,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_001, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStopped(appRecord);
 }
 
@@ -470,7 +470,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_002, TestSize.Level0)
     std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStopped(appRecord);
 }
 
@@ -492,7 +492,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_003, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStopped(appRecord);
 }
 
@@ -513,7 +513,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_004, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStopped(appRecord);
 }
 
@@ -536,7 +536,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_001, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -559,7 +559,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_002, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -581,7 +581,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_003, TestSize.Level0)
     bool needNotifyApp = false;
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -603,7 +603,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_004, TestSize.Level0)
     bool needNotifyApp = false;
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -626,7 +626,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_005, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -650,7 +650,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_006, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -672,7 +672,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_007, TestSize.Level0)
     bool needNotifyApp = false;
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -713,7 +713,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_001, TestSize.Leve
     std::string bundleName = "com.ohos.unittest";
     abilityStateData.bundleName = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleStateChangedNotifyObserver(abilityStateData, isAbility, false);
 }
 
@@ -734,7 +734,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_002, TestSize.Leve
     std::vector<std::string> bundleNameList;
     std::string bundleName = "com.ohos.unittest";
     abilityStateData.bundleName = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleStateChangedNotifyObserver(abilityStateData, isAbility, false);
 }
 
@@ -757,7 +757,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_003, TestSize.Leve
     std::string bundleName2 = "com.ohos.unittest2";
     abilityStateData.bundleName = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleStateChangedNotifyObserver(abilityStateData, isAbility, false);
 }
 
@@ -779,7 +779,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_004, TestSize.Leve
     std::string bundleName = "com.ohos.unittest";
     abilityStateData.bundleName = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleStateChangedNotifyObserver(abilityStateData, isAbility, false);
 }
 
@@ -836,7 +836,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_001, TestSize.Level0)
     std::vector<std::string> bundleNameList;
     std::string bundleName = "com.ohos.unittest";
     data.bundleName = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessCreated(data);
 }
 
@@ -857,7 +857,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_002, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     data.bundleName = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessCreated(data);
 }
 
@@ -879,7 +879,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_003, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest";
     data.bundleName = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessCreated(data);
 }
 
@@ -900,7 +900,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_004, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     data.bundleName = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessCreated(data);
 }
 
@@ -936,7 +936,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_002, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessStateChanged(appRecord);
 }
 
@@ -956,7 +956,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_003, TestSize.Level0)
     std::vector<std::string> bundleNameList;
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessStateChanged(appRecord);
 }
 
@@ -978,7 +978,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_004, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessStateChanged(appRecord);
 }
 
@@ -999,7 +999,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_005, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessStateChanged(appRecord);
 }
 
@@ -1056,7 +1056,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_001, TestSize.Level0)
     std::vector<std::string> bundleNameList;
     std::string bundleName = "com.ohos.unittest";
     data.bundleName = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessDied(data);
 }
 
@@ -1077,7 +1077,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_002, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     data.bundleName = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessDied(data);
 }
 
@@ -1099,7 +1099,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_003, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     data.bundleName = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessDied(data);
 }
 
@@ -1121,7 +1121,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_004, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     data.bundleName = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessDied(data);
 }
 
@@ -1153,7 +1153,7 @@ HWTEST_F(AppSpawnSocketTest, ObserverExist_002, TestSize.Level0)
     auto manager = std::make_shared<AppStateObserverManager>();
     sptr<IApplicationStateObserver> observer = new MockApplicationStateObserver();
     std::vector<std::string> bundleNameList;
-    manager->appStateObserverMap_.emplace(observer, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, bundleNameList});
     bool res = manager->ObserverExist(observer);
     EXPECT_TRUE(res);
 }
@@ -1168,7 +1168,7 @@ HWTEST_F(AppSpawnSocketTest, RegisterAbilityForegroundStateObserver_0100, TestSi
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
     sptr<IAbilityForegroundStateObserver> observer = new AbilityForegroundStateObserverProxy(nullptr);
-    manager->abilityforegroundObserverSet_.emplace(observer);
+    manager->abilityForegroundObserverMap_.emplace(observer, 0);
     auto res = manager->RegisterAbilityForegroundStateObserver(observer);
     EXPECT_EQ(res, ERR_PERMISSION_DENIED);
 }
@@ -1183,14 +1183,14 @@ HWTEST_F(AppSpawnSocketTest, UnregisterAbilityForegroundStateObserver_0100, Test
     sptr<IAbilityForegroundStateObserver> observer = new AbilityForegroundStateObserverProxy(nullptr);
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
-    manager->abilityforegroundObserverSet_.emplace(observer);
+    manager->abilityForegroundObserverMap_.emplace(observer, 0);
     auto res = manager->UnregisterAbilityForegroundStateObserver(observer);
     EXPECT_EQ(res, ERR_PERMISSION_DENIED);
 }
 
 /**
  * @tc.name: IsAbilityForegroundObserverExist_0100
- * @tc.desc: Test return when abilityforegroundObserverSet_ is not empty and
+ * @tc.desc: Test return when abilityForegroundObserverMap_ is not empty and
  *      the conditions within the loop are met.
  * @tc.type: FUNC
  */
@@ -1200,7 +1200,7 @@ HWTEST_F(AppSpawnSocketTest, IsAbilityForegroundObserverExist_0100, TestSize.Lev
     sptr<IAbilityForegroundStateObserver> observers = new AbilityForegroundStateObserverProxy(nullptr);
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
-    manager->abilityforegroundObserverSet_.emplace(observers);
+    manager->abilityForegroundObserverMap_.emplace(observers, 0);
     auto res = manager->IsAbilityForegroundObserverExist(observer);
     EXPECT_EQ(res, true);
 }
@@ -1304,14 +1304,14 @@ HWTEST_F(AppSpawnSocketTest, UnregisterAppForegroundStateObserver_0100, TestSize
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     sptr<IAppForegroundStateObserver> observer = new (std::nothrow) AppForegroundStateObserver();
-    manager->appForegroundStateObserverSet_.emplace(observer);
+    manager->appForegroundStateObserverMap_.emplace(observer, 0);
     auto res = manager->UnregisterAppForegroundStateObserver(observer);
     EXPECT_EQ(ERR_PERMISSION_DENIED, res);
 }
 
 /**
  * @tc.name: IsAppForegroundObserverExist_0100
- * @tc.desc: Test when observer and appForegroundStateObserverSet is not nullptr
+ * @tc.desc: Test when observer and appForegroundStateObserverMap is not nullptr
  *      and asObject of them is same.
  * @tc.type: FUNC
  */
@@ -1319,7 +1319,7 @@ HWTEST_F(AppSpawnSocketTest, IsAppForegroundObserverExist_0100, TestSize.Level1)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     sptr<IAppForegroundStateObserver> observer = new (std::nothrow) AppForegroundStateObserver();
-    manager->appForegroundStateObserverSet_.emplace(observer);
+    manager->appForegroundStateObserverMap_.emplace(observer, 0);
     auto res = manager->IsAppForegroundObserverExist(observer);
     EXPECT_EQ(true, res);
 }
@@ -1352,7 +1352,7 @@ HWTEST_F(AppSpawnSocketTest, OnObserverDied_0200, TestSize.Level1)
     ObserverType type = ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER;
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnObserverDied(remote, type);
     auto abilityforegroundObserverSetSize =
-        DelayedSingleton<AppStateObserverManager>::GetInstance()->abilityforegroundObserverSet_.size();
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->abilityForegroundObserverMap_.size();
     EXPECT_EQ(0, abilityforegroundObserverSetSize);
 }
 
@@ -1368,7 +1368,7 @@ HWTEST_F(AppSpawnSocketTest, OnObserverDied_0300, TestSize.Level1)
     ObserverType type = ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER;
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnObserverDied(remote, type);
     auto appForegroundStateObserverSetSize =
-        DelayedSingleton<AppStateObserverManager>::GetInstance()->appForegroundStateObserverSet_.size();
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->appForegroundStateObserverMap_.size();
     EXPECT_EQ(0, appForegroundStateObserverSetSize);
 }
 
@@ -1408,7 +1408,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_001, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_CREATE);
 }
 
@@ -1428,7 +1428,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_002, TestSize.Level0)
     std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_CREATE);
 }
 
@@ -1450,7 +1450,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_003, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_CREATE);
 }
 
@@ -1471,7 +1471,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_004, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_CREATE);
 }
 } // namespace AppExecFwk
