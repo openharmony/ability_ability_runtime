@@ -164,13 +164,5 @@ bool AbilityRunningRecord::IsSceneBoard() const
     }
     return info_->name == SCENEBOARD_ABILITY_NAME && info_->bundleName == BUNDLE_NAME_SCENEBOARD;
 }
-void AbilityRunningRecord::SetPersistentId(const int32_t persistentId)
-{
-    persistentId_ = persistentId;
-}
-int32_t AbilityRunningRecord::GetPersistentId() const
-{
-    return persistentId_;
-}
 }  // namespace AppExecFwk
 }  // namespace OHOS

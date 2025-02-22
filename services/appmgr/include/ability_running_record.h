@@ -149,9 +149,6 @@ public:
      */
     bool IsSceneBoard() const;
 
-    void SetPersistentId(const int32_t persistentId);
-    int32_t GetPersistentId() const;
-
 private:
     bool isTerminating_ = false;
     bool isFocused_ = false;
@@ -166,7 +163,6 @@ private:
     std::shared_ptr<AAFwk::Want> want_ = nullptr;
     sptr<IRemoteObject> token_;
     sptr<IRemoteObject> preToken_;
-    int32_t persistentId_ = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
