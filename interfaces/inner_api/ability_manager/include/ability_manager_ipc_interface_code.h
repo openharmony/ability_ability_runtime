@@ -602,6 +602,9 @@ enum class AbilityManagerInterfaceCode {
 
     // Unregister hidden start observer
     UNREGISTER_HIDDEN_START_OBSERVER = 6136,
+
+    // Query preload uiextension record
+    QUERY_PRELOAD_UIEXTENSION_RECORD = 6137,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

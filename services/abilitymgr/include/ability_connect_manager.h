@@ -122,6 +122,18 @@ public:
         int32_t hostPid = AAFwk::DEFAULT_INVAL_VALUE);
 
     /**
+     * Query preload uiextension record.
+     *
+     * @param element, The uiextension ElementName.
+     * @param hostBundleName, The uiextension caller hostBundleName.
+     * @param recordNum, The returned count of uiextension.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int QueryPreLoadUIExtensionRecordInner(const AppExecFwk::ElementName &element,
+                                           const std::string &hostBundleName,
+                                           int32_t &recordNum);
+
+    /**
      * UnloadUIExtensionAbility, unload uiextension ability.
      *
      * @param abilityRecord, uiextension ability record.
@@ -644,7 +656,7 @@ private:
     int32_t ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
     void ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
         const std::shared_ptr<AbilityRecord> abilityRecord, sptr<IRemoteObject> callerToken);
-        
+
     void SetExtensionLoadParam(AbilityRuntime::LoadParam &loadParam, std::shared_ptr<AbilityRecord> abilityRecord);
     bool IsStrictMode(std::shared_ptr<AbilityRecord> abilityRecord);
     bool NeedExtensionControl(std::shared_ptr<AbilityRecord> abilityRecord);
@@ -662,13 +674,13 @@ private:
     RecipientMapType uiExtRecipientMap_;
     UIExtensionMapType uiExtensionMap_;
     WindowExtensionMapType windowExtensionMap_;
-    
+
     std::list<std::shared_ptr<AbilityRecord>> terminatingExtensionList_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<EventHandlerWrap> eventHandler_;
     std::vector<AbilityRequest> restartResidentTaskList_;
     std::unordered_map<std::string, std::shared_ptr<std::list<AbilityRequest>>> startServiceReqList_;
- 
+
     std::unique_ptr<UIExtensionAbilityConnectManager> uiExtensionAbilityRecordMgr_ = nullptr;
     ffrt::mutex serialMutex_;
     std::mutex connectMapMutex_;
