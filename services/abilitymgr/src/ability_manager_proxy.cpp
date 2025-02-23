@@ -6244,7 +6244,7 @@ int32_t AbilityManagerProxy::QueryPreLoadUIExtensionRecord(const AppExecFwk::Ele
     }
 
     if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "write hostBundleName fail");
+        TAG_LOGE(AAFwkTag::UI_EXT, "write userId fail");
         return INNER_ERR;
     }
 

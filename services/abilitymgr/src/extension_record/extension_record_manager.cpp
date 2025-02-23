@@ -801,9 +801,9 @@ int32_t ExtensionRecordManager::QueryPreLoadUIExtensionRecord(const AppExecFwk::
     std::lock_guard<std::mutex> lock(preloadUIExtensionMapMutex_);
     auto item = preloadUIExtensionMap_.find(extensionRecordMapKey);
     if (item != preloadUIExtensionMap_.end()) {
-        if (!item->second.empty()) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "UIExtensionAbility has been preloaded.");
+        if (!item->second.empty()) {            
             recordNum = item->second.size();
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "UIExtensionAbility has been preloaded,recordNum:%{public}d.", recordNum);
             return ERR_OK;
         }
     }
