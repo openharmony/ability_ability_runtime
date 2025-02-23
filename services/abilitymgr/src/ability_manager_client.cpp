@@ -2158,5 +2158,17 @@ ErrCode AbilityManagerClient::UnregisterHiddenStartObserver(const sptr<IHiddenSt
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->UnregisterHiddenStartObserver(observer);
 }
+
+ErrCode AbilityManagerClient::QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
+                                                            const std::string &hostBundleName,
+                                                            int32_t &recordNum,
+                                                            int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "call QueryPreLoadUIExtensionRecord");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->QueryPreLoadUIExtensionRecord(
+        element, hostBundleName, recordNum, userId);
+}
 } // namespace AAFwk
 } // namespace OHOS
