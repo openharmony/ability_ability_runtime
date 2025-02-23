@@ -1635,6 +1635,20 @@ public:
      */
     virtual int32_t UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer) override;
 
+    /**
+     * Query preload uiextension record.
+     *
+     * @param element, The uiextension ElementName.
+     * @param hostBundleName, The uiextension caller hostBundleName.
+     * @param recordNum, The returned count of uiextension.
+     * @param userId, The User Id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
+                                                  const std::string &hostBundleName,
+                                                  int32_t &recordNum,
+                                                  int32_t userId = DEFAULT_INVAL_VALUE) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
