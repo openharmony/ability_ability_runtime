@@ -357,8 +357,8 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
         appRunningUniqueId);
     int ret = 0;
     TAG_LOGW(AAFwkTag::APPDFR, "write hisysevent, eventName:%{public}s, bundleName:%{public}s, "
-            "startTime:%{public}s", faultNotifyData.errorObject.name.c_str(), appInfo.bundleName.c_str(),
-            AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
+        "startTime:%{public}s", faultData.errorObject.name.c_str(), appInfo.bundleName.c_str(),
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
     if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) {
         ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, faultData.errorObject.name,
             OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_UID, appInfo.uid, EVENT_PID, appInfo.pid,
