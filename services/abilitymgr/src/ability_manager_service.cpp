@@ -623,7 +623,7 @@ int AbilityManagerService::StartAbilityWithSpecifyTokenId(const Want &want, cons
 {
     if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility with specialId, current process not foundation process");
-        return ERR_INVALID_CONTINUATION_FLAG;
+        return CHECK_PERMISSION_FAILED;
     }
     return StartAbilityWithSpecifyTokenIdInner(want, callerToken, specifyTokenId, false, userId, requestCode);
 }
@@ -775,7 +775,7 @@ int AbilityManagerService::StartAbilityOnlyUIAbility(const Want &want, const spt
 {
     if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbility with specialId, process not foundation process");
-        return ERR_INVALID_CONTINUATION_FLAG;
+        return CHECK_PERMISSION_FAILED;
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
