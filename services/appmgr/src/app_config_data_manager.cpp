@@ -100,6 +100,10 @@ int32_t AppConfigDataManager::SetAppWaitingDebugInfo(const std::string &bundleNa
     DistributedKv::Status status;
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        if (kvStorePtr_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "kvStorePtr_ null");
+            return ERR_INVALID_OPERATION;
+        }
         status = kvStorePtr_->Put(key, value);
     }
 
@@ -125,6 +129,10 @@ int32_t AppConfigDataManager::ClearAppWaitingDebugInfo()
     DistributedKv::Status status;
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        if (kvStorePtr_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "kvStorePtr_ null");
+            return ERR_INVALID_OPERATION;
+        }
         status = kvStorePtr_->Delete(key);
     }
 
@@ -150,6 +158,10 @@ int32_t AppConfigDataManager::GetAppWaitingDebugList(std::vector<std::string> &b
     std::vector<DistributedKv::Entry> allEntries;
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        if (kvStorePtr_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "kvStorePtr_ null");
+            return ERR_INVALID_OPERATION;
+        }
         status = kvStorePtr_->GetEntries(nullptr, allEntries);
     }
 

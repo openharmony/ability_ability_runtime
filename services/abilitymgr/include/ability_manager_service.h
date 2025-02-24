@@ -2626,6 +2626,7 @@ private:
     ffrt::mutex collaboratorMapLock_;
     ffrt::mutex abilityDebugDealLock_;
     ffrt::mutex shouldBlockAllAppStartMutex_;
+    mutable ffrt::mutex timeoutMapLock_;
     std::mutex whiteListMutex_;
 
     std::mutex prepareTermiationCallbackMutex_;
