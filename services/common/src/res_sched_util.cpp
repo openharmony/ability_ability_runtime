@@ -100,6 +100,12 @@ std::string ResSchedUtil::GetThawReasonByAbilityType(const AbilityInfo &abilityI
     return reason;
 }
 
+bool ResSchedUtil::NeedReportByPidWhenConnect(const AbilityInfo &abilityInfo)
+{
+    return abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::REMOTE_NOTIFICATION ||
+           abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::BACKUP;
+}
+
 void ResSchedUtil::ReportEventToRSS(const int32_t uid, const std::string &bundleName, const std::string &reason,
     const int32_t pid, const int32_t callerPid)
 {
