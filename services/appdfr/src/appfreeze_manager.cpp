@@ -159,8 +159,9 @@ int AppfreezeManager::MergeNotifyInfo(FaultData& faultNotifyData, const Appfreez
     int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
     CollectFreezeSysMemory(memoryContent);
     TAG_LOGW(AAFwkTag::APPDFR, "collect memory info, eventName:%{public}s, bundleName:%{public}s, "
-        "endTime:%{public}s, interval:%{public}ldms", faultNotifyData.errorObject.name.c_str(), appInfo.bundleName.c_str(),
-        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(), AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime);
+        "endTime:%{public}s, interval:%{public}lld ms", faultNotifyData.errorObject.name.c_str(),
+        appInfo.bundleName.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
+        AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime);
 
     std::string fileName = faultNotifyData.errorObject.name + "_" +
         AbilityRuntime::TimeUtil::FormatTime("%Y%m%d%H%M%S") + "_" + std::to_string(appInfo.pid) + "_stack";
@@ -179,8 +180,9 @@ int AppfreezeManager::MergeNotifyInfo(FaultData& faultNotifyData, const Appfreez
         catchJsonStack += CatchJsonStacktrace(appInfo.pid, faultNotifyData.errorObject.name,
             faultNotifyData.errorObject.stack);
         TAG_LOGW(AAFwkTag::APPDFR, "catch stack, eventName:%{public}s, bundleName:%{public}s, "
-            "endTime:%{public}s, interval:%{public}ldms", faultNotifyData.errorObject.name.c_str(), appInfo.bundleName.c_str(),
-            AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(), AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime);
+            "endTime:%{public}s, interval:%{public}lld ms", faultNotifyData.errorObject.name.c_str(),
+            appInfo.bundleName.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
+            AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime);
 
         fullStackPath = WriteToFile(fileName, catchJsonStack);
         faultNotifyData.errorObject.stack = fullStackPath;
@@ -370,7 +372,7 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
     }
     TAG_LOGW(AAFwkTag::APPDFR,
         "reportEvent:%{public}s, pid:%{public}d, tid:%{public}d, bundleName:%{public}s, appRunningUniqueId:%{public}s"
-        ", endTime:%{public}s, interval:%{public}ldms, eventId:%{public}d hisysevent write ret: %{public}d",
+        ", endTime:%{public}s, interval:%{public}lld ms, eventId:%{public}d hisysevent write ret: %{public}d",
         faultData.errorObject.name.c_str(), appInfo.pid, faultData.tid, appInfo.bundleName.c_str(),
         appRunningUniqueId.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
         AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime, faultData.eventId, ret);
