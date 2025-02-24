@@ -114,7 +114,10 @@ napi_value AttachUIServiceExtensionContext(napi_env env, void *value, void *)
 
 JsUIServiceExtension* JsUIServiceExtension::Create(const std::unique_ptr<Runtime>& runtime)
 {
-    return new JsUIServiceExtension(static_cast<AbilityRuntime::JsRuntime&>(*runtime));
+    if (runtime == nullptr) {
+        return nullptr;
+    }
+    return new (std::nothrow) JsUIServiceExtension(static_cast<AbilityRuntime::JsRuntime&>(*runtime));
 }
 
 JsUIServiceExtension::JsUIServiceExtension(AbilityRuntime::JsRuntime& jsRuntime) : jsRuntime_(jsRuntime) {}
@@ -240,7 +243,7 @@ void JsUIServiceExtension::BindContext(napi_env env, napi_value obj)
 void JsUIServiceExtension::OnStart(const AAFwk::Want &want)
 {
     Extension::OnStart(want);
-    TAG_LOGE(AAFwkTag::UISERVC_EXT, "call");
+    TAG_LOGI(AAFwkTag::UISERVC_EXT, "call");
 
     auto context = GetContext();
     if (context != nullptr) {

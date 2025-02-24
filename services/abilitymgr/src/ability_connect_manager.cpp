@@ -312,7 +312,9 @@ void AbilityConnectManager::EnqueueStartServiceReq(const AbilityRequest &ability
         startServiceReqList_.emplace(abilityUri, reqList);
 
         CHECK_POINTER(taskHandler_);
-        auto callback = [abilityUri, connectManager = shared_from_this()]() {
+        auto callback = [abilityUri, connectManagerWeak = weak_from_this()]() {
+            auto connectManager = connectManagerWeak.lock();
+            CHECK_POINTER(connectManager);
             std::lock_guard guard{connectManager->startServiceReqListLock_};
             auto exist = connectManager->startServiceReqList_.erase(abilityUri);
             if (exist) {
@@ -345,7 +347,9 @@ int AbilityConnectManager::TerminateAbilityLocked(const sptr<IRemoteObject> &tok
         HandleTerminateDisconnectTask(connectRecordList);
     }
 
-    auto timeoutTask = [abilityRecord, connectManager = shared_from_this()]() {
+    auto timeoutTask = [abilityRecord, connectManagerWeak = weak_from_this()]() {
+        auto connectManager = connectManagerWeak.lock();
+        CHECK_POINTER(connectManager);
         TAG_LOGW(AAFwkTag::ABILITYMGR, "disconnect timeout");
         connectManager->HandleStopTimeoutTask(abilityRecord);
     };
@@ -406,6 +410,7 @@ int32_t AbilityConnectManager::GetOrCreateExtensionRecord(const AbilityRequest &
         if (ret != ERR_OK) {
             return ret;
         }
+        CHECK_POINTER_AND_RETURN(extensionRecord, ERR_NULL_OBJECT);
         extensionRecord->SetCreateByConnectMode(isCreatedByConnect);
         std::string extensionRecordKey = element.GetURI() + std::to_string(extensionRecord->GetUIExtensionAbilityId());
         extensionRecord->SetURI(extensionRecordKey);
@@ -488,6 +493,7 @@ void AbilityConnectManager::GetConnectRecordListFromMap(
     const sptr<IAbilityConnection> &connect, std::list<std::shared_ptr<ConnectionRecord>> &connectRecordList)
 {
     std::lock_guard lock(connectMapMutex_);
+    CHECK_POINTER(connect);
     auto connectMapIter = connectMap_.find(connect->AsObject());
     if (connectMapIter != connectMap_.end()) {
         connectRecordList = connectMapIter->second;
@@ -547,6 +553,7 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
     std::shared_ptr<AbilityRecord> targetService = extensionRecord->abilityRecord_;
     AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, abilityRequest.abilityInfo.bundleName,
         abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
+    CHECK_POINTER_AND_RETURN(targetService, ERR_INVALID_VALUE);
     std::string extensionRecordKey = element.GetURI() + std::to_string(targetService->GetUIExtensionAbilityId());
     targetService->SetURI(extensionRecordKey);
     AddToServiceMap(extensionRecordKey, targetService);
@@ -787,7 +794,9 @@ void AbilityConnectManager::TerminateRecord(std::shared_ptr<AbilityRecord> abili
         !AbilityCacheManager::GetInstance().FindRecordByToken(abilityRecord->GetToken())) {
         return;
     }
-    auto timeoutTask = [abilityRecord, connectManager = shared_from_this()]() {
+    auto timeoutTask = [abilityRecord, connectManagerWeak = weak_from_this()]() {
+        auto connectManager = connectManagerWeak.lock();
+        CHECK_POINTER(connectManager);
         TAG_LOGW(AAFwkTag::ABILITYMGR, "disconnect timeout");
         connectManager->HandleStopTimeoutTask(abilityRecord);
     };
@@ -1444,6 +1453,7 @@ std::list<std::shared_ptr<ConnectionRecord>> AbilityConnectManager::GetConnectRe
 {
     std::lock_guard guard(connectMapMutex_);
     std::list<std::shared_ptr<ConnectionRecord>> connectList;
+    CHECK_POINTER_AND_RETURN(callback, connectList);
     auto connectMapIter = connectMap_.find(callback->AsObject());
     if (connectMapIter != connectMap_.end()) {
         connectList = connectMapIter->second;
@@ -1470,7 +1480,9 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
     sptr<Token> token = abilityRecord->GetToken();
     sptr<Token> perToken = nullptr;
     if (abilityRecord->IsCreateByConnect()) {
-        perToken = iface_cast<Token>(abilityRecord->GetConnectingRecord()->GetToken());
+        auto connectingRecord = abilityRecord->GetConnectingRecord();
+        CHECK_POINTER(connectingRecord);
+        perToken = iface_cast<Token>(connectingRecord->GetToken());
     } else {
         auto callerList = abilityRecord->GetCallerRecordList();
         if (!callerList.empty() && callerList.back()) {
@@ -1566,7 +1578,8 @@ void AbilityConnectManager::PostRestartResidentTask(const AbilityRequest &abilit
     TAG_LOGI(AAFwkTag::ABILITYMGR, "PostRestartResidentTask start");
     CHECK_POINTER(taskHandler_);
     std::string taskName = std::string("RestartResident_") + std::string(abilityRequest.abilityInfo.name);
-    auto task = [abilityRequest, connectManager = shared_from_this()]() {
+    auto task = [abilityRequest, connectManagerWeak = weak_from_this()]() {
+        auto connectManager = connectManagerWeak.lock();
         CHECK_POINTER(connectManager);
         connectManager->HandleRestartResidentTask(abilityRequest);
     };
@@ -1644,7 +1657,9 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord>
         return;
     }
 
-    auto timeoutTask = [abilityRecord, connectManager = shared_from_this(), messageId]() {
+    auto timeoutTask = [abilityRecord, connectManagerWeak = weak_from_this(), messageId]() {
+        auto connectManager = connectManagerWeak.lock();
+        CHECK_POINTER(connectManager);
         if (messageId == AbilityManagerService::LOAD_TIMEOUT_MSG) {
             connectManager->HandleStartTimeoutTask(abilityRecord);
         } else if (messageId == AbilityConnectManager::CONNECT_TIMEOUT_MSG) {
@@ -1803,6 +1818,7 @@ int AbilityConnectManager::DispatchInactive(const std::shared_ptr<AbilityRecord>
         ConnectAbility(abilityRecord);
     } else if (abilityRecord->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "IS_PRELOAD_UIEXTENSION_ABILITY");
+        CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_INVALID_VALUE);
         auto ret = uiExtensionAbilityRecordMgr_->AddPreloadUIExtensionRecord(abilityRecord);
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "AddPreloadUIExtensionRecord error");
@@ -1827,8 +1843,11 @@ int AbilityConnectManager::DispatchForeground(const std::shared_ptr<AbilityRecor
     CHECK_POINTER_AND_RETURN(taskHandler_, ERR_INVALID_VALUE);
     // remove foreground timeout task.
     abilityRecord->RemoveForegroundTimeoutTask();
-    auto self(shared_from_this());
-    auto task = [self, abilityRecord]() { self->CompleteForeground(abilityRecord); };
+    auto task = [self = weak_from_this(), abilityRecord]() {
+        auto selfObj = self.lock();
+        CHECK_POINTER(selfObj);
+        selfObj->CompleteForeground(abilityRecord);
+    };
     taskHandler_->SubmitTask(task, TaskQoS::USER_INTERACTIVE);
 
     return ERR_OK;
@@ -1841,8 +1860,11 @@ int AbilityConnectManager::DispatchBackground(const std::shared_ptr<AbilityRecor
     // remove background timeout task.
     taskHandler_->CancelTask("background_" + std::to_string(abilityRecord->GetAbilityRecordId()));
 
-    auto self(shared_from_this());
-    auto task = [self, abilityRecord]() { self->CompleteBackground(abilityRecord); };
+    auto task = [self = weak_from_this(), abilityRecord]() {
+        auto selfObj = self.lock();
+        CHECK_POINTER(selfObj);
+        selfObj->CompleteBackground(abilityRecord);
+    };
     taskHandler_->SubmitTask(task, TaskQoS::USER_INTERACTIVE);
 
     return ERR_OK;
@@ -1911,7 +1933,9 @@ void AbilityConnectManager::CommandAbility(const std::shared_ptr<AbilityRecord> 
         abilityRecord->AddStartId();
         std::string taskName = std::string("CommandTimeout_") + std::to_string(recordId) + std::string("_") +
                                std::to_string(abilityRecord->GetStartId());
-        auto timeoutTask = [abilityRecord, connectManager = shared_from_this()]() {
+        auto timeoutTask = [abilityRecord, connectManagerWeak = weak_from_this()]() {
+            auto connectManager = connectManagerWeak.lock();
+            CHECK_POINTER(connectManager);
             TAG_LOGE(AAFwkTag::ABILITYMGR, "command ability timeout. %{public}s",
                 abilityRecord->GetAbilityInfo().name.c_str());
             connectManager->HandleCommandTimeoutTask(abilityRecord);
@@ -1940,7 +1964,9 @@ void AbilityConnectManager::CommandAbilityWindow(const std::shared_ptr<AbilityRe
         int recordId = abilityRecord->GetRecordId();
         std::string taskName = std::string("CommandWindowTimeout_") + std::to_string(recordId) + std::string("_") +
             std::to_string(sessionInfo->persistentId) + std::string("_") + std::to_string(winCmd);
-        auto timeoutTask = [abilityRecord, sessionInfo, winCmd, connectManager = shared_from_this()]() {
+        auto timeoutTask = [abilityRecord, sessionInfo, winCmd, connectManagerWeak = weak_from_this()]() {
+            auto connectManager = connectManagerWeak.lock();
+            CHECK_POINTER(connectManager);
             TAG_LOGE(AAFwkTag::ABILITYMGR, "command window timeout. %{public}s",
                 abilityRecord->GetAbilityInfo().name.c_str());
             connectManager->HandleCommandWindowTimeoutTask(abilityRecord, sessionInfo, winCmd);
@@ -2046,6 +2072,7 @@ void AbilityConnectManager::RemoveConnectionRecordFromMap(std::shared_ptr<Connec
         auto &connectList = connectCallback.second;
         auto connectRecord = std::find(connectList.begin(), connectList.end(), connection);
         if (connectRecord != connectList.end()) {
+            CHECK_POINTER(*connectRecord);
             TAG_LOGD(AAFwkTag::ABILITYMGR, "connrecord(%{public}d)", (*connectRecord)->GetRecordId());
             connectList.remove(connection);
             if (connectList.empty()) {
@@ -2115,7 +2142,11 @@ void AbilityConnectManager::OnCallBackDied(const wptr<IRemoteObject> &remote)
     auto object = remote.promote();
     CHECK_POINTER(object);
     if (taskHandler_) {
-        auto task = [object, connectManager = shared_from_this()]() { connectManager->HandleCallBackDiedTask(object); };
+        auto task = [object, connectManagerWeak = weak_from_this()]() {
+            auto connectManager = connectManagerWeak.lock();
+            CHECK_POINTER(connectManager);
+            connectManager->HandleCallBackDiedTask(object);
+        };
         taskHandler_->SubmitTask(task, TASK_ON_CALLBACK_DIED);
     }
 }
@@ -2138,6 +2169,7 @@ void AbilityConnectManager::HandleCallBackDiedTask(const sptr<IRemoteObject> &co
         if (it != connectMap_.end()) {
             ConnectListType connectRecordList = it->second;
             for (auto &connRecord : connectRecordList) {
+                CHECK_POINTER_CONTINUE(connRecord);
                 connRecord->ClearConnCallBack();
             }
         } else {
@@ -2207,7 +2239,9 @@ void AbilityConnectManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &
         taskHandler_->CancelTask("terminate_" + std::to_string(abilityRecord->GetAbilityRecordId()));
     }
     if (taskHandler_) {
-        auto task = [abilityRecord, connectManager = shared_from_this(), currentUserId]() {
+        auto task = [abilityRecord, connectManagerWeak = weak_from_this(), currentUserId]() {
+            auto connectManager = connectManagerWeak.lock();
+            CHECK_POINTER(connectManager);
             connectManager->HandleAbilityDiedTask(abilityRecord, currentUserId);
         };
         taskHandler_->SubmitTask(task, TASK_ON_ABILITY_DIED);
@@ -2302,6 +2336,7 @@ void AbilityConnectManager::ClearPreloadUIExtensionRecord(const std::shared_ptr<
     CHECK_POINTER(abilityRecord);
     auto extensionRecordId = abilityRecord->GetUIExtensionAbilityId();
     std::string hostBundleName;
+    CHECK_POINTER(uiExtensionAbilityRecordMgr_);
     auto ret = uiExtensionAbilityRecordMgr_->GetHostBundleNameForExtensionId(extensionRecordId, hostBundleName);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "GetHostBundleNameForExtensionId fail");
@@ -2374,6 +2409,7 @@ void AbilityConnectManager::HandleAbilityDiedTask(
     abilityRecord->SetConnRemoteObject(nullptr);
     ConnectListType connlist = abilityRecord->GetConnectRecordList();
     for (auto &connectRecord : connlist) {
+        CHECK_POINTER_CONTINUE(connectRecord);
         TAG_LOGW(AAFwkTag::ABILITYMGR, "record complete disconnect. recordId:%{public}d",
             connectRecord->GetRecordId());
         RemoveExtensionDelayDisconnectTask(connectRecord);
@@ -2741,6 +2777,7 @@ void AbilityConnectManager::GetExtensionRunningInfo(std::shared_ptr<AbilityRecor
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     ExtensionRunningInfo extensionInfo;
     AppExecFwk::RunningProcessInfo processInfo;
+    CHECK_POINTER(abilityRecord);
     extensionInfo.extension = abilityRecord->GetElementName();
     extensionInfo.type = abilityRecord->GetAbilityInfo().extensionAbilityType;
     DelayedSingleton<AppScheduler>::GetInstance()->
@@ -3037,7 +3074,9 @@ void AbilityConnectManager::OnUIExtWindowDied(const wptr<IRemoteObject> &remote)
     auto object = remote.promote();
     CHECK_POINTER(object);
     if (taskHandler_) {
-        auto task = [object, connectManager = shared_from_this()]() {
+        auto task = [object, connectManagerWeak = weak_from_this()]() {
+            auto connectManager = connectManagerWeak.lock();
+            CHECK_POINTER(connectManager);
             connectManager->HandleUIExtWindowDiedTask(object);
         };
         taskHandler_->SubmitTask(task);

@@ -729,7 +729,7 @@ void UriPermissionManagerStubImpl::ConnectManager(sptr<T> &mgr, int32_t serviceI
         }
         TAG_LOGE(AAFwkTag::URIPERMMGR, "to cast");
         mgr = iface_cast<T>(remoteObj);
-        if (mgr == nullptr) {
+        if (mgr == nullptr || mgr->AsObject() == nullptr) {
             TAG_LOGE(AAFwkTag::URIPERMMGR, "null mgr");
             return;
         }

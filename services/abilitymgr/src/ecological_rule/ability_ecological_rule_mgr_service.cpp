@@ -155,7 +155,9 @@ int32_t AbilityEcologicalRuleMgrServiceClient::QueryStartExperience(const OHOS::
 
 void AbilityEcologicalRuleMgrServiceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &object)
 {
-    AbilityEcologicalRuleMgrServiceClient::GetInstance()->OnRemoteSaDied(object);
+    if (AbilityEcologicalRuleMgrServiceClient::GetInstance()) {
+        AbilityEcologicalRuleMgrServiceClient::GetInstance()->OnRemoteSaDied(object);
+    }
 }
 
 AbilityEcologicalRuleMgrServiceProxy::AbilityEcologicalRuleMgrServiceProxy(

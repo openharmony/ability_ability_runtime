@@ -71,12 +71,12 @@ bool DeepLinkReserveConfig::LoadConfiguration()
     return true;
 }
    
-bool DeepLinkReserveConfig::isLinkReserved(const std::string &linkString, std::string &bundleName)
+bool DeepLinkReserveConfig::IsLinkReserved(const std::string &linkString, std::string &bundleName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     for (auto it = deepLinkReserveUris_.begin(); it != deepLinkReserveUris_.end(); ++it) {
         for (auto &itemUri : it->second) {
-            if (isUriMatched(itemUri, linkString)) {
+            if (IsUriMatched(itemUri, linkString)) {
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "link:%{public}s, linkReserved:%{public}s, matched",
                     linkString.c_str(), itemUri.scheme.c_str());
                 bundleName = it->first;
@@ -103,7 +103,7 @@ static bool StartsWith(const std::string &sourceString, const std::string &targe
 }
 
 
-bool DeepLinkReserveConfig::isUriMatched(const ReserveUri &reservedUri, const std::string &link)
+bool DeepLinkReserveConfig::IsUriMatched(const ReserveUri &reservedUri, const std::string &link)
 {
     if (reservedUri.scheme.empty()) {
         return false;
@@ -223,7 +223,7 @@ void DeepLinkReserveConfig::LoadReservedUrilItem(const nlohmann::json &jsonUriOb
 
 bool DeepLinkReserveConfig::LoadReservedUriList(const nlohmann::json &object)
 {
-    if (!object.contains(DEEPLINK_RESERVED_URI_NAME)) {
+    if (!object.contains(DEEPLINK_RESERVED_URI_NAME) || !object.at(DEEPLINK_RESERVED_URI_NAME).is_array()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uri config absent");
         return false;
     }
