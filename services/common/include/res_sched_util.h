@@ -46,6 +46,7 @@ public:
     void ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart);
     void ReportAbilityAssociatedStartInfoToRSS(
         const AbilityInfo &abilityInfo, int64_t resSchedType, int32_t callerUid, int32_t callerPid);
+    bool NeedReportByPidWhenConnect(const AbilityInfo &abilityInfo);
     void ReportEventToRSS(const int32_t uid, const std::string &bundleName, const std::string &reason,
         const int32_t pid = -1, const int32_t callerPid = -1);
     std::string GetThawReasonByAbilityType(const AbilityInfo &abilityInfo);
