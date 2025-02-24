@@ -74,10 +74,12 @@ ohos_moduletest("ability_delegator_args_moduletest") {
 
   external_deps = [
     "ability_base:want",
+    "c_utils:utils",
     "googletest:gmock",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "ipc:ipc_core",
   ]
 }
 
