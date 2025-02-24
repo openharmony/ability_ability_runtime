@@ -6449,13 +6449,11 @@ int32_t AppMgrServiceInner::SubmitDfxFaultTask(const FaultData &faultData, const
         TAG_LOGW(AAFwkTag::APPMGR, "get dfx handler fail");
         return ERR_INVALID_VALUE;
     }
-    TAG_LOGW(AAFwkTag::APPDFR, "submit NotifyAppFaultTask, eventName:%{public}s, bundleName:%{public}s, "
-        "startTime:%{public}s", faultData.errorObject.name.c_str(), bundleName.c_str(),
-        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
+    int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
     dfxTaskHandler_->SubmitTask(notifyAppTask, "NotifyAppFaultTask");
     TAG_LOGW(AAFwkTag::APPDFR, "submit NotifyAppFaultTask, eventName:%{public}s, bundleName:%{public}s, "
-        "endTime:%{public}s", faultData.errorObject.name.c_str(), bundleName.c_str(),
-        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
+        "endTime:%{public}s, interval:%{public}ldms", faultData.errorObject.name.c_str(), bundleName.c_str(),
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(), AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime);
 
     constexpr int delayTime = 15 * 1000; // 15s
     auto task = [pid, innerService = shared_from_this()]() {
