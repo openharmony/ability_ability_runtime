@@ -226,7 +226,12 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
                 TAG_LOGE(AAFwkTag::JSRUNTIME, "null weak");
             return;
         }
-        if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+        // system is debuggable when const.secure is false and const.debuggable is true
+        bool isSystemDebuggable = system::GetBoolParameter("const.secure", true) == false &&
+            system::GetBoolParameter("const.debuggable", false) == true;
+        // Don't start any server if (system not in debuggable mode) and app is release version
+        // Starting ConnectServer in release app on debuggable system is only for debug mode, not for profiling mode.
+        if ((!isSystemDebuggable) && appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "not support release app");
             return;
         }
@@ -237,6 +242,10 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
             ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
         } else {
+            if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "not support release app");
+                return;
+            }
             if (isDebugApp) {
                 weak->StopDebugger(option);
             }
