@@ -595,7 +595,7 @@ public:
 
     int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) override;
 
-    int32_t HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result) override;
+    int32_t IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result) override;
 private:
     /**
      * Init, Initialize application services.

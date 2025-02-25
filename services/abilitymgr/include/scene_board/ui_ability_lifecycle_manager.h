@@ -444,7 +444,7 @@ private:
     void AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request);
     void StartSpecifiedRequest(SpecifiedRequest &specifiedRequest);
     std::shared_ptr<SpecifiedRequest> PopAndGetNextSpecified(int32_t requestId);
-    bool HasAppRecord(const AbilityRequest &abilityRequest);
+    bool IsSpecifiedModuleLoaded(const AbilityRequest &abilityRequest);
     bool HandleStartSpecifiedCold(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag);
     bool HandleColdAcceptWantDone(const AAFwk::Want &want, const std::string &flag,
         const SpecifiedRequest &specifiedRequest);
