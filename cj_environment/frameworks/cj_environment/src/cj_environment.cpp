@@ -234,8 +234,10 @@ CJEnvironment::CJEnvironment(NSMode mode) : nsMode_(mode)
 CJEnvironment::~CJEnvironment()
 {
     StopRuntime();
-
-    delete lazyApis_;
+    if (lazyApis_ != nullptr) {
+        delete lazyApis_;
+        lazyApis_ = nullptr;
+    }
 }
 
 CJEnvironment* CJEnvironment::GetInstance()
@@ -614,8 +616,14 @@ void CJEnvironment::InitCJNS(const std::string& appPath)
 #ifdef __OHOS__
     InitNewCJAppNS(appPath.empty() ? SANDBOX_LIB_PATH : appPath);
 #endif
-    StartRuntime();
-    StartUIScheduler();
+    if (!StartRuntime()) {
+        LOGE("StartRuntime failed");
+        return;
+    }
+    if (!StartUIScheduler()) {
+        LOGE("StartUIScheduler failed");
+        return;
+    }
 }
 
 CJEnvMethods* CJEnvironment::CreateEnvMethods()
