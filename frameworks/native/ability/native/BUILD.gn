@@ -402,6 +402,7 @@ ohos_shared_library("extensionkit_native") {
     "${ability_runtime_native_path}/ability/native/extension_module_loader.cpp",
     "${ability_runtime_native_path}/ability/native/js_extension_common.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/extension_context.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/ui_holder_extension_context.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
   ]
 
@@ -413,6 +414,7 @@ ohos_shared_library("extensionkit_native") {
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/appkit:app_context",
   ]
 
   external_deps = [
@@ -1750,13 +1752,14 @@ ohos_shared_library("embedded_ui_extension_module") {
 config("auto_fill_extension_config") {
   visibility = [ ":*" ]
   include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/auto_fill_extension_ability",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
   ]
 }
 
 ohos_shared_library("auto_fill_extension") {
-  configs = [ ":auto_fill_extension_config" ]
+  public_configs = [ ":auto_fill_extension_config" ]
 
   sources = [
     "${ability_runtime_native_path}/ability/native/auto_fill_extension_ability/auto_fill_extension.cpp",

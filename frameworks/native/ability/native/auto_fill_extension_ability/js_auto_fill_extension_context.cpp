@@ -16,6 +16,7 @@
 #include "js_auto_fill_extension_context.h"
 
 #include "hilog_tag_wrapper.h"
+#include "js_auto_fill_extension_util.h"
 #include "js_error_utils.h"
 #include "js_extension_context.h"
 #include "napi/native_api.h"
