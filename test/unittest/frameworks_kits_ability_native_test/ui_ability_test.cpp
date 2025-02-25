@@ -82,10 +82,10 @@ HWTEST_F(UIAbilityBaseTest, AbilityRuntime_Name_0100, Function | MediumTest | Le
 
     ability_->Init(nullptr, application, handler, token);
 
-    auto  prevAbilityContext = ability_->GetAbilityContext();
     auto abilityContextNew = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ability_->AttachAbilityContext(abilityContextNew);
     ability_->Init(abilityRecord, application, handler, token);
+    auto prevAbilityContext = ability_->GetAbilityContext();
     ability_->AttachAbilityContext(prevAbilityContext);
     GTEST_LOG_(INFO) << "AbilityRuntime_Name_0100 end";
 }
@@ -1285,6 +1285,8 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_OnConfigurationUpdatedNotify_0100, TestSiz
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     Configuration configuration;
+    auto context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ability_->AttachAbilityContext(context);
     ability_->OnConfigurationUpdatedNotify(configuration);
     EXPECT_NE(ability_, nullptr);
 
