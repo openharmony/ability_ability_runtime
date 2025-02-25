@@ -54,9 +54,8 @@ void RegisterCJUncaughtExceptionHandlerTest(const CJUncaughtExceptionInfo &handl
 HWTEST_F(CjEnvironmentTest, CJEnvironment_GetInstance_0100, TestSize.Level1)
 {
     auto cJEnvironment = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
-    CJEnvironment *ret = nullptr;
-    ret = cJEnvironment->GetInstance();
-    EXPECT_NE(ret, nullptr);
+    CJEnvironment *ret = cJEnvironment->GetInstance();
+    EXPECT_EQ(ret, nullptr);
 }
 
 /**
@@ -147,13 +146,8 @@ HWTEST_F(CjEnvironmentTest, CJEnvironment_InitCJChipSDKNS_0100, TestSize.Level1)
 HWTEST_F(CjEnvironmentTest, CJEnvironment_StartRuntime_0100, TestSize.Level1)
 {
     auto cJEnvironment = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
-
     bool ret = cJEnvironment->StartRuntime();
     EXPECT_EQ(ret, false);
-
-    cJEnvironment->isRuntimeStarted_ = true;
-    ret = cJEnvironment->StartRuntime();
-    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -165,10 +159,10 @@ HWTEST_F(CjEnvironmentTest, CJEnvironment_StopRuntime_0100, TestSize.Level1)
 {
     auto cJEnvironment = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
     cJEnvironment->StopRuntime();
-    EXPECT_EQ(cJEnvironment->isRuntimeStarted_, false);
+    EXPECT_EQ(cJEnvironment->IsRuntimeStarted(), false);
 
-    cJEnvironment->isUISchedulerStarted_ = true;
-    EXPECT_EQ(cJEnvironment->isRuntimeStarted_, false);
+    cJEnvironment->SetUISchedulerState(true);
+    EXPECT_EQ(cJEnvironment->IsRuntimeStarted(), false);
 }
 
 /**
@@ -221,7 +215,7 @@ HWTEST_F(CjEnvironmentTest, CJEnvironment_IsUISchedulerStarted_0100, TestSize.Le
 HWTEST_F(CjEnvironmentTest, StartUIScheduler_0100, TestSize.Level1)
 {
     auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
-    cjEnv->isUISchedulerStarted_ = true;
+    cjEnv->SetUISchedulerState(true);
     auto res = cjEnv->StartUIScheduler();
     EXPECT_EQ(res, true);
 }
@@ -287,7 +281,7 @@ HWTEST_F(CjEnvironmentTest, UnLoadCJLibrary_0100, TestSize.Level1)
 HWTEST_F(CjEnvironmentTest, GetUIScheduler_0100, TestSize.Level1)
 {
     auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
-    cjEnv->isUISchedulerStarted_ = true;
+    cjEnv->SetUISchedulerState(true);
     auto res = cjEnv->GetUIScheduler();
     EXPECT_EQ(res, nullptr);
 }

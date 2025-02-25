@@ -67,9 +67,10 @@ void TestFunc()
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestPostTask_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->PostTask(nullptr);
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    cjEnv->PostTask(nullptr);
     void (*func)() = TestFunc;
-    auto ret = CJEnvironment::GetInstance()->PostTask(func);
+    auto ret = cjEnv->PostTask(func);
     EXPECT_EQ(ret, true);
 }
 
@@ -80,7 +81,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestPostTask_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestHasHigherPriorityTask_001, TestSize.Level0)
 {
-    auto ret = CJEnvironment::GetInstance()->HasHigherPriorityTask();
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    auto ret = cjEnv->HasHigherPriorityTask();
     EXPECT_EQ(ret, false);
 }
 
@@ -91,8 +93,9 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestHasHigherPriorityTask_001, TestSize
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJChipSDKNS_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->InitCJChipSDKNS("path/to/hap");
-    EXPECT_NE(CJEnvironment::GetInstance()->cjAppNSName, nullptr);
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    cjEnv->InitCJChipSDKNS("path/to/hap");
+    EXPECT_NE(cjEnv->cjAppNSName, nullptr);
 }
 
 /**
@@ -102,8 +105,9 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJChipSDKNS_001, TestSize.Level
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJAppNS_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->InitCJAppNS("path/to/hap");
-    EXPECT_NE(CJEnvironment::GetInstance()->cjAppNSName, nullptr);
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    cjEnv->InitCJAppNS("path/to/hap");
+    EXPECT_NE(cjEnv->cjAppNSName, nullptr);
 }
 
 /**
@@ -113,8 +117,9 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJAppNS_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJSDKNS_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->InitCJSDKNS("path/to/hap");
-    EXPECT_NE(CJEnvironment::GetInstance()->cjAppNSName, nullptr);
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    cjEnv->InitCJSDKNS("path/to/hap");
+    EXPECT_NE(cjEnv->cjAppNSName, nullptr);
 }
 
 /**
@@ -124,8 +129,9 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJSDKNS_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJSysNS_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->InitCJSysNS("path/to/hap");
-    EXPECT_NE(CJEnvironment::GetInstance()->cjAppNSName, nullptr);
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    cjEnv->InitCJSysNS("path/to/hap");
+    EXPECT_NE(cjEnv->cjAppNSName, nullptr);
 }
 
 /**
@@ -135,7 +141,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJSysNS_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartRuntime_001, TestSize.Level0)
 {
-    auto ret = CJEnvironment::GetInstance()->StartRuntime();
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    auto ret = cjEnv->StartRuntime();
     EXPECT_EQ(ret, false);
 }
 
@@ -146,8 +153,9 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartRuntime_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopRuntime_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->StopRuntime();
-    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    cjEnv->StopRuntime();
+    EXPECT_NE(cjEnv, nullptr);
 }
 
 /**
@@ -157,8 +165,9 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopRuntime_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopUIScheduler_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->StopUIScheduler();
-    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    cjEnv->StopUIScheduler();
+    EXPECT_NE(cjEnv, nullptr);
 }
 
 /**
@@ -168,7 +177,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopUIScheduler_001, TestSize.Level
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestLoadCJLibrary_001, TestSize.Level0)
 {
-    auto ret = CJEnvironment::GetInstance()->LoadCJLibrary("dlName");
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    auto ret = cjEnv->LoadCJLibrary("dlName");
     EXPECT_EQ(ret, nullptr);
 }
 
@@ -179,10 +189,11 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestLoadCJLibrary_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestLoadCJLibrary_002, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::APP, "dlName");
-    CJEnvironment::GetInstance()->LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::SYSTEM, "dlName");
-    CJEnvironment::GetInstance()->LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::SDK, "dlName");
-    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    cjEnv->LoadCJLibrary(cjEnv->LibraryKind::APP, "dlName");
+    cjEnv->LoadCJLibrary(cjEnv->LibraryKind::SYSTEM, "dlName");
+    cjEnv->LoadCJLibrary(cjEnv->LibraryKind::SDK, "dlName");
+    EXPECT_NE(cjEnv, nullptr);
 }
 
 /**
@@ -192,7 +203,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestLoadCJLibrary_002, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartDebugger_001, TestSize.Level0)
 {
-    auto ret = CJEnvironment::GetInstance()->StartDebugger();
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    auto ret = cjEnv->StartDebugger();
     EXPECT_EQ(ret, false);
 }
 
@@ -203,6 +215,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartDebugger_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestGetSymbol_001, TestSize.Level0)
 {
-    auto ret = CJEnvironment::GetInstance()->GetSymbol(nullptr, "dlName");
+    auto cjEnv = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
+    auto ret = cjEnv->GetSymbol(nullptr, "dlName");
     EXPECT_EQ(ret, nullptr);
 }

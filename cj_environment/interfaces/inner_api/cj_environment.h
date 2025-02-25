@@ -87,6 +87,8 @@ public:
     bool HasHigherPriorityTask();
     CJRuntimeAPI* GetLazyApis() { return lazyApis_; }
     void SetLazyApis(CJRuntimeAPI* apis) { lazyApis_ = apis; }
+    void SetRuntimeState(bool state) { isRuntimeStarted_ = state; }
+    void SetUISchedulerState(bool state) { isUISchedulerStarted_ = state; }
 
     void PreloadLibs();
     void InitCJAppNS(const std::string& path);
