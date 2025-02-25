@@ -194,12 +194,20 @@ static std::string GetContent(napi_env env, napi_value exception, const std::str
     std::string content;
     napi_value propertyNmae = nullptr;
     std::string property = name;
-    napi_create_string_utf8(env, property.c_str(), property.size(), &propertyNmae);
-    napi_get_property(env, exception, propertyNmae, &tempContent);
+    if (napi_create_string_utf8(env, property.c_str(), property.size(), &propertyNmae) != napi_ok) {
+        TAG_LOGW(AAFwkTag::JSNAPI, "Create String Failed");
+    }
+    if (napi_get_property(env, exception, propertyNmae, &tempContent) != napi_ok) {
+        TAG_LOGW(AAFwkTag::JSNAPI, "Get Property Failed");
+    }
     size_t length = 0;
-    napi_get_value_string_utf8(env, tempContent, nullptr, 0, &length);
+    if (napi_get_value_string_utf8(env, tempContent, nullptr, 0, &length) != napi_ok) {
+        TAG_LOGW(AAFwkTag::JSNAPI, "Get Content Failed");
+    }
     content.resize(length);
-    napi_get_value_string_utf8(env, tempContent, content.data(), content.size() + 1, &length);
+    if (napi_get_value_string_utf8(env, tempContent, content.data(), content.size() + 1, &length) != napi_ok) {
+        TAG_LOGW(AAFwkTag::JSNAPI, "Copy Content Failed");
+    }
     return content;
 }
 
@@ -750,7 +758,8 @@ private:
                 ThrowInvalidNumParametersError(env);
                 return CreateJsUndefined(env);
             }
-            return OnOffAllUnhandledRejection(env, argv[ARGC_ONE]);
+            return argc == ARGC_TWO ? OnOffAllUnhandledRejection(env, argv[ARGC_ONE])
+                                    : OnOffAllUnhandledRejection(env, nullptr);
         }
         if (type == GLOBAL_ON_OFF_TYPE) {
             if (argc != ARGC_TWO && argc != ARGC_ONE) {
@@ -758,7 +767,8 @@ private:
                 ThrowInvalidNumParametersError(env);
                 return CreateJsUndefined(env);
             }
-            return OnOffAllError(env, argv[ARGC_ONE]);
+            return argc == ARGC_TWO ? OnOffAllError(env, argv[ARGC_ONE])
+                                    : OnOffAllError(env, nullptr);
         }
         if (type == FREEZE_TYPE) {
             return OffFreeze(env, argc, argv);
@@ -787,6 +797,7 @@ private:
         NAPI_CALL(env, napi_create_reference(env, function, INITITAL_REFCOUNT_ONE, &item.ref));
         item.env = env;
         globalObserverList.insert(item);
+        TAG_LOGI(AAFwkTag::JSNAPI, "add observer successfully");
         return CreateJsUndefined(env);
     }
 
@@ -825,6 +836,7 @@ private:
         NAPI_CALL(env, napi_create_reference(env, function, INITITAL_REFCOUNT_ONE, &item.ref));
         item.env = env;
         globalPromiseList.insert(item);
+        TAG_LOGI(AAFwkTag::JSNAPI, "add observer successfully");
         return CreateJsUndefined(env);
     }
 
@@ -837,6 +849,7 @@ private:
                 NAPI_CALL(env, napi_delete_reference(env, iter.ref));
             }
             globalObserverList.clear();
+            TAG_LOGI(AAFwkTag::JSNAPI, "remove all observer");
             return res;
         }
         if (!ValidateFunction(env, function)) {
@@ -856,7 +869,7 @@ private:
             }
         }
         TAG_LOGI(AAFwkTag::JSNAPI, "remove observer failed");
-
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_OBSERVER_NOT_FOUND);
         return CreateJsUndefined(env);
     }
 
@@ -887,6 +900,7 @@ private:
             return res;
         }
         TAG_LOGI(AAFwkTag::JSNAPI, "remove observer failed");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_OBSERVER_NOT_FOUND);
         return CreateJsUndefined(env);
     }
 
@@ -899,6 +913,7 @@ private:
                 NAPI_CALL(env, napi_delete_reference(env, iter.ref));
             }
             globalPromiseList.clear();
+            TAG_LOGI(AAFwkTag::JSNAPI, "remove all observer");
             return res;
         }
         if (!ValidateFunction(env, function)) {
@@ -917,6 +932,7 @@ private:
             }
         }
         TAG_LOGI(AAFwkTag::JSNAPI, "remove observer failed");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_OBSERVER_NOT_FOUND);
         return CreateJsUndefined(env);
     }
     
