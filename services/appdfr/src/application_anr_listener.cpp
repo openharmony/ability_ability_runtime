@@ -58,8 +58,10 @@ void ApplicationAnrListener::OnAnr(int32_t pid, int32_t eventId) const
     faultData.notifyApp = false;
     faultData.forceExit = false;
     faultData.eventId = eventId;
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::RELIABILITY, "LOWMEM_DUMP",
+    int ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::RELIABILITY, "LOWMEM_DUMP",
         HiviewDFX::HiSysEvent::EventType::STATISTIC, "PID", pid, "MSG", "APP_INPUT_BLOCK");
+    TAG_LOGI(AAFwkTag::APPDFR, "hisysevent pid=%{public}d, eventName=LOWMEM_DUMP, MSG=APP_INPUT_BLOCK,"
+        "ret=%{public}d", pid, ret);
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
 }
 }  // namespace AAFwk
