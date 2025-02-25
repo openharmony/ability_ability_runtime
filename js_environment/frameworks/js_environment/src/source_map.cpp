@@ -155,7 +155,7 @@ std::string SourceMap::TranslateBySourceMap(const std::string& stackStr)
             auto iter = sourceMaps_.find(key);
             if (iter != sourceMaps_.end()) {
                 sourceInfo = GetSourceInfo(line, column, *(iter->second), key);
-            } else if (key.rfind(".js") != std::string::npos) {
+            } else {
                 ans = ans + temp + "\n";
                 continue;
             }
