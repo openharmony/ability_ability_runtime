@@ -359,5 +359,21 @@ HWTEST_F(UIExtensionContextTest, OpenAtomicService_0100, TestSize.Level1)
 
     TAG_LOGI(AAFwkTag::TEST, "OpenAtomicService_0100 end");
 }
+
+/**
+ * @tc.number: ConvertTo_0100
+ * @tc.name: ConvertTo
+ * @tc.desc: ConvertTo.
+ */
+HWTEST_F(UIExtensionContextTest, ConvertTo_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ConvertTo_0100 start");
+    std::shared_ptr<Context> context = std::make_shared<UIExtensionContext>();
+    auto uiHolderExtensionContext = Context::ConvertTo<UIHolderExtensionContext>(context);
+    EXPECT_NE(uiHolderExtensionContext, nullptr);
+    auto uiExtensionContext = Context::ConvertTo<UIExtensionContext>(context);
+    EXPECT_NE(uiExtensionContext, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "ConvertTo_0100 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

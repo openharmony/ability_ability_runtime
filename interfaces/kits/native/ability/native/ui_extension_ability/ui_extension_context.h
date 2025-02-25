@@ -22,20 +22,18 @@
 #include "extension_context.h"
 #include "free_install_observer_interface.h"
 #include "start_options.h"
+#include "ui_holder_extension_context.h"
 #include "want.h"
 #include "window.h"
 
 namespace OHOS {
-namespace Ace {
-class UIContent;
-}
 namespace AbilityRuntime {
 using RuntimeTask = std::function<void(int, const AAFwk::Want &, bool)>;
 /**
  * @brief context supply for UIExtension
  *
  */
-class UIExtensionContext : public ExtensionContext {
+class UIExtensionContext : public UIHolderExtensionContext {
 public:
     UIExtensionContext() = default;
     virtual ~UIExtensionContext() = default;
@@ -145,7 +143,7 @@ public:
 
     sptr<Rosen::Window> GetWindow();
 
-    Ace::UIContent* GetUIContent();
+    Ace::UIContent* GetUIContent() override;
 
     ErrCode OpenLink(const AAFwk::Want& want, int reuqestCode);
 
@@ -164,18 +162,16 @@ public:
 protected:
     bool IsContext(size_t contextTypeId) override
     {
-        return contextTypeId == CONTEXT_TYPE_ID || ExtensionContext::IsContext(contextTypeId);
+        return contextTypeId == CONTEXT_TYPE_ID || UIHolderExtensionContext::IsContext(contextTypeId);
     }
 
+    sptr<Rosen::Window> window_ = nullptr;
 private:
     static int ILLEGAL_REQUEST_CODE;
     std::map<int, RuntimeTask> resultCallbacks_;
 
     static int32_t curRequestCode_;
     static std::mutex requestCodeMutex_;
-
-    sptr<Rosen::Window> window_ = nullptr;
-
     std::mutex mutexlock_;
     /**
      * @brief Get Current Ability Type
