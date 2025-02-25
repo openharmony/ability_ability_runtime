@@ -6476,9 +6476,13 @@ int32_t AppMgrServiceInner::SubmitDfxFaultTask(const FaultData &faultData, const
         TAG_LOGW(AAFwkTag::APPMGR, "get dfx handler fail");
         return ERR_INVALID_VALUE;
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "dfx submit freeze task start.");
+    int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
     dfxTaskHandler_->SubmitTask(notifyAppTask, "NotifyAppFaultTask");
-    TAG_LOGI(AAFwkTag::APPMGR, "dfx submit freeze task end.");
+    TAG_LOGW(AAFwkTag::APPDFR, "submit NotifyAppFaultTask, eventName:%{public}s, bundleName:%{public}s, "
+        "endTime:%{public}s, interval:%{public}lld ms", faultData.errorObject.name.c_str(),
+        bundleName.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
+        AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime);
+
     constexpr int delayTime = 15 * 1000; // 15s
     auto task = [pid]() {
         AppExecFwk::AppfreezeManager::GetInstance()->DeleteStack(pid);
@@ -6503,6 +6507,10 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
         return ERR_OK;
     }
     std::string bundleName = appRecord->GetBundleName();
+
+    TAG_LOGW(AAFwkTag::APPDFR, "called, eventName:%{public}s, bundleName:%{public}s, currentTime:%{public}s",
+        faultData.errorObject.name.c_str(), bundleName.c_str(),
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
     if (AppExecFwk::AppfreezeManager::GetInstance()->IsProcessDebug(pid, bundleName)) {
         TAG_LOGW(AAFwkTag::APPMGR,
             "don't report event and kill:%{public}s, pid:%{public}d, bundleName:%{public}s",

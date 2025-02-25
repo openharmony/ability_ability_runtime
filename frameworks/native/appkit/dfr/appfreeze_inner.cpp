@@ -179,6 +179,8 @@ int AppfreezeInner::AppfreezeHandle(const FaultData& faultData, bool onlyMainThr
         handlinglist_.emplace_back(faultData);
         constexpr int HANDLING_MIN_SIZE = 1;
         if (handlinglist_.size() <= HANDLING_MIN_SIZE) {
+            TAG_LOGW(AAFwkTag::APPDFR, "submit reportAppFreeze, eventName:%{public}s, startTime:%{public}s\n",
+                faultData.errorObject.name.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
             ffrt::submit(reportFreeze, {}, {}, ffrt::task_attr().name("reportAppFreeze"));
         }
     }
@@ -199,7 +201,12 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
     HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeInner::AcquireStack name:%s", info.errorObject.name.c_str());
     std::string stack = "";
     std::string msgContent;
+    int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
     GetMainHandlerDump(msgContent);
+    TAG_LOGW(AAFwkTag::APPDFR, "get mainhandler dump, eventName:%{public}s, endTime:%{public}s, "
+        "interval:%{public}lld ms", info.errorObject.name.c_str(),
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
+        AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime);
 
     std::lock_guard<std::mutex> lock(handlingMutex_);
     for (auto it = handlinglist_.begin(); it != handlinglist_.end(); it = handlinglist_.erase(it)) {
@@ -261,8 +268,9 @@ int AppfreezeInner::NotifyANR(const FaultData& faultData)
     }
 
     int32_t pid = static_cast<int32_t>(getpid());
-    TAG_LOGW(AAFwkTag::APPDFR, "NotifyAppFault:%{public}s, pid:%{public}d, bundleName:%{public}s",
-        faultData.errorObject.name.c_str(), pid, applicationInfo->bundleName.c_str());
+    TAG_LOGW(AAFwkTag::APPDFR, "NotifyAppFault:%{public}s, pid:%{public}d, bundleName:%{public}s "
+        "currentTime:%{public}s\n", faultData.errorObject.name.c_str(), pid, applicationInfo->bundleName.c_str(),
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
 
     int ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
     if (ret != 0) {
