@@ -37,6 +37,9 @@ bool MissionSnapshot::ReadFromParcel(Parcel &parcel)
 MissionSnapshot *MissionSnapshot::Unmarshalling(Parcel &parcel)
 {
     MissionSnapshot *info = new (std::nothrow) MissionSnapshot();
+    if (info == nullptr) {
+        return nullptr;
+    }
 
     if (!info->ReadFromParcel(parcel)) {
         delete info;

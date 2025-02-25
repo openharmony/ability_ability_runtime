@@ -1961,6 +1961,20 @@ public:
      */
     virtual int32_t UnregisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer) override;
 
+    /**
+     * Query preload uiextension record.
+     *
+     * @param element, The uiextension ElementName.
+     * @param hostBundleName, The uiextension caller hostBundleName.
+     * @param recordNum, The returned count of uiextension.
+     * @param userId, The User Id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
+                                                  const std::string &hostBundleName,
+                                                  int32_t &recordNum,
+                                                  int32_t userId = DEFAULT_INVAL_VALUE) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -2602,7 +2616,7 @@ private:
 
     std::shared_ptr<AbilityDebugDeal> abilityDebugDeal_;
     std::shared_ptr<AppExitReasonHelper> appExitReasonHelper_;
-    
+
     ffrt::mutex globalLock_;
     ffrt::mutex bgtaskObserverMutex_;
     ffrt::mutex abilityTokenLock_;
@@ -2612,6 +2626,7 @@ private:
     ffrt::mutex collaboratorMapLock_;
     ffrt::mutex abilityDebugDealLock_;
     ffrt::mutex shouldBlockAllAppStartMutex_;
+    mutable ffrt::mutex timeoutMapLock_;
     std::mutex whiteListMutex_;
 
     std::mutex prepareTermiationCallbackMutex_;

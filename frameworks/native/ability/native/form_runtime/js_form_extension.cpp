@@ -308,6 +308,10 @@ sptr<IRemoteObject> JsFormExtension::OnConnect(const OHOS::AAFwk::Want& want)
     if (providerRemoteObject_ == nullptr) {
         TAG_LOGD(AAFwkTag::FORM_EXT, "null providerRemoteObject");
         sptr<FormExtensionProviderClient> providerClient = new (std::nothrow) FormExtensionProviderClient();
+        if (providerClient == nullptr) {
+            TAG_LOGE(AAFwkTag::FORM_EXT, "providerClient null");
+            return nullptr;
+        }
         std::shared_ptr<JsFormExtension> formExtension = std::static_pointer_cast<JsFormExtension>(shared_from_this());
         providerClient->SetOwner(formExtension);
         providerRemoteObject_ = providerClient->AsObject();

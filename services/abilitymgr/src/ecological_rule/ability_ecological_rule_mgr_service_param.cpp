@@ -19,7 +19,6 @@
 
 namespace OHOS {
 namespace EcologicalRuleMgrService {
-#define TAG "ERMS_PARAM"
 
 AbilityExperienceRule *AbilityExperienceRule::Unmarshalling(Parcel &in)
 {

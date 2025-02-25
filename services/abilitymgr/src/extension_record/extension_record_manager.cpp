@@ -700,6 +700,7 @@ void ExtensionRecordManager::TerminateTimeout(int32_t extensionRecordId)
 void ExtensionRecordManager::GetCallerTokenList(
     const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::list<sptr<IRemoteObject>> &callerList)
 {
+    CHECK_POINTER(abilityRecord);
     auto extensionRecordId = abilityRecord->GetUIExtensionAbilityId();
     auto sessionInfo = abilityRecord->GetSessionInfo();
     if (!sessionInfo) {
@@ -779,6 +780,37 @@ bool ExtensionRecordManager::IsFocused(
         }
     }
     return isFocused;
+}
+
+int32_t ExtensionRecordManager::QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
+                                                              const std::string &hostBundleName,
+                                                              int32_t &recordNum)
+{
+    if (element.GetAbilityName().empty() || element.GetBundleName().empty() || element.GetModuleName().empty() ||
+        hostBundleName.empty()) {
+        recordNum = 0;
+        return ERR_INVALID_VALUE;
+    }
+    std::string abilityName = element.GetAbilityName();
+    std::string bundleName = element.GetBundleName();
+    std::string moduleName = element.GetModuleName();
+    auto extensionRecordMapKey =
+        std::make_tuple(abilityName, bundleName, moduleName, hostBundleName);
+    TAG_LOGD(AAFwkTag::UI_EXT,
+             "hostBundleName: %{public}s, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
+             hostBundleName.c_str(), bundleName.c_str(), moduleName.c_str(), abilityName.c_str());
+    std::lock_guard<std::mutex> lock(preloadUIExtensionMapMutex_);
+    auto item = preloadUIExtensionMap_.find(extensionRecordMapKey);
+    if (item != preloadUIExtensionMap_.end()) {
+        if (!item->second.empty()) {
+            recordNum = item->second.size();
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "UIExtensionAbility has been preloaded,recordNum:%{public}d.", recordNum);
+            return ERR_OK;
+        }
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension is not preloaded.");
+    recordNum = 0;
+    return ERR_OK;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

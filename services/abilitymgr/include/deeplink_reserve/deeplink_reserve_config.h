@@ -45,13 +45,13 @@ public:
     }
     ~DeepLinkReserveConfig() = default;
     bool LoadConfiguration();
-    bool isLinkReserved(const std::string &linkString, std::string &bundleName);
+    bool IsLinkReserved(const std::string &linkString, std::string &bundleName);
 
 private:
     std::string GetConfigPath();
     bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
     bool LoadReservedUriList(const nlohmann::json &object);
-    bool isUriMatched(const ReserveUri &reservedUri, const std::string &link);
+    bool IsUriMatched(const ReserveUri &reservedUri, const std::string &link);
     void LoadReservedUrilItem(const nlohmann::json &jsonUriObject, std::vector<ReserveUri> &uriList);
     DeepLinkReserveConfig() = default;
     DISALLOW_COPY_AND_MOVE(DeepLinkReserveConfig);
