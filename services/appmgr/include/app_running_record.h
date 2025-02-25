@@ -924,6 +924,7 @@ private:
     void SendClearTask(uint32_t msg, int64_t timeOut);
 
     void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record, bool isExtensionDebug = false);
+    void SetModuleLoaded(const std::string &moduleName) const;
 
 private:
     class RemoteObjHash {

@@ -2062,7 +2062,7 @@ int32_t AppMgrProxy::GetSupportedProcessCachePids(const std::string &bundleName,
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
+int32_t AppMgrProxy::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2074,7 +2074,7 @@ int32_t AppMgrProxy::HasAppRecord(const AAFwk::Want &want, const AbilityInfo &ab
     PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &want);
     PARCEL_UTIL_WRITE_RET_INT(data, Parcelable, &abilityInfo);
 
-    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::HAS_APP_RECORD, data, reply, option);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::IS_SPECIFIED_MODULE_LOADED, data, reply, option);
     result = reply.ReadBool();
     return ERR_OK;
 }
