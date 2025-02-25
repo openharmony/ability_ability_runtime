@@ -44,10 +44,7 @@ ErrCode AbilityJumpInterceptor::DoProcess(AbilityInterceptorParam param)
     }
     // get bms
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
-    if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleMgrHelper");
-        return ERR_OK;
-    }
+    CHECK_POINTER_AND_RETURN(bundleMgrHelper, ERR_OK);
     AppExecFwk::AbilityInfo targetAbilityInfo;
     if (StartAbilityUtils::startAbilityInfo != nullptr &&
         StartAbilityUtils::startAbilityInfo->abilityInfo.bundleName == param.want.GetBundle() &&
@@ -71,6 +68,7 @@ ErrCode AbilityJumpInterceptor::DoProcess(AbilityInterceptorParam param)
             controlRule.callerPkg.c_str(), controlRule.targetPkg.c_str());
         auto sysDialogScheduler = DelayedSingleton<SystemDialogScheduler>::GetInstance();
         Want targetWant = param.want;
+        CHECK_POINTER_AND_RETURN(sysDialogScheduler, ERR_INVALID_VALUE);
         Want dialogWant = sysDialogScheduler->GetJumpInterceptorDialogWant(targetWant);
         AbilityUtil::ParseJumpInterceptorWant(dialogWant, controlRule.callerPkg);
         LoadAppLabelInfo(dialogWant, controlRule, param.userId);

@@ -198,7 +198,7 @@ protected:
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_;
     sptr<IRemoteObject> token_ = nullptr;
     std::shared_ptr<AbilityHandler> handler_ = nullptr;
-    CJExtensionAbilityType extType_;
+    CJExtensionAbilityType extType_ {};
 
 #ifdef SUPPORT_GRAPHICS
 private:

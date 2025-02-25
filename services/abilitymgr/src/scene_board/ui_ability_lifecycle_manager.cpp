@@ -235,6 +235,7 @@ bool UIAbilityLifecycleManager::CheckSessionInfo(sptr<SessionInfo> sessionInfo) 
         return false;
     }
     auto sessionToken = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
+    CHECK_POINTER_AND_RETURN(sessionToken, false);
     auto descriptor = Str16ToStr8(sessionToken->GetDescriptor());
     if (descriptor != "OHOS.ISession") {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "token's Descriptor: %{public}s", descriptor.c_str());
@@ -917,6 +918,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GetUIAbilityRecordBySe
     CHECK_POINTER_AND_RETURN(sessionInfo, nullptr);
     CHECK_POINTER_AND_RETURN(sessionInfo->sessionToken, nullptr);
     auto sessionToken = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
+    CHECK_POINTER_AND_RETURN(sessionToken, nullptr);
     std::string descriptor = Str16ToStr8(sessionToken->GetDescriptor());
     if (descriptor != "OHOS.ISession") {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, descriptor: %{public}s",
@@ -1160,6 +1162,7 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
     CHECK_POINTER_LOG(sessionInfo, "sessionInfo is invalid.");
     CHECK_POINTER_LOG(sessionInfo->sessionToken, "sessionToken is nullptr.");
     auto sessionToken = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
+    CHECK_POINTER_LOG(sessionToken, "sessionToken is nullptr.");
     auto descriptor = Str16ToStr8(sessionToken->GetDescriptor());
     if (descriptor != "OHOS.ISession") {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "token's Descriptor: %{public}s", descriptor.c_str());
@@ -1246,6 +1249,7 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         CHECK_POINTER_AND_RETURN(callerSessionInfo, ERR_INVALID_VALUE);
         CHECK_POINTER_AND_RETURN(callerSessionInfo->sessionToken, ERR_INVALID_VALUE);
         auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
+        CHECK_POINTER_AND_RETURN(callerSession, ERR_INVALID_VALUE);
         CheckCallerFromBackground(abilityRecord, sessionInfo);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s",
             sessionInfo->want.GetElement().GetAbilityName().c_str());
@@ -1370,6 +1374,7 @@ void UIAbilityLifecycleManager::CompleteBackground(const std::shared_ptr<Ability
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    CHECK_POINTER(abilityRecord);
     if (abilityRecord->GetAbilityState() != AbilityState::BACKGROUNDING) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, state: %{public}d, not complete background",
             abilityRecord->GetAbilityState());
@@ -1708,6 +1713,7 @@ int32_t UIAbilityLifecycleManager::GetReusedCollaboratorPersistentId(const Abili
 bool UIAbilityLifecycleManager::CheckProperties(const std::shared_ptr<AbilityRecord> &abilityRecord,
     const AbilityRequest &abilityRequest, AppExecFwk::LaunchMode launchMode) const
 {
+    CHECK_POINTER_RETURN_BOOL(abilityRecord);
     const auto& abilityInfo = abilityRecord->GetAbilityInfo();
     int32_t appIndex = 0;
     (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
@@ -1784,6 +1790,7 @@ void UIAbilityLifecycleManager::NotifySCBToHandleException(const std::shared_ptr
     CHECK_POINTER(sessionInfo);
     CHECK_POINTER(sessionInfo->sessionToken);
     auto session = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
+    CHECK_POINTER(session);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBToHandleException reason: %{public}s", errorReason.c_str());
     sptr<SessionInfo> info = abilityRecord->GetSessionInfo();
     info->errorCode = errorCode;
@@ -1799,6 +1806,7 @@ void UIAbilityLifecycleManager::NotifySCBToHandleAtomicServiceException(sptr<Ses
     CHECK_POINTER(sessionInfo);
     CHECK_POINTER(sessionInfo->sessionToken);
     auto session = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
+    CHECK_POINTER(session);
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "call notifySessionException, errorReason: %{public}s", errorReason.c_str());
     sessionInfo->errorCode = errorCode;
@@ -2042,6 +2050,7 @@ void UIAbilityLifecycleManager::NotifyStartSpecifiedAbility(AbilityRequest &abil
         int32_t type = static_cast<int32_t>(abilityRequest.abilityInfo.type);
         newWant.SetParam("abilityType", type);
         sptr<Want> extraParam = new (std::nothrow) Want();
+        CHECK_POINTER(extraParam);
         abilityInfoCallback->NotifyStartSpecifiedAbility(abilityRequest.callerToken, newWant,
             abilityRequest.requestCode, extraParam);
         int32_t procCode = extraParam->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
@@ -2106,6 +2115,7 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
         auto callerSessionInfo = callerAbility->GetSessionInfo();
         if (callerSessionInfo != nullptr && callerSessionInfo->sessionToken != nullptr) {
             auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
+            CHECK_POINTER_AND_RETURN(callerSession, ERR_INVALID_VALUE);
             CheckCallerFromBackground(callerAbility, sessionInfo);
             TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s",
                 sessionInfo->want.GetElement().GetAbilityName().c_str());
@@ -2196,6 +2206,9 @@ int UIAbilityLifecycleManager::ReleaseCallLocked(
 
     auto abilityRecords = GetAbilityRecordsByNameInner(element);
     auto isExist = [connect] (const std::shared_ptr<AbilityRecord> &abilityRecord) {
+        if (abilityRecord == nullptr) {
+            return false;
+        }
         return abilityRecord->IsExistConnection(connect);
     };
     auto findRecord = std::find_if(abilityRecords.begin(), abilityRecords.end(), isExist);
@@ -2223,6 +2236,9 @@ void UIAbilityLifecycleManager::OnCallConnectDied(const std::shared_ptr<CallReco
     AppExecFwk::ElementName element = callRecord->GetTargetServiceName();
     auto abilityRecords = GetAbilityRecordsByNameInner(element);
     auto isExist = [callRecord] (const std::shared_ptr<AbilityRecord> &abilityRecord) {
+        if (abilityRecord == nullptr) {
+            return false;
+        }
         return abilityRecord->IsExistConnection(callRecord->GetConCallBack());
     };
     auto findRecord = std::find_if(abilityRecords.begin(), abilityRecords.end(), isExist);
@@ -2958,9 +2974,7 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
         abilityRecord = GetAbilityRecordByToken(token);
     }
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    auto tokenID = abilityRecord->GetApplicationInfo().accessTokenId;
-    if (callingTokenId != tokenID) {
+    if (IPCSkeleton::GetCallingTokenID() != abilityRecord->GetApplicationInfo().accessTokenId) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not self");
         return ERR_NATIVE_NOT_SELF_APPLICATION;
     }
@@ -3000,6 +3014,7 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     CHECK_POINTER_AND_RETURN(callerSessionInfo->sessionToken, ERR_INVALID_VALUE);
     auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "got callerSession, call ChangeSessionVisibilityWithStatusBar()");
+    CHECK_POINTER_AND_RETURN(callerSession, ERR_INVALID_VALUE);
     return static_cast<int>(callerSession->ChangeSessionVisibilityWithStatusBar(callerSessionInfo, isShow));
 }
 
@@ -3351,6 +3366,7 @@ bool UIAbilityLifecycleManager::HandleColdAcceptWantDone(const AAFwk::Want &want
     TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleColdAcceptWantDone: %{public}d, session:%{public}d",
         specifiedRequest.requestId, specifiedRequest.persistentId);
     auto uiAbilityRecord = iter->second;
+    CHECK_POINTER_AND_RETURN(uiAbilityRecord, false);
     uiAbilityRecord->SetSpecifiedFlag(flag);
     auto isShellCall = specifiedRequest.abilityRequest.want.GetBoolParam(IS_SHELL_CALL, false);
     uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);

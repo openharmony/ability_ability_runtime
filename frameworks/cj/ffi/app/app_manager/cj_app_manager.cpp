@@ -163,12 +163,12 @@ CJ_EXPORT CArrProcessInformation FfiAppMgrGetRunningProcessInformation(int32_t* 
             head[i].pid = processInfo.pid_;
             head[i].uid = processInfo.uid_;
             head[i].bundleNames.head = VectorToCArrString(processInfo.bundleNames);
-            head[i].bundleNames.size = (processInfo.bundleNames).size();
+            head[i].bundleNames.size = static_cast<int64_t>((processInfo.bundleNames).size());
             head[i].state = ConvertToCJAppProcessState(processInfo.state_, processInfo.isFocused);
             head[i].bundleType = processInfo.bundleType;
             head[i].appCloneIndex = processInfo.appCloneIndex;
         }
-        processInfos.size = infos.size();
+        processInfos.size = static_cast<int64_t>(infos.size());
         processInfos.head = head;
     }
     return processInfos;

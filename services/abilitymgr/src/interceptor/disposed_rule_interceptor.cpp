@@ -198,6 +198,7 @@ ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk:
             interceptor->disposedObserverMap_.erase(iter);
         }
     };
+    CHECK_POINTER_AND_RETURN(taskHandler_, ERR_INVALID_VALUE);
     taskHandler_->SubmitTask(unregisterTask, UNREGISTER_TIMEOUT_OBSERVER_TASK, UNREGISTER_OBSERVER_MICRO_SECONDS);
     return ERR_OK;
 }
@@ -225,6 +226,7 @@ sptr<OHOS::AppExecFwk::IAppMgr> DisposedRuleInterceptor::GetAppMgr()
 void DisposedRuleInterceptor::UnregisterObserver(const std::string &bundleName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
+    CHECK_POINTER(taskHandler_);
     taskHandler_->CancelTask(UNREGISTER_TIMEOUT_OBSERVER_TASK);
     auto unregisterTask = [bundleName, interceptor = shared_from_this()] () {
         std::lock_guard<ffrt::mutex> guard{interceptor->observerLock_};

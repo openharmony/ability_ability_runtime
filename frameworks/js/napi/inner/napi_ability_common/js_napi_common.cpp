@@ -209,6 +209,7 @@ bool JsNapiCommon::CreateConnectionAndConnectAbilityLocked(
     TAG_LOGD(AAFwkTag::JSNAPI, "Create new connection");
     // Create connection
     sptr<NAPIAbilityConnection> connection(new (std::nothrow) NAPIAbilityConnection());
+    CHECK_POINTER_AND_RETURN_LOG(connection, false, "null connection");
     ConnectionKey key;
     id = serialNumber_;
     key.id = id;

@@ -61,7 +61,7 @@ public:
     }
 private:
     int64_t callbackId_ = 0;
-    int64_t connectId_;
+    int64_t connectId_ = 0;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

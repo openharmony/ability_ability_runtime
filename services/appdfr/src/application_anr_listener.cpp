@@ -22,6 +22,7 @@
 #include "backtrace_local.h"
 #include "fault_data.h"
 #include "hilog_tag_wrapper.h"
+#include "hisysevent.h"
 #include "time_util.h"
 
 namespace OHOS {
@@ -49,6 +50,8 @@ void ApplicationAnrListener::OnAnr(int32_t pid, int32_t eventId) const
     faultData.notifyApp = false;
     faultData.forceExit = false;
     faultData.eventId = eventId;
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::RELIABILITY, "LOWMEM_DUMP",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "PID", pid, "MSG", "APP_INPUT_BLOCK");
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
 }
 }  // namespace AAFwk

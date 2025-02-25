@@ -31,7 +31,6 @@
 #include "ui_service_extension_context.h"
 #include "time_util.h"
 
-
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
@@ -39,15 +38,14 @@ using namespace OHOS::AppExecFwk;
 UIServiceExtension* UIServiceExtension::Create(const std::unique_ptr<Runtime>& runtime)
 {
     if (!runtime) {
-        return new UIServiceExtension();
+        return new (std::nothrow) UIServiceExtension();
     }
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "UIServiceExtension Create runtime");
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
             return JsUIServiceExtension::Create(runtime);
-
         default:
-            return new UIServiceExtension();
+            return new (std::nothrow) UIServiceExtension();
     }
 }
 
@@ -82,6 +80,10 @@ sptr<Rosen::WindowOption> UIServiceExtension::GetWindowOption(
     auto option = sptr<Rosen::WindowOption>::MakeSptr();
     if (option == nullptr) {
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "null option");
+        return nullptr;
+    }
+    if (extensionWindowConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "ExtensionWindowConfig is nullptr");
         return nullptr;
     }
     if (extensionWindowConfig->windowAttribute == Rosen::ExtensionWindowAttribute::SUB_WINDOW) {

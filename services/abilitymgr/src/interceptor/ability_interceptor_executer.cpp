@@ -43,6 +43,10 @@ ErrCode AbilityInterceptorExecuter::DoProcess(AbilityInterceptorParam param)
     auto interceptorMap = GetInterceptorMapCopy();
     auto item = interceptorMap.begin();
     while (item != interceptorMap.end()) {
+        if ((*item).second == nullptr) {
+            item++;
+            continue;
+        }
         result = (*item).second->DoProcess(param);
         if (result != ERR_OK) {
             break;
