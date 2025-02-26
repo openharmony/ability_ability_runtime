@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1064,7 +1064,7 @@ int AbilityManagerProxy::CloseUIExtensionAbilityBySCB(const sptr<IRemoteObject> 
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
+int AbilityManagerProxy::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, uint32_t sceneFlag)
 {
     int error;
     MessageParcel data;
@@ -1086,6 +1086,10 @@ int AbilityManagerProxy::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
             TAG_LOGE(AAFwkTag::ABILITYMGR, "flag write fail");
             return INNER_ERR;
         }
+    }
+    if (!data.WriteUint32(sceneFlag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sceneFlag write fail");
+        return INNER_ERR;
     }
 
     error = SendRequest(AbilityManagerInterfaceCode::CLOSE_UI_ABILITY_BY_SCB, data, reply, option);
@@ -5633,7 +5637,7 @@ void AbilityManagerProxy::NotifyFrozenProcessByRSS(const std::vector<int32_t> &p
     }
 }
 
-int AbilityManagerProxy::CleanUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
+int AbilityManagerProxy::CleanUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, uint32_t sceneFlag)
 {
     int error;
     MessageParcel data;
@@ -5655,7 +5659,11 @@ int AbilityManagerProxy::CleanUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
             return INNER_ERR;
         }
     }
-
+    if (!data.WriteUint32(sceneFlag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sceneFlag write fail");
+        return INNER_ERR;
+    }
+    
     error = SendRequest(AbilityManagerInterfaceCode::CLEAN_UI_ABILITY_BY_SCB, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);

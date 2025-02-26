@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -533,6 +533,7 @@ group("unittest") {
       "insight_intent_profile_test:unittest",
       "js_ability_context_test:unittest",
       "js_service_extension_test:unittest",
+      "js_ui_ability_test:unittest",
       "js_ui_extension_content_session_test:unittest",
       "js_ui_extension_context_test:unittest",
       "js_uiservice_uiext_connection_test:unittest",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -232,7 +232,8 @@ protected:
 private:
     void AfterFocusedCommon(bool isFocused);
     void UpdateSilentForeground(const AAFwk::LifeCycleStateInfo &targetState, sptr<AAFwk::SessionInfo> sessionInfo);
-
+    void OnWillBackground();
+    
     bool hasSaveData_ = false;
     bool needSaveDate_ = false;
     AppExecFwk::PacMap restoreData_;
@@ -266,6 +267,8 @@ private:
         void AfterUnfocused() override;
         void ForegroundFailed(int32_t type) override;
         void BackgroundFailed(int32_t type) override;
+        void AfterDidForeground() override;
+        void AfterDidBackground() override;
 
     private:
         sptr<IRemoteObject> token_ = nullptr;
