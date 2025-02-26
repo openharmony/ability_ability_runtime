@@ -244,12 +244,14 @@ int AppfreezeManager::LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::
     AppFaultDataBySA faultDataSA;
     faultDataSA.errorObject.name = info.eventName;
     faultDataSA.errorObject.message = info.msg;
-    faultDataSA.errorObject.stack = "\nDump tid stack start time:" + AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
+    faultDataSA.errorObject.stack = "\nDump tid stack start time:" +
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
     std::string stack = "";
     if (!HiviewDFX::GetBacktraceStringByTidWithMix(stack, info.pid, 0, true)) {
         stack = "Failed to dump stacktrace for " + stack;
     }
-    faultDataSA.errorObject.stack += stack + "\nDump tid stack end time:" + AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
+    faultDataSA.errorObject.stack += stack + "\nDump tid stack end time:" +
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
     faultDataSA.faultType = FaultDataType::APP_FREEZE;
     faultDataSA.timeoutMarkers = "notifyFault" +
                                  std::to_string(info.pid) +
