@@ -347,6 +347,8 @@ private:
         MessageParcel &reply, MessageOption &option);
     int OnRemoteRequestInnerNineteenth(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
+    int OnRemoteRequestInnerTwentieth(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
     int HandleOnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int HandleOnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
