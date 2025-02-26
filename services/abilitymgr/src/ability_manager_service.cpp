@@ -12651,5 +12651,29 @@ bool AbilityManagerService::CheckCrossUser(const int32_t userId, AppExecFwk::Ext
     }
     return false;
 }
+
+int32_t AbilityManagerService::QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
+                                                             const std::string &moduleName,
+                                                             const std::string &hostBundleName,
+                                                             int32_t &recordNum,
+                                                             int32_t userId)
+{
+  // check preload ui extension permission.
+  CHECK_CALLER_IS_SYSTEM_APP;
+  if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
+          PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY)) {
+      TAG_LOGE(AAFwkTag::UI_EXT, "permission %{public}s verification failed",
+               PermissionConstants::PERMISSION_PRELOAD_UI_EXTENSION_ABILITY);
+      return ERR_PERMISSION_DENIED;
+  }
+  int32_t validUserId = GetValidUserId(userId);
+  auto connectManager = GetConnectManagerByUserId(validUserId);
+  if (!connectManager) {
+      TAG_LOGE(AAFwkTag::UI_EXT, "connectManager null. userId=%{public}d", userId);
+      return ERR_INVALID_VALUE;
+  }
+  return connectManager->QueryPreLoadUIExtensionRecordInner(
+      element, moduleName, hostBundleName, recordNum);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

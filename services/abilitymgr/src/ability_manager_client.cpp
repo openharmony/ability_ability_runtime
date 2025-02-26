@@ -2017,5 +2017,18 @@ ErrCode AbilityManagerClient::StartSelfUIAbility(const Want &want)
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->StartSelfUIAbility(want);
 }
+
+ErrCode AbilityManagerClient::QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
+                                                            const std::string &moduleName,
+                                                            const std::string &hostBundleName,
+                                                            int32_t &recordNum,
+                                                            int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "call QueryPreLoadUIExtensionRecord");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->QueryPreLoadUIExtensionRecord(
+        element, moduleName, hostBundleName, recordNum, userId);
+}
 } // namespace AAFwk
 } // namespace OHOS

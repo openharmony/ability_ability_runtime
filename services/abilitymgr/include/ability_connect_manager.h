@@ -118,7 +118,20 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int PreloadUIExtensionAbilityLocked(const AbilityRequest &abilityRequest, std::string &hostBundleName);
-
+    
+    /**
+     * Query preload uiextension record.
+     *
+     * @param element, The uiextension ElementName.
+     * @param moduleName, The uiextension moduleName.
+     * @param hostBundleName, The uiextension caller hostBundleName.
+     * @param recordNum, The returned count of uiextension.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int QueryPreLoadUIExtensionRecordInner(const AppExecFwk::ElementName &element,
+                                           const std::string &moduleName,
+                                           const std::string &hostBundleName,
+                                           int32_t &recordNum);
     /**
      * UnloadUIExtensionAbility, unload uiextension ability.
      *

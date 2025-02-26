@@ -564,6 +564,9 @@ enum class AbilityManagerInterfaceCode {
 
     // start seld uiability
     NDK_START_SELF_UI_ABILITY = 6132,
+
+    // Query preload uiextension record
+    QUERY_PRELOAD_UIEXTENSION_RECORD = 6137,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
