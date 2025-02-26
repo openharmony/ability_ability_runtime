@@ -813,6 +813,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentieth(uint32_t code, MessageParc
     if (interfaceCode == AbilityManagerInterfaceCode::UNREGISTER_HIDDEN_START_OBSERVER) {
         return UnregisterHiddenStartObserverInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::QUERY_PRELOAD_UIEXTENSION_RECORD) {
+        return QueryPreLoadUIExtensionRecordInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4411,12 +4414,13 @@ int32_t AbilityManagerStub::QueryPreLoadUIExtensionRecordInner(MessageParcel &da
         TAG_LOGE(AAFwkTag::UI_EXT, "receive element null");
         return ERR_INVALID_VALUE;
     }
+    std::string moduleName = data.ReadString();
     std::string hostBundleName = data.ReadString();
     int32_t userId = data.ReadInt32();
 
     int32_t recordNum;
     int32_t result = QueryPreLoadUIExtensionRecord(
-        *element, hostBundleName, recordNum, userId);
+        *element, moduleName, hostBundleName, recordNum, userId);
     if (!reply.WriteInt32(recordNum)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "reply write recordNum fail");
         return INNER_ERR;
@@ -4426,7 +4430,7 @@ int32_t AbilityManagerStub::QueryPreLoadUIExtensionRecordInner(MessageParcel &da
         TAG_LOGE(AAFwkTag::UI_EXT, "reply write fail");
         return INNER_ERR;
     }
-    return NO_ERROR;
+    return result;
 }
 } // namespace AAFwk
 } // namespace OHOS
