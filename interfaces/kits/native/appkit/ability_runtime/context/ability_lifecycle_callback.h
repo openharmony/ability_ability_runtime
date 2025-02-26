@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -220,10 +220,6 @@ public:
         const std::shared_ptr<NativeReference> &windowStage) {}
     virtual void OnAbilityWillSaveState(const std::shared_ptr<NativeReference> &ability) {}
     virtual void OnAbilitySaveState(const std::shared_ptr<NativeReference> &ability) {}
-    virtual void OnWillForeground(const std::shared_ptr<NativeReference> &ability) {}
-    virtual void OnDidForeground(const std::shared_ptr<NativeReference> &ability) {}
-    virtual void OnWillBackground(const std::shared_ptr<NativeReference> &ability) {}
-    virtual void OnDidBackground(const std::shared_ptr<NativeReference> &ability) {}
 };
 
 class JsAbilityLifecycleCallback : public AbilityLifecycleCallback,
@@ -263,10 +259,6 @@ public:
     int32_t Register(napi_value jsCallback, bool isSync = false);
     bool UnRegister(int32_t callbackId, bool isSync = false);
     bool IsEmpty() const;
-    void OnWillForeground(const std::shared_ptr<NativeReference> &ability) override;
-    void OnDidForeground(const std::shared_ptr<NativeReference> &ability) override;
-    void OnWillBackground(const std::shared_ptr<NativeReference> &ability) override;
-    void OnDidBackground(const std::shared_ptr<NativeReference> &ability) override;
     static int32_t serialNumber_;
 
 private:
