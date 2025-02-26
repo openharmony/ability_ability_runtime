@@ -5777,7 +5777,7 @@ int32_t AbilityManagerProxy::QueryPreLoadUIExtensionRecord(const AppExecFwk::Ele
         return error;
     }
     recordNum = reply.ReadInt32();
-    return NO_ERROR;
+    return error;
 }
 } // namespace AAFwk
 } // namespace OHOS
