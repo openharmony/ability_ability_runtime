@@ -242,9 +242,12 @@ void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent)
 #ifdef APP_NO_RESPONSE_DIALOG
         isSixSecondEvent.store(false);
 #endif
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::RELIABILITY, "LOWMEM_DUMP",
-        HiviewDFX::HiSysEvent::EventType::STATISTIC, "MSG", "THREAD_BLOCK_6S");
-} else {
+        int32_t pid = static_cast<int32_t>(getpid());
+        int ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::RELIABILITY, "LOWMEM_DUMP",
+            HiviewDFX::HiSysEvent::EventType::STATISTIC, "PID", pid, "MSG", "THREAD_BLOCK_6S");
+        TAG_LOGI(AAFwkTag::APPDFR, "hisysevent pid=%{public}d, eventName=LOWMEM_DUMP, MSG=THREAD_BLOCK_6S,"
+            "ret=%{public}d", pid, ret);
+    } else {
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
         isSixSecondEvent.store(true);
     }
