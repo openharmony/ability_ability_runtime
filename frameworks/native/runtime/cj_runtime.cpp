@@ -225,7 +225,7 @@ void CJRuntime::StartDebugMode(const DebugOption dOption)
     bool isStartWithDebug = dOption.isStartWithDebug;
     bool isDebugApp = dOption.isDebugApp;
     const std::string bundleName = bundleName_;
-    int32_t instanceId = instanceId_;
+    int32_t instanceId = static_cast<int32_t>(instanceId_);
     std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
 
     TAG_LOGI(AAFwkTag::CJRUNTIME, "StartDebugMode %{public}s", bundleName_.c_str());
