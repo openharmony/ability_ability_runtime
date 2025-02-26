@@ -20,6 +20,7 @@
 #include "ui_ability_impl.h"
 #undef protected
 #undef private
+#include "ability_context_impl.h"
 #include "ability_handler.h"
 #include "context_deal.h"
 #include "locale_config.h"
@@ -97,6 +98,8 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ScheduleUpdateConfiguration_001, Test
             contextDeal->SetApplicationContext(application);
             pMocKUIAbility->AttachBaseContext(contextDeal);
             application->AttachBaseContext(contextDeal);
+            auto abilityContext = std::make_shared<AbilityContextImpl>();
+            uiability->AttachAbilityContext(abilityContext);
             mockUIAbilityimpl->Init(application, record, uiability, handler, token);
 
             Configuration config;
@@ -145,6 +148,8 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ScheduleUpdateConfiguration_002, Test
             contextDeal->SetApplicationContext(application);
             pMocKUIAbility->AttachBaseContext(contextDeal);
             application->AttachBaseContext(contextDeal);
+            auto abilityContext = std::make_shared<AbilityContextImpl>();
+            uiability->AttachAbilityContext(abilityContext);
             mockUIAbilityimpl->Init(application, record, uiability, handler, token);
 
             auto testNotify1 = pMocKUIAbility->OnConfigurationUpdated_;
@@ -203,6 +208,8 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ScheduleUpdateConfiguration_003, Test
             contextDeal->SetApplicationContext(application);
             pMocKUIAbility->AttachBaseContext(contextDeal);
             application->AttachBaseContext(contextDeal);
+            auto abilityContext = std::make_shared<AbilityContextImpl>();
+            uiability->AttachAbilityContext(abilityContext);
             mockUIAbilityimpl->Init(application, record, uiability, handler, token);
 
             Configuration config;
