@@ -111,6 +111,8 @@ struct VerificationInfo {
 
     bool VerifyBackgroundCallPermission(const bool isBackgroundCall) const;
 
+    bool VerifyFusionAccessPermission() const;
+
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);
 
