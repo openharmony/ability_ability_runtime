@@ -266,8 +266,10 @@ void CJUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackI
     }
 
     UIAbility::OnStop();
-    CallAppCtxFunc(CjAppCtxFuncType::ON_ABILITY_WILL_DESTROY, cjAbilityObj_->GetId());
-    cjAbilityObj_->OnStop();
+    if (cjAbilityObj_ != nullptr) {
+        CallAppCtxFunc(CjAppCtxFuncType::ON_ABILITY_WILL_DESTROY, cjAbilityObj_->GetId());
+        cjAbilityObj_->OnStop();
+    }
     OnStopCallback();
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -285,7 +287,9 @@ void CJUIAbility::OnStopCallback()
         TAG_LOGE(AAFwkTag::UIABILITY, "service connection disconnected");
     }
     ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
-    CallAppCtxFunc(CjAppCtxFuncType::ON_ABILITY_DESTROY, cjAbilityObj_->GetId());
+    if (cjAbilityObj_ != nullptr) {
+        CallAppCtxFunc(CjAppCtxFuncType::ON_ABILITY_DESTROY, cjAbilityObj_->GetId());
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
@@ -430,7 +434,9 @@ void CJUIAbility::OnBackground()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
 
-    CallAppCtxFunc(CjAppCtxFuncType::ON_ABILITY_WILL_BACKGROUND, cjAbilityObj_->GetId());
+    if (cjAbilityObj_ != nullptr) {
+        CallAppCtxFunc(CjAppCtxFuncType::ON_ABILITY_WILL_BACKGROUND, cjAbilityObj_->GetId());
+    }
 
     UIAbility::OnBackground();
 
