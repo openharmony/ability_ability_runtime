@@ -792,7 +792,6 @@ void JsUIAbility::OnDidBackground()
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
-
 bool JsUIAbility::OnBackPress()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
