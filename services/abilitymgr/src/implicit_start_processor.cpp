@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -199,8 +199,9 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         }
         if (want.GetBoolParam("isCreateAppGallerySelector", false)) {
             want.RemoveParam("isCreateAppGallerySelector");
+            bool needGrantUriPermission = true;
             DialogSessionManager::GetInstance().CreateImplicitSelectorModalDialog(request, want, userId,
-                dialogAppInfos);
+                dialogAppInfos, needGrantUriPermission);
             return ERR_IMPLICIT_START_ABILITY_FAIL;
         }
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, show tips dialog");
@@ -275,8 +276,9 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
                 return DialogSessionManager::GetInstance().CreateCloneSelectorModalDialog(request, want,
                     userId, dialogAppInfos, replaceWantString);
             }
+            bool needGrantUriPermission = true;
             return DialogSessionManager::GetInstance().CreateImplicitSelectorModalDialog(request,
-                want, userId, dialogAppInfos);
+                want, userId, dialogAppInfos, needGrantUriPermission);
         }
         ret = abilityMgr->ImplicitStartAbilityAsCaller(request.want, request.callerToken, nullptr);
         // reset calling indentity
