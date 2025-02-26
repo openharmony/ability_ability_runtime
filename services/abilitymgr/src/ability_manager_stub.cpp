@@ -879,6 +879,10 @@ int AbilityManagerStub::HandleOnRemoteRequestInnerSecond(uint32_t code, MessageP
     if (retCode != ERR_CODE_NOT_EXIST) {
         return retCode;
     }
+    retCode = OnRemoteRequestInnerTwentieth(code, data, reply, option);
+    if (retCode != ERR_CODE_NOT_EXIST) {
+        return retCode;
+    } 
     return ERR_CODE_NOT_EXIST;
 }
 
