@@ -261,5 +261,25 @@ bool JsAbilityLifecycleCallback::IsEmpty() const
 {
     return callbacks_.empty() && callbacksSync_.empty();
 }
+
+void JsAbilityLifecycleCallback::OnWillForeground(const std::shared_ptr<NativeReference> &ability)
+{
+    CallJsMethod("onWillForeground", ability);
+}
+
+void JsAbilityLifecycleCallback::OnDidForeground(const std::shared_ptr<NativeReference> &ability)
+{
+    CallJsMethod("onDidForeground", ability);
+}
+
+void JsAbilityLifecycleCallback::OnWillBackground(const std::shared_ptr<NativeReference> &ability)
+{
+    CallJsMethod("onWillBackground", ability);
+}
+
+void JsAbilityLifecycleCallback::OnDidBackground(const std::shared_ptr<NativeReference> &ability)
+{
+    CallJsMethod("onDidBackground", ability);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
