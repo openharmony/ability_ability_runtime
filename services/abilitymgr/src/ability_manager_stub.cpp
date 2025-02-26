@@ -766,6 +766,16 @@ int AbilityManagerStub::OnRemoteRequestInnerNineteenth(uint32_t code, MessagePar
     return ERR_CODE_NOT_EXIST;
 }
 
+int AbilityManagerStub::OnRemoteRequestInnerTwentieth(uint32_t code, MessageParcel &data,
+    MessageParcel &reply, MessageOption &option)
+{
+    AbilityManagerInterfaceCode interfaceCode = static_cast<AbilityManagerInterfaceCode>(code);
+    if (interfaceCode == AbilityManagerInterfaceCode::QUERY_PRELOAD_UIEXTENSION_RECORD) {
+        return QueryPreLoadUIExtensionRecordInner(data, reply);
+    }
+    return ERR_CODE_NOT_EXIST;
+}
+
 int AbilityManagerStub::OnRemoteRequestInner(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
@@ -4120,6 +4130,32 @@ int32_t AbilityManagerStub::StartSelfUIAbilityInner(MessageParcel &data, Message
         return INNER_ERR;
     }
     return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::QueryPreLoadUIExtensionRecordInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<AppExecFwk::ElementName> element(data.ReadParcelable<AppExecFwk::ElementName>());
+    if (element == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "receive element null");
+        return ERR_INVALID_VALUE;
+    }
+    std::string moduleName = data.ReadString();
+    std::string hostBundleName = data.ReadString();
+    int32_t userId = data.ReadInt32();
+
+    int32_t recordNum;
+    int32_t result = QueryPreLoadUIExtensionRecord(
+        *element, moduleName, hostBundleName, recordNum, userId);
+    if (!reply.WriteInt32(recordNum)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "reply write recordNum fail");
+        return INNER_ERR;
+    }
+
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "reply write fail");
+        return INNER_ERR;
+    }
+    return result;
 }
 } // namespace AAFwk
 } // namespace OHOS

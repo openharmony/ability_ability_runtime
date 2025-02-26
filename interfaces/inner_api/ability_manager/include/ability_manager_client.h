@@ -1614,6 +1614,22 @@ public:
     ErrCode UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
         const std::list<std::string>& exportConfigs, int32_t flag);
 
+    /**
+     * Query preload uiextension record.
+     *
+     * @param element, The uiextension ElementName.
+     * @param moduleName, The uiextension moduleName.
+     * @param hostBundleName, The uiextension caller hostBundleName.
+     * @param recordNum, The returned count of uiextension.
+     * @param userId, The User Id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
+                                          const std::string &moduleName,
+                                          const std::string &hostBundleName,
+                                          int32_t &recordNum,
+                                          int32_t userId = DEFAULT_INVAL_VALUE);
+
 private:
     AbilityManagerClient();
     DISALLOW_COPY_AND_MOVE(AbilityManagerClient);
