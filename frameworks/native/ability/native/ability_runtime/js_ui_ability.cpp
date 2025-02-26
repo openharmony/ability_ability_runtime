@@ -1524,7 +1524,7 @@ sptr<IRemoteObject> JsUIAbility::CallRequest()
     }
 
     if (remoteCallee_ != nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null remoteCallee_");
+        TAG_LOGE(AAFwkTag::UIABILITY, "remoteCallee_ is exist");
         return remoteCallee_;
     }
 
