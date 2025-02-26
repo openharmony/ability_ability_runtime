@@ -276,4 +276,15 @@ HWTEST_F(WantAgentTest, ProcessOptionsTest_0900, TestSize.Level1)
     bool ret = option->IsAttachToStatusBarItemMode(value);
     EXPECT_EQ(ret, false);
 }
+
+/*
+ * @tc.number    : ProcessOptionsTest_1000
+ * @tc.name      : IsNewHiddenProcessMode
+ * @tc.desc      : IsNewHiddenProcessMode
+ */
+HWTEST_F(WantAgentTest, ProcessOptionsTest_1000, TestSize.Level1)
+{
+    ProcessMode value = ProcessMode::NEW_HIDDEN_PROCESS;
+    EXPECT_EQ(ProcessOptions::IsNewHiddenProcessMode(value), true);
+}
 }  // namespace OHOS::AbilityRuntime::WantAgent
