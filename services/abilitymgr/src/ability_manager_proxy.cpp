@@ -5754,7 +5754,7 @@ int32_t AbilityManagerProxy::QueryPreLoadUIExtensionRecord(const AppExecFwk::Ele
         return ERR_INVALID_VALUE;
     }
 
-    if (!data.WriteString(&moduleName)) {
+    if (!data.WriteString(moduleName)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "write moduleName fail");
         return ERR_INVALID_VALUE;
     }
