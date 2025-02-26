@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 
+#include "ability_config.h"
 #define private public
 #include "dialog_session_manager.h"
 #undef private
@@ -190,6 +191,169 @@ HWTEST_F(DialogSessionManagerTest, IsCreateCloneSelectorDialogTest_0100, TestSiz
     bool ret = dialogSessionManager.IsCreateCloneSelectorDialog(TEST_BUNDLE_NAME, TEST_USER_ID);
     EXPECT_FALSE(ret);
     GTEST_LOG_(INFO) << "IsCreateCloneSelectorDialogTest_0100 end";
+}
+
+/**
+ * @tc.name: UpdateExtensionWantWithDialogCallerInfo_0100
+ * @tc.desc: callerToken is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, UpdateExtensionWantWithDialogCallerInfo_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0100 start";
+    std::string dialogSessionId = "";
+    AbilityRequest abilityRequest;
+    bool isSCBCall = false;
+    sptr<IRemoteObject> callerToken = nullptr;
+    abilityRequest.want.SetParam(TEST_DIALOG_SESSION_ID, dialogSessionId);
+    DialogSessionManager dialogSessionManager;
+    auto ret = dialogSessionManager.UpdateExtensionWantWithDialogCallerInfo(abilityRequest, callerToken, isSCBCall);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0100 end";
+}
+
+/**
+ * @tc.name: UpdateExtensionWantWithDialogCallerInfo_0200
+ * @tc.desc: dialogSessionId is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, UpdateExtensionWantWithDialogCallerInfo_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0200 start";
+    std::string dialogSessionId = "";
+    AbilityRequest abilityRequest;
+    bool isSCBCall = false;
+    sptr<IRemoteObject> callerToken = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    abilityRequest.want.SetParam(TEST_DIALOG_SESSION_ID, dialogSessionId);
+    DialogSessionManager dialogSessionManager;
+    auto ret = dialogSessionManager.UpdateExtensionWantWithDialogCallerInfo(abilityRequest, callerToken, isSCBCall);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0200 end";
+}
+
+/**
+ * @tc.name: UpdateExtensionWantWithDialogCallerInfo_0300
+ * @tc.desc: can not find dialogCallerInfo by dialogSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, UpdateExtensionWantWithDialogCallerInfo_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0300 start";
+    std::string dialogSessionId = "1000001";
+    AbilityRequest abilityRequest;
+    bool isSCBCall = false;
+    sptr<IRemoteObject> callerToken = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    abilityRequest.want.SetParam(TEST_DIALOG_SESSION_ID, dialogSessionId);
+    DialogSessionManager dialogSessionManager;
+    auto ret = dialogSessionManager.UpdateExtensionWantWithDialogCallerInfo(abilityRequest, callerToken, isSCBCall);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0300 end";
+}
+
+/**
+ * @tc.name: UpdateExtensionWantWithDialogCallerInfo_0400
+ * @tc.desc: dialog callerInfo do not need grant uri permission
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, UpdateExtensionWantWithDialogCallerInfo_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0400 start";
+    std::string dialogSessionId = "1000001";
+    AbilityRequest abilityRequest;
+    bool isSCBCall = false;
+    sptr<IRemoteObject> callerToken = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    abilityRequest.want.SetParam(TEST_DIALOG_SESSION_ID, dialogSessionId);
+
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    dialogCallerInfo->needGrantUriPermission = false;
+    DialogSessionManager dialogSessionManager;
+    dialogSessionManager.dialogCallerInfoMap_[dialogSessionId] = dialogCallerInfo;
+    auto ret = dialogSessionManager.UpdateExtensionWantWithDialogCallerInfo(abilityRequest, callerToken, isSCBCall);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0400 end";
+}
+
+/**
+ * @tc.name: UpdateExtensionWantWithDialogCallerInfo_0500
+ * @tc.desc: do not have uri permission flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, UpdateExtensionWantWithDialogCallerInfo_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0500 start";
+    std::string dialogSessionId = "1000001";
+    AbilityRequest abilityRequest;
+    bool isSCBCall = false;
+    sptr<IRemoteObject> callerToken = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    abilityRequest.want.SetParam(TEST_DIALOG_SESSION_ID, dialogSessionId);
+
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    dialogCallerInfo->needGrantUriPermission = true;
+    DialogSessionManager dialogSessionManager;
+    dialogSessionManager.dialogCallerInfoMap_[dialogSessionId] = dialogCallerInfo;
+    auto ret = dialogSessionManager.UpdateExtensionWantWithDialogCallerInfo(abilityRequest, callerToken, isSCBCall);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0500 end";
+}
+
+/**
+ * @tc.name: UpdateExtensionWantWithDialogCallerInfo_0600
+ * @tc.desc: not scb call and have uri permission flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, UpdateExtensionWantWithDialogCallerInfo_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0600 start";
+    std::string dialogSessionId = "1000001";
+    AbilityRequest abilityRequest;
+    bool isSCBCall = false;
+    sptr<IRemoteObject> callerToken = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    abilityRequest.want.SetParam(TEST_DIALOG_SESSION_ID, dialogSessionId);
+
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    uint32_t flag = 1;
+    dialogCallerInfo->targetWant.SetFlags(flag);
+    dialogCallerInfo->needGrantUriPermission = true;
+
+    DialogSessionManager dialogSessionManager;
+    dialogSessionManager.dialogCallerInfoMap_[dialogSessionId] = dialogCallerInfo;
+    auto ret = dialogSessionManager.UpdateExtensionWantWithDialogCallerInfo(abilityRequest, callerToken, isSCBCall);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0600 end";
+}
+
+/**
+ * @tc.name: UpdateExtensionWantWithDialogCallerInfo_0700
+ * @tc.desc: scb call and have uri permission flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, UpdateExtensionWantWithDialogCallerInfo_0700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0600 start";
+    std::string dialogSessionId = "1000001";
+    AbilityRequest abilityRequest;
+    bool isSCBCall = true;
+    sptr<IRemoteObject> callerToken = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    abilityRequest.want.SetParam(TEST_DIALOG_SESSION_ID, dialogSessionId);
+
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    uint32_t flag = 1;
+    std::string uri = "file://com.example.test/temp.txt";
+    std::vector<std::string> uriVec = { uri };
+    dialogCallerInfo->targetWant.SetFlags(flag);
+    dialogCallerInfo->targetWant.SetUri(uri);
+    dialogCallerInfo->targetWant.SetParam(AbilityConfig::PARAMS_STREAM, uriVec);
+    dialogCallerInfo->needGrantUriPermission = true;
+
+    DialogSessionManager dialogSessionManager;
+    dialogSessionManager.dialogCallerInfoMap_[dialogSessionId] = dialogCallerInfo;
+    auto ret = dialogSessionManager.UpdateExtensionWantWithDialogCallerInfo(abilityRequest, callerToken, isSCBCall);
+    EXPECT_FALSE(ret);
+
+    EXPECT_EQ(abilityRequest.want.GetFlags(), flag);
+    EXPECT_EQ(abilityRequest.want.GetUriString(), uri);
+    EXPECT_EQ(abilityRequest.want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM).size(), 1);
+    GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0700 end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS
