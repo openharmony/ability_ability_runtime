@@ -16,8 +16,6 @@
 #include <gtest/gtest.h>
 #define private public
 #define protected public
-#include "iremote_object.h"
-#include "iservice_registry.h"
 #include "js_runtime.h"
 #include "mock_runtime.h"
 #include "runtime.h"
