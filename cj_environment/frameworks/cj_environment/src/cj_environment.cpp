@@ -321,11 +321,13 @@ bool CJEnvironment::LoadRuntimeApis()
         !LoadSymbolRegisterStackInfoCallbacks(dso, *lazyApis_) ||
         !LoadSymbolRegisterArkVM(dso, *lazyApis_)) {
         LOGE("load symbol failed");
+        DynamicFreeLibrary(dso);
         return false;
     }
 #ifdef __OHOS__
     if (!LoadSymbolRegisterCJUncaughtExceptionHandler(dso, *lazyApis_)) {
         LOGE("load symbol RegisterCJUncaughtExceptionHandler failed");
+        DynamicFreeLibrary(dso);
         return false;
     }
 #endif
