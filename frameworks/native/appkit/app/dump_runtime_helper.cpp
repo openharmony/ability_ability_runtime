@@ -39,15 +39,15 @@ void DumpRuntimeHelper::SetAppFreezeFilterCallback()
         TAG_LOGE(AAFwkTag::APPKIT, "OHOSApplication is nullptr");
         return;
     }
-    auto& runtime = application_->GetRuntime();
+    auto& runtime = application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0);
     if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Runtime is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
     auto appfreezeFilterCallback = [] (const int32_t pid) -> bool {
         auto client = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
         if (client == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "client is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null client");
             return false;
         }
         return client->SetAppFreezeFilter(pid);
@@ -62,7 +62,7 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
         TAG_LOGE(AAFwkTag::APPKIT, "null application");
         return;
     }
-    auto& runtime = application_->GetRuntime();
+    auto& runtime = application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0);
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;

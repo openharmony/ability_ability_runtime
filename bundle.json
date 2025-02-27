@@ -119,6 +119,7 @@
           "//foundation/ability/ability_runtime/frameworks/js/napi:napi_packages",
           "//foundation/ability/ability_runtime/cj_environment/frameworks/cj_environment:cj_environment",
           "//foundation/ability/ability_runtime/js_environment/frameworks/js_environment:js_environment",
+          "//foundation/ability/ability_runtime/sts_environment/frameworks/sts_environment:sts_environment",
           "//foundation/ability/ability_runtime/services/abilitymgr/etc:appfwk_etc",
           "//foundation/ability/ability_runtime/service_router_framework:srms_target",
           "//foundation/ability/ability_runtime/service_router_framework:jsapi_target"
@@ -184,6 +185,15 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/js_environment/frameworks/js_environment:js_environment"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/sts_environment/interfaces/inner_api",
+              "header_files": [
+                "sts_environment.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/sts_environment/frameworks/sts_environment:sts_environment"
           },
           {
             "header": {

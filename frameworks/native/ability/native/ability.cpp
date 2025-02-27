@@ -85,7 +85,6 @@ Ability* Ability::Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime
     switch (runtime->GetLanguage()) {
         case AbilityRuntime::Runtime::Language::JS:
             return AbilityRuntime::JsAbility::Create(runtime);
-
         default:
             return new Ability();
     }

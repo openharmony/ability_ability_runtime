@@ -143,6 +143,7 @@ public:
         const std::string& moduleName, const napi_value* argv = nullptr, size_t argc = 0);
     void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override;
     void UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName) override;
+    void RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo) override;
 
 private:
     void FinishPreload() override;

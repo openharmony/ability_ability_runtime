@@ -36,7 +36,8 @@ enum class FaultDataType {
     CJ_ERROR,
     APP_FREEZE,
     PERFORMANCE_CONTROL,
-    RESOURCE_CONTROL
+    RESOURCE_CONTROL,
+    STS_ERROR
 };
 
 class AppFreezeType {

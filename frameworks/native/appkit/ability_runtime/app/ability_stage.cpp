@@ -22,6 +22,7 @@
 #include "cj_ability_stage.h"
 #endif
 #include "js_ability_stage.h"
+#include "sts_ability_stage.h"
 #include "runtime.h"
 
 namespace OHOS {
@@ -41,6 +42,8 @@ std::shared_ptr<AbilityStage> AbilityStage::Create(
         case Runtime::Language::CJ:
             return CJAbilityStage::Create(runtime, hapModuleInfo);
 #endif
+        case Runtime::Language::STS:
+            return STSAbilityStage::Create(runtime, hapModuleInfo);
         default:
             return std::make_shared<AbilityStage>();
     }
