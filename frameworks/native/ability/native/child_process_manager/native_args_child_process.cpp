@@ -15,6 +15,7 @@
 
 #include "native_args_child_process.h"
 
+#include "child_process_args_manager.h"
 #include <dlfcn.h>
 #include "hilog_tag_wrapper.h"
 #include "securec.h"
@@ -63,6 +64,7 @@ void NativeArgsChildProcess::OnStart(std::shared_ptr<AppExecFwk::ChildProcessArg
         TAG_LOGE(AAFwkTag::PROCESSMGR, "null entryFunc");
         return;
     }
+    ChildProcessArgsManager::GetInstance().SetChildProcessArgs(nativeArgs);
     entryFunc_(nativeArgs);
     TAG_LOGI(AAFwkTag::PROCESSMGR, "Native lib entry function returned");
 }
