@@ -100,7 +100,7 @@ void CJTestRunner::Run()
 void CJTestRunner::ReportFinished(const std::string &msg)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
-    auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     if (!delegator) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
         return;
@@ -112,7 +112,7 @@ void CJTestRunner::ReportFinished(const std::string &msg)
 void CJTestRunner::ReportStatus(const std::string &msg)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "Enter");
-    auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     if (!delegator) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
         return;

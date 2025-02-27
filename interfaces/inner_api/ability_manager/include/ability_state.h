@@ -60,6 +60,7 @@ enum Reason {
     REASON_RESOURCE_CONTROL,
     REASON_UPGRADE,
     REASON_MAX = REASON_UPGRADE,
+    REASON_STS_ERROR,
 };
 
 enum UserStatus {

@@ -30,7 +30,7 @@ namespace OHOS {
 namespace AppExecFwk {
 using CreateExtension = std::function<AbilityRuntime::Extension *(void)>;
 using CreateAblity = std::function<Ability *(void)>;
-using CreateUIAbility = std::function<AbilityRuntime::UIAbility *(void)>;
+using CreateUIAbility = std::function<AbilityRuntime::UIAbility*(const std::string& language)>;
 #ifdef ABILITY_WINDOW_SUPPORT
 using CreateSlice = std::function<AbilitySlice *(void)>;
 #endif
@@ -97,7 +97,7 @@ public:
      * @param abilityName UIAbility classname
      * @return return UIAbility address
      */
-    AbilityRuntime::UIAbility *GetUIAbilityByName(const std::string &abilityName);
+    AbilityRuntime::UIAbility* GetUIAbilityByName(const std::string &abilityName, const std::string &language);
 
 #ifdef ABILITY_WINDOW_SUPPORT
     void RegisterAbilitySlice(const std::string &sliceName, const CreateSlice &createFunc);

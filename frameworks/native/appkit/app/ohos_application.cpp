@@ -73,11 +73,14 @@ void OHOSApplication::OnForeground()
         abilityRuntimeContext_->NotifyApplicationForeground();
     }
 
-    if (runtime_ == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "NotifyApplicationState, runtime_ is nullptr");
-        return;
+    for (const auto& runtime : runtimes_) {
+        if (runtime == nullptr) {
+            TAG_LOGD(AAFwkTag::APPKIT, "NotifyApplicationState, runtime is nullptr");
+            continue;
+        }
+        runtime->NotifyApplicationState(false);
     }
-    runtime_->NotifyApplicationState(false);
+
     TAG_LOGD(AAFwkTag::APPKIT, "NotifyApplicationState::OnForeground end");
 }
 
@@ -93,11 +96,13 @@ void OHOSApplication::OnBackground()
         abilityRuntimeContext_->NotifyApplicationBackground();
     }
 
-    if (runtime_ == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "runtime_ is nullptr");
-        return;
+    for (const auto& runtime : runtimes_) {
+        if (runtime == nullptr) {
+            TAG_LOGD(AAFwkTag::APPKIT, "runtime is nullptr");
+            continue;
+        }
+        runtime->NotifyApplicationState(true);
     }
-    runtime_->NotifyApplicationState(true);
 }
 
 void OHOSApplication::DumpApplication()
@@ -145,18 +150,18 @@ void OHOSApplication::DumpApplication()
 }
 
 /**
- * @brief Set Runtime
+ * @brief Add Runtime
  *
  * @param runtime Runtime instance.
  */
-void OHOSApplication::SetRuntime(std::unique_ptr<AbilityRuntime::Runtime>&& runtime)
+void OHOSApplication::AddRuntime(std::unique_ptr<AbilityRuntime::Runtime>&& runtime)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "begin");
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "runtime is empty");
         return;
     }
-    runtime_ = std::move(runtime);
+    runtimes_.push_back(std::move(runtime));
 }
 
 /**
@@ -379,8 +384,9 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfo is nullptr");
             return nullptr;
         }
-        if (runtime_) {
-            runtime_->UpdatePkgContextInfoJson(
+        auto& runtime = GetRuntime(abilityInfo->language);
+        if (runtime) {
+            runtime->UpdatePkgContextInfoJson(
                 hapModuleInfo->moduleName, hapModuleInfo->hapPath, hapModuleInfo->packageName);
         }
         SetAppEnv(hapModuleInfo->appEnvironments);
@@ -391,7 +397,10 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             stageContext->SetResourceManager(rm);
         }
 
-        abilityStage = AbilityRuntime::AbilityStage::Create(runtime_, *hapModuleInfo);
+        auto& runtimeStage = GetRuntime(hapModuleInfo->language);
+        if (runtimeStage) {
+            abilityStage = AbilityRuntime::AbilityStage::Create(runtimeStage, *hapModuleInfo);
+        }
         if (abilityStage == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
             return nullptr;
@@ -573,8 +582,8 @@ bool OHOSApplication::AddAbilityStage(
         return false;
     }
 
-    if (runtime_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runtime_ is nullptr");
+    if (runtimes_.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
         return false;
     }
 
@@ -598,7 +607,12 @@ bool OHOSApplication::AddAbilityStage(
         stageContext->SetResourceManager(rm);
     }
 
-    auto abilityStage = AbilityRuntime::AbilityStage::Create(runtime_, *moduleInfo);
+    auto& runtime = GetRuntime(moduleInfo->language);
+    if (runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        return false;
+    }
+    auto abilityStage = AbilityRuntime::AbilityStage::Create(runtime, *moduleInfo);
     if (abilityStage == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
         return false;
@@ -618,6 +632,7 @@ bool OHOSApplication::AddAbilityStage(
     abilityStage->OnCreate(want);
     abilityStages_[hapModuleInfo.moduleName] = abilityStage;
     TAG_LOGI(AAFwkTag::APPKIT, "abilityStage insert and initialization");
+
     return true;
 }
 
@@ -653,9 +668,9 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::GetAppContext() const
     return abilityRuntimeContext_;
 }
 
-const std::unique_ptr<AbilityRuntime::Runtime>& OHOSApplication::GetRuntime() const
+const std::vector<std::unique_ptr<AbilityRuntime::Runtime>>& OHOSApplication::GetRuntime() const
 {
-    return runtime_;
+    return runtimes_;
 }
 
 void OHOSApplication::SetConfiguration(const Configuration &config)
@@ -715,32 +730,62 @@ void OHOSApplication::SetExtensionTypeMap(std::map<int32_t, std::string> map)
 
 bool OHOSApplication::NotifyLoadRepairPatch(const std::string &hqfFile, const std::string &hapPath)
 {
-    if (runtime_ == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "runtime is nullptr");
+    // TODO sts 确认hqf类型，当前只js\cj使用
+    if (runtimes_.empty()) {
+        TAG_LOGD(AAFwkTag::APPKIT, "runtimes empty");
         return true;
     }
 
-    return runtime_->LoadRepairPatch(hqfFile, hapPath);
+    for (const auto& runtime : runtimes_) {
+        if (runtime == nullptr) {
+            TAG_LOGD(AAFwkTag::APPKIT, "null runtime");
+            continue;
+        }
+        if (!runtime->LoadRepairPatch(hqfFile, hapPath)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool OHOSApplication::NotifyHotReloadPage()
 {
-    if (runtime_ == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "runtime is nullptr");
+    if (runtimes_.empty()) {
+        TAG_LOGD(AAFwkTag::APPKIT, "runtimes empty");
         return true;
     }
 
-    return runtime_->NotifyHotReloadPage();
+    for (const auto& runtime : runtimes_) {
+        if (runtime == nullptr) {
+            TAG_LOGD(AAFwkTag::APPKIT, "null runtime");
+            continue;
+        }
+        if (!runtime->NotifyHotReloadPage()) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool OHOSApplication::NotifyUnLoadRepairPatch(const std::string &hqfFile)
 {
-    if (runtime_ == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "runtime is nullptr");
+    // TODO sts 确认hqf类型，当前只js\cj使用
+    if (runtimes_.empty()) {
+        TAG_LOGD(AAFwkTag::APPKIT, "runtimes empty");
         return true;
     }
 
-    return runtime_->UnLoadRepairPatch(hqfFile);
+    for (const auto& runtime : runtimes_) {
+        if (runtime == nullptr) {
+            TAG_LOGD(AAFwkTag::APPKIT, "null runtime");
+            continue;
+        }
+        if (!runtime->UnLoadRepairPatch(hqfFile)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void OHOSApplication::CleanAppTempData(bool isLastProcess)
@@ -914,6 +959,16 @@ bool OHOSApplication::IsMainProcess(const std::string &bundleName, const std::st
     }
     TAG_LOGD(AAFwkTag::APPKIT, "not main process");
     return false;
+}
+
+const std::unique_ptr<AbilityRuntime::Runtime>& OHOSApplication::GetRuntime(const std::string& language) const
+{
+    for (auto& runtime : runtimes_) {
+        if (runtime->GetLanguage() == AbilityRuntime::Runtime::ConvertLangToCode(language)) {
+            return runtime;
+        }
+    }
+    return runtimeNullptr_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

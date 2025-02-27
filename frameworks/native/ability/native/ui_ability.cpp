@@ -22,6 +22,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "js_ui_ability.h"
+#include "sts_ui_ability.h"
 #ifdef CJ_FRONTEND
 #include "cj_ui_ability.h"
 #endif
@@ -66,6 +67,8 @@ UIAbility *UIAbility::Create(const std::unique_ptr<Runtime> &runtime)
         case Runtime::Language::CJ:
             return CJUIAbility::Create(runtime);
 #endif
+        case Runtime::Language::STS:
+            return StsUIAbility::Create(runtime);
         default:
             return new (std::nothrow) UIAbility();
     }
