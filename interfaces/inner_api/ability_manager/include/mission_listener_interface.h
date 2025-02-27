@@ -17,11 +17,13 @@
 #define OHOS_ABILITY_RUNTIME_MISSION_LISTENER_INTERFACE_H
 
 #include "iremote_broker.h"
-#ifdef SUPPORT_SCREEN
-#include "pixel_map.h"
-#endif //SUPPORT_SCREEN
 
 namespace OHOS {
+namespace Media {
+#ifdef SUPPORT_SCREEN
+class PixelMap;
+#endif //SUPPORT_SCREEN
+}
 namespace AAFwk {
 /**
  * @class IMissionListener

@@ -16,6 +16,9 @@
 #include "mission_listener_stub.h"
 
 #include "hilog_tag_wrapper.h"
+#ifdef SUPPORT_SCREEN
+#include "pixel_map.h"
+#endif //SUPPORT_SCREEN
 
 namespace OHOS {
 namespace AAFwk {

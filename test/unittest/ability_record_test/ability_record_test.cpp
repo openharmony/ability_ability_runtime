@@ -45,6 +45,9 @@
 #undef private
 #undef protected
 #endif
+#ifdef SUPPORT_SCREEN
+#include "pixel_map.h"
+#endif //SUPPORT_SCREEN
 
 using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
