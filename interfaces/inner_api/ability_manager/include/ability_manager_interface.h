@@ -1640,14 +1640,14 @@ public:
      * @param bundleName The application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t AttachAppDebug(const std::string &bundleName) = 0;
+    virtual int32_t AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal) = 0;
 
     /**
      * @brief Detach app debug.
      * @param bundleName The application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t DetachAppDebug(const std::string &bundleName) = 0;
+    virtual int32_t DetachAppDebug(const std::string &bundleName, bool isDebugFromLocal) = 0;
 
     /**
      * @brief Execute intent.

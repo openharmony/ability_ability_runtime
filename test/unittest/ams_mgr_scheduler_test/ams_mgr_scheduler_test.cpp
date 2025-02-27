@@ -907,12 +907,12 @@ HWTEST_F(AmsMgrSchedulerTest, AttachAppDebug_001, TestSize.Level0)
     auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
     EXPECT_NE(amsMgrScheduler, nullptr);
     std::string bundleName = "";
-    int32_t res = amsMgrScheduler->AttachAppDebug(bundleName);
+    int32_t res = amsMgrScheduler->AttachAppDebug(bundleName, false);
     EXPECT_EQ(res, ERR_INVALID_OPERATION);
 
     amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
     amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
-    res = amsMgrScheduler->AttachAppDebug(bundleName);
+    res = amsMgrScheduler->AttachAppDebug(bundleName, false);
     EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 

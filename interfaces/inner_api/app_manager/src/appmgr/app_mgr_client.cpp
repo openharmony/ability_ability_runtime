@@ -1028,12 +1028,12 @@ int32_t AppMgrClient::UnregisterAppDebugListener(const sptr<IAppDebugListener> &
     return amsService_->UnregisterAppDebugListener(listener);
 }
 
-int32_t AppMgrClient::AttachAppDebug(const std::string &bundleName)
+int32_t AppMgrClient::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     if (!IsAmsServiceReady()) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    return amsService_->AttachAppDebug(bundleName);
+    return amsService_->AttachAppDebug(bundleName, isDebugFromLocal);
 }
 
 int32_t AppMgrClient::DetachAppDebug(const std::string &bundleName)

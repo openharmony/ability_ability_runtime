@@ -77,6 +77,7 @@ constexpr const char* FOUNDATION_PROCESS = "foundation";
 constexpr const char* BS_PROCESS_NAME = "bgtaskmgr_service";
 constexpr int32_t USER_UID = 2000;
 constexpr const char* HIVIEW_PROCESS_NAME = "hiview";
+constexpr const char* DEBUG_FROM = "ohos.param.debugFrom";
 }  // namespace
 
 REGISTER_SYSTEM_ABILITY_BY_ID(AppMgrService, APP_MGR_SERVICE_ID, true);
@@ -1193,6 +1194,12 @@ int32_t AppMgrService::StartNativeProcessForDebugger(const AAFwk::Want &want)
     if (!isShellCall) {
         TAG_LOGE(AAFwkTag::APPMGR, "permission denied");
         return ERR_INVALID_OPERATION;
+    }
+    bool isDebugFromLocal = want.GetBoolParam(DEBUG_FROM, false);
+    if (isDebugFromLocal &&
+        !AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "local debug permission denied");
+        return ERR_PERMISSION_DENIED;
     }
     auto ret = appMgrServiceInner_->StartNativeProcessForDebugger(want);
     if (ret != ERR_OK) {

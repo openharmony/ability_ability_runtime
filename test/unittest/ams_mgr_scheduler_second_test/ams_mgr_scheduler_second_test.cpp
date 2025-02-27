@@ -1267,7 +1267,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AttachAppDebug_001
      * @tc.steps: step1. amsMgrScheduler isReady false
      * @tc.expected: step1. expect ERR_INVALID_OPERATION
      */
-    auto ret = amsMgrScheduler->AttachAppDebug("");
+    auto ret = amsMgrScheduler->AttachAppDebug("", false);
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_AttachAppDebug_001 end");
 }
@@ -1289,7 +1289,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AttachAppDebug_002
      * @tc.expected: step1. expect ERR_INVALID_OPERATION
      */
     MyFlag::flag_ = 0;
-    auto ret = amsMgrScheduler->AttachAppDebug("");
+    auto ret = amsMgrScheduler->AttachAppDebug("", false);
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_AttachAppDebug_002 end");
 }
@@ -1311,7 +1311,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AttachAppDebug_003
      * @tc.expected: step1. expect ERR_INVALID_OPERATION
      */
     MyFlag::flag_ = MyFlag::IS_SA_CALL;
-    auto ret = amsMgrScheduler->AttachAppDebug("");
+    auto ret = amsMgrScheduler->AttachAppDebug("", false);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_AttachAppDebug_003 end");
 }

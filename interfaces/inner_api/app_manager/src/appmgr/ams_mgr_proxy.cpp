@@ -991,7 +991,7 @@ int32_t AmsMgrProxy::UnregisterAppDebugListener(const sptr<IAppDebugListener> &l
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::AttachAppDebug(const std::string &bundleName)
+int32_t AmsMgrProxy::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
@@ -1002,6 +1002,11 @@ int32_t AmsMgrProxy::AttachAppDebug(const std::string &bundleName)
 
     if (bundleName.empty() || !data.WriteString(bundleName)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write bundleName failed");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!data.WriteBool(isDebugFromLocal)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write isDebugFromLocal failed");
         return ERR_INVALID_DATA;
     }
 

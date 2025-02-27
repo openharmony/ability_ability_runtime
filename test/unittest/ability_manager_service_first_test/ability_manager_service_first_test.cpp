@@ -1428,7 +1428,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, AttachAppDebug_001, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::string bundleName;
-    abilityMs_->AttachAppDebug(bundleName);
+    abilityMs_->AttachAppDebug(bundleName, false);
     EXPECT_NE(abilityMs_, nullptr);
 }
 
@@ -1442,7 +1442,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, DetachAppDebug_001, TestSize.Level1)
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
     std::string bundleName;
-    auto result = abilityMs_->DetachAppDebug(bundleName);
+    auto result = abilityMs_->DetachAppDebug(bundleName, false);
     EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
 }
 

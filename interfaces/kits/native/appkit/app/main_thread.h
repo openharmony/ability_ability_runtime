@@ -311,7 +311,7 @@ public:
      */
     int32_t ScheduleChangeAppGcState(int32_t state) override;
 
-    void AttachAppDebug() override;
+    void AttachAppDebug(bool isDebugFromLocal) override;
     void DetachAppDebug() override;
     bool NotifyDeviceDisConnect();
 
@@ -648,6 +648,8 @@ private:
      * @config the config of application
      */
     void ParseAppConfigurationParams(const std::string configuration, Configuration &config);
+
+    int32_t OnAttachLocalDebug(bool isDebugFromLocal);
 
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
     void HandleNWebPreload();
