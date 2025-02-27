@@ -48,19 +48,17 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
     AAFwk::Want newWant = param.want;
     newWant.RemoveAllFd();
     if (param.isStartAsCaller) {
-        TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "isAsCaller");
         callerInfo.isAsCaller = true;
     }
     InitErmsCallerInfo(newWant, param.abilityInfo, callerInfo, param.userId, param.callerToken);
 
     int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
         callerInfo, rule));
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "isBackSkuExempt: %{public}d.", rule.isBackSkuExempt);
     if (ret != ERR_OK) {
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "check ecological rule failed");
         return ERR_OK;
     }
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "check ecological rule success");
+    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "query erms suc, isBackSkuExempt: %{public}d.", rule.isBackSkuExempt);
     StartAbilityUtils::ermsResultCode = rule.resultCode;
     StartAbilityUtils::ermsSupportBackToCallerFlag = rule.isBackSkuExempt;
     if (rule.resultCode == ERMS_ISALLOW_RESULTCODE) {
@@ -156,16 +154,15 @@ ErrCode EcologicalRuleInterceptor::QueryAtomicServiceStartupRule(Want &want, spt
         callerInfo, _rule));
     CHECK_RET_RETURN_RET(ret, "check ecological rule failed");
 
-    TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "check ecological rule success");
     StartAbilityUtils::ermsResultCode = _rule.resultCode;
     StartAbilityUtils::ermsSupportBackToCallerFlag = _rule.isBackSkuExempt;
     rule.isOpenAllowed = _rule.resultCode == ERMS_ISALLOW_RESULTCODE;
     rule.isEmbeddedAllowed = _rule.embedResultCode == ERMS_ISALLOW_EMBED_RESULTCODE;
+    TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "query erms suc, open: %{public}d, hasWant: %{public}d.",
+        rule.isOpenAllowed, _rule.replaceWant != nullptr);
     if (rule.isOpenAllowed) {
-        TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "allow ecological rule");
         return ERR_OK;
     }
-    TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "isOpenAllowed false");
 
 #ifdef SUPPORT_GRAPHICS
     if (_rule.replaceWant != nullptr) {
@@ -174,7 +171,6 @@ ErrCode EcologicalRuleInterceptor::QueryAtomicServiceStartupRule(Want &want, spt
         return ERR_ECOLOGICAL_CONTROL_STATUS;
     }
 #endif
-    TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "replaceWant is nullptr");
     return ERR_OK;
 }
 
@@ -278,7 +274,9 @@ void EcologicalRuleInterceptor::InitErmsCallerInfo(const Want &want,
 
     GetEcologicalTargetInfo(want, abilityInfo, callerInfo);
     GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
-    TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "ERMS's %{public}s", callerInfo.ToString().c_str());
+
+    TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "ERMS's caller{%{public}s_%{public}d_%{public}d}",
+        callerInfo.packageName.c_str(), callerInfo.uid, callerInfo.pid);
 }
 
 int32_t EcologicalRuleInterceptor::GetAppTypeByBundleType(int32_t bundleType)
