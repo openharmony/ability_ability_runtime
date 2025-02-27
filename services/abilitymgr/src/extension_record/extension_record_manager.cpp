@@ -790,12 +790,12 @@ int32_t ExtensionRecordManager::QueryPreLoadUIExtensionRecord(const AppExecFwk::
     std::string abilityName = element.GetAbilityName();
     std::string bundleName = element.GetBundleName();
     TAG_LOGD(AAFwkTag::UI_EXT,
-            "hostBundleName: %{public}s, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
-            hostBundleName.c_str(), bundleName.c_str(), moduleName.c_str(), abilityName.c_str());
+             "hostBundleName: %{public}s, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
+             hostBundleName.c_str(), bundleName.c_str(), moduleName.c_str(), abilityName.c_str());
     if (element.GetAbilityName().empty() || element.GetBundleName().empty() || moduleName.empty() ||
         hostBundleName.empty()) {
         recordNum = 0;
-        TAG_LOGD(AAFwkTag::UI_EXT,"element or hostBundleName is null.");
+        TAG_LOGD(AAFwkTag::UI_EXT, "element or hostBundleName is null.");
         return ERR_INVALID_VALUE;
     }
 
