@@ -77,7 +77,7 @@ ffrt::mutex AppfreezeManager::freezeFilterMutex_;
 
 AppfreezeManager::AppfreezeManager()
 {
-    name_ = "AppfreezeManager" + std::to_string(GetMilliseconds());
+    name_ = "AppfreezeManager" + std::to_string(AbilityRuntime::TimeUtil::CurrentTimeMillis());
 }
 
 AppfreezeManager::~AppfreezeManager()
@@ -104,13 +104,6 @@ void AppfreezeManager::DestroyInstance()
     }
 }
 
-uint64_t AppfreezeManager::GetMilliseconds()
-{
-    auto now = std::chrono::system_clock::now();
-    auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-    return millisecs.count();
-}
-
 bool AppfreezeManager::IsHandleAppfreeze(const std::string& bundleName)
 {
     if (bundleName.empty()) {
@@ -130,8 +123,7 @@ int AppfreezeManager::AppfreezeHandle(const FaultData& faultData, const Appfreez
         faultData.errorObject.name.c_str(), appInfo.bundleName.c_str());
     std::string memoryContent = "";
     CollectFreezeSysMemory(memoryContent);
-    if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK ||
-        faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S) {
+    if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) {
         AcquireStack(faultData, appInfo, memoryContent);
     } else {
         NotifyANR(faultData, appInfo, "", memoryContent);
@@ -141,57 +133,42 @@ int AppfreezeManager::AppfreezeHandle(const FaultData& faultData, const Appfreez
 
 void AppfreezeManager::CollectFreezeSysMemory(std::string& memoryContent)
 {
+    memoryContent = "\nGet freeze memory start time: " + AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
     std::string tmp = "";
     std::string pressMemInfo = "/proc/pressure/memory";
     OHOS::LoadStringFromFile(pressMemInfo, tmp);
-    memoryContent = tmp + "\n";
+    memoryContent += tmp + "\n";
     std::string memInfoPath = "/proc/memview";
     if (!OHOS::FileExists(memInfoPath)) {
         memInfoPath = "/proc/meminfo";
     }
     OHOS::LoadStringFromFile(memInfoPath, tmp);
-    memoryContent += tmp;
+    memoryContent += tmp + "\nGet freeze memory end time: " + AbilityRuntime::TimeUtil::DefaultCurrentTimeStr();
 }
 
 int AppfreezeManager::MergeNotifyInfo(FaultData& faultNotifyData, const AppfreezeManager::AppInfo& appInfo)
 {
     std::string memoryContent = "";
-    int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
     CollectFreezeSysMemory(memoryContent);
-    TAG_LOGW(AAFwkTag::APPDFR, "collect memory info, eventName:%{public}s, bundleName:%{public}s, "
-        "endTime:%{public}s, interval:%{public}lld ms", faultNotifyData.errorObject.name.c_str(),
-        appInfo.bundleName.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
-        AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime);
-
     std::string fileName = faultNotifyData.errorObject.name + "_" +
         AbilityRuntime::TimeUtil::FormatTime("%Y%m%d%H%M%S") + "_" + std::to_string(appInfo.pid) + "_stack";
     std::string catcherStack = "";
-    std::string catchJsonStack = "";
-    std::string fullStackPath = "";
+    faultNotifyData.errorObject.message += "\nCatche stack trace start time: " +
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
     if (faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT
         || faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) {
         catcherStack += CatcherStacktrace(appInfo.pid, faultNotifyData.errorObject.stack);
-        fullStackPath = WriteToFile(fileName, catcherStack);
-        faultNotifyData.errorObject.stack = fullStackPath;
     } else {
-        std::string currentTime = AbilityRuntime::TimeUtil::DefaultCurrentTimeStr();
-        int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
-        faultNotifyData.errorObject.message += "\nTimestamp:" + currentTime;
-        catchJsonStack += CatchJsonStacktrace(appInfo.pid, faultNotifyData.errorObject.name,
+        catcherStack += CatchJsonStacktrace(appInfo.pid, faultNotifyData.errorObject.name,
             faultNotifyData.errorObject.stack);
-        TAG_LOGW(AAFwkTag::APPDFR, "catch stack, eventName:%{public}s, bundleName:%{public}s, "
-            "endTime:%{public}s, interval:%{public}lld ms", faultNotifyData.errorObject.name.c_str(),
-            appInfo.bundleName.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
-            AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime);
-
-        fullStackPath = WriteToFile(fileName, catchJsonStack);
-        faultNotifyData.errorObject.stack = fullStackPath;
     }
+    std::string timeStamp = "Catche stack trace end time: " + AbilityRuntime::TimeUtil::DefaultCurrentTimeStr();
+    faultNotifyData.errorObject.stack = WriteToFile(fileName, catcherStack);
     if (appInfo.isOccurException) {
         faultNotifyData.errorObject.message += "\nnotifyAppFault exception.\n";
     }
-    if (faultNotifyData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK ||
-        faultNotifyData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S) {
+    faultNotifyData.errorObject.message += timeStamp;
+    if (faultNotifyData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) {
         AcquireStack(faultNotifyData, appInfo, memoryContent);
     } else {
         NotifyANR(faultNotifyData, appInfo, "", memoryContent);
@@ -248,13 +225,6 @@ std::string AppfreezeManager::WriteToFile(const std::string& fileName, std::stri
     return stackPath;
 }
 
-std::string AppfreezeManager::GetFormatTime()
-{
-    std::string timeStamp = "\nTimestamp:" + AbilityRuntime::TimeUtil::FormatTime("%Y-%m-%d %H:%M:%S") +
-        ":" + std::to_string(GetMilliseconds() % AbilityRuntime::TimeUtil::SEC_TO_MILLISEC) + "\n";
-    return timeStamp;
-}
-
 int AppfreezeManager::LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::LifecycleFlow flow)
 {
     if (info.typeId != AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT) {
@@ -274,16 +244,18 @@ int AppfreezeManager::LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::
     AppFaultDataBySA faultDataSA;
     faultDataSA.errorObject.name = info.eventName;
     faultDataSA.errorObject.message = info.msg;
-    faultDataSA.errorObject.stack = GetFormatTime();
+    faultDataSA.errorObject.stack = "\nDump tid stack start time:" +
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
     std::string stack = "";
     if (!HiviewDFX::GetBacktraceStringByTidWithMix(stack, info.pid, 0, true)) {
         stack = "Failed to dump stacktrace for " + stack;
     }
-    faultDataSA.errorObject.stack += stack + "\n" + GetFormatTime();
+    faultDataSA.errorObject.stack += stack + "\nDump tid stack end time:" +
+        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
     faultDataSA.faultType = FaultDataType::APP_FREEZE;
     faultDataSA.timeoutMarkers = "notifyFault" +
                                  std::to_string(info.pid) +
-                                 "-" + std::to_string(GetMilliseconds());
+                                 "-" + std::to_string(AbilityRuntime::TimeUtil::CurrentTimeMillis());
     faultDataSA.pid = info.pid;
     if (flow.state != AbilityRuntime::FreezeUtil::TimeoutState::UNKNOWN) {
         faultDataSA.token = flow.token;
@@ -557,39 +529,34 @@ std::string AppfreezeManager::CatchJsonStacktrace(int pid, const std::string& fa
 {
     HITRACE_METER_FMT(HITRACE_TAG_APP, "CatchJsonStacktrace pid:%d", pid);
     HiviewDFX::DfxDumpCatcher dumplog;
-    std::string ret;
     std::string msg;
     size_t defaultMaxFaultNum = 256;
     if (dumplog.DumpCatchProcess(pid, msg, defaultMaxFaultNum, true) == -1) {
         TAG_LOGI(AAFwkTag::APPDFR, "appfreeze catch stack failed");
-        ret = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg +
+        msg = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg +
             "\nMain thread stack:" + stack;
         if (faultType == AppFreezeType::APP_INPUT_BLOCK) {
-            FindStackByPid(ret, pid);
+            FindStackByPid(msg, pid);
         }
     } else {
-        ret = msg;
         if (faultType == AppFreezeType::THREAD_BLOCK_3S) {
             std::lock_guard<ffrt::mutex> lock(catchStackMutex_);
             catchStackMap_[pid] = msg;
         }
     }
-    return ret;
+    return msg;
 }
 
 std::string AppfreezeManager::CatcherStacktrace(int pid, const std::string& stack) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_APP, "CatcherStacktrace pid:%d", pid);
     HiviewDFX::DfxDumpCatcher dumplog;
-    std::string ret;
     std::string msg;
     if (dumplog.DumpCatchProcess(pid, msg) == -1) {
-        ret = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg +
+        msg = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg +
             "\nMain thread stack:" + stack;
-    } else {
-        ret = msg;
     }
-    return ret;
+    return msg;
 }
 
 bool AppfreezeManager::IsProcessDebug(int32_t pid, std::string bundleName)
