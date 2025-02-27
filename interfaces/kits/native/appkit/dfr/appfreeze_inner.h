@@ -54,7 +54,6 @@ private:
     int NotifyANR(const FaultData& faultData);
     bool IsExitApp(const std::string& name);
     bool IsHandleAppfreeze();
-    std::string GetFormatTime();
 
     static std::mutex singletonMutex_;
     static std::shared_ptr<AppfreezeInner> instance_;
