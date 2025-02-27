@@ -19,11 +19,40 @@
 #include "cj_runtime.h"
 #endif
 #include "js_runtime.h"
+#include "sts_runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 std::unique_ptr<Runtime> g_preloadedInstance;
+}
+
+std::vector<std::unique_ptr<Runtime>> Runtime::CreateRuntimes(Runtime::Options& options)
+{
+    std::vector<std::unique_ptr<Runtime>> runtimes;
+    // TODO sts review
+    for (auto lang : options.langs) {
+        switch (lang.first) {
+            case Runtime::Language::JS:
+                options.lang = Runtime::Language::JS;
+                runtimes.push_back(JsRuntime::Create(options));
+                break;
+#ifdef CJ_FRONTEND
+            case Runtime::Language::CJ:
+                options.lang = Runtime::Language::CJ;
+                runtimes.push_back(CJRuntime::Create(options));
+                break;
+#endif
+            case Runtime::Language::STS:
+                options.lang = Runtime::Language::STS;
+                runtimes.push_back(STSRuntime::Create(options));
+                break;
+            default:
+                runtimes.push_back(std::unique_ptr<Runtime>());
+                break;
+        }
+    }
+    return runtimes;
 }
 
 std::unique_ptr<Runtime> Runtime::Create(const Runtime::Options& options)
@@ -35,6 +64,8 @@ std::unique_ptr<Runtime> Runtime::Create(const Runtime::Options& options)
         case Runtime::Language::CJ:
             return CJRuntime::Create(options);
 #endif
+        case Runtime::Language::STS:
+            return STSRuntime::Create(options);
         default:
             return std::unique_ptr<Runtime>();
     }
@@ -52,5 +83,17 @@ std::unique_ptr<Runtime> Runtime::GetPreloaded()
 {
     return std::move(g_preloadedInstance);
 }
-}  // namespace AbilityRuntime
-}  // namespace OHOS
+
+Runtime::Language Runtime::ConvertLangToCode(const std::string& language)
+{
+    if (language == APPLICAITON_CODE_LANGUAGE_ARKTS_1_0) {
+        return Language::JS;
+    } else if (language == APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+        return Language::STS;
+    } else {
+        return Language::UNKNOWN;
+    }
+}
+
+} // namespace AbilityRuntime
+} // namespace OHOS

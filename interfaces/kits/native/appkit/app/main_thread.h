@@ -34,6 +34,7 @@
 #include "inner_event.h"
 #include "ipc_singleton.h"
 #include "js_runtime.h"
+#include "sts_runtime.h"
 #include "native_engine/native_engine.h"
 #include "overlay_event_subscriber.h"
 #include "resource_manager.h"
@@ -293,6 +294,10 @@ public:
     CJUncaughtExceptionInfo CreateCjExceptionInfo(const std::string &bundleName, uint32_t versionCode,
         const std::string &hapPath);
 #endif
+    JsEnv::UncaughtExceptionInfo CreateJsExceptionInfo(const std::string& bundleName, uint32_t versionCode,
+        const std::string& hapPath, std::string& appRunningId, int32_t pid, std::string& processName);
+    STSUncaughtExceptionInfo CreateStsExceptionInfo(
+        const std::string& bundleName, uint32_t versionCode, const std::string& hapPath);
     /**
      * @brief Notify NativeEngine GC of status change.
      *
@@ -366,9 +371,9 @@ private:
     void HandleJsHeapMemory(const OHOS::AppExecFwk::JsHeapDumpInfo &info);
 
     void PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleInfo,
-        std::unique_ptr<AbilityRuntime::Runtime>& runtime);
+        const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
 
-    void ProcessMainAbility(const AbilityInfo &info, std::unique_ptr<AbilityRuntime::Runtime>& runtime);
+    void ProcessMainAbility(const AbilityInfo &info, const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
 
     /**
      *
@@ -725,6 +730,8 @@ private:
         std::vector<std::pair<std::string, std::string>> &fileMap);
     void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths);
     void SetAppDebug(uint32_t modeFlag, bool isDebug);
+
+    void AddRuntimeLang(ApplicationInfo& appInfo, AbilityRuntime::Runtime::Options& options);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;
