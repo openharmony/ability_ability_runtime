@@ -257,7 +257,7 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    int32_t AttachAppDebug();
+    int32_t AttachAppDebug(bool isDebugFromLocal);
 
     /**
      * @brief detach a debugging process.

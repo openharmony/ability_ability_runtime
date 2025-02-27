@@ -256,7 +256,7 @@ public:
     /**
      * @brief Attach app debug.
      */
-    virtual void AttachAppDebug() = 0;
+    virtual void AttachAppDebug(bool isDebugFromLocal) = 0;
 
     /**
      * @brief Detach app debug.

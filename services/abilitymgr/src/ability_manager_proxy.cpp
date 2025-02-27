@@ -4953,7 +4953,7 @@ int32_t AbilityManagerProxy::UnregisterAppDebugListener(sptr<AppExecFwk::IAppDeb
     return reply.ReadInt32();
 }
 
-int32_t AbilityManagerProxy::AttachAppDebug(const std::string &bundleName)
+int32_t AbilityManagerProxy::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     MessageParcel data;
@@ -4967,6 +4967,11 @@ int32_t AbilityManagerProxy::AttachAppDebug(const std::string &bundleName)
         return INNER_ERR;
     }
 
+    if (!data.WriteBool(isDebugFromLocal)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "isDebugFromLocal write fail");
+        return INNER_ERR;
+    }
+
     MessageParcel reply;
     MessageOption option;
     int32_t error = SendRequest(AbilityManagerInterfaceCode::ATTACH_APP_DEBUG, data, reply, option);
@@ -4977,7 +4982,7 @@ int32_t AbilityManagerProxy::AttachAppDebug(const std::string &bundleName)
     return reply.ReadInt32();
 }
 
-int32_t AbilityManagerProxy::DetachAppDebug(const std::string &bundleName)
+int32_t AbilityManagerProxy::DetachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     MessageParcel data;
@@ -4988,6 +4993,11 @@ int32_t AbilityManagerProxy::DetachAppDebug(const std::string &bundleName)
 
     if (!data.WriteString(bundleName)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write bundleName fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteBool(isDebugFromLocal)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "isDebugFromLocal write fail");
         return INNER_ERR;
     }
 

@@ -642,7 +642,7 @@ public:
      * @param bundleName The application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t AttachAppDebug(const std::string &bundleName);
+    int32_t AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal);
 
     /**
      * @brief Detach app debug.

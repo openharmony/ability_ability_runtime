@@ -302,7 +302,7 @@ public:
      * @param bundleName The application bundle name.
      * @param isAttachDebug Determine if it is in attach debug mode.
      */
-    void SetAttachAppDebug(const std::string &bundleName, const bool &isAttachDebug);
+    void SetAttachAppDebug(const std::string &bundleName, const bool &isAttachDebug, bool isDebugFromLocal);
 
     /**
      * @brief Obtain app debug infos through bundleName.

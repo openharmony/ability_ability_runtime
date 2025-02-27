@@ -160,7 +160,8 @@ std::unique_ptr<JsRuntime> JsRuntime::Create(const Options& options)
 void JsRuntime::StartDebugMode(const DebugOption dOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "localDebug %{public}d", dOption.isDebugFromLocal);
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "developer Mode false");
         return;
     }
@@ -183,12 +184,18 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
     uint32_t instanceId = instanceId_;
     auto weak = jsEnv_;
     std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
-    HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp, [bundleName,
-            isStartWithDebug, instanceId, weak, isDebugApp, appProvisionType] (int socketFd, std::string option) {
-            TAG_LOGI(AAFwkTag::JSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s",
-                socketFd, option.c_str());
+    HdcRegister::DebugRegisterMode debugMode = HdcRegister::DebugRegisterMode::HDC_DEBUG_REG;
+    if (debugOption_.isDebugFromLocal && debugOption_.isDeveloperMode) {
+        debugMode = HdcRegister::DebugRegisterMode::BOTH_REG;
+    } else if (debugOption_.isDebugFromLocal) {
+        debugMode = HdcRegister::DebugRegisterMode::LOCAL_DEBUG_REG;
+    }
+    HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp, debugMode,
+        [bundleName, isStartWithDebug, instanceId, weak, isDebugApp, appProvisionType]
+        (int socketFd, std::string option) {
+        TAG_LOGI(AAFwkTag::JSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s", socketFd, option.c_str());
         if (weak == nullptr) {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "null weak");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null weak");
             return;
         }
         // system is debuggable when const.secure is false and const.debuggable is true
@@ -317,7 +324,8 @@ int32_t JsRuntime::JsperfProfilerCommandParse(const std::string &command, int32_
 void JsRuntime::StartProfiler(const DebugOption dOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "localDebug %{public}d", dOption.isDebugFromLocal);
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "developer Mode false");
         return;
     }
@@ -335,6 +343,7 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
     uint32_t instanceId = instanceId_;
     std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
     HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
+        HdcRegister::DebugRegisterMode::HDC_DEBUG_REG,
         [bundleName, isStartWithDebug, instanceId, weak, isDebugApp, appProvisionType](int socketFd, std::string option) {
         TAG_LOGI(AAFwkTag::JSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s", socketFd, option.c_str());
         if (weak == nullptr) {
@@ -1673,5 +1682,15 @@ void JsRuntime::UpdatePkgContextInfoJson(const std::string& moduleName, const st
     panda::JSNApi::UpdatePkgNameList(vm, packageNameList);
 }
 
+void JsRuntime::SetDebugOption(const DebugOption debugOption)
+{
+    debugOption_ = debugOption;
+}
+
+void JsRuntime::StartLocalDebugMode(bool isDebugFromLocal)
+{
+    debugOption_.isDebugFromLocal = isDebugFromLocal;
+    StartDebugMode(debugOption_);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

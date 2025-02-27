@@ -550,7 +550,7 @@ int32_t AmsMgrScheduler::UnregisterAppDebugListener(const sptr<IAppDebugListener
     return amsMgrServiceInner_->UnregisterAppDebugListener(listener);
 }
 
-int32_t AmsMgrScheduler::AttachAppDebug(const std::string &bundleName)
+int32_t AmsMgrScheduler::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
@@ -560,7 +560,7 @@ int32_t AmsMgrScheduler::AttachAppDebug(const std::string &bundleName)
         TAG_LOGE(AAFwkTag::APPMGR, "caller is not foundation");
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->AttachAppDebug(bundleName);
+    return amsMgrServiceInner_->AttachAppDebug(bundleName, isDebugFromLocal);
 }
 
 int32_t AmsMgrScheduler::DetachAppDebug(const std::string &bundleName)

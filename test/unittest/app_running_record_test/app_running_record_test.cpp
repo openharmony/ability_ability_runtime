@@ -123,7 +123,7 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetAttachDebug_0100, TestSize.Le
     std::string processName;
     auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
     EXPECT_NE(appRunningRecord, nullptr);
-    appRunningRecord->SetAttachDebug(isAttachDebug);
+    appRunningRecord->SetAttachDebug(isAttachDebug, false);
     EXPECT_EQ(appRunningRecord->isAttachDebug_, true);
 }
 
@@ -140,7 +140,7 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetAttachDebug_0200, TestSize.Le
     std::string processName;
     auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
     EXPECT_NE(appRunningRecord, nullptr);
-    appRunningRecord->SetAttachDebug(isAttachDebug);
+    appRunningRecord->SetAttachDebug(isAttachDebug, false);
     EXPECT_EQ(appRunningRecord->isAttachDebug_, false);
 }
 

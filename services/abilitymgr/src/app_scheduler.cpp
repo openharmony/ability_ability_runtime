@@ -576,10 +576,10 @@ int32_t AppScheduler::UnregisterAppDebugListener(const sptr<AppExecFwk::IAppDebu
     return ERR_OK;
 }
 
-int32_t AppScheduler::AttachAppDebug(const std::string &bundleName)
+int32_t AppScheduler::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    auto ret = static_cast<int32_t>(appMgrClient_->AttachAppDebug(bundleName));
+    auto ret = static_cast<int32_t>(appMgrClient_->AttachAppDebug(bundleName, isDebugFromLocal));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "attach app debug failed");
         return INNER_ERR;
