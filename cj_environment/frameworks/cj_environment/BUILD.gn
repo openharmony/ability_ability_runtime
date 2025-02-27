@@ -21,6 +21,18 @@ config("cj_rt_public_config") {
     "${ability_runtime_path}/cj_environment/interfaces/inner_api",
   ]
   defines = cj_config.common_defines
+
+  if (target_cpu == "arm64") {
+    defines += [ "_ARM64_" ]
+  }
+
+  if (target_cpu == "arm64") {
+    defines += [ "APP_USE_ARM64" ]
+  } else if (target_cpu == "arm") {
+    defines += [ "APP_USE_ARM" ]
+  } else if (target_cpu == "x86_64") {
+    defines += [ "APP_USE_X86_64" ]
+  }
 }
 
 ohos_shared_library("cj_environment") {
