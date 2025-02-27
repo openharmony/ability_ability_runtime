@@ -18,6 +18,7 @@
 #include <mutex>
 #include "hilog_tag_wrapper.h"
 #include "native_child_callback.h"
+#include "child_process_args_manager.h"
 #include "child_process_manager.h"
 #include "child_callback_manager.h"
 #include "child_process_manager_error_utils.h"
@@ -114,4 +115,13 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
         return ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(cpmErr);
     }
     return NCP_NO_ERROR;
+}
+
+NativeChildProcess_Args* OH_Ability_GetCurrentChildProcessArgs()
+{
+    NativeChildProcess_Args* result = ChildProcessArgsManager::GetInstance().GetChildProcessArgs();
+    if (result == nullptr) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "GetChildProcessArgs null");
+    }
+    return result;
 }
