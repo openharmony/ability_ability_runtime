@@ -19,6 +19,7 @@
 #include <memory>
 #include "ability_delegator.h"
 #include "ability_delegator_args.h"
+#include "runtime.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -29,7 +30,8 @@ public:
      *
      * @return the AbilityDelegator object initialized when the application is started.
      */
-    static std::shared_ptr<AbilityDelegator> GetAbilityDelegator();
+    static std::shared_ptr<AbilityDelegator> GetAbilityDelegator(
+        const AbilityRuntime::Runtime::Language &language = AbilityRuntime::Runtime::Language::JS);
 
     /**
      * Obtains test parameters stored in the AbilityDelegatorArgs object.
@@ -46,10 +48,11 @@ public:
      * @param args, Indicates the AbilityDelegatorArgs object.
      */
     static void RegisterInstance(
-        const std::shared_ptr<AbilityDelegator> &delegator, const std::shared_ptr<AbilityDelegatorArgs> &args);
+        const std::shared_ptr<AbilityDelegator> &delegator, const std::shared_ptr<AbilityDelegatorArgs> &args,
+        const AbilityRuntime::Runtime::Language &language);
 
 private:
-    static std::shared_ptr<AbilityDelegator> abilityDelegator_;
+    static std::map<AbilityRuntime::Runtime::Language, std::shared_ptr<AbilityDelegator>> abilityDelegator_;
     static std::shared_ptr<AbilityDelegatorArgs> abilityDelegatorArgs_;
 };
 }  // namespace AppExecFwk

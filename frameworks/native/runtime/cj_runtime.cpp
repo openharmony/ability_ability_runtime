@@ -129,16 +129,6 @@ bool CJRuntime::Initialize(const Options& options)
     return true;
 }
 
-void CJRuntime::RegisterUncaughtExceptionHandler(const CJUncaughtExceptionInfo& uncaughtExceptionInfo)
-{
-    auto cjEnv = OHOS::CJEnv::LoadInstance();
-    if (cjEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
-        return;
-    }
-    cjEnv->registerCJUncaughtExceptionHandler(uncaughtExceptionInfo);
-}
-
 bool CJRuntime::IsCJAbility(const std::string& info)
 {
     // in cj application, the srcEntry format should be packageName.AbilityClassName.
@@ -243,4 +233,15 @@ bool CJRuntime::StartDebugger()
 void CJRuntime::UnLoadCJAppLibrary()
 {
     TAG_LOGI(AAFwkTag::CJRUNTIME, "UnLoadCJAppLibrary not support yet");
+}
+
+void CJRuntime::RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo)
+{
+    // TODO sts 已完成
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");
+        return;
+    }
+    cjEnv->registerCJUncaughtExceptionHandler(*static_cast<CJUncaughtExceptionInfo*>(uncaughtExceptionInfo));
 }

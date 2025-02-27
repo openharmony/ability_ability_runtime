@@ -72,7 +72,9 @@ ohos_shared_library("runtime") {
     "${ability_runtime_native_path}/runtime/ohos_js_env_logger.cpp",
     "${ability_runtime_native_path}/runtime/ohos_js_environment_impl.cpp",
     "${ability_runtime_native_path}/runtime/ohos_loop_handler.cpp",
+    "${ability_runtime_native_path}/runtime/ohos_sts_environment_impl.cpp",
     "${ability_runtime_native_path}/runtime/runtime.cpp",
+    "${ability_runtime_native_path}/runtime/sts_runtime.cpp",
   ]
 
   configs = [ ":runtime_config" ]
@@ -88,6 +90,7 @@ ohos_shared_library("runtime") {
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_path}/js_environment/frameworks/js_environment:js_environment",
+    "${ability_runtime_path}/sts_environment/frameworks/sts_environment:sts_environment",
   ]
 
   external_deps = [

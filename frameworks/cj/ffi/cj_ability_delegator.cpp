@@ -72,7 +72,8 @@ void CJAbilityDelegator::FinishTest(const char* msg, int64_t code)
 extern "C" {
 int64_t FFIAbilityDelegatorRegistryGetAbilityDelegator()
 {
-    auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator =
+        OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     if (delegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
         return INVALID_CODE;

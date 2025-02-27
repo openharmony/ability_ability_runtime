@@ -599,6 +599,7 @@ ohos_shared_library("uiabilitykit_native") {
 
   sources = [
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ui_ability.cpp",
+    "${ability_runtime_native_path}/ability/native/ability_runtime/sts_ui_ability.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_handler_stage.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_manager_stage.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/reverse_continuation_scheduler_primary_stage.cpp",

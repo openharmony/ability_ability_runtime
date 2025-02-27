@@ -27,14 +27,22 @@ namespace AppExecFwk {
 class EventRunner;
 } // namespace AppExecFwk
 namespace AbilityRuntime {
+namespace {
+const std::string APPLICAITON_CODE_LANGUAGE_ARKTS_1_0 = "ArkTS1.0";
+const std::string APPLICAITON_CODE_LANGUAGE_ARKTS_1_2 = "ArkTS1.2";
+const std::string APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID = "ArkTSHybrid";
+} // namespace
+
 class Runtime {
 public:
     enum class Language {
         JS = 0,
-        CJ
+        CJ,
+        STS,
+        UNKNOWN,
     };
-
     struct Options {
+        std::map<Language, bool> langs;
         Language lang = Language::JS;
         std::string bundleName;
         std::string moduleName;
@@ -76,9 +84,11 @@ public:
         bool isStartWithNative = false;
     };
 
+    static std::vector<std::unique_ptr<Runtime>> CreateRuntimes(Options& options);
     static std::unique_ptr<Runtime> Create(const Options& options);
     static void SavePreloaded(std::unique_ptr<Runtime>&& instance);
     static std::unique_ptr<Runtime> GetPreloaded();
+    static Runtime::Language ConvertLangToCode(const std::string &language);
 
     Runtime() = default;
     virtual ~Runtime() = default;
@@ -116,7 +126,8 @@ public:
     Runtime(Runtime&&) = delete;
     Runtime& operator=(const Runtime&) = delete;
     Runtime& operator=(Runtime&&) = delete;
+    virtual void RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo) = 0;
 };
-}  // namespace AbilityRuntime
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_RUNTIME_H
+} // namespace AbilityRuntime
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_RUNTIME_H

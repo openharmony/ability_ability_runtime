@@ -165,7 +165,7 @@ void CJUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     cjAbilityObj_->OnStart(want, GetLaunchParam());
     AddLifecycleEventAfterCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStart");
         delegator->PostPerformStart(CreateADelegatorAbilityProperty());
@@ -254,7 +254,7 @@ void CJUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackI
 
 void CJUIAbility::OnStopCallback()
 {
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStop");
         delegator->PostPerformStop(CreateADelegatorAbilityProperty());
@@ -310,7 +310,7 @@ void CJUIAbility::OnSceneCreated()
         AddLifecycleEventAfterCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     }
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceCreated");
         delegator->PostPerformScenceCreated(CreateADelegatorAbilityProperty());
@@ -361,7 +361,7 @@ void CJUIAbility::OnSceneRestored()
         }
     }
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceRestored");
         delegator->PostPerformScenceRestored(CreateADelegatorAbilityProperty());
@@ -409,7 +409,7 @@ void CJUIAbility::onSceneDestroyed()
         }
     }
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceDestroyed");
         delegator->PostPerformScenceDestroyed(CreateADelegatorAbilityProperty());
@@ -452,7 +452,7 @@ void CJUIAbility::CallOnForegroundFunc(const Want &want)
     cjAbilityObj_->OnForeground(want);
     AddLifecycleEventAfterCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformForeground");
         delegator->PostPerformForeground(CreateADelegatorAbilityProperty());
@@ -490,7 +490,7 @@ void CJUIAbility::OnBackground()
     cjAbilityObj_->OnBackground();
     AddLifecycleEventAfterCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformBackground");
         delegator->PostPerformBackground(CreateADelegatorAbilityProperty());

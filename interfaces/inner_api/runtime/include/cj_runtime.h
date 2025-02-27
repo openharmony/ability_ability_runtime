@@ -71,8 +71,8 @@ public:
     void DumpCpuProfile() override {};
     void AllowCrossThreadExecution() override {};
     void GetHeapPrepare() override {};
-    void RegisterUncaughtExceptionHandler(const CJUncaughtExceptionInfo& uncaughtExceptionInfo);
     void UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName) override {};
+    void RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo) override;
 private:
     bool StartDebugger();
     bool LoadCJAppLibrary(const AppLibPathVec& appLibPaths);

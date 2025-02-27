@@ -130,6 +130,7 @@ public:
     void DumpHeapSnapshot(uint32_t tid, bool isFullGC) override {}
     void ForceFullGC(uint32_t tid) override {}
     void UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName) override {}
+    void RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo) override {}
 public:
     Language language;
 };

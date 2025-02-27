@@ -1354,13 +1354,6 @@ void JsRuntime::UpdateModuleNameAndAssetPath(const std::string& moduleName)
     panda::JSNApi::SetModuleName(vm, moduleName_);
 }
 
-void JsRuntime::RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionInfo& uncaughtExceptionInfo)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    CHECK_POINTER(jsEnv_);
-    jsEnv_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
-}
-
 void JsRuntime::RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -1616,6 +1609,13 @@ std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
     return systemKitsMap;
 }
 
+void JsRuntime::RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionInfo& uncaughtExceptionInfo)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
+}
+
 void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName)
 {
     auto iterator = pkgContextInfoJsonStringMap_.find(moduleName);
@@ -1631,6 +1631,14 @@ void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hap
         panda::JSNApi::SetPkgAliasList(vm, pkgAliasMap);
         panda::JSNApi::SetPkgNameList(vm, packageNameList_);
     }
+}
+
+void JsRuntime::RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo)
+{
+    // TODO sts 已修改
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->RegisterUncaughtExceptionHandler(*static_cast<JsEnv::UncaughtExceptionInfo*>(uncaughtExceptionInfo));
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

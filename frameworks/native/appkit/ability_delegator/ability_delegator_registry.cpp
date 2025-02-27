@@ -17,12 +17,17 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-std::shared_ptr<AbilityDelegator> AbilityDelegatorRegistry::abilityDelegator_ {};
+std::map<AbilityRuntime::Runtime::Language, std::shared_ptr<AbilityDelegator>> AbilityDelegatorRegistry::abilityDelegator_ {};
 std::shared_ptr<AbilityDelegatorArgs> AbilityDelegatorRegistry::abilityDelegatorArgs_ {};
 
-std::shared_ptr<AbilityDelegator> AbilityDelegatorRegistry::GetAbilityDelegator()
+std::shared_ptr<AbilityDelegator> AbilityDelegatorRegistry::GetAbilityDelegator(
+    const AbilityRuntime::Runtime::Language &language)
 {
-    return abilityDelegator_;
+    auto it = abilityDelegator_.find(language);
+    if (it != abilityDelegator_.end()) {
+        return it->second;
+    }
+    return nullptr; 
 }
 
 std::shared_ptr<AbilityDelegatorArgs> AbilityDelegatorRegistry::GetArguments()
@@ -31,10 +36,11 @@ std::shared_ptr<AbilityDelegatorArgs> AbilityDelegatorRegistry::GetArguments()
 }
 
 void AbilityDelegatorRegistry::RegisterInstance(
-    const std::shared_ptr<AbilityDelegator> &delegator, const std::shared_ptr<AbilityDelegatorArgs> &args)
+    const std::shared_ptr<AbilityDelegator> &delegator, const std::shared_ptr<AbilityDelegatorArgs> &args,
+    const AbilityRuntime::Runtime::Language &language)
 {
-    abilityDelegator_ = delegator;
     abilityDelegatorArgs_ = args;
+    abilityDelegator_.emplace(language, delegator);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

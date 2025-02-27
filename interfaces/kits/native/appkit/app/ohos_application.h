@@ -48,11 +48,11 @@ public:
     void DumpApplication();
 
     /**
-     * @brief Set Runtime
+     * @brief Add Runtime
      *
      * @param runtime Runtime instance.
      */
-    void SetRuntime(std::unique_ptr<AbilityRuntime::Runtime>&& runtime);
+    void AddRuntime(std::unique_ptr<AbilityRuntime::Runtime>&& runtime);
 
     /**
      * @brief Set ApplicationContext
@@ -168,11 +168,18 @@ public:
     std::shared_ptr<AbilityRuntime::Context> GetAppContext() const;
 
     /**
+     * @brief return the application runtimes
+     *
+     * @param runtime
+     */
+    const std::vector<std::unique_ptr<AbilityRuntime::Runtime>>& GetRuntime() const;
+
+    /**
      * @brief return the application runtime
      *
      * @param runtime
      */
-    const std::unique_ptr<AbilityRuntime::Runtime>& GetRuntime() const;
+    const std::unique_ptr<AbilityRuntime::Runtime>& GetRuntime(const std::string& language) const;
 
     /*
      *
@@ -242,7 +249,8 @@ private:
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;
     std::shared_ptr<AbilityRuntime::ApplicationContext> abilityRuntimeContext_ = nullptr;
     std::unordered_map<std::string, std::shared_ptr<AbilityRuntime::AbilityStage>> abilityStages_;
-    std::unique_ptr<AbilityRuntime::Runtime> runtime_;
+    std::vector<std::unique_ptr<AbilityRuntime::Runtime>> runtimes_;
+    std::unique_ptr<AbilityRuntime::Runtime> runtimeNullptr_;
     std::shared_ptr<Configuration> configuration_ = nullptr;
     std::map<int32_t, std::string> extensionTypeMap_;
 };
