@@ -390,7 +390,7 @@ void StartSpecifiedAbilityResponse::OnAcceptWantResponse(
 void AppScheduler::PrepareTerminateApp(const pid_t pid, const std::string &moduleName)
 {
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->PrepareTerminateApp(pid, moduleName);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->PrepareTerminateApp(pid, moduleName));
 }
 
 void StartSpecifiedAbilityResponse::OnTimeoutResponse(const AAFwk::Want &want, int32_t requestId)
