@@ -34,6 +34,9 @@ export class AsyncCallback {
 export default class UIAbilityContext {
   public native startAbilitySync(want: Want, callback:AsyncCallback): int;
   public native startAbilitySync(want: Want): int;
+  public native terminateSelfSync(): void;
+  public native terminateSelfSyncPromise(): void;
+  public native reportDrawnCompletedSync(): void;
   public nativeContext : long;
 
   startAbility(want: Want, callback: MyFun):void{
@@ -72,5 +75,42 @@ export default class UIAbilityContext {
       console.log("startAbility Promise 444");
     });
     return p;
+  }
+
+  terminateSelf(callback:() => void): void {
+    console.log("call startAbility callback 111");
+    let p1 = launch UIAbilityContext.terminateSelfSync();
+    console.log("call startAbility callback 222");
+    p1.then<void>(()=>{
+      callback();
+      console.log("call startAbility callback 333");
+    });
+    console.log("call startAbility callback 444");
+  }
+
+  terminateSelf(): Promise<void> {
+    console.log("terminateSelf Promise 111");
+    let p = new Promise<void>((resolve: () => void): void => {
+        console.log("terminateSelf Promise 222");
+        let p1 = launch UIAbilityContext.terminateSelfSyncPromise();
+        console.log("terminateSelf Promise 333");
+        p1.then<void>(():void=>{
+          resolve();
+          console.log("terminateSelf Promise 444");
+        });
+    });
+        console.log("terminateSelf Promise 555");
+        return p;
+  }
+
+  reportDrawnCompleted(callback:() => void): void {
+    console.log("reportDrawnCompleted callback 111");
+    let p1 = launch UIAbilityContext.reportDrawnCompletedSync();
+    console.log("reportDrawnCompleted callback 222");
+    p1.then<void>(()=>{
+      //callback();
+      console.log("reportDrawnCompleted callback 333");
+    });
+    console.log("reportDrawnCompleted callback 444");
   }
 }

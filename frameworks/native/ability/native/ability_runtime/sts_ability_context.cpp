@@ -113,6 +113,81 @@ static ani_int startAbility([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_
     return -1;
 }
 
+static void terminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass)
+{
+    TAG_LOGE(AAFwkTag::UIABILITY, "terminateSelfSynccpp 111");
+    ani_class cls = nullptr;
+    ani_long nativeContextLong;
+    ani_field contextField = nullptr;
+    ani_status status = ANI_ERROR;
+
+    if ((status = env->FindClass("LUIAbilityContext/UIAbilityContext;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+    if ((status = env->Class_FindField(cls, "nativeContext", &contextField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+
+    if ((status = env->Object_GetField_Long(aniClass, contextField, &nativeContextLong)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+    TAG_LOGE(AAFwkTag::UIABILITY, "nativeContext %{public}lld", nativeContextLong);
+
+    TAG_LOGE(AAFwkTag::UIABILITY, "terminateSelfSynccpp 222");
+    ((AbilityRuntime::AbilityContext*)nativeContextLong)->TerminateSelf();
+    TAG_LOGE(AAFwkTag::UIABILITY, "terminateSelfSynccpp end");
+}
+
+static void terminateSelfSyncPromise([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass)
+{
+    TAG_LOGE(AAFwkTag::UIABILITY, "terminateSelfSyncPromise 111");
+    ani_class cls = nullptr;
+    ani_long nativeContextLong;
+    ani_field contextField = nullptr;
+    ani_status status = ANI_ERROR;
+
+    if ((status = env->FindClass("LUIAbilityContext/UIAbilityContext;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+    if ((status = env->Class_FindField(cls, "nativeContext", &contextField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+
+    if ((status = env->Object_GetField_Long(aniClass, contextField, &nativeContextLong)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+    TAG_LOGE(AAFwkTag::UIABILITY, "nativeContext %{public}lld", nativeContextLong);
+
+    TAG_LOGE(AAFwkTag::UIABILITY, "terminateSelfSyncPromise 222");
+    ((AbilityRuntime::AbilityContext*)nativeContextLong)->TerminateSelf();
+    TAG_LOGE(AAFwkTag::UIABILITY, "terminateSelfSyncPromise end");
+}
+
+static void reportDrawnCompletedSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass)
+{
+    ani_class cls = nullptr;
+    ani_long nativeContextLong;
+    ani_field contextField = nullptr;
+    ani_status status = ANI_ERROR;
+    TAG_LOGE(AAFwkTag::UIABILITY, "reportDrawnCompletedSync 111");
+
+    if ((status = env->FindClass("LUIAbilityContext/UIAbilityContext;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+    if ((status = env->Class_FindField(cls, "nativeContext", &contextField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+
+    if ((status = env->Object_GetField_Long(aniClass, contextField, &nativeContextLong)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+    TAG_LOGE(AAFwkTag::UIABILITY, "nativeContext %{public}lld", nativeContextLong);
+
+    TAG_LOGE(AAFwkTag::UIABILITY, "reportDrawnCompletedSync 222");
+    ((AbilityRuntime::AbilityContext*)nativeContextLong)->ReportDrawnCompleted();
+    TAG_LOGE(AAFwkTag::UIABILITY, "reportDrawnCompletedSync end");
+}
+
 ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context)
 {
     TAG_LOGE(AAFwkTag::UIABILITY, "start");
@@ -130,6 +205,9 @@ ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityConte
             reinterpret_cast<ani_int*>(startAbilityByCall) },
         ani_native_function {
             "startAbilitySync", "L@ohos/app/ability/Want/Want;:I", reinterpret_cast<ani_int*>(startAbility) },
+        ani_native_function { "terminateSelfSync", ":V", reinterpret_cast<ani_int*>(terminateSelfSync) },
+        ani_native_function { "terminateSelfSyncPromise", ":V", reinterpret_cast<ani_int*>(terminateSelfSyncPromise) },
+        ani_native_function { "reportDrawnCompletedSync", ":V", reinterpret_cast<ani_int*>(reportDrawnCompletedSync) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
