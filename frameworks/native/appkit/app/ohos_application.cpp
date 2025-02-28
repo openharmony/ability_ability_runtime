@@ -468,10 +468,8 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             stageContext->SetResourceManager(rm);
         }
 
-        auto& runtimeStage = GetRuntime(abilityInfo->language);
-        if (runtimeStage) {
-            abilityStage = AbilityRuntime::AbilityStage::Create(runtimeStage, *hapModuleInfo);
-        }
+        auto& runtimeStage = GetRuntime(hapModuleInfo->language);
+        abilityStage = AbilityRuntime::AbilityStage::Create(runtimeStage, *hapModuleInfo);
         if (abilityStage == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
             return nullptr;
@@ -679,10 +677,6 @@ bool OHOSApplication::AddAbilityStage(
     }
 
     auto& runtime = GetRuntime(moduleInfo->language);
-    if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
-        return false;
-    }
     auto abilityStage = AbilityRuntime::AbilityStage::Create(runtime, *moduleInfo);
     if (abilityStage == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
