@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -438,9 +438,12 @@ public:
      *  CloseUIAbilityBySCB, close the special ability by scb.
      *
      * @param sessionInfo the session info of the ability to terminate.
+     * @param isUserRequestedExit determine whether it is a user request to exit.
+     * @param sceneFlag the reason info of the ability to terminate.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit = false);
+    ErrCode CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo,
+        bool isUserRequestedExit = false, uint32_t sceneFlag = 0);
 
     /**
      * SendResultToAbility with want, return resultWant from ability manager service.
@@ -1605,9 +1608,12 @@ public:
      *  Request to clean UIAbility from user.
      *
      * @param sessionInfo the session info of the ability to clean.
+     * @param isUserRequestedExit determine whether it is a user request to exit.
+     * @param sceneFlag the reason info of the ability to terminate.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool isUserRequestedExit = false);
+    ErrCode CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo,
+        bool isUserRequestedExit = false, uint32_t sceneFlag = 0);
 
     /**
      * Open link of ability and atomic service.
