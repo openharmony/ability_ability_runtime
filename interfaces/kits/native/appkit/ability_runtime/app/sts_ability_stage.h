@@ -83,6 +83,7 @@ private:
 
     void SetJsAbilityStage(const std::shared_ptr<Context> &context);
     std::unique_ptr<STSNativeReference> stsAbilityStageObj_;
+    ani_object stageObj_ = nullptr;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
