@@ -42,11 +42,14 @@
 #ifdef SUPPORT_GRAPHICS
 #include "window.h"
 #endif
+#include "runtime/include/mock/ani/ani.h"
+#include "sts_runtime.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
     constexpr const char* PERSIST_DARKMODE_KEY = "persist.ace.darkmode";
+    constexpr const char* STS_APPLICATION_CONTEXT_CLASS_NAME = "LAbilityStageHand/ApplicationContext;";
 }
 REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
 constexpr int32_t APP_ENVIRONMENT_OVERWRITE = 1;
@@ -196,6 +199,74 @@ void OHOSApplication::SetApplicationContext(
         }
         applicationSptr->OnUpdateConfigurationForAll(config);
     });
+}
+
+static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_boolean value) {
+    TAG_LOGI(AAFwkTag::APPKIT, "SetSupportedProcessCacheSync called");
+    ani_class applicationContextCls = nullptr;
+    if (env->FindClass(STS_APPLICATION_CONTEXT_CLASS_NAME, &applicationContextCls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed");
+        return;
+    }
+    ani_field contextField;
+    if (env->Class_FindField(applicationContextCls, "nativeApplicationContext", &contextField) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed");
+        return;
+    }
+    ani_long nativeContextLong;
+    if (env->Object_GetField_Long(aniObj, contextField, &nativeContextLong) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_GetField_Long failed");
+        return;
+    }
+    ((AbilityRuntime::ApplicationContext*)nativeContextLong)->SetSupportedProcessCacheSelf(value);
+    TAG_LOGI(AAFwkTag::APPKIT, "SetSupportedProcessCacheSync end");
+}
+
+void OHOSApplication::InitAniApplicationContext()
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "init application context");
+    auto& runtime = GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
+    auto aniEnv = static_cast<AbilityRuntime::STSRuntime &>(*runtime).GetAniEnv();
+    ani_class applicationContextCls = nullptr;
+    if (aniEnv->FindClass(STS_APPLICATION_CONTEXT_CLASS_NAME, &applicationContextCls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed");
+        return;
+    }
+    std::array applicationContextFunctions = {
+        ani_native_function {"setSupportedProcessCacheSync", "Z:V",
+            reinterpret_cast<void *>(SetSupportedProcessCacheSync)},
+    };
+    aniEnv->Class_BindNativeMethods(applicationContextCls, applicationContextFunctions.data(),
+        applicationContextFunctions.size());
+
+    ani_method contextCtorMethod = nullptr;
+    if (aniEnv->Class_FindMethod(applicationContextCls, "<ctor>", ":V", &contextCtorMethod) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod ctor failed");
+        return;
+    }
+    ani_object applicationContextObject = nullptr;
+    if (aniEnv->Object_New(applicationContextCls, contextCtorMethod, &applicationContextObject) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_New failed");
+        return;
+    }
+    ani_field contextField;
+    if (aniEnv->Class_FindField(applicationContextCls, "nativeApplicationContext", &contextField) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed");
+        return;
+    }
+    if (aniEnv->Object_SetField_Long(applicationContextObject, contextField,
+        (ani_long)abilityRuntimeContext_.get()) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Long failed");
+        return;
+    }
+    ani_ref applicationContextObjectRef = nullptr;
+    if (aniEnv->GlobalReference_Create(applicationContextObject, &applicationContextObjectRef) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Create failed");
+        return;
+    }
+    applicationContextObjRef_ = reinterpret_cast<void*>(applicationContextObjectRef);
+    TAG_LOGI(AAFwkTag::APPKIT, "init application context success");
 }
 
 /**
@@ -397,7 +468,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             stageContext->SetResourceManager(rm);
         }
 
-        auto& runtimeStage = GetRuntime(hapModuleInfo->language);
+        auto& runtimeStage = GetRuntime(abilityInfo->language);
         if (runtimeStage) {
             abilityStage = AbilityRuntime::AbilityStage::Create(runtimeStage, *hapModuleInfo);
         }

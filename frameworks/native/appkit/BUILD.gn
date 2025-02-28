@@ -76,6 +76,7 @@ ohos_shared_library("appkit_native") {
   include_dirs = [
     "native",
     "${ability_runtime_path}/interfaces/inner_api/error_utils/include",
+    "${ability_runtime_path}/interfaces/inner_api",
     "${ability_runtime_path}/interfaces/kits/native/appkit",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",

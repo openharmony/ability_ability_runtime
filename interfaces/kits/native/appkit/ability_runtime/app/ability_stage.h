@@ -62,11 +62,13 @@ public:
     virtual int32_t RunAutoStartupTask(const std::function<void()> &callback, bool &isAsyncCallback,
         const std::shared_ptr<Context> &stageContext);
 
+protected:
+    std::weak_ptr<AppExecFwk::OHOSApplication> application_;
+
 private:
     friend class JsAbilityStage;
     std::shared_ptr<Context> context_;
     std::map<sptr<IRemoteObject>, std::shared_ptr<AppExecFwk::AbilityLocalRecord>> abilityRecords_;
-    std::weak_ptr<AppExecFwk::OHOSApplication> application_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

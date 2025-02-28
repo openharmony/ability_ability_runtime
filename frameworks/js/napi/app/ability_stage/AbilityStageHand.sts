@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+interface BaseContext {
+    readonly area: int;
+    readonly filesDir: string;
+    readonly tempDir: string;
+}
+
+abstract class Context implements BaseContext{
+    area: int = 0;
+    filesDir: string = "";
+    tempDir: string = "";
+
+    private applicationContext?: ApplicationContext;
+
+    getApplicationContext():ApplicationContext | undefined {
+        console.log("ywz getApplicationContext 111");
+        return this.applicationContext;
+    }
+}
+
+class ApplicationContext extends Context {
+    public native setSupportedProcessCacheSync(isSupported : boolean):void;
+    public nativeApplicationContext:long = 0;
+
+    setSupportedProcessCache(isSupported : boolean):void {
+        console.log("call setSupportedProcessCache 111");
+        let p1 = launch this.setSupportedProcessCacheSync(isSupported);
+        console.log("call setSupportedProcessCache 222");
+        p1.then<void>(():void=>{
+            console.log("call setSupportedProcessCache 333");
+        });
+    }
+}
+
+interface Configuration {
+    readonly language: string;
+}
+
+class ConfigurationInner implements Configuration {
+    language: string = "";
+}
+
+class AbilityStageContext extends Context {
+    public stageContext: long = 0; 
+    config?: Configuration;
+}
+
+
+// The subclass name must be STSAbilityStage
+abstract class AbilityStage {
+    stageContext?: AbilityStageContext;
+
+    onCreate() {
+    }
+}
