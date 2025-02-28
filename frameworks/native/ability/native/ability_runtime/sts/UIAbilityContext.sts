@@ -1,0 +1,76 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {Want} from './@ohos.app.ability.Want';
+
+export type MyFun = (e:int) => void;
+export class AsyncCallback {
+
+  myFun_:MyFun = (e:int) => {}
+
+  constructor(myFun:MyFun){
+    console.log("AsyncCallback");
+    this.myFun_ = myFun;
+  }
+
+  invoke(e:int) : void {
+    this.myFun_(e);
+  }
+}
+
+
+export default class UIAbilityContext {
+  public native startAbilitySync(want: Want, callback:AsyncCallback): int;
+  public native startAbilitySync(want: Want): int;
+  public nativeContext : long;
+
+  startAbility(want: Want, callback: MyFun):void{
+    console.log("call startAbility callback 111");
+    let myCall = new AsyncCallback(callback);
+    let p1 = launch this.startAbilitySync(want, myCall);
+    console.log("call startAbility callback 222");
+    p1.then((e : int)=>{
+      // callback();
+      console.log("e" + e);
+      console.log("call startAbility callback 333");
+    });
+    console.log("call startAbility callback 444");
+  }
+
+  // startAbility(want: Want, callback: AsyncCallback<void>): void;
+  // startAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void;
+  // startAbility(want: Want, options?: StartOptions): Promise<void>;
+  startAbility(want: Want): Promise<int> {
+    console.log("startAbility Promise");
+    let p = new Promise<int>((resolve: (r1 : int)=>void, reject:(err: string)=>void):void => {
+      console.log("startAbility Promise 111");
+      let p1 = launch this.startAbilitySync(want);
+      console.log("startAbility Promise 222");
+      p1.then((e : int)=>{
+        // callback();
+      console.log("startAbility Promise 333");
+        console.log("eee" + e);
+        if (e == 0) {
+          resolve(e);
+        } else {
+          reject("error");
+        }
+
+      });
+      console.log("startAbility Promise 444");
+    });
+    return p;
+  }
+}
