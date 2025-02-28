@@ -277,6 +277,10 @@ bool STSEnvironment::StartRuntime()
     // etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, "/system/lib/sts/EntryAbility.abc" });
     // etsVMOptions.push_back({ EtsOptionType::ETS_NATIVE_LIBRARY_PATH, (char*)strdup(std::string(appLibPath).c_str())
     // });
+
+    // TODO: for test
+    // etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, "/system/lib64/sts/ability_delegator.abc" });
+
     etsVMOptions.push_back({ EtsOptionType::ETS_VERIFICATION_MODE, "on-the-fly" });
     etsVMOptions.push_back({ EtsOptionType::ETS_NO_JIT, nullptr });
     // etsVMOptions.push_back({ EtsOptionType::ETS_MOBILE_LOG, (void*)ArkMobileLog });
