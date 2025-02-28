@@ -1622,6 +1622,15 @@ public:
         int32_t prepareTermination, bool isExist) override;
 
     /**
+     * KillProcessForPermissionUpdate
+     * force kill the application by accessTokenId, notify exception to SCB.
+     *
+     * @param  accessTokenId, accessTokenId.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual ErrCode KillProcessForPermissionUpdate(uint32_t accessTokenId) override;
+
+    /**
      * Register hidden start observer.
      * @param observer, ability token.
      * @return Returns ERR_OK on success, others on failure.

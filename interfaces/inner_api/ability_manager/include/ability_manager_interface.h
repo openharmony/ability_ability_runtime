@@ -2049,6 +2049,18 @@ public:
     {}
 
     /**
+     * KillProcessForPermissionUpdate, call KillProcessForPermissionUpdate() through proxy object,
+     * force kill the application by accessTokenId, notify exception to SCB.
+     *
+     * @param  accessTokenId, accessTokenId.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t KillProcessForPermissionUpdate(uint32_t accessTokenId)
+    {
+        return 0;
+    }
+
+    /**
      * Register hidden start observer.
      * @param observer, ability token.
      * @return Returns ERR_OK on success, others on failure.

@@ -2143,6 +2143,13 @@ void AbilityManagerClient::KillProcessWithPrepareTerminateDone(const std::string
     return abms->KillProcessWithPrepareTerminateDone(moduleName, prepareTermination, isExist);
 }
 
+ErrCode AbilityManagerClient::KillProcessForPermissionUpdate(uint32_t accessTokenId)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->KillProcessForPermissionUpdate(accessTokenId);
+}
+
 ErrCode AbilityManagerClient::RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call RegisterHiddenStartObserver");

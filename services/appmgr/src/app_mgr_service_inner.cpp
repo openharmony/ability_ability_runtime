@@ -1712,19 +1712,17 @@ int32_t AppMgrServiceInner::KillProcessesByAccessTokenId(const uint32_t accessTo
         return ERR_PERMISSION_DENIED;
     }
 
+    int32_t result = ERR_OK;
     std::vector<pid_t> pids;
-    GetPidsByAccessTokenId(accessTokenId, pids);
+    result = GetPidsByAccessTokenId(accessTokenId, pids);
+    if (result != ERR_OK) {
+        return result;
+    }
     if (pids.empty()) {
         TAG_LOGI(AAFwkTag::APPMGR, "no accessTokenId");
         return ERR_OK;
     }
 
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
-        return ERR_NO_INIT;
-    }
-
-    int32_t result = ERR_OK;
     for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
         result = KillProcessByPid(*iter, "KillProcessesByAccessTokenId");
         if (result < 0) {
@@ -8822,9 +8820,12 @@ bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) co
     return ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(bundleName);
 }
 
-void AppMgrServiceInner::GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids)
+int32_t AppMgrServiceInner::GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids)
 {
-    int32_t result = ERR_OK;
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return ERR_NO_INIT;
+    }
     std::vector<pid_t> foregroundPids;
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
@@ -8847,6 +8848,7 @@ void AppMgrServiceInner::GetPidsByAccessTokenId(const uint32_t accessTokenId, st
     for (pid_t foregroundPid : foregroundPids) {
         pids.push_back(foregroundPid);
     }
+    return ERR_OK;
 }
 
 bool AppMgrServiceInner::IsProcessContainsOnlyUIAbility(const pid_t pid)

@@ -1688,6 +1688,15 @@ public:
     void KillProcessWithPrepareTerminateDone(const std::string &moduleName, int32_t prepareTermination, bool isExist);
 
     /**
+     * KillProcessForPermissionUpdate
+     * force kill the application by accessTokenId, notify exception to SCB.
+     *
+     * @param  accessTokenId, accessTokenId.
+     * @return ERR_OK, return back success, others fail.
+     */
+    ErrCode KillProcessForPermissionUpdate(uint32_t accessTokenId);
+
+    /**
      * Register hidden start observer.
      * @param observer, ability token.
      * @return Returns ERR_OK on success, others on failure.
