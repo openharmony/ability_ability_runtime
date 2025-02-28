@@ -13171,9 +13171,11 @@ int32_t AbilityManagerService::KillProcessForPermissionUpdate(uint32_t accessTok
         return ERR_PERMISSION_DENIED;
     }
 
-    auto uiAbilityManager = GetUIAbilityManagerByUid(callingUid);
-    CHECK_POINTER_AND_RETURN_LOG(uiAbilityManager, ERR_NULL_OBJECT, "uiAbilityLifecycleManager nullptr");
-    uiAbilityManager->SetKillForPermissionUpdateFlag(accessTokenId);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto uiAbilityManager = GetUIAbilityManagerByUid(callingUid);
+        CHECK_POINTER_AND_RETURN_LOG(uiAbilityManager, ERR_NULL_OBJECT, "uiAbilityLifecycleManager nullptr");
+        uiAbilityManager->SetKillForPermissionUpdateFlag(accessTokenId);
+    }
 
     int32_t ret = 
         DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByAccessTokenId(accessTokenId);
