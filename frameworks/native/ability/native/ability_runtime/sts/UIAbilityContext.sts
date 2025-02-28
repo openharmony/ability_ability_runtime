@@ -14,34 +14,44 @@
  */
 
 import {Want} from './@ohos.app.ability.Want';
+import StartOptions from './@ohos.app.ability.StartOptions'
 
-export type MyFun = (e:int) => void;
-export class AsyncCallback {
+export class BusinessError {
+  code: int;
+  data?: string;
+}
 
-  myFun_:MyFun = (e:int) => {}
+type MyFun<T> = (err: BusinessError, data: T) => void;
+export class AsyncCallback<T> {
+  myFun_:MyFun<T> = (err: BusinessError, data: T) => {}
 
-  constructor(myFun:MyFun){
+  constructor(myFun:MyFun<T>){
     console.log("AsyncCallback");
     this.myFun_ = myFun;
   }
 
-  invoke(e:int) : void {
-    this.myFun_(e);
+  invoke(err: BusinessError, data: T) : void {
+    this.myFun_(err, data);
   }
 }
 
+export class AbilityResult {
+  resultCode: int
+}
 
 export default class UIAbilityContext {
-  public native startAbilitySync(want: Want, callback:AsyncCallback): int;
+  public native startAbilitySync(want: Want, callback:AsyncCallback<void>): int;
   public native startAbilitySync(want: Want): int;
+  public native nativeStartAbilityForResult(want: Want, callback:AsyncCallback<AbilityResult>): void;
+  public native nativeStartAbilityForResult(want: Want, startOptions: StartOptions, callback:AsyncCallback<AbilityResult>): void;
   public native terminateSelfSync(): void;
   public native terminateSelfSyncPromise(): void;
   public native reportDrawnCompletedSync(): void;
   public nativeContext : long;
 
-  startAbility(want: Want, callback: MyFun):void{
+  startAbility(want: Want, callback: MyFun<void>):void{
     console.log("call startAbility callback 111");
-    let myCall = new AsyncCallback(callback);
+    let myCall = new AsyncCallback<void>(callback);
     let p1 = launch this.startAbilitySync(want, myCall);
     console.log("call startAbility callback 222");
     p1.then((e : int)=>{
@@ -74,6 +84,40 @@ export default class UIAbilityContext {
       });
       console.log("startAbility Promise 444");
     });
+    return p;
+  }
+
+  startAbilityForResult(want: Want, callback: MyFun<AbilityResult>):void{
+    console.log("call startAbility callback 111");
+    let myCall = new AsyncCallback<AbilityResult>(callback);
+    launch this.nativeStartAbilityForResult(want, myCall);
+    console.log("call startAbility callback 222");
+  }
+
+  startAbilityForResult(want: Want, startOptions: StartOptions, callback: MyFun<AbilityResult>):void{
+    console.log("call startAbility callback 111");
+    let myCall = new AsyncCallback<AbilityResult>(callback);
+    launch this.nativeStartAbilityForResult(want, startOptions, myCall);
+    console.log("call startAbility callback 222");
+  }
+
+  startAbilityForResult(want: Want, startOptions?: StartOptions): Promise<AbilityResult>{
+    console.log("call startAbility callback 111");
+    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallback<AbilityResult>((err: BusinessError, data: AbilityResult)=>{
+        if (err.code == 0) {
+          resolve(data);
+        } else {
+          reject(err);
+        }
+      });
+      if (startOptions) {
+        launch this.nativeStartAbilityForResult(want, startOptions, myCall);
+      } else {
+        launch this.nativeStartAbilityForResult(want, myCall);
+      }
+    });
+    console.log("call startAbility callback 222");
     return p;
   }
 
