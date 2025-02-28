@@ -398,9 +398,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         }
 
         auto& runtimeStage = GetRuntime(hapModuleInfo->language);
-        if (runtimeStage) {
-            abilityStage = AbilityRuntime::AbilityStage::Create(runtimeStage, *hapModuleInfo);
-        }
+        abilityStage = AbilityRuntime::AbilityStage::Create(runtimeStage, *hapModuleInfo);
         if (abilityStage == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
             return nullptr;
@@ -608,10 +606,6 @@ bool OHOSApplication::AddAbilityStage(
     }
 
     auto& runtime = GetRuntime(moduleInfo->language);
-    if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
-        return false;
-    }
     auto abilityStage = AbilityRuntime::AbilityStage::Create(runtime, *moduleInfo);
     if (abilityStage == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
