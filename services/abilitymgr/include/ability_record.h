@@ -1116,6 +1116,9 @@ public:
     void SetRestartAppFlag(bool isRestartApp);
     bool GetRestartAppFlag() const;
 
+    void SetKillForPermissionUpdateFlag(bool isKillForPermissionUpdate);
+    bool GetKillForPermissionUpdateFlag() const;
+
     void UpdateUIExtensionInfo(const WantParams &wantParams);
 
     void SetSpecifyTokenId(const uint32_t specifyTokenId);
@@ -1376,6 +1379,8 @@ private:
     ffrt::mutex lock_;
     ffrt::mutex connectWantLock_;
     std::mutex collaborateWantLock_;
+
+    bool isKillForPermissionUpdate_ = false;
 
     std::mutex isPrepareTerminateAbilityMutex_;
     std::condition_variable isPrepareTerminateAbilityCv_;

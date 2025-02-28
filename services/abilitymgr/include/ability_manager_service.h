@@ -1934,6 +1934,15 @@ public:
     virtual void PrepareTerminateAbilityDone(const sptr<IRemoteObject> &token, bool isTerminate) override;
 
     /**
+     * KillProcessForPermissionUpdate, call KillProcessForPermissionUpdate() through proxy object,
+     * force kill the application by accessTokenId, notify exception to SCB.
+     *
+     * @param  accessTokenId, accessTokenId.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t KillProcessForPermissionUpdate(uint32_t accessTokenId) override;
+
+    /**
      * KillProcessWithPrepareTerminateDone, called when KillProcessWithPrepareTerminate call is done.
      *
      * @param moduleName, the module name of the application.
