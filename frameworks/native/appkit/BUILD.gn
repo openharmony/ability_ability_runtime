@@ -76,6 +76,7 @@ ohos_shared_library("appkit_native") {
   include_dirs = [
     "native",
     "${ability_runtime_path}/interfaces/inner_api/error_utils/include",
+    "${ability_runtime_path}/interfaces/inner_api",
     "${ability_runtime_path}/interfaces/kits/native/appkit",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
@@ -414,6 +415,9 @@ ohos_shared_library("appkit_delegator") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/ability_delegator/include",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
+
+    # TODO: for test
+    "${ability_runtime_path}/frameworks/ani/ability_delegator/include",
   ]
 
   configs = [ ":appkit_config" ]
@@ -428,8 +432,13 @@ ohos_shared_library("appkit_delegator") {
     "${ability_runtime_native_path}/appkit/ability_delegator/iability_monitor.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/iability_stage_monitor.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/runner_runtime/js_test_runner.cpp",
+    "${ability_runtime_native_path}/appkit/ability_delegator/runner_runtime/sts_test_runner.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/shell_cmd_result.cpp",
     "${ability_runtime_native_path}/appkit/ability_delegator/test_runner.cpp",
+
+    # TODO: for test
+    "${ability_runtime_path}/frameworks/ani/ability_delegator/src/sts_ability_delegator_registry.cpp",
+    "${ability_runtime_path}/frameworks/ani/ability_delegator/src/sts_ability_delegator_utils.cpp",
     "${ability_runtime_path}/tools/aa/src/shell_command_result.cpp",
     "${ability_runtime_path}/tools/aa/src/test_observer_proxy.cpp",
   ]

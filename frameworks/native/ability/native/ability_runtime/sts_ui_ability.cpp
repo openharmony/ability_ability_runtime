@@ -27,17 +27,19 @@
 #include "connection_manager.h"
 #include "context/application_context.h"
 #include "context/context.h"
-//#include "display_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "if_system_ability_manager.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "insight_intent_execute_param.h"
+#include "sts_ability_context.h"
+#include "sts_data_struct_converter.h"
 #ifdef SUPPORT_SCREEN
 #include "distributed_client.h"
 #include "scene_board_judgement.h"
 #endif
+#include "ani_common/ani_common_want.h"
 #include "string_wrapper.h"
 #include "system_ability_definition.h"
 #include "time_util.h"
@@ -52,10 +54,7 @@ const std::string METHOD_NAME = "WindowScene::GoForeground";
 #endif
 // Numerical base (radix) that determines the valid characters and their interpretation.
 #ifdef SUPPORT_SCREEN
-// const int32_t BASE_DISPLAY_ID_NUM (10);
-// constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
-// constexpr const char* SUPPORT_COLLABORATE_INDEX = "ohos.extra.param.key.supportCollaborateIndex";
-// constexpr const char* COLLABORATE_KEY = "ohos.dms.collabToken";
+const int32_t BASE_DISPLAY_ID_NUM(10);
 enum CollaborateResult {
     ACCEPT = 0,
     REJECT,
@@ -68,7 +67,7 @@ constexpr const int32_t API_VERSION_MOD = 100;
 
 UIAbility *StsUIAbility::Create(const std::unique_ptr<Runtime> &runtime)
 {
-    return new (std::nothrow) StsUIAbility(static_cast<STSRuntime &>(*runtime));
+    return new (std::nothrow) StsUIAbility(static_cast<STSRuntime&>(*runtime));
 }
 
 StsUIAbility::StsUIAbility(STSRuntime &stsRuntime) : stsRuntime_(stsRuntime)
@@ -128,157 +127,74 @@ void StsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath);
 }
 
-void StsUIAbility::UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
-    const std::string &moduleName, const std::string &srcPath)
+std::shared_ptr<STSNativeReference> LoadModule(ani_env *env)
+{
+    std::shared_ptr<STSNativeReference> stsNativeReference = std::make_shared<STSNativeReference>();
+    ani_class cls = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass("LEntryAbility/EntryAbility;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
+    }
+
+    ani_method entryMethod = nullptr;
+    if (env->Class_FindMethod(cls, "<ctor>", ":V", &entryMethod) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Class_FindMethod ctor failed");
+    }
+
+    ani_object entryObject = nullptr;
+    if (env->Object_New(cls, entryMethod, &entryObject) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Object_New AbcRuntimeLinker failed");
+    }
+
+    ani_ref entryObjectRef = nullptr;
+    if (env->GlobalReference_Create(entryObject, &entryObjectRef) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "GlobalReference_Create failed");
+    }
+    stsNativeReference->aniCls = cls;
+    stsNativeReference->aniObj = entryObject;
+    stsNativeReference->aniRef = entryObjectRef;
+    return stsNativeReference;
+}
+
+void StsUIAbility::UpdateAbilityObj(
+    std::shared_ptr<AbilityInfo> abilityInfo, const std::string &moduleName, const std::string &srcPath)
 {
     std::string key = moduleName + "::" + srcPath;
     std::unique_ptr<NativeReference> moduleObj = nullptr;
-    stsAbilityObj_ = stsRuntime_.LoadModule(
-        moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
-        false, abilityInfo->srcEntrance);
+    // stsAbilityObj_ = stsRuntime_.LoadModule(
+    //     moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
+    //     false, abilityInfo->srcEntrance);
+    auto env = stsRuntime_.GetAniEnv();
+    stsAbilityObj_ = LoadModule(env);
 }
 
-void StsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
-    std::shared_ptr<AAFwk::Want> want, const std::string &moduleName, const std::string &srcPath)
+void StsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want,
+    const std::string &moduleName, const std::string &srcPath)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
-    
-    // auto env = stsRuntime_.GetAniEnv();
+
+    // HandleScope handleScope(jsRuntime_);
+    auto env = stsRuntime_.GetAniEnv();
     UpdateAbilityObj(abilityInfo, moduleName, srcPath);
     if (stsAbilityObj_ == nullptr || abilityContext_ == nullptr || want == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsAbilityObj_ or abilityContext_ or want");
         return;
     }
-    TAG_LOGI(AAFwkTag::UIABILITY, "End");
-}
 
-ani_object WrapWantParams(ani_env* env, const AAFwk::WantParams &wantParams)
-{
-    ani_status status = ANI_ERROR;
-    ani_class recordCls = nullptr;
-    ani_method recordGetMethod = nullptr;
-
-    const char * recordClassName = "Lescompat/Record;";
-    if ((status = env->FindClass(recordClassName, &recordCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if (env->Class_FindMethod(recordCls, "set", "Lstd/core/Object;:Lstd/core/Object;", &recordGetMethod) != ANI_OK){
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-
-    //TODO
-    
-
-    return nullptr;
-}
-
-ani_object WrapWant(ani_env* env, ani_class cls, const Want &want)
-{
-    TAG_LOGE(AAFwkTag::UIABILITY, "WrapWant");
-    ani_method method = nullptr;
-    ani_status status = ANI_ERROR;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    ani_object object = nullptr;
-    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null object");
-        return nullptr;
-    }
+    ani_ref contextObj = CreateStsAbilityContext(env, abilityContext_);
+    ani_ref contextGlobalRef = nullptr;
     ani_field field = nullptr;
-    ani_string string = nullptr;
-    auto elementName = want.GetElement();
-
-    if ((status = env->Class_FindField(cls, "deviceId", &field)) != ANI_OK) {
+    ani_status status = ANI_ERROR;
+    if ((status = env->GlobalReference_Create(contextObj, &contextGlobalRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
     }
-    env->String_NewUTF8(elementName.GetDeviceID().c_str(), elementName.GetDeviceID().size(), &string);
-    if ((status = env->Object_SetField_Ref(object, field, string)) != ANI_OK) {
+    if ((status = env->Class_FindField(stsAbilityObj_->aniCls, "context", &field)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
     }
-    if ((status = env->Class_FindField(cls, "bundleName", &field)) != ANI_OK) {
+    if ((status = env->Object_SetField_Ref(stsAbilityObj_->aniObj, field, contextGlobalRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
     }
-    if ((status = env->String_NewUTF8(elementName.GetBundleName().c_str(), elementName.GetBundleName().size(), &string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if ((status = env->Object_SetField_Ref(object, field, string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    env->Class_FindField(cls, "abilityName", &field);
-    env->String_NewUTF8(elementName.GetAbilityName().c_str(), elementName.GetAbilityName().size(), &string);
-    env->Object_SetField_Ref(object, field, string);
-
-    env->Class_FindField(cls, "moduleName", &field);
-    env->String_NewUTF8(elementName.GetModuleName().c_str(), elementName.GetModuleName().size(), &string);
-    env->Object_SetField_Ref(object, field, string);
-
-    env->Class_FindField(cls, "uri", &field);
-    env->String_NewUTF8(want.GetUriString().c_str(), want.GetUriString().size(), &string);
-    env->Object_SetField_Ref(object, field, string);
-
-    env->Class_FindField(cls, "type", &field);
-    env->String_NewUTF8(want.GetType().c_str(), want.GetType().size(), &string);
-    env->Object_SetField_Ref(object, field, string);
-
-    if ((status = env->Class_FindField(cls, "flags", &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if ((status = env->Object_SetField_Int(object, field, want.GetFlags())) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-
-    env->Class_FindField(cls, "action", &field);
-    env->String_NewUTF8(want.GetAction().c_str(), want.GetAction().size(), &string);
-    env->Object_SetField_Ref(object, field, string);
-    // TODO
-    return object;
-}
-
-ani_object CreateStsLaunchParam(ani_env *env, ani_class cls, const AAFwk::LaunchParam &launchParam)
-{
-    // ani_method method = nullptr;
-    // ani_field field = nullptr;
-    // ani_string string = nullptr;
-    // ani_status status = ANI_ERROR;
-     ani_object object = nullptr;
-
-    // if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-    //     TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    // }
-    // if (method == nullptr) {
-    //     TAG_LOGE(AAFwkTag::UIABILITY, "null method");
-    // }
-    // if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-    //     TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    // }
-    // if (object == nullptr) {
-    //     TAG_LOGE(AAFwkTag::UIABILITY, "null object");
-    //     return nullptr;
-    // }
-    // if ((status = env->Class_FindField(cls, "launchReason", &field)) != ANI_OK) {
-    //     TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    // }
-    // if ((status = env->Object_SetField_Int(object, field, launchParam.launchReason)) != ANI_OK) {
-    //     TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    // }
-    // field = nullptr;
-    // string = nullptr;
-    // env->Class_FindField(cls, "launchReasonMessage", &field);
-    // env->String_NewUTF8(launchParam.launchReasonMessage.c_str(), launchParam.launchReasonMessage.size(), &string);
-    // env->Object_SetField_Ref(object, field, string);
-    // field = nullptr;
-    // env->Class_FindField(cls, "lastExitReason", &field);
-    // env->Object_SetField_Int(object, field, launchParam.lastExitReason);
-    // field = nullptr;
-    // string = nullptr;
-    // env->Class_FindField(cls, "lastExitMessage", &field);
-    // env->String_NewUTF8(launchParam.lastExitMessage.c_str(), launchParam.lastExitMessage.size(), &string);
-    // env->Object_SetField_Ref(object, field, string);
-    return object;
+    TAG_LOGI(AAFwkTag::UIABILITY, "End");
 }
 
 void StsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
@@ -298,16 +214,7 @@ void StsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
     }
 
     ani_status status = ANI_ERROR;
-    ani_class wantCls = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/Want/Want;", &wantCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if (wantCls == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null wantCls");
-        return;
-    }
-
-    ani_ref wantObj = WrapWant(env, wantCls, want);
+    ani_ref wantObj = OHOS::AppExecFwk::WrapWant(env, want);
     if (wantObj == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null wantObj");
         return;
@@ -334,20 +241,14 @@ void StsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
         launchParam.launchReason = AAFwk::LaunchReason::LAUNCHREASON_INSIGHT_INTENT;
     }
-    ani_class launchParamCls = nullptr;
-    if((status = env->FindClass("L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;", &launchParamCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if (launchParamCls == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null launchParamCls");
-    }
-    ani_ref launchParamRef = CreateStsLaunchParam(env, launchParamCls, launchParam);
-    const char* signature = "L@ohos/app/ability/Want/Want;L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;:V";
+    ani_ref launchParamRef = CreateStsLaunchParam(env, launchParam);
+    const char *signature =
+        "L@ohos/app/ability/Want/Want;L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;:V";
 
     std::string methodName = "OnStart";
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     CallObjectMethod(false, "onCreate", signature, wantRef, launchParamRef);
@@ -359,21 +260,23 @@ void StsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
     }
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
 void StsUIAbility::AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
-    // auto entry = std::string("StsUIAbility::") + methodName + " begin";
-    // FreezeUtil::GetInstance().AddLifecycleEvent(AbilityContext::token_, entry);
+    FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
+    auto entry = std::string("JsUIAbility::") + methodName + "; the " + methodName + " begin.";
+    FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
 void StsUIAbility::AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
-    // auto entry = std::string("StsUIAbility::") + methodName + " end";
-    // FreezeUtil::GetInstance().AddLifecycleEvent(AbilityContext::token_, entry);
+    FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
+    auto entry = std::string("JsUIAbility::") + methodName + "; the " + methodName + " end.";
+    FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
 int32_t StsUIAbility::OnShare(WantParams &wantParam)
@@ -399,9 +302,9 @@ void StsUIAbility::OnStop()
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
-    const char* signature = ":V";
+    const char *signature = ":V";
     CallObjectMethod(false, "onDestroy", signature);
     OnStopCallback();
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
@@ -426,7 +329,7 @@ void StsUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callback
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
     std::weak_ptr<UIAbility> weakPtr = shared_from_this();
     auto asyncCallback = [abilityWeakPtr = weakPtr]() {
@@ -457,7 +360,7 @@ void StsUIAbility::OnStopCallback()
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
 }
 
@@ -470,19 +373,20 @@ void StsUIAbility::OnSceneCreated()
     auto stsAppWindowStage = CreateAppWindowStage();
     if (stsAppWindowStage == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsAppWindowStage");
+        return;
     }
 
     UpdateStsWindowStage(stsAppWindowStage->aniRef);
     stsWindowStageObj_ = std::shared_ptr<STSNativeReference>(stsAppWindowStage.release());
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "onWindowStageCreate");
         std::string methodName = "OnSceneCreated";
         AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
-        const char* signature = "L@ohos/window/window/WindowStage;:V";
+        const char *signature = "L@ohos/window/window/WindowStage;:V";
         CallObjectMethod(false, "onWindowStageCreate", signature, stsAppWindowStage->aniRef);
         AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     }
@@ -495,7 +399,7 @@ void StsUIAbility::OnSceneCreated()
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
 
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
@@ -506,19 +410,19 @@ void StsUIAbility::OnSceneRestored()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     UIAbility::OnSceneRestored();
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    
+
     auto stsAppWindowStage = CreateAppWindowStage();
     if (stsAppWindowStage == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsAppWindowStage");
         return;
     }
-    //TODO
+    // TODO
 }
 
 void StsUIAbility::OnSceneWillDestroy()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
-    
+
     if (stsWindowStageObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsWindowStageObj_");
         return;
@@ -532,11 +436,11 @@ void StsUIAbility::onSceneDestroyed()
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
 
     UpdateStsWindowStage(nullptr);
-    const char* signature = ":V";
+    const char *signature = ":V";
     CallObjectMethod(false, "onWindowStageDestroy", signature);
 
     if (scene_ != nullptr) {
@@ -555,7 +459,7 @@ void StsUIAbility::onSceneDestroyed()
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -565,11 +469,11 @@ void StsUIAbility::OnForeground(const Want &want)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
     if (abilityInfo_) {
-        //TODO
+        // TODO
     }
 
     UIAbility::OnForeground(want);
-    //HandleCollaboration(want);
+    // HandleCollaboration(want);
 
     if (CheckIsSilentForeground()) {
         TAG_LOGD(AAFwkTag::UIABILITY, "silent foreground, do not call 'onForeground'");
@@ -585,25 +489,17 @@ void StsUIAbility::CallOnForegroundFunc(const Want &want)
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsAbilityObj_");
         return;
     }
-    //TODO
+    // TODO
     ani_status status = ANI_ERROR;
-    ani_class wantCls = nullptr;
     ani_field field = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/Want/Want;", &wantCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if (wantCls == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null wantCls");
-        return;
-    }
-    ani_ref wantRef = WrapWant(env, wantCls, want);
+    ani_ref wantRef = OHOS::AppExecFwk::WrapWant(env, want);
     if (wantRef == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null wantObj");
         return;
     }
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
 
     if ((status = env->Class_FindField(stsAbilityObj_->aniCls, "lastRequestWant", &field)) != ANI_OK) {
@@ -614,8 +510,7 @@ void StsUIAbility::CallOnForegroundFunc(const Want &want)
     }
     std::string methodName = "OnForeground";
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
-    const char* signature = "L@ohos/app/ability/Want/Want;:V";
-    CallObjectMethod(false, "onForeground", signature, wantRef);
+    CallObjectMethod(false, "onForeground", nullptr, wantRef);
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
@@ -626,7 +521,7 @@ void StsUIAbility::CallOnForegroundFunc(const Want &want)
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -637,12 +532,12 @@ void StsUIAbility::OnBackground()
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
     std::string methodName = "OnBackground";
-    
+
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
-    const char* signature = ":V";
+    const char *signature = ":V";
     CallObjectMethod(false, "onBackground", signature);
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
 
@@ -656,11 +551,11 @@ void StsUIAbility::OnBackground()
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
     auto want = GetWant();
     if (want != nullptr) {
-        //HandleCollaboration(*want);
+        // HandleCollaboration(*want);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -673,7 +568,7 @@ bool StsUIAbility::OnBackPress()
     return false;
 }
 
-ani_object CreateAniWindowStage(ani_env* env, std::shared_ptr<Rosen::WindowScene>& windowScene)
+ani_object CreateAniWindowStage(ani_env *env, std::shared_ptr<Rosen::WindowScene> &windowScene)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "[ANI] null env");
@@ -748,7 +643,7 @@ void StsUIAbility::RestorePageStack(const Want &want)
         std::string pageStack;
         GetPageStackFromWant(want, pageStack);
         if (abilityContext_->GetContentStorage()) {
-            //TODO
+            // TODO
         } else {
             TAG_LOGE(AAFwkTag::UIABILITY, "null content storage");
         }
@@ -758,28 +653,28 @@ void StsUIAbility::RestorePageStack(const Want &want)
 void StsUIAbility::AbilityContinuationOrRecover(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "launch reason: %{public}d, last exit reasion: %{public}d",
-        launchParam_.launchReason, launchParam_.lastExitReason);
+    TAG_LOGD(AAFwkTag::UIABILITY, "launch reason: %{public}d, last exit reasion: %{public}d", launchParam_.launchReason,
+        launchParam_.lastExitReason);
     if (IsRestoredInContinuation()) {
         RestorePageStack(want);
         OnSceneRestored();
         NotifyContinuationResult(want, true);
     } else if (ShouldRecoverState(want)) {
         std::string pageStack = abilityRecovery_->GetSavedPageStack(AppExecFwk::StateReason::DEVELOPER_REQUEST);
-        
+
         auto mainWindow = scene_->GetMainWindow();
         if (mainWindow != nullptr) {
-            //TODO
+            // TODO
         } else {
             TAG_LOGE(AAFwkTag::UIABILITY, "null mainWindow");
         }
         OnSceneRestored();
     } else {
-        if (ShouldDefaultRecoverState(want) && abilityRecovery_ != nullptr && scene_ != nullptr) {
+        if (ShouldDefaultRecoverState(want) &&abilityRecovery_ != nullptr &&scene_ != nullptr) {
             TAG_LOGD(AAFwkTag::UIABILITY, "need restore");
             std::string pageStack = abilityRecovery_->GetSavedPageStack(AppExecFwk::StateReason::DEVELOPER_REQUEST);
             auto mainWindow = scene_->GetMainWindow();
-            if (!pageStack.empty() && mainWindow != nullptr) {
+            if (!pageStack.empty() &&mainWindow != nullptr) {
                 mainWindow->SetRestoredRouterStack(pageStack);
             }
         }
@@ -798,7 +693,7 @@ void StsUIAbility::DoOnForeground(const Want &want)
         DoOnForegroundForSceneIsNull(want);
     } else {
         auto window = scene_->GetMainWindow();
-        if (window != nullptr && want.HasParameter(Want::PARAM_RESV_WINDOW_MODE)) {
+        if (window != nullptr &&want.HasParameter(Want::PARAM_RESV_WINDOW_MODE)) {
             auto windowMode = want.GetIntParam(
                 Want::PARAM_RESV_WINDOW_MODE, AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED);
             window->SetWindowMode(static_cast<Rosen::WindowMode>(windowMode));
@@ -808,7 +703,7 @@ void StsUIAbility::DoOnForeground(const Want &want)
     }
 
     auto window = scene_->GetMainWindow();
-    if (window != nullptr && securityFlag_) {
+    if (window != nullptr &&securityFlag_) {
         window->SetSystemPrivacyMode(true);
     }
 
@@ -826,49 +721,50 @@ void StsUIAbility::DoOnForeground(const Want &want)
 
 void StsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
 {
-    // scene_ = std::make_shared<Rosen::WindowScene>();
-    // int32_t displayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
-    // if (setting_ != nullptr) {
-    //     std::string strDisplayId = setting_->GetProperty(OHOS::AppExecFwk::AbilityStartSetting::WINDOW_DISPLAY_ID_KEY);
-    //     std::regex formatRegex("[0-9]{0,9}$");
-    //     std::smatch sm;
-    //     bool flag = std::regex_match(strDisplayId, sm, formatRegex);
-    //     if (flag && !strDisplayId.empty()) {
-    //         displayId = strtol(strDisplayId.c_str(), nullptr, BASE_DISPLAY_ID_NUM);
-    //         TAG_LOGD(AAFwkTag::UIABILITY, "displayId: %{public}d", displayId);
-    //     } else {
-    //         TAG_LOGW(AAFwkTag::UIABILITY, "formatRegex: [%{public}s] failed", strDisplayId.c_str());
-    //     }
-    // }
-    // auto option = GetWindowOption(want);
-    // Rosen::WMError ret = Rosen::WMError::WM_OK;
-    // auto sessionToken = GetSessionToken();
-    // auto identityToken = GetIdentityToken();
-    // HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "scene_->Init");
-    // if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken != nullptr) {
-    //     abilityContext_->SetWeakSessionToken(sessionToken);
-    //     ret = scene_->Init(displayId, abilityContext_, sceneListener_, option, sessionToken, identityToken);
-    // } else {
-    //     ret = scene_->Init(displayId, abilityContext_, sceneListener_, option);
-    // }
-    // if (ret != Rosen::WMError::WM_OK) {
-    //     TAG_LOGE(AAFwkTag::UIABILITY, "init window scene failed");
-    //     FreezeUtil::GetInstance().AppendLifecycleEvent(AbilityContext::token_,
-    //         std::string("StsUIAbility::DoOnForegroundForSceneIsNull; error ") + std::to_string(static_cast<int>(ret)));
-    //     return;
-    // }
+    scene_ = std::make_shared<Rosen::WindowScene>();
+    int32_t displayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
+    if (setting_ != nullptr) {
+        std::string strDisplayId = setting_->GetProperty(OHOS::AppExecFwk::AbilityStartSetting::WINDOW_DISPLAY_ID_KEY);
+        std::regex formatRegex("[0-9]{0,9}$");
+        std::smatch sm;
+        bool flag = std::regex_match(strDisplayId, sm, formatRegex);
+        if (flag &&!strDisplayId.empty()) {
+            displayId = strtol(strDisplayId.c_str(), nullptr, BASE_DISPLAY_ID_NUM);
+            TAG_LOGD(AAFwkTag::UIABILITY, "displayId: %{public}d", displayId);
+        } else {
+            TAG_LOGW(AAFwkTag::UIABILITY, "formatRegex: [%{public}s] failed", strDisplayId.c_str());
+        }
+    }
+    auto option = GetWindowOption(want);
+    Rosen::WMError ret = Rosen::WMError::WM_OK;
+    auto sessionToken = GetSessionToken();
+    auto identityToken = GetIdentityToken();
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "scene_->Init");
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&sessionToken != nullptr) {
+        abilityContext_->SetWeakSessionToken(sessionToken);
+        ret = scene_->Init(displayId, abilityContext_, sceneListener_, option, sessionToken, identityToken);
+    } else {
+        ret = scene_->Init(displayId, abilityContext_, sceneListener_, option);
+    }
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "init window scene failed");
+        FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, FreezeUtil::TimeoutState::FOREGROUND };
+        FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
+            std::string("ERROR JsUIAbility::DoOnForegroundForSceneIsNull: ") + std::to_string(static_cast<int>(ret)));
+        return;
+    }
 
-    // AbilityContinuationOrRecover(want);
-    // auto window = scene_->GetMainWindow();
-    // if (window) {
-    //     TAG_LOGD(AAFwkTag::UIABILITY, "registerDisplayMoveListener, windowId: %{public}d", window->GetWindowId());
-    //     abilityDisplayMoveListener_ = new AbilityDisplayMoveListener(weak_from_this());
-    //     if (abilityDisplayMoveListener_ == nullptr) {
-    //         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityDisplayMoveListener_");
-    //         return;
-    //     }
-    //     window->RegisterDisplayMoveListener(abilityDisplayMoveListener_);
-    // }
+    AbilityContinuationOrRecover(want);
+    auto window = scene_->GetMainWindow();
+    if (window) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "registerDisplayMoveListener, windowId: %{public}d", window->GetWindowId());
+        abilityDisplayMoveListener_ = new AbilityDisplayMoveListener(weak_from_this());
+        if (abilityDisplayMoveListener_ == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityDisplayMoveListener_");
+            return;
+        }
+        window->RegisterDisplayMoveListener(abilityDisplayMoveListener_);
+    }
 }
 
 void StsUIAbility::RequestFocus(const Want &want)
@@ -879,7 +775,7 @@ void StsUIAbility::RequestFocus(const Want &want)
         return;
     }
     auto window = scene_->GetMainWindow();
-    if (window != nullptr && want.HasParameter(Want::PARAM_RESV_WINDOW_MODE)) {
+    if (window != nullptr &&want.HasParameter(Want::PARAM_RESV_WINDOW_MODE)) {
         auto windowMode = want.GetIntParam(
             Want::PARAM_RESV_WINDOW_MODE, AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED);
         window->SetWindowMode(static_cast<Rosen::WindowMode>(windowMode));
@@ -947,8 +843,8 @@ void StsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
     auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
     if (!ret) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
-        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
-            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        InsightIntentExecutorMgr::TriggerCallbackInner(
+            std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
 
@@ -973,7 +869,7 @@ void StsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
     }
 
     if (abilityInfo_) {
-        //TODO
+        // TODO
     }
     UIAbility::OnForeground(want);
 
@@ -992,8 +888,8 @@ void StsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
     auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
     if (!ret) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
-        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
-            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        InsightIntentExecutorMgr::TriggerCallbackInner(
+            std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
 
@@ -1017,15 +913,15 @@ void StsUIAbility::ExecuteInsightIntentBackground(const Want &want,
     }
 
     if (abilityInfo_) {
-        //TODO
+        // TODO
     }
 
     InsightIntentExecutorInfo executeInfo;
     auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
     if (!ret) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
-        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
-            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        InsightIntentExecutorMgr::TriggerCallbackInner(
+            std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
 
@@ -1038,8 +934,7 @@ void StsUIAbility::ExecuteInsightIntentBackground(const Want &want,
 }
 
 bool StsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
-    const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
-    InsightIntentExecutorInfo& executeInfo)
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam, InsightIntentExecutorInfo &executeInfo)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 
@@ -1049,8 +944,7 @@ bool StsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
         return false;
     }
 
-    if (executeParam->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND
-        && stsWindowStageObj_ == nullptr) {
+    if (executeParam->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND &&stsWindowStageObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "param invalid");
         return false;
     }
@@ -1062,7 +956,7 @@ bool StsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
     executeInfo.windowMode = windowMode_;
     executeInfo.token = context->GetToken();
     if (stsWindowStageObj_ != nullptr) {
-        //TODO
+        // TODO
     }
     executeInfo.executeParam = executeParam;
     return true;
@@ -1073,7 +967,7 @@ int32_t StsUIAbility::OnCollaborate(WantParams &wantParam)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "OnCollaborate: %{public}s", GetAbilityName().c_str());
     int32_t ret = CollaborateResult::REJECT;
-    
+
     // auto env = stsRuntime_.GetAniEnv();
 
     if (stsAbilityObj_ == nullptr) {
@@ -1084,37 +978,10 @@ int32_t StsUIAbility::OnCollaborate(WantParams &wantParam)
     return ret;
 }
 
-// void StsUIAbility::HandleCollaboration(const Want &want)
-// {
-//     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-//     if (abilityInfo_ == nullptr) {
-//         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
-//         return;
-//     }
-//     if (want.GetBoolParam(IS_CALLING_FROM_DMS, false) &&
-//         (abilityInfo_->launchMode != AppExecFwk::LaunchMode::SPECIFIED)) {
-//         (const_cast<Want &>(want)).RemoveParam(IS_CALLING_FROM_DMS);
-//         SetWant(want);
-//         OHOS::AAFwk::WantParams wantParams = want.GetParams();
-//         int32_t resultCode = OnCollaborate(wantParams);
-//         auto abilityContext = GetAbilityContext();
-//         if (abilityContext == nullptr) {
-//             TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
-//             return;
-//         }
-//         OHOS::AAFwk::WantParams param = want.GetParams().GetWantParams(SUPPORT_COLLABORATE_INDEX);
-//         auto collabToken = param.GetStringParam(COLLABORATE_KEY);
-//         auto uid = abilityInfo_->uid;
-//         auto callerPid = getpid();
-//         auto accessTokenId = abilityInfo_->applicationInfo.accessTokenId;
-//         AAFwk::DistributedClient dmsClient;
-//         dmsClient.OnCollaborateDone(collabToken, resultCode, callerPid, uid, accessTokenId);
-//     }
-// }
 #endif
 
-int32_t StsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
-    const AppExecFwk::AbilityInfo &abilityInfo)
+int32_t StsUIAbility::OnContinue(
+    WantParams &wantParams, bool &isAsyncOnContinue, const AppExecFwk::AbilityInfo &abilityInfo)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
     if (stsAbilityObj_ == nullptr) {
@@ -1180,7 +1047,7 @@ void StsUIAbility::OnNewWant(const Want &want)
     if (scene_) {
         scene_->OnNewWant(want);
     }
-    //HandleCollaboration(want);
+    // HandleCollaboration(want);
 #endif
     auto env = stsRuntime_.GetAniEnv();
     if (stsAbilityObj_ == nullptr) {
@@ -1189,15 +1056,7 @@ void StsUIAbility::OnNewWant(const Want &want)
     }
     ani_status status = ANI_OK;
     ani_field field = nullptr;
-    ani_class wantCls = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/Want/Want;", &wantCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if (wantCls == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null wantCls");
-        return;
-    }
-    ani_ref wantRef = WrapWant(env, wantCls, want);
+    ani_ref wantRef = OHOS::AppExecFwk::WrapWant(env, want);
     if (wantRef == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null wantObj");
         return;
@@ -1205,7 +1064,7 @@ void StsUIAbility::OnNewWant(const Want &want)
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
     if ((status = env->Class_FindField(stsAbilityObj_->aniCls, "lastRequestWant", &field)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
@@ -1217,23 +1076,17 @@ void StsUIAbility::OnNewWant(const Want &want)
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
         launchParam.launchReason = AAFwk::LaunchReason::LAUNCHREASON_INSIGHT_INTENT;
     }
-    ani_class launchParamCls = nullptr;
-    if((status = env->FindClass("L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;", &launchParamCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if (launchParamCls == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null launchParamCls");
-    }
-    ani_ref launchParamRef = CreateStsLaunchParam(env, launchParamCls, launchParam);
+    ani_ref launchParamRef = CreateStsLaunchParam(env, launchParam);
     std::string methodName = "OnNewWant";
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
-    const char* signature = "L@ohos/app/ability/Want/Want;L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;:V";
+    const char *signature =
+        "L@ohos/app/ability/Want/Want;L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;:V";
     CallObjectMethod(false, "onNewWant", signature, wantRef, launchParamRef);
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        //TODO
+        // TODO
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -1265,7 +1118,7 @@ sptr<IRemoteObject> StsUIAbility::CallRequest()
     return remoteCallee_;
 }
 
-ani_ref StsUIAbility::CallObjectMethod(bool withResult, const char* name, const char* signature, ...)
+ani_ref StsUIAbility::CallObjectMethod(bool withResult, const char *name, const char *signature, ...)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
     TAG_LOGI(AAFwkTag::UIABILITY, "StsUIAbility call sts, name: %{public}s", name);
@@ -1365,19 +1218,19 @@ void StsUIAbility::UpdateStsWindowStage(ani_ref windowStage)
     ani_status status = ANI_ERROR;
     if (windowStage == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null windowStage");
-        if((status = env->Class_FindField(cls, "windowStage", &field)) != ANI_OK) {
+        if ((status = env->Class_FindField(cls, "windowStage", &field)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         }
-        if((status = env->Object_SetField_Ref(contextObj, field, nullptr)) != ANI_OK) {
+        if ((status = env->Object_SetField_Ref(contextObj, field, nullptr)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         }
         return;
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "set context windowStage");
-    if((status = env->Class_FindField(cls, "windowStage", &field)) != ANI_OK) {
+    if ((status = env->Class_FindField(cls, "windowStage", &field)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
     }
-    if((status = env->Object_SetField_Ref(contextObj, field, windowStage)) != ANI_OK) {
+    if ((status = env->Object_SetField_Ref(contextObj, field, windowStage)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
     }
 }
@@ -1411,9 +1264,9 @@ void StsUIAbility::OnAfterFocusedCommon(bool isFocused)
         return;
     }
     if (isFocused) {
-        //TODO
+        // TODO
     } else {
-        //TODO
+        // TODO
     }
 }
 } // namespace AbilityRuntime
