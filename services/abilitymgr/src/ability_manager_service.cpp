@@ -13140,6 +13140,32 @@ bool AbilityManagerService::CheckCrossUser(const int32_t userId, AppExecFwk::Ext
     return false;
 }
 
+int32_t AbilityManagerService::KillProcessForPermissionUpdate(uint32_t accessTokenId)
+{
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "Call KillProcessForPermissionUpdate. callingUid: %{public}d", callingUid);
+    auto isCallingPerm = PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_KILL_APP_PROCESSES);
+    if (!isCallingPerm) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "no permission to kill processes.");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    auto uiAbilityManager = GetUIAbilityManagerByUid(callingUid);
+    CHECK_POINTER_AND_RETURN_LOG(uiAbilityManager, ERR_NULL_OBJECT, "uiAbilityLifecycleManager nullptr");
+    uiAbilityManager->SetKillForPermissionUpdateFlag(accessTokenId);
+
+    int32_t ret = 
+        DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByAccessTokenId(accessTokenId);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "KillProcessesByAccessTokenId error");
+        return ret;
+    }
+
+    return ERR_OK;
+}
+
 int32_t AbilityManagerService::RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
 {
     if (!AAFwk::PermissionVerification::GetInstance()->VerifyStartUIAbilityToHiddenPermission()) {

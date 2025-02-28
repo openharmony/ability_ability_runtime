@@ -319,6 +319,7 @@ private:
     int32_t QueryAtomicServiceStartupRuleInner(MessageParcel &data, MessageParcel &reply);
     int32_t PrepareTerminateAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
     int32_t KillProcessWithPrepareTerminateDoneInner(MessageParcel &data, MessageParcel &reply);
+    int32_t KillProcessForPermissionUpdateInner(MessageParcel &data, MessageParcel &reply);
     int32_t RegisterHiddenStartObserverInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterHiddenStartObserverInner(MessageParcel &data, MessageParcel &reply);
     int32_t QueryPreLoadUIExtensionRecordInner(MessageParcel &data, MessageParcel &reply);

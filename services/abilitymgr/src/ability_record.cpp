@@ -3695,6 +3695,16 @@ bool AbilityRecord::GetRestartAppFlag() const
     return isRestartApp_;
 }
 
+void AbilityRecord::SetKillForPermissionUpdateFlag(bool isKillForPermissionUpdate)
+{
+    isKillForPermissionUpdate_ = isKillForPermissionUpdate;
+}
+
+bool AbilityRecord::GetKillForPermissionUpdateFlag() const
+{
+    return isKillForPermissionUpdate_;
+}
+
 void AbilityRecord::UpdateUIExtensionInfo(const WantParams &wantParams)
 {
     if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {

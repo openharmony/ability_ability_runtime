@@ -370,6 +370,8 @@ public:
 
     void EnableListForSCBRecovery();
 
+    void SetKillForPermissionUpdateFlag(uint32_t accessTokenId);
+
     void PrepareTerminateAbilityDone(std::shared_ptr<AbilityRecord> abilityRecord, bool isTerminate);
 
     void TryPrepareTerminateByPidsDone(const std::string &moduleName, int32_t prepareTermination, bool isExist);
@@ -396,7 +398,7 @@ private:
         AbilityState state = AbilityState::INITIAL);
     void HandleForegroundTimeout(const std::shared_ptr<AbilityRecord> &ability);
     void NotifySCBToHandleException(const std::shared_ptr<AbilityRecord> &ability, int32_t errorCode,
-        const std::string& errorReason);
+        const std::string& errorReason, bool needClearCallerLink = true);
     void MoveToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void PrintTimeOutLog(std::shared_ptr<AbilityRecord> ability, uint32_t msgId, bool isHalf = false);

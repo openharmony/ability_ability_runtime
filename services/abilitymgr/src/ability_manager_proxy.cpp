@@ -6165,6 +6165,29 @@ void AbilityManagerProxy::KillProcessWithPrepareTerminateDone(const std::string 
     }
 }
 
+int32_t AbilityManagerProxy::KillProcessForPermissionUpdate(uint32_t accessTokenId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token fail");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(accessTokenId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "weite accessTokenId fail");
+        return IPC_PROXY_WRITE_PARCEL_ERR;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::KILL_PROCESS_FOR_PERMISSION_UPDATE,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return IPC_PROXY_ERR;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t AbilityManagerProxy::RegisterHiddenStartObserver(const sptr<IHiddenStartObserver> &observer)
 {
     if (!observer) {

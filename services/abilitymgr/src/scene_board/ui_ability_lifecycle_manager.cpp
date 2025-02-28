@@ -1779,7 +1779,7 @@ void UIAbilityLifecycleManager::SetRootSceneSession(const sptr<IRemoteObject> &r
 }
 
 void UIAbilityLifecycleManager::NotifySCBToHandleException(const std::shared_ptr<AbilityRecord> &abilityRecord,
-    int32_t errorCode, const std::string& errorReason)
+    int32_t errorCode, const std::string& errorReason, bool needClearCallerLink)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     if (abilityRecord == nullptr) {
@@ -1795,7 +1795,9 @@ void UIAbilityLifecycleManager::NotifySCBToHandleException(const std::shared_ptr
     sptr<SessionInfo> info = abilityRecord->GetSessionInfo();
     info->errorCode = errorCode;
     info->errorReason = errorReason;
-    session->NotifySessionException(info);
+    Rosen::ExceptionInfo exceptionInfo;
+    exceptionInfo.needClearCallerLink = needClearCallerLink;
+    session->NotifySessionException(info, exceptionInfo);
     EraseAbilityRecord(abilityRecord);
 }
 
@@ -1811,7 +1813,8 @@ void UIAbilityLifecycleManager::NotifySCBToHandleAtomicServiceException(sptr<Ses
         "call notifySessionException, errorReason: %{public}s", errorReason.c_str());
     sessionInfo->errorCode = errorCode;
     sessionInfo->errorReason = errorReason;
-    session->NotifySessionException(sessionInfo);
+    Rosen::ExceptionInfo exceptionInfo;
+    session->NotifySessionException(sessionInfo, exceptionInfo);
 }
 
 void UIAbilityLifecycleManager::HandleLoadTimeout(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -1844,7 +1847,7 @@ void UIAbilityLifecycleManager::HandleForegroundTimeout(const std::shared_ptr<Ab
 
 void UIAbilityLifecycleManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRecord)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call OnAbilityDied");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     if (abilityRecord == nullptr) {
@@ -1868,7 +1871,12 @@ void UIAbilityLifecycleManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abi
 
     terminateAbilityList_.push_back(abilityRecord);
     abilityRecord->SetAbilityState(AbilityState::TERMINATING);
-    if (!abilityRecord->GetRestartAppFlag()) {
+    if (abilityRecord->GetKillForPermissionUpdateFlag()) {
+        bool needClearCallerLink = false;
+        NotifySCBToHandleException(abilityRecord,
+            static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_PERMISSION_UPDATE),
+            "kill process for permission update", needClearCallerLink);
+    } else if (!abilityRecord->GetRestartAppFlag()) {
         NotifySCBToHandleException(abilityRecord, static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_DIED),
             "onAbilityDied");
     }
@@ -3395,6 +3403,24 @@ void UIAbilityLifecycleManager::PutSpecifiedFlag(int32_t requestId, const std::s
     };
     TaskHandlerWrap::GetFfrtHandler()->SubmitTaskJust(timeoutTask, "PutSpecifiedFlagTimeout",
         AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE);
+}
+
+void UIAbilityLifecycleManager::SetKillForPermissionUpdateFlag(uint32_t accessTokenId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    for (auto it = sessionAbilityMap_.begin(); it != sessionAbilityMap_.end(); it++) {
+        if (it->second == nullptr) {
+            continue;
+        }
+        auto &abilityInfo = it->second->GetAbilityInfo();
+        auto &applicationInfo = it->second->GetApplicationInfo();
+        if (applicationInfo.accessTokenId == accessTokenId &&
+            applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE &&
+            abilityInfo.type == AppExecFwk::AbilityType::PAGE) {
+                it->second->SetKillForPermissionUpdateFlag(true);
+        }
+    }
 }
 
 void UIAbilityLifecycleManager::HandleForegroundCollaborate(
