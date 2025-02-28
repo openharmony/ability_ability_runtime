@@ -23,6 +23,7 @@
 
 #include "ability_manager_client.h"
 #include "ability_manager_errors.h"
+#include "ani_common/ani_common_start_options.h"
 #include "app_utils.h"
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
@@ -111,6 +112,167 @@ static ani_int startAbility([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_
 
     TAG_LOGE(AAFwkTag::UIABILITY, "end");
     return -1;
+}
+
+static void InvokeAsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result)
+{
+    ani_class clsCall = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass("LUIAbilityContext/AsyncCallback;", &clsCall)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return;
+    }
+    ani_method method = nullptr;
+    if ((status = env->Class_FindMethod(clsCall, "invoke",
+        "LUIAbilityContext/BusinessError;Lstd/core/Object;:V",&method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return;
+    }
+    if ((status = env->Object_CallMethod_Void(call, method, error, result)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return;
+    }
+}
+
+static AbilityRuntime::AbilityContext* GetAbilityContext(ani_env *env, ani_object aniObj)
+{
+    ani_long nativeContextLong = 0;
+    ani_class cls = nullptr;
+    ani_field contextField = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass("LUIAbilityContext/UIAbilityContext;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindField(cls, "nativeContext", &contextField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_GetField_Long(aniObj, contextField, &nativeContextLong)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    TAG_LOGE(AAFwkTag::UIABILITY, "nativeContext %{public}lld", nativeContextLong);
+    return reinterpret_cast<AbilityRuntime::AbilityContext*>(nativeContextLong);
+}
+
+static ani_object WrapAbilityResult(ani_env *env, ani_int code)
+{
+    ani_class cls = nullptr;
+    ani_field field = nullptr;
+    ani_method method = nullptr;
+    ani_object obj = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass("LUIAbilityContext/AbilityResult;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(cls, "<ctor>", nullptr, &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_New(cls, method, &obj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindField(cls, "resultCode", &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_SetField_Int(obj, field, code)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    return obj;
+}
+
+static ani_object WrapBusinessError(ani_env *env, ani_int code)
+{
+    ani_class cls = nullptr;
+    ani_field field = nullptr;
+    ani_method method = nullptr;
+    ani_object obj = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass("LUIAbilityContext/BusinessError;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(cls, "<ctor>", nullptr, &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_New(cls, method, &obj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindField(cls, "code", &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_SetField_Int(obj, field, code)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
+    }
+    return obj;
+}
+
+static std::mutex requestCodeMutex_;
+static int32_t GenerateRequestCode()
+{
+    static int32_t curRequestCode_ = 0;
+    std::lock_guard lock(requestCodeMutex_);
+    curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
+    return curRequestCode_;
+}
+
+// TO DO: free install
+static void StartAbilityForResultInner(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object startOptionsObj, ani_object callback)
+{
+    auto context = GetAbilityContext(env, aniObj);
+    AAFwk::Want want;
+    OHOS::AppExecFwk::UnwrapWant(env, wantObj, want);
+    AAFwk::StartOptions startOptions;
+    if (startOptionsObj) {
+        OHOS::AppExecFwk::AniUnwrapStartOptions(env, startOptionsObj, startOptions);
+    }
+    std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count());
+    RuntimeTask task = [env, callback, element = want.GetElement(), flags = want.GetFlags(), startTime]
+        (int resultCode, const AAFwk::Want& want, bool isInner) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "start async callback");
+        // HandleScope handleScope(env);
+        std::string bundleName = element.GetBundleName();
+        std::string abilityName = element.GetAbilityName();
+        ani_object abilityResult = WrapAbilityResult(env, resultCode);
+        // TO DO
+        // napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
+        if (abilityResult == nullptr) {
+            TAG_LOGW(AAFwkTag::CONTEXT, "null abilityResult");
+            isInner = true;
+            resultCode = ERR_INVALID_VALUE;
+        }
+        InvokeAsyncCallback(env, callback, WrapBusinessError(env, 0), abilityResult);
+    };
+    auto requestCode = GenerateRequestCode();
+    (startOptionsObj == nullptr) ? context->StartAbilityForResult(want, requestCode, std::move(task)) :
+        context->StartAbilityForResult(want, startOptions, requestCode, std::move(task));
+    return;
+}
+
+// TO DO: free install
+static void StartAbilityForResult1(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callback)
+{
+    TAG_LOGE(AAFwkTag::UIABILITY, "start");
+    StartAbilityForResultInner(env, aniObj, wantObj, nullptr, callback);
+}
+
+// TO DO: free install
+static void StartAbilityForResult2(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object startOptionsObj, ani_object callback)
+{
+    TAG_LOGE(AAFwkTag::UIABILITY, "start");
+    StartAbilityForResultInner(env, aniObj, wantObj, startOptionsObj, callback);
 }
 
 static void terminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass)
@@ -205,6 +367,13 @@ ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityConte
             reinterpret_cast<ani_int*>(startAbilityByCall) },
         ani_native_function {
             "startAbilitySync", "L@ohos/app/ability/Want/Want;:I", reinterpret_cast<ani_int*>(startAbility) },
+        ani_native_function {
+            "nativeStartAbilityForResult", "L@ohos/app/ability/Want/Want;LUIAbilityContext/AsyncCallback;:V",
+            reinterpret_cast<void*>(StartAbilityForResult1) },
+        ani_native_function {
+            "nativeStartAbilityForResult",
+            "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;LUIAbilityContext/AsyncCallback;:V",
+            reinterpret_cast<void*>(StartAbilityForResult2) },
         ani_native_function { "terminateSelfSync", ":V", reinterpret_cast<ani_int*>(terminateSelfSync) },
         ani_native_function { "terminateSelfSyncPromise", ":V", reinterpret_cast<ani_int*>(terminateSelfSyncPromise) },
         ani_native_function { "reportDrawnCompletedSync", ":V", reinterpret_cast<ani_int*>(reportDrawnCompletedSync) },
