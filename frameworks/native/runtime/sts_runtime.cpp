@@ -619,6 +619,7 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
         return std::make_unique<STSNativeReference>();
     }
     std::string entryPath = "entry/entryability/EntryAbility/EntryAbility";
+    // std::string entryPath = "OpenHarmonyTestRunner/OpenHarmonyTestRunner";
     ani_string entryClassStr;
     aniEnv->String_NewUTF8(entryPath.c_str(), entryPath.length(), &entryClassStr);
     ani_class entryClass = nullptr;
