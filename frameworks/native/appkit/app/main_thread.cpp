@@ -1694,7 +1694,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 } else {
                     return AbilityRuntime::UIAbility::Create(
                         app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0));
-                }             
+                }
             }
             TAG_LOGE(AAFwkTag::APPKIT, "failed");
             return nullptr;
@@ -2115,9 +2115,9 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
     auto args = std::make_shared<AbilityDelegatorArgs>(record->want);
     if (isStageBased) { // Stage model
         TAG_LOGD(AAFwkTag::APPKIT, "Stage model");
-        // TODO sts 已修改无法验证
         auto& runtimes = application_->GetRuntime();
         for (const auto& runtime : runtimes) {
+            TAG_LOGI(AAFwkTag::DELEGATOR, "create testrunner");
             auto testRunner = TestRunner::Create(runtime, args, false);
             auto delegator = std::make_shared<AbilityDelegator>(
                 application_->GetAppContext(), std::move(testRunner), record->observer);
