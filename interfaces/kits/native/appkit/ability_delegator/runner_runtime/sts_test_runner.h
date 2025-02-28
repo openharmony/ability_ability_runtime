@@ -60,6 +60,8 @@ public:
 private:
     STSTestRunner(STSRuntime &STSRuntime,
         const std::shared_ptr<AbilityDelegatorArgs> &args, const AppExecFwk::BundleInfo &bundleInfo);
+    void CallOnPrepareMethod(ani_env* aniEnv);
+    void CallOnRunMethod(ani_env* aniEnv);
 
     STSRuntime &stsRuntime_;
     std::unique_ptr<STSNativeReference> stsTestRunnerObj_;
