@@ -165,6 +165,42 @@ static napi_value NotifyUnhandledRejectionHandler(napi_env env, napi_callback_in
     return CreateJsUndefined(env);
 }
 
+static void ClearGlobalObserverReference(napi_env env)
+{
+    std::lock_guard<std::mutex> lock(globalErrorMtx);
+    TAG_LOGI(AAFwkTag::JSNAPI, "Clearing observer refs for env: %{public}p", env);
+    auto it = globalObserverList.begin();
+    while (it != globalObserverList.end()) {
+        if (it->env == env) {
+            if (napi_delete_reference(env, it->ref) != napi_ok) {
+                TAG_LOGW(AAFwkTag::JSNAPI,
+                    "Failed to delete observer reference %{public}p in env %{public}p", it->ref, env);
+            }
+            it = globalObserverList.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+static void ClearGlobalPromiseReference(napi_env env)
+{
+    std::lock_guard<std::mutex> lock(globalPromiseMtx);
+    TAG_LOGI(AAFwkTag::JSNAPI, "Clearing promise refs for env: %{public}p", env);
+    auto it = globalPromiseList.begin();
+    while (it != globalPromiseList.end()) {
+        if (it->env == env) {
+            if (napi_delete_reference(env, it->ref) != napi_ok) {
+                TAG_LOGW(AAFwkTag::JSNAPI,
+                    "Failed to delete promise reference %{public}p in env %{public}p", it->ref, env);
+            }
+            it = globalPromiseList.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 static bool IsobserverListNotEmpty()
 {
     std::lock_guard<std::recursive_mutex> lock(errorMtx);
@@ -520,6 +556,8 @@ public:
         TAG_LOGI(AAFwkTag::JSNAPI, "finalizer called");
         std::unique_ptr<JsErrorManager>(static_cast<JsErrorManager*>(data));
         ClearReference(env);
+        ClearGlobalObserverReference(env);
+        ClearGlobalPromiseReference(env);
     }
 
     static napi_value On(napi_env env, napi_callback_info info)
@@ -783,6 +821,9 @@ private:
         }
         std::lock_guard<std::mutex> lock(globalErrorMtx);
         for (auto &iter : globalObserverList) {
+            if (iter.env != env) {
+                continue;
+            }
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
@@ -822,6 +863,9 @@ private:
         }
         std::lock_guard<std::mutex> lock(globalPromiseMtx);
         for (auto &iter : globalPromiseList) {
+            if (iter.env != env) {
+                continue;
+            }
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
@@ -844,12 +888,7 @@ private:
     {
         auto res = CreateJsUndefined(env);
         if (function == nullptr) {
-            std::lock_guard<std::mutex> lock(globalErrorMtx);
-            for (auto &iter : globalObserverList) {
-                NAPI_CALL(env, napi_delete_reference(env, iter.ref));
-            }
-            globalObserverList.clear();
-            TAG_LOGI(AAFwkTag::JSNAPI, "remove all observer");
+            ClearGlobalObserverReference(env);
             return res;
         }
         if (!ValidateFunction(env, function)) {
@@ -858,6 +897,9 @@ private:
 
         std::lock_guard<std::mutex> lock(globalErrorMtx);
         for (auto &iter : globalObserverList) {
+            if (iter.env != env) {
+                continue;
+            }
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
@@ -908,12 +950,7 @@ private:
     {
         auto res = CreateJsUndefined(env);
         if (function == nullptr) {
-            std::lock_guard<std::mutex> lock(globalPromiseMtx);
-            for (auto &iter : globalPromiseList) {
-                NAPI_CALL(env, napi_delete_reference(env, iter.ref));
-            }
-            globalPromiseList.clear();
-            TAG_LOGI(AAFwkTag::JSNAPI, "remove all observer");
+            ClearGlobalPromiseReference(env);
             return res;
         }
         if (!ValidateFunction(env, function)) {
@@ -921,6 +958,9 @@ private:
         }
         std::lock_guard<std::mutex> lock(globalPromiseMtx);
         for (auto &iter : globalPromiseList) {
+            if (iter.env != env) {
+                continue;
+            }
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
