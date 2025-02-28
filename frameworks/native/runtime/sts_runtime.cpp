@@ -23,6 +23,7 @@
 #include <filesystem>
 #include <fstream>
 #include <mutex>
+#include <nlohmann/json.hpp>
 #include <regex>
 #include <sys/epoll.h>
 #include <unistd.h>
@@ -77,6 +78,83 @@ const std::string STS_CHIPSDK_PATH = "/system/lib/chipset-pub-sdk";
 #endif
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
+constexpr char ENTRY_PATH_MAP_FILE[] = "/data/storage/el1/bundle/lib/entrypath.json";
+constexpr char ENTRY_PATH_MAP_KEY[] = "entryPath";
+constexpr char DEFAULT_ENTRY_ABILITY_CLASS[] = "entry/entryability/EntryAbility/EntryAbility";
+
+class EntryPathManager {
+public:
+    static EntryPathManager &GetInstance()
+    {
+        static EntryPathManager instance;
+        return instance;
+    }
+
+    bool Init()
+    {
+        std::ifstream inFile;
+        inFile.open(ENTRY_PATH_MAP_FILE, std::ios::in);
+        if (!inFile.is_open()) {
+            TAG_LOGD(AAFwkTag::STSRUNTIME, "no entrypath file");
+            return false;
+        }
+        nlohmann::json filePathsJson;
+        inFile >> filePathsJson;
+        if (filePathsJson.is_discarded()) {
+            TAG_LOGE(AAFwkTag::STSRUNTIME, "json discarded error");
+            inFile.close();
+            return false;
+        }
+
+        if (filePathsJson.is_null() || filePathsJson.empty()) {
+            TAG_LOGE(AAFwkTag::STSRUNTIME, "invalid json");
+            inFile.close();
+            return false;
+        }
+
+        if (!filePathsJson.contains(ENTRY_PATH_MAP_KEY)) {
+            TAG_LOGD(AAFwkTag::STSRUNTIME, "no entrypath key");
+            return false;
+        }
+        const auto &entryPathMap = filePathsJson[ENTRY_PATH_MAP_KEY];
+        if (!entryPathMap.is_object()) {
+            TAG_LOGE(AAFwkTag::STSRUNTIME, "entrypath is not object");
+            return false;
+        }
+
+        for (const auto &entryPath: entryPathMap.items()) {
+            std::string key = entryPath.key();
+            if (!entryPath.value().is_string()) {
+                TAG_LOGE(AAFwkTag::STSRUNTIME, "val is not string, key: %{public}s", key.c_str());
+                continue;
+            }
+            std::string val = entryPath.value();
+            TAG_LOGD(AAFwkTag::STSRUNTIME, "key: %{public}s, value: %{public}s", key.c_str(), val.c_str());
+            entryPathMap_.emplace(key, val);
+        }
+        inFile.close();
+        return true;
+    }
+
+    std::string GetEntryPath(const std::string &srcEntry)
+    {
+        auto const &iter = entryPathMap_.find(srcEntry);
+        if (iter == entryPathMap_.end()) {
+            TAG_LOGD(AAFwkTag::STSRUNTIME, "not found srcEntry: %{public}s", srcEntry.c_str());
+            return DEFAULT_ENTRY_ABILITY_CLASS;
+        }
+        TAG_LOGD(AAFwkTag::STSRUNTIME, "found srcEntry: %{public}s, output: %{public}s",
+                 srcEntry.c_str(), iter->second.c_str());
+        return iter->second;
+    }
+
+private:
+    EntryPathManager() = default;
+
+    ~EntryPathManager() = default;
+
+    std::map<std::string, std::string> entryPathMap_{};
+};
 } // namespace
 
 AppLibPathVec STSRuntime::appLibPaths_;
@@ -107,6 +185,7 @@ std::unique_ptr<STSRuntime> STSRuntime::Create(const Options& options)
     if (!instance->Initialize(options)) {
         return std::unique_ptr<STSRuntime>();
     }
+    EntryPathManager::GetInstance().Init();
 
     return instance;
 }
@@ -618,12 +697,14 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Class_FindMethod loadClass failed");
         return std::make_unique<STSNativeReference>();
     }
-    std::string entryPath = "entry/entryability/EntryAbility/EntryAbility";
+    std::string entryPath = EntryPathManager::GetInstance().GetEntryPath(srcEntrance);
+    // std::string entryPath = "entry/entryability/EntryAbility/EntryAbility";
     // std::string entryPath = "OpenHarmonyTestRunner/OpenHarmonyTestRunner";
     ani_string entryClassStr;
     aniEnv->String_NewUTF8(entryPath.c_str(), entryPath.length(), &entryClassStr);
     ani_class entryClass = nullptr;
     ani_ref entryClassRef = nullptr;
+    TAG_LOGI(AAFwkTag::STSRUNTIME, "load class: %{public}s", entryPath.c_str());
     if (aniEnv->Object_CallMethod_Ref(object, loadClassMethod, &entryClassRef, entryClassStr) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Object_CallMethod_Ref loadClassMethod failed");
         return std::make_unique<STSNativeReference>();
