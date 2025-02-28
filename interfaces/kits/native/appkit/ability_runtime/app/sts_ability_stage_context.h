@@ -20,10 +20,13 @@
 #include "sts_runtime.h"
 
 namespace OHOS {
+namespace AppExecFwk {
+class OHOSApplication;
+}
 namespace AbilityRuntime {
 
 constexpr const char* STS_ABILITY_STAGE_CONTEXT_CLASS_NAME = "LAbilityStageHand/AbilityStageContext;";
-constexpr const char* STS_CONFIGURATION_CLASS_NAME = "LAbilityStageHand/Configuration;";
+constexpr const char* STS_CONFIGURATION_CLASS_NAME = "LAbilityStageHand/ConfigurationInner;";
 constexpr const char* STS_HAPMODULEINFO_CLASS_NAME = "LAbilityStageHand/HapModuleInfo;";
 constexpr const char* STS_ABILITY_STAGE_CLASS_NAME = "LAbilityStageHand/AbilityStage;";
 
@@ -39,13 +42,19 @@ public:
     {
         return context_.lock();
     }
-    static ani_object CreateStsAbilityStageContext(ani_env* env, std::shared_ptr<Context> context);
+    static ani_object CreateStsAbilityStageContext(ani_env* env, std::shared_ptr<Context> context,
+        std::weak_ptr<AppExecFwk::OHOSApplication> application);
     static ani_object Createfiguration(ani_env* env, const std::shared_ptr<AppExecFwk::Configuration> &configuration);
     static void ResetEnv(ani_env* env);
 
 private:
     static ani_object Createfiguration(ani_env* env, const std::shared_ptr<Context> &context);
     static ani_object CreateHapModuleInfo(ani_env* env, const std::shared_ptr<Context> &context);
+    static void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+        std::weak_ptr<AppExecFwk::OHOSApplication> application);
+
+    static void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+        std::shared_ptr<Context> context);
 
 private:
     std::weak_ptr<Context> context_;
