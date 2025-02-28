@@ -230,6 +230,13 @@ public:
 
     void CleanEmptyAbilityStage();
 
+    void InitAniApplicationContext();
+
+    inline void* GetApplicationCtxObjRef()
+    {
+        return applicationContextObjRef_;
+    }
+
 private:
     void UpdateAppContextResMgr(const Configuration &config);
     bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
@@ -253,6 +260,7 @@ private:
     std::unique_ptr<AbilityRuntime::Runtime> runtimeNullptr_;
     std::shared_ptr<Configuration> configuration_ = nullptr;
     std::map<int32_t, std::string> extensionTypeMap_;
+    void* applicationContextObjRef_ = nullptr;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
