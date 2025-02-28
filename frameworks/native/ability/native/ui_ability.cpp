@@ -745,6 +745,26 @@ void UIAbility::OnBackground()
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONBACKGROUND, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
+void UIAbility::OnWillForeground()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnWillForeground is called");
+}
+
+void UIAbility::OnDidForeground()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnDidForeground is called");
+}
+
+void UIAbility::OnWillBackground()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnWillBackground is called");
+}
+
+void UIAbility::OnDidBackground()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnDidBackground is called");
+}
+
 void UIAbility::OnAfterFocusedCommon(bool isFocused)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");

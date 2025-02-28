@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2303,6 +2303,40 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_UpdateSilentForeground_0100, TestSize
     abilityImpl->UpdateSilentForeground(targetState, sessionInfo);
     EXPECT_EQ(true, abilityImpl->ability_->CheckIsSilentForeground());
     GTEST_LOG_(INFO) << "AbilityRuntime_UpdateSilentForeground_0100 end";
+}
+
+/**
+ * @tc.number: AbilityRuntime_AfterDidForeground_0100
+ * @tc.name: AfterDidForeground
+ * @tc.desc: Verify AfterDidForeground succeeded.
+ */
+HWTEST_F(UIAbilityImplTest, AbilityRuntime_AfterDidForeground_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_AfterDidForeground_0100 start";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto abilityImpl = std::make_shared<UIAbilityImpl>();
+    sptr<UIAbilityImpl::WindowLifeCycleImpl> impl =
+        new (std::nothrow) UIAbilityImpl::WindowLifeCycleImpl(token, abilityImpl);
+    ASSERT_NE(impl, nullptr);
+    impl->AfterDidForeground();
+    GTEST_LOG_(INFO) << "AbilityRuntime_AfterDidForeground_0100 end";
+}
+
+/**
+ * @tc.number: AbilityRuntime_AfterDidBackground_0100
+ * @tc.name: AfterDidBackground
+ * @tc.desc: Verify AfterDidBackground succeeded.
+ */
+HWTEST_F(UIAbilityImplTest, AbilityRuntime_AfterDidBackground_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_AfterDidBackground_0100 start";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto abilityImpl = std::make_shared<UIAbilityImpl>();
+    sptr<UIAbilityImpl::WindowLifeCycleImpl> impl =
+        new (std::nothrow) UIAbilityImpl::WindowLifeCycleImpl(token, abilityImpl);
+    ASSERT_NE(impl, nullptr);
+    impl->AfterDidBackground();
+    GTEST_LOG_(INFO) << "AbilityRuntime_AfterDidBackground_0100 end";
 }
 } // namespace AppExecFwk
 } // namespace OHOS

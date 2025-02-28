@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1494,6 +1494,62 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_CheckIsSilentForeground_0100, TestSize.Lev
     ability->SetIsSilentForeground(true);
     EXPECT_EQ(true, ability->CheckIsSilentForeground());
     TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: UIAbility_OnWillForeground_0100
+ * @tc.desc: OnWillForeground test
+ * @tc.desc: Verify function OnWillForeground.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_OnWillForeground_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(ability, nullptr);
+    ability->OnWillForeground();
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_OnDidForeground_0100
+ * @tc.desc: OnDidForeground test
+ * @tc.desc: Verify function OnDidForeground.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_OnDidForeground_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(ability, nullptr);
+    ability->OnDidForeground();
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_OnWillBackground_0100
+ * @tc.desc: OnWillBackground test
+ * @tc.desc: Verify function OnWillBackground.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_OnWillBackground_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(ability, nullptr);
+    ability->OnWillBackground();
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_OnDidBackground_0100
+ * @tc.desc: OnDidBackground test
+ * @tc.desc: Verify function OnDidBackground.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_OnDidBackground_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(ability, nullptr);
+    ability->OnDidBackground();
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

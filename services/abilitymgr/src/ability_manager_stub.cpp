@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1808,7 +1808,8 @@ int AbilityManagerStub::CloseUIAbilityBySCBInner(MessageParcel &data, MessagePar
     if (data.ReadBool()) {
         sessionInfo = data.ReadParcelable<SessionInfo>();
     }
-    int32_t result = CloseUIAbilityBySCB(sessionInfo);
+    uint32_t sceneFlag = data.ReadUint32();
+    int32_t result = CloseUIAbilityBySCB(sessionInfo, sceneFlag);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -4145,7 +4146,8 @@ int32_t AbilityManagerStub::CleanUIAbilityBySCBInner(MessageParcel &data, Messag
     if (data.ReadBool()) {
         sessionInfo = data.ReadParcelable<SessionInfo>();
     }
-    int32_t result = CleanUIAbilityBySCB(sessionInfo);
+    uint32_t sceneFlag = data.ReadUint32();
+    int32_t result = CleanUIAbilityBySCB(sessionInfo, sceneFlag);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
