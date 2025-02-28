@@ -1,0 +1,119 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ type AsyncCallback<T> = (data: T) => void;
+
+ namespace uriPermissionManager {
+    export native function grantUriPermissionPromiseSync(uri: string, flag: int, targetBundleName: string): int;
+    export native function grantUriPermissionPromiseWithAppCloneIndexSync(uri: string, flag: int,
+        targetBundleName: string, appCloneIndex: int): void;
+    export native function grantUriPermissionCallbackSync(uri: string, flag: int, targetBundleName: string): void;
+    export native function revokeUriPermissionPromiseSync(uri: string, targetBundleName: string): int;
+    export native function revokeUriPermissionPromiseWithAppCloneIndexSync(uri: string, targetBundleName: string,
+        appCloneIndex: int): void;
+    export native function revokeUriPermissionCallbackSync(uri: string, targetBundleName: string): void;
+
+    export function grantUriPermission(uri: string, flag: int, targetBundleName: string): Promise<int> {
+        let tag = "call grantUriPermission promise ";
+        console.log(tag + "1");
+        let p = new Promise<int>((resolve: (a: int) => void): void => {
+            console.log(tag + "3");
+            let p1 = launch uriPermissionManager.grantUriPermissionPromiseSync(uri, flag, targetBundleName);
+            console.log(tag + "2");
+            p1.then<int>((v: int): void => {
+                resolve(v);
+                console.log(tag + "5");
+            });
+        });
+        console.log(tag + "2");
+        return p;
+    }
+
+    export function grantUriPermission(uri: string, flag: int, targetBundleName: string,
+        appCloneIndex: int): Promise<void> {
+        let tag = "call grantUriPermission promise with appCloneIndex ";
+        console.log(tag + "1");
+        let p = new Promise<void>((resolve: (a: int) => void): void => {
+            console.log(tag + "3");
+            let p1 = launch uriPermissionManager.grantUriPermissionPromiseWithAppCloneIndexSync(uri,
+                flag, targetBundleName, appCloneIndex);
+            console.log(tag + "4");
+            p1.then<void>((): void => {
+                resolve(1);
+                console.log(tag + "5");
+            });
+        });
+        console.log(tag + "2");
+        return p;
+    }
+
+    export function grantUriPermission(uri: string, flag: int, targetBundleName: string,
+        callback: AsyncCallback<number>): void {
+        let tag = "call grantUriPermission callback ";
+        console.log(tag + "1");
+        let p1 = launch uriPermissionManager.grantUriPermissionCallbackSync(uri, flag, targetBundleName);
+        console.log(tag + "2");
+        p1.then<void>((): void => {
+            console.log(tag + "3");
+            callback(0);
+        });
+        console.log(tag + "4");
+    }
+
+    export function revokeUriPermission(uri: string, targetBundleName: string): Promise<int> {
+        let tag = "call revokeUriPermission promise ";
+        console.log(tag + "1");
+        let p = new Promise<int>((resolve: (a: int) => void): void => {
+            console.log(tag + "3");
+            let p1 = launch uriPermissionManager.revokeUriPermissionPromiseSync(uri, targetBundleName);
+            console.log(tag + "4");
+            p1.then<int>((v: int): void => {
+                resolve(v);
+                console.log(tag + "5");
+            });
+        });
+        console.log(tag + "2");
+        return p;
+    }
+
+    export function revokeUriPermission(uri: string, targetBundleName: string, appCloneIndex: int): Promise<int> {
+        let tag = "call revokeUriPermission promise with appCloneIndex ";
+        console.log(tag + "1");
+        let p = new Promise<int>((resolve: (a: int) => void): void => {
+            console.log(tag + "3");
+            let p1 = launch uriPermissionManager.revokeUriPermissionPromiseWithAppCloneIndexSync(uri, targetBundleName,
+                appCloneIndex);
+            console.log(tag + "4");
+            p1.then<void>((): void => {
+                resolve(1);
+                console.log(tag + "5");
+            });
+        });
+        console.log(tag + "2");
+        return p;
+    }
+
+    export function revokeUriPermission(uri: string, targetBundleName: string, callback: AsyncCallback<number>): void {
+        let tag = "call revokeUriPermission callback ";
+        console.log(tag + "1");
+        let p1 = launch uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName);
+        console.log(tag + "2");
+        p1.then<void>((): void => {
+            console.log(tag + "3");
+            callback(0);
+        });
+        console.log(tag + "4");
+    }
+ }
