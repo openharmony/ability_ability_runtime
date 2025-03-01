@@ -19,9 +19,9 @@
 #include <algorithm>
 #include <memory>
 #include <native_engine/native_value.h>
+
 #include "ability_context.h"
 #include "configuration.h"
-
 #include "sts_runtime.h"
 
 class STSNativeReference;
@@ -30,13 +30,33 @@ namespace OHOS {
 namespace AbilityRuntime {
 class StsAbilityContext final {
 public:
-    explicit StsAbilityContext(const std::shared_ptr<AbilityContext> &context) : context_(context) {}
-    ~StsAbilityContext() = default;
+    static void StartAbility1(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniObj, ani_object wantObj, ani_object call);
+    static void StartAbility2([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniObj, ani_object wantObj,
+        ani_object opt, ani_object call);
+    static void StartAbilityForResult1(ani_env* env, ani_object aniObj, ani_object wantObj, ani_object callback);
+    static void StartAbilityForResult2(
+        ani_env* env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj, ani_object callback);
+    static void TerminateSelfWithResult(ani_env *env, ani_object aniObj, ani_object abilityResult, ani_object callback);
+    static void reportDrawnCompletedSync([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass);
+
+    static ani_object SetAbilityContext(ani_env* env, const std::shared_ptr<AbilityContext>& context);
+    static AbilityRuntime::AbilityContext* GetAbilityContext(ani_env* env, ani_object aniObj);
 
 private:
-    std::weak_ptr<AbilityContext> context_;
+    static bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
+    static ani_object WrapAbilityResult(ani_env *env, ani_int code);
+    static ani_object WrapBusinessError(ani_env *env, ani_int code);
+    static void InheritWindowMode(ani_env* env, ani_object aniObj, AAFwk::Want& want);
+    static void StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
+        ani_object wantObj, ani_object opt, ani_object call);
+    static void StartAbilityForResultInner(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object startOptionsObj, ani_object callback);
+    static int32_t GenerateRequestCode();
+
+    static std::mutex requestCodeMutex_;
 };
-ani_ref CreateStsAbilityContext(ani_env* env, const std::shared_ptr<AbilityContext> &context);
+ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_SIMULATOR_STS_ABILITY_CONTEXT_H

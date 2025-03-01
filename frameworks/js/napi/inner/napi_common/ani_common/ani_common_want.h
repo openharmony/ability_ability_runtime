@@ -21,9 +21,9 @@
 #include <vector>
 
 #include "native_engine/native_engine.h"
-#include "sts_runtime.h"
 #include "want.h"
 #include "want_params.h"
+#include "ani_common_util.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -32,8 +32,8 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want);
 ani_object WrapWantParams(ani_env *env, ani_class cls, const AAFwk::WantParams &wantParams);
 
 bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want);
+void UnWrapAbilityResult(ani_env *env, ani_object param, int &resultCode, AAFwk::Want &want);
 
-std::string GetStdString(ani_env *env, ani_string str);
 } // namespace AppExecFwk
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ANICOMMON_WANT_H
