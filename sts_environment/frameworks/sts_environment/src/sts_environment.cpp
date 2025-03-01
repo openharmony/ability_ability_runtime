@@ -277,7 +277,7 @@ bool STSEnvironment::StartRuntime()
     // etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, "/system/lib/sts/EntryAbility.abc" });
     // etsVMOptions.push_back({ EtsOptionType::ETS_NATIVE_LIBRARY_PATH, (char*)strdup(std::string(appLibPath).c_str())
     // });
-
+    etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, "/data/storage/el1/bundle/lib/ServiceExtensionAbility.abc"});
     // TODO: for test
     // etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, "/system/lib64/sts/ability_delegator.abc" });
 
