@@ -49,9 +49,75 @@ constexpr int OPTION_WINDOW_TOP = 262;
 constexpr int OPTION_WINDOW_HEIGHT = 263;
 constexpr int OPTION_WINDOW_WIDTH = 264;
 
+constexpr int INNER_ERR_START = 10108101;
+constexpr int INNER_ERR_TEST = 10108501;
+constexpr int INNER_ERR_DEBUG = 10108601;
+
 const std::string DEVELOPERMODE_STATE = "const.security.developermode.state";
 
 const std::string SHORT_OPTIONS = "ch:d:a:b:e:t:p:s:m:A:U:CDESNR";
+const std::string RESOLVE_ABILITY_ERR_SOLUTION_ONE =
+    "Check if the parameter abilityName of aa -a and the parameter bundleName of -b are correct";
+const std::string RESOLVE_ABILITY_ERR_SOLUTION_TWO =
+    "Check if the application corresponding to the specified bundleName is installed";
+const std::string RESOLVE_ABILITY_ERR_SOLUTION_THREE =
+    "For multi-HAP applications, it is necessary to confirm whether the HAP to which"
+    " the ability belongs has been installed";
+const std::string GET_ABILITY_SERVICE_FAILED_SOLUTION_ONE =
+    "Check if the application corresponding to the specified bundleName is installed";
+const std::string ABILITY_SERVICE_NOT_CONNECTED_SOLUTION_ONE =
+    "Try restarting the device and executing again";
+const std::string RESOLVE_APP_ERR_SOLUTION_ONE =
+    "The app information retrieved from BMS is missing the application name or package name";
+const std::string START_ABILITY_WAITING_SOLUTION_ONE = "No need to process, just wait for the startup";
+const std::string INNER_ERR_START_SOLUTION_ONE = "Confirm whether the system memory is sufficient and "
+    "if there are any issues with the system version used by the device";
+const std::string INNER_ERR_START_SOLUTION_TWO = "Check if too many abilities have been launched";
+const std::string INNER_ERR_START_SOLUTION_THREE = "Try restarting the device";
+const std::string INNER_ERR_DEBUG_SOLUTION_ONE = "Confirm whether the system memory is sufficient and "
+    "if there are any issues with the system version used by the device";
+const std::string INNER_ERR_DEBUG_SOLUTION_TWO = "Try restarting the device";
+const std::string INNER_ERR_TEST_SOLUTION_ONE = "Confirm whether the system memory is sufficient and "
+    "if there are any issues with the system version used by the device";
+const std::string INNER_ERR_TEST_SOLUTION_TWO = "Try restarting the device";
+const std::string TARGET_ABILITY_NOT_SERVICE_SOLUTION_ONE =
+    "Check whether the ability corresponding to the parameter abilityName in aa -a is of type serviceAbility";
+const std::string KILL_PROCESS_FAILED_SOLUTION_ONE = "Confirm whether the target application exists";
+const std::string KILL_PROCESS_FAILED_SOLUTION_TWO = "Confirm the permissions of the target process";
+const std::string CHECK_PERMISSION_FAILED_SOLUTION_ONE = "Confirm whether the target ability can be launched";
+const std::string NO_FOUND_ABILITY_BY_CALLER_SOLUTION_ONE = "Normal specifications, no action needed";
+const std::string ABILITY_VISIBLE_FALSE_DENY_REQUEST_SOLUTION_ONE = "Check if the exported configuration "
+    "of the Ability field in the module.json5 of the pulled application is set to true. If not, set it to true";
+const std::string GET_BUNDLE_INFO_FAILED_SOLUTION_ONE = "Check if the bundleName is correct";
+const std::string GET_BUNDLE_INFO_FAILED_SOLUTION_TWO = "Check whether the application corresponding"
+    " to the specified bundleName is installed";
+const std::string ERR_NOT_DEVELOPER_MODE_SOLUTION_ONE = "Enable developer mode in the settings";
+const std::string KILL_PROCESS_KEEP_ALIVE_SOLUTION_ONE = "Normal specifications, no action needed";
+const std::string ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE_SOLUTION_ONE =
+    "Check in the settings whether the current device is in developer mode, and turn off developer mode";
+const std::string ERR_NOT_SUPPORTED_PRODUCT_TYPE_SOLUTION_ONE = "Normal specifications, no action needed";
+const std::string ERR_NOT_IN_APP_PROVISION_MODE_SOLUTION_ONE = "The same application can be compiled with"
+    " the Debug mode process to produce an application that supports Debug mode";
+const std::string ERR_NOT_DEBUG_APP_SOLUTION_ONE = "Configure the target application as a Debug application";
+const std::string ERR_APP_CLONE_INDEX_INVALID_SOLUTION_ONE = "Confirm whether the appCloneIndex is valid";
+const std::string ERROR_SERVICE_NOT_CONNECTED_SOLUTION_ONE = "Try restarting the device";
+const std::string ERR_STATIC_CFG_PERMISSION_SOLUTION_ONE =
+    "Confirm whether the permissions of the specified process are correct";
+const std::string ERR_CROWDTEST_EXPIRED_SOLUTION_ONE =
+    "Please check whether the application has expired for beta testing; "
+    "applications that have passed their validity period cannot be launched";
+const std::string ERR_APP_CONTROLLED_SOLUTION_ONE = "It is recommended to uninstall the application";
+const std::string ERR_EDM_APP_CONTROLLED_SOLUTION_ONE =
+    "Please contact the personnel related to enterprise device management";
+const std::string ERR_MULTI_INSTANCE_NOT_SUPPORTED_SOLUTION_ONE =
+    "Ensure that the queried application supports multi-instance";
+const std::string ERR_NOT_SUPPORT_APP_CLONE_SOLUTION_ONE =
+    "Avoid calling getCurrentAppCloneIndex in applications that do not support app clone";
+const std::string ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_ONE =
+    "Make sure the parameter configuration of implicit startup is correct";
+const std::string ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_TWO =
+    "Make sure the corresponding HAP package is installed";
+
 constexpr struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"device", required_argument, nullptr, 'd'},
@@ -181,14 +247,27 @@ ErrCode AbilityManagerShellCommand::CreateCommandMap()
 
 ErrCode AbilityManagerShellCommand::CreateMessageMap()
 {
-    messageMap_[RESOLVE_ABILITY_ERR] = "error: resolve ability err.";
-    messageMap_[GET_ABILITY_SERVICE_FAILED] = "error: get ability service failed.";
-    messageMap_[ABILITY_SERVICE_NOT_CONNECTED] = "error: ability service not connected.";
-    messageMap_[RESOLVE_APP_ERR] = "error: resolve app err.";
+    messageMap_[RESOLVE_ABILITY_ERR] = GetAaToolErrorInfo("10104001", "The specified ability does not exist",
+        "The specified Ability is not installed",
+        {RESOLVE_ABILITY_ERR_SOLUTION_ONE, RESOLVE_ABILITY_ERR_SOLUTION_TWO, RESOLVE_ABILITY_ERR_SOLUTION_THREE});
+    messageMap_[GET_ABILITY_SERVICE_FAILED] = GetAaToolErrorInfo("10105002", "Failed to get the ability service",
+        "The abilityInfo is empty when generating the Ability request through BMS",
+        {GET_ABILITY_SERVICE_FAILED_SOLUTION_ONE});
+    messageMap_[ABILITY_SERVICE_NOT_CONNECTED] = GetAaToolErrorInfo("10105001",
+        "Ability service connection failed",
+        "Failed to obtain the ability remote service",
+        {ABILITY_SERVICE_NOT_CONNECTED_SOLUTION_ONE});
+    messageMap_[RESOLVE_APP_ERR] = GetAaToolErrorInfo("10100101",
+        "An error of the Want could not be resolved to app info from BMS",
+        "Abnormal app information retrieved from BMS",
+        {RESOLVE_APP_ERR_SOLUTION_ONE});
     messageMap_[ABILITY_EXISTED] = "error: ability existed.";
     messageMap_[CREATE_MISSION_STACK_FAILED] = "error: create mission stack failed.";
     messageMap_[CREATE_ABILITY_RECORD_FAILED] = "error: create ability record failed.";
-    messageMap_[START_ABILITY_WAITING] = "start ability successfully. waiting...";
+    messageMap_[START_ABILITY_WAITING] = GetAaToolErrorInfo("10106101",
+        "Another ability is being started. Wait until it finishes starting",
+        "High system concurrency",
+        {START_ABILITY_WAITING_SOLUTION_ONE});
     messageMap_[TERMINATE_LAUNCHER_DENIED] = "error: terminate launcher denied.";
     messageMap_[CONNECTION_NOT_EXIST] = "error: connection not exist.";
     messageMap_[INVALID_CONNECTION_STATE] = "error: invalid connection state.";
@@ -197,25 +276,120 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
     messageMap_[GET_BUNDLE_MANAGER_SERVICE_FAILED] = "error: get bundle manager service failed.";
     messageMap_[REMOVE_MISSION_FAILED] = "error: remove mission failed.";
     messageMap_[INNER_ERR] = "error: inner err.";
+    messageMap_[INNER_ERR_START] = GetAaToolErrorInfo("10108101", "Internal error",
+        "Kernel common errors such as memory allocation and multithreading processing. "
+        "Specific reasons may include: internal object being null, processing timeout, "
+        "failure to obtain application information from package management, failure to obtain system service, "
+        "the number of launched ability instances has reached the limit, etc",
+        {INNER_ERR_START_SOLUTION_ONE, INNER_ERR_START_SOLUTION_TWO, INNER_ERR_START_SOLUTION_THREE});
+    messageMap_[INNER_ERR_DEBUG] = GetAaToolErrorInfo("10108601", "Internal error",
+        "General kernel errors related to memory allocation, multithreading, etc. The specific reasons may "
+        "include: internal objects being null, processing timeouts, failure to obtain system services, and so on",
+        {INNER_ERR_DEBUG_SOLUTION_ONE, INNER_ERR_DEBUG_SOLUTION_TWO});
+    messageMap_[INNER_ERR_TEST] = GetAaToolErrorInfo("10108501", "Internal error",
+        "The current device is not in developer mode",
+        {INNER_ERR_TEST_SOLUTION_ONE, INNER_ERR_TEST_SOLUTION_TWO});
     messageMap_[GET_RECENT_MISSIONS_FAILED] = "error: get recent missions failed.";
     messageMap_[REMOVE_STACK_LAUNCHER_DENIED] = "error: remove stack launcher denied.";
-    messageMap_[TARGET_ABILITY_NOT_SERVICE] = "error: target ability not service.";
+    messageMap_[TARGET_ABILITY_NOT_SERVICE] = GetAaToolErrorInfo("10103201",
+        "The target ability is not of type serviceAbility",
+        "The ability corresponding to abilityName is not of service type",
+        {TARGET_ABILITY_NOT_SERVICE_SOLUTION_ONE});
     messageMap_[TERMINATE_SERVICE_IS_CONNECTED] = "error: terminate service is connected.";
     messageMap_[START_SERVICE_ABILITY_ACTIVATING] = "error: start service ability activating.";
-    messageMap_[KILL_PROCESS_FAILED] = "error: kill process failed.";
+    messageMap_[KILL_PROCESS_FAILED] = GetAaToolErrorInfo("10106401", "kill process failed",
+        "The specified application's process ID does not exist, "
+        "there is no permission to kill the target process, or the connection to appManagerService was not successful",
+        {KILL_PROCESS_FAILED_SOLUTION_ONE, KILL_PROCESS_FAILED_SOLUTION_TWO});
     messageMap_[UNINSTALL_APP_FAILED] = "error: uninstall app failed.";
     messageMap_[TERMINATE_ABILITY_RESULT_FAILED] = "error: terminate ability result failed.";
-    messageMap_[CHECK_PERMISSION_FAILED] = "error: check permission failed.";
-    messageMap_[NO_FOUND_ABILITY_BY_CALLER] = "error: no found ability by caller.";
-    messageMap_[ABILITY_VISIBLE_FALSE_DENY_REQUEST] = "error: ability visible false deny request.";
-    messageMap_[GET_BUNDLE_INFO_FAILED] = "error: get bundle info failed.";
-    messageMap_[ERR_NOT_DEVELOPER_MODE] = "error: not developer mode.";
-    messageMap_[KILL_PROCESS_KEEP_ALIVE] = "error: keep alive process can not be killed.";
-    messageMap_[ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE] = "error: unlock screen failed in developer mode.";
-    messageMap_[ERR_NOT_SUPPORTED_PRODUCT_TYPE] = "error: not supported in the current product type.";
-    messageMap_[ERR_NOT_IN_APP_PROVISION_MODE] = "error: not supported in non-app-provision mode.";
-    messageMap_[ERR_NOT_DEBUG_APP] = "error: not debug app.";
+    messageMap_[CHECK_PERMISSION_FAILED] = GetAaToolErrorInfo("10107101",
+        "Permission check failed when launching the ability",
+        "No permission to start this ability",
+        {CHECK_PERMISSION_FAILED_SOLUTION_ONE});
+    messageMap_[NO_FOUND_ABILITY_BY_CALLER] = GetAaToolErrorInfo("10100102",
+        "aa start cannot launch UIExtensionAbility",
+        "aa start does not meet the restrictions imposed by UIExtensionAbility on the initiating party",
+        {NO_FOUND_ABILITY_BY_CALLER_SOLUTION_ONE});
+    messageMap_[ABILITY_VISIBLE_FALSE_DENY_REQUEST] = GetAaToolErrorInfo("10103001",
+        "Can not start invisible component",
+        "Application visibility check failed",
+        {ABILITY_VISIBLE_FALSE_DENY_REQUEST_SOLUTION_ONE});
+    messageMap_[GET_BUNDLE_INFO_FAILED] = GetAaToolErrorInfo("10104401",
+        "Failed to retrieve specified package information when killing the process",
+        "The application corresponding to the specified package name is not installed.",
+        {GET_BUNDLE_INFO_FAILED_SOLUTION_ONE, GET_BUNDLE_INFO_FAILED_SOLUTION_TWO});
+    messageMap_[ERR_NOT_DEVELOPER_MODE] = GetAaToolErrorInfo("10106001", "not developer Mode",
+        "The current device is not in developer mode",
+        {ERR_NOT_DEVELOPER_MODE_SOLUTION_ONE});
+    messageMap_[KILL_PROCESS_KEEP_ALIVE] = GetAaToolErrorInfo("10106402", "The persistent process cannot be killed",
+        "Designate the process as a persistent process and ensure that the device has sufficient memory",
+        {KILL_PROCESS_KEEP_ALIVE_SOLUTION_ONE});
+    messageMap_[ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE] = GetAaToolErrorInfo("10106102",
+        "for unlock screen failed in developer mode",
+        "The current mode is developer mode, and the screen cannot be unlocked automatically",
+        {ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE_SOLUTION_ONE});
+    messageMap_[ERR_NOT_SUPPORTED_PRODUCT_TYPE] = GetAaToolErrorInfo("10106107",
+        "The current device does not support using window options",
+        "The user specified windowOptions, but the device does not support it",
+        {ERR_NOT_SUPPORTED_PRODUCT_TYPE_SOLUTION_ONE});
+    messageMap_[ERR_NOT_IN_APP_PROVISION_MODE] = GetAaToolErrorInfo("10106002",
+        "The target application does not support Debug mode",
+        "The application specified by the aa tool is a Release version and does not support Debug mode",
+        {ERR_NOT_IN_APP_PROVISION_MODE_SOLUTION_ONE});
+    messageMap_[ERR_NOT_DEBUG_APP] = GetAaToolErrorInfo("10106701",
+        "The target application is not a debug application",
+        "The developer forgot to configure the target application as a Debug application",
+        {ERR_NOT_DEBUG_APP_SOLUTION_ONE});
+    messageMap_[ERR_APP_CLONE_INDEX_INVALID] = GetAaToolErrorInfo("10103102",
+        "The app clone index is invalid",
+        "If the appCloneIndex carried in the parameters of the aa tool is an invalid value, return that error code",
+        {ERR_APP_CLONE_INDEX_INVALID_SOLUTION_ONE});
+    messageMap_[ERROR_SERVICE_NOT_CONNECTED] = GetAaToolErrorInfo("10105003",
+        "App service connection failed",
+        "Failed to retrieve the App remote service",
+        {ERROR_SERVICE_NOT_CONNECTED_SOLUTION_ONE});
+    messageMap_[ERR_STATIC_CFG_PERMISSION] = GetAaToolErrorInfo("10107102",
+        "The specified process does not have the permission",
+        "The specified process permission check failed",
+        {ERR_STATIC_CFG_PERMISSION_SOLUTION_ONE});
+    messageMap_[ERR_CROWDTEST_EXPIRED] = GetAaToolErrorInfo("10106102",
+        "Failed to unlock the screen in developer mode",
+        "The current mode is developer mode, and the screen cannot be unlocked automatically",
+        {ERR_CROWDTEST_EXPIRED_SOLUTION_ONE});
+    messageMap_[ERR_APP_CONTROLLED] = GetAaToolErrorInfo("10106105",
+        "The application is controlled",
+        "The application is suspected of malicious behavior and is restricted from launching by the appStore",
+        {ERR_APP_CONTROLLED_SOLUTION_ONE});
+    messageMap_[ERR_EDM_APP_CONTROLLED] = GetAaToolErrorInfo("10106106",
+        "The application is controlled by EDM",
+        "The application is under the control of enterprise device management",
+        {ERR_EDM_APP_CONTROLLED_SOLUTION_ONE});
+    messageMap_[ERR_MULTI_INSTANCE_NOT_SUPPORTED] = GetAaToolErrorInfo("10106501",
+        "App clone or multi-instance is not supported",
+        "The target application does not support multi-instance information, so this error code is returned",
+        {ERR_MULTI_INSTANCE_NOT_SUPPORTED_SOLUTION_ONE});
+    messageMap_[ERR_NOT_SUPPORT_APP_CLONE] = GetAaToolErrorInfo("10106502",
+        "App clone is not supported",
+        "When calling getCurrentAppCloneIndex in an application that does not support"
+        " app cloning, this error code is returned",
+        {ERR_NOT_SUPPORT_APP_CLONE_SOLUTION_ONE});
+    messageMap_[ERR_IMPLICIT_START_ABILITY_FAIL] = GetAaToolErrorInfo("10103101",
+        "No matching ability is found",
+        "The parameter configuration of implicit startup is incorrect, or the specified HAP package is not installed.",
+        {ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_ONE, ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_TWO});
     return OHOS::ERR_OK;
+}
+
+std::string AbilityManagerShellCommand::GetAaToolErrorInfo(std::string errorCode, std::string message,
+    std::string cause, std::vector<std::string> solutions)
+{
+    AaToolErrorInfo aaToolErrorInfo;
+    aaToolErrorInfo.code = errorCode;
+    aaToolErrorInfo.message = message;
+    aaToolErrorInfo.cause = cause;
+    aaToolErrorInfo.solutions = solutions;
+    return aaToolErrorInfo.ToString();
 }
 
 ErrCode AbilityManagerShellCommand::init()
@@ -254,6 +428,10 @@ ErrCode AbilityManagerShellCommand::RunAsStartAbility()
             if (result != START_ABILITY_WAITING) {
                 resultReceiver_ = STRING_START_ABILITY_NG + "\n";
             }
+            CheckStartAbilityResult(result);
+            if (result == INNER_ERR) {
+                result = INNER_ERR_START;
+            }
             resultReceiver_.append(GetMessageFromCode(result));
         }
     } else {
@@ -262,6 +440,14 @@ ErrCode AbilityManagerShellCommand::RunAsStartAbility()
     }
 
     return result;
+}
+
+void AbilityManagerShellCommand::CheckStartAbilityResult(ErrCode& result)
+{
+    auto it = messageMap_.find(result);
+    if (it == messageMap_.end()) {
+        result = INNER_ERR;
+    }
 }
 
 ErrCode AbilityManagerShellCommand::RunAsStopService()
@@ -516,6 +702,7 @@ ErrCode AbilityManagerShellCommand::RunAsDumpsysCommand()
                 resultReceiver_ += it + "\n";
             }
         } else {
+            resultReceiver_.append(GetMessageFromCode(result));
             TAG_LOGI(AAFwkTag::AA_TOOL, "dump state failed");
         }
     }
@@ -625,11 +812,14 @@ ErrCode AbilityManagerShellCommand::RunAsAttachDebugCommand()
     }
 
     auto result = AbilityManagerClient::GetInstance()->AttachAppDebug(bundleName);
+    if (result == INNER_ERR) {
+        result = INNER_ERR_DEBUG;
+    }
     if (result == OHOS::ERR_OK) {
         resultReceiver_.append(STRING_ATTACH_APP_DEBUG_OK + "\n");
         return result;
     }
-
+    resultReceiver_.append(GetMessageFromCode(result));
     TAG_LOGD(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_ATTACH_APP_DEBUG_NG.c_str(), result);
     resultReceiver_.append(STRING_ATTACH_APP_DEBUG_NG + "\n");
     return result;
@@ -650,7 +840,10 @@ ErrCode AbilityManagerShellCommand::RunAsDetachDebugCommand()
         resultReceiver_.append(STRING_DETACH_APP_DEBUG_OK + "\n");
         return result;
     }
-
+    if (result == INNER_ERR) {
+        result = INNER_ERR_DEBUG;
+    }
+    resultReceiver_.append(GetMessageFromCode(result));
     TAG_LOGD(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_DETACH_APP_DEBUG_NG.c_str(), result);
     resultReceiver_.append(STRING_DETACH_APP_DEBUG_NG + "\n");
     return result;
@@ -777,8 +970,8 @@ ErrCode AbilityManagerShellCommand::RunAsAppDebugDebugCommand()
         resultReceiver_.append(GetMessageFromCode(result));
         return result;
     }
-
     resultReceiver_ = STRING_APP_DEBUG_OK + "\n";
+    resultReceiver_.append(GetMessageFromCode(result));
     if (isGet && !debugInfoList.empty()) {
         for (auto it : debugInfoList) {
             resultReceiver_ += it + "\n";
@@ -801,6 +994,7 @@ ErrCode AbilityManagerShellCommand::RunAsProcessCommand()
             TAG_LOGI(
                 AAFwkTag::AA_TOOL, "%{public}s result:%{public}d", STRING_START_NATIVE_PROCESS_NG.c_str(), result);
             resultReceiver_ = STRING_START_NATIVE_PROCESS_NG;
+            resultReceiver_.append(GetMessageFromCode(result));
         }
     } else {
         resultReceiver_.append(HELP_MSG_PROCESS);
@@ -1982,6 +2176,9 @@ ErrCode AbilityManagerShellCommand::StartUserTest(const std::map<std::string, st
     if (result != OHOS::ERR_OK) {
         TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_START_USER_TEST_NG.c_str(), result);
         resultReceiver_ = STRING_START_USER_TEST_NG + "\n";
+            if (result == INNER_ERR) {
+                result = INNER_ERR_TEST;
+            }
         resultReceiver_.append(GetMessageFromCode(result));
         return result;
     }
