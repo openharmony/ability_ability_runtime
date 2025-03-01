@@ -13,29 +13,9 @@
  * limitations under the License.
  */
 
-import EventHub from "../event_hub/event_hub.sts";
+import Context from './Context'
 
-interface BaseContext {
-    readonly area: int;
-    readonly filesDir: string;
-    readonly tempDir: string;
-}
-
-abstract class Context implements BaseContext{
-    area: int = 0;
-    filesDir: string = "";
-    tempDir: string = "";
-    eventHub: EventHub = new EventHub();
-
-    private applicationContext?: ApplicationContext;
-
-    getApplicationContext():ApplicationContext | undefined {
-        console.log("ywz getApplicationContext 111");
-        return this.applicationContext;
-    }
-}
-
-class ApplicationContext extends Context {
+export default class ApplicationContext extends Context {
     public native setSupportedProcessCacheSync(isSupported : boolean):void;
     public nativeApplicationContext:long = 0;
 
@@ -46,27 +26,5 @@ class ApplicationContext extends Context {
         p1.then<void>(():void=>{
             console.log("call setSupportedProcessCache 333");
         });
-    }
-}
-
-interface Configuration {
-    readonly language: string;
-}
-
-class ConfigurationInner implements Configuration {
-    language: string = "";
-}
-
-class AbilityStageContext extends Context {
-    public stageContext: long = 0; 
-    config?: Configuration;
-}
-
-
-// The subclass name must be STSAbilityStage
-abstract class AbilityStage {
-    context?: AbilityStageContext;
-
-    onCreate() {
     }
 }
