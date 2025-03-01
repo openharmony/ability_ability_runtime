@@ -18,6 +18,7 @@
 #include "sts_runtime.h"
 #include "configuration_convertor.h"
 #include "ohos_application.h"
+#include "sts_context_util.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -28,65 +29,6 @@ void STSAbilityStageContext::ResetEnv(ani_env* env)
 {
     env->DescribeError();  // 打印异常信息
     env->ResetError();  // 清除异常，避免影响后续 ANI 调用
-}
-
-void STSAbilityStageContext::BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::weak_ptr<AppExecFwk::OHOSApplication> application)
-{
-    // bind parent context field:applicationContext
-    ani_field applicationContextField;
-    if (aniEnv->Class_FindField(contextClass, "applicationContext", &applicationContextField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "[ywz] Class_FindField failed");
-    }
-    auto ohosApplication = application.lock();
-    if (ohosApplication == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ohosApplication is null");
-        return;
-    }
-    ani_ref applicationContextRef = reinterpret_cast<ani_ref>(ohosApplication->GetApplicationCtxObjRef());
-    TAG_LOGI(AAFwkTag::APPKIT, "[ywz] applicationContextRef: %{public}p", applicationContextRef);
-    if (aniEnv->Object_SetField_Ref(contextObj, applicationContextField, applicationContextRef) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "[ywz] Object_SetField_Ref failed");
-    }
-}
-
-void STSAbilityStageContext::BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<Context> context)
-{
-    // bind parent context property
-    ani_method areaSetter;
-    if (ANI_OK != aniEnv->Class_FindMethod(contextClass, "<set>area", nullptr, &areaSetter)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "[ywz] find set area failed");
-    }
-    auto area = context->GetArea();
-    TAG_LOGI(AAFwkTag::APPKIT, "[ywz] ani area:%{public}d", area);
-    if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, areaSetter, ani_int(area))) {
-        TAG_LOGE(AAFwkTag::APPKIT, "[ywz] call set area failed");
-    }
-
-    ani_method filesDirSetter;
-    if (ANI_OK != aniEnv->Class_FindMethod(contextClass, "<set>filesDir", nullptr, &filesDirSetter)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "[ywz] find set filesDir failed");
-    }
-    std::string filesDir = context->GetFilesDir();
-    TAG_LOGI(AAFwkTag::APPKIT, "[ywz] ani filesDir:%{public}s", filesDir.c_str());
-    ani_string filesDir_string{};
-    aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDir_string);
-    if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, filesDirSetter, filesDir_string)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "[ywz] call set filesDir failed");
-    }
-
-    ani_method tempDirSetter;
-    if (ANI_OK != aniEnv->Class_FindMethod(contextClass, "<set>tempDir", nullptr, &tempDirSetter)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "[ywz] find set tempDir failed");
-    }
-    auto tempDir = context->GetTempDir();
-    TAG_LOGI(AAFwkTag::APPKIT, "[ywz] ani tempDir:%{public}s", tempDir.c_str());
-    ani_string tempDir_string{};
-    aniEnv->String_NewUTF8(tempDir.c_str(), tempDir.size(), &tempDir_string);
-    if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, tempDirSetter, tempDir_string)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "[ywz] call set tempDir failed");
-    }
 }
 
 ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, std::shared_ptr<Context> context,
@@ -137,8 +79,12 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
     }
 
     // bind parent context
-    BindApplicationCtx(env, abilityStageCtxCls, obj, application);
-    BindParentProperty(env, abilityStageCtxCls, obj, context);
+    auto app = application.lock();
+    if (app == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "application is null");
+        return nullptr;
+    }
+    ContextUtil::StsCreatContext(env, abilityStageCtxCls, obj, app->GetApplicationCtxObjRef(), context);
 
     //set Config class
     ani_object configObj = Createfiguration(env, context);
