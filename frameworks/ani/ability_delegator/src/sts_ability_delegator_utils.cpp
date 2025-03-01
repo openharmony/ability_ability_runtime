@@ -17,6 +17,7 @@
 
 #include <map>
 #include "hilog_tag_wrapper.h"
+#include "sts_ability_delegator.h"
 
 namespace OHOS {
 namespace AbilityDelegatorSts {
@@ -53,7 +54,12 @@ ani_object CreateStsAbilityDelegator(ani_env *aniEnv)
     TAG_LOGI(AAFwkTag::DELEGATOR, "Object_New success");
 
     std::array delegatorFunctions = {
-        ani_native_function {"printSync", "Lstd/core/String;:V", reinterpret_cast<void *>(PrintSync)},
+        ani_native_function {"getAppContext", ":L@ohos/ability/AbilityDelegator/Context;",
+            reinterpret_cast<void *>(GetAppContext)},
+        ani_native_function {"executeShellCommandsync", "Lstd/core/String;I:LShellCmdResult;",
+            reinterpret_cast<void *>(ExecuteShellCommand)},
+        ani_native_function {"finishTestSync", "Lstd/core/String;I:I;", reinterpret_cast<void *>(FinishTestSync)},
+        ani_native_function {"printSync", "Lstd/core/String;:V", reinterpret_cast<void *>(PrintSync)}
         // TODO: other api except for printSync
     };
     aniEnv->Class_BindNativeMethods(abilityDelegator, delegatorFunctions.data(), delegatorFunctions.size());
