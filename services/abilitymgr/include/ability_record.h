@@ -1215,6 +1215,8 @@ private:
     void SetDebugAppByWaitingDebugFlag();
     void AfterLoaded();
 
+    void CancelPrepareTerminate();
+
 #ifdef SUPPORT_SCREEN
     std::shared_ptr<Want> GetWantFromMission() const;
     void SetShowWhenLocked(const AppExecFwk::AbilityInfo &abilityInfo, sptr<AbilityTransitionInfo> &info) const;

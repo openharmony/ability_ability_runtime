@@ -1353,6 +1353,22 @@ void AbilityRecord::PrepareTerminateAbilityDone(bool isTerminate)
     isPrepareTerminateAbilityCv_.notify_one();
 }
 
+void AbilityRecord::CancelPrepareTerminate()
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "canceling prepare terminate,bundle=%{public}s,module=%{public}s,ability=%{public}s",
+        abilityInfo_.bundleName.c_str(), abilityInfo_.moduleName.c_str(), abilityInfo_.name.c_str());
+    std::unique_lock<std::mutex> lock(isPrepareTerminateAbilityMutex_);
+    if (!isPrepareTerminateAbilityCalled_.load()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "prepare terminate not called");
+        return;
+    }
+    isPrepareTerminate_ = true; // no need to terminate again
+    isPrepareTerminateAbilityDone_.store(true);
+    isPrepareTerminateAbilityCalled_.store(false);
+    isPrepareTerminateAbilityCv_.notify_one();
+}
+
 int AbilityRecord::TerminateAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -2672,6 +2688,7 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 
 void AbilityRecord::OnProcessDied()
 {
+    CancelPrepareTerminate();
     std::lock_guard<ffrt::mutex> guard(lock_);
     if (!IsSceneBoard() && scheduler_ != nullptr) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "OnProcessDied: '%{public}s', attached.", abilityInfo_.name.c_str());
