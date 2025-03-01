@@ -38,75 +38,39 @@ using namespace OHOS::AbilityRuntime;
 
 ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
 {
-    TAG_LOGE(AAFwkTag::UIABILITY, "WrapWant");
+    TAG_LOGE(AAFwkTag::JSNAPI, "WrapWant");
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
     ani_method method = nullptr;
     ani_object object = nullptr;
-    ani_field field = nullptr;
-    ani_string string = nullptr;
     if ((status = env->FindClass("L@ohos/app/ability/Want/Want;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
     }
     if (cls == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null wantCls");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null wantCls");
         return nullptr;
     }
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
     }
     if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
     }
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null object");
         return nullptr;
     }
 
     auto elementName = want.GetElement();
-    if ((status = env->Class_FindField(cls, "deviceId", &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    env->String_NewUTF8(elementName.GetDeviceID().c_str(), elementName.GetDeviceID().size(), &string);
-    if ((status = env->Object_SetField_Ref(object, field, string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if ((status = env->Class_FindField(cls, "bundleName", &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if ((status = env->String_NewUTF8(
-             elementName.GetBundleName().c_str(), elementName.GetBundleName().size(), &string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if ((status = env->Object_SetField_Ref(object, field, string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    env->Class_FindField(cls, "abilityName", &field);
-    env->String_NewUTF8(elementName.GetAbilityName().c_str(), elementName.GetAbilityName().size(), &string);
-    env->Object_SetField_Ref(object, field, string);
+    SetFieldString(env, cls, object, "deviceId", elementName.GetDeviceID());
+    SetFieldString(env, cls, object, "bundleName", elementName.GetBundleName());
+    SetFieldString(env, cls, object, "abilityName", elementName.GetAbilityName());
+    SetFieldString(env, cls, object, "moduleName", elementName.GetModuleName());
+    SetFieldString(env, cls, object, "uri", want.GetUriString());
+    SetFieldString(env, cls, object, "type", want.GetType());
+    SetFieldInt(env, cls, object, "flags", want.GetFlags());
+    SetFieldString(env, cls, object, "action", want.GetAction());
 
-    env->Class_FindField(cls, "moduleName", &field);
-    env->String_NewUTF8(elementName.GetModuleName().c_str(), elementName.GetModuleName().size(), &string);
-    env->Object_SetField_Ref(object, field, string);
-
-    env->Class_FindField(cls, "uri", &field);
-    env->String_NewUTF8(want.GetUriString().c_str(), want.GetUriString().size(), &string);
-    env->Object_SetField_Ref(object, field, string);
-
-    env->Class_FindField(cls, "type", &field);
-    env->String_NewUTF8(want.GetType().c_str(), want.GetType().size(), &string);
-    env->Object_SetField_Ref(object, field, string);
-
-    if ((status = env->Class_FindField(cls, "flags", &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-    if ((status = env->Object_SetField_Int(object, field, want.GetFlags())) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-    }
-
-    env->Class_FindField(cls, "action", &field);
-    env->String_NewUTF8(want.GetAction().c_str(), want.GetAction().size(), &string);
-    env->Object_SetField_Ref(object, field, string);
     // TODO
     return object;
 }
@@ -118,7 +82,7 @@ ani_object WrapWantParams(ani_env *env, ani_class cls, const AAFwk::WantParams &
     env->Class_FindMethod(cls, "<init>", "I:V", &method);
     env->Object_New(cls, method, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null object");
         return nullptr;
     }
     // TODO
@@ -137,72 +101,83 @@ bool InnerWrapWantParamsString(
     return true;
 }
 
-std::string GetStdString(ani_env *env, ani_string str)
-{
-    std::string result;
-    ani_size sz {};
-    env->String_GetUTF8Size(str, &sz);
-    result.resize(sz + 1);
-    env->String_GetUTF8SubString(str, 0, sz, result.data(), result.size(), &sz);
-    result.resize(sz);
-    return result;
-}
-
 bool UnwrapElementName(ani_env *env, ani_object param, ElementName &elementName)
 {
-    ani_ref deviceIdRef {};
-    env->Object_GetFieldByName_Ref(param, "deviceId", &deviceIdRef);
-    ani_string deviceIdAni = reinterpret_cast<ani_string>(deviceIdRef);
-    std::string deviceId = GetStdString(env, deviceIdAni);
-    elementName.SetDeviceID(deviceId);
+    std::string deviceId;
+    if (GetStringOrUndefined(env, param, "deviceId", deviceId)) {
+        elementName.SetDeviceID(deviceId);
+    }
 
-    ani_ref bundleNameRef {};
-    env->Object_GetFieldByName_Ref(param, "bundleName", &bundleNameRef);
-    ani_string bundleNameAni = reinterpret_cast<ani_string>(bundleNameRef);
-    std::string bundleName = GetStdString(env, bundleNameAni);
-    elementName.SetBundleName(bundleName);
+    std::string bundleName;
+    if (GetStringOrUndefined(env, param, "bundleName", bundleName)) {
+        elementName.SetBundleName(bundleName);
+    }
 
-    ani_ref abilityNameRef {};
-    env->Object_GetFieldByName_Ref(param, "abilityName", &abilityNameRef);
-    ani_string abilityNameAni = reinterpret_cast<ani_string>(abilityNameRef);
-    std::string abilityName = GetStdString(env, abilityNameAni);
-    elementName.SetAbilityName(abilityName);
+    std::string abilityName;
+    if (GetStringOrUndefined(env, param, "abilityName", abilityName)) {
+        elementName.SetAbilityName(abilityName);
+    }
 
-    ani_ref moduleNameRef {};
-    env->Object_GetFieldByName_Ref(param, "moduleName", &moduleNameRef);
-    ani_string moduleNameAni = reinterpret_cast<ani_string>(moduleNameRef);
-    std::string moduleName = GetStdString(env, moduleNameAni);
-    elementName.SetModuleName(moduleName);
+    std::string moduleName;
+    if (GetStringOrUndefined(env, param, "moduleName", moduleName)) {
+        elementName.SetModuleName(moduleName);
+    }
     return true;
 }
 
 bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
 {
-    ani_ref actionRef {};
-    env->Object_GetFieldByName_Ref(param, "action", &actionRef);
-    ani_string actionAni = reinterpret_cast<ani_string>(actionRef);
-    std::string action = GetStdString(env, actionAni);
+    std::string action;
+    if (GetStringOrUndefined(env, param, "action", action)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "action %{public}s", action.c_str());
+        want.SetAction(action);
+    }
 
-    ani_ref uriRef {};
-    env->Object_GetFieldByName_Ref(param, "uri", &uriRef);
-    ani_string uriAni = reinterpret_cast<ani_string>(uriRef);
-    std::string uri = GetStdString(env, uriAni);
+    std::string uri;
+    if (GetStringOrUndefined(env, param, "uri", uri)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "uri %{public}s", uri.c_str());
+        want.SetUri(uri);
+    }
 
-    ani_int flags {};
-    env->Object_GetFieldByName_Int(param, "flags", &flags);
+    int flags = GetIntOrUndefined(env, param, "flags");
+    TAG_LOGE(AAFwkTag::UIABILITY, "flags %{public}d", flags);
     want.SetFlags(flags);
 
-    ani_ref typeRef {};
-    env->Object_GetFieldByName_Ref(param, "type", &typeRef);
-    ani_string typeAni = reinterpret_cast<ani_string>(typeRef);
-    std::string type = GetStdString(env, typeAni);
+    std::string type;
+    if (GetStringOrUndefined(env, param, "type", type)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "uri %{public}s", type.c_str());
+        want.SetType(type);
+    }
 
     ElementName natElementName;
     UnwrapElementName(env, param, natElementName);
     want.SetElementName(natElementName.GetDeviceID(), natElementName.GetBundleName(), natElementName.GetAbilityName(),
         natElementName.GetModuleName());
+    TAG_LOGE(AAFwkTag::UIABILITY,
+        "DeviceID %{public}s, BundleName %{public}s, AbilityName %{public}s, ModuleName %{public}s",
+        natElementName.GetDeviceID().c_str(), natElementName.GetBundleName().c_str(),
+        natElementName.GetAbilityName().c_str(), natElementName.GetModuleName().c_str());
     // TODO
     return true;
+}
+
+void UnWrapAbilityResult(ani_env *env, ani_object param, int &resultCode, AAFwk::Want &want)
+{
+    resultCode = GetIntOrUndefined(env, param, "resultCode");
+    ani_status status = ANI_ERROR;
+    ani_ref wantRef = nullptr;
+    ani_boolean isUndefined = true;
+    if ((status = env->Object_GetFieldByName_Ref(param, "want", &wantRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    }
+    if ((status = env->Reference_IsUndefined(wantRef, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    }
+    if (isUndefined){
+        TAG_LOGE(AAFwkTag::JSNAPI, "want undefined");
+        return;
+    } 
+    UnwrapWant(env, reinterpret_cast<ani_object>(wantRef), want);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

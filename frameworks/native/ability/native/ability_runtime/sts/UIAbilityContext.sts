@@ -36,73 +36,165 @@ export class AsyncCallback<T> {
 }
 
 export class AbilityResult {
-  resultCode: int
+  resultCode: int;
+  want?: Want;
 }
 
-export default class UIAbilityContext {
-  public native startAbilitySync(want: Want, callback:AsyncCallback<void>): int;
-  public native startAbilitySync(want: Want): int;
+export namespace ConfigurationConstant {
+  export enum ColorMode {
+    COLOR_MODE_NOT_SET = -1,
+    COLOR_MODE_DARK = 0,
+    COLOR_MODE_LIGHT = 1
+  }
+  export enum Direction {
+    DIRECTION_NOT_SET = -1,
+    DIRECTION_VERTICAL = 0,
+    DIRECTION_HORIZONTAL = 1
+  }
+  export enum ScreenDensity {
+    SCREEN_DENSITY_NOT_SET = 0,
+    SCREEN_DENSITY_SDPI = 120,
+    SCREEN_DENSITY_MDPI = 160,
+    SCREEN_DENSITY_LDPI = 240,
+    SCREEN_DENSITY_XLDPI = 320,
+    SCREEN_DENSITY_XXLDPI = 480,
+    SCREEN_DENSITY_XXXLDPI = 640
+  }
+}
+export class Configuration {
+  language?: string;
+  colorMode: ConfigurationConstant.ColorMode;
+  direction: ConfigurationConstant.Direction;
+  screenDensity: ConfigurationConstant.ScreenDensity;
+  displayId: int;
+  hasPointerDevice: boolean;
+  fontId?: string;
+  fontSizeScale: double;
+  fontWeightScale: double;
+  mcc?: string;
+  mnc?: string;
+}
+
+interface AbilityInfo {
+  readonly bundleName: string;
+  readonly moduleName: string;
+  readonly name: string;
+  readonly label: string;
+  readonly labelId: int;
+  readonly description: string;
+  readonly descriptionId: int;
+  readonly icon: string;
+  readonly iconId: int;
+  readonly process: string;
+  readonly exported: boolean;
+  // readonly type: bundleManager.AbilityType;
+  // readonly orientation: bundleManager.DisplayOrientation;
+  // readonly launchType: bundleManager.LaunchType;
+  readonly permissions: Array<string>;
+  readonly readPermission: string;
+  readonly writePermission: string;
+  readonly uri: string;
+  readonly deviceTypes: Array<string>;
+  // readonly applicationInfo: ApplicationInfo;
+  // readonly metadata: Array<Metadata>;
+  readonly enabled: boolean;
+  // readonly supportWindowModes: Array<bundleManager.SupportWindowMode>;
+  // readonly windowSize: WindowSize;
+  readonly excludeFromDock: boolean;
+  // readonly skills: Array<Skill>;
+  readonly appIndex: int;
+  readonly orientationId: int;
+}
+
+export class AbilityInfoCls implements AbilityInfo {
+  readonly bundleName: string = '';
+  readonly moduleName: string = '';
+  readonly name: string = '';
+  readonly label: string = '';
+  readonly labelId: int;
+  readonly description: string = '';
+  readonly descriptionId: int;
+  readonly icon: string = '';
+  readonly iconId: int;
+  readonly process: string = '';
+  readonly exported: boolean;
+  readonly permissions: Array<string> = new Array<string>();
+  readonly readPermission: string = '';
+  readonly writePermission: string = '';
+  readonly uri: string = '';
+  readonly deviceTypes: Array<string> = new Array<string>();
+  readonly enabled: boolean;
+  readonly excludeFromDock: boolean;
+  readonly appIndex: int;
+  readonly orientationId: int;
+}
+
+export class UIAbilityContext {
+  public nativeContext : long;
+  public config?: Configuration;
+  public abilityInfo?: AbilityInfo;
+  // public windowStage?: window.WindowStage;
+
+  public native nativeStartAbilitySync(want: Want, callback: AsyncCallback<AbilityResult>): void;
+  public native nativeStartAbilitySync(want: Want, options: StartOptions, callback:AsyncCallback<AbilityResult>): void;
   public native nativeStartAbilityForResult(want: Want, callback:AsyncCallback<AbilityResult>): void;
   public native nativeStartAbilityForResult(want: Want, startOptions: StartOptions, callback:AsyncCallback<AbilityResult>): void;
-  public native terminateSelfSync(): void;
-  public native terminateSelfSyncPromise(): void;
+  public native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallback<AbilityResult>): void;
   public native reportDrawnCompletedSync(): void;
-  public nativeContext : long;
-
-  startAbility(want: Want, callback: MyFun<void>):void{
-    console.log("call startAbility callback 111");
-    let myCall = new AsyncCallback<void>(callback);
-    let p1 = launch this.startAbilitySync(want, myCall);
-    console.log("call startAbility callback 222");
-    p1.then((e : int)=>{
-      // callback();
-      console.log("e" + e);
-      console.log("call startAbility callback 333");
-    });
-    console.log("call startAbility callback 444");
-  }
 
   // startAbility(want: Want, callback: AsyncCallback<void>): void;
-  // startAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void;
-  // startAbility(want: Want, options?: StartOptions): Promise<void>;
-  startAbility(want: Want): Promise<int> {
-    console.log("startAbility Promise");
-    let p = new Promise<int>((resolve: (r1 : int)=>void, reject:(err: string)=>void):void => {
-      console.log("startAbility Promise 111");
-      let p1 = launch this.startAbilitySync(want);
-      console.log("startAbility Promise 222");
-      p1.then((e : int)=>{
-        // callback();
-      console.log("startAbility Promise 333");
-        console.log("eee" + e);
-        if (e == 0) {
-          resolve(e);
-        } else {
-          reject("error");
-        }
+  startAbility(want: Want, callback: MyFun<AbilityResult>):void{
+    console.log("call startAbility callback 111");
+    let myCall = new AsyncCallback<AbilityResult>(callback);
+    let p1 = launch this.nativeStartAbilitySync(want, myCall);
+    console.log("call startAbility callback 222");
+  }
 
+  // startAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void;
+  startAbility(want: Want, options: StartOptions, callback: MyFun<AbilityResult>):void{
+    console.log("call startAbility callback 111");
+    let myCall = new AsyncCallback<AbilityResult>(callback);
+    let p1 = launch this.nativeStartAbilitySync(want, options, myCall);
+    console.log("call startAbility callback 222");
+  }
+
+  // startAbility(want: Want, options?: StartOptions): Promise<void>;
+  startAbility(want: Want, options?: StartOptions): Promise<AbilityResult> {
+    console.log("call startAbility callback 111");
+    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallback<AbilityResult>((err: BusinessError, data: AbilityResult)=>{
+        if (err.code == 0) {
+          resolve(data);
+        } else {
+          reject(err);
+        }
       });
-      console.log("startAbility Promise 444");
+      if (options) {
+        launch this.nativeStartAbilitySync(want, options, myCall);
+      } else {
+        launch this.nativeStartAbilitySync(want, myCall);
+      }
+    console.log("call startAbility callback 222");
     });
     return p;
   }
 
   startAbilityForResult(want: Want, callback: MyFun<AbilityResult>):void{
-    console.log("call startAbility callback 111");
+    console.log("call startAbilityForResult callback 111");
     let myCall = new AsyncCallback<AbilityResult>(callback);
     launch this.nativeStartAbilityForResult(want, myCall);
-    console.log("call startAbility callback 222");
+    console.log("call startAbilityForResult callback 222");
   }
 
   startAbilityForResult(want: Want, startOptions: StartOptions, callback: MyFun<AbilityResult>):void{
-    console.log("call startAbility callback 111");
+    console.log("call startAbilityForResult callback 111");
     let myCall = new AsyncCallback<AbilityResult>(callback);
-    launch this.nativeStartAbilityForResult(want, startOptions, myCall);
-    console.log("call startAbility callback 222");
+    launch this.nativeStartAbilityForResult(want, myCall);
+    console.log("call startAbilityForResult callback 222");
   }
 
   startAbilityForResult(want: Want, startOptions?: StartOptions): Promise<AbilityResult>{
-    console.log("call startAbility callback 111");
+    console.log("call startAbilityForResult callback 111");
     let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError)=>void):void => {
       let myCall = new AsyncCallback<AbilityResult>((err: BusinessError, data: AbilityResult)=>{
         if (err.code == 0) {
@@ -117,41 +209,40 @@ export default class UIAbilityContext {
         launch this.nativeStartAbilityForResult(want, myCall);
       }
     });
-    console.log("call startAbility callback 222");
+    console.log("call startAbilityForResult callback 222");
     return p;
   }
 
-  terminateSelf(callback:() => void): void {
-    console.log("call startAbility callback 111");
-    let p1 = launch UIAbilityContext.terminateSelfSync();
-    console.log("call startAbility callback 222");
-    p1.then<void>(()=>{
-      callback();
-      console.log("call startAbility callback 333");
-    });
-    console.log("call startAbility callback 444");
+
+  terminateSelfWithResult(parameter: AbilityResult, callback: MyFun<AbilityResult>): void{
+    
+    console.log("call terminateSelfWithResult callback 111");
+    let myCall = new AsyncCallback<AbilityResult>(callback);
+    launch this.nativeTerminateSelfWithResult(parameter, myCall);
+    console.log("call terminateSelfWithResult callback 222");
   }
 
-  terminateSelf(): Promise<void> {
-    console.log("terminateSelf Promise 111");
-    let p = new Promise<void>((resolve: () => void): void => {
-        console.log("terminateSelf Promise 222");
-        let p1 = launch UIAbilityContext.terminateSelfSyncPromise();
-        console.log("terminateSelf Promise 333");
-        p1.then<void>(():void=>{
-          resolve();
-          console.log("terminateSelf Promise 444");
-        });
+  terminateSelfWithResult(parameter: AbilityResult): Promise<AbilityResult>{
+    console.log("call terminateSelfWithResult callback 111");
+    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallback<AbilityResult>((err: BusinessError, data: AbilityResult)=>{
+        if (err.code == 0) {
+          resolve(data);
+        } else {
+          reject(err);
+        }
+      });
+      launch this.nativeTerminateSelfWithResult(parameter, myCall);
     });
-        console.log("terminateSelf Promise 555");
-        return p;
+    console.log("call terminateSelfWithResult callback 222");
+    return p;
   }
 
   reportDrawnCompleted(callback:() => void): void {
     console.log("reportDrawnCompleted callback 111");
-    let p1 = launch UIAbilityContext.reportDrawnCompletedSync();
+    let p1 = launch this.reportDrawnCompletedSync();
     console.log("reportDrawnCompleted callback 222");
-    p1.then<void>(()=>{
+    p1?.then<void>(():void=>{
       //callback();
       console.log("reportDrawnCompleted callback 333");
     });

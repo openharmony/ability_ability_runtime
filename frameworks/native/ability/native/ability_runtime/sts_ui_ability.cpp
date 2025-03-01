@@ -620,6 +620,11 @@ std::unique_ptr<STSNativeReference> StsUIAbility::CreateAppWindowStage()
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsWindowStage");
         return nullptr;
     }
+    // TODO
+    std::unique_ptr<STSNativeReference> stsWindowStageObj = std::make_unique<STSNativeReference>();
+    stsWindowStageObj->aniCls = nullptr;
+    stsWindowStageObj->aniObj = stsWindowStage;
+    stsWindowStageObj->aniRef = reinterpret_cast<ani_ref>(stsWindowStage);
     TAG_LOGE(AAFwkTag::UIABILITY, "CreateAppWindowStage end");
     return nullptr;
 }
@@ -1221,7 +1226,9 @@ void StsUIAbility::UpdateStsWindowStage(ani_ref windowStage)
         if ((status = env->Class_FindField(cls, "windowStage", &field)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         }
-        if ((status = env->Object_SetField_Ref(contextObj, field, nullptr)) != ANI_OK) {
+        ani_ref undefinedRef = nullptr; // env->
+        env->GetUndefined(&undefinedRef);
+        if ((status = env->Object_SetField_Ref(contextObj, field, undefinedRef)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         }
         return;
