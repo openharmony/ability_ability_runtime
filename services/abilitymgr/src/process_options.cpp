@@ -68,6 +68,27 @@ ProcessMode ProcessOptions::ConvertInt32ToProcessMode(int32_t value)
     return static_cast<ProcessMode>(value);
 }
 
+//   enum ProcessMode {
+//     NEW_PROCESS_ATTACH_TO_PARENT = 1,
+//     NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM = 2,
+//     ATTACH_TO_STATUS_BAR_ITEM = 3
+//   }
+ProcessMode ProcessOptions::ConvertStsToProcessMode(int32_t index)
+{
+    if (index < 0 || index > 2) {
+        return ProcessMode::UNSPECIFIED;
+    }
+    return static_cast<ProcessMode>(index + 1);
+}
+int32_t ProcessOptions::ConvertProcessModeToSts(const ProcessMode mode)
+{
+    int32_t value = static_cast<int32_t>(mode);
+    if (value >= 1 && value <= 3) {
+        return value - 1;
+    }
+    return static_cast<int32_t>(ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT);
+}
+
 StartupVisibility ProcessOptions::ConvertInt32ToStartupVisibility(int32_t value)
 {
     if (value <= static_cast<int32_t>(StartupVisibility::UNSPECIFIED) ||
@@ -75,6 +96,27 @@ StartupVisibility ProcessOptions::ConvertInt32ToStartupVisibility(int32_t value)
         return StartupVisibility::UNSPECIFIED;
     }
     return static_cast<StartupVisibility>(value);
+}
+// enum StartupVisibility {
+//     STARTUP_HIDE = 0,
+//     STARTUP_SHOW = 1
+//   }StartupVisibility
+StartupVisibility ConvertStsToStartupVisibility(int32_t index)
+{
+    if (index < 0 || index > 1) {
+        return StartupVisibility::UNSPECIFIED;
+    }
+    return static_cast<StartupVisibility>(index);
+}
+int32_t ConvertStartupVisibilityToSts(const StartupVisibility value)
+{
+    if (value == StartupVisibility::STARTUP_HIDE) {
+        return 0;
+    } else if (value == StartupVisibility::STARTUP_SHOW) {
+        return 1;
+    }
+
+    return 0;
 }
 
 bool ProcessOptions::IsNewProcessMode(ProcessMode value)

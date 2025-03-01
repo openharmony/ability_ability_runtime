@@ -124,5 +124,19 @@ MissionValidResult *MissionValidResult::Unmarshalling(Parcel &parcel)
     }
     return info.release();
 }
+ContinueState ContinueState_ConvertStsToNative(const int32_t index)
+{
+    if (index <0 || index >1) {
+        return ContinueState::CONTINUESTATE_UNKNOWN;
+    }
+    return static_cast<ContinueState>(index);
+}
+int32_t ContinueState_ConvertNativeToSts(const ContinueState value)
+{
+    if(value ==ContinueState::CONTINUESTATE_ACTIVE || value == ContinueState::CONTINUESTATE_INACTIVE){
+        return value;
+    }
+    return ContinueState::CONTINUESTATE_UNKNOWN;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
