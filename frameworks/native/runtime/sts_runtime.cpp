@@ -63,16 +63,18 @@ using Extractor = OHOS::AbilityBase::Extractor;
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-// const std::string DEBUGGER = "@Debugger";
-// const std::string APP_LIB_NAME = "arm";
-const std::string SANDBOX_LIB_PATH = "/data/storage/el1/bundle/lib";
-const std::string STS_RT_PATH = SANDBOX_LIB_PATH; // + "/runtime";
-// const std::string STS_LIB_PATH = SANDBOX_LIB_PATH + "/ohos";
+
 #ifdef APP_USE_ARM64
-const std::string STS_SYSLIB_PATH = "/system/lib64:/system/lib64/platformsdk:/system/lib64/module:/system/lib64/ndk";
+const std::string SANDBOX_LIB_PATH = "/system/lib64";
+const std::string STS_RT_PATH = SANDBOX_LIB_PATH;
+const std::string STS_SYSLIB_PATH = "/system/lib64:/system/lib64/platformsdk:/"
+                                    "system/lib64/module:/system/lib64/ndk";
 const std::string STS_CHIPSDK_PATH = "/system/lib64/chipset-pub-sdk";
 #else
-const std::string STS_SYSLIB_PATH = "/system/lib:/system/lib/platformsdk:/system/lib/module:/system/lib/ndk";
+const std::string SANDBOX_LIB_PATH = "/system/lib";
+const std::string STS_RT_PATH = SANDBOX_LIB_PATH;
+const std::string STS_SYSLIB_PATH =
+    "/system/lib:/system/lib/platformsdk:/system/lib/module:/system/lib/ndk";
 const std::string STS_CHIPSDK_PATH = "/system/lib/chipset-pub-sdk";
 #endif
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
