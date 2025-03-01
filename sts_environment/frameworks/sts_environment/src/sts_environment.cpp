@@ -34,8 +34,8 @@ const char STS_GET_CREATED_VMS[] = "ETS_GetCreatedVMs";
 const char STS_CREATE_VM[] = "ETS_CreateVM";
 const char STS_ANI_GET_CREATEDVMS[] = "ANI_GetCreatedVMs";
 const char STS_LIB_PATH[] = "libarkruntime.so";
-const char STS_STD_LIB_PATH[] = "/data/storage/el1/bundle/lib/etsstdlib.abc";
-const char BOOT_PATH[] = "/data/storage/el1/bundle/lib/bootpath.json";
+const char STS_STD_LIB_PATH[] = "/system/etc/etsstdlib.abc";
+const char BOOT_PATH[] = "/system/etc/bootpath.json";
 const char STS_ARK_UI_PATH_KEY[] = "arkui";
 const char STS_ARK_COMPILER_PATH_KEY[] = "arkcompiler";
 const char STS_WINDOW_PATH_KEY[] = "window";
@@ -117,7 +117,7 @@ bool STSEnvironment::LoadRuntimeApis()
     dlns_get(STSEnvironment::stsSDKNSName, &ns);
     auto dso = DynamicLoadLibrary(&ns, STS_LIB_PATH, 1);
     if (!dso) {
-        LOGE("load library failed: %{public}s", STS_LIB_PATH);
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "load library failed: %{public}s", STS_LIB_PATH);
         return false;
     }
 
@@ -125,7 +125,7 @@ bool STSEnvironment::LoadRuntimeApis()
 	    !LoadSymbolGetCreatedVMs(dso, lazyApis_) ||
         !LoadSymbolCreateVM(dso, lazyApis_) ||
         !LoadSymbolANIGetCreatedVMs(dso, lazyApis_)) {
-        LOGE("load symbol failed");
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "load symbol failed");
         return false;
     }
 
@@ -142,13 +142,13 @@ bool STSEnvironment::PostTask(TaskFuncType task)
 {
     // #ifdef WITH_EVENT_HANDLER
     //     if (task == nullptr) {
-    //         LOGE("null task could not be posted");
+    //         TAG_LOGE(AAFwkTag::STSRUNTIME, "null task could not be posted");
     //         return false;
     //     }
 
     //     bool postDone = g_handler->PostTask(task, "spawn-main-task-from-cj", 0,
     //     AppExecFwk::EventQueue::Priority::HIGH); if (!postDone) {
-    //         LOGE("event handler support cj ui scheduler");
+    //         TAG_LOGE(AAFwkTag::STSRUNTIME, "event handler support cj ui scheduler");
     //         return false;
     //     }
     //     return true;
@@ -160,7 +160,7 @@ bool STSEnvironment::LoadSymbolGetDefaultVMInitArgs(void* handle, STSRuntimeAPI&
 {
     auto symbol = dlsym(handle, STS_GET_DEFAULT_VM_INIT_ARGS);
     if (symbol == nullptr) {
-        LOGE("runtime api not found: %{public}s", STS_GET_DEFAULT_VM_INIT_ARGS);
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "runtime api not found: %{public}s", STS_GET_DEFAULT_VM_INIT_ARGS);
         return false;
     }
     apis.ETS_GetDefaultVMInitArgs = reinterpret_cast<GetDefaultVMInitArgsSTSRuntimeType>(symbol);
@@ -172,7 +172,7 @@ bool STSEnvironment::LoadSymbolGetCreatedVMs(void* handle, STSRuntimeAPI& apis)
 {
     auto symbol = dlsym(handle, STS_GET_CREATED_VMS);
     if (symbol == nullptr) {
-        LOGE("runtime api not found: %{public}s", STS_GET_CREATED_VMS);
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "runtime api not found: %{public}s", STS_GET_CREATED_VMS);
         return false;
     }
     apis.ETS_GetCreatedVMs = reinterpret_cast<GetCreatedVMsSTSRuntimeType>(symbol);
@@ -184,7 +184,7 @@ bool STSEnvironment::LoadSymbolCreateVM(void* handle, STSRuntimeAPI& apis)
 {
     auto symbol = dlsym(handle, STS_CREATE_VM);
     if (symbol == nullptr) {
-        LOGE("runtime api not found: %{public}s", STS_CREATE_VM);
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "runtime api not found: %{public}s", STS_CREATE_VM);
         return false;
     }
     apis.ETS_CreateVM = reinterpret_cast<CreateVMSTSRuntimeType>(symbol);
@@ -196,7 +196,7 @@ bool STSEnvironment::LoadSymbolANIGetCreatedVMs(void* handle, STSRuntimeAPI& api
 {
     auto symbol = dlsym(handle, STS_ANI_GET_CREATEDVMS);
     if (symbol == nullptr) {
-        LOGE("runtime api not found: %{public}s", STS_ANI_GET_CREATEDVMS);
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "runtime api not found: %{public}s", STS_ANI_GET_CREATEDVMS);
         return false;
     }
     apis.ANI_GetCreatedVMs = reinterpret_cast<ANIGetCreatedVMsType>(symbol);
@@ -258,21 +258,21 @@ void STSEnvironment::InitSTSSysNS(const std::string& path)
 
 bool STSEnvironment::StartRuntime()
 {
-    LOGE("StartRuntime call");
+    TAG_LOGE(AAFwkTag::STSRUNTIME, "StartRuntime call");
     if (isRuntimeStarted_) {
         return true;
     }
     if (!LoadRuntimeApis()) {
-        LOGE("LoadRuntimeApis failed");
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "LoadRuntimeApis failed");
         return false;
     }
     std::vector<EtsVMOption> etsVMOptions;
     if (!LoadBootPathFile(etsVMOptions)) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME,"LoadBootPathFile failed");
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "LoadBootPathFile failed");
         return false;
     }
     etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, STS_STD_LIB_PATH });
-    LOGE("etsVMOptions.size() = %{public}d", etsVMOptions.size());
+    TAG_LOGE(AAFwkTag::STSRUNTIME, "etsVMOptions.size() = %{public}d", etsVMOptions.size());
     // etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, "/data/storage/el1/bundle/lib/modules.static.abc" });   // for Test
     // etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, "/system/lib/sts/EntryAbility.abc" });
     // etsVMOptions.push_back({ EtsOptionType::ETS_NATIVE_LIBRARY_PATH, (char*)strdup(std::string(appLibPath).c_str())
@@ -299,7 +299,6 @@ bool STSEnvironment::StartRuntime()
     if (lazyApis_.ANI_GetCreatedVMs(&vmEntry_.ani_vm, 1, &nrVMs) != ANI_OK) {
         return false;
     };
-
     if (vmEntry_.ani_vm->GetEnv(ANI_VERSION_1, &vmEntry_.ani_env) != ANI_OK) {
         return false;
     }
@@ -331,7 +330,7 @@ bool STSEnvironment::StartUIScheduler()
 
     // uiScheduler_ = lazyApis_.InitUIScheduler();
     // if (!uiScheduler_) {
-    //     LOGE("init cj ui scheduler failed");
+    //     TAG_LOGE(AAFwkTag::STSRUNTIME, "init cj ui scheduler failed");
     //     return false;
     // }
 
@@ -347,19 +346,19 @@ void STSEnvironment::StopUIScheduler()
 void* STSEnvironment::LoadSTSLibrary(const char* dlName)
 {
     // if (!StartRuntime()) {
-    //     LOGE("StartRuntime failed");
+    //     TAG_LOGE(AAFwkTag::STSRUNTIME, "StartRuntime failed");
     //     return nullptr;
     // }
     // auto handle = LoadSTSLibrary(APP, dlName);
     // if (!handle) {
-    //     LOGE("load cj library failed: %{public}s", DynamicGetError());
+    //     TAG_LOGE(AAFwkTag::STSRUNTIME, "load cj library failed: %{public}s", DynamicGetError());
     //     return nullptr;
     // }
 
     // LOGI("LoadCJLibrary InitCJLibrary: %{public}s", dlName);
     // auto status = lazyApis_.InitCJLibrary(dlName);
     // if (status != E_OK) {
-    //     LOGE("InitCJLibrary failed: %{public}s", dlName);
+    //     TAG_LOGE(AAFwkTag::STSRUNTIME, "InitCJLibrary failed: %{public}s", dlName);
     //     UnLoadCJLibrary(handle);
     //     return nullptr;
     // }
@@ -384,12 +383,12 @@ bool STSEnvironment::StartDebugger()
     //     auto handle = DynamicLoadLibrary(DEBUGGER_LIBNAME, 0);
     // #endif
     //     if (!handle) {
-    //         LOGE("failed to load library: %{public}s", DEBUGGER_LIBNAME);
+    //         TAG_LOGE(AAFwkTag::STSRUNTIME, "failed to load library: %{public}s", DEBUGGER_LIBNAME);
     //         return false;
     //     }
     //     auto symbol = DynamicFindSymbol(handle, DEBUGGER_SYMBOL_NAME);
     //     if (!symbol) {
-    //         LOGE("failed to find symbol: %{public}s", DEBUGGER_SYMBOL_NAME);
+    //         TAG_LOGE(AAFwkTag::STSRUNTIME, "failed to find symbol: %{public}s", DEBUGGER_SYMBOL_NAME);
     //         DynamicFreeLibrary(handle);
     //         return false;
     //     }
