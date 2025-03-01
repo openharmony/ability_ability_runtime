@@ -18,6 +18,7 @@ ohos_shared_library("uripermissionmanager_napi") {
   sources = [
     "js_uri_perm_mgr.cpp",
     "native_module.cpp",
+    "sts_uri_perm_mgr.cpp",
   ]
 
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
