@@ -1849,6 +1849,7 @@ void UIAbilityLifecycleManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abi
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call OnAbilityDied");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    CancelPrepareTerminate(abilityRecord);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null ability record");
@@ -2937,6 +2938,37 @@ void UIAbilityLifecycleManager::TryPrepareTerminateByPidsDone(const std::string 
     }
     (*iter)->prepareTermination_ = prepareTermination;
     (*iter)->isExist_ = isExist;
+    (*iter)->isTryPrepareTerminateByPidsDone_.store(true);
+    isTryPrepareTerminateByPidsCv_.notify_one();
+    prepareTerminateByPidRecords_.erase(iter);
+}
+
+void UIAbilityLifecycleManager::CancelPrepareTerminate(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    CHECK_POINTER(abilityRecord);
+    auto abilityInfo = abilityRecord->GetAbilityInfo();
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "canceling PrepareTerminate,bundle=%{public}s,module=%{public}s,ability=%{public}s",
+        abilityInfo.bundleName.c_str(), abilityInfo.moduleName.c_str(), abilityInfo.name.c_str());
+    std::unique_lock<std::mutex> lock(isTryPrepareTerminateByPidsDoneMutex_);
+    auto iter = std::find_if(prepareTerminateByPidRecords_.begin(), prepareTerminateByPidRecords_.end(),
+        [pid = abilityRecord->GetPid(), moduleName = abilityInfo.moduleName](
+            const std::shared_ptr<PrepareTerminateByPidRecord> &record) {
+        return record->pid_ == pid && record->moduleName_ == moduleName;
+    });
+    if (iter == prepareTerminateByPidRecords_.end()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "record with (pid=%{public}d,moduleName=%{public}s) not exist",
+            abilityRecord->GetPid(), abilityInfo.moduleName.c_str());
+        return;
+    }
+    if ((*iter) == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "record is nullptr");
+        prepareTerminateByPidRecords_.erase(iter);
+        return;
+    }
+    // no need to terminate again, return cancel by default
+    (*iter)->prepareTermination_ = static_cast<int32_t>(AppExecFwk::PrepareTermination::CANCEL);
+    (*iter)->isExist_ = true;
     (*iter)->isTryPrepareTerminateByPidsDone_.store(true);
     isTryPrepareTerminateByPidsCv_.notify_one();
     prepareTerminateByPidRecords_.erase(iter);
