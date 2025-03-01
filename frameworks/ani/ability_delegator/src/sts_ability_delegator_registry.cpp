@@ -26,7 +26,7 @@ namespace OHOS {
 namespace AbilityDelegatorSts {
 thread_local std::unique_ptr<AbilityRuntime::STSNativeReference> stsReference;
 
-static ani_object GetAbilityDelegator([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_class aniClass)
+static ani_object GetAbilityDelegator(ani_env *env, [[maybe_unused]]ani_class aniClass)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
@@ -49,7 +49,7 @@ static ani_object GetAbilityDelegator([[maybe_unused]]ani_env *env, [[maybe_unus
     }
 }
 
-static ani_object GetArguments([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_class aniClass)
+static ani_object GetArguments(ani_env *env, [[maybe_unused]]ani_class aniClass)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
@@ -73,12 +73,11 @@ void StsAbilityDelegatorRegistryInit(ani_env *env)
         TAG_LOGE(AAFwkTag::STSRUNTIME, "ResetError failed");
     }
 
-    ani_namespace kitNs;
-    status = env->FindNamespace("L@ohos/app/ability/abilityDelegatorRegistry;", &kitNs);
+    ani_namespace ns;
+    status = env->FindNamespace("L@ohos/app/ability/abilityDelegatorRegistry/abilityDelegatorRegistry;", &ns);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "FindNamespace L@ohos/app/ability/abilityDelegatorRegistry failed "
-            "status : %{public}d", status);
-        // TODO: for test don't return for now
+        TAG_LOGE(AAFwkTag::DELEGATOR, "FindNamespace abilityDelegatorRegistry failed status : %{public}d", status);
+        return;
     }
 
     std::array kitFunctions = {
@@ -86,32 +85,13 @@ void StsAbilityDelegatorRegistryInit(ani_env *env)
         ani_native_function {"getArguments", nullptr, reinterpret_cast<void *>(GetArguments)},
     };
 
-    status = env->Namespace_BindNativeFunctions(kitNs, kitFunctions.data(), kitFunctions.size());
+    status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Namespace_BindNativeFunctions failed status : %{public}d", status);
     }
 
     if (env->ResetError() != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "ResetError failed");
-    }
-
-    // for test to support EntryAbility.sts
-    ani_namespace ns;
-    status = env->FindNamespace("LEntryAbility/abilityDelegatorRegistry;", &ns);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass LEntryAbility/abilityDelegatorRegistry failed status : %{public}d",
-            status);
-        return;
-    }
-
-    std::array functions = {
-        ani_native_function {"getAbilityDelegator", nullptr, reinterpret_cast<void *>(GetAbilityDelegator)},
-        ani_native_function {"getArguments", nullptr, reinterpret_cast<void *>(GetArguments)},
-    };
-
-    status = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size());
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Namespace_BindNativeFunctions failed status : %{public}d", status);
     }
 
     TAG_LOGI(AAFwkTag::DELEGATOR, "StsAbilityDelegatorRegistryInit end");
