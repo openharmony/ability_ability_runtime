@@ -26,6 +26,7 @@ ani_int FinishTestSync(std::string &msg, int64_t &code);
 ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
     std::shared_ptr<AbilityRuntime::Context> context);
 ani_object GetAppContext(ani_env* env, ani_class clss);
+void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg);
 } // namespace AbilityDelegatorSts
 } // namespace OHOS
 

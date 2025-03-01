@@ -21,17 +21,12 @@
 
 namespace OHOS {
 namespace AbilityDelegatorSts {
-static void PrintSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_class aniClass)
-{
-    TAG_LOGI(AAFwkTag::DELEGATOR, "PrintSync");
-}
-
 ani_object CreateStsAbilityDelegator(ani_env *aniEnv)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "CreateJsAbilityDelegator");
     ani_class abilityDelegator = nullptr;
     ani_status status = ANI_ERROR;
-    status = aniEnv->FindClass("LEntryAbility/AbilityDelegatorInner;", &abilityDelegator);
+    status = aniEnv->FindClass("L@ohos/ability/abilityDelegatorArgs/AbilityDelegatorArgsInner;", &abilityDelegator);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegator failed status : %{public}d", status);
         return {};
@@ -227,7 +222,7 @@ ani_object CreateStsAbilityDelegatorArguments(
     TAG_LOGI(AAFwkTag::DELEGATOR, "CreateJsAbilityDelegatorArguments");
     ani_class arguments = nullptr;
     ani_status status = ANI_ERROR;
-    status = aniEnv->FindClass("LEntryAbility/AbilityDelegatorArgsInner;", &arguments);
+    status = aniEnv->FindClass("L@ohos/ability/abilityDelegatorArgs/AbilityDelegatorArgsInner;", &arguments);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegatorArgs failed status : %{public}d", status);
         return {};
