@@ -59,6 +59,14 @@ enum CollaborateResult {
     ACCEPT = 0,
     REJECT,
 };
+[[maybe_unused]] static CollaborateResult CollaborateResult_ConvertStsToNative(const int32_t index)
+{
+    return static_cast<CollaborateResult>(index);
+}
+[[maybe_unused]] static int32_t CollaborateResult_ConvertNativeToSts(const CollaborateResult value)
+{
+    return value;
+}
 #endif
 constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;

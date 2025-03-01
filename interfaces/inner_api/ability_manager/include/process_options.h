@@ -46,7 +46,11 @@ public:
     static ProcessOptions *Unmarshalling(Parcel &parcel);
 
     static ProcessMode ConvertInt32ToProcessMode(int32_t value);
+    static ProcessMode ConvertStsToProcessMode(int32_t index);
+    static int32_t ConvertProcessModeToSts(const ProcessMode ProcessMode);
     static StartupVisibility ConvertInt32ToStartupVisibility(int32_t value);
+    static StartupVisibility ConvertStsToStartupVisibility(int32_t index);
+    static int32_t ConvertStartupVisibilityToSts(const StartupVisibility value);
     static bool IsNewProcessMode(ProcessMode value);
     static bool IsAttachToStatusBarMode(ProcessMode value);
     static bool IsValidProcessMode(ProcessMode value);
