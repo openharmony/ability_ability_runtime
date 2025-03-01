@@ -75,6 +75,7 @@ config("appkit_public_config") {
 ohos_shared_library("appkit_native") {
   include_dirs = [
     "native",
+    "${ability_runtime_path}/frameworks/ani/app/context_util",
     "${ability_runtime_path}/interfaces/inner_api/error_utils/include",
     "${ability_runtime_path}/interfaces/inner_api",
     "${ability_runtime_path}/interfaces/kits/native/appkit",
