@@ -174,5 +174,24 @@ ani_int FinishTestSync(std::string &msg, int64_t &code)
     return 1;
 }
 
+void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "PrintSync");
+    std::string msgStr;
+    ani_size sz {};
+    env->String_GetUTF8Size(msg, &sz);
+    msgStr.resize(sz + 1);
+    env->String_GetUTF8SubString(msg, 0, sz, msgStr.data(), msgStr.size(), &sz);
+    TAG_LOGI(AAFwkTag::DELEGATOR, "PrintSync %{public}s", msgStr.c_str());
+
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
+    if (delegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
+        return;
+    }
+
+    delegator->Print(msgStr);
+    return;
+}
 } // namespace AbilityDelegatorSts
 } // namespace OHOS

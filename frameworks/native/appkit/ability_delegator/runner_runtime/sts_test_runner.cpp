@@ -133,7 +133,7 @@ void STSTestRunner::CallOnPrepareMethod(ani_env* aniEnv)
     // find testRunner class
     ani_class testRunner = nullptr;
     ani_status status = ANI_ERROR;
-    status = aniEnv->FindClass("LEntryAbility/OHTestRunner;", &testRunner);
+    status = aniEnv->FindClass("L@test/OHTestRunner;", &testRunner);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "find OHTestRunner failed status : %{public}d", status);
         return;
@@ -187,7 +187,7 @@ void STSTestRunner::CallOnRunMethod(ani_env* aniEnv)
     // find testRunner class
     ani_class testRunner = nullptr;
     ani_status status = ANI_ERROR;
-    status = aniEnv->FindClass("LEntryAbility/OHTestRunner;", &testRunner);
+    status = aniEnv->FindClass("L@test/OHTestRunner;", &testRunner);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "find OHTestRunner failed status : %{public}d", status);
         return;
