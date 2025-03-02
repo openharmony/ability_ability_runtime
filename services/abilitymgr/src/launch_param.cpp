@@ -67,5 +67,68 @@ bool LaunchParam::Marshalling(Parcel &parcel) const
     }
     return true;
 }
+//  enum LaunchReason {
+//     UNKNOWN = 0,
+//     START_ABILITY = 1,
+//     CALL = 2,
+//     CONTINUATION = 3,
+//     APP_RECOVERY = 4,
+//     SHARE = 5,
+//     AUTO_STARTUP = 8,
+//     INSIGHT_INTENT = 9,
+//     PREPARE_CONTINUATION = 10,
+//   }
+static constexpr std::array<int32_t, 9> LaunchReasonArray_ = {0, 1, 2, 3, 4, 5, 8, 9, 10};
+LaunchReason LaunchReason_ConvertStsToNative(const int32_t index)
+{
+    if (index < 0 || index >= LaunchReasonArray_.size()) {
+        return LaunchReason::LAUNCHREASON_UNKNOWN;
+    }
+    return static_cast<LaunchReason>(LaunchReasonArray_[index]);
+}
+int32_t LaunchReason_ConvertNativeToSts(const LaunchReason value)
+{
+    for (int32_t index = 0; index < LaunchReasonArray_.size(); index++) {
+        if (value == LaunchReasonArray_[index]) {
+            return index;
+        }
+    }
+    return 0;
+}
+// enum LastExitReason {
+//     UNKNOWN = 0,
+//     ABILITY_NOT_RESPONDING = 1,
+//     NORMAL = 2,
+//     CPP_CRASH = 3,
+//     JS_ERROR = 4,
+//     APP_FREEZE = 5,
+//     PERFORMANCE_CONTROL = 6,
+//     RESOURCE_CONTROL = 7,
+//     UPGRADE = 8
+//   }
+LastExitReason LastExitReason_ConvertStsToNative(const int32_t index)
+{
+    if (index < 0 || index > LastExitReason::LASTEXITREASON_UPGRADE) {
+        return LastExitReason::LASTEXITREASON_UNKNOWN;
+    }
+    return static_cast<LastExitReason>(index);
+}
+int32_t LastExitReason_ConvertNativeToSts(const LastExitReason value)
+{
+    return value;
+}
+// enum OnContinueResult {
+//     AGREE = 0,
+//     REJECT = 1,
+//     MISMATCH = 2
+//   }
+OnContinueResult OnContinueResult_ConvertStsToNative(const int index)
+{
+    return static_cast<OnContinueResult>(index);
+}
+int32_t OnContinueResult_ConvertNativeToSts(const OnContinueResult value)
+{
+    return value;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
