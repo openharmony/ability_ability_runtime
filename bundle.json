@@ -123,7 +123,8 @@
           "//foundation/ability/ability_runtime/sts_environment/frameworks/sts_environment:sts_environment",
           "//foundation/ability/ability_runtime/services/abilitymgr/etc:appfwk_etc",
           "//foundation/ability/ability_runtime/service_router_framework:srms_target",
-          "//foundation/ability/ability_runtime/service_router_framework:jsapi_target"
+          "//foundation/ability/ability_runtime/service_router_framework:jsapi_target",
+          "//foundation/ability/ability_runtime/frameworks/ani/ui_extension_ability:ui_extension_ability_ani_kit"
         ],
         "inner_api": [
           {
