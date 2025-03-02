@@ -858,7 +858,6 @@ ohos_shared_library("service_extension") {
     "${ability_runtime_native_path}/ability/native/js_service_extension.cpp",
     "${ability_runtime_native_path}/ability/native/js_service_extension_context.cpp",
     "${ability_runtime_native_path}/ability/native/service_extension.cpp",
-    "${ability_runtime_native_path}/ability/native/sts_service_extension.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/service_extension_context.cpp",
   ]
 

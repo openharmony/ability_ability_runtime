@@ -14,22 +14,39 @@
  */
 
 import {AbilityConstant} from './@ohos.app.ability.AbilityConstant';
-import UIAbilityContext from './UIAbilityContext';
+import {UIAbilityContext} from './UIAbilityContext';
 import {Want} from './@ohos.app.ability.Want';
 
-export class UIAbility {
-  context: UIAbilityContext = new UIAbilityContext();
+// class LaunchParamImpl implements AbilityConstant.LaunchParam {
+//   launchReason: AbilityConstant.LaunchReason;
+//   launchReasonMessage?: string|undefined;
+//   lastExitReason: AbilityConstant.LastExitReason;
+//   lastExitMessage: string = '';
+// }
 
-  launchWant: Want = new Want();
-  lastRequestWant: Want = new Want();
+
+export class UIAbility {
+  context?: UIAbilityContext;
+
+  launchWant?: Want;
+  lastRequestWant?: Want;
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void{
     console.log("onCreate");
-    console.log("bundleName " + want.bundleName);
   }
-  // onWindowStageCreate(windowStage: window.WindowStage): void;
-  onWindowStageDestroy(): void{}
-  // onDestroy(): void | Promise<void>{}
-  onForeground(): void{}
-  onBackground(): void{}
-  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void{}
+  // onWindowStageCreate(windowStage: window.WindowStage): void{}
+  onWindowStageDestroy(): void{
+    console.log("onWindowStageDestroy");
+  }
+  onDestroy(): void {
+    console.log("onDestroy");
+  }
+  onForeground(): void{
+    console.log("onForeground");
+  }
+  onBackground(): void{
+    console.log("onBackground");
+  }
+  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void{
+    console.log("onDestroy");
+  }
 }
