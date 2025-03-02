@@ -109,10 +109,10 @@ CConfiguration CreateCConfiguration(const AppExecFwk::Configuration &configurati
 void CjEnvironmentCallback::CallConfigurationUpdatedInner(const AppExecFwk::Configuration &config,
     const std::map<int32_t, std::function<void(CConfiguration)>> &callbacks)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "methodName = onConfiguration");
+    TAG_LOGD(AAFwkTag::DEFAULT, "methodName = onConfiguration");
     for (auto &callback : callbacks) {
         if (!callback.second) {
-            TAG_LOGE(AAFwkTag::APPKIT, " Invalid cjCallback");
+            TAG_LOGE(AAFwkTag::DEFAULT, " Invalid cjCallback");
             return;
         }
         auto cfg = CreateCConfiguration(config);
@@ -132,10 +132,10 @@ void CjEnvironmentCallback::OnConfigurationUpdated(const AppExecFwk::Configurati
 void CjEnvironmentCallback::CallMemoryLevelInner(const int level,
     const std::map<int32_t, std::function<void(int32_t)>> &callbacks)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "onMemoryLevel");
+    TAG_LOGD(AAFwkTag::DEFAULT, "onMemoryLevel");
     for (auto &callback : callbacks) {
         if (!callback.second) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Invalid jsCallback");
+            TAG_LOGE(AAFwkTag::DEFAULT, "Invalid jsCallback");
             return;
         }
         callback.second(static_cast<int32_t>(level));
@@ -171,22 +171,22 @@ int32_t CjEnvironmentCallback::Register(std::function<void(CConfiguration)> cfgC
 
 bool CjEnvironmentCallback::UnRegister(int32_t callbackId, bool isSync)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "callbackId : %{public}d", callbackId);
+    TAG_LOGD(AAFwkTag::DEFAULT, "callbackId : %{public}d", callbackId);
     if (isSync) {
         return false;
     }
     auto itCfg = onConfigurationUpdatedCallbacks_.find(callbackId);
     if (itCfg == onConfigurationUpdatedCallbacks_.end()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d is not in callbacks_", callbackId);
+        TAG_LOGE(AAFwkTag::DEFAULT, "callbackId: %{public}d is not in callbacks_", callbackId);
         return false;
     }
-    TAG_LOGD(AAFwkTag::APPKIT, "callbacks_.callbackId : %{public}d", itCfg->first);
+    TAG_LOGD(AAFwkTag::DEFAULT, "callbacks_.callbackId : %{public}d", itCfg->first);
     auto itMem = onMemoryLevelCallbacks_.find(callbackId);
     if (itMem == onMemoryLevelCallbacks_.end()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d is not in callbacks_", callbackId);
+        TAG_LOGE(AAFwkTag::DEFAULT, "callbackId: %{public}d is not in callbacks_", callbackId);
         return false;
     }
-    TAG_LOGD(AAFwkTag::APPKIT, "callbacks_.callbackId : %{public}d", itMem->first);
+    TAG_LOGD(AAFwkTag::DEFAULT, "callbacks_.callbackId : %{public}d", itMem->first);
     return onConfigurationUpdatedCallbacks_.erase(callbackId) == 1 && onMemoryLevelCallbacks_.erase(callbackId) == 1;
 }
 
