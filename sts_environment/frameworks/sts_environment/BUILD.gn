@@ -37,6 +37,7 @@ ohos_shared_library("sts_environment") {
 
   sources = [
     "src/dynamic_loader_ohos.cpp",
+    "src/sts_enum_convert.cpp",
     "src/sts_environment.cpp",
   ]
 

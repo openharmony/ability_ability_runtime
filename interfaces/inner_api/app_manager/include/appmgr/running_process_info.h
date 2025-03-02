@@ -74,6 +74,8 @@ struct RunningProcessInfo : public Parcelable {
     ProcessType processType_ = ProcessType::NORMAL;
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
 };
+[[maybe_unused]] static AppProcessState AppProcessState_ConvertStsToNative(const int32_t index);
+[[maybe_unused]] static int32_t AppProcessState_ConvertNativeToSts(const AppProcessState value);
 }  // namespace AppExecFwk
 }  // namespace OHOS
 

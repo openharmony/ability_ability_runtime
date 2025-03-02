@@ -23,6 +23,14 @@ enum MemoryLevel {
     MEMORY_LEVEL_LOW = 1,
     MEMORY_LEVEL_CRITICAL = 2,
 };
+[[maybe_unused]] static MemoryLevel MemoryLevel_ConvertStsToNative(const int index)
+{
+    return static_cast<MemoryLevel>(index);
+}
+[[maybe_unused]] static MemoryLevel MemoryLevel_ConvertNativeToSts(const MemoryLevel value)
+{
+    return value;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
 
