@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import ApplicationInfo from 'bms/ApplicationInfo'
+// import ApplicationInfo from 'bms/ApplicationInfo'
 
 export default interface BaseContext {
     readonly area: int;
     readonly filesDir: string;
     readonly tempDir: string;
-    readonly applicationInfo: ApplicationInfo;
+    // readonly applicationInfo: ApplicationInfo;
 }
