@@ -20,5 +20,6 @@ group("ani_packages") {
     "${ability_runtime_path}/frameworks/ani/ability_delegator:ability_delegator_registry_ani_kit",
     "${ability_runtime_path}/frameworks/ani/configuration:configuration_abc",
     "${ability_runtime_path}/frameworks/ani/configuration:configuration_ani_kit",
+    "${ability_runtime_path}/frameworks/ani/uiextensioncontext:ui_ext_con_ani_kit",
   ]
 }
