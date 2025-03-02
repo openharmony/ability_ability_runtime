@@ -596,9 +596,12 @@ ohos_shared_library("uiabilitykit_native") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
     "${ability_runtime_path}/utils/global/time/include",
+    "${ability_runtime_native_path}/ability/native/ability_runtime/abilityresult/include",
+    "${ability_runtime_napi_path}/inner/napi_common/ani_common",
   ]
 
   sources = [
+    "${ability_runtime_native_path}/ability/native/ability_runtime/abilityresult/src/sts_ability_result.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ui_ability.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/sts_ui_ability.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_handler_stage.cpp",
