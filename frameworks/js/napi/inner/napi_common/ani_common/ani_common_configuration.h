@@ -13,29 +13,18 @@
  * limitations under the License.
  */
 
-#include "ani_common_start_options.h"
+#ifndef OHOS_ABILITY_RUNTIME_NAPI_COMMON_CONFIGURATION_H
+#define OHOS_ABILITY_RUNTIME_NAPI_COMMON_CONFIGURATION_H
 
-#include "hilog_tag_wrapper.h"
+#include "configuration.h"
+#include "ani_common_util.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 
-bool UnwrapStartOptionsWithProcessOption(ani_env* env, ani_object param, AAFwk::StartOptions &startOptions)
-{
-    UnwrapStartOptions(env, param, startOptions);
-    return true;
-}
+ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &configuration);
+bool UnwrapConfiguration(ani_env *env, ani_object param, Configuration &config);
 
-bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions)
-{
-    TAG_LOGI(AAFwkTag::JSNAPI, "called");
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
-        return false;
-    }
-    ani_int displayId = GetIntOrUndefined(env, param, "displayId");
-    startOptions.SetDisplayID(displayId);
-    return true;
-}
 }  // namespace AppExecFwk
 }  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_NAPI_COMMON_CONFIGURATION_H

@@ -27,7 +27,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchParam);
+ani_object CreateStsLaunchParam(ani_env *env, const AAFwk::LaunchParam& launchParam);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_STS_DATA_STRUCT_CONVERTER_H

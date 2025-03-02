@@ -17,12 +17,13 @@
 #define OHOS_ABILITY_RUNTIME_ANI_COMMON_START_OPTIONS_H
 
 #include "start_options.h"
-#include "sts_runtime.h"
-
+#include "ani_common_util.h"
 namespace OHOS {
 namespace AppExecFwk {
-bool AniUnwrapStartOptionsWithProcessOption(ani_env* env, ani_object param, AAFwk::StartOptions &startOptions);
-bool AniUnwrapStartOptions(ani_env* env, ani_object param, AAFwk::StartOptions &startOptions);
+
+bool UnwrapStartOptionsWithProcessOption(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions);
+bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions);
+
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_NAPI_COMMON_START_OPTIONS_H

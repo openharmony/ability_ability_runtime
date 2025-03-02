@@ -55,6 +55,13 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
     env->Class_FindField(cls, "lastExitMessage", &field);
     env->String_NewUTF8(launchParam.lastExitMessage.c_str(), launchParam.lastExitMessage.size(), &string);
     env->Object_SetField_Ref(object, field, string);
+
+    env->Class_FindField(cls, "launchReason", &field);
+    env->Object_SetField_Int(object, field, launchParam.launchReason);
+
+    env->Class_FindField(cls, "lastExitReason", &field);
+    env->Object_SetField_Int(object, field, launchParam.lastExitReason);
+
     return object;
 }
 } // namespace AbilityRuntime
