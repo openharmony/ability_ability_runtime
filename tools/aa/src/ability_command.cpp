@@ -312,7 +312,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "aa start does not meet the restrictions imposed by UIExtensionAbility on the initiating party",
         {NO_FOUND_ABILITY_BY_CALLER_SOLUTION_ONE});
     messageMap_[ABILITY_VISIBLE_FALSE_DENY_REQUEST] = GetAaToolErrorInfo("10103001",
-        "Can not start invisible component",
+        "error: ability visible false deny request.",
         "Application visibility check failed",
         {ABILITY_VISIBLE_FALSE_DENY_REQUEST_SOLUTION_ONE});
     messageMap_[GET_BUNDLE_INFO_FAILED] = GetAaToolErrorInfo("10104401",
@@ -338,7 +338,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The application specified by the aa tool is a Release version and does not support Debug mode",
         {ERR_NOT_IN_APP_PROVISION_MODE_SOLUTION_ONE});
     messageMap_[ERR_NOT_DEBUG_APP] = GetAaToolErrorInfo("10106701",
-        "The target application is not a debug application",
+        "error: not debug app.",
         "The developer forgot to configure the target application as a Debug application",
         {ERR_NOT_DEBUG_APP_SOLUTION_ONE});
     messageMap_[ERR_APP_CLONE_INDEX_INVALID] = GetAaToolErrorInfo("10103102",
