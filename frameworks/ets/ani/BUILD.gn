@@ -16,12 +16,12 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 group("ani_packages") {
   deps = [
-    "${ability_runtime_path}/frameworks/ani/ability_delegator:ability_delegator_abc_etc",
-    "${ability_runtime_path}/frameworks/ani/ability_delegator:ability_delegator_registry_ani_kit",
-    "${ability_runtime_path}/frameworks/ani/configuration:configuration_abc",
-    "${ability_runtime_path}/frameworks/ani/configuration:configuration_ani_kit",
-    "${ability_runtime_path}/frameworks/ani/launch_param:launch_param_ani_kit",
-    "${ability_runtime_path}/frameworks/ani/ui_extension_ability:ui_extension_ability_ani_kit",
-    "${ability_runtime_path}/frameworks/ani/uiextensioncontext:ui_ext_con_ani_kit",
+    "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_abc_etc",
+    "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_registry_ani_kit",
+    "${ability_runtime_path}/frameworks/ets/ani/configuration:configuration_abc",
+    "${ability_runtime_path}/frameworks/ets/ani/configuration:configuration_ani_kit",
+    "${ability_runtime_path}/frameworks/ets/ani/launch_param:launch_param_ani_kit",
+    "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability:ui_extension_ability_ani_kit",
+    "${ability_runtime_path}/frameworks/ets/ani/uiextensioncontext:ui_ext_con_ani_kit",
   ]
 }
