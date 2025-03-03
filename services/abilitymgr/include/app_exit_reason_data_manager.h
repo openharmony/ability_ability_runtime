@@ -69,6 +69,11 @@ public:
 
     int32_t RecordSignalReason(int32_t pid, int32_t uid, int32_t signal, std::string &bundleName);
 
+    int32_t GetRecordAppAbilityNames(const uint32_t accessTokenId, std::vector<std::string> &abilityLists);
+
+    void UpdateAppExitReason(uint32_t accessTokenId, const std::vector<std::string> &abilityList,
+        const AAFwk::ExitReason &exitReason, const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg);
+
 private:
     DistributedKv::Status GetKvStore();
     bool CheckKvStore();
@@ -80,8 +85,6 @@ private:
         bool &withKillMsg);
     void ConvertReasonFromValue(const nlohmann::json &jsonObject, AAFwk::ExitReason &exitReason, bool &withKillMsg);
     void ConvertAccessTokenIdFromValue(const DistributedKv::Value &value, uint32_t &accessTokenId);
-    void UpdateAppExitReason(uint32_t accessTokenId, const std::vector<std::string> &abilityList,
-        const AAFwk::ExitReason &exitReason, const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg);
     void InnerDeleteAppExitReason(const std::string &keyName);
     void InnerDeleteSessionId(const int32_t sessionId);
     void InnerAddSessionId(const int32_t sessionId, uint32_t accessTokenId);

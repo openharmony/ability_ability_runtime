@@ -1809,7 +1809,8 @@ int AbilityManagerStub::CloseUIAbilityBySCBInner(MessageParcel &data, MessagePar
         sessionInfo = data.ReadParcelable<SessionInfo>();
     }
     uint32_t sceneFlag = data.ReadUint32();
-    int32_t result = CloseUIAbilityBySCB(sessionInfo, sceneFlag);
+    bool isUserRequestedExit = data.ReadBool();
+    int32_t result = CloseUIAbilityBySCB(sessionInfo, isUserRequestedExit, sceneFlag);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -4147,7 +4148,8 @@ int32_t AbilityManagerStub::CleanUIAbilityBySCBInner(MessageParcel &data, Messag
         sessionInfo = data.ReadParcelable<SessionInfo>();
     }
     uint32_t sceneFlag = data.ReadUint32();
-    int32_t result = CleanUIAbilityBySCB(sessionInfo, sceneFlag);
+    bool isUserRequestedExit = data.ReadBool();
+    int32_t result = CleanUIAbilityBySCB(sessionInfo, isUserRequestedExit, sceneFlag);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

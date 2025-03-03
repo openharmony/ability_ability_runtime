@@ -343,5 +343,36 @@ int32_t AppExitReasonHelper::GetActiveAbilityListWithPid(int32_t uid, std::vecto
     }
     return ERR_OK;
 }
+
+int32_t AppExitReasonHelper::RecordUIAbilityExitReason(const pid_t pid, const std::string &abilityName,
+    const ExitReason &exitReason)
+{
+    AppExecFwk::ApplicationInfo application;
+    bool debug = false;
+    auto ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->GetApplicationInfoByProcessID(pid,
+        application, debug));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getApplicationInfoByProcessID failed");
+        return ret;
+    }
+    auto bundleName = application.bundleName;
+    AppExecFwk::RunningProcessInfo processInfo;
+    if (pid > 0) {
+        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(pid, processInfo);
+    }
+    std::vector<std::string> abilityLists = {};
+    DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+        GetRecordAppAbilityNames(application.accessTokenId, abilityLists);
+    bool isAbilityListsEmpty = abilityLists.empty();
+    abilityLists.emplace_back(abilityName);
+    if (isAbilityListsEmpty) {
+        return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(bundleName,
+            application.accessTokenId, abilityLists, exitReason, processInfo, false);
+    } else {
+        DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+            UpdateAppExitReason(application.accessTokenId, abilityLists, exitReason, processInfo, false);
+    }
+    return ERR_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
