@@ -26,6 +26,7 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
 
   include_dirs = [
     "./include",
+    "${ability_runtime_path}/frameworks/ani/uiextensioncontext/include/",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_services_path}/common/include",
@@ -36,6 +37,7 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
     "${ability_runtime_path}/frameworks/js/napi/inner/napi_common/ani_common",
     "${ability_runtime_path}/frameworks/native/ability/native/ability_runtime/sts",
+    "${ability_runtime_path}/interfaces/inner_api/runtime/include",
   ]
 
   sources = [
@@ -50,14 +52,10 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability:ability_context_native",
-    "${ability_runtime_native_path}/ability:ability_context_native",
-    "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:abilitykit_utils",
@@ -66,9 +64,9 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
     "${ability_runtime_native_path}/ability/native:ui_service_extension",
     "${ability_runtime_native_path}/ability/native:ui_service_extension_connection",
     "${ability_runtime_native_path}/appkit:app_context",
-    "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_path}/frameworks/ani/uiextensioncontext:ui_ext_con_ani_kit",
     "${ability_runtime_path}/frameworks/native/ability/native:ui_extension",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]
@@ -99,26 +97,16 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
 
     public_external_deps = [ "window_manager:scene_session_manager" ]
   }
-
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
 
-#generate_static_abc("ability_extension_abc") {
-#  arktsconfig = "${ability_runtime_path}/frameworks/ani/ui_extension_ability/extension_ability_config.json"
-#  dst_file = "$target_out_dir/UIExtensionContentSession.abc"
-#  out_puts = [ "$target_out_dir/UIExtensionContentSession.abc" ]
+generate_static_abc("ui_extension_ability_ani_abc") {
+  arktsconfig = "${ability_runtime_path}/frameworks/ani/ui_extension_ability/ui_extension_ability_config.json"
+  dst_file = "$target_out_dir/ui_extension_ability_ani.abc"
+  out_puts = [ "$target_out_dir/ui_extension_ability_ani.abc" ]
 
-#  #is_boot_abc = "True"
-#  #device_dst_file = "system/framework/UIExtensionContentSession.abc"
-#}
-
-# TODO
-# generate_static_abc("ui_extension_ability_ani_abc") {
-#  arktsconfig = "${ability_runtime_path}/frameworks/ani/ui_extension_ability/ui_extension_ability_config.json"
-#  dst_file = "$target_out_dir/ui_extension_ability_ani.abc"
-#  out_puts = [ "$target_out_dir/ui_extension_ability_ani.abc" ]
-#  is_boot_abc = "True"
-# device_dst_file = "system/framework/ui_extension_ability_ani.abc"
-# }
+  # is_boot_abc = "True"
+  # device_dst_file = "system/framework/ui_extension_ability_ani.abc"
+}
