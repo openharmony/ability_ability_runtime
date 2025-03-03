@@ -35,6 +35,70 @@
 namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime;
+namespace {
+bool WrapWantParams(ani_env* env, ani_class wantCls, ani_object wantObject, const AAFwk::WantParams& wantParams)
+{
+    ani_method setParametersMethod = nullptr;
+    ani_status status = ANI_ERROR;
+    status = env->Class_FindMethod(wantCls, "setParametersString", "Lstd/core/String;:V", &setParametersMethod);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to get setParametersString method, status : %{public}d", status);
+        return false;
+    }
+    nlohmann::json wantParamsJson = wantParams;
+    std::string wantParamsString = wantParamsJson.dump();
+    ani_string wantParamsAniString;
+    status = env->String_NewUTF8(wantParamsString.c_str(), wantParamsString.length(), &wantParamsAniString);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to get setParametersString method, status : %{public}d", status);
+        return false;
+    }
+    status = env->Object_CallMethod_Void(wantObject, setParametersMethod, wantParamsAniString);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to call setParametersString method, status : %{public}d", status);
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::JSNAPI, "WrapWantParams done");
+    return true;
+}
+
+bool UnwrapWantParams(ani_env* env, ani_object wantObject, AAFwk::WantParams& wantParams)
+{
+    ani_class wantCls = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass("L@ohos/app/ability/Want/Want;", &wantCls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return false;
+    }
+    if (wantCls == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null wantCls");
+        return false;
+    }
+
+    ani_method getParametersMethod = nullptr;
+    status = env->Class_FindMethod(wantCls, "getParametersString", ":Lstd/core/String;", &getParametersMethod);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to get getParametersMethod method, status : %{public}d", status);
+        return false;
+    }
+    ani_ref wantParamsAniString;
+    status = env->Object_CallMethod_Ref(wantObject, getParametersMethod, &wantParamsAniString);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to call getParametersMethod method, status : %{public}d", status);
+        return false;
+    }
+
+    std::string wantParamsString;
+    if (!GetStdString(env, reinterpret_cast<ani_string>(wantParamsAniString), wantParamsString)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
+        return false;
+    }
+    nlohmann::json wantParamsJson = nlohmann::json::parse(wantParamsString);
+    from_json(wantParamsJson, wantParams);
+    TAG_LOGD(AAFwkTag::JSNAPI, "UnwrapWantParams done");
+    return true;
+}
+}
 
 ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
 {
@@ -70,6 +134,7 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     SetFieldString(env, cls, object, "type", want.GetType());
     SetFieldInt(env, cls, object, "flags", want.GetFlags());
     SetFieldString(env, cls, object, "action", want.GetAction());
+    WrapWantParams(env, cls, object, want.GetParams());
 
     // TODO
     return object;
@@ -157,7 +222,11 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
         "DeviceID %{public}s, BundleName %{public}s, AbilityName %{public}s, ModuleName %{public}s",
         natElementName.GetDeviceID().c_str(), natElementName.GetBundleName().c_str(),
         natElementName.GetAbilityName().c_str(), natElementName.GetModuleName().c_str());
-    // TODO
+
+    AAFwk::WantParams wantParams;
+    if (UnwrapWantParams(env, param, wantParams)) {
+        want.SetParams(wantParams);
+    }
     return true;
 }
 
