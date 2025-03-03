@@ -885,14 +885,6 @@ bool OHOSApplication::IsUpdateColorNeeded(Configuration &config, AbilityRuntime:
 
     bool needUpdate = true;
 
-    if (level < AbilityRuntime::ApplicationConfigurationManager::GetInstance().GetColorModeSetLevel() ||
-        colorMode.empty()) {
-        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-        config.RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
-        TAG_LOGI(AAFwkTag::APPKIT, "color remove");
-        needUpdate = false;
-    }
-
     if (!colorMode.empty()) {
         config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
             AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetColorModeSetLevel(level, colorMode));
@@ -901,6 +893,14 @@ bool OHOSApplication::IsUpdateColorNeeded(Configuration &config, AbilityRuntime:
             config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP,
                 AppExecFwk::ConfigurationInner::IS_SET_BY_APP);
         }
+    }
+
+    if (level < AbilityRuntime::ApplicationConfigurationManager::GetInstance().GetColorModeSetLevel() ||
+        colorMode.empty()) {
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
+        TAG_LOGI(AAFwkTag::APPKIT, "color remove");
+        needUpdate = false;
     }
 
     return needUpdate;
