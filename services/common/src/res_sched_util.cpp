@@ -85,6 +85,21 @@ void ResSchedUtil::ReportAbilityAssociatedStartInfoToRSS(
 #endif
 }
 
+void ResSchedUtil::ReportPreloadApplicationToRSS(const std::shared_ptr<AbilityInfo>& abilityInfo, int32_t preloadMode)
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    uint32_t resType = ResourceSchedule::ResType::RES_TYPE_PRELOAD_APPLICATION;
+    std::unordered_map<std::string, std::string> eventParams {
+        { "name", "preload_application" },
+        { "uid", std::to_string(abilityInfo->applicationInfo.uid) },
+        { "bundleName", abilityInfo->applicationInfo.bundleName },
+        { "preloadMode", std::to_string(preloadMode) }
+    };
+    TAG_LOGD(AAFwkTag::DEFAULT, "call");
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, type, eventParams);
+#endif
+}
+
 std::string ResSchedUtil::GetThawReasonByAbilityType(const AbilityInfo &abilityInfo)
 {
     std::string reason;

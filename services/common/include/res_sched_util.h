@@ -50,6 +50,7 @@ public:
     static ResSchedUtil &GetInstance();
     void ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart,
         int32_t warmStartType);
+    void ReportPreloadApplicationToRSS(const std::shared_ptr<AbilityInfo>& abilityInfo, int32_t preloadMode);
     void ReportAbilityAssociatedStartInfoToRSS(
         const AbilityInfo &abilityInfo, int64_t resSchedType, int32_t callerUid, int32_t callerPid);
     bool NeedReportByPidWhenConnect(const AbilityInfo &abilityInfo);
