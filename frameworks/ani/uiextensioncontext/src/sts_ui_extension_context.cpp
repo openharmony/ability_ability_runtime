@@ -54,7 +54,7 @@ static void TerminateSelfSyncPromise([[maybe_unused]] ani_env *env, [[maybe_unus
     ((OHOS::AbilityRuntime::UIExtensionContext*)nativeContextLong)->TerminateSelf();
     TAG_LOGE(AAFwkTag::UI_EXT, "terminateSelfSyncPromise end");
 }
-ani_ref CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context)
+ani_object CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context)
 {
     TAG_LOGE(AAFwkTag::UI_EXT, "CreateStsUiExtensionContext start");
     ani_class cls = nullptr;
