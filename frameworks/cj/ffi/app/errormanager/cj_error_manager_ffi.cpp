@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include <cstring.h>
+#include <cstring>
 #include "cj_error_manager_ffi.h"
 #include "cj_error_observer.h"
 #include "application_data_manager.h"

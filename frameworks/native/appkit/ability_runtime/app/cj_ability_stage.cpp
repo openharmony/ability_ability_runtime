@@ -21,8 +21,9 @@
 #include "ability_delegator_registry.h"
 #include "js_ability_stage_context.h"
 
-using namespace OHOS::AbilityRuntime;
-
+namespace OHOS {
+namespace AbilityRuntime {
+namespace {
 char* CreateCStringFromString(const std::string& source)
 {
     if (source.size() == 0) {
@@ -40,6 +41,7 @@ char* CreateCStringFromString(const std::string& source)
         return nullptr;
     }
     return res;
+}
 }
 
 extern "C" {
@@ -308,4 +310,6 @@ std::shared_ptr<OHOS::AppExecFwk::CJDelegatorAbilityStageProperty> CJAbilityStag
     property->srcEntrance_ = hapModuleInfo->srcEntrance;
     property->cjStageObject_ = cjAbilityStageObject_->GetId();
     return property;
+}
+}
 }
