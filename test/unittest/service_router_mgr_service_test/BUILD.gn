@@ -36,6 +36,7 @@ ohos_unittest("service_router_mgr_service_test") {
   external_deps = [
     "ability_base:session_info",
     "ability_base:want",
+    "access_token:libaccesstoken_sdk",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "eventhandler:libeventhandler",
