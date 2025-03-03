@@ -1128,7 +1128,7 @@ int AbilityManagerStub::AttachAbilityThreadInner(MessageParcel &data, MessagePar
 {
     auto scheduler = iface_cast<IAbilityScheduler>(data.ReadRemoteObject());
     if (scheduler == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "scheduler null");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "scheduler null");
         return ERR_INVALID_VALUE;
     }
     auto token = data.ReadRemoteObject();
@@ -1143,7 +1143,7 @@ int AbilityManagerStub::AbilityTransitionDoneInner(MessageParcel &data, MessageP
     int targetState = data.ReadInt32();
     std::unique_ptr<PacMap> saveData(data.ReadParcelable<PacMap>());
     if (!saveData) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "saveData null");
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "saveData null");
         return ERR_INVALID_VALUE;
     }
     int32_t result = AbilityTransitionDone(token, targetState, *saveData);
@@ -1384,7 +1384,7 @@ int AbilityManagerStub::StartExtensionAbilityInner(MessageParcel &data, MessageP
 {
     std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "want null");
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> callerToken = nullptr;
@@ -1524,7 +1524,7 @@ int AbilityManagerStub::StopExtensionAbilityInner(MessageParcel& data, MessagePa
 {
     std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null want");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null want");
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> callerToken = nullptr;
@@ -1615,7 +1615,7 @@ int AbilityManagerStub::ConnectAbilityInner(MessageParcel &data, MessageParcel &
 {
     std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null want");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null want");
         return ERR_INVALID_VALUE;
     }
     sptr<IAbilityConnection> callback = nullptr;
@@ -1690,11 +1690,11 @@ int AbilityManagerStub::DisconnectAbilityInner(MessageParcel &data, MessageParce
 {
     sptr<IAbilityConnection> callback = iface_cast<IAbilityConnection>(data.ReadRemoteObject());
     if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "callback null");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "callback null");
         return ERR_INVALID_VALUE;
     }
     int32_t result = DisconnectAbility(callback);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "disconnect ability ret = %d", result);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "disconnect ability ret = %d", result);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
