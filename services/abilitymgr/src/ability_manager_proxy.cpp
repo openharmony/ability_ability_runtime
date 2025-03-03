@@ -637,31 +637,31 @@ int32_t AbilityManagerProxy::StartExtensionAbility(const Want &want, const sptr<
         return INNER_ERR;
     }
     if (!data.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "want write fail");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "want write fail");
         return INNER_ERR;
     }
     if (callerToken) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(callerToken)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and callerToken write fail");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "flag and callerToken write fail");
             return INNER_ERR;
         }
     } else {
         if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag write fail");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "flag write fail");
             return INNER_ERR;
         }
     }
     if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "userId write failed");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "userId write failed");
         return INNER_ERR;
     }
     if (!data.WriteInt32(static_cast<int32_t>(extensionType))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "extensionType write failed");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "extensionType write failed");
         return INNER_ERR;
     }
     error = SendRequest(AbilityManagerInterfaceCode::START_EXTENSION_ABILITY, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -853,31 +853,31 @@ int AbilityManagerProxy::StopExtensionAbility(const Want &want, const sptr<IRemo
         return INNER_ERR;
     }
     if (!data.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "want write fail");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "want write fail");
         return INNER_ERR;
     }
     if (callerToken) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(callerToken)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and callerToken write fail");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "flag and callerToken write fail");
             return INNER_ERR;
         }
     } else {
         if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag write fail");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "flag write fail");
             return INNER_ERR;
         }
     }
     if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "userId write fail");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "userId write fail");
         return INNER_ERR;
     }
     if (!data.WriteInt32(static_cast<int32_t>(extensionType))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInt32 fail");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "writeInt32 fail");
         return INNER_ERR;
     }
     error = SendRequest(AbilityManagerInterfaceCode::STOP_EXTENSION_ABILITY, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -1276,20 +1276,20 @@ int AbilityManagerProxy::DisconnectAbility(sptr<IAbilityConnection> connect)
     MessageParcel reply;
     MessageOption option;
     if (connect == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, connect null");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "fail, connect null");
         return ERR_INVALID_VALUE;
     }
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
     }
     if (!data.WriteRemoteObject(connect->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "connect write failed");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "connect write failed");
         return ERR_INVALID_VALUE;
     }
 
     error = SendRequest(AbilityManagerInterfaceCode::DISCONNECT_ABILITY, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -1364,13 +1364,13 @@ int AbilityManagerProxy::AttachAbilityThread(const sptr<IAbilityScheduler> &sche
         return INNER_ERR;
     }
     if (!data.WriteRemoteObject(scheduler->AsObject()) || !data.WriteRemoteObject(token)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "data write fail");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "data write fail");
         return ERR_INVALID_VALUE;
     }
 
     error = SendRequest(AbilityManagerInterfaceCode::ATTACH_ABILITY_THREAD, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
             std::string("AttachAbilityThread; ipc error ") + std::to_string(error));
         return error;
@@ -1389,11 +1389,11 @@ int AbilityManagerProxy::AbilityTransitionDone(const sptr<IRemoteObject> &token,
         return INNER_ERR;
     }
     if (!data.WriteRemoteObject(token) || !data.WriteInt32(state)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "token or state write fail");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "token or state write fail");
         return ERR_INVALID_VALUE;
     }
     if (!data.WriteParcelable(&saveData)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "saveData write fail");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "saveData write fail");
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
             "AbilityTransitionDone; write saveData failed");
         return INNER_ERR;
@@ -1401,7 +1401,7 @@ int AbilityManagerProxy::AbilityTransitionDone(const sptr<IRemoteObject> &token,
 
     error = SendRequest(AbilityManagerInterfaceCode::ABILITY_TRANSITION_DONE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
             std::string("AbilityTransitionDone; ipc error ") + std::to_string(error));
         return error;
@@ -1451,31 +1451,31 @@ int AbilityManagerProxy::ScheduleConnectAbilityDone(
 
     if (token) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(token)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag and token fail");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "write flag and token fail");
             return ERR_INVALID_VALUE;
         }
     } else {
         if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag fail");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "write flag fail");
             return ERR_INVALID_VALUE;
         }
     }
 
     if (remoteObject) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(remoteObject)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag and remoteObject fail");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "write flag and remoteObject fail");
             return ERR_INVALID_VALUE;
         }
     } else {
         if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag fail");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "write flag fail");
             return ERR_INVALID_VALUE;
         }
     }
 
     error = SendRequest(AbilityManagerInterfaceCode::CONNECT_ABILITY_DONE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -1492,13 +1492,13 @@ int AbilityManagerProxy::ScheduleDisconnectAbilityDone(const sptr<IRemoteObject>
         return INNER_ERR;
     }
     if (!data.WriteRemoteObject(token)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "token write failed.");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "token write failed.");
         return ERR_INVALID_VALUE;
     }
 
     error = SendRequest(AbilityManagerInterfaceCode::DISCONNECT_ABILITY_DONE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -1515,13 +1515,13 @@ int AbilityManagerProxy::ScheduleCommandAbilityDone(const sptr<IRemoteObject> &t
         return INNER_ERR;
     }
     if (!data.WriteRemoteObject(token)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "token write fail");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "token write fail");
         return ERR_INVALID_VALUE;
     }
 
     error = SendRequest(AbilityManagerInterfaceCode::COMMAND_ABILITY_DONE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
