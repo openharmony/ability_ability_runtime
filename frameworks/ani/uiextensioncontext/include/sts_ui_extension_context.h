@@ -24,9 +24,9 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 
-static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass);
-static void TerminateSelfSyncPromise([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass);
-ani_ref CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context);
+[[maybe_unused]] static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass);
+[[maybe_unused]] static void TerminateSelfSyncPromise([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass);
+ani_object CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context);
 class StsUIExtensionContext final {
 public:
     explicit StsUIExtensionContext(const std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext>& context)

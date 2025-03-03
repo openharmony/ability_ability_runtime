@@ -18,8 +18,8 @@
  */
 
 // import { AbilityResult } from '../ability/abilityResult';
-import type { AsyncCallback } from '../@ohos.base';
-import { BusinessError } from '../@ohos.base';
+import type { AsyncCallback } from '@ohos.base';
+import { BusinessError } from '@ohos.base';
 // import ConnectOptions from '../ability/connectOptions';
 // import ExtensionContext from './ExtensionContext';
 // import type Want from '../@ohos.app.ability.Want';
