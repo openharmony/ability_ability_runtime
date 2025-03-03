@@ -51,7 +51,7 @@
 
 // generate_static_abc("launch_param_abc") {
 //     arktsconfig =
-//         "${ability_runtime_path}/frameworks/ani/launch_param/launch_param.json"
+//         "${ability_runtime_path}/frameworks/ets/ani/launch_param/launch_param.json"
 //     dst_file = "$target_out_dir/launch_param.abc"
 //     out_puts = [ "$target_out_dir/launch_param.abc" ]
 //     is_boot_abc = "True"

@@ -15,7 +15,7 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-ohos_shared_library("ability_delegator_registry_ani_kit") {
+ohos_shared_library("ui_ext_con_ani_kit") {
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
@@ -30,20 +30,22 @@ ohos_shared_library("ability_delegator_registry_ani_kit") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/ability_delegator/include",
     "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/frameworks/js/napi/app/ability_delegator",
     "${ability_runtime_path}/interfaces/inner_api/runtime/include",
+    "${ability_runtime_path}/interfaces/inner_api/insight_intent/insight_intent_context",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/insight_intent_executor",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/frameworks/js/napi/inner/napi_common/ani_common",
+    "${ability_runtime_path}/frameworks/native/ability/native/ability_runtime/sts",
   ]
 
   configs = []
 
   public_configs = []
 
-  sources = [
-    "./src/sts_ability_delegator.cpp",
-    "./src/sts_ability_delegator_registry.cpp",
-    "./src/sts_ability_delegator_utils.cpp",
-  ]
+  sources = [ "./src/sts_ui_extension_context.cpp" ]
 
   cflags = []
   if (target_cpu == "arm") {
@@ -57,39 +59,49 @@ ohos_shared_library("ability_delegator_registry_ani_kit") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_native_path}/appkit:delegator_mgmt",
+    "${ability_runtime_path}/frameworks/native/ability/native:ui_extension",
   ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
+    "ability_base:zuri",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "json:nlohmann_json_static",
     "napi:ace_napi",
+    "window_manager:embeddablewindowstage_kit",
+    "window_manager:extensionwindow_napi",
   ]
+
+  if (ability_runtime_graphics) {
+    defines = [ "SUPPORT_SCREEN" ]
+    external_deps += [
+      "ace_engine:ace_uicontent",
+      "window_manager:libdm",
+    ]
+
+    public_external_deps = [ "window_manager:scene_session_manager" ]
+  }
 
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
 
-generate_static_abc("ability_delegator_abc") {
-  arktsconfig = "${ability_runtime_path}/frameworks/ani/ability_delegator/ability_delegator_config.json"
-  dst_file = "$target_out_dir/ability_delegator.abc"
-  out_puts = [ "$target_out_dir/ability_delegator.abc" ]
+# generate_static_abc("ui_ext_con_ani_abc") {
+# arktsconfig = "${ability_runtime_path}/frameworks/ets/ani/uiextensioncontext/extension_context_config.json"
+# dst_file = "$target_out_dir/ui_ext_con_ani.abc"
+# out_puts = [ "$target_out_dir/ui_ext_con_ani.abc" ]
 
-  is_boot_abc = "True"
-  device_dst_file = "/system/framework/ability_delegator.abc"
-  cache_path = "$target_out_dir/cache"
-}
-
-ohos_prebuilt_etc("ability_delegator_abc_etc") {
-  source = "$target_out_dir/ability_delegator.abc"
-  module_install_dir = "framework"
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-  deps = [ ":ability_delegator_abc" ]
-}
+#   is_boot_abc = "True"
+#   device_dst_file = "system/framework/ui_ext_con_ani.abc"
+# }
