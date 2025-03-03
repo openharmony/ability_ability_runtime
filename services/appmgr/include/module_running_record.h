@@ -78,8 +78,7 @@ public:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecordByToken(const sptr<IRemoteObject> &token) const;
 
     std::shared_ptr<AbilityRunningRecord> AddAbility(sptr<IRemoteObject> token,
-        std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId,
-        int32_t persistentId = 0);
+        std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
 
     bool IsLastAbilityRecord(const sptr<IRemoteObject> &token);
 
