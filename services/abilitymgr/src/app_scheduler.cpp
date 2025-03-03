@@ -70,14 +70,14 @@ int AppScheduler::LoadAbility(const AbilityRuntime::LoadParam &loadParam, const 
     const AppExecFwk::ApplicationInfo &applicationInfo, const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     /* because the errcode type of AppMgr Client API will be changed to int,
      * so must to covert the return result  */
     int ret = static_cast<int>(IN_PROCESS_CALL(
         appMgrClient_->LoadAbility(abilityInfo, applicationInfo, want, loadParam)));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "AppScheduler fail to LoadAbility. ret %d", ret);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "AppScheduler fail to LoadAbility. ret %d", ret);
         return INNER_ERR;
     }
     return ERR_OK;
