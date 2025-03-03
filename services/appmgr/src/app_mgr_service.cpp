@@ -1190,16 +1190,11 @@ int32_t AppMgrService::StartNativeProcessForDebugger(const AAFwk::Want &want)
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
-    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
-    if (!isShellCall) {
+    bool isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    bool isLocalDebugCall = AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug();
+    if (!isShellCall && !isLocalDebugCall) {
         TAG_LOGE(AAFwkTag::APPMGR, "permission denied");
         return ERR_INVALID_OPERATION;
-    }
-    bool isDebugFromLocal = want.GetBoolParam(DEBUG_FROM, false);
-    if (isDebugFromLocal &&
-        !AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "local debug permission denied");
-        return ERR_PERMISSION_DENIED;
     }
     auto ret = appMgrServiceInner_->StartNativeProcessForDebugger(want);
     if (ret != ERR_OK) {
