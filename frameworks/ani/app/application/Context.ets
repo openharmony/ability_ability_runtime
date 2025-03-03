@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-import BaseContext from './BaseContext'
-import ApplicationContext from './ApplicationContext'
-import EventHub from '../../../js/napi/app/event_hub/event_hub.sts';
-import ApplicationInfo from 'bms/ApplicationInfo'
+import BaseContext from './BaseContext.ets'
+import ApplicationContext from './ApplicationContext.ets'
+// import EventHub from '../../../js/napi/app/event_hub/event_hub.sts';
+// import ApplicationInfo from 'bms/ApplicationInfo'
 
-abstract class Context implements BaseContext{
+export abstract class Context implements BaseContext{
     area: int = 0;
     filesDir: string = "";
     tempDir: string = "";
-    applicationInfo?: ApplicationInfo;
-    eventHub: EventHub = new EventHub();
+    // applicationInfo?: ApplicationInfo;
+    // eventHub: EventHub = new EventHub();
 
     private applicationContext?: ApplicationContext;
 
