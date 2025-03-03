@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
-import { Context } from './Context.ets'
+export type Callback<T> = (data: T)=> void;
 
-export default class ApplicationContext extends Context {
-    public native setSupportedProcessCacheSync(isSupported : boolean):void;
-    public nativeApplicationContext:long = 0;
+export class Result<T, E>{
+  result:T;
+  error:E;
+  constructor(result: T , error: E) {
+      this.result = result;
+      this.error = error;
+  }
+}
 
-    setSupportedProcessCache(isSupported : boolean):void {
-        console.log("call setSupportedProcessCache 111");
-        let p1 = launch this.setSupportedProcessCacheSync(isSupported);
-        console.log("call setSupportedProcessCache 222");
-        p1.then<void>(():void=>{
-            console.log("call setSupportedProcessCache 333");
-        });
-    }
+export type AsyncCallback<T> = (err: BusinessError<T>, data: T)=> void;
+
+export class BusinessError<T = void> {
+    code: number;
+    data: T;
 }
