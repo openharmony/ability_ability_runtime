@@ -6045,6 +6045,8 @@ bool AppMgrServiceInner::IsSharedBundleRunning(const std::string &bundleName, ui
     if (!CheckGetRunningInfoPermission()) {
         return false;
     }
+
+    std::lock_guard lock(runningSharedBundleListMutex_);
     for (const auto &it : runningSharedBundleList_) {
         for (const auto &item : it.second) {
             if (item.bundleName == bundleName && item.versionCode == versionCode) {
@@ -6218,11 +6220,13 @@ int32_t AppMgrServiceInner::GetCurrentAccountId() const
 void AppMgrServiceInner::SetRunningSharedBundleList(const std::string &bundleName,
     const std::vector<BaseSharedBundleInfo> baseSharedBundleInfoList)
 {
+    std::lock_guard lock(runningSharedBundleListMutex_);
     runningSharedBundleList_.try_emplace(bundleName, baseSharedBundleInfoList);
 }
 
 void AppMgrServiceInner::RemoveRunningSharedBundleList(const std::string &bundleName)
 {
+    std::lock_guard lock(runningSharedBundleListMutex_);
     auto iterator = runningSharedBundleList_.find(bundleName);
     if (iterator == runningSharedBundleList_.end()) {
         return;
