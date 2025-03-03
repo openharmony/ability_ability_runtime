@@ -38,7 +38,10 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
     "${ability_runtime_path}/frameworks/native/ability/native/ability_runtime/sts",
   ]
 
-  sources = [ "./src/sts_ui_extension.cpp" ]
+  sources = [
+    "./src/sts_ui_extension.cpp",
+    "./src/sts_ui_extension_content_session.cpp",
+  ]
 
   cflags = []
   if (target_cpu == "arm") {
@@ -65,6 +68,7 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
+    "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_path}/frameworks/native/ability/native:ui_extension",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]
@@ -100,6 +104,16 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
+
+#generate_static_abc("ability_extension_abc") {
+#  arktsconfig = "${ability_runtime_path}/frameworks/ani/ui_extension_ability/extension_ability_config.json"
+#  dst_file = "$target_out_dir/UIExtensionContentSession.abc"
+#  out_puts = [ "$target_out_dir/UIExtensionContentSession.abc" ]
+
+#  #is_boot_abc = "True"
+#  #device_dst_file = "system/framework/UIExtensionContentSession.abc"
+#}
+
 # TODO
 # generate_static_abc("ui_extension_ability_ani_abc") {
 #  arktsconfig = "${ability_runtime_path}/frameworks/ani/ui_extension_ability/ui_extension_ability_config.json"
