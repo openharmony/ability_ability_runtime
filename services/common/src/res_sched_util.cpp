@@ -96,7 +96,7 @@ void ResSchedUtil::ReportPreloadApplicationToRSS(const std::shared_ptr<AbilityIn
         { "preloadMode", std::to_string(preloadMode) }
     };
     TAG_LOGD(AAFwkTag::DEFAULT, "call");
-    ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, resType, eventParams);
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, preloadMode, eventParams);
 #endif
 }
 
