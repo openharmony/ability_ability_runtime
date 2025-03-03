@@ -37,8 +37,6 @@ const std::string WRONG_BUNDLE_NAME = "wrong";
 const std::string MIME_TYPE = "html";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string PURPOSE_NAME = "pay";
-const int32_t ERR_COD1 = 8519924;
-const int32_t ERR_COD2 = 8388613;
 }  // namespace
 
 class ServiceRouterMgrInterfaceTest : public testing::Test {
@@ -512,10 +510,11 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0001, Function | S
     auto serviceRouterMgrProxy = std::make_shared<ServiceRouterMgrProxy>(nullptr);
     EXPECT_NE(serviceRouterMgrProxy, nullptr);
     BusinessAbilityFilter filter;
+    int32_t funcResult = -1;
     filter.businessType = BusinessType::UNSPECIFIED;
     std::vector<BusinessAbilityInfo> abilityInfos;
-    auto ret = serviceRouterMgrProxy->QueryBusinessAbilityInfos(filter, abilityInfos);
-    EXPECT_EQ(ret, ERR_COD1);
+    auto ret = serviceRouterMgrProxy->QueryBusinessAbilityInfos(filter, abilityInfos, funcResult);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 
 /**
@@ -529,9 +528,10 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0002, Function | S
     auto serviceRouterMgrProxy = std::make_shared<ServiceRouterMgrProxy>(nullptr);
     EXPECT_NE(serviceRouterMgrProxy, nullptr);
     Want want;
+    int32_t funcResult = -1;
     std::vector<PurposeInfo> purposeInfos;
-    auto ret = serviceRouterMgrProxy->QueryPurposeInfos(want, "", purposeInfos);
-    EXPECT_EQ(ret, ERR_COD1);
+    auto ret = serviceRouterMgrProxy->QueryPurposeInfos(want, "", purposeInfos, funcResult);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 
 /**
@@ -544,10 +544,11 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0003, Function | S
 {
     auto serviceRouterMgrProxy = std::make_shared<ServiceRouterMgrProxy>(nullptr);
     EXPECT_NE(serviceRouterMgrProxy, nullptr);
-    sptr<SessionInfo> sessionInfo = nullptr;
+    SessionInfo sessionInfo;
     int32_t userId = 1;
-    auto ret = serviceRouterMgrProxy->StartUIExtensionAbility(sessionInfo, userId);
-    EXPECT_EQ(ret, ERR_COD1);
+    int32_t funcResult = -1;
+    auto ret = serviceRouterMgrProxy->StartUIExtensionAbility(sessionInfo, userId, funcResult);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 
 /**
@@ -562,9 +563,10 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0004, Function | S
     EXPECT_NE(serviceRouterMgrProxy, nullptr);
     Want want;
     sptr<IAbilityConnection> connect = nullptr;
-    sptr<SessionInfo> sessionInfo = nullptr;
+    SessionInfo sessionInfo;
     int32_t userId = 1;
-    auto ret = serviceRouterMgrProxy->ConnectUIExtensionAbility(want, connect, sessionInfo, userId);
-    EXPECT_EQ(ret, ERR_COD2);
+    int32_t funcResult = -1;
+    auto ret = serviceRouterMgrProxy->ConnectUIExtensionAbility(want, connect, sessionInfo, userId, funcResult);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 } // OHOS
