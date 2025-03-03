@@ -1,16 +1,13 @@
-import AbilityConstant from '@ohos.app.ability.AbilityConstant';
-import Want from '@ohos.@ohos.app.ability.Want';
-
-class UIExtensionContentSession {}
-
-class UIExtensionContext{}
+import {AbilityConstant} from '@ohos.app.ability.AbilityConstant';
+import {Want} from '@ohos.app.ability.Want';
+import {Want} from 'UIExtensionContentSession';
+import {UIExtensionContext} from '../../uiextensioncontext/ets_inner/UIExtensionContext';
 
 class ExtensionAbility {}
 
 export class UIExtensionAbility extends ExtensionAbility {
 
-  public native UIExtensionContext:long = 0;
-  public native dotest() : void;
+  uiExtenstionContext?: UIExtensionContext;
 
   onCreate(launchParam: AbilityConstant.LaunchParam): void {}
 
@@ -23,12 +20,5 @@ export class UIExtensionAbility extends ExtensionAbility {
   onBackground(): void {}
 
   //onDestroy(): void | Promise<void>;
-  onDestroy(): void;
-}
-
-function main(){
-  console.log("my test start")
-  let cc = new UIExtensionAbility;
-  cc.dotest()
-  console.log("my test end")
+  onDestroy(): void {}
 }

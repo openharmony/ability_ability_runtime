@@ -27,8 +27,7 @@
 #include <mutex>
 #include <unordered_set>
 #include "sts_runtime.h"
-#include "js_ui_extension_content_session.h"
-#include "js_ui_extension.h"
+#include "sts_ui_extension_content_session.h"
 
 class STSNativeReference;
 
@@ -186,7 +185,7 @@ public:
 private:
     // virtual void BindContext(napi_env env, napi_value obj, std::shared_ptr<AAFwk::Want> want);
     virtual void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want);
-    ani_object CreateSTSContext(std::shared_ptr<UIExtensionContext> context, int32_t screenMode);
+    ani_object CreateSTSContext(ani_env *env, std::shared_ptr<UIExtensionContext> context, int32_t screenMode);
     // napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
     //     bool withResult = false);
     ani_ref CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
@@ -217,7 +216,6 @@ private:
         const sptr<AAFwk::SessionInfo> &sessionInfo);
 
     STSRuntime& stsRuntime_;
-    // std::shared_ptr<NativeReference> jsObj_ = nullptr;
     std::shared_ptr<STSNativeReference> stsObj_ = nullptr;
     std::shared_ptr<STSNativeReference> shellContextRef_ = nullptr;
     std::mutex uiWindowMutex_;

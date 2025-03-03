@@ -31,6 +31,8 @@
 #include "ani_common_want.h"
 #include "ui_extension_window_command.h"
 #include "want_params_wrapper.h"
+#include "sts_data_struct_converter.h"
+#include "sts_ui_extension_context.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -49,7 +51,7 @@ StsUIExtension::StsUIExtension(STSRuntime &stsRuntime) : stsRuntime_(stsRuntime)
 
 StsUIExtension::~StsUIExtension()
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "Js ui extension destructor");
+    TAG_LOGI(AAFwkTag::UI_EXT, "Js ui extension destructor");
     auto context = GetContext();
     if (context) {
         context->Unbind();
@@ -69,7 +71,7 @@ void StsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "init");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension init");
     if (record == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "record null");
         return;
@@ -104,6 +106,7 @@ void StsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
 
 std::shared_ptr<STSNativeReference> StsUIExtension::LoadModule(ani_env *env)
 {
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::LoadModule");
     std::shared_ptr<STSNativeReference> stsNativeReference = std::make_shared<STSNativeReference>();
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
@@ -131,9 +134,11 @@ std::shared_ptr<STSNativeReference> StsUIExtension::LoadModule(ani_env *env)
     return stsNativeReference;
 }
 
-ani_object StsUIExtension::CreateSTSContext(std::shared_ptr<UIExtensionContext> context, int32_t screenMode)
+ani_object StsUIExtension::CreateSTSContext(ani_env* env, std::shared_ptr<UIExtensionContext> context,
+    int32_t screenMode)
 {
-    ani_object obj = nullptr;
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg CreateSTSContext");
+    ani_object obj = CreateStsUiExtensionContext(env, context);
     // if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
     //     contextObj = JsUIExtensionContext::CreateJsUIExtensionContext(env, context);
     //     CHECK_POINTER(contextObj);
@@ -151,6 +156,7 @@ ani_object StsUIExtension::CreateSTSContext(std::shared_ptr<UIExtensionContext> 
 
 void StsUIExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want)
 {
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension BindContext");
     auto context = GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
@@ -163,10 +169,49 @@ void StsUIExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want)
     }
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
 
-    ani_object contextObj = CreateSTSContext(context, screenMode);
-    (void) contextObj;
+    ani_object contextObj = CreateSTSContext(env, context, screenMode);
 
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+    ani_class cls = nullptr;
+    ani_status status = ANI_OK;
+    if ((status = env->FindClass(UIEXTENSION_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "zg status : %{public}d", status);
+        return;
+    }
+
+    ani_method method = nullptr;
+    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    if (status != ANI_OK) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "zg call Class_FindMethod ctor failed");
+        return;
+    }
+
+    ani_object object = nullptr;
+    status = env->Object_New(cls, method, &object);
+    if (status != ANI_OK) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "zg call Object_New obj failed");
+        return;
+    }
+
+    //bind uiExtenstionContext
+    ani_field contextField;
+    status = env->Class_FindField(cls, "uiExtenstionContext", &contextField);
+    if (status != ANI_OK) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "zg Class_GetField context failed");
+        ResetEnv(env);
+        return;
+    }
+
+    ani_ref contextObjRef = nullptr;
+    if (env->GlobalReference_Create(contextObj, &contextObjRef) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "GlobalReference_Create stageCtxObj failed");
+        return;
+    }
+
+    if (env->Object_SetField_Ref(object, contextField, contextObjRef) != ANI_OK) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "zg Object_SetField_Ref stageCtxObj failed");
+        ResetEnv(env);
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "zg BindContext end");
 }
 
 ani_object StsUIExtension::CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& param)
@@ -178,7 +223,7 @@ ani_object StsUIExtension::CreateStsLaunchParam(ani_env* env, const AAFwk::Launc
 void StsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension OnStart begin");
     //TODO file /native/ability/native/extension.cpp:44 null pointer of abilityInfo_
     //Extension::OnStart(want);
     auto context = GetContext();
@@ -203,11 +248,11 @@ void StsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> s
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
         launchParam.launchReason = AAFwk::LaunchReason::LAUNCHREASON_INSIGHT_INTENT;
     }
-    ani_ref launchParamRef = CreateStsLaunchParam(env, launchParam);
+    ani_object launchParamRef = CreateStsLaunchParam(env, launchParam);
 
     CallObjectMethod(false, "onCreate", signature, launchParamRef);
 
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg OnStart end");
 }
 
 void StsUIExtension::OnStop()
@@ -215,7 +260,7 @@ void StsUIExtension::OnStop()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     //TODO FILE Extension abilityInfo_ is nullptr
     //UIExtension::OnStop();
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension onStop");
     //HandleScope handleScope(jsRuntime_);
     CallObjectMethod(false, "onDestroy", nullptr);
 #ifdef SUPPORT_GRAPHICS
@@ -226,6 +271,7 @@ void StsUIExtension::OnStop()
 }
 void StsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback)
 {
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension onStop");
     if (callbackInfo == nullptr) {
         isAsyncCallback = false;
         OnStop();
@@ -267,7 +313,7 @@ void StsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callba
 
 void StsUIExtension::OnStopCallBack()
 {
-    TAG_LOGE(AAFwkTag::UI_EXT, "StsUIExtension::OnStopCallBack called");
+    TAG_LOGI(AAFwkTag::UI_EXT, "StsUIExtension::OnStopCallBack called");
     auto context = GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
@@ -287,7 +333,7 @@ void StsUIExtension::OnStopCallBack()
 
 sptr<IRemoteObject> StsUIExtension::OnConnect(const AAFwk::Want &want)
 {
-    TAG_LOGE(AAFwkTag::UI_EXT, "StsUIExtension::OnConnect called");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::OnConnect called");
     //TODO NAPI_ohos_rpc_getNativeRemoteObject
     // HandleScope handleScope(jsRuntime_);
     // napi_value result = CallOnConnect(want);
@@ -303,6 +349,7 @@ sptr<IRemoteObject> StsUIExtension::OnConnect(const AAFwk::Want &want)
 void StsUIExtension::OnDisconnect(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::OnDisconnect called");
     Extension::OnDisconnect(want);
     TAG_LOGI(AAFwkTag::UI_EXT, "StsUIExtension OnDisconnect begin");
     // HandleScope handleScope(jsRuntime_);
@@ -312,7 +359,7 @@ void StsUIExtension::OnDisconnect(const AAFwk::Want &want)
 
 ani_status StsUIExtension::CallOnDisconnect(const AAFwk::Want &want, bool withResult)
 {
-    TAG_LOGI(AAFwkTag::UI_EXT, "CallOnDisconnect called");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg CallOnDisconnect called");
     //TODO imp onDisconnect
     // HandleEscape handleEscape(jsRuntime_);
     // napi_env env = jsRuntime_.GetNapiEnv();
@@ -351,6 +398,7 @@ void StsUIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::
     AAFwk::WindowCommand winCmd)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::OnCommandWindow called");
     if (sessionInfo == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "sessionInfo is nullptr");
         return;
@@ -384,7 +432,7 @@ bool StsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     const sptr<AAFwk::SessionInfo> &sessionInfo, bool needForeground)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::ForegroundWindowWithInsightIntent called");
     if (!HandleSessionCreate(want, sessionInfo)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "HandleSessionCreate failed");
         return false;
@@ -435,7 +483,7 @@ void StsUIExtension::PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &s
     const AppExecFwk::InsightIntentExecuteResult &result, bool needForeground)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "Post insightintent executed");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::PostInsightIntentExecuted called");
     if (needForeground) {
         // If uiextensionability is started for the first time or need move background to foreground.
         CallObjectMethod(false, "onForeground", nullptr);
@@ -458,7 +506,7 @@ void StsUIExtension::PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &s
 void StsUIExtension::OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::OnCommandWindowDone called");
     auto context = GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
@@ -482,6 +530,7 @@ void StsUIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &
     const AppExecFwk::InsightIntentExecuteResult &result)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::OnInsightIntentExecuteDone called");
     if (sessionInfo == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return;
@@ -521,14 +570,14 @@ void StsUIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &
 
 void StsUIExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "OnCommand CALLED");
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::OnCommand called");
+    TAG_LOGD(AAFwkTag::UI_EXT, "zg OnCommand end");
 }
 
 void StsUIExtension::OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::OnForeground called");
     if (sessionInfo == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "sessionInfo nullptr");
         return;
@@ -544,22 +593,23 @@ void StsUIExtension::OnForeground(const Want &want, sptr<AAFwk::SessionInfo> ses
     }
     ForegroundWindow(want, sessionInfo);
     CallObjectMethod(false, "onForeground", nullptr);
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg onForeground");
 }
 
 void StsUIExtension::OnBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::OnBackground called");
     CallObjectMethod(false, "onBackground", nullptr);
     //TODO  FILE Extension abilityInfo_ is nullptr
     //Extension::OnBackground();
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::OnBackground end");
 }
 
 bool StsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::HandleSessionCreate called");
     if (sessionInfo == nullptr || sessionInfo->uiExtensionComponentId == 0) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return false;
@@ -588,7 +638,8 @@ bool StsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAF
             TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
         }
         //TODO create UIExtensionContentSession
-        ani_object sessonObj = nullptr;
+        ani_object sessonObj = StsUIExtensionContentSession::CreateStsUIExtensionContentSession(env,
+            sessionInfo, uiWindow, context, abilityResultListeners_);
         // napi_value nativeContentSession = JsUIExtensionContentSession::CreateJsUIExtensionContentSession(
         //     env, sessionInfo, uiWindow, context, abilityResultListeners_);
         // napi_ref ref = nullptr;
@@ -615,12 +666,14 @@ bool StsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAF
         }
 #endif // SUPPORT_GRAPHICS
     }
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::HandleSessionCreate end");
     return true;
 }
 
 sptr<Rosen::Window> StsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtensionContext> context,
     const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::CreateUIWindow start");
     if (context == nullptr || context->GetAbilityInfo() == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
         return nullptr;
@@ -639,12 +692,13 @@ sptr<Rosen::Window> StsUIExtension::CreateUIWindow(const std::shared_ptr<UIExten
     option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
     HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::CreateUIWindow end");
 }
 
 std::unique_ptr<STSNativeReference> StsUIExtension::CreateAppWindowStage(sptr<Rosen::Window> uiWindow,
     sptr<AAFwk::SessionInfo> sessionInfo)
 {
-    TAG_LOGE(AAFwkTag::UI_EXT, "CreateAppWindowStage called");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::CreateAppWindowStage start");
     //TODO create window stage
     // auto env = jsRuntime_.GetNapiEnv();
     // napi_value jsWindowStage = Rosen::JsEmbeddableWindowStage::CreateJsEmbeddableWindowStage(
@@ -654,13 +708,13 @@ std::unique_ptr<STSNativeReference> StsUIExtension::CreateAppWindowStage(sptr<Ro
     //     return nullptr;
     // }
     // return JsRuntime::LoadSystemModuleByEngine(env, "application.embeddablewindowstage", &jsWindowStage, 1);
-
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension::CreateAppWindowStage end");
     return std::make_unique<STSNativeReference>();
 }
 
 void StsUIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
-    TAG_LOGI(AAFwkTag::UI_EXT, "ForegroundWindow called");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg ForegroundWindow called");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!HandleSessionCreate(want, sessionInfo)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "HandleSessionCreate failed");
@@ -676,13 +730,13 @@ void StsUIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk:
         uiWindow->Show();
         foregroundWindows_.emplace(componentId);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg ForegroundWindow end");
 }
 
 void StsUIExtension::BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::UI_EXT, "BackgroundWindow called");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg BackgroundWindow called");
     if (sessionInfo == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return;
@@ -700,13 +754,13 @@ void StsUIExtension::BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInf
         uiWindow->Hide();
         foregroundWindows_.erase(componentId);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg BackgroundWindow called end");
 }
 
 void StsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::UI_EXT, "DestroyWindow called");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg DestroyWindow called start");
     if (sessionInfo == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return;
@@ -725,7 +779,10 @@ void StsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
             //CallObjectMethod("onWindowStageDestroy");
         } else {
             //TODO create UIEXtensionSessioni obj
-            ani_object sessionObj = nullptr;
+            auto uiWindow = uiWindowMap_[componentId];
+            auto env = stsRuntime_.GetAniEnv();
+            ani_object sessionObj = StsUIExtensionContentSession::CreateStsUIExtensionContentSession(env,
+                sessionInfo, uiWindow, GetContext(), abilityResultListeners_);;
             CallObjectMethod(false, "onSessionDestroy", nullptr, sessionObj);
         }
     }
@@ -751,7 +808,7 @@ void StsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
     if (abilityResultListeners_) {
         abilityResultListeners_->RemoveListener(componentId);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg DestroyWindow called end");
 }
 
 ani_ref StsUIExtension::CallObjectMethod(bool withResult, const char *name, const char *signature, ...)
@@ -772,14 +829,14 @@ ani_ref StsUIExtension::CallObjectMethod(bool withResult, const char *name, cons
     ani_method method = nullptr;
     status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "zg call Class_FindMethod ctor failed");
+        TAG_LOGI(AAFwkTag::UI_EXT, "zg call Class_FindMethod ctor failed");
         return nullptr;
     }
 
     ani_object obj = nullptr;
     status = env->Object_New(cls, method, &obj);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "zg call Object_New obj failed");
+        TAG_LOGI(AAFwkTag::UI_EXT, "zg call Object_New obj failed");
         return nullptr;
     }
 
@@ -813,7 +870,7 @@ void StsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& con
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Extension::OnConfigurationUpdated(configuration);
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg OnConfigurationUpdated called start");
 
     // Notify extension context
     auto context = GetContext();
@@ -826,6 +883,7 @@ void StsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& con
     configUtils->UpdateGlobalConfig(configuration, context->GetConfiguration(), context->GetResourceManager());
 
     ConfigurationUpdated();
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg OnConfigurationUpdated called end");
 }
 
 void StsUIExtension::Dump(const std::vector<std::string> &params, std::vector<std::string> &info)
@@ -836,7 +894,7 @@ void StsUIExtension::Dump(const std::vector<std::string> &params, std::vector<st
 
 void StsUIExtension::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg OnAbilityResult start");
     Extension::OnAbilityResult(requestCode, resultCode, resultData);
     auto context = GetContext();
     if (context == nullptr) {
@@ -849,12 +907,12 @@ void StsUIExtension::OnAbilityResult(int requestCode, int resultCode, const Want
         return;
     }
     abilityResultListeners_->OnAbilityResult(requestCode, resultCode, resultData);
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg OnAbilityResult end");
 }
 
 void StsUIExtension::ConfigurationUpdated()
 {
-    TAG_LOGI(AAFwkTag::UI_EXT, "ConfigurationUpdated begin");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg ConfigurationUpdated begin");
     ani_env* env = stsRuntime_.GetAniEnv();
     if (env == nullptr) {
         TAG_LOGD(AAFwkTag::UI_EXT, "begin");
@@ -875,13 +933,14 @@ void StsUIExtension::ConfigurationUpdated()
     //TODO wrap configuration and send onConfigurationUpdate
     //napi_value napiConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, *fullConfig);
     //CallObjectMethod(false, "onConfigurationUpdate", &napiConfiguration, ARGC_ONE);
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg ConfigurationUpdated end");
 }
 
 #ifdef SUPPORT_GRAPHICS
 void StsUIExtension::OnDisplayInfoChange(
     const sptr<IRemoteObject> &token, Rosen::DisplayId displayId, float density, Rosen::DisplayOrientation orientation)
 {
-    TAG_LOGI(AAFwkTag::UI_EXT, "displayId: %{public}" PRIu64 "", displayId);
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg OnDisplayInfoChange: %{public}" PRIu64 "", displayId);
     auto context = GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Context is invalid");
@@ -926,13 +985,14 @@ void StsUIExtension::RegisterDisplayInfoChangedListener()
         TAG_LOGE(AAFwkTag::UI_EXT, "Param is invalid");
         return;
     }
-    TAG_LOGI(AAFwkTag::UI_EXT, "RegisterDisplayInfoChangedListener");
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg RegisterDisplayInfoChangedListener start");
     Rosen::WindowManager::GetInstance().RegisterDisplayInfoChangedListener(
         context->GetToken(), StsUIExtensionAbilityDisplayListener_);
 }
 
 void StsUIExtension::UnregisterDisplayInfoChangedListener()
 {
+    TAG_LOGI(AAFwkTag::UI_EXT, "zg UnregisterDisplayInfoChangedListener start");
     auto context = GetContext();
     if (context == nullptr || context->GetToken() == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Param is invalid");
