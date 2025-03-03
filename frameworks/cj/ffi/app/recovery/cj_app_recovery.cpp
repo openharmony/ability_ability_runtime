@@ -53,6 +53,9 @@ CJ_EXPORT bool FFIAppRecoverySaveAppState(int64_t ctxId)
 CJ_EXPORT void FFIAppRecoverySetRestartWant(WantHandle want)
 {
     auto actualWant = reinterpret_cast<OHOS::AAFwk::Want*>(want);
+    if (!actualWant) {
+        return;
+    }
     std::shared_ptr<OHOS::AAFwk::Want> paramWant = std::make_shared<OHOS::AAFwk::Want>();
     *paramWant = *actualWant;
     AppRecovery::GetInstance().SetRestartWant(paramWant);
