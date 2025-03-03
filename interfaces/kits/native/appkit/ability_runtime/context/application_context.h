@@ -150,6 +150,16 @@ public:
     void SetCurrentAppMode(int32_t appIndex);
     void ProcessSecurityExit(const AAFwk::ExitReason &exitReason);
 
+    inline void* GetApplicationCtxObjRef()
+    {
+        return applicationContextObjRef_;
+    }
+
+    inline void SetApplicationCtxObjRef(void* applicationContextObjRef)
+    {
+        applicationContextObjRef_ = applicationContextObjRef;
+    }
+
     using SelfType = ApplicationContext;
     static const size_t CONTEXT_TYPE_ID;
 
@@ -175,6 +185,7 @@ private:
     int32_t appIndex_ = 0;
     int32_t appMode_ = 0;
     std::string instanceKey_;
+    void* applicationContextObjRef_ = nullptr;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
