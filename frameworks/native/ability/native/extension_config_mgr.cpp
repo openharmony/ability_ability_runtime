@@ -20,6 +20,7 @@
 
 #include "app_module_checker.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 
 namespace OHOS::AbilityRuntime {
 namespace {
@@ -28,6 +29,8 @@ namespace {
 
 void ExtensionConfigMgr::Init()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::EXT, "Init begin");
     // clear cached data
     blocklistConfig_.clear();
     extensionBlocklist_.clear();
@@ -64,6 +67,7 @@ void ExtensionConfigMgr::Init()
         currentBlockList.clear();
     }
     inFile.close();
+    TAG_LOGD(AAFwkTag::EXT, "Init end");
 }
 
 void ExtensionConfigMgr::AddBlockListItem(const std::string& name, int32_t type)
@@ -84,7 +88,8 @@ void ExtensionConfigMgr::UpdateRuntimeModuleChecker(const std::unique_ptr<Abilit
         return;
     }
     TAG_LOGD(AAFwkTag::EXT, "extensionType_: %{public}d", extensionType_);
-    auto moduleChecker = std::make_shared<AppModuleChecker>(extensionType_, std::move(extensionBlocklist_));
+    auto moduleChecker = std::make_shared<AppModuleChecker>(extensionType_, extensionBlocklist_);
     runtime->SetModuleLoadChecker(moduleChecker);
+    extensionBlocklist_.clear();
 }
 }

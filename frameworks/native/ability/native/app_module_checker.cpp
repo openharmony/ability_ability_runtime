@@ -18,21 +18,42 @@
 #include "hilog_tag_wrapper.h"
 #include "module_checker_delegate.h"
 #include "utils/log.h"
+
+#include <algorithm>
+#include <cctype>
 #include <string>
+
+AppModuleChecker::AppModuleChecker(int32_t extensionType,
+    const std::unordered_map<int32_t, std::unordered_set<std::string>>& extensionBlocklist)
+{
+    auto iter = extensionBlocklist.find(extensionType);
+    if (iter == extensionBlocklist.end()) {
+        return;
+    }
+    TAG_LOGD(AAFwkTag::ABILITY, "transform begin");
+    for (const auto& module: iter->second) {
+        std::string lowermodule;
+        lowermodule.reserve(module.size());
+        std::transform(module.cbegin(), module.cend(), std::back_inserter(lowermodule),
+            [](unsigned char c) { return std::tolower(c); });
+            blockList_.emplace(std::move(lowermodule));
+    }
+    TAG_LOGD(AAFwkTag::ABILITY, "transform end");
+}
 
 bool AppModuleChecker::CheckModuleLoadable(const char *moduleName,
                                            std::unique_ptr<ApiAllowListChecker> &apiAllowListChecker,
                                            bool isAppModule)
 {
     apiAllowListChecker = nullptr;
-    TAG_LOGD(AAFwkTag::ABILITY, "check blocklist, moduleName:%{public}s, processExtensionType_:%{public}d",
-        moduleName, static_cast<int32_t>(processExtensionType_));
-    const auto& blockListIter = moduleBlocklist_.find(processExtensionType_);
-    if (blockListIter == moduleBlocklist_.end()) {
-        return true;
-    }
-    auto blockList = blockListIter->second;
-    if (blockList.find(moduleName) == blockList.end()) {
+    TAG_LOGD(AAFwkTag::ABILITY, "check blocklist, moduleName:%{public}s", moduleName);
+
+    std::string strModuleName(moduleName);
+    std::string lowerModuleName;
+    lowerModuleName.reserve(strModuleName.size());
+    std::transform(strModuleName.cbegin(), strModuleName.cend(), std::back_inserter(lowerModuleName),
+        [](unsigned char c) { return std::tolower(c); });
+    if (blockList_.find(lowerModuleName) == blockList_.end()) {
         return true;
     }
     return false;
