@@ -1364,13 +1364,13 @@ int AbilityManagerProxy::AttachAbilityThread(const sptr<IAbilityScheduler> &sche
         return INNER_ERR;
     }
     if (!data.WriteRemoteObject(scheduler->AsObject()) || !data.WriteRemoteObject(token)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "data write fail");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "data write fail");
         return ERR_INVALID_VALUE;
     }
 
     error = SendRequest(AbilityManagerInterfaceCode::ATTACH_ABILITY_THREAD, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
             std::string("AttachAbilityThread; ipc error ") + std::to_string(error));
         return error;
@@ -1389,11 +1389,11 @@ int AbilityManagerProxy::AbilityTransitionDone(const sptr<IRemoteObject> &token,
         return INNER_ERR;
     }
     if (!data.WriteRemoteObject(token) || !data.WriteInt32(state)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "token or state write fail");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "token or state write fail");
         return ERR_INVALID_VALUE;
     }
     if (!data.WriteParcelable(&saveData)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "saveData write fail");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "saveData write fail");
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
             "AbilityTransitionDone; write saveData failed");
         return INNER_ERR;
@@ -1401,7 +1401,7 @@ int AbilityManagerProxy::AbilityTransitionDone(const sptr<IRemoteObject> &token,
 
     error = SendRequest(AbilityManagerInterfaceCode::ABILITY_TRANSITION_DONE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
             std::string("AbilityTransitionDone; ipc error ") + std::to_string(error));
         return error;
