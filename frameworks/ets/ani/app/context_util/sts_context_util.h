@@ -18,13 +18,14 @@
 
 #include "sts_runtime.h"
 #include "context.h"
-#include "common_fun_ani.h"
-#include "extension_context.h"
-#include "application_context.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 namespace ContextUtil {
+static void ApplicationInfo() {}
+
+static void BindExtensionInfo() {}
+
 static void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     void* applicationCtxRef)
 {
@@ -40,67 +41,45 @@ static void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_obje
     }
 }
 
-static void BindApplicationInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<Context> context) {
-    TAG_LOGE(AAFwkTag::APPKIT, "BindApplicationInfo");
-    ani_field applicationInfoField;
-    if (ANI_OK != aniEnv->Class_FindField(contextClass, "applicationInfo", &applicationInfoField)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find find applicationInfo failed");
-        return;
-    }
-    auto appInfo = context->GetApplicationInfo();
-    ani_object appInfoObj = AppExecFwk::CommonFunAni::ConvertApplicationInfo(aniEnv, *appInfo);
-    if (aniEnv->Object_SetField_Ref(contextObj, applicationInfoField, reinterpret_cast<ani_ref>(appInfoObj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
-        return;
-    }
-}
-
 static void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context)
 {
-    BindApplicationInfo(aniEnv, contextClass, contextObj, context);
-
     // bind parent context property
-    ani_field areaField;
-    if (ANI_OK != aniEnv->Class_FindField(contextClass, "area", &areaField)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find area failed");
-        return;
+    ani_method areaSetter;
+    if (ANI_OK != aniEnv->Class_FindMethod(contextClass, "<set>area", nullptr, &areaSetter)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find set area failed");
     }
     auto area = context->GetArea();
     TAG_LOGI(AAFwkTag::APPKIT, "ani area:%{public}d", area);
-    if (aniEnv->Object_SetField_Int(contextObj, areaField, (ani_int)area) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Int failed");
-        return;
+    if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, areaSetter, ani_int(area))) {
+        TAG_LOGE(AAFwkTag::APPKIT, "call set area failed");
     }
 
-    ani_field filesDirField;
-    if (ANI_OK != aniEnv->Class_FindField(contextClass, "filesDir", &filesDirField)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find filesDir failed");
-        return;
+    ani_method filesDirSetter;
+    if (ANI_OK != aniEnv->Class_FindMethod(contextClass, "<set>filesDir", nullptr, &filesDirSetter)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find set filesDir failed");
     }
-    auto filesDir = context->GetFilesDir();
+    std::string filesDir = context->GetFilesDir();
     TAG_LOGI(AAFwkTag::APPKIT, "ani filesDir:%{public}s", filesDir.c_str());
     ani_string filesDir_string{};
     aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDir_string);
-    if (aniEnv->Object_SetField_Ref(contextObj, filesDirField, reinterpret_cast<ani_ref>(filesDir_string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
-        return;
+    if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, filesDirSetter, filesDir_string)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "call set filesDir failed");
     }
 
-    ani_field tempDirField;
-    if (ANI_OK != aniEnv->Class_FindField(contextClass, "tempDir", &tempDirField)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find find tempDir failed");
-        return;
+    ani_method tempDirSetter;
+    if (ANI_OK != aniEnv->Class_FindMethod(contextClass, "<set>tempDir", nullptr, &tempDirSetter)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find set tempDir failed");
     }
     auto tempDir = context->GetTempDir();
     TAG_LOGI(AAFwkTag::APPKIT, "ani tempDir:%{public}s", tempDir.c_str());
     ani_string tempDir_string{};
     aniEnv->String_NewUTF8(tempDir.c_str(), tempDir.size(), &tempDir_string);
-    if (aniEnv->Object_SetField_Ref(contextObj, tempDirField, reinterpret_cast<ani_ref>(tempDir_string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
-        return;
+    if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, tempDirSetter, tempDir_string)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "call set tempDir failed");
     }
+
+    ApplicationInfo();
 }
 
 static void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
@@ -110,40 +89,11 @@ static void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object 
     BindParentProperty(aniEnv, contextClass, contextObj, context);
 }
 
-static void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo) {
-    TAG_LOGE(AAFwkTag::APPKIT, "BindExtensionInfo");
-    auto hapModuleInfo = context->GetHapModuleInfo();
-    if (abilityInfo && hapModuleInfo) {
-        auto isExist = [&abilityInfo](const AppExecFwk::ExtensionAbilityInfo& info) {
-            TAG_LOGD(AAFwkTag::CONTEXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
-            return info.bundleName == abilityInfo->bundleName && info.name == abilityInfo->name;
-        };
-        auto infoIter = std::find_if(
-            hapModuleInfo->extensionInfos.begin(), hapModuleInfo->extensionInfos.end(), isExist);
-        if (infoIter == hapModuleInfo->extensionInfos.end()) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "set extensionAbilityInfo fail");
-            return;
-        }
-        ani_field extensionAbilityInfoField;
-        if (ANI_OK != aniEnv->Class_FindField(contextClass, "extensionAbilityInfo", &extensionAbilityInfoField)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "find extensionAbilityInfo failed");
-            return;
-        }
-        ani_object extAbilityInfoObj = AppExecFwk::CommonFunAni::ConvertExtensionInfo(aniEnv, *infoIter);
-        if (aniEnv->Object_SetField_Ref(contextObj, extensionAbilityInfoField,
-            reinterpret_cast<ani_ref>(extAbilityInfoObj)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
-            return;
-        }
-    }
-}
-
 static void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<AbilityRuntime::ExtensionContext> context)
+    void* applicationCtxRef, std::shared_ptr<Context> context)
 {
     StsCreatContext(aniEnv, contextClass, contextObj, applicationCtxRef, context);
-    BindExtensionInfo(aniEnv, contextClass, contextObj, context, context->GetAbilityInfo());
+    BindExtensionInfo();
 }
 }
 } // namespace AbilityRuntime

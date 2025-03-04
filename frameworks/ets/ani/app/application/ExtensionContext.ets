@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Context } from './Context'
+import { Context } from './Context.ets'
 // import ExtensionAbilityInfo from 'bms/ExtensionAbilityInfo.ets'
 
 export default class ExtensionContext extends Context {
