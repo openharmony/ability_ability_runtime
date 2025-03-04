@@ -97,11 +97,11 @@ ohos_shared_library("ui_ext_con_ani_kit") {
   part_name = "ability_runtime"
 }
 
-# generate_static_abc("ui_ext_con_ani_abc") {
-# arktsconfig = "${ability_runtime_path}/frameworks/ets/ani/uiextensioncontext/extension_context_config.json"
-# dst_file = "$target_out_dir/ui_ext_con_ani.abc"
-# out_puts = [ "$target_out_dir/ui_ext_con_ani.abc" ]
+generate_static_abc("ui_ext_con_ani_abc") {
+  arktsconfig = "${ability_runtime_path}/frameworks/ets/ani/uiextensioncontext/extension_context_config.json"
+  dst_file = "$target_out_dir/ui_ext_con_ani.abc"
+  out_puts = [ "$target_out_dir/ui_ext_con_ani.abc" ]
 
-#   is_boot_abc = "True"
-#   device_dst_file = "system/framework/ui_ext_con_ani.abc"
-# }
+  #   is_boot_abc = "True"
+  #   device_dst_file = "system/framework/ui_ext_con_ani.abc"
+}
