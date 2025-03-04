@@ -163,39 +163,15 @@ void STSAbilityStage::OnCreate(const AAFwk::Want &want) const
         return;
     }
 
-    ani_class abilityStageCls;
-    status = env->FindClass(STS_ABILITY_STAGE_CLASS_NAME, &abilityStageCls);
-    if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "FindClass FAILED");
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
-
-    ani_method methodCtor = nullptr;
-    status = env->Class_FindMethod(abilityStageCls, "<ctor>", ":V", &methodCtor);
-    if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "Class_FindMethod find constructor failed");
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
-
-    ani_object abilityStageObj = nullptr;
-    status = env->Object_New(abilityStageCls, methodCtor, &abilityStageObj);
-    if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "Object_New failed");
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
-
     ani_method method = nullptr;
-    status = env->Class_FindMethod(abilityStageCls, "onCreate", ":V", &method);
+    status = env->Class_FindMethod(stsAbilityStageObj_->aniCls, "onCreate", ":V", &method);
     if (status != ANI_OK) {
         TAG_LOGI(AAFwkTag::ABILITY, "Class_FindMethod FAILED");
         STSAbilityStageContext::ResetEnv(env);
         return;
     }
 
-    status = env->Object_CallMethod_Void(stageObj_, method);
+    status = env->Object_CallMethod_Void(stsAbilityStageObj_->aniObj, method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "CALL Object_CallMethod FAILED: %{public}d", status);
         STSAbilityStageContext::ResetEnv(env);
@@ -417,31 +393,8 @@ void STSAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
     }
 
     ani_status status = ANI_OK;
-    ani_class stageCls;
-    status = env->FindClass(STS_ABILITY_STAGE_CLASS_NAME, &stageCls);
-    if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "call FindClass LAbilityStage/AbilityStage; failed, status:%{public}d", status);
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
-
-    ani_method method = nullptr;
-    status = env->Class_FindMethod(stageCls, "<ctor>", ":V", &method);
-    if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "call Class_FindMethod ctor failed");
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
-
-    status = env->Object_New(stageCls, method, &stageObj_);
-    if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "call Object_New stageObj failed");
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
-
     ani_field contextField;
-    status = env->Class_FindField(stageCls, "context", &contextField);
+    status = env->Class_FindField(stsAbilityStageObj_->aniCls, "context", &contextField);
     if (status != ANI_OK) {
         TAG_LOGI(AAFwkTag::ABILITY, "Class_GetField context failed");
         STSAbilityStageContext::ResetEnv(env);
@@ -452,7 +405,7 @@ void STSAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
         TAG_LOGE(AAFwkTag::ABILITY, "GlobalReference_Create stageCtxObj failed");
         return;
     }
-    if (env->Object_SetField_Ref(stageObj_, contextField, stageCtxObjRef) != ANI_OK) {
+    if (env->Object_SetField_Ref(stsAbilityStageObj_->aniObj, contextField, stageCtxObjRef) != ANI_OK) {
         TAG_LOGI(AAFwkTag::ABILITY, "zg Object_SetField_Ref stageCtxObj failed");
         STSAbilityStageContext::ResetEnv(env);
     }

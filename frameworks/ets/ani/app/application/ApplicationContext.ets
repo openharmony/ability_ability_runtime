@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Context } from './Context.ets'
+import { Context } from './Context'
 
 export default class ApplicationContext extends Context {
     public native setSupportedProcessCacheSync(isSupported : boolean):void;
