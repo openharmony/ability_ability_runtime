@@ -51,7 +51,8 @@ const int ERR_BUNDLE_MANAGER_INVALID_UID = 8521233;
 
 class MockIAbilityConnection : public IAbilityConnection {
 public:
-    void OnAbilityConnectDone(const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode)
+    void OnAbilityConnectDone(const AppExecFwk::ElementName &element,
+        const sptr<IRemoteObject> &remoteObject, int resultCode)
     {
         return;
     }
