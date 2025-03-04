@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("js_ui_service_extension_context_second_test") {
-  module_out_path = "ability_runtime/extension"
+  module_out_path = "ability_runtime/ability_runtime/extension"
 
   sources = [ "js_ui_service_extension_context_second_test.cpp" ]
 

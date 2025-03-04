@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("ability_service_extension_test") {
-  module_out_path = "ability_runtime/service_extension"
+  module_out_path = "ability_runtime/ability_runtime/service_extension"
 
   include_dirs = [
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",

@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("cj_ui_ability_test") {
-  module_out_path = "ability_runtime/cj_ui_ability_test"
+  module_out_path = "ability_runtime/ability_runtime/cj_ui_ability_test"
   include_dirs = [
     "${ability_runtime_test_path}/mock/common/include",
     "${ability_runtime_path}/utils/global/freeze",

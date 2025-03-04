@@ -14,7 +14,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/native_runtime"
+module_output_path = "ability_runtime/ability_runtime/native_runtime"
 
 ohos_unittest("napi_common_want_agent_test") {
   module_out_path = module_output_path

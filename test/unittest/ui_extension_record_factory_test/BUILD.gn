@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("ui_extension_record_factory_test") {
-  module_out_path = "ability_runtime/extension"
+  module_out_path = "ability_runtime/ability_runtime/extension"
   sanitize = {
     cfi = true
     cfi_cross_dso = true

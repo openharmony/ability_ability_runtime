@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("insight_intent_execute_manager_second_test") {
-  module_out_path = "ability_runtime/insight_intent"
+  module_out_path = "ability_runtime/ability_runtime/insight_intent"
 
   cflags_cc = []
 
