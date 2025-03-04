@@ -53,10 +53,9 @@ static Ability* GetJSAbilityObject(napi_env env)
     return ability;
 }
 
-void SetShowOnLockScreenAsyncCompleteCB(napi_env env, napi_status status, void *data)
+void SetShowOnLockScreenAsyncCompleteCB(napi_env env, ShowOnLockScreenCB *showOnLockScreenCB)
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "called");
-    ShowOnLockScreenCB *showOnLockScreenCB = static_cast<ShowOnLockScreenCB *>(data);
     if (showOnLockScreenCB == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "null showOnLockScreenCB");
         return;
@@ -105,21 +104,40 @@ napi_value SetShowOnLockScreenAsync(napi_env env, napi_value *args, ShowOnLockSc
 
     NAPI_CALL(env, napi_create_reference(env, args[PARAM1], 1, &showOnLockScreenCB->cbBase.cbInfo.callback));
 
-    napi_value resourceName = nullptr;
-    NAPI_CALL(env, napi_create_string_latin1(env, __func__, NAPI_AUTO_LENGTH, &resourceName));
-
-    NAPI_CALL(env, napi_create_async_work(env, nullptr, resourceName,
-            [](napi_env env, void *data) {
-                TAG_LOGI(AAFwkTag::JSNAPI, "execute");
-            },
-            SetShowOnLockScreenAsyncCompleteCB,
-            static_cast<void *>(showOnLockScreenCB),
-            &showOnLockScreenCB->cbBase.asyncWork));
-    NAPI_CALL(env, napi_queue_async_work_with_qos(env, showOnLockScreenCB->cbBase.asyncWork, napi_qos_user_initiated));
+    auto res = napi_send_event(env,
+        [env, showOnLockScreenCB] () {SetShowOnLockScreenAsyncCompleteCB(env, showOnLockScreenCB);},
+        napi_eprio_immediate);
+    if (res != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "napi_send_event failed");
+    }
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
 
     return result;
+}
+
+static void SetShowOnLockScreenAsyncCB(napi_env env, ShowOnLockScreenCB *showOnLockScreenCB)
+{
+    showOnLockScreenCB->cbBase.errCode = NO_ERROR;
+    if (showOnLockScreenCB->cbBase.ability == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
+        showOnLockScreenCB->cbBase.errCode = NAPI_ERR_ACE_ABILITY;
+    } else {
+#ifdef SUPPORT_SCREEN
+        showOnLockScreenCB->cbBase.ability->SetShowOnLockScreen(showOnLockScreenCB->isShow);
+#endif
+    }
+
+        napi_value result = GetCallbackErrorValue(env, showOnLockScreenCB->cbBase.errCode);
+        if (showOnLockScreenCB->cbBase.errCode == NO_ERROR) {
+            napi_resolve_deferred(env, showOnLockScreenCB->cbBase.deferred, result);
+        } else {
+            napi_reject_deferred(env, showOnLockScreenCB->cbBase.deferred, result);
+        }
+
+        delete showOnLockScreenCB;
+        showOnLockScreenCB = nullptr;
+        TAG_LOGI(AAFwkTag::JSNAPI, "complete end");
 }
 
 napi_value SetShowOnLockScreenPromise(napi_env env, ShowOnLockScreenCB *cbData)
@@ -129,56 +147,25 @@ napi_value SetShowOnLockScreenPromise(napi_env env, ShowOnLockScreenCB *cbData)
         TAG_LOGE(AAFwkTag::JSNAPI, "null cbData");
         return nullptr;
     }
-    napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, __func__, NAPI_AUTO_LENGTH, &resourceName);
 
     napi_deferred deferred;
     napi_value promise = nullptr;
     napi_create_promise(env, &deferred, &promise);
     cbData->cbBase.deferred = deferred;
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
-        [](napi_env env, void *data) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "execute");
-        },
-        [](napi_env env, napi_status status, void *data) {
-            ShowOnLockScreenCB *showOnLockScreenCB = static_cast<ShowOnLockScreenCB *>(data);
-            showOnLockScreenCB->cbBase.errCode = NO_ERROR;
-            if (showOnLockScreenCB->cbBase.ability == nullptr) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
-                showOnLockScreenCB->cbBase.errCode = NAPI_ERR_ACE_ABILITY;
-            } else {
-#ifdef SUPPORT_SCREEN
-                showOnLockScreenCB->cbBase.ability->SetShowOnLockScreen(showOnLockScreenCB->isShow);
-#endif
-            }
-
-            napi_value result = GetCallbackErrorValue(env, showOnLockScreenCB->cbBase.errCode);
-            if (showOnLockScreenCB->cbBase.errCode == NO_ERROR) {
-                napi_resolve_deferred(env, showOnLockScreenCB->cbBase.deferred, result);
-            } else {
-                napi_reject_deferred(env, showOnLockScreenCB->cbBase.deferred, result);
-            }
-
-            napi_delete_async_work(env, showOnLockScreenCB->cbBase.asyncWork);
-            delete showOnLockScreenCB;
-            showOnLockScreenCB = nullptr;
-            TAG_LOGI(AAFwkTag::JSNAPI, "complete end");
-        },
-        static_cast<void *>(cbData),
-        &cbData->cbBase.asyncWork);
-    napi_queue_async_work_with_qos(env, cbData->cbBase.asyncWork, napi_qos_user_initiated);
+    auto res = napi_send_event(env,
+        [env, cbData] () {SetShowOnLockScreenAsyncCB(env, cbData);},
+        napi_eprio_immediate);
+    if (res != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "napi_send_event failed");
+    }
     TAG_LOGI(AAFwkTag::JSNAPI, "promise end");
     return promise;
 }
 
-static void SetWakeUpScreenAsyncCompleteCB(napi_env env, napi_status status, void *data)
+static void SetWakeUpScreenAsyncCompleteCB(napi_env env, SetWakeUpScreenCB *setWakeUpScreenCB)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
-    SetWakeUpScreenCB *setWakeUpScreenCB = static_cast<SetWakeUpScreenCB *>(data);
     if (setWakeUpScreenCB == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "null setWakeUpScreenCB");
         return;
@@ -233,24 +220,39 @@ static napi_value SetWakeUpScreenAsync(napi_env env, napi_value *args, SetWakeUp
     }
     NAPI_CALL(env, napi_create_reference(env, args[PARAM1], 1, &cbData->cbBase.cbInfo.callback));
 
-    napi_value resourceName = nullptr;
-    NAPI_CALL(env, napi_create_string_latin1(env, __func__, NAPI_AUTO_LENGTH, &resourceName));
-
-    NAPI_CALL(env,
-        napi_create_async_work(
-            env,
-            nullptr,
-            resourceName,
-            [](napi_env env, void *data) {
-                TAG_LOGI(AAFwkTag::JSNAPI, "execute called");
-            },
-            SetWakeUpScreenAsyncCompleteCB,
-            static_cast<void *>(cbData),
-            &cbData->cbBase.asyncWork));
-    NAPI_CALL(env, napi_queue_async_work(env, cbData->cbBase.asyncWork));
+    auto res = napi_send_event(env,
+        [env, cbData] () {SetWakeUpScreenAsyncCompleteCB(env, cbData);},
+        napi_eprio_high);
+    if (res != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "napi_send_event failed");
+    }
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
     return result;
+}
+
+static void SetWakeUpScreenAsyncCB(napi_env env, SetWakeUpScreenCB *setWakeUpScreenCB)
+{
+    TAG_LOGI(AAFwkTag::JSNAPI, "complete called");
+    setWakeUpScreenCB->cbBase.errCode = NO_ERROR;
+    if (setWakeUpScreenCB->cbBase.ability == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
+        setWakeUpScreenCB->cbBase.errCode = NAPI_ERR_ACE_ABILITY;
+    } else {
+#ifdef SUPPORT_SCREEN
+        setWakeUpScreenCB->cbBase.ability->SetWakeUpScreen(setWakeUpScreenCB->wakeUp);
+#endif
+    }
+        napi_value result = GetCallbackErrorValue(env, setWakeUpScreenCB->cbBase.errCode);
+        if (setWakeUpScreenCB->cbBase.errCode == NO_ERROR) {
+            napi_resolve_deferred(env, setWakeUpScreenCB->cbBase.deferred, result);
+        } else {
+            napi_reject_deferred(env, setWakeUpScreenCB->cbBase.deferred, result);
+        }
+
+        delete setWakeUpScreenCB;
+        setWakeUpScreenCB = nullptr;
+        TAG_LOGI(AAFwkTag::JSNAPI, "complete end");
 }
 
 napi_value SetWakeUpScreenPromise(napi_env env, SetWakeUpScreenCB *cbData)
@@ -260,47 +262,17 @@ napi_value SetWakeUpScreenPromise(napi_env env, SetWakeUpScreenCB *cbData)
         TAG_LOGE(AAFwkTag::JSNAPI, "null cbData");
         return nullptr;
     }
-    napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, __func__, NAPI_AUTO_LENGTH, &resourceName);
     napi_deferred deferred;
     napi_value promise = nullptr;
     napi_create_promise(env, &deferred, &promise);
     cbData->cbBase.deferred = deferred;
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
-        [](napi_env env, void *data) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "execute called");
-        },
-        [](napi_env env, napi_status status, void *data) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "complete called");
-            SetWakeUpScreenCB *setWakeUpScreenCB = static_cast<SetWakeUpScreenCB *>(data);
-            setWakeUpScreenCB->cbBase.errCode = NO_ERROR;
-            if (setWakeUpScreenCB->cbBase.ability == nullptr) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
-                setWakeUpScreenCB->cbBase.errCode = NAPI_ERR_ACE_ABILITY;
-            } else {
-#ifdef SUPPORT_SCREEN
-                setWakeUpScreenCB->cbBase.ability->SetWakeUpScreen(setWakeUpScreenCB->wakeUp);
-#endif
-            }
-            napi_value result = GetCallbackErrorValue(env, setWakeUpScreenCB->cbBase.errCode);
-            if (setWakeUpScreenCB->cbBase.errCode == NO_ERROR) {
-                napi_resolve_deferred(env, setWakeUpScreenCB->cbBase.deferred, result);
-            } else {
-                napi_reject_deferred(env, setWakeUpScreenCB->cbBase.deferred, result);
-            }
-
-            napi_delete_async_work(env, setWakeUpScreenCB->cbBase.asyncWork);
-            delete setWakeUpScreenCB;
-            setWakeUpScreenCB = nullptr;
-            TAG_LOGI(AAFwkTag::JSNAPI, "complete end");
-        },
-        static_cast<void *>(cbData),
-        &cbData->cbBase.asyncWork);
-    napi_queue_async_work(env, cbData->cbBase.asyncWork);
+    auto res = napi_send_event(env,
+        [env, cbData] () {SetWakeUpScreenAsyncCB(env, cbData);},
+        napi_eprio_high);
+    if (res != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "napi_send_event failed");
+    }
     return promise;
 }
 
