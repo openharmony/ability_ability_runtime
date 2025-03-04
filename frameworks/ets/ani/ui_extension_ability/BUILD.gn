@@ -26,7 +26,7 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
 
   include_dirs = [
     "./include",
-    "${ability_runtime_path}/frameworks/ani/uiextensioncontext/include/",
+    "${ability_runtime_path}/frameworks/ets/ani/uiextensioncontext/include/",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_services_path}/common/include",
@@ -66,7 +66,7 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${ability_runtime_path}/frameworks/ani/uiextensioncontext:ui_ext_con_ani_kit",
+    "${ability_runtime_path}/frameworks/ets/ani/uiextensioncontext:ui_ext_con_ani_kit",
     "${ability_runtime_path}/frameworks/native/ability/native:ui_extension",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]
@@ -103,7 +103,7 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
 }
 
 generate_static_abc("ui_extension_ability_ani_abc") {
-  arktsconfig = "${ability_runtime_path}/frameworks/ani/ui_extension_ability/ui_extension_ability_config.json"
+  arktsconfig = "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/ui_extension_ability_config.json"
   dst_file = "$target_out_dir/ui_extension_ability_ani.abc"
   out_puts = [ "$target_out_dir/ui_extension_ability_ani.abc" ]
 
