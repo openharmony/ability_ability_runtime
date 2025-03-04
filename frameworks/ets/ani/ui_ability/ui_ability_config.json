@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+        "std": [
+          "../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/std"
+        ],
+        "escompat": [
+          "../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/escompat"
+        ],
+        "@ohos.app.ability.AbilityConstant": [
+          "./ets/@ohos.app.ability.AbilityConstant.ets"
+        ],
+        "@ohos.app.ability.StartOptions": [
+          "./ets/@ohos.app.ability.StartOptions.ets"
+        ],
+        "@ohos.app.ability.Want": [
+          "./ets/@ohos.app.ability.Want.ets"
+        ],
+		    "UIAbilityContext": [
+          "./ets/UIAbilityContext.ets"
+        ]
+      },
+      "outDir": "../cache",
+      "package": ""
+    },
+    "include": [
+      "./ets/*.ets"
+    ]
+}
