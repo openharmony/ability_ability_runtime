@@ -62,7 +62,7 @@ constexpr int KILL_TIMEOUT_MULTIPLE = 3;
 constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr int32_t MAX_FIND_UIEXTENSION_CALLER_TIMES = 10;
 constexpr int32_t START_UI_ABILITY_PER_SECOND_UPPER_LIMIT = 20;
-constexpr int32_t API16 = 16;
+constexpr int32_t API20 = 20;
 constexpr int32_t API_VERSION_MOD = 100;
 constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
 
@@ -494,7 +494,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
 
     auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (abilityInfo.launchMode == AppExecFwk::LaunchMode::SINGLETON && (callerAbility == nullptr ||
-        callerAbility->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD >= API16)) {
+        callerAbility->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD >= API20)) {
         if (HasAbilityRequest(abilityRequest)) {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "multi start request");
             return ERR_UI_ABILITY_IS_STARTING;
