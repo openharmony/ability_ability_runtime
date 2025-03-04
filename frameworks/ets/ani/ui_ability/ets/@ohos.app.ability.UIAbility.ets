@@ -15,7 +15,7 @@
 
 import {AbilityConstant} from './@ohos.app.ability.AbilityConstant';
 import {UIAbilityContext} from './UIAbilityContext';
-import {Want} from './@ohos.app.ability.Want';
+import Want from './@ohos.app.ability.Want';
 
 // class LaunchParamImpl implements AbilityConstant.LaunchParam {
 //   launchReason: AbilityConstant.LaunchReason;
@@ -24,16 +24,17 @@ import {Want} from './@ohos.app.ability.Want';
 //   lastExitMessage: string = '';
 // }
 
+export default class UIAbility {
 
-export class UIAbility {
-  context?: UIAbilityContext;
+  context: UIAbilityContext = new UIAbilityContext();
+  launchWant: Want = new Want();
+  lastRequestWant: Want = new Want();
 
-  launchWant?: Want;
-  lastRequestWant?: Want;
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void{
     console.log("onCreate");
   }
-  // onWindowStageCreate(windowStage: window.WindowStage): void{}
+  // onWindowStageCreate(): void{}
+
   onWindowStageDestroy(): void{
     console.log("onWindowStageDestroy");
   }
