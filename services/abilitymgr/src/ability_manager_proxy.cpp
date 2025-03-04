@@ -1344,13 +1344,13 @@ int AbilityManagerProxy::AttachAbilityThread(const sptr<IAbilityScheduler> &sche
         return INNER_ERR;
     }
     if (!data.WriteRemoteObject(scheduler->AsObject()) || !data.WriteRemoteObject(token)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "data write failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "data write failed.");
         return ERR_INVALID_VALUE;
     }
 
     error = SendRequest(AbilityManagerInterfaceCode::ATTACH_ABILITY_THREAD, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Send request error: %{public}d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
             std::string("ERROR AttachAbilityThread failed IPC error") + std::to_string(error));
         return error;
@@ -1370,11 +1370,11 @@ int AbilityManagerProxy::AbilityTransitionDone(const sptr<IRemoteObject> &token,
         return INNER_ERR;
     }
     if (!data.WriteRemoteObject(token) || !data.WriteInt32(state)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "token or state write failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "token or state write failed.");
         return ERR_INVALID_VALUE;
     }
     if (!data.WriteParcelable(&saveData)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "saveData write failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "saveData write failed.");
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
             "write saveData failed");
         return INNER_ERR;
@@ -1382,7 +1382,7 @@ int AbilityManagerProxy::AbilityTransitionDone(const sptr<IRemoteObject> &token,
 
     error = SendRequest(AbilityManagerInterfaceCode::ABILITY_TRANSITION_DONE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Send request error: %{public}d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
             std::string("ERROR AbilityTransitionDone failed IPC error") + std::to_string(error));
         return error;

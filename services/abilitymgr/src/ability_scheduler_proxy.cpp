@@ -43,7 +43,7 @@ bool AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
     sptr<SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "begin");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "begin");
     auto start = std::chrono::system_clock::now();
     MessageParcel data;
     MessageParcel reply;
@@ -52,7 +52,7 @@ bool AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
         return false;
     }
     if (!data.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "write want failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write want failed");
         return false;
     }
     data.WriteParcelable(&stateInfo);
@@ -60,7 +60,7 @@ bool AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
         SessionInfo tmpInfo = *sessionInfo;
         tmpInfo.want = Want();
         if (!data.WriteBool(true) || !data.WriteParcelable(&tmpInfo)) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "write sessionInfo failed");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write sessionInfo failed");
             return false;
         }
     } else {
@@ -70,16 +70,16 @@ bool AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
     }
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_TRANSACTION, data, reply, option);
     if (err != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "ScheduleAbilityTransaction fail to SendRequest. err: %{public}d", err);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleAbilityTransaction fail to SendRequest. err: %{public}d", err);
         return false;
     }
     int64_t cost = std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::system_clock::now() - start).count();
     if (cost > SCHEDULE_IPC_LOG_TIME) {
-        TAG_LOGI(AAFwkTag::SERVICE_EXT, "ScheduleAbilityTransaction proxy cost %{public}" PRId64 "mirco seconds,"
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "ScheduleAbilityTransaction proxy cost %{public}" PRId64 "mirco seconds,"
             " data size: %{public}zu", cost, data.GetWritePosition());
     } else {
-        TAG_LOGD(AAFwkTag::SERVICE_EXT, "ScheduleAbilityTransaction proxy cost %{public}" PRId64 "mirco seconds,"
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ScheduleAbilityTransaction proxy cost %{public}" PRId64 "mirco seconds,"
             " data size: %{public}zu", cost, data.GetWritePosition());
     }
     return true;
