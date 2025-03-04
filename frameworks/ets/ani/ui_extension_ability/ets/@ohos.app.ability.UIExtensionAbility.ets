@@ -1,6 +1,6 @@
 import {AbilityConstant} from '@ohos.app.ability.AbilityConstant';
 import {Want} from '@ohos.app.ability.Want';
-import {Want} from 'UIExtensionContentSession';
+import {UIExtensionContentSession} from 'UIExtensionContentSession';
 import {UIExtensionContext} from '../../uiextensioncontext/ets/UIExtensionContext';
 
 class ExtensionAbility {}

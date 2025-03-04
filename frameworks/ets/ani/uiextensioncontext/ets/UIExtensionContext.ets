@@ -30,13 +30,13 @@ import { BusinessError } from '@ohos.base';
 // import type UIServiceProxy from './UIServiceProxy';
 // import type UIServiceExtensionConnectCallback from './UIServiceExtensionConnectCallback';
 
-class UIExtensionContext {
+export class UIExtensionContext {
   public nativeUIExtensionContext:long = 0;
   public native  terminateSelfSync( ): void;
   public native  terminateSelfSyncPromise( ): void;
     terminateSelf(callback: AsyncCallback<void>):void{
       console.log("UIExtensionContext.terminateSelf callback1");
-    let p1 = launch this.terminateSelfSync();
+    let p1 = taskpool.execute(():undefined => {new UIExtensionContext().terminateSelfSync();  return undefined});
     console.log("UIExtensionContext.terminateSelf callback2");
         p1.then((e :NullishType)=>{
           console.log("UIExtensionContext.terminateSelf callback3");
@@ -54,7 +54,7 @@ class UIExtensionContext {
       console.log("UIExtensionContext.terminateSelf promise1");
       let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
         console.log("UIExtensionContext.terminateSelf promise2");
-          let p1 = launch this.terminateSelfSyncPromise();
+          let p1 = taskpool.execute(():undefined => {new UIExtensionContext().terminateSelfSyncPromise();  return undefined});
           console.log("UIExtensionContext.terminateSelf promise3");
           p1.then((e :NullishType)=>{
             console.log("UIExtensionContext.terminateSelf promise4");
