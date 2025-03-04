@@ -7508,9 +7508,11 @@ void AbilityManagerService::RemoveUnauthorizedLaunchReasonMessage(const Want &wa
             return;
         }
         auto tokenId = targetRecord->GetAbilityInfo().applicationInfo.accessTokenId;
+        auto extensionType = targetRecord->GetAbilityInfo().extensionAbilityType;
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "extensionAbilityType is %{public}d.", extensionType);
         if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenId,
             PermissionConstants::PERMISSION_SET_LAUNCH_REASON_MESSAGE) ||
-            (!PermissionVerification::GetInstance()->IsSystemAppCall() &&
+            (!AAFwk::UIExtensionUtils::IsSystemUIExtension(extensionType) &&
             !PermissionVerification::GetInstance()->IsSACall())) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "verifyPermission failed, remove launch reason message.");
             (const_cast<Want &>(want)).RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
