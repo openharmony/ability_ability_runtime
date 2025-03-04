@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("ui_extension_get_host_info_test") {
-  module_out_path = "ability_runtime/ui_extension"
+  module_out_path = "ability_runtime/ability_runtime/ui_extension"
 
   cflags_cc = []
 

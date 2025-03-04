@@ -14,7 +14,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/ability/ability_runtime/service_router_framework/srms.gni")
 
-module_output_path = "ability_runtime/serviceroutermgrservice"
+module_output_path = "ability_runtime/ability_runtime/serviceroutermgrservice"
 
 ohos_unittest("service_router_mgr_service_test") {
   module_out_path = module_output_path

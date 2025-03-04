@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("ability_service_log_test") {
-  module_out_path = "ability_runtime/service_log"
+  module_out_path = "ability_runtime/ability_runtime/service_log"
 
   include_dirs = [ "${ability_runtime_path}/services/common/include" ]
 

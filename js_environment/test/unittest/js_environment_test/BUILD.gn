@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("../../../../ability_runtime.gni")
 import("../../../js_environment.gni")
 
-module_output_path = "ability_runtime/js_environment"
+module_output_path = "ability_runtime/ability_runtime/js_environment"
 
 template("js_environment_test_template") {
   ohos_unittest(target_name) {
