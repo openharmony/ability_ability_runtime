@@ -45,31 +45,19 @@ const std::string DLP_PARAMS_SANDBOX = "ohos.dlp.params.sandbox";
 
 #define CHECK_POINTER_RETURN(object)                        \
     if (!object) {                                          \
-<<<<<<< HEAD
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "proxy is nullptr"); \
-=======
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null proxy"); \
->>>>>>> 69f892a239 (manager client adjust)
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "proxy is nullptr"); \
         return;                                             \
     }
 
 #define CHECK_POINTER_RETURN_NOT_CONNECTED(object)           \
     if (!object) {                                           \
-<<<<<<< HEAD
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "proxy is nullptr."); \
-=======
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null proxy"); \
->>>>>>> 69f892a239 (manager client adjust)
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "proxy is nullptr."); \
         return ABILITY_SERVICE_NOT_CONNECTED;                \
     }
 
 #define CHECK_POINTER_RETURN_INVALID_VALUE(object)           \
     if (!object) {                                           \
-<<<<<<< HEAD
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "proxy is nullptr."); \
-=======
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null proxy"); \
->>>>>>> 69f892a239 (manager client adjust)
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "proxy is nullptr."); \
         return ERR_INVALID_VALUE;                            \
     }
 
@@ -151,12 +139,6 @@ ErrCode AbilityManagerClient::StartAbility(const Want &want, int requestCode, in
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-<<<<<<< HEAD
-=======
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbility ability:%{public}s, userId:%{public}d, appCloneIndex:%{public}d",
-        want.GetElement().GetURI().c_str(), userId, want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
-
->>>>>>> 69f892a239 (manager client adjust)
     HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbility(want, userId, requestCode);
 }
@@ -167,13 +149,8 @@ ErrCode AbilityManagerClient::StartAbility(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-<<<<<<< HEAD
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "ability:%{public}s, userId:%{public}d",
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability:%{public}s, userId:%{public}d",
         want.GetElement().GetAbilityName().c_str(), userId);
-=======
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbility ability:%{public}s, userId:%{public}d, appCloneIndex:%{public}d",
-        want.GetElement().GetURI().c_str(), userId, want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
->>>>>>> 69f892a239 (manager client adjust)
     HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbility(want, callerToken, userId, requestCode);
 }
@@ -196,11 +173,6 @@ ErrCode AbilityManagerClient::StartAbility(const Want &want, const AbilityStartS
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-<<<<<<< HEAD
-=======
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbility ability:%{public}s, userId:%{public}d, appCloneIndex:%{public}d",
-        want.GetElement().GetURI().c_str(), userId, want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
->>>>>>> 69f892a239 (manager client adjust)
     HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbility(want, abilityStartSetting, callerToken, userId, requestCode);
 }
@@ -211,13 +183,8 @@ ErrCode AbilityManagerClient::StartAbility(const Want &want, const StartOptions 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-<<<<<<< HEAD
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "abilityName:%{public}s, userId:%{public}d.",
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "abilityName:%{public}s, userId:%{public}d.",
         want.GetElement().GetAbilityName().c_str(), userId);
-=======
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability, ability:%{public}s, userId:%{public}d,appCloneIndex:%{public}d",
-        want.GetElement().GetURI().c_str(), userId, want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
->>>>>>> 69f892a239 (manager client adjust)
     HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbility(want, startOptions, callerToken, userId, requestCode);
 }
@@ -229,13 +196,8 @@ ErrCode AbilityManagerClient::StartAbilityAsCaller(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-<<<<<<< HEAD
-    TAG_LOGI(AAFwkTag::SERVICE_EXT,
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
         "ability:%{public}s, userId:%{public}d.", want.GetElement().GetAbilityName().c_str(), userId);
-=======
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbilityAsCaller ability:%{public}s, userId:%{public}d.",
-        want.GetElement().GetURI().c_str(), userId);
->>>>>>> 69f892a239 (manager client adjust)
     HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbilityAsCaller(want, callerToken, asCallerSourceToken, userId, requestCode);
 }
@@ -247,13 +209,8 @@ ErrCode AbilityManagerClient::StartAbilityAsCaller(const Want &want, const Start
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-<<<<<<< HEAD
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "abilityName:%{public}s, userId:%{public}d",
-        want.GetElement().GetAbilityName().c_str(), userId);
-=======
     TAG_LOGI(AAFwkTag::ABILITYMGR, "abilityName:%{public}s, userId:%{public}d",
-        want.GetElement().GetURI().c_str(), userId);
->>>>>>> 69f892a239 (manager client adjust)
+        want.GetElement().GetAbilityName().c_str(), userId);
     HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbilityAsCaller(want, startOptions, callerToken, asCallerSourceToken, userId, requestCode);
 }
@@ -264,13 +221,8 @@ ErrCode AbilityManagerClient::StartAbilityForResultAsCaller(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-<<<<<<< HEAD
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "The abilityName:%{public}s, userId:%{public}d",
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "The abilityName:%{public}s, userId:%{public}d",
         want.GetElement().GetAbilityName().c_str(), userId);
-=======
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartAbilityForResultAsCaller, The abilityName:%{public}s, userId:%{public}d",
-        want.GetElement().GetURI().c_str(), userId);
->>>>>>> 69f892a239 (manager client adjust)
     HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbilityForResultAsCaller(want, callerToken, requestCode, userId);
 }
@@ -281,13 +233,8 @@ ErrCode AbilityManagerClient::StartAbilityForResultAsCaller(const Want &want, co
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-<<<<<<< HEAD
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "The abilityName:%{public}s, userId:%{public}d",
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "The abilityName:%{public}s, userId:%{public}d",
         want.GetElement().GetAbilityName().c_str(), userId);
-=======
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "The abilityName:%{public}s, userId:%{public}d",
-        want.GetElement().GetURI().c_str(), userId);
->>>>>>> 69f892a239 (manager client adjust)
     HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbilityForResultAsCaller(want, startOptions, callerToken, requestCode, userId);
 }
@@ -598,7 +545,8 @@ ErrCode AbilityManagerClient::ConnectDataShareExtensionAbility(const Want &want,
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     if (abms == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Connect failed, bundleName:%{public}s, abilityName:%{public}s, uri:%{public}s.",
+        TAG_LOGE(AAFwkTag::SERVICE_EXT,
+            "Connect failed, bundleName:%{public}s, abilityName:%{public}s, uri:%{public}s.",
             want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(),
             want.GetUriString().c_str());
         return ABILITY_SERVICE_NOT_CONNECTED;
