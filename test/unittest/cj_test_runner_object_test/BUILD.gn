@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("cj_test_runner_object_test") {
-  module_out_path = "ability_runtime/cj_test_runner_object_test"
+  module_out_path = "ability_runtime/ability_runtime/cj_test_runner_object_test"
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",

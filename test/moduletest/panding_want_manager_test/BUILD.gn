@@ -16,7 +16,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import(
     "//foundation/ability/ability_runtime/services/abilitymgr/abilitymgr.gni")
 
-module_output_path = "ability_runtime/mstabilitymgrservice"
+module_output_path = "ability_runtime/ability_runtime/mstabilitymgrservice"
 
 ohos_moduletest("PandingWantMgrTest") {
   module_out_path = module_output_path

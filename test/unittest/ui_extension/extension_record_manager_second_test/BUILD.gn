@@ -22,7 +22,7 @@ ohos_unittest("extension_record_manager_second_test") {
     debug = false
     blocklist = "../../../cfi_blocklist.txt"
   }
-  module_out_path = "ability_runtime/ui_extension"
+  module_out_path = "ability_runtime/ability_runtime/ui_extension"
 
   cflags_cc = []
 

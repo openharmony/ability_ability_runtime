@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/freeze_util"
+module_output_path = "ability_runtime/ability_runtime/freeze_util"
 
 ohos_unittest("freeze_util_test") {
   module_out_path = module_output_path

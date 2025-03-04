@@ -70,7 +70,7 @@ ohos_unittest("js_photo_editor_extension_impl_test") {
     debug = false
   }
 
-  module_out_path = "ability_runtime/photo_editor_extension"
+  module_out_path = "ability_runtime/ability_runtime/photo_editor_extension"
 
   include_dirs = [
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",

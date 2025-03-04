@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("ui_service_extension_test") {
-  module_out_path = "ability_runtime/extension"
+  module_out_path = "ability_runtime/ability_runtime/extension"
 
   sources = [
     "${ability_runtime_path}/test/mock/frameworks_kits_ability_native_test/include/mock_ability_manager_service.cpp",

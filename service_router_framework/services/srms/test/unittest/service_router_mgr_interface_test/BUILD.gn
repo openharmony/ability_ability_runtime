@@ -13,7 +13,8 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/service_router_framework/srms.gni")
 
-module_output_path = "ability_runtime/serviceroutermanagerservice"
+module_output_path =
+    "ability_runtime/ability_runtime/serviceroutermanagerservice"
 
 ohos_unittest("ServiceRouterMgrInterfaceTest") {
   use_exceptions = true
