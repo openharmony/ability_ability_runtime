@@ -79,14 +79,14 @@ bool LaunchParam::Marshalling(Parcel &parcel) const
 //     PREPARE_CONTINUATION = 10,
 //   }
 static constexpr std::array<int32_t, 9> LaunchReasonArray_ = {0, 1, 2, 3, 4, 5, 8, 9, 10};
-LaunchReason LaunchReason_ConvertStsToNative(const int32_t index)
+LaunchReason LaunchParam::LaunchReason_ConvertStsToNative(const int32_t index)
 {
     if (index < 0 || index >= LaunchReasonArray_.size()) {
         return LaunchReason::LAUNCHREASON_UNKNOWN;
     }
     return static_cast<LaunchReason>(LaunchReasonArray_[index]);
 }
-int32_t LaunchReason_ConvertNativeToSts(const LaunchReason value)
+int32_t LaunchParam::LaunchReason_ConvertNativeToSts(const LaunchReason value)
 {
     for (int32_t index = 0; index < LaunchReasonArray_.size(); index++) {
         if (value == LaunchReasonArray_[index]) {
@@ -106,14 +106,14 @@ int32_t LaunchReason_ConvertNativeToSts(const LaunchReason value)
 //     RESOURCE_CONTROL = 7,
 //     UPGRADE = 8
 //   }
-LastExitReason LastExitReason_ConvertStsToNative(const int32_t index)
+LastExitReason LaunchParam::LastExitReason_ConvertStsToNative(const int32_t index)
 {
     if (index < 0 || index > LastExitReason::LASTEXITREASON_UPGRADE) {
         return LastExitReason::LASTEXITREASON_UNKNOWN;
     }
     return static_cast<LastExitReason>(index);
 }
-int32_t LastExitReason_ConvertNativeToSts(const LastExitReason value)
+int32_t LaunchParam::LastExitReason_ConvertNativeToSts(const LastExitReason value)
 {
     return value;
 }
@@ -122,11 +122,11 @@ int32_t LastExitReason_ConvertNativeToSts(const LastExitReason value)
 //     REJECT = 1,
 //     MISMATCH = 2
 //   }
-OnContinueResult OnContinueResult_ConvertStsToNative(const int index)
+OnContinueResult LaunchParam::OnContinueResult_ConvertStsToNative(const int index)
 {
     return static_cast<OnContinueResult>(index);
 }
-int32_t OnContinueResult_ConvertNativeToSts(const OnContinueResult value)
+int32_t LaunchParam::OnContinueResult_ConvertNativeToSts(const OnContinueResult value)
 {
     return value;
 }
