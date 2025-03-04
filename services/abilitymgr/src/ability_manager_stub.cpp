@@ -1128,7 +1128,7 @@ int AbilityManagerStub::AttachAbilityThreadInner(MessageParcel &data, MessagePar
 {
     auto scheduler = iface_cast<IAbilityScheduler>(data.ReadRemoteObject());
     if (scheduler == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "scheduler null");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "scheduler null");
         return ERR_INVALID_VALUE;
     }
     auto token = data.ReadRemoteObject();
@@ -1143,7 +1143,7 @@ int AbilityManagerStub::AbilityTransitionDoneInner(MessageParcel &data, MessageP
     int targetState = data.ReadInt32();
     std::unique_ptr<PacMap> saveData(data.ReadParcelable<PacMap>());
     if (!saveData) {
-        TAG_LOGI(AAFwkTag::SERVICE_EXT, "saveData null");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "saveData null");
         return ERR_INVALID_VALUE;
     }
     int32_t result = AbilityTransitionDone(token, targetState, *saveData);

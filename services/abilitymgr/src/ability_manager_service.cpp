@@ -5559,7 +5559,7 @@ int AbilityManagerService::AttachAbilityThread(
     const sptr<IAbilityScheduler> &scheduler, const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "%{public}s called", __func__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s called", __func__);
     CHECK_POINTER_AND_RETURN(scheduler, ERR_INVALID_VALUE);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && !VerificationAllToken(token)) {
         return ERR_INVALID_VALUE;
@@ -5575,21 +5575,21 @@ int AbilityManagerService::AttachAbilityThread(
     auto type = abilityInfo.type;
     // force timeout ability for test
     if (IsNeedTimeoutForTest(abilityInfo.name, AbilityRecord::ConvertAbilityState(AbilityState::INITIAL))) {
-        TAG_LOGW(AAFwkTag::SERVICE_EXT,
+        TAG_LOGW(AAFwkTag::ABILITYMGR,
             "force timeout ability, state:INITIAL, ability:%{public}s", abilityInfo.name.c_str());
         return ERR_OK;
     }
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
         auto connectManager = GetConnectManagerByUserId(userId);
         if (!connectManager) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "connectManager null userId=%{public}d", userId);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null userId=%{public}d", userId);
             return ERR_INVALID_VALUE;
         }
         return connectManager->AttachAbilityThreadLocked(scheduler, token);
     } else if (type == AppExecFwk::AbilityType::DATA) {
         auto dataAbilityManager = GetDataAbilityManagerByUserId(userId);
         if (!dataAbilityManager) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "dataAbilityManager null userId=%{public}d", userId);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "dataAbilityManager null userId=%{public}d", userId);
             return ERR_INVALID_VALUE;
         }
         return dataAbilityManager->AttachAbilityThread(scheduler, token);
@@ -6159,7 +6159,7 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     }
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN_LOG(abilityRecord, ERR_INVALID_VALUE, "Ability record is nullptr.");
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "AbilityTransitionDone, ability: %{public}s, state:%{public}d",
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilityTransitionDone, ability: %{public}s, state:%{public}d",
         abilityRecord->GetURI().c_str(), state);
     if (!JudgeSelfCalled(abilityRecord)) {
         return CHECK_PERMISSION_FAILED;
@@ -6174,7 +6174,7 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     std::string tempState = isTerminate ? AbilityRecord::ConvertAbilityState(AbilityState::TERMINATING) :
         AbilityRecord::ConvertAbilityState(static_cast<AbilityState>(targetState));
     if (IsNeedTimeoutForTest(abilityInfo.name, tempState)) {
-        TAG_LOGW(AAFwkTag::SERVICE_EXT, "force timeout ability, state:%{public}s, ability:%{public}s",
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "force timeout ability, state:%{public}s, ability:%{public}s",
             tempState.c_str(),
             abilityInfo.name.c_str());
         return ERR_OK;
@@ -6182,7 +6182,7 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
         auto connectManager = GetConnectManagerByUserId(userId);
         if (!connectManager) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "connectManager null userId=%{public}d", userId);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null userId=%{public}d", userId);
             return ERR_INVALID_VALUE;
         }
         return connectManager->AbilityTransitionDone(token, state);
@@ -6190,7 +6190,7 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     if (type == AppExecFwk::AbilityType::DATA) {
         auto dataAbilityManager = GetDataAbilityManagerByUserId(userId);
         if (!dataAbilityManager) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "dataAbilityManager null userId=%{public}d", userId);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "dataAbilityManager null userId=%{public}d", userId);
             return ERR_INVALID_VALUE;
         }
         return dataAbilityManager->AbilityTransitionDone(token, state);
