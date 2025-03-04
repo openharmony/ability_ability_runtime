@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/abilitymgr"
+module_output_path = "ability_runtime/ability_runtime/abilitymgr"
 
 ohos_unittest("atomic_service_status_callback_stub_test") {
   module_out_path = module_output_path
