@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/appkit"
+module_output_path = "ability_runtime/ability_runtime/appkit"
 config("coverage_flags") {
   if (ability_runtime_feature_coverage) {
     cflags = [ "--coverage" ]

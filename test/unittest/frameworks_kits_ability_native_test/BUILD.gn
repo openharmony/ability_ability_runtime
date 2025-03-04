@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/ability_test"
+module_output_path = "ability_runtime/ability_runtime/ability_test"
 
 config("coverage_flags") {
   if (ability_runtime_feature_coverage) {
