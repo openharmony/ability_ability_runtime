@@ -63,6 +63,7 @@ public:
     void RegisterArkVMInRuntime(unsigned long long externalVM);
     void RegisterStackInfoCallbacks(UpdateStackInfoFuncType uFunc);
     void RegisterCJUncaughtExceptionHandler(const CJUncaughtExceptionInfo& handle);
+    bool RegisterCangjieCallback();
     bool IsUISchedulerStarted()
     {
         return isUISchedulerStarted_;
