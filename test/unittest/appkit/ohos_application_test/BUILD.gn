@@ -23,7 +23,7 @@ config("coverage_flags") {
 }
 
 ohos_unittest("ohos_application_test") {
-  module_out_path = "ability_runtime/appkit"
+  module_out_path = "ability_runtime/ability_runtime/appkit"
 
   include_dirs = [
     "${ability_runtime_path}/mock/services_appmgr_test/include",

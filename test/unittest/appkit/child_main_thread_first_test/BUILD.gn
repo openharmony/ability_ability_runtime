@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("child_main_thread_first_test") {
-  module_out_path = "ability_runtime/appkit"
+  module_out_path = "ability_runtime/ability_runtime/appkit"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
