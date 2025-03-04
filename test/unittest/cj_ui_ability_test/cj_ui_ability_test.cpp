@@ -155,6 +155,9 @@ HWTEST_F(CjUIAbilityTest, CJRuntime_Init_0100, Function | MediumTest | Level1)
  */
 HWTEST_F(CjUIAbilityTest, CJUIAbility_Create_0100, TestSize.Level1)
 {
+    AppLibPathMap appLibPaths;
+    appLibPaths["module_test"] = {"ability_runtime/CjUIAbilityTest"};
+    AbilityRuntime::CJRuntime::SetAppLibPath(appLibPaths);
     AbilityRuntime::Runtime::Options options;
     options.lang = AbilityRuntime::Runtime::Language::CJ;
     auto runtime = AbilityRuntime::Runtime::Create(options);
