@@ -162,6 +162,7 @@ auto OnSendFinishedUvAfterWorkCallback = [](uv_work_t* work, int status) {
         dataWorkerData->wantAgent = nullptr;
     }
     napi_set_named_property(dataWorkerData->env, objValueSecond, "wantAgent", jsWantAgent);
+    napi_set_named_property(dataWorkerData->env, objValueSecond, "info", jsWantAgent);
     napi_set_named_property(dataWorkerData->env, objValueSecond, "want",
         CreateJsWant(dataWorkerData->env, dataWorkerData->want));
     napi_set_named_property(dataWorkerData->env, objValueSecond, "finalCode",
