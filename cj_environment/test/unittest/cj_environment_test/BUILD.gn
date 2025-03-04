@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 
-module_output_path = "ability_runtime/cj_environment"
+module_output_path = "ability_runtime/ability_runtime/cj_environment"
 
 ohos_unittest("cj_environment_test") {
   module_out_path = module_output_path

@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("quick_fix_manager_client_test") {
-  module_out_path = "ability_runtime/quick_fix"
+  module_out_path = "ability_runtime/ability_runtime/quick_fix"
 
   include_dirs = [
     "${ability_runtime_test_path}/unittest/quick_fix/mock/include",

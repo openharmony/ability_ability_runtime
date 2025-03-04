@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("ability_extension_running_info_test") {
-  module_out_path = "ability_runtime/extension"
+  module_out_path = "ability_runtime/ability_runtime/extension"
 
   sources = [ "ability_extension_running_info_test.cpp" ]
 

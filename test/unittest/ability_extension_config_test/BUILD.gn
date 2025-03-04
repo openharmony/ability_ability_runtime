@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("ability_extension_config_test") {
-  module_out_path = "ability_runtime/extension"
+  module_out_path = "ability_runtime/ability_runtime/extension"
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/extension_config.cpp",
     "ability_extension_config_test.cpp",
