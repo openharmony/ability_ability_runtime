@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 // import type { AbilityResult } from './ability/abilityResult';
 // import type AbilityStartCallback from './application/AbilityStartCallback';
 import type { AsyncCallback } from './@ohos.base';
@@ -23,8 +23,8 @@ import type uiExtensionHost from './@ohos.uiExtensionHost';
 // import type uiExtension from './@ohos.arkui.uiExtension';
 import type LocalStorage from './LocalStorage';
 
-class UIExtensionContentSession {
-  
+export class UIExtensionContentSession {
+
   static {loadLibrary("sts_ui_extension_content_session.z");}
 
   native sendData(data: Record<string, Object>): void;
@@ -36,7 +36,7 @@ class UIExtensionContentSession {
 
   terminateSelf( callback: AsyncCallback<void>):void{
     console.log("ability.finishTest terminateSelfSync start");
-       let p1 = launch this.terminateSelfSync();
+    let p1 = taskpool.execute(():undefined => {new UIExtensionContentSession().terminateSelfSync();  return undefined});
     console.log("ability.finishTest terminateSelfSync end");
            p1.then((e :NullishType)=>{
              console.log("ability.finishTest terminateSelfSync");
@@ -48,7 +48,7 @@ class UIExtensionContentSession {
    }
    terminateSelf():Promise<void>{
      let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
-         let p1 = launch this.terminateSelfSync();
+         let p1 = taskpool.execute(():undefined => {new UIExtensionContentSession().terminateSelfSync();  return undefined});
          p1.then((e :NullishType)=>{
            let PromiseLike = e as PromiseLike<void>;
            resolve(PromiseLike);
@@ -59,7 +59,7 @@ class UIExtensionContentSession {
    }
 
    setReceiveDataCallback(callback: (data: Record<string, Object>) => void): void{
-     let p1 = launch this.setReceiveDataCallbackSync();
+     let p1 = taskpool.execute(():undefined => {new UIExtensionContentSession().setReceiveDataCallbackSync();  return undefined});
          p1.then((e :NullishType)=>{
             let result = e as Record<string, Object>;
               callback(result);
