@@ -88,10 +88,10 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
     //set Config class
     ani_object configObj = Createfiguration(env, context);
     if(configObj != nullptr) {
-        TAG_LOGI(AAFwkTag::ABILITY, "configObj bind");
+        TAG_LOGI(AAFwkTag::ABILITY, "[ywz] configObj bind");
         ani_ref configObjRef = nullptr;
         if (env->GlobalReference_Create(configObj, &configObjRef) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ABILITY, "GlobalReference_Create configObjRef failed");
+            TAG_LOGE(AAFwkTag::ABILITY, "[ywz] GlobalReference_Create configObjRef failed");
         }
         ani_field configField;
         status = env->Class_FindField(abilityStageCtxCls, "config", &configField);
