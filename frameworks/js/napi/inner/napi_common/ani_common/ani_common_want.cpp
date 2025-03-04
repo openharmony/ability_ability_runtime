@@ -14,6 +14,7 @@
  */
 
 #include "ani_common_want.h"
+#include "ani_common_util.h"
 #include "array_wrapper.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
@@ -102,7 +103,7 @@ bool UnwrapWantParams(ani_env* env, ani_object wantObject, AAFwk::WantParams& wa
 
 ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
 {
-    TAG_LOGE(AAFwkTag::JSNAPI, "WrapWant");
+    TAG_LOGI(AAFwkTag::JSNAPI, "WrapWant");
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
     ani_method method = nullptr;
@@ -135,6 +136,7 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     SetFieldInt(env, cls, object, "flags", want.GetFlags());
     SetFieldString(env, cls, object, "action", want.GetAction());
     WrapWantParams(env, cls, object, want.GetParams());
+    SetFieldArrayString(env, cls, object, "entities", want.GetEntities());
 
     // TODO
     return object;
@@ -192,25 +194,28 @@ bool UnwrapElementName(ani_env *env, ani_object param, ElementName &elementName)
 
 bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
 {
+    TAG_LOGI(AAFwkTag::JSNAPI, "UnwrapWant");
     std::string action;
     if (GetStringOrUndefined(env, param, "action", action)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "action %{public}s", action.c_str());
+        TAG_LOGI(AAFwkTag::UIABILITY, "action %{public}s", action.c_str());
         want.SetAction(action);
     }
 
-    std::string uri;
+    std::string uri = "";
     if (GetStringOrUndefined(env, param, "uri", uri)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "uri %{public}s", uri.c_str());
+        TAG_LOGI(AAFwkTag::UIABILITY, "uri %{public}s", uri.c_str());
         want.SetUri(uri);
     }
 
-    int flags = GetIntOrUndefined(env, param, "flags");
-    TAG_LOGE(AAFwkTag::UIABILITY, "flags %{public}d", flags);
-    want.SetFlags(flags);
+    int flags = 0;
+    if (GetIntByName(env, param, "flags", flags)) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "flags %{public}d", flags);
+        want.SetFlags(flags);
+    }
 
-    std::string type;
+    std::string type = "";
     if (GetStringOrUndefined(env, param, "type", type)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "uri %{public}s", type.c_str());
+        TAG_LOGI(AAFwkTag::UIABILITY, "type %{public}s", type.c_str());
         want.SetType(type);
     }
 
@@ -218,6 +223,14 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
     UnwrapElementName(env, param, natElementName);
     want.SetElementName(natElementName.GetDeviceID(), natElementName.GetBundleName(), natElementName.GetAbilityName(),
         natElementName.GetModuleName());
+
+    std::vector<std::string> valueStringList;
+    if (GetStringArrayOrUndefined(env, param, "entities", valueStringList)) {
+        for (size_t i = 0; i < valueStringList.size(); i++) {
+            want.AddEntity(valueStringList[i]);
+        }
+    }
+
     TAG_LOGE(AAFwkTag::UIABILITY,
         "DeviceID %{public}s, BundleName %{public}s, AbilityName %{public}s, ModuleName %{public}s",
         natElementName.GetDeviceID().c_str(), natElementName.GetBundleName().c_str(),

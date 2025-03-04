@@ -24,6 +24,8 @@ ani_int GetIntOrUndefined(ani_env *env, ani_object param, const char *name);
 double GetDoubleOrUndefined(ani_env *env, ani_object param, const char *name);
 bool GetBoolOrUndefined(ani_env *env, ani_object param, const char *name);
 bool GetStringOrUndefined(ani_env *env, ani_object param, const char *name, std::string &res);
+bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value);
+bool GetStringArrayOrUndefined(ani_env *env, ani_object param, const char *name, std::vector<std::string> &res);
 
 bool GetStdString(ani_env *env, ani_string str, std::string &res);
 
