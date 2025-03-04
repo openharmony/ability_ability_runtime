@@ -706,8 +706,9 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
     aniEnv->String_NewUTF8(entryPath.c_str(), entryPath.length(), &entryClassStr);
     ani_class entryClass = nullptr;
     ani_ref entryClassRef = nullptr;
+    ani_boolean isInit = false;
     TAG_LOGI(AAFwkTag::STSRUNTIME, "load class: %{public}s", entryPath.c_str());
-    if (aniEnv->Object_CallMethod_Ref(object, loadClassMethod, &entryClassRef, entryClassStr) != ANI_OK) {
+    if (aniEnv->Object_CallMethod_Ref(object, loadClassMethod, &entryClassRef, entryClassStr, isInit) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Object_CallMethod_Ref loadClassMethod failed");
         return std::make_unique<STSNativeReference>();
     } else {
