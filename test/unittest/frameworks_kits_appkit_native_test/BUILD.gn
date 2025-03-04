@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-module_output_path = "ability_runtime/application_test"
+module_output_path = "ability_runtime/ability_runtime/application_test"
 
 ###############################################################################
 config("module_private_config") {
