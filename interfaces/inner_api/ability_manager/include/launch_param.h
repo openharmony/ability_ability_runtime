@@ -78,13 +78,14 @@ struct LaunchParam : public Parcelable {
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     static LaunchParam *Unmarshalling(Parcel &parcel);
-};
-[[maybe_unused]] static LaunchReason LaunchReason_ConvertStsToNative(const int32_t index);
-[[maybe_unused]] static int32_t LaunchReason_ConvertNativeToSts(const LaunchReason value);
-[[maybe_unused]] static LastExitReason LastExitReason_ConvertStsToNative(const int32_t index);
-[[maybe_unused]] static int32_t LastExitReason_ConvertNativeToSts(const LastExitReason value);
-[[maybe_unused]] static OnContinueResult OnContinueResult_ConvertStsToNative(const int index);
-[[maybe_unused]] static int32_t OnContinueResult_ConvertNativeToSts(const OnContinueResult value);
+    static LaunchReason LaunchReason_ConvertStsToNative(const int32_t index);
+    static int32_t LaunchReason_ConvertNativeToSts(const LaunchReason value);
+    static LastExitReason LastExitReason_ConvertStsToNative(const int32_t index);
+    static int32_t LastExitReason_ConvertNativeToSts(const LastExitReason value);
+    static OnContinueResult OnContinueResult_ConvertStsToNative(const int index);
+    static int32_t OnContinueResult_ConvertNativeToSts(const OnContinueResult value);
+    };
+
 }  // namespace AAFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_LAUNCH_PARAM_H
