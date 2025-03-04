@@ -1443,5 +1443,23 @@ HWTEST_F(JsRuntimeTest, JsRuntimeSetStopPreloadSoCallback_0100, TestSize.Level1)
     ASSERT_TRUE(jsRuntimePtr != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "SetStopPreloadSoCallback_0100 start");
 }
+
+/**
+ * @tc.name: StartProfiler_0100
+ * @tc.desc: JsRuntime test for StartProfiler.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, StartProfiler_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartProfiler_0100 start");
+    Runtime::DebugOption debugOption;
+    debugOption.isDebugFromLocal = true;
+    debugOption.isDeveloperMode = true;
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    EXPECT_NE(jsRuntime, nullptr);
+    jsRuntime->StartProfiler(debugOption);
+    EXPECT_EQ(jsRuntime->jsEnv_, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "StartProfiler_0100 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
