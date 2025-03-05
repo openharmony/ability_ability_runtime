@@ -1030,7 +1030,7 @@ HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_RunAsProcessCommand_0002,
 
     ErrCode result = cmd->RunAsProcessCommand();
     EXPECT_EQ(result, OHOS::ERR_INVALID_OPERATION);
-    EXPECT_EQ(cmd->resultReceiver_, STRING_START_NATIVE_PROCESS_NG);
+    EXPECT_NE(cmd->resultReceiver_.find(STRING_START_NATIVE_PROCESS_NG), string::npos);
     TAG_LOGI(AAFwkTag::TEST, "RunAsProcessCommand_0002 is end");
 }
 

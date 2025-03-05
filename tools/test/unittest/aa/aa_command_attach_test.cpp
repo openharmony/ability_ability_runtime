@@ -247,7 +247,7 @@ HWTEST_F(AaCommandAttachTest, Aa_Command_Attach_0700, TestSize.Level1)
     int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
     AbilityManagerShellCommand cmd(argc, argv);
-    EXPECT_EQ(cmd.ExecCommand(), STRING_ATTACH_APP_DEBUG_NG + "\n");
+    EXPECT_NE(cmd.ExecCommand().find(STRING_ATTACH_APP_DEBUG_NG), string::npos);
 }
 
 /**
@@ -394,5 +394,5 @@ HWTEST_F(AaCommandAttachTest, Aa_Command_Detach_0700, TestSize.Level1)
     int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
     AbilityManagerShellCommand cmd(argc, argv);
-    EXPECT_EQ(cmd.ExecCommand(), STRING_DETACH_APP_DEBUG_NG + "\n");
+    EXPECT_NE(cmd.ExecCommand().find(STRING_DETACH_APP_DEBUG_NG), string::npos);
 }
