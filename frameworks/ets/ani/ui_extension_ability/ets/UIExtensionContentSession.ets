@@ -23,7 +23,7 @@ import type uiExtensionHost from './@ohos.uiExtensionHost';
 // import type uiExtension from './@ohos.arkui.uiExtension';
 import type LocalStorage from './LocalStorage';
 
-export class UIExtensionContentSession {
+export default class UIExtensionContentSession {
 
   static {loadLibrary("sts_ui_extension_content_session.z");}
 

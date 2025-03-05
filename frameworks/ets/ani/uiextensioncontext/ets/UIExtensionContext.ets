@@ -30,7 +30,7 @@ import { BusinessError } from '@ohos.base';
 // import type UIServiceProxy from './UIServiceProxy';
 // import type UIServiceExtensionConnectCallback from './UIServiceExtensionConnectCallback';
 
-export class UIExtensionContext {
+export default class UIExtensionContext {
   public nativeUIExtensionContext:long = 0;
   public native  terminateSelfSync( ): void;
   public native  terminateSelfSyncPromise( ): void;

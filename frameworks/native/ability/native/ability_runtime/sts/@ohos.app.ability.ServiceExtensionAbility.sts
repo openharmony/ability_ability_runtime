@@ -16,7 +16,7 @@
 import {Want} from './@ohos.app.ability.Want';
 import ServiceExtensionContext from './ServiceExtensionContext';
 
-export class ServiceExtensionAbility {
+export default class ServiceExtensionAbility {
   launchWant: Want = new Want();
   lastRequestWant: Want = new Want();
   context: ServiceExtensionContext = new ServiceExtensionContext();
