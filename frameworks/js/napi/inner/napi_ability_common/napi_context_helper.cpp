@@ -128,16 +128,16 @@ static void SetShowOnLockScreenAsyncCB(napi_env env, ShowOnLockScreenCB *showOnL
 #endif
     }
 
-        napi_value result = GetCallbackErrorValue(env, showOnLockScreenCB->cbBase.errCode);
-        if (showOnLockScreenCB->cbBase.errCode == NO_ERROR) {
-            napi_resolve_deferred(env, showOnLockScreenCB->cbBase.deferred, result);
-        } else {
-            napi_reject_deferred(env, showOnLockScreenCB->cbBase.deferred, result);
-        }
+    napi_value result = GetCallbackErrorValue(env, showOnLockScreenCB->cbBase.errCode);
+    if (showOnLockScreenCB->cbBase.errCode == NO_ERROR) {
+        napi_resolve_deferred(env, showOnLockScreenCB->cbBase.deferred, result);
+    } else {
+        napi_reject_deferred(env, showOnLockScreenCB->cbBase.deferred, result);
+    }
 
-        delete showOnLockScreenCB;
-        showOnLockScreenCB = nullptr;
-        TAG_LOGI(AAFwkTag::JSNAPI, "complete end");
+    delete showOnLockScreenCB;
+    showOnLockScreenCB = nullptr;
+    TAG_LOGI(AAFwkTag::JSNAPI, "complete end");
 }
 
 napi_value SetShowOnLockScreenPromise(napi_env env, ShowOnLockScreenCB *cbData)
@@ -243,16 +243,16 @@ static void SetWakeUpScreenAsyncCB(napi_env env, SetWakeUpScreenCB *setWakeUpScr
         setWakeUpScreenCB->cbBase.ability->SetWakeUpScreen(setWakeUpScreenCB->wakeUp);
 #endif
     }
-        napi_value result = GetCallbackErrorValue(env, setWakeUpScreenCB->cbBase.errCode);
-        if (setWakeUpScreenCB->cbBase.errCode == NO_ERROR) {
-            napi_resolve_deferred(env, setWakeUpScreenCB->cbBase.deferred, result);
-        } else {
-            napi_reject_deferred(env, setWakeUpScreenCB->cbBase.deferred, result);
-        }
+    napi_value result = GetCallbackErrorValue(env, setWakeUpScreenCB->cbBase.errCode);
+    if (setWakeUpScreenCB->cbBase.errCode == NO_ERROR) {
+        napi_resolve_deferred(env, setWakeUpScreenCB->cbBase.deferred, result);
+    } else {
+        napi_reject_deferred(env, setWakeUpScreenCB->cbBase.deferred, result);
+    }
 
-        delete setWakeUpScreenCB;
-        setWakeUpScreenCB = nullptr;
-        TAG_LOGI(AAFwkTag::JSNAPI, "complete end");
+    delete setWakeUpScreenCB;
+    setWakeUpScreenCB = nullptr;
+    TAG_LOGI(AAFwkTag::JSNAPI, "complete end");
 }
 
 napi_value SetWakeUpScreenPromise(napi_env env, SetWakeUpScreenCB *cbData)
