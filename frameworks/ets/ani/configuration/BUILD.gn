@@ -64,6 +64,7 @@ ohos_shared_library("configuration_ani_kit") {
     "ipc:ipc_core",
     "json:nlohmann_json_static",
     "napi:ace_napi",
+    "runtime_core:ani",
   ]
 
   innerapi_tags = [ "platformsdk" ]

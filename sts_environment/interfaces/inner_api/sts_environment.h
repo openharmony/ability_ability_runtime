@@ -25,7 +25,7 @@
 #include "sts_environment_impl.h"
 #include "sts_envsetup.h"
 #include "sts_interface.h"
-#include "runtime/include/mock/ani/ani.h"
+#include "ani.h"
 
 // #ifdef WINDOWS_PLATFORM
 // #define STS_EXPORT __declspec(dllexport)
