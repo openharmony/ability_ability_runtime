@@ -50,6 +50,7 @@ ohos_shared_library("sts_environment") {
     "hilog:libhilog",
     "json:nlohmann_json_static",
     "libuv:uv",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {

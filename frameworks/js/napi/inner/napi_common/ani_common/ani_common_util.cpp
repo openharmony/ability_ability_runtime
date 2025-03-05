@@ -249,36 +249,36 @@ bool SetFieldInt(ani_env *env, ani_class cls, ani_object object, const std::stri
 
 bool SetFieldArrayString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::vector<std::string> &values)
 {
-    ani_field field = nullptr;
-    ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return false;
-    }
-    ani_array_ref array = nullptr;
-    status = env->Array_New_Ref(values.size(), nullptr, &array);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return false;
-    }
-    for (size_t i = 0; i < values.size(); ++i) {
-        ani_string string = nullptr;
-        status = env->String_NewUTF8(values[i].c_str(), values[i].size(), &string);
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-            return false;
-        }
-        status = env->Array_Set_Ref(array, i, string);
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-            return false;
-        }
-    }
-    status = env->Object_SetField_Ref(object, field, array);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return false;
-    }
+    // ani_field field = nullptr;
+    // ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
+    // if (status != ANI_OK) {
+    //     TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    //     return false;
+    // }
+    // ani_array_ref array = nullptr;
+    // status = env->Array_New_Ref(values.size(), nullptr, &array);
+    // if (status != ANI_OK) {
+    //     TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    //     return false;
+    // }
+    // for (size_t i = 0; i < values.size(); ++i) {
+    //     ani_string string = nullptr;
+    //     status = env->String_NewUTF8(values[i].c_str(), values[i].size(), &string);
+    //     if (status != ANI_OK) {
+    //         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    //         return false;
+    //     }
+    //     status = env->Array_Set_Ref(array, i, string);
+    //     if (status != ANI_OK) {
+    //         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    //         return false;
+    //     }
+    // }
+    // status = env->Object_SetField_Ref(object, field, array);
+    // if (status != ANI_OK) {
+    //     TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    //     return false;
+    // }
     return true;
 }
 

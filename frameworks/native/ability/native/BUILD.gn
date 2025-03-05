@@ -352,6 +352,7 @@ ohos_shared_library("abilitykit_native") {
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "runtime_core:ani",
     "samgr:samgr_proxy",
   ]
   if (!(host_os == "linux" && host_cpu == "arm64")) {
@@ -649,6 +650,7 @@ ohos_shared_library("uiabilitykit_native") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "resource_management:global_resmgr",
+    "runtime_core:ani",
   ]
   public_external_deps = [
     "bundle_framework:appexecfwk_core",
@@ -887,6 +889,7 @@ ohos_shared_library("service_extension") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "runtime_core:ani",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

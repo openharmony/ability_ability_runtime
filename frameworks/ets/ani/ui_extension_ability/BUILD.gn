@@ -84,6 +84,7 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "runtime_core:ani",
     "window_manager:embeddablewindowstage_kit",
     "window_manager:extensionwindow_napi",
   ]
