@@ -5,7 +5,7 @@ import {UIExtensionContext} from '../../uiextensioncontext/ets/UIExtensionContex
 
 class ExtensionAbility {}
 
-export class UIExtensionAbility extends ExtensionAbility {
+export default class UIExtensionAbility extends ExtensionAbility {
 
   uiExtenstionContext?: UIExtensionContext;
 
