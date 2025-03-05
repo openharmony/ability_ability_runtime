@@ -100,7 +100,7 @@ STSTestRunner::STSTestRunner(
     moduleName.append("::").append("TestRunner");
     stsTestRunnerObj_ = stsRuntime_.LoadModule(moduleName, srcPath_, hapPath_,
         bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE,
-        false, entryHapModuleInfo.srcEntrance);
+        false, srcPath_);
     if (!stsTestRunnerObj_ && srcPath_.find(LOWERCASETESTRUNNER) != std::string::npos) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "not found %{public}s , retry load capital address", srcPath_.c_str());
         std::regex src_pattern(LOWERCASETESTRUNNER);
@@ -108,7 +108,7 @@ STSTestRunner::STSTestRunner(
         TAG_LOGI(AAFwkTag::DELEGATOR, "capital address is %{public}s", srcPath_.c_str());
         stsTestRunnerObj_ = stsRuntime_.LoadModule(moduleName, srcPath_, hapPath_,
             bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE,
-            false, entryHapModuleInfo.srcEntrance);
+            false, srcPath_);
     }
 
     // TODO: for test, cause namespace don't support static loadlibrary
