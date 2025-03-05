@@ -13,18 +13,11 @@
  * limitations under the License.
  */
 
-import { Context } from './Context.ets'
+// import ApplicationInfo from 'bms/ApplicationInfo'
 
-export default class ApplicationContext extends Context {
-    public native setSupportedProcessCacheSync(isSupported : boolean):void;
-    public nativeApplicationContext:long = 0;
-
-    setSupportedProcessCache(isSupported : boolean):void {
-        console.log("call setSupportedProcessCache 111");
-        let p1 = launch this.setSupportedProcessCacheSync(isSupported);
-        console.log("call setSupportedProcessCache 222");
-        p1.then<void>(():void=>{
-            console.log("call setSupportedProcessCache 333");
-        });
-    }
+export default interface BaseContext {
+    readonly area: int;
+    readonly filesDir: string;
+    readonly tempDir: string;
+    // readonly applicationInfo: ApplicationInfo;
 }

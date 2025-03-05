@@ -89,7 +89,6 @@
             "relational_store",
             "resource_management",
             "resource_schedule_service",
-            "runtime_core",
             "safwk",
             "samgr",
             "sandbox_manager",

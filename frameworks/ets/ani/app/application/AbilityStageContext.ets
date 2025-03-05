@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-import { Context } from './Context'
-import { Configuration } form '@ohos.app.ability.Configuration'
+import { Context } from './Context.ets'
 
 export default class AbilityStageContext extends Context {
     public stageContext: long = 0; 
