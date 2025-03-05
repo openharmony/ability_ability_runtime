@@ -36,8 +36,6 @@ struct SourceMapInfo {
     int32_t beforeColumn = 0;
     int32_t afterRow = 0;
     int32_t afterColumn = 0;
-    int32_t sourcesVal = 0;
-    int32_t namesVal = 0;
 };
 
 struct MappingInfo {
@@ -52,10 +50,9 @@ public:
     ~SourceMapData() = default;
 
     SourceMapInfo nowPos_;
-    std::vector<std::string> entryPackageInfo_;
-    std::vector<std::string> packageInfo_;
-    std::vector<std::string> sources_;
-    std::vector<std::string> names_;
+    std::string packageName_;
+    bool isPackageInfo_ = false;
+    std::string sources_;
     std::vector<std::string> mappings_;
     std::vector<SourceMapInfo> afterPos_;
 
@@ -93,24 +90,15 @@ private:
     bool VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans);
     MappingInfo Find(int32_t row, int32_t col, const SourceMapData& targetMap, const std::string& key);
     void GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column);
-    std::string GetRelativePath(const std::string& sources);
     std::string GetSourceInfo(const std::string& line, const std::string& column,
                               const SourceMapData& targetMap, const std::string& key);
-    void SetSourceMapData();
     static void GetPackageName(const SourceMapData& targetMap, std::string& packageName);
 
 private:
-    bool isModular_ = true;
-    std::string hapPath_;
-    std::unordered_map<std::string, std::shared_ptr<SourceMapData>> sourceMaps_;
-    std::shared_ptr<SourceMapData> nonModularMap_;
     static ReadSourceMapCallback readSourceMapFunc_;
     static std::mutex sourceMapMutex_;
     static GetHapPathCallback getHapPathFunc_;
-    std::unordered_map<std::string, std::string> sources_;
-    std::unordered_map<std::string, std::string> mappings_;
-    std::unordered_map<std::string, std::string> entryPackageInfo_;
-    std::unordered_map<std::string, std::string> packageInfo_;
+    std::unordered_map<std::string, std::shared_ptr<SourceMapData>> sourceMaps_;
 };
 } // namespace JsEnv
 } // namespace OHOS
