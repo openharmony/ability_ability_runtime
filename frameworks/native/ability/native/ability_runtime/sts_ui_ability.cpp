@@ -36,6 +36,7 @@
 #include "sts_ability_context.h"
 #include "sts_data_struct_converter.h"
 #ifdef SUPPORT_SCREEN
+#include "ani_window_stage.h"
 #include "distributed_client.h"
 #include "scene_board_judgement.h"
 #endif
@@ -169,11 +170,11 @@ void StsUIAbility::UpdateAbilityObj(
 {
     std::string key = moduleName + "::" + srcPath;
     std::unique_ptr<NativeReference> moduleObj = nullptr;
-    // stsAbilityObj_ = stsRuntime_.LoadModule(
-    //     moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
-    //     false, abilityInfo->srcEntrance);
-    auto env = stsRuntime_.GetAniEnv();
-    stsAbilityObj_ = LoadModule(env);
+    stsAbilityObj_ = stsRuntime_.LoadModule(
+        moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
+        false, abilityInfo->srcEntrance);
+    // auto env = stsRuntime_.GetAniEnv();
+    // stsAbilityObj_ = LoadModule(env);
 }
 
 void StsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want,
@@ -384,8 +385,18 @@ void StsUIAbility::OnSceneCreated()
         return;
     }
 
-    UpdateStsWindowStage(stsAppWindowStage->aniRef);
-    stsWindowStageObj_ = std::shared_ptr<STSNativeReference>(stsAppWindowStage.release());
+    UpdateStsWindowStage(reinterpret_cast<ani_ref>(stsAppWindowStage));
+    stsWindowStageObj_ = std::make_shared<STSNativeReference>();
+    stsWindowStageObj_->aniObj = stsAppWindowStage;
+    ani_ref entryObjectRef = nullptr;
+    auto env = stsRuntime_.GetAniEnv();
+    if (env->GlobalReference_Create(stsAppWindowStage, &entryObjectRef) !=
+        ANI_OK) {
+      TAG_LOGE(AAFwkTag::UIABILITY, "GlobalReference_Create failed");
+      return;
+    }
+    stsWindowStageObj_->aniRef = entryObjectRef;
+
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
         // TODO
@@ -395,7 +406,7 @@ void StsUIAbility::OnSceneCreated()
         std::string methodName = "OnSceneCreated";
         AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
         const char *signature = "L@ohos/window/window/WindowStage;:V";
-        CallObjectMethod(false, "onWindowStageCreate", signature, stsAppWindowStage->aniRef);
+        CallObjectMethod(false, "onWindowStageCreate", signature, stsAppWindowStage);
         AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     }
 
@@ -576,40 +587,7 @@ bool StsUIAbility::OnBackPress()
     return false;
 }
 
-ani_object CreateAniWindowStage(ani_env *env, std::shared_ptr<Rosen::WindowScene> &windowScene)
-{
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "[ANI] null env");
-        return nullptr;
-    }
-    TAG_LOGE(AAFwkTag::UIABILITY, "[ANI] create wstage");
-
-    ani_status ret;
-    ani_class cls = nullptr;
-    if ((ret = env->FindClass("Lwindow/window/WindowStage;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "[ANI] null env %{public}u", ret);
-        return cls;
-    }
-
-    long ptr = reinterpret_cast<long>(windowScene.get());
-    ani_field contextField;
-    if ((ret = env->Class_FindField(cls, "nativeWindowStage", &contextField)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "[ANI] get field fail %{public}u", ret);
-    }
-
-    ani_method initFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", "J:V", &initFunc)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "[ANI] get ctor fail %{public}u", ret);
-    }
-    ani_object obj = nullptr;
-    if ((ret = env->Object_New(cls, initFunc, &obj, ptr)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "[ANI] obj new fail %{public}u", ret);
-    }
-
-    return obj;
-}
-
-std::unique_ptr<STSNativeReference> StsUIAbility::CreateAppWindowStage()
+ani_object StsUIAbility::CreateAppWindowStage()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto env = stsRuntime_.GetAniEnv();
@@ -629,12 +607,8 @@ std::unique_ptr<STSNativeReference> StsUIAbility::CreateAppWindowStage()
         return nullptr;
     }
     // TODO
-    std::unique_ptr<STSNativeReference> stsWindowStageObj = std::make_unique<STSNativeReference>();
-    stsWindowStageObj->aniCls = nullptr;
-    stsWindowStageObj->aniObj = stsWindowStage;
-    stsWindowStageObj->aniRef = reinterpret_cast<ani_ref>(stsWindowStage);
     TAG_LOGE(AAFwkTag::UIABILITY, "CreateAppWindowStage end");
-    return nullptr;
+    return stsWindowStage;
 }
 
 void StsUIAbility::GetPageStackFromWant(const Want &want, std::string &pageStack)
