@@ -32,6 +32,7 @@
 #include "want.h"
 #include "mock_iqueryermsobserver.h"
 #include "mock_ihiddenstartobserver.h"
+#include "mock_sa_call.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -373,6 +374,36 @@ HWTEST_F(AbilityManagerClientTest, UnregisterHiddenStartObserver_0100, TestSize.
     EXPECT_NE(result, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "UnregisterHiddenStartObserver_0100 end");
+}
+
+/**
+ * @tc.name: KillProcessForPermissionUpdate_0100
+ * @tc.desc: KillProcessForPermissionUpdate ERR_PERMISSION_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, KillProcessForPermissionUpdate_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessForPermissionUpdate_0100 start");
+    uint32_t accessTokenId = 1;
+    auto result = AbilityManagerClient::GetInstance()->KillProcessForPermissionUpdate(accessTokenId);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessForPermissionUpdate_0100 end");
+}
+
+/**
+ * @tc.name: KillProcessForPermissionUpdate_0200
+ * @tc.desc: KillProcessForPermissionUpdate has peimission
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, KillProcessForPermissionUpdate_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessForPermissionUpdate_0200 start");
+    uint32_t accessTokenId = 1;
+    AAFwk::IsMockSaCall::IsMockKillAppProcessesPermission();
+    TAG_LOGI(AAFwkTag::TEST, "MockKillAppProcessesPermission");
+    auto result = AbilityManagerClient::GetInstance()->KillProcessForPermissionUpdate(accessTokenId);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessForPermissionUpdate_0200 end");
 }
 
 /**

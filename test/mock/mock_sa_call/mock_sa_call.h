@@ -133,6 +133,29 @@ public:
         SetSelfTokenID(tokenId);
         Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
     }
+
+    static void IsMockKillAppProcessesPermission()
+    {
+        int permission = 0;
+        uint64_t tokenId;
+        const char** perms = new const char* [1];
+        perms[permission] = "ohos.permission.KILL_APP_PROCESSES";
+        NativeTokenInfoParams infoInstance = {
+            .dcapsNum = 0,
+            .permsNum = 1,
+            .aclsNum = 0,
+            .dcaps = nullptr,
+            .perms = perms,
+            .acls = nullptr,
+            .aplStr = "system_core",
+        };
+
+        infoInstance.processName = "accesstoken_service";
+        tokenId = GetAccessTokenId(&infoInstance);
+        SetSelfTokenID(tokenId);
+        OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+        delete[] perms;
+    }
 };
 }  // namespace OHOS::AAFwk
 #endif // UNITTEST_OHOS_ABILITY_RUNTIME_IS_SA_CALL_TEST_H
