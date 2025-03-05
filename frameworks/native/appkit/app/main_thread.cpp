@@ -1341,10 +1341,10 @@ JsEnv::UncaughtExceptionInfo MainThread::CreateJsExceptionInfo(const std::string
     return uncaughtExceptionInfo;
 }
 
-STSUncaughtExceptionInfo MainThread::CreateStsExceptionInfo(
+StsEnv::STSUncaughtExceptionInfo MainThread::CreateStsExceptionInfo(
     const std::string& bundleName, uint32_t versionCode, const std::string& hapPath)
 {
-    STSUncaughtExceptionInfo uncaughtExceptionInfo;
+    StsEnv::STSUncaughtExceptionInfo uncaughtExceptionInfo;
     // TODO sts 未完成
     return uncaughtExceptionInfo;
 }

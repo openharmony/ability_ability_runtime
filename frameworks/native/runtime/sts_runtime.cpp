@@ -80,7 +80,7 @@ const std::string STS_CHIPSDK_PATH = "/system/lib/chipset-pub-sdk";
 #endif
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
-constexpr char ENTRY_PATH_MAP_FILE[] = "/data/storage/el1/bundle/lib/entrypath.json";
+constexpr char ENTRY_PATH_MAP_FILE[] = "/system/etc/entrypath.json";
 constexpr char ENTRY_PATH_MAP_KEY[] = "entryPath";
 constexpr char DEFAULT_ENTRY_ABILITY_CLASS[] = "entry/entryability/EntryAbility/EntryAbility";
 
@@ -653,35 +653,38 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
     // if (!RunScript(aniEnv, moduleName, path, hapPath, srcEntrance)) {
     //     return std::make_unique<STSNativeReference>();
     // }
-    ani_class clsArray = nullptr;
-    if (aniEnv->FindClass("Lfixarray/GetPathArray;", &clsArray) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "FindClass failed");
-        return std::make_unique<STSNativeReference>();
-    };
-    ani_static_method methodArray;
-    if (aniEnv->Class_FindStaticMethod(
-            clsArray, "getPathArray", "Lstd/core/String;:[Lstd/core/String;", &methodArray) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "Class_FindStaticMethod failed");
-        return std::make_unique<STSNativeReference>();
-    };
-    std::string modulePath = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
-    ani_string abcPath;
-    if (aniEnv->String_NewUTF8(modulePath.c_str(), modulePath.length(), &abcPath) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "abilityPath String_NewUTF8 failed");
-    };
-    ani_ref refArray = nullptr;
-    if (aniEnv->Class_CallStaticMethod_Ref(clsArray, methodArray, &refArray, abcPath) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "Class_CallStaticMethod_Ref failed");
-        return std::make_unique<STSNativeReference>();
-    };
-    ani_class cls = nullptr;
-    if (aniEnv->FindClass("Lstd/core/AbcRuntimeLinker;", &cls) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "FindClass AbcRuntimeLinker failed");
+
+    ani_class stringCls = nullptr;
+    if (aniEnv->FindClass("Lstd/core/String;", &stringCls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "FindClass Lstd/core/String Failed");
         return std::make_unique<STSNativeReference>();
     }
+
+    std::string modulePath = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
+    ani_string ani_str;
+    if (aniEnv->String_NewUTF8(modulePath.c_str(), modulePath.size(), &ani_str) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "String_NewUTF8 modulePath Failed");
+        return std::make_unique<STSNativeReference>();
+    }
+
     ani_ref undefined_ref;
     if (aniEnv->GetUndefined(&undefined_ref) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "GetUndefined failed");
+        return std::make_unique<STSNativeReference>();
+    }
+    ani_array_ref refArray;
+    if (aniEnv->Array_New_Ref(stringCls, 1, undefined_ref, &refArray) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_New_Ref Failed");
+        return std::make_unique<STSNativeReference>();
+    }
+    if (aniEnv->Array_Set_Ref(refArray, 0, ani_str) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_Set_Ref Failed");
+        return std::make_unique<STSNativeReference>();
+    }
+
+    ani_class cls = nullptr;
+    if (aniEnv->FindClass("Lstd/core/AbcRuntimeLinker;", &cls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "FindClass AbcRuntimeLinker failed");
         return std::make_unique<STSNativeReference>();
     }
     ani_method method = nullptr;
@@ -695,7 +698,7 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
         return std::make_unique<STSNativeReference>();
     }
     ani_method loadClassMethod = nullptr;
-    if (aniEnv->Class_FindMethod(cls, "loadClass", "Lstd/core/String;Z:Lstd/core/Class;", &loadClassMethod) != ANI_OK) {
+    if (aniEnv->Class_FindMethod(cls, "loadClass", nullptr, &loadClassMethod) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Class_FindMethod loadClass failed");
         return std::make_unique<STSNativeReference>();
     }

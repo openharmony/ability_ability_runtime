@@ -42,7 +42,7 @@
 #ifdef SUPPORT_GRAPHICS
 #include "window.h"
 #endif
-#include "runtime/include/mock/ani/ani.h"
+#include "ani.h"
 #include "sts_runtime.h"
 
 namespace OHOS {

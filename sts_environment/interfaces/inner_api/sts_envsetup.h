@@ -19,6 +19,7 @@
 #include <string>
 
 namespace OHOS {
+namespace StsEnv {
 struct STSErrorObject {
     const char* name;
     const char* message;
@@ -29,7 +30,7 @@ struct STSUncaughtExceptionInfo {
     const char* hapPath;
     std::function<void(const char* summary, const STSErrorObject errorObj)> uncaughtTask;
 };
-
+} // namespace StsEnv
 } // namespace OHOS
 
 #endif // OHOS_ABILITY_RUNTIME_STS_ENVSETUP_H

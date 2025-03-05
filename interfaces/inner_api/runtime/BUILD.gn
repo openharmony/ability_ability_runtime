@@ -39,6 +39,7 @@ config("runtime_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_business_error",
+    "${ability_runtime_path}/sts_environment/interfaces/inner_api",
     "include",
   ]
 }
@@ -53,6 +54,7 @@ ohos_shared_library("runtime") {
   include_dirs = [
     "${ability_runtime_path}/services/abilitymgr/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
+    "${ability_runtime_path}/sts_environment/interfaces/inner_api",
     "${ability_runtime_utils_path}/global/constant",
   ]
 
@@ -119,6 +121,7 @@ ohos_shared_library("runtime") {
     "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "runtime_core:ani",
     "samgr:samgr_proxy",
     "zlib:shared_libz",
   ]

@@ -34,12 +34,12 @@
 #include "inner_event.h"
 #include "ipc_singleton.h"
 #include "js_runtime.h"
-#include "sts_runtime.h"
 #include "native_engine/native_engine.h"
 #include "overlay_event_subscriber.h"
 #include "resource_manager.h"
 #include "runtime.h"
 #include "watchdog.h"
+#include "sts_envsetup.h"
 
 #ifdef CJ_FRONTEND
 #include "cj_envsetup.h"
@@ -296,7 +296,7 @@ public:
 #endif
     JsEnv::UncaughtExceptionInfo CreateJsExceptionInfo(const std::string& bundleName, uint32_t versionCode,
         const std::string& hapPath, std::string& appRunningId, int32_t pid, std::string& processName);
-    STSUncaughtExceptionInfo CreateStsExceptionInfo(
+    StsEnv::STSUncaughtExceptionInfo CreateStsExceptionInfo(
         const std::string& bundleName, uint32_t versionCode, const std::string& hapPath);
     /**
      * @brief Notify NativeEngine GC of status change.
@@ -746,6 +746,6 @@ private:
 #endif  // APPLICATION_LIBRARY_LOADER
     DISALLOW_COPY_AND_MOVE(MainThread);
 };
-}  // namespace AppExecFwk
-}  // namespace OHOS
+} // namespace AppExecFwk
+} // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_MAIN_THREAD_H
