@@ -20,7 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <csignal>
-#include "runtime/include/mock/ani/ani.h"
+#include "ani.h"
 
 namespace OHOS {
 using PostTaskType = bool(*)(void*);

@@ -25,8 +25,8 @@
 #include <vector>
 
 #include "runtime.h"
-#include "../../../../../sts_environment/interfaces/inner_api/sts_envsetup.h"
-#include "../include/mock/ani/ani.h"
+#include "sts_envsetup.h"
+#include "ani.h"
 
 using AppLibPathMap = std::map<std::string, std::vector<std::string>>;
 using AppLibPathVec = std::vector<std::string>;

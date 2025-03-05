@@ -36,10 +36,6 @@ const char STS_ANI_GET_CREATEDVMS[] = "ANI_GetCreatedVMs";
 const char STS_LIB_PATH[] = "libarkruntime.so";
 const char STS_STD_LIB_PATH[] = "/system/etc/etsstdlib.abc";
 const char BOOT_PATH[] = "/system/etc/bootpath.json";
-const char STS_ARK_UI_PATH_KEY[] = "arkui";
-const char STS_ARK_COMPILER_PATH_KEY[] = "arkcompiler";
-const char STS_WINDOW_PATH_KEY[] = "window";
-const char STS_FIX_ARRAY_PATH_KEY[] = "fixarray";
 
 using GetDefaultVMInitArgsSTSRuntimeType = ets_int (*)(EtsVMInitArgs* vmArgs);
 using GetCreatedVMsSTSRuntimeType = ets_int (*)(EtsVM** vmBuf, ets_size bufLen, ets_size* nVms);
@@ -55,40 +51,30 @@ STSRuntimeAPI STSEnvironment::lazyApis_{};
 
 bool STSEnvironment::LoadBootPathFile(std::vector<EtsVMOption> &etsVMOptions)
 {
-    std::vector<std::string> pathFiles;
-    pathFiles.push_back(std::string(STS_ARK_UI_PATH_KEY));
-    pathFiles.push_back(std::string(STS_ARK_COMPILER_PATH_KEY));
-    pathFiles.push_back(std::string(STS_WINDOW_PATH_KEY));
-    pathFiles.push_back(std::string(STS_FIX_ARRAY_PATH_KEY));
-
     std::ifstream inFile;
     inFile.open(BOOT_PATH, std::ios::in);
     if (!inFile.is_open()) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "read json error");
         return false;
     }
-    nlohmann::json filePathsJson;
-    inFile >> filePathsJson;
-    if (filePathsJson.is_discarded()) {
+    nlohmann::json jsonObject = nlohmann::json::parse(inFile);
+    if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "json discarded error");
         inFile.close();
         return false;
     }
 
-    if (filePathsJson.is_null() || filePathsJson.empty()) {
+    if (jsonObject.is_null() || jsonObject.empty()) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "invalid json");
         inFile.close();
         return false;
     }
 
-    for (auto& pathFile : pathFiles) {
-        if (!filePathsJson.contains(pathFile)) {
-            continue;
-        }
-        if (!filePathsJson[pathFile].is_null() && filePathsJson[pathFile].is_string()) {
-            std::string jsonValue = filePathsJson[pathFile].get<std::string>();
+    for (const auto &[key, value] : jsonObject.items()) {
+      if (!value.is_null() && value.is_string()) {
+            std::string jsonValue = value.get<std::string>();
             if (jsonValue.empty()) {
-                TAG_LOGE(AAFwkTag::STSRUNTIME, "json value of %{public}s is empty", pathFile.c_str());
+                TAG_LOGE(AAFwkTag::STSRUNTIME, "json value of %{public}s is empty", key.c_str());
                 continue;
             }
             std::ifstream abcfile(jsonValue);

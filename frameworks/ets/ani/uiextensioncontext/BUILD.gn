@@ -78,6 +78,7 @@ ohos_shared_library("ui_ext_con_ani_kit") {
     "ipc:ipc_napi",
     "json:nlohmann_json_static",
     "napi:ace_napi",
+    "runtime_core:ani",
     "window_manager:embeddablewindowstage_kit",
     "window_manager:extensionwindow_napi",
   ]
