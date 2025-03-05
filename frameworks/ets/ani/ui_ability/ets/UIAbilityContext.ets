@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Want} from './@ohos.app.ability.Want';
+import Want from './@ohos.app.ability.Want';
 import StartOptions from './@ohos.app.ability.StartOptions'
 
 export class BusinessError {
@@ -106,7 +106,7 @@ interface AbilityInfo {
   readonly orientationId: int;
 }
 
-export class AbilityInfoCls implements AbilityInfo {
+class AbilityInfoCls implements AbilityInfo {
   readonly bundleName: string = '';
   readonly moduleName: string = '';
   readonly name: string = '';
@@ -130,6 +130,7 @@ export class AbilityInfoCls implements AbilityInfo {
 }
 
 export class UIAbilityContext {
+
   public nativeContext : long;
   public config?: Configuration;
   public abilityInfo?: AbilityInfo;
