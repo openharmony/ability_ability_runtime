@@ -142,8 +142,12 @@ public:
     {
         auto const &iter = entryPathMap_.find(srcEntry);
         if (iter == entryPathMap_.end()) {
-            TAG_LOGD(AAFwkTag::STSRUNTIME, "not found srcEntry: %{public}s", srcEntry.c_str());
-            return DEFAULT_ENTRY_ABILITY_CLASS;
+            if (StartsWithDotSlash(srcEntry)) {
+                TAG_LOGD(AAFwkTag::STSRUNTIME, "not found srcEntry: %{public}s", srcEntry.c_str());
+                return DEFAULT_ENTRY_ABILITY_CLASS;
+            }
+            TAG_LOGD(AAFwkTag::STSRUNTIME, "srcEntry as class: %{public}s", srcEntry.c_str());
+            return srcEntry;
         }
         TAG_LOGD(AAFwkTag::STSRUNTIME, "found srcEntry: %{public}s, output: %{public}s",
                  srcEntry.c_str(), iter->second.c_str());
@@ -154,6 +158,15 @@ private:
     EntryPathManager() = default;
 
     ~EntryPathManager() = default;
+
+    static bool StartsWithDotSlash(const std::string &str)
+    {
+        if (str.length() < 2) {
+            return false;
+        }
+        std::string prefix = str.substr(0, 2);
+        return prefix == "./";
+    }
 
     std::map<std::string, std::string> entryPathMap_{};
 };
