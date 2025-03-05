@@ -651,6 +651,7 @@ ohos_shared_library("uiabilitykit_native") {
     "ipc:ipc_napi",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "window_manager:windowstageani_kit",
   ]
   public_external_deps = [
     "bundle_framework:appexecfwk_core",
