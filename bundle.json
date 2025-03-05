@@ -88,6 +88,8 @@
             "qos_manager",
             "relational_store",
             "resource_management",
+            "runtime_core",
+            "window_manager",
             "resource_schedule_service",
             "runtime_core",
             "safwk",
