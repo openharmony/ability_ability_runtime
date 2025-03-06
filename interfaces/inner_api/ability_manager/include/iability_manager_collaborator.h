@@ -176,6 +176,26 @@ public:
         return 0;
     }
 
+    /**
+     * @brief Update caller if need.
+     * @param want to start ability
+     * @return 0 when update caller successfully or else failed.
+     */
+    virtual int32_t UpdateCallerIfNeed(Want &want)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Update target if need.
+     * @param want to start ability
+     * @return 0 when update target successfully or else failed.
+     */
+    virtual int32_t UpdateTargetIfNeed(Want &want)
+    {
+        return 0;
+    }
+
     enum {
         NOTIFY_START_ABILITY = 1,
         NOTIFY_MISSION_CREATED,
@@ -194,6 +214,8 @@ public:
         OPEN_FILE,
         NOTIFY_MISSION_BIND_PID,
         CHECK_STATIC_CFG_PERMISSION,
+        UPDATE_CALLER_IF_NEED,
+        UPDATE_TARGET_IF_NEED,
     };
 };
 }  // namespace AAFwk
