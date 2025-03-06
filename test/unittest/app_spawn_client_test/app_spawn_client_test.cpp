@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -953,19 +953,14 @@ HWTEST_F(AppSpawnClientTest, StartProcess_002, TestSize.Level0)
  */
 HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_001, TestSize.Level0)
 {
-    JITPermissionsList jitPermissionsList = {
-        "ohos.permission.jit1",
-        "ohos.permission.jit2"
+    std::map<std::string, std::string> jitPermissionsMap = {
+        {"ohos.permission.jit1", "1"}, {"ohos.permission.jit2", "{\"cont\": \"1\"}"}
     };
-    std::string expectJITPermission1 = "ohos.permission.jit1";
-    std::string expectJITPermission2 = "ohos.permission.jit2";
-    std::string jsonJITPermissions = DumpJITPermissionListToJson(jitPermissionsList);
+    std::string jsonJITPermissions = DumpJITPermissionListToJson(jitPermissionsMap);
 
-    size_t pos = jsonJITPermissions.find(expectJITPermission1);
+    size_t pos = jsonJITPermissions.find("ohos.permission.jit1");
     ASSERT_NE(pos, std::string::npos);
-    pos = jsonJITPermissions.find(expectJITPermission2);
-    ASSERT_NE(pos, std::string::npos);
-    pos = jsonJITPermissions.find(expectJITPermission2);
+    pos = jsonJITPermissions.find("ohos.permission.jit2");
     ASSERT_NE(pos, std::string::npos);
 }
 
