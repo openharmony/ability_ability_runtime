@@ -286,6 +286,45 @@ CJEnvironment* CJEnvironment::GetInstance()
     return instance_;
 }
 
+bool CJEnvironment::RegisterCangjieCallback()
+{
+    constexpr char CANGJIE_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
+    auto handlerConnectServerSo = LoadCJLibrary(CJEnvironment::SYSTEM, CANGJIE_DEBUGGER_LIB_PATH);
+    if (handlerConnectServerSo == nullptr) {
+        LOGE("null handlerConnectServerSo: %{public}s", dlerror());
+        return false;
+    }
+    using SendMsgCB = const std::function<void(const std::string& message)>;
+    using SetCangjieCallback = void(*)(const std::function<void(const std::string& message, SendMsgCB)>);
+    using CangjieCallback = void(*)(const std::string& message, SendMsgCB);
+    auto setCangjieCallback = reinterpret_cast<SetCangjieCallback>(
+        DynamicFindSymbol(handlerConnectServerSo, "SetCangjieCallback"));
+    if (setCangjieCallback == nullptr) {
+        LOGE("null setCangjieCallback: %{public}s", dlerror());
+        return false;
+    }
+    #define RTLIB_NAME "libcangjie-runtime.so"
+    auto dso = LoadCJLibrary(CJEnvironment::SDK, RTLIB_NAME);
+    if (!dso) {
+        LOGE("load library failed: %{public}s", RTLIB_NAME);
+        return false;
+    }
+    LOGE("load libcangjie-runtime.so success");
+    #define PROFILERAGENT "ProfilerAgent"
+    CangjieCallback cangjieCallback = reinterpret_cast<CangjieCallback>(DynamicFindSymbol(dso, PROFILERAGENT));
+    if (cangjieCallback == nullptr) {
+        dlclose(handlerConnectServerSo);
+        handlerConnectServerSo = nullptr;
+        LOGE("runtime api not found: %{public}s", PROFILERAGENT);
+        return false;
+    }
+    LOGE("find runtime api success");
+    setCangjieCallback(cangjieCallback);
+    dlclose(handlerConnectServerSo);
+    handlerConnectServerSo = nullptr;
+    return true;
+}
+
 bool CJEnvironment::LoadRuntimeApis()
 {
     if (isRuntimeApiLoaded) {
@@ -586,7 +625,7 @@ void* CJEnvironment::LoadCJLibrary(const char* dlName)
         UnLoadCJLibrary(handle);
         return nullptr;
     }
-
+    CJEnvironment::RegisterCangjieCallback();
     isLoadCJLibrary_ = true;
     return handle;
 }

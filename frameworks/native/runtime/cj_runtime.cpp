@@ -179,33 +179,37 @@ void CJRuntime::SetSanitizerVersion(SanitizerKind kind)
 
 bool CJRuntime::RegisterCangjieCallback()
 {
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
     constexpr char CANGJIE_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
-    auto handlerConnectServerSo = dlopen(CANGJIE_DEBUGGER_LIB_PATH, RTLD_NOLOAD | RTLD_NOW);
+    #define LIBARARYKIND_SYS 0
+    auto handlerConnectServerSo = cjEnv->loadLibrary(LIBARARYKIND_SYS, CANGJIE_DEBUGGER_LIB_PATH);
     if (handlerConnectServerSo == nullptr) {
-            TAG_LOGE(AAFwkTag::CJRUNTIME, "null handlerConnectServerSo: %{public}s", dlerror());
-            return false;
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "null handlerConnectServerSo: %{public}s", dlerror());
+        return false;
     }
     using SendMsgCB = const std::function<void(const std::string& message)>;
     using SetCangjieCallback = void(*)(const std::function<void(const std::string& message, SendMsgCB)>);
     using CangjieCallback = void(*)(const std::string& message, SendMsgCB);
-    auto setCangjieCallback = reinterpret_cast<SetCangjieCallback>(dlsym(handlerConnectServerSo, "SetCangjieCallback"));
+    auto setCangjieCallback = reinterpret_cast<SetCangjieCallback>(
+        cjEnv->getSymbol(handlerConnectServerSo, "SetCangjieCallback"));
     if (setCangjieCallback == nullptr) {
         TAG_LOGE(AAFwkTag::CJRUNTIME, "null setCangjieCallback: %{public}s", dlerror());
         return false;
     }
     #define RTLIB_NAME "libcangjie-runtime.so"
-    Dl_namespace ns;
-    dlns_get("cj_app_sdk", &ns);
-    auto dso = dlopen_ns(&ns, RTLIB_NAME, 1 | RTLD_GLOBAL | RTLD_NOW);
+    #define LIBARARYKIND_SDK 1
+    auto dso = cjEnv->loadLibrary(LIBARARYKIND_SDK, RTLIB_NAME);
     if (!dso) {
         TAG_LOGE(AAFwkTag::CJRUNTIME, "load library failed: %{public}s", RTLIB_NAME);
         return false;
     }
     TAG_LOGE(AAFwkTag::CJRUNTIME, "load libcangjie-runtime.so success");
     #define PROFILERAGENT "ProfilerAgent"
-    CangjieCallback cangjieCallback = reinterpret_cast<CangjieCallback>(dlsym(dso, "ProfilerAgent"));
+    CangjieCallback cangjieCallback = reinterpret_cast<CangjieCallback>(cjEnv->getSymbol(dso, PROFILERAGENT));
     if (cangjieCallback == nullptr) {
         TAG_LOGE(AAFwkTag::CJRUNTIME, "runtime api not found: %{public}s", PROFILERAGENT);
+        dlclose(handlerConnectServerSo);
+        handlerConnectServerSo = nullptr;
         return false;
     }
     TAG_LOGE(AAFwkTag::CJRUNTIME, "find runtime api success");
