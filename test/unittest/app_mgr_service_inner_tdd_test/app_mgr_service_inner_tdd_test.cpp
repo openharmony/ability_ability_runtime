@@ -42,8 +42,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AppExecFwk {
-namespace{
-    constexpr int32_t DEFAULT_USERID = 100;
+namespace {
+constexpr int32_t DEFAULT_USERID = 100;
 }
 class AppMgrServiceInnerTest : public testing::Test {
 public:
