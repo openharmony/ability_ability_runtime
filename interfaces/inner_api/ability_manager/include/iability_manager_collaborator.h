@@ -176,11 +176,21 @@ public:
         return 0;
     }
 
+    /**
+     * @brief Update caller if need.
+     * @param want to start ability
+     * @return 0 when update caller successfully or else failed.
+     */
     virtual int32_t UpdateCallerIfNeed(Want &want)
     {
         return 0;
     }
 
+    /**
+     * @brief Update target if need.
+     * @param want to start ability
+     * @return 0 when update target successfully or else failed.
+     */
     virtual int32_t UpdateTargetIfNeed(Want &want)
     {
         return 0;
