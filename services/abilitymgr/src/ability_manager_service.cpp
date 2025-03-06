@@ -13222,6 +13222,7 @@ int32_t AbilityManagerService::UnregisterHiddenStartObserver(const sptr<IHiddenS
 }
 
 int32_t AbilityManagerService::QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
+                                                             const std::string &moduleName,
                                                              const std::string &hostBundleName,
                                                              int32_t &recordNum,
                                                              int32_t userId)
@@ -13241,7 +13242,7 @@ int32_t AbilityManagerService::QueryPreLoadUIExtensionRecord(const AppExecFwk::E
       return ERR_INVALID_VALUE;
   }
   return connectManager->QueryPreLoadUIExtensionRecordInner(
-      element, hostBundleName, recordNum);
+      element, moduleName, hostBundleName, recordNum);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
