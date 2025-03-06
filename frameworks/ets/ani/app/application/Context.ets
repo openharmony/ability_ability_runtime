@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-import BaseContext from './BaseContext.ets'
-import ApplicationContext from './ApplicationContext.ets'
+import ApplicationContext from './ApplicationContext'
 // import EventHub from '../../../js/napi/app/event_hub/event_hub.sts';
 // import ApplicationInfo from 'bms/ApplicationInfo'
 
-export abstract class Context implements BaseContext{
+export class Context {
     area: int = 0;
     filesDir: string = "";
     tempDir: string = "";
@@ -28,7 +27,7 @@ export abstract class Context implements BaseContext{
     private applicationContext?: ApplicationContext;
 
     getApplicationContext():ApplicationContext | undefined {
-        console.log("ywz getApplicationContext 111");
+        console.log("getApplicationContext 111");
         return this.applicationContext;
     }
 }
