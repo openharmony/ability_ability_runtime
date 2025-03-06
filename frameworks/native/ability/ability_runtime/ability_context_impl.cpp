@@ -43,6 +43,7 @@ constexpr const char* START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
 constexpr const char* UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
 constexpr const char* FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
 constexpr const char* DISPOSED_PROHIBIT_BACK = "APPGALLERY_APP_DISPOSED_PROHIBIT_BACK";
+constexpr const char* IS_WINDOWMODE_FOLLOWHOST = "isWindowModeFollowHost";
 
 struct RequestResult {
     int32_t resultCode {0};
@@ -1113,6 +1114,9 @@ ErrCode AbilityContextImpl::CreateModalUIExtensionWithApp(const AAFwk::Want &wan
     config.prohibitedRemoveByRouter = true;
     if (want.GetBoolParam(DISPOSED_PROHIBIT_BACK, false)) {
         config.isProhibitBack = true;
+    }
+    if (want.GetBoolParam(IS_WINDOWMODE_FOLLOWHOST, false)) {
+        config.isWindowModeFollowHost = true;
     }
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
