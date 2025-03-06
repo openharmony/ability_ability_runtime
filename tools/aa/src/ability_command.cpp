@@ -117,6 +117,8 @@ const std::string ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_ONE =
     "Make sure the parameter configuration of implicit startup is correct";
 const std::string ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_TWO =
     "Make sure the corresponding HAP package is installed";
+const std::string ERR_INVALID_VALUE_SOLUTION_ONE =
+    "Check if the application corresponding to the specified bundleName is installed.";
 
 constexpr struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -330,11 +332,11 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The current mode is developer mode, and the screen cannot be unlocked automatically",
         {ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE_SOLUTION_ONE});
     messageMap_[ERR_NOT_SUPPORTED_PRODUCT_TYPE] = GetAaToolErrorInfo("10106107",
-        "The current device does not support using window options",
+        "error: not supported in the current product type.",
         "The user specified windowOptions, but the device does not support it",
         {ERR_NOT_SUPPORTED_PRODUCT_TYPE_SOLUTION_ONE});
     messageMap_[ERR_NOT_IN_APP_PROVISION_MODE] = GetAaToolErrorInfo("10106002",
-        "The target application does not support Debug mode",
+        "error: not supported in non-app-provision mode.",
         "The application specified by the aa tool is a Release version and does not support Debug mode",
         {ERR_NOT_IN_APP_PROVISION_MODE_SOLUTION_ONE});
     messageMap_[ERR_NOT_DEBUG_APP] = GetAaToolErrorInfo("10106701",
@@ -378,6 +380,13 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "No matching ability is found",
         "The parameter configuration of implicit startup is incorrect, or the specified HAP package is not installed.",
         {ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_ONE, ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_TWO});
+    messageMap_[ERR_INVALID_VALUE] = GetAaToolErrorInfo("10103601",
+        "The specified bundleName does not exist.",
+        "The bundleName specified by the aa attach/detach command does not exist.",
+        {ERR_INVALID_VALUE_SOLUTION_ONE});
+    messageMap_[ERR_INVALID_OPERATION] = GetAaToolErrorInfo("10105002", "Failed to obtain ability information.",
+        "The abilityInfo is empty when generating the Ability request through BMS",
+        {GET_ABILITY_SERVICE_FAILED_SOLUTION_ONE});
     return OHOS::ERR_OK;
 }
 
