@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,42 @@ typedef enum {
      */
     ABILITY_RUNTIME_AREA_MODE_EL5 = 4,
 } AbilityRuntime_AreaMode;
+
+/**
+* @brief Window mode.
+*
+* @since 16
+*/
+typedef enum {
+    /**
+     * The window mode is not defined.
+     */
+    ABILITY_RUNTIME_WINDOW_MODE_UNDEFINED = 0,
+    /**
+     * Full screen mode.
+     */
+    ABILITY_RUNTIME_WINDOW_MODE_FULLSCREEN = 1,
+} AbilityRuntime_WindowMode;
+
+/**
+* Support window mode
+*
+* @since 16
+*/
+typedef enum {
+    /**
+     * Indicates supported window mode of full screen mode
+     */
+    ABILITY_RUNTIME_SUPPORT_WINDOW_MODE_FULL_SCREEN = 0,
+    /**
+     * Indicates supported window mode of split mode
+     */
+    ABILITY_RUNTIME_SUPPORT_WINDOW_MODE_SPLIT = 1,
+    /**
+     * Indicates supported window mode of floating mode
+     */
+    ABILITY_RUNTIME_SUPPORT_WINDOW_MODE_FLOATING = 2,
+} AbilityRuntime_SupportWindowMode;
 
 #ifdef __cplusplus
 } // extern "C"
