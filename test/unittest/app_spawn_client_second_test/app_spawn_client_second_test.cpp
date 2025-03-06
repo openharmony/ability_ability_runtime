@@ -155,6 +155,23 @@ HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_007, TestSize.Level0)
     EXPECT_NE(appSpawnClient.SetStartFlags(startMsg, reqHandle), 0);
 }
 
+// Scenario8: Test when startMsg.isCustomSandboxFlag is true and all other flags are false.
+HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_008, TestSize.Level0)
+{
+    AppSpawnClient appSpawnClient;
+    AppSpawnStartMsg startMsg;
+    startMsg.flags = 0;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.isCustomSandboxFlag = true;
+#ifdef SUPPORT_CHILD_PROCESS
+    startMsg.childProcessType = 0;
+#endif // SUPPORT_CHILD_PROCESS
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    EXPECT_NE(appSpawnClient.SetStartFlags(startMsg, reqHandle), 0);
+}
+
 // Scenario1: Test when provisionType is empty then function returns 0.
 HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_001, TestSize.Level0)
 {
