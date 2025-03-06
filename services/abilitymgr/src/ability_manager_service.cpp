@@ -1191,7 +1191,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             TAG_LOGI(AAFwkTag::ABILITYMGR, "UpdateTargetIfNeed end,ret:%{public}d", ret);
             (const_cast<Want &>(want)).SetElement(tempWant.GetElement());
         } else {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "UpdateTargetIfNeed error due to collaborator is nullptr);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "UpdateTargetIfNeed error due to collaborator is nullptr");
         }
     }
     result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
