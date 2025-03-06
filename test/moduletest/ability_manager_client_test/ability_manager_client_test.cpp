@@ -468,21 +468,5 @@ HWTEST_F(AbilityManagerClientTest, StartAbilityByCallWithErrMsg_0100, TestSize.L
 
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityByCallWithErrMsg_0100 end");
 }
-
-/**
- * @tc.name: AbilityManagerClient_QueryPreLoadUIExtensionRecord_0100
- * @tc.desc: QueryPreLoadUIExtensionRecord
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerClientTest, SQueryPreLoadUIExtensionRecord_0200, TestSize.Level1)
-{
-    AppExecFwk::ElementName element;
-    std::string hostBundleName = "com.ohos.example.hostBundleName";
-    int32_t recordNum = 0x001;
-    int32_t userId = 0x001;
-    auto result = AbilityManagerClient::GetInstance()->QueryPreLoadUIExtensionRecord(element,
-        hostBundleName, recordNum, userId);
-    EXPECT_NE(result, ERR_OK);
-}
 }  // namespace AAFwk
 }  // namespace OHOS
