@@ -176,6 +176,16 @@ public:
         return 0;
     }
 
+    virtual int32_t UpdateCallerIfNeed(Want &want)
+    {
+        return 0;
+    }
+
+    virtual int32_t UpdateTargetIfNeed(Want &want)
+    {
+        return 0;
+    }
+
     enum {
         NOTIFY_START_ABILITY = 1,
         NOTIFY_MISSION_CREATED,
@@ -195,6 +205,7 @@ public:
         NOTIFY_MISSION_BIND_PID,
         CHECK_STATIC_CFG_PERMISSION,
         UPDATE_CALLER_IF_NEED,
+        UPDATE_TARGET_IF_NEED,
     };
 };
 }  // namespace AAFwk
