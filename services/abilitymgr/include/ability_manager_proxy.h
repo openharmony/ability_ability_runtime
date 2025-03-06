@@ -46,6 +46,16 @@ public:
     virtual int StartSelfUIAbility(const Want &want) override;
 
     /**
+     * StartSelfUIAbility with want and startOptions, start self uiability only on 2-in-1 devices.
+     *
+     * @param want, the want of the ability to start.
+     * @param options, the startOptions of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartSelfUIAbilityWithStartOptions(const Want &want,
+        const StartOptions &options) override;
+
+    /**
      * StartAbility with want, send want to ability manager service.
      *
      * @param want, the want of the ability to start.

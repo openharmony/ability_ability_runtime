@@ -182,7 +182,8 @@ int32_t AbilityPermissionUtil::CheckMultiInstance(Want &want, sptr<IRemoteObject
         return ERR_INVALID_VALUE;
     }
     // in-app launch
-    if (callerRecord != nullptr && callerRecord->GetAbilityInfo().bundleName == want.GetBundle()) {
+    if ((callerRecord != nullptr && callerRecord->GetAbilityInfo().bundleName == want.GetBundle()) ||
+        IsStartSelfUIAbility()) {
         if (isCreating) {
             if (!instanceKey.empty()) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "Not allow to set instanceKey");
@@ -194,7 +195,11 @@ int32_t AbilityPermissionUtil::CheckMultiInstance(Want &want, sptr<IRemoteObject
             }
             return ERR_OK;
         }
-        return UpdateInstanceKey(want, instanceKey, instanceKeyArray, callerRecord->GetInstanceKey());
+        if (callerRecord != nullptr) {
+            return UpdateInstanceKey(want, instanceKey, instanceKeyArray, callerRecord->GetInstanceKey());
+        }
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "native c call set instanceKey");
+        return UpdateInstanceKey(want, instanceKey, instanceKeyArray, instanceKey);
     }
     // inter-app launch
     if (isCreating) {

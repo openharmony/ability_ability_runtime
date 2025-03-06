@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -883,6 +883,37 @@ enum NativeFreeInstallError {
      * Result(29360206) for atomic service minimized.
      */
     ATOMIC_SERVICE_MINIMIZED = 29360206,
+
+    /* codes 29360210 - 29360220 are reserved for StartSelfUIAbility with startOptions */
+    /*
+     * Result(29360210) for write interface code failed.
+     */
+    ERR_WRITE_INTERFACE_CODE = 29360210,
+
+    /*
+     * Result(29360211) for write want failed.
+     */
+    ERR_WRITE_WANT = 29360211,
+
+    /*
+     * Result(29360212) for write startOptions failed.
+     */
+    ERR_WRITE_START_OPTIONS = 29360212,
+
+    /*
+     * Result(29360213) for read want failed.
+     */
+    ERR_READ_WANT = 29360213,
+
+    /*
+     * Result(29360214) for read startOptions failed.
+     */
+    ERR_READ_START_OPTIONS = 29360214,
+
+    /*
+     * Result(29360215) for write StartSelfUIAbility result failed.
+     */
+    ERR_WRITE_START_SELF_UI_ABILITY_RESULT = 29360215,
 
     /**
      * Undefine error code.
