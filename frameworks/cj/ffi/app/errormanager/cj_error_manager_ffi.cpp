@@ -117,6 +117,9 @@ int32_t FfiOHOSErrorManagerLoopObserverOn(int64_t timeout, CLoopObserver observe
         g_loopObserver->callbackOnLoopTimeout = CJLambda::Create(observer.callbackOnLoopTimeout);
     }
     g_loopObserver->mainRunner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+    if (g_loopObserver->mainRunner == nullptr) {
+        return ERR_PARAM;
+    }
     g_loopObserver->mainRunner->SetTimeout(timeout);
     g_loopObserver->mainRunner->SetTimeoutCallback(CallbackTimeout);
     return SUCCESS_CODE;
