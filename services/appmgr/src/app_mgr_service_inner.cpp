@@ -3755,7 +3755,7 @@ void AppMgrServiceInner::SetStartMsgCustomSandboxFlag(AppSpawnStartMsg &startMsg
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to get app provision info");
         return;
     }
-   std::string jsonString = appProvisionInfo.appServiceCapabilities;
+    std::string jsonString = appProvisionInfo.appServiceCapabilities;
     if (jsonString.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "JSON string is empty");
         return;
