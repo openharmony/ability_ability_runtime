@@ -457,6 +457,7 @@ group("unittest") {
       "auto_startup_callback_stub_test:unittest",
       "auto_startup_info_test:unittest",
       "background_task_observer_test:unittest",
+      "bundle_mgr_helper_second_test:unittest",
       "bundle_mgr_helper_test:unittest",
       "cache_process_manager_test:unittest",
       "call_record_test:unittest",
