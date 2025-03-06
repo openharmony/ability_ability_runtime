@@ -25,11 +25,16 @@
 #include "context.h"
 
 namespace OHOS {
+
 namespace AbilityRuntime {
     class Context;
 }
+
+namespace AppExecFwk {
+    class Ability;
 }
 
+}
 /**
  * @brief Get "stageMode" value of object.
  *
