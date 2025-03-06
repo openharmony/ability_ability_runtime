@@ -16,12 +16,14 @@
 import ApplicationContext from './ApplicationContext'
 // import EventHub from '../../../js/napi/app/event_hub/event_hub.sts';
 // import ApplicationInfo from 'bms/ApplicationInfo'
+// import {resourceManager} from 'global/resourceManager'
 
 export class Context {
     area: int = 0;
     filesDir: string = "";
     tempDir: string = "";
     // applicationInfo?: ApplicationInfo;
+    // resourceManager?: resourceManager.ResourceManager
     // eventHub: EventHub = new EventHub();
 
     private applicationContext?: ApplicationContext;

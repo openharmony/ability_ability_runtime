@@ -13,36 +13,37 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STS_CONTEXT_UTIL_H
-#define OHOS_ABILITY_RUNTIME_STS_CONTEXT_UTIL_H
+#include "sts_context_util.h"
 
-#include "sts_runtime.h"
-#include "context.h"
 #include "common_fun_ani.h"
-#include "extension_context.h"
 #include "application_context.h"
+#include "hilog_tag_wrapper.h"
+#include "resmgr_ani.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 namespace ContextUtil {
-static void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     void* applicationCtxRef)
 {
     // bind parent context field:applicationContext
     ani_field applicationContextField;
     if (aniEnv->Class_FindField(contextClass, "applicationContext", &applicationContextField) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed");
+        return;
     }
     ani_ref applicationContextRef = reinterpret_cast<ani_ref>(applicationCtxRef);
     TAG_LOGI(AAFwkTag::APPKIT, "applicationContextRef: %{public}p", applicationContextRef);
     if (aniEnv->Object_SetField_Ref(contextObj, applicationContextField, applicationContextRef) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
+        return;
     }
 }
 
-static void BindApplicationInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<Context> context) {
-    TAG_LOGE(AAFwkTag::APPKIT, "BindApplicationInfo");
+void BindApplicationInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    std::shared_ptr<Context> context)
+{
+    TAG_LOGE(AAFwkTag::APPKIT, "ywz BindApplicationInfo");
     ani_field applicationInfoField;
     if (ANI_OK != aniEnv->Class_FindField(contextClass, "applicationInfo", &applicationInfoField)) {
         TAG_LOGE(AAFwkTag::APPKIT, "find find applicationInfo failed");
@@ -50,16 +51,36 @@ static void BindApplicationInfo(ani_env* aniEnv, ani_class contextClass, ani_obj
     }
     auto appInfo = context->GetApplicationInfo();
     ani_object appInfoObj = AppExecFwk::CommonFunAni::ConvertApplicationInfo(aniEnv, *appInfo);
-    if (aniEnv->Object_SetField_Ref(contextObj, applicationInfoField, reinterpret_cast<ani_ref>(appInfoObj)) != ANI_OK) {
+    if (aniEnv->Object_SetField_Ref(contextObj, applicationInfoField,
+        reinterpret_cast<ani_ref>(appInfoObj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
         return;
     }
 }
 
-static void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+void BindResourceManager(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    std::shared_ptr<Context> context)
+{
+    TAG_LOGE(AAFwkTag::APPKIT, "ywz BindResourceManager");
+    ani_field resourceManagerField;
+    if (ANI_OK != aniEnv->Class_FindField(contextClass, "resourceManager", &resourceManagerField)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find find resourceManager failed");
+        return;
+    }
+    auto resourceManager = context->GetResourceManager();
+    ani_object resourceMgrObj = Global::Resource::ResMgrAddon::CreateResMgr(aniEnv, "", resourceManager, context);
+    if (aniEnv->Object_SetField_Ref(contextObj, resourceManagerField,
+        reinterpret_cast<ani_ref>(resourceMgrObj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
+        return;
+    }
+}
+
+void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context)
 {
     BindApplicationInfo(aniEnv, contextClass, contextObj, context);
+    BindResourceManager(aniEnv, contextClass, contextObj, context);
 
     // bind parent context property
     ani_field areaField;
@@ -103,16 +124,17 @@ static void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_obje
     }
 }
 
-static void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     void* applicationCtxRef, std::shared_ptr<Context> context)
 {
     BindApplicationCtx(aniEnv, contextClass, contextObj, applicationCtxRef);
     BindParentProperty(aniEnv, contextClass, contextObj, context);
 }
 
-static void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo) {
-    TAG_LOGE(AAFwkTag::APPKIT, "BindExtensionInfo");
+void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    std::shared_ptr<AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo)
+{
+    TAG_LOGE(AAFwkTag::APPKIT, "ywz BindExtensionInfo");
     auto hapModuleInfo = context->GetHapModuleInfo();
     if (abilityInfo && hapModuleInfo) {
         auto isExist = [&abilityInfo](const AppExecFwk::ExtensionAbilityInfo& info) {
@@ -139,7 +161,7 @@ static void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_objec
     }
 }
 
-static void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     void* applicationCtxRef, std::shared_ptr<AbilityRuntime::ExtensionContext> context)
 {
     StsCreatContext(aniEnv, contextClass, contextObj, applicationCtxRef, context);
@@ -148,4 +170,3 @@ static void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, an
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_STS_CONTEXT_UTIL_H
