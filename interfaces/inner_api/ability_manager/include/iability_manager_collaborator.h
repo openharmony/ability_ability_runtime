@@ -194,6 +194,7 @@ public:
         OPEN_FILE,
         NOTIFY_MISSION_BIND_PID,
         CHECK_STATIC_CFG_PERMISSION,
+        UPDATE_CALLER_IF_NEED,
     };
 };
 }  // namespace AAFwk
