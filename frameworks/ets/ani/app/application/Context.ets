@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+import BaseContext from './BaseContext.ets'
 import ApplicationContext from './ApplicationContext'
 // import EventHub from '../../../js/napi/app/event_hub/event_hub.sts';
 // import ApplicationInfo from 'bms/ApplicationInfo'
 // import {resourceManager} from 'global/resourceManager'
 
-export class Context {
+export class Context extends BaseContext {
+    public nativeContext:long;
     area: int = 0;
     filesDir: string = "";
     tempDir: string = "";
