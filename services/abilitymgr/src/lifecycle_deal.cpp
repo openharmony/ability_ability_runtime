@@ -40,10 +40,10 @@ sptr<IAbilityScheduler> LifecycleDeal::GetScheduler()
 
 void LifecycleDeal::Activate(const Want &want, LifeCycleStateInfo &stateInfo)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
     auto abilityScheduler = GetScheduler();
     CHECK_POINTER(abilityScheduler);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "caller %{public}s, %{public}s",
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "caller %{public}s, %{public}s",
         stateInfo.caller.bundleName.c_str(),
         stateInfo.caller.abilityName.c_str());
     stateInfo.state = AbilityLifeCycleState::ABILITY_STATE_ACTIVE;
@@ -53,7 +53,7 @@ void LifecycleDeal::Activate(const Want &want, LifeCycleStateInfo &stateInfo)
 void LifecycleDeal::Inactivate(const Want &want, LifeCycleStateInfo &stateInfo,
     sptr<SessionInfo> sessionInfo)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
     auto abilityScheduler = GetScheduler();
     CHECK_POINTER(abilityScheduler);
     stateInfo.state = AbilityLifeCycleState::ABILITY_STATE_INACTIVE;
@@ -71,7 +71,7 @@ void LifecycleDeal::MoveToBackground(const Want &want, LifeCycleStateInfo &state
 
 void LifecycleDeal::ConnectAbility(const Want &want)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
     auto abilityScheduler = GetScheduler();
     CHECK_POINTER(abilityScheduler);
     abilityScheduler->ScheduleConnectAbility(want);
@@ -79,7 +79,7 @@ void LifecycleDeal::ConnectAbility(const Want &want)
 
 void LifecycleDeal::DisconnectAbility(const Want &want)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
     auto abilityScheduler = GetScheduler();
     CHECK_POINTER(abilityScheduler);
     abilityScheduler->ScheduleDisconnectAbility(want);
@@ -96,7 +96,7 @@ void LifecycleDeal::Terminate(const Want &want, LifeCycleStateInfo &stateInfo, s
 
 void LifecycleDeal::CommandAbility(const Want &want, bool reStart, int startId)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "startId:%{public}d", startId);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "startId:%{public}d", startId);
     auto abilityScheduler = GetScheduler();
     CHECK_POINTER(abilityScheduler);
     abilityScheduler->ScheduleCommandAbility(want, reStart, startId);
