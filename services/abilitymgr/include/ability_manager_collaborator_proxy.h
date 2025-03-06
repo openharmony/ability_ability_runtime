@@ -148,6 +148,20 @@ public:
     virtual void NotifyMissionBindPid(int32_t missionId, int32_t pid) override;
 
     virtual int32_t CheckStaticCfgPermission(const Want &want, bool isImplicit) override;
+
+    /**
+     * @brief Update caller if need.
+     * @param want target info
+     * @return 0 when update caller successfully or else failed.
+     */
+    virtual int32_t UpdatCallerIfNeed(Want &want) override;
+
+    /**
+     * @brief Update target if need.
+     * @param want target info
+     * @return 0 when update target successfully or else failed.
+     */
+    virtual int32_t UpdatTargetIfNeed(Want &want) override;
 private:
     static inline BrokerDelegator<AbilityManagerCollaboratorProxy> delegator_;
     int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
