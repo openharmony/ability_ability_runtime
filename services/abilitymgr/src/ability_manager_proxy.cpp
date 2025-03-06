@@ -6271,6 +6271,7 @@ int32_t AbilityManagerProxy::UnregisterHiddenStartObserver(const sptr<IHiddenSta
 }
 
 int32_t AbilityManagerProxy::QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
+                                                           const std::string &moduleName,
                                                            const std::string &hostBundleName,
                                                            int32_t &recordNum,
                                                            int32_t userId)
@@ -6286,6 +6287,11 @@ int32_t AbilityManagerProxy::QueryPreLoadUIExtensionRecord(const AppExecFwk::Ele
 
     if (!data.WriteParcelable(&element)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "write element fail");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteString(moduleName)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "write moduleName fail");
         return ERR_INVALID_VALUE;
     }
 
