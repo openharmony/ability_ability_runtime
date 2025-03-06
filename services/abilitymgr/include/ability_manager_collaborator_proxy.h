@@ -154,14 +154,14 @@ public:
      * @param want target info
      * @return 0 when update caller successfully or else failed.
      */
-    virtual int32_t UpdatCallerIfNeed(Want &want) override;
+    virtual int32_t UpdateCallerIfNeed(Want &want) override;
 
     /**
      * @brief Update target if need.
      * @param want target info
      * @return 0 when update target successfully or else failed.
      */
-    virtual int32_t UpdatTargetIfNeed(Want &want) override;
+    virtual int32_t UpdateTargetIfNeed(Want &want) override;
 private:
     static inline BrokerDelegator<AbilityManagerCollaboratorProxy> delegator_;
     int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
