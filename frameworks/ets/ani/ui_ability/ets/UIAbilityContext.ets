@@ -63,9 +63,9 @@ export namespace ConfigurationConstant {
 }
 export class Configuration {
   language?: string;
-  colorMode: ConfigurationConstant.ColorMode;
-  direction: ConfigurationConstant.Direction;
-  screenDensity: ConfigurationConstant.ScreenDensity;
+  colorMode?: ConfigurationConstant.ColorMode;
+  direction?: ConfigurationConstant.Direction;
+  screenDensity?: ConfigurationConstant.ScreenDensity;
   displayId: int;
   hasPointerDevice: boolean;
   fontId?: string;
