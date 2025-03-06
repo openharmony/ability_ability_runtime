@@ -3023,6 +3023,10 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
 
     do {
         if (HiddenStartObserverManager::GetInstance().IsHiddenStart(abilityRecord->GetApplicationInfo().uid)) {
+            if (!IsCallerInStatusBar(abilityRecord->GetInstanceKey())) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "no status bar while detaching.");
+                break;
+            }
             auto ret = DoCallerProcessDetachment(abilityRecord);
             if (ret != ERR_OK) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "caller detach to status bar failed, ret: %{public}d", ret);
