@@ -1184,7 +1184,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     std::string identifier = system::GetParameter(PARAM_ANCO_APP_IDENTIFIER, "");
     std::string targetBundleName = want.GetBundle();
     if (!identifier.empty() && !targetBundleName.empty() && identifier.find(targetBundleName) != std::string::npos) {
-        auto collaborator = GetCollaborator(collaboratorType::RESERVE_TYPE);
+        auto collaborator = GetCollaborator(CollaboratorType::RESERVE_TYPE);
         if (collaborator != nullptr) {
             Want tempWant = want;
             int32_t ret = collaborator->UpdateTargetIfNeed(tempWant);
@@ -1349,7 +1349,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             abilityRequest.want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, std::string(""));
         }
         if (StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
-            auto collaborator = GetCollaborator(collaboratorType::RESERVE_TYPE);
+            auto collaborator = GetCollaborator(CollaboratorType::RESERVE_TYPE);
             if (collaborator != nullptr) {
                 int32_t ret = collaborator->UpdateCallerIfNeed(abilityRequest.want);
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "UpdateCallerIfNeed end,ret:%{public}d", ret);
