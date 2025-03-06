@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ namespace AppExecFwk {
 enum class SpawnConnectionState { STATE_NOT_CONNECT, STATE_CONNECTED, STATE_CONNECT_FAILED };
 using HspList = std::vector<BaseSharedBundleInfo>;
 using DataGroupInfoList = std::vector<DataGroupInfo>;
-using JITPermissionsList = std::vector<std::string>;
+using JITPermissionsMap = std::map<std::string, std::string>;
 const int32_t MAX_FLAG_INDEX = 32;
 const int32_t MAX_PROC_NAME_LEN = 256;
 const int32_t START_FLAG_BASE = 1;
@@ -89,7 +89,7 @@ struct AppSpawnStartMsg {
     std::map<std::string, std::string> appEnv; // environment variable to be set to the process
     std::map<std::string, int32_t> fds;
     DataGroupInfoList dataGroupInfoList; // list of harmony shared package
-    JITPermissionsList jitPermissionsList; // list of JIT permissions
+    JITPermissionsMap jitPermissionsMap; // map of JIT permissions
 };
 
 constexpr auto LEN_PID = sizeof(pid_t);
