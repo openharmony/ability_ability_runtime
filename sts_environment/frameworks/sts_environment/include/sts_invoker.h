@@ -31,8 +31,8 @@ struct STSUncaughtExceptionInfo;
 struct STSRuntimeAPI {
     ets_int (*ETS_GetDefaultVMInitArgs)(EtsVMInitArgs *vmArgs);
     ets_int (*ETS_GetCreatedVMs)(EtsVM **vmBuf, ets_size bufLen, ets_size *nVms);
-    ets_int (*ETS_CreateVM)(EtsVM **pVm, EtsEnv **pEnv, EtsVMInitArgs *vmArgs);
     ani_status (*ANI_GetCreatedVMs)(ani_vm **vms_buffer, ani_size vms_buffer_length, ani_size *result);
+    ani_status (*ANI_CreateVM)(const ani_options *options, uint32_t version, ani_vm **result);
 };
 }
 
