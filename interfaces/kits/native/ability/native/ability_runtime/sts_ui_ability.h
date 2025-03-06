@@ -302,7 +302,7 @@ private:
 
 private:
     ani_ref CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
-    std::unique_ptr<STSNativeReference> CreateAppWindowStage();
+    ani_object CreateAppWindowStage();
     std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
         std::shared_ptr<AAFwk::Want> want, const std::string &moduleName, const std::string &srcPath);

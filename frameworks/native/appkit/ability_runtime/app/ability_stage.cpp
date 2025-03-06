@@ -43,7 +43,8 @@ std::shared_ptr<AbilityStage> AbilityStage::Create(
             return CJAbilityStage::Create(runtime, hapModuleInfo);
 #endif
         case Runtime::Language::STS:
-            return STSAbilityStage::Create(runtime, hapModuleInfo);
+            //return STSAbilityStage::Create(runtime, hapModuleInfo);
+            return std::make_shared<AbilityStage>();
         default:
             return std::make_shared<AbilityStage>();
     }
