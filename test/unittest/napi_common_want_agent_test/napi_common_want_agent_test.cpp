@@ -47,21 +47,30 @@ void NapiCommonWantAgentTest::TearDown()
 }
 
 /**
- * @tc.number: WrapWantAgent_0100andUnwrapWantAgent_0100
- * @tc.name: WrapWantAgent_0100andUnwrapWantAgent_0100
- * @tc.desc: WrapWantAgent and UnwrapWantAgent.
+ * @tc.number: WrapWantAgent_0100
+ * @tc.name: WrapWantAgent_0100
+ * @tc.desc: WrapWantAgent.
  */
-HWTEST_F(NapiCommonWantAgentTest, WrapWantAgent_0100andUnwrapWantAgent_0100, Function | MediumTest | Level1)
+HWTEST_F(NapiCommonWantAgentTest, WrapWantAgent_0100, Function | MediumTest | Level1)
 {
     napi_env env = nullptr;
     AbilityRuntime::WantAgent::WantAgent* wantAgent = nullptr;
     napi_finalize finalizeCb = nullptr;
     auto test = OHOS::AppExecFwk::WrapWantAgent(env, wantAgent, finalizeCb);
+    EXPECT_EQ(test, nullptr);
+}
 
+/**
+ * @tc.number: UnwrapWantAgent_0100
+ * @tc.name: UnwrapWantAgent_0100
+ * @tc.desc: UnwrapWantAgent.
+ */
+HWTEST_F(NapiCommonWantAgentTest, UnwrapWantAgent_0100, Function | MediumTest | Level1)
+{
+    napi_env env = nullptr;
     napi_value jsParam = nullptr;
     void **result = nullptr;
     OHOS::AppExecFwk::UnwrapWantAgent(env, jsParam, result);
-    EXPECT_EQ(test, nullptr);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
