@@ -298,6 +298,7 @@ void UIAbilityLifecycleManager::CheckSpecified(int32_t requestId, std::shared_pt
 {
     auto iter = specifiedFlagMap_.find(requestId);
     if (iter != specifiedFlagMap_.end()) {
+        UpdateSpecifiedFlag(uiAbilityRecord, iter->second);
         uiAbilityRecord->SetSpecifiedFlag(iter->second);
         specifiedFlagMap_.erase(iter);
     }
@@ -1230,7 +1231,8 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
     TAG_LOGD(AAFwkTag::ABILITYMGR, "windowLeft=%{public}d,windowTop=%{public}d,"
         "windowHeight=%{public}d,windowWidth=%{public}d,windowMode=%{public}d,"
         "supportWindowModes.size=%{public}zu,minWindowWidth=%{public}d,"
-        "minWindowHeight=%{public}d,maxWindowWidth=%{public}d,maxWindowHeight=%{public}d",
+        "minWindowHeight=%{public}d,maxWindowWidth=%{public}d,maxWindowHeight=%{public}d,"
+        "specifiedFlag=%{public}s",
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
@@ -1240,7 +1242,8 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MIN_WINDOW_WIDTH, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MIN_WINDOW_HEIGHT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MAX_WINDOW_WIDTH, 0),
-        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MAX_WINDOW_HEIGHT, 0));
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MAX_WINDOW_HEIGHT, 0),
+        sessionInfo->specifiedFlag.c_str());
     TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex:%{public}d, instanceKey:%{public}s",
         (sessionInfo->want).GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0), sessionInfo->instanceKey.c_str());
     auto abilityRecord = GetAbilityRecordByToken(abilityRequest.callerToken);
@@ -2110,7 +2113,8 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
         "windowLeft=%{public}d,windowTop=%{public}d,"
         "windowHeight=%{public}d,windowWidth=%{public}d,"
         "minWindowWidth=%{public}d,minWindowHeight=%{public}d,"
-        "maxWindowWidth=%{public}d,mixWindowHeight=%{public}d",
+        "maxWindowWidth=%{public}d,mixWindowHeight=%{public}d,"
+        "specifiedFlag=%{public}s",
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
@@ -2118,7 +2122,8 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MIN_WINDOW_WIDTH, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MIN_WINDOW_HEIGHT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MAX_WINDOW_WIDTH, 0),
-        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MAX_WINDOW_HEIGHT, 0));
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MAX_WINDOW_HEIGHT, 0),
+        sessionInfo->specifiedFlag.c_str());
     auto tmpSceneSession = iface_cast<Rosen::ISession>(rootSceneSession_);
     if (callerAbility != nullptr) {
         auto callerSessionInfo = callerAbility->GetSessionInfo();
@@ -3407,6 +3412,7 @@ bool UIAbilityLifecycleManager::HandleColdAcceptWantDone(const AAFwk::Want &want
         specifiedRequest.requestId, specifiedRequest.persistentId);
     auto uiAbilityRecord = iter->second;
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, false);
+    UpdateSpecifiedFlag(uiAbilityRecord, flag);
     uiAbilityRecord->SetSpecifiedFlag(flag);
     auto isShellCall = specifiedRequest.abilityRequest.want.GetBoolParam(IS_SHELL_CALL, false);
     uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
@@ -3462,6 +3468,28 @@ void UIAbilityLifecycleManager::HandleForegroundCollaborate(
     if (abilityRecord->GetAbilityState() == AbilityState::FOREGROUND) {
         abilityRecord->ScheduleCollaborate(abilityRequest.want);
     }
+}
+
+bool UIAbilityLifecycleManager::UpdateSpecifiedFlag(std::shared_ptr<AbilityRecord> uiAbilityRecord,
+    const std::string &flag)
+{
+    if (uiAbilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityRecord is nullptr");
+        return false;
+    }
+    auto sessionInfo = uiAbilityRecord->GetSessionInfo();
+    if (sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo is nullptr");
+        return false;
+    }
+    auto session = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
+    if (session == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "session is nullptr");
+        return false;
+    }
+    session->UpdateFlag(flag);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call session UpdateFlag, specifiedFlag: %{public}s", flag.c_str());
+    return true;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -498,6 +498,7 @@ private:
     std::vector<sptr<IRemoteObject>> PrepareTerminateAppAndGetRemainingInner(int32_t pid, const std::string &moduleName,
         const std::vector<sptr<IRemoteObject>> &tokens);
     void CancelPrepareTerminate(std::shared_ptr<AbilityRecord> abilityRecord);
+    bool UpdateSpecifiedFlag(std::shared_ptr<AbilityRecord> abilityRequest, const std::string &flag);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
