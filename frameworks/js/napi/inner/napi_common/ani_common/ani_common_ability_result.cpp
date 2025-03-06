@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "ability_runtime/sts_ability_context.h"
+#include "ani_common_ability_result.h"
+
 #include "ani_common_want.h"
-#include "sts_ability_result.h"
 #include "hilog_tag_wrapper.h"
 #include "want.h"
 
 namespace OHOS {
-namespace AbilityRuntime {
+namespace AppExecFwk {
 
 ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want &want)
 {
@@ -36,7 +36,7 @@ ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want
         return nullptr;
     }
 
-    if ((status = env->Class_FindMethod(cls, "<init>", "()V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "status : %{public}d", status);
         return nullptr;
     }
@@ -47,7 +47,7 @@ ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want
     }
     
     ani_method resultCodeSetter = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<set>result", nullptr, &resultCodeSetter)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<set>resultCode", nullptr, &resultCodeSetter)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "status : %{public}d", status);
     }
 
@@ -69,5 +69,5 @@ ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want
 
     return result_obj;
 }
-} // namespace AbilityRuntime
+} // namespace AppExecFwk
 } // namespace OHOS
