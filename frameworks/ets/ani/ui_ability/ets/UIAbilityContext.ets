@@ -14,30 +14,21 @@
  */
 
 import Want from './@ohos.app.ability.Want';
-import StartOptions from './@ohos.app.ability.StartOptions'
+import StartOptions from './@ohos.app.ability.StartOptions';
+import { BusinessError, AsyncCallback } from './@ohos.base';
+import { AbilityResult } from './abilityResult';
 
-export class BusinessError {
-  code: int;
-  data?: string;
-}
+export class AsyncCallbackWrapper<T> {
+  myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
 
-type MyFun<T> = (err: BusinessError, data: T) => void;
-export class AsyncCallback<T> {
-  myFun_:MyFun<T> = (err: BusinessError, data: T) => {}
-
-  constructor(myFun:MyFun<T>){
-    console.log("AsyncCallback");
+  constructor(myFun:AsyncCallback<T, void>){
+    console.log("AsyncCallbackWrapper");
     this.myFun_ = myFun;
   }
 
-  invoke(err: BusinessError, data: T) : void {
+  invoke(err: BusinessError<void>, data: T) : void {
     this.myFun_(err, data);
   }
-}
-
-export class AbilityResult {
-  resultCode: int;
-  want?: Want;
 }
 
 export namespace ConfigurationConstant {
@@ -136,25 +127,25 @@ export class UIAbilityContext {
   public abilityInfo?: AbilityInfo;
   // public windowStage?: window.WindowStage;
 
-  public native nativeStartAbilitySync(want: Want, callback: AsyncCallback<AbilityResult>): void;
-  public native nativeStartAbilitySync(want: Want, options: StartOptions, callback:AsyncCallback<AbilityResult>): void;
-  public native nativeStartAbilityForResult(want: Want, callback:AsyncCallback<AbilityResult>): void;
-  public native nativeStartAbilityForResult(want: Want, startOptions: StartOptions, callback:AsyncCallback<AbilityResult>): void;
-  public native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallback<AbilityResult>): void;
+  public native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<AbilityResult>): void;
+  public native nativeStartAbilitySync(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<AbilityResult>): void;
+  public native nativeStartAbilityForResult(want: Want, callback:AsyncCallbackWrapper<AbilityResult>): void;
+  public native nativeStartAbilityForResult(want: Want, startOptions: StartOptions, callback:AsyncCallbackWrapper<AbilityResult>): void;
+  public native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<AbilityResult>): void;
   public native reportDrawnCompletedSync(): void;
 
-  // startAbility(want: Want, callback: AsyncCallback<void>): void;
-  startAbility(want: Want, callback: MyFun<AbilityResult>):void{
+  // startAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
+  startAbility(want: Want, callback: AsyncCallback<AbilityResult, void>):void{
     console.log("call startAbility callback 111");
-    let myCall = new AsyncCallback<AbilityResult>(callback);
+    let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
     let p1 = launch this.nativeStartAbilitySync(want, myCall);
     console.log("call startAbility callback 222");
   }
 
-  // startAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void;
-  startAbility(want: Want, options: StartOptions, callback: MyFun<AbilityResult>):void{
+  // startAbility(want: Want, options: StartOptions, callback: AsyncCallbackWrapper<void>): void;
+  startAbility(want: Want, options: StartOptions, callback: AsyncCallback<AbilityResult, void>):void{
     console.log("call startAbility callback 111");
-    let myCall = new AsyncCallback<AbilityResult>(callback);
+    let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
     let p1 = launch this.nativeStartAbilitySync(want, options, myCall);
     console.log("call startAbility callback 222");
   }
@@ -162,8 +153,8 @@ export class UIAbilityContext {
   // startAbility(want: Want, options?: StartOptions): Promise<void>;
   startAbility(want: Want, options?: StartOptions): Promise<AbilityResult> {
     console.log("call startAbility callback 111");
-    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError)=>void):void => {
-      let myCall = new AsyncCallback<AbilityResult>((err: BusinessError, data: AbilityResult)=>{
+    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError<void>, data: AbilityResult)=>{
         if (err.code == 0) {
           resolve(data);
         } else {
@@ -180,53 +171,64 @@ export class UIAbilityContext {
     return p;
   }
 
-  startAbilityForResult(want: Want, callback: MyFun<AbilityResult>):void{
+  startAbilityForResult(want: Want, callback: AsyncCallback<AbilityResult, void>):void{
     console.log("call startAbilityForResult callback 111");
-    let myCall = new AsyncCallback<AbilityResult>(callback);
+    let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
     launch this.nativeStartAbilityForResult(want, myCall);
     console.log("call startAbilityForResult callback 222");
   }
 
-  startAbilityForResult(want: Want, startOptions: StartOptions, callback: MyFun<AbilityResult>):void{
+  startAbilityForResult(want: Want, startOptions: StartOptions, callback: AsyncCallback<AbilityResult, void>):void{
     console.log("call startAbilityForResult callback 111");
-    let myCall = new AsyncCallback<AbilityResult>(callback);
-    launch this.nativeStartAbilityForResult(want, myCall);
+    let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
+    launch this.nativeStartAbilityForResult(want, startOptions, myCall);
     console.log("call startAbilityForResult callback 222");
   }
 
-  startAbilityForResult(want: Want, startOptions?: StartOptions): Promise<AbilityResult>{
+  startAbilityForResult(want: Want): Promise<AbilityResult>{
     console.log("call startAbilityForResult callback 111");
-    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError)=>void):void => {
-      let myCall = new AsyncCallback<AbilityResult>((err: BusinessError, data: AbilityResult)=>{
+    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError<void>, data: AbilityResult)=>{
         if (err.code == 0) {
           resolve(data);
         } else {
           reject(err);
         }
       });
-      if (startOptions) {
-        launch this.nativeStartAbilityForResult(want, startOptions, myCall);
-      } else {
-        launch this.nativeStartAbilityForResult(want, myCall);
-      }
+      launch this.nativeStartAbilityForResult(want, myCall);
     });
     console.log("call startAbilityForResult callback 222");
     return p;
   }
 
+  startAbilityForResult(want: Want, startOptions: StartOptions): Promise<AbilityResult>{
+    console.log("call startAbilityForResult callback 111");
+    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError<void>, data: AbilityResult)=>{
+        if (err.code == 0) {
+          resolve(data);
+        } else {
+          reject(err);
+        }
+      });
+      launch this.nativeStartAbilityForResult(want, startOptions, myCall);
+    });
+    console.log("call startAbilityForResult callback 222");
+    return p;
+  }
 
-  terminateSelfWithResult(parameter: AbilityResult, callback: MyFun<AbilityResult>): void{
+  terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<AbilityResult, void>): void{
     
     console.log("call terminateSelfWithResult callback 111");
-    let myCall = new AsyncCallback<AbilityResult>(callback);
+    let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
     launch this.nativeTerminateSelfWithResult(parameter, myCall);
     console.log("call terminateSelfWithResult callback 222");
   }
 
   terminateSelfWithResult(parameter: AbilityResult): Promise<AbilityResult>{
     console.log("call terminateSelfWithResult callback 111");
-    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError)=>void):void => {
-      let myCall = new AsyncCallback<AbilityResult>((err: BusinessError, data: AbilityResult)=>{
+    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError<void>, data: AbilityResult)=>{
         if (err.code == 0) {
           resolve(data);
         } else {

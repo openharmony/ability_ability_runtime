@@ -13,14 +13,9 @@
  * limitations under the License.
  */
 
-import Want from './@ohos.app.ability.Want';
+export type AsyncCallback<T, E = void> = (err: BusinessError<E>, data: T)=> void;
 
-export interface AbilityResult {
-    resultCode: int;
-    want?: Want;
-}
-
-class AbilityResultInner implements AbilityResult {
-    resultCode: int;
-    want?: Want | undefined = {};
+export class BusinessError<T = void> {
+    code: int;
+    data?: T;
 }
