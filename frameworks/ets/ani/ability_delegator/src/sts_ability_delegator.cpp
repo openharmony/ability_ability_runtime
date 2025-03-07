@@ -193,5 +193,19 @@ void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg)
     delegator->Print(msgStr);
     return;
 }
+
+void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "AddAbilityMonitorASync");
+    //TODO parse monitorObj
+    std::shared_ptr<AppExecFwk::IAbilityMonitor> monitor = std::make_shared<AppExecFwk::IAbilityMonitor>("");
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    if (delegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
+        return;
+    }
+    delegator->AddAbilityMonitor(monitor);
+}
+
 } // namespace AbilityDelegatorSts
 } // namespace OHOS
