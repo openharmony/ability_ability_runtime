@@ -20,6 +20,8 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
+#include <thread>
+#include <chrono>
 
 #include "dynamic_loader.h"
 #include "event_handler.h"
@@ -31,15 +33,14 @@ namespace OHOS {
 namespace StsEnv {
 const char STS_GET_DEFAULT_VM_INIT_ARGS[] = "ETS_GetDefaultVMInitArgs";
 const char STS_GET_CREATED_VMS[] = "ETS_GetCreatedVMs";
-const char STS_CREATE_VM[] = "ETS_CreateVM";
+const char STS_CREATE_VM[] = "ANI_CreateVM";
 const char STS_ANI_GET_CREATEDVMS[] = "ANI_GetCreatedVMs";
 const char STS_LIB_PATH[] = "libarkruntime.so";
-const char STS_STD_LIB_PATH[] = "/system/etc/etsstdlib.abc";
-const char BOOT_PATH[] = "/system/etc/bootpath.json";
+const char BOOT_PATH[] = "/system/framework/bootpath.json";
 
 using GetDefaultVMInitArgsSTSRuntimeType = ets_int (*)(EtsVMInitArgs* vmArgs);
 using GetCreatedVMsSTSRuntimeType = ets_int (*)(EtsVM** vmBuf, ets_size bufLen, ets_size* nVms);
-using CreateVMSTSRuntimeType = ets_int (*)(EtsVM** pVm, EtsEnv** pEnv, EtsVMInitArgs* vmArgs);
+using CreateVMSTSRuntimeType = ani_status (*)(const ani_options *options, uint32_t version, ani_vm **result);
 using ANIGetCreatedVMsType = ani_status (*)(ani_vm **vms_buffer, ani_size vms_buffer_length, ani_size *result);
 
 const char* STSEnvironment::stsAppNSName = "sts_app";
@@ -49,7 +50,7 @@ const char* STSEnvironment::stsChipSDKNSName = "sts_chipsdk";
 
 STSRuntimeAPI STSEnvironment::lazyApis_{};
 
-bool STSEnvironment::LoadBootPathFile(std::vector<EtsVMOption> &etsVMOptions)
+bool STSEnvironment::LoadBootPathFile(std::string& bootfiles)
 {
     std::ifstream inFile;
     inFile.open(BOOT_PATH, std::ios::in);
@@ -77,15 +78,8 @@ bool STSEnvironment::LoadBootPathFile(std::vector<EtsVMOption> &etsVMOptions)
                 TAG_LOGE(AAFwkTag::STSRUNTIME, "json value of %{public}s is empty", key.c_str());
                 continue;
             }
-            std::ifstream abcfile(jsonValue);
-            if (!abcfile.good()) {
-                TAG_LOGE(AAFwkTag::STSRUNTIME, "file is not exist: %{public}s", jsonValue.c_str());
-                continue;
-            }
-            TAG_LOGI(AAFwkTag::STSRUNTIME, "load file: %{public}s", jsonValue.c_str());
-            char* charArray = new char[jsonValue.size() + 1];
-            std::strcpy(charArray, jsonValue.c_str());
-            etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, charArray });
+            bootfiles += ":";
+            bootfiles += jsonValue.c_str();
         }
     }
     inFile.close();
@@ -173,7 +167,7 @@ bool STSEnvironment::LoadSymbolCreateVM(void* handle, STSRuntimeAPI& apis)
         TAG_LOGE(AAFwkTag::STSRUNTIME, "runtime api not found: %{public}s", STS_CREATE_VM);
         return false;
     }
-    apis.ETS_CreateVM = reinterpret_cast<CreateVMSTSRuntimeType>(symbol);
+    apis.ANI_CreateVM = reinterpret_cast<CreateVMSTSRuntimeType>(symbol);
 
     return true;
 }
@@ -252,34 +246,32 @@ bool STSEnvironment::StartRuntime()
         TAG_LOGE(AAFwkTag::STSRUNTIME, "LoadRuntimeApis failed");
         return false;
     }
-    std::vector<EtsVMOption> etsVMOptions;
-    if (!LoadBootPathFile(etsVMOptions)) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "LoadBootPathFile failed");
+    std::string bootfiles = "/system/framework/arkoala.abc";
+    if (!LoadBootPathFile(bootfiles)) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME,"LoadBootPathFile failed");
         return false;
     }
-    etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, STS_STD_LIB_PATH });
-    TAG_LOGE(AAFwkTag::STSRUNTIME, "etsVMOptions.size() = %{public}d", etsVMOptions.size());
-    // etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, "/data/storage/el1/bundle/lib/modules.static.abc" });   // for Test
-    // etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, "/system/lib/sts/EntryAbility.abc" });
-    // etsVMOptions.push_back({ EtsOptionType::ETS_NATIVE_LIBRARY_PATH, (char*)strdup(std::string(appLibPath).c_str())
-    // });
-    // TODO: for test
-    // etsVMOptions.push_back({ EtsOptionType::ETS_BOOT_FILE, "/system/lib64/sts/ability_delegator.abc" });
 
-    etsVMOptions.push_back({ EtsOptionType::ETS_VERIFICATION_MODE, "on-the-fly" });
-    etsVMOptions.push_back({ EtsOptionType::ETS_NO_JIT, nullptr });
-    // etsVMOptions.push_back({ EtsOptionType::ETS_MOBILE_LOG, (void*)ArkMobileLog });
-    EtsVMInitArgs vmArgs;
-    vmArgs.version = ETS_NAPI_VERSION_1_0;
-    vmArgs.options = etsVMOptions.data();
-    vmArgs.nOptions = etsVMOptions.size();
-    EtsVM* vm = { nullptr };
-    EtsEnv* env = { nullptr };
-    if (lazyApis_.ETS_CreateVM(&vm, &env, &vmArgs) != ETS_OK) {
+    const std::string optionPrefix = "--ext:";
+    // Create boot-panda-files options
+    std::vector<ani_option> options;
+    std::string bootString = optionPrefix + "--boot-panda-files=" + bootfiles;
+    TAG_LOGI(AAFwkTag::STSRUNTIME, "bootString %{public}s", bootString.c_str());
+
+    options.push_back(ani_option{bootString.c_str(), nullptr});
+    std::string bootStringAsyn = optionPrefix + "--coroutine-enable-features:ani-drain-queue";
+    TAG_LOGI(AAFwkTag::STSRUNTIME, "bootStringAsyn %{public}s", bootStringAsyn.c_str());
+
+    options.push_back(ani_option{bootStringAsyn.c_str(), nullptr});
+    options.push_back(ani_option{"--ext:--log-level=info", nullptr});
+
+    ani_options optionsPtr = {options.size(), options.data()};
+    auto status = lazyApis_.ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.ani_vm);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "ANI_CreateVM failed %{public}d", status);
         return false;
     }
-    vmEntry_.vm = vm;
-    vmEntry_.env = env;
+ 
     ani_size nrVMs;
     if (lazyApis_.ANI_GetCreatedVMs(&vmEntry_.ani_vm, 1, &nrVMs) != ANI_OK) {
         return false;
@@ -433,15 +425,6 @@ bool STSEnvironment::ReInitUVLoop()
         return impl_->ReInitUVLoop();
     }
     return false;
-}
-
-EtsVM* STSEnvironment::GetEtsVM()
-{
-    return vmEntry_.vm;
-}
-EtsEnv* STSEnvironment::GetEtsEnv()
-{
-    return vmEntry_.env;
 }
 
 void STSEnvironment::ReInitStsEnvImpl(std::unique_ptr<StsEnvironmentImpl> impl)
