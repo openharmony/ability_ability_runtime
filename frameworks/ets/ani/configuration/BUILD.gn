@@ -78,5 +78,14 @@ generate_static_abc("configuration_abc") {
   out_puts = [ "$target_out_dir/configuration.abc" ]
 
   is_boot_abc = "True"
-  device_dst_file = "system/framework/configuration.abc"
+  device_dst_file = "/system/framework/configuration.abc"
+  cache_path = "$target_out_dir/cache"
+}
+
+ohos_prebuilt_etc("configuration_abc_etc") {
+  source = "$target_out_dir/configuration.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":configuration_abc" ]
 }
