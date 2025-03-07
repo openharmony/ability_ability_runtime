@@ -467,6 +467,7 @@ group("unittest") {
       "dataobs_mgr_stub_test:unittest",
       "deeplink_reserve_config_test:unittest",
       "dfr_test:unittest",
+      "dialog_session_manager_test:unittest",
       "dlp_state_item_test:unittest",
       "dlp_utils_test:unittest",
       "dummy_values_bucket_test:unittest",
