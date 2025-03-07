@@ -17,7 +17,13 @@
         "@ohos.app.ability.Want": [
           "./ets/@ohos.app.ability.Want.ets"
         ],
-		    "UIAbilityContext": [
+        "@ohos.base": [
+          "./ets/@ohos.base.ets"
+        ],
+        "abilityResult": [
+          "./ets/abilityResult.ets"
+        ],
+        "UIAbilityContext": [
           "./ets/UIAbilityContext.ets"
         ]
       },

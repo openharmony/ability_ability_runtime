@@ -31,6 +31,7 @@ ohos_shared_library("napi_common") {
 
   sources = [
     "ani_common/ani_common_ability_info.cpp",
+    "ani_common/ani_common_ability_result.cpp",
     "ani_common/ani_common_configuration.cpp",
     "ani_common/ani_common_start_options.cpp",
     "ani_common/ani_common_util.cpp",

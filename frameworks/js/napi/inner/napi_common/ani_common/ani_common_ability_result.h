@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNNTIME_ABILITY_RESULT_H
-#define OHOS_ABILITY_RUNNTIME_ABILITY_RESULT_H
+#ifndef OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_RESULT_H
+#define OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_RESULT_H
 
-#include "ability_runtime/sts_ability_context.h"
 #include "sts_runtime.h"
 #include "want.h"
 
@@ -28,4 +27,4 @@ ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want
 } // namespace AppExecFwk
 } // namespace OHOS
 
-#endif // OHOS_ABILITY_RUNNTIME_ABILITY_RESULT_H
+#endif // OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_RESULT_H
