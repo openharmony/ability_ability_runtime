@@ -79,19 +79,42 @@ ohos_shared_library("ability_delegator_registry_ani_kit") {
 }
 
 generate_static_abc("ability_delegator_abc") {
-  arktsconfig = "${ability_runtime_path}/frameworks/ets/ani/ability_delegator/ability_delegator_config.json"
+  base_url = "./ets"
+
+  files = [
+    "./ets/@ohos.app.ability.abilityDelegatorRegistry.ets",
+    "./ets/@ohos.ability.AbilityDelegator.ets",
+    "./ets/@ohos.ability.abilityDelegatorArgs.ets",
+    "./ets/@ohos.application.testRunner.ets",
+    "./ets/AbilityMonitor.ets",
+    "./ets/AbilityStageMonitor.ets",
+  ]
+
+  paths_keys = [
+    "@ohos.ability.AbilityDelegator",
+    "@ohos.ability.abilityDelegatorArgs",
+    "AbilityMonitor",
+    "AbilityStageMonitor",
+  ]
+
+  paths_values = [
+    "./ets/@ohos.ability.AbilityDelegator.ets",
+    "./ets/@ohos.ability.abilityDelegatorArgs.ets",
+    "./ets/AbilityMonitor.ets",
+    "./ets/AbilityStageMonitor.ets",
+  ]
+
   dst_file = "$target_out_dir/ability_delegator.abc"
   out_puts = [ "$target_out_dir/ability_delegator.abc" ]
 
   is_boot_abc = "True"
   device_dst_file = "/system/framework/ability_delegator.abc"
-  cache_path = "$target_out_dir/cache"
 }
 
 ohos_prebuilt_etc("ability_delegator_abc_etc") {
   source = "$target_out_dir/ability_delegator.abc"
+  deps = [ ":ability_delegator_abc" ]
   module_install_dir = "framework"
   subsystem_name = "ability"
   part_name = "ability_runtime"
-  deps = [ ":ability_delegator_abc" ]
 }

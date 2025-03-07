@@ -33,8 +33,8 @@ static ani_object GetAbilityDelegator(ani_env *env, [[maybe_unused]]ani_class an
         return {};
     }
 
-    auto delgator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
-    if (delgator == nullptr) {
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
+    if (delegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
         return {};
     }
