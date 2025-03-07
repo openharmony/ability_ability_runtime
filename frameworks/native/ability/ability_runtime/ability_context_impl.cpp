@@ -1115,8 +1115,8 @@ ErrCode AbilityContextImpl::CreateModalUIExtensionWithApp(const AAFwk::Want &wan
     if (want.GetBoolParam(DISPOSED_PROHIBIT_BACK, false)) {
         config.isProhibitBack = true;
     }
-    if (want.GetBoolParam(IS_WINDOWMODE_FOLLOWHOST, false)) {
-        config.isWindowModeFollowHost = true;
+    if (want.HasParameter(IS_WINDOWMODE_FOLLOWHOST)) {
+        config.isWindowModeFollowHost = want.GetBoolParam(IS_WINDOWMODE_FOLLOWHOST, false);
     }
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
