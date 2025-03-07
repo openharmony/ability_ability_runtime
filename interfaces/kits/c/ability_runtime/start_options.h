@@ -316,7 +316,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetStartOptionsStartWindowBackgroundC
  * @brief Set start window modes for start options.
  *
  * @param startOptions The options to set start window modes for.
- * @param supportWindowModes The start window modes.
+ * @param supportedWindowModes The start window modes.
  * @param size The size of start window modes.
  * @return The error code.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
@@ -324,15 +324,15 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetStartOptionsStartWindowBackgroundC
  *              or size is invalid.
  * @since 16
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_SetStartOptionsSupportWindowMode(
-    AbilityRuntime_StartOptions *startOptions, AbilityRuntime_SupportWindowMode *supportWindowModes,
+AbilityRuntime_ErrorCode OH_AbilityRuntime_SetStartOptionsSupportedWindowModes(
+    AbilityRuntime_StartOptions *startOptions, AbilityRuntime_SupportedWindowMode *supportedWindowModes,
     size_t size);
 
 /**
  * @brief Get start window modes from start options.
  *
  * @param startOptions The options to get start window modes from.
- * @param supportWindowModes The obtained start window modes.
+ * @param supportedWindowModes The obtained start window modes.
  * @param size The size of the returned start window modes.
  * @return The error code.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
@@ -341,8 +341,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_SetStartOptionsSupportWindowMode(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if error occurred in malloc.
  * @since 16
  */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_GetStartOptionsSupportWindowMode(
-    AbilityRuntime_StartOptions *startOptions, AbilityRuntime_SupportWindowMode **supportWindowModes,
+AbilityRuntime_ErrorCode OH_AbilityRuntime_GetStartOptionsSupportedWindowModes(
+    AbilityRuntime_StartOptions *startOptions, AbilityRuntime_SupportedWindowMode **supportedWindowModes,
     size_t &size);
 
 /**

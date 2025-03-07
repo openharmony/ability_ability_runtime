@@ -235,34 +235,12 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetCloudFileDir(
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_CROSS_APP} if the caller tries to start a different application.
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if internal error occurs.
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY} if the caller is not top ability.
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED}
+ *          if the number of app instances reached the limit (since 16).
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED}
+ *          if the APP_INSTANCE_KEY cannot be specified (since 16).
  * For details, see {@link AbilityRuntime_ErrorCode}.
  * @since 15
- */
-/**
- * @brief Starts self UIAbility.
- *
- * @permission {@code ohos.permission.NDK_START_SELF_UI_ABILITY}
- * @param want The arguments passed to start self UIAbility.
- * For details, see {@link AbilityBase_Want}.
- * @param options The start options passed to start self UIAbility.
- * For details, see {@link AbilityRuntime_StartOptions}.
- * @return Returns {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the call is successful.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED} if the caller has no correct permission.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the arguments provided is invalid.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED} if the device does not support starting self uiability.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY} if the target ability does not exist.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE} if the ability type is incorrect.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_CROWDTEST_EXPIRED} if the crowdtesting application expires.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_WUKONG_MODE} if the ability cannot be started in Wukong mode.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_CONTROLLED} if the app is controlled.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_EDM_CONTROLLED} if the app is controlled by EDM.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_CROSS_APP} if the caller tries to start a different application.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if internal error occurs.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY} if the caller is not foreground process.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT} if the number of app instances reached the limit.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT} if the APP_INSTANCE_KEY cannot be specified.
- * For details, see {@link AbilityRuntime_ErrorCode}.
- * @since 16
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbility(AbilityBase_Want *want);
 
@@ -287,13 +265,14 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbility(AbilityBase_Want *
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_CROSS_APP} if the caller tries to start a different application.
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if internal error occurs.
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY} if the caller is not foreground process.
- * Returns {@link ABILITY_RUNTIME_ERROR_SET_VISIBILITY_DISABLED} if setting visibility is disabled.
+ * Returns {@link ABILITY_RUNTIME_ERROR_VISIBILITY_SETTING_DISABLED} if setting visibility is disabled.
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_MULTI_APP_NOT_SUPPORTED}
  *          if the app clone or multi-instance is not supported.
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_INVALID_APP_INSTANCE_KEY} if the app instance key is invalid.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT} if the number of app instances reached the limit.
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED} if the number of app instances reached the limit.
  * Returns {@link ABILITY_RUNTIME_ERROR_MULTI_INSTANCE_NOT_SUPPORTED} if the multi-instance is not supported.
- * Returns {@link ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT} if the APP_INSTANCE_KEY cannot be specified.
+ * Returns {@link ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED}
+ *          if the APP_INSTANCE_KEY cannot be specified.
  * For details, see {@link AbilityRuntime_ErrorCode}.
  * @since 16
  */
