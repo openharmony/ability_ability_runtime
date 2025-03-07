@@ -14,11 +14,18 @@
  */
 
 export namespace AbilityConstant {
-  export class LaunchParam {
+  export interface LaunchParam {
     launchReason: LaunchReason;
     launchReasonMessage?: string;
     lastExitReason: LastExitReason;
     lastExitMessage: string;
+  }
+
+  class LaunchParamImpl implements AbilityConstant.LaunchParam {
+    launchReason: AbilityConstant.LaunchReason;
+    launchReasonMessage?: string|undefined;
+    lastExitReason: AbilityConstant.LastExitReason;
+    lastExitMessage: string = '';
   }
 
   export enum LaunchReason {

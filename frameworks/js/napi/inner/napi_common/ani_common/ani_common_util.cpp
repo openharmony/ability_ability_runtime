@@ -243,22 +243,38 @@ bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::s
     ani_string string = nullptr;
     ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
 
+    TAG_LOGE(AAFwkTag::JSNAPI, "fieldName : %{public}s", fieldName.c_str());
+
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return false;
     }
-    status = env->String_NewUTF8(value.c_str(), value.size(), &string);
-    if (status != ANI_OK) {
+
+    if (value.empty()) {
+        ani_ref nullRef = nullptr;
+        if ((status = env->GetNull(&nullRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+            return false;
+        }
+        if ((status = env->Object_SetField_Ref(object, field, nullRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+            return false;
+        }
+        return true;
+    }
+
+    if ((status = env->String_NewUTF8(value.c_str(), value.size(), &string)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return false;
     }
-    status = env->Object_SetField_Ref(object, field, string);
-    if (status != ANI_OK) {
+    
+    if ((status = env->Object_SetField_Ref(object, field, string)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return false;
     }
     return true;
 }
+
 
 bool SetFieldDouble(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, double value)
 {
