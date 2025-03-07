@@ -45,7 +45,6 @@ public:
 
 private:
     static bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
-    static ani_object WrapAbilityResult(ani_env *env, ani_int code);
     static ani_object WrapBusinessError(ani_env *env, ani_int code);
     static void InheritWindowMode(ani_env* env, ani_object aniObj, AAFwk::Want& want);
     static void StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
