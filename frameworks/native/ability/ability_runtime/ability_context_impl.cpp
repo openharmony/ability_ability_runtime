@@ -43,7 +43,7 @@ constexpr const char* START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
 constexpr const char* UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
 constexpr const char* FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
 constexpr const char* DISPOSED_PROHIBIT_BACK = "APPGALLERY_APP_DISPOSED_PROHIBIT_BACK";
-constexpr const char* IS_WINDOWMODE_FOLLOWHOST = "ohos.uec.params.isWindowModeFollowHost";
+constexpr const char* IS_WINDOWMODE_FOLLOWHOST = "APPGALLERY_APP_WINDOW_MODE_FOLLOW_HOST";
 
 struct RequestResult {
     int32_t resultCode {0};
