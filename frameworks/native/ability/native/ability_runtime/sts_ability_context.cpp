@@ -127,6 +127,11 @@ bool StsAbilityContext::AsyncCallback(ani_env *env, ani_object call, ani_object 
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         return false;
     }
+    if (result == nullptr) {
+        ani_ref nullRef = nullptr;
+        env->GetNull(&nullRef);
+        result = reinterpret_cast<ani_object>(nullRef);
+    }
     if ((status = env->Object_CallMethod_Void(call, method, error, result)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         return false;
