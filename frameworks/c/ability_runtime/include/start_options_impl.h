@@ -51,10 +51,10 @@ public:
     AbilityRuntime_ErrorCode SetStartOptionsStartWindowBackgroundColor(const char *startWindowBackgroundColor);
     AbilityRuntime_ErrorCode GetStartOptionsStartWindowBackgroundColor(char **startWindowBackgroundColor,
         size_t &size);
-    AbilityRuntime_ErrorCode SetStartOptionsSupportWindowMode(AbilityRuntime_SupportWindowMode *supportWindowModes,
-        size_t size);
-    AbilityRuntime_ErrorCode GetStartOptionsSupportWindowMode(AbilityRuntime_SupportWindowMode **supportWindowModes,
-        size_t &size);
+    AbilityRuntime_ErrorCode SetStartOptionsSupportedWindowModes(
+        AbilityRuntime_SupportedWindowMode *supportedWindowModes, size_t size);
+    AbilityRuntime_ErrorCode GetStartOptionsSupportedWindowModes(
+        AbilityRuntime_SupportedWindowMode **supportedWindowModes, size_t &size);
     AbilityRuntime_ErrorCode SetStartOptionsMinWindowWidth(int32_t minWindowWidth);
     AbilityRuntime_ErrorCode GetStartOptionsMinWindowWidth(int32_t &minWindowWidth);
     AbilityRuntime_ErrorCode SetStartOptionsMaxWindowWidth(int32_t maxWindowWidth);

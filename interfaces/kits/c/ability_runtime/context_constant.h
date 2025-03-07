@@ -87,7 +87,7 @@ typedef enum {
     /**
      * Full screen mode.
      */
-    ABILITY_RUNTIME_WINDOW_MODE_FULLSCREEN = 1,
+    ABILITY_RUNTIME_WINDOW_MODE_FULL_SCREEN = 1,
 } AbilityRuntime_WindowMode;
 
 /**
@@ -99,16 +99,16 @@ typedef enum {
     /**
      * Indicates supported window mode of full screen mode
      */
-    ABILITY_RUNTIME_SUPPORT_WINDOW_MODE_FULL_SCREEN = 0,
+    ABILITY_RUNTIME_SUPPORTED_WINDOW_MODE_FULL_SCREEN = 0,
     /**
      * Indicates supported window mode of split mode
      */
-    ABILITY_RUNTIME_SUPPORT_WINDOW_MODE_SPLIT = 1,
+    ABILITY_RUNTIME_SUPPORTED_WINDOW_MODE_SPLIT = 1,
     /**
      * Indicates supported window mode of floating mode
      */
-    ABILITY_RUNTIME_SUPPORT_WINDOW_MODE_FLOATING = 2,
-} AbilityRuntime_SupportWindowMode;
+    ABILITY_RUNTIME_SUPPORTED_WINDOW_MODE_FLOATING = 2,
+} AbilityRuntime_SupportedWindowMode;
 
 #ifdef __cplusplus
 } // extern "C"
