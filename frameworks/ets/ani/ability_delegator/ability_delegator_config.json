@@ -13,6 +13,12 @@
         ],
         "@ohos.ability.abilityDelegatorArgs": [
           "./ets/@ohos.ability.abilityDelegatorArgs.ets"
+        ],
+        "AbilityMonitor": [
+          "./ets/AbilityMonitor.ets"
+        ],
+        "AbilityStageMonitor": [
+          "./ets/AbilityStageMonitor.ets"
         ]
       },
       "outDir": "../cache",
