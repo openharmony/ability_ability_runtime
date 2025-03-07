@@ -380,6 +380,7 @@ group("unittest") {
       "ability_running_info_test:unittest",
       "ability_running_record_test:unittest",
       "ability_runtime_error_util_test:unittest",
+      "ability_runtime_start_options_test:unittest",
       "ability_scheduler_proxy_test:unittest",
       "ability_scheduler_stub_test:unittest",
       "ability_service_extension_test:unittest",
