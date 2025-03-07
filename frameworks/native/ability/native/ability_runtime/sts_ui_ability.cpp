@@ -136,35 +136,6 @@ void StsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath);
 }
 
-std::shared_ptr<STSNativeReference> LoadModule(ani_env *env)
-{
-    std::shared_ptr<STSNativeReference> stsNativeReference = std::make_shared<STSNativeReference>();
-    ani_class cls = nullptr;
-    ani_status status = ANI_ERROR;
-    if ((status = env->FindClass("LEntryAbility/EntryAbility;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
-    }
-
-    ani_method entryMethod = nullptr;
-    if (env->Class_FindMethod(cls, "<ctor>", ":V", &entryMethod) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "Class_FindMethod ctor failed");
-    }
-
-    ani_object entryObject = nullptr;
-    if (env->Object_New(cls, entryMethod, &entryObject) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "Object_New AbcRuntimeLinker failed");
-    }
-
-    ani_ref entryObjectRef = nullptr;
-    if (env->GlobalReference_Create(entryObject, &entryObjectRef) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "GlobalReference_Create failed");
-    }
-    stsNativeReference->aniCls = cls;
-    stsNativeReference->aniObj = entryObject;
-    stsNativeReference->aniRef = entryObjectRef;
-    return stsNativeReference;
-}
-
 void StsUIAbility::UpdateAbilityObj(
     std::shared_ptr<AbilityInfo> abilityInfo, const std::string &moduleName, const std::string &srcPath)
 {
@@ -173,8 +144,6 @@ void StsUIAbility::UpdateAbilityObj(
     stsAbilityObj_ = stsRuntime_.LoadModule(
         moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
         false, abilityInfo->srcEntrance);
-    // auto env = stsRuntime_.GetAniEnv();
-    // stsAbilityObj_ = LoadModule(env);
 }
 
 void StsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want,
@@ -313,8 +282,7 @@ void StsUIAbility::OnStop()
     if (applicationContext != nullptr) {
         // TODO
     }
-    const char *signature = ":V";
-    CallObjectMethod(false, "onDestroy", signature);
+    CallObjectMethod(false, "onDestroy", nullptr);
     OnStopCallback();
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -340,6 +308,7 @@ void StsUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callback
     if (applicationContext != nullptr) {
         // TODO
     }
+    CallObjectMethod(false, "onDestroy", nullptr);
     std::weak_ptr<UIAbility> weakPtr = shared_from_this();
     auto asyncCallback = [abilityWeakPtr = weakPtr]() {
         auto ability = abilityWeakPtr.lock();
@@ -1208,9 +1177,9 @@ void StsUIAbility::UpdateStsWindowStage(ani_ref windowStage)
         if ((status = env->Class_FindField(cls, "windowStage", &field)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         }
-        ani_ref undefinedRef = nullptr; // env->
-        env->GetUndefined(&undefinedRef);
-        if ((status = env->Object_SetField_Ref(contextObj, field, undefinedRef)) != ANI_OK) {
+        ani_ref nullRef = nullptr;
+        env->GetNull(&nullRef);
+        if ((status = env->Object_SetField_Ref(contextObj, field, nullRef)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         }
         return;

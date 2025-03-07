@@ -22,6 +22,34 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
+#define SETTER_METHOD_NAME(property) "<set>" #property
+
+void ClassSetter(
+    ani_env* env, ani_class cls, ani_object object, const char* setterName, ...)
+{
+    ani_status status = ANI_ERROR;
+    ani_method setter;
+    if ((status = env->Class_FindMethod(cls, setterName, nullptr, &setter)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    }
+    va_list args;
+    va_start(args, setterName);
+    if ((status = env->Object_CallMethod_Void_V(object, setter, args)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    }
+    va_end(args);
+}
+
+ani_string GetAniString(ani_env *env, const std::string &str)
+{
+    ani_string aniStr = nullptr;
+    ani_status status = env->String_NewUTF8(str.c_str(), str.size(), &aniStr);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return nullptr;
+    }
+    return aniStr;
+}
 
 ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchParam)
 {
@@ -52,15 +80,9 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
         return nullptr;
     }
     // TODO
-    env->Class_FindField(cls, "lastExitMessage", &field);
-    env->String_NewUTF8(launchParam.lastExitMessage.c_str(), launchParam.lastExitMessage.size(), &string);
-    env->Object_SetField_Ref(object, field, string);
-
-    env->Class_FindField(cls, "launchReason", &field);
-    env->Object_SetField_Int(object, field, launchParam.launchReason);
-
-    env->Class_FindField(cls, "lastExitReason", &field);
-    env->Object_SetField_Int(object, field, launchParam.lastExitReason);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(lastExitMessage), GetAniString(env, launchParam.lastExitMessage));
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(launchReason), launchParam.launchReason);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(lastExitReason), launchParam.lastExitReason);
 
     return object;
 }
