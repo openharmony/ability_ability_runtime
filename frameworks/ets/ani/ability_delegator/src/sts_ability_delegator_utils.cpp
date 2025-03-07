@@ -26,12 +26,25 @@ ani_object CreateStsAbilityDelegator(ani_env *aniEnv)
     TAG_LOGI(AAFwkTag::DELEGATOR, "CreateJsAbilityDelegator");
     ani_class abilityDelegator = nullptr;
     ani_status status = ANI_ERROR;
-    status = aniEnv->FindClass("L@ohos/ability/abilityDelegatorArgs/AbilityDelegatorArgsInner;", &abilityDelegator);
+    status = aniEnv->FindClass("L@ohos/ability/AbilityDelegator/AbilityDelegatorInner;", &abilityDelegator);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegator failed status : %{public}d", status);
         return {};
     }
     TAG_LOGI(AAFwkTag::DELEGATOR, "find AbilityDelegator success");
+
+    std::array delegatorFunctions = {
+        ani_native_function {"getAppContext", nullptr, reinterpret_cast<void *>(GetAppContext)},
+        ani_native_function {"executeShellCommandsync", nullptr, reinterpret_cast<void *>(ExecuteShellCommand)},
+        ani_native_function {"finishTestSync", nullptr, reinterpret_cast<void *>(FinishTestSync)},
+        ani_native_function {"printSync", "Lstd/core/String;:V", reinterpret_cast<void *>(PrintSync)},
+        ani_native_function {"addAbilityMonitorASync", nullptr, reinterpret_cast<void *>(AddAbilityMonitorASync)}
+    };
+    status = aniEnv->Class_BindNativeMethods(abilityDelegator, delegatorFunctions.data(), delegatorFunctions.size());
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_BindNativeMethods failed status : %{public}d", status);
+        return {};
+    }
 
     ani_method method = nullptr;
     status = aniEnv->Class_FindMethod(abilityDelegator, "<ctor>", ":V", &method);
@@ -46,19 +59,8 @@ ani_object CreateStsAbilityDelegator(ani_env *aniEnv)
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status : %{public}d", status);
         return {};
     }
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Object_New success");
 
-    std::array delegatorFunctions = {
-        ani_native_function {"getAppContext", ":L@ohos/ability/AbilityDelegator/Context;",
-            reinterpret_cast<void *>(GetAppContext)},
-        ani_native_function {"executeShellCommandsync", "Lstd/core/String;I:LShellCmdResult;",
-            reinterpret_cast<void *>(ExecuteShellCommand)},
-        ani_native_function {"finishTestSync", "Lstd/core/String;I:I;", reinterpret_cast<void *>(FinishTestSync)},
-        ani_native_function {"printSync", "Lstd/core/String;:V", reinterpret_cast<void *>(PrintSync)},
-        ani_native_function {"addAbilityMonitorASync", nullptr, reinterpret_cast<void *>(AddAbilityMonitorASync)}
-        // TODO: other api except for printSync
-    };
-    aniEnv->Class_BindNativeMethods(abilityDelegator, delegatorFunctions.data(), delegatorFunctions.size());
+    TAG_LOGI(AAFwkTag::DELEGATOR, "CreateStsAbilityDelegator success");
     return object;
 }
 

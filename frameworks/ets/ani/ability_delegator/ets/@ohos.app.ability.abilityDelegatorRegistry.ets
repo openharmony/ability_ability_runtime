@@ -17,7 +17,7 @@ import AbilityDelegator from '@ohos.ability.AbilityDelegator';
 import AbilityDelegatorArgs from '@ohos.ability.abilityDelegatorArgs';
 
 export default namespace abilityDelegatorRegistry {
-    //static { loadLibrary("ability_delegator_registry_ani_kit.z"); }
+    loadLibrary("ability_delegator_registry_ani_kit.z")
     export native function getAbilityDelegator(): AbilityDelegator;
     export native function getArguments(): AbilityDelegatorArgs;
 }

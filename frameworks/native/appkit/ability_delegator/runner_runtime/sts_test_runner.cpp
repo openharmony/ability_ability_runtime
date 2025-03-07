@@ -18,8 +18,6 @@
 #include "ability_delegator_registry.h"
 #include "hilog_tag_wrapper.h"
 #include "runner_runtime/sts_test_runner.h"
-// TODO: for test, cause namespace don't support static loadlibrary
-#include "sts_ability_delegator_registry.h"
 
 namespace OHOS {
 namespace RunnerRuntime {
@@ -110,10 +108,6 @@ STSTestRunner::STSTestRunner(
             bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE,
             false, srcPath_);
     }
-
-    // TODO: for test, cause namespace don't support static loadlibrary
-    auto aniEnv = stsRuntime_.GetAniEnv();
-    AbilityDelegatorSts::StsAbilityDelegatorRegistryInit(aniEnv);
 }
 
 STSTestRunner::~STSTestRunner() = default;
@@ -121,114 +115,6 @@ STSTestRunner::~STSTestRunner() = default;
 bool STSTestRunner::Initialize()
 {
     return true;
-}
-
-void STSTestRunner::CallOnPrepareMethod(ani_env* aniEnv)
-{
-    if (aniEnv->ResetError() != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "ResetError failed");
-    }
-
-    TAG_LOGI(AAFwkTag::DELEGATOR, "get testrunner");
-    // find testRunner class
-    ani_class testRunner = nullptr;
-    ani_status status = ANI_ERROR;
-    status = aniEnv->FindClass("L@test/OHTestRunner;", &testRunner);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find OHTestRunner failed status : %{public}d", status);
-        return;
-    }
-
-    // find the target ctor method
-    TAG_LOGI(AAFwkTag::DELEGATOR, "find OHTestRunner success");
-    ani_method method = nullptr;
-    status = aniEnv->Class_FindMethod(testRunner, "<ctor>", ":V", &method);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status : %{public}d", status);
-        return;
-    }
-
-    // new a object
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Class_FindMethod ctor success");
-    ani_object object = nullptr;
-    status = aniEnv->Object_New(testRunner, method, &object);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status : %{public}d", status);
-        return;
-    }
-
-    // find and call the method
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Object_New success");
-    ani_method onPrepareMethod = nullptr;
-    status = aniEnv->Class_FindMethod(testRunner, "onPrepare", ":V", &onPrepareMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "get onPrepare failed status : %{public}d", status);
-        return;
-    }
-
-    TAG_LOGI(AAFwkTag::DELEGATOR, "get onPrepare success");
-    ani_int result;
-    status = aniEnv->Object_CallMethod_Void(object, onPrepareMethod, &result);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_CallMethod_Void failed status : %{public}d", status);
-        return;
-    }
-
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Object_CallMethod_Void success");
-}
-
-void STSTestRunner::CallOnRunMethod(ani_env* aniEnv)
-{
-    if (aniEnv->ResetError() != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "ResetError failed");
-    }
-
-    TAG_LOGI(AAFwkTag::DELEGATOR, "get testrunner");
-    // find testRunner class
-    ani_class testRunner = nullptr;
-    ani_status status = ANI_ERROR;
-    status = aniEnv->FindClass("L@test/OHTestRunner;", &testRunner);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find OHTestRunner failed status : %{public}d", status);
-        return;
-    }
-
-    // find the target ctor method
-    TAG_LOGI(AAFwkTag::DELEGATOR, "find OHTestRunner success");
-    ani_method method = nullptr;
-    status = aniEnv->Class_FindMethod(testRunner, "<ctor>", ":V", &method);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status : %{public}d", status);
-        return;
-    }
-
-    // new a object
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Class_FindMethod ctor success");
-    ani_object object = nullptr;
-    status = aniEnv->Object_New(testRunner, method, &object);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status : %{public}d", status);
-        return;
-    }
-
-    // find and call the method
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Object_New success");
-    ani_method onRunMethod = nullptr;
-    status = aniEnv->Class_FindMethod(testRunner, "onRun", ":V", &onRunMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "get onRun failed status : %{public}d", status);
-        return;
-    }
-
-    TAG_LOGI(AAFwkTag::DELEGATOR, "get onRun success");
-    ani_int result;
-    status = aniEnv->Object_CallMethod_Void(object, onRunMethod, &result);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_CallMethod_Void failed status : %{public}d", status);
-        return;
-    }
-
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Object_CallMethod_Void success");
 }
 
 void STSTestRunner::Prepare()
@@ -257,11 +143,6 @@ void STSTestRunner::Prepare()
             TAG_LOGI(AAFwkTag::DELEGATOR, "Object_CallMethod_Void onPrepare success");
         }
     }
-
-    // TODO: for test to support EntryAbility.sts
-    TAG_LOGI(AAFwkTag::DELEGATOR, "use default entryability");
-    auto aniEnv = stsRuntime_.GetAniEnv();
-    CallOnPrepareMethod(aniEnv);
 }
 
 void STSTestRunner::Run()
@@ -290,11 +171,6 @@ void STSTestRunner::Run()
             TAG_LOGI(AAFwkTag::DELEGATOR, "Object_CallMethod_Void onRun success");
         }
     }
-
-    // TODO: for test to support EntryAbility.sts
-    TAG_LOGI(AAFwkTag::DELEGATOR, "use default entryability");
-    auto aniEnv = stsRuntime_.GetAniEnv();
-    CallOnRunMethod(aniEnv);
 }
 } // namespace RunnerRuntime
 } // namespace OHOS
