@@ -2146,7 +2146,7 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         bool isFaJsModel = entryHapModuleInfo.abilityInfos.front().srcLanguage == "js" ? true : false;
         // TODO sts 已修改无法验证
         options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true); // default
-        auto runtimes = AbilityRuntime::Runtime::CreateRuntimes(options);
+        static auto runtimes = AbilityRuntime::Runtime::CreateRuntimes(options);
         for (const auto& runtime : runtimes) {
             auto testRunner = TestRunner::Create(runtime, args, isFaJsModel);
             if (testRunner == nullptr) {
