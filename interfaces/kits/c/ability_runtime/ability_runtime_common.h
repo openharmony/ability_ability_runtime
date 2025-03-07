@@ -112,7 +112,7 @@ typedef enum {
      * @error Setting visibility is disabled.
      * @since 16
      */
-    ABILITY_RUNTIME_ERROR_SET_VISIBILITY_DISABLED = 16000067,
+    ABILITY_RUNTIME_ERROR_VISIBILITY_SETTING_DISABLED = 16000067,
     /**
      * @error App clone or multi-instance is not supported.
      * @since 16
@@ -127,7 +127,7 @@ typedef enum {
      * @error The number of app instances reaches the limit.
      * @since 16
      */
-    ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT = 16000077,
+    ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED = 16000077,
     /**
      * @error The multi-instance is not supported.
      * @since 16
@@ -137,7 +137,7 @@ typedef enum {
      * @error The APP_INSTANCE_KEY cannot be specified.
      * @since 16
      */
-    ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT = 16000079,
+    ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED = 16000079,
 } AbilityRuntime_ErrorCode;
 
 #ifdef __cplusplus

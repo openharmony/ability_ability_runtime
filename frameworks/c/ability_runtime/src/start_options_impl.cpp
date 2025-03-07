@@ -35,7 +35,7 @@ OHOS::AAFwk::StartOptions AbilityRuntime_StartOptions::GetInnerStartOptions()
 AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsWindowMode(AbilityRuntime_WindowMode windowMode)
 {
     if (windowMode < ABILITY_RUNTIME_WINDOW_MODE_UNDEFINED ||
-        windowMode > ABILITY_RUNTIME_WINDOW_MODE_FULLSCREEN) {
+        windowMode > ABILITY_RUNTIME_WINDOW_MODE_FULL_SCREEN) {
         TAG_LOGE(AAFwkTag::APPKIT, "windowMode=%{public}d is invalid", static_cast<int32_t>(windowMode));
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
@@ -225,45 +225,47 @@ AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsStartWindow
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsSupportWindowMode(
-    AbilityRuntime_SupportWindowMode* supportWindowModes, size_t size)
+AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsSupportedWindowModes(
+    AbilityRuntime_SupportedWindowMode* supportedWindowModes, size_t size)
 {
-    if (supportWindowModes == nullptr || size == 0 || size > MAX_SUPPOPRT_WINDOW_MODES_SIZE) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null supportWindowModes or size is invalid");
+    if (supportedWindowModes == nullptr || size == 0 || size > MAX_SUPPOPRT_WINDOW_MODES_SIZE) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null supportedWindowModes or size is invalid");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
     for (size_t i = 0; i < size; ++i) {
-        if (supportWindowModes[i] < ABILITY_RUNTIME_SUPPORT_WINDOW_MODE_FULL_SCREEN ||
-            supportWindowModes[i] > ABILITY_RUNTIME_SUPPORT_WINDOW_MODE_FLOATING) {
-            TAG_LOGE(AAFwkTag::APPKIT, "invalild supportWindowMode:%{public}d", supportWindowModes[i]);
+        if (supportedWindowModes[i] < ABILITY_RUNTIME_SUPPORTED_WINDOW_MODE_FULL_SCREEN ||
+            supportedWindowModes[i] > ABILITY_RUNTIME_SUPPORTED_WINDOW_MODE_FLOATING) {
+            TAG_LOGE(AAFwkTag::APPKIT, "invalild supportWindowMode:%{public}d", supportedWindowModes[i]);
             return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
         }
-        options.supportWindowModes_.push_back(static_cast<OHOS::AppExecFwk::SupportWindowMode>(supportWindowModes[i]));
+        options.supportWindowModes_.push_back(
+            static_cast<OHOS::AppExecFwk::SupportWindowMode>(supportedWindowModes[i]));
     }
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsSupportWindowMode(
-    AbilityRuntime_SupportWindowMode **supportWindowModes, size_t &size)
+AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsSupportedWindowModes(
+    AbilityRuntime_SupportedWindowMode **supportedWindowModes, size_t &size)
 {
-    if (supportWindowModes == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null supportWindowModes");
+    if (supportedWindowModes == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null supportedWindowModes");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
-    if (*supportWindowModes != nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "supportWindowModes is not null");
+    if (*supportedWindowModes != nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "supportedWindowModes is not null");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
     if (!options.supportWindowModes_.empty()) {
         size = options.supportWindowModes_.size();
-        *supportWindowModes = static_cast<AbilityRuntime_SupportWindowMode*>(
-            malloc(sizeof(AbilityRuntime_SupportWindowMode) * options.supportWindowModes_.size()));
-        if (*supportWindowModes == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "supportWindowModes uninitialized");
+        *supportedWindowModes = static_cast<AbilityRuntime_SupportedWindowMode*>(
+            malloc(sizeof(AbilityRuntime_SupportedWindowMode) * options.supportWindowModes_.size()));
+        if (*supportedWindowModes == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "supportedWindowModes uninitialized");
             return ABILITY_RUNTIME_ERROR_CODE_INTERNAL;
         }
         for (size_t i = 0; i < size; ++i) {
-            (*supportWindowModes)[i] = static_cast<AbilityRuntime_SupportWindowMode>(options.supportWindowModes_[i]);
+            (*supportedWindowModes)[i] =
+                static_cast<AbilityRuntime_SupportedWindowMode>(options.supportWindowModes_[i]);
         }
     }
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
