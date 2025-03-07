@@ -21,6 +21,7 @@ namespace AppExecFwk {
 namespace {
 constexpr const char* BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
 constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.MainAbility";
+static const std::string EMPTY_NAME;
 }
 AbilityRunningRecord::AbilityRunningRecord(std::shared_ptr<AbilityInfo> info,
     sptr<IRemoteObject> token, int32_t abilityRecordId)
@@ -34,7 +35,7 @@ const std::string &AbilityRunningRecord::GetName() const
 {
     if (info_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetName info_ nullptr");
-        return "";
+        return EMPTY_NAME;
     }
     return info_->name;
 }
@@ -43,7 +44,7 @@ const std::string &AbilityRunningRecord::GetBundleName() const
 {
     if (info_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetBundleName info_ nullptr");
-        return "";
+        return EMPTY_NAME;
     }
     return info_->bundleName;
 }
@@ -52,7 +53,7 @@ const std::string &AbilityRunningRecord::GetModuleName() const
 {
     if (info_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetModuleName info_ nullptr");
-        return "";
+        return EMPTY_NAME;
     }
     return info_->moduleName;
 }
