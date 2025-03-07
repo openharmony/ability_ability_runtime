@@ -57,6 +57,7 @@ struct AppSpawnStartMsg {
     bool isolatedSELinuxFlag = false;
     bool isolatedSandboxFlagLegacy = false; // APP_FLAGS_EXTENSION_SANDBOX legacy
     bool isScreenLockDataProtect = false;
+    bool isCustomSandboxFlag = false;
     int32_t uid;
     int32_t gid;
     int32_t pid;

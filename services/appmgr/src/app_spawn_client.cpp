@@ -272,6 +272,14 @@ int32_t AppSpawnClient::SetStartFlags(const AppSpawnStartMsg &startMsg, AppSpawn
             return ret;
         }
     }
+    if (startMsg.isCustomSandboxFlag) {
+        ret = AppSpawnReqMsgSetAppFlag(reqHandle, APP_FLAGS_CUSTOM_SANDBOX);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
+            return ret;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "Set APP_FLAGS_CUSTOM_SANDBOX flag success.");
+    }
 #ifdef SUPPORT_CHILD_PROCESS
     ret = SetChildProcessTypeStartFlag(reqHandle, startMsg.childProcessType);
     if (ret != ERR_OK) {
