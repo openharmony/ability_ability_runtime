@@ -127,36 +127,34 @@ export class UIAbilityContext {
   public abilityInfo?: AbilityInfo;
   // public windowStage?: window.WindowStage;
 
-  public native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<AbilityResult>): void;
-  public native nativeStartAbilitySync(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<AbilityResult>): void;
+  public native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
+  public native nativeStartAbilitySync(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<void>): void;
   public native nativeStartAbilityForResult(want: Want, callback:AsyncCallbackWrapper<AbilityResult>): void;
   public native nativeStartAbilityForResult(want: Want, startOptions: StartOptions, callback:AsyncCallbackWrapper<AbilityResult>): void;
   public native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<AbilityResult>): void;
   public native reportDrawnCompletedSync(): void;
 
   // startAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
-  startAbility(want: Want, callback: AsyncCallback<AbilityResult, void>):void{
+  startAbility(want: Want, callback: AsyncCallbackWrapper<void>):void{
     console.log("call startAbility callback 111");
-    let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
-    let p1 = launch this.nativeStartAbilitySync(want, myCall);
+    let p1 = launch this.nativeStartAbilitySync(want, callback);
     console.log("call startAbility callback 222");
   }
 
   // startAbility(want: Want, options: StartOptions, callback: AsyncCallbackWrapper<void>): void;
-  startAbility(want: Want, options: StartOptions, callback: AsyncCallback<AbilityResult, void>):void{
+  startAbility(want: Want, options: StartOptions, callback: AsyncCallbackWrapper<void>):void{
     console.log("call startAbility callback 111");
-    let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
-    let p1 = launch this.nativeStartAbilitySync(want, options, myCall);
+    let p1 = launch this.nativeStartAbilitySync(want, options, callback);
     console.log("call startAbility callback 222");
   }
 
   // startAbility(want: Want, options?: StartOptions): Promise<void>;
-  startAbility(want: Want, options?: StartOptions): Promise<AbilityResult> {
+  startAbility(want: Want, options?: StartOptions): Promise<void> {
     console.log("call startAbility callback 111");
-    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError<void>, data: AbilityResult)=>{
+    let p = new Promise<void>((resolve: ()=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
         if (err.code == 0) {
-          resolve(data);
+          resolve();
         } else {
           reject(err);
         }
