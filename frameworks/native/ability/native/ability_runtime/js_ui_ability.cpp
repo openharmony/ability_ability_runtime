@@ -307,6 +307,7 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
     if (status != napi_ok && workContext != nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "napi_wrap Failed: %{public}d", status);
         delete workContext;
+        delete workScreenMode;
         return;
     }
 
