@@ -64,7 +64,6 @@ using Extractor = OHOS::AbilityBase::Extractor;
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-
 #ifdef APP_USE_ARM64
 const std::string SANDBOX_LIB_PATH = "/system/lib64";
 const std::string STS_RT_PATH = SANDBOX_LIB_PATH;
@@ -80,9 +79,9 @@ const std::string STS_CHIPSDK_PATH = "/system/lib/chipset-pub-sdk";
 #endif
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
-constexpr char ENTRY_PATH_MAP_FILE[] = "/system/etc/entrypath.json";
+constexpr char ENTRY_PATH_MAP_FILE[] = "/system/framework/entrypath.json";
 constexpr char ENTRY_PATH_MAP_KEY[] = "entryPath";
-constexpr char DEFAULT_ENTRY_ABILITY_CLASS[] = "entry/entryability/EntryAbility/EntryAbility";
+constexpr char DEFAULT_ENTRY_ABILITY_CLASS[] = "entry/src/main/ets/entryability/EntryAbility/EntryAbility";
 
 class EntryPathManager {
 public:
@@ -142,8 +141,12 @@ public:
     {
         auto const &iter = entryPathMap_.find(srcEntry);
         if (iter == entryPathMap_.end()) {
-            TAG_LOGD(AAFwkTag::STSRUNTIME, "not found srcEntry: %{public}s", srcEntry.c_str());
-            return DEFAULT_ENTRY_ABILITY_CLASS;
+            if (StartsWithDotSlash(srcEntry)) {
+                TAG_LOGD(AAFwkTag::STSRUNTIME, "not found srcEntry: %{public}s", srcEntry.c_str());
+                return DEFAULT_ENTRY_ABILITY_CLASS;
+            }
+            TAG_LOGD(AAFwkTag::STSRUNTIME, "srcEntry as class: %{public}s", srcEntry.c_str());
+            return srcEntry;
         }
         TAG_LOGD(AAFwkTag::STSRUNTIME, "found srcEntry: %{public}s, output: %{public}s",
                  srcEntry.c_str(), iter->second.c_str());
@@ -155,6 +158,15 @@ private:
 
     ~EntryPathManager() = default;
 
+    static bool StartsWithDotSlash(const std::string &str)
+    {
+        if (str.length() < 2) {
+            return false;
+        }
+        std::string prefix = str.substr(0, 2);
+        return prefix == "./";
+    }
+
     std::map<std::string, std::string> entryPathMap_{};
 };
 } // namespace
@@ -165,7 +177,6 @@ std::unique_ptr<STSRuntime> STSRuntime::Create(const Options& options)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
     std::unique_ptr<STSRuntime> instance;
-    // TODO is not need?
     // JsRuntimeLite::InitJsRuntimeLite(options);
     if (!options.preload && options.isStageModel) {
         auto preloadedInstance = Runtime::GetPreloaded();
@@ -245,12 +256,12 @@ bool STSRuntime::Initialize(const Options& options)
     apiTargetVersion_ = options.apiTargetVersion;
     TAG_LOGD(AAFwkTag::STSRUNTIME, "Initialize: %{public}d", apiTargetVersion_);
     if (options.isStageModel || options.isTestFramework) {
-        auto vm = stsEnv_->GetEtsVM();
-        auto env = stsEnv_->GetEtsEnv();
-        if (vm == nullptr || env == nullptr) {
-            TAG_LOGE(AAFwkTag::STSRUNTIME, "vm or env nullptr");
-            return false;
-        }
+        // auto vm = stsEnv_->GetEtsVM();
+        // auto env = stsEnv_->GetEtsEnv();
+        // if (vm == nullptr || env == nullptr) {
+        //     TAG_LOGE(AAFwkTag::STSRUNTIME, "vm or env nullptr");
+        //     return false;
+        // }
 
         if (preloaded_) {
             PostPreload(options);
@@ -501,11 +512,6 @@ void STSRuntime::ReInitStsEnvImpl(const Options& options)
 void STSRuntime::LoadAotFile(const Options& options)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
-    auto vm = stsEnv_->GetEtsVM();
-    if (vm == nullptr) {
-        return;
-    }
-
     if (options.hapPath.empty()) {
         return;
     }
@@ -599,9 +605,8 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadModule(const std::string& mo
     const std::string& modulePath, const std::string& hapPath, bool esmodule, bool useCommonChunk,
     const std::string& srcEntrance)
 {
-    TAG_LOGD(AAFwkTag::STSRUNTIME, "Load module(%{public}s, %{private}s, %{private}s, %{public}s)",
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "Load module(%{public}s, %{public}s, %{public}s, %{public}s)",
         moduleName.c_str(), modulePath.c_str(), hapPath.c_str(), esmodule ? "true" : "false");
-    auto vm = stsEnv_->GetEtsVM();
     //CHECK_POINTER_AND_RETURN(vm, std::unique_ptr<STSNativeReference>());
     // // use for debugger, js engine need to know load module to handle debug event
     // panda::JSNApi::NotifyLoadModule(vm);
@@ -620,7 +625,7 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadModule(const std::string& mo
         path.erase(pos, path.size() - pos);
         moduleName_ = path;
     }
-    TAG_LOGD(AAFwkTag::STSRUNTIME, "wangbing moduleName_(%{public}s, path %{private}s",
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "moduleName_(%{public}s, path %{public}s",
         moduleName_.c_str(),path.c_str());
 
     std::string fileName;
@@ -630,7 +635,7 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadModule(const std::string& mo
         fileName = std::regex_replace(fileName, pattern, "");
     } else {
         if (!MakeFilePath(codePath_, modulePath, fileName)) {
-            TAG_LOGE(AAFwkTag::STSRUNTIME, "make module file path: %{private}s failed", modulePath.c_str());
+            TAG_LOGE(AAFwkTag::STSRUNTIME, "make module file path: %{public}s failed", modulePath.c_str());
             return nullptr;
         }
     }
@@ -641,7 +646,7 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadModule(const std::string& mo
 std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string& moduleName, const std::string& path, const std::string& hapPath,
     const std::string& srcEntrance)
 {
-    TAG_LOGD(AAFwkTag::STSRUNTIME, "Load sts module(%{public}s, %{private}s, %{private}s, %{public}s)",
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "Load sts module(%{public}s, %{public}s, %{public}s, %{public}s)",
         moduleName.c_str(), path.c_str(), hapPath.c_str(), srcEntrance.c_str());
     auto stsNativeReference = std::make_unique<STSNativeReference>();
     ani_env* aniEnv = GetAniEnv();

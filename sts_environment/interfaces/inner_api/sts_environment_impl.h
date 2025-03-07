@@ -18,6 +18,7 @@
 
 #include <string>
 #include "event_handler.h"
+#include "sts_interface.h"
 // #include "native_engine/native_engine.h"
 
 // #include "native_engine/native_engine.h"
