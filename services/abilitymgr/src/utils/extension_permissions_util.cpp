@@ -27,6 +27,9 @@ bool ExtensionPermissionsUtil::CheckSAPermission(const AppExecFwk::ExtensionAbil
     if (extensionType == AppExecFwk::ExtensionAbilityType::ASSET_ACCELERATION) {
         return PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_ASSET_ACCELERATION_EXTENSION");
+    } else if (extensionType == AppExecFwk::ExtensionAbilityType::DISTRIBUTED) {
+        checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
+            "ohos.permission.CONNECT_DISTRIBUTED_EXTENSION");
     }
     if (!PermissionVerification::GetInstance()->IsSACall()) {
         return true;
@@ -59,9 +62,6 @@ bool ExtensionPermissionsUtil::CheckSAPermission(const AppExecFwk::ExtensionAbil
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::PRINT) {
         checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_PRINT_EXTENSION");
-    } else if (extensionType == AppExecFwk::ExtensionAbilityType::VPN) {
-        checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
-            "ohos.permission.CONNECT_VPN_EXTENSION");
     } else {
         checkRet = CheckSAPermissionMore(extensionType);
     }
@@ -76,7 +76,10 @@ bool ExtensionPermissionsUtil::CheckSAPermission(const AppExecFwk::ExtensionAbil
 bool ExtensionPermissionsUtil::CheckSAPermissionMore(const AppExecFwk::ExtensionAbilityType &extensionType)
 {
     auto checkRet = false;
-    if (extensionType == AppExecFwk::ExtensionAbilityType::FILEACCESS_EXTENSION) {
+    if (extensionType == AppExecFwk::ExtensionAbilityType::VPN) {
+        checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
+            "ohos.permission.CONNECT_VPN_EXTENSION");
+    } else if (extensionType == AppExecFwk::ExtensionAbilityType::FILEACCESS_EXTENSION) {
         checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_FILE_ACCESS_EXTENSION");
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::REMOTE_NOTIFICATION) {
