@@ -1,0 +1,80 @@
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
+
+module_output_path = "ability_runtime/abilitymgr"
+
+ohos_unittest("dialog_session_manager_test") {
+  module_out_path = module_output_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../../cfi_blocklist.txt"
+  }
+
+  include_dirs = [
+    "${ability_runtime_path}/services/abilitymgr/include/dialog_session",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
+  ]
+
+  sources = [
+    "${ability_runtime_path}/frameworks/native/appkit/ability_bundle_manager_helper/bundle_mgr_helper.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/dialog_session/dialog_session_info.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/dialog_session/dialog_session_manager.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/start_ability_utils.cpp",
+    "dialog_session_manager_test.cpp",
+  ]
+
+  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
+
+  cflags = []
+
+  deps = [
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_path}/utils/server/startup:startup_util",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/common:app_util",
+    "${ability_runtime_services_path}/common:task_handler_wrap",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
+    "safwk:api_cache_manager",
+    "samgr:samgr_proxy",
+    "window_manager:libmodal_system_ui_extension_client",
+  ]
+}
+
+group("unittest") {
+  testonly = true
+
+  deps = [ ":dialog_session_manager_test" ]
+}
