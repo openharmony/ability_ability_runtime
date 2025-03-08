@@ -765,12 +765,6 @@ CJEnvMethods* CJEnvironment::CreateEnvMethods()
         .startDebugger = []() {
             return CJEnvironment::GetInstance()->StartDebugger();
         },
-        .registerArkVMInRuntime = [](unsigned long long arkVM) {
-            CJEnvironment::GetInstance()->RegisterArkVMInRuntime(arkVM);
-        },
-        .registerStackInfoCallbacks = [](UpdateStackInfoFuncType uFunc) {
-            CJEnvironment::GetInstance()->RegisterStackInfoCallbacks(uFunc);
-        },
         .registerCJUncaughtExceptionHandler = [](const CJUncaughtExceptionInfo& handle) {
             return CJEnvironment::GetInstance()->RegisterCJUncaughtExceptionHandler(handle);
         },
@@ -779,6 +773,12 @@ CJEnvMethods* CJEnvironment::CreateEnvMethods()
         },
         .checkLoadCJLibrary = []() {
             return CJEnvironment::GetInstance()->CheckLoadCJLibrary();
+        },
+        .registerArkVMInRuntime = [](unsigned long long arkVM) {
+            CJEnvironment::GetInstance()->RegisterArkVMInRuntime(arkVM);
+        },
+        .registerStackInfoCallbacks = [](UpdateStackInfoFuncType uFunc) {
+            CJEnvironment::GetInstance()->RegisterStackInfoCallbacks(uFunc);
         }
     };
     return &gCJEnvMethods;
