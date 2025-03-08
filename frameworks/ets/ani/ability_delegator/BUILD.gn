@@ -86,22 +86,16 @@ generate_static_abc("ability_delegator_abc") {
     "./ets/@ohos.ability.AbilityDelegator.ets",
     "./ets/@ohos.ability.abilityDelegatorArgs.ets",
     "./ets/@ohos.application.testRunner.ets",
-    "./ets/AbilityMonitor.ets",
-    "./ets/AbilityStageMonitor.ets",
   ]
 
   paths_keys = [
     "@ohos.ability.AbilityDelegator",
     "@ohos.ability.abilityDelegatorArgs",
-    "AbilityMonitor",
-    "AbilityStageMonitor",
   ]
 
   paths_values = [
     "./ets/@ohos.ability.AbilityDelegator.ets",
     "./ets/@ohos.ability.abilityDelegatorArgs.ets",
-    "./ets/AbilityMonitor.ets",
-    "./ets/AbilityStageMonitor.ets",
   ]
 
   dst_file = "$target_out_dir/ability_delegator.abc"
