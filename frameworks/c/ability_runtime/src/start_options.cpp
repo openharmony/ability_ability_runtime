@@ -31,7 +31,7 @@ AbilityRuntime_StartOptions* OH_AbilityRuntime_CreateStartOptions(void)
 
 AbilityRuntime_ErrorCode OH_AbilityRuntime_DestroyStartOptions(AbilityRuntime_StartOptions **startOptions)
 {
-    if (startOptions == nullptr) {
+    if (startOptions == nullptr || *startOptions == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null startOptions");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
@@ -171,7 +171,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_SetStartOptionsWindowWidth(AbilityRun
 }
 
 AbilityRuntime_ErrorCode OH_AbilityRuntime_GetStartOptionsWindowWidth(AbilityRuntime_StartOptions *startOptions,
-    int32_t windowWidth)
+    int32_t &windowWidth)
 {
     if (startOptions == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null startOptions");
