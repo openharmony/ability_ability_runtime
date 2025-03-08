@@ -182,7 +182,7 @@ bool AppRecovery::IsNeedSaveAppState(StateReason reason)
 
 bool AppRecovery::ScheduleSaveAppState(StateReason reason, uintptr_t ability)
 {
-    TAG_LOGD(AAFwkTag::RECOVERY, "begin");
+    TAG_LOGI(AAFwkTag::RECOVERY, "begin");
     bool ret = IsNeedSaveAppState(reason);
     if (!ret && this->freezeCallback ==  nullptr) {
         return false;
@@ -210,6 +210,7 @@ bool AppRecovery::ScheduleSaveAppState(StateReason reason, uintptr_t ability)
 #endif
         if (this->freezeCallback) {
             this->freezeCallback();
+            TAG_LOGW(AAFwkTag::RECOVERY, "Freeze callback execution completed");
         }
         if (!ret) {
             return false;
