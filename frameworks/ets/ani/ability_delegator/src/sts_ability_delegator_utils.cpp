@@ -37,8 +37,7 @@ ani_object CreateStsAbilityDelegator(ani_env *aniEnv)
         ani_native_function {"getAppContext", nullptr, reinterpret_cast<void *>(GetAppContext)},
         ani_native_function {"executeShellCommandsync", nullptr, reinterpret_cast<void *>(ExecuteShellCommand)},
         ani_native_function {"finishTestSync", nullptr, reinterpret_cast<void *>(FinishTestSync)},
-        ani_native_function {"printSync", "Lstd/core/String;:V", reinterpret_cast<void *>(PrintSync)},
-        ani_native_function {"addAbilityMonitorASync", nullptr, reinterpret_cast<void *>(AddAbilityMonitorASync)}
+        ani_native_function {"printSync", "Lstd/core/String;:V", reinterpret_cast<void *>(PrintSync)}
     };
     status = aniEnv->Class_BindNativeMethods(abilityDelegator, delegatorFunctions.data(), delegatorFunctions.size());
     if (status != ANI_OK) {
