@@ -20,6 +20,7 @@
 #include "context/application_context.h"
 #include "securec.h"
 #include "want_manager.h"
+#include "want_utils.h"
 
 namespace OHOS::AbilityRuntime {
 namespace {
@@ -1822,6 +1823,125 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_004, Test
     ASSERT_STREQ(buffer, cloudFileDir.c_str());
 }
 
+// CheckWant - Normal
+/**
+ * @tc.number: CheckWant_001
+ * @tc.desc: Function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_001, TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    char bundleName[] = "com.example.myapplication";
+    want.element.bundleName = bundleName;
+
+    char abilityName[] = "com.test.Ability";
+    want.element.abilityName = abilityName;
+
+    char moduleName[] = "com.test.module";
+    want.element.moduleName = moduleName;
+
+    // Act
+    AbilityRuntime_ErrorCode result = CheckWant(&want);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_NO_ERROR, result);
+}
+
+// CheckWant - nullptr
+/**
+ * @tc.number: CheckWant_002
+ * @tc.desc: Function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_002, TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want* want = nullptr;
+
+    // Act
+    AbilityRuntime_ErrorCode result = CheckWant(want);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+// CheckWant - bundleName nullptr
+/**
+ * @tc.number: CheckWant_003
+ * @tc.desc: Function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_003, TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    want.element.bundleName = nullptr;
+
+    char abilityName[] = "com.test.Ability";
+    want.element.abilityName = abilityName;
+
+    char moduleName[] = "com.test.module";
+    want.element.moduleName = moduleName;
+
+    // Act
+    AbilityRuntime_ErrorCode result = CheckWant(&want);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+// CheckWant - abilityName nullptr
+/**
+ * @tc.number: CheckWant_004
+ * @tc.desc: Function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_004, TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    char bundleName[] = "com.example.myapplication";
+    want.element.bundleName = bundleName;
+
+    want.element.abilityName = nullptr;
+
+    char moduleName[] = "com.test.module";
+    want.element.moduleName = moduleName;
+
+    // Act
+    AbilityRuntime_ErrorCode result = CheckWant(&want);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+// CheckWant - moduleName nullptr
+/**
+ * @tc.number: CheckWant_005
+ * @tc.desc: Function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_005, TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    char bundleName[] = "com.example.myapplication";
+    want.element.bundleName = bundleName;
+
+    char abilityName[] = "com.test.Ability";
+    want.element.abilityName = abilityName;
+
+    want.element.moduleName = nullptr;
+
+    // Act
+    AbilityRuntime_ErrorCode result = CheckWant(&want);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
 /**
  * @tc.number: StartSelfUIAbility_001
  * @tc.desc: Function test
@@ -1842,5 +1962,54 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, StartSelfUIAbility_001, TestS
     want.fds = std::map<std::string, int32_t>();
     AbilityRuntime_ErrorCode errCode = OH_AbilityRuntime_StartSelfUIAbility(&want);
     ASSERT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED);
+}
+
+/**
+ * @tc.number: StartSelfUIAbility_002
+ * @tc.desc: Function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, StartSelfUIAbility_002, TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    char bundleName[] = "com.example.myapplication";
+    want.element.bundleName = bundleName;
+
+    char abilityName[] = "com.test.Ability";
+    want.element.abilityName = abilityName;
+
+    want.element.moduleName = nullptr;
+
+    // Act
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbility(&want);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.number: StartSelfUIAbility_003
+ * @tc.desc: Function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, StartSelfUIAbility_003, TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    char bundleName[] = "com.example.myapplication";
+    want.element.bundleName = bundleName;
+
+    char abilityName[] = "com.test.Ability";
+    want.element.abilityName = abilityName;
+
+    char moduleName[] = "com.test.module";
+    want.element.moduleName = moduleName;
+
+    // Act
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbility(&want);
+
+    // Assert
+    EXPECT_NE(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
 }
 } // namespace OHOS::AbilityRuntime
