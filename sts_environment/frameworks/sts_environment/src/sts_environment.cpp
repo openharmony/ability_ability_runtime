@@ -265,6 +265,18 @@ bool STSEnvironment::StartRuntime()
     options.push_back(ani_option{bootStringAsyn.c_str(), nullptr});
     options.push_back(ani_option{"--ext:--log-level=info", nullptr});
 
+    std::string forbiddenJIT = optionPrefix + "--compiler-enable-jit=false";
+    ani_option forbiddenJITOption = {forbiddenJIT.data(), nullptr};
+    options.push_back(forbiddenJITOption);
+
+    std::string enableVerfication = optionPrefix + "--verification-enabled=true";
+    ani_option enableVerficationOption = {enableVerfication.data(), nullptr};
+    options.push_back(enableVerficationOption);
+
+    std::string verificationMode = optionPrefix + "--verification-mode=on-the-fly";
+    ani_option verificationModeOption = {verificationMode.data(), nullptr};
+    options.push_back(verificationModeOption);
+
     ani_options optionsPtr = {options.size(), options.data()};
     auto status = lazyApis_.ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.ani_vm);
     if (status != ANI_OK) {
