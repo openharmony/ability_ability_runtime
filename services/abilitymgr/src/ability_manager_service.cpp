@@ -13171,7 +13171,8 @@ int AbilityManagerService::StartSelfUIAbilityInner(StartSelfUIAbilityParam param
     }
 
     if (processInfo.appMode == AppExecFwk::MultiAppModeType::MULTI_INSTANCE &&
-        !param.want.HasParameter(Want::APP_INSTANCE_KEY)) {
+        !param.want.HasParameter(Want::APP_INSTANCE_KEY) &&
+        !param.want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "set instanceKey: %{public}s", processInfo.instanceKey.c_str());
         param.want.SetParam(Want::APP_INSTANCE_KEY, processInfo.instanceKey);
     }
