@@ -255,6 +255,33 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_GetStartOptionsWindowWidth(AbilityRun
     int32_t &windowWidth);
 
 /**
+ * @brief Set start visibility for start options.
+ *
+ * @param startOptions The options to set start visibility for.
+ * @param startVisibility The start visibility.
+ * @return The error code.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the startOptions is invalid
+ *              or startVisibility is invalid.
+ * @since 18
+ */
+AbilityRuntime_ErrorCode OH_AbilityRuntime_SetStartOptionsStartVisibility(AbilityRuntime_StartOptions *startOptions,
+    AbilityRuntime_StartVisibility startVisibility);
+
+/**
+ * @brief Get start visibility from start options.
+ *
+ * @param startOptions The options to get start visibility from.
+ * @param startVisibility The obtained start visibility.
+ * @return The error code.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the startOptions is invalid.
+ * @since 18
+ */
+AbilityRuntime_ErrorCode OH_AbilityRuntime_GetStartOptionsStartVisibility(AbilityRuntime_StartOptions *startOptions,
+    AbilityRuntime_StartVisibility &startVisibility);
+
+/**
  * @brief Set start window icon for start options.
  *
  * @param startOptions The options to set start window icon for.

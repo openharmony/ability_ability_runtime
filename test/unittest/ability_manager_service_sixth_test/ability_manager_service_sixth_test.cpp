@@ -449,6 +449,31 @@ HWTEST_F(AbilityManagerServiceSixthTest, CheckProcessOptions_001, TestSize.Level
 
 /*
  * Feature: AbilityManagerService
+ * Function: CheckStartSelfUIAbilityStartOptions
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckStartSelfUIAbilityStartOptions
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, CheckStartSelfUIAbilityStartOptions_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckStartSelfUIAbilityStartOptions_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+
+    Want want;
+    StartOptions startOptions;
+    auto ret = abilityMs->CheckStartSelfUIAbilityStartOptions(want, startOptions);
+    EXPECT_EQ(ret, ERR_OK);
+
+    startOptions.processOptions = std::make_shared<ProcessOptions>();
+    startOptions.processOptions->isStartFromNDK = true;
+    ret = abilityMs->CheckStartSelfUIAbilityStartOptions(want, startOptions);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_CAPABILITY_NOT_SUPPORT);
+    }
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckStartSelfUIAbilityStartOptions_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: PreStartFreeInstall
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService PreStartFreeInstall
