@@ -604,7 +604,7 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsStartWindowIcon_003, testing::ext:
 
     // Assert
     EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_NO_ERROR, result);
-    EXPECT_EQ(nullptr, startWindowIcon);
+    EXPECT_NE(nullptr, startWindowIcon);
 #endif
 }
 
