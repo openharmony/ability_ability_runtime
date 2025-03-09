@@ -2306,6 +2306,30 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_UpdateSilentForeground_0100, TestSize
 }
 
 /**
+ * @tc.number: AbilityRuntime_UpdateSilentForeground_0200
+ * @tc.name: UpdateSilentForeground
+ * @tc.desc: Verify UpdateSilentForeground.
+ */
+HWTEST_F(UIAbilityImplTest, AbilityRuntime_UpdateSilentForeground_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_UpdateSilentForeground_0200 start";
+    auto abilityImpl = std::make_shared<UIAbilityImpl>();
+    EXPECT_NE(abilityImpl, nullptr);
+    std::shared_ptr<MockUIAbility> pMocKUIAbility = std::make_shared<MockUIAbility>();
+    std::shared_ptr<UIAbility> uiability = pMocKUIAbility;
+    abilityImpl->ability_ = uiability;
+    abilityImpl->lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
+    sptr<AAFwk::SessionInfo> sessionInfo = new (std::nothrow) AAFwk::SessionInfo();
+    sessionInfo->processOptions = std::make_shared<AAFwk::ProcessOptions>();
+    sessionInfo->processOptions->isStartFromNDK = true;
+    sessionInfo->processOptions->startupVisibility = AAFwk::StartupVisibility::STARTUP_HIDE;
+    AAFwk::LifeCycleStateInfo targetState;
+    abilityImpl->UpdateSilentForeground(targetState, sessionInfo);
+    EXPECT_EQ(true, abilityImpl->ability_->CheckIsSilentForeground());
+    GTEST_LOG_(INFO) << "AbilityRuntime_UpdateSilentForeground_0200 end";
+}
+
+/**
  * @tc.number: AbilityRuntime_AfterDidForeground_0100
  * @tc.name: AfterDidForeground
  * @tc.desc: Verify AfterDidForeground succeeded.

@@ -46,6 +46,8 @@ public:
     AbilityRuntime_ErrorCode GetStartOptionsWindowHeight(int32_t &windowHeight);
     AbilityRuntime_ErrorCode SetStartOptionsWindowWidth(int32_t windowWidth);
     AbilityRuntime_ErrorCode GetStartOptionsWindowWidth(int32_t &windowWidth);
+    AbilityRuntime_ErrorCode SetStartOptionsStartVisibility(AbilityRuntime_StartVisibility startVisibility);
+    AbilityRuntime_ErrorCode GetStartOptionsStartVisibility(AbilityRuntime_StartVisibility &startVisibility);
     AbilityRuntime_ErrorCode SetStartOptionsStartWindowIcon(OH_PixelmapNative *startWindowIcon);
     AbilityRuntime_ErrorCode GetStartOptionsStartWindowIcon(OH_PixelmapNative **startWindowIcon);
     AbilityRuntime_ErrorCode SetStartOptionsStartWindowBackgroundColor(const char *startWindowBackgroundColor);

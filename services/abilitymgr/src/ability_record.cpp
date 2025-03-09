@@ -1433,7 +1433,8 @@ void AbilityRecord::UpdateAbilityVisibilityState()
         auto state = AbilityVisibilityState::UNSPECIFIED;
         auto sessionInfo = GetSessionInfo();
         if (sessionInfo && sessionInfo->processOptions &&
-            ProcessOptions::IsNewProcessMode(sessionInfo->processOptions->processMode)) {
+            (ProcessOptions::IsNewProcessMode(sessionInfo->processOptions->processMode) ||
+             sessionInfo->processOptions->isStartFromNDK)) {
             auto startupVisibility = sessionInfo->processOptions->startupVisibility;
             if (startupVisibility == StartupVisibility::STARTUP_SHOW) {
                 state = AbilityVisibilityState::FOREGROUND_SHOW;

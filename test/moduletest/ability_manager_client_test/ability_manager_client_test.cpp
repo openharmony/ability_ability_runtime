@@ -329,6 +329,23 @@ HWTEST_F(AbilityManagerClientTest, StartSelfUIAbility_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AbilityManagerClient_StartSelfUIAbilityWithStartOptions_0100
+ * @tc.desc: StartSelfUIAbilityWithStartOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, StartSelfUIAbilityWithStartOptions_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSelfUIAbilityWithStartOptions_0100 start");
+    AAFwk::Want want;
+    AAFwk::StartOptions options;
+    auto result = AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithStartOptions(want, options);
+    sptr<IRemoteObject> token_(new IPCObjectStub());
+    AbilityManagerClient::GetInstance()->SubmitSaveRecoveryInfo(token_);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "StartSelfUIAbilityWithStartOptions_0100 end");
+}
+
+/**
  * @tc.name: AddQueryERMSObserver_0100
  * @tc.name: AbilityManagerClient_AddQueryERMSObserver_0100
  * @tc.desc: AddQueryERMSObserver
