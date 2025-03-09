@@ -19,6 +19,7 @@
 #include "application_context.h"
 #include "context/application_context.h"
 #include "securec.h"
+#include "start_options_impl.h"
 #include "want_manager.h"
 #include "want_utils.h"
 
@@ -1826,7 +1827,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_004, Test
 // CheckWant - Normal
 /**
  * @tc.number: CheckWant_001
- * @tc.desc: Function test
+ * @tc.desc: CheckWant succeeds
  * @tc.type: FUNC
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_001, TestSize.Level0)
@@ -1852,7 +1853,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_001, TestSize.Level
 // CheckWant - nullptr
 /**
  * @tc.number: CheckWant_002
- * @tc.desc: Function test
+ * @tc.desc: CheckWant fails when want is nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_002, TestSize.Level0)
@@ -1870,7 +1871,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_002, TestSize.Level
 // CheckWant - bundleName nullptr
 /**
  * @tc.number: CheckWant_003
- * @tc.desc: Function test
+ * @tc.desc: CheckWant fails when bundle name is nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_003, TestSize.Level0)
@@ -1895,7 +1896,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_003, TestSize.Level
 // CheckWant - abilityName nullptr
 /**
  * @tc.number: CheckWant_004
- * @tc.desc: Function test
+ * @tc.desc: CheckWant fails when ability name is nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_004, TestSize.Level0)
@@ -1920,7 +1921,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_004, TestSize.Level
 // CheckWant - moduleName nullptr
 /**
  * @tc.number: CheckWant_005
- * @tc.desc: Function test
+ * @tc.desc: CheckWant fails when module name is nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_005, TestSize.Level0)
@@ -1943,11 +1944,11 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_005, TestSize.Level
 }
 
 /**
- * @tc.number: StartSelfUIAbility_001
- * @tc.desc: Function test
+ * @tc.number: OH_AbilityRuntime_StartSelfUIAbility_001
+ * @tc.desc: OH_AbilityRuntime_StartSelfUIAbility does not return 401 when everything is ok
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, StartSelfUIAbility_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_001, TestSize.Level0)
 {
     AbilityBase_Want want;
     char bundleName[] = "com.example.myapplication";
@@ -1961,15 +1962,15 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, StartSelfUIAbility_001, TestS
     want.params = std::map<std::string, std::string>();
     want.fds = std::map<std::string, int32_t>();
     AbilityRuntime_ErrorCode errCode = OH_AbilityRuntime_StartSelfUIAbility(&want);
-    ASSERT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED);
+    EXPECT_NE(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, errCode);
 }
 
 /**
- * @tc.number: StartSelfUIAbility_002
- * @tc.desc: Function test
+ * @tc.number: OH_AbilityRuntime_StartSelfUIAbility_002
+ * @tc.desc: OH_AbilityRuntime_StartSelfUIAbility returns 401 when module name is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, StartSelfUIAbility_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_002, TestSize.Level0)
 {
     // Arrange
     AbilityBase_Want want;
@@ -1989,11 +1990,11 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, StartSelfUIAbility_002, TestS
 }
 
 /**
- * @tc.number: StartSelfUIAbility_003
- * @tc.desc: Function test
+ * @tc.number: OH_AbilityRuntime_StartSelfUIAbility_003
+ * @tc.desc: OH_AbilityRuntime_StartSelfUIAbility does not return 401 when everything is ok
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, StartSelfUIAbility_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_003, TestSize.Level0)
 {
     // Arrange
     AbilityBase_Want want;
@@ -2011,5 +2012,207 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, StartSelfUIAbility_003, TestS
 
     // Assert
     EXPECT_NE(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_StartSelfUIAbility_004
+ * @tc.desc: OH_AbilityRuntime_StartSelfUIAbility returns 401 when bundle name is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_004, TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    want.element.bundleName = nullptr;
+
+    char abilityName[] = "com.test.Ability";
+    want.element.abilityName = abilityName;
+
+    char moduleName[] = "com.test.module";
+    want.element.moduleName = moduleName;
+
+    // Act
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbility(&want);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_StartSelfUIAbility_005
+ * @tc.desc: OH_AbilityRuntime_StartSelfUIAbility returns 401 when ability name is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_005, TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    char bundleName[] = "com.example.myapplication";
+    want.element.bundleName = bundleName;
+
+    want.element.abilityName = nullptr;
+
+    char moduleName[] = "com.test.module";
+    want.element.moduleName = moduleName;
+
+    // Act
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbility(&want);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_001
+ * @tc.desc: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions returns 401 when bundle name is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_001,
+    TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    want.element.bundleName = nullptr;
+
+    char abilityName[] = "com.test.Ability";
+    want.element.abilityName = abilityName;
+
+    char moduleName[] = "com.test.module";
+    want.element.moduleName = moduleName;
+
+    AbilityRuntime_StartOptions options;
+
+    // Act
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(&want, &options);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_002
+ * @tc.desc: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions returns 401 when ability name is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_002,
+    TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    char bundleName[] = "com.example.myapplication";
+    want.element.bundleName = bundleName;
+
+    want.element.abilityName = nullptr;
+
+    char moduleName[] = "com.test.module";
+    want.element.moduleName = moduleName;
+
+    AbilityRuntime_StartOptions options;
+
+    // Act
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(&want, &options);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_003
+ * @tc.desc: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions returns 401 when module name is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_003,
+    TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    char bundleName[] = "com.example.myapplication";
+    want.element.bundleName = bundleName;
+
+    char abilityName[] = "com.test.Ability";
+    want.element.abilityName = abilityName;
+
+    want.element.moduleName = nullptr;
+
+    AbilityRuntime_StartOptions options;
+
+    // Act
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(&want, &options);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_004
+ * @tc.desc: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions returns 401 when start options is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_004,
+    TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    char bundleName[] = "com.example.myapplication";
+    want.element.bundleName = bundleName;
+
+    char abilityName[] = "com.test.Ability";
+    want.element.abilityName = abilityName;
+
+    char moduleName[] = "com.test.module";
+    want.element.moduleName = moduleName;
+
+    // Act
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(&want, nullptr);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_005
+ * @tc.desc: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions does not return 401 when everything is ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_005,
+    TestSize.Level0)
+{
+    // Arrange
+    AbilityBase_Want want;
+    char bundleName[] = "com.example.myapplication";
+    want.element.bundleName = bundleName;
+
+    char abilityName[] = "com.test.Ability";
+    want.element.abilityName = abilityName;
+
+    char moduleName[] = "com.test.module";
+    want.element.moduleName = moduleName;
+
+    AbilityRuntime_StartOptions *options = OH_AbilityRuntime_CreateStartOptions();
+    ASSERT_NE(options, nullptr);
+
+    // Act
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(&want, options);
+
+    // Assert
+    EXPECT_NE(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+
+    ASSERT_EQ(OH_AbilityRuntime_DestroyStartOptions(&options), ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(options, nullptr);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_006
+ * @tc.desc: OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions returns 401 when want is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_006,
+    TestSize.Level0)
+{
+    // Act
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(nullptr, nullptr);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
 }
 } // namespace OHOS::AbilityRuntime
