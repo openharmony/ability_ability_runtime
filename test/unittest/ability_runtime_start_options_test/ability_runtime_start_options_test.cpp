@@ -886,6 +886,94 @@ HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsWindow
 }
 
 /**
+ * @tc.name: OH_AbilityRuntime_SetStartOptionsStartVisibility_001
+ * @tc.desc: OH_AbilityRuntime_SetStartOptionsStartVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_SetStartOptionsStartVisibility_001, TestSize.Level1)
+{
+    AbilityRuntime_StartOptions* startOptions = nullptr;
+    AbilityRuntime_StartVisibility startVisibility = AbilityRuntime_StartVisibility::ABILITY_RUNTIME_HIDE_UPON_START;
+    EXPECT_EQ(OH_AbilityRuntime_SetStartOptionsWindowWidth(startOptions, startVisibility),
+        ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_AbilityRuntime_SetStartOptionsStartVisibility_002
+ * @tc.desc: OH_AbilityRuntime_SetStartOptionsStartVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_SetStartOptionsStartVisibility_002, TestSize.Level1)
+{
+    AbilityRuntime_StartOptions *startOptions = OH_AbilityRuntime_CreateStartOptions();
+    AbilityRuntime_StartVisibility startVisibility = AbilityRuntime_StartVisibility::ABILITY_RUNTIME_HIDE_UPON_START;
+    EXPECT_EQ(OH_AbilityRuntime_SetStartOptionsStartVisibility(startOptions, startVisibility),
+        startOptions->SetStartOptionsStartVisibility(startVisibility));
+    OH_AbilityRuntime_DestroyStartOptions(&startOptions);
+}
+
+/**
+ * @tc.name: OH_AbilityRuntime_GetStartOptionsStartVisibility_001
+ * @tc.desc: OH_AbilityRuntime_GetStartOptionsStartVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsStartVisibility_001, TestSize.Level1)
+{
+    // Arrange
+    AbilityRuntime_StartOptions *startOptions = nullptr;
+    AbilityRuntime_StartVisibility startVisibility;
+
+    // Act
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_GetStartOptionsStartVisibility(startOptions, startVisibility);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.name: OH_AbilityRuntime_GetStartOptionsStartVisibility_002
+ * @tc.desc: OH_AbilityRuntime_GetStartOptionsStartVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsStartVisibility_002, TestSize.Level1)
+{
+    // Arrange
+    AbilityRuntime_StartOptions *startOptions = OH_AbilityRuntime_CreateStartOptions();
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_SetStartOptionsStartVisibility(startOptions,
+        AbilityRuntime_StartVisibility::ABILITY_RUNTIME_SHOW_UPON_START);
+    // Assuming OH_AbilityRuntime_SetStartOptionsWindowMode returns success
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_NO_ERROR, result);
+
+    AbilityRuntime_StartVisibility startVisibility;
+
+    // Act
+    result = OH_AbilityRuntime_GetStartOptionsStartVisibility(startOptions, startVisibility);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_NO_ERROR, result);
+    EXPECT_EQ(AbilityRuntime_StartVisibility::ABILITY_RUNTIME_SHOW_UPON_START, startVisibility);
+    OH_AbilityRuntime_DestroyStartOptions(&startOptions);
+
+    result = OH_AbilityRuntime_GetStartOptionsStartVisibility(startOptions, startVisibility);
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.name: OH_AbilityRuntime_GetStartOptionsStartVisibility_003
+ * @tc.desc: OH_AbilityRuntime_GetStartOptionsStartVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsStartVisibility_003, TestSize.Level1)
+{
+    // Arrange
+    AbilityRuntime_StartOptions *startOptions = OH_AbilityRuntime_CreateStartOptions();
+    AbilityRuntime_StartVisibility startVisibility;
+
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_GetStartOptionsStartVisibility(startOptions, startVisibility);
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
  * @tc.name: OH_AbilityRuntime_SetStartOptionsMinWindowWidth_001
  * @tc.desc: OH_AbilityRuntime_SetStartOptionsMinWindowWidth
  * @tc.type: FUNC

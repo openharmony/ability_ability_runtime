@@ -19,6 +19,7 @@
 #ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
 #include "pixelmap_native_impl.h"
 #endif
+#include "process_options.h"
 #include "securec.h"
 #include "start_window_option.h"
 
@@ -138,6 +139,33 @@ AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsWindowWidth
     if (options.windowWidthUsed_) {
         windowWidth = options.GetWindowWidth();
     }
+    return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+}
+
+AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsStartVisibility(
+    AbilityRuntime_StartVisibility startVisibility)
+{
+    if (startVisibility < ABILITY_RUNTIME_HIDE_UPON_START ||
+        startVisibility > ABILITY_RUNTIME_SHOW_UPON_START) {
+        TAG_LOGE(AAFwkTag::APPKIT, "startVisibility=%{public}d is invalid", static_cast<int32_t>(startVisibility));
+        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
+    if (options.processOptions == nullptr) {
+        options.processOptions = std::make_shared<OHOS::AAFwk::ProcessOptions>();
+    }
+    options.processOptions->startupVisibility =
+        static_cast<OHOS::AAFwk::StartupVisibility>(startVisibility);
+    return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+}
+
+AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsStartVisibility(
+    AbilityRuntime_StartVisibility &startVisibility)
+{
+    if (options.processOptions == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null processOptions");
+        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
+    startVisibility = static_cast<AbilityRuntime_StartVisibility>(options.processOptions->startupVisibility);
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
