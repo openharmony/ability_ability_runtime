@@ -2407,6 +2407,8 @@ private:
 
     int32_t CheckProcessOptions(const Want &want, const StartOptions &startOptions, int32_t userId);
 
+    int32_t CheckStartSelfUIAbilityStartOptions(const Want &want, const StartOptions &startOptions);
+
     void GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
         std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility);
 

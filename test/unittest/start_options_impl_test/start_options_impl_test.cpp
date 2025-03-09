@@ -468,6 +468,86 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsWindowWidth_001, testing::ext::Tes
 }
 
 // Test cases
+// Test SetStartOptionsStartVisibility function - Normal case
+/**
+ * @tc.name: SetStartOptionsStartVisibility_001
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, SetStartOptionsStartVisibility_001, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetStartOptionsStartVisibility_001 begin");
+    // Arrange
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    // Act
+    AbilityRuntime_StartVisibility startVisibility = AbilityRuntime_StartVisibility::ABILITY_RUNTIME_SHOW_UPON_START;
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->SetStartOptionsStartVisibility(startVisibility);
+    TAG_LOGI(AAFwkTag::TEST,
+        "SetStartOptionsStartVisibility_001 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    TAG_LOGI(AAFwkTag::TEST, "SetStartOptionsStartVisibility_001 end");
+}
+
+// Test cases
+// Test GetStartOptionsStartVisibility function - Normal case
+/**
+ * @tc.name: GetStartOptionsStartVisibility_001
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsStartVisibility_001, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsStartVisibility_001 begin");
+    // Arrange
+    AbilityRuntime_StartVisibility expectedStartVisibility =
+        AbilityRuntime_StartVisibility::ABILITY_RUNTIME_SHOW_UPON_START;
+    startOptions->SetStartOptionsStartVisibility(expectedStartVisibility);
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    // Act
+    AbilityRuntime_StartVisibility startVisibility = AbilityRuntime_StartVisibility::ABILITY_RUNTIME_HIDE_UPON_START;
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->GetStartOptionsStartVisibility(startVisibility);
+    TAG_LOGI(AAFwkTag::TEST,
+        "GetStartOptionsStartVisibility_001 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    EXPECT_EQ(expectedStartVisibility, startVisibility);
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsStartVisibility_001 end");
+}
+
+// Test cases
+// Test GetStartOptionsStartVisibility function - Get without set
+/**
+ * @tc.name: GetStartOptionsStartVisibility_002
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsStartVisibility_002, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsStartVisibility_002 begin");
+    // Arrange
+    startOptions = new AbilityRuntime_StartOptions();
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+
+    // Act
+    AbilityRuntime_StartVisibility startVisibility = AbilityRuntime_StartVisibility::ABILITY_RUNTIME_HIDE_UPON_START;
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->GetStartOptionsStartVisibility(startVisibility);
+    TAG_LOGI(AAFwkTag::TEST,
+        "GetStartOptionsStartVisibility_002 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsStartVisibility_002 end");
+}
+
+// Test cases
 // Test SetStartOptionsStartWindowIcon function - Normal case
 /**
  * @tc.name: SetStartOptionsStartWindowIcon_001
