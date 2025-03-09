@@ -30,10 +30,12 @@ ohos_unittest("capi_ability_runtime_application_context_test") {
   include_dirs = [
     "${ability_runtime_ndk_path}/ability_runtime",
     "${ability_runtime_path}/frameworks/c/ability_runtime/include",
+    "${ability_runtime_path}/interfaces/inner_api/",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/",
   ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_path}/frameworks/c/ability_runtime:ability_runtime",
   ]
