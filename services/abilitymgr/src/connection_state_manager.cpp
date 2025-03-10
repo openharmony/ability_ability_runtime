@@ -18,6 +18,7 @@
 #include "connection_observer_errors.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
@@ -371,6 +372,7 @@ bool ConnectionStateManager::RemoveConnectionInner(std::shared_ptr<ConnectionRec
 
 void ConnectionStateManager::HandleCallerDied(int32_t callerPid)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto connectionStateItem = RemoveDiedCaller(callerPid);
     if (!connectionStateItem) {
         TAG_LOGD(AAFwkTag::CONNECTION, "no connectionStateItem");
