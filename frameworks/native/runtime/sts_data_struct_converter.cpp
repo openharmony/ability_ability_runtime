@@ -59,7 +59,7 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
     ani_status status = ANI_ERROR;
     ani_object object = nullptr;
     ani_class cls = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("L@ohos/app/ability/AbilityConstant/LaunchParamImpl;", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
     }
     if (cls == nullptr) {

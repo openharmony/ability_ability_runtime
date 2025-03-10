@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import Want from './@ohos.app.ability.Want';
+import Want from '../@ohos.app.ability.Want';
 
 export interface AbilityResult {
     resultCode: int;

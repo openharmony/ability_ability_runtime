@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
-import Want from './@ohos.app.ability.Want';
-import StartOptions from './@ohos.app.ability.StartOptions';
-import { BusinessError, AsyncCallback } from './@ohos.base';
-import { AbilityResult } from './abilityResult';
+import { AbilityInfo } from '../bundleManager/AbilityInfo';
+import Want from '../@ohos.app.ability.Want';
+import StartOptions from '../@ohos.app.ability.StartOptions';
+import { BusinessError, AsyncCallback } from '../@ohos.base';
+import { AbilityResult } from '../ability/abilityResult';
+import AbilityStartCallback from './AbilityStartCallback';
+import { Configuration } from '../@ohos.app.ability.Configuration';
 
 export class AsyncCallbackWrapper<T> {
   myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
@@ -31,96 +34,7 @@ export class AsyncCallbackWrapper<T> {
   }
 }
 
-export namespace ConfigurationConstant {
-  export enum ColorMode {
-    COLOR_MODE_NOT_SET = -1,
-    COLOR_MODE_DARK = 0,
-    COLOR_MODE_LIGHT = 1
-  }
-  export enum Direction {
-    DIRECTION_NOT_SET = -1,
-    DIRECTION_VERTICAL = 0,
-    DIRECTION_HORIZONTAL = 1
-  }
-  export enum ScreenDensity {
-    SCREEN_DENSITY_NOT_SET = 0,
-    SCREEN_DENSITY_SDPI = 120,
-    SCREEN_DENSITY_MDPI = 160,
-    SCREEN_DENSITY_LDPI = 240,
-    SCREEN_DENSITY_XLDPI = 320,
-    SCREEN_DENSITY_XXLDPI = 480,
-    SCREEN_DENSITY_XXXLDPI = 640
-  }
-}
-export class Configuration {
-  language?: string;
-  colorMode?: ConfigurationConstant.ColorMode;
-  direction?: ConfigurationConstant.Direction;
-  screenDensity?: ConfigurationConstant.ScreenDensity;
-  displayId: int;
-  hasPointerDevice: boolean;
-  fontId?: string;
-  fontSizeScale: double;
-  fontWeightScale: double;
-  mcc?: string;
-  mnc?: string;
-}
-
-interface AbilityInfo {
-  readonly bundleName: string;
-  readonly moduleName: string;
-  readonly name: string;
-  readonly label: string;
-  readonly labelId: int;
-  readonly description: string;
-  readonly descriptionId: int;
-  readonly icon: string;
-  readonly iconId: int;
-  readonly process: string;
-  readonly exported: boolean;
-  // readonly type: bundleManager.AbilityType;
-  // readonly orientation: bundleManager.DisplayOrientation;
-  // readonly launchType: bundleManager.LaunchType;
-  readonly permissions: Array<string>;
-  readonly readPermission: string;
-  readonly writePermission: string;
-  readonly uri: string;
-  readonly deviceTypes: Array<string>;
-  // readonly applicationInfo: ApplicationInfo;
-  // readonly metadata: Array<Metadata>;
-  readonly enabled: boolean;
-  // readonly supportWindowModes: Array<bundleManager.SupportWindowMode>;
-  // readonly windowSize: WindowSize;
-  readonly excludeFromDock: boolean;
-  // readonly skills: Array<Skill>;
-  readonly appIndex: int;
-  readonly orientationId: int;
-}
-
-class AbilityInfoCls implements AbilityInfo {
-  readonly bundleName: string = '';
-  readonly moduleName: string = '';
-  readonly name: string = '';
-  readonly label: string = '';
-  readonly labelId: int;
-  readonly description: string = '';
-  readonly descriptionId: int;
-  readonly icon: string = '';
-  readonly iconId: int;
-  readonly process: string = '';
-  readonly exported: boolean;
-  readonly permissions: Array<string> = new Array<string>();
-  readonly readPermission: string = '';
-  readonly writePermission: string = '';
-  readonly uri: string = '';
-  readonly deviceTypes: Array<string> = new Array<string>();
-  readonly enabled: boolean;
-  readonly excludeFromDock: boolean;
-  readonly appIndex: int;
-  readonly orientationId: int;
-}
-
-export class UIAbilityContext {
+export default class UIAbilityContext {
 
   public nativeContext : long;
   public config?: Configuration;
@@ -133,18 +47,21 @@ export class UIAbilityContext {
   public native nativeStartAbilityForResult(want: Want, startOptions: StartOptions, callback:AsyncCallbackWrapper<AbilityResult>): void;
   public native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<AbilityResult>): void;
   public native reportDrawnCompletedSync(): void;
+  public native nativeStartAbilityByTypeSync(type: string, wantParam: string, startCallback: AbilityStartCallback, callback:AsyncCallbackWrapper<void>): void;
 
-  // startAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
-  startAbility(want: Want, callback: AsyncCallbackWrapper<void>):void{
+  // startAbility(want: Want, callback: AsyncCallback<void>): void;
+  startAbility(want: Want, callback: AsyncCallback<void>): void {
     console.log("call startAbility callback 111");
-    let p1 = launch this.nativeStartAbilitySync(want, callback);
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    let p1 = launch this.nativeStartAbilitySync(want, myCall);
     console.log("call startAbility callback 222");
   }
 
   // startAbility(want: Want, options: StartOptions, callback: AsyncCallbackWrapper<void>): void;
-  startAbility(want: Want, options: StartOptions, callback: AsyncCallbackWrapper<void>):void{
+  startAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void {
     console.log("call startAbility callback 111");
-    let p1 = launch this.nativeStartAbilitySync(want, options, callback);
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    let p1 = launch this.nativeStartAbilitySync(want, options, myCall);
     console.log("call startAbility callback 222");
   }
 
@@ -169,14 +86,14 @@ export class UIAbilityContext {
     return p;
   }
 
-  startAbilityForResult(want: Want, callback: AsyncCallback<AbilityResult, void>):void{
+  startAbilityForResult(want: Want, callback: AsyncCallback<AbilityResult, void>): void {
     console.log("call startAbilityForResult callback 111");
     let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
     launch this.nativeStartAbilityForResult(want, myCall);
     console.log("call startAbilityForResult callback 222");
   }
 
-  startAbilityForResult(want: Want, startOptions: StartOptions, callback: AsyncCallback<AbilityResult, void>):void{
+  startAbilityForResult(want: Want, startOptions: StartOptions, callback: AsyncCallback<AbilityResult, void>): void {
     console.log("call startAbilityForResult callback 111");
     let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
     launch this.nativeStartAbilityForResult(want, startOptions, myCall);
@@ -199,7 +116,7 @@ export class UIAbilityContext {
     return p;
   }
 
-  startAbilityForResult(want: Want, startOptions: StartOptions): Promise<AbilityResult>{
+  startAbilityForResult(want: Want, startOptions: StartOptions): Promise<AbilityResult> {
     console.log("call startAbilityForResult callback 111");
     let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError<void>)=>void):void => {
       let myCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError<void>, data: AbilityResult)=>{
@@ -215,7 +132,7 @@ export class UIAbilityContext {
     return p;
   }
 
-  terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<AbilityResult, void>): void{
+  terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<AbilityResult, void>): void {
     
     console.log("call terminateSelfWithResult callback 111");
     let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
@@ -248,5 +165,31 @@ export class UIAbilityContext {
       console.log("reportDrawnCompleted callback 333");
     });
     console.log("reportDrawnCompleted callback 444");
+  }
+
+  startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback, callback: AsyncCallback<void>): void {
+    console.log("call startAbilityByType callback 111");
+    let jsonStr = ""; //convert form value;
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    launch this.nativeStartAbilityByTypeSync(type, jsonStr, startCallback, myCall);
+    console.log("call startAbilityByType callback 222");
+  }
+ 
+  startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): Promise<void> {
+    console.log("call startAbilityByType promis type 111..");
+    let p = new Promise<void>((resolve: ()=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError)=>{
+        console.log("call startAbilityByType promis type callback 122");
+        if (err.code == 0) {
+          resolve();
+        } else {
+          reject(err);
+        }
+      });
+      let jsonStr = ""; //convert form value;
+      launch this.nativeStartAbilityByTypeSync(type, jsonStr, startCallback, myCall);
+    });
+    console.log("call startAbilityByType callback end...");
+    return p;
   }
 }

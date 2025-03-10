@@ -19,7 +19,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-#define SETTER_METHOD_NAME(property) "<set>" #property
 
 ani_object WrapAbilityInfo(ani_env *env, const AbilityInfo &abilityInfo)
 {
@@ -29,7 +28,7 @@ ani_object WrapAbilityInfo(ani_env *env, const AbilityInfo &abilityInfo)
     ani_method method = nullptr;
     ani_object object = nullptr;
 
-    if ((status = env->FindClass("LUIAbilityContext/AbilityInfoCls;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("LbundleManager/AbilityInfo/AbilityInfoCls;", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
     }
     if (cls == nullptr) {
