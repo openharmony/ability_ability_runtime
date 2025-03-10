@@ -534,7 +534,8 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
         isDebugFromLocal);
     bool checkDeveloperModeFlag = (isDebugApp || hasWindowOptions || isNativeDebugApp || isDebugFromLocal);
     if (checkDeveloperModeFlag) {
-        if (isDebugFromLocal && !AAFwk::PermissionVerification::GetInstance()-> VerifyStartLocalDebug()) {
+        if (isDebugFromLocal &&
+            !AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug(IPCSkeleton::GetCallingTokenID())) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "local debugging, permission denied");
             return CHECK_PERMISSION_FAILED;
         } else if (!isDebugFromLocal && !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
@@ -6658,6 +6659,24 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
     }
 
     if (ModalSystemDialogUtil::CheckDebugAppNotInDeveloperMode(request.abilityInfo.applicationInfo)) {
+        // local debug do not show dialog.
+        if (AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug(IPCSkeleton::GetCallingTokenID())) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "local debug");
+            return ERR_OK;
+        }
+        if (AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug(
+            request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0))) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "real call is local debug");
+            return ERR_OK;
+        }
+        if (abilityRecord != nullptr) {
+            std::string targetBundleName = request.want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+            std::string callerBundleName = abilityRecord->GetApplicationInfo().bundleName;
+            if (targetBundleName.compare(callerBundleName) ==0) {
+                TAG_LOGD(AAFwkTag::ABILITYMGR, "same bundle");
+                return ERR_OK;
+            }
+        }
         // service and extension do not show dialog.
         if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
             !(request.abilityInfo.type == AppExecFwk::AbilityType::SERVICE ||
@@ -11147,7 +11166,8 @@ std::shared_ptr<AbilityDebugDeal> AbilityManagerService::ConnectInitAbilityDebug
 int32_t AbilityManagerService::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    if (isDebugFromLocal && !AAFwk::PermissionVerification::GetInstance()-> VerifyStartLocalDebug()) {
+    if (isDebugFromLocal &&
+        !AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug(IPCSkeleton::GetCallingTokenID())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "local debugging, permission denied");
         return CHECK_PERMISSION_FAILED;
     } else if (!isDebugFromLocal && !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
@@ -11175,7 +11195,8 @@ int32_t AbilityManagerService::AttachAppDebug(const std::string &bundleName, boo
 int32_t AbilityManagerService::DetachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    if (isDebugFromLocal && !AAFwk::PermissionVerification::GetInstance()-> VerifyStartLocalDebug()) {
+    if (isDebugFromLocal &&
+        !AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug(IPCSkeleton::GetCallingTokenID())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "local debugging, permission denied");
         return CHECK_PERMISSION_FAILED;
     } else if (!isDebugFromLocal && !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
