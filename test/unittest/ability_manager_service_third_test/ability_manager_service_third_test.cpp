@@ -37,6 +37,7 @@
 #include "scene_board_judgement.h"
 #include "system_ability_definition.h"
 #include "uri.h"
+#include "mock_ability_connect_callback.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -570,6 +571,37 @@ HWTEST_F(AbilityManagerServiceThirdTest, ClearUserData_001, TestSize.Level1)
     ASSERT_NE(abilityMs_, nullptr);
     abilityMs_->ClearUserData(100);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ClearUserData_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: DisconnectBeforeCleanupByUserId
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService DisconnectBeforeCleanupByUserId
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, DisconnectBeforeCleanupByUserId_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest DisconnectBeforeCleanupByUserId_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    abilityMs_->subManagersHelper_->InitConnectManager(100, false);
+
+    auto abilityRecord = MockAbilityRecord(AbilityType::SERVICE);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    OHOS::sptr<IAbilityConnection> callback1 = new AbilityConnectCallback();
+    std::shared_ptr<ConnectionRecord> connection1 =
+        std::make_shared<ConnectionRecord>(callerToken, abilityRecord, callback1, nullptr);
+    abilityRecord->currentState_ = AbilityState::ACTIVE;
+    abilityRecord->AddConnectRecordToList(connection1);
+    abilityMs_->GetConnectManagerByUserId(100)->AddConnectObjectToMap(callback1->AsObject(),
+        abilityRecord->GetConnectRecordList(), false);
+    abilityMs_->GetConnectManagerByUserId(100)->serviceMap_.emplace(abilityRecord->GetElementName().GetURI(),
+        abilityRecord);
+
+    abilityMs_->DisconnectBeforeCleanupByUserId(100);
+    ASSERT_EQ(abilityRecord->GetConnectRecordList().empty(), true);
+    ASSERT_EQ(abilityMs_->GetConnectManagerByUserId(100)->GetConnectRecordListByCallback(callback1).empty(), true);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest DisconnectBeforeCleanupByUserId_001 end");
 }
 
 /*

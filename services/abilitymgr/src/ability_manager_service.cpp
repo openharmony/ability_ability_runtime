@@ -8167,8 +8167,18 @@ int AbilityManagerService::GetProcessRunningInfosByUserId(
 void AbilityManagerService::ClearUserData(int32_t userId)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
+    // notify disconnect done to callers before clear connectManager's user data
+    DisconnectBeforeCleanupByUserId(userId);
     CHECK_POINTER(subManagersHelper_);
     subManagersHelper_->ClearSubManagers(userId);
+}
+
+void AbilityManagerService::DisconnectBeforeCleanupByUserId(int32_t userId) {
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
+    auto connectManager = GetConnectManagerByUserId(userId);
+    CHECK_POINTER(connectManager);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "handle all abilities die before clear data, userId:%{public}d", userId);
+    connectManager->DisconnectBeforeCleanup();
 }
 
 int AbilityManagerService::RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler)
