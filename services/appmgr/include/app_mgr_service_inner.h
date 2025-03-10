@@ -1672,6 +1672,7 @@ private:
     sptr<WindowFocusChangedListener> focusListener_;
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
+    ffrt::mutex runningSharedBundleListMutex_;
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
     std::map<std::string, bool> waitingDebugBundleList_;
     ffrt::mutex waitingDebugLock_;
