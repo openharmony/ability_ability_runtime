@@ -45,11 +45,11 @@ export default class UIAbilityContext {
   public native nativeStartAbilitySync(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<void>): void;
   public native nativeStartAbilityForResult(want: Want, callback:AsyncCallbackWrapper<AbilityResult>): void;
   public native nativeStartAbilityForResult(want: Want, startOptions: StartOptions, callback:AsyncCallbackWrapper<AbilityResult>): void;
-  public native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<AbilityResult>): void;
-  public native reportDrawnCompletedSync(): void;
+  public native nativeTerminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
+  public native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
+  public native nativeReportDrawnCompletedSync(callback:AsyncCallbackWrapper<void>): void;
   public native nativeStartAbilityByTypeSync(type: string, wantParam: string, startCallback: AbilityStartCallback, callback:AsyncCallbackWrapper<void>): void;
 
-  // startAbility(want: Want, callback: AsyncCallback<void>): void;
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     console.log("call startAbility callback 111");
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -57,7 +57,6 @@ export default class UIAbilityContext {
     console.log("call startAbility callback 222");
   }
 
-  // startAbility(want: Want, options: StartOptions, callback: AsyncCallbackWrapper<void>): void;
   startAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void {
     console.log("call startAbility callback 111");
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -65,23 +64,32 @@ export default class UIAbilityContext {
     console.log("call startAbility callback 222");
   }
 
-  // startAbility(want: Want, options?: StartOptions): Promise<void>;
-  startAbility(want: Want, options?: StartOptions): Promise<void> {
-    console.log("call startAbility callback 111");
-    let p = new Promise<void>((resolve: ()=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+  startAbility(want: Want): Promise<int> {
+    let p = new Promise<int>((resolve: (data:int)=>void, reject:(err: BusinessError<void>)=>void):void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
         if (err.code == 0) {
-          resolve();
+          resolve(1);
         } else {
           reject(err);
         }
       });
-      if (options) {
-        launch this.nativeStartAbilitySync(want, options, myCall);
-      } else {
-        launch this.nativeStartAbilitySync(want, myCall);
-      }
-    console.log("call startAbility callback 222");
+      launch this.nativeStartAbilitySync(want, myCall);
+    });
+    return p;
+  }
+
+  startAbility(want: Want, options: StartOptions): Promise<int> {
+    console.log("call startAbility callback 111");
+    let p = new Promise<int>((resolve: (data:int)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+        if (err.code == 0) {
+          resolve(1);
+        } else {
+          reject(err);
+        }
+      });
+      launch this.nativeStartAbilitySync(want, options, myCall);
+      console.log("call startAbility callback 222");
     });
     return p;
   }
@@ -132,20 +140,42 @@ export default class UIAbilityContext {
     return p;
   }
 
-  terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<AbilityResult, void>): void {
-    
+  terminateSelf(callback:AsyncCallback<void>): void {
+    console.log("reportDrawnCompleted callback 111");
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    launch this.nativeTerminateSelfSync(myCall);
+    console.log("reportDrawnCompleted callback 222");
+  }
+
+  terminateSelf(): Promise<int> {
+    console.log("call startAbility callback 111");
+    let p = new Promise<int>((resolve: (data:int)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+        if (err.code == 0) {
+          resolve(1);
+        } else {
+          reject(err);
+        }
+      });
+      launch this.nativeTerminateSelfSync(myCall);
+      console.log("call startAbility callback 222");
+    });
+    return p;
+  }
+
+  terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<void>): void {
     console.log("call terminateSelfWithResult callback 111");
-    let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
+    let myCall = new AsyncCallbackWrapper<void>(callback);
     launch this.nativeTerminateSelfWithResult(parameter, myCall);
     console.log("call terminateSelfWithResult callback 222");
   }
 
-  terminateSelfWithResult(parameter: AbilityResult): Promise<AbilityResult>{
+  terminateSelfWithResult(parameter: AbilityResult): Promise<int>{
     console.log("call terminateSelfWithResult callback 111");
-    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError<void>, data: AbilityResult)=>{
+    let p = new Promise<int>((resolve: (data: int)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
         if (err.code == 0) {
-          resolve(data);
+          resolve(1);
         } else {
           reject(err);
         }
@@ -156,15 +186,11 @@ export default class UIAbilityContext {
     return p;
   }
 
-  reportDrawnCompleted(callback:() => void): void {
+  reportDrawnCompleted(callback:AsyncCallback<void>): void {
     console.log("reportDrawnCompleted callback 111");
-    let p1 = launch this.reportDrawnCompletedSync();
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    launch this.nativeReportDrawnCompletedSync(myCall);
     console.log("reportDrawnCompleted callback 222");
-    p1?.then<void>(():void=>{
-      //callback();
-      console.log("reportDrawnCompleted callback 333");
-    });
-    console.log("reportDrawnCompleted callback 444");
   }
 
   startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback, callback: AsyncCallback<void>): void {

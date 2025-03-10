@@ -58,16 +58,16 @@ ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &conf
     str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     ClassSetter(env, cls, object, SETTER_METHOD_NAME(language), GetAniString(env, str));
 
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(colorMode), ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE)));
+    // ClassSetter(env, cls, object, SETTER_METHOD_NAME(colorMode), ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE)));
 
     int32_t displayId = ConvertDisplayId(configuration.GetItem(ConfigurationInner::APPLICATION_DISPLAYID));
     ClassSetter(env, cls, object, SETTER_METHOD_NAME(displayId), displayId);
 
-    std::string direction = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(direction), ConvertDirection(direction));
+    // std::string direction = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
+    // ClassSetter(env, cls, object, SETTER_METHOD_NAME(direction), ConvertDirection(direction));
 
-    std::string density = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(screenDensity), ConvertDensity(density));
+    // std::string density = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI);
+    // ClassSetter(env, cls, object, SETTER_METHOD_NAME(screenDensity), ConvertDensity(density));
     
     std::string hasPointerDevice = configuration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     ClassSetter(env, cls, object, SETTER_METHOD_NAME(hasPointerDevice), hasPointerDevice == "true" ? true : false);
