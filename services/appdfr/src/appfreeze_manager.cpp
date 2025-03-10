@@ -123,7 +123,9 @@ int AppfreezeManager::AppfreezeHandle(const FaultData& faultData, const Appfreez
         faultData.errorObject.name.c_str(), appInfo.bundleName.c_str());
     std::string memoryContent = "";
     CollectFreezeSysMemory(memoryContent);
-    if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) {
+    if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK ||
+        faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S ||
+        faultData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
         AcquireStack(faultData, appInfo, memoryContent);
     } else {
         NotifyANR(faultData, appInfo, "", memoryContent);
@@ -168,7 +170,9 @@ int AppfreezeManager::MergeNotifyInfo(FaultData& faultNotifyData, const Appfreez
         faultNotifyData.errorObject.message += "\nnotifyAppFault exception.\n";
     }
     faultNotifyData.errorObject.message += timeStamp;
-    if (faultNotifyData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) {
+    if (faultNotifyData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK ||
+        faultNotifyData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S ||
+        faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
         AcquireStack(faultNotifyData, appInfo, memoryContent);
     } else {
         NotifyANR(faultNotifyData, appInfo, "", memoryContent);
