@@ -9691,6 +9691,10 @@ void AbilityManagerService::PrepareTerminateAbilityDone(const sptr<IRemoteObject
     CHECK_POINTER(uiAbilityManager);
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER(abilityRecord);
+    if (!JudgeSelfCalled(abilityRecord)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not self caller");
+        return;
+    }
     auto abilityRecordId = std::to_string(abilityRecord->GetAbilityRecordId());
     std::lock_guard<std::mutex> guard(prepareTermiationCallbackMutex_);
     auto iter = prepareTermiationCallbacks_.find(abilityRecordId);
@@ -12095,6 +12099,10 @@ int32_t AbilityManagerService::AddQueryERMSObserver(sptr<IRemoteObject> callerTo
     sptr<AbilityRuntime::IQueryERMSObserver> observer)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (callerToken == nullptr || !JudgeSelfCalled(Token::GetAbilityRecordByToken(callerToken))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller invalid");
+        return ERR_PERMISSION_DENIED;
+    }
     return QueryERMSManager::GetInstance().AddQueryERMSObserver(callerToken, observer);
 }
 
