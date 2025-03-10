@@ -1268,6 +1268,14 @@ public:
 
     void ClearUserData(int32_t userId);
 
+    /**
+     * notify callers disconnect abilities before clearUserData
+     * or can not find connectManager_ by userId when onAbilityDied.
+     *
+     * @param userId userId.
+     */
+    void DisconnectBeforeCleanupByUserId(int32_t userId);
+
     virtual int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler) override;
 
     virtual int32_t GetMissionSnapshot(const std::string& deviceId, int32_t missionId,

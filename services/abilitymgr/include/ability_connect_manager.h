@@ -290,6 +290,12 @@ public:
      */
     void OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
 
+    /**
+     * DisconnectBeforeCleanup.
+     *
+     */
+    void DisconnectBeforeCleanup();
+
     void DumpState(std::vector<std::string> &info, bool isClient, const std::string &args = "");
 
     void DumpStateByUri(std::vector<std::string> &info, bool isClient, const std::string &args,
@@ -558,6 +564,7 @@ private:
      * @param abilityRecord, died ability.
      */
     void HandleAbilityDiedTask(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
+
     void HandleUIExtensionDied(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     void RestartAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
