@@ -88,16 +88,3 @@ ani_object CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
     TAG_LOGE(AAFwkTag::UI_EXT, "CreateStsUiExtensionContext end");
     return contextObj;
 }
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
-{
-    std::cerr << "ANI_Constructor call" <<std::endl;
-    ani_env *env;
-    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
-        return ANI_ERROR;
-    }
-    auto context = std::make_shared<OHOS::AbilityRuntime::UIExtensionContext>();
-    (void)CreateStsUiExtensionContext(env, context);
-    *result = ANI_VERSION_1;
-    return ANI_OK;
-}
