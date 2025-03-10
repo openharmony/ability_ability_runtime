@@ -15,14 +15,26 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-generate_static_abc("ui_ability_abc") {
-  arktsconfig = "${ability_runtime_path}/frameworks/ets/ani/ui_ability/ui_ability_config.json"
-  dst_file = "$target_out_dir/ui_ability.abc"
-  out_puts = [ "$target_out_dir/ui_ability.abc" ]
+generate_static_abc("ui_ability") {
+  base_url = "./ets"
+  files = [
+    "./ets/ability/abilityResult.ets",
+    "./ets/application/AbilityStartCallback.ets",
+    "./ets/application/ServiceExtensionContext.ets",
+    "./ets/application/UIAbilityContext.ets",
+    "./ets/bundleManager/AbilityInfo.ets",
+    "./ets/@ohos.app.ability.AbilityConstant.ets",
+    "./ets/@ohos.app.ability.Configuration.ets",
+    "./ets/@ohos.app.ability.ConfigurationConstant.ets",
+    "./ets/@ohos.app.ability.ServiceExtensionAbility.ets",
+    "./ets/@ohos.app.ability.StartOptions.ets",
+    "./ets/@ohos.app.ability.UIAbility.ets",
+    "./ets/@ohos.app.ability.Want.ets",
+    "./ets/@ohos.base.ets",
+  ]
 
   is_boot_abc = "True"
   device_dst_file = "/system/framework/ui_ability.abc"
-  cache_path = "$target_out_dir/cache"
 }
 
 ohos_prebuilt_etc("ui_ability_abc_etc") {
@@ -30,5 +42,5 @@ ohos_prebuilt_etc("ui_ability_abc_etc") {
   module_install_dir = "framework"
   subsystem_name = "ability"
   part_name = "ability_runtime"
-  deps = [ ":ui_ability_abc" ]
+  deps = [ ":ui_ability" ]
 }

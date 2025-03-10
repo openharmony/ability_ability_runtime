@@ -35,7 +35,7 @@ ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &conf
     ani_method method = nullptr;
     ani_object object = nullptr;
 
-    if ((status = env->FindClass("LUIAbilityContext/Configuration;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("L@ohos/app/ability/Configuration/ConfigurationImpl;", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
     }
     if (cls == nullptr) {
@@ -56,36 +56,36 @@ ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &conf
     std::string str;
 
     str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    SetFieldString(env, cls, object, "language", str);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(language), GetAniString(env, str));
 
-    SetFieldInt(env, cls, object, "colorMode", ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE)));
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(colorMode), ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE)));
 
     int32_t displayId = ConvertDisplayId(configuration.GetItem(ConfigurationInner::APPLICATION_DISPLAYID));
-    SetFieldInt(env, cls, object, "displayId", displayId);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(displayId), displayId);
 
     std::string direction = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
-    SetFieldInt(env, cls, object, "direction", ConvertDirection(direction));
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(direction), ConvertDirection(direction));
 
     std::string density = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI);
-    SetFieldInt(env, cls, object, "screenDensity", ConvertDensity(density));
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(screenDensity), ConvertDensity(density));
     
     std::string hasPointerDevice = configuration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    SetFieldBoolean(env, cls, object, "hasPointerDevice", hasPointerDevice == "true" ? true : false);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(hasPointerDevice), hasPointerDevice == "true" ? true : false);
 
     str = configuration.GetItem(AAFwk::GlobalConfigurationKey::APPLICATION_FONT);
-    SetFieldString(env, cls, object, "fontId", str);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(fontId), GetAniString(env, str));
 
     std::string fontSizeScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    SetFieldDouble(env, cls, object, "fontSizeScale", fontSizeScale != "" ? std::stod(fontSizeScale) : 1.0);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(fontSizeScale), fontSizeScale != "" ? std::stod(fontSizeScale) : 1.0);
 
     std::string fontWeightScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
-    SetFieldDouble(env, cls, object, "fontWeightScale", fontWeightScale != "" ? std::stod(fontWeightScale) : 1.0);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(fontWeightScale), fontWeightScale != "" ? std::stod(fontWeightScale) : 1.0);
 
     str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
-    SetFieldString(env, cls, object, "mcc", str);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(mcc), GetAniString(env, str));
 
     str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
-    SetFieldString(env, cls, object, "mnc", str);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(mnc), GetAniString(env, str));
 
     return object;
 }
