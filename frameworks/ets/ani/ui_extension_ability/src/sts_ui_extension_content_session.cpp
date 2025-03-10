@@ -22,7 +22,7 @@
 #include "want.h"
 #include "window.h"
 
-static ani_object NativeSetReceiveDataCallback(ani_env* env, ani_object obj)
+ani_object NativeSetReceiveDataCallback(ani_env* env, ani_object obj)
 {
     if (env == nullptr) {
         TAG_LOGW(AAFwkTag::UI_EXT, "NativeGetUIExtensionHostWindowProxy null env");
@@ -53,7 +53,7 @@ static ani_object NativeSetReceiveDataCallback(ani_env* env, ani_object obj)
     }
     return stsContentSession->SetReceiveDataCallback(env, obj);
 }
-static void NativeSendData(ani_env* env, ani_object obj)
+void NativeSendData(ani_env* env, ani_object obj)
 {
     if (env == nullptr) {
         TAG_LOGW(AAFwkTag::UI_EXT, "NativeSendData null env");
@@ -82,7 +82,7 @@ static void NativeSendData(ani_env* env, ani_object obj)
     return stsContentSession->SendData(env, obj);
 }
 
-static void NativeLoadContent(ani_env* env, ani_object obj, ani_string path, ani_object storage)
+void NativeLoadContent(ani_env* env, ani_object obj, ani_string path, ani_object storage)
 {
     if (env == nullptr) {
         TAG_LOGW(AAFwkTag::UI_EXT, "NativeLoadContent null env");
@@ -111,7 +111,7 @@ static void NativeLoadContent(ani_env* env, ani_object obj, ani_string path, ani
     return stsContentSession->LoadContent(env, obj, path, storage);
 }
 
-static void NativeTerminateSelf(ani_env* env, ani_object obj)
+void NativeTerminateSelf(ani_env* env, ani_object obj)
 {
     if (env == nullptr) {
         TAG_LOGW(AAFwkTag::UI_EXT, "NativeTerminateSelf null env");
@@ -140,7 +140,7 @@ static void NativeTerminateSelf(ani_env* env, ani_object obj)
     return stsContentSession->TerminateSelf();
 }
 
-static void NativeSetWindowBackgroundColor(ani_env* env, ani_object obj)
+void NativeSetWindowBackgroundColor(ani_env* env, ani_object obj)
 {
     if (env == nullptr) {
         TAG_LOGW(AAFwkTag::UI_EXT, "NativeTerminateSelfWithResult null env");
@@ -169,7 +169,7 @@ static void NativeSetWindowBackgroundColor(ani_env* env, ani_object obj)
     return stsContentSession->SetWindowBackgroundColor("red");
 }
 
-static ani_object NativeGetUIExtensionHostWindowProxy(ani_env* env, ani_object obj)
+ani_object NativeGetUIExtensionHostWindowProxy(ani_env* env, ani_object obj)
 {
     if (env == nullptr) {
         TAG_LOGW(AAFwkTag::UI_EXT, "NativeGetUIExtensionHostWindowProxy null env");
@@ -375,7 +375,7 @@ void StsUIExtensionContentSession::SetWindowBackgroundColor(std::string color)
 ani_object StsUIExtensionContentSession::GetUIExtensionHostWindowProxy(ani_env* env, ani_object object)
 {
     TAG_LOGE(AAFwkTag::UI_EXT, "StsUIExtensionContentSession GetUIExtensionHostWindowProxy call");
-    //Todo 
+    //Todo
     // if (sessionInfo_ == nullptr) {
     //     TAG_LOGE(AAFwkTag::UI_EXT, "Invalid session info");
     //     ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
@@ -422,42 +422,4 @@ ani_object StsUIExtensionContentSession::SetReceiveDataCallback(ani_env* env, an
     return nullptr;
 }
 }
-}
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
-{
-    ani_env *env;
-    ani_status status = ANI_ERROR;
-    status = vm->GetEnv(ANI_VERSION_1, &env);
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "GetEnv is fail %{public}d", status);
-        return ANI_ERROR;
-    }
-
-    static const char *className = "LUIExtensionContentSession/UIExtensionContentSession;";
-    ani_class cls;
-    status = env->FindClass(className, &cls);
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "FindClass is fail %{public}d", status);
-        return ANI_ERROR;
-    }
-
-    std::array methods = {
-        ani_native_function {"terminateSelfSync", ":V", reinterpret_cast<void *>(NativeTerminateSelf)},
-        ani_native_function {"sendData", nullptr, reinterpret_cast<void *>(NativeSendData)},
-        ani_native_function {"loadContent", nullptr, reinterpret_cast<void *>(NativeLoadContent)},
-        ani_native_function {"setWindowBackgroundColor", nullptr,
-            reinterpret_cast<void *>(NativeSetWindowBackgroundColor)},
-        ani_native_function {"getUIExtensionHostWindowProxy", nullptr,
-            reinterpret_cast<void *>(NativeGetUIExtensionHostWindowProxy)},
-        ani_native_function {"setReceiveDataCallback", nullptr, reinterpret_cast<void *>(NativeSetReceiveDataCallback)}
-    };
-
-    status = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Class_BindNativeMethods is fail %{public}d", status);
-        return ANI_ERROR;
-    };
-
-    *result = ANI_VERSION_1;
-    return ANI_OK;
 }

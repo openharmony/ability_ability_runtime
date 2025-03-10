@@ -33,6 +33,7 @@
 #include "want_params_wrapper.h"
 #include "sts_data_struct_converter.h"
 #include "sts_ui_extension_context.h"
+#include "sts_ui_extension_content_session.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -1043,10 +1044,49 @@ void StsUIExtension::Test(STSRuntime& stsRuntime)
 
     TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension ondestory finished ");
 }
-
 #endif
 
-}
-}
+} // AbilityRuntime
+} // OHOS
 
+
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    std::cerr << "ANI_Constructor call" <<std::endl;
+    ani_env *env;
+    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
+        return ANI_ERROR;
+    }
+    static const char *className = "LUIExtensionContentSession/UIExtensionContentSession;";
+    ani_class cls;
+    ani_status status = env->FindClass(className, &cls);
+    if (ANI_OK != status) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "FindClass is fail %{public}d", status);
+        return ANI_ERROR;
+    }
+
+    std::array methods = {
+        ani_native_function {"terminateSelfSync", ":V", reinterpret_cast<void *>(NativeTerminateSelf)},
+        ani_native_function {"sendData", nullptr, reinterpret_cast<void *>(NativeSendData)},
+        ani_native_function {"loadContent", nullptr, reinterpret_cast<void *>(NativeLoadContent)},
+        ani_native_function {"setWindowBackgroundColor", nullptr,
+            reinterpret_cast<void *>(NativeSetWindowBackgroundColor)},
+        ani_native_function {"getUIExtensionHostWindowProxy", nullptr,
+            reinterpret_cast<void *>(NativeGetUIExtensionHostWindowProxy)},
+        ani_native_function {"setReceiveDataCallback", nullptr, reinterpret_cast<void *>(NativeSetReceiveDataCallback)}
+    };
+
+    status = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    if (ANI_OK != status) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Class_BindNativeMethods is fail %{public}d", status);
+        return ANI_ERROR;
+    };
+
+    auto context = std::make_shared<OHOS::AbilityRuntime::UIExtensionContext>();
+    (void)CreateStsUiExtensionContext(env, context);
+
+    *result = ANI_VERSION_1;
+    return ANI_OK;
+}
 
