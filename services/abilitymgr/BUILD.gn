@@ -328,13 +328,9 @@ ohos_shared_library("ams_configuration_parameter") {
     debug = false
   }
   branch_protector_ret = "pac_ret"
-  include_dirs = [
-    "${ability_runtime_services_path}/abilitymgr/include",
-  ]
+  include_dirs = [ "${ability_runtime_services_path}/abilitymgr/include" ]
 
-  sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/ams_configuration_parameter.cpp",
-  ]
+  sources = [ "${ability_runtime_services_path}/abilitymgr/src/ams_configuration_parameter.cpp" ]
 
   deps = [ "${ability_runtime_services_path}/common:app_util" ]
   external_deps = [
