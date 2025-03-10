@@ -63,7 +63,10 @@ ohos_unittest("watchdog_test") {
     "watchdog_test.cpp",
   ]
 
-  deps = [ "${ability_runtime_native_path}/appkit:appkit_native" ]
+  deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/appkit:appkit_native",
+  ]
 
   external_deps = [
     "ability_base:base",

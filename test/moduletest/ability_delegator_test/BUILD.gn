@@ -179,6 +179,7 @@ ohos_moduletest("ability_delegator_moduletest") {
 
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_native_path}/appkit:appkit_native",
