@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -765,6 +765,97 @@ HWTEST_F(AbilityToolTest, AbilityTool_ForceStop_0300, TestSize.Level1)
     EXPECT_EQ(cmd.RunAsForceStop(), OHOS::ERR_OK);
     managerClientPtr->proxy_ = nullptr;
     testing::Mock::AllowLeak(mockAbilityManagerStub);
+}
+
+/**
+ * @tc.number: ParseStartAbilityArgsFromCmd_0100
+ * @tc.name: ParseStartAbilityArgsFromCmd
+ * @tc.desc: "ability_tool start --flags 0" test
+ */
+HWTEST_F(AbilityToolTest, ParseStartAbilityArgsFromCmd_0100, TestSize.Level1)
+{
+    char* argv[] = {
+        const_cast<char*>("ability_tool"),
+        const_cast<char*>("start"),
+        const_cast<char*>("--ability"),
+        const_cast<char*>("TestAbility"),
+        const_cast<char*>("--bundle"),
+        const_cast<char*>("com.example.abilitytooltest"),
+        const_cast<char*>("--flags"),
+        const_cast<char*>("0"),
+        const_cast<char*>("--cold-start"),
+        const_cast<char*>("--debug"),
+        const_cast<char*>("--default"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    AbilityToolCommand cmd(argc, argv);
+
+    Want want;
+    StartOptions startOptions;
+    ErrCode ret = cmd.ParseStartAbilityArgsFromCmd(want, startOptions);
+    EXPECT_EQ(want.GetFlags(), 0);
+    EXPECT_TRUE(want.GetParams().GetParam("coldStart"));
+    EXPECT_TRUE(want.GetParams().GetParam("debugApp"));
+    EXPECT_EQ(ret, OHOS::ERR_OK);
+}
+
+/**
+ * @tc.number: ParseTestArgsFromCmd_0100
+ * @tc.name: ParseTestArgsFromCmd
+ * @tc.desc: "ability_tool test --watchdog 0" test
+ */
+HWTEST_F(AbilityToolTest, ParseTestArgsFromCmd_0100, TestSize.Level1)
+{
+    char* argv[] = {
+        const_cast<char*>("ability_tool"),
+        const_cast<char*>("test"),
+        const_cast<char*>("--bundle"),
+        const_cast<char*>("com.example.abilitytooltest"),
+        const_cast<char*>("--package-name"),
+        const_cast<char*>("package"),
+        const_cast<char*>("--module-name"),
+        const_cast<char*>("module"),
+        const_cast<char*>("--watchdog"),
+        const_cast<char*>("0"),
+        const_cast<char*>("--debug"),
+        const_cast<char*>("--default"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    AbilityToolCommand cmd(argc, argv);
+
+    std::map<std::string, std::string> params;
+    ErrCode ret = cmd.ParseTestArgsFromCmd(params);
+    EXPECT_EQ(params["-p"], "package");
+    EXPECT_EQ(params["-m"], "module");
+    EXPECT_EQ(params["-D"], "true");
+    EXPECT_EQ(ret, OHOS::ERR_OK);
+}
+
+/**
+ * @tc.number: ParseTestArgsFromCmd_0200
+ * @tc.name: ParseTestArgsFromCmd
+ * @tc.desc: "ability_tool test --watchdog 01" test
+ */
+HWTEST_F(AbilityToolTest, ParseTestArgsFromCmd_0200, TestSize.Level1)
+{
+    char* argv[] = {
+        const_cast<char*>("ability_tool"),
+        const_cast<char*>("test"),
+        const_cast<char*>("--bundle"),
+        const_cast<char*>("com.example.abilitytooltest"),
+        const_cast<char*>("--package-name"),
+        const_cast<char*>("package"),
+        const_cast<char*>("--module-name"),
+        const_cast<char*>("module"),
+        const_cast<char*>("--watchdog"),
+        const_cast<char*>("01"),
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]);
+    AbilityToolCommand cmd(argc, argv);
+
+    std::map<std::string, std::string> params;
+    ErrCode ret = cmd.ParseTestArgsFromCmd(params);
+    EXPECT_EQ(ret, OHOS::ERR_INVALID_VALUE);
 }
 } // namespace AAFwk
 } // namespace OHOS

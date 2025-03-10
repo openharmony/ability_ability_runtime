@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -1812,6 +1812,39 @@ ohos_unittest("pac_map_test") {
   }
 }
 
+ohos_unittest("pac_map_second_test") {
+  module_out_path = module_output_path
+  sources = [ "pac_map_second_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:extractortool",
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  if (ability_runtime_graphics) {
+    external_deps += [
+      "form_fwk:fmskit_native",
+      "i18n:intl_util",
+      "input:libmmi-client",
+    ]
+  }
+}
+
 ohos_unittest("ability_permission_test") {
   module_out_path = module_output_path
   sources = [
@@ -3315,6 +3348,7 @@ group("unittest") {
     ":form_extension_test",
     ":js_ui_extension_Callback_test",
     ":new_ability_impl_test",
+    ":pac_map_second_test",
     ":pac_map_test",
     ":reserse_continuation_scheduler_primary_proxy_test",
     ":reserse_continuation_scheduler_primary_stub_test",
