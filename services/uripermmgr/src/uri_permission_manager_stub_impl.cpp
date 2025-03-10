@@ -154,7 +154,9 @@ bool UriPermissionManagerStubImpl::IsDistributedSubDirUri(const std::string &inp
     }
     std::string iTempUri = inputUri.substr(0, iPos);
     std::string cTempUri = cachedUri.substr(0, cPos);
-    return iTempUri.find(cTempUri + "/") == 0;
+    std::string iTempNetworkId = inputUri.substr(iPos);
+    std::string cTempNetworkId = cachedUri.substr(cPos);
+    return (iTempUri.find(cTempUri + "/") == 0 && iTempNetworkId.compare(cTempNetworkId) == 0);
 }
 
 int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
