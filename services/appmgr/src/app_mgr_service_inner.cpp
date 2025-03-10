@@ -29,6 +29,7 @@
 #include "ability_manager_errors.h"
 #include "ability_window_configuration.h"
 #include "accesstoken_kit.h"
+#include "ams_configuration_parameter.h"
 #include "app_config_data_manager.h"
 #include "app_mem_info.h"
 #include "app_mgr_service.h"
@@ -3740,7 +3741,7 @@ int32_t AppMgrServiceInner::CreateStartMsg(const CreateStartMsgParam &param, App
 
 void AppMgrServiceInner::SetStartMsgCustomSandboxFlag(AppSpawnStartMsg &startMsg, int32_t userId)
 {
-    if (!system::GetBoolParameter(DEVELOPERMODE_STATE, false) ||
+    if (AAFwk::AmsConfigurationParameter::GetInstance().CustomSandbox() == 0 ||
         !AAFwk::AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not in PC mode or developer mode");
         return;

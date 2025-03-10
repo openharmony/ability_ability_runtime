@@ -33,6 +33,7 @@ ohos_fuzztest("ToolsTestObserverFuzzTest") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/abilitymgr:ams_configuration_parameter",
   ]
   external_deps = [
     "ability_base:configuration",
