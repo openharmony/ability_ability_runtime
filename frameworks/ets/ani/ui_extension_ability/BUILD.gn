@@ -43,6 +43,7 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
   sources = [
     "./src/sts_ui_extension.cpp",
     "./src/sts_ui_extension_content_session.cpp",
+    "./src/sts_ui_extension_context.cpp",
   ]
 
   cflags = []
@@ -66,7 +67,6 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${ability_runtime_path}/frameworks/ets/ani/uiextensioncontext:ui_ext_con_ani_kit",
     "${ability_runtime_path}/frameworks/native/ability/native:ui_extension",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]
@@ -104,10 +104,30 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
 }
 
 generate_static_abc("ui_extension_ability_ani_abc") {
-  arktsconfig = "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/ui_extension_ability_config.json"
+  base_url = "./ets"
+
+  files = [
+    "./ets/@ohos.app.ability.AbilityConstant.ets",
+    "./ets/@ohos.app.ability.UIExtensionAbility.ets",
+    "./ets/@ohos.app.ability.Want.ets",
+    "./ets/@ohos.base.ets",
+    "./ets/@ohos.uiExtensionHost.ets",
+    "./ets/LocalStorage.ets",
+    "./ets/UIExtensionContentSession.ets",
+    "./ets/UIExtensionContext.ets",
+  ]
+
   dst_file = "$target_out_dir/ui_extension_ability_ani.abc"
   out_puts = [ "$target_out_dir/ui_extension_ability_ani.abc" ]
 
-  # is_boot_abc = "True"
-  # device_dst_file = "system/framework/ui_extension_ability_ani.abc"
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ui_extension_ability_ani.abc"
+}
+
+ohos_prebuilt_etc("ui_extension_ability_ani_abc_etc") {
+  source = "$target_out_dir/ui_extension_ability_ani.abc"
+  deps = [ ":ui_extension_ability_ani_abc" ]
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
 }

@@ -91,4 +91,13 @@ private:
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
+
+//ani bingding functions
+ani_object NativeSetReceiveDataCallback(ani_env* env, ani_object obj);
+void NativeSendData(ani_env* env, ani_object obj);
+void NativeLoadContent(ani_env* env, ani_object obj, ani_string path, ani_object storage);
+void NativeTerminateSelf(ani_env* env, ani_object obj);
+void NativeSetWindowBackgroundColor(ani_env* env, ani_object obj);
+ani_object NativeGetUIExtensionHostWindowProxy(ani_env* env, ani_object obj);
+
 #endif  // OHOS_ABILITY_RUNTIME_STS_UI_EXTENSION_CONTENT_SESSION_H
