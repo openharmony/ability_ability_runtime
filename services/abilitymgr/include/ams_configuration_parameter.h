@@ -48,6 +48,7 @@ constexpr const char* UIEATENSION = "uiextension";
 constexpr const char* UIEATENSION_TYPE = "type";
 constexpr const char* UIEATENSION_TYPE_PICKER = "typePicker";
 constexpr const char* MULTI_USER_TYPE = "multiUserType";
+constexpr const char* CUSTOM_SANDBOX_FEATURE = "support_custom_sandbox";
 constexpr const char* SUPPORT_BACK_TO_CALLER = "supportBackToCaller";
 constexpr const char* SUPPORT_SCB_CRASH_REBOOT = "supportSCBCrashReboot";
 constexpr const char* RESIDENT_WHITE_LIST = "normal_resident_apps";
@@ -138,6 +139,8 @@ public:
 
     int MultiUserType() const;
 
+    int CustomSandbox() const;
+
     const std::map<std::string, std::string>& GetPickerMap() const;
 
     bool InResidentWhiteList(const std::string &bundleName) const;
@@ -181,6 +184,7 @@ private:
     int bootAnimationTime_ {5};
     int timeoutUnitTime_ {1000};
     int multiUserType_ {0};
+    int supportCustomSandbox_{0};
 
     std::vector<std::string> residentWhiteList_;
     std::string orientation_ {""};

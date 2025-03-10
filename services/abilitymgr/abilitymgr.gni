@@ -52,7 +52,6 @@ abilityms_files = [
   "src/pending_want_manager.cpp",
   "src/pending_want_common_event.cpp",
   "src/restart_app_manager.cpp",
-  "src/ams_configuration_parameter.cpp",
   "src/recovery_info_timer.cpp",
   "src/modal_system_dialog/modal_system_dialog_ui_extension.cpp",
   "src/hidden_start_observer_manager.cpp",
