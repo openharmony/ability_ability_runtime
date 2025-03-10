@@ -346,6 +346,7 @@ AppMgrServiceInner::~AppMgrServiceInner()
 void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
     int32_t requestId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "call.");
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
@@ -368,21 +369,23 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
     auto mainAppRecord =
         appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid, bundleInfo);
     if (mainAppRecord != nullptr) {
-        TAG_LOGD(AAFwkTag::APPMGR, "main process exists.");
+        TAG_LOGI(AAFwkTag::APPMGR, "main process exists.");
         mainAppRecord->SetScheduleNewProcessRequestState(requestId, want, hapModuleInfo.moduleName);
         auto moduleRecord = mainAppRecord->GetModuleRecordByModuleName(appInfo->bundleName, hapModuleInfo.moduleName);
         if (!moduleRecord) {
-            TAG_LOGD(AAFwkTag::APPMGR, "module record is nullptr, add modules");
+            TAG_LOGI(AAFwkTag::APPMGR, "module record is nullptr, add modules");
             std::vector<HapModuleInfo> hapModules = { hapModuleInfo };
             mainAppRecord->AddModules(appInfo, hapModules);
-            mainAppRecord->AddAbilityStageBySpecifiedProcess(appInfo->bundleName);
+            if (mainAppRecord->GetApplicationClient() != nullptr) {
+                mainAppRecord->AddAbilityStageBySpecifiedProcess(appInfo->bundleName);
+            }
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "schedule new process request.");
         mainAppRecord->ScheduleNewProcessRequest(want, hapModuleInfo.moduleName);
         return;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "main process do not exists.");
+    TAG_LOGI(AAFwkTag::APPMGR, "main process do not exists.");
     if (startSpecifiedAbilityResponse_) {
         startSpecifiedAbilityResponse_->OnNewProcessRequestResponse(want, "", requestId);
     }
@@ -1104,14 +1107,29 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
         return;
     }
     appRecord->LaunchPendingAbilities();
-    if (appRecord->IsStartSpecifiedAbility()) {
-        appRecord->AddAbilityStageBySpecifiedAbility(appRecord->GetBundleName());
-    }
+    AddAbilityStageForSpecified(appRecord);
 
     if (appRecord->IsPreloading()) {
         appRecord->SetPreloadState(PreloadState::PRELOADED);
     }
     SendAppLaunchEvent(appRecord);
+}
+
+void AppMgrServiceInner::AddAbilityStageForSpecified(std::shared_ptr<AppRunningRecord> appRecord)
+{
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "appRecord null");
+    if (appRecord->IsStartSpecifiedAbility()) {
+        TAG_LOGI(AAFwkTag::APPMGR, "start specified ability");
+        auto moduleRecordList = appRecord->GetAllModuleRecord();
+        for (const auto iter : moduleRecordList) {
+            iter->SetModuleRecordState(ModuleRecordState::INITIALIZED_STATE);
+        }
+        appRecord->AddAbilityStageBySpecifiedAbility(appRecord->GetBundleName());
+    }
+
+    if (appRecord->IsNewProcessRequest()) {
+        appRecord->AddAbilityStageBySpecifiedProcess(appRecord->GetBundleName());
+    }
 }
 
 void AppMgrServiceInner::AddAbilityStageDone(const int32_t recordId)
