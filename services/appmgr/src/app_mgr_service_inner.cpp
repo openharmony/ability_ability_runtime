@@ -6572,7 +6572,7 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
     int32_t pid = IPCSkeleton::GetCallingPid();
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (appRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "no appRecord");
+        TAG_LOGE(AAFwkTag::APPMGR, "no appRecord, pid:%{public}d", pid);
         return ERR_INVALID_VALUE;
     }
     if (appRecord->GetState() == ApplicationState::APP_STATE_TERMINATED ||
@@ -6581,14 +6581,14 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
         return ERR_OK;
     }
     std::string bundleName = appRecord->GetBundleName();
+    std::string eventName = faultData.errorObject.name;
 
-    TAG_LOGW(AAFwkTag::APPDFR, "called, eventName:%{public}s, bundleName:%{public}s, currentTime:%{public}s",
-        faultData.errorObject.name.c_str(), bundleName.c_str(),
+    TAG_LOGW(AAFwkTag::APPDFR, "called, eventName:%{public}s, pid:%{public}d, bundleName:%{public}s, "
+        "currentTime:%{public}s", eventName.c_str(), pid, bundleName.c_str(),
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
     if (AppExecFwk::AppfreezeManager::GetInstance()->IsProcessDebug(pid, bundleName)) {
-        TAG_LOGW(AAFwkTag::APPMGR,
-            "don't report event and kill:%{public}s, pid:%{public}d, bundleName:%{public}s",
-            faultData.errorObject.name.c_str(), pid, bundleName.c_str());
+        TAG_LOGW(AAFwkTag::APPMGR, "don't report event and kill:%{public}s, pid:%{public}d, bundleName:%{public}s",
+            eventName.c_str(), pid, bundleName.c_str());
         return ERR_OK;
     }
 
@@ -6601,12 +6601,11 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
             AppRecoveryNotifyApp(pid, bundleName, FaultDataType::APP_FREEZE, "recoveryTimeout");
         }
     }
-    if (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT ||
-        faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK ||
-        faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S ||
-        faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S) {
-        if (AppExecFwk::AppfreezeManager::GetInstance()->IsNeedIgnoreFreezeEvent(pid, faultData.errorObject.name)) {
-            TAG_LOGE(AAFwkTag::APPDFR, "appFreeze happend");
+    if (eventName == AppFreezeType::LIFECYCLE_TIMEOUT || eventName == AppFreezeType::APP_INPUT_BLOCK ||
+        eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::THREAD_BLOCK_3S) {
+        if (AppExecFwk::AppfreezeManager::GetInstance()->IsNeedIgnoreFreezeEvent(pid, eventName)) {
+            TAG_LOGE(AAFwkTag::APPDFR, "appFreeze happend, pid:%{public}d, eventName:%{public}s",
+                pid, eventName.c_str());
             return ERR_OK;
         }
     }
@@ -6615,8 +6614,7 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
     }
 
     if (appRecord->GetApplicationInfo()->asanEnabled) {
-        TAG_LOGI(AAFwkTag::APPMGR,
-            "faultData: %{public}s, pid: %{public}d", bundleName.c_str(), pid);
+        TAG_LOGI(AAFwkTag::APPMGR, "asan enable, bundleName:%{public}s, pid:%{public}d", bundleName.c_str(), pid);
         return ERR_OK;
     }
 
