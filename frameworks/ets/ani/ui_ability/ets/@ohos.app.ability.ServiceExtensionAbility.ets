@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import {Want} from './@ohos.app.ability.Want';
-import ServiceExtensionContext from './ServiceExtensionContext';
+import Want from './@ohos.app.ability.Want';
+import ServiceExtensionContext from './application/ServiceExtensionContext';
 
 export default class ServiceExtensionAbility {
   launchWant: Want = new Want();

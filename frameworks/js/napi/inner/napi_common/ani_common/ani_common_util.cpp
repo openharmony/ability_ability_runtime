@@ -314,11 +314,13 @@ bool SetFieldInt(ani_env *env, ani_class cls, ani_object object, const std::stri
     ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}s", fieldName.c_str());
         return false;
     }
     status = env->Object_SetField_Int(object, field, value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}s", fieldName.c_str());
         return false;
     }
     return true;

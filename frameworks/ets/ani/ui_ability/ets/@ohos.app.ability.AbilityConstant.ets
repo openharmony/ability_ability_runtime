@@ -13,19 +13,12 @@
  * limitations under the License.
  */
 
-export namespace AbilityConstant {
+declare namespace AbilityConstant  {
   export interface LaunchParam {
     launchReason: LaunchReason;
     launchReasonMessage?: string;
     lastExitReason: LastExitReason;
     lastExitMessage: string;
-  }
-
-  class LaunchParamImpl implements AbilityConstant.LaunchParam {
-    launchReason: AbilityConstant.LaunchReason;
-    launchReasonMessage?: string|undefined;
-    lastExitReason: AbilityConstant.LastExitReason;
-    lastExitMessage: string = '';
   }
 
   export enum LaunchReason {
@@ -92,3 +85,12 @@ export namespace AbilityConstant {
     CANCEL = 1
   }
 }
+
+class LaunchParamImpl implements AbilityConstant.LaunchParam {
+  launchReason: AbilityConstant.LaunchReason;
+  launchReasonMessage?: string | undefined;
+  lastExitReason: AbilityConstant.LastExitReason;
+  lastExitMessage: string = '';
+}
+
+export default AbilityConstant;

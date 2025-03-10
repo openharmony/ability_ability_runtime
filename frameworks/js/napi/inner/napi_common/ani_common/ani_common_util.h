@@ -19,6 +19,7 @@
 #include "sts_runtime.h"
 namespace OHOS {
 namespace AppExecFwk {
+#define SETTER_METHOD_NAME(property) "<set>" #property
 
 ani_int GetIntOrUndefined(ani_env *env, ani_object param, const char *name);
 double GetDoubleOrUndefined(ani_env *env, ani_object param, const char *name);
