@@ -33,7 +33,10 @@ bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &sta
         TAG_LOGE(AAFwkTag::JSNAPI, "null env");
         return false;
     }
-    ani_int displayId = GetIntOrUndefined(env, param, "displayId");
+    ani_int displayId = 0;
+    if (!GetIntOrUndefined(env, param, "displayId", displayId)) {
+        return false;
+    }
     startOptions.SetDisplayID(displayId);
     return true;
 }
