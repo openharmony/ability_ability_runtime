@@ -54,6 +54,7 @@ config("appkit_config") {
 config("appkit_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
+    "${ability_runtime_path}/frameworks/ets/ani/app/context_util/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_delegator",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
