@@ -1547,6 +1547,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 #ifdef CJ_FRONTEND
         if (isCJApp) {
             options.langs.emplace(AbilityRuntime::Runtime::Language::CJ, true);
+            application_->SetCJApplication(true);
         } else {
             AddRuntimeLang(appInfo, options);
         }
