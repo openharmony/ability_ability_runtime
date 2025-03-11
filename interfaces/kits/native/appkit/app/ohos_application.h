@@ -26,7 +26,7 @@
 #include "context.h"
 #include "ability_stage_context.h"
 #include "application_configuration_manager.h"
-
+#include "runtime.h"
 namespace OHOS {
 namespace AbilityRuntime {
 class Runtime;
@@ -237,6 +237,8 @@ public:
         return applicationContextObjRef_;
     }
 
+    void SetCJApplication(bool isCJApplication = false);
+
 private:
     void UpdateAppContextResMgr(const Configuration &config);
     bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
@@ -251,6 +253,7 @@ private:
         const AppExecFwk::HapModuleInfo &hapModuleInfo,
         const std::function<void()>& callback);
     bool IsMainProcess(const std::string &bundleName, const std::string &process);
+    AbilityRuntime::Runtime::Language ConvertLangToCode(const std::string &language) const;
 
 private:
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;
@@ -261,6 +264,7 @@ private:
     std::shared_ptr<Configuration> configuration_ = nullptr;
     std::map<int32_t, std::string> extensionTypeMap_;
     void* applicationContextObjRef_ = nullptr;
+    bool isCJApplication_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
