@@ -357,7 +357,7 @@ Status DataObsMgrService::NotifyProcessObserver(const std::string &key, const sp
     Want want;
     want.SetElementName(DIALOG_APP, PROGRESS_ABILITY);
     want.SetAction(PROGRESS_ABILITY);
-    want.SetParam("promptText", PROMPT_TEXT);
+    want.SetParam("promptText", std::string(PROMPT_TEXT));
     want.SetParam("remoteDeviceName", std::string());
     want.SetParam("progressKey", key);
     want.SetParam("isRemote", false);
