@@ -257,17 +257,17 @@ bool STSEnvironment::StartRuntime()
     std::vector<ani_option> options;
     std::string bootString = optionPrefix + "--boot-panda-files=" + bootfiles;
     TAG_LOGI(AAFwkTag::STSRUNTIME, "bootString %{public}s", bootString.c_str());
-
     options.push_back(ani_option{bootString.c_str(), nullptr});
+
     std::string bootStringAsyn = optionPrefix + "--coroutine-enable-features:ani-drain-queue";
     TAG_LOGI(AAFwkTag::STSRUNTIME, "bootStringAsyn %{public}s", bootStringAsyn.c_str());
-
     options.push_back(ani_option{bootStringAsyn.c_str(), nullptr});
-    options.push_back(ani_option{"--ext:--log-level=info", nullptr});
 
     std::string forbiddenJIT = optionPrefix + "--compiler-enable-jit=false";
     ani_option forbiddenJITOption = {forbiddenJIT.data(), nullptr};
     options.push_back(forbiddenJITOption);
+
+    options.push_back(ani_option{"--ext:--log-level=info", nullptr});
 
     std::string enableVerfication = optionPrefix + "--verification-enabled=true";
     ani_option enableVerficationOption = {enableVerfication.data(), nullptr};
