@@ -70,7 +70,7 @@ ani_object GetAppContext(ani_env* env, ani_class clss)
     if (ANI_OK != env->FindClass("L@ohos/ability/AbilityDelegator/Context;", &cls)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "CreateStsBaseContext FindClass");
     }
-    auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (!delegator) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
         ani_object nullobj = nullptr;
@@ -146,13 +146,13 @@ ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmd
     return object;
 }
 
-ani_object ExecuteShellCommand(ani_env* env, std::string &cmd, int timeoutSecs)
+ani_object ExecuteShellCommand(ani_env* env, std::string &cmd, double timeoutSecs)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "ExecuteShellCommand called");
     ani_object objValue = nullptr;
-    auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (delegator != nullptr) {
-        auto result = delegator->ExecuteShellCommand(cmd, timeoutSecs);
+        auto result = delegator->ExecuteShellCommand(cmd, static_cast<int64_t>(timeoutSecs));
         objValue = wrapShellCmdResult(env, std::move(result));
     } else {
         TAG_LOGE(AAFwkTag::DELEGATOR, "delegator is nullptr");
@@ -161,15 +161,15 @@ ani_object ExecuteShellCommand(ani_env* env, std::string &cmd, int timeoutSecs)
     return objValue;
 }
 
-ani_int FinishTestSync(std::string &msg, int64_t &code)
+ani_int FinishTestSync(std::string &msg, double &code)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
-    auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (!delegator) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "finishTestSync delegator is null");
         return 0;
     }
-    delegator->FinishUserTest(msg, code);
+    delegator->FinishUserTest(msg, static_cast<int64_t>(code));
     TAG_LOGI(AAFwkTag::DELEGATOR, "finishTestSync END");
     return 1;
 }
