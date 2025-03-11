@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,9 @@ namespace {
 std::string TEST_LABEL = "testLabel";
 OHOS::sptr<MockServiceAbilityManagerService> g_mockAbilityMs = nullptr;
 const std::string FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
+const int DISPLAY_ID = 1001;
+const int32_t COLOR_MODE1 = -2;
+const int32_t COLOR_MODE2 = 2;
 }
 
 class MyAbilityCallback : public IAbilityCallback {
@@ -1809,6 +1812,69 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_CreateDisplayContext_0200,
     auto displayContext = context_->CreateDisplayContext(0);
     EXPECT_EQ(displayContext, nullptr);
 }
+
+/**
+ * @tc.number: Ability_Context_Impl_CreateDisplayContext_0200
+ * @tc.name: SetAbilityConfiguration
+ * @tc.desc: Verify that function SetAbilityConfiguration.
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetAbilityConfiguration_0100, Function | MediumTest | Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    AppExecFwk::Configuration config;
+    context_->abilityConfiguration_ = nullptr;
+    context_->SetAbilityConfiguration(config);
+    EXPECT_NE(context_->abilityConfiguration_, nullptr);
+
+    context_->abilityConfiguration_ = std::make_shared<AppExecFwk::Configuration>(config);
+    context_->SetAbilityConfiguration(config);
+    EXPECT_NE(context_->abilityConfiguration_, nullptr);
+
+    config.AddItem(DISPLAY_ID, AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, TEST_LABEL);
+    context_->SetAbilityConfiguration(config);
+    EXPECT_EQ(context_->abilityConfiguration_->GetItemSize(), 1);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_CreateDisplayContext_0200
+ * @tc.name: SetAbilityColorMode
+ * @tc.desc: Verify that function SetAbilityColorMode.
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetAbilityColorMode_0100, Function | MediumTest | Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    int32_t colorMode = COLOR_MODE1;
+    context_->SetAbilityColorMode(colorMode);
+    colorMode = COLOR_MODE2;
+    context_->SetAbilityColorMode(colorMode);
+    colorMode = 0;
+    context_->SetAbilityColorMode(colorMode);
+    colorMode = 0;
+    context_->SetAbilityColorMode(colorMode);
+    context_->abilityConfigUpdateCallback_ = nullptr;
+    int itemSize = 0;
+    auto abilityConfigCallback = [&itemSize](AppExecFwk::Configuration &config) {
+        itemSize = config.GetItemSize();
+    };
+    context_->abilityConfigUpdateCallback_ = abilityConfigCallback;
+    context_->SetAbilityColorMode(colorMode);
+    EXPECT_EQ(itemSize, 2);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_CreateDisplayContext_0200
+ * @tc.name: CreateModalUIExtensionWithApp
+ * @tc.desc: Verify that function CreateModalUIExtensionWithApp.
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_CreateModalUIExtensionWithApp_0100,
+    Function | MediumTest | Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    AAFwk::Want want = {};
+    auto ret =context_->CreateModalUIExtensionWithApp(want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
 #endif
 } // namespace AppExecFwk
 } // namespace OHOS
