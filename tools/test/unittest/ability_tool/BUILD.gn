@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_tools/tools"
+module_output_path = "ability_runtime/ability_runtime/tools"
 
 config("test_ability_tool_config") {
   include_dirs = [ "${ability_runtime_path}/tools/test/mock" ]
