@@ -134,6 +134,8 @@ public:
     virtual void OnNewProcessRequestResponse(const AAFwk::Want &want, const std::string &flag,
         int32_t requestId) override;
     virtual void OnNewProcessRequestTimeoutResponse(const AAFwk::Want &want, int32_t requestId) override;
+
+    virtual void OnStartSpecifiedFailed(int32_t requestId) override;
 };
 
 /**

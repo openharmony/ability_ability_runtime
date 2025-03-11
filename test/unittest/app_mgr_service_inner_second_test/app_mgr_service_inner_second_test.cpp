@@ -934,9 +934,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LaunchApplic
     appRecord->SetState(ApplicationState::APP_STATE_CREATE);
     appMgrServiceInner->LaunchApplication(appRecord);
     appRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
-    appRecord->SetEmptyKeepAliveAppState(false);
-    appRecord->specifiedRequestId_ = 1;
-    appMgrServiceInner->LaunchApplication(appRecord);
     appRecord->SetEmptyKeepAliveAppState(true);
     appRecord->SetKeepAliveEnableState(false);
     appRecord->SetKeepAliveDkv(false);
@@ -951,7 +948,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LaunchApplic
     appRecord->SetEmptyKeepAliveAppState(false);
     appMgrServiceInner->LaunchApplication(appRecord);
     Want want;
-    appRecord->SetSpecifiedAbilityFlagAndWant(-1, want, "");
+    appRecord->ResetSpecifiedRequest();
     appMgrServiceInner->LaunchApplication(appRecord);
     appRecord->SetSpecifiedAbilityFlagAndWant(1, want, "");
     appMgrServiceInner->LaunchApplication(appRecord);
@@ -1044,7 +1041,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, KillApplicationByUid_0100, TestSize.Level
     appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
     MyFlag::flag_ = 0;
     ret = appMgrServiceInner->KillApplicationByUid(TEST_BUNDLE_NAME, uid);
-    EXPECT_EQ(ret, ERR_NOT_SYSTEM_APP); //permission verification fail
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED); //permission verification fail
 
     MyFlag::flag_ = MyFlag::IS_SA_CALL;
     appMgrServiceInner->remoteClientManager_ = nullptr;
@@ -2066,7 +2063,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartChildPr
     auto& utils = AAFwk::AppUtils::GetInstance();
     utils.isMultiProcessModel_.isLoaded = false;
     ret = appMgrServiceInner->StartChildProcessPreCheck(pid, 1);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, AAFwk::ERR_CHILD_PROCESS_REACH_LIMIT);
 
     utils.maxChildProcess_.isLoaded = true;
     utils.maxChildProcess_.value = 1000000;

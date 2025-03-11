@@ -46,11 +46,14 @@ public:
 
     virtual void OnNewProcessRequestTimeoutResponse(const AAFwk::Want &want, int32_t requestId) = 0;
 
-    enum class Message {
+    virtual void OnStartSpecifiedFailed(int32_t requestId) {};
+
+    enum Message {
         ON_ACCEPT_WANT_RESPONSE = 0,
         ON_TIMEOUT_RESPONSE,
         ON_NEW_PROCESS_REQUEST_RESPONSE,
-        ON_NEW_PROCESS_REQUEST_TIMEOUT_RESPONSE
+        ON_NEW_PROCESS_REQUEST_TIMEOUT_RESPONSE,
+        ON_START_SPECIFIED_FAILED
     };
 };
 }  // namespace AppExecFwk

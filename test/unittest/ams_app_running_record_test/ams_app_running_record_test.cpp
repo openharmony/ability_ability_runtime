@@ -1903,7 +1903,8 @@ HWTEST_F(AmsAppRunningRecordTest, Specified_LaunchApplication_001, TestSize.Leve
         loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     record->SetApplicationClient(GetMockedAppSchedulerClient());
-    record->specifiedRequestId_ = 1;
+    record->specifiedAbilityRequest_ = std::make_shared<SpecifiedRequest>();
+    record->specifiedAbilityRequest_->requestId = 1;
     EXPECT_CALL(*mockAppSchedulerClient_, ScheduleLaunchApplication(_, _)).Times(1);
     service_->LaunchApplication(record);
     auto ability = record->GetAbilityRunningRecordByToken(GetMockToken());
@@ -2476,7 +2477,8 @@ HWTEST_F(AmsAppRunningRecordTest, AddAbilityStageDone_001, TestSize.Level1)
         AAFwk::EventWrap(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, 1), 0);
     record->AddAbilityStageDone();
 
-    record->specifiedRequestId_ = 1;
+    record->specifiedAbilityRequest_ = std::make_shared<SpecifiedRequest>();
+    record->specifiedAbilityRequest_->requestId = 1;
     record->AddAbilityStageDone();
 
     TAG_LOGI(AAFwkTag::TEST, "AmsAppRunningRecordTest AddAbilityStageDone_001 end");

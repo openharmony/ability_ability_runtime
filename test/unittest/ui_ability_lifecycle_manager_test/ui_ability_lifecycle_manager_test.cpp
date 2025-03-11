@@ -2709,6 +2709,25 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnStartSpecifiedAbilityTimeoutResponse_0
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_OnStartSpecifiedFailed_0100
+ * @tc.desc: OnStartSpecifiedFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, OnStartSpecifiedFailed_001, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    int32_t requestId = 0;
+    uiAbilityLifecycleManager->OnStartSpecifiedFailed(requestId);
+    
+    auto &list = uiAbilityLifecycleManager->specifiedRequestList_[std::string()];
+    list.push_back(std::make_shared<SpecifiedRequest>(requestId, AbilityRequest()));
+
+    uiAbilityLifecycleManager->OnStartSpecifiedFailed(requestId);
+    EXPECT_TRUE(list.empty());
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_OnStartSpecifiedProcessTimeoutResponse_0100
  * @tc.desc: OnStartSpecifiedProcessTimeoutResponse
  * @tc.type: FUNC

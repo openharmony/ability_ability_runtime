@@ -46,6 +46,8 @@ public:
 
     virtual void OnNewProcessRequestTimeoutResponse(const AAFwk::Want &want, int32_t requestId) override;
 
+    virtual void OnStartSpecifiedFailed(int32_t requestId) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     static inline BrokerDelegator<StartSpecifiedAbilityResponseProxy> delegator_;

@@ -1950,12 +1950,18 @@ void UIAbilityLifecycleManager::HandleLegacyAcceptWantDone(AbilityRequest &abili
 
 void UIAbilityLifecycleManager::OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want, int32_t requestId)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SpecifiedAbilityTimeout %{public}d", requestId);
+    OnStartSpecifiedFailed(requestId);
+}
+
+void UIAbilityLifecycleManager::OnStartSpecifiedFailed(int32_t requestId)
+{
     std::lock_guard lock(sessionLock_);
     auto curRequest = GetSpecifiedRequest(requestId);
     if (curRequest == nullptr) {
         return;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "SpecifiedAbilityTimeout %{public}d", requestId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedFailed %{public}d", requestId);
     if (curRequest->persistentId != 0) {
         auto iter = sessionAbilityMap_.find(curRequest->persistentId);
         if (iter != sessionAbilityMap_.end() && iter->second != nullptr) {
@@ -3332,7 +3338,7 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
     auto timeoutTask = [requestId = specifiedRequest.requestId, wThis = weak_from_this()]() {
         auto pThis = wThis.lock();
         if (pThis) {
-            pThis->OnStartSpecifiedAbilityTimeoutResponse(Want(), requestId);
+            pThis->OnStartSpecifiedFailed(requestId);
         }
     };
     TaskHandlerWrap::GetFfrtHandler()->SubmitTaskJust(timeoutTask, "SpecifiedFinalTimeout",
