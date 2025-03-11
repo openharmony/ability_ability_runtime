@@ -1030,11 +1030,31 @@ bool OHOSApplication::IsMainProcess(const std::string &bundleName, const std::st
 const std::unique_ptr<AbilityRuntime::Runtime>& OHOSApplication::GetRuntime(const std::string& language) const
 {
     for (auto& runtime : runtimes_) {
-        if (runtime->GetLanguage() == AbilityRuntime::Runtime::ConvertLangToCode(language)) {
+        if (runtime->GetLanguage() == ConvertLangToCode(language)) {
             return runtime;
         }
     }
     return runtimeNullptr_;
+}
+
+void OHOSApplication::SetCJApplication(bool isCJApplication)
+{
+    isCJApplication_ = isCJApplication;
+}
+
+AbilityRuntime::Runtime::Language OHOSApplication::ConvertLangToCode(const std::string& language) const
+{
+    if (language == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0) {
+        if (isCJApplication_) {
+            return AbilityRuntime::Runtime::Language::CJ;
+        } else {
+            return AbilityRuntime::Runtime::Language::JS;
+        }
+    } else if (language == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+        return AbilityRuntime::Runtime::Language::STS;
+    } else {
+        return AbilityRuntime::Runtime::Language::UNKNOWN;
+    }
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

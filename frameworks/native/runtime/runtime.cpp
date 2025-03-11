@@ -84,16 +84,5 @@ std::unique_ptr<Runtime> Runtime::GetPreloaded()
     return std::move(g_preloadedInstance);
 }
 
-Runtime::Language Runtime::ConvertLangToCode(const std::string& language)
-{
-    if (language == APPLICAITON_CODE_LANGUAGE_ARKTS_1_0) {
-        return Language::JS;
-    } else if (language == APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
-        return Language::STS;
-    } else {
-        return Language::UNKNOWN;
-    }
-}
-
 } // namespace AbilityRuntime
 } // namespace OHOS
