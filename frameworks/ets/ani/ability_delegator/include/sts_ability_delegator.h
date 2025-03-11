@@ -21,8 +21,8 @@
 #include "sts_runtime.h"
 namespace OHOS {
 namespace AbilityDelegatorSts {
-ani_object ExecuteShellCommand(ani_env* env, std::string &cmd, int timeoutSecs = 0);
-ani_int FinishTestSync(std::string &msg, int64_t &code);
+ani_object ExecuteShellCommand(ani_env* env, std::string &cmd, double timeoutSecs = 0);
+ani_int FinishTestSync(std::string &msg, double &code);
 ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
     std::shared_ptr<AbilityRuntime::Context> context);
 ani_object GetAppContext(ani_env* env, ani_class clss);
