@@ -18,7 +18,7 @@
 #include "common_fun_ani.h"
 #include "application_context.h"
 #include "hilog_tag_wrapper.h"
-#include "resmgr_ani.h"
+#include "resourceManager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
