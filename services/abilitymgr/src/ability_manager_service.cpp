@@ -7493,7 +7493,11 @@ void AbilityManagerService::RemoveUnauthorizedLaunchReasonMessage(const Want &wa
     const sptr<IRemoteObject> &callerToken)
 {
     std::string value = want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
-    if (value.empty()) {
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "launchReasonMessage:%{public}s", value.c_str());
+    if (!AppUtils::GetInstance().IsSystemReasonMessage(value)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "value is not find, launchReasonMessage:%{public}s", value.c_str());
+        (const_cast<Want &>(want)).RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+        abilityRequest.want.RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
         return;
     }
 
@@ -7508,11 +7512,9 @@ void AbilityManagerService::RemoveUnauthorizedLaunchReasonMessage(const Want &wa
             return;
         }
         auto tokenId = targetRecord->GetAbilityInfo().applicationInfo.accessTokenId;
-        auto extensionType = targetRecord->GetAbilityInfo().extensionAbilityType;
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "extensionAbilityType is %{public}d.", extensionType);
         if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenId,
             PermissionConstants::PERMISSION_SET_LAUNCH_REASON_MESSAGE) ||
-            (!AAFwk::UIExtensionUtils::IsSystemUIExtension(extensionType) &&
+            (!PermissionVerification::GetInstance()->IsSystemAppCall() &&
             !PermissionVerification::GetInstance()->IsSACall())) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "verifyPermission failed, remove launch reason message.");
             (const_cast<Want &>(want)).RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
