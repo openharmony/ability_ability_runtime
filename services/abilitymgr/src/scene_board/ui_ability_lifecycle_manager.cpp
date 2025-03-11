@@ -2609,10 +2609,9 @@ void UIAbilityLifecycleManager::Dump(std::vector<std::string> &info)
         info.push_back(dumpInfo);
 
         abilityRecord->Dump(info);
-
-        dumpInfo = " }";
-        info.push_back(dumpInfo);
     }
+    dumpInfo = " }";
+    info.push_back(dumpInfo);
 }
 
 void UIAbilityLifecycleManager::DumpMissionList(
@@ -2648,10 +2647,9 @@ void UIAbilityLifecycleManager::DumpMissionList(
 
         std::vector<std::string> params;
         abilityRecord->DumpAbilityState(info, isClient, params);
-
-        dumpInfo = " }";
-        info.push_back(dumpInfo);
     }
+    dumpInfo = " }";
+    info.push_back(dumpInfo);
 }
 
 void UIAbilityLifecycleManager::DumpMissionListByRecordId(std::vector<std::string> &info, bool isClient,
@@ -2689,10 +2687,9 @@ void UIAbilityLifecycleManager::DumpMissionListByRecordId(std::vector<std::strin
         info.push_back(dumpInfo);
 
         abilityRecord->DumpAbilityState(info, isClient, params);
-
-        dumpInfo = " }";
-        info.push_back(dumpInfo);
     }
+    dumpInfo = " }";
+    info.push_back(dumpInfo);
 }
 
 int UIAbilityLifecycleManager::MoveMissionToFront(int32_t sessionId, std::shared_ptr<StartOptions> startOptions)
