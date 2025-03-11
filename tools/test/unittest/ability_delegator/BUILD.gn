@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_tools/tools"
+module_output_path = "ability_runtime/ability_runtime/tools"
 
 ability_delegator_mock_sources =
     [ "${ability_runtime_path}/tools/test/mock/mock_ability_manager_stub.cpp" ]
