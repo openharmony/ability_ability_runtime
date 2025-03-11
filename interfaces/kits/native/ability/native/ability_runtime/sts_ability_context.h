@@ -37,8 +37,10 @@ public:
     static void StartAbilityForResult1(ani_env* env, ani_object aniObj, ani_object wantObj, ani_object callback);
     static void StartAbilityForResult2(
         ani_env* env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj, ani_object callback);
+    static void TerminateSelf(ani_env* env, ani_object aniObj, ani_object callback);
     static void TerminateSelfWithResult(ani_env *env, ani_object aniObj, ani_object abilityResult, ani_object callback);
-    static void reportDrawnCompletedSync([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass);
+    static void reportDrawnCompletedSync(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniObj, ani_object call);
 
     static ani_object SetAbilityContext(ani_env* env, const std::shared_ptr<AbilityContext>& context);
     static AbilityRuntime::AbilityContext* GetAbilityContext(ani_env* env, ani_object aniObj);
