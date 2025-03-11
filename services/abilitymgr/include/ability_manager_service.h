@@ -1162,6 +1162,7 @@ public:
     void OnStartSpecifiedProcessResponse(const AAFwk::Want &want, const std::string &flag,
         int32_t requestId = 0);
     void OnStartSpecifiedProcessTimeoutResponse(const AAFwk::Want &want, int32_t requestId = 0);
+    void OnStartSpecifiedFailed(int32_t requestId);
 
     virtual int GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info) override;
     virtual int GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info) override;

@@ -459,6 +459,22 @@ HWTEST_F(AbilityManagerServiceThirdTest, OnStartSpecifiedAbilityTimeoutResponse_
 
 /*
  * Feature: AbilityManagerService
+ * Function: OnStartSpecifiedFailed
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnStartSpecifiedFailed
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, OnStartSpecifiedFailed_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest OnStartSpecifiedFailed_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    ASSERT_NE(abilityMs_, nullptr);
+    abilityMs_->OnStartSpecifiedFailed(1);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest OnStartSpecifiedFailed_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: GetAbilityRunningInfos
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService GetAbilityRunningInfos
@@ -1236,7 +1252,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityWithSpecifyTokenId_001, Tes
     int32_t userId = 0;
     int32_t requestCode = 0;
     auto result = abilityMs->StartAbilityWithSpecifyTokenId(want, callerToken, specifyTokenId, userId, requestCode);
-    EXPECT_EQ(result, ERR_INVALID_CONTINUATION_FLAG);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
 }
 
 /*

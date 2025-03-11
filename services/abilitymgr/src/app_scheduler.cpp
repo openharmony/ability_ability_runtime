@@ -416,6 +416,11 @@ void StartSpecifiedAbilityResponse::OnNewProcessRequestTimeoutResponse(const AAF
     DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedProcessTimeoutResponse(want, requestId);
 }
 
+void StartSpecifiedAbilityResponse::OnStartSpecifiedFailed(int32_t requestId)
+{
+    DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedFailed(requestId);
+}
+
 int AppScheduler::GetProcessRunningInfos(std::vector<AppExecFwk::RunningProcessInfo> &info)
 {
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);

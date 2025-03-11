@@ -233,6 +233,14 @@ public:
     void OnStartSpecifiedProcessTimeoutResponse(const AAFwk::Want &want, int32_t requestId = 0);
 
     /**
+     * OnStartSpecifiedFailed.
+     *
+     * @param requestId request id of the failed request.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    void OnStartSpecifiedFailed(int32_t requestId);
+
+    /**
      * Start specified ability by SCB.
      *
      * @param want Want information.
