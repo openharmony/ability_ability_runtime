@@ -423,7 +423,19 @@
             "file.PhotoPickerComponent",
             "file.RecentPhotoComponent",
             "multimedia.movingphotoview",
-            "multimedia.cameraPicker"
+            "multimedia.cameraPicker",
+            "ai.CardRecognition",
+            "ai.DocumentScanner",
+            "pasteboard",
+            "collaboration.systemShare",
+            "collaboration.harmonyShare",
+            "calendarManager",
+            "multimedia.avCastPicker",
+            "core.map.sceneMap",
+            "core.payment.paymentService",
+            "core.account.accountPicker",
+            "collaboration.devicePicker",
+            "collaboration.CollaborationDevicePicker"
         ],
         "FenceExtension": [
             "ability.featureAbility",
