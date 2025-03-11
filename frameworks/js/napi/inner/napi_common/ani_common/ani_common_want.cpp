@@ -63,42 +63,42 @@ bool WrapWantParams(ani_env* env, ani_class wantCls, ani_object wantObject, cons
     return true;
 }
 
-// bool UnwrapWantParams(ani_env* env, ani_object wantObject, AAFwk::WantParams& wantParams)
-// {
-//     ani_class wantCls = nullptr;
-//     ani_status status = ANI_ERROR;
-//     if ((status = env->FindClass("L@ohos/app/ability/Want/Want;", &wantCls)) != ANI_OK) {
-//         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-//         return false;
-//     }
-//     if (wantCls == nullptr) {
-//         TAG_LOGE(AAFwkTag::JSNAPI, "null wantCls");
-//         return false;
-//     }
+bool UnwrapWantParams(ani_env* env, ani_object wantObject, AAFwk::WantParams& wantParams)
+{
+    ani_class wantCls = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass("L@ohos/app/ability/Want/Want;", &wantCls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return false;
+    }
+    if (wantCls == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null wantCls");
+        return false;
+    }
 
-//     ani_method getParametersMethod = nullptr;
-//     status = env->Class_FindMethod(wantCls, "getParametersString", ":Lstd/core/String;", &getParametersMethod);
-//     if (status != ANI_OK) {
-//         TAG_LOGE(AAFwkTag::JSNAPI, "failed to get getParametersMethod method, status : %{public}d", status);
-//         return false;
-//     }
-//     ani_ref wantParamsAniString;
-//     status = env->Object_CallMethod_Ref(wantObject, getParametersMethod, &wantParamsAniString);
-//     if (status != ANI_OK) {
-//         TAG_LOGE(AAFwkTag::JSNAPI, "failed to call getParametersMethod method, status : %{public}d", status);
-//         return false;
-//     }
+    ani_method getParametersMethod = nullptr;
+    status = env->Class_FindMethod(wantCls, "getParametersString", ":Lstd/core/String;", &getParametersMethod);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to get getParametersMethod method, status : %{public}d", status);
+        return false;
+    }
+    ani_ref wantParamsAniString;
+    status = env->Object_CallMethod_Ref(wantObject, getParametersMethod, &wantParamsAniString);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to call getParametersMethod method, status : %{public}d", status);
+        return false;
+    }
 
-//     std::string wantParamsString;
-//     if (!GetStdString(env, reinterpret_cast<ani_string>(wantParamsAniString), wantParamsString)) {
-//         TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
-//         return false;
-//     }
-//     nlohmann::json wantParamsJson = nlohmann::json::parse(wantParamsString);
-//     from_json(wantParamsJson, wantParams);
-//     TAG_LOGD(AAFwkTag::JSNAPI, "UnwrapWantParams done");
-//     return true;
-// }
+    std::string wantParamsString;
+    if (!GetStdString(env, reinterpret_cast<ani_string>(wantParamsAniString), wantParamsString)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
+        return false;
+    }
+    nlohmann::json wantParamsJson = nlohmann::json::parse(wantParamsString);
+    from_json(wantParamsJson, wantParams);
+    TAG_LOGD(AAFwkTag::JSNAPI, "UnwrapWantParams done");
+    return true;
+}
 }
 
 ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
@@ -236,10 +236,10 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
         natElementName.GetDeviceID().c_str(), natElementName.GetBundleName().c_str(),
         natElementName.GetAbilityName().c_str(), natElementName.GetModuleName().c_str());
 
-    // AAFwk::WantParams wantParams;
-    // if (UnwrapWantParams(env, param, wantParams)) {
-    //     want.SetParams(wantParams);
-    // }
+    AAFwk::WantParams wantParams;
+    if (UnwrapWantParams(env, param, wantParams)) {
+        want.SetParams(wantParams);
+    }
     return true;
 }
 

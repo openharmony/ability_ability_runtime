@@ -23,9 +23,9 @@ class RecordWriter {
     }
     private writeObject(obj: NullishType): void {
         if (obj === null) {
-            this.buffer.append("null");
+            this.buffer.append('null');
         } else if (obj === undefined) {
-            this.buffer.append("undefined");
+            this.buffer.append('undefined');
         } else if (obj instanceof String) {
             this.buffer.append(JSON.stringify(obj as String));
         } else if (this.writeValueType(obj)) {
@@ -39,8 +39,7 @@ class RecordWriter {
             if (objType instanceof ArrayType) {
                 this.writeBuildArray(obj, Value.of(obj) as ArrayValue);
             } else {
-                // throw new AssertionError("Unsupported object type: " + Type.of(obj));
-                this.buffer.append("null");
+                this.buffer.append('null');
             }
         }
     }
@@ -77,65 +76,65 @@ class RecordWriter {
         }
     }
     private writeArray(arr: Array<valueType>): void {
-        this.buffer.append("[");
+        this.buffer.append('[');
         const length = arr.length as int;
         this.checkReferencesCycle(arr);
         this.store.add(arr);
         for (let idx = 0; idx < length; idx++) {
             if (arr[idx] == null) {
-                this.buffer.append("null");
+                this.buffer.append('null');
             } else {
                 this.writeObject(arr[idx]);
             }
             if (idx < length - 1) {
-                this.buffer.append(",");
+                this.buffer.append(',');
             }
         }
         this.store.delete(arr);
-        this.buffer.append("]");
+        this.buffer.append(']');
     }
     private writeBuildArray(arr: Object, arrayValue: ArrayValue): void {
-        this.buffer.append("[");
+        this.buffer.append('[');
         const length = arrayValue.getLength() as int;
         this.checkReferencesCycle(arr);
         this.store.add(arr);
         for (let idx = 0; idx < length; idx++) {
             let member = arrayValue.getElement(idx).getData();
             if (member == null) {
-                this.buffer.append("null");
+                this.buffer.append('null');
             } else {
                 this.writeObject(member);
             }
             if (idx < length - 1) {
-                this.buffer.append(",");
+                this.buffer.append(',');
             }
         }
         this.store.delete(arr);
-        this.buffer.append("]");
+        this.buffer.append(']');
     }
     private writeRecord(rec: Record<string, valueType>): void {
-        this.buffer.append("{");
+        this.buffer.append('{');
         this.checkReferencesCycle(rec);
         this.store.add(rec);
         let isFirst = true;
         for (let key of rec.keys()) {
             if (rec[key] !== undefined) {
                 if (!isFirst) {
-                    this.buffer.append(",");
+                    this.buffer.append(',');
                 } else {
                     isFirst = false;
                 }
                 this.buffer.append(JSON.stringify(key as String));
-                this.buffer.append(":");
+                this.buffer.append(':');
                 this.writeObject(rec[key]);
             }
         }
         this.store.delete(rec);
-        this.buffer.append("}");
+        this.buffer.append('}');
     }
     private checkReferencesCycle(obj: Object): void {
         if (this.store.has(obj)) {
-            throw new TypeError("cyclic object value");
+            throw new TypeError('cyclic object value');
         }
     }
 }
@@ -147,11 +146,12 @@ export class RecordSerializeTool {
         let jsonValue = JSONParser.parse(text);
         let res = RecordSerializeTool.jsonValue2Object(jsonValue);
         if (!(res instanceof Record)) {
-            throw new TypeError("RecordSerializeTool parse only used for Record");
+            throw new TypeError('RecordSerializeTool parse only used for Record');
         }
         return res as Record<string, valueType>;
     }
-    private static jsonValue2Object(value: JSONValue): string | number | boolean | null | Array<valueType> | Record<string, valueType> {
+    private static jsonValue2Object(value: JSONValue): string | number | boolean | null |
+        Array<valueType> | Record<string, valueType> {
         if (value instanceof JSONString) {
             return value.value;
         } else if (value instanceof JSONNumber) {
@@ -180,7 +180,7 @@ export class RecordSerializeTool {
             }
             return result;
         } else {
-            throw new TypeError("unknown JSONValue");
+            throw new TypeError('unknown JSONValue');
         }
     }
 }
