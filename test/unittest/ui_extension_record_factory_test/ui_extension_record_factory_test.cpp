@@ -167,5 +167,64 @@ HWTEST_F(UIExtensionRecordFactoryTest, CreateRecord_0100, TestSize.Level1)
     int32_t result = info.CreateRecord(abilityRequest, extensionRecord);
     EXPECT_EQ(result, ERR_OK);
 }
+
+/**
+ * @tc.number: CreateRecord_0200
+ * @tc.name: UIExtensionRecordFactoryTest
+ * @tc.desc: Call function CreateRecord
+ */
+HWTEST_F(UIExtensionRecordFactoryTest, CreateRecord_0200, TestSize.Level1)
+{
+    AbilityRuntime::UIExtensionRecordFactory info;
+    AAFwk::AbilityRequest abilityRequest;
+    std::shared_ptr<ExtensionRecord> extensionRecord = nullptr;
+
+    abilityRequest.extensionType == AppExecFwk::ExtensionAbilityType::EMBEDDED_UI;
+    auto sessionInfo = MockSessionInfo(1);
+    abilityRequest.sessionInfo = sessionInfo;
+
+    std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
+    OHOS::sptr<OHOS::IRemoteObject> token = new OHOS::AAFwk::Token(abilityRecord);
+    abilityRequest.sessionInfo->callerToken = token;
+    auto result = info.CreateRecord(abilityRequest, extensionRecord);
+    EXPECT_NE(extensionRecord, nullptr);
+    EXPECT_NE(extensionRecord->abilityRecord_, nullptr);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number: PreCheck_0100
+ * @tc.name: UIExtensionRecordFactoryTest
+ * @tc.desc: Call function PreCheck
+ */
+HWTEST_F(UIExtensionRecordFactoryTest, PreCheck_0100, TestSize.Level1)
+{
+    auto uiExtensionRecordFactory = std::make_shared<AbilityRuntime::UIExtensionRecordFactory>();
+    AAFwk::AbilityRequest abilityRequest;
+    std::string hostBundleName = "com.ohos.example.hostBundleName";
+    abilityRequest.extensionType = ExtensionAbilityType::WORK_SCHEDULER;
+    EXPECT_EQ(uiExtensionRecordFactory->PreCheck(abilityRequest, hostBundleName), ERR_OK);
+}
+
+/**
+ * @tc.number: CreateDebugRecord_0100
+ * @tc.name: UIExtensionRecordFactoryTest
+ * @tc.desc: Call function CreateDebugRecord
+ */
+HWTEST_F(UIExtensionRecordFactoryTest, CreateDebugRecord_0200, TestSize.Level1)
+{
+    AbilityRuntime::UIExtensionRecordFactory info;
+    AAFwk::AbilityRequest abilityRequest;
+    std::string deviceName = "device";
+    std::string abilityName = "ServiceAbility";
+    std::string appName = "hiservcie";
+    std::string bundleName = "com.ix.hiservcie";
+    std::string moduleName = "entry";
+    abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    OHOS::sptr<OHOS::IRemoteObject> token = new OHOS::AAFwk::Token(abilityRecord);
+    abilityRequest.callerToken = token;
+    EXPECT_NO_THROW(info.CreateDebugRecord(abilityRequest, abilityRecord));
+}
 }
 }
