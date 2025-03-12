@@ -4261,5 +4261,31 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_006, TestS
         &resultWant, callerRequestCode);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_UpdateSpecifiedFlag_0100
+ * @tc.desc: UpdateSpecifiedFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, UpdateSpecifiedFlag_0100, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    abilityRequest.startRecent = true;
+    std::string flag = "specified";
+    abilityRequest.specifiedFlag = flag;
+
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->persistentId = 1;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    auto ret = uiAbilityLifecycleManager->UpdateSpecifiedFlag(abilityRecord, flag);
+    EXPECT_EQ(ret, true);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
