@@ -19,7 +19,7 @@
 #include "js_ui_extension.h"
 #include "runtime.h"
 #include "ui_extension_context.h"
-
+#include "sts_ui_extension.h"
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
@@ -32,7 +32,8 @@ UIExtension* UIExtension::Create(const std::unique_ptr<Runtime>& runtime)
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
             return JsUIExtension::Create(runtime);
-
+        case Runtime::Language::STS:
+            return StsUIExtension::Create(runtime);
         default:
             return new UIExtension();
     }

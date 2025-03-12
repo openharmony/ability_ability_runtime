@@ -107,14 +107,11 @@ generate_static_abc("ui_extension_ability_ani_abc") {
   base_url = "./ets"
 
   files = [
-    "./ets/@ohos.app.ability.AbilityConstant.ets",
+    "./ets/application/UIExtensionContext.ets",
     "./ets/@ohos.app.ability.UIExtensionAbility.ets",
-    "./ets/@ohos.app.ability.Want.ets",
-    "./ets/@ohos.base.ets",
+    "./ets/@ohos.app.ability.UIExtensionContentSession.ets",
     "./ets/@ohos.uiExtensionHost.ets",
-    "./ets/LocalStorage.ets",
-    "./ets/UIExtensionContentSession.ets",
-    "./ets/UIExtensionContext.ets",
+    "./ets/@ohos.app.ability.AbilityConstant.ets",
   ]
 
   dst_file = "$target_out_dir/ui_extension_ability_ani.abc"
@@ -124,7 +121,7 @@ generate_static_abc("ui_extension_ability_ani_abc") {
   device_dst_file = "/system/framework/ui_extension_ability_ani.abc"
 }
 
-ohos_prebuilt_etc("ui_extension_ability_ani_abc_etc") {
+ohos_prebuilt_etc("ui_extension_ability_ani_etc") {
   source = "$target_out_dir/ui_extension_ability_ani.abc"
   deps = [ ":ui_extension_ability_ani_abc" ]
   module_install_dir = "framework"
