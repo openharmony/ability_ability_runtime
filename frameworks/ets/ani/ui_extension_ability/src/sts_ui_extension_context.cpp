@@ -21,7 +21,7 @@ static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] an
     ani_long nativeContextLong;
     ani_field contextField = nullptr;
     ani_status status = ANI_ERROR;
-    if ((status = env->FindClass("LUIExtensionContext/UIExtensionContext;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("Lapplication/UIExtensionContext/UIExtensionContext;", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "terminateSelfSync find class status : %{public}d", status);
     }
     if ((status = env->Class_FindField(cls, "nativeUIExtensionContext", &contextField)) != ANI_OK) {
@@ -34,20 +34,20 @@ static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] an
     ((OHOS::AbilityRuntime::UIExtensionContext*)nativeContextLong)->TerminateSelf();
     TAG_LOGE(AAFwkTag::UI_EXT, "terminateSelfSync end");
 }
-static void TerminateSelfSyncPromise([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass)
+static void TerminateSelfSyncPromise([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj)
 {
     TAG_LOGE(AAFwkTag::UI_EXT, "terminateSelfSyncPromise start");
     ani_class cls = nullptr;
     ani_long nativeContextLong;
     ani_field contextField = nullptr;
     ani_status status = ANI_ERROR;
-    if ((status = env->FindClass("LUIExtensionContext/UIExtensionContext;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("Lapplication/UIExtensionContext/UIExtensionContext;", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "terminateSelfSyncPromise find class status : %{public}d", status);
     }
     if ((status = env->Class_FindField(cls, "nativeUIExtensionContext", &contextField)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "terminateSelfSyncPromise find field status : %{public}d", status);
     }
-    if ((status = env->Object_GetField_Long(aniClass, contextField, &nativeContextLong)) != ANI_OK) {
+    if ((status = env->Object_GetField_Long(obj, contextField, &nativeContextLong)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "terminateSelfSyncPromise get filed status : %{public}d", status);
     }
     TAG_LOGE(AAFwkTag::UI_EXT, "nativeUIExtensionContext %{public}lld", nativeContextLong);
@@ -62,7 +62,7 @@ ani_object CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
     ani_method method = nullptr;
     ani_field field = nullptr;
     ani_object contextObj = nullptr;
-    if ((env->FindClass("LUIExtensionContext/UIExtensionContext;", &cls)) != ANI_OK) {
+    if ((env->FindClass("Lapplication/UIExtensionContext/UIExtensionContext;", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "CreateStsUiExtensionContext find class status : %{public}d", status);
     }
     std::array functions = {
