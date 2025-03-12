@@ -334,7 +334,8 @@ int32_t AbilityPermissionUtil::CheckStartCallHasFloatingWindow(const sptr<IRemot
         bool hasFloatingWindow = false;
         auto err = sceneSessionManager->HasFloatingWindowForeground(callerToken, hasFloatingWindow);
         TAG_LOGI(AAFwkTag::ABILITYMGR,
-            "startAbility call from background, checking floatingwindow. Ret: %{public}d", static_cast<int32_t>(err));
+            "check floatingwindow permission. Ret: %{public}d, hasFloatingWindow: %{public}d",
+            static_cast<int32_t>(err), hasFloatingWindow);
         if (err != Rosen::WMError::WM_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR,
                 "checking floatingwindow err: %{public}d", static_cast<int32_t>(err));
