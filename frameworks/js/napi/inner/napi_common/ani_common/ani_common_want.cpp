@@ -208,7 +208,7 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
     }
 
     int flags = 0;
-    if (GetIntOrUndefined(env, param, "flags", flags)) {
+    if (GetIntByName(env, param, "flags", flags)) {
         TAG_LOGI(AAFwkTag::UIABILITY, "flags %{public}d", flags);
         want.SetFlags(flags);
     }
@@ -245,9 +245,7 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
 
 void UnWrapAbilityResult(ani_env *env, ani_object param, int &resultCode, AAFwk::Want &want)
 {
-    if (!GetIntOrUndefined(env, param, "resultCode", resultCode)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "resultCode undefined");
-    }
+    resultCode = GetIntOrUndefined(env, param, "resultCode");
     ani_status status = ANI_ERROR;
     ani_ref wantRef = nullptr;
     ani_boolean isUndefined = true;
