@@ -72,6 +72,28 @@ enum CollaborateResult {
 constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;
 
+
+void PromiseCallback(ani_env* env, ani_object aniObj)
+{
+    TAG_LOGI(AAFwkTag::UIABILITY, "PromiseCallback");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    ani_long destroyCallbackPoint = 0;
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_GetFieldByName_Long(aniObj, "destroyCallbackPoint", &destroyCallbackPoint)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return;
+    }
+    auto *callbackInfo = reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<> *>(destroyCallbackPoint);
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null callbackInfo");
+        return;
+    }
+    callbackInfo->Call();
+    AppExecFwk::AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
+}
 } // namespace
 
 UIAbility *StsUIAbility::Create(const std::unique_ptr<Runtime> &runtime)
@@ -147,6 +169,18 @@ void StsUIAbility::UpdateAbilityObj(
     stsAbilityObj_ = stsRuntime_.LoadModule(
         moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
         false, abilityInfo->srcEntrance);
+
+    std::array functions = {
+        ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void*>(PromiseCallback) },
+    };
+    ani_status status = ANI_ERROR;
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        return;
+    }
+    if ((status = env->Class_BindNativeMethods(stsAbilityObj_->aniCls, functions.data(), functions.size())) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
 }
 
 void StsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want,
@@ -311,7 +345,6 @@ void StsUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callback
     if (applicationContext != nullptr) {
         // TODO
     }
-    CallObjectMethod(false, "onDestroy", nullptr);
     std::weak_ptr<UIAbility> weakPtr = shared_from_this();
     auto asyncCallback = [abilityWeakPtr = weakPtr]() {
         auto ability = abilityWeakPtr.lock();
@@ -322,6 +355,29 @@ void StsUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callback
         ability->OnStopCallback();
     };
     callbackInfo->Push(asyncCallback);
+
+    ani_long destroyCallbackPoint = (ani_long)callbackInfo;
+    ani_status status = ANI_ERROR;
+    ani_field field = nullptr;
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr || stsAbilityObj_ == nullptr) {
+        isAsyncCallback = false;
+        OnStop();
+        return;
+    }
+    if ((status = env->Class_FindField(stsAbilityObj_->aniCls, "destroyCallbackPoint", &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+    if ((status = env->Object_SetField_Long(stsAbilityObj_->aniObj, field, destroyCallbackPoint)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+
+    isAsyncCallback = CallObjectMethod(true, "callOnDestroy", ":Z");
+    TAG_LOGI(AAFwkTag::UIABILITY, "callOnDestroy isAsyncCallback: %{public}d", isAsyncCallback);
+    if (!isAsyncCallback) {
+        OnStopCallback();
+        return;
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
@@ -1077,13 +1133,13 @@ sptr<IRemoteObject> StsUIAbility::CallRequest()
     return remoteCallee_;
 }
 
-ani_ref StsUIAbility::CallObjectMethod(bool withResult, const char *name, const char *signature, ...)
+bool StsUIAbility::CallObjectMethod(bool withResult, const char *name, const char *signature, ...)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
     TAG_LOGI(AAFwkTag::UIABILITY, "StsUIAbility call sts, name: %{public}s", name);
     if (stsAbilityObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsAbilityObj");
-        return nullptr;
+        return false;
     }
     auto env = stsRuntime_.GetAniEnv();
     auto obj = stsAbilityObj_->aniObj;
@@ -1093,17 +1149,17 @@ ani_ref StsUIAbility::CallObjectMethod(bool withResult, const char *name, const 
     ani_method method = nullptr;
     if ((status = env->Class_FindMethod(cls, name, signature, &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
+        return false;
     }
     if (method == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get '%{public}s' from ability object failed", name);
-        return nullptr;
+        return false;
     }
     if (withResult) {
-        ani_ref res = nullptr;
+        ani_boolean res = 0;
         va_list args;
         va_start(args, signature);
-        if ((status = env->Object_CallMethod_Ref_V(obj, method, &res, args)) != ANI_OK) {
+        if ((status = env->Object_CallMethod_Boolean(obj, method, &res, args)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         }
         va_end(args);
@@ -1119,7 +1175,7 @@ ani_ref StsUIAbility::CallObjectMethod(bool withResult, const char *name, const 
     int64_t timeEnd = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
     TAG_LOGI(AAFwkTag::UIABILITY, "end, name: %{public}s, time: %{public}s", name,
         std::to_string(timeEnd - timeStart).c_str());
-    return nullptr;
+    return false;
 }
 
 std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> StsUIAbility::CreateADelegatorAbilityProperty()
