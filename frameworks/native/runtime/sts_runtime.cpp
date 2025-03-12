@@ -146,7 +146,7 @@ public:
                 return DEFAULT_ENTRY_ABILITY_CLASS;
             }
             TAG_LOGD(AAFwkTag::STSRUNTIME, "srcEntry as class: %{public}s", srcEntry.c_str());
-            return srcEntry;
+            return HandleOhmUrlSrcEntry(srcEntry);
         }
         TAG_LOGD(AAFwkTag::STSRUNTIME, "found srcEntry: %{public}s, output: %{public}s",
                  srcEntry.c_str(), iter->second.c_str());
@@ -165,6 +165,33 @@ private:
         }
         std::string prefix = str.substr(0, 2);
         return prefix == "./";
+    }
+
+    static std::string HandleOhmUrlSrcEntry(const std::string &srcEntry)
+    {
+        size_t lastSlashPos = srcEntry.rfind('/');
+        if (lastSlashPos == std::string::npos) {
+            std::string fileName = srcEntry;
+            // If there is no slash, the entire string is processed directly.
+            HandleOhmUrlFileName(fileName);
+            return fileName;
+        }
+        std::string base = srcEntry.substr(0, lastSlashPos + 1);
+        std::string fileName = srcEntry.substr(lastSlashPos + 1);
+        HandleOhmUrlFileName(fileName);
+        return base + fileName;
+    }
+
+    static void HandleOhmUrlFileName(std::string &fileName)
+    {
+        size_t colonPos = fileName.rfind(':');
+        if (colonPos != std::string::npos) {
+            // <fileName>:<className>  =>  <fileName>/<className>
+            fileName.replace(colonPos, 1, "/");
+        } else {
+            // <fileName>  =>  <fileName>/<fileName>
+            fileName = fileName + "/" + fileName;
+        }
     }
 
     std::map<std::string, std::string> entryPathMap_{};
