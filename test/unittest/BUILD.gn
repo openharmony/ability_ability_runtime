@@ -555,6 +555,7 @@ group("unittest") {
       "mission_listener_test:unittest",
       "multi_app_utils_test:unittest",
       "multi_instance_utils_test:unittest",
+      "multi_user_config_mgr_test:unittest",
       "napi_base_context_test:unittest",
       "napi_common_want_agent_test:unittest",
       "native_runtime_test:unittest",
