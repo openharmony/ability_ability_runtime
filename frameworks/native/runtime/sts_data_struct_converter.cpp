@@ -18,7 +18,7 @@
 #include "common_func.h"
 #include "configuration_convertor.h"
 #include "hilog_tag_wrapper.h"
-
+#include "ani_enum_convert.h"
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
@@ -79,10 +79,16 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
         TAG_LOGE(AAFwkTag::UIABILITY, "null object");
         return nullptr;
     }
-    // TODO
     ClassSetter(env, cls, object, SETTER_METHOD_NAME(lastExitMessage), GetAniString(env, launchParam.lastExitMessage));
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(launchReason), launchParam.launchReason);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(lastExitReason), launchParam.lastExitReason);
+    ani_enum_item launchReasonItem {};
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
+        "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchReason;", launchParam.launchReason, launchReasonItem);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(launchReason), launchReasonItem);
+    ani_enum_item lastExitReasonItem {};
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
+        "L@ohos/app/ability/AbilityConstant/AbilityConstant/LastExitReason;",
+        launchParam.lastExitReason, lastExitReasonItem);
+    ClassSetter(env, cls, object, SETTER_METHOD_NAME(lastExitReason), lastExitReasonItem);
 
     return object;
 }
