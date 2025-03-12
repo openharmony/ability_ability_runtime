@@ -40,6 +40,7 @@ ohos_unittest("app_mgr_service_test") {
   configs = [ "${ability_runtime_services_path}/appmgr:appmgr_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/appmgr:libappms",
