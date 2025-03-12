@@ -55,6 +55,7 @@ ohos_shared_library("runtime") {
     "${ability_runtime_path}/services/abilitymgr/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_path}/sts_environment/interfaces/inner_api",
+    "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
     "${ability_runtime_utils_path}/global/constant",
   ]
 
