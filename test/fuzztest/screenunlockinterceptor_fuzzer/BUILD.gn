@@ -58,6 +58,7 @@ ohos_fuzztest("ScreenUnlockInterceptorFuzzTest") {
   deps = [
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/abilitymgr:ams_configuration_parameter",
     "${ability_runtime_services_path}/appmgr:libappms",
     "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:event_report",
