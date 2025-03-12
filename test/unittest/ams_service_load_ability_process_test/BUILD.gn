@@ -20,6 +20,7 @@ ohos_unittest("AmsServiceLoadAbilityProcessTest") {
   module_out_path = module_output_path
   cflags_cc = []
   include_dirs = [
+    "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/appmgr/test/unittest/mocks",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_test_path}/mock/common/include",
@@ -68,6 +69,7 @@ ohos_unittest("AmsServiceLoadAbilityProcessTest") {
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
+    "${ability_runtime_services_path}/abilitymgr:ams_configuration_parameter",
     "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:event_report",
     "${ability_runtime_services_path}/common:perm_verification",

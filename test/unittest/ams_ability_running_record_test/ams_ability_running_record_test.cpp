@@ -21,6 +21,7 @@
 #include "hilog_tag_wrapper.h"
 #include "mock_ability_token.h"
 #include "mock_application.h"
+#include "window_focus_changed_listener.h"
 
 using namespace testing::ext;
 using testing::_;
