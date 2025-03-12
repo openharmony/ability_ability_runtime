@@ -23,7 +23,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 
-bool GetIntOrUndefined(ani_env *env, ani_object param, const char *name, int &value)
+int GetIntOrUndefined(ani_env *env, ani_object param, const char *name)
 {
     ani_ref obj = nullptr;
     ani_boolean isUndefined = true;
@@ -32,23 +32,21 @@ bool GetIntOrUndefined(ani_env *env, ani_object param, const char *name, int &va
 
     if ((status = env->Object_GetFieldByName_Ref(param, name, &obj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return false;
+        return res;
     }
     if ((status = env->Reference_IsUndefined(obj, &isUndefined)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return false;
+        return res;
     }
     if (isUndefined){
         TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s : undefined", name);
-        return false;
+        return res;
     } 
     if ((status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "intValue", nullptr, &res)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return false;
+        return res;
     }
-
-    value = static_cast<int>(res);
-    return true;
+    return res;
 }
 
 bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value)
