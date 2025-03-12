@@ -17,5 +17,6 @@ import { Context } from './Context'
 // import ExtensionAbilityInfo from 'bms/ExtensionAbilityInfo.ets'
 
 export default class ExtensionContext extends Context {
+    public nativeContext:long = 0;
     // extensionAbilityInfo?: ExtensionAbilityInfo
 }

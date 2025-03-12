@@ -20,7 +20,6 @@ import ApplicationContext from './ApplicationContext'
 // import {resourceManager} from 'global/resourceManager'
 
 export class Context extends BaseContext {
-    public nativeContext:long;
     area: int = 0;
     filesDir: string = "";
     tempDir: string = "";

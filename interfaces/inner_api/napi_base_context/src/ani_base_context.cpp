@@ -15,6 +15,8 @@
 
 #include "ani_base_context.h"
 
+namespace OHOS {
+namespace AbilityRuntime {
 ani_status IsStageContext(ani_env* env, ani_object object, ani_boolean& stageMode)
 {
     if (env == nullptr) {
@@ -22,19 +24,7 @@ ani_status IsStageContext(ani_env* env, ani_object object, ani_boolean& stageMod
         return ANI_ERROR;
     }
 
-    ani_class cls = nullptr;
-    if ((env->FindClass("LBaseContext/BaseContext;", &cls)) != ANI_OK) {
-        std::cerr << "FindClass failed" << std::endl;
-        return ANI_ERROR;
-    }
-
-    ani_field filedStageMode = nullptr;
-    if (env->Class_FindField(cls, "stageMode", &filedStageMode) != ANI_OK) {
-        std::cerr << "FindField failed" << std::endl;
-        return ANI_ERROR;
-    }
-
-    if (env->Object_GetField_Boolean(object, filedStageMode, &stageMode) != ANI_OK) {
+    if (env->Object_GetFieldByName_Boolean(object, "stageMode", &stageMode) != ANI_OK) {
         std::cerr << "GetField failed" << std::endl;
         return ANI_ERROR;
     }
@@ -43,36 +33,27 @@ ani_status IsStageContext(ani_env* env, ani_object object, ani_boolean& stageMod
     return ANI_OK;
 }
 
-std::shared_ptr<OHOS::AbilityRuntime::Context> GetStageModeContext(ani_env* env, ani_object object)
+std::shared_ptr<Context> GetStageModeContext(ani_env* env, ani_object object)
 {
     if (env == nullptr) {
         std::cerr << "env is nullptr" << std::endl;
         return nullptr;
     }
 
-    ani_class cls = nullptr;
-    if ((env->FindClass("LContext/Context;", &cls)) != ANI_OK) {
-        std::cerr << "FindClass failed" << std::endl;
-        return nullptr;
-    }
-
-    ani_field field = nullptr;
-    if ((env->Class_FindField(cls, "nativeContext", &field)) != ANI_OK) {
-        std::cerr << "Class_FindField failed" << std::endl;
-        return nullptr;
-    }
-
     ani_long nativeContextLong;
-    if ((env->Object_GetField_Long(cls, field, &nativeContextLong)) != ANI_OK) {
+    if ((env->Object_GetFieldByName_Long(object, "nativeContext", &nativeContextLong)) != ANI_OK) {
         std::cerr << "Object_GetField_Long failed" << std::endl;
         return nullptr;
     }
-    std::shared_ptr<OHOS::AbilityRuntime::Context> ptr((OHOS::AbilityRuntime::Context*)nativeContextLong);
+
+    std::shared_ptr<Context> ptr((Context*)nativeContextLong);
 
     return ptr;
 }
 
-OHOS::AppExecFwk::Ability* GetCurrentAbility(ani_env* env)
+AppExecFwk::Ability* GetCurrentAbility(ani_env* env)
 {
     return nullptr;
 }
+} // namespace AbilityRuntime
+} // namespace OHOS
