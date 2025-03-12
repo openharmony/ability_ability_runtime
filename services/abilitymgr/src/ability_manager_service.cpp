@@ -2537,7 +2537,7 @@ void AbilityManagerService::AppUpgradeCompleted(int32_t uid)
 
 int32_t AbilityManagerService::RecordAppExitReason(const ExitReason &exitReason)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "recordAppExitReason reason:%{public}d, exitMsg:%{public}s", exitReason.reason,
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "recordAppExitReason reason:%{public}d, exitMsg:%{public}s", exitReason.reason,
         exitReason.exitMsg.c_str());
 
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);

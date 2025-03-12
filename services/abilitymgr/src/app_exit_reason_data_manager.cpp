@@ -125,6 +125,7 @@ int32_t AppExitReasonDataManager::SetAppExitReason(const std::string &bundleName
         TAG_LOGE(AAFwkTag::ABILITYMGR, "insert data err: %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "set reason info: %{public}s", value.ToString().c_str());
     return ERR_OK;
 }
 
@@ -345,7 +346,6 @@ DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValue(
         { JSON_KEY_ABILITY_LIST, abilityList },
     };
     DistributedKv::Value value(jsonObject.dump());
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "value: %{public}s", value.ToString().c_str());
     return value;
 }
 
