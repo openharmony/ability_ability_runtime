@@ -32,8 +32,8 @@ constexpr const char* EXTENSION_AUTO_DISCONNECT_TIME = "auto_disconnect_time";
 constexpr const char* EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME = "third_party_app_blocked_flag";
 constexpr const char* EXTENSION_SERVICE_BLOCKED_LIST_NAME = "service_blocked_list";
 constexpr const char* EXTENSION_SERVICE_STARTUP_ENABLE_FLAG = "service_startup_enable_flag";
-constexpr const char* EXTENSION_NETWORK_ENABLE_FLAG = "network_acesss_enable_flag";
-constexpr const char* EXTENSION_SA_ENABLE_FLAG = "sa_acesss_enable_flag";
+constexpr const char* EXTENSION_NETWORK_ENABLE_FLAG = "network_access_enable_flag";
+constexpr const char* EXTENSION_SA_ENABLE_FLAG = "sa_access_enable_flag";
 }
 namespace OHOS {
 namespace AbilityRuntime {
