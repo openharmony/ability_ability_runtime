@@ -32,6 +32,8 @@ constexpr const char*
     JIT_PERMISSION_DISABLE_CODE_MEMORY_PROTECTION = "ohos.permission.kernel.DISABLE_CODE_MEMORY_PROTECTION";
 constexpr const char*
     JIT_PERMISSION_ALLOW_EXECUTABLE_FORT_MEMORY = "ohos.permission.kernel.ALLOW_EXECUTABLE_FORT_MEMORY";
+constexpr const char*
+    JIT_PERMISSION_DISABLE_GOTPLT_RO_PROTECTION = "ohos.permission.kernel.DISABLE_GOTPLT_RO_PROTECTION";
 
 static uint32_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &applicationInfo)
 {
@@ -98,7 +100,8 @@ static void SetJITPermissions(uint32_t accessTokenId, std::vector<std::string> &
     std::vector<std::string> tmpPermissionList = {
         JIT_PERMISSION_ALLOW_WRITABLE_CODE_MEMORY,
         JIT_PERMISSION_DISABLE_CODE_MEMORY_PROTECTION,
-        JIT_PERMISSION_ALLOW_EXECUTABLE_FORT_MEMORY
+        JIT_PERMISSION_ALLOW_EXECUTABLE_FORT_MEMORY,
+        JIT_PERMISSION_DISABLE_GOTPLT_RO_PROTECTION
     };
 
     std::vector<int32_t> permStateList;
