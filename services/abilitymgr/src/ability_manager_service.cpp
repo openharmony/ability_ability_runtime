@@ -8043,6 +8043,17 @@ void AbilityManagerService::OnStartSpecifiedProcessTimeoutResponse(const AAFwk::
     }
 }
 
+void AbilityManagerService::OnStartSpecifiedFailed(int32_t requestId)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "On accept want response");
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        CHECK_POINTER(uiAbilityManager);
+        uiAbilityManager->OnStartSpecifiedFailed(requestId);
+        return;
+    }
+}
+
 int AbilityManagerService::GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

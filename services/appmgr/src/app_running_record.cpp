@@ -1485,48 +1485,53 @@ void AppRunningRecord::SetSpecifiedAbilityFlagAndWant(
     int requestId, const AAFwk::Want &want, const std::string &moduleName)
 {
     std::lock_guard lock(specifiedMutex_);
-    if (specifiedRequestId_ != -1) {
-        TAG_LOGW(AAFwkTag::APPMGR, "specifiedRequestId: %{public}d", specifiedRequestId_);
+    if (specifiedAbilityRequest_ != nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "specifiedRequestId: %{public}d", specifiedAbilityRequest_->requestId);
     }
-    specifiedRequestId_ = requestId;
-    specifiedWant_ = want;
+    specifiedAbilityRequest_ = std::make_shared<SpecifiedRequest>();
+    specifiedAbilityRequest_->requestId = requestId;
+    specifiedAbilityRequest_->want = want;
     moduleName_ = moduleName;
 }
 
 int32_t AppRunningRecord::GetSpecifiedRequestId() const
 {
     std::lock_guard lock(specifiedMutex_);
-    return specifiedRequestId_;
+    if (specifiedAbilityRequest_ != nullptr) {
+        return specifiedAbilityRequest_->requestId;
+    }
+    return -1;
 }
 
-void AppRunningRecord::ResetSpecifiedRequestId()
+void AppRunningRecord::ResetSpecifiedRequest()
 {
     std::lock_guard lock(specifiedMutex_);
-    specifiedRequestId_ = -1;
+    specifiedAbilityRequest_.reset();
 }
 
 void AppRunningRecord::SetScheduleNewProcessRequestState(int32_t requestId,
     const AAFwk::Want &want, const std::string &moduleName)
 {
     std::lock_guard lock(specifiedMutex_);
-    if (newProcessRequestId_ != -1) {
-        TAG_LOGW(AAFwkTag::APPMGR, "newProcessRequestId: %{public}d", newProcessRequestId_);
+    if (specifiedProcessRequest_ != nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "newProcessRequestId: %{public}d", specifiedProcessRequest_->requestId);
     }
-    newProcessRequestId_ = requestId;
-    newProcessRequestWant_ = want;
+    specifiedProcessRequest_ = std::make_shared<SpecifiedRequest>();
+    specifiedProcessRequest_->requestId = requestId;
+    specifiedProcessRequest_->want = want;
     moduleName_ = moduleName;
 }
 
 bool AppRunningRecord::IsNewProcessRequest() const
 {
     std::lock_guard lock(specifiedMutex_);
-    return newProcessRequestId_ != -1;
+    return specifiedProcessRequest_ != nullptr;
 }
 
 bool AppRunningRecord::IsStartSpecifiedAbility() const
 {
     std::lock_guard lock(specifiedMutex_);
-    return specifiedRequestId_ != -1;
+    return specifiedAbilityRequest_ != nullptr;
 }
 
 void AppRunningRecord::SchedulePrepareTerminate(const std::string &moduleName)
@@ -1606,25 +1611,34 @@ void AppRunningRecord::ApplicationTerminated()
 AAFwk::Want AppRunningRecord::GetSpecifiedWant() const
 {
     std::lock_guard lock(specifiedMutex_);
-    return specifiedWant_;
+    if (specifiedAbilityRequest_ != nullptr) {
+        return specifiedAbilityRequest_->want;
+    }
+    return AAFwk::Want();
 }
 
 AAFwk::Want AppRunningRecord::GetNewProcessRequestWant() const
 {
     std::lock_guard lock(specifiedMutex_);
-    return newProcessRequestWant_;
+    if (specifiedProcessRequest_ != nullptr) {
+        return specifiedProcessRequest_->want;
+    }
+    return AAFwk::Want();
 }
 
 int32_t AppRunningRecord::GetNewProcessRequestId() const
 {
     std::lock_guard lock(specifiedMutex_);
-    return newProcessRequestId_;
+    if (specifiedProcessRequest_ != nullptr) {
+        return specifiedProcessRequest_->requestId;
+    }
+    return -1;
 }
 
-void AppRunningRecord::ResetNewProcessRequestId()
+void AppRunningRecord::ResetNewProcessRequest()
 {
     std::lock_guard lock(specifiedMutex_);
-    newProcessRequestId_ = -1;
+    specifiedProcessRequest_.reset();
 }
 
 int32_t AppRunningRecord::UpdateConfiguration(const Configuration &config)

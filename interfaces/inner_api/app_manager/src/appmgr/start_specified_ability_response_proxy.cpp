@@ -144,5 +144,25 @@ void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestTimeoutResponse(cons
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
     }
 }
+
+void StartSpecifiedAbilityResponseProxy::OnStartSpecifiedFailed(int32_t requestId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    if (!data.WriteInt32(requestId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
+        return;
+    }
+
+    int32_t ret = SendTransactCmd(
+        static_cast<uint32_t>(IStartSpecifiedAbilityResponse::Message::ON_START_SPECIFIED_FAILED), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+    }
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

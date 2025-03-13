@@ -25,8 +25,8 @@ namespace OHOS {
 namespace AppExecFwk {
 class StartSpecifiedAbilityResponseStub : public IRemoteStub<IStartSpecifiedAbilityResponse> {
 public:
-    StartSpecifiedAbilityResponseStub();
-    virtual ~StartSpecifiedAbilityResponseStub();
+    StartSpecifiedAbilityResponseStub() = default;
+    virtual ~StartSpecifiedAbilityResponseStub() = default;
 
     virtual int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
@@ -36,9 +36,7 @@ private:
     int32_t HandleOnTimeoutResponse(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnNewProcessRequestResponse(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnNewProcessRequestTimeoutResponse(MessageParcel &data, MessageParcel &reply);
-
-    using responseFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
-    std::map<uint32_t, responseFunc> responseFuncMap_;
+    int32_t HandleOnStartSpecifiedFailed(MessageParcel &data, MessageParcel &reply);
 
     DISALLOW_COPY_AND_MOVE(StartSpecifiedAbilityResponseStub);
 };
