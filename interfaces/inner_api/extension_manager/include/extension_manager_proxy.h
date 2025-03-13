@@ -42,7 +42,7 @@ public:
      * @param userId, Designation User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ConnectAbilityCommon(const Want &want, const sptr<IRemoteObject> &connect,
+    virtual int ConnectAbilityCommon(const Want &want, sptr<IRemoteObject> connect,
         const sptr<IRemoteObject> &callerToken, AppExecFwk::ExtensionAbilityType extensionType,
         int32_t userId = DEFAULT_INVALID_USER_ID, bool isQueryExtensionOnly = true) override;
 

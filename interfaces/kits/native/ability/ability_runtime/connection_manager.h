@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_CONNECTION_MANAGER_H
 #define OHOS_ABILITY_RUNTIME_CONNECTION_MANAGER_H
 
+#include <chrono>
 #include <map>
 #include <vector>
 #include "ability_connect_callback.h"
@@ -37,6 +38,7 @@ struct ConnectionInfo {
 
     int32_t userid;
     void* uiServiceExtProxy = nullptr;
+    int64_t connectingTime = 0;
 
     ConnectionInfo(const sptr<IRemoteObject> &connectCaller, const AAFwk::Operation &connectReceiver,
         const sptr<AbilityConnection> &abilityConnection, int32_t accountId = -1) : connectCaller(connectCaller),
@@ -49,6 +51,12 @@ struct ConnectionInfo {
         uiServiceExtProxy = proxyPtr;
     }
 
+    void RecordConnectingTime()
+    {
+        auto now = std::chrono::steady_clock::now().time_since_epoch();
+        connectingTime = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+    }
+
     inline bool operator < (const ConnectionInfo &that) const
     {
         if (userid < that.userid) {
@@ -58,6 +66,9 @@ struct ConnectionInfo {
             return true;
         }
         if (connectCaller < that.connectCaller) {
+            return true;
+        }
+        if (connectingTime < that.connectingTime) {
             return true;
         }
         if (connectCaller == that.connectCaller &&
@@ -198,6 +209,7 @@ private:
         bool isUIService = false);
     ErrCode CreateConnection(const sptr<IRemoteObject> &connectCaller,
         const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback, bool isUIService);
+    bool IsConnectingTimeout(const ConnectionInfo& info);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
