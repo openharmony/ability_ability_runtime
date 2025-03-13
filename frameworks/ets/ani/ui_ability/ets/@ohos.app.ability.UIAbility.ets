@@ -18,6 +18,20 @@ import UIAbilityContext from './application/UIAbilityContext';
 import Want from './@ohos.app.ability.Want';
 
 export default class UIAbility {
+  private isOnDestroyAsync: boolean = true;
+  private destroyCallbackPoint: long;
+  private native nativeOnDestroyCallback(): void;
+  private callOnDestroy(): boolean {
+    let p = this.onDestroyAsync();
+    if (this.isOnDestroyAsync) {
+      p.then<void>((a:undefined): void => {
+        this.nativeOnDestroyCallback();
+      });
+    } else {
+      this.onDestroy();
+    }
+    return this.isOnDestroyAsync;
+  }
 
   context: UIAbilityContext = new UIAbilityContext();
   launchWant: Want = new Want();
@@ -33,6 +47,10 @@ export default class UIAbility {
   }
   onDestroy(): void {
     console.log("onDestroy");
+  }
+  onDestroyAsync(): Promise<void> {
+    this.isOnDestroyAsync = false;
+    return new Promise<void>((resolve: (a: undefined)=>void, reject: (err: Error)=>void): void => {});
   }
   onForeground(): void{
     console.log("onForeground");
