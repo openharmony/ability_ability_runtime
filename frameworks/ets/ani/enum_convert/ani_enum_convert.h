@@ -22,7 +22,7 @@ namespace AAFwk {
 
 namespace AniEnumConvertUtil {
 //enum convert
-static bool GetStdString(ani_env *env, ani_string str, std::string &res)
+[[maybe_unused]] static bool GetStdString(ani_env *env, ani_string str, std::string &res)
 {
     ani_size sz {};
     ani_status status = ANI_ERROR;
