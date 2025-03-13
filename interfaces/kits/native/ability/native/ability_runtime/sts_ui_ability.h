@@ -301,7 +301,7 @@ private:
 #endif
 
 private:
-    ani_ref CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
+    bool CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
     ani_object CreateAppWindowStage();
     std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
