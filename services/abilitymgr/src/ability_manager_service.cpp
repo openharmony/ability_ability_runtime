@@ -3271,6 +3271,13 @@ int AbilityManagerService::CheckUIExtensionUsage(AppExecFwk::UIExtensionUsage ui
         TAG_LOGE(AAFwkTag::ABILITYMGR, "secureConstrainedEmbedded extension type error:%u.", extensionType);
         return ERR_INVALID_VALUE;
     }
+
+    if (AAFwk::UIExtensionUtils::IsOnlyForModal(extensionType) && 
+        uiExtensionUsage != UIExtensionUsage::MODAL) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "secureModal extension type error:%u.", extensionType);
+        return ERR_INVALID_VALUE;
+    }
+
     return ERR_OK;
 }
 
