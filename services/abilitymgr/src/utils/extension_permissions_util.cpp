@@ -28,7 +28,7 @@ bool ExtensionPermissionsUtil::CheckSAPermission(const AppExecFwk::ExtensionAbil
         return PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_ASSET_ACCELERATION_EXTENSION");
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::DISTRIBUTED) {
-        checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
+        return PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_DISTRIBUTED_EXTENSION");
     }
     if (!PermissionVerification::GetInstance()->IsSACall()) {
