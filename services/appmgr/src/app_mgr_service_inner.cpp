@@ -2738,7 +2738,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
         return nullptr;
     }
     auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, bundleInfo,
-        loadParam->instanceKey, abilityInfo->process);
+        loadParam->instanceKey, abilityInfo ? abilityInfo->process : "");
     CHECK_POINTER_AND_RETURN_VALUE(appRecord, nullptr);
     appRecord->SetProcessAndExtensionType(abilityInfo, loadParam->extensionProcessMode);
     appRecord->SetKeepAliveEnableState(bundleInfo.isKeepAlive);
@@ -4288,6 +4288,15 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
         }
     }
     ClearData(appRecord);
+    
+    if (appRecord->IsStartSpecifiedAbility() && startSpecifiedAbilityResponse_) {
+        startSpecifiedAbilityResponse_->OnStartSpecifiedFailed(appRecord->GetSpecifiedRequestId());
+    }
+    appRecord->ResetSpecifiedRequest();
+    if (appRecord->IsNewProcessRequest() && startSpecifiedAbilityResponse_) {
+        startSpecifiedAbilityResponse_->OnStartSpecifiedFailed(appRecord->GetNewProcessRequestId());
+    }
+    appRecord->ResetNewProcessRequest();
 }
 
 void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord)
@@ -4476,13 +4485,13 @@ void AppMgrServiceInner::HandleAddAbilityStageTimeOut(std::shared_ptr<AppRunning
         startSpecifiedAbilityResponse_->OnTimeoutResponse(appRecord->GetSpecifiedWant(),
             appRecord->GetSpecifiedRequestId());
     }
-    appRecord->ResetSpecifiedRequestId();
+    appRecord->ResetSpecifiedRequest();
 
     if (appRecord->IsNewProcessRequest() && startSpecifiedAbilityResponse_) {
         startSpecifiedAbilityResponse_->OnNewProcessRequestTimeoutResponse(appRecord->GetNewProcessRequestWant(),
             appRecord->GetNewProcessRequestId());
     }
-    appRecord->ResetNewProcessRequestId();
+    appRecord->ResetNewProcessRequest();
 
     KillApplicationByRecord(appRecord);
 }
@@ -5167,11 +5176,12 @@ void AppMgrServiceInner::ScheduleAcceptWantDone(
         TAG_LOGE(AAFwkTag::APPMGR, "get appRecord fail");
         return;
     }
+    auto requestId = appRecord->GetSpecifiedRequestId();
     appRecord->ScheduleAcceptWantDone();
+    appRecord->ResetSpecifiedRequest();
 
     if (startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnAcceptWantResponse(want, flag,
-            appRecord->GetSpecifiedRequestId());
+        startSpecifiedAbilityResponse_->OnAcceptWantResponse(want, flag, requestId);
     }
 }
 
@@ -5202,7 +5212,7 @@ void AppMgrServiceInner::HandleStartSpecifiedAbilityTimeOut(std::shared_ptr<AppR
         startSpecifiedAbilityResponse_->OnTimeoutResponse(appRecord->GetSpecifiedWant(),
             appRecord->GetSpecifiedRequestId());
     }
-    appRecord->ResetSpecifiedRequestId();
+    appRecord->ResetSpecifiedRequest();
 
     KillApplicationByRecord(appRecord);
 }
@@ -5217,13 +5227,14 @@ void AppMgrServiceInner::ScheduleNewProcessRequestDone(
         TAG_LOGE(AAFwkTag::APPMGR, "get appRecord fail");
         return;
     }
+    auto requestId = appRecord->GetNewProcessRequestId();
     appRecord->ScheduleNewProcessRequestDone();
+    appRecord->ResetNewProcessRequest();
 
     if (startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse(want, flag,
-            appRecord->GetNewProcessRequestId());
+        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse(want, flag, requestId);
     }
-    appRecord->ResetNewProcessRequestId();
+    appRecord->ResetNewProcessRequest();
 }
 
 void AppMgrServiceInner::HandleStartSpecifiedProcessTimeout(std::shared_ptr<AppRunningRecord> appRecord)
@@ -5238,7 +5249,7 @@ void AppMgrServiceInner::HandleStartSpecifiedProcessTimeout(std::shared_ptr<AppR
         startSpecifiedAbilityResponse_->OnNewProcessRequestTimeoutResponse(appRecord->GetNewProcessRequestWant(),
             appRecord->GetNewProcessRequestId());
     }
-    appRecord->ResetNewProcessRequestId();
+    appRecord->ResetNewProcessRequest();
 }
 
 int32_t AppMgrServiceInner::DealWithUserConfiguration(const Configuration& config, const int32_t userId,

@@ -61,6 +61,11 @@ class AppMgrServiceInner;
 class AppRunningRecord;
 class AppRunningManager;
 
+struct SpecifiedRequest {
+    int32_t requestId = 0;
+    AAFwk::Want want;
+};
+
 class AppRunningRecord : public std::enable_shared_from_this<AppRunningRecord> {
 public:
     static int64_t appEventId_;
@@ -645,9 +650,9 @@ public:
      */
     int32_t GetSpecifiedRequestId() const;
     /**
-     * Called when one specified request is finished to set the request id to -1
+     * Called when one specified request is finished to clear the request
      */
-    void ResetSpecifiedRequestId();
+    void ResetSpecifiedRequest();
 
     void SchedulePrepareTerminate(const std::string &moduleName);
 
@@ -668,7 +673,7 @@ public:
     AAFwk::Want GetSpecifiedWant() const;
     AAFwk::Want GetNewProcessRequestWant() const;
     int32_t GetNewProcessRequestId() const;
-    void ResetNewProcessRequestId();
+    void ResetNewProcessRequest();
     bool IsDebug();
     void SetDebugApp(bool isDebugApp);
     /**
@@ -1156,8 +1161,6 @@ private:
     int32_t appRecordId_ = 0;
     int32_t mainUid_;
     int restartResidentProcCount_ = 0;
-    int32_t specifiedRequestId_ = -1;
-    int32_t newProcessRequestId_ = -1;
     int32_t exitReason_ = 0;
     int32_t appIndex_ = 0; // render record
     int32_t requestProcCode_ = 0; // render record
@@ -1196,9 +1199,9 @@ private:
     std::string appIdentifier_;
 
     mutable std::mutex specifiedMutex_;
-    AAFwk::Want specifiedWant_;
+    std::shared_ptr<SpecifiedRequest> specifiedAbilityRequest_;
+    std::shared_ptr<SpecifiedRequest> specifiedProcessRequest_;
     std::string moduleName_;
-    AAFwk::Want newProcessRequestWant_;
 
     std::string perfCmd_;
     std::string preloadModuleName_;

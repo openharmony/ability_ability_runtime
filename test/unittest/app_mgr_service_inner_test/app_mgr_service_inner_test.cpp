@@ -1980,7 +1980,8 @@ HWTEST_F(AppMgrServiceInnerTest, HandleAddAbilityStageTimeOut_001, TestSize.Leve
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
 
-    appRecord->specifiedRequestId_ = 1;
+    appRecord->specifiedAbilityRequest_ = std::make_shared<SpecifiedRequest>();
+    appRecord->specifiedAbilityRequest_->requestId = 1;
     appMgrServiceInner->HandleAddAbilityStageTimeOut(appRecord);
 
     sptr<IStartSpecifiedAbilityResponse> response;
@@ -2582,6 +2583,10 @@ HWTEST_F(AppMgrServiceInnerTest, ScheduleAcceptWantDone_001, TestSize.Level0)
     appMgrServiceInner->RegisterStartSpecifiedAbilityResponse(response);
     appMgrServiceInner->ScheduleAcceptWantDone(appRecord->GetRecordId(), want, flag);
 
+    appRecord->SetSpecifiedAbilityFlagAndWant(0, AAFwk::Want(), "");
+    appMgrServiceInner->ScheduleAcceptWantDone(appRecord->GetRecordId(), want, flag);
+    EXPECT_FALSE(appRecord->IsStartSpecifiedAbility());
+
     TAG_LOGI(AAFwkTag::TEST, "ScheduleAcceptWantDone_001 end");
 }
 
@@ -2608,14 +2613,15 @@ HWTEST_F(AppMgrServiceInnerTest, HandleStartSpecifiedAbilityTimeOut_001, TestSiz
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
 
-    appRecord->specifiedRequestId_ = 1;
+    appRecord->specifiedAbilityRequest_ = std::make_shared<SpecifiedRequest>();
+    appRecord->specifiedAbilityRequest_->requestId = 1;
     appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(appRecord);
 
     sptr<IStartSpecifiedAbilityResponse> response;
     appMgrServiceInner->startSpecifiedAbilityResponse_ = response;
     appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(appRecord);
 
-    appRecord->specifiedRequestId_ = -1;
+    appRecord->specifiedAbilityRequest_ = nullptr;
     appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(appRecord);
 
     TAG_LOGI(AAFwkTag::TEST, "HandleStartSpecifiedAbilityTimeOut_001 end");
