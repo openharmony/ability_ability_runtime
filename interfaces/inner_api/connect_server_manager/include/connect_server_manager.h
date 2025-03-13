@@ -47,8 +47,7 @@ public:
         int32_t tid, int32_t instanceId, const std::string& instanceName = "PandaDebugger");
     void StoreDebuggerInfo(int32_t tid, void* vm, const panda::JSNApi::DebugOption& debugOption,
         const DebuggerPostTask& debuggerPostTask, bool isDebugApp);
-    void SetSwitchCallback(const std::function<void(bool)> &setSwitchStatus,
-        const std::function<void(int32_t)> &createLayoutInfo, int32_t instanceId);
+    void SetSwitchCallback(const std::function<void(int32_t)> &createLayoutInfo, int32_t instanceId);
     void SetProfilerCallBack(const std::function<void(bool)> &setStateProfilerStatus);
     void SetConnectedCallback();
     bool SendInstanceMessage(int32_t tid, int32_t instanceId, const std::string& instanceName);
