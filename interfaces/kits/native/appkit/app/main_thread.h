@@ -566,7 +566,7 @@ private:
      * @param nativeEngine nativeEngine instance
      */
     void LoadAllExtensions(NativeEngine &nativeEngine);
-    void LoadAllStsExtensions();
+
     /**
      *
      * @brief Ability Delegator Prepare.
