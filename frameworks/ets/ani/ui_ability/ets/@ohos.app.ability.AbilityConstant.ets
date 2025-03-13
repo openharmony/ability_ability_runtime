@@ -87,9 +87,9 @@ declare namespace AbilityConstant  {
 }
 
 class LaunchParamImpl implements AbilityConstant.LaunchParam {
-  launchReason: AbilityConstant.LaunchReason;
+  launchReason: AbilityConstant.LaunchReason = AbilityConstant.LaunchReason.UNKNOWN;
   launchReasonMessage?: string | undefined;
-  lastExitReason: AbilityConstant.LastExitReason;
+  lastExitReason: AbilityConstant.LastExitReason = AbilityConstant.LastExitReason.UNKNOWN;
   lastExitMessage: string = '';
 }
 
