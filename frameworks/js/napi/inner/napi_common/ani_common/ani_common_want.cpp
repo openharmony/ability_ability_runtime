@@ -37,75 +37,24 @@ namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime;
 namespace {
-bool WrapWantParams(ani_env* env, ani_class wantCls, ani_object wantObject, const AAFwk::WantParams& wantParams)
+bool InnerWrapWantParams(ani_env* env, ani_class wantCls, ani_object wantObject, const AAFwk::WantParams& wantParams)
 {
-    ani_method setParametersMethod = nullptr;
-    ani_status status = ANI_ERROR;
-    status = env->Class_FindMethod(wantCls, "setParametersString", "Lstd/core/String;:V", &setParametersMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "failed to get setParametersString method, status : %{public}d", status);
+    ani_ref wantParamRef = WrapWantParams(env, wantParams);
+    if (wantParamRef == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to WrapWantParams");
         return false;
     }
-    nlohmann::json wantParamsJson = wantParams;
-    std::string wantParamsString = wantParamsJson.dump();
-    ani_string wantParamsAniString;
-    status = env->String_NewUTF8(wantParamsString.c_str(), wantParamsString.length(), &wantParamsAniString);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "failed to get setParametersString method, status : %{public}d", status);
-        return false;
-    }
-    status = env->Object_CallMethod_Void(wantObject, setParametersMethod, wantParamsAniString);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "failed to call setParametersString method, status : %{public}d", status);
-        return false;
-    }
-    TAG_LOGD(AAFwkTag::JSNAPI, "WrapWantParams done");
-    return true;
+    return SetFieldRef(env, wantCls, wantObject, "parameters", wantParamRef);
 }
 
-bool UnwrapWantParams(ani_env* env, ani_object wantObject, AAFwk::WantParams& wantParams)
+bool InnerUnwrapWantParams(ani_env* env, ani_object wantObject, AAFwk::WantParams& wantParams)
 {
-    ani_class wantCls = nullptr;
-    ani_status status = ANI_ERROR;
-    if ((status = env->FindClass("L@ohos/app/ability/Want/Want;", &wantCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    ani_ref wantParamRef = nullptr;
+    if (!GetRefFieldByName(env, wantObject, "parameters", wantParamRef)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to get want parameter");
         return false;
     }
-    if (wantCls == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null wantCls");
-        return false;
-    }
-
-    ani_method getParametersMethod = nullptr;
-    status = env->Class_FindMethod(wantCls, "getParametersString", ":Lstd/core/String;", &getParametersMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "failed to get getParametersMethod method, status : %{public}d", status);
-        return false;
-    }
-    ani_ref wantParamsAniString;
-    status = env->Object_CallMethod_Ref(wantObject, getParametersMethod, &wantParamsAniString);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "failed to call getParametersMethod method, status : %{public}d", status);
-        return false;
-    }
-
-    std::string wantParamsString;
-    if (!GetStdString(env, reinterpret_cast<ani_string>(wantParamsAniString), wantParamsString)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
-        return false;
-    }
-    if (wantParamsString.empty()) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "wantParamsString empty");
-        return false;
-    }
-    nlohmann::json wantParamsJson = nlohmann::json::parse(wantParamsString, nullptr, false);
-    if (wantParamsJson.is_discarded()) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Failed to parse json string");
-        return false;
-    }
-    from_json(wantParamsJson, wantParams);
-    TAG_LOGD(AAFwkTag::JSNAPI, "UnwrapWantParams done");
-    return true;
+    return UnwrapWantParams(env, wantParamRef, wantParams);
 }
 }
 
@@ -143,25 +92,47 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     SetFieldString(env, cls, object, "type", want.GetType());
     SetFieldInt(env, cls, object, "flags", want.GetFlags());
     SetFieldString(env, cls, object, "action", want.GetAction());
-    WrapWantParams(env, cls, object, want.GetParams());
+    InnerWrapWantParams(env, cls, object, want.GetParams());
     SetFieldArrayString(env, cls, object, "entities", want.GetEntities());
 
     // TODO
     return object;
 }
 
-ani_object WrapWantParams(ani_env *env, ani_class cls, const AAFwk::WantParams &wantParams)
+ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams)
 {
-    ani_method method = nullptr;
-    ani_object object = nullptr;
-    env->Class_FindMethod(cls, "<init>", "I:V", &method);
-    env->Object_New(cls, method, &object);
-    if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null object");
+    ani_status status = ANI_ERROR;
+    ani_class cls = nullptr;
+    if ((status = env->FindClass("L@ohos/app/ability/Want/RecordSerializeTool;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "FindClass RecordSerializeTool failed, status : %{public}d", status);
+    }
+    if (cls == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "RecordSerializeTool class null");
         return nullptr;
     }
-    // TODO
-    return object;
+    ani_static_method parseNoThrowMethod = nullptr;
+    status = env->Class_FindStaticMethod(cls, "parseNoThrow", nullptr, &parseNoThrowMethod);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to get parseNoThrow method, status : %{public}d", status);
+        return nullptr;
+    }
+
+    nlohmann::json wantParamsJson = wantParams;
+    std::string wantParamsString = wantParamsJson.dump();
+    ani_string wantParamsAniString;
+    status = env->String_NewUTF8(wantParamsString.c_str(), wantParamsString.length(), &wantParamsAniString);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "String_NewUTF8 wantParamsString failed, status : %{public}d", status);
+        return nullptr;
+    }
+
+    ani_ref wantParamsRef = nullptr;
+    status = env->Class_CallStaticMethod_Ref(cls, parseNoThrowMethod, &wantParamsRef, wantParamsAniString);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to call parseNoThrow method, status : %{public}d", status);
+        return nullptr;
+    }
+    return wantParamsRef;
 }
 
 bool InnerWrapWantParamsString(
@@ -245,9 +216,52 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
         natElementName.GetAbilityName().c_str(), natElementName.GetModuleName().c_str());
 
     AAFwk::WantParams wantParams;
-    if (UnwrapWantParams(env, param, wantParams)) {
+    if (InnerUnwrapWantParams(env, param, wantParams)) {
         want.SetParams(wantParams);
     }
+    return true;
+}
+
+bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams)
+{
+    ani_status status = ANI_ERROR;
+    ani_class cls = nullptr;
+    if ((status = env->FindClass("L@ohos/app/ability/Want/RecordSerializeTool;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "FindClass RecordSerializeTool failed, status : %{public}d", status);
+    }
+    if (cls == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "RecordSerializeTool class null");
+        return false;
+    }
+
+    ani_static_method stringifyMethod = nullptr;
+    status = env->Class_FindStaticMethod(cls, "stringifyNoThrow", nullptr, &stringifyMethod);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to get stringifyNoThrow method, status : %{public}d", status);
+        return false;
+    }
+    ani_ref wantParamsAniString;
+    status = env->Class_CallStaticMethod_Ref(cls, stringifyMethod, &wantParamsAniString, param);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "failed to call stringifyNoThrow method, status : %{public}d", status);
+        return false;
+    }
+
+    std::string wantParamsString;
+    if (!GetStdString(env, reinterpret_cast<ani_string>(wantParamsAniString), wantParamsString)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
+        return false;
+    }
+    if (wantParamsString.empty()) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "wantParamsString empty");
+        return false;
+    }
+    nlohmann::json wantParamsJson = nlohmann::json::parse(wantParamsString, nullptr, false);
+    if (wantParamsJson.is_discarded()) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Failed to parse json string");
+        return false;
+    }
+    from_json(wantParamsJson, wantParams);
     return true;
 }
 
