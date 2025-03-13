@@ -2019,7 +2019,7 @@ HWTEST_F(AbilityContextImplTest, EraseUIExtension_100, Function | MediumTest | L
     context_->uiExtensionMap_.clear();
     context_->uiExtensionMap_.emplace(sessionId, want);
     context_->EraseUIExtension(sessionId);
-    EXPECT_EQ(context_->uiExtensionMap_.size(),0);
+    EXPECT_EQ(context_->uiExtensionMap_.size(), 0);
 }
 
 
