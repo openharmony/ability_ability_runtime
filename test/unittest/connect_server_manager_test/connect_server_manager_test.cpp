@@ -200,7 +200,7 @@ HWTEST_F(ConnectServerManagerTest, SendInstanceMessageTest_0100, TestSize.Level1
     TAG_LOGI(AAFwkTag::TEST, "SendInstanceMessageTest_0100 is start");
     ConnectServerManager &connectServerManager = AbilityRuntime::ConnectServerManager::Get();
     std::string message = "Message";
-    connectServerManager.SendStateProfilerMessage(message);
+    connectServerManager.SendMessage(message);
     int32_t tid = 1;
     int32_t instanceId = 1;
     const std::string instanceName = "instanceName";

@@ -274,7 +274,8 @@ bool ConnectServerManager::AddInstance(int32_t tid, int32_t instanceId, const st
     storeMessage(instanceId, message);
 
     // WaitForConnection() means the connection state of the connect server
-    auto sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
+    auto sendMessage =
+        reinterpret_cast<OHOS::AbilityRuntime::SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
     if (sendMessage == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null SendMessage");
         return false;
@@ -329,7 +330,8 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
         return;
     }
 
-    auto sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
+    auto sendMessage =
+        reinterpret_cast<OHOS::AbilityRuntime::SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
     if (sendMessage == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendMessage");
         return;
@@ -340,7 +342,8 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
 void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr)
 {
     TAG_LOGI(AAFwkTag::JSRUNTIME, "called");
-    auto sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
+    auto sendMessage =
+        reinterpret_cast<OHOS::AbilityRuntime::SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
     if (sendMessage == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendMessage");
         return;
@@ -349,10 +352,11 @@ void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const s
     sendMessage(jsonSnapshotStr);
 }
 
-void ConnectServerManager::SendStateProfilerMessage(const std::string &message)
+void ConnectServerManager::SendMessage(const std::string &message)
 {
     TAG_LOGI(AAFwkTag::JSRUNTIME, "called");
-    auto sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
+    auto sendMessage =
+        reinterpret_cast<OHOS::AbilityRuntime::SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
     if (sendMessage == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendMessage");
         return;
@@ -393,7 +397,8 @@ void ConnectServerManager::SetRecordResults(const std::string &jsonArrayStr)
         TAG_LOGE(AAFwkTag::JSRUNTIME, "No connected server");
         return;
     }
-    auto sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
+    auto sendMessage =
+        reinterpret_cast<OHOS::AbilityRuntime::SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
     if (sendMessage == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendMessage");
         return;
