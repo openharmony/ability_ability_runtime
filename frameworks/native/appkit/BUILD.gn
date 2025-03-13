@@ -207,7 +207,7 @@ ohos_shared_library("appkit_native") {
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
-    "resource_management:resmgr",
+    "resource_management:resourceManager_ani",
     "runtime_core:ani",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
