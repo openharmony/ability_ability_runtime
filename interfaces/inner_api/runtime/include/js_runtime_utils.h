@@ -282,6 +282,7 @@ private:
     bool Start(const std::string &name, napi_env env);
     bool StartHighQos(const std::string &name, napi_env env);
     bool StartLowQos(const std::string &name, napi_env env);
+    bool SendNapiEvent(napi_env env, napi_event_priority eventPriority);
 
     napi_deferred deferred_ = nullptr;
     napi_ref callbackRef_ = nullptr;
