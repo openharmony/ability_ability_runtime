@@ -173,7 +173,7 @@ bool AbilityJumpInterceptor::LoadAppLabelInfo(Want &want,
     AppExecFwk::ApplicationInfo callerAppInfo;
     StartAbilityUtils::GetApplicationInfo(controlRule.callerPkg, userId, callerAppInfo);
     AppExecFwk::ApplicationInfo targetAppInfo;
-    StartAbilityUtils::GetApplicationInfo(controlRule.targetPkg, userId, callerAppInfo);
+    StartAbilityUtils::GetApplicationInfo(controlRule.targetPkg, userId, targetAppInfo);
     want.SetParam(JUMP_DIALOG_CALLER_BUNDLE_NAME, controlRule.callerPkg);
     want.SetParam(JUMP_DIALOG_CALLER_MODULE_NAME, callerAppInfo.labelResource.moduleName);
     want.SetParam(JUMP_DIALOG_CALLER_LABEL_ID, static_cast<long long>(callerAppInfo.labelId));
