@@ -219,11 +219,10 @@ HWTEST_F(ConnectServerManagerTest, GetDebuggerPostTaskTest_0100, TestSize.Level1
 {
     TAG_LOGI(AAFwkTag::TEST, "GetDebuggerPostTaskTest_0100 is start");
     auto setStateProfilerStatus = [](bool) {};
-    auto setSwitchStatus = [](bool) {};
     auto createLayoutInfo = [](int32_t) {};
     int32_t instanceId = 1;
     ConnectServerManager &connectServerManager = AbilityRuntime::ConnectServerManager::Get();
-    connectServerManager.SetSwitchCallback(setSwitchStatus, createLayoutInfo, instanceId);
+    connectServerManager.SetSwitchCallback(createLayoutInfo, instanceId);
     connectServerManager.SetProfilerCallBack(setStateProfilerStatus);
     int32_t tid = 1;
     EXPECT_EQ(connectServerManager.GetDebuggerPostTask(tid), nullptr);
