@@ -22,6 +22,7 @@
 
 #include "cj_envsetup.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "hdc_register.h"
 #include "connect_server_manager.h"
 
@@ -68,6 +69,7 @@ std::unique_ptr<CJRuntime> CJRuntime::Create(const Options& options)
 
 void CJRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, "Initialize cangjie runtime and namespace");
     std::string appPath = "";
     for (const auto& kv : appLibPaths) {
         for (const auto& libPath : kv.second) {
@@ -132,6 +134,7 @@ bool CJRuntime::IsCJAbility(const std::string& info)
 
 bool CJRuntime::LoadCJAppLibrary(const AppLibPathVec& appLibPaths)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto cjEnv = OHOS::CJEnv::LoadInstance();
     if (cjEnv == nullptr) {
         TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");
