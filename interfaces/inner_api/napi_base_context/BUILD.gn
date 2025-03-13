@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 config("napi_context_base_public_config") {
   visibility = [ ":*" ]
@@ -19,13 +20,30 @@ config("napi_context_base_public_config") {
 }
 
 ohos_shared_library("napi_base_context") {
-  sources = [ "src/napi_base_context.cpp" ]
+  include_dirs = [
+    "include",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+  ]
+
+  sources = [
+    "src/ani_base_context.cpp",
+    "src/napi_base_context.cpp",
+  ]
 
   configs = []
 
   public_configs = [ ":napi_context_base_public_config" ]
 
-  external_deps = [ "napi:ace_napi" ]
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+  ]
+
+  external_deps = [
+    "napi:ace_napi",
+    "runtime_core:ani",
+  ]
 
   public_external_deps = [
     "form_fwk:form_manager",
