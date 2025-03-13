@@ -51,7 +51,7 @@ public:
      * @param runtime The runtime.
      * @return The StsUIExtension instance.
      */
-    static StsUIExtension* Create(const std::unique_ptr<Runtime>& stsRuntime);
+    static StsUIExtension* Create(const std::unique_ptr<STSRuntime>& stsRuntime);
 
     /**
      * @brief Init the ui extension.
@@ -226,9 +226,7 @@ private:
     std::shared_ptr<int32_t> screenModePtr_;
     sptr<IRemoteObject> token_ = nullptr;
     std::shared_ptr<AbilityHandler> handler_ = nullptr;
-    std::shared_ptr<StsAbilityResultListeners> abilityResultListeners_ = nullptr;
-    ani_ref contentSession_;
-    std::shared_ptr<StsUIExtensionContentSession> stsUiExtContentSession_;
+    std::shared_ptr<AbilityResultListeners> abilityResultListeners_ = nullptr;
 
 #ifdef SUPPORT_GRAPHICS
     class StsUIExtensionAbilityDisplayListener : public OHOS::Rosen::IDisplayInfoChangedListener {

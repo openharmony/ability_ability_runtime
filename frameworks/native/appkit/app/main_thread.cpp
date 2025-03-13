@@ -1737,10 +1737,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
                     auto helper = std::make_shared<DumpRuntimeHelper>(application_);
                     helper->SetAppFreezeFilterCallback();
-                } else if (runtimeItr->GetLanguage() == AbilityRuntime::Runtime::Language::STS) {
-                    if (application_ != nullptr) {
-                        LoadAllStsExtensions();
-                    }
                 }
             }
         }
@@ -2104,37 +2100,6 @@ void MainThread::LoadAllExtensions(NativeEngine &nativeEngine)
             if (app != nullptr) {
                 return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str())
                     .Create(app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0));
-            }
-            TAG_LOGE(AAFwkTag::APPKIT, "failed.");
-            return nullptr;
-        });
-    }
-    application_->SetExtensionTypeMap(extensionTypeMap);
-}
-
-void MainThread::LoadAllStsExtensions()
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPKIT, "LoadAllStsExtensions");
-    auto extensionPlugins = AbilityRuntime::ExtensionPluginInfo::GetInstance().GetExtensionPlugins();
-    if (extensionPlugins.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "no extension type map");
-        return;
-    }
-
-    std::map<int32_t, std::string> extensionTypeMap;
-    for (auto& item : extensionPlugins) {
-        extensionTypeMap.insert(std::pair<int32_t, std::string>(item.extensionType, item.extensionName));
-        AddExtensionBlockItem(item.extensionName, item.extensionType);
-
-        std::string file = item.extensionLibFile;
-        std::weak_ptr<OHOSApplication> wApp = application_;
-        AbilityLoader::GetInstance().RegisterExtension(item.extensionName,
-            [wApp, file]() -> AbilityRuntime::Extension* {
-            auto app = wApp.lock();
-            if (app != nullptr) {
-                return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str())
-                    .Create(app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2));
             }
             TAG_LOGE(AAFwkTag::APPKIT, "failed.");
             return nullptr;
