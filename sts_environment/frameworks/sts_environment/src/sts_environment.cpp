@@ -236,7 +236,7 @@ void STSEnvironment::InitSTSSysNS(const std::string& path)
     dlns_inherit(&ns, &ndk, "allow_all_shared_libs");
 }
 
-bool STSEnvironment::StartRuntime()
+bool STSEnvironment::StartRuntime(napi_env napiEnv)
 {
     TAG_LOGE(AAFwkTag::STSRUNTIME, "StartRuntime call");
     if (isRuntimeStarted_) {
@@ -259,9 +259,11 @@ bool STSEnvironment::StartRuntime()
     TAG_LOGI(AAFwkTag::STSRUNTIME, "bootString %{public}s", bootString.c_str());
     options.push_back(ani_option{bootString.c_str(), nullptr});
 
-    std::string bootStringAsyn = optionPrefix + "--coroutine-enable-features:ani-drain-queue";
-    TAG_LOGI(AAFwkTag::STSRUNTIME, "bootStringAsyn %{public}s", bootStringAsyn.c_str());
-    options.push_back(ani_option{bootStringAsyn.c_str(), nullptr});
+    // std::string bootStringAsyn = optionPrefix + "--coroutine-enable-features:ani-drain-queue";
+    // options.push_back(ani_option{bootStringAsyn.c_str(), nullptr});
+    std::string schedulingExternal = optionPrefix + "--coroutine-enable-external-scheduling=true";
+    ani_option schedulingExternalOption = {schedulingExternal.data(), nullptr};
+    options.push_back(schedulingExternalOption);
 
     std::string forbiddenJIT = optionPrefix + "--compiler-enable-jit=false";
     ani_option forbiddenJITOption = {forbiddenJIT.data(), nullptr};
@@ -276,6 +278,10 @@ bool STSEnvironment::StartRuntime()
     std::string verificationMode = optionPrefix + "--verification-mode=on-the-fly";
     ani_option verificationModeOption = {verificationMode.data(), nullptr};
     options.push_back(verificationModeOption);
+
+    std::string interop = optionPrefix + "interop";
+    ani_option interopOption = {interop.data(), (void*)napiEnv};
+    options.push_back(interopOption);
 
     ani_options optionsPtr = {options.size(), options.data()};
     auto status = lazyApis_.ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.ani_vm);
