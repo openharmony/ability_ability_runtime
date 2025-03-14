@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 
 #include <utility>
+#include "ability_business_error_utils.h"
+#include "ability_manager_errors.h"
 #include "application_context.h"
 #include "context/application_context.h"
 #include "securec.h"
@@ -2214,5 +2216,237 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
 
     // Assert
     EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.number: ConvertToCommonBusinessErrorCode_001
+ * @tc.desc: ConvertToCommonBusinessErrorCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToCommonBusinessErrorCode_001, TestSize.Level0)
+{
+    int32_t abilityManagerError = OHOS::ERR_OK;
+    AbilityRuntime_ErrorCode errCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    abilityManagerError = OHOS::ERR_OK;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
+
+    abilityManagerError = OHOS::AAFwk::CHECK_PERMISSION_FAILED;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED);
+
+    abilityManagerError = OHOS::ERR_PERMISSION_DENIED;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED);
+
+    abilityManagerError = OHOS::AAFwk::RESOLVE_ABILITY_ERR;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY);
+
+    abilityManagerError = OHOS::AAFwk::TARGET_BUNDLE_NOT_EXIST;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY);
+
+    abilityManagerError = OHOS::AAFwk::ERR_NOT_ALLOW_IMPLICIT_START;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY);
+
+    abilityManagerError = OHOS::AAFwk::ERR_WRONG_INTERFACE_CALL;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE);
+
+    abilityManagerError = OHOS::AAFwk::TARGET_ABILITY_NOT_SERVICE;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE);
+
+    abilityManagerError = OHOS::AAFwk::RESOLVE_CALL_ABILITY_TYPE_ERR;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE);
+
+    abilityManagerError = -1;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INTERNAL);
+}
+
+/**
+ * @tc.number: ConvertToCommonBusinessErrorCode_002
+ * @tc.desc: ConvertToCommonBusinessErrorCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToCommonBusinessErrorCode_002, TestSize.Level0)
+{
+    int32_t abilityManagerError = OHOS::ERR_OK;
+    AbilityRuntime_ErrorCode errCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    abilityManagerError = OHOS::AAFwk::ERR_CROWDTEST_EXPIRED;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_CROWDTEST_EXPIRED);
+
+    abilityManagerError = OHOS::ERR_WOULD_BLOCK;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_WUKONG_MODE);
+
+    abilityManagerError = OHOS::AAFwk::ERR_APP_CONTROLLED;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_CONTROLLED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_EDM_APP_CONTROLLED;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_EDM_CONTROLLED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_START_OTHER_APP_FAILED;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_CROSS_APP);
+
+    abilityManagerError = OHOS::AAFwk::NOT_TOP_ABILITY;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY);
+
+    abilityManagerError = OHOS::AAFwk::ERR_START_OPTIONS_CHECK_FAILED;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_VISIBILITY_SETTING_DISABLED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_UPPER_LIMIT;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_APP_INSTANCE_KEY_NOT_SUPPORT;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_NOT_SELF_APPLICATION;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_CROSS_APP);
+
+    abilityManagerError = -1;
+    errCode = ConvertToCommonBusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INTERNAL);
+}
+
+/**
+ * @tc.number: ConvertToAPI18BusinessErrorCode_001
+ * @tc.desc: ConvertToAPI18BusinessErrorCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToAPI18BusinessErrorCode_001, TestSize.Level0)
+{
+    int32_t abilityManagerError = OHOS::ERR_OK;
+    AbilityRuntime_ErrorCode errCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    abilityManagerError = OHOS::ERR_OK;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
+
+    abilityManagerError = OHOS::AAFwk::CHECK_PERMISSION_FAILED;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED);
+
+    abilityManagerError = OHOS::ERR_PERMISSION_DENIED;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_PERMISSION_DENIED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NOT_SUPPORTED);
+
+    abilityManagerError = OHOS::AAFwk::RESOLVE_ABILITY_ERR;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY);
+
+    abilityManagerError = OHOS::AAFwk::TARGET_BUNDLE_NOT_EXIST;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY);
+
+    abilityManagerError = OHOS::AAFwk::ERR_NOT_ALLOW_IMPLICIT_START;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NO_SUCH_ABILITY);
+
+    abilityManagerError = OHOS::AAFwk::ERR_WRONG_INTERFACE_CALL;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE);
+
+    abilityManagerError = OHOS::AAFwk::TARGET_ABILITY_NOT_SERVICE;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE);
+
+    abilityManagerError = OHOS::AAFwk::RESOLVE_CALL_ABILITY_TYPE_ERR;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INCORRECT_ABILITY_TYPE);
+
+    abilityManagerError = OHOS::AAFwk::ERR_CROWDTEST_EXPIRED;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_CROWDTEST_EXPIRED);
+
+    abilityManagerError = OHOS::ERR_WOULD_BLOCK;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_WUKONG_MODE);
+
+    abilityManagerError = -1;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INTERNAL);
+}
+
+/**
+ * @tc.number: ConvertToAPI18BusinessErrorCode_002
+ * @tc.desc: ConvertToAPI18BusinessErrorCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToAPI18BusinessErrorCode_002, TestSize.Level0)
+{
+    int32_t abilityManagerError = OHOS::ERR_OK;
+    AbilityRuntime_ErrorCode errCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    abilityManagerError = OHOS::AAFwk::ERR_APP_CONTROLLED;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_CONTROLLED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_EDM_APP_CONTROLLED;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_EDM_CONTROLLED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_START_OTHER_APP_FAILED;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_CROSS_APP);
+
+    abilityManagerError = OHOS::AAFwk::NOT_TOP_ABILITY;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY);
+
+    abilityManagerError = OHOS::AAFwk::ERR_START_OPTIONS_CHECK_FAILED;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_VISIBILITY_SETTING_DISABLED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_UPPER_LIMIT;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_APP_INSTANCE_KEY_NOT_SUPPORT;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_NOT_SELF_APPLICATION;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_CROSS_APP);
+
+    abilityManagerError = OHOS::AAFwk::ERR_MULTI_APP_NOT_SUPPORTED;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_MULTI_APP_NOT_SUPPORTED);
+
+    abilityManagerError = OHOS::AAFwk::ERR_INVALID_APP_INSTANCE_KEY;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INVALID_APP_INSTANCE_KEY);
+
+    abilityManagerError = OHOS::AAFwk::ERR_MULTI_INSTANCE_NOT_SUPPORTED;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_MULTI_INSTANCE_NOT_SUPPORTED);
+
+    abilityManagerError = -1;
+    errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
+    EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INTERNAL);
 }
 } // namespace OHOS::AbilityRuntime
