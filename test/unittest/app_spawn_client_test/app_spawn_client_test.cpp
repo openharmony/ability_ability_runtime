@@ -965,6 +965,34 @@ HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: DumpJITPermissionListToJson_002
+ * @tc.desc: appspawn client DumpJITPermissionListToJson_002
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_002, TestSize.Level0)
+{
+    std::map<std::string, std::string> jitPermissionsMap;
+    std::string jsonJITPermissions = DumpJITPermissionListToJson(jitPermissionsMap);
+
+    size_t pos = jsonJITPermissions.find("\"ohos.encaps.count\":0");
+    ASSERT_NE(pos, std::string::npos);
+}
+
+/**
+ * @tc.name: DumpJITPermissionListToJson_003
+ * @tc.desc: appspawn client DumpJITPermissionListToJson_003
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_003, TestSize.Level0)
+{
+    std::map<std::string, std::string> jitPermissionsMap = { { "ohos.permission.jit1", "" } };
+    std::string jsonJITPermissions = DumpJITPermissionListToJson(jitPermissionsMap);
+
+    size_t pos = jsonJITPermissions.find("ohos.permission.jit1");
+    ASSERT_NE(pos, std::string::npos);
+}
+
+/**
  * @tc.name: SendAppSpawnUninstallDebugHapMsg_001
  * @tc.desc: SendAppSpawnUninstallDebugHapMsg
  * @tc.type: FUNC
