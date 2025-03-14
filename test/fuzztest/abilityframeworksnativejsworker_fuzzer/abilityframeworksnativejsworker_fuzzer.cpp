@@ -18,6 +18,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "extractor.h"
+#include "file_mapper.h"
 #define private public
 #include "js_worker.h"
 #undef private
@@ -73,13 +75,15 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string jsonStr(data, size);
     uint8_t *buff = nullptr;
     size_t buffSize;
-    helper.GetSafeData(jsonStr, &buff, &buffSize);
+    std::unique_ptr<AbilityBase::FileMapper> fileMapper = std::make_unique<AbilityBase::FileMapper>();
+    void* mapper = static_cast<void*>(fileMapper.get());
+    helper.GetSafeData(jsonStr, &buff, &buffSize, &mapper);
     helper.NormalizedFileName(jsonStr);
     bool useSecureMem = *data % ENABLE;
     bool isRestricted = *data % ENABLE;
     std::vector<uint8_t> content;
-    helper.ReadAmiData(jsonStr, &buff, &buffSize, content, useSecureMem, isRestricted);
-    helper.ReadFilePathData(jsonStr, &buff, &buffSize, content, useSecureMem, isRestricted);
+    helper.ReadAmiData(jsonStr, &buff, &buffSize, content, useSecureMem, isRestricted, &mapper);
+    helper.ReadFilePathData(jsonStr, &buff, &buffSize, content, useSecureMem, isRestricted, &mapper);
     helper.GetAmi(jsonStr, jsonStr);
     AbilityRuntime::GetContainerId();
     bool isDebugApp = *data % ENABLE;

@@ -17,6 +17,8 @@
 #include <cstdarg>
 #include <string>
 
+#include "extractor.h"
+#include "file_mapper.h"
 #include "js_environment_impl.h"
 #define private public
 #define protected public
@@ -88,7 +90,9 @@ HWTEST_F(JsWorkerTest, AssetHelper_0100, TestSize.Level1)
     bool useSecureMem;
     bool isRestricted = false;
     auto func = TestGetGetAssetFunc();
-    func("/data", &buff, &buffSize, content, ami, useSecureMem, isRestricted);
+    std::unique_ptr<AbilityBase::FileMapper> fileMapper = std::make_unique<AbilityBase::FileMapper>();
+    void* mapper = static_cast<void*>(fileMapper.get());
+    func("/data", &buff, &buffSize, content, ami, useSecureMem, &mapper, isRestricted);
     EXPECT_EQ(useSecureMem, false);
 }
 
@@ -114,7 +118,9 @@ HWTEST_F(JsWorkerTest, AssetHelper_0200, TestSize.Level1)
 
     uint8_t *buff = nullptr;
     size_t buffSize;
-    auto ret = helper.GetSafeData("test.txt", &buff, &buffSize);
+    std::unique_ptr<AbilityBase::FileMapper> fileMapper = std::make_unique<AbilityBase::FileMapper>();
+    void* mapper = static_cast<void*>(fileMapper.get());
+    auto ret = helper.GetSafeData("test.txt", &buff, &buffSize, &mapper);
     EXPECT_EQ(ret, false);
 }
 } // namespace AbilityRuntime

@@ -26,6 +26,7 @@ namespace AbilityRuntime {
 void StartDebuggerInWorkerModule(bool isDebugApp, bool isNativeStart);
 void InitWorkerFunc(NativeEngine* nativeEngine);
 void OffWorkerFunc(NativeEngine* nativeEngine);
+void ReleaseWorkerSafeMemFunc(void* mapper);
 int32_t GetContainerId();
 void UpdateContainerScope(int32_t id);
 void RestoreContainerScope(int32_t id);
@@ -44,20 +45,20 @@ public:
     virtual ~AssetHelper();
 
     void operator()(const std::string& uri, uint8_t** buff, size_t* buffSize, std::vector<uint8_t>& content,
-        std::string& ami, bool& useSecureMem, bool isRestricted = false);
+        std::string& ami, bool& useSecureMem, void** mapper, bool isRestricted = false);
 
 private:
     std::string NormalizedFileName(const std::string& fileName) const;
 
     bool ReadAmiData(const std::string& ami, uint8_t** buff, size_t* buffSize, std::vector<uint8_t>& content,
-        bool& useSecureMem, bool isRestricted);
+        bool& useSecureMem, bool isRestricted, void** mapper);
 
     bool ReadFilePathData(const std::string& filePath, uint8_t** buff, size_t* buffSize, std::vector<uint8_t>& content,
-        bool& useSecureMem, bool isRestricted);
+        bool& useSecureMem, bool isRestricted, void** mapper);
 
     void GetAmi(std::string& ami, const std::string& filePath);
 
-    bool GetSafeData(const std::string& ami, uint8_t** buff, size_t* buffSize);
+    bool GetSafeData(const std::string& ami, uint8_t** buff, size_t* buffSize, void** mapper);
     
     bool GetIsStageModel();
 
