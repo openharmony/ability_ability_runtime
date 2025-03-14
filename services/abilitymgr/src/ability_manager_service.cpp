@@ -2048,7 +2048,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         abilityRequest.userId = oriValidUserId;
         abilityRequest.want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
         abilityRequest.processOptions = startOptions.processOptions;
-        if (IPCSkeleton::GetCallingTokenID() == abilityRequest.appInfo.accessTokenId) {
+        if (IPCSkeleton::GetCallingTokenID() == abilityRequest.appInfo.accessTokenId ||
+            AbilityPermissionUtil::GetInstance().IsStartSelfUIAbility()) {
             abilityRequest.startWindowOption = startOptions.startWindowOption;
         }
         abilityRequest.supportWindowModes = startOptions.supportWindowModes_;
