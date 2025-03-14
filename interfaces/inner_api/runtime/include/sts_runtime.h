@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "runtime.h"
+#include "js_runtime.h"
 #include "sts_envsetup.h"
 #include "ani.h"
 
@@ -48,7 +49,7 @@ struct STSNativeReference
 
 class STSRuntime : public Runtime {
 public:
-    static std::unique_ptr<STSRuntime> Create(const Options& options);
+    static std::unique_ptr<STSRuntime> Create(const Options& options, Runtime* jsRuntime);
     static void SetAppLibPath(const AppLibPathMap& appLibPaths);
     ~STSRuntime() override;
     Language GetLanguage() const override
@@ -129,6 +130,9 @@ private:
     static AppLibPathVec appLibPaths_;
     std::string moduleName_;
     std::unordered_map<std::string, STSNativeReference*> modules_;
+
+public:
+    static AbilityRuntime::JsRuntime* jsRuntime_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
