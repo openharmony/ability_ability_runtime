@@ -278,6 +278,7 @@ constexpr int32_t BLUETOOTH_GROUPID = 1002;
 constexpr int32_t NETSYS_SOCKET_GROUPID = 1097;
 #endif
 
+constexpr int32_t SHADER_CACHE_GROUPID = 3099;
 constexpr int32_t DEFAULT_INVAL_VALUE = -1;
 constexpr int32_t NO_ABILITY_RECORD_ID = -1;
 constexpr int32_t EXIT_REASON_UNKNOWN = 0;
@@ -3925,7 +3926,6 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
         }
         return AAFwk::ERR_CREATE_START_MSG_FAILED;
     };
-
     SetProcessJITState(appRecord);
     PerfProfile::GetInstance().SetAppForkStartTime(GetTickCount());
     pid_t pid = 0;
@@ -3940,6 +3940,7 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
         errCode = remoteClientManager_->GetCJSpawnClient()->StartProcess(startMsg, pid);
     } else {
         SendCreateAtomicServiceProcessEvent(appRecord, bundleType, moduleName, abilityName);
+        startMsg.gids.push_back(SHADER_CACHE_GROUPID);
         errCode = remoteClientManager_->GetSpawnClient()->StartProcess(startMsg, pid);
     }
     if (FAILED(errCode)) {
@@ -5967,6 +5968,9 @@ void AppMgrServiceInner::SetRenderStartMsg(AppSpawnStartMsg &startMsg, std::shar
     if (isGPU) {
         startMsg.procName += GPU_PROCESS_NAME;
         startMsg.processType = GPU_PROCESS_TYPE;
+        if (std::find(startMsg.gids.begin(), startMsg.gids.end(), SHADER_CACHE_GROUPID) == startMsg.gids.end()) {
+            startMsg.gids.push_back(SHADER_CACHE_GROUPID);
+        }
     } else {
         startMsg.procName += RENDER_PROCESS_NAME;
         startMsg.processType = RENDER_PROCESS_TYPE;
