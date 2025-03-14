@@ -43,6 +43,7 @@
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "js_runtime.h"
 #include "module_checker_delegate.h"
 #include "ohos_sts_environment_impl.h"
 #include "parameters.h"
@@ -199,9 +200,11 @@ private:
 } // namespace
 
 AppLibPathVec STSRuntime::appLibPaths_;
+AbilityRuntime::JsRuntime* STSRuntime::jsRuntime_ = nullptr;
 
-std::unique_ptr<STSRuntime> STSRuntime::Create(const Options& options)
+std::unique_ptr<STSRuntime> STSRuntime::Create(const Options& options, Runtime* jsRuntime)
 {
+    STSRuntime::jsRuntime_ = static_cast<AbilityRuntime::JsRuntime*>(jsRuntime);
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
     std::unique_ptr<STSRuntime> instance;
     // JsRuntimeLite::InitJsRuntimeLite(options);
@@ -494,7 +497,7 @@ bool STSRuntime::CreateStsEnv(const Options& options)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
     stsEnv_ = std::make_shared<StsEnv::STSEnvironment>(std::make_unique<OHOSStsEnvironmentImpl>(options.eventRunner));
-    if (stsEnv_ == nullptr || !stsEnv_->StartRuntime()) {
+    if (stsEnv_ == nullptr || !stsEnv_->StartRuntime(STSRuntime::jsRuntime_->GetNapiEnv())) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Init StsEnv failed");
         return false;
     }
