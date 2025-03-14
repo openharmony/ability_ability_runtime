@@ -3615,7 +3615,7 @@ void MainThread::AddRuntimeLang(ApplicationInfo& appInfo, AbilityRuntime::Runtim
     if (appInfo.applicationCodeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
         options.langs.emplace(AbilityRuntime::Runtime::Language::STS, true);
     } else if (appInfo.applicationCodeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID) {
-        options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true);
+        //options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true);
         options.langs.emplace(AbilityRuntime::Runtime::Language::STS, true);
     } else {
         options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true);
