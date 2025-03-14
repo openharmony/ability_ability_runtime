@@ -37,42 +37,21 @@ int32_t StartSpecifiedAbilityResponseStub::HandleOnAcceptWantResponse(MessagePar
 
 int32_t StartSpecifiedAbilityResponseStub::HandleOnTimeoutResponse(MessageParcel &data, MessageParcel &reply)
 {
-    AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-
-    OnTimeoutResponse(*want, data.ReadInt32());
-    delete want;
+    OnTimeoutResponse(data.ReadInt32());
     return NO_ERROR;
 }
 
 int32_t StartSpecifiedAbilityResponseStub::HandleOnNewProcessRequestResponse(MessageParcel &data, MessageParcel &reply)
 {
-    AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-
     auto flag = Str16ToStr8(data.ReadString16());
-    OnNewProcessRequestResponse(*want, flag, data.ReadInt32());
-    delete want;
+    OnNewProcessRequestResponse(flag, data.ReadInt32());
     return NO_ERROR;
 }
 
 int32_t StartSpecifiedAbilityResponseStub::HandleOnNewProcessRequestTimeoutResponse(MessageParcel &data,
     MessageParcel &reply)
 {
-    AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-
-    OnNewProcessRequestTimeoutResponse(*want, data.ReadInt32());
-    delete want;
+    OnNewProcessRequestTimeoutResponse(data.ReadInt32());
     return NO_ERROR;
 }
 

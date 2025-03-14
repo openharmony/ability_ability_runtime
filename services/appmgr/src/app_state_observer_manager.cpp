@@ -1026,6 +1026,7 @@ void AppStateObserverManager::RemoveObserverDeathRecipient(const sptr<IRemoteBro
 void AppStateObserverManager::AddObserverCount(int32_t uid)
 {
     std::lock_guard lock(observerCountMapMutex_);
+    observerAmount_++;
     auto it = observerCountMap_.find(uid);
     if (it == observerCountMap_.end()) {
         observerCountMap_.emplace(uid, 1);
@@ -1034,7 +1035,6 @@ void AppStateObserverManager::AddObserverCount(int32_t uid)
         if (it->second > OBSERVER_UID_COUNT_LOG) {
             TAG_LOGW(AAFwkTag::APPMGR, "too many observer uid: %{public}d, count: %{public}d", uid, it->second);
         }
-        observerAmount_++;
         if (observerAmount_ % OBSERVER_AMOUNT_COUNT_LOG == 0) {
             for (const auto &[uid, count] : observerCountMap_) {
                 TAG_LOGW(AAFwkTag::APPMGR, "observer overview uid: %{public}d, count: %{public}d", uid, count);

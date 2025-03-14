@@ -208,29 +208,28 @@ public:
      * @param abilityRequest the flag of the ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId = 0);
+    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId);
 
     /**
      * OnStartSpecifiedProcessResponse.
      *
-     * @param want the want of the ability to start.
-     * @param abilityRequest target ability request.
+     * @param requestId target ability requestId.
      */
-    void OnStartSpecifiedProcessResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId = 0);
+    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId);
 
     /**
      * OnStartSpecifiedAbilityTimeoutResponse.
      *
-     * @param want the want of the ability to start.
+     * @param requestId the requestId of the ability to start.
      */
-    void OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want, int32_t requestId = 0);
+    void OnStartSpecifiedAbilityTimeoutResponse(int32_t requestId);
 
     /**
      * OnStartSpecifiedProcessTimeoutResponse.
      *
-     * @param want the want of the ability to start.
+     * @param requestId the requestId of the ability to start.
      */
-    void OnStartSpecifiedProcessTimeoutResponse(const AAFwk::Want &want, int32_t requestId = 0);
+    void OnStartSpecifiedProcessTimeoutResponse(int32_t requestId);
 
     /**
      * OnStartSpecifiedFailed.

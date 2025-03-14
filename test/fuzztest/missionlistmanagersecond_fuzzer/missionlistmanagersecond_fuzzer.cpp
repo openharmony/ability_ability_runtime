@@ -154,7 +154,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::shared_ptr<CallRecord> callRecord;
     missionListManager->OnCallConnectDied(callRecord);
     missionListManager->OnAcceptWantResponse(*want, stringParam);
-    missionListManager->OnStartSpecifiedAbilityTimeoutResponse(*want);
+    missionListManager->OnStartSpecifiedAbilityTimeoutResponse();
     missionListManager->GetMissionBySpecifiedFlag(*want, stringParam);
     missionListManager->IsReachToLimitLocked();
     sptr<ISnapshotHandler> snapshotHandler;
