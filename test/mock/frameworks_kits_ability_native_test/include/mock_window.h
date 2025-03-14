@@ -160,7 +160,7 @@ public:
     virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) {return "";}
     virtual Ace::UIContent* GetUIContent() const {return nullptr;}
     virtual void OnNewWant(const AAFwk::Want& want) {}
-    virtual void SetRequestedOrientation(Orientation) {}
+    virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) {}
     virtual Orientation GetRequestedOrientation() {return Orientation::BEGIN;}
     virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) {}
     virtual uint32_t GetRequestModeSupportInfo() const {return 0;}
