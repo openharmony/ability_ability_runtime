@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-declare namespace AbilityConstant  {
+namespace AbilityConstant {
   export interface LaunchParam {
     launchReason: LaunchReason;
     launchReasonMessage?: string;
