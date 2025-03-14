@@ -691,6 +691,81 @@ int32_t UIAbility::OnShare(AAFwk::WantParams &wantParams)
     return ERR_OK;
 }
 
+void UIAbility::BindHybridContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (application == nullptr || record == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application or record");
+        return;
+    }
+    auto appInfo = application->GetApplicationInfo();
+    if (appInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null appInfo");
+        return;
+    }
+    if (appInfo->codeLanguage != AppExecFwk::Constants::CODE_LANGUAGE_HYBRID) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "not hybrid app, no need to create hybrid context");
+        return;
+    }
+
+    auto abilityInfo = record->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo");
+        return;
+    }
+    if (abilityInfo->codeLanguage == APPLICAITON_CODE_LANGUAGE_ARKTS_1_0) {
+        BindStsContext(application, record);
+    } else if (abilityInfo->codeLanguage == APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+        BindJsContext(application, record);
+    } else {
+        TAG_LOGE(AAFwkTag::UIABILITY, "unknown codeLanguage");
+    }
+}
+
+void UIAbility::BindStsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (abilityContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
+        return;
+    }
+    auto& bindingObject = abilityContext_->GetBindingObject();
+    if (bindingObject == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObject");
+        return;
+    }
+
+    auto* ptr = bindingObject->Get<ani_ref>();
+    if (ptr != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "sts context already binded");
+        return;
+    }
+    StsUIAbility::CreateAndBindContext(
+        application, record, abilityContext_, application->GetSpecifiedRuntime(CODE_LANGUAGE_ARKTS_1_2));
+}
+
+void UIAbility::BindJsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (abilityContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
+        return;
+    }
+    auto& bindingObject = abilityContext_->GetBindingObject();
+    if (bindingObject == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObject");
+        return;
+    }
+
+    auto* ptr = bindingObject->Get<NativeReference>();
+    if (ptr != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "sts context already binded");
+        return;
+    }
+    JsUIAbility::CreateAndBindContext(
+        application, record, abilityContext_, application->GetSpecifiedRuntime(CODE_LANGUAGE_ARKTS_1_1));
+}
+
 bool UIAbility::CheckIsSilentForeground() const
 {
     return isSilentForeground_;
