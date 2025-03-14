@@ -33,6 +33,7 @@
 #include "want_params_wrapper.h"
 #include "sts_data_struct_converter.h"
 #include "sts_ui_extension_context.h"
+#include "sts_ui_extension_content_session.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -40,9 +41,9 @@ using namespace OHOS::AppExecFwk;
 
 static constexpr char UIEXTENSION_CLASS_NAME[] = "L@ohos/app/ability/UIExtensionAbility/UIExtensionAbility;";
 
-StsUIExtension* StsUIExtension::Create(const std::unique_ptr<Runtime>& runtime)
+StsUIExtension* StsUIExtension::Create(const std::unique_ptr<STSRuntime>& stsRuntime)
 {
-    return new (std::nothrow) StsUIExtension(static_cast<STSRuntime&>(*runtime));
+    return new (std::nothrow) StsUIExtension(*stsRuntime);
 }
 
 StsUIExtension::StsUIExtension(STSRuntime &stsRuntime) : stsRuntime_(stsRuntime)
@@ -95,14 +96,7 @@ void StsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
 
     auto env = stsRuntime_.GetAniEnv();
 
-    stsObj_ = stsRuntime_.LoadModule(
-        moduleName, srcPath, abilityInfo_->hapPath, abilityInfo_->compileMode == AppExecFwk::CompileMode::ES_MODULE,
-        false, abilityInfo_->srcEntrance);
-
-    if (stsObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get stsObj_");
-        return;
-    }
+    stsObj_ = LoadModule(env);
 
     BindContext(env, record->GetWant());
 
@@ -178,43 +172,43 @@ void StsUIExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want)
 
     ani_object contextObj = CreateSTSContext(env, context, screenMode);
 
-    // ani_class cls = nullptr;
-    // ani_status status = ANI_OK;
-    // if ((status = env->FindClass(UIEXTENSION_CLASS_NAME, &cls)) != ANI_OK) {
-    //     TAG_LOGE(AAFwkTag::UI_EXT, "zg status : %{public}d", status);
-    //     return;
-    // }
+    ani_class cls = nullptr;
+    ani_status status = ANI_OK;
+    if ((status = env->FindClass(UIEXTENSION_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "zg status : %{public}d", status);
+        return;
+    }
 
-    // ani_method method = nullptr;
-    // status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
-    // if (status != ANI_OK) {
-    //     TAG_LOGI(AAFwkTag::UI_EXT, "zg call Class_FindMethod ctor failed");
-    //     return;
-    // }
+    ani_method method = nullptr;
+    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    if (status != ANI_OK) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "zg call Class_FindMethod ctor failed");
+        return;
+    }
 
-    // ani_object object = nullptr;
-    // status = env->Object_New(cls, method, &object);
-    // if (status != ANI_OK) {
-    //     TAG_LOGI(AAFwkTag::UI_EXT, "zg call Object_New obj failed");
-    //     return;
-    // }
+    ani_object object = nullptr;
+    status = env->Object_New(cls, method, &object);
+    if (status != ANI_OK) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "zg call Object_New obj failed");
+        return;
+    }
 
     //bind uiExtenstionContext
     ani_field contextField;
-    auto status = env->Class_FindField(stsObj_->aniCls, "context", &contextField);
+    status = env->Class_FindField(cls, "uiExtenstionContext", &contextField);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "zg Class_GetField context failed");
+        TAG_LOGI(AAFwkTag::UI_EXT, "zg Class_GetField context failed");
         ResetEnv(env);
         return;
     }
 
-    ani_ref contextRef = nullptr;
-    if (env->GlobalReference_Create(contextObj, &contextRef) != ANI_OK) {
+    ani_ref contextObjRef = nullptr;
+    if (env->GlobalReference_Create(contextObj, &contextObjRef) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "GlobalReference_Create stageCtxObj failed");
         return;
     }
 
-    if (env->Object_SetField_Ref(stsObj_->aniObj, contextField, contextRef) != ANI_OK) {
+    if (env->Object_SetField_Ref(object, contextField, contextObjRef) != ANI_OK) {
         TAG_LOGI(AAFwkTag::UI_EXT, "zg Object_SetField_Ref stageCtxObj failed");
         ResetEnv(env);
     }
@@ -645,19 +639,13 @@ bool StsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAF
             TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
         }
         //TODO create UIExtensionContentSession
-        std::weak_ptr<Context> wkctx = context;
-        stsUiExtContentSession_ = std::make_shared<StsUIExtensionContentSession>(sessionInfo, uiWindow,
-            wkctx, abilityResultListeners_);
         ani_object sessonObj = StsUIExtensionContentSession::CreateStsUIExtensionContentSession(env,
-            sessionInfo, uiWindow, context, abilityResultListeners_, stsUiExtContentSession_);
+            sessionInfo, uiWindow, context, abilityResultListeners_);
         // napi_value nativeContentSession = JsUIExtensionContentSession::CreateJsUIExtensionContentSession(
         //     env, sessionInfo, uiWindow, context, abilityResultListeners_);
         // napi_ref ref = nullptr;
         // napi_create_reference(env, nativeContentSession, 1, &ref);
         // contentSessions_.emplace(compId, std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref)));
-        if ((status = env->GlobalReference_Create(sessonObj, &contentSession_)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
-        }
         int32_t screenMode = want.GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
         if (screenMode == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
             screenMode_ = AAFwk::EMBEDDED_FULL_SCREEN_MODE;
@@ -669,7 +657,7 @@ bool StsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAF
             //napi_value argv[] = {jsAppWindowStage->GetNapiValue()};
             //CallObjectMethod("onWindowStageCreate", argv, ARGC_ONE);
         } else {
-            CallObjectMethod(false, "onSessionCreate", nullptr, wantObj, sessonObj);
+            CallObjectMethod(true, "onSessionCreate", nullptr, sessonObj);
         }
         uiWindowMap_[compId] = uiWindow;
 #ifdef SUPPORT_GRAPHICS
@@ -785,25 +773,19 @@ void StsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
         return;
     }
     //TODO need to write sts contentSessions_
-    // if (contentSessions_.find(componentId) != contentSessions_.end() && contentSessions_[componentId] != nullptr) {
-    //     //HandleScope handleScope(jsRuntime_);
-    //     if (screenMode_ == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
-    //         screenMode_ = AAFwk::IDLE_SCREEN_MODE;
-    //         //CallObjectMethod("onWindowStageDestroy");
-    //     } else {
-    //         //TODO create UIEXtensionSessioni obj
-    //         auto uiWindow = uiWindowMap_[componentId];
-    //         auto env = stsRuntime_.GetAniEnv();
-    //         ani_object sessionObj = StsUIExtensionContentSession::CreateStsUIExtensionContentSession(env,
-    //             sessionInfo, uiWindow, GetContext(), abilityResultListeners_);
-    //         CallObjectMethod(false, "onSessionDestroy", nullptr, sessionObj);
-    //     }
-    // }
-    ani_object contenSessionObj = static_cast<ani_object>(contentSession_);
-    if (contenSessionObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "contenSessionObj null ptr");
-    } else {
-        CallObjectMethod(false, "onSessionDestroy", nullptr, contenSessionObj);
+    if (contentSessions_.find(componentId) != contentSessions_.end() && contentSessions_[componentId] != nullptr) {
+        //HandleScope handleScope(jsRuntime_);
+        if (screenMode_ == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
+            screenMode_ = AAFwk::IDLE_SCREEN_MODE;
+            //CallObjectMethod("onWindowStageDestroy");
+        } else {
+            //TODO create UIEXtensionSessioni obj
+            auto uiWindow = uiWindowMap_[componentId];
+            auto env = stsRuntime_.GetAniEnv();
+            ani_object sessionObj = StsUIExtensionContentSession::CreateStsUIExtensionContentSession(env,
+                sessionInfo, uiWindow, GetContext(), abilityResultListeners_);;
+            CallObjectMethod(false, "onSessionDestroy", nullptr, sessionObj);
+        }
     }
     TAG_LOGI(AAFwkTag::UI_EXT, "Befor window destory, UIExtcomponent id: %{public}" PRId64,
         sessionInfo->uiExtensionComponentId);
@@ -834,16 +816,33 @@ ani_ref StsUIExtension::CallObjectMethod(bool withResult, const char *name, cons
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
     TAG_LOGI(AAFwkTag::UI_EXT, "zg CallObjectMethod call sts, name: %{public}s", name);
-    if (stsObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "zg stsObj_ nullptr");
+
+    auto env = stsRuntime_.GetAniEnv();
+    ani_status status = ANI_OK;
+
+    ResetEnv(env);
+    ani_class cls = nullptr;
+    if ((status = env->FindClass(UIEXTENSION_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "zg status : %{public}d", status);
         return nullptr;
     }
 
-    auto env = stsRuntime_.GetAniEnv();
-    ResetEnv(env);
-    ani_status status = ANI_OK;
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(stsObj_->aniCls, name, signature, &method)) != ANI_OK) {
+    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    if (status != ANI_OK) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "zg call Class_FindMethod ctor failed");
+        return nullptr;
+    }
+
+    ani_object obj = nullptr;
+    status = env->Object_New(cls, method, &obj);
+    if (status != ANI_OK) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "zg call Object_New obj failed");
+        return nullptr;
+    }
+
+    method = nullptr;
+    if ((status = env->Class_FindMethod(cls, name, signature, &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "zg Class_FindMethod status : %{public}d", status);
         return nullptr;
     }
@@ -852,7 +851,7 @@ ani_ref StsUIExtension::CallObjectMethod(bool withResult, const char *name, cons
         ani_ref res = nullptr;
         va_list args;
         va_start(args, signature);
-        if ((status = env->Object_CallMethod_Ref_V(stsObj_->aniObj, method, &res, args)) != ANI_OK) {
+        if ((status = env->Object_CallMethod_Ref_V(obj, method, &res, args)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UI_EXT, "zg Object_CallMethod_Ref_V status : %{public}d", status);
         }
         va_end(args);
@@ -860,7 +859,7 @@ ani_ref StsUIExtension::CallObjectMethod(bool withResult, const char *name, cons
     }
     va_list args;
     va_start(args, signature);
-    if ((status = env->Object_CallMethod_Void_V(stsObj_->aniObj, method, args)) != ANI_OK) {
+    if ((status = env->Object_CallMethod_Void_V(obj, method, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "zg Object_CallMethod_Void_V status : %{public}d", status);
     }
     va_end(args);
@@ -1045,10 +1044,49 @@ void StsUIExtension::Test(STSRuntime& stsRuntime)
 
     TAG_LOGI(AAFwkTag::UI_EXT, "zg StsUIExtension ondestory finished ");
 }
-
 #endif
 
 } // AbilityRuntime
 } // OHOS
 
+
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    std::cerr << "ANI_Constructor call" <<std::endl;
+    ani_env *env;
+    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
+        return ANI_ERROR;
+    }
+    static const char *className = "LUIExtensionContentSession/UIExtensionContentSession;";
+    ani_class cls;
+    ani_status status = env->FindClass(className, &cls);
+    if (ANI_OK != status) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "FindClass is fail %{public}d", status);
+        return ANI_ERROR;
+    }
+
+    std::array methods = {
+        ani_native_function {"terminateSelfSync", ":V", reinterpret_cast<void *>(NativeTerminateSelf)},
+        ani_native_function {"sendData", nullptr, reinterpret_cast<void *>(NativeSendData)},
+        ani_native_function {"loadContent", nullptr, reinterpret_cast<void *>(NativeLoadContent)},
+        ani_native_function {"setWindowBackgroundColor", nullptr,
+            reinterpret_cast<void *>(NativeSetWindowBackgroundColor)},
+        ani_native_function {"getUIExtensionHostWindowProxy", nullptr,
+            reinterpret_cast<void *>(NativeGetUIExtensionHostWindowProxy)},
+        ani_native_function {"setReceiveDataCallback", nullptr, reinterpret_cast<void *>(NativeSetReceiveDataCallback)}
+    };
+
+    status = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    if (ANI_OK != status) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Class_BindNativeMethods is fail %{public}d", status);
+        return ANI_ERROR;
+    };
+
+    auto context = std::make_shared<OHOS::AbilityRuntime::UIExtensionContext>();
+    (void)CreateStsUiExtensionContext(env, context);
+
+    *result = ANI_VERSION_1;
+    return ANI_OK;
+}
 

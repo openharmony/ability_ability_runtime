@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export default namespace AbilityConstant {
+export namespace AbilityConstant {
   export class LaunchParam {
     launchReason: LaunchReason;
     launchReasonMessage?: string;
