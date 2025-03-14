@@ -77,7 +77,7 @@ typedef enum {
 /**
  * @brief Start visibility.
  *
- * @since 16
+ * @since 17
  */
 typedef enum {
     /**
@@ -93,7 +93,7 @@ typedef enum {
 /**
 * @brief Window mode.
 *
-* @since 16
+* @since 17
 */
 typedef enum {
     /**
@@ -109,7 +109,7 @@ typedef enum {
 /**
 * Support window mode
 *
-* @since 16
+* @since 17
 */
 typedef enum {
     /**
