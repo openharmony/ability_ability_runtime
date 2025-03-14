@@ -236,9 +236,9 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetCloudFileDir(
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_INTERNAL} if internal error occurs.
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_NOT_TOP_ABILITY} if the caller is not top ability.
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_UPPER_LIMIT_REACHED}
- *          if the number of app instances reached the limit (since 16).
+ *          if the number of app instances reached the limit (since 17).
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED}
- *          if the APP_INSTANCE_KEY cannot be specified (since 16).
+ *          if the APP_INSTANCE_KEY cannot be specified (since 17).
  * For details, see {@link AbilityRuntime_ErrorCode}.
  * @since 15
  */
@@ -274,7 +274,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbility(AbilityBase_Want *
  * Returns {@link ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED}
  *          if the APP_INSTANCE_KEY cannot be specified.
  * For details, see {@link AbilityRuntime_ErrorCode}.
- * @since 16
+ * @since 17
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(AbilityBase_Want *want,
     AbilityRuntime_StartOptions *options);
