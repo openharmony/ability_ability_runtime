@@ -170,6 +170,11 @@ public:
      */
     int32_t OnShare(WantParams &wantParams) override;
 
+    static void CreateAndBindContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+        const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
+        const std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext,
+        const std::unique_ptr<Runtime>& runtime);
+
 #ifdef SUPPORT_SCREEN
 public:
     /**
