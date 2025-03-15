@@ -3634,6 +3634,10 @@ void MissionListManager::NotifyStartSpecifiedAbility(AbilityRequest &abilityRequ
         int32_t type = static_cast<int32_t>(abilityRequest.abilityInfo.type);
         newWant.SetParam("abilityType", type);
         sptr<Want> extraParam = new (std::nothrow) Want();
+        if (extraParam == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null extraParam");
+            return;
+        }
         abilityInfoCallback->NotifyStartSpecifiedAbility(abilityRequest.callerToken, newWant,
             abilityRequest.requestCode, extraParam);
         int32_t procCode = extraParam->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
