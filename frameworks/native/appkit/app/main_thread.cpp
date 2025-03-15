@@ -1746,7 +1746,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
-        if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo)) {
+        if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo, appInfo.applicationCodeLanguage)) {
             TAG_LOGE(AAFwkTag::APPKIT, "Failed to prepare ability delegator");
             return;
         }
@@ -2109,7 +2109,7 @@ void MainThread::LoadAllExtensions(NativeEngine &nativeEngine)
 }
 
 bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
-    const AppExecFwk::HapModuleInfo &entryHapModuleInfo)
+    const AppExecFwk::HapModuleInfo &entryHapModuleInfo, const std::string &applicationCodeLanguage)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "enter, isStageBased = %{public}d", isStageBased);
     if (!record) {
@@ -2119,13 +2119,23 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
     auto args = std::make_shared<AbilityDelegatorArgs>(record->want);
     if (isStageBased) { // Stage model
         TAG_LOGD(AAFwkTag::APPKIT, "Stage model");
-        auto& runtimes = application_->GetRuntime();
-        for (const auto& runtime : runtimes) {
-            TAG_LOGI(AAFwkTag::DELEGATOR, "create testrunner");
+        if (applicationCodeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0) {
+            TAG_LOGI(AAFwkTag::DELEGATOR, "create 1.0 testrunner");
+            auto& runtime = application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0);
             auto testRunner = TestRunner::Create(runtime, args, false);
             auto delegator = std::make_shared<AbilityDelegator>(
                 application_->GetAppContext(), std::move(testRunner), record->observer);
-            AbilityDelegatorRegistry::RegisterInstance(delegator, args, runtime->GetLanguage());
+            AbilityDelegatorRegistry::RegisterInstance(delegator, args, AbilityRuntime::Runtime::Language::JS);
+            delegator->Prepare();
+        }
+
+        if (applicationCodeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+            TAG_LOGI(AAFwkTag::DELEGATOR, "create 1.2 testrunner");
+            auto& runtime = application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
+            auto testRunner = TestRunner::Create(runtime, args, false);
+            auto delegator = std::make_shared<AbilityDelegator>(
+                application_->GetAppContext(), std::move(testRunner), record->observer);
+            AbilityDelegatorRegistry::RegisterInstance(delegator, args, AbilityRuntime::Runtime::Language::STS);
             delegator->Prepare();
         }
     } else { // FA model
