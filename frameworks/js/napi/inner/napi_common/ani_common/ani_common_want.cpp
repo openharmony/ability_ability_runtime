@@ -94,7 +94,15 @@ bool UnwrapWantParams(ani_env* env, ani_object wantObject, AAFwk::WantParams& wa
         TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
         return false;
     }
-    nlohmann::json wantParamsJson = nlohmann::json::parse(wantParamsString);
+    if (wantParamsString.empty()) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "wantParamsString empty");
+        return false;
+    }
+    nlohmann::json wantParamsJson = nlohmann::json::parse(wantParamsString, nullptr, false);
+    if (wantParamsJson.is_discarded()) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Failed to parse json string");
+        return false;
+    }
     from_json(wantParamsJson, wantParams);
     TAG_LOGD(AAFwkTag::JSNAPI, "UnwrapWantParams done");
     return true;
