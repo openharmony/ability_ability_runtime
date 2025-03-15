@@ -199,11 +199,19 @@ export default class Want {
   readonly fds?: Record<string, int>;
 
   public getParametersString(): String {
-    let res = RecordSerializeTool.stringify(this.parameters as Object as Record<string, NullishType>);
-    return res;
+    try {
+      return RecordSerializeTool.stringify(this.parameters as Object as Record<string, NullishType>);
+    } catch (err) {
+      console.log('err: ' + err.toString());
+      return '';
+    }
   }
 
   public setParametersString(parametersString: String): void {
-    this.parameters = RecordSerializeTool.parse(parametersString) as Object as Record<string, Object>;
+    try {
+      this.parameters = RecordSerializeTool.parse(parametersString) as Object as Record<string, Object>;
+    } catch (err) {
+      console.log('err: ' + err.toString());
+    }
   }
 }
