@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "app_utils.h"
+#include <unordered_set>
 #include "json_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "nlohmann/json.hpp"
@@ -492,6 +493,14 @@ bool AppUtils::IsPrepareTerminateEnabled()
         return true;
     }
     return false;
+}
+
+bool AppUtils::IsSystemReasonMessage(const std::string &reasonMessage)
+{
+    const std::unordered_set<std::string> systemReasonMessagesSet = {
+        "ReasonMessage_SystemShare",
+    };
+    return systemReasonMessagesSet.find(reasonMessage) != systemReasonMessagesSet.end();
 }
 }  // namespace AAFwk
 }  // namespace OHOS
