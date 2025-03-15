@@ -121,7 +121,7 @@ HWTEST_F(SpecifiedAbilityServiceTest, OnAcceptWantResponse_001, TestSize.Level1)
     } else {
         abilityMgrServ_->subManagersHelper_->InitSubManagers(11, true);
     }
-    abilityMgrServ_->OnAcceptWantResponse(want, "flag");
+    abilityMgrServ_->OnAcceptWantResponse(want, "flag", 0);
 
     EXPECT_EQ(false, abilityRecord->IsNewWant());
 }

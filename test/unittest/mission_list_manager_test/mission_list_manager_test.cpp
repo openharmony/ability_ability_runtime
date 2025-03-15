@@ -6459,7 +6459,7 @@ HWTEST_F(MissionListManagerTest, OnStartSpecifiedAbilityTimeoutResponse_001, Tes
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     EXPECT_NE(missionListManager, nullptr);
     Want want;
-    missionListManager->OnStartSpecifiedAbilityTimeoutResponse(want);
+    missionListManager->OnStartSpecifiedAbilityTimeoutResponse();
 }
 
 /*
@@ -6475,10 +6475,9 @@ HWTEST_F(MissionListManagerTest, OnStartSpecifiedAbilityTimeoutResponse_002, Tes
     constexpr int32_t userId = 3;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     EXPECT_NE(missionListManager, nullptr);
-    Want want;
     AbilityRequest abilityRequest;
     missionListManager->waitingAbilityQueue_.push(abilityRequest);
-    missionListManager->OnStartSpecifiedAbilityTimeoutResponse(want);
+    missionListManager->OnStartSpecifiedAbilityTimeoutResponse();
 }
 
 /*
@@ -6494,15 +6493,14 @@ HWTEST_F(MissionListManagerTest, OnStartSpecifiedAbilityTimeoutResponse_003, Tes
     constexpr int32_t userId = 3;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     EXPECT_NE(missionListManager, nullptr);
-    Want want;
     AbilityRequest abilityRequest1;
     AbilityRequest abilityRequest2;
     abilityRequest1.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
     abilityRequest1.abilityInfo.visible = false;
     missionListManager->waitingAbilityQueue_.push(abilityRequest1);
-    missionListManager->OnStartSpecifiedAbilityTimeoutResponse(want);
+    missionListManager->OnStartSpecifiedAbilityTimeoutResponse();
     missionListManager->waitingAbilityQueue_.push(abilityRequest2);
-    missionListManager->OnStartSpecifiedAbilityTimeoutResponse(want);
+    missionListManager->OnStartSpecifiedAbilityTimeoutResponse();
 }
 
 /*
@@ -6518,15 +6516,14 @@ HWTEST_F(MissionListManagerTest, OnStartSpecifiedAbilityTimeoutResponse_004, Tes
     constexpr int32_t userId = 3;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     EXPECT_NE(missionListManager, nullptr);
-    Want want;
     AbilityRequest abilityRequest1;
     AbilityRequest abilityRequest2;
     abilityRequest1.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
     abilityRequest1.abilityInfo.visible = true;
     missionListManager->waitingAbilityQueue_.push(abilityRequest1);
-    missionListManager->OnStartSpecifiedAbilityTimeoutResponse(want);
+    missionListManager->OnStartSpecifiedAbilityTimeoutResponse();
     missionListManager->waitingAbilityQueue_.push(abilityRequest2);
-    missionListManager->OnStartSpecifiedAbilityTimeoutResponse(want);
+    missionListManager->OnStartSpecifiedAbilityTimeoutResponse();
 }
 
 /*
@@ -6542,15 +6539,14 @@ HWTEST_F(MissionListManagerTest, OnStartSpecifiedAbilityTimeoutResponse_005, Tes
     constexpr int32_t userId = 3;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     EXPECT_NE(missionListManager, nullptr);
-    Want want;
     AbilityRequest abilityRequest1;
     AbilityRequest abilityRequest2;
     abilityRequest1.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
     abilityRequest1.abilityInfo.visible = true;
     missionListManager->waitingAbilityQueue_.push(abilityRequest1);
-    missionListManager->OnStartSpecifiedAbilityTimeoutResponse(want);
+    missionListManager->OnStartSpecifiedAbilityTimeoutResponse();
     missionListManager->waitingAbilityQueue_.push(abilityRequest2);
-    missionListManager->OnStartSpecifiedAbilityTimeoutResponse(want);
+    missionListManager->OnStartSpecifiedAbilityTimeoutResponse();
 }
 
 /*
