@@ -18,12 +18,116 @@
 #include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "parcel.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace AAFwk {
 namespace {
-const int MAX_URI_COUNT = 500;
-const uint32_t CYCLE_LIMIT = 1000;
+const int MAX_URI_COUNT = 200000;
+constexpr size_t MAX_IPC_RAW_DATA_SIZE = 128 * 1024 * 1024; // 128M
+constexpr int32_t MAX_PARCEL_IPC_DATA_SIZE = 200 * 1024; // 200K
+
+inline size_t GetPadSize(size_t size)
+{
+    const size_t offset = 3;
+    return (((size + offset) & (~offset)) - size);
+}
+
+bool CheckUseRawData(const std::vector<std::string> &uriVec)
+{
+    int32_t oriSize = sizeof(int32_t);
+    for (auto &uri : uriVec) {
+        int32_t desire = uri.length() + sizeof(char) + sizeof(int32_t);
+        int32_t padSize = GetPadSize(desire);
+        oriSize += (desire + padSize);
+        if (oriSize > MAX_PARCEL_IPC_DATA_SIZE) {
+            TAG_LOGI(AAFwkTag::URIPERMMGR, "use raw data %{public}d", oriSize);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool GetData(void *&buffer, size_t size, const void *data)
+{
+    if (data == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null data");
+        return false;
+    }
+    if (size == 0 || size > MAX_IPC_RAW_DATA_SIZE) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "size invalid: %{public}zu", size);
+        return false;
+    }
+    buffer = malloc(size);
+    if (buffer == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "malloc buffer failed");
+        return false;
+    }
+    if (memcpy_s(buffer, size, data, size) != EOK) {
+        free(buffer);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "memcpy failed");
+        return false;
+    }
+    return true;
+}
+
+bool WriteStringUriByRawData(MessageParcel &data, const std::vector<std::string> &uriVec)
+{
+    MessageParcel tempParcel;
+    tempParcel.SetMaxCapacity(MAX_IPC_RAW_DATA_SIZE);
+    if (!tempParcel.WriteStringVector(uriVec)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write uris failed");
+        return false;
+    }
+    size_t dataSize = tempParcel.GetDataSize();
+    if (!data.WriteInt32(static_cast<int32_t>(dataSize))) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write data size failed");
+        return false;
+    }
+    if (!data.WriteRawData(reinterpret_cast<uint8_t *>(tempParcel.GetData()), dataSize)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write raw data failed");
+        return false;
+    }
+    return true;
+}
+
+bool WriteStringUris(MessageParcel &data, const std::vector<std::string> &uriVec)
+{
+    bool isWriteUriByRawData = CheckUseRawData(uriVec);
+    if (!data.WriteBool(isWriteUriByRawData)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "write bool failed");
+        return false;
+    }
+    if (isWriteUriByRawData) {
+        // write uris by raw data
+        return WriteStringUriByRawData(data, uriVec);
+    }
+    // write uris by parcel
+    return data.WriteStringVector(uriVec);
+}
+
+bool ReadBatchResultByRawData(MessageParcel &data, std::vector<bool> &result)
+{
+    size_t dataSize = static_cast<size_t>(data.ReadInt32());
+    if (dataSize == 0) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "parcel no data");
+        return false;
+    }
+
+    void *buffer = nullptr;
+    if (!GetData(buffer, dataSize, data.ReadRawData(dataSize))) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "read raw data failed: %{public}zu", dataSize);
+        return false;
+    }
+
+    MessageParcel tempParcel;
+    if (!tempParcel.ParseFrom(reinterpret_cast<uintptr_t>(buffer), dataSize)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "failed to parseFrom");
+        return false;
+    }
+    tempParcel.ReadBoolVector(&result);
+    return true;
+}
 }
 
 UriPermissionManagerProxy::UriPermissionManagerProxy(const sptr<IRemoteObject> &impl)
@@ -39,7 +143,7 @@ bool UriPermissionManagerProxy::WriteBatchUris(MessageParcel &data, const std::v
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Write uri size failed");
         return false;
     }
-    if (!data.WriteStringVector(uriStrVec)) {
+    if (!WriteStringUris(data, uriStrVec)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Write uris failed");
         return false;
     }
@@ -131,7 +235,7 @@ int UriPermissionManagerProxy::GrantUriPermission(const std::vector<Uri> &uriVec
 int32_t UriPermissionManagerProxy::GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
     const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType)
 {
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "GrantUriPermissionPrivileged call");
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
         return ERR_URI_LIST_OUT_OF_RANGE;
@@ -260,7 +364,7 @@ bool UriPermissionManagerProxy::VerifyUriPermission(const Uri& uri, uint32_t fla
 std::vector<bool> UriPermissionManagerProxy::CheckUriAuthorization(const std::vector<std::string> &uriVec,
     uint32_t flag, uint32_t tokenId)
 {
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "CheckUriAuthorization call");
     std::vector<bool> result(uriVec.size(), false);
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
@@ -275,7 +379,7 @@ std::vector<bool> UriPermissionManagerProxy::CheckUriAuthorization(const std::ve
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Write uris size failed");
         return result;
     }
-    if (!data.WriteStringVector(uriVec)) {
+    if (!WriteStringUris(data, uriVec)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Write uris failed");
         return result;
     }
@@ -294,14 +398,11 @@ std::vector<bool> UriPermissionManagerProxy::CheckUriAuthorization(const std::ve
         TAG_LOGE(AAFwkTag::URIPERMMGR, "SendRequest error:%{public}d", error);
         return result;
     }
-    auto size = reply.ReadUint32();
-    if (size > CYCLE_LIMIT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "Reply size too large");
-        return result;
+    if (!ReadBatchResultByRawData(reply, result) || uriVec.size() != result.size()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "ReadBatchResultByRawData failed");
+        result = std::vector<bool>(uriVec.size(), false);
     }
-    for (auto i = 0; i < static_cast<int32_t>(size); i++) {
-        result[i] = reply.ReadBool();
-    }
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "CheckUriAuthorization end");
     return result;
 }
 

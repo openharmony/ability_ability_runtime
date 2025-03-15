@@ -321,7 +321,6 @@ int32_t UriPermissionManagerStubImpl::AddTempUriPermission(const std::string &ur
     auto search = uriMap_.find(uri);
     GrantInfo info = { flag, fromTokenId, targetTokenId };
     if (search == uriMap_.end()) {
-        TAG_LOGI(AAFwkTag::URIPERMMGR, "Insert an uri r/w permission");
         std::list<GrantInfo> infoList = { info };
         uriMap_.emplace(uri, infoList);
         return ERR_OK;
@@ -332,14 +331,11 @@ int32_t UriPermissionManagerStubImpl::AddTempUriPermission(const std::string &ur
             TAG_LOGI(AAFwkTag::URIPERMMGR, "Item: flag:%{public}u", item.flag);
             if ((item.flag & flag) != flag) {
                 item.flag |= flag;
-                TAG_LOGI(AAFwkTag::URIPERMMGR, "Update uri r/w permission");
                 return ERR_OK;
             }
-            TAG_LOGD(AAFwkTag::URIPERMMGR, "Uri has been granted");
             return ERR_OK;
         }
     }
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "insert new uri permission record");
     infoList.emplace_back(info);
     return ERR_OK;
 }
@@ -530,12 +526,13 @@ void UriPermissionManagerStubImpl::RevokeMapUriPermission(uint32_t tokenId)
     TAG_LOGD(AAFwkTag::URIPERMMGR, "RevokeMapUriPermission call");
     std::lock_guard<std::mutex> guard(mutex_);
     std::vector<std::string> uriList;
+    int32_t deleteCount = 0;
     for (auto iter = uriMap_.begin(); iter != uriMap_.end();) {
         auto& list = iter->second;
         bool findUriRecord = false;
         for (auto it = list.begin(); it != list.end();) {
             if (it->targetTokenId == tokenId) {
-                TAG_LOGI(AAFwkTag::URIPERMMGR, "Erase an info form list");
+                deleteCount++;
                 it = list.erase(it);
                 findUriRecord = true;
                 continue;
@@ -554,7 +551,7 @@ void UriPermissionManagerStubImpl::RevokeMapUriPermission(uint32_t tokenId)
     if (!uriList.empty()) {
         DeleteShareFile(tokenId, uriList);
     }
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "end");
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "revoke map: %{public}d", deleteCount);
 }
 
 int UriPermissionManagerStubImpl::RevokeAllUriPermissions(uint32_t tokenId)
@@ -673,7 +670,7 @@ int32_t UriPermissionManagerStubImpl::RevokeMapUriPermissionManually(uint32_t ca
         for (auto it = list.begin(); it != list.end(); it++) {
             if (it->targetTokenId == targetTokenId && (callerTokenId == it->fromTokenId || isRevokeSelfUri)) {
                 uriList.emplace_back(search->first);
-                TAG_LOGI(AAFwkTag::URIPERMMGR, "revoke uri permission record");
+                TAG_LOGD(AAFwkTag::URIPERMMGR, "revoke uri permission record");
                 list.erase(it);
                 break;
             }
