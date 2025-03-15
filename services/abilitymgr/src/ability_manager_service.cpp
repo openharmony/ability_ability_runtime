@@ -7530,7 +7530,11 @@ void AbilityManagerService::RemoveUnauthorizedLaunchReasonMessage(const Want &wa
     const sptr<IRemoteObject> &callerToken)
 {
     std::string value = want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
-    if (value.empty()) {
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "launchReasonMessage:%{public}s", value.c_str());
+    if (!AppUtils::GetInstance().IsSystemReasonMessage(value)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "value is not find, launchReasonMessage:%{public}s", value.c_str());
+        (const_cast<Want &>(want)).RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+        abilityRequest.want.RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
         return;
     }
 
