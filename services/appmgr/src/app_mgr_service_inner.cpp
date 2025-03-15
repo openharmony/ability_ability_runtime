@@ -469,7 +469,7 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
     }
     TAG_LOGI(AAFwkTag::APPMGR, "main process do not exists.");
     if (startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse(want, "", requestId);
+        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse("", requestId);
     }
 }
 
@@ -4483,14 +4483,12 @@ void AppMgrServiceInner::HandleAddAbilityStageTimeOut(std::shared_ptr<AppRunning
     }
 
     if (appRecord->IsStartSpecifiedAbility() && startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnTimeoutResponse(appRecord->GetSpecifiedWant(),
-            appRecord->GetSpecifiedRequestId());
+        startSpecifiedAbilityResponse_->OnTimeoutResponse(appRecord->GetSpecifiedRequestId());
     }
     appRecord->ResetSpecifiedRequest();
 
     if (appRecord->IsNewProcessRequest() && startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnNewProcessRequestTimeoutResponse(appRecord->GetNewProcessRequestWant(),
-            appRecord->GetNewProcessRequestId());
+        startSpecifiedAbilityResponse_->OnNewProcessRequestTimeoutResponse(appRecord->GetNewProcessRequestId());
     }
     appRecord->ResetNewProcessRequest();
 
@@ -5210,8 +5208,7 @@ void AppMgrServiceInner::HandleStartSpecifiedAbilityTimeOut(std::shared_ptr<AppR
     }
 
     if (appRecord->IsStartSpecifiedAbility() && startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnTimeoutResponse(appRecord->GetSpecifiedWant(),
-            appRecord->GetSpecifiedRequestId());
+        startSpecifiedAbilityResponse_->OnTimeoutResponse(appRecord->GetSpecifiedRequestId());
     }
     appRecord->ResetSpecifiedRequest();
 
@@ -5233,7 +5230,7 @@ void AppMgrServiceInner::ScheduleNewProcessRequestDone(
     appRecord->ResetNewProcessRequest();
 
     if (startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse(want, flag, requestId);
+        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse(flag, requestId);
     }
     appRecord->ResetNewProcessRequest();
 }
@@ -5247,8 +5244,7 @@ void AppMgrServiceInner::HandleStartSpecifiedProcessTimeout(std::shared_ptr<AppR
     }
 
     if (startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnNewProcessRequestTimeoutResponse(appRecord->GetNewProcessRequestWant(),
-            appRecord->GetNewProcessRequestId());
+        startSpecifiedAbilityResponse_->OnNewProcessRequestTimeoutResponse(appRecord->GetNewProcessRequestId());
     }
     appRecord->ResetNewProcessRequest();
 }

@@ -393,9 +393,9 @@ void AppScheduler::PrepareTerminateApp(const pid_t pid, const std::string &modul
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->PrepareTerminateApp(pid, moduleName));
 }
 
-void StartSpecifiedAbilityResponse::OnTimeoutResponse(const AAFwk::Want &want, int32_t requestId)
+void StartSpecifiedAbilityResponse::OnTimeoutResponse(int32_t requestId)
 {
-    DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedAbilityTimeoutResponse(want, requestId);
+    DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedAbilityTimeoutResponse(requestId);
 }
 
 void AppScheduler::StartSpecifiedProcess(
@@ -405,15 +405,14 @@ void AppScheduler::StartSpecifiedProcess(
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->StartSpecifiedProcess(want, abilityInfo, requestId));
 }
 
-void StartSpecifiedAbilityResponse::OnNewProcessRequestResponse(
-    const AAFwk::Want &want, const std::string &flag, int32_t requestId)
+void StartSpecifiedAbilityResponse::OnNewProcessRequestResponse(const std::string &flag, int32_t requestId)
 {
-    DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedProcessResponse(want, flag, requestId);
+    DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedProcessResponse(flag, requestId);
 }
 
-void StartSpecifiedAbilityResponse::OnNewProcessRequestTimeoutResponse(const AAFwk::Want &want, int32_t requestId)
+void StartSpecifiedAbilityResponse::OnNewProcessRequestTimeoutResponse(int32_t requestId)
 {
-    DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedProcessTimeoutResponse(want, requestId);
+    DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedProcessTimeoutResponse(requestId);
 }
 
 void StartSpecifiedAbilityResponse::OnStartSpecifiedFailed(int32_t requestId)

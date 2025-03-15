@@ -68,8 +68,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     sptr<IUserCallback> callback;
     abilityms->StartUser(intParam, callback);
     abilityms->StopUser(intParam, callback);
-    abilityms->OnAcceptWantResponse(*want, stringParam);
-    abilityms->OnStartSpecifiedAbilityTimeoutResponse(*want);
+    abilityms->OnAcceptWantResponse(*want, stringParam, 0);
+    abilityms->OnStartSpecifiedAbilityTimeoutResponse(0);
     if (want) {
         delete want;
         want = nullptr;

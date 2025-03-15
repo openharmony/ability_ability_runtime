@@ -3647,7 +3647,7 @@ void MissionListManager::NotifyStartSpecifiedAbility(AbilityRequest &abilityRequ
     }
 }
 
-void MissionListManager::OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want)
+void MissionListManager::OnStartSpecifiedAbilityTimeoutResponse()
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     std::lock_guard guard(managerLock_);

@@ -1156,12 +1156,11 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE);
 
-    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId = 0);
-    void OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want, int32_t requestId = 0);
+    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId);
+    void OnStartSpecifiedAbilityTimeoutResponse(int32_t requestId);
 
-    void OnStartSpecifiedProcessResponse(const AAFwk::Want &want, const std::string &flag,
-        int32_t requestId = 0);
-    void OnStartSpecifiedProcessTimeoutResponse(const AAFwk::Want &want, int32_t requestId = 0);
+    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId = 0);
+    void OnStartSpecifiedProcessTimeoutResponse(int32_t requestId);
     void OnStartSpecifiedFailed(int32_t requestId);
 
     virtual int GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info) override;

@@ -267,7 +267,7 @@ void DoSomethingTestWithMyAPI4(std::shared_ptr<MissionListManager> missionListMg
     missionListMgr->OnAcceptWantResponse(want, stringParam);
     missionListMgr->EnqueueWaitingAbility(abilityRequest);
     missionListMgr->EnqueueWaitingAbility(abilityRequest); // add twice
-    missionListMgr->OnStartSpecifiedAbilityTimeoutResponse(want);
+    missionListMgr->OnStartSpecifiedAbilityTimeoutResponse();
     missionListMgr->GetMissionBySpecifiedFlag(want, stringParam);
 }
 
