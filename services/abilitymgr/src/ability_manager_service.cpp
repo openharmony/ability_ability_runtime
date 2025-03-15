@@ -6202,8 +6202,9 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     }
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN_LOG(abilityRecord, ERR_INVALID_VALUE, "Ability record is nullptr.");
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilityTransitionDone, ability: %{public}s, state:%{public}d",
-        abilityRecord->GetURI().c_str(), state);
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilityTransitionDone, ability:%{public}s, state:%{public}d, callerPid:%{public}d",
+        abilityRecord->GetURI().c_str(), state, callerPid);
     if (!JudgeSelfCalled(abilityRecord)) {
         return CHECK_PERMISSION_FAILED;
     }
