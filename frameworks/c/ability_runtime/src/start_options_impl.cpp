@@ -76,10 +76,8 @@ AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsWithAnimati
 
 AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsWindowLeft(int32_t windowLeft)
 {
-    if (windowLeft != 0) {
-        options.windowLeftUsed_ = true;
-        options.SetWindowLeft(windowLeft);
-    }
+    options.windowLeftUsed_ = true;
+    options.SetWindowLeft(windowLeft);
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
@@ -93,10 +91,8 @@ AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsWindowLeft(
 
 AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsWindowTop(int32_t windowTop)
 {
-    if (windowTop != 0) {
-        options.windowTopUsed_ = true;
-        options.SetWindowTop(windowTop);
-    }
+    options.windowTopUsed_ = true;
+    options.SetWindowTop(windowTop);
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
@@ -110,10 +106,8 @@ AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsWindowTop(i
 
 AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsWindowHeight(int32_t windowHeight)
 {
-    if (windowHeight != 0) {
-        options.windowHeightUsed_ = true;
-        options.SetWindowHeight(windowHeight);
-    }
+    options.windowHeightUsed_ = true;
+    options.SetWindowHeight(windowHeight);
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
@@ -127,10 +121,8 @@ AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsWindowHeigh
 
 AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsWindowWidth(int32_t windowWidth)
 {
-    if (windowWidth != 0) {
-        options.windowWidthUsed_ = true;
-        options.SetWindowWidth(windowWidth);
-    }
+    options.windowWidthUsed_ = true;
+    options.SetWindowWidth(windowWidth);
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
@@ -301,10 +293,8 @@ AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsSupportedWi
 
 AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsMinWindowWidth(int32_t minWindowWidth)
 {
-    if (minWindowWidth != 0) {
-        options.minWindowWidthUsed_ = true;
-        options.SetMinWindowWidth(minWindowWidth);
-    }
+    options.minWindowWidthUsed_ = true;
+    options.SetMinWindowWidth(minWindowWidth);
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
@@ -318,10 +308,8 @@ AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsMinWindowWi
 
 AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsMaxWindowWidth(int32_t maxWindowWidth)
 {
-    if (maxWindowWidth != 0) {
-        options.maxWindowWidthUsed_ = true;
-        options.SetMaxWindowWidth(maxWindowWidth);
-    }
+    options.maxWindowWidthUsed_ = true;
+    options.SetMaxWindowWidth(maxWindowWidth);
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
@@ -335,10 +323,8 @@ AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsMaxWindowWi
 
 AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsMinWindowHeight(int32_t minWindowHeight)
 {
-    if (minWindowHeight != 0) {
-        options.minWindowHeightUsed_ = true;
-        options.SetMinWindowHeight(minWindowHeight);
-    }
+    options.minWindowHeightUsed_ = true;
+    options.SetMinWindowHeight(minWindowHeight);
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
@@ -352,10 +338,8 @@ AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::GetStartOptionsMinWindowHe
 
 AbilityRuntime_ErrorCode AbilityRuntime_StartOptions::SetStartOptionsMaxWindowHeight(int32_t maxWindowHeight)
 {
-    if (maxWindowHeight != 0) {
-        options.maxWindowHeightUsed_ = true;
-        options.SetMaxWindowHeight(maxWindowHeight);
-    }
+    options.maxWindowHeightUsed_ = true;
+    options.SetMaxWindowHeight(maxWindowHeight);
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 

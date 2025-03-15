@@ -309,6 +309,33 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsWindowLeft_001, testing::ext::Test
 }
 
 // Test cases
+// Test GetStartOptionsWindowLeft function
+/**
+ * @tc.name: GetStartOptionsWindowLeft_002
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsWindowLeft_002, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsWindowLeft_002 begin");
+    // Arrange
+    int32_t expectedWindowLeft = -100;
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    // Act
+    int32_t windowLeft = -100;
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->GetStartOptionsWindowLeft(windowLeft);
+    TAG_LOGI(AAFwkTag::TEST,
+        "GetStartOptionsWindowLeft_002 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    EXPECT_EQ(expectedWindowLeft, windowLeft);
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsWindowLeft_002 end");
+}
+
+// Test cases
 // Test SetStartOptionsWindowTop function - Normal case
 /**
  * @tc.name: SetStartOptionsWindowTop_001
@@ -359,6 +386,33 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsWindowTop_001, testing::ext::TestS
     EXPECT_EQ(expectedErrorCode, resultErrorCode);
     EXPECT_EQ(expectedWindowTop, windowTop);
     TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsWindowTop_001 end");
+}
+
+// Test cases
+// Test GetStartOptionsWindowTop function
+/**
+ * @tc.name: GetStartOptionsWindowTop_002
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsWindowTop_002, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsWindowTop_002 begin");
+    // Arrange
+    int32_t expectedWindowTop = 500;
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    // Act
+    int32_t windowTop = 500;
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->GetStartOptionsWindowTop(windowTop);
+    TAG_LOGI(AAFwkTag::TEST,
+        "GetStartOptionsWindowTop_002 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    EXPECT_EQ(expectedWindowTop, windowTop);
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsWindowTop_002 end");
 }
 
 // Test cases
@@ -415,6 +469,33 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsWindowHeight_001, testing::ext::Te
 }
 
 // Test cases
+// Test GetStartOptionsWindowHeight function
+/**
+ * @tc.name: GetStartOptionsWindowHeight_002
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsWindowHeight_002, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsWindowHeight_002 begin");
+    // Arrange
+    int32_t expectedWindowHeight = 500;
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    // Act
+    int32_t windowHeight = 500;
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->GetStartOptionsWindowHeight(windowHeight);
+    TAG_LOGI(AAFwkTag::TEST,
+        "GetStartOptionsWindowHeight_002 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    EXPECT_EQ(expectedWindowHeight, windowHeight);
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsWindowHeight_002 end");
+}
+
+// Test cases
 // Test SetStartOptionsWindowWidth function - Normal case
 /**
  * @tc.name: SetStartOptionsWindowWidth_001
@@ -465,6 +546,33 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsWindowWidth_001, testing::ext::Tes
     EXPECT_EQ(expectedErrorCode, resultErrorCode);
     EXPECT_EQ(expectedWindowWidth, windowWidth);
     TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsWindowWidth_001 end");
+}
+
+// Test cases
+// Test GetStartOptionsWindowWidth function
+/**
+ * @tc.name: GetStartOptionsWindowWidth_002
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsWindowWidth_002, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsWindowWidth_002 begin");
+    // Arrange
+    int32_t expectedWindowWidth = 500;
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    // Act
+    int32_t windowWidth = 500;
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->GetStartOptionsWindowWidth(windowWidth);
+    TAG_LOGI(AAFwkTag::TEST,
+        "GetStartOptionsWindowWidth_002 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    EXPECT_EQ(expectedWindowWidth, windowWidth);
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsWindowWidth_002 end");
 }
 
 // Test cases
@@ -1064,6 +1172,33 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsMinWindowWidth_001, testing::ext::
 }
 
 // Test cases
+// Test GetStartOptionsMinWindowWidth function
+/**
+ * @tc.name: GetStartOptionsMinWindowWidth_002
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsMinWindowWidth_002, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsMinWindowWidth_002 begin");
+    // Arrange
+    int32_t expectedMinWindowWidth = 500;
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    // Act
+    int32_t minWindowWidth = 500;
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->GetStartOptionsMinWindowWidth(minWindowWidth);
+    TAG_LOGI(AAFwkTag::TEST,
+        "GetStartOptionsMinWindowWidth_002 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    EXPECT_EQ(expectedMinWindowWidth, minWindowWidth);
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsMinWindowWidth_002 end");
+}
+
+// Test cases
 // Test SetStartOptionsMaxWindowWidth function - Normal case
 /**
  * @tc.name: SetStartOptionsMaxWindowWidth_001
@@ -1114,6 +1249,33 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsMaxWindowWidth_001, testing::ext::
     EXPECT_EQ(expectedErrorCode, resultErrorCode);
     EXPECT_EQ(expectedMaxWindowWidth, maxWindowWidth);
     TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsMaxWindowWidth_001 end");
+}
+
+// Test cases
+// Test GetStartOptionsMaxWindowWidth function
+/**
+ * @tc.name: GetStartOptionsMaxWindowWidth_002
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsMaxWindowWidth_002, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsMaxWindowWidth_002 begin");
+    // Arrange
+    int32_t expectedMaxWindowWidth = 500;
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    // Act
+    int32_t maxWindowWidth = 500;
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->GetStartOptionsMaxWindowWidth(maxWindowWidth);
+    TAG_LOGI(AAFwkTag::TEST,
+        "GetStartOptionsMaxWindowWidth_002 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    EXPECT_EQ(expectedMaxWindowWidth, maxWindowWidth);
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsMaxWindowWidth_002 end");
 }
 
 // Test cases
@@ -1170,6 +1332,33 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsMinWindowHeight_001, testing::ext:
 }
 
 // Test cases
+// Test GetStartOptionsMinWindowHeight function - Normal case
+/**
+ * @tc.name: GetStartOptionsMinWindowHeight_002
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsMinWindowHeight_002, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsMinWindowHeight_002 begin");
+    // Arrange
+    int32_t expectedMinWindowHeight = 500;
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    // Act
+    int32_t minWindowHeight = 500;
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->GetStartOptionsMinWindowHeight(minWindowHeight);
+    TAG_LOGI(AAFwkTag::TEST,
+        "GetStartOptionsMinWindowHeight_002 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    EXPECT_EQ(expectedMinWindowHeight, minWindowHeight);
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsMinWindowHeight_002 end");
+}
+
+// Test cases
 // Test SetStartOptionsMaxWindowHeight function - Normal case
 /**
  * @tc.name: SetStartOptionsMaxWindowHeight_001
@@ -1220,4 +1409,31 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsMaxWindowHeight_001, testing::ext:
     EXPECT_EQ(expectedErrorCode, resultErrorCode);
     EXPECT_EQ(expectedMaxWindowHeight, maxWindowHeight);
     TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsMaxWindowHeight_001 end");
+}
+
+// Test cases
+// Test GetStartOptionsMaxWindowHeight function - Normal case
+/**
+ * @tc.name: GetStartOptionsMaxWindowHeight_002
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsMaxWindowHeight_002, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsMaxWindowHeight_002 begin");
+    // Arrange
+    int32_t expectedMaxWindowHeight = 500;
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+
+    // Act
+    int32_t maxWindowHeight = 500;
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->GetStartOptionsMaxWindowHeight(maxWindowHeight);
+    TAG_LOGI(AAFwkTag::TEST,
+        "GetStartOptionsMaxWindowHeight_002 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    EXPECT_EQ(expectedMaxWindowHeight, maxWindowHeight);
+    TAG_LOGI(AAFwkTag::TEST, "GetStartOptionsMaxWindowHeight_002 end");
 }
