@@ -25,6 +25,10 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace AAFwk {
+namespace {
+const int MAX_URI_COUNT = 200000;
+}
+
 class UriPermissionManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -144,7 +148,7 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_BatchGrantUriPermission_
 {
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
     Uri uri = Uri("file://com.example.test1001/data/storage/el2/base/haps/entry/files/test_A.txt");
-    std::vector<Uri> uriVec(501, uri);
+    std::vector<Uri> uriVec(MAX_URI_COUNT + 1, uri);
     std::string bundleName = "com.example.test1001";
     uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
     auto ret = upmc.GrantUriPermission(uriVec, flag, bundleName, 0, 0);
@@ -299,11 +303,49 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_CheckUriAuthorization_00
 {
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
     std::string uriStr = "file://docs/storage/Users/currentUser/test.txt";
-    std::vector<std::string> uriVec(501, uriStr);
+    std::vector<std::string> uriVec(MAX_URI_COUNT + 1, uriStr);
     uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
     uint32_t tokenId = 1001;
     auto res = upmc.CheckUriAuthorization(uriVec, flag, tokenId);
-    std::vector<bool> expectRes(501, false);
+    std::vector<bool> expectRes(MAX_URI_COUNT + 1, false);
+    EXPECT_EQ(res, expectRes);
+}
+
+/*
+ * Feature: UriPermissionManagerClient
+ * Function: CheckUriAuthorization
+ * SubFunction: CheckUriAuthorization
+ * FunctionPoints: Write Uri and result by raw data
+ * CaseDescription: Verify UriPermissionManagerClient CheckUriAuthorization
+ */
+HWTEST_F(UriPermissionManagerTest, UriPermissionManager_CheckUriAuthorization_004, TestSize.Level1)
+{
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::string uriStr = "file://docs/storage/Users/currentUser/test.txt";
+    std::vector<std::string> uriVec(50000, uriStr);
+    uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
+    uint32_t tokenId = 1001;
+    auto res = upmc.CheckUriAuthorization(uriVec, flag, tokenId);
+    std::vector<bool> expectRes(50000, false);
+    EXPECT_EQ(res, expectRes);
+}
+
+/*
+ * Feature: UriPermissionManagerClient
+ * Function: CheckUriAuthorization
+ * SubFunction: CheckUriAuthorization
+ * FunctionPoints: Write Uri and result by raw data
+ * CaseDescription: Verify UriPermissionManagerClient CheckUriAuthorization
+ */
+HWTEST_F(UriPermissionManagerTest, UriPermissionManager_CheckUriAuthorization_005, TestSize.Level1)
+{
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::string uriStr = "file://docs/storage/Users/currentUser/test.txt";
+    std::vector<std::string> uriVec(MAX_URI_COUNT, uriStr);
+    uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
+    uint32_t tokenId = 1001;
+    auto res = upmc.CheckUriAuthorization(uriVec, flag, tokenId);
+    std::vector<bool> expectRes(MAX_URI_COUNT, false);
     EXPECT_EQ(res, expectRes);
 }
 
@@ -337,7 +379,7 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionPrivil
 {
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
     std::string uriStr = "file://docs/storage/Users/currentUser/test.txt";
-    std::vector<Uri> uriVec(501, Uri(uriStr));
+    std::vector<Uri> uriVec(MAX_URI_COUNT + 1, Uri(uriStr));
     uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
     std::string bundleName = "com.example.test1001";
     int32_t appIndex = 0;
@@ -357,6 +399,44 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionPrivil
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
     std::string uriStr = "file://docs/storage/Users/currentUser/test.txt";
     std::vector<Uri> uriVec(1, Uri(uriStr));
+    uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
+    std::string bundleName = "com.example.test1001";
+    int32_t appIndex = 0;
+    auto res = upmc.GrantUriPermissionPrivileged(uriVec, flag, bundleName, appIndex, 0, 0);
+    EXPECT_EQ(res, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: UriPermissionManagerClient
+ * Function: GrantUriPermissionPrivileged
+ * SubFunction: GrantUriPermissionPrivileged
+ * FunctionPoints: Write Uri by raw data
+ * CaseDescription: Verify UriPermissionManagerClient GrantUriPermissionPrivileged
+ */
+HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionPrivileged_004, TestSize.Level1)
+{
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::string uriStr = "file://docs/storage/Users/currentUser/test.txt";
+    std::vector<Uri> uriVec(50000, Uri(uriStr));
+    uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
+    std::string bundleName = "com.example.test1001";
+    int32_t appIndex = 0;
+    auto res = upmc.GrantUriPermissionPrivileged(uriVec, flag, bundleName, appIndex, 0, 0);
+    EXPECT_EQ(res, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: UriPermissionManagerClient
+ * Function: GrantUriPermissionPrivileged
+ * SubFunction: GrantUriPermissionPrivileged
+ * FunctionPoints: Write Uri by raw data
+ * CaseDescription: Verify UriPermissionManagerClient GrantUriPermissionPrivileged
+ */
+HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionPrivileged_005, TestSize.Level1)
+{
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::string uriStr = "file://docs/storage/Users/currentUser/test.txt";
+    std::vector<Uri> uriVec(MAX_URI_COUNT, Uri(uriStr));
     uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
     std::string bundleName = "com.example.test1001";
     int32_t appIndex = 0;
