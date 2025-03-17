@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import AbilityConstant from './@ohos.app.ability.AbilityConstant';
+import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import UIAbilityContext from './application/UIAbilityContext';
-import Want from './@ohos.app.ability.Want';
+import Want from '@ohos.app.ability.Want';
 
 export default class UIAbility {
   private isOnDestroyAsync: boolean = true;

@@ -13,10 +13,18 @@
  * limitations under the License.
  */
 
-export default interface Configuration {
-    readonly language: string;
-}
+import { Context } from './Context'
 
-class ConfigurationInner implements Configuration {
-    language: string = "";
+export default class ApplicationContext extends Context {
+    public native setSupportedProcessCacheSync(isSupported : boolean):void;
+    public nativeApplicationContext:long = 0;
+
+    setSupportedProcessCache(isSupported : boolean):void {
+        console.log("call setSupportedProcessCache 111");
+        let p1 = launch this.setSupportedProcessCacheSync(isSupported);
+        console.log("call setSupportedProcessCache 222");
+        p1.then<void>(():void=>{
+            console.log("call setSupportedProcessCache 333");
+        });
+    }
 }
