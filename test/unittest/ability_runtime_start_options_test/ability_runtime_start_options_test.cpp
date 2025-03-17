@@ -18,6 +18,7 @@
 #include "start_options.h"
 
 #include <cstring>
+#include "hilog_tag_wrapper.h"
 #ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
 #include "pixelmap_native_impl.h"
 #endif
@@ -1499,11 +1500,7 @@ HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_SetStartOptionsStartW
     AbilityRuntime_ErrorCode result = OH_AbilityRuntime_SetStartOptionsStartWindowIcon(startOptions, startWindowIcon);
 
     // Assert
-#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
     EXPECT_EQ(startOptions->SetStartOptionsStartWindowIcon(startWindowIcon), result);
-#else
-    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_NO_ERROR, result);
-#endif
 
     OH_AbilityRuntime_DestroyStartOptions(&startOptions);
 #ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
@@ -1537,15 +1534,16 @@ HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsStartW
 HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsStartWindowIcon_002, TestSize.Level1)
 {
     // Arrange
+    TAG_LOGI(AAFwkTag::APPKIT, "OH_AbilityRuntime_GetStartOptionsStartWindowIcon_002 begin");
     AbilityRuntime_StartOptions *startOptions = OH_AbilityRuntime_CreateStartOptions();
     EXPECT_NE(startOptions, nullptr);
 
-    OH_PixelmapNative *startWindowIcon = nullptr;
+    AbilityRuntime_ErrorCode result = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 #ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
-    startWindowIcon = new OH_PixelmapNative(nullptr);
-#endif
-    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_SetStartOptionsStartWindowIcon(startOptions, startWindowIcon);
+    OH_PixelmapNative *startWindowIcon = new OH_PixelmapNative(nullptr);
+    result = OH_AbilityRuntime_SetStartOptionsStartWindowIcon(startOptions, startWindowIcon);
     EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_NO_ERROR, result);
+#endif
 
     // Act
     OH_PixelmapNative *newStartWindowIcon = nullptr;
@@ -1553,16 +1551,17 @@ HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsStartW
 
     // Assert
 #ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
-    newStartWindowIcon = nullptr;
-    EXPECT_EQ(startOptions->GetStartOptionsStartWindowIcon(&newStartWindowIcon), result);
-#else
     EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_NO_ERROR, result);
+    EXPECT_EQ(newStartWindowIcon, nullptr);
+#else
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
 #endif
 
 #ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
     delete startWindowIcon;
 #endif
     OH_AbilityRuntime_DestroyStartOptions(&startOptions);
+    TAG_LOGI(AAFwkTag::APPKIT, "OH_AbilityRuntime_GetStartOptionsStartWindowIcon_002 end");
 }
 
 /**
@@ -1573,6 +1572,7 @@ HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsStartW
 HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsStartWindowIcon_003, TestSize.Level1)
 {
     // Arrange
+    TAG_LOGI(AAFwkTag::APPKIT, "OH_AbilityRuntime_GetStartOptionsStartWindowIcon_003 begin");
     AbilityRuntime_StartOptions *startOptions = OH_AbilityRuntime_CreateStartOptions();
     EXPECT_NE(startOptions, nullptr);
 
@@ -1582,14 +1582,10 @@ HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsStartW
     AbilityRuntime_ErrorCode result = OH_AbilityRuntime_GetStartOptionsStartWindowIcon(startOptions, &startWindowIcon);
 
     // Assert
-#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
-    startWindowIcon = nullptr;
-    EXPECT_EQ(startOptions->GetStartOptionsStartWindowIcon(&startWindowIcon), result);
-#else
-    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_NO_ERROR, result);
-#endif
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
 
-OH_AbilityRuntime_DestroyStartOptions(&startOptions);
+    OH_AbilityRuntime_DestroyStartOptions(&startOptions);
+    TAG_LOGI(AAFwkTag::APPKIT, "OH_AbilityRuntime_GetStartOptionsStartWindowIcon_003 end");
 }
 
 /**
