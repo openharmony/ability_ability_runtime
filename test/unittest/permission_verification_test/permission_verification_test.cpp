@@ -745,5 +745,16 @@ HWTEST_F(PermissionVerificationTest, JudgeStartInvisibleAbility_0001, TestSize.L
     ret = AAFwk::PermissionVerification::GetInstance()->JudgeStartInvisibleAbility(aTkId, false, sTkId);
     EXPECT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: CheckVerifyStartLocalDebug_0100
+ * @tc.desc: CheckVerifyStartLocalDebug Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, CheckVerifyStartLocalDebug_0100, TestSize.Level0)
+{
+    int result = AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug();
+    EXPECT_EQ(result, false);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
