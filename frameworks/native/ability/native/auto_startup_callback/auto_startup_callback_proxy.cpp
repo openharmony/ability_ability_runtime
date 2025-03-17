@@ -27,7 +27,7 @@ void AutoStartupCallBackProxy::OnAutoStartupOn(const AutoStartupInfo &info)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(AutoStartupCallBackProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Write interface token failed");
         return;
@@ -48,7 +48,7 @@ void AutoStartupCallBackProxy::OnAutoStartupOff(const AutoStartupInfo &info)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(AutoStartupCallBackProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Write interface token failed");
         return;

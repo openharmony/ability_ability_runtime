@@ -292,6 +292,12 @@ int32_t AbilityAutoStartupService::CheckAutoStartupData(const std::string &bundl
     return ERR_OK;
 }
 
+void AbilityAutoStartupService::GetCallbackVector(std::vector<sptr<IRemoteObject>>& callbackVector)
+{
+    std::lock_guard<std::mutex> lock(autoStartUpMutex_);
+    callbackVector = callbackVector_;
+}
+
 void AbilityAutoStartupService::ExecuteCallbacks(bool isCallOn, const AutoStartupInfo &info)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP,
@@ -299,25 +305,15 @@ void AbilityAutoStartupService::ExecuteCallbacks(bool isCallOn, const AutoStartu
         " accessTokenId: %{public}s, userId: %{public}d",
         info.bundleName.c_str(), info.moduleName.c_str(),
         info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
-    for (auto item : callbackVector_) {
+    std::vector<sptr<IRemoteObject>> callbackVector;
+    GetCallbackVector(callbackVector);
+    for (auto& item : callbackVector) {
         auto remoteSystemCallback = iface_cast<IAutoStartupCallBack>(item);
         if (remoteSystemCallback != nullptr) {
             if (isCallOn) {
                 remoteSystemCallback->OnAutoStartupOn(info);
             } else {
                 remoteSystemCallback->OnAutoStartupOff(info);
-            }
-        }
-    }
-
-    auto it = callbackMaps_.find(info.bundleName);
-    if (it != callbackMaps_.end()) {
-        auto remoteCallback = iface_cast<IAutoStartupCallBack>(it->second);
-        if (remoteCallback != nullptr) {
-            if (isCallOn) {
-                remoteCallback->OnAutoStartupOn(info);
-            } else {
-                remoteCallback->OnAutoStartupOff(info);
             }
         }
     }
@@ -350,7 +346,7 @@ void AbilityAutoStartupService::CleanResource(const wptr<IRemoteObject> &remote)
         return;
     }
 
-    // Clean the callbackVector_ and callbackMaps_.
+    // Clean the callbackVector_.
     {
         std::lock_guard<std::mutex> lock(autoStartUpMutex_);
         for (auto item = callbackVector_.begin(); item != callbackVector_.end();) {
@@ -358,15 +354,6 @@ void AbilityAutoStartupService::CleanResource(const wptr<IRemoteObject> &remote)
                 item = callbackVector_.erase(item);
             } else {
                 item++;
-            }
-        }
-
-        for (auto it = callbackMaps_.begin(); it != callbackMaps_.end();) {
-            const auto &callback = it->second;
-            if (callback == object) {
-                it = callbackMaps_.erase(it);
-            } else {
-                it++;
             }
         }
     }
