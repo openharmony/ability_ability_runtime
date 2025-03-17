@@ -25,7 +25,7 @@
 #include "hitrace_meter.h"
 
 [[maybe_unused]] static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass);
-[[maybe_unused]] static void TerminateSelfSyncPromise([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass);
+[[maybe_unused]] static void TerminateSelfSyncPromise([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj);
 ani_object CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context);
 class StsUIExtensionContext final {
 public:

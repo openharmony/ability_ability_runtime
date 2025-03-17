@@ -14,12 +14,12 @@
  */
 
 import { AbilityInfo } from '../bundleManager/AbilityInfo';
-import Want from '../@ohos.app.ability.Want';
+import Want from '@ohos.app.ability.Want';
 import StartOptions from '../@ohos.app.ability.StartOptions';
 import { BusinessError, AsyncCallback } from '../@ohos.base';
-import { AbilityResult } from '../ability/abilityResult';
+import { AbilityResult } from 'ability.abilityResult';
 import AbilityStartCallback from './AbilityStartCallback';
-import { Configuration } from '../@ohos.app.ability.Configuration';
+import { Configuration } from '@ohos.app.ability.Configuration';
 
 export class AsyncCallbackWrapper<T> {
   myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}

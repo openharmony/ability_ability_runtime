@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ConfigurationConstant from './@ohos.app.ability.ConfigurationConstant';
+import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 
 export interface Configuration {
     language?: string;
