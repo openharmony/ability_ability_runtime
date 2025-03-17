@@ -478,5 +478,76 @@ HWTEST_F(ExtensionRecordManagerTest, IsPreloadExtensionRecord_0100, TestSize.Lev
     result = extRecordMgr->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extRecord, isLoaded);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: IsBelongToManager_0100
+ * @tc.desc: IsBelongToManager
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, IsBelongToManager_0100, TestSize.Level1)
+{
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.extensionAbilityType =  AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    EXPECT_TRUE(extRecordMgr->IsBelongToManager(abilityInfo));
+}
+
+/**
+ * @tc.name: GetOrCreateExtensionRecord_0100
+ * @tc.desc: GetOrCreateExtensionRecord
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetOrCreateExtensionRecord_0100, TestSize.Level1)
+{
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    abilityRequest.sessionInfo->uiExtensionComponentId = 0;
+
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<ExtensionRecord> extRecord =
+        std::make_shared<ExtensionRecord>(abilityRecord);
+    extRecord->abilityRecord_ = abilityRecord;
+    std::string hostBundleName = "testHostBundleName";
+    bool isLoaded = false;
+
+    std::string deviceId = "testDeviceId";
+    std::string bundleName = "testBundleName";
+    std::string abilityName = "testAbilityName";
+    std::string moduleName = "testModuleName";
+    abilityRequest.want.SetElementName(deviceId, bundleName, abilityName, moduleName);
+    auto extensionRecordMapKey = std::make_tuple(abilityName,
+        bundleName, moduleName, hostBundleName);
+    std::vector<std::shared_ptr<ExtensionRecord>> nullExtensions;
+    std::vector<std::shared_ptr<ExtensionRecord>> extensions;
+
+    extensions.push_back(extRecord);
+    extRecordMgr->preloadUIExtensionMap_.insert({extensionRecordMapKey, extensions});
+    auto ret = extRecordMgr->GetOrCreateExtensionRecord(abilityRequest,
+        hostBundleName, abilityRecord, isLoaded);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: GetOrCreateExtensionRecord_0200
+ * @tc.desc: GetOrCreateExtensionRecord
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetOrCreateExtensionRecord_0200, TestSize.Level1)
+{
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    abilityRequest.sessionInfo->uiExtensionComponentId = 0;
+    std::string hostBundleName = "testHostBundleName";
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    bool isLoaded = false;
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    auto ret = extRecordMgr->GetOrCreateExtensionRecord(abilityRequest,
+        hostBundleName, abilityRecord, isLoaded);
+    EXPECT_NE(ret, ERR_OK);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
