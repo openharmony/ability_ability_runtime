@@ -27,7 +27,8 @@ namespace AbilityRuntime {
 namespace {
     std::shared_ptr<AppExecFwk::EventHandler> g_eventHandler = nullptr;
 }
-void OHOSJsEnvironmentImpl::PostTaskToHandler(void* handler, uv_io_cb func, void* work, int status, int priority)
+void OHOSJsEnvironmentImpl::PostTaskToHandler(const char* taskName, uv_io_cb func, void* work, int status,
+                                              int priority)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     if (!func || !work) {
@@ -64,7 +65,11 @@ void OHOSJsEnvironmentImpl::PostTaskToHandler(void* handler, uv_io_cb func, void
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid parameters");
         return;
     }
-    g_eventHandler->PostTask(task, "uv_io_cb", 0, prio);
+    if (taskName == nullptr) {
+        g_eventHandler->PostTask(task, "uv_io_cb", 0, prio);
+    } else {
+        g_eventHandler->PostTask(task, taskName, 0, prio);
+    }
 }
 OHOSJsEnvironmentImpl::OHOSJsEnvironmentImpl()
 {
