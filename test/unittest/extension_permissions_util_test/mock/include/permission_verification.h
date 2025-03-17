@@ -31,6 +31,7 @@ public:
 
     bool VerifyCallingPermission(const std::string &permissionName) const;
     bool IsSACall() const;
+    bool IsShellCall() const;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
