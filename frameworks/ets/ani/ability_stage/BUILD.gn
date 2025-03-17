@@ -16,23 +16,24 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 generate_static_abc("ability_stage_abc") {
-  base_url = "./"
+  base_url = "./ets"
+
   files = [
-    "./@ohos.app.ability.AbilityStage.ets",
-    "./@ohos.app.ability.Configuration.ets",
+    "./ets/@ohos.app.ability.AbilityStage.ets",
+    "./ets/application/AbilityStageContext.ets",
   ]
 
-  dst_file = "$target_out_dir/AbilityStage.abc"
-  out_puts = [ "$target_out_dir/AbilityStage.abc" ]
+  dst_file = "$target_out_dir/ability_stage.abc"
+  out_puts = [ "$target_out_dir/ability_stage.abc" ]
 
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/AbilityStage.abc"
+  device_dst_file = "/system/framework/ability_stage.abc"
 }
 
 ohos_prebuilt_etc("ability_stage_abc_etc") {
-  source = "$target_out_dir/AbilityStage.abc"
+  source = "$target_out_dir/ability_stage.abc"
+  deps = [ ":ability_stage_abc" ]
   module_install_dir = "framework"
   subsystem_name = "ability"
   part_name = "ability_runtime"
-  deps = [ ":ability_stage_abc" ]
 }

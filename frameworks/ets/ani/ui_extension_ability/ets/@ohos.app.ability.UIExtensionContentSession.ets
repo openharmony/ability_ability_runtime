@@ -15,28 +15,43 @@
 
 // import type { AbilityResult } from './ability/abilityResult';
 // import type AbilityStartCallback from './application/AbilityStartCallback';
-import type { AsyncCallback } from './@ohos.base';
-import  { BusinessError } from './@ohos.base';
+//import type { AsyncCallback } from './@ohos.base';
+//import  { BusinessError } from './@ohos.base';
 // import type Want from './@ohos.app.ability.Want';
 // import type StartOptions from './@ohos.app.ability.StartOptions';
-import type uiExtensionHost from './@ohos.uiExtensionHost';
+//import type uiExtensionHost from './@ohos.uiExtensionHost';
 // import type uiExtension from './@ohos.arkui.uiExtension';
-import type LocalStorage from './LocalStorage';
+//import type LocalStorage from './LocalStorage';
+export type Callback<T> = (data: T)=> void;
+
+export class Result<T, E>{
+  result:T;
+  error:E;
+  constructor(result: T , error: E) {
+      this.result = result;
+      this.error = error;
+  }
+}
+
+export type AsyncCallback<T> = (err: BusinessError<T>, data: T)=> void;
+
+export class BusinessError<T = void> {
+    code: number;
+    data: T;
+}
 
 export default class UIExtensionContentSession {
-
-  static {loadLibrary("sts_ui_extension_content_session.z");}
-
-  native sendData(data: Record<string, Object>): void;
-  native loadContent(path: string, storage?: LocalStorage): void;
-  native setWindowBackgroundColor(color: string): void;
-  native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
+  public nativeContextSession:long = 0;
+  //native sendData(data: Record<string, Object>): void;
+  //native loadContent(path: string, storage?: LocalStorage): void;
+  //public native setWindowBackgroundColor(color: string): void;
+  //native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
   native setReceiveDataCallbackSync(): void;
   native terminateSelfSync(): void;
 
   terminateSelf( callback: AsyncCallback<void>):void{
     console.log("ability.finishTest terminateSelfSync start");
-    let p1 = taskpool.execute(():undefined => {new UIExtensionContentSession().terminateSelfSync();  return undefined});
+    let p1 = taskpool.execute(():undefined => {this.terminateSelfSync();  return undefined});
     console.log("ability.finishTest terminateSelfSync end");
            p1.then((e :NullishType)=>{
              console.log("ability.finishTest terminateSelfSync");
@@ -48,7 +63,7 @@ export default class UIExtensionContentSession {
    }
    terminateSelf():Promise<void>{
      let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
-         let p1 = taskpool.execute(():undefined => {new UIExtensionContentSession().terminateSelfSync();  return undefined});
+         let p1 = taskpool.execute(():undefined => {this.terminateSelfSync();  return undefined});
          p1.then((e :NullishType)=>{
            let PromiseLike = e as PromiseLike<void>;
            resolve(PromiseLike);

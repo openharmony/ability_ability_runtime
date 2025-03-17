@@ -18,18 +18,12 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 generate_static_abc("ui_ability") {
   base_url = "./ets"
   files = [
-    "./ets/ability/abilityResult.ets",
     "./ets/application/AbilityStartCallback.ets",
     "./ets/application/ServiceExtensionContext.ets",
     "./ets/application/UIAbilityContext.ets",
-    "./ets/bundleManager/AbilityInfo.ets",
-    "./ets/@ohos.app.ability.AbilityConstant.ets",
-    "./ets/@ohos.app.ability.Configuration.ets",
-    "./ets/@ohos.app.ability.ConfigurationConstant.ets",
     "./ets/@ohos.app.ability.ServiceExtensionAbility.ets",
     "./ets/@ohos.app.ability.StartOptions.ets",
     "./ets/@ohos.app.ability.UIAbility.ets",
-    "./ets/@ohos.app.ability.Want.ets",
     "./ets/@ohos.base.ets",
   ]
 
