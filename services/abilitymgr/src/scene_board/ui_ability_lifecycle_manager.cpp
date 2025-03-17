@@ -2778,6 +2778,7 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
             sessionInfo->requestCode = request.requestCode;
             sessionInfo->userId = userId_;
             sessionInfo->tmpSpecifiedId = specifiedRequest.requestId;
+            sessionInfo->isFromIcon = request.isFromIcon;
             TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest cold");
             NotifySCBPendingActivation(sessionInfo, request);
             sessionInfo->want.RemoveAllFd();
