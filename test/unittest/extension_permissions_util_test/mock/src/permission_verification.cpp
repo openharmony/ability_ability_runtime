@@ -25,5 +25,9 @@ bool PermissionVerification::IsSACall() const
 {
     return (MyFlag::flag_ & MyFlag::FLAG::IS_SA_CALL);
 }
+bool PermissionVerification::IsShellCall() const
+{
+    return (MyFlag::flag_ & MyFlag::FLAG::IS_SHELL_CALL);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
