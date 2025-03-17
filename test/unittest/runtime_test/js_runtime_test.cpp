@@ -546,7 +546,7 @@ HWTEST_F(JsRuntimeTest, JsRuntimeLoadSystemModulesTest_0100, TestSize.Level0)
  */
 HWTEST_F(JsRuntimeTest, JsRuntimeStartDebugModeTest_0100, TestSize.Level0)
 {
-    TAG_LOGI(AAFwkTag::TEST, "StartDebugMode start");
+    TAG_LOGI(AAFwkTag::TEST, "JsRuntimeStartDebugModeTest_0100 start");
 
     auto jsRuntime = std::make_unique<JsRuntime>();
     AbilityRuntime::Runtime::DebugOption debugOption;
@@ -554,12 +554,38 @@ HWTEST_F(JsRuntimeTest, JsRuntimeStartDebugModeTest_0100, TestSize.Level0)
     debugOption.processName = "test";
     debugOption.isDebugApp = true;
     debugOption.isStartWithNative = false;
+    debugOption.isDeveloperMode = true;
     jsRuntime->StartDebugMode(debugOption);
     EXPECT_TRUE(jsRuntime != nullptr);
 
     jsRuntime.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    TAG_LOGI(AAFwkTag::TEST, "StartDebugMode end");
+    TAG_LOGI(AAFwkTag::TEST, "JsRuntimeStartDebugModeTest_0100 end");
+}
+
+/**
+ * @tc.name: JsRuntimeStartDebugModeTest_0200
+ * @tc.desc: JsRuntime test for StartDebugMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeStartDebugModeTest_0200, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "JsRuntimeStartDebugModeTest_0200 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    AbilityRuntime::Runtime::DebugOption debugOption;
+    debugOption.isStartWithDebug = true;
+    debugOption.processName = "test";
+    debugOption.isDebugApp = true;
+    debugOption.isStartWithNative = false;
+    debugOption.isDeveloperMode = false;
+    debugOption.isDebugFromLocal = true;
+    jsRuntime->StartDebugMode(debugOption);
+    EXPECT_TRUE(jsRuntime != nullptr);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "JsRuntimeStartDebugModeTest_0200 end");
 }
 
 /**
