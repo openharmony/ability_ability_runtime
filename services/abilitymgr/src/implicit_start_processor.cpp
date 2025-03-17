@@ -47,6 +47,8 @@ const std::string PARAM_ABILITY_APPINFOS = "ohos.ability.params.appInfos";
 const std::string ANCO_PENDING_REQUEST = "ancoPendingRequest";
 const int NFC_CALLER_UID = 1027;
 const int NFC_QUERY_LENGTH = 2;
+const int32_t API18 = 18;
+const int32_t API_VERSION_MOD = 100;
 const std::string OPEN_LINK_APP_LINKING_ONLY = "appLinkingOnly";
 const std::string HTTP_SCHEME_NAME = "http";
 const std::string HTTPS_SCHEME_NAME = "https";
@@ -186,10 +188,13 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start ability fail");
         return ERR_IMPLICIT_START_ABILITY_FAIL;
     }
-    if (dialogAppInfos.size() == 0 && request.want.HasParameter(OPEN_LINK_APP_LINKING_ONLY) &&
-        (request.want.GetUriString() == "" || request.want.GetUri().GetScheme() != FILE_SCHEME_NAME)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start ability fail");
-        return ERR_IMPLICIT_START_ABILITY_FAIL;
+    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(request.callerToken);
+    if (callerAbility != nullptr && callerAbility->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD >= API18) {
+        if (dialogAppInfos.size() == 0 && request.want.HasParameter(OPEN_LINK_APP_LINKING_ONLY) &&
+            (request.want.GetUriString() == "" || request.want.GetUri().GetScheme() != FILE_SCHEME_NAME)) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start ability fail");
+            return ERR_IMPLICIT_START_ABILITY_FAIL;
+        }
     }
     if (dialogAppInfos.size() == 0 && AppUtils::GetInstance().IsSelectorDialogDefaultPossion()) {
         ret = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want, want, request.callerToken);
