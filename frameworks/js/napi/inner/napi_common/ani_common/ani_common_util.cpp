@@ -396,6 +396,26 @@ ani_array_ref GetAniArrayString(ani_env *env, const std::vector<std::string> &va
     return aArrayRef;
 }
 
+bool GetRefFieldByName(ani_env *env, ani_object param, const char *name, ani_ref &ref)
+{
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_GetFieldByName_Ref(param, name, &ref)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Object_GetFieldByName_Ref failed, status : %{public}d", status);
+        return false;
+    }
+
+    ani_boolean isUndefined = true;
+    if ((status = env->Reference_IsUndefined(ref, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Reference_IsUndefined failed, status : %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "wantParams is undefined");
+        return false;
+    }
+    return true;
+}
+
 bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::string &value)
 {
     ani_field field = nullptr;
@@ -433,7 +453,6 @@ bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::s
     }
     return true;
 }
-
 
 bool SetFieldDouble(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, double value)
 {
@@ -480,6 +499,22 @@ bool SetFieldInt(ani_env *env, ani_class cls, ani_object object, const std::stri
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}s", fieldName.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool SetFieldRef(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, ani_ref value)
+{
+    ani_field field = nullptr;
+    ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "FindField %{public}s failed, status: %{public}d", fieldName.c_str(), status);
+        return false;
+    }
+    status = env->Object_SetField_Ref(object, field, value);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "SetField_Ref %{public}s failed, status: %{public}d", fieldName.c_str(), status);
         return false;
     }
     return true;

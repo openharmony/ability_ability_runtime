@@ -32,12 +32,14 @@ bool GetStdString(ani_env *env, ani_string str, std::string &res);
 
 ani_string GetAniString(ani_env *env, const std::string &str);
 ani_array_ref GetAniArrayString(ani_env *env, const std::vector<std::string> &values);
+bool GetRefFieldByName(ani_env *env, ani_object param, const char *name, ani_ref &ref);
 
 bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::string &value);
 bool SetFieldDouble(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, double value);
 bool SetFieldBoolean(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, bool value);
 bool SetFieldInt(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, int value);
 bool SetFieldArrayString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::vector<std::string> &values);
+bool SetFieldRef(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, ani_ref value);
 
 void ClassSetter(ani_env* env, ani_class cls, ani_object object, const char* setterName, ...);
 }  // namespace AppExecFwk
