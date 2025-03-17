@@ -18,8 +18,8 @@
  */
 
 // import { AbilityResult } from '../ability/abilityResult';
-import type { AsyncCallback } from '@ohos.base';
-import { BusinessError } from '@ohos.base';
+// import { AsyncCallback } from '@ohos.base';
+// import { BusinessError } from '@ohos.base';
 // import ConnectOptions from '../ability/connectOptions';
 // import ExtensionContext from './ExtensionContext';
 // import type Want from '../@ohos.app.ability.Want';
@@ -29,6 +29,25 @@ import { BusinessError } from '@ohos.base';
 // import type ConfigurationConstant from '../@ohos.app.ability.ConfigurationConstant';
 // import type UIServiceProxy from './UIServiceProxy';
 // import type UIServiceExtensionConnectCallback from './UIServiceExtensionConnectCallback';
+//import hilog from './@ohos.hilog';
+
+export type Callback<T> = (data: T)=> void;
+
+export class Result<T, E>{
+  result:T;
+  error:E;
+  constructor(result: T , error: E) {
+      this.result = result;
+      this.error = error;
+  }
+}
+
+export type AsyncCallback<T> = (err: BusinessError<T>, data: T)=> void;
+
+export class BusinessError<T = void> {
+    code: number;
+    data: T;
+}
 
 export default class UIExtensionContext {
   public nativeUIExtensionContext:long = 0;
@@ -36,7 +55,7 @@ export default class UIExtensionContext {
   public native  terminateSelfSyncPromise( ): void;
     terminateSelf(callback: AsyncCallback<void>):void{
       console.log("UIExtensionContext.terminateSelf callback1");
-    let p1 = taskpool.execute(():undefined => {new UIExtensionContext().terminateSelfSync();  return undefined});
+    let p1 = taskpool.execute(():undefined => {this.terminateSelfSync();  return undefined});
     console.log("UIExtensionContext.terminateSelf callback2");
         p1.then((e :NullishType)=>{
           console.log("UIExtensionContext.terminateSelf callback3");
@@ -51,19 +70,20 @@ export default class UIExtensionContext {
         });
     }
     terminateSelf( ):Promise<void>{
-      console.log("UIExtensionContext.terminateSelf promise1");
+      //hilog.info(0x0000, 'testTag',"UIExtensionContext.terminateSelf promise1");
       let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
-        console.log("UIExtensionContext.terminateSelf promise2");
-          let p1 = taskpool.execute(():undefined => {new UIExtensionContext().terminateSelfSyncPromise();  return undefined});
-          console.log("UIExtensionContext.terminateSelf promise3");
+        //hilog.info(0x0000, 'testTag',"UIExtensionContext.terminateSelf promise2");
+          let p1 = taskpool.execute(():undefined => {this.terminateSelfSyncPromise();  return undefined});
+          //hilog.info(0x0000, 'testTag',"UIExtensionContext.terminateSelf promise3");
           p1.then((e :NullishType)=>{
-            console.log("UIExtensionContext.terminateSelf promise4");
+            //hilog.info(0x0000, 'testTag',"UIExtensionContext.terminateSelf promise4");
             let PromiseLike = e as PromiseLike<void>;
             resolve(PromiseLike);
           }, (err:Object): void => {
-            console.log("UIExtensionContext.terminateSelf promise5");
+            //hilog.info(0x0000, 'testTag',"UIExtensionContext.terminateSelf promise5");
           });
       });
       return p;
     }
+
 }

@@ -13,16 +13,6 @@
  * limitations under the License.
  */
 
-export class Want {
-  bundleName?: string;
-  abilityName?: string;
-  deviceId?: string;
-  uri?: string;
-  type?: string;
-  flags: int;
-  action?: string;
-  parameters?: Record<string, Object>;
-  entities?: Array<string>;
-  moduleName?: string;
-  readonly fds?: Record<string, int>;
+export default class BaseContext {
+    pubilc stageMode: boolean;
 }

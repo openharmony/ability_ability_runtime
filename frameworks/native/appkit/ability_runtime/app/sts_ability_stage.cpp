@@ -19,6 +19,7 @@
 #include "hilog_tag_wrapper.h"
 #include "configuration_convertor.h"
 #include "sts_ability_stage_context.h"
+#include "ani_common_configuration.h"
 #include "ohos_application.h"
 #include "startup_manager.h"
 #include "hitrace_meter.h"
@@ -247,8 +248,7 @@ void STSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& co
         return;
     }
 
-    auto configurationPtr = std::make_shared<AppExecFwk::Configuration>(configuration);
-    ani_object configObj = STSAbilityStageContext::Createfiguration(env, configurationPtr);
+    ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, configuration);
 
 
     ani_method method = nullptr;
