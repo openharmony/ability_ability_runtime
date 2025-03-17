@@ -21,6 +21,34 @@
 
 namespace OHOS {
 namespace AAFwk {
+
+LastExitDetailInfo::LastExitDetailInfo(const LastExitDetailInfo &other)
+{
+    pid = other.pid;
+    uid = other.uid;
+    exitSubReason = other.exitSubReason;
+    rss = other.rss;
+    pss = other.pss;
+    timestamp = other.timestamp;
+    processName = other.processName;
+    exitMsg = other.exitMsg;
+}
+
+LastExitDetailInfo &LastExitDetailInfo::operator=(const LastExitDetailInfo &other)
+{
+    if (this != &other) {
+        pid = other.pid;
+        uid = other.uid;
+        exitSubReason = other.exitSubReason;
+        rss = other.rss;
+        pss = other.pss;
+        timestamp = other.timestamp;
+        processName = other.processName;
+        exitMsg = other.exitMsg;
+    }
+    return *this;
+}
+
 bool LastExitDetailInfo::ReadFromParcel(Parcel &parcel)
 {
     int32_t pidData;
