@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,25 @@
 #define OHOS_ABILITY_RUNTIME_URI_PERMISSION_MANAGER_CLIENT_H
 
 #include <functional>
+#include <sstream>
 
 #include "uri.h"
-#include "uri_permission_manager_interface.h"
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+#include "iuri_permission_manager_with_sand_box_mgr.h"
+#include "policy_info.h"
+#else
+#include "iuri_permission_manager.h"
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 
 namespace OHOS {
 namespace AAFwk {
-using ClearProxyCallback = std::function<void()>;
+using ProxyClearProxyCallback = std::function<void()>;
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+using namespace AccessControl::SandboxManager;
+using IUriPermissionManager = IUriPermissionManagerWithSandBoxMgr;
+#else
+using IUriPermissionManager = IUriPermissionManager;
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 class UriPermissionManagerClient {
 public:
     static UriPermissionManagerClient& GetInstance();
@@ -110,15 +122,18 @@ private:
     void SetUriPermMgr(const sptr<IRemoteObject> &remoteObject);
     sptr<IUriPermissionManager> GetUriPermMgr();
     DISALLOW_COPY_AND_MOVE(UriPermissionManagerClient);
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    void PolicyInfo2RawData(const std::vector<PolicyInfo> &policy, PolicyRawData &policyRawData);
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 
     class UpmsDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
-        explicit UpmsDeathRecipient(const ClearProxyCallback &proxy) : proxy_(proxy) {}
+        explicit UpmsDeathRecipient(const ProxyClearProxyCallback &proxy) : proxy_(proxy) {}
         ~UpmsDeathRecipient() = default;
         virtual void OnRemoteDied([[maybe_unused]] const wptr<IRemoteObject>& remote) override;
 
     private:
-        ClearProxyCallback proxy_;
+        ProxyClearProxyCallback proxy_;
     };
 
 private:
