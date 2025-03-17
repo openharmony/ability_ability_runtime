@@ -78,7 +78,7 @@ struct LaunchParam : public Parcelable {
     LastExitReason lastExitReason = LastExitReason::LASTEXITREASON_NORMAL;
     std::string launchReasonMessage = "";
     std::string lastExitMessage = "";
-    LastExitDetailInfo lastExitDetailInfo = {};
+    LastExitDetailInfo lastExitDetailInfo;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
