@@ -230,6 +230,15 @@
           },
           {
             "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/ani_base_context/include",
+              "header_files": [
+                "ani_base_context.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/ani_base_context:ani_base_context"
+          },
+          {
+            "header": {
               "header_base": "//foundation/ability/ability_runtime/frameworks/js/napi/inner/napi_common",
               "header_files": [
                 "napi_common_configuration.h",
