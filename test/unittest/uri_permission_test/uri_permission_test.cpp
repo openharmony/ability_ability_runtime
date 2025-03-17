@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr const int32_t CHECK_PERMISSION_FAILED = 2097177;
+}
 class UriPermissionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -47,11 +50,11 @@ void UriPermissionTest::TearDown() {}
 
 /*
  * Feature: URIPermissionManagerService
- * Function: GrantUriPermission
+ * Function: GrantSingleUriPermission
  * SubFunction: NA
- * FunctionPoints: URIPermissionManagerService GrantUriPermission
+ * FunctionPoints: URIPermissionManagerService GrantSingleUriPermission
  */
-HWTEST_F(UriPermissionTest, Upms_GrantUriPermission_001, TestSize.Level1)
+HWTEST_F(UriPermissionTest, Upms_GrantSingleUriPermission_001, TestSize.Level1)
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     EXPECT_NE(upms, nullptr);
@@ -59,7 +62,9 @@ HWTEST_F(UriPermissionTest, Upms_GrantUriPermission_001, TestSize.Level1)
     Uri uri(uriStr);
     unsigned int flag = 1;
     std::string targetBundleName = "name2";
-    upms->GrantUriPermission(uri, flag, targetBundleName);
+    int32_t funcResult = -1;
+    upms->GrantSingleUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
 }
 
 /*
