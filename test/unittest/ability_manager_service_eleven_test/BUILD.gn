@@ -1,0 +1,124 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
+
+module_output_path = "ability_runtime/ability_runtime/abilitymgr"
+
+ohos_unittest("ability_manager_service_eleven_test") {
+  use_exceptions = true
+  module_out_path = module_output_path
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../../cfi_blocklist.txt"
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  include_dirs = [
+    "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/include",
+    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime/",
+    "${ability_runtime_test_path}/mock/ability_manager_collaborator",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
+    "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit/include",
+    "${ability_runtime_test_path}/unittest/app_debug_listener_stub_test",
+    "${ability_runtime_services_path}/abilitymgr/include/mission",
+    "${ability_runtime_services_path}/abilitymgr/include/scene_board",
+    "mock/include",
+  ]
+
+  sources = [
+    "${ability_runtime_path}/services/abilitymgr/src/ability_auto_startup_service.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ability_connect_callback_stub.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/process_options.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/window_options_utils.cpp",
+    "ability_manager_service_eleven_test.cpp",
+    "mock/src/mock_my_flag.cpp",
+    "mock/src/mock_permission_verification.cpp",
+    "mock/src/mock_scene_board_judgement.cpp",
+  ]
+
+  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
+
+  cflags = [
+    "-Dprivate = public",
+    "-Dprotected = public",
+  ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
+    "${ability_runtime_innerkits_path}/ability_manager:mission_info",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
+    "${ability_runtime_native_path}/ability/native:auto_startup_callback",
+    "${ability_runtime_path}/utils/global/freeze:freeze_util",
+    "${ability_runtime_path}/utils/server/startup:startup_util",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/abilitymgr:ams_configuration_parameter",
+    "${ability_runtime_services_path}/abilitymgr:wantagent_manager",
+    "${ability_runtime_services_path}/common:app_util",
+    "${ability_runtime_services_path}/common:event_report",
+    "${ability_runtime_services_path}/common:perm_verification",
+    "${ability_runtime_services_path}/common:task_handler_wrap",
+    "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit:aakit_mock",
+  ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "safwk:api_cache_manager",
+    "selinux_adapter:librestorecon",
+    "window_manager:session_manager_lite",
+  ]
+
+  if (ability_runtime_graphics) {
+    external_deps += [
+      "hitrace:libhitracechain",
+      "window_manager:scene_session",
+    ]
+  }
+
+  cflags_cc = []
+
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":ability_manager_service_eleven_test" ]
+}
