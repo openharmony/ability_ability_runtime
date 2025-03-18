@@ -205,8 +205,6 @@ protected:
 private:
     inline bool UIExtensionAbilityExecuteInsightIntent(const Want &want);
 
-    void PrintTokenInfo() const;
-
     bool skipCommandExtensionWithIntent_ = false;
     int lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
     sptr<IRemoteObject> token_;

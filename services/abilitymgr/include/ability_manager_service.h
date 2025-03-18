@@ -1043,6 +1043,7 @@ public:
     void HandleActiveTimeOut(int64_t abilityRecordId);
     void HandleInactiveTimeOut(int64_t abilityRecordId);
     void HandleForegroundTimeOut(int64_t abilityRecordId, bool isHalf = false, bool isExtension = false);
+    void HandleConnectTimeOut(int64_t abilityRecordId, bool isHalf = false);
     void HandleShareDataTimeOut(int64_t uniqueId);
     int32_t GetShareDataPairAndReturnData(std::shared_ptr<AbilityRecord> abilityRecord,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam);
@@ -2010,6 +2011,8 @@ public:
     static constexpr uint32_t SHAREDATA_TIMEOUT_MSG = 7;
     static constexpr uint32_t LOAD_HALF_TIMEOUT_MSG = 8;
     static constexpr uint32_t FOREGROUND_HALF_TIMEOUT_MSG = 9;
+    static constexpr uint32_t CONNECT_TIMEOUT_MSG = 10;
+    static constexpr uint32_t CONNECT_HALF_TIMEOUT_MSG = 11;
 
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
     static constexpr uint32_t MAX_WAIT_SYSTEM_UI_NUM = 600;

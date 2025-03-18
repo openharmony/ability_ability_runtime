@@ -40,40 +40,38 @@ void AbilityEventHandler::ProcessEvent(const EventWrap &event)
         return;
     }
     switch (event.GetEventId()) {
-        case AbilityManagerService::LOAD_HALF_TIMEOUT_MSG: {
+        case AbilityManagerService::LOAD_HALF_TIMEOUT_MSG:
             ProcessLoadTimeOut(event, true);
             break;
-        }
-        case AbilityManagerService::LOAD_TIMEOUT_MSG: {
+        case AbilityManagerService::LOAD_TIMEOUT_MSG:
             ProcessLoadTimeOut(event, false);
             break;
-        }
-        case AbilityManagerService::ACTIVE_TIMEOUT_MSG: {
+        case AbilityManagerService::ACTIVE_TIMEOUT_MSG:
             ProcessActiveTimeOut(event.GetParam());
             break;
-        }
-        case AbilityManagerService::INACTIVE_TIMEOUT_MSG: {
+        case AbilityManagerService::INACTIVE_TIMEOUT_MSG:
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Inactive timeout.");
             // inactivate pre ability immediately in case blocking next ability start
             ProcessInactiveTimeOut(event.GetParam());
             break;
-        }
-        case AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG: {
+        case AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG:
             ProcessForegroundTimeOut(event, true);
             break;
-        }
-        case AbilityManagerService::FOREGROUND_TIMEOUT_MSG: {
+        case AbilityManagerService::FOREGROUND_TIMEOUT_MSG:
             ProcessForegroundTimeOut(event, false);
             break;
-        }
-        case AbilityManagerService::SHAREDATA_TIMEOUT_MSG: {
+        case AbilityManagerService::SHAREDATA_TIMEOUT_MSG:
             ProcessShareDataTimeOut(event.GetParam());
             break;
-        }
-        default: {
+        case AbilityManagerService::CONNECT_TIMEOUT_MSG:
+            ProcessConnectTimeOut(event, false);
+            break;
+        case AbilityManagerService::CONNECT_HALF_TIMEOUT_MSG:
+            ProcessConnectTimeOut(event, true);
+            break;
+        default:
             TAG_LOGW(AAFwkTag::ABILITYMGR, "unsupported timeout message");
             break;
-        }
     }
 }
 
@@ -115,6 +113,14 @@ void AbilityEventHandler::ProcessShareDataTimeOut(int64_t uniqueId)
     auto server = server_.lock();
     CHECK_POINTER(server);
     server->HandleShareDataTimeOut(uniqueId);
+}
+
+void AbilityEventHandler::ProcessConnectTimeOut(const EventWrap &event, bool isHalf)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "connect timeout");
+    auto server = server_.lock();
+    CHECK_POINTER(server);
+    server->HandleConnectTimeOut(event.GetParam(), isHalf);
 }
 
 }  // namespace AAFwk

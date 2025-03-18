@@ -74,6 +74,7 @@ constexpr const char* FROZEN_WHITE_DIALOG = "com.huawei.hmos.huaweicast";
 constexpr char BUNDLE_NAME_DIALOG[] = "com.ohos.amsdialog";
 constexpr char ABILITY_NAME_ASSERT_FAULT_DIALOG[] = "AssertFaultDialog";
 constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
+constexpr int32_t HALF_TIMEOUT = 2;
 
 constexpr uint32_t PROCESS_MODE_RUN_WITH_MAIN_PROCESS =
     1 << static_cast<uint32_t>(AppExecFwk::ExtensionProcessMode::RUN_WITH_MAIN_PROCESS);
@@ -868,7 +869,7 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetURI();
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "ability:%{public}s", element.c_str());
-    CancelLoadTimeoutTask(abilityRecord);
+    abilityRecord->RemoveLoadTimeoutTask();
     if (abilityRecord->IsSceneBoard()) {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "attach Ability: %{public}s", element.c_str());
         sceneBoardTokenId_ = abilityRecord->GetAbilityInfo().applicationInfo.accessTokenId;
@@ -1614,7 +1615,7 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord>
 {
     CHECK_POINTER(abilityRecord);
     int connectRecordId = 0;
-    if (messageId == AbilityConnectManager::CONNECT_TIMEOUT_MSG) {
+    if (messageId == AbilityManagerService::CONNECT_TIMEOUT_MSG) {
         auto connectRecord = abilityRecord->GetConnectingRecord();
         CHECK_POINTER(connectRecord);
         connectRecordId = connectRecord->GetRecordId();
@@ -1630,44 +1631,28 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord>
 
     std::string taskName;
     int32_t delayTime = 0;
+    auto recordId = abilityRecord->GetAbilityRecordId();
     if (messageId == AbilityManagerService::LOAD_TIMEOUT_MSG) {
         if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
             return abilityRecord->PostUIExtensionAbilityTimeoutTask(messageId);
         }
         // first load ability, There is at most one connect record.
-        int recordId = abilityRecord->GetRecordId();
-        taskName = std::string("LoadTimeout_") + std::to_string(recordId);
         delayTime = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
-    } else if (messageId == AbilityConnectManager::CONNECT_TIMEOUT_MSG) {
-        taskName = std::string("ConnectTimeout_") + std::to_string(connectRecordId);
+        abilityRecord->SendEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, delayTime / HALF_TIMEOUT,
+            recordId, true);
+        abilityRecord->SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, delayTime, recordId, true);
+    } else if (messageId == AbilityManagerService::CONNECT_TIMEOUT_MSG) {
+        taskName = std::to_string(connectRecordId);
         delayTime = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * CONNECT_TIMEOUT_MULTIPLE;
+        abilityRecord->SendEvent(AbilityManagerService::CONNECT_HALF_TIMEOUT_MSG, delayTime / HALF_TIMEOUT, recordId,
+            true, taskName);
+        abilityRecord->SendEvent(AbilityManagerService::CONNECT_TIMEOUT_MSG, delayTime, recordId, true, taskName);
         ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_BEGIN, abilityRecord->GetPid(),
-            abilityRecord->GetUid(), delayTime, abilityRecord->GetAbilityRecordId());
+            abilityRecord->GetUid(), delayTime, recordId);
     } else {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "messageId error");
         return;
     }
-
-    // check libc.hook_mode
-    const int bufferLen = 128;
-    char paramOutBuf[bufferLen] = {0};
-    const char *hook_mode = "startup:";
-    int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen - 1);
-    if (ret > 0 && strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) == 0) {
-        TAG_LOGD(AAFwkTag::SERVICE_EXT, "Hook_mode: no timeoutTask");
-        return;
-    }
-
-    auto timeoutTask = [abilityRecord, connectManagerWeak = weak_from_this(), messageId]() {
-        auto connectManager = connectManagerWeak.lock();
-        CHECK_POINTER(connectManager);
-        if (messageId == AbilityManagerService::LOAD_TIMEOUT_MSG) {
-            connectManager->HandleStartTimeoutTask(abilityRecord);
-        } else if (messageId == AbilityConnectManager::CONNECT_TIMEOUT_MSG) {
-            connectManager->HandleConnectTimeoutTask(abilityRecord);
-        }
-    };
-    taskHandler_->SubmitTask(timeoutTask, taskName, delayTime);
 }
 
 void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -1893,7 +1878,7 @@ void AbilityConnectManager::ConnectAbility(const std::shared_ptr<AbilityRecord> 
     if (extType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         ResumeConnectAbility(abilityRecord);
     } else {
-        PostTimeOutTask(abilityRecord, AbilityConnectManager::CONNECT_TIMEOUT_MSG);
+        PostTimeOutTask(abilityRecord, AbilityManagerService::CONNECT_TIMEOUT_MSG);
         abilityRecord->ConnectAbility();
     }
 }
@@ -1903,7 +1888,7 @@ void AbilityConnectManager::ConnectUIServiceExtAbility(const std::shared_ptr<Abi
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER(abilityRecord);
-    PostTimeOutTask(abilityRecord, connectRecordId, AbilityConnectManager::CONNECT_TIMEOUT_MSG);
+    PostTimeOutTask(abilityRecord, connectRecordId, AbilityManagerService::CONNECT_TIMEOUT_MSG);
     abilityRecord->ConnectAbilityWithWant(want);
 }
 
@@ -1919,7 +1904,7 @@ void AbilityConnectManager::ResumeConnectAbility(const std::shared_ptr<AbilityRe
             continue;
         }
         int connectRecordId = connectRecord->GetRecordId();
-        PostTimeOutTask(abilityRecord, connectRecordId, AbilityConnectManager::CONNECT_TIMEOUT_MSG);
+        PostTimeOutTask(abilityRecord, connectRecordId, AbilityManagerService::CONNECT_TIMEOUT_MSG);
         abilityRecord->ConnectAbilityWithWant(connectRecord->GetConnectWant());
     }
 }
@@ -2201,22 +2186,9 @@ int32_t AbilityConnectManager::GetActiveUIExtensionList(
 
 void AbilityConnectManager::OnLoadAbilityFailed(std::shared_ptr<AbilityRecord> abilityRecord)
 {
-    CancelLoadTimeoutTask(abilityRecord);
-    HandleStartTimeoutTask(abilityRecord);
-}
-
-void AbilityConnectManager::CancelLoadTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord)
-{
     CHECK_POINTER(abilityRecord);
-    if (taskHandler_) {
-        auto recordId = abilityRecord->GetRecordId();
-        std::string taskName = std::string("LoadTimeout_") + std::to_string(recordId);
-        taskHandler_->CancelTask(taskName);
-    }
-    
-    if (eventHandler_) {
-        abilityRecord->RemoveLoadTimeoutTask();
-    }
+    abilityRecord->RemoveLoadTimeoutTask();
+    HandleStartTimeoutTask(abilityRecord);
 }
 
 void AbilityConnectManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)
@@ -2270,6 +2242,9 @@ void AbilityConnectManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordId, b
             break;
         case AbilityManagerService::FOREGROUND_TIMEOUT_MSG:
             HandleForegroundTimeoutTask(abilityRecord);
+            break;
+        case AbilityManagerService::CONNECT_TIMEOUT_MSG:
+            HandleConnectTimeoutTask(abilityRecord);
             break;
         default:
             break;
@@ -2972,29 +2947,8 @@ void AbilityConnectManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord>
     }
     int typeId = AppExecFwk::AppfreezeManager::TypeAttribute::NORMAL_TIMEOUT;
     std::string msgContent = "ability:" + ability->GetAbilityInfo().name + " ";
-    switch (msgId) {
-        case AbilityManagerService::LOAD_TIMEOUT_MSG:
-            msgContent += "load timeout";
-            typeId = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
-            break;
-        case AbilityManagerService::ACTIVE_TIMEOUT_MSG:
-            msgContent += "active timeout";
-            break;
-        case AbilityManagerService::INACTIVE_TIMEOUT_MSG:
-            msgContent += "inactive timeout";
-            break;
-        case AbilityManagerService::FOREGROUND_TIMEOUT_MSG:
-            msgContent += "foreground timeout";
-            typeId = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
-            break;
-        case AbilityManagerService::BACKGROUND_TIMEOUT_MSG:
-            msgContent += "background timeout";
-            break;
-        case AbilityManagerService::TERMINATE_TIMEOUT_MSG:
-            msgContent += "terminate timeout";
-            break;
-        default:
-            return;
+    if (!GetTimeoutMsgContent(msgId, msgContent, typeId)) {
+        return;
     }
 
     TAG_LOGW(AAFwkTag::SERVICE_EXT,
@@ -3010,7 +2964,42 @@ void AbilityConnectManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord>
         .bundleName = ability->GetAbilityInfo().bundleName,
         .msg = msgContent
     };
+    if (!IsUIExtensionAbility(ability)) {
+        info.needKillProcess = false;
+    }
     AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info);
+}
+
+bool AbilityConnectManager::GetTimeoutMsgContent(uint32_t msgId, std::string &msgContent, int &typeId)
+{
+    switch (msgId) {
+        case AbilityManagerService::LOAD_TIMEOUT_MSG:
+            msgContent += "load timeout";
+            typeId = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
+            return true;
+        case AbilityManagerService::ACTIVE_TIMEOUT_MSG:
+            msgContent += "active timeout";
+            return true;
+        case AbilityManagerService::INACTIVE_TIMEOUT_MSG:
+            msgContent += "inactive timeout";
+            return true;
+        case AbilityManagerService::FOREGROUND_TIMEOUT_MSG:
+            msgContent += "foreground timeout";
+            typeId = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
+            return true;
+        case AbilityManagerService::BACKGROUND_TIMEOUT_MSG:
+            msgContent += "background timeout";
+            return true;
+        case AbilityManagerService::TERMINATE_TIMEOUT_MSG:
+            msgContent += "terminate timeout";
+            return true;
+        case AbilityManagerService::CONNECT_TIMEOUT_MSG:
+            msgContent += "connect timeout";
+            typeId = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
+            return true;
+        default:
+            return false;
+    }
 }
 
 void AbilityConnectManager::MoveToTerminatingMap(const std::shared_ptr<AbilityRecord>& abilityRecord)
