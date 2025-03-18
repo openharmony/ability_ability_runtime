@@ -12,24 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef OHOS_ABILITY_RUNTIME_CJ_CALLER_COMPLEX_H
+#define OHOS_ABILITY_RUNTIME_CJ_CALLER_COMPLEX_H
 
-#include "hilog_tag_wrapper.h"
+#include <memory>
+#include <functional>
+
+#include "ability_context.h"
+#include "cj_common_ffi.h"
+#include "iremote_object.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-#ifndef CJ_EXPORT
-#ifndef __WINDOWS__
-#define CJ_EXPORT __attribute__((visibility("default")))
-#else
-#define CJ_EXPORT __declspec(dllexport)
-#endif
-#endif
+using ReleaseCallFunc = std::function<ErrCode(std::shared_ptr<CallerCallBack>&)>;
 
-extern "C" {
-CJ_EXPORT void FFIRegisterCJExtAbilityFuncs()
-{
-    return;
-}
-}
-} // namespace AbilityRuntime
-} // namespace OHOS
+int32_t CreateCjCallerComplex(
+    ReleaseCallFunc releaseCallFunc, sptr<IRemoteObject> callee,
+    std::shared_ptr<CallerCallBack> callerCallBack, int64_t* callerId, int64_t* remoteId);
+
+int64_t CreateCjCalleeRemoteObject(sptr<IRemoteObject> callee);
+} // AbilityRuntime
+} // OHOS
+#endif  // OHOS_ABILITY_RUNTIME_CJ_CALLER_COMPLEX_H

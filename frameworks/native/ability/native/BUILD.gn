@@ -439,6 +439,70 @@ ohos_shared_library("abilitykit_native") {
   part_name = "ability_runtime"
 }
 
+ohos_shared_library("cj_abilitykit_native_ffi") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  defines = [ "AMS_LOG_TAG = \"Ability\"" ]
+  defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
+  branch_protector_ret = "pac_ret"
+  sources = [
+    "${ability_runtime_native_path}/ability/native/ability_runtime/cj_ability_context_ffi.cpp",
+    "${ability_runtime_native_path}/ability/native/ability_runtime/cj_caller_complex.cpp",
+  ]
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
+    "${ability_runtime_path}/frameworks/cj/ffi",
+    "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
+  ]
+  public_configs = [ "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi_public_config" ]
+
+  defines += [ "CJ_FRONTEND" ]
+  deps = [
+    ":abilitykit_native",
+    ":continuation_ipc",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi",
+  ]
+  external_deps = [
+    "ace_engine:ace_uicontent",
+    "eventhandler:libeventhandler",
+    "ipc:cj_ipc_ffi",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "ipc:rpc",
+    "napi:ace_napi",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+  ]
+
+  if (!(host_os == "linux" && host_cpu == "arm64")) {
+    external_deps += [ "relational_store:native_rdb" ]
+  }
+
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
+
+  if (background_task_mgr_continuous_task_enable) {
+    external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
+    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
+  }
+
+  innerapi_tags = [ "platformsdk" ]
+  version_script = "libabilitykit_native.map"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 config("extensionkit_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
@@ -513,9 +577,6 @@ ohos_shared_library("extensionkit_native") {
     "jsoncpp:jsoncpp",
   ]
 
-  if (cj_frontend) {
-    sources += [ "${ability_runtime_native_path}/ability/native/cj_extension_common_instance.cpp" ]
-  }
   if (ability_runtime_graphics) {
     external_deps += [ "ability_base:session_info" ]
     public_external_deps += [
@@ -1539,9 +1600,6 @@ ohos_shared_library("ui_extension") {
     "window_manager:windowstage_kit",
   ]
 
-  if (cj_frontend) {
-    sources += [ "${ability_runtime_native_path}/ability/native/ui_extension_base/cj_ui_extension_base_instance.cpp" ]
-  }
   if (ability_runtime_graphics) {
     defines = [ "SUPPORT_SCREEN" ]
     external_deps += [

@@ -289,7 +289,7 @@ private:
 #endif
 private:
     std::shared_ptr<AppExecFwk::ACJDelegatorAbilityProperty> CreateADelegatorAbilityProperty();
-    sptr<IRemoteObject> SetNewRuleFlagToCallee(napi_env env, napi_value remoteJsObj);
+    sptr<IRemoteObject> SetNewRuleFlagToCallee(int64_t remoteJsObj);
     void SetAbilityContext(const std::shared_ptr<AbilityInfo> &abilityInfo);
     void InitSceneDoOnForeground(std::shared_ptr<Rosen::WindowScene> scene, const Want &want);
     void AddLifecycleEventBeforeCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;

@@ -24,6 +24,7 @@ group("cj_ability_packages") {
     "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi",
     "${ability_runtime_path}/frameworks/cj/ffi/want_agent:cj_want_agent_ffi",
     "${ability_runtime_path}/frameworks/native/ability:cj_ability_context_native",
+    "${ability_runtime_path}/frameworks/native/ability/native:cj_abilitykit_native_ffi",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_action_extension",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_embedded_ui_extension",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_extensionkit_native",
