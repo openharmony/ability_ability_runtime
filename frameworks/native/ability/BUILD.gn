@@ -110,10 +110,6 @@ ohos_shared_library("ability_context_native") {
     external_deps += [ "hichecker:libhichecker" ]
   }
 
-  if (cj_frontend) {
-    sources += [ "ability_runtime/cj_extension_context_instance.cpp" ]
-  }
-
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
