@@ -7546,6 +7546,8 @@ void AbilityManagerService::RemoveUnauthorizedLaunchReasonMessage(const Want &wa
         auto targetRecord = Token::GetAbilityRecordByToken(callerToken);
         if (targetRecord == nullptr) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "targetRecord is nullptr.");
+            (const_cast<Want &>(want)).RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+            abilityRequest.want.RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
             return;
         }
         auto tokenId = targetRecord->GetAbilityInfo().applicationInfo.accessTokenId;
