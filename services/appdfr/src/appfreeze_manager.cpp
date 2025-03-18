@@ -274,7 +274,7 @@ int AppfreezeManager::AcquireStack(const FaultData& faultData,
     for (auto& pidTemp : syncPids) {
         TAG_LOGI(AAFwkTag::APPDFR, "PeerBinder pidTemp pids:%{public}d", pidTemp);
         if (pidTemp != pid) {
-            std::string content = "PeerBinder catcher stacktrace for pid : " + std::to_string(pidTemp) + "\n";
+            std::string content = "Binder catcher stacktrace, type is peer, pid : " + std::to_string(pidTemp) + "\n";
             content += CatcherStacktrace(pidTemp);
             binderInfo += content;
         }
@@ -282,7 +282,7 @@ int AppfreezeManager::AcquireStack(const FaultData& faultData,
     for (auto& pidTemp : asyncPids) {
         TAG_LOGI(AAFwkTag::APPDFR, "AsyncBinder pidTemp pids:%{public}d", pidTemp);
         if (pidTemp != pid && syncPids.find(pidTemp) == syncPids.end()) {
-            std::string content = "AsyncBinder catcher stacktrace for pid : " + std::to_string(pidTemp) + "\n";
+            std::string content = "Binder catcher stacktrace, type is async, pid : " + std::to_string(pidTemp) + "\n";
             content += CatcherStacktrace(pidTemp);
             binderInfo += content;
         }
