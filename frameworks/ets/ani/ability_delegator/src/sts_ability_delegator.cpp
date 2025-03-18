@@ -19,6 +19,7 @@
 #include <mutex>
 #include "hilog_tag_wrapper.h"
 #include "shell_cmd_result.h"
+#include "ani_common_want.h"
 namespace OHOS {
 namespace AbilityDelegatorSts {
 
@@ -28,8 +29,25 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
     std::shared_ptr<AbilityRuntime::Context> context)
 {
     // bind parent context property
+    ani_status status = ANI_ERROR;
     ani_method areaSetter;
     ani_object contextObj = nullptr;
+    ani_method method = nullptr;
+
+    status = aniEnv->Class_FindMethod(contextClass, "<ctor>", ":V", &method);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status : %{public}d", status);
+        return {};
+    }
+    TAG_LOGI(AAFwkTag::DELEGATOR, "Class_FindMethod ctor success");
+
+    status = aniEnv->Object_New(contextClass, method, &contextObj);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status : %{public}d", status);
+        return {};
+    }
+    TAG_LOGI(AAFwkTag::DELEGATOR, "Object_New success");
+
     if (ANI_OK != aniEnv->Class_FindMethod(contextClass, "<set>area", nullptr, &areaSetter)) {
         TAG_LOGE(AAFwkTag::APPKIT, "find set area failed");
     }
@@ -65,25 +83,25 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
 
 ani_object GetAppContext(ani_env* env, ani_class clss)
 {
-    TAG_LOGE(AAFwkTag::DELEGATOR, "GetAppContext call");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "GetAppContext call");
     ani_class cls;
-    if (ANI_OK != env->FindClass("L@ohos/ability/AbilityDelegator/Context;", &cls)) {
+    ani_object nullobj = nullptr;
+    if (ANI_OK != env->FindClass("Lapplication/Context;", &cls)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "CreateStsBaseContext FindClass");
+        return nullobj;
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (!delegator) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
-        ani_object nullobj = nullptr;
         return nullobj;
     }
     std::shared_ptr<AbilityRuntime::Context> context = delegator->GetAppContext();
     if (!context) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null context");
-        ani_object nullobj = nullptr;
         return nullobj;
     }
     ani_object object = CreateStsBaseContext(env, cls, context);
-    TAG_LOGE(AAFwkTag::DELEGATOR, "GetAppContext end");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "GetAppContext end");
     return object;
 }
 
@@ -194,17 +212,91 @@ void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg)
     return;
 }
 
+void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resString)
+{
+    ani_status status = ANI_OK;
+    ani_size result = 0U;
+    status = env->String_GetUTF8Size(string, &result);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "zg String_GetUTF8Size failed status : %{public}d", status);
+        return;
+    }
+    ani_size substrOffset = 0U;
+    ani_size substrSize = result;
+    const ani_size bufferExtension = 10U;
+    resString.resize(substrSize + bufferExtension);
+    ani_size resSize = resString.size();
+    result = 0U;
+    status = env->String_GetUTF8SubString(string, substrOffset, substrSize, resString.data(), resSize, &result);
+}
+
 void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "AddAbilityMonitorASync");
-    //TODO parse monitorObj
-    std::shared_ptr<AppExecFwk::IAbilityMonitor> monitor = std::make_shared<AppExecFwk::IAbilityMonitor>("");
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    ani_class monitorCls;
+    ani_status status = env->FindClass("L@ohos/ability/AbilityDelegator/AbilityMonitor;", &monitorCls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status : %{public}d", status);
+        return;
+    }
+
+    ani_field fieldModuleName = nullptr;
+    status = env->Class_FindField(monitorCls, "moduleName", &fieldModuleName);
+    if (status != ANI_OK) {
+        TAG_LOGI(AAFwkTag::DELEGATOR, "Class_GetField failed");
+        return;
+    }
+
+    ani_ref moduleNameRef;
+    status = env->Object_GetField_Ref(monitorObj, fieldModuleName, &moduleNameRef);
+    if (status != ANI_OK) {
+        TAG_LOGI(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
+        return;
+    }
+    std::string strModuleName;
+    ani_string aniModuleString = static_cast<ani_string>(moduleNameRef);
+    RetrieveStringFromAni(env, aniModuleString, strModuleName);
+
+    ani_field fieldAbilityName = nullptr;
+    status = env->Class_FindField(monitorCls, "abilityName", &fieldAbilityName);
+    if (status != ANI_OK) {
+        TAG_LOGI(AAFwkTag::DELEGATOR, "Class_GetField failed");
+        return;
+    }
+
+    ani_ref abilityNameRef;
+    status = env->Object_GetField_Ref(monitorObj, fieldAbilityName, &abilityNameRef);
+    if (status != ANI_OK) {
+        TAG_LOGI(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
+        return;
+    }
+
+    std::string strAbilityName;
+    ani_string aniAbilityName = static_cast<ani_string>(abilityNameRef);
+    RetrieveStringFromAni(env, aniAbilityName, strAbilityName);
+
+    std::shared_ptr<AppExecFwk::IAbilityMonitor> monitor =
+        std::make_shared<AppExecFwk::IAbilityMonitor>(strAbilityName, strModuleName);
+
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (delegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
         return;
     }
     delegator->AddAbilityMonitor(monitor);
+}
+
+ani_int StartAbility(ani_env* env, ani_class aniClass, ani_object wantObj)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "StartAbility call");
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "UnwrapWant  failed");
+        return ani_int(-1);
+    }
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
+    int result = delegator->StartAbility(want);
+    return ani_int(result);
 }
 
 } // namespace AbilityDelegatorSts
