@@ -78,6 +78,8 @@ public:
     bool CreateOpenLinkTask(RuntimeTask &&task, int32_t requestCode, AAFwk::Want &want, int &nativeRequestCode);
     int32_t OpenLink(const AAFwk::Want& want, int requestCode);
     int32_t ChangeAbilityVisibility(bool isShow);
+    int32_t StartAbilityByCall(const AAFwk::Want& want, const std::shared_ptr<CallerCallBack> &callback,
+        int32_t accountId);
 
 #ifdef SUPPORT_GRAPHICS
     int32_t SetMissionLabel(const std::string& label);

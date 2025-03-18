@@ -18,9 +18,13 @@
 #include "cj_remote_object_ffi.h"
 #include "cj_macro.h"
 #include "hilog_tag_wrapper.h"
+#include <dlfcn.h>
 
 namespace OHOS {
 namespace AbilityRuntime {
+const char* CJ_IPC_LIBNAME = "libcj_ipc_ffi.z.so";
+const char* FUNC_CREATE_REMOTEOBJECT = "OHOS_CallCreateRemoteObject";
+
 struct CJUIExtensionConnectionKey {
     AAFwk::Want want;
     int64_t id;
@@ -37,7 +41,7 @@ struct KeyCompare {
 };
 
 namespace {
-static CJAbilityConnectCallbackFuncs* g_cjAbilityConnectCallbackFuncs = nullptr;
+static CJAbilityConnectCallbackFuncs g_cjAbilityConnectCallbackFuncs {};
 static std::map<CJUIExtensionConnectionKey, sptr<CJAbilityConnectCallback>, KeyCompare> g_connects;
 static int64_t g_serialNumber = 0;
 static std::mutex g_connectMtx;
@@ -46,13 +50,12 @@ static std::mutex g_connectMtx;
 void RegisterCJAbilityConnectCallbackFuncs(void (*registerFunc)(CJAbilityConnectCallbackFuncs* result))
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "start");
-    if (g_cjAbilityConnectCallbackFuncs != nullptr) {
+    if (g_cjAbilityConnectCallbackFuncs.onConnect != nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "not null cangjie callback");
         return;
     }
 
-    g_cjAbilityConnectCallbackFuncs = new CJAbilityConnectCallbackFuncs();
-    registerFunc(g_cjAbilityConnectCallbackFuncs);
+    registerFunc(&g_cjAbilityConnectCallbackFuncs);
 }
 
 sptr<CJAbilityConnectCallback> CJAbilityConnectCallback::Create(int64_t id, AAFwk::Want& want)
@@ -107,54 +110,70 @@ void CJAbilityConnectCallback::FindConnection(AAFwk::Want& want, sptr<CJAbilityC
 
 CJAbilityConnectCallback::~CJAbilityConnectCallback()
 {
-    if (g_cjAbilityConnectCallbackFuncs == nullptr) {
+    if (g_cjAbilityConnectCallbackFuncs.release == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null cangjie callback");
         return;
     }
-    g_cjAbilityConnectCallbackFuncs->release(callbackId_);
+    g_cjAbilityConnectCallbackFuncs.release(callbackId_);
+}
+
+
+int64_t CallCreateRemoteObject(sptr<IRemoteObject> remoteObject)
+{
+    int64_t ret = 0;
+    void* handle = dlopen(CJ_IPC_LIBNAME, RTLD_LAZY);
+    if (handle == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
+        return ret;
+    }
+    using CreateRemoteObjectFunc = int64_t (*)(void *);
+    auto func = reinterpret_cast<CreateRemoteObjectFunc>(dlsym(handle, FUNC_CREATE_REMOTEOBJECT));
+    if (func == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null func");
+        dlclose(handle);
+        return ret;
+    }
+    ret = func(&remoteObject);
+    dlclose(handle);
+    return ret;
 }
 
 void CJAbilityConnectCallback::OnAbilityConnectDone(
     const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called, resultCode:%{public}d", resultCode);
-    if (g_cjAbilityConnectCallbackFuncs == nullptr) {
+    if (g_cjAbilityConnectCallbackFuncs.onConnect == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null g_cjAbilityConnectCallbackFuncs");
         return;
     }
 
     ElementNameHandle elementNameHandle = const_cast<AppExecFwk::ElementName*>(&element);
-    // The cj side is responsible for the release.
-    auto cjRemoteObj = FFI::FFIData::Create<AppExecFwk::CJRemoteObject>(remoteObject);
-    if (cjRemoteObj == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null cjRemoteObj");
-        return;
-    }
-    g_cjAbilityConnectCallbackFuncs->onConnect(callbackId_, elementNameHandle, cjRemoteObj->GetID(), resultCode);
+    int64_t cjRemoteObj = CallCreateRemoteObject(remoteObject);
+    g_cjAbilityConnectCallbackFuncs.onConnect(callbackId_, elementNameHandle, cjRemoteObj, resultCode);
 }
 
 void CJAbilityConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called, resultCode:%{public}d", resultCode);
-    if (g_cjAbilityConnectCallbackFuncs == nullptr) {
+    if (g_cjAbilityConnectCallbackFuncs.onDisconnect == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null cangjie callback");
         return;
     }
 
     ElementNameHandle elementNameHandle = const_cast<AppExecFwk::ElementName*>(&element);
-    g_cjAbilityConnectCallbackFuncs->onDisconnect(callbackId_, elementNameHandle, resultCode);
+    g_cjAbilityConnectCallbackFuncs.onDisconnect(callbackId_, elementNameHandle, resultCode);
     Remove(connectId_);
 }
 
 void CJAbilityConnectCallback::OnFailed(int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called, resultCode:%{public}d", resultCode);
-    if (g_cjAbilityConnectCallbackFuncs == nullptr) {
+    if (g_cjAbilityConnectCallbackFuncs.onFailed == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null cangjie callback");
         return;
     }
 
-    g_cjAbilityConnectCallbackFuncs->onFailed(callbackId_, resultCode);
+    g_cjAbilityConnectCallbackFuncs.onFailed(callbackId_, resultCode);
 }
 } // AbilityRuntime
 } // OHOS
