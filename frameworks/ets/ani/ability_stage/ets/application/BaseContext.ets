@@ -14,5 +14,5 @@
  */
 
 export default class BaseContext {
-    pubilc stageMode: boolean;
+    public stageMode: boolean;
 }
