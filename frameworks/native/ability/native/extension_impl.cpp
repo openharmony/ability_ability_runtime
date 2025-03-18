@@ -54,31 +54,10 @@ void ExtensionImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
             extension_->SetExtensionWindowLifeCycleListener(
                 sptr<ExtensionWindowLifeCycleImpl>(new ExtensionWindowLifeCycleImpl(token_, shared_from_this())));
         }
-        if (record->GetAbilityInfo()->name == "com.ohos.callui.ServiceAbility") {
-            PrintTokenInfo();
-        }
     }
     extension_->Init(record, application, handler, token);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
     skipCommandExtensionWithIntent_ = false;
-}
-
-void ExtensionImpl::PrintTokenInfo() const
-{
-    if (token_ == nullptr) {
-        TAG_LOGI(AAFwkTag::EXT, "null token");
-        return;
-    }
-    if (!token_->IsProxyObject()) {
-        TAG_LOGI(AAFwkTag::EXT, "token not proxy");
-        return;
-    }
-    IPCObjectProxy *tokenProxyObject = reinterpret_cast<IPCObjectProxy *>(token_.GetRefPtr());
-    if (tokenProxyObject != nullptr) {
-        std::string remoteDescriptor = Str16ToStr8(tokenProxyObject->GetInterfaceDescriptor());
-        TAG_LOGI(AAFwkTag::EXT, "handle: %{public}d, descriptor: %{public}s",
-            tokenProxyObject->GetHandle(), remoteDescriptor.c_str());
-    }
 }
 
 /**

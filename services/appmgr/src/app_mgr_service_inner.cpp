@@ -6810,6 +6810,7 @@ FaultData AppMgrServiceInner::ConvertDataTypes(const AppFaultDataBySA &faultData
     newfaultData.token = faultData.token;
     newfaultData.state = faultData.state;
     newfaultData.eventId = faultData.eventId;
+    newfaultData.needKillProcess = faultData.needKillProcess;
     return newfaultData;
 }
 

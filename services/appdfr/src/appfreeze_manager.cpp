@@ -261,6 +261,7 @@ int AppfreezeManager::LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::
                                  std::to_string(info.pid) +
                                  "-" + std::to_string(AbilityRuntime::TimeUtil::CurrentTimeMillis());
     faultDataSA.pid = info.pid;
+    faultDataSA.needKillProcess = info.needKillProcess;
     if (flow.state != AbilityRuntime::FreezeUtil::TimeoutState::UNKNOWN) {
         faultDataSA.token = flow.token;
         faultDataSA.state = static_cast<uint32_t>(flow.state);

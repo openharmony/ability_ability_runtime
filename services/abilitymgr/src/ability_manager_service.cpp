@@ -7076,6 +7076,17 @@ void AbilityManagerService::HandleInactiveTimeOut(int64_t abilityRecordId)
     }
 }
 
+void AbilityManagerService::HandleConnectTimeOut(int64_t abilityRecordId, bool isHalf)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Handle connect timeout.");
+    auto connectManagers = GetConnectManagers();
+    for (auto& item : connectManagers) {
+        if (item.second) {
+            item.second->OnTimeOut(AbilityManagerService::CONNECT_TIMEOUT_MSG, abilityRecordId, isHalf);
+        }
+    }
+}
+
 void AbilityManagerService::HandleForegroundTimeOut(int64_t abilityRecordId, bool isHalf, bool isExtension)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "foreground timeout %{public}" PRId64, abilityRecordId);

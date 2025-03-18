@@ -131,9 +131,6 @@ ErrCode ServiceExtensionContext::StartAbilityWithAccount(const AAFwk::Want &want
     TAG_LOGI(AAFwkTag::APPKIT, "accountId: %{public}d, ability: %{public}s, caller: %{public}s",
         accountId, want.GetElement().GetURI().c_str(), callerName.c_str());
     (const_cast<Want &>(want)).SetParam(START_ABILITY_TYPE, true);
-    if (callerName == "com.ohos.callui.ServiceAbility") {
-        PrintTokenInfo();
-    }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(
         want, token_, ILLEGAL_REQUEST_CODE, accountId);
     TAG_LOGD(AAFwkTag::APPKIT, "ret=%{public}d", err);

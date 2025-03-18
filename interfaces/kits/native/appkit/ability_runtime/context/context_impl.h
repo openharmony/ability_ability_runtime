@@ -422,8 +422,6 @@ public:
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
 
-    void PrintTokenInfo() const;
-
     void AppHasDarkRes(bool &darkRes);
 
     void SetProcessName(const std::string &processName);

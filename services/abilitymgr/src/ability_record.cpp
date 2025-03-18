@@ -2797,12 +2797,13 @@ bool AbilityRecord::IsActiveState() const
             IsAbilityState(AbilityState::FOREGROUNDING));
 }
 
-void AbilityRecord::SendEvent(uint32_t msg, uint32_t timeOut, int32_t param, bool isExtension)
+void AbilityRecord::SendEvent(uint32_t msg, uint32_t timeOut, int32_t param, bool isExtension,
+    const std::string &taskName)
 {
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER(handler);
     param = (param == -1) ? recordId_ : param;
-    auto eventWrap = EventWrap(msg, param, isExtension);
+    auto eventWrap = EventWrap(msg, param, isExtension, taskName);
     eventWrap.SetTimeout(timeOut);
     if (!handler->SendEvent(eventWrap, timeOut, false)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "failed: %{public}u, %{public}d", msg, param);

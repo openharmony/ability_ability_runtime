@@ -66,6 +66,7 @@ struct FaultData : public Parcelable {
     bool waitSaveState = false;
     bool notifyApp = false;
     bool forceExit = false;
+    bool needKillProcess = true;
     uint32_t state = 0;
     int32_t eventId = -1;
     int32_t tid = -1;
@@ -82,6 +83,8 @@ struct AppFaultDataBySA : public Parcelable {
     bool waitSaveState = false;
     bool notifyApp = false;
     bool forceExit = false;
+    bool needKillProcess = true;
+    bool WriteErrorObject(Parcel &parcel) const;
     virtual bool Marshalling(Parcel &parcel) const override;
     static AppFaultDataBySA *Unmarshalling(Parcel &parcel);
     // error object
