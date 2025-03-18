@@ -373,6 +373,7 @@ group("unittest") {
       "ability_manager_service_seventh_test:unittest",
       "ability_manager_service_sixth_test:unittest",
       "ability_manager_service_third_test:unittest",
+      "ability_manager_service_twelfth_test:unittest",
       "ability_manager_stub_second_test:unittest",
       "ability_manager_stub_test:unittest",
       "ability_permission_util_test:unittest",
