@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,25 +12,37 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-config("napi_context_base_public_config") {
+config("ani_context_base_public_config") {
   visibility = [ ":*" ]
   include_dirs = [ "include" ]
 }
 
-ohos_shared_library("napi_base_context") {
-  sources = [ "src/napi_base_context.cpp" ]
+ohos_shared_library("ani_base_context") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "include",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+  ]
+
+  sources = [ "src/ani_base_context.cpp" ]
 
   configs = []
 
-  public_configs = [ ":napi_context_base_public_config" ]
+  public_configs = [ ":ani_context_base_public_config" ]
 
-  external_deps = [ "napi:ace_napi" ]
-
-  public_external_deps = [
-    "form_fwk:form_manager",
-    "window_manager:libdm",
-    "window_manager:libwm",
+  external_deps = [
+    "ability_base:configuration",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "runtime_core:ani",
   ]
 
   innerapi_tags = [ "platformsdk" ]
