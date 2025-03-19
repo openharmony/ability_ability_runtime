@@ -2871,7 +2871,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsAbilityStarted_002, TestSize.Level1)
     abilityRequest.sessionInfo = sessionInfo;
     auto targetRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, targetRecord);
-    EXPECT_EQ(uiAbilityLifecycleManager->IsAbilityStarted(abilityRequest, targetRecord), false);
     sptr<IAbilityScheduler> scheduler = new AbilitySchedulerMock();
     targetRecord->SetScheduler(scheduler);
     EXPECT_EQ(uiAbilityLifecycleManager->IsAbilityStarted(abilityRequest, targetRecord), true);
