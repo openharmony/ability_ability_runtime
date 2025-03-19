@@ -1593,7 +1593,7 @@ void AbilityRecord::SetCreateByConnectMode(bool isCreatedByConnect)
 
 void AbilityRecord::Activate()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Activate.");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Activate.");
     CHECK_POINTER(lifecycleDeal_);
 
     if (!IsDebug()) {
@@ -1619,7 +1619,7 @@ void AbilityRecord::Activate()
 void AbilityRecord::Inactivate()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability:%{public}s.", abilityInfo_.name.c_str());
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "ability:%{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
 
     if (!IsDebug()) {
@@ -1685,7 +1685,7 @@ void AbilityRecord::ShareData(const int32_t &uniqueId)
 
 void AbilityRecord::ConnectAbility()
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Connect ability.");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Connect ability.");
     Want want = GetWant();
     UpdateDmsCallerInfo(want);
     ConnectAbilityWithWant(want);
@@ -1693,10 +1693,10 @@ void AbilityRecord::ConnectAbility()
 
 void AbilityRecord::ConnectAbilityWithWant(const Want &want)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Connect ability.");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Connect ability.");
     CHECK_POINTER(lifecycleDeal_);
     if (isConnected) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "connect state error.");
+        TAG_LOGW(AAFwkTag::SERVICE_EXT, "connect state error.");
     }
 #ifdef SUPPORT_SCREEN
     GrantUriPermissionForServiceExtension();
@@ -1708,7 +1708,7 @@ void AbilityRecord::ConnectAbilityWithWant(const Want &want)
 void AbilityRecord::DisconnectAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "DisconnectAbility, bundle:%{public}s, ability:%{public}s.",
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "DisconnectAbility, bundle:%{public}s, ability:%{public}s.",
         abilityInfo_.applicationInfo.bundleName.c_str(), abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
     lifecycleDeal_->DisconnectAbility(GetWant());
@@ -1724,7 +1724,7 @@ void AbilityRecord::DisconnectAbility()
 void AbilityRecord::DisconnectAbilityWithWant(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability:%{public}s.", abilityInfo_.name.c_str());
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "ability:%{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
     lifecycleDeal_->DisconnectAbility(want);
     if (GetInProgressRecordCount() == 0) {
@@ -1749,7 +1749,7 @@ bool AbilityRecord::GrantUriPermissionForServiceExtension()
 
 void AbilityRecord::CommandAbility()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "startId_:%{public}d.", startId_);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "startId_:%{public}d.", startId_);
     Want want = GetWant();
     UpdateDmsCallerInfo(want);
     CHECK_POINTER(lifecycleDeal_);
