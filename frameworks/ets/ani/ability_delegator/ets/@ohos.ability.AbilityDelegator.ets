@@ -14,34 +14,15 @@
  */
 
 //import AbilityMonitor from 'AbilityMonitor';
+import Want from '@ohos.app.ability.Want';
+import { Context } from './application/Context';
+import { BusinessError, AsyncCallback } from '@ohos.base';
 
-interface BaseContext {
-    readonly area: int;
-    readonly filesDir: string;
-    readonly tempDir: string;
-}
+export class AbilityMonitor {
 
-abstract class Context implements BaseContext{
-    area: int = 0;
-    filesDir: string = "";
-    tempDir: string = "";
+    abilityName: string= "";
+    moduleName: string= "";
 }
-
-class ApplicationContext extends Context {
-}
-
-class AbilityStage {}
-class Want {}
-type Callback<T> = (data: T)=> void;
-class Result<T, E>{
-  result:T;
-  error:E;
-  constructor(result: T , error: E) {
-      this.result = result;
-      this.error = error;
-  }
-}
-type AsyncCallback<T> = (err: BusinessError<T>, data: T)=> void;
 
 export default interface AbilityDelegator {
     printSync(msg: string): void;
@@ -51,9 +32,11 @@ export default interface AbilityDelegator {
     executeShellCommand (cmd: String, callback: AsyncCallback<ShellCmdResult>) : void;
     executeShellCommand (cmd: String, timeoutSecs: number, callback: AsyncCallback<ShellCmdResult>) : void;
     executeShellCommand (cmd: string, timeoutSecs?: number) : Promise<ShellCmdResult>;
-    //addAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallback<void>): void
-    //addAbilityMonitor(monitor: AbilityMonitor): Promise<void>;
-    //addAbilityMonitorSync(monitor: AbilityMonitor): void;
+    addAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallback<void>): void
+    addAbilityMonitor(monitor: AbilityMonitor): Promise<void>;
+    addAbilityMonitorAsync(monitor: AbilityMonitor): void;
+    startAbility(want: Want, callback: AsyncCallback<void>): void;
+    startAbility(want: Want): Promise<void>;
     // other api
 }
 
@@ -62,22 +45,18 @@ class ShellCmdResult {
   exitCode: int;
 }
 
-export class BusinessError<T = void> {
-    code: number;
-    data: T;
-}
-
 class AbilityDelegatorInner implements AbilityDelegator {
     public native printSync(msg: string): void;
     public native finishTestSync(a: String, b: number): int;
     public native executeShellCommandsync(cmd: string, timeoutSecs: number): ShellCmdResult;
     public native getAppContext(): Context;
-    //public native addAbilityMonitorSync(monitor: AbilityMonitor): void;
+    public native addAbilityMonitorAsync(monitor: AbilityMonitor): void;
+    public native startAbilityAsync(want: Want) : int;
     // other api
 
     finishTest(msg: string, code: number, callback: AsyncCallback<void>):void{
         console.log("finishTest callback1_test start");
-        let p1 = taskpool.execute(():undefined => {new AbilityDelegatorInner().finishTestSync(msg, code);  return undefined});
+        let p1 = taskpool.execute(():undefined => {this.finishTestSync(msg, code);  return undefined});
             p1.then((e :NullishType)=>{
                 let resultCode: Int  = e as Int;
                 let r: BusinessError = { code: resultCode.intValue(), data: undefined };
@@ -88,7 +67,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
     finishTest(msg: string, code: number):Promise<void>{
         console.log("finishTest promise1_test start");
         let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
-            let p1 = taskpool.execute(():undefined => {new AbilityDelegatorInner().finishTestSync(msg, code);  return undefined});
+            let p1 = taskpool.execute(():undefined => {this.finishTestSync(msg, code);  return undefined});
             p1.then((e :NullishType)=>{
             let PromiseLike = e as PromiseLike<void>;
             resolve(PromiseLike);
@@ -101,10 +80,10 @@ class AbilityDelegatorInner implements AbilityDelegator {
     executeShellCommand (cmd: String, callback: AsyncCallback<ShellCmdResult>) : void {
         console.log("executeShellCommand callback2_01");
         let timeoutSecs =  0;
-        let pCallback1 = taskpool.execute(():undefined => {new AbilityDelegatorInner().executeShellCommandsync(cmd, timeoutSecs);  return undefined});
+        let pCallback1 = taskpool.execute(():undefined => {this.executeShellCommandsync(cmd, timeoutSecs);  return undefined});
         console.log("executeShellCommand callback2_04");
         pCallback1.then((e :NullishType)=>{
-        let err = new BusinessError<ShellCmdResult>;
+        let err = new BusinessError<void>;
         let data  = new  ShellCmdResult;
         callback(err, data);
         console.log("executeShellCommand callback2_06");
@@ -114,10 +93,10 @@ class AbilityDelegatorInner implements AbilityDelegator {
     }
     executeShellCommand (cmd: String, timeoutSecs: number, callback: AsyncCallback<ShellCmdResult>) : void {
         console.log("executeShellCommand callback1_01");
-        let pCallback2 = taskpool.execute(():undefined => {new AbilityDelegatorInner().executeShellCommandsync(cmd, timeoutSecs);  return undefined});
+        let pCallback2 = taskpool.execute(():undefined => {this.executeShellCommandsync(cmd, timeoutSecs);  return undefined});
         console.log("executeShellCommand callback1_04");
         pCallback2.then((e :NullishType)=>{
-        let err = new BusinessError<ShellCmdResult>;
+        let err = new BusinessError<void>;
         let data  = new  ShellCmdResult;
         callback(err, data);
         console.log("executeShellCommand callback1_06");
@@ -129,7 +108,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
         if (timeoutSecs == null) {
         let pPromise2 = new Promise<ShellCmdResult>((resolve: (v: ShellCmdResult) => void, reject: (error: Object) => void) => {
             console.log("executeShellCommand promise1_01");
-            let pPromise1 = taskpool.execute(():undefined => {new AbilityDelegatorInner().executeShellCommandsync(cmd, 0);  return undefined});
+            let pPromise1 = taskpool.execute(():undefined => {this.executeShellCommandsync(cmd, 0);  return undefined});
             pPromise1.then((e :NullishType)=>{
             console.log("executeShellCommand promise1_04");
             let r : ShellCmdResult =  e as ShellCmdResult;
@@ -142,7 +121,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
         } else {
         let pPromise = new Promise<ShellCmdResult>((resolve: (v: ShellCmdResult) => void, reject: (error: Object) => void) => {
             console.log("executeShellCommand promise1_01");
-            let pPromise1 = taskpool.execute(():undefined => {new AbilityDelegatorInner().executeShellCommandsync(cmd, timeoutSecs as double);  return undefined});
+            let pPromise1 = taskpool.execute(():undefined => {this.executeShellCommandsync(cmd, timeoutSecs as double);  return undefined});
             pPromise1.then((e :NullishType)=>{
             console.log("executeShellCommand promise1_04");
             let r : ShellCmdResult =  e as ShellCmdResult;
@@ -155,25 +134,47 @@ class AbilityDelegatorInner implements AbilityDelegator {
         }
     }
 
-    //addAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallback<void>): void {
-    //    let p1 = taskpool.execute(():undefined => {new AbilityDelegatorInner().addAbilityMonitorSync(monitor);  return undefined});
-    //        p1.then((e :NullishType)=>{
-    //            let resultCode: Int  = e as Int;
-    //            let r: BusinessError = { code: resultCode.intValue(), data: undefined };
-    //            callback(r, undefined);
-    //        }, (err:Object): void => {
-    //        });
-	//
-    //}
-    //addAbilityMonitor(monitor: AbilityMonitor): Promise<void> {
-    //    let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
-    //        let p1 = taskpool.execute(():undefined => {new AbilityDelegatorInner().addAbilityMonitorSync(monitor);  return undefined});
-    //        p1.then((e :NullishType)=>{
-    //        let PromiseLike = e as PromiseLike<void>;
-    //        resolve(PromiseLike);
-    //        }, (err:Object): void => {
-    //        });
-    //    });
-    //    return p;
-    //}
+    addAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallback<void>): void {
+        let p1 = taskpool.execute(():undefined => {this.addAbilityMonitorAsync(monitor);  return undefined});
+            p1.then((e :NullishType)=>{
+                let resultCode: Int  = e as Int;
+                let r: BusinessError = { code: resultCode.intValue(), data: undefined };
+                callback(r, undefined);
+            }, (err:Object): void => {
+            });
+
+    }
+    addAbilityMonitor(monitor: AbilityMonitor): Promise<void> {
+        let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
+            let p1 = taskpool.execute(():undefined => {this.addAbilityMonitorAsync(monitor);  return undefined});
+            p1.then((e :NullishType)=>{
+            let PromiseLike = e as PromiseLike<void>;
+            resolve(PromiseLike);
+            }, (err:Object): void => {
+            });
+        });
+        return p;
+    }
+
+    startAbility(want: Want, callback: AsyncCallback<void>): void {
+        let p1 = taskpool.execute(():undefined => {this.startAbilityAsync(want);  return undefined});
+            p1.then((e :NullishType)=>{
+                let resultCode: Int  = e as Int;
+                let r: BusinessError = { code: resultCode.intValue(), data: undefined };
+                callback(r, undefined);
+            }, (err:Object): void => {
+            });
+
+    }
+    startAbility(want: Want): Promise<void> {
+        let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
+            let p1 = taskpool.execute(():undefined => {this.startAbilityAsync(want);  return undefined});
+            p1.then((e :NullishType)=>{
+            let PromiseLike = e as PromiseLike<void>;
+            resolve(PromiseLike);
+            }, (err:Object): void => {
+            });
+        });
+        return p;
+    }
 }

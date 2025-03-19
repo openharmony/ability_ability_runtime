@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import UIAbility from '../../ui_ability/ets/@ohos.app.ability.UIAbility';
+// import UIAbility from '../../ui_ability/ets/@ohos.app.ability.UIAbility';
+//import UIAbility from '.@ohos.app.ability.UIAbility';
+
+class UIAbility{ }
 
 export default interface AbilityMonitor {
 
