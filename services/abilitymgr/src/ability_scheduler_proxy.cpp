@@ -134,12 +134,12 @@ void AbilitySchedulerProxy::ScheduleConnectAbility(const Want &want)
         return;
     }
     if (!data.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to WriteParcelable");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "fail to WriteParcelable");
         return;
     }
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_CONNECT, data, reply, option);
     if (err != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleConnectAbility fail to SendRequest. err: %{public}d", err);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "ScheduleConnectAbility fail to SendRequest. err: %{public}d", err);
     }
 }
 
@@ -152,13 +152,13 @@ void AbilitySchedulerProxy::ScheduleDisconnectAbility(const Want &want)
         return;
     }
     if (!data.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to WriteParcelable.");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "fail to WriteParcelable.");
         return;
     }
 
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_DISCONNECT, data, reply, option);
     if (err != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleDisconnectAbility fail to SendRequest. err: %{public}d.", err);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "ScheduleDisconnectAbility fail to SendRequest. err: %{public}d.", err);
     }
 }
 
@@ -171,22 +171,22 @@ void AbilitySchedulerProxy::ScheduleCommandAbility(const Want &want, bool restar
         return;
     }
     if (!data.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "WriteParcelable failed");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "WriteParcelable failed");
         return;
     }
     if (!data.WriteBool(restart)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "WriteBool failed");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "WriteBool failed");
         return;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "WriteInt32,startId:%{public}d", startId);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "WriteInt32,startId:%{public}d", startId);
     if (!data.WriteInt32(startId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to WriteInt32");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "fail to WriteInt32");
         return;
     }
 
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_COMMAND, data, reply, option);
     if (err != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleCommandAbility fail to SendRequest. err: %{public}d", err);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "ScheduleCommandAbility fail to SendRequest. err: %{public}d", err);
     }
 }
 
