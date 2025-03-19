@@ -444,6 +444,7 @@ group("unittest") {
       "app_recovery_test:unittest",
       "app_running_manager_second_test:unittest",
       "app_running_manager_test:unittest",
+      "app_running_manager_third_test:unittest",
       "app_running_processes_info_test:unittest",
       "app_running_record_test:unittest",
       "app_scheduler_host_test:unittest",
