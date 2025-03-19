@@ -520,6 +520,7 @@ group("unittest") {
       "dynamic_loader_ohos_test:unittest",
       "ecological_rule_interceptor_test:unittest",
       "event_report_test:unittest",
+      "exit_info_data_manager_test:unittest",
       "exit_reason_test:unittest",
       "exit_resident_process_manager_test:unittest",
       "extension_config_mgr_test:unittest",
