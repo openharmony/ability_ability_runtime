@@ -1683,7 +1683,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         for (auto& runtime : runtimes) {
             application_->AddRuntime(std::move(runtime));
         }
-        if (appInfo.applicationCodeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+        if (appInfo.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
             application_->InitAniApplicationContext();
         }
         std::weak_ptr<OHOSApplication> wpApplication = application_;
@@ -1750,7 +1750,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
-        if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo, appInfo.applicationCodeLanguage)) {
+        if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo, appInfo.codeLanguage)) {
             TAG_LOGE(AAFwkTag::APPKIT, "Failed to prepare ability delegator");
             return;
         }
@@ -3657,9 +3657,9 @@ void MainThread::HandleCacheProcess()
 
 void MainThread::AddRuntimeLang(ApplicationInfo& appInfo, AbilityRuntime::Runtime::Options& options)
 {
-    if (appInfo.applicationCodeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+    if (appInfo.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
         options.langs.emplace(AbilityRuntime::Runtime::Language::STS, true);
-    } else if (appInfo.applicationCodeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID) {
+    } else if (appInfo.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID) {
         //options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true);
         options.langs.emplace(AbilityRuntime::Runtime::Language::STS, true);
     } else {
