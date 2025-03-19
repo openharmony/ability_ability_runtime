@@ -56,8 +56,8 @@ const std::string APP_LINKING_ONLY = "appLinkingOnly";
 const char* CJ_ABILITY_LIBNAME = "libcj_ability_ffi.z.so";
 const char* FUNC_CONVERT_CONFIGURATION = "OHOS_ConvertConfiguration";
 const char* CJ_BUNDLE_MGR_LIBNAME = "libcj_bundle_manager_ffi.z.so";
-const char* FUNC_CONVERT_ABILITY_INFO = "OHOS_ConvertAbilityInfo";
-const char* FUNC_CONVERT_HAP_INFO = "OHOS_ConvertHapInfo";
+const char* FUNC_CONVERT_ABILITY_INFO = "OHOS_ConvertAbilityInfoV2";
+const char* FUNC_CONVERT_HAP_INFO = "OHOS_ConvertHapInfoV2";
 } // namespace
 
 int64_t RequestCodeFromStringToInt64(const std::string& requestCode)
@@ -626,15 +626,15 @@ CConfiguration FFIAbilityContextPropConfiguration(int64_t id, int32_t* errCode)
     return CallConvertConfig(configuration);
 }
 
-RetAbilityInfo CallConvertAbilityInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
+RetAbilityInfoV2 CallConvertAbilityInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
 {
-    RetAbilityInfo retInfo;
+    RetAbilityInfoV2 retInfo;
     void* handle = dlopen(CJ_BUNDLE_MGR_LIBNAME, RTLD_LAZY);
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
         return retInfo;
     }
-    using ConvertAbilityInfoFunc = RetAbilityInfo (*)(void*);
+    using ConvertAbilityInfoFunc = RetAbilityInfoV2 (*)(void*);
     auto func = reinterpret_cast<ConvertAbilityInfoFunc>(dlsym(handle, FUNC_CONVERT_ABILITY_INFO));
     if (func == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null func");
@@ -646,9 +646,9 @@ RetAbilityInfo CallConvertAbilityInfo(std::shared_ptr<AppExecFwk::AbilityInfo> a
     return retInfo;
 }
 
-RetAbilityInfo FFIAbilityContextPropAbilityInfo(int64_t id, int32_t* errCode)
+RetAbilityInfoV2 FFIAbilityContextPropAbilityInfo(int64_t id, int32_t* errCode)
 {
-    RetAbilityInfo ret;
+    RetAbilityInfoV2 ret;
     auto context = FFIData::GetData<CJAbilityContext>(id);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null CJAbilityContext");
@@ -664,15 +664,15 @@ RetAbilityInfo FFIAbilityContextPropAbilityInfo(int64_t id, int32_t* errCode)
     return CallConvertAbilityInfo(abilityInfo);
 }
 
-RetHapModuleInfo CallConvertHapInfo(std::shared_ptr<AppExecFwk::HapModuleInfo> hapInfo)
+RetHapModuleInfoV2 CallConvertHapInfo(std::shared_ptr<AppExecFwk::HapModuleInfo> hapInfo)
 {
-    RetHapModuleInfo retInfo;
+    RetHapModuleInfoV2 retInfo;
     void* handle = dlopen(CJ_BUNDLE_MGR_LIBNAME, RTLD_LAZY);
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
         return retInfo;
     }
-    using ConvertHapInfoFunc = RetHapModuleInfo (*)(void*);
+    using ConvertHapInfoFunc = RetHapModuleInfoV2 (*)(void*);
     auto func = reinterpret_cast<ConvertHapInfoFunc>(dlsym(handle, FUNC_CONVERT_HAP_INFO));
     if (func == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null func");
@@ -684,9 +684,9 @@ RetHapModuleInfo CallConvertHapInfo(std::shared_ptr<AppExecFwk::HapModuleInfo> h
     return retInfo;
 }
 
-RetHapModuleInfo FFIAbilityContextPropCurrentHapModuleInfo(int64_t id, int32_t* errCode)
+RetHapModuleInfoV2 FFIAbilityContextPropCurrentHapModuleInfo(int64_t id, int32_t* errCode)
 {
-    RetHapModuleInfo ret;
+    RetHapModuleInfoV2 ret;
     auto context = FFIData::GetData<CJAbilityContext>(id);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null CJAbilityContext");
