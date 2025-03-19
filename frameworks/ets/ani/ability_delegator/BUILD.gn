@@ -33,6 +33,7 @@ ohos_shared_library("ability_delegator_registry_ani_kit") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/frameworks/js/napi/app/ability_delegator",
     "${ability_runtime_path}/interfaces/inner_api/runtime/include",
+    "${ability_runtime_path}/frameworks/js/napi/inner/napi_common/ani_common",
   ]
 
   configs = []
@@ -55,6 +56,7 @@ ohos_shared_library("ability_delegator_registry_ani_kit") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_native_path}/appkit:delegator_mgmt",
