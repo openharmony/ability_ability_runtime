@@ -456,7 +456,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfo is nullptr");
             return nullptr;
         }
-        auto& runtime = GetRuntime(abilityInfo->language);
+        auto& runtime = GetRuntime(abilityInfo->codeLanguage);
         if (runtime) {
             runtime->UpdatePkgContextInfoJson(
                 hapModuleInfo->moduleName, hapModuleInfo->hapPath, hapModuleInfo->packageName);
@@ -469,7 +469,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             stageContext->SetResourceManager(rm);
         }
 
-        auto& runtimeStage = GetRuntime(hapModuleInfo->language);
+        auto& runtimeStage = GetRuntime(hapModuleInfo->codeLanguage);
         abilityStage = AbilityRuntime::AbilityStage::Create(runtimeStage, *hapModuleInfo);
         if (abilityStage == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
@@ -677,7 +677,7 @@ bool OHOSApplication::AddAbilityStage(
         stageContext->SetResourceManager(rm);
     }
 
-    auto& runtime = GetRuntime(moduleInfo->language);
+    auto& runtime = GetRuntime(moduleInfo->codeLanguage);
     auto abilityStage = AbilityRuntime::AbilityStage::Create(runtime, *moduleInfo);
     if (abilityStage == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
