@@ -53,7 +53,7 @@ struct MultiAppMode {
     int32_t count;
 };
 
-struct RetApplicationInfo {
+struct RetApplicationInfoV2 {
     char* name;
     char* description;
     uint32_t descriptionId;
@@ -130,7 +130,7 @@ struct RetCArrSkill {
     int64_t size;
 };
 
-struct RetAbilityInfo {
+struct RetAbilityInfoV2 {
     char* bundleName;
     char* moduleName;
     char* name;
@@ -146,7 +146,7 @@ struct RetAbilityInfo {
     int32_t launchType;
     CArrString permissions;
     CArrString deviceTypes;
-    RetApplicationInfo applicationInfo;
+    RetApplicationInfoV2 applicationInfo;
     CArrMetadata metadata;
     bool enabled;
     CArrInt32 supportWindowModes;
@@ -156,12 +156,12 @@ struct RetAbilityInfo {
     int32_t appIndex;
 };
 
-struct CArrRetAbilityInfo {
-    RetAbilityInfo* head;
+struct CArrRetAbilityInfoV2 {
+    RetAbilityInfoV2* head;
     int64_t size;
 };
 
-struct RetExtensionAbilityInfo {
+struct RetExtensionAbilityInfoV2 {
     char* bundleName;
     char* moduleName;
     char* name;
@@ -171,7 +171,7 @@ struct RetExtensionAbilityInfo {
     bool exported;
     int32_t extensionAbilityType;
     CArrString permissions;
-    RetApplicationInfo applicationInfo;
+    RetApplicationInfoV2 applicationInfo;
     CArrMetadata metadata;
     bool enabled;
     char* readPermission;
@@ -181,8 +181,8 @@ struct RetExtensionAbilityInfo {
     int32_t appIndex;
 };
 
-struct CArrRetExtensionAbilityInfo {
-    RetExtensionAbilityInfo* head;
+struct CArrRetExtensionAbilityInfoV2 {
+    RetExtensionAbilityInfoV2* head;
     int64_t size;
 };
 
@@ -229,7 +229,7 @@ struct CArrRouterItem {
     int64_t size;
 };
 
-struct RetHapModuleInfo {
+struct RetHapModuleInfoV2 {
     char* name;
     char* icon;
     uint32_t iconId;
@@ -238,8 +238,8 @@ struct RetHapModuleInfo {
     char* description;
     uint32_t descriptionId;
     char* mainElementName;
-    CArrRetAbilityInfo abilitiesInfo;
-    CArrRetExtensionAbilityInfo extensionAbilitiesInfo;
+    CArrRetAbilityInfoV2 abilitiesInfo;
+    CArrRetExtensionAbilityInfoV2 extensionAbilitiesInfo;
     CArrMetadata metadata;
     CArrString deviceTypes;
     bool installationFree;
