@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,6 @@
 
 #include "application_info.h"
 #include "bindable.h"
-#include "configuration.h"
 #include "hap_module_info.h"
 #include "iremote_object.h"
 #include "resource_manager.h"
@@ -29,6 +28,15 @@
 using IRemoteObject = OHOS::IRemoteObject;
 
 namespace OHOS {
+namespace Global {
+namespace Resource {
+class ResourceManager;
+enum DeviceType : int32_t;
+}
+}
+namespace AppExecFwk {
+class Configuration;
+}
 namespace AbilityRuntime {
 class ApplicationContext;
 
