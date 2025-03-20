@@ -33,7 +33,7 @@ void DataAbilityObserverProxy::OnChange()
 {
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_ASYNC | MessageOption::TF_ASYNC_WAKEUP_LATER);
 
     if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "write token false");
@@ -55,7 +55,7 @@ void DataAbilityObserverProxy::OnChangeExt(const ChangeInfo &changeInfo)
 {
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_ASYNC | MessageOption::TF_ASYNC_WAKEUP_LATER);
 
     if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "write token false");
@@ -82,7 +82,7 @@ void DataAbilityObserverProxy::OnChangePreferences(const std::string &key)
 {
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_ASYNC | MessageOption::TF_ASYNC_WAKEUP_LATER);
 
     if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "write token false");
