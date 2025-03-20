@@ -22,7 +22,7 @@ export default class EventHub {
       const cloneArray = deepcopy<Array<Object>>(array) as Array<Object>;
       return cloneArray;
     }
-    return [];
+    return new Array<Object>();
   }
 
   on(event: string, callback: Object) {
