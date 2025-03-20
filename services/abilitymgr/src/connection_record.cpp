@@ -294,13 +294,11 @@ void ConnectionRecord::ScheduleConnectAbilityDone()
 
 void ConnectionRecord::CancelConnectTimeoutTask()
 {
-    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-    if (handler == nullptr) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "fail to get AbilityTaskHandler");
-    } else {
-        std::string taskName = std::string("ConnectTimeout_") + std::to_string(recordId_);
-        handler->CancelTask(taskName);
-    }
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
+    CHECK_POINTER(handler);
+    std::string taskName = std::to_string(recordId_);
+    handler->RemoveEvent(AbilityManagerService::CONNECT_TIMEOUT_MSG, taskName);
+    handler->RemoveEvent(AbilityManagerService::CONNECT_HALF_TIMEOUT_MSG, taskName);
 }
 
 void ConnectionRecord::DisconnectTimeout()

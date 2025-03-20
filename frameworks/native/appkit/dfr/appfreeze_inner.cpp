@@ -118,7 +118,7 @@ void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string
     }
     faultData.errorObject.stack += stack + "\nDump tid stack end time: " +
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
-    bool isExit = IsExitApp(faultData.errorObject.name);
+    bool isExit = IsExitApp(faultData.errorObject.name) && faultData.needKillProcess;
     if (isExit) {
         faultData.forceExit = true;
         faultData.waitSaveState = AppRecovery::GetInstance().IsEnabled();
@@ -214,6 +214,7 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
         faultData.errorObject.name = it->errorObject.name;
         faultData.timeoutMarkers = it->timeoutMarkers;
         faultData.eventId = it->eventId;
+        faultData.needKillProcess = it->needKillProcess;
         ChangeFaultDateInfo(faultData, msgContent);
     }
     return 0;
@@ -264,8 +265,9 @@ int AppfreezeInner::NotifyANR(const FaultData& faultData)
 
     int32_t pid = static_cast<int32_t>(getpid());
     TAG_LOGW(AAFwkTag::APPDFR, "NotifyAppFault:%{public}s, pid:%{public}d, bundleName:%{public}s "
-        "currentTime:%{public}s\n", faultData.errorObject.name.c_str(), pid, applicationInfo->bundleName.c_str(),
-        AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
+        "currentTime:%{public}s, processExit:%{public}d\n", faultData.errorObject.name.c_str(), pid,
+        applicationInfo->bundleName.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
+        faultData.needKillProcess);
 
     int ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
     if (ret != 0) {

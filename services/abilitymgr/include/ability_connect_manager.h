@@ -356,9 +356,6 @@ public:
      */
     void HandleExtensionDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
 
-    // MSG 0 - 20 represents timeout message
-    static constexpr uint32_t CONNECT_TIMEOUT_MSG = 1;
-
 private:
     /**
      * StartAbilityLocked with request.
@@ -478,7 +475,6 @@ private:
         std::shared_ptr<ConnectionRecord> &connectRecord);
     void HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo);
     void TerminateOrCacheAbility(std::shared_ptr<AbilityRecord> abilityRecord);
-    void CancelLoadTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord);
 
     /**
      * IsAbilityConnected.
@@ -662,6 +658,7 @@ private:
     void SetExtensionLoadParam(AbilityRuntime::LoadParam &loadParam, std::shared_ptr<AbilityRecord> abilityRecord);
     bool IsStrictMode(std::shared_ptr<AbilityRecord> abilityRecord);
     bool NeedExtensionControl(std::shared_ptr<AbilityRecord> abilityRecord);
+    bool GetTimeoutMsgContent(uint32_t msgId, std::string &msgContent, int &typeId);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";

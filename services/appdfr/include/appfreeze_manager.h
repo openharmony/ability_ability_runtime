@@ -63,6 +63,7 @@ public:
     };
 
     struct ParamInfo {
+        bool needKillProcess = true;
         int typeId = TypeAttribute::NORMAL_TIMEOUT;
         int32_t pid = 0;
         std::string eventName;

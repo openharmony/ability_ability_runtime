@@ -75,5 +75,119 @@ HWTEST_F(AbilityEventHandlerTest, ability_event_handler_001, TestSize.Level1)
     handler->ProcessEvent(event2);
     EXPECT_TRUE(handler != nullptr);
 }  // namespace AppExecFwk
+
+/*
+ * Feature: Ability Event Handler
+ * Function: EventWrap
+ * SubFunction: NA
+ * FunctionPoints: EventWrap
+ * EnvConditions: NA
+ * CaseDescription: Verify ProcessEvent
+ */
+HWTEST_F(AbilityEventHandlerTest, event_wrap_001, TestSize.Level1)
+{
+    auto event = EventWrap(10);
+    EXPECT_TRUE(event.GetEventId() == 10);
+    EXPECT_TRUE(event.GetParam() == 0);
+}  // namespace AppExecFwk
+
+/*
+ * Feature: Ability Event Handler
+ * Function: EventWrap
+ * SubFunction: NA
+ * FunctionPoints: EventWrap
+ * EnvConditions: NA
+ * CaseDescription: Verify ProcessEvent
+ */
+HWTEST_F(AbilityEventHandlerTest, event_wrap_002, TestSize.Level1)
+{
+    auto event = EventWrap(10, 101);
+    EXPECT_TRUE(event.GetEventId() == 10);
+    EXPECT_TRUE(event.GetParam() == 101);
+    EXPECT_FALSE(event.IsExtension());
+}  // namespace AppExecFwk
+
+/*
+ * Feature: Ability Event Handler
+ * Function: EventWrap
+ * SubFunction: NA
+ * FunctionPoints: EventWrap
+ * EnvConditions: NA
+ * CaseDescription: Verify ProcessEvent
+ */
+HWTEST_F(AbilityEventHandlerTest, event_wrap_003, TestSize.Level1)
+{
+    auto event = EventWrap(10, 101, true);
+    EXPECT_TRUE(event.GetEventId() == 10);
+    EXPECT_TRUE(event.GetParam() == 101);
+    EXPECT_TRUE(event.IsExtension());
+    EXPECT_TRUE(event.GetEventString() == "10_101");
+}  // namespace AppExecFwk
+
+/*
+ * Feature: Ability Event Handler
+ * Function: EventWrap
+ * SubFunction: NA
+ * FunctionPoints: EventWrap
+ * EnvConditions: NA
+ * CaseDescription: Verify ProcessEvent
+ */
+HWTEST_F(AbilityEventHandlerTest, event_wrap_004, TestSize.Level1)
+{
+    auto event = EventWrap(10, "connectTimeout_101");
+    EXPECT_TRUE(event.GetEventId() == 10);
+    EXPECT_TRUE(event.GetEventString() == "10_connectTimeout_101");
+}  // namespace AppExecFwk
+
+/*
+ * Feature: Ability Event Handler
+ * Function: EventWrap
+ * SubFunction: NA
+ * FunctionPoints: EventWrap
+ * EnvConditions: NA
+ * CaseDescription: Verify ProcessEvent
+ */
+HWTEST_F(AbilityEventHandlerTest, event_wrap_005, TestSize.Level1)
+{
+    auto event = EventWrap(10, 101, true, "connectTimeout_101");
+    EXPECT_TRUE(event.GetEventId() == 10);
+    EXPECT_TRUE(event.GetParam() == 101);
+    EXPECT_TRUE(event.IsExtension());
+    EXPECT_TRUE(event.GetEventString() == "10_connectTimeout_101");
+}  // namespace AppExecFwk
+
+/*
+ * Feature: Ability Event Handler
+ * Function: EventWrap
+ * SubFunction: NA
+ * FunctionPoints: EventWrap
+ * EnvConditions: NA
+ * CaseDescription: Verify ProcessEvent
+ */
+HWTEST_F(AbilityEventHandlerTest, event_wrap_006, TestSize.Level1)
+{
+    auto event = EventWrap(10, "connectTimeout_101");
+    event.SetTimeout(10000);
+    EXPECT_TRUE(event.GetEventId() == 10);
+    EXPECT_TRUE(event.GetEventString() == "10_connectTimeout_101");
+    EXPECT_TRUE(event.GetTimeout() == 10000);
+}  // namespace AppExecFwk
+
+/*
+ * Feature: Ability Event Handler
+ * Function: EventWrap
+ * SubFunction: NA
+ * FunctionPoints: EventWrap
+ * EnvConditions: NA
+ * CaseDescription: Verify ProcessEvent
+ */
+HWTEST_F(AbilityEventHandlerTest, event_wrap_007, TestSize.Level1)
+{
+    auto event = EventWrap(10, "connectTimeout_101");
+    event.SetRunCount(6);
+    EXPECT_TRUE(event.GetEventId() == 10);
+    EXPECT_TRUE(event.GetEventString() == "10_connectTimeout_101");
+    EXPECT_TRUE(event.GetRunCount() == 6);
+}  // namespace AppExecFwk
 }  // namespace OHOS
 }
