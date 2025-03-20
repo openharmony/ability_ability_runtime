@@ -80,6 +80,8 @@ struct CJAbilityFuncs {
     CJNumberParmas (*cjAbilityOnSaveState)(int64_t id_, int32_t reason, const char* params);
     char* (*cjAbilityOnShare)(int64_t id_, const char* params);
     CJNumberParmas (*cjAbilityOnContinueWithParams)(int64_t id, const char* params);
+    int64_t (*cjAbilityOnCallRequest)(int64_t id);
+    void (*cjAbilityOnSetCalleeFlag)(int64_t id, bool flag);
 };
 
 CJ_EXPORT void RegisterCJAbilityFuncs(void (*registerFunc)(CJAbilityFuncs*));
@@ -117,6 +119,8 @@ public:
     bool OnPrepareTerminate() const;
     int32_t OnSaveState(int32_t reason, WantParams &wantParams) const;
     int32_t OnShare(WantParams &wantParams) const;
+    int64_t OnCallRequest() const;
+    void OnSetCalleeFlag(bool flag) const;
 
 private:
     int64_t id_ = 0;
