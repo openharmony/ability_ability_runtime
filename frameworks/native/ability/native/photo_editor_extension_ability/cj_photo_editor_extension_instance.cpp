@@ -73,22 +73,5 @@ PhotoEditorExtension* CreateCJPhotoEditorExtension(const std::unique_ptr<Runtime
 
     return instance;
 }
-
-extern "C" {
-CJ_EXPORT int32_t FFIPhotoExtAbilityGetContext()
-{
-    return 0;
-}
-
-CJ_EXPORT int32_t FFIPhotoExtCtxSaveEditedContentWithUri()
-{
-    return 0;
-}
-
-CJ_EXPORT int32_t FFIPhotoExtCtxSaveEditedContentWithImage()
-{
-    return 0;
-}
-}
 } // namespace AbilityRuntime
 } // namespace OHOS
