@@ -178,6 +178,7 @@ void OHOSJsEnvironmentImpl::InitWorkerModule(NativeEngine* engine, std::shared_p
     CHECK_POINTER(workerInfo);
     engine->SetInitWorkerFunc(InitWorkerFunc);
     engine->SetOffWorkerFunc(OffWorkerFunc);
+    engine->SetReleaseWorkerSafeMemFunc(ReleaseWorkerSafeMemFunc);
     engine->SetGetAssetFunc(AssetHelper(workerInfo));
     engine->SetApiVersion(static_cast<int32_t>(workerInfo->apiTargetVersion.GetOriginPointer()));
 
