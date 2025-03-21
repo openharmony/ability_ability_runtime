@@ -278,7 +278,8 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
     messageMap_[GET_BUNDLE_MANAGER_SERVICE_FAILED] = "error: get bundle manager service failed.";
     messageMap_[REMOVE_MISSION_FAILED] = "error: remove mission failed.";
     messageMap_[INNER_ERR] = "error: inner err.";
-    messageMap_[INNER_ERR_START] = GetAaToolErrorInfo("10108101", "Internal error",
+    messageMap_[INNER_ERR_START] = GetAaToolErrorInfo("10108101",
+        "An internal error occurs while attempting to launch the ability.",
         "Kernel common errors such as memory allocation and multithreading processing. "
         "Specific reasons may include: internal object being null, processing timeout, "
         "failure to obtain application information from package management, failure to obtain system service, "
@@ -294,7 +295,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
     messageMap_[GET_RECENT_MISSIONS_FAILED] = "error: get recent missions failed.";
     messageMap_[REMOVE_STACK_LAUNCHER_DENIED] = "error: remove stack launcher denied.";
     messageMap_[TARGET_ABILITY_NOT_SERVICE] = GetAaToolErrorInfo("10103201",
-        "The target ability is not of type serviceAbility",
+        "The target ability is not of the ServiceAbility type.",
         "The ability corresponding to abilityName is not of service type",
         {TARGET_ABILITY_NOT_SERVICE_SOLUTION_ONE});
     messageMap_[TERMINATE_SERVICE_IS_CONNECTED] = "error: terminate service is connected.";
@@ -310,25 +311,26 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "No permission to start this ability",
         {CHECK_PERMISSION_FAILED_SOLUTION_ONE});
     messageMap_[NO_FOUND_ABILITY_BY_CALLER] = GetAaToolErrorInfo("10100102",
-        "aa start cannot launch UIExtensionAbility",
+        "The aa start command cannot be used to launch a UIExtensionAbility.",
         "aa start does not meet the restrictions imposed by UIExtensionAbility on the initiating party",
         {NO_FOUND_ABILITY_BY_CALLER_SOLUTION_ONE});
     messageMap_[ABILITY_VISIBLE_FALSE_DENY_REQUEST] = GetAaToolErrorInfo("10103001",
         "Failed to verify the visibility of the target ability.",
         "Application visibility check failed",
         {ABILITY_VISIBLE_FALSE_DENY_REQUEST_SOLUTION_ONE});
-    messageMap_[GET_BUNDLE_INFO_FAILED] = GetAaToolErrorInfo("10104401",
-        "Failed to retrieve specified package information when killing the process",
+    messageMap_[GET_BUNDLE_INFO_FAILED] = GetAaToolErrorInfo("10104002",
+        "Failed to retrieve specified package information.",
         "The application corresponding to the specified package name is not installed.",
         {GET_BUNDLE_INFO_FAILED_SOLUTION_ONE, GET_BUNDLE_INFO_FAILED_SOLUTION_TWO});
     messageMap_[ERR_NOT_DEVELOPER_MODE] = GetAaToolErrorInfo("10106001", "not developer Mode",
         "The current device is not in developer mode",
         {ERR_NOT_DEVELOPER_MODE_SOLUTION_ONE});
-    messageMap_[KILL_PROCESS_KEEP_ALIVE] = GetAaToolErrorInfo("10106402", "The persistent process cannot be killed",
+    messageMap_[KILL_PROCESS_KEEP_ALIVE] = GetAaToolErrorInfo("10106402",
+        "Persistent processes cannot be terminated.",
         "Designate the process as a persistent process and ensure that the device has sufficient memory",
         {KILL_PROCESS_KEEP_ALIVE_SOLUTION_ONE});
     messageMap_[ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE] = GetAaToolErrorInfo("10106102",
-        "for unlock screen failed in developer mode",
+        "The device screen is locked during the application launch.",
         "The current mode is developer mode, and the screen cannot be unlocked automatically",
         {ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE_SOLUTION_ONE});
     messageMap_[ERR_NOT_SUPPORTED_PRODUCT_TYPE] = GetAaToolErrorInfo("10106107",
@@ -344,7 +346,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The developer forgot to configure the target application as a Debug application",
         {ERR_NOT_DEBUG_APP_SOLUTION_ONE});
     messageMap_[ERR_APP_CLONE_INDEX_INVALID] = GetAaToolErrorInfo("10103102",
-        "The app clone index is invalid",
+        "The passed appCloneIndex is invalid.",
         "If the appCloneIndex carried in the parameters of the aa tool is an invalid value, return that error code",
         {ERR_APP_CLONE_INDEX_INVALID_SOLUTION_ONE});
     messageMap_[ERROR_SERVICE_NOT_CONNECTED] = GetAaToolErrorInfo("10105003",
@@ -360,7 +362,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The current mode is developer mode, and the screen cannot be unlocked automatically",
         {ERR_CROWDTEST_EXPIRED_SOLUTION_ONE});
     messageMap_[ERR_APP_CONTROLLED] = GetAaToolErrorInfo("10106105",
-        "The application is controlled",
+        "The target application is under control.",
         "The application is suspected of malicious behavior and is restricted from launching by the appStore",
         {ERR_APP_CONTROLLED_SOLUTION_ONE});
     messageMap_[ERR_EDM_APP_CONTROLLED] = GetAaToolErrorInfo("10106106",
@@ -368,16 +370,16 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The application is under the control of enterprise device management",
         {ERR_EDM_APP_CONTROLLED_SOLUTION_ONE});
     messageMap_[ERR_MULTI_INSTANCE_NOT_SUPPORTED] = GetAaToolErrorInfo("10106501",
-        "App clone or multi-instance is not supported",
+        "The aa test command is not available for multi-app mode.",
         "The target application does not support multi-instance information, so this error code is returned",
         {ERR_MULTI_INSTANCE_NOT_SUPPORTED_SOLUTION_ONE});
     messageMap_[ERR_NOT_SUPPORT_APP_CLONE] = GetAaToolErrorInfo("10106502",
-        "App clone is not supported",
+        "The aa test command is not available for app clones.",
         "When calling getCurrentAppCloneIndex in an application that does not support"
         " app cloning, this error code is returned",
         {ERR_NOT_SUPPORT_APP_CLONE_SOLUTION_ONE});
     messageMap_[ERR_IMPLICIT_START_ABILITY_FAIL] = GetAaToolErrorInfo("10103101",
-        "No matching ability is found",
+        "Failed to find a matching application for implicit launch.",
         "The parameter configuration of implicit startup is incorrect, or the specified HAP package is not installed.",
         {ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_ONE, ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_TWO});
     messageMap_[ERR_INVALID_VALUE] = GetAaToolErrorInfo("10103601",
