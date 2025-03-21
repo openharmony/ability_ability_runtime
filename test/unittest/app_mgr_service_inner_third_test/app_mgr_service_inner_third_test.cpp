@@ -52,7 +52,7 @@ void AppMgrServiceInnerThirdTest::SetUp() {}
 
 void AppMgrServiceInnerThirdTest::TearDown() {}
 
- /**
+/**
  * @tc.name: SetStartMsgCustomSandboxFlag_001
  * @tc.type: FUNC
  * @tc.Function: SetStartMsgCustomSandboxFlag
