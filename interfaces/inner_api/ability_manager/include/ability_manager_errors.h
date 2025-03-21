@@ -703,6 +703,11 @@ enum {
     ERR_NULL_APP_MGR_PROXY = 2097303,
     ERR_NO_APP_RECORD = 2097304,
 
+    /*
+     * Result(2097305) for extension starting ability controlled
+     */
+    ERR_EXTENSION_START_ABILITY_CONTROLEED = 2097305,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
