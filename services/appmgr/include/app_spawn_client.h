@@ -223,7 +223,7 @@ public:
      *
      * @param startMsg, request message,
      * @param reqHandle, handle for request message
-     * 
+     *
      * Return the Message Set result.
      */
     int32_t AppspawnSetExtMsgSec(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle);
