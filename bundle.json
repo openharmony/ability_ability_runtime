@@ -453,9 +453,7 @@
             "header": {
               "header_base": "//foundation/ability/ability_runtime/service_router_framework/interfaces/inner_api/include",
               "header_files": [
-                "service_info.h",
-                "service_router_mgr_interface.h",
-                "service_router_mgr_proxy.h"
+                "service_info.h"
               ]
             },
             "name": "//foundation/ability/ability_runtime/service_router_framework/interfaces/inner_api:srms_fwk"
