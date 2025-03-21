@@ -68,6 +68,7 @@ constexpr int32_t TRACE_ATOMIC_SERVICE_ID = 201;
 const std::string TRACE_ATOMIC_SERVICE = "StartAtomicService";
 constexpr int GET_TARGET_MISSION_OVER = 200;
 constexpr int32_t MAX_FIND_UIEXTENSION_CALLER_TIMES = 10;
+constexpr uint32_t ABILITY_CALL_FLAG = 4;
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -309,7 +310,8 @@ int MissionListManager::MoveMissionToFrontInner(int32_t missionId, bool isCaller
 
 #ifdef SUPPORT_SCREEN
     AbilityRequest abilityRequest;
-    targetAbilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility);
+    targetAbilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility,
+        ABILITY_CALL_FLAG);
 #else
     targetAbilityRecord->ProcessForegroundAbility(0);
 #endif
@@ -475,7 +477,8 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
 
 #ifdef SUPPORT_SCREEN
     std::shared_ptr<StartOptions> startOptions = nullptr;
-    targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility);
+    targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility,
+        ABILITY_CALL_FLAG);
 #else
     targetAbilityRecord->ProcessForegroundAbility(0);
 #endif
@@ -1538,6 +1541,7 @@ int MissionListManager::MoveAbilityToBackgroundLocked(const std::shared_ptr<Abil
             nextAbilityRecord->ProcessForegroundAbility(abilityRecord, false);
         } else {
             bool animaEnabled = false;
+            abilityRecord->SetSceneFlag(ABILITY_CALL_FLAG);
             if (!abilityRecord->IsClearMissionFlag()) {
                 abilityRecord->NotifyAnimationFromMinimizeAbility(animaEnabled);
             }
@@ -1711,6 +1715,7 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
                 abilityRecord->SetPendingState(AbilityState::BACKGROUND);
                 return ERR_OK;
             }
+            abilityRecord->SetSceneFlag(ABILITY_CALL_FLAG);
             abilityRecord->SetPendingState(AbilityState::BACKGROUND);
             MoveToBackgroundTask(abilityRecord, true);
         }
@@ -2178,6 +2183,7 @@ void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecor
         self->PrintTimeOutLog(abilityRecord, AbilityManagerService::BACKGROUND_TIMEOUT_MSG);
         self->CompleteBackground(abilityRecord);
     };
+    abilityRecord->SetSceneFlag(ABILITY_CALL_FLAG);
     abilityRecord->BackgroundAbility(task);
 }
 
@@ -3382,7 +3388,8 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
 #ifdef SUPPORT_SCREEN
             std::shared_ptr<StartOptions> startOptions = nullptr;
             auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
-            targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility);
+            targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility,
+                ABILITY_CALL_FLAG);
 #else
             targetAbilityRecord->ProcessForegroundAbility(0);
 #endif
