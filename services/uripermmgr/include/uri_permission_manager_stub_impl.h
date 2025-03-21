@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,22 +20,25 @@
 #include <map>
 #include <vector>
 #include <unordered_set>
+#include <sstream>
 #include "app_mgr_interface.h"
 #include "batch_uri.h"
 #include "istorage_manager.h"
 #include "tokenid_permission.h"
 #include "uri.h"
-#include "uri_permission_manager_stub.h"
+#include "access_token.h"
 
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 #include "policy_info.h"
+#include "uri_permission_manager_with_sand_box_mgr_stub.h"
 #else
 #include "upms_policy_info.h"
+#include "uri_permission_manager_stub.h"
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 
 namespace OHOS::AAFwk {
 namespace {
-using ClearProxyCallback = std::function<void(const wptr<IRemoteObject>&)>;
+using StubClearProxyCallback = std::function<void(const wptr<IRemoteObject>&)>;
 using TokenId = Security::AccessToken::AccessTokenID;
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 using namespace AccessControl::SandboxManager;
@@ -57,8 +60,13 @@ struct GrantPolicyInfo {
     }
 };
 
-class UriPermissionManagerStubImpl : public UriPermissionManagerStub,
-                                     public std::enable_shared_from_this<UriPermissionManagerStubImpl> {
+class UriPermissionManagerStubImpl :
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    public UriPermissionManagerWithSandBoxMgrStub,
+#else
+    public UriPermissionManagerStub,
+#endif
+    public std::enable_shared_from_this<UriPermissionManagerStubImpl> {
 public:
     UriPermissionManagerStubImpl() = default;
     virtual ~UriPermissionManagerStubImpl() = default;
@@ -66,37 +74,37 @@ public:
     /*
     * not support local media file uri.
     */
-    bool VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId) override;
+    ErrCode VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId, bool& funcResult) override;
 
     /*
     * only support local file uri, not support distribute docs and content uri.
     */
-    int GrantUriPermission(const Uri &uri, unsigned int flag, const std::string targetBundleName,
-        int32_t appIndex = 0, uint32_t initiatorTokenId = 0) override;
+    ErrCode GrantSingleUriPermission(const Uri &uri, unsigned int flag, const std::string& targetBundleName,
+        int32_t appIndex, uint32_t initiatorTokenId, int32_t& funcResult) override;
 
     /*
     * only support local file uri, not support distribute docs and content uri.
     */
-    int GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
-        const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0) override;
+    ErrCode GrantMultipleUrisPermission(const std::vector<Uri> &uriVec, unsigned int flag,
+        const std::string& targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t& funcResult) override;
 
     /*
     * only support local file uri, not support distribute docs and content uri.
     */
-    int32_t GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
+    ErrCode GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
         const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId,
-        int32_t hideSensitiveType) override;
+        int32_t hideSensitiveType, int32_t& funcResult) override;
 
     /*
     * only support local file uri, not support distribute docs and content uri.
     */
-    std::vector<bool> CheckUriAuthorization(const std::vector<std::string> &uriVec, uint32_t flag,
-        uint32_t tokenId) override;
+    ErrCode CheckUriAuthorization(const std::vector<std::string> &uriVec, uint32_t flag,
+        uint32_t tokenId, std::vector<bool>& funcResult) override;
 
-    int RevokeAllUriPermissions(uint32_t tokenId) override;
+    ErrCode RevokeAllUriPermissions(uint32_t tokenId, int32_t& funcResult) override;
 
-    int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName,
-        int32_t appIndex = 0) override;
+    ErrCode RevokeUriPermissionManually(const Uri &uri, const std::string& bundleName,
+        int32_t appIndex, int32_t& funcResult) override;
 
 private:
     template<typename T>
@@ -144,20 +152,22 @@ private:
 
     bool IsDistributedSubDirUri(const std::string &inputUri, const std::string &cachedUri);
 
-    int32_t ClearPermissionTokenByMap(const uint32_t tokenId) override;
+    ErrCode ClearPermissionTokenByMap(const uint32_t tokenId, int32_t& funcResult) override;
 
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
-    int32_t Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result) override;
+    ErrCode Active(const PolicyRawData& policyRawData, std::vector<uint32_t>& res, int32_t& funcResult)
+        override;
+    bool RawData2PolicyInfo(const PolicyRawData& policyRawData, std::vector<PolicyInfo>& policy);
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 
     class ProxyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
-        explicit ProxyDeathRecipient(ClearProxyCallback&& proxy) : proxy_(proxy) {}
+        explicit ProxyDeathRecipient(StubClearProxyCallback&& proxy) : proxy_(proxy) {}
         ~ProxyDeathRecipient() = default;
         virtual void OnRemoteDied([[maybe_unused]] const wptr<IRemoteObject>& remote) override;
 
     private:
-        ClearProxyCallback proxy_;
+        StubClearProxyCallback proxy_;
     };
 
 private:
