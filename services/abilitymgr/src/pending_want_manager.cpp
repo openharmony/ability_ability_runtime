@@ -685,6 +685,7 @@ void PendingWantManager::Dump(std::vector<std::string> &info)
     std::string dumpInfo = "    PendingWantRecords:";
     info.push_back(dumpInfo);
 
+    std::lock_guard<ffrt::mutex> locker(mutex_);
     for (const auto &item : wantRecords_) {
         const auto &pendingKey = item.first;
         dumpInfo = "        PendWantRecord ID #" + std::to_string(pendingKey->GetCode()) +
@@ -717,6 +718,7 @@ void PendingWantManager::DumpByRecordId(std::vector<std::string> &info, const st
     std::string dumpInfo = "    PendingWantRecords:";
     info.push_back(dumpInfo);
 
+    std::lock_guard<ffrt::mutex> locker(mutex_);
     for (const auto &item : wantRecords_) {
         const auto &pendingKey = item.first;
         if (args == std::to_string(pendingKey->GetCode())) {
