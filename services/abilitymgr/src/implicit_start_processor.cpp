@@ -769,6 +769,7 @@ int32_t ImplicitStartProcessor::ImplicitStartAbilityInner(const Want &targetWant
             auto windowMode = targetWant.GetIntParam(Want::PARAM_RESV_WINDOW_MODE, 0);
             startOptions.SetDisplayID(static_cast<int32_t>(displayId));
             startOptions.SetWindowMode(static_cast<int32_t>(windowMode));
+            startOptions.requestId_ = targetWant.GetStringParam(KEY_REQUEST_ID);
             result = abilityMgr->ImplicitStartAbility(
                 targetWant, startOptions, request.callerToken, userId, request.requestCode);
             break;
