@@ -235,6 +235,23 @@ void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &h
     }
 }
 
+void MainThread::GetPluginNativeLibPath(std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos, AppLibPathMap &appLibPaths)
+{
+    for (auto pluginBundleInfo : pluginBundleInfos) {
+        for (auto pluginModuleInfo : pluginBundleInfo.pluginModuleInfos) {
+            std::string libPath = pluginModuleInfo.nativeLibraryPath;
+            if (libPath.empty()) {
+                continue;
+            }
+            std::string appLibPathKey = pluginBundleInfo.pluginBundleName + "/" + pluginModuleInfo.moduleName;
+            libPath = std::string(LOCAL_CODE_PATH) + "/+plugin/" + libPath;
+            TAG_LOGD(
+                AAFwkTag::APPKIT, "appLibPathKey: %{private}s, libPath: %{private}s", appLibPathKey.c_str(), libPath.c_str());
+            appLibPaths[appLibPathKey].emplace_back(libPath);
+        }
+    }
+}
+
 /**
  *
  * @brief Notify the AppMgrDeathRecipient that the remote is dead.
@@ -1463,6 +1480,19 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
     AppLibPathMap appLibPaths {};
     GetNativeLibPath(bundleInfo, hspList, appLibPaths);
+
+    // todo 判断是否有插件
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+    if (bundleMgrHelper->GetPluginInfosForSelf(pluginBundleInfos) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "GetPluginInfosForSelf failed");
+    }
+    GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
+    //添加语境信息表
+    for (auto pluginBundleInfo : pluginBundleInfos) {
+        for (auto pluginModuleInfo : pluginBundleInfo.pluginModuleInfos) {
+            pkgContextInfoJsonStringMap[pluginModuleInfo.moduleName] = pluginModuleInfo。hapPath;
+        }
+    }
     bool isSystemApp = bundleInfo.applicationInfo.isSystemApp;
     TAG_LOGD(AAFwkTag::APPKIT, "the application isSystemApp: %{public}d", isSystemApp);
 #ifdef CJ_FRONTEND
