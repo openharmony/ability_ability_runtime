@@ -2100,7 +2100,6 @@ HWTEST_F(AbilityContextImplTest, EraseUIExtension_100, Function | MediumTest | L
     EXPECT_EQ(context_->uiExtensionMap_.size(), 0);
 }
 
-
 /**
  * @tc.number: Ability_Context_Impl_AddFreeInstallObserver_0100
  * @tc.name: CreateDisplayContext
@@ -2204,6 +2203,117 @@ HWTEST_F(AbilityContextImplTest, RevokeDelegator_0600, Function | MediumTest | L
     } else {
         EXPECT_EQ(result, ERR_INVALID_VALUE);
     }
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_AddCompletionHandler_0100
+ * @tc.name: AddCompletionHandler
+ * @tc.desc: Verify that function AddCompletionHandler.
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandler_100, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = nullptr;
+    OnRequestResult onRequestFail = nullptr;
+    auto result = context_->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(context_->onRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_AddCompletionHandler_0200
+ * @tc.name: AddCompletionHandler
+ * @tc.desc: Verify that function AddCompletionHandler.
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandler_0200, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = nullptr;
+    auto result = context_->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(context_->onRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_AddCompletionHandler_0300
+ * @tc.name: AddCompletionHandler
+ * @tc.desc: Verify that function AddCompletionHandler.
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandler_0300, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onRequestResults_.empty(), false);
+    context_->onRequestResults_.clear();
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_OnRequestSuccess_0100
+ * @tc.name: OnRequestSuccess
+ * @tc.desc: Verify that function OnRequestSuccess.
+ */
+HWTEST_F(AbilityContextImplTest, OnRequestSuccess_0100, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onRequestResults_.empty(), false);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    context_->OnRequestSuccess(requestId, element, "success");
+    EXPECT_EQ(context_->onRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_OnRequestSuccess_0200
+ * @tc.name: OnRequestSuccess
+ * @tc.desc: Verify that function OnRequestSuccess.
+ */
+HWTEST_F(AbilityContextImplTest, OnRequestSuccess_0200, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    EXPECT_EQ(context_->onRequestResults_.empty(), true);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    context_->OnRequestSuccess(requestId, element, "success");
+    EXPECT_EQ(context_->onRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_OnRequestFailure_0100
+ * @tc.name: OnRequestFailure
+ * @tc.desc: Verify that function OnRequestFailure.
+ */
+HWTEST_F(AbilityContextImplTest, OnRequestFailure_0100, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onRequestResults_.empty(), false);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    context_->OnRequestFailure(requestId, element, "failure");
+    EXPECT_EQ(context_->onRequestResults_.empty(), true);
+    context_->onRequestResults_.clear();
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_OnRequestFailure_0200
+ * @tc.name: OnRequestFailure
+ * @tc.desc: Verify that function OnRequestFailure.
+ */
+HWTEST_F(AbilityContextImplTest, OnRequestFailure_0200, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    EXPECT_EQ(context_->onRequestResults_.empty(), true);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    context_->OnRequestFailure(requestId, element, "failure");
+    EXPECT_EQ(context_->onRequestResults_.empty(), true);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
