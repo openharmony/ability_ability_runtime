@@ -40,7 +40,7 @@
 #include "distributed_client.h"
 #include "scene_board_judgement.h"
 #endif
-#include "ani_common/ani_common_want.h"
+#include "ani_common_want.h"
 #include "string_wrapper.h"
 #include "system_ability_definition.h"
 #include "time_util.h"

@@ -30,12 +30,6 @@ ohos_shared_library("napi_common") {
   ]
 
   sources = [
-    "ani_common/ani_common_ability_info.cpp",
-    "ani_common/ani_common_ability_result.cpp",
-    "ani_common/ani_common_configuration.cpp",
-    "ani_common/ani_common_start_options.cpp",
-    "ani_common/ani_common_util.cpp",
-    "ani_common/ani_common_want.cpp",
     "napi_common_child_process_param.cpp",
     "napi_common_configuration.cpp",
     "napi_common_execute_param.cpp",
@@ -68,7 +62,6 @@ ohos_shared_library("napi_common") {
     "json:nlohmann_json_static",
     "libuv:uv",
     "napi:ace_napi",
-    "runtime_core:ani",
   ]
 
   public_external_deps = [
