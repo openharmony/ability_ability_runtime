@@ -314,7 +314,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "aa start does not meet the restrictions imposed by UIExtensionAbility on the initiating party",
         {NO_FOUND_ABILITY_BY_CALLER_SOLUTION_ONE});
     messageMap_[ABILITY_VISIBLE_FALSE_DENY_REQUEST] = GetAaToolErrorInfo("10103001",
-        "error: ability visible false deny request.",
+        "Failed to verify the visibility of the target ability.",
         "Application visibility check failed",
         {ABILITY_VISIBLE_FALSE_DENY_REQUEST_SOLUTION_ONE});
     messageMap_[GET_BUNDLE_INFO_FAILED] = GetAaToolErrorInfo("10104401",
@@ -332,15 +332,15 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The current mode is developer mode, and the screen cannot be unlocked automatically",
         {ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE_SOLUTION_ONE});
     messageMap_[ERR_NOT_SUPPORTED_PRODUCT_TYPE] = GetAaToolErrorInfo("10106107",
-        "error: not supported in the current product type.",
+        "The current device does not support using window options.",
         "The user specified windowOptions, but the device does not support it",
         {ERR_NOT_SUPPORTED_PRODUCT_TYPE_SOLUTION_ONE});
     messageMap_[ERR_NOT_IN_APP_PROVISION_MODE] = GetAaToolErrorInfo("10106002",
-        "error: not supported in non-app-provision mode.",
+        "The target application does not support debug mode.",
         "The application specified by the aa tool is a Release version and does not support Debug mode",
         {ERR_NOT_IN_APP_PROVISION_MODE_SOLUTION_ONE});
     messageMap_[ERR_NOT_DEBUG_APP] = GetAaToolErrorInfo("10106701",
-        "error: not debug app.",
+        "The target application is not a debug application.",
         "The developer forgot to configure the target application as a Debug application",
         {ERR_NOT_DEBUG_APP_SOLUTION_ONE});
     messageMap_[ERR_APP_CLONE_INDEX_INVALID] = GetAaToolErrorInfo("10103102",
