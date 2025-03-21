@@ -252,6 +252,19 @@
           },
           {
             "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/ets/ani/ani_common/include",
+              "header_files": [
+                "ani_common_ability_result.h",
+                "ani_common_configuration.h",
+                "ani_common_start_options.h",
+                "ani_common_util.h",
+                "ani_common_want.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/ets/ani/ani_common:ani_common"
+          },
+          {
+            "header": {
               "header_base": "//foundation/ability/ability_runtime/frameworks/js/napi/inner/napi_ability_common",
               "header_files": [
               ]
