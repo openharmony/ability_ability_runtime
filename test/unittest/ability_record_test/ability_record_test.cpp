@@ -3572,5 +3572,80 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetInstanceKey_001, TestSize.Level1)
     EXPECT_EQ(instanceKey, "");
 }
 
+/*
+ * Feature: AbilityRecord
+ * Function: NotifyAbilityRequestFailure
+ * SubFunction: NotifyAbilityRequestFailure
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord NotifyAbilityRequestFailure
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_NotifyAbilityRequestFailure_001, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    EXPECT_NE(abilityRecord_->lifecycleDeal_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    abilityRecord_->NotifyAbilityRequestFailure(requestId, element, message);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: NotifyAbilityRequestFailure
+ * SubFunction: NotifyAbilityRequestFailure
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord NotifyAbilityRequestFailure
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_NotifyAbilityRequestFailure_002, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    EXPECT_NE(abilityRecord_->lifecycleDeal_, nullptr);
+    abilityRecord_->lifecycleDeal_ = nullptr;
+    EXPECT_EQ(abilityRecord_->lifecycleDeal_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    abilityRecord_->NotifyAbilityRequestFailure(requestId, element, message);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: NotifyAbilityRequestSuccess
+ * SubFunction: NotifyAbilityRequestSuccess
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord NotifyAbilityRequestSuccess
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_NotifyAbilityRequestSuccess_001, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    EXPECT_NE(abilityRecord_->lifecycleDeal_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "success";
+    abilityRecord_->NotifyAbilityRequestSuccess(requestId, element, message);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: NotifyAbilityRequestSuccess
+ * SubFunction: NotifyAbilityRequestSuccess
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord NotifyAbilityRequestSuccess
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_NotifyAbilityRequestSuccess_002, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    EXPECT_NE(abilityRecord_->lifecycleDeal_, nullptr);
+    abilityRecord_->lifecycleDeal_ = nullptr;
+    EXPECT_EQ(abilityRecord_->lifecycleDeal_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "success";
+    abilityRecord_->NotifyAbilityRequestSuccess(requestId, element, message);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

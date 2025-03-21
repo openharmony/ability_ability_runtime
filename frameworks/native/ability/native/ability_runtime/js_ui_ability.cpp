@@ -1275,6 +1275,32 @@ void JsUIAbility::HandleCollaboration(const Want &want)
 }
 #endif
 
+void JsUIAbility::OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnAbilityRequestFailure called");
+    UIAbility::OnAbilityRequestFailure(requestId, element, message);
+    auto abilityContext = GetAbilityContext();
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        return;
+    }
+    abilityContext->OnRequestFailure(requestId, element, message);
+}
+
+void JsUIAbility::OnAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnAbilityRequestSuccess called");
+    UIAbility::OnAbilityRequestSuccess(requestId, element, message);
+    auto abilityContext = GetAbilityContext();
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        return;
+    }
+    abilityContext->OnRequestSuccess(requestId, element, message);
+}
+
 int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
     const AppExecFwk::AbilityInfo &abilityInfo)
 {

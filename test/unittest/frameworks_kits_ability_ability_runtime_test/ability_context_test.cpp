@@ -471,6 +471,46 @@ public:
     {
         return;
     }
+
+    /**
+     * @brief Add CompletioHandler.
+     *
+     * @param requestId, the requestId.
+     * @param onRequestSucc, the callback ot be called upon request success.
+     * @param onRequestFail, the callback ot be called upon request failure.
+     * @return ERR_OK on success, otherwise failure.
+     */
+    virtual ErrCode AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
+        OnRequestResult onRequestFail)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Callback on request success.
+     *
+     * @param requestId, the requestId.
+     * @param element, the want element of startAbility.
+     * @param message, the message returned to the callback.
+     */
+    virtual void OnRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message)
+    {
+        return;
+    }
+
+    /**
+     * @brief Callback on request failure.
+     *
+     * @param requestId, the requestId.
+     * @param element, the want element of startAbility.
+     * @param message, the message returned to the callback.
+     */
+    virtual void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message)
+    {
+        return;
+    }
 private:
     std::unique_ptr<NativeReference> mockContentStorage_ = nullptr;
 };

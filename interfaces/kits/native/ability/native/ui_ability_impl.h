@@ -176,6 +176,12 @@ public:
 
     void ScheduleCollaborate(const Want &want);
 
+    void ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
+
+    void ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
+
 #ifdef SUPPORT_GRAPHICS
 public:
 
