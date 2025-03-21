@@ -51,6 +51,7 @@ ohos_fuzztest("ExtensionConfigFuzzTest") {
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/abilitymgr:ams_configuration_parameter",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [

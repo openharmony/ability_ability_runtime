@@ -183,6 +183,9 @@ enum class AbilityErrorCode {
     // UIAbility is in starting state.
     ERROR_CODE_UI_ABILITY_IS_STARTING = 16000082,
 
+    // extension can not start the ability due to extension control.
+    ERROR_CODE_EXTENSION_START_ABILITY_CONTROLLED = 16000083,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 

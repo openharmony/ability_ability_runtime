@@ -114,5 +114,13 @@ bool JsonUtils::IsEqual(nlohmann::json &jsonObject, const std::string &key, int3
     }
     return true;
 }
+
+std::optional<bool> JsonUtils::JsonToOptionalBool(const nlohmann::json &jsonObject, const std::string &key)
+{
+    if (jsonObject.contains(key) && jsonObject[key].is_boolean()) {
+        return jsonObject[key].get<bool>();
+    }
+    return std::nullopt;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
