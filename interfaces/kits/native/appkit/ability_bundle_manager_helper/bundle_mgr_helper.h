@@ -48,6 +48,8 @@ public:
     bool GetBundleInfo(const std::string &bundleName, int32_t flags, BundleInfo &bundleInfo, int32_t userId);
     std::string GetAppIdByBundleName(const std::string &bundleName, const int32_t userId);
     bool GetHapModuleInfo(const AbilityInfo &abilityInfo, HapModuleInfo &hapModuleInfo);
+    bool GetPluginHapModuleInfo(const std::string &hostBundleName, const std::string &pluginBundleName,
+        const std::string &pluginModuleName, const int32_t userId, HapModuleInfo &hapModuleInfo);
     std::string GetAbilityLabel(const std::string &bundleName, const std::string &abilityName);
     std::string GetAppType(const std::string &bundleName);
     ErrCode GetBaseSharedBundleInfos(
@@ -112,6 +114,9 @@ public:
         const std::string &bundleName, const std::string &moduleName, uint32_t resId, int32_t userId);
     std::string GetDataDir(const std::string &bundleName, const int32_t appIndex);
     ErrCode GetAppProvisionInfo(const std::string &bundleName, int32_t userId, AppExecFwk::AppProvisionInfo &info);
+    ErrCode GetAllPluginInfo(const std::string &hostBundleName, int32_t userId,
+        std::vector<PluginBundleInfo> &pluginBundleInfos);
+    ErrCode GetPluginInfosForSelf(std::vector<PluginBundleInfo> &pluginBundleInfos);
 
 private:
     sptr<IBundleMgr> Connect();

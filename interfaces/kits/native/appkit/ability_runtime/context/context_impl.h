@@ -208,6 +208,9 @@ public:
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName,
         const std::string &moduleName, std::shared_ptr<Context> inputContext);
 
+    std::shared_ptr<Context> CreatePluginContext(const std::string &pluginBundleName,
+        const std::string &moduleName, std::shared_ptr<Context> inputContext);
+
     std::string GetBundleNameWithContext(std::shared_ptr<Context> inputContext = nullptr) const;
 
     /**
@@ -320,6 +323,15 @@ public:
      * @param hapModuleInfo HapModuleInfo instance.
      */
     void InitHapModuleInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo);
+    
+    /**
+     * @brief Set HapModuleInfo
+     *
+     * @param hapModuleInfo HapModuleInfo instance.
+     */
+    void InitPluginHapModuleInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
+        const std::string &hostBundleName);
+    
 
     /**
      * @brief Set HapModuleInfo
@@ -515,7 +527,8 @@ private:
 #ifdef SUPPORT_GRAPHICS
     bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
 #endif
-
+    bool GetPluginInfo(const std::string &hostBundleName, const std::string &pluginBundleName,
+        const std::string &pluginModuleName, AppExecFwk::PluginBundleInfo &pluginBundleInfo);
     // Adding a new attribute requires adding a copy in the ShallowCopySelf function
     static Global::Resource::DeviceType deviceType_;
     std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo_ = nullptr;
@@ -540,6 +553,7 @@ private:
     std::mutex overlaySubscriberMutex_;
     std::shared_ptr<AppExecFwk::OverlayEventSubscriber> overlaySubscriber_;
     std::string processName_;
+    bool isPlugin_ = false;
 #ifdef SUPPORT_GRAPHICS
     static std::mutex getDisplayConfigCallbackMutex_;
     static GetDisplayConfigCallback getDisplayConfigCallback_;

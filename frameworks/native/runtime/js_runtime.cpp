@@ -1110,6 +1110,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
         return false;
     }
     if (newCreate) {
+        TAG_LOGI(AAFwkTag::JSRUNTIME, "zhuhan loadPath[%{public}s]", loadPath.c_str());
         panda::JSNApi::LoadAotFile(vm, moduleName_);
         auto resourceManager = AbilityBase::ExtractResourceManager::GetExtractResourceManager().GetGlobalObject();
         if (resourceManager) {
