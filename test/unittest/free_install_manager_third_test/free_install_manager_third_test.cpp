@@ -16,9 +16,11 @@
 #include <gtest/gtest.h>
 
 #include "ability_manager_service.h"
-#include "task_handler_wrap.h"
 #include "ability_record.h"
+#include "hilog_tag_wrapper.h"
+#include "mock_ability_token.h"
 #include "sa_mgr_client.h"
+#include "task_handler_wrap.h"
 
 using namespace testing::ext;
 using namespace OHOS::AAFwk;
@@ -312,6 +314,61 @@ HWTEST_F(FreeInstallTest, FreeInstall_HandleOnFreeInstallFail_002, TestSize.Leve
     freeInstallInfo.isOpenAtomicServiceShortUrl = true;
     freeInstallManager_->HandleOnFreeInstallFail(recordId, freeInstallInfo, resultCode, isAsync);
     EXPECT_EQ(freeInstallInfo.isPreStartMissionCalled, false);
+}
+
+/**
+ * @tc.number: HandleOnFreeInstallFail_003
+ * @tc.name: HandleOnFreeInstallFail
+ * @tc.desc: Test HandleOnFreeInstallFail.
+ */
+HWTEST_F(FreeInstallTest, FreeInstall_HandleOnFreeInstallFail_003, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    Want want;
+    ElementName element("", "com.example.aplication", "MainAbility");
+    want.SetElement(element);
+    int32_t recordId = 100;
+    int resultCode = 0;
+    want.SetParam(Want::PARAM_RESV_START_TIME, std::string("0"));
+    FreeInstallInfo freeInstallInfo;
+    freeInstallInfo.want = want;
+    bool isAsync = true;
+    freeInstallInfo.isOpenAtomicServiceShortUrl = true;
+    freeInstallInfo.startOptions = std::make_shared<StartOptions>();
+    EXPECT_NE(freeInstallInfo.startOptions, nullptr);
+    freeInstallInfo.startOptions->requestId_ = "1234567890";
+    freeInstallManager_->HandleOnFreeInstallFail(recordId, freeInstallInfo, resultCode, isAsync);
+    EXPECT_EQ(freeInstallInfo.isPreStartMissionCalled, false);
+}
+
+/**
+ * @tc.number: HandleOnFreeInstallFail_004
+ * @tc.name: HandleOnFreeInstallFail
+ * @tc.desc: Test HandleOnFreeInstallFail.
+ */
+HWTEST_F(FreeInstallTest, FreeInstall_HandleOnFreeInstallFail_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "FreeInstall_HandleOnFreeInstallFail_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    Want want;
+    ElementName element("", "com.example.aplication", "MainAbility");
+    want.SetElement(element);
+    int32_t recordId = 100;
+    int resultCode = 0;
+    want.SetParam(Want::PARAM_RESV_START_TIME, std::string("0"));
+    FreeInstallInfo freeInstallInfo;
+    freeInstallInfo.want = want;
+    bool isAsync = true;
+    freeInstallInfo.isOpenAtomicServiceShortUrl = true;
+    freeInstallInfo.startOptions = std::make_shared<StartOptions>();
+    EXPECT_NE(freeInstallInfo.startOptions, nullptr);
+    freeInstallInfo.startOptions->requestId_ = "1234567890";
+    freeInstallInfo.callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    freeInstallManager_->HandleOnFreeInstallFail(recordId, freeInstallInfo, resultCode, isAsync);
+    EXPECT_EQ(freeInstallInfo.isPreStartMissionCalled, false);
+    TAG_LOGI(AAFwkTag::TEST, "FreeInstall_HandleOnFreeInstallFail_004 start");
 }
 
 /**

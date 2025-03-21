@@ -41,6 +41,7 @@ public:
     std::shared_ptr<ProcessOptions> processOptions = nullptr;
     std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
+    std::string requestId_;
 
     StartOptions() = default;
     ~StartOptions() = default;

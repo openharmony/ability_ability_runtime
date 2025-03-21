@@ -1277,5 +1277,55 @@ ErrCode AbilityContextImpl::RevokeDelegator()
     SetHookOff(true);
     return ERR_OK;
 }
+
+ErrCode AbilityContextImpl::AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
+    OnRequestResult onRequestFail)
+{
+    if (onRequestSucc == nullptr || onRequestFail == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "either func is null");
+        return ERR_INVALID_VALUE;
+    }
+    std::lock_guard lock(onRequestResultMutex_);
+    for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+        if (iter->requestId_ == requestId) {
+            TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s already exists", requestId.c_str());
+            return ERR_OK;
+        }
+    }
+    onRequestResults_.emplace_back(requestId, onRequestSucc, onRequestFail);
+    return ERR_OK;
+}
+
+void AbilityContextImpl::OnRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    std::lock_guard lock(onRequestResultMutex_);
+    for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+        if (iter->requestId_ == requestId) {
+            TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s, call onRequestSuccess", requestId.c_str());
+            iter->onRequestSuccess_(element, message);
+            onRequestResults_.erase(iter);
+            return;
+        }
+    }
+
+    TAG_LOGE(AAFwkTag::CONTEXT, "requestId=%{public}s not exist", requestId.c_str());
+}
+
+void AbilityContextImpl::OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    std::lock_guard lock(onRequestResultMutex_);
+    for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+        if (iter->requestId_ == requestId) {
+            TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s, call onRequestFailure", requestId.c_str());
+            iter->onRequestFailure_(element, message);
+            onRequestResults_.erase(iter);
+            return;
+        }
+    }
+
+    TAG_LOGE(AAFwkTag::CONTEXT, "requestId=%{public}s not exist", requestId.c_str());
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

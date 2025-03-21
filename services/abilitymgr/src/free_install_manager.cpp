@@ -323,6 +323,16 @@ void FreeInstallManager::HandleOnFreeInstallFail(int32_t recordId, FreeInstallIn
     TAG_LOGI(AAFwkTag::FREE_INSTALL, "install failed");
     freeInstallInfo.isInstalled = false;
 
+    if (freeInstallInfo.startOptions != nullptr && !freeInstallInfo.startOptions->requestId_.empty()) {
+        auto abilityRecord = Token::GetAbilityRecordByToken(freeInstallInfo.callerToken);
+        if (abilityRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::FREE_INSTALL, "null ability record");
+            return;
+        }
+        abilityRecord->NotifyAbilityRequestFailure(freeInstallInfo.startOptions->requestId_,
+            freeInstallInfo.want.GetElement(), "free install failed");
+    }
+
     if (isAsync) {
         if (freeInstallInfo.isPreStartMissionCalled &&
             freeInstallInfo.want.HasParameter(KEY_SESSION_ID) &&
