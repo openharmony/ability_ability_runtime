@@ -29,7 +29,7 @@
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
 #include "service_router_mgr_helper.h"
-#include "service_router_mgr_interface.h"
+#include "iservice_router_mgr.h"
 #include "service_router_mgr_proxy.h"
 #include "system_ability_definition.h"
 
@@ -141,9 +141,13 @@ static ErrCode InnerQueryBusinessAbilityInfos(AbilityInfosCallbackInfo *info)
         return ERROR_BUNDLE_SERVICE_EXCEPTION;
     }
 
-    auto ret = serviceRouterMgr->QueryBusinessAbilityInfos(info->filter, info->businessAbilityInfos);
-    TAG_LOGI(AAFwkTag::SER_ROUTER, "ErrCode : %{public}d", ret);
-    return CommonFunc::ConvertErrCode(ret);
+    int32_t funcResult = -1;
+    auto ret = serviceRouterMgr->QueryBusinessAbilityInfos(info->filter, info->businessAbilityInfos, funcResult);
+    if (ret == ERR_INVALID_VALUE || ret == ERR_INVALID_DATA) {
+        TAG_LOGI(AAFwkTag::SER_ROUTER, "SendRequest failed, error:%{public}d", ret);
+        funcResult = ERR_APPEXECFWK_PARCEL_ERROR;
+    }
+    return CommonFunc::ConvertErrCode(funcResult);
 }
 
 static bool ParseBusinessAbilityInfo(napi_env env, napi_value args, BusinessAbilityFilter &filter)

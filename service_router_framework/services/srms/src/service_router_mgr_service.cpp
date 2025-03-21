@@ -33,6 +33,8 @@
 #include "sr_samgr_helper.h"
 #include "system_ability_definition.h"
 #include "want.h"
+#include "accesstoken_kit.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -40,6 +42,7 @@ namespace {
 const std::string NAME_SERVICE_ROUTER_MGR_SERVICE = "ServiceRouterMgrService";
 const std::string TASK_NAME = "ServiceRouterUnloadTask";
 const int64_t UNLOAD_DELAY_TIME = 90000;
+const int CYCLE_LIMIT = 1000;
 }
 
 const bool REGISTER_RESULT =
@@ -155,36 +158,101 @@ bool ServiceRouterMgrService::ServiceRouterMgrService::SubscribeCommonEvent()
     return true;
 }
 
-int32_t ServiceRouterMgrService::QueryBusinessAbilityInfos(const BusinessAbilityFilter &filter,
-    std::vector< BusinessAbilityInfo> &businessAbilityInfos)
+ErrCode ServiceRouterMgrService::QueryBusinessAbilityInfos(const BusinessAbilityFilter& filter,
+    std::vector<BusinessAbilityInfo>& businessAbilityInfos, int32_t& funcResult)
+{
+    TAG_LOGD(AAFwkTag::SER_ROUTER, "CheckPermission is supported");
+    if (!VerifySystemApp()) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "verify system app failed");
+        funcResult = ERR_BUNDLE_MANAGER_SYSTEM_API_DENIED;
+        return funcResult;
+    }
+    if (!VerifyCallingPermission(Constants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "verify GET_BUNDLE_INFO_PRIVILEGED failed");
+        funcResult = ERR_BUNDLE_MANAGER_PERMISSION_DENIED;
+        return funcResult;
+    }
+    if (funcResult > CYCLE_LIMIT) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "funcResult size too large");
+        funcResult = ERR_APPEXECFWK_PARCEL_ERROR;
+        return funcResult;
+    }
+    QueryBusinessAbilityInfosInner(filter, businessAbilityInfos, funcResult);
+    return ERR_OK;
+}
+
+void ServiceRouterMgrService::QueryBusinessAbilityInfosInner(const BusinessAbilityFilter& filter,
+    std::vector<BusinessAbilityInfo>& businessAbilityInfos, int32_t& funcResult)
 {
     TAG_LOGD(AAFwkTag::SER_ROUTER, "coldStart");
     DelayUnloadTask();
-    return ServiceRouterDataMgr::GetInstance().QueryBusinessAbilityInfos(filter, businessAbilityInfos);
+    funcResult = ServiceRouterDataMgr::GetInstance().QueryBusinessAbilityInfos(filter, businessAbilityInfos);
 }
 
-int32_t ServiceRouterMgrService::QueryPurposeInfos(const Want &want, const std::string purposeName,
-    std::vector<PurposeInfo> &purposeInfos)
+ErrCode ServiceRouterMgrService::QueryPurposeInfos(const Want& want, const std::string& purposeName,
+    std::vector<PurposeInfo>& purposeInfos, int32_t& funcResult)
 {
     TAG_LOGD(AAFwkTag::SER_ROUTER, "coldStart");
     DelayUnloadTask();
-    return ServiceRouterDataMgr::GetInstance().QueryPurposeInfos(want, purposeName, purposeInfos);
+    funcResult = ServiceRouterDataMgr::GetInstance().QueryPurposeInfos(want, purposeName, purposeInfos);
+    return ERR_OK;
 }
 
-int32_t ServiceRouterMgrService::StartUIExtensionAbility(const sptr<SessionInfo> &sessionInfo, int32_t userId)
+ErrCode ServiceRouterMgrService::StartUIExtensionAbility(const SessionInfo& sessionInfo, int32_t userId,
+    int32_t& funcResult)
 {
     TAG_LOGD(AAFwkTag::SER_ROUTER, "Called");
     DelayUnloadTask();
-    return IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartUIExtensionAbility(sessionInfo, userId));
+    auto shard_sessionInfo = sptr<SessionInfo>::MakeSptr(sessionInfo);
+    funcResult = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartUIExtensionAbility(shard_sessionInfo,
+        userId));
+    return ERR_OK;
 }
 
-int32_t ServiceRouterMgrService::ConnectUIExtensionAbility(const Want &want, const sptr<IAbilityConnection> &connect,
-    const sptr<SessionInfo> &sessionInfo, int32_t userId)
+ErrCode ServiceRouterMgrService::ConnectUIExtensionAbility(const Want& want, const sptr<IAbilityConnection>& connect,
+    const SessionInfo& sessionInfo, int32_t userId, int32_t& funcResult)
 {
     TAG_LOGD(AAFwkTag::SER_ROUTER, "Called");
     DelayUnloadTask();
-    return IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->
-        ConnectUIExtensionAbility(want, connect, sessionInfo, userId));
+    auto shard_sessionInfo = sptr<SessionInfo>::MakeSptr(sessionInfo);
+    funcResult = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->
+        ConnectUIExtensionAbility(want, connect, shard_sessionInfo, userId));
+    return ERR_OK;
+}
+
+bool ServiceRouterMgrService::VerifySystemApp()
+{
+    TAG_LOGD(AAFwkTag::SER_ROUTER, "Called");
+    Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::ATokenTypeEnum tokenType =
+        Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE
+        || IPCSkeleton::GetCallingUid() == Constants::ROOT_UID) {
+        return true;
+    }
+    uint64_t accessTokenIdEx = IPCSkeleton::GetCallingFullTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIdEx)) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "non-system app calling system api");
+        return false;
+    }
+    return true;
+}
+
+bool ServiceRouterMgrService::VerifyCallingPermission(const std::string &permissionName)
+{
+    TAG_LOGD(AAFwkTag::SER_ROUTER, "Verify: %{public}s", permissionName.c_str());
+    OHOS::Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
+    OHOS::Security::AccessToken::ATokenTypeEnum tokenType =
+        OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    if (tokenType == OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        return true;
+    }
+    int32_t ret = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
+    if (ret == OHOS::Security::AccessToken::PermissionState::PERMISSION_DENIED) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "PERMISSION_DENIED: %{public}s", permissionName.c_str());
+        return false;
+    }
+    return true;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

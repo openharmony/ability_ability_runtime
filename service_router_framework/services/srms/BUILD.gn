@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
+import("//build/config/components/idl_tool/idl.gni")
 import("//foundation/ability/ability_runtime/service_router_framework/srms.gni")
 
 group("srms_target") {
@@ -37,7 +37,6 @@ ohos_shared_library("libsrms") {
     "src/inner_service_info.cpp",
     "src/service_router_data_mgr.cpp",
     "src/service_router_mgr_service.cpp",
-    "src/service_router_mgr_stub.cpp",
     "src/sr_common_event_subscriber.cpp",
     "src/sr_samgr_helper.cpp",
   ]
@@ -50,7 +49,7 @@ ohos_shared_library("libsrms") {
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${srms_inner_api_path}:srms_fwk",
   ]
-
+  deps += [ "${srms_inner_api_path}:service_router_mgr_stub" ]
   external_deps = [
     "ability_base:session_info",
     "ability_base:want",
