@@ -1161,6 +1161,12 @@ public:
         return securityFlag_;
     }
 
+    void NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
+
+    void NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
+
     void ScheduleCollaborate(const Want &want);
 
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false,
