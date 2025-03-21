@@ -432,6 +432,7 @@ group("unittest") {
       "app_mgr_service_dump_ipc_test:unittest",
       "app_mgr_service_dump_test:unittest",
       "app_mgr_service_event_handler_test:unittest",
+      "app_mgr_service_inner_fourth_test:unittest",
       "app_mgr_service_inner_mock_test:unittest",
       "app_mgr_service_inner_second_test:unittest",
       "app_mgr_service_inner_tdd_second_test:unittest",
