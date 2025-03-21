@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
+import("//build/config/components/idl_tool/idl.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 config("uripermkit_public_config") {
@@ -20,6 +20,7 @@ config("uripermkit_public_config") {
   include_dirs = [
     "include",
     "${ability_runtime_services_path}/uripermmgr/include",
+    "${target_gen_dir}",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -27,8 +28,74 @@ config("uripermkit_public_config") {
   }
 }
 
+idl_gen_interface("uri_permission_manager_interface") {
+  sources = [
+    "IUriPermissionManager.idl",
+    "IUriPermissionManagerWithSandBoxMgr.idl",
+  ]
+  log_domainid = "0xD001315"
+  log_tag = "UriPermMgr"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_source_set("uri_permission_manager_proxy") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  public_configs = [ ":uripermkit_public_config" ]
+
+  output_values = get_target_outputs(":uri_permission_manager_interface")
+  sources = filter_include(output_values, [ "*_proxy.cpp" ])
+
+  deps = [ ":uri_permission_manager_interface" ]
+  external_deps = [
+    "ability_base:zuri",
+    "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_source_set("uri_permission_manager_stub") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  configs = [ "${ability_runtime_services_path}/common:common_config" ]
+  public_configs = [ ":uripermkit_public_config" ]
+
+  output_values = get_target_outputs(":uri_permission_manager_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+
+  deps = [ ":uri_permission_manager_interface" ]
+  external_deps = [
+    "ability_base:zuri",
+    "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 #build so
 ohos_shared_library("uri_permission_mgr") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   branch_protector_ret = "pac_ret"
 
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
@@ -36,7 +103,10 @@ ohos_shared_library("uri_permission_mgr") {
 
   sources = []
 
-  deps = []
+  deps = [
+    ":uri_permission_manager_proxy",
+    ":uri_permission_manager_stub",
+  ]
 
   external_deps = [
     "ability_base:zuri",
@@ -51,8 +121,6 @@ ohos_shared_library("uri_permission_mgr") {
   sources += [
     "src/uri_permission_load_callback.cpp",
     "src/uri_permission_manager_client.cpp",
-    "src/uri_permission_manager_proxy.cpp",
-    "src/uri_permission_manager_stub.cpp",
   ]
 
   if (ability_runtime_feature_sandboxmanager) {
