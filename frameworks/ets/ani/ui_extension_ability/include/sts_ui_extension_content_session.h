@@ -21,6 +21,14 @@
 #include "window.h"
 #include "sts_runtime.h"
 
+[[maybe_unused]] static void NativeSendData(ani_env* env, ani_object obj, ani_string data);
+[[maybe_unused]] static void NativeLoadContent(ani_env* env, ani_object obj, ani_string path, ani_object storage);
+[[maybe_unused]] static void NativeTerminateSelf(ani_env* env, ani_object obj, [[maybe_unused]] ani_object callback);
+[[maybe_unused]] static void NativeSetWindowBackgroundColor(ani_env* env, ani_object obj, ani_string color);
+[[maybe_unused]] static int NativeTerminateSelfWithResult(ani_env* env, ani_object obj,
+    [[maybe_unused]] ani_object abilityResult, [[maybe_unused]] ani_object callback);
+[[maybe_unused]] static ani_object NativeSetReceiveDataCallback(ani_env* env, ani_object obj);
+
 namespace OHOS {
 namespace AbilityRuntime {
 using RuntimeTask = std::function<void(int, const AAFwk::Want&, bool)>;
@@ -71,10 +79,13 @@ public:
         std::weak_ptr<AbilityRuntime::Context> context,
         std::shared_ptr<StsAbilityResultListeners>& abilityResultListeners,
         std::shared_ptr<StsUIExtensionContentSession> contentSessionPtr);
+    static bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
+    static ani_object WrapBusinessError(ani_env *env, ani_int code);
 
-    void SendData(ani_env* env, ani_object object);
+    void SendData(ani_env* env, ani_object object, ani_string data);
     void LoadContent(ani_env* env, ani_object object, ani_string path, ani_object storage);
     void TerminateSelf();
+    int TerminateSelfWithResult();
     void SetWindowBackgroundColor(ani_env* env, ani_string color);
     ani_object GetUIExtensionHostWindowProxy(ani_env* env, ani_object object);
     ani_object SetReceiveDataCallback(ani_env* env, ani_object object);
@@ -93,13 +104,4 @@ private:
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-
-//ani bingding functions
-ani_object NativeSetReceiveDataCallback(ani_env* env, ani_object obj);
-void NativeSendData(ani_env* env, ani_object obj);
-void NativeLoadContent(ani_env* env, ani_object obj, ani_string path, ani_object storage);
-void NativeTerminateSelf(ani_env* env, ani_object obj);
-void NativeSetWindowBackgroundColor(ani_env* env, ani_object obj, ani_string color);
-ani_object NativeGetUIExtensionHostWindowProxy(ani_env* env, ani_object obj);
-
 #endif  // OHOS_ABILITY_RUNTIME_STS_UI_EXTENSION_CONTENT_SESSION_H
