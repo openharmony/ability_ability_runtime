@@ -4283,10 +4283,10 @@ HWTEST_F(UIAbilityLifecycleManagerTest, UpdateSpecifiedFlag_0100, TestSize.Level
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    std::string flag = "specified";
     AbilityRequest abilityRequest;
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
     abilityRequest.startRecent = true;
-    std::string flag = "specified";
     abilityRequest.specifiedFlag = flag;
 
     Rosen::SessionInfo info;
@@ -4297,7 +4297,68 @@ HWTEST_F(UIAbilityLifecycleManagerTest, UpdateSpecifiedFlag_0100, TestSize.Level
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     EXPECT_NE(abilityRecord, nullptr);
     auto ret = uiAbilityLifecycleManager->UpdateSpecifiedFlag(abilityRecord, flag);
-    EXPECT_EQ(ret, true);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_UpdateSpecifiedFlag_0200
+ * @tc.desc: UpdateSpecifiedFlag failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, UpdateSpecifiedFlag_0200, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    std::string flag = "specified";
+    auto ret = uiAbilityLifecycleManager->UpdateSpecifiedFlag(nullptr, flag);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_UpdateSpecifiedFlag_0300
+ * @tc.desc: UpdateSpecifiedFlag failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, UpdateSpecifiedFlag_0300, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    abilityRequest.startRecent = true;
+    std::string flag = "specified";
+    abilityRequest.specifiedFlag = flag;
+    abilityRequest.sessionInfo = nullptr;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    auto ret = uiAbilityLifecycleManager->UpdateSpecifiedFlag(abilityRecord, flag);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_UpdateSpecifiedFlag_0400
+ * @tc.desc: UpdateSpecifiedFlag failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, UpdateSpecifiedFlag_0400, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    abilityRequest.startRecent = true;
+    std::string flag = "specified";
+    abilityRequest.specifiedFlag = flag;
+
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = nullptr;
+    sessionInfo->persistentId = 1;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    auto ret = uiAbilityLifecycleManager->UpdateSpecifiedFlag(abilityRecord, flag);
+    EXPECT_FALSE(ret);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
