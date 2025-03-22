@@ -1632,6 +1632,8 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord>
     std::string taskName;
     int32_t delayTime = 0;
     auto recordId = abilityRecord->GetAbilityRecordId();
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "task: %{public}s, %{public}d, %{public}" PRId64,
+        abilityRecord->GetURI().c_str(), connectRecordId, recordId);
     if (messageId == AbilityManagerService::LOAD_TIMEOUT_MSG) {
         if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
             return abilityRecord->PostUIExtensionAbilityTimeoutTask(messageId);
