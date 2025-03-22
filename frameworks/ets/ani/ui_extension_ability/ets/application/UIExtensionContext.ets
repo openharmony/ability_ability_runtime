@@ -17,9 +17,9 @@
  * @kit AbilityKit
  */
 
-// import { AbilityResult } from '../ability/abilityResult';
-// import { AsyncCallback } from '@ohos.base';
-// import { BusinessError } from '@ohos.base';
+import { AbilityResult } from 'ability.abilityResult';
+import { AsyncCallback } from '@ohos.base';
+import { BusinessError } from '@ohos.base';
 // import ConnectOptions from '../ability/connectOptions';
 // import ExtensionContext from './ExtensionContext';
 // import type Want from '../@ohos.app.ability.Want';
@@ -31,59 +31,59 @@
 // import type UIServiceExtensionConnectCallback from './UIServiceExtensionConnectCallback';
 //import hilog from './@ohos.hilog';
 
-export type Callback<T> = (data: T)=> void;
+export class AsyncCallbackWrapper<T> {
+  myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
 
-export class Result<T, E>{
-  result:T;
-  error:E;
-  constructor(result: T , error: E) {
-      this.result = result;
-      this.error = error;
+  constructor(myFun:AsyncCallback<T, void>){
+    console.log("AsyncCallbackWrapper");
+    this.myFun_ = myFun;
   }
-}
 
-export type AsyncCallback<T> = (err: BusinessError<T>, data: T)=> void;
-
-export class BusinessError<T = void> {
-    code: number;
-    data: T;
+  invoke(err: BusinessError<void>, data: T) : void {
+    this.myFun_(err, data);
+  }
 }
 
 export default class UIExtensionContext {
   public nativeUIExtensionContext:long = 0;
-  public native  terminateSelfSync( ): void;
-  public native  terminateSelfSyncPromise( ): void;
-    terminateSelf(callback: AsyncCallback<void>):void{
-      console.log("UIExtensionContext.terminateSelf callback1");
-    let p1 = taskpool.execute(():undefined => {this.terminateSelfSync();  return undefined});
-    console.log("UIExtensionContext.terminateSelf callback2");
-        p1.then((e :NullishType)=>{
-          console.log("UIExtensionContext.terminateSelf callback3");
-          let resultCode: Int  = e as Int;
-          console.log("UIExtensionContext.terminateSelf callback4");
-          let r: BusinessError = { code: resultCode.intValue(), data: undefined };
-          console.log("UIExtensionContext.terminateSelf callback5");
-            callback(r, undefined);
-            console.log("UIExtensionContext.terminateSelf callback6");
-        }, (err:Object): void => {
-          console.log("UIExtensionContext.terminateSelf callback7");
-        });
-    }
-    terminateSelf( ):Promise<void>{
-      //hilog.info(0x0000, 'testTag',"UIExtensionContext.terminateSelf promise1");
-      let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
-        //hilog.info(0x0000, 'testTag',"UIExtensionContext.terminateSelf promise2");
-          let p1 = taskpool.execute(():undefined => {this.terminateSelfSyncPromise();  return undefined});
-          //hilog.info(0x0000, 'testTag',"UIExtensionContext.terminateSelf promise3");
-          p1.then((e :NullishType)=>{
-            //hilog.info(0x0000, 'testTag',"UIExtensionContext.terminateSelf promise4");
-            let PromiseLike = e as PromiseLike<void>;
-            resolve(PromiseLike);
-          }, (err:Object): void => {
-            //hilog.info(0x0000, 'testTag',"UIExtensionContext.terminateSelf promise5");
-          });
-      });
-      return p;
-    }
+  public native  terminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
+  public native  terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
 
+  terminateSelf(callback:AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    launch this.terminateSelfSync(myCall);
+  }
+
+  terminateSelf(): Promise<void> {
+    let p = new Promise<void>((resolve: () => void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+        if (err.code == 0) {
+          resolve();
+        } else {
+          reject(err);
+        }
+      });
+      launch this.terminateSelfSync(myCall);
+    });
+    return p;
+  }
+
+  terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    launch this.terminateSelfWithResultSync(parameter, myCall);
+  }
+
+  terminateSelfWithResult(parameter: AbilityResult): Promise<void>{
+    let p = new Promise<void>((resolve: ()=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+        if (err.code == 0) {
+          resolve();
+        } else {
+          reject(err);
+        }
+      });
+      launch this.terminateSelfWithResultSync(parameter, myCall);
+    });
+    return p;
+  }
 }
