@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +19,6 @@
 #include <string>
 #include "event_handler.h"
 #include "sts_interface.h"
-// #include "native_engine/native_engine.h"
-
-// #include "native_engine/native_engine.h"
-
-// #include "data_protect.h"
 
 namespace OHOS {
 namespace StsEnv {

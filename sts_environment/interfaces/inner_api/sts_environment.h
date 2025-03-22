@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,12 +27,6 @@
 #include "sts_interface.h"
 #include "ani.h"
 #include "napi/native_api.h"
-
-// #ifdef WINDOWS_PLATFORM
-// #define STS_EXPORT __declspec(dllexport)
-// #else
-// #define STS_EXPORT __attribute__((visibility("default")))
-// #endif
 
 namespace OHOS {
 struct STSRuntimeAPI;
