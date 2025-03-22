@@ -1748,7 +1748,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                         return;
                     }
                     OHOS::AppManagerSts::StsAppManagerRegistryInit(
-                        (static_cast<AbilityRuntime::STSRuntime&>(*runtimeGetAniEnv()
+                        (static_cast<AbilityRuntime::STSRuntime&>(*runtime)).GetAniEnv()
                     );
                 }
             }
