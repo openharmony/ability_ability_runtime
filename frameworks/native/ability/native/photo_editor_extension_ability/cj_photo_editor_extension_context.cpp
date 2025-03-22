@@ -108,7 +108,7 @@ CJ_EXPORT int32_t FFIPhotoExtCtxSaveEditedContentWithUri(int64_t id, const char*
     return cjContext->SaveEditedContentWithUri(std::string(uri), *actualWant);
 }
 
-static Media::PackOption ParseCPackOption(const CPackingOptionV2& option)
+static Media::PackOption ParseCPackOption(const CPackingOption& option)
 {
     return Media::PackOption {
         .format = option.format,
@@ -118,7 +118,7 @@ static Media::PackOption ParseCPackOption(const CPackingOptionV2& option)
     };
 }
 
-CJ_EXPORT int32_t FFIPhotoExtCtxSaveEditedContentWithImage(int64_t id, int64_t imageId, CPackingOptionV2 option,
+CJ_EXPORT int32_t FFIPhotoExtCtxSaveEditedContentWithImage(int64_t id, int64_t imageId, CPackingOption option,
     WantHandle want)
 {
     if (want == nullptr) {
