@@ -8,7 +8,7 @@ class ExtensionAbility{}
 
 export default class UIExtensionAbility extends ExtensionAbility {
 
-  uiExtenstionContext?: UIExtensionContext;
+  context?: UIExtensionContext = {};
 
   onCreate(launchParam: AbilityConstant.LaunchParam): void {}
 
