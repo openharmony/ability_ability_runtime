@@ -319,5 +319,19 @@ HWTEST_F(ConnectionRecordTest, AaFwk_ConnectionRecord_013, TestSize.Level1)
 
     EXPECT_NE(info.end(), std::find_if(info.begin(), info.end(), IsExist));
 }
+
+/*
+ * Feature: ConnectionRecord
+ * Function: CompleteDisconnectSync
+ * SubFunction: NA
+ * FunctionPoints: CompleteDisconnectSync
+ * EnvConditions:NA
+ * CaseDescription: Verify the correct process of complete disconnect
+ */
+HWTEST_F(ConnectionRecordTest, AaFwk_ConnectionRecord_014, TestSize.Level1)
+{
+    connectionRecord_->CompleteDisconnectSync();
+    EXPECT_EQ(connectionRecord_->GetConnectState(), ConnectionState::DISCONNECTED);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

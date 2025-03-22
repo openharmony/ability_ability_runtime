@@ -2376,6 +2376,35 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
     }
 }
 
+void AbilityConnectManager::DisconnectBeforeCleanup()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
+    std::lock_guard lock(serviceMapMutex_);
+    for (auto it = serviceMap_.begin(); it != serviceMap_.end(); ++it) {
+        auto abilityRecord = it->second;
+        CHECK_POINTER(abilityRecord);
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "ability will died: %{public}s", abilityRecord->GetURI().c_str());
+        if (abilityRecord->GetAbilityInfo().type != AbilityType::SERVICE &&
+            abilityRecord->GetAbilityInfo().type != AbilityType::EXTENSION) {
+            TAG_LOGW(AAFwkTag::SERVICE_EXT, "type not service");
+            continue;
+        }
+        ConnectListType connlist = abilityRecord->GetConnectRecordList();
+        for (auto &connectRecord : connlist) {
+            CHECK_POINTER_CONTINUE(connectRecord);
+            // just notify no same userId
+            if (connectRecord->GetCallerUid() / BASE_USER_RANGE == userId_) {
+                continue;
+            }
+            RemoveExtensionDelayDisconnectTask(connectRecord);
+            connectRecord->CompleteDisconnectSync();
+            abilityRecord->RemoveConnectRecordFromList(connectRecord);
+            RemoveConnectionRecordFromMap(connectRecord);
+        }
+    }
+}
+
 void AbilityConnectManager::HandleAbilityDiedTask(
     const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)
 {
