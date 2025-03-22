@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,24 +115,10 @@ bool STSEnvironment::LoadRuntimeApis()
 
 void STSEnvironment::RegisterUncaughtExceptionHandler(const STSUncaughtExceptionInfo& handle)
 {
-    // lazyApis_.RegisterCJUncaughtExceptionHandler(handle);
 }
 
 bool STSEnvironment::PostTask(TaskFuncType task)
 {
-    // #ifdef WITH_EVENT_HANDLER
-    //     if (task == nullptr) {
-    //         TAG_LOGE(AAFwkTag::STSRUNTIME, "null task could not be posted");
-    //         return false;
-    //     }
-
-    //     bool postDone = g_handler->PostTask(task, "spawn-main-task-from-cj", 0,
-    //     AppExecFwk::EventQueue::Priority::HIGH); if (!postDone) {
-    //         TAG_LOGE(AAFwkTag::STSRUNTIME, "event handler support cj ui scheduler");
-    //         return false;
-    //     }
-    //     return true;
-    // #endif
     return true;
 }
 
@@ -198,7 +184,6 @@ void STSEnvironment::InitSTSChipSDKNS(const ::std::string& path)
     dlns_inherit(&chip_ndk, &current, "allow_all_shared_libs");
 }
 
-// Init app namespace
 void STSEnvironment::InitSTSAppNS(const std::string& path)
 {
     LOGI("InitSTSAppNS: %{public}s", path.c_str());
@@ -213,7 +198,6 @@ void STSEnvironment::InitSTSAppNS(const std::string& path)
     dlns_inherit(&current, &ndk, "allow_all_shared_libs");
 }
 
-// Init sts sdk namespace
 void STSEnvironment::InitSTSSDKNS(const std::string& path)
 {
     LOGI("InitSTSSDKNS: %{public}s", path.c_str());
@@ -223,7 +207,6 @@ void STSEnvironment::InitSTSSDKNS(const std::string& path)
     DynamicInitNamespace(&ns, &sts_app, path.c_str(), STSEnvironment::stsSDKNSName);
 }
 
-// Init sts system namespace
 void STSEnvironment::InitSTSSysNS(const std::string& path)
 {
     LOGI("InitSTSSysNS: %{public}s", path.c_str());
@@ -306,60 +289,19 @@ void STSEnvironment::StopRuntime()
     if (!isRuntimeStarted_) {
         return;
     }
-
-    // if (isUISchedulerStarted_) {
-    //     StopUIScheduler();
-    // }
-
-    // auto code = lazyApis_.FiniCJRuntime();
-    // if (code == E_OK) {
-    //     isRuntimeStarted_ = false;
-    // }
 }
 
 bool STSEnvironment::StartUIScheduler()
 {
-    // if (isUISchedulerStarted_) {
-    //     return true;
-    // }
-
-    // uiScheduler_ = lazyApis_.InitUIScheduler();
-    // if (!uiScheduler_) {
-    //     TAG_LOGE(AAFwkTag::STSRUNTIME, "init cj ui scheduler failed");
-    //     return false;
-    // }
-
-    // isUISchedulerStarted_ = true;
     return true;
 }
 
 void STSEnvironment::StopUIScheduler()
 {
-    // isUISchedulerStarted_ = false;
 }
 
 void* STSEnvironment::LoadSTSLibrary(const char* dlName)
 {
-    // if (!StartRuntime()) {
-    //     TAG_LOGE(AAFwkTag::STSRUNTIME, "StartRuntime failed");
-    //     return nullptr;
-    // }
-    // auto handle = LoadSTSLibrary(APP, dlName);
-    // if (!handle) {
-    //     TAG_LOGE(AAFwkTag::STSRUNTIME, "load cj library failed: %{public}s", DynamicGetError());
-    //     return nullptr;
-    // }
-
-    // LOGI("LoadCJLibrary InitCJLibrary: %{public}s", dlName);
-    // auto status = lazyApis_.InitCJLibrary(dlName);
-    // if (status != E_OK) {
-    //     TAG_LOGE(AAFwkTag::STSRUNTIME, "InitCJLibrary failed: %{public}s", dlName);
-    //     UnLoadCJLibrary(handle);
-    //     return nullptr;
-    // }
-
-    // isLoadCJLibrary_ = true;
-    // return handle;
     return nullptr;
 }
 
@@ -370,26 +312,6 @@ void STSEnvironment::UnLoadSTSLibrary(void* handle)
 
 bool STSEnvironment::StartDebugger()
 {
-    // #ifdef __OHOS__
-    //     Dl_namespace ns;
-    //     dlns_get(CJEnvironment::cjSysNSName, &ns);
-    //     auto handle = DynamicLoadLibrary(&ns, DEBUGGER_LIBNAME, 0);
-    // #else
-    //     auto handle = DynamicLoadLibrary(DEBUGGER_LIBNAME, 0);
-    // #endif
-    //     if (!handle) {
-    //         TAG_LOGE(AAFwkTag::STSRUNTIME, "failed to load library: %{public}s", DEBUGGER_LIBNAME);
-    //         return false;
-    //     }
-    //     auto symbol = DynamicFindSymbol(handle, DEBUGGER_SYMBOL_NAME);
-    //     if (!symbol) {
-    //         TAG_LOGE(AAFwkTag::STSRUNTIME, "failed to find symbol: %{public}s", DEBUGGER_SYMBOL_NAME);
-    //         DynamicFreeLibrary(handle);
-    //         return false;
-    //     }
-    //     auto func = reinterpret_cast<bool (*)(int, const std::string&)>(symbol);
-    //     std::string name = "PandaDebugger";
-    //     func(0, name);
     return true;
 }
 
