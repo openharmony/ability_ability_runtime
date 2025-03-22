@@ -19,6 +19,7 @@
 #include "configuration_convertor.h"
 #include "ohos_application.h"
 #include "sts_context_util.h"
+#include "ani_common_configuration.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -27,35 +28,40 @@ ani_ref STSAbilityStageContext::stsAbilityStageContextObj_ = nullptr;
 
 void STSAbilityStageContext::ResetEnv(ani_env* env)
 {
-    env->DescribeError();  // 打印异常信息
-    env->ResetError();  // 清除异常，避免影响后续 ANI 调用
+    if (env) {
+        env->DescribeError();
+        env->ResetError();
+    }
 }
 
 ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, std::shared_ptr<Context> context,
     std::weak_ptr<AppExecFwk::OHOSApplication> application)
 {
     TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
-    if (!env) {
-        TAG_LOGE(AAFwkTag::ABILITY, "env nullptr");
+    if (env == nullptr || context == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "env nullptr or context nullptr");
+        return nullptr;
     }
 
-    TAG_LOGE(AAFwkTag::ABILITY, "CreateStsAbilityStageContext env:%{public}p", env);
     ani_status status = ANI_OK;
     ani_class abilityStageCtxCls;
     status = env->FindClass(STS_ABILITY_STAGE_CONTEXT_CLASS_NAME, &abilityStageCtxCls);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "call FindClass LAbilityStageContext failed, status:%{public}d", status);
+        TAG_LOGE(AAFwkTag::ABILITY, "call FindClass LAbilityStageContext failed, status:%{public}d", status);
+        return nullptr;
     }
 
     ani_method method = nullptr;
     status = env->Class_FindMethod(abilityStageCtxCls, "<ctor>", ":V", &method);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "call Class_FindMethod ctor failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "call Class_FindMethod ctor failed");
+        return nullptr;
     }
     ani_object obj = nullptr;
     status = env->Object_New(abilityStageCtxCls, method, &obj);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "call Object_New abilityStageCtxCls failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "call Object_New abilityStageCtxCls failed");
+        return nullptr;
     }
     stsAbilityStageContextObj_ = reinterpret_cast<ani_ref>(obj);
 
@@ -64,7 +70,7 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
     ani_field contextField;
     status = env->Class_FindField(abilityStageCtxCls, "stageContext", &contextField);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "call Class_FindField stageContext failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "call Class_FindField stageContext failed");
     }
     auto pCtx = workContext->lock();
     if(pCtx != nullptr) {
@@ -86,23 +92,25 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
     ContextUtil::StsCreatContext(env, abilityStageCtxCls, obj, app->GetApplicationCtxObjRef(), context);
 
     //set Config class
-    ani_object configObj = Createfiguration(env, context);
-    if(configObj != nullptr) {
-        TAG_LOGI(AAFwkTag::ABILITY, "configObj bind");
-        ani_ref configObjRef = nullptr;
-        if (env->GlobalReference_Create(configObj, &configObjRef) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ABILITY, "GlobalReference_Create configObjRef failed");
-        }
-        ani_field configField;
-        status = env->Class_FindField(abilityStageCtxCls, "config", &configField);
-        if (status != ANI_OK) {
-            TAG_LOGI(AAFwkTag::ABILITY, "Class_FindField config failed");
-        }
-        if (env->Object_SetField_Ref(obj, configField, configObjRef) != ANI_OK) {
-            TAG_LOGI(AAFwkTag::ABILITY, "Object_SetField_Ref configField failed");
+    auto configuration = context->GetConfiguration();
+    if (configuration != nullptr) {
+        ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, *configuration);
+        if(configObj != nullptr) {
+            TAG_LOGI(AAFwkTag::ABILITY, "configObj bind");
+            ani_ref configObjRef = nullptr;
+            if (env->GlobalReference_Create(configObj, &configObjRef) != ANI_OK) {
+                TAG_LOGE(AAFwkTag::ABILITY, "GlobalReference_Create configObjRef failed");
+            }
+            ani_field configField;
+            status = env->Class_FindField(abilityStageCtxCls, "config", &configField);
+            if (status != ANI_OK) {
+                TAG_LOGI(AAFwkTag::ABILITY, "Class_FindField config failed");
+            }
+            if (env->Object_SetField_Ref(obj, configField, configObjRef) != ANI_OK) {
+                TAG_LOGI(AAFwkTag::ABILITY, "Object_SetField_Ref configField failed");
+            }
         }
     }
-
     //set HapModuleInfo class
     ani_object moduleInfoObj = CreateHapModuleInfo(env, context);
     if (moduleInfoObj != nullptr) {
@@ -304,7 +312,7 @@ void STSAbilityStageContext::ConfigurationUpdated(ani_env* env, const std::share
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "null config");
         return;
     }
-    ani_object configObj = Createfiguration(env, config);
+    ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, *config);
 
     ani_class abilityStageCtxCls = nullptr;
     ani_status status = env->FindClass(STS_ABILITY_STAGE_CLASS_NAME, &abilityStageCtxCls);
