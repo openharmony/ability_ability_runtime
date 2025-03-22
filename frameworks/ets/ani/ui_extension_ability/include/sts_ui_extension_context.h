@@ -24,14 +24,18 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 
-[[maybe_unused]] static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class aniClass);
-[[maybe_unused]] static void TerminateSelfSyncPromise([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj);
+[[maybe_unused]] static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj,
+    [[maybe_unused]] ani_object callback);
+[[maybe_unused]] static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env,
+    [[maybe_unused]] ani_object obj, [[maybe_unused]] ani_object abilityResult, [[maybe_unused]] ani_object callback);
 ani_object CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context);
 class StsUIExtensionContext final {
 public:
     explicit StsUIExtensionContext(const std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext>& context)
         : context_(context) {}
     virtual ~StsUIExtensionContext() = default;
+    static bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
+    static ani_object WrapBusinessError(ani_env *env, ani_int code);
 protected:
     std::weak_ptr<OHOS::AbilityRuntime::UIExtensionContext> context_;
 };
