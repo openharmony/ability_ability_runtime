@@ -343,5 +343,26 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetAssignTokenId_0100, TestSize.
     int32_t assignTokenId = appRecord->GetAssignTokenId();
     EXPECT_EQ(assignTokenId, setId);
 }
+
+/**
+ * @tc.name: AppRunningRecord_SetDebugFromLocal_0100
+ * @tc.desc: Test SetDebugFromLocal works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetDebugFromLocal_0100, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "AppRunningRecord_SetDebugFromLocal_0100 called.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    EXPECT_NE(appRecord, nullptr);
+    bool isDebugFromLocal = false;
+    appRecord->SetDebugFromLocal(isDebugFromLocal);
+    bool resultOne = appRecord->GetDebugFromLocal();
+    EXPECT_EQ(isDebugFromLocal, resultOne);
+    isDebugFromLocal = true;
+    appRecord->SetDebugFromLocal(isDebugFromLocal);
+    bool resultTwo = appRecord->GetDebugFromLocal();
+    EXPECT_EQ(isDebugFromLocal, resultTwo);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
