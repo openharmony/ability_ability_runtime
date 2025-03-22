@@ -19,6 +19,8 @@ group("ani_packages") {
     "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_abc_etc",
     "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_registry_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/frameworks/ets/ani/app_manager:ability_app_manager_abc_etc",
+    "${ability_runtime_path}/frameworks/ets/ani/app_manager:ability_app_manager_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/configuration:configuration_abc_etc",
     "${ability_runtime_path}/frameworks/ets/ani/configuration:configuration_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/ui_ability:ui_ability_abc_etc",

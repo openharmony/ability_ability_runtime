@@ -91,6 +91,7 @@
 #include "js_runtime_utils.h"
 #include "context/application_context.h"
 #include "os_account_manager_wrapper.h"
+#include "sts_app_manager.h"
 
 #if defined(NWEB)
 #include <thread>
@@ -1741,6 +1742,14 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     if (application_ != nullptr) {
                         LoadAllStsExtensions();
                     }
+                    auto& runtime = application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
+                    if (runtime == nullptr) {
+                        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+                        return;
+                    }
+                    OHOS::AppManagerSts::StsAppManagerRegistryInit(
+                        (static_cast<AbilityRuntime::STSRuntime&>(*runtime)).GetAniEnv()
+                    );
                 }
             }
         }
