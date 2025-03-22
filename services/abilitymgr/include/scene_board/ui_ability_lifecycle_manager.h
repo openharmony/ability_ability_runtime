@@ -34,10 +34,16 @@ class StatusBarDelegateManager;
 struct AbilityRunningInfo;
 struct MissionValidResult;
 
+enum class SpecifiedProcessState: u_int8_t {
+    STATE_NONE = 0,
+    STATE_PROCESS = 1,
+    STATE_ABILITY = 2
+};
+
 struct SpecifiedRequest {
     bool preCreateProcessName = false;
     bool isCold = false;
-    bool isSpecifiedProcess = false;
+    SpecifiedProcessState specifiedProcessState = SpecifiedProcessState::STATE_NONE;
     int32_t requestId = 0;
     int32_t persistentId = 0;
     uint32_t sceneFlag = 0;

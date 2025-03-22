@@ -369,7 +369,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
         && isUIAbility) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess");
         auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
-        specifiedRequest->isSpecifiedProcess = true;
+        specifiedRequest->specifiedProcessState = SpecifiedProcessState::STATE_PROCESS;
         AddSpecifiedRequest(specifiedRequest);
         return ERR_OK;
     }
@@ -405,7 +405,7 @@ int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const Ab
         && isUIAbility) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess");
         auto specifiedRequest = std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest);
-        specifiedRequest->isSpecifiedProcess = true;
+        specifiedRequest->specifiedProcessState = SpecifiedProcessState::STATE_PROCESS;
         AddSpecifiedRequest(specifiedRequest);
         return ERR_OK;
     }
@@ -1758,7 +1758,7 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const AAFwk::Wan
     auto &abilityRequest = request->abilityRequest;
     abilityRequest.want.SetParam(PARAM_SPECIFIED_PROCESS_FLAG, flag);
     if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
-        request->isSpecifiedProcess = false;
+        request->specifiedProcessState = SpecifiedProcessState::STATE_ABILITY;
         StartSpecifiedRequest(*request);
         return;
     }
@@ -2764,7 +2764,7 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest: %{public}d", specifiedRequest.requestId);
     auto &request = specifiedRequest.abilityRequest;
 
-    if (specifiedRequest.isSpecifiedProcess) {
+    if (specifiedRequest.specifiedProcessState == SpecifiedProcessState::STATE_PROCESS) {
         DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedProcess(request.want,
             request.abilityInfo, specifiedRequest.requestId);
     } else {
@@ -2772,7 +2772,8 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
             PreCreateProcessName(request);
         }
 
-        if (!IsSpecifiedModuleLoaded(request)) {
+        if (specifiedRequest.specifiedProcessState == SpecifiedProcessState::STATE_NONE &&
+            !IsSpecifiedModuleLoaded(request)) {
             specifiedRequest.isCold = true;
             auto sessionInfo = CreateSessionInfo(request);
             sessionInfo->requestCode = request.requestCode;
