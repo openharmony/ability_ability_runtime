@@ -254,6 +254,7 @@ private:
         const std::function<void()>& callback);
     bool IsMainProcess(const std::string &bundleName, const std::string &process);
     AbilityRuntime::Runtime::Language ConvertLangToCode(const std::string &language) const;
+    void PreloadHybridModule(const HapModuleInfo &hapModuleInfo) const;
 
 private:
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;
