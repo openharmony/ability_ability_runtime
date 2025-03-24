@@ -6786,6 +6786,9 @@ int AbilityManagerService::StopServiceAbility(const Want &want, int32_t userId, 
 void AbilityManagerService::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     CHECK_POINTER(abilityRecord);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "On ability died: %{public}s, %{public}d, %{public}" PRId64,
+        abilityRecord->GetURI().c_str(), abilityRecord->GetRecordId(),
+        abilityRecord->GetAbilityRecordId());
     if (abilityRecord->GetToken()) {
         FreezeUtil::GetInstance().DeleteLifecycleEvent(abilityRecord->GetToken()->AsObject());
     }
