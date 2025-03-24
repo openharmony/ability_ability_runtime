@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "sts_ui_extension_context.h"
 #include "ui_extension_context.h"
 #include "ani_common_want.h"
@@ -20,7 +19,7 @@
 static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj,
     [[maybe_unused]] ani_object callback)
 {
-    TAG_LOGE(AAFwkTag::UI_EXT, "terminateSelfSync start");
+    TAG_LOGI(AAFwkTag::UI_EXT, "terminateSelfSync start");
     ani_class cls = nullptr;
     ani_long nativeContextLong;
     ani_field contextField = nullptr;
@@ -139,7 +138,7 @@ bool StsUIExtensionContext::AsyncCallback(ani_env *env, ani_object call, ani_obj
 
 ani_object CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context)
 {
-    TAG_LOGE(AAFwkTag::UI_EXT, "CreateStsUiExtensionContext start");
+    TAG_LOGI(AAFwkTag::UI_EXT, "CreateStsUiExtensionContext start");
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
     ani_method method = nullptr;
@@ -169,6 +168,6 @@ ani_object CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
     if ((status = env->Object_SetField_Long(contextObj, field, nativeContextLong)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "CreateStsUiExtensionContext set filed status : %{public}d", status);
     }
-    TAG_LOGE(AAFwkTag::UI_EXT, "CreateStsUiExtensionContext end");
+    TAG_LOGI(AAFwkTag::UI_EXT, "CreateStsUiExtensionContext end");
     return contextObj;
 }
