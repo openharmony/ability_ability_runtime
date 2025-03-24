@@ -2043,9 +2043,9 @@ void AppRunningRecord::OnWindowVisibilityChanged(
             windowIds_.emplace(info->windowId_);
         }
     }
-
-    TAG_LOGI(AAFwkTag::APPMGR, "window id empty: %{public}d, pState: %{public}d, cState: %{public}d",
-        windowIds_.empty(), pendingState_, curState_);
+    auto pid = GetPriorityObject() ? GetPriorityObject()->GetPid() : -1;
+    TAG_LOGI(AAFwkTag::APPMGR, "wnd call, %{public}s_%{public}d, isEmpty_%{public}d, c_%{public}d -> p_%{public}d",
+        GetBundleName().c_str(), pid, windowIds_.empty(), curState_, pendingState_);
     if (pendingState_ == ApplicationPendingState::READY) {
         if (!windowIds_.empty() && curState_ != ApplicationState::APP_STATE_FOREGROUND) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
