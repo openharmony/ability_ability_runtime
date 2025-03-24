@@ -1884,6 +1884,8 @@ public:
 
     bool IsSupportStatusBar(int32_t uid);
 
+    bool IsSceneBoardReady(int32_t userId);
+
     /**
      * Set keep-alive flag for application under a specific user.
      * @param bundleName Bundle name.
