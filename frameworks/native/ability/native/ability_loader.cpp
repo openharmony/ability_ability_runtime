@@ -52,13 +52,14 @@ Ability *AbilityLoader::GetAbilityByName(const std::string &abilityName)
     return nullptr;
 }
 
-AbilityRuntime::Extension *AbilityLoader::GetExtensionByName(const std::string &abilityName)
+AbilityRuntime::Extension *AbilityLoader::GetExtensionByName(const std::string &abilityName,
+    const std::string &language)
 {
     auto it = extensions_.find(abilityName);
     if (it != extensions_.end()) {
-        return it->second();
+        return it->second(language);
     }
-    TAG_LOGE(AAFwkTag::ABILITY, "failed:%{public}s", abilityName.c_str());
+    TAG_LOGI(AAFwkTag::ABILITY, "failed:%{public}s", abilityName.c_str());
     return nullptr;
 }
 
