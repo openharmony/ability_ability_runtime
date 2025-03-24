@@ -237,7 +237,6 @@ void CJRuntime::UnLoadCJAppLibrary()
 
 void CJRuntime::RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo)
 {
-    // TODO sts 已完成
     auto cjEnv = OHOS::CJEnv::LoadInstance();
     if (cjEnv == nullptr) {
         TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");

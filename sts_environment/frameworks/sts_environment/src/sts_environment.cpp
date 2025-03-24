@@ -241,9 +241,6 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv)
     std::string bootString = optionPrefix + "--boot-panda-files=" + bootfiles;
     TAG_LOGI(AAFwkTag::STSRUNTIME, "bootString %{public}s", bootString.c_str());
     options.push_back(ani_option{bootString.c_str(), nullptr});
-
-    // std::string bootStringAsyn = optionPrefix + "--coroutine-enable-features:ani-drain-queue";
-    // options.push_back(ani_option{bootStringAsyn.c_str(), nullptr});
     std::string schedulingExternal = optionPrefix + "--coroutine-enable-external-scheduling=true";
     ani_option schedulingExternalOption = {schedulingExternal.data(), nullptr};
     options.push_back(schedulingExternalOption);

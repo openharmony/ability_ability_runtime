@@ -249,17 +249,6 @@ void STSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths)
     StsEnv::STSEnvironment::InitSTSAppNS(appPath);
     StsEnv::STSEnvironment::InitSTSSDKNS(STS_RT_PATH);
     StsEnv::STSEnvironment::InitSTSSysNS(STS_SYSLIB_PATH);
-
-    // TODO uncompleted
-    // auto moduleManager = NativeModuleManager::GetInstance();
-    // if (moduleManager == nullptr) {
-    //     TAG_LOGE(AAFwkTag::STSRUNTIME, "null moduleManager");
-    //     return;
-    // }
-
-    // for (const auto &appLibPath : appLibPaths) {
-    //     moduleManager->SetAppLibPath(appLibPath.first, appLibPath.second, isSystemApp);
-    // }
 }
 
 bool STSRuntime::Initialize(const Options& options)
@@ -286,44 +275,14 @@ bool STSRuntime::Initialize(const Options& options)
     apiTargetVersion_ = options.apiTargetVersion;
     TAG_LOGD(AAFwkTag::STSRUNTIME, "Initialize: %{public}d", apiTargetVersion_);
     if (options.isStageModel || options.isTestFramework) {
-        // auto vm = stsEnv_->GetEtsVM();
-        // auto env = stsEnv_->GetEtsEnv();
-        // if (vm == nullptr || env == nullptr) {
-        //     TAG_LOGE(AAFwkTag::STSRUNTIME, "vm or env nullptr");
-        //     return false;
-        // }
-
         if (preloaded_) {
             PostPreload(options);
         }
 
-        // HandleScope handleScope(*this);
-        // napi_value globalObj = nullptr;
-        // napi_get_global(env, &globalObj);
-        // CHECK_POINTER_AND_RETURN(globalObj, false);
-
         if (!preloaded_) {
-            // TODO uncompleted
-            // InitSyscapModule(env);
-            // // Simple hook function 'isSystemplugin'
-            // const char* moduleName = "JsRuntime";
-            // BindNativeFunction(env, globalObj, "isSystemplugin", moduleName,
-            //     [](napi_env env, napi_callback_info cbinfo) -> napi_value { return CreateJsUndefined(env); });
-
-            // TODO uncompleted
-            // napi_value propertyValue = nullptr;
-            // napi_get_named_property(env, globalObj, "requireNapi", &propertyValue);
-            // napi_ref tmpRef = nullptr;
-            // napi_create_reference(env, propertyValue, 1, &tmpRef);
-            // methodRequireNapiRef_.reset(reinterpret_cast<NativeReference*>(tmpRef));
-            // if (!methodRequireNapiRef_) {
-            //     TAG_LOGE(AAFwkTag::JSRUNTIME, "null methodRequireNapiRef_");
-            //     return false;
-            // }
             TAG_LOGD(AAFwkTag::STSRUNTIME, "PreloadAce start");
             PreloadAce(options);
             TAG_LOGD(AAFwkTag::STSRUNTIME, "PreloadAce end");
-            // nativeEngine->RegisterPermissionCheck(PermissionCheckFunc);
         }
 
         if (!options.preload) {
@@ -348,9 +307,6 @@ bool STSRuntime::Initialize(const Options& options)
             InitTimerModule();
         }
 
-        // TODO uncompleted
-        // InitWorkerModule(options);
-        // TODO uncompleted
         SetModuleLoadChecker(options.moduleCheckerDelegate);
         if (!stsEnv_->InitLoop(options.isStageModel)) {
             TAG_LOGE(AAFwkTag::STSRUNTIME, "Init loop failed");
@@ -366,64 +322,13 @@ bool STSRuntime::LoadSTSAppLibrary(const AppLibPathVec& appLibPaths)
         TAG_LOGE(AAFwkTag::STSRUNTIME, "null stsEnv_");
          return false;
     }
-    // TODO uncompleted
-    // void* handle = nullptr;
-    // // According to the OHOS rule, the format of the SO name is as follows
-    // auto targetSoName = "lib" + packageName_ + ".so";
 
-    // for (const auto& libPath : appLibPaths) {
-    //     for (auto& itor : std::filesystem::directory_iterator(libPath)) {
-    //         // According to the convention, the names of cj generated products must contain the following keywords
-    //         if (itor.path().string().find(targetSoName) == std::string::npos) {
-    //             continue;
-    //         }
-    //         handle = env->loadSTSLibrary(itor.path().c_str());
-    //         if (handle == nullptr) {
-    //             char* errMsg = dlerror();
-    //             TAG_LOGE(AAFwkTag::STSRUNTIME,
-    //                 "load %{public}s failed, reason: %{public}s", itor.path().c_str(), errMsg ? errMsg : "null");
-    //             return false;
-    //         }
-    //     }
-    // }
     appLibLoaded_ = true;
     return true;
 }
 
 void STSRuntime::StartDebugMode(const DebugOption dOption)
 {
-    // if (debugModel_) {
-    //     TAG_LOGI(AAFwkTag::CJRUNTIME, "already debug mode");
-    //     return;
-    // }
-
-    // bool isStartWithDebug = dOption.isStartWithDebug;
-    // bool isDebugApp = dOption.isDebugApp;
-    // const std::string bundleName = bundleName_;
-    // std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
-
-    // TAG_LOGI(AAFwkTag::CJRUNTIME, "StartDebugMode %{public}s", bundleName_.c_str());
-
-    // HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
-    //     [bundleName, isStartWithDebug, isDebugApp](int socketFd, std::string option) {
-    //         TAG_LOGI(AAFwkTag::CJRUNTIME, "hdcRegister callback call, socket fd: %{public}d, option: %{public}s.",
-    //             socketFd, option.c_str());
-    //         if (option.find(DEBUGGER) == std::string::npos) {
-    //             if (!isDebugApp) {
-    //                 ConnectServerManager::Get().StopConnectServer(false);
-    //             }
-    //             ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
-    //             ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
-    //         } else {
-    //             TAG_LOGE(AAFwkTag::CJRUNTIME, "debugger service unexpected option: %{public}s", option.c_str());
-    //         }
-    //     });
-    // if (isDebugApp) {
-    //     ConnectServerManager::Get().StartConnectServer(bundleName_, -1, true);
-    // }
-    // ConnectServerManager::Get().AddInstance(instanceId_, instanceId_);
-
-    // debugModel_ = StartDebugger();
 }
 
 bool STSRuntime::StartDebugger()
@@ -442,12 +347,6 @@ void STSRuntime::UnLoadSTSAppLibrary()
 
 void STSRuntime::RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo)
 {
-    //     auto cjEnv = OHOS::CJEnv::LoadInstance();
-    //     if (cjEnv == nullptr) {
-    //         TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");
-    //         return;
-    //     }
-    //     cjEnv->registerCJUncaughtExceptionHandler(uncaughtExceptionInfo);
 }
 
 STSRuntime::~STSRuntime()
@@ -487,7 +386,7 @@ void STSRuntime::Deinitialize()
         delete it->second;
         it->second = nullptr;
     }
-    // methodRequireNapiRef_.reset();
+
     if (stsEnv_ != nullptr) {
         stsEnv_->DeInitLoop();
     }
@@ -502,32 +401,12 @@ bool STSRuntime::CreateStsEnv(const Options& options)
         return false;
     }
 
-    // TODO uncompleted
-    // if (!LoadSTSAppLibrary(STSRuntime::appLibPaths_)) {
-    //     TAG_LOGE(AAFwkTag::STSRUNTIME, "load app library fail");
-    //     return false;
-    // }
     return true;
 }
 
 void STSRuntime::PreloadAce(const Options& options)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
-    // TODO uncompleted
-    // auto nativeEngine = GetNativeEnginePointer();
-    // CHECK_POINTER(nativeEngine);
-#ifdef SUPPORT_SCREEN
-    if (options.loadAce) {
-        // ArkTsCard start
-        if (options.isUnique) {
-            // OHOS::Ace::DeclarativeModulePreloader::PreloadCard(
-            //     *nativeEngine, options.bundleName, options.pkgContextInfoJsonStringMap);
-        } else {
-            // OHOS::Ace::DeclarativeModulePreloader::Preload(*nativeEngine);
-        }
-        // ArkTsCard end
-    }
-#endif
 }
 
 void STSRuntime::ReInitStsEnvImpl(const Options& options)
@@ -549,29 +428,19 @@ void STSRuntime::LoadAotFile(const Options& options)
     std::string loadPath = ExtractorUtil::GetLoadFilePath(options.hapPath);
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate, true);
     if (extractor != nullptr && newCreate) {
-        // TODO uncompleted
-        // panda::JSNApi::LoadAotFile(vm, options.moduleName);
+        // need vm support LoadAotFile
     }
 }
 
 void STSRuntime::InitConsoleModule()
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
-    // TODO uncompleted
-    // if (stsEnv_ == nullptr) {
-    //     return;
-    // }
-    // stsEnv_->InitConsoleModule();
+    // need vm support Console
 }
 
 void STSRuntime::InitTimerModule()
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
-    // TODO uncompleted, have requirement support
-    // if (stsEnv_ == nullptr) {
-    //     return;
-    // }
-    // stsEnv_->InitTimerModule();
 }
 
 void STSRuntime::ReInitUVLoop()
@@ -586,40 +455,8 @@ void STSRuntime::ReInitUVLoop()
 void STSRuntime::PostPreload(const Options& options)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
-    // TODO uncompleted
-    // auto vm = GetEcmaVm();
-    // CHECK_POINTER(vm);
-    // auto env = GetNapiEnv();
-    // CHECK_POINTER(env);
-    // panda::RuntimeOption postOption;
-    // postOption.SetBundleName(options.bundleName);
-    // if (!options.arkNativeFilePath.empty()) {
-    //     std::string sandBoxAnFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath;
-    //     postOption.SetAnDir(sandBoxAnFilePath);
-    // }
-    // if (options.isMultiThread) {
-    //     TAG_LOGD(AAFwkTag::JSRUNTIME, "Multi-Thread Mode: %{public}d", options.isMultiThread);
-           // TODO not supported
-    //     panda::JSNApi::SetMultiThreadCheck();
-    // }
-    // if (options.isErrorInfoEnhance) {
-    //     TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Error-Info-Enhance Mode: %{public}d.", options.isErrorInfoEnhance);
-    //     panda::JSNApi::SetErrorInfoEnhance();
-    // }
-    // bool profileEnabled = OHOS::system::GetBoolParameter("ark.profile", false);
-    // postOption.SetEnableProfile(profileEnabled);
-    // TAG_LOGD(AAFwkTag::JSRUNTIME, "ASMM JIT Verify PostFork, jitEnabled: %{public}d", options.jitEnabled);
-    // postOption.SetEnableJIT(options.jitEnabled);
-    // postOption.SetAOTCompileStatusMap(options.aotCompileStatusMap);
-    // {
-    //     HITRACE_METER_NAME(HITRACE_TAG_APP, "panda::JSNApi::PostFork");
-    //     panda::JSNApi::PostFork(vm, postOption);
-    // }
-    // reinterpret_cast<NativeEngine*>(env)->ReinitUVLoop();
+    // need vm support Preload
     ReInitUVLoop();
-    // uv_loop_s* loop = nullptr;
-    // napi_get_uv_event_loop(env, &loop);
-    // panda::JSNApi::SetLoop(vm, loop);
 }
 
 ani_env* STSRuntime::GetAniEnv()
@@ -637,17 +474,6 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadModule(const std::string& mo
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "Load module(%{public}s, %{public}s, %{public}s, %{public}s)",
         moduleName.c_str(), modulePath.c_str(), hapPath.c_str(), esmodule ? "true" : "false");
-    //CHECK_POINTER_AND_RETURN(vm, std::unique_ptr<STSNativeReference>());
-    // // use for debugger, js engine need to know load module to handle debug event
-    // panda::JSNApi::NotifyLoadModule(vm);
-
-    //env 2.0??
-    //  auto env = GetNapiEnv();
-
-    // CHECK_POINTER_AND_RETURN(env, std::unique_ptr<NativeReference>());
-    // isOhmUrl_ = panda::JSNApi::IsOhmUrl(srcEntrance);
-
-   // HandleScope handleScope(*this);
 
     std::string path = moduleName;
     auto pos = path.find("::");
@@ -684,10 +510,6 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
         TAG_LOGE(AAFwkTag::STSRUNTIME, "GetAniEnv failed");
         return std::make_unique<STSNativeReference>();
     }
-    // TODO 未完成
-    // if (!RunScript(aniEnv, moduleName, path, hapPath, srcEntrance)) {
-    //     return std::make_unique<STSNativeReference>();
-    // }
 
     ani_class stringCls = nullptr;
     if (aniEnv->FindClass("Lstd/core/String;", &stringCls) != ANI_OK) {
@@ -738,8 +560,6 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
         return std::make_unique<STSNativeReference>();
     }
     std::string entryPath = EntryPathManager::GetInstance().GetEntryPath(srcEntrance);
-    // std::string entryPath = "entry/entryability/EntryAbility/EntryAbility";
-    // std::string entryPath = "OpenHarmonyTestRunner/OpenHarmonyTestRunner";
     ani_string entryClassStr;
     aniEnv->String_NewUTF8(entryPath.c_str(), entryPath.length(), &entryClassStr);
     ani_class entryClass = nullptr;
@@ -782,77 +602,8 @@ bool STSRuntime::RunScript(ani_env* aniEnv, const std::string& moduleName, const
     bool newCreate = false;
     std::string loadPath = ExtractorUtil::GetLoadFilePath(hapPath);
     TAG_LOGE(AAFwkTag::STSRUNTIME, "hapPath[%{public}s], loadPath:%{public}s", hapPath.c_str(), loadPath.c_str());
-//     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate, true);
-//     if (!extractor) {
-//         TAG_LOGE(AAFwkTag::STSRUNTIME, "hapPath[%{private}s]", hapPath.c_str());
-//         return false;
-//     }
-//     if (newCreate) {
-//         // panda::JSNApi::LoadAotFile(vm, moduleName_);
-//         // auto resourceManager = AbilityBase::ExtractResourceManager::GetExtractResourceManager().GetGlobalObject();
-//         // if (resourceManager) {
-//         //     resourceManager->AddResource(loadPath.c_str());
-//         // }
-//     }
-//     auto func = [&](std::string modulePath, const std::string abcPath) {
-//      //  bool useSafeMempry = apiTargetVersion_ == 0 || apiTargetVersion_ > API8;
-//         if (!extractor->IsHapCompress(modulePath)) { //&& useSafeMempry) {
-//             auto safeData = extractor->GetSafeData(modulePath);
-//             if (!safeData) {
-//                 TAG_LOGE(AAFwkTag::STSRUNTIME, "null safeData");
-//              //   return false;
-//             }
-//          //   LoadScript(abcPath, safeData->GetDataPtr(), safeData->GetDataLen(), isBundle_, srcEntrance);
-//         } else {
-//             std::unique_ptr<uint8_t[]> data;
-//             size_t dataLen = 0;
-//             if (!extractor->ExtractToBufByName(modulePath, data, dataLen)) {
-//                 TAG_LOGE(AAFwkTag::STSRUNTIME, "get abc file failed");
-//               //  return false;
-//             }
-//             std::vector<uint8_t> buffer;
-//             buffer.assign(data.get(), data.get() + dataLen);
-
-//          //   LoadScript(abcPath, &buffer, isBundle_);
-//         }
-//     };
-
-//     std::string path = abcPath;
-//     if (!isBundle_) {
-//         TAG_LOGE(AAFwkTag::JSRUNTIME, "wangbing isBundle_");
-//         if (moduleName_.empty()) {
-//             TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName empty");
-//             return false;
-//         }
-//         path = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
-//       //  panda::JSNApi::SetAssetPath(vm, path);
-//        // panda::JSNApi::SetModuleName(vm, moduleName_);
-//     }
-
-//    // func(path, abcPath);
+    // need vm support Aot.
     return true;
 }
-
-// bool STSRuntime::LoadScript(const std::string& path, std::vector<uint8_t>* buffer, bool isBundle)
-// {
-//     TAG_LOGD(AAFwkTag::STSRUNTIME, "path: %{private}s", path.c_str());
-//     //CHECK_POINTER_AND_RETURN(jsEnv_, false);
-//     return stsEnv_->LoadScript(path, buffer, isBundle);
-// }
-
-// bool STSRuntime::LoadScript(const std::string& path, uint8_t* buffer, size_t len, bool isBundle,
-//     const std::string& srcEntrance)
-// {
-//     TAG_LOGD(AAFwkTag::STSRUNTIME, "path: %{private}s", path.c_str());
-//    // CHECK_POINTER_AND_RETURN(jsEnv_, false);
-//     // if (isOhmUrl_ && !moduleName_.empty()) {
-//     //     auto vm = GetEcmaVm();
-//     //  //   CHECK_POINTER_AND_RETURN(vm, false);
-//     //     std::string srcFilename = "";
-//     //     srcFilename = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
-//     //     return panda::JSNApi::ExecuteSecureWithOhmUrl(vm, buffer, len, srcFilename, srcEntrance);
-//     // }
-//     return stsEnv_->LoadScript(path, buffer, len, isBundle);
-// }
 } // namespace AbilityRuntime
 } // namespace OHOS

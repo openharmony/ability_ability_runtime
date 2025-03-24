@@ -15,30 +15,12 @@
 
 // import type { AbilityResult } from './ability/abilityResult';
 // import type AbilityStartCallback from './application/AbilityStartCallback';
-//import type { AsyncCallback } from './@ohos.base';
-//import  { BusinessError } from './@ohos.base';
 // import type Want from './@ohos.app.ability.Want';
 // import type StartOptions from './@ohos.app.ability.StartOptions';
 //import type uiExtensionHost from './@ohos.uiExtensionHost';
 // import type uiExtension from './@ohos.arkui.uiExtension';
 //import type LocalStorage from './LocalStorage';
-export type Callback<T> = (data: T)=> void;
-
-export class Result<T, E>{
-  result:T;
-  error:E;
-  constructor(result: T , error: E) {
-      this.result = result;
-      this.error = error;
-  }
-}
-
-export type AsyncCallback<T> = (err: BusinessError<T>, data: T)=> void;
-
-export class BusinessError<T = void> {
-    code: number;
-    data: T;
-}
+import { BusinessError, AsyncCallback } from '@ohos.base';
 
 export default class UIExtensionContentSession {
   public nativeContextSession:long = 0;
