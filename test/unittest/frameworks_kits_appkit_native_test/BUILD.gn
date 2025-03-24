@@ -1153,6 +1153,7 @@ group("unittest") {
     ":context_deal_test",
     ":context_impl_second_test",
     ":context_impl_test",
+    ":context_impl_third_test",
     ":dump_ffrt_helper_test",
     ":dump_ipc_helper_test",
     ":dump_runtime_helper_second_test",
