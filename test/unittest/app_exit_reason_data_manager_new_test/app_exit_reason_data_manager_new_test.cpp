@@ -283,5 +283,69 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_SetUIExtensionAb
         extensionList, exitReason, processInfo, false);
     EXPECT_EQ(result, ERR_OK);
 }
+
+/* *
+ * @tc.name: AppExitReasonDataManager_UpdateAppExitReason_001
+ * @tc.desc: UpdateAppExitReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_UpdateAppExitReason_001, TestSize.Level1)
+{
+    uint32_t accessTokenId = 0;
+    std::vector<std::string> abilityList;
+    abilityList.push_back(ABILITY_NAME);
+    AAFwk::ExitReason exitReason = {AAFwk::REASON_JS_ERROR, "Js Error."};
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->UpdateAppExitReason(
+        accessTokenId, abilityList, exitReason, processInfo, false);
+
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+        BUNDLE_NAME, 0, abilityList, exitReason, processInfo, false);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    auto tempKv = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = nullptr;
+    auto &tempStoreId =
+        const_cast<DistributedKv::StoreId &>(DelayedSingleton<AppExitReasonDataManager>::GetInstance()->storeId_);
+    tempStoreId.storeId = "app_**exit_reason_infos";
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->UpdateAppExitReason(accessTokenId,
+        abilityList, exitReason, processInfo, false);
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = tempKv;
+    tempStoreId.storeId = "app_exit_reason_infos";
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(BUNDLE_NAME, ACCESS_TOKEN_ID,
+        abilityList, exitReason, processInfo, false);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/* *
+ * @tc.name: AppExitReasonDataManager_RecordSignalReason_001
+ * @tc.desc: RecordSignalReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_RecordSignalReason_001, TestSize.Level1)
+{
+    int32_t pid = 0;
+    int32_t uid = 0;
+    int32_t signal = 9;
+    std::string bundleName = BUNDLE_NAME;
+
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->RecordSignalReason(
+        pid, uid, signal, bundleName);
+    EXPECT_EQ(result, AAFwk::ERR_GET_EXIT_INFO_FAILED);
+
+    auto tempKv = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = nullptr;
+    auto &tempStoreId =
+        const_cast<DistributedKv::StoreId &>(DelayedSingleton<AppExitReasonDataManager>::GetInstance()->storeId_);
+    tempStoreId.storeId = "app_**exit_reason_infos";
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->RecordSignalReason(
+        pid, uid, signal, bundleName);
+
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = tempKv;
+    tempStoreId.storeId = "app_exit_reason_infos";
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->RecordSignalReason(
+        pid, uid, signal, bundleName);
+    EXPECT_EQ(result, AAFwk::ERR_GET_EXIT_INFO_FAILED);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
