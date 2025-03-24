@@ -109,10 +109,6 @@ const std::string ERR_CROWDTEST_EXPIRED_SOLUTION_ONE =
 const std::string ERR_APP_CONTROLLED_SOLUTION_ONE = "It is recommended to uninstall the application";
 const std::string ERR_EDM_APP_CONTROLLED_SOLUTION_ONE =
     "Please contact the personnel related to enterprise device management";
-const std::string ERR_MULTI_INSTANCE_NOT_SUPPORTED_SOLUTION_ONE =
-    "Ensure that the queried application supports multi-instance";
-const std::string ERR_NOT_SUPPORT_APP_CLONE_SOLUTION_ONE =
-    "Avoid calling getCurrentAppCloneIndex in applications that do not support app clone";
 const std::string ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_ONE =
     "Make sure the parameter configuration of implicit startup is correct";
 const std::string ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_TWO =
@@ -369,15 +365,6 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The application is controlled by EDM",
         "The application is under the control of enterprise device management",
         {ERR_EDM_APP_CONTROLLED_SOLUTION_ONE});
-    messageMap_[ERR_MULTI_INSTANCE_NOT_SUPPORTED] = GetAaToolErrorInfo("10106501",
-        "The aa test command is not available for multi-app mode.",
-        "The target application does not support multi-instance information, so this error code is returned",
-        {ERR_MULTI_INSTANCE_NOT_SUPPORTED_SOLUTION_ONE});
-    messageMap_[ERR_NOT_SUPPORT_APP_CLONE] = GetAaToolErrorInfo("10106502",
-        "The aa test command is not available for app clones.",
-        "When calling getCurrentAppCloneIndex in an application that does not support"
-        " app cloning, this error code is returned",
-        {ERR_NOT_SUPPORT_APP_CLONE_SOLUTION_ONE});
     messageMap_[ERR_IMPLICIT_START_ABILITY_FAIL] = GetAaToolErrorInfo("10103101",
         "Failed to find a matching application for implicit launch.",
         "The parameter configuration of implicit startup is incorrect, or the specified HAP package is not installed.",
