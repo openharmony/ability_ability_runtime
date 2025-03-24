@@ -31,29 +31,32 @@ namespace AbilityRuntime {
 class StsAbilityContext final {
 public:
     static void StartAbility1(
-        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniObj, ani_object wantObj, ani_object call);
-    static void StartAbility2([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniObj, ani_object wantObj,
+        [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj, ani_object wantObj, ani_object call);
+    static void StartAbility2([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj, ani_object wantObj,
         ani_object opt, ani_object call);
-    static void StartAbilityForResult1(ani_env* env, ani_object aniObj, ani_object wantObj, ani_object callback);
+    static void StartAbilityForResult1(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callback);
     static void StartAbilityForResult2(
-        ani_env* env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj, ani_object callback);
-    static void TerminateSelf(ani_env* env, ani_object aniObj, ani_object callback);
+        ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj, ani_object callback);
+    static void TerminateSelf(ani_env *env, ani_object aniObj, ani_object callback);
     static void TerminateSelfWithResult(ani_env *env, ani_object aniObj, ani_object abilityResult, ani_object callback);
     static void reportDrawnCompletedSync(
-        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniObj, ani_object call);
+        [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj, ani_object call);
 
-    static ani_object SetAbilityContext(ani_env* env, const std::shared_ptr<AbilityContext>& context);
-    static AbilityRuntime::AbilityContext* GetAbilityContext(ani_env* env, ani_object aniObj);
+    static ani_object SetAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context);
+    static AbilityRuntime::AbilityContext *GetAbilityContext(ani_env *env, ani_object aniObj);
 
 private:
     static bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
-    static ani_object WrapBusinessError(ani_env *env, ani_int code);
-    static void InheritWindowMode(ani_env* env, ani_object aniObj, AAFwk::Want& want);
+    static ani_object WrapBusinessError(ani_env *env, int32_t code);
+    static ani_object WrapError(ani_env *env, const std::string &msg);
+    static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
     static void StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
         ani_object wantObj, ani_object opt, ani_object call);
     static void StartAbilityForResultInner(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object startOptionsObj, ani_object callback);
     static int32_t GenerateRequestCode();
+    static std::string GetErrMsg(int32_t err, const std::string &permission = "");
+
     static std::mutex requestCodeMutex_;
 };
 ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context);

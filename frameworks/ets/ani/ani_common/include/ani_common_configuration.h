@@ -22,6 +22,10 @@
 namespace OHOS {
 namespace AppExecFwk {
 
+void SetBasicConfiguration(
+    ani_env *env, ani_class cls, ani_object object, const AppExecFwk::Configuration &configuration);
+void SetAdditionalConfiguration(
+    ani_env *env, ani_class cls, ani_object object, const AppExecFwk::Configuration &configuration);
 ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &configuration);
 bool UnwrapConfiguration(ani_env *env, ani_object param, Configuration &config);
 
