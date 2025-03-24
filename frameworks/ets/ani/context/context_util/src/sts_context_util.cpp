@@ -16,7 +16,10 @@
 #include "sts_context_util.h"
 
 #include "common_fun_ani.h"
+#include "ani_common_util.h"
+#include "ani_enum_convert.h"
 #include "application_context.h"
+#include "application_context_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "resourceManager.h"
 
@@ -90,7 +93,11 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
     }
     auto area = context->GetArea();
     TAG_LOGI(AAFwkTag::APPKIT, "ani area:%{public}d", area);
-    if (aniEnv->Object_SetField_Int(contextObj, areaField, (ani_int)area) != ANI_OK) {
+    ani_enum_item areaModeItem {};
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(
+        aniEnv, "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;", area, areaModeItem);
+
+    if (aniEnv->Object_SetField_Ref(contextObj, areaField, (ani_ref)areaModeItem) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Int failed");
         return;
     }
@@ -166,6 +173,18 @@ void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_objec
 {
     StsCreatContext(aniEnv, contextClass, contextObj, applicationCtxRef, context);
     BindExtensionInfo(aniEnv, contextClass, contextObj, context, context->GetAbilityInfo());
+}
+
+ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "called GetApplicationContextSync");
+    auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetStsGlobalObject(env);
+    if (appContextObj != nullptr) {
+        TAG_LOGI(AAFwkTag::APPKIT, "appContextObj is not nullptr");
+        return appContextObj->aniObj;
+    }
+    TAG_LOGI(AAFwkTag::APPKIT, "called GetApplicationContextSync finish");
+    return {};
 }
 }
 } // namespace AbilityRuntime
