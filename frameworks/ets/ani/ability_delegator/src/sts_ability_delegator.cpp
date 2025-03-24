@@ -39,20 +39,15 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status : %{public}d", status);
         return {};
     }
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Class_FindMethod ctor success");
-
     status = aniEnv->Object_New(contextClass, method, &contextObj);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status : %{public}d", status);
         return {};
     }
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Object_New success");
-
     if (ANI_OK != aniEnv->Class_FindMethod(contextClass, "<set>area", nullptr, &areaSetter)) {
         TAG_LOGE(AAFwkTag::APPKIT, "find set area failed");
     }
     auto area = context->GetArea();
-    TAG_LOGI(AAFwkTag::APPKIT, "ani area:%{public}d", area);
     if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, areaSetter, ani_int(area))) {
         TAG_LOGE(AAFwkTag::APPKIT, "call set area failed");
     }
@@ -61,7 +56,6 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
         TAG_LOGE(AAFwkTag::APPKIT, "find set filesDir failed");
     }
     std::string filesDir = context->GetFilesDir();
-    TAG_LOGI(AAFwkTag::APPKIT, "ani filesDir:%{public}s", filesDir.c_str());
     ani_string filesDir_string{};
     aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDir_string);
     if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, filesDirSetter, filesDir_string)) {
@@ -72,7 +66,6 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
         TAG_LOGE(AAFwkTag::APPKIT, "find set tempDir failed");
     }
     auto tempDir = context->GetTempDir();
-    TAG_LOGI(AAFwkTag::APPKIT, "ani tempDir:%{public}s", tempDir.c_str());
     ani_string tempDir_string{};
     aniEnv->String_NewUTF8(tempDir.c_str(), tempDir.size(), &tempDir_string);
     if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, tempDirSetter, tempDir_string)) {
@@ -112,7 +105,6 @@ ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmd
     if (result == nullptr) {
         return {};
     }
-
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
     status = env->FindClass("LAbilityDelegator/ShellCmdResult;", &cls);
@@ -218,7 +210,7 @@ void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resStri
     ani_size result = 0U;
     status = env->String_GetUTF8Size(string, &result);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "zg String_GetUTF8Size failed status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "String_GetUTF8Size failed status : %{public}d", status);
         return;
     }
     ani_size substrOffset = 0U;

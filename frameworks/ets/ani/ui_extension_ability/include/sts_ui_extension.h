@@ -179,9 +179,6 @@ public:
 
     void ResetEnv(ani_env* env);
 
-    //test
-    static void Test(STSRuntime& stsRuntime);
-
 private:
     // virtual void BindContext(napi_env env, napi_value obj, std::shared_ptr<AAFwk::Want> want);
     virtual void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want);
