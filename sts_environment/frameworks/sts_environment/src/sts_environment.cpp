@@ -78,7 +78,9 @@ bool STSEnvironment::LoadBootPathFile(std::string& bootfiles)
                 TAG_LOGE(AAFwkTag::STSRUNTIME, "json value of %{public}s is empty", key.c_str());
                 continue;
             }
-            bootfiles += ":";
+            if (!bootfiles.empty()) {
+                bootfiles += ":";
+            }
             bootfiles += jsonValue.c_str();
         }
     }
@@ -229,7 +231,7 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv)
         TAG_LOGE(AAFwkTag::STSRUNTIME, "LoadRuntimeApis failed");
         return false;
     }
-    std::string bootfiles = "/system/framework/arkoala.abc";
+    std::string bootfiles;
     if (!LoadBootPathFile(bootfiles)) {
         TAG_LOGE(AAFwkTag::STSRUNTIME,"LoadBootPathFile failed");
         return false;
