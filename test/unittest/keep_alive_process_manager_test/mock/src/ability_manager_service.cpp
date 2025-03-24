@@ -38,6 +38,11 @@ bool AbilityManagerService::IsSupportStatusBar(int32_t uid)
     return isSupportStatusBarResult;
 }
 
+bool AbilityManagerService::IsSceneBoardReady(int32_t userId)
+{
+    return false;
+}
+
 int32_t AbilityManagerService::GetUserId() const
 {
     return userId_;
