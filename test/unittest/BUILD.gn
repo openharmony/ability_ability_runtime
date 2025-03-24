@@ -583,6 +583,7 @@ group("unittest") {
       "permission_verification_test:unittest",
       "preload_uiext_state_observer_test:unittest",
       "prepare_terminate_callback_proxy_test:unittest",
+      "query_erms_observer_manager_test:unittest",
       "quick_fix:unittest",
       "recovery_info_timer_test:unittest",
       "remote_mission_listener_proxy_test:unittest",

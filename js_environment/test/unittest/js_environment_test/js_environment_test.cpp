@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#define private public
 #include "js_environment.h"
+#undef private
 
 #include <gtest/gtest.h>
 #include <gtest/hwext/gtest-multithread.h>
@@ -542,6 +544,81 @@ HWTEST_F(JsEnvironmentTest, GetSourceMapOperator_0100, TestSize.Level0)
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     jsEnv->GetSourceMapOperator();
     ASSERT_NE(jsEnv, nullptr);
+}
+
+/**
+ * @tc.name: initworkermodule_0100
+ * @tc.desc: Js environment initworkermodule.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, initworkermodule_0100, TestSize.Level0)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    std::shared_ptr<WorkerInfo> workerInfo = std::make_shared<WorkerInfo>();
+    jsEnv->InitWorkerModule(workerInfo);
+    ASSERT_NE(jsEnv, nullptr);
+}
+
+/**
+ * @tc.name: InitSourceMap_0100
+ * @tc.desc: Js environment InitSourceMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, InitSourceMap_0100, TestSize.Level0)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    std::shared_ptr<JsEnv::SourceMapOperator> operatorObj = nullptr;
+    jsEnv->InitSourceMap(operatorObj);
+    ASSERT_NE(jsEnv, nullptr);
+}
+
+/**
+ * @tc.name: DeInitLoop_0100
+ * @tc.desc: Js environment DeInitLoop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, DeInitLoop_0100, TestSize.Level0)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    jsEnv->DeInitLoop();
+    ASSERT_NE(jsEnv, nullptr);
+}
+
+/**
+ * @tc.name: SetModuleLoadChecker_0100
+ * @tc.desc: Js environment SetModuleLoadChecker.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, SetModuleLoadChecker_0100, TestSize.Level0)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate = nullptr;
+    jsEnv->SetModuleLoadChecker(moduleCheckerDelegate);
+    ASSERT_NE(jsEnv, nullptr);
+}
+
+/**
+ * @tc.name: ReInitJsEnvImpl_0100
+ * @tc.desc: Js environment ReInitJsEnvImpl.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, ReInitJsEnvImpl_0100, TestSize.Level0)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    jsEnv->ReInitJsEnvImpl(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    ASSERT_NE(jsEnv->impl_, nullptr);
+}
+
+/**
+ * @tc.name: GetDebugMode_0100
+ * @tc.desc: Js environment GetDebugMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, GetDebugMode_0100, TestSize.Level0)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    auto result = jsEnv->GetDebugMode();
+    ASSERT_EQ(result, false);
 }
 } // namespace JsEnv
 } // namespace OHOS
