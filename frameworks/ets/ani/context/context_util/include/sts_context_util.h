@@ -47,6 +47,8 @@ void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object conte
 
 void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     void* applicationCtxRef, std::shared_ptr<AbilityRuntime::ExtensionContext> context);
+
+ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
