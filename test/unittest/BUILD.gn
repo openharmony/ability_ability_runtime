@@ -439,6 +439,7 @@ group("unittest") {
       "app_mgr_service_inner_test:unittest",
       "app_mgr_service_inner_third_test:unittest",
       "app_mgr_service_test:unittest",
+      "app_mgr_service_third_test:unittest",
       "app_mgr_stub_test:unittest",
       "app_preloader_test:unittest",
       "app_recovery_test:unittest",
