@@ -28,7 +28,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-using CreateExtension = std::function<AbilityRuntime::Extension *(void)>;
+using CreateExtension = std::function<AbilityRuntime::Extension *(const std::string& language)>;
 using CreateAblity = std::function<Ability *(void)>;
 using CreateUIAbility = std::function<AbilityRuntime::UIAbility*(const std::string& language)>;
 #ifdef ABILITY_WINDOW_SUPPORT
@@ -90,7 +90,8 @@ public:
      *
      * @return return Ability address
      */
-    AbilityRuntime::Extension *GetExtensionByName(const std::string &abilityName);
+    AbilityRuntime::Extension *GetExtensionByName(const std::string &abilityName,
+        const std::string &language = AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0);
 
     /**
      * @brief Get UIAbility address

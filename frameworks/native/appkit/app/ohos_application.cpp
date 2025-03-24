@@ -28,6 +28,7 @@
 #include "application_context.h"
 #include "application_cleaner.h"
 #include "application_impl.h"
+#include "application_context_manager.h"
 #include "bundle_mgr_helper.h"
 #include "configuration_utils.h"
 #include "context_impl.h"
@@ -44,12 +45,14 @@
 #endif
 #include "ani.h"
 #include "sts_runtime.h"
+#include "sts_context_util.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
     constexpr const char* PERSIST_DARKMODE_KEY = "persist.ace.darkmode";
-    constexpr const char* STS_APPLICATION_CONTEXT_CLASS_NAME = "LApplicationContext/ApplicationContext;";
+    constexpr const char* STS_APPLICATION_CONTEXT_CLASS_NAME = "Lapplication/ApplicationContext/ApplicationContext;";
+    constexpr const char* STS_CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
 }
 REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
 constexpr int32_t APP_ENVIRONMENT_OVERWRITE = 1;
@@ -265,9 +268,31 @@ void OHOSApplication::InitAniApplicationContext()
         TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Create failed");
         return;
     }
+    auto stsReference = std::make_shared<AbilityRuntime::STSNativeReference>();
+    stsReference->aniObj = applicationContextObject;
+    AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().AddStsGlobalObject(aniEnv, stsReference);
     applicationContextObjRef_ = reinterpret_cast<void*>(applicationContextObjectRef);
     abilityRuntimeContext_->SetApplicationCtxObjRef(applicationContextObjRef_);
     TAG_LOGI(AAFwkTag::APPKIT, "init application context success");
+}
+
+void OHOSApplication::InitAniContext()
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "init context");
+    auto& runtime = GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
+    auto aniEnv = static_cast<AbilityRuntime::STSRuntime &>(*runtime).GetAniEnv();
+    ani_class contextCls = nullptr;
+    if (aniEnv->FindClass(STS_CONTEXT_CLASS_NAME, &contextCls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass Context failed");
+        return;
+    }
+    std::array contextFunctions = {
+        ani_native_function {"getApplicationContextSync", ":Lapplication/ApplicationContext/ApplicationContext;",
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::GetApplicationContextSync)},
+    };
+    aniEnv->Class_BindNativeMethods(contextCls, contextFunctions.data(),
+        contextFunctions.size());
+    TAG_LOGI(AAFwkTag::APPKIT, "init context success");
 }
 
 /**
@@ -796,7 +821,7 @@ void OHOSApplication::SetExtensionTypeMap(std::map<int32_t, std::string> map)
 
 bool OHOSApplication::NotifyLoadRepairPatch(const std::string &hqfFile, const std::string &hapPath)
 {
-    // TODO sts 确认hqf类型，当前只js\cj使用
+    // need vm support
     if (runtimes_.empty()) {
         TAG_LOGD(AAFwkTag::APPKIT, "runtimes empty");
         return true;
@@ -835,7 +860,7 @@ bool OHOSApplication::NotifyHotReloadPage()
 
 bool OHOSApplication::NotifyUnLoadRepairPatch(const std::string &hqfFile)
 {
-    // TODO sts 确认hqf类型，当前只js\cj使用
+    // need vm support
     if (runtimes_.empty()) {
         TAG_LOGD(AAFwkTag::APPKIT, "runtimes empty");
         return true;
