@@ -33,32 +33,19 @@ export default class UIAbility {
     return this.isOnDestroyAsync;
   }
 
-  context: UIAbilityContext = new UIAbilityContext();
-  launchWant: Want = new Want();
-  lastRequestWant: Want = new Want();
+  context: UIAbilityContext;
+  launchWant: Want;
+  lastRequestWant: Want;
 
-  onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void{
-    console.log("onCreate");
-  }
-  // onWindowStageCreate(): void{}
-
-  onWindowStageDestroy(): void{
-    console.log("onWindowStageDestroy");
-  }
-  onDestroy(): void {
-    console.log("onDestroy");
-  }
+  onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {}
+  // OnWindowStageCreate is not implemented
+  onWindowStageDestroy(): void {}
+  onDestroy(): void {}
   onDestroyAsync(): Promise<void> {
     this.isOnDestroyAsync = false;
     return new Promise<void>((resolve: (a: undefined)=>void, reject: (err: Error)=>void): void => {});
   }
-  onForeground(): void{
-    console.log("onForeground");
-  }
-  onBackground(): void{
-    console.log("onBackground");
-  }
-  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void{
-    console.log("onDestroy");
-  }
+  onForeground(): void {}
+  onBackground(): void {}
+  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {}
 }

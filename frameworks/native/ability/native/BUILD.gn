@@ -341,6 +341,7 @@ ohos_shared_library("abilitykit_native") {
     "access_token:libtoken_callback_sdk",
     "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_base",
+    "bundle_framework:bms_ani_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",

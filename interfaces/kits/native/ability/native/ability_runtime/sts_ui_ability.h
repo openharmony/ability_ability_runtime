@@ -313,6 +313,7 @@ private:
     bool BackPressDefaultValue();
     void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &moduleName, const std::string &srcPath);
+    void CreateAniContext(ani_env *env, ani_ref contextGlobalRef, int32_t screenMode);
 
     STSRuntime &stsRuntime_;
     std::shared_ptr<STSNativeReference> shellContextRef_;
