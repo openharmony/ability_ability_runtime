@@ -241,7 +241,13 @@ void ExtensionAbilityThread::HandleAttach(const std::shared_ptr<AppExecFwk::OHOS
     }
 
     // 2.new ability
-    auto extension = AppExecFwk::AbilityLoader::GetInstance().GetExtensionByName(abilityName);
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityRecord->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::EXT, "null abilityInfo");
+        return;
+    }
+    auto extension = AppExecFwk::AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        abilityInfo->codeLanguage);
     if (extension == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null extension");
         return;

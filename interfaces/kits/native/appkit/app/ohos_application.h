@@ -232,6 +232,8 @@ public:
 
     void InitAniApplicationContext();
 
+    void InitAniContext();
+
     inline void* GetApplicationCtxObjRef()
     {
         return applicationContextObjRef_;

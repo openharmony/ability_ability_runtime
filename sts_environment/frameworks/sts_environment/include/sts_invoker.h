@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,5 +35,4 @@ struct STSRuntimeAPI {
     ani_status (*ANI_CreateVM)(const ani_options *options, uint32_t version, ani_vm **result);
 };
 }
-
 #endif //OHOS_ABILITY_RUNTIME_STS_INVOKER_H
