@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STS_CONTEXT_UTIL_H
-#define OHOS_ABILITY_RUNTIME_STS_CONTEXT_UTIL_H
+#ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_ANI_COMMON_CONTEXT_H
 
 #include "sts_runtime.h"
 #include "context.h"
@@ -52,4 +52,4 @@ ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unuse
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_STS_CONTEXT_UTIL_H
+#endif // OHOS_ABILITY_RUNTIME_ANI_COMMON_CONTEXT_H
