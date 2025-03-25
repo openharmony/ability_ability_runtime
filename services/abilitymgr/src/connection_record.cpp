@@ -315,6 +315,7 @@ void ConnectionRecord::CancelConnectTimeoutTask()
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER(handler);
     std::string taskName = std::to_string(recordId_);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "CancelConnectTimeoutTask taskName:%{public}s", taskName.c_str());
     handler->RemoveEvent(AbilityManagerService::CONNECT_TIMEOUT_MSG, taskName);
     handler->RemoveEvent(AbilityManagerService::CONNECT_HALF_TIMEOUT_MSG, taskName);
 }

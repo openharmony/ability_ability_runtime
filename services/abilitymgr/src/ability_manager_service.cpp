@@ -6813,6 +6813,8 @@ void AbilityManagerService::OnAbilityDied(std::shared_ptr<AbilityRecord> ability
     if (connectManager) {
         connectManager->OnAbilityDied(abilityRecord, GetUserId());
         return;
+    } else {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "connectManager not found");
     }
 
     auto dataAbilityManager = GetDataAbilityManagerByToken(abilityRecord->GetToken());
