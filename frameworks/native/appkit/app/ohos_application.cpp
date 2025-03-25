@@ -821,7 +821,7 @@ void OHOSApplication::SetExtensionTypeMap(std::map<int32_t, std::string> map)
 
 bool OHOSApplication::NotifyLoadRepairPatch(const std::string &hqfFile, const std::string &hapPath)
 {
-    // TODO sts 确认hqf类型，当前只js\cj使用
+    // need vm support
     if (runtimes_.empty()) {
         TAG_LOGD(AAFwkTag::APPKIT, "runtimes empty");
         return true;
@@ -860,7 +860,7 @@ bool OHOSApplication::NotifyHotReloadPage()
 
 bool OHOSApplication::NotifyUnLoadRepairPatch(const std::string &hqfFile)
 {
-    // TODO sts 确认hqf类型，当前只js\cj使用
+    // need vm support
     if (runtimes_.empty()) {
         TAG_LOGD(AAFwkTag::APPKIT, "runtimes empty");
         return true;

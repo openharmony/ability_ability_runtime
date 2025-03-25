@@ -60,9 +60,7 @@ public:
     void StartDebugMode(const DebugOption debugOption) override;
     void DumpHeapSnapshot(bool isPrivate) override {}
     void NotifyApplicationState(bool isBackground) override {}
-    // TODO uncompleted
     bool SuspendVM(uint32_t tid) override { return false; }
-    // TODO uncompleted
     void ResumeVM(uint32_t tid) override {}
     void PreloadSystemModule(const std::string& moduleName) override {}
     void PreloadMainAbility(const std::string& moduleName, const std::string& srcPath,
@@ -75,7 +73,6 @@ public:
     bool UnLoadRepairPatch(const std::string& patchFile) override { return false; }
     void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) override {};
     void StartProfiler(const DebugOption debugOption) override {};
-    // TODO uncompleted
     void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const override {}
     void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override {};
     bool IsAppLibLoaded() const { return appLibLoaded_; }
@@ -114,19 +111,14 @@ private:
     void InitTimerModule();
     std::shared_ptr<StsEnv::STSEnvironment> stsEnv_;
     bool preloaded_ = false;
-    // [cz] RunScript RunSandboxScript LoadModule PreloadMainAbility PreloadModule need
     int32_t apiTargetVersion_ = 0;
-    // [cz] UpdateModuleNameAndAssetPath RunScript RunSandboxScript LoadModule PreloadMainAbility PreloadModule need
     bool isBundle_ = true;
-    // [cz] RunSandboxScript LoadModule PreloadMainAbility PreloadModule need
     std::string codePath_;
-    // [cz] UpdatePkgContextInfoJson need
     std::map<std::string, std::string> pkgContextInfoJsonStringMap_;
     std::map<std::string, std::string> packageNameList_;
     bool appLibLoaded_ = false;
     bool debugModel_ = false;
     std::string bundleName_;
-    // uint32_t instanceId_ = 0;
     static AppLibPathVec appLibPaths_;
     std::string moduleName_;
     std::unordered_map<std::string, STSNativeReference*> modules_;

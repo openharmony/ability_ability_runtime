@@ -56,7 +56,7 @@ StsUIExtension::~StsUIExtension()
     if (context) {
         context->Unbind();
     }
-	//#TODO STS runtime free reference
+	//need runtime free reference
     contentSessions_.clear();
 }
 

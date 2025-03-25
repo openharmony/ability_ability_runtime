@@ -1346,7 +1346,7 @@ StsEnv::STSUncaughtExceptionInfo MainThread::CreateStsExceptionInfo(
     const std::string& bundleName, uint32_t versionCode, const std::string& hapPath)
 {
     StsEnv::STSUncaughtExceptionInfo uncaughtExceptionInfo;
-    // TODO sts 未完成
+    // need vm support
     return uncaughtExceptionInfo;
 }
 /**
@@ -1358,7 +1358,6 @@ StsEnv::STSUncaughtExceptionInfo MainThread::CreateStsExceptionInfo(
  */
 void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, const Configuration &config)
 {
-    TAG_LOGE(AAFwkTag::APPKIT, "HandleLaunchApplication begin");
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleLaunchApplication:begin");
     if (!CheckForHandleLaunchApplication(appLaunchData)) {
@@ -1504,7 +1503,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         pkgContextInfoJsonStringMap[hapModuleInfo.moduleName] = hapModuleInfo.hapPath;
     }
-    //TODO sts
     AppLibPathMap appLibPaths {};
     GetNativeLibPath(bundleInfo, hspList, appLibPaths);
     bool isSystemApp = bundleInfo.applicationInfo.isSystemApp;
@@ -1544,7 +1542,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.uid = bundleInfo.applicationInfo.uid;
         options.apiTargetVersion = appInfo.apiTargetVersion;
         options.pkgContextInfoJsonStringMap = pkgContextInfoJsonStringMap;
-        //TODO sts review
 #ifdef CJ_FRONTEND
         if (isCJApp) {
             options.langs.emplace(AbilityRuntime::Runtime::Language::CJ, true);
@@ -1581,7 +1578,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
             return;
         }
-        // TODO sts 已修改无法验证
+        // need vm support
         if (appInfo.debug && appLaunchData.GetDebugApp()) {
             wptr<MainThread> weak = this;
             auto cb = [weak]() {
@@ -1596,7 +1593,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 runtime->SetDeviceDisconnectCallback(cb);
             }
         }
-        // TODO sts 未完成
+        // need vm support
         if (appLaunchData.IsNeedPreloadModule()) {
             for(auto &runtime : application_->GetRuntime()) {
                 PreloadModule(entryHapModuleInfo, runtime);
@@ -1638,7 +1635,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     it->moduleName.c_str(), it->hqfFilePath.c_str());
                 modulePaths.insert(std::make_pair(it->moduleName, it->hqfFilePath));
             }
-            // TODO sts 未完成
+            // need vm support
             for (const auto& runtime : runtimes) {
                 runtime->RegisterQuickFixQueryFunc(modulePaths);
             }
@@ -1692,7 +1689,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         AbilityLoader::GetInstance().RegisterUIAbility("UIAbility",
             [wpApplication](const std::string &language) -> AbilityRuntime::UIAbility* {
             auto app = wpApplication.lock();
-            // TODO sts 已完成
             if (app != nullptr) {
                 if (language == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
                     return AbilityRuntime::UIAbility::Create(
@@ -1708,7 +1704,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 #ifdef CJ_FRONTEND
         if (!isCJApp) {
 #endif
-            // TODO sts 已完成
             auto &runtime = application_->GetRuntime(appInfo.codeLanguage);
             if (application_ != nullptr) {
                 TAG_LOGE(AAFwkTag::APPKIT, "main_thread bundleName is %{public}s",
@@ -2098,7 +2093,6 @@ void MainThread::LoadAllExtensions()
         AbilityLoader::GetInstance().RegisterExtension(item.extensionName,
             [wApp, file](const std::string& language) -> AbilityRuntime::Extension* {
             auto app = wApp.lock();
-            // TODO sts 已完成
             if (app != nullptr) {
                 return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str())
                     .Create(app->GetRuntime(language));
@@ -2157,7 +2151,6 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
             return false;
         }
         bool isFaJsModel = entryHapModuleInfo.abilityInfos.front().srcLanguage == "js" ? true : false;
-        // TODO sts 已修改无法验证
         options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true); // default
         static auto runtimes = AbilityRuntime::Runtime::CreateRuntimes(options);
         for (const auto& runtime : runtimes) {
@@ -2234,7 +2227,7 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
             TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr");
             return;
         }
-        // TODO complete
+        // need vm support
         auto& runtimes = application->GetRuntime();
         for (const auto& runtime : runtimes) {
             appThread->UpdateRuntimeModuleChecker(runtime);
@@ -2262,7 +2255,6 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
         return;
     }
     SetProcessExtensionType(abilityRecord);
-    // TODO complete
     auto& runtimes = application_->GetRuntime();
     for (const auto& runtime : runtimes) {
         UpdateRuntimeModuleChecker(runtime);
@@ -3392,7 +3384,6 @@ int32_t MainThread::ChangeAppGcState(int32_t state)
         TAG_LOGE(AAFwkTag::APPKIT, "application_ is nullptr");
         return ERR_INVALID_VALUE;
     }
-    // TODO complete
     auto& runtimes = application_->GetRuntime();
     if (runtimes.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
