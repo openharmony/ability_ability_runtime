@@ -699,7 +699,7 @@ bool PendingWantManager::CheckWindowState(int32_t pid)
     }
     std::vector<Rosen::MainWindowState> windowStates;
     Rosen::WSError ret = sceneSessionManager->GetMainWindowStatesByPid(pid, windowStates);
-    if (ret != Rosen::WSError::WS_OK) {
+    if (ret != Rosen::WSError::WS_OK || windowStates.empty()) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "fail GetWindow");
         return false;
     }
