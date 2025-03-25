@@ -286,14 +286,6 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv, std::vector<ani_option>& opt
 
     options.push_back(ani_option{"--ext:--log-level=info", nullptr});
 
-    std::string enableVerfication = optionPrefix + "--verification-enabled=true";
-    ani_option enableVerficationOption = {enableVerfication.data(), nullptr};
-    options.push_back(enableVerficationOption);
-
-    std::string verificationMode = optionPrefix + "--verification-mode=on-the-fly";
-    ani_option verificationModeOption = {verificationMode.data(), nullptr};
-    options.push_back(verificationModeOption);
-
     std::string interop = optionPrefix + "interop";
     ani_option interopOption = {interop.data(), (void*)napiEnv};
     options.push_back(interopOption);
