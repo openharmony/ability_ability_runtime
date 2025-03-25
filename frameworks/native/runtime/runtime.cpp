@@ -30,7 +30,6 @@ std::unique_ptr<Runtime> g_preloadedInstance;
 std::vector<std::unique_ptr<Runtime>> Runtime::CreateRuntimes(Runtime::Options& options)
 {
     std::vector<std::unique_ptr<Runtime>> runtimes;
-    // TODO sts review
     for (auto lang : options.langs) {
         switch (lang.first) {
             case Runtime::Language::JS:

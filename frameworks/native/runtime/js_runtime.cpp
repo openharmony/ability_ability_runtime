@@ -1635,7 +1635,6 @@ void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hap
 
 void JsRuntime::RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo)
 {
-    // TODO sts 已修改
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER(jsEnv_);
     jsEnv_->RegisterUncaughtExceptionHandler(*static_cast<JsEnv::UncaughtExceptionInfo*>(uncaughtExceptionInfo));
