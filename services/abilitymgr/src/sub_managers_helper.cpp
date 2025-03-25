@@ -17,6 +17,7 @@
 
 #include <dlfcn.h>
 
+#include "ability_cache_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "scene_board_judgement.h"
@@ -245,15 +246,19 @@ std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetConnectManagerByTok
         if (item.second && item.second->GetExtensionByTokenFromServiceMap(token)) {
             return item.second;
         }
-        if (item.second && item.second->GetExtensionByTokenFromAbilityCache(token)) {
-            return item.second;
-        }
         if (item.second && item.second->GetExtensionByTokenFromTerminatingMap(token)) {
             return item.second;
         }
     }
-
-    return nullptr;
+    auto abilityRecord = AbilityCacheManager::GetInstance().FindRecordByToken(token);
+    if (abilityRecord == nullptr) {
+        return nullptr;
+    }
+    auto iter = connectManagers_.find(abilityRecord->GetOwnerMissionUserId());
+    if (iter == connectManagers_.end()) {
+        return nullptr;
+    }
+    return iter->second;
 }
 
 std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetConnectManagerByAbilityRecordId(
@@ -435,12 +440,12 @@ bool SubManagersHelper::VerificationAllTokenForConnectManagers(const sptr<IRemot
         if (item.second && item.second->GetExtensionByTokenFromServiceMap(token)) {
             return true;
         }
-        if (item.second && item.second->GetExtensionByTokenFromAbilityCache(token)) {
-            return true;
-        }
         if (item.second && item.second->GetExtensionByTokenFromTerminatingMap(token)) {
             return true;
         }
+    }
+    if (AbilityCacheManager::GetInstance().FindRecordByToken(token)) {
+        return true;
     }
     return false;
 }

@@ -1261,7 +1261,7 @@ private:
     void SetAbilityStateInner(AbilityState state);
 #endif
 
-    static int64_t abilityRecordId;
+    static std::atomic<int64_t> abilityRecordId;
     bool isReady_ = false;                            // is ability thread attached?
     bool isWindowStarted_ = false;                     // is window hotstart or coldstart?
     bool isWindowAttached_ = false;                   // Is window of this ability attached?

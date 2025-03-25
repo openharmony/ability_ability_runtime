@@ -125,7 +125,7 @@ int AbilityConnectManager::TerminateAbilityInner(const sptr<IRemoteObject> &toke
 {
     auto abilityRecord = GetExtensionByTokenFromServiceMap(token);
     if (abilityRecord == nullptr) {
-        abilityRecord = GetExtensionByTokenFromAbilityCache(token);
+        abilityRecord = AbilityCacheManager::GetInstance().FindRecordByToken(token);
     }
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetURI();
@@ -1353,12 +1353,6 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetExtensionByTokenFromSer
         return serviceRecord->second;
     }
     return nullptr;
-}
-
-std::shared_ptr<AbilityRecord> AbilityConnectManager::GetExtensionByTokenFromAbilityCache(
-    const sptr<IRemoteObject> &token)
-{
-    return AbilityCacheManager::GetInstance().FindRecordByToken(token);
 }
 
 std::shared_ptr<AbilityRecord> AbilityConnectManager::GetExtensionByIdFromServiceMap(

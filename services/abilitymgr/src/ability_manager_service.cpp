@@ -7179,7 +7179,7 @@ bool AbilityManagerService::VerificationToken(const sptr<IRemoteObject> &token)
         return true;
     }
 
-    if (connectManager->GetExtensionByTokenFromAbilityCache(token)) {
+    if (AbilityCacheManager::GetInstance().FindRecordByToken(token)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "verification token5");
         return true;
     }
