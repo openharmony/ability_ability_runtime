@@ -254,7 +254,6 @@ void AppStateCallbackProxy::OnCacheExitInfo(uint32_t accessTokenId, const AAFwk:
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
     }
-
 }
 
 void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid, int32_t userId)
