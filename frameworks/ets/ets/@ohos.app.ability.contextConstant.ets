@@ -13,5 +13,25 @@
  * limitations under the License.
  */
 
-export default class LocalStorage {
+namespace contextConstant {
+  export enum AreaMode {
+    EL1 = 0,
+    EL2 = 1,
+    EL3 = 2,
+    EL4 = 3,
+    EL5 = 4
+  }
+
+  export enum ProcessMode {
+    NEW_PROCESS_ATTACH_TO_PARENT = 1,
+    NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM = 2,
+    ATTACH_TO_STATUS_BAR_ITEM = 3
+  }
+  
+  export enum StartupVisibility {
+    STARTUP_HIDE = 0,
+    STARTUP_SHOW = 1
+  }
 }
+
+export default contextConstant;

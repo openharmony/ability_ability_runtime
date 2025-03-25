@@ -15,7 +15,7 @@
 
 import BaseContext from './BaseContext.ets'
 import ApplicationContext from './ApplicationContext'
-// import EventHub from '../../../js/napi/app/event_hub/event_hub.sts';
+//import EventHub from './EventHub';
 // import ApplicationInfo from 'bms/ApplicationInfo'
 
 export class Context extends BaseContext {
@@ -24,6 +24,7 @@ export class Context extends BaseContext {
     filesDir: string = "";
     tempDir: string = "";
     // applicationInfo?: ApplicationInfo;
+    // resourceManager?: resourceManager.ResourceManager
     // eventHub: EventHub = new EventHub();
 
     private applicationContext?: ApplicationContext;

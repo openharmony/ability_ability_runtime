@@ -13,20 +13,14 @@
  * limitations under the License.
  */
 
-export type Callback<T> = (data: T)=> void;
+#ifndef OHOS_ABILITY_RUNTIME_STS_APP_MANAGER_H
+#define OHOS_ABILITY_RUNTIME_STS_APP_MANAGER_H
 
-export class Result<T, E>{
-  result:T;
-  error:E;
-  constructor(result: T , error: E) {
-      this.result = result;
-      this.error = error;
-  }
-}
+#include "sts_runtime.h"
 
-export type AsyncCallback<T> = (err: BusinessError<T>, data: T)=> void;
-
-export class BusinessError<T = void> {
-    code: number;
-    data: T;
-}
+namespace OHOS {
+namespace AppManagerSts {
+void StsAppManagerRegistryInit(ani_env *env);
+} // namespace AppManagerSts
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_STS_APP_MANAGER_H

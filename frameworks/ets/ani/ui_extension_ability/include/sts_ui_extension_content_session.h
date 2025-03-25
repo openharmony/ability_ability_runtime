@@ -21,7 +21,9 @@
 #include "window.h"
 #include "sts_runtime.h"
 
-[[maybe_unused]] static void NativeSendData(ani_env* env, ani_object obj, ani_string data);
+namespace OHOS {
+namespace AbilityRuntime {
+[[maybe_unused]] static void NativeSendData(ani_env* env, ani_object obj, ani_object data);
 [[maybe_unused]] static void NativeLoadContent(ani_env* env, ani_object obj, ani_string path, ani_object storage);
 [[maybe_unused]] static void NativeTerminateSelf(ani_env* env, ani_object obj, [[maybe_unused]] ani_object callback);
 [[maybe_unused]] static void NativeSetWindowBackgroundColor(ani_env* env, ani_object obj, ani_string color);
@@ -29,8 +31,6 @@
     [[maybe_unused]] ani_object abilityResult, [[maybe_unused]] ani_object callback);
 [[maybe_unused]] static ani_object NativeSetReceiveDataCallback(ani_env* env, ani_object obj);
 
-namespace OHOS {
-namespace AbilityRuntime {
 using RuntimeTask = std::function<void(int, const AAFwk::Want&, bool)>;
 
 class StsAbilityResultListener {
@@ -79,13 +79,10 @@ public:
         std::weak_ptr<AbilityRuntime::Context> context,
         std::shared_ptr<StsAbilityResultListeners>& abilityResultListeners,
         std::shared_ptr<StsUIExtensionContentSession> contentSessionPtr);
-    static bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
-    static ani_object WrapBusinessError(ani_env *env, ani_int code);
-
-    void SendData(ani_env* env, ani_object object, ani_string data);
+    void SendData(ani_env* env, ani_object object, ani_object data);
     void LoadContent(ani_env* env, ani_object object, ani_string path, ani_object storage);
     void TerminateSelf();
-    int TerminateSelfWithResult();
+    int32_t TerminateSelfWithResult();
     void SetWindowBackgroundColor(ani_env* env, ani_string color);
     ani_object GetUIExtensionHostWindowProxy(ani_env* env, ani_object object);
     ani_object SetReceiveDataCallback(ani_env* env, ani_object object);
@@ -99,7 +96,6 @@ private:
     std::shared_ptr<CallbackWrapper> receiveDataForResultCallback_;
     bool isSyncRegistered = false;
     std::shared_ptr<StsUISessionAbilityResultListener> listener_;
-    //sptr<JsFreeInstallObserver> freeInstallObserver_ = nullptr;
     bool isFirstTriggerBindModal_ = true;
 };
 }  // namespace AbilityRuntime

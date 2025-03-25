@@ -91,6 +91,7 @@
 #include "js_runtime_utils.h"
 #include "context/application_context.h"
 #include "os_account_manager_wrapper.h"
+#include "sts_app_manager.h"
 
 #if defined(NWEB)
 #include <thread>
@@ -1685,6 +1686,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         }
         if (appInfo.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
             application_->InitAniApplicationContext();
+            application_->InitAniContext();
         }
         std::weak_ptr<OHOSApplication> wpApplication = application_;
         AbilityLoader::GetInstance().RegisterUIAbility("UIAbility",
@@ -1707,41 +1709,37 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         if (!isCJApp) {
 #endif
             // TODO sts 已完成
-            auto& runtimesVec = application_->GetRuntime();
-            for (const auto& runtimeItr : runtimesVec) {
-                if (runtimeItr->GetLanguage() == AbilityRuntime::Runtime::Language::JS) {
-                    auto& jsEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtimeItr)).GetNativeEngine();
-                    if (application_ != nullptr) {
-                        LoadAllExtensions(jsEngine);
+            auto &runtime = application_->GetRuntime(appInfo.codeLanguage);
+            if (application_ != nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "main_thread bundleName is %{public}s",
+                    appInfo.bundleName.c_str());
+                TAG_LOGE(AAFwkTag::APPKIT, "LoadAllExtensions lan:%{public}s", appInfo.codeLanguage.c_str());
+                LoadAllExtensions();
+            }
+            if (appInfo.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0) {
+                auto &jsEngine = (static_cast<AbilityRuntime::JsRuntime &>(*runtime)).GetNativeEngine();
+                IdleTimeCallback callback = [wpApplication](int32_t idleTime) {
+                    auto app = wpApplication.lock();
+                    if (app == nullptr) {
+                        TAG_LOGE(AAFwkTag::APPKIT, "null app");
+                        return;
                     }
-
-                    IdleTimeCallback callback = [wpApplication](int32_t idleTime) {
-                        auto app = wpApplication.lock();
-                        if (app == nullptr) {
-                            TAG_LOGE(AAFwkTag::APPKIT, "null app");
-                            return;
-                        }
-                        auto& runtime = app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0);
-                        if (runtime == nullptr) {
-                            TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
-                            return;
-                        }
-                        auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
-                        nativeEngine.NotifyIdleTime(idleTime);
-                    };
-                    idleTime_ = std::make_shared<IdleTime>(mainHandler_, callback);
-                    idleTime_->Start();
-
-                    IdleNotifyStatusCallback cb = idleTime_->GetIdleNotifyFunc();
-                    jsEngine.NotifyIdleStatusControl(cb);
-
-                    auto helper = std::make_shared<DumpRuntimeHelper>(application_);
-                    helper->SetAppFreezeFilterCallback();
-                } else if (runtimeItr->GetLanguage() == AbilityRuntime::Runtime::Language::STS) {
-                    if (application_ != nullptr) {
-                        LoadAllStsExtensions();
+                    auto& runtime = app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0);
+                    if (runtime == nullptr) {
+                        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+                        return;
                     }
-                }
+                    auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
+                    nativeEngine.NotifyIdleTime(idleTime);
+                };
+                idleTime_ = std::make_shared<IdleTime>(mainHandler_, callback);
+                idleTime_->Start();
+
+                IdleNotifyStatusCallback cb = idleTime_->GetIdleNotifyFunc();
+                jsEngine.NotifyIdleStatusControl(cb);
+
+                auto helper = std::make_shared<DumpRuntimeHelper>(application_);
+                helper->SetAppFreezeFilterCallback();
             }
         }
 #ifdef CJ_FRONTEND
@@ -2080,7 +2078,7 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
     appMgr_->AddAbilityStageDone(applicationImpl_->GetRecordId());
 }
 
-void MainThread::LoadAllExtensions(NativeEngine &nativeEngine)
+void MainThread::LoadAllExtensions()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "LoadAllExtensions");
@@ -2098,43 +2096,12 @@ void MainThread::LoadAllExtensions(NativeEngine &nativeEngine)
         std::string file = item.extensionLibFile;
         std::weak_ptr<OHOSApplication> wApp = application_;
         AbilityLoader::GetInstance().RegisterExtension(item.extensionName,
-            [wApp, file]() -> AbilityRuntime::Extension* {
+            [wApp, file](const std::string& language) -> AbilityRuntime::Extension* {
             auto app = wApp.lock();
             // TODO sts 已完成
             if (app != nullptr) {
                 return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str())
-                    .Create(app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0));
-            }
-            TAG_LOGE(AAFwkTag::APPKIT, "failed.");
-            return nullptr;
-        });
-    }
-    application_->SetExtensionTypeMap(extensionTypeMap);
-}
-
-void MainThread::LoadAllStsExtensions()
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPKIT, "LoadAllStsExtensions");
-    auto extensionPlugins = AbilityRuntime::ExtensionPluginInfo::GetInstance().GetExtensionPlugins();
-    if (extensionPlugins.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "no extension type map");
-        return;
-    }
-
-    std::map<int32_t, std::string> extensionTypeMap;
-    for (auto& item : extensionPlugins) {
-        extensionTypeMap.insert(std::pair<int32_t, std::string>(item.extensionType, item.extensionName));
-        AddExtensionBlockItem(item.extensionName, item.extensionType);
-
-        std::string file = item.extensionLibFile;
-        std::weak_ptr<OHOSApplication> wApp = application_;
-        AbilityLoader::GetInstance().RegisterExtension(item.extensionName,
-            [wApp, file]() -> AbilityRuntime::Extension* {
-            auto app = wApp.lock();
-            if (app != nullptr) {
-                return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str())
-                    .Create(app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2));
+                    .Create(app->GetRuntime(language));
             }
             TAG_LOGE(AAFwkTag::APPKIT, "failed.");
             return nullptr;

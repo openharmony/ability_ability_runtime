@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "sts_ui_extension_context.h"
 #include "ui_extension_context.h"
 #include "ani_common_want.h"
 #include "ability_manager_client.h"
+#include "sts_ui_extension_common.h"
+
 const char *INVOKE_METHOD_NAME = "invoke";
 static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj,
     [[maybe_unused]] ani_object callback)
@@ -40,8 +41,8 @@ static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] an
         return;
     }
     ret = ((OHOS::AbilityRuntime::UIExtensionContext*)nativeContextLong)->TerminateSelf();
-    StsUIExtensionContext::AsyncCallback(env, callback, StsUIExtensionContext::WrapBusinessError(env,
-        static_cast<int32_t>(ret)), nullptr);
+    OHOS::AbilityRuntime::StsUIExtensionCommon::AsyncCallback(env, callback,
+        OHOS::AbilityRuntime::StsUIExtensionCommon::WrapBusinessError(env, static_cast<int32_t>(ret)), nullptr);
     TAG_LOGD(AAFwkTag::UI_EXT, "terminateSelfSync end");
 }
 static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj,
@@ -81,68 +82,9 @@ static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env, [[maybe_u
         TAG_LOGE(AAFwkTag::UI_EXT, "TerminateSelf failed, errorCode is %{public}d", ret);
         return;
     }
-    StsUIExtensionContext::AsyncCallback(env, callback, StsUIExtensionContext::WrapBusinessError(env,
-        static_cast<int32_t>(ret)), nullptr);
+    OHOS::AbilityRuntime::StsUIExtensionCommon::AsyncCallback(env, callback,
+        OHOS::AbilityRuntime::StsUIExtensionCommon::WrapBusinessError(env, static_cast<int32_t>(ret)), nullptr);
     TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelfWithResultSync end");
-}
-
-ani_object StsUIExtensionContext::WrapBusinessError(ani_env *env, ani_int code)
-{
-    TAG_LOGD(AAFwkTag::UI_EXT, "WrapBusinessError start");
-    ani_class cls = nullptr;
-    ani_field field = nullptr;
-    ani_method method = nullptr;
-    ani_object obj = nullptr;
-    ani_status status = ANI_ERROR;
-    if ((status = env->FindClass("L@ohos/base/BusinessError;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
-    }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
-    }
-    if ((status = env->Object_New(cls, method, &obj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
-    }
-    if ((status = env->Class_FindField(cls, "code", &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
-    }
-    if ((status = env->Object_SetField_Double(obj, field, code)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
-    }
-    TAG_LOGD(AAFwkTag::UI_EXT, "WrapBusinessError end");
-    return obj;
-}
-
-bool StsUIExtensionContext::AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result)
-{
-    ani_status status = ANI_ERROR;
-    ani_class clsCall = nullptr;
-
-    if ((status = env->FindClass("Lapplication/UIExtensionContext/AsyncCallbackContextWrapper;", &clsCall)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return false;
-    }
-    ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(
-        clsCall, INVOKE_METHOD_NAME, "L@ohos/base/BusinessError;Lstd/core/Object;:V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return false;
-    }
-    if (result == nullptr) {
-        ani_ref nullRef = nullptr;
-        env->GetNull(&nullRef);
-        result = reinterpret_cast<ani_object>(nullRef);
-    }
-    if ((status = env->Object_CallMethod_Void(call, method, error, result)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return false;
-    }
-    return true;
 }
 
 ani_object CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context)
