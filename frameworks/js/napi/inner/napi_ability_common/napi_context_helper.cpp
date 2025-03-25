@@ -71,7 +71,9 @@ void SetShowOnLockScreenAsyncCompleteCB(napi_env env, ShowOnLockScreenCB *showOn
 #endif
     }
 
-    napi_value callback = nullptr, undefined = nullptr, callResult = nullptr;
+    napi_value callback = nullptr;
+    napi_value undefined = nullptr;
+    napi_value callResult = nullptr;
     napi_value result[ARGS_TWO] = {nullptr};
     napi_get_undefined(env, &undefined);
     result[PARAM0] = GetCallbackErrorValue(env, showOnLockScreenCB->cbBase.errCode);
@@ -411,7 +413,8 @@ napi_value NAPI_SetShowOnLockScreen(napi_env env, napi_callback_info info)
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
 
     size_t argc = 2;
-    const size_t argcAsync = 2, argcPromise = 1;
+    const size_t argcAsync = 2;
+    const size_t argcPromise = 1;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, nullptr, nullptr));
