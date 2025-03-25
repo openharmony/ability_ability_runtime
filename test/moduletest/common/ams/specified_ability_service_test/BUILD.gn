@@ -22,6 +22,7 @@ ohos_moduletest("specified_ability_service_test") {
   include_dirs = [ "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/include" ]
 
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/ability_cache_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/process_options.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_window_option.cpp",
