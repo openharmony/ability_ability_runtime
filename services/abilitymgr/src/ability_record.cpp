@@ -520,6 +520,7 @@ void AbilityRecord::RemoveLoadTimeoutTask()
 {
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER(handler);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "RemoveLoadTimeoutTask recordId:%{public}" PRId64, GetAbilityRecordId());
     handler->RemoveEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, GetAbilityRecordId());
     handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, GetAbilityRecordId());
 }
