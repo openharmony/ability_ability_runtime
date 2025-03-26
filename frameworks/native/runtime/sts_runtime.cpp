@@ -468,6 +468,56 @@ ani_env* STSRuntime::GetAniEnv()
     return stsEnv_->GetAniEnv();
 }
 
+void STSRuntime::PreloadModule(const std::string& moduleName, const std::string& hapPath,
+    bool isEsMode, bool useCommonTrunk)
+{
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "moduleName: %{public}s", moduleName.c_str());
+    ani_env* aniEnv = GetAniEnv();
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "GetAniEnv failed");
+        return;
+    }
+    ani_class stringCls = nullptr;
+    if (aniEnv->FindClass("Lstd/core/String;", &stringCls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "FindClass Lstd/core/String Failed");
+        return;
+    }
+    std::string modulePath = BUNDLE_INSTALL_PATH + moduleName + MERGE_ABC_PATH;
+    ani_string ani_str;
+    if (aniEnv->String_NewUTF8(modulePath.c_str(), modulePath.size(), &ani_str) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "String_NewUTF8 modulePath Failed");
+        return;
+    }
+    ani_ref undefined_ref;
+    if (aniEnv->GetUndefined(&undefined_ref) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "GetUndefined failed");
+        return;
+    }
+    ani_array_ref refArray;
+    if (aniEnv->Array_New_Ref(stringCls, 1, undefined_ref, &refArray) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_New_Ref Failed");
+        return;
+    }
+    if (aniEnv->Array_Set_Ref(refArray, 0, ani_str) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_Set_Ref Failed");
+        return;
+    }
+    ani_class cls = nullptr;
+    if (aniEnv->FindClass("Lstd/core/AbcRuntimeLinker;", &cls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "FindClass AbcRuntimeLinker failed");
+        return;
+    }
+    ani_method method = nullptr;
+    if (aniEnv->Class_FindMethod(cls, "<ctor>", "Lstd/core/RuntimeLinker;[Lstd/core/String;:V", &method) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Class_FindMethod ctor failed");
+        return;
+    }
+    ani_object object = nullptr;
+    if (aniEnv->Object_New(cls, method, &object, undefined_ref, refArray) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Object_New AbcRuntimeLinker failed");
+    }
+}
+
 std::unique_ptr<STSNativeReference> STSRuntime::LoadModule(const std::string& moduleName,
     const std::string& modulePath, const std::string& hapPath, bool esmodule, bool useCommonChunk,
     const std::string& srcEntrance)

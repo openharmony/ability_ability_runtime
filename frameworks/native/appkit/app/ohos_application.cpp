@@ -454,6 +454,25 @@ void OHOSApplication::SetAppEnv(const std::vector<AppEnvironment>& appEnvironmen
     return;
 }
 
+void OHOSApplication::PreloadHybridModule(const HapModuleInfo &hapModuleInfo) const
+{
+    if (hapModuleInfo.codeLanguage != Constants::CODE_LANGUAGE_HYBRID) {
+        TAG_LOGD(AAFwkTag::APPKIT, "not hybrid runtime");
+        return;
+    }
+    for (const auto& runtime : runtimes_) {
+        bool isEsmode = hapModuleInfo.compileMode == CompileMode::ES_MODULE;
+        bool useCommonTrunk = false;
+        for (const auto& md : hapModuleInfo.metadata) {
+            if (md.name == "USE_COMMON_CHUNK") {
+                useCommonTrunk = md.value == "true";
+                break;
+            }
+        }
+        runtime->PreloadModule(hapModuleInfo.moduleName, hapModuleInfo.hapPath, isEsmode, useCommonTrunk);
+    }
+}
+
 std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
     const std::function<void(const std::shared_ptr<AbilityRuntime::Context> &)> &callback, bool &isAsyncCallback)
@@ -481,6 +500,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfo is nullptr");
             return nullptr;
         }
+        PreloadHybridModule(*hapModuleInfo);
         auto& runtime = GetRuntime(abilityInfo->codeLanguage);
         if (runtime) {
             runtime->UpdatePkgContextInfoJson(
