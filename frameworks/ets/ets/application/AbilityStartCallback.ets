@@ -13,14 +13,9 @@
  * limitations under the License.
  */
 
-import Want from '@ohos.app.ability.Want';
+import { AbilityResult } from 'ability.abilityResult';
 
-export interface AbilityResult {
-    resultCode: number;
-    want?: Want;
-}
-
-class AbilityResultInner implements AbilityResult {
-    resultCode: number;
-    want?: Want | undefined = {};
+ export default class AbilityStartCallback {
+    onError(code: int, name: string, message: string) {}
+    onResult?:(parameter: AbilityResult)=>void = (parameter:AbilityResult) => {}
 }
