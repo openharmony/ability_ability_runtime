@@ -70,7 +70,7 @@ public:
     static constexpr uint32_t DELAY_KILL_PROCESS_TIMEOUT = 3000; // ms
     static constexpr uint32_t DELAY_KILL_EXTENSION_PROCESS_TIMEOUT = 500; // ms
     static constexpr uint32_t DELAY_NOTIFY_PROCESS_CACHED_STATE = 2000; // ms
-    static constexpr uint32_t DELAY_CHECK_ALL_PROCESSES_EXITED = 5000; // ms
+    static constexpr uint32_t DELAY_CHECK_ALL_PROCESSES_EXITED = 200; // ms
 private:
     std::weak_ptr<AppMgrServiceInner> appMgr_;
 };
