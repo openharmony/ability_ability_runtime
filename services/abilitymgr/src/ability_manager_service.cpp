@@ -214,6 +214,8 @@ constexpr int32_t UPDATE_CONFIG_FLAG_APPEND = 2;
 constexpr int32_t START_AUTO_START_APP_DELAY_TIME = 200;
 constexpr int32_t START_AUTO_START_APP_RETRY_MAX_TIMES = 5;
 constexpr int32_t RETRY_COUNT = 20;
+constexpr const char* LIFE_CYCLE_STATE_FOREGROUND_DONE = "foreground done";
+constexpr const char* LIFE_CYCLE_STATE_BACKGROUND_DONE = "background done";
 
 const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
     "share", "action"
@@ -238,6 +240,17 @@ bool IsEmbeddableStart(int32_t screenMode)
 {
     return screenMode == AAFwk::EMBEDDED_FULL_SCREEN_MODE ||
         screenMode == AAFwk::EMBEDDED_HALF_SCREEN_MODE;
+}
+
+void SendUIAbilityEvent(EventInfo &eventInfo, const int32_t state)
+{
+    if (state == static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_FOREGROUND)) {
+        eventInfo.lifeCycleState = LIFE_CYCLE_STATE_FOREGROUND_DONE;
+        SendAbilityEvent(EventName::ABILITY_ONFOREGROUND, HiSysEventType::BEHAVIOR, eventInfo);
+    } else if (state == static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_BACKGROUND)) {
+        eventInfo.lifeCycleState = LIFE_CYCLE_STATE_BACKGROUND_DONE;
+        SendAbilityEvent(EventName::ABILITY_ONBACKGROUND, HiSysEventType::BEHAVIOR, eventInfo);
+    }
 }
 } // namespace
 
@@ -615,7 +628,7 @@ int32_t AbilityManagerService::StartAbilityByFreeInstall(const Want &want, sptr<
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not allow startAbility with continuation flags");
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_INVALID_CONTINUATION_FLAG;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CONTINUATION_FLAG;
     }
@@ -652,7 +665,7 @@ int AbilityManagerService::StartAbilityWithSpecifyTokenIdInner(const Want &want,
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility with continuation flags not allowed");
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_INVALID_CONTINUATION_FLAG;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CONTINUATION_FLAG;
     }
@@ -799,7 +812,7 @@ int AbilityManagerService::StartAbilityOnlyUIAbility(const Want &want, const spt
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbility not allowed");
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_INVALID_CONTINUATION_FLAG;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CONTINUATION_FLAG;
     }
@@ -840,7 +853,7 @@ int AbilityManagerService::StartAbilityAsCallerDetails(const Want &want, const s
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility with continuation flags not allowed");
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_INVALID_CONTINUATION_FLAG;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CONTINUATION_FLAG;
     }
@@ -1133,7 +1146,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr, shouldBlockFunc);
-    auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+    auto result = interceptorExecuter_ == nullptr ? ERR_NULL_INTERCEPTOR_EXECUTER :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptorExecuter_ null or DoProcess error");
@@ -1484,13 +1497,13 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     if ((want.GetFlags() & Want::FLAG_ABILITY_PREPARE_CONTINUATION) == Want::FLAG_ABILITY_PREPARE_CONTINUATION &&
         IPCSkeleton::GetCallingUid() != DMS_UID) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "The flag only support for DMS, flag is %{public}d", want.GetFlags());
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_INVALID_CONTINUATION_FLAG;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CONTINUATION_FLAG;
     }
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_INVALID_CALLER;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CALLER;
     }
@@ -1510,7 +1523,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr, shouldBlockFunc);
-    result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+    result = interceptorExecuter_ == nullptr ? ERR_NULL_INTERCEPTOR_EXECUTER :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptorExecuter_ null or doProcess error");
@@ -1534,7 +1547,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
 
     if (!JudgeMultiUserConcurrency(validUserId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "multi-user non-concurrent unsatisfied");
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_CROSS_USER;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_CROSS_USER;
     }
@@ -1596,14 +1609,14 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
 
     if (abilityInfo.type == AppExecFwk::AbilityType::DATA) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "cannot start data ability, use 'AcquireDataAbility()'");
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_WRONG_INTERFACE_CALL;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_WRONG_INTERFACE_CALL;
     }
 
     AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(abilityRequest.want, requestCode,
         GetUserId(), true, callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo), false, appIndex);
-    result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
+    result = afterCheckExecuter_ == nullptr ? ERR_NULL_AFTER_CHECK_EXECUTER :
         afterCheckExecuter_->DoProcess(afterCheckParam);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "afterCheckExecuter_ null or doProcess error");
@@ -1624,7 +1637,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
 #ifdef SUPPORT_GRAPHICS
     if (abilityInfo.type != AppExecFwk::AbilityType::PAGE) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "only support page type ability");
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_WRONG_INTERFACE_CALL;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -1647,9 +1660,9 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     auto missionListManager = GetMissionListManagerByUserId(oriValidUserId);
     if (missionListManager == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListManager null userId=%{public}d", validUserId);
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_NULL_MISSION_LIST_MANAGER;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
-        return ERR_INVALID_VALUE;
+        return ERR_NULL_MISSION_LIST_MANAGER;
     }
     UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, callerToken);
     auto ret = missionListManager->StartAbility(abilityRequest);
@@ -1808,13 +1821,13 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     if ((want.GetFlags() & Want::FLAG_ABILITY_PREPARE_CONTINUATION) == Want::FLAG_ABILITY_PREPARE_CONTINUATION &&
         IPCSkeleton::GetCallingUid() != DMS_UID) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "The flag only support for DMS, flag is %{public}d", want.GetFlags());
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_INVALID_CONTINUATION_FLAG;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CONTINUATION_FLAG;
     }
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_INVALID_CALLER;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CALLER;
     }
@@ -1835,7 +1848,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr, shouldBlockFunc);
-    auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+    auto result = interceptorExecuter_ == nullptr ? ERR_NULL_INTERCEPTOR_EXECUTER :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptorExecuter_ null or doProcess error");
@@ -1864,7 +1877,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     }
     if (!JudgeMultiUserConcurrency(validUserId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "multi-user non-concurrent unsatisfied");
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_CROSS_USER;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_CROSS_USER;
     }
@@ -1962,9 +1975,9 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
 
     if (abilityInfo.type != AppExecFwk::AbilityType::PAGE) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "only support page type ability");
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_ABILITY_TYPE_INVALID;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
-        return ERR_INVALID_VALUE;
+        return ERR_ABILITY_TYPE_INVALID;
     }
 
     if (!AbilityUtil::IsSystemDialogAbility(abilityInfo.bundleName, abilityInfo.name)) {
@@ -2054,15 +2067,15 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         }
         abilityRequest.supportWindowModes = startOptions.supportWindowModes_;
         auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
-        CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
+        CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_NULL_UI_ABILITY_MANAGER);
         return uiAbilityManager->NotifySCBToStartUIAbility(abilityRequest);
     }
     auto missionListManager = GetMissionListManagerByUserId(oriValidUserId);
     if (missionListManager == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListManager null userId=%{public}d", oriValidUserId);
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_NULL_MISSION_LIST_MANAGER;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
-        return ERR_INVALID_VALUE;
+        return ERR_NULL_MISSION_LIST_MANAGER;
     }
 
     auto ret = missionListManager->StartAbility(abilityRequest);
@@ -2318,7 +2331,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
 
     auto currentUserId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-    CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
+    CHECK_POINTER_AND_RETURN(sessionInfo, ERR_NULL_SESSION_INFO);
     if (sessionInfo->userId == DEFAULT_INVAL_VALUE) {
         sessionInfo->userId = currentUserId;
     }
@@ -2339,7 +2352,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
         auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
         AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(sessionInfo->want, requestCode,
             currentUserId, true, nullptr, shouldBlockFunc);
-        auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+        auto result = interceptorExecuter_ == nullptr ? ERR_NULL_INTERCEPTOR_EXECUTER :
         interceptorExecuter_->DoProcess(interceptorParam);
         if (result != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptorExecuter_ null or DoProcess error");
@@ -3767,7 +3780,8 @@ int AbilityManagerService::BackToCallerAbilityWithResult(const sptr<IRemoteObjec
 
 int AbilityManagerService::CloseAbility(const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant)
 {
-    EventInfo eventInfo;
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    EventInfo eventInfo = BuildEventInfoByAbilityRecord(abilityRecord);
     SendAbilityEvent(EventName::CLOSE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     return TerminateAbilityWithFlag(token, resultCode, resultWant, false);
 }
@@ -3945,9 +3959,7 @@ int AbilityManagerService::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionI
         return ERR_WOULD_BLOCK;
     }
 
-    EventInfo eventInfo;
-    eventInfo.bundleName = abilityRecord->GetAbilityInfo().bundleName;
-    eventInfo.abilityName = abilityRecord->GetAbilityInfo().name;
+    EventInfo eventInfo = BuildEventInfoByAbilityRecord(abilityRecord);
     SendAbilityEvent(EventName::CLOSE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     if (isUserRequestedExit) {
         CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
@@ -4447,6 +4459,36 @@ EventInfo AbilityManagerService::BuildEventInfo(const Want &want, int32_t userId
     eventInfo.bundleName = want.GetElement().GetBundleName();
     eventInfo.moduleName = want.GetElement().GetModuleName();
     eventInfo.abilityName = want.GetElement().GetAbilityName();
+    std::vector<AbilityRunningInfo> abilityRunningInfos;
+    auto result = GetAbilityRunningInfos(abilityRunningInfos);
+    if (result != ERR_OK) {
+        return eventInfo;
+    }
+    for (const auto& info : abilityRunningInfos) {
+        if (info.ability.GetBundleName() == eventInfo.bundleName &&
+            info.ability.GetModuleName() == eventInfo.moduleName &&
+            info.ability.GetAbilityName() == eventInfo.abilityName) {
+            eventInfo.appIndex = info.appCloneIndex;
+        }
+    }
+    return eventInfo;
+}
+
+EventInfo AbilityManagerService::BuildEventInfoByAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    EventInfo eventInfo;
+    if (abilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityRecord");
+        return eventInfo;
+    }
+    auto want = abilityRecord->GetWant();
+    eventInfo.userId = abilityRecord->GetUid() / BASE_USER_RANGE;
+    eventInfo.bundleName = want.GetElement().GetBundleName();
+    eventInfo.moduleName = want.GetElement().GetModuleName();
+    eventInfo.abilityName = want.GetElement().GetAbilityName();
+    eventInfo.callerBundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    eventInfo.bundleType = static_cast<int32_t>(abilityRecord->GetApplicationInfo().bundleType);
+    eventInfo.appIndex = abilityRecord->GetAppIndex();
     return eventInfo;
 }
 
@@ -6447,6 +6489,10 @@ void AbilityManagerService::OnAbilityRequestDone(const sptr<IRemoteObject> &toke
         }
         default: {
             int32_t ownerUserId = abilityRecord->GetOwnerMissionUserId();
+            if (type == AppExecFwk::AbilityType::PAGE) {
+                auto eventInfo = BuildEventInfoByAbilityRecord(abilityRecord);
+                SendUIAbilityEvent(eventInfo, state);
+            }
             if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
                 auto uiAbilityManager = GetUIAbilityManagerByUserId(ownerUserId);
                 CHECK_POINTER(uiAbilityManager);
@@ -12648,7 +12694,7 @@ int32_t AbilityManagerService::PreStartInner(const FreeInstallInfo& taskInfo)
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
-        eventInfo.errCode = ERR_INVALID_VALUE;
+        eventInfo.errCode = ERR_INVALID_CALLER;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CALLER;
     }
@@ -13029,10 +13075,8 @@ void AbilityManagerService::ReportCleanSession(const sptr<SessionInfo> &sessionI
     (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
         DeleteAbilityRecoverInfo(abilityInfo.applicationInfo.accessTokenId, abilityInfo.moduleName, abilityName);
 
-    EventInfo eventInfo;
+    EventInfo eventInfo = BuildEventInfoByAbilityRecord(abilityRecord);
     eventInfo.errCode = errCode;
-    eventInfo.bundleName = abilityRecord->GetAbilityInfo().bundleName;
-    eventInfo.abilityName = abilityRecord->GetAbilityInfo().name;
     SendAbilityEvent(EventName::CLOSE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     if (eventInfo.errCode != ERR_OK) {
         SendAbilityEvent(EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);

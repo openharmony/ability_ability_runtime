@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -304,7 +304,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0300, TestSize.Leve
     Want want1;
     want1.SetElementName(DEVICE_MANAGER_BUNDLE_NAME, DEVICE_MANAGER_NAME);
     auto ret = abilityMs->StartAbilityDetails(want1, abilityStartSetting_, nullptr, MAIN_USER_ID, -1, false);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_NULL_INTERCEPTOR_EXECUTER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0300 end");
 }
 

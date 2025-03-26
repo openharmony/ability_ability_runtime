@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,7 +95,7 @@ HWTEST_F(StartOptionDisplayIdTest, start_option_display_id_002, TestSize.Level1)
     StartOptions option;
     option.SetDisplayID(DISPLAY_ID);
     auto result = abilityMs_->StartAbility(want, option, nullptr);
-    EXPECT_EQ(OHOS::ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

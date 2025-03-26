@@ -47,6 +47,8 @@ struct EventInfo {
     int32_t subReason = -1;
     int32_t exitReason = -1;
     int32_t preloadMode = 0;
+    int32_t appIndex = -1;
+    std::string lifeCycleState;
     uint32_t versionCode = 0;
     uint32_t callerVersionCode = -1;
     int64_t time = 0;
@@ -142,6 +144,7 @@ private:
     static void LogAbilityOnForegroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogAbilityOnBackgroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogAbilityOnActiveEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogAbilityOnInactiveEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogStartStandardEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogStartAbilityByAppLinking(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
 };
