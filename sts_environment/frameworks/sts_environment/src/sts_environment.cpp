@@ -23,6 +23,7 @@
 #include <thread>
 #include <chrono>
 
+#include "ani.h"
 #include "dynamic_loader.h"
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
@@ -47,8 +48,6 @@ const char* STSEnvironment::stsAppNSName = "sts_app";
 const char* STSEnvironment::stsSDKNSName = "sts_sdk";
 const char* STSEnvironment::stsSysNSName = "sts_system";
 const char* STSEnvironment::stsChipSDKNSName = "sts_chipsdk";
-
-STSRuntimeAPI STSEnvironment::lazyApis_{};
 
 bool STSEnvironment::LoadBootPathFile(std::string& bootfiles)
 {
@@ -85,33 +84,6 @@ bool STSEnvironment::LoadBootPathFile(std::string& bootfiles)
         }
     }
     inFile.close();
-    return true;
-}
-
-bool STSEnvironment::LoadRuntimeApis()
-{
-    static bool isRuntimeApiLoaded{ false };
-    if (isRuntimeApiLoaded) {
-        return true;
-    }
-
-    Dl_namespace ns;
-    dlns_get(STSEnvironment::stsSDKNSName, &ns);
-    auto dso = DynamicLoadLibrary(&ns, STS_LIB_PATH, 1);
-    if (!dso) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "load library failed: %{public}s", STS_LIB_PATH);
-        return false;
-    }
-
-    if (!LoadSymbolGetDefaultVMInitArgs(dso, lazyApis_) ||
-	    !LoadSymbolGetCreatedVMs(dso, lazyApis_) ||
-        !LoadSymbolCreateVM(dso, lazyApis_) ||
-        !LoadSymbolANIGetCreatedVMs(dso, lazyApis_)) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "load symbol failed");
-        return false;
-    }
-
-    isRuntimeApiLoaded = true;
     return true;
 }
 
@@ -227,10 +199,6 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv)
     if (isRuntimeStarted_) {
         return true;
     }
-    if (!LoadRuntimeApis()) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "LoadRuntimeApis failed");
-        return false;
-    }
     std::string bootfiles;
     if (!LoadBootPathFile(bootfiles)) {
         TAG_LOGE(AAFwkTag::STSRUNTIME,"LoadBootPathFile failed");
@@ -266,14 +234,14 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv)
     options.push_back(interopOption);
 
     ani_options optionsPtr = {options.size(), options.data()};
-    auto status = lazyApis_.ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.ani_vm);
+    auto status = ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.ani_vm);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "ANI_CreateVM failed %{public}d", status);
         return false;
     }
  
     ani_size nrVMs;
-    if (lazyApis_.ANI_GetCreatedVMs(&vmEntry_.ani_vm, 1, &nrVMs) != ANI_OK) {
+    if (ANI_GetCreatedVMs(&vmEntry_.ani_vm, 1, &nrVMs) != ANI_OK) {
         return false;
     };
     if (vmEntry_.ani_vm->GetEnv(ANI_VERSION_1, &vmEntry_.ani_env) != ANI_OK) {
