@@ -66,6 +66,34 @@ void StsUIExtension::ResetEnv(ani_env* env)
     env->ResetError();  // 清除异常，避免影响后续 ANI 调用
 }
 
+static void PromiseCallback(ani_env* env, ani_object aniObj)
+{
+    TAG_LOGI(AAFwkTag::UI_EXT, "PromiseCallback");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env or null aniObj");
+        return;
+    }
+    ani_long destroyCallbackPoint = 0;
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_GetFieldByName_Long(aniObj, "destroyCallbackPoint", &destroyCallbackPoint)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
+        return;
+    }
+    auto *callbackInfo = reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<> *>(destroyCallbackPoint);
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null callbackInfo");
+        return;
+    }
+    callbackInfo->Call();
+    AppExecFwk::AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
+
+    if ((status = env->Object_SetFieldByName_Long(aniObj, "destroyCallbackPoint",
+        static_cast<ani_long>(0))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
+        return;
+    }
+}
+
 void StsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     const std::shared_ptr<OHOSApplication> &application, std::shared_ptr<AbilityHandler> &handler,
     const sptr<IRemoteObject> &token)
@@ -109,7 +137,13 @@ void StsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
         TAG_LOGE(AAFwkTag::UI_EXT, "null env");
         return;
     }
-
+    std::array functions = {
+        ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void*>(PromiseCallback) },
+    };
+    ani_status status = ANI_ERROR;
+    if ((status = env->Class_BindNativeMethods(stsObj_->aniCls, functions.data(), functions.size())) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
+    }
     BindContext(env, record->GetWant());
     RegisterDisplayInfoChangedListener();
 }
@@ -155,19 +189,24 @@ ani_object StsUIExtension::CreateSTSContext(ani_env* env, std::shared_ptr<UIExte
 void StsUIExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "StsUIExtension BindContext");
+
+    if (env == nullptr || want == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Want info is null or env is null");
+        return;
+    }
+
     auto context = GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
         return;
     }
 
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Want info is null.");
-        return;
-    }
-
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
     ani_object contextObj = CreateSTSContext(env, context, screenMode);
+    if (contextObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null contextObj");
+        return;
+    }
 
     //bind uiExtenstionContext
     ani_field contextField;
@@ -201,7 +240,7 @@ void StsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> s
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::UI_EXT, "StsUIExtension OnStart begin");
-    //TODO file /native/ability/native/extension.cpp:44 null pointer of abilityInfo_
+    //file /native/ability/native/extension.cpp:44 null pointer of abilityInfo_
     //Extension::OnStart(want);
     auto context = GetContext();
 #ifdef SUPPORT_GRAPHICS
@@ -235,7 +274,7 @@ void StsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> s
 void StsUIExtension::OnStop()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    //TODO FILE Extension abilityInfo_ is nullptr
+    // FILE Extension abilityInfo_ is nullptr
     //UIExtension::OnStop();
     TAG_LOGI(AAFwkTag::UI_EXT, "StsUIExtension onStop");
     //HandleScope handleScope(jsRuntime_);
@@ -246,6 +285,7 @@ void StsUIExtension::OnStop()
     OnStopCallBack();
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
+
 void StsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "StsUIExtension onStop");
@@ -257,34 +297,42 @@ void StsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callba
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     UIExtension::OnStop();
-    //HandleScope handleScope(jsRuntime_);
-    CallObjectMethod(false, "onDestroy", nullptr);
 #ifdef SUPPORT_GRAPHICS
     UnregisterDisplayInfoChangedListener();
 #endif // SUPPORT_GRAPHICS
 
-    //TODO handl async callback
-    // if (!CheckPromise(result)) {
-    //     OnStopCallBack();
-    //     isAsyncCallback = false;
-    //     return;
-    // }
+    std::weak_ptr<Extension> weakPtr = shared_from_this();
+    auto asyncCallback = [extensionWeakPtr = weakPtr]() {
+        auto stsUIExtension = extensionWeakPtr.lock();
+        if (stsUIExtension == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "extension is nullptr");
+            return;
+        }
+        stsUIExtension->OnStopCallBack();
+    };
+    callbackInfo->Push(asyncCallback);
+    ani_long destroyCallbackPoint = (ani_long)callbackInfo;
+    ani_status status = ANI_ERROR;
+    ani_field field = nullptr;
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr || stsObj_ == nullptr) {
+        isAsyncCallback = false;
+        OnStop();
+        return;
+    }
+    if ((status = env->Class_FindField(stsObj_->aniCls, "destroyCallbackPoint", &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
+    }
+    if ((status = env->Object_SetField_Long(stsObj_->aniObj, field, destroyCallbackPoint)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
+    }
 
-    // std::weak_ptr<Extension> weakPtr = shared_from_this();
-    // auto asyncCallback = [extensionWeakPtr = weakPtr]() {
-    //     auto jsUIExtension = extensionWeakPtr.lock();
-    //     if (jsUIExtension == nullptr) {
-    //         TAG_LOGE(AAFwkTag::UI_EXT, "extension is nullptr");
-    //         return;
-    //     }
-    //     jsUIExtension->OnStopCallBack();
-    // };
-    // callbackInfo->Push(asyncCallback);
-    // isAsyncCallback = CallPromise(result, callbackInfo);
-    // if (!isAsyncCallback) {
-    //     TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call promise");
-    //     OnStopCallBack();
-    // }
+    isAsyncCallback = CallObjectMethod(true, "callOnDestroy", ":Z");
+    TAG_LOGI(AAFwkTag::UI_EXT, "callOnDestroy isAsyncCallback: %{public}d", isAsyncCallback);
+    if (!isAsyncCallback) {
+        OnStopCallBack();
+        return;
+    }
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
@@ -301,7 +349,6 @@ void StsUIExtension::OnStopCallBack()
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
         TAG_LOGD(AAFwkTag::UI_EXT, "The service connection is not disconnected");
     }
-    //TODO
     // auto applicationContext = Context::GetApplicationContext();
     // if (applicationContext != nullptr) {
     //     applicationContext->DispatchOnAbilityDestroy(jsObj_);
@@ -311,7 +358,7 @@ void StsUIExtension::OnStopCallBack()
 sptr<IRemoteObject> StsUIExtension::OnConnect(const AAFwk::Want &want)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "StsUIExtension::OnConnect called");
-    //TODO NAPI_ohos_rpc_getNativeRemoteObject
+    // NAPI_ohos_rpc_getNativeRemoteObject
     // HandleScope handleScope(jsRuntime_);
     // napi_value result = CallOnConnect(want);
     // napi_env env = jsRuntime_.GetNapiEnv();
@@ -337,7 +384,7 @@ void StsUIExtension::OnDisconnect(const AAFwk::Want &want)
 ani_status StsUIExtension::CallOnDisconnect(const AAFwk::Want &want, bool withResult)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "CallOnDisconnect called");
-    //TODO imp onDisconnect
+    // imp onDisconnect
     // HandleEscape handleEscape(jsRuntime_);
     // napi_env env = jsRuntime_.GetNapiEnv();
     // napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
@@ -559,7 +606,7 @@ void StsUIExtension::OnForeground(const Want &want, sptr<AAFwk::SessionInfo> ses
         TAG_LOGE(AAFwkTag::UI_EXT, "sessionInfo nullptr");
         return;
     }
-    //TODO  FILE Extension 116 abilityInfo_ is nullptr
+    //  FILE Extension 116 abilityInfo_ is nullptr
     //Extension::OnForeground(want, sessionInfo);
 
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
@@ -578,7 +625,7 @@ void StsUIExtension::OnBackground()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::UI_EXT, "StsUIExtension::OnBackground called");
     CallObjectMethod(false, "onBackground", nullptr);
-    //TODO  FILE Extension abilityInfo_ is nullptr
+    //  FILE Extension abilityInfo_ is nullptr
     //Extension::OnBackground();
     TAG_LOGI(AAFwkTag::UI_EXT, "StsUIExtension::OnBackground end");
 }
@@ -614,7 +661,7 @@ bool StsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAF
         if ((status = env->GlobalReference_Create(wantObj, &wantRef)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
         }
-        //TODO create UIExtensionContentSession
+        // create UIExtensionContentSession
         std::weak_ptr<Context> wkctx = context;
         stsUiExtContentSession_ = std::make_shared<StsUIExtensionContentSession>(sessionInfo, uiWindow,
             wkctx, abilityResultListeners_);
@@ -644,7 +691,7 @@ bool StsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAF
         uiWindowMap_[compId] = uiWindow;
 #ifdef SUPPORT_GRAPHICS
         if (context && context->GetWindow() == nullptr) {
-            //TODO UIExtensionContext::window_ is nullptr
+            // UIExtensionContext::window_ is nullptr
             context->SetWindow(uiWindow);
         }
 #endif // SUPPORT_GRAPHICS
@@ -682,7 +729,7 @@ std::unique_ptr<STSNativeReference> StsUIExtension::CreateAppWindowStage(sptr<Ro
     sptr<AAFwk::SessionInfo> sessionInfo)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "StsUIExtension::CreateAppWindowStage start");
-    //TODO create window stage
+    // create window stage
     // auto env = jsRuntime_.GetNapiEnv();
     // napi_value jsWindowStage = Rosen::JsEmbeddableWindowStage::CreateJsEmbeddableWindowStage(
     //     env, uiWindow, sessionInfo);
@@ -754,14 +801,14 @@ void StsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
         TAG_LOGE(AAFwkTag::UI_EXT, "Wrong to find uiWindow");
         return;
     }
-    //TODO need to write sts contentSessions_
+    // need to write sts contentSessions_
     // if (contentSessions_.find(componentId) != contentSessions_.end() && contentSessions_[componentId] != nullptr) {
     //     //HandleScope handleScope(jsRuntime_);
     //     if (screenMode_ == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
     //         screenMode_ = AAFwk::IDLE_SCREEN_MODE;
     //         //CallObjectMethod("onWindowStageDestroy");
     //     } else {
-    //         //TODO create UIEXtensionSessioni obj
+    //         //create UIEXtensionSessioni obj
     //         auto uiWindow = uiWindowMap_[componentId];
     //         auto env = stsRuntime_.GetAniEnv();
     //         ani_object sessionObj = StsUIExtensionContentSession::CreateStsUIExtensionContentSession(env,
@@ -800,13 +847,13 @@ void StsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
     TAG_LOGI(AAFwkTag::UI_EXT, "DestroyWindow called end");
 }
 
-ani_ref StsUIExtension::CallObjectMethod(bool withResult, const char *name, const char *signature, ...)
+bool StsUIExtension::CallObjectMethod(bool withResult, const char *name, const char *signature, ...)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
     TAG_LOGI(AAFwkTag::UI_EXT, "CallObjectMethod call sts, name: %{public}s", name);
     if (stsObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "stsObj_ nullptr");
-        return nullptr;
+        return false;
     }
 
     auto env = stsRuntime_.GetAniEnv();
@@ -815,14 +862,14 @@ ani_ref StsUIExtension::CallObjectMethod(bool withResult, const char *name, cons
     ani_method method = nullptr;
     if ((status = env->Class_FindMethod(stsObj_->aniCls, name, signature, &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Class_FindMethod status : %{public}d", status);
-        return nullptr;
+        return false;
     }
 
     if (withResult) {
-        ani_ref res = nullptr;
+        ani_boolean res = 0;
         va_list args;
         va_start(args, signature);
-        if ((status = env->Object_CallMethod_Ref_V(stsObj_->aniObj, method, &res, args)) != ANI_OK) {
+        if ((status = env->Object_CallMethod_Boolean(stsObj_->aniObj, method, &res, args)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UI_EXT, "Object_CallMethod_Ref_V status : %{public}d", status);
         }
         va_end(args);
@@ -835,7 +882,7 @@ ani_ref StsUIExtension::CallObjectMethod(bool withResult, const char *name, cons
     }
     va_end(args);
     TAG_LOGI(AAFwkTag::UI_EXT, "CallObjectMethod call sts, name: %{public}s end", name);
-    return nullptr;
+    return false;
 }
 
 void StsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
@@ -902,7 +949,7 @@ void StsUIExtension::ConfigurationUpdated()
         TAG_LOGE(AAFwkTag::UI_EXT, "Configuration is nullptr");
         return;
     }
-    //TODO wrap configuration and send onConfigurationUpdate
+    //wrap configuration and send onConfigurationUpdate
     //napi_value napiConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, *fullConfig);
     //CallObjectMethod(false, "onConfigurationUpdate", &napiConfiguration, ARGC_ONE);
     TAG_LOGI(AAFwkTag::UI_EXT, "ConfigurationUpdated end");
@@ -945,7 +992,7 @@ void StsUIExtension::OnDisplayInfoChange(
 
 void StsUIExtension::RegisterDisplayInfoChangedListener()
 {
-    //TODO register displayid change callback
+    // register displayid change callback
     // auto jsUiExtension = std::static_pointer_cast<StsUIExtension>(shared_from_this());
     // jsUiExtensionAbilityDisplayListener_ = sptr<JsUIExtensionAbilityDisplayListener>::MakeSptr(jsUiExtension);
     // if (jsUiExtensionAbilityDisplayListener_ == nullptr) {
