@@ -27,6 +27,7 @@
 #include "sts_interface.h"
 #include "ani.h"
 #include "napi/native_api.h"
+#include "runtime/include/runtime.h"
 
 namespace OHOS {
 struct STSRuntimeAPI;
@@ -46,7 +47,7 @@ public:
     static void InitSTSAppNS(const std::string& path);
     static void InitSTSSDKNS(const std::string& path);
     static void InitSTSSysNS(const std::string& path);
-    bool StartRuntime(napi_env napiEnv);
+    bool StartRuntime(napi_env napiEnv, const AbilityRuntime::Runtime::Options& runtimeOptions);
     void StopRuntime();
     void RegisterUncaughtExceptionHandler(const STSUncaughtExceptionInfo& handle);
     bool IsUISchedulerStarted()

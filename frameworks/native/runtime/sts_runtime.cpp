@@ -396,7 +396,7 @@ bool STSRuntime::CreateStsEnv(const Options& options)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
     stsEnv_ = std::make_shared<StsEnv::STSEnvironment>(std::make_unique<OHOSStsEnvironmentImpl>(options.eventRunner));
-    if (stsEnv_ == nullptr || !stsEnv_->StartRuntime(STSRuntime::jsRuntime_->GetNapiEnv())) {
+    if (stsEnv_ == nullptr || !stsEnv_->StartRuntime(STSRuntime::jsRuntime_->GetNapiEnv(), options)) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Init StsEnv failed");
         return false;
     }
