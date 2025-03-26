@@ -70,11 +70,13 @@ void AppRunningManagerFourthTest::TearDownTestCase(void)
 void AppRunningManagerFourthTest::SetUp()
 {
     appRunningManager_ = std::make_shared<AppRunningManager>();
-    EXPECT_NE(appRunningManager_, nullptr);
+    ASSERT_NE(appRunningManager_, nullptr);
 }
 
 void AppRunningManagerFourthTest::TearDown()
-{}
+{
+    appRunningManager_.reset();
+}
 
 sptr<Token> GetTestAbilityToken()
 {
