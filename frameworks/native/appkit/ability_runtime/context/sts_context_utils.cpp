@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "ani_common_context.h"
+#include "sts_context_utils.h"
 
 #include "common_fun_ani.h"
 #include "ani_common_util.h"
@@ -136,43 +136,6 @@ void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object context
 {
     BindApplicationCtx(aniEnv, contextClass, contextObj, applicationCtxRef);
     BindParentProperty(aniEnv, contextClass, contextObj, context);
-}
-
-void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo)
-{
-    TAG_LOGE(AAFwkTag::APPKIT, "ywz BindExtensionInfo");
-    auto hapModuleInfo = context->GetHapModuleInfo();
-    if (abilityInfo && hapModuleInfo) {
-        auto isExist = [&abilityInfo](const AppExecFwk::ExtensionAbilityInfo& info) {
-            TAG_LOGD(AAFwkTag::CONTEXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
-            return info.bundleName == abilityInfo->bundleName && info.name == abilityInfo->name;
-        };
-        auto infoIter = std::find_if(
-            hapModuleInfo->extensionInfos.begin(), hapModuleInfo->extensionInfos.end(), isExist);
-        if (infoIter == hapModuleInfo->extensionInfos.end()) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "set extensionAbilityInfo fail");
-            return;
-        }
-        ani_field extensionAbilityInfoField;
-        if (ANI_OK != aniEnv->Class_FindField(contextClass, "extensionAbilityInfo", &extensionAbilityInfoField)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "find extensionAbilityInfo failed");
-            return;
-        }
-        ani_object extAbilityInfoObj = AppExecFwk::CommonFunAni::ConvertExtensionInfo(aniEnv, *infoIter);
-        if (aniEnv->Object_SetField_Ref(contextObj, extensionAbilityInfoField,
-            reinterpret_cast<ani_ref>(extAbilityInfoObj)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
-            return;
-        }
-    }
-}
-
-void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<AbilityRuntime::ExtensionContext> context)
-{
-    StsCreatContext(aniEnv, contextClass, contextObj, applicationCtxRef, context);
-    BindExtensionInfo(aniEnv, contextClass, contextObj, context, context->GetAbilityInfo());
 }
 
 ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj)

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_CONTEXT_H
-#define OHOS_ABILITY_RUNTIME_ANI_COMMON_CONTEXT_H
+#ifndef OHOS_ABILITY_RUNTIME_STS_CONTEXT_UTILS_H
+#define OHOS_ABILITY_RUNTIME_STS_CONTEXT_UTILS_H
 
 #include "sts_runtime.h"
 #include "context.h"
@@ -42,14 +42,8 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
 void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     void* applicationCtxRef, std::shared_ptr<Context> context);
 
-void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo);
-
-void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<AbilityRuntime::ExtensionContext> context);
-
 ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_ANI_COMMON_CONTEXT_H
+#endif // OHOS_ABILITY_RUNTIME_STS_CONTEXT_UTILS_H
