@@ -20,35 +20,35 @@ namespace AbilityRuntime {
 ani_status IsStageContext(ani_env* env, ani_object object, ani_boolean& stageMode)
 {
     if (env == nullptr) {
-        std::cerr << "env is nullptr" << std::endl;
+        TAG_LOGE(AAFwkTag::APPMGR, "env is nullptr");
         return ANI_ERROR;
     }
 
-    if (env->Object_GetFieldByName_Boolean(object, "stageMode", &stageMode) != ANI_OK) {
-        std::cerr << "GetField failed" << std::endl;
+    ani_status status = env->Object_GetFieldByName_Boolean(object, "stageMode", &stageMode);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetField failed, status : %{public}d", status);
         return ANI_ERROR;
     }
 
-    std::cerr << "GetField, stageMode : " << std::to_string(stageMode) << std::endl;
     return ANI_OK;
 }
 
 std::shared_ptr<Context> GetStageModeContext(ani_env* env, ani_object object)
 {
     if (env == nullptr) {
-        std::cerr << "env is nullptr" << std::endl;
+        TAG_LOGE(AAFwkTag::APPMGR, "env is nullptr");
         return nullptr;
     }
 
     ani_long nativeContextLong;
-    if ((env->Object_GetFieldByName_Long(object, "nativeContext", &nativeContextLong)) != ANI_OK) {
-        std::cerr << "Object_GetField_Long failed" << std::endl;
+    ani_status status = env->Object_GetFieldByName_Long(object, "nativeContext", &nativeContextLong);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_GetField_Long failed, status : %{public}d", status);
         return nullptr;
     }
 
-    std::shared_ptr<Context> ptr((Context*)nativeContextLong);
-
-    return ptr;
+    auto weakContext = reinterpret_cast<std::weak_ptr<Context>*>(nativeContextLong);
+    return weakContext != nullptr ? weakContext->lock() : nullptr;
 }
 
 AppExecFwk::Ability* GetCurrentAbility(ani_env* env)
