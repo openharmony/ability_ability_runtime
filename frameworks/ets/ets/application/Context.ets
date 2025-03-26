@@ -18,7 +18,7 @@ import ApplicationContext from './ApplicationContext'
 import EventHub from './EventHub';
 import contextConstant from '@ohos.app.ability.contextConstant'
 // import ApplicationInfo from 'bms/ApplicationInfo'
-// import {resourceManager} from 'global/resourceManager'
+import resmgr from '@ohos.resourceManager'
 
 export class Context extends BaseContext {
     public nativeContext:long;
@@ -26,8 +26,8 @@ export class Context extends BaseContext {
     filesDir: string = "";
     tempDir: string = "";
     // applicationInfo?: ApplicationInfo;
-    // resourceManager?: resourceManager.ResourceManager
     eventHub: EventHub = new EventHub();
+    resourceManager: resmgr.ResourceManager;
 
     public native getApplicationContextSync(): ApplicationContext;
 
