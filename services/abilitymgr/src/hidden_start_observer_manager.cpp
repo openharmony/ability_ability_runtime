@@ -93,7 +93,7 @@ bool HiddenStartObserverManager::ObserverExist(const sptr<IRemoteBroker> &observ
     return false;
 }
 
-bool HiddenStartObserverManager::IsHiddenStart(int32_t uid)
+bool HiddenStartObserverManager::IsHiddenStart(int32_t pid)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto observersCopy = GetObserversCopy();
@@ -102,7 +102,7 @@ bool HiddenStartObserverManager::IsHiddenStart(int32_t uid)
         if (*it == nullptr) {
             continue;
         }
-        if ((*it)->IsHiddenStart(uid)) {
+        if ((*it)->IsHiddenStart(pid)) {
             return true;
         }
     }

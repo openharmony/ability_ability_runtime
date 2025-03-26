@@ -46,7 +46,7 @@ public:
     static HiddenStartObserverManager &GetInstance();
     int32_t RegisterObserver(const sptr<IHiddenStartObserver> &observer);
     int32_t UnregisterObserver(const sptr<IHiddenStartObserver> &observer);
-    bool IsHiddenStart(int32_t uid);
+    bool IsHiddenStart(int32_t pid);
     void OnObserverDied(const wptr<IRemoteObject> &remote);
     void AddObserverDeathRecipient(const sptr<IRemoteBroker> &observer);
     void RemoveObserverDeathRecipient(const sptr<IRemoteBroker> &observer);

@@ -29,10 +29,10 @@ public:
     /**
      * IsHiddenStart, return if the given app is started hidden.
      *
-     * @param uid Uid of the given app.
+     * @param pid Pid of the given app's process.
      * @return if the given app is started hidden
      */
-    virtual bool IsHiddenStart(int32_t uid) override;
+    virtual bool IsHiddenStart(int32_t pid) override;
 
 private:
     /**

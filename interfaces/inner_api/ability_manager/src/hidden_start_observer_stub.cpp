@@ -41,8 +41,8 @@ int HiddenStartObserverStub::OnRemoteRequest(
 
 int32_t HiddenStartObserverStub::HandleIsHiddenStart(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t uid = data.ReadInt32();
-    bool result = IsHiddenStart(uid);
+    int32_t pid = data.ReadInt32();
+    bool result = IsHiddenStart(pid);
     reply.WriteBool(result);
     return NO_ERROR;
 }
