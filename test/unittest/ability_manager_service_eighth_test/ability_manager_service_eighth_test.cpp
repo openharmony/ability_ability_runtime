@@ -94,11 +94,12 @@ void AbilityManagerServiceEighthTest::TearDownTestCase()
 void AbilityManagerServiceEighthTest::SetUp()
 {
     abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
 }
 
 void AbilityManagerServiceEighthTest::TearDown()
 {
-    abilityMs_ = nullptr;
+    abilityMs_.reset();
 }
 
 std::shared_ptr<AbilityRecord> AbilityManagerServiceEighthTest::GetAbilityRecord()
