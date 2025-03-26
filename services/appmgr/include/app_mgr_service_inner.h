@@ -1869,7 +1869,7 @@ private:
 
     void SetAppInfo(const BundleInfo &bundleInfo, AppSpawnStartMsg &startMsg);
 
-    void SetStartMsgCustomSandboxFlag(AppSpawnStartMsg &startMsg, int32_t userId);
+    void SetStartMsgCustomSandboxFlag(AppSpawnStartMsg &startMsg, uint32_t accessTokenId);
 
     /**
      * Query ability for one want param

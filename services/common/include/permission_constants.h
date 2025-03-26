@@ -73,6 +73,7 @@ constexpr const char* PERMISSION_SET_LAUNCH_REASON_MESSAGE = "ohos.permission.SE
 constexpr const char* PERMISSION_PERFORM_LOCAL_DEBUG = "ohos.permission.PERFORM_LOCAL_DEBUG";
 constexpr const char* PERMISSION_NDK_START_SELF_UI_ABILITY = "ohos.permission.NDK_START_SELF_UI_ABILITY";
 constexpr const char* PERMISSION_FUSION_ACCESS = "ohos.permission.ACCESS_AMS_FROM_FUSION";
+constexpr const char* PERMISSION_CUSTOM_SANDBOX = "ohos.permission.CUSTOM_SANDBOX";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS
