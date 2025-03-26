@@ -43,7 +43,7 @@ public:
         [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj, ani_object call);
 
     static ani_object SetAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context);
-    static AbilityRuntime::AbilityContext *GetAbilityContext(ani_env *env, ani_object aniObj);
+    static std::shared_ptr<AbilityContext> GetAbilityContext(ani_env *env, ani_object aniObj);
 
 private:
     static bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
