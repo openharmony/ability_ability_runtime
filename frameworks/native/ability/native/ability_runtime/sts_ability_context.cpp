@@ -50,7 +50,7 @@ const char *INVOKE_METHOD_NAME = "invoke";
 std::mutex StsAbilityContext::requestCodeMutex_;
 
 
-AbilityRuntime::AbilityContext *StsAbilityContext::GetAbilityContext(ani_env *env, ani_object aniObj)
+std::shared_ptr<AbilityContext> StsAbilityContext::GetAbilityContext(ani_env *env, ani_object aniObj)
 {
     ani_long nativeContextLong;
     ani_class cls {};
@@ -68,12 +68,14 @@ AbilityRuntime::AbilityContext *StsAbilityContext::GetAbilityContext(ani_env *en
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         return nullptr;
     }
-    return ((AbilityRuntime::AbilityContext*)nativeContextLong);
+    auto weakContext = reinterpret_cast<std::weak_ptr<AbilityContext>*>(nativeContextLong);
+    return weakContext != nullptr ? weakContext->lock() : nullptr;
 }
 
 ani_object StsAbilityContext::SetAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context)
 {
-    ani_long nativeContextLong = (ani_long)context.get();
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(context);
+    ani_long nativeContextLong = (ani_long)workContext;
     ani_class cls {};
     ani_status status = ANI_ERROR;
     ani_object contextObj = nullptr;
@@ -290,6 +292,10 @@ void StsAbilityContext::StartAbilityForResultInner(ani_env *env, ani_object aniO
     ani_object startOptionsObj, ani_object callback)
 {
     auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext is nullptr");
+        return;
+    }
     AAFwk::Want want;
     OHOS::AppExecFwk::UnwrapWant(env, wantObj, want);
     AAFwk::StartOptions startOptions;
@@ -360,14 +366,14 @@ void StsAbilityContext::TerminateSelfWithResult(
     TAG_LOGE(AAFwkTag::UIABILITY, "start");
 
     auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext is nullptr");
+        return;
+    }
     AAFwk::Want want;
     int resultCode = 0;
     OHOS::AppExecFwk::UnWrapAbilityResult(env, abilityResult, resultCode, want);
-
-    if (context != nullptr) {
-        context->SetTerminating(true);
-    }
-
+    context->SetTerminating(true);
     ErrCode ret = context->TerminateAbilityWithResult(want, resultCode);
     AsyncCallback(env, callback, WrapBusinessError(env, static_cast<int32_t>(ret)), nullptr);
     TAG_LOGE(AAFwkTag::UIABILITY, "end");
