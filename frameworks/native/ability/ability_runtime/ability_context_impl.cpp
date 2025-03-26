@@ -27,6 +27,7 @@
 #include "request_constants.h"
 #include "session_info.h"
 #include "string_wrapper.h"
+#include "sts_ui_extension_callback.h"
 #ifdef SUPPORT_SCREEN
 #include "session/host/include/zidl/session_interface.h"
 #include "scene_board_judgement.h"
@@ -926,33 +927,46 @@ ErrCode AbilityContextImpl::StartAbilityByType(const std::string &type,
         TAG_LOGE(AAFwkTag::CONTEXT, "null uiContent");
         return ERR_INVALID_VALUE;
     }
-    wantParams.SetParam(UIEXTENSION_TARGET_TYPE_KEY, AAFwk::String::Box(type));
-    AAFwk::Want want;
-    want.SetParams(wantParams);
-    if (wantParams.HasParam(FLAG_AUTH_READ_URI_PERMISSION)) {
-        int32_t flag = wantParams.GetIntParam(FLAG_AUTH_READ_URI_PERMISSION, 0);
-        want.SetFlags(flag);
-        wantParams.Remove(FLAG_AUTH_READ_URI_PERMISSION);
-    }
+    AAFwk::Want want = UpdateWantAndParams(type, wantParams);
+    bool isSts = IsStsAbility(abilityInfo_);
     Ace::ModalUIExtensionCallbacks callback;
-    callback.onError = [uiExtensionCallbacks](int32_t arg, const std::string &str1, const std::string &str2) {
-        uiExtensionCallbacks->OnError(arg);
+    callback.onError = [uiExtensionCallbacks, isSts](int32_t arg, const std::string &str1, const std::string &str2) {
+        if (isSts && uiExtensionCallbacks) {
+            StsUIExtensionCallback* callbackPtr = static_cast<StsUIExtensionCallback*>(uiExtensionCallbacks.get());
+            if (callbackPtr) {
+                callbackPtr->OnError(arg);
+            }
+        } else {
+            uiExtensionCallbacks->OnError(arg);
+        }
     };
-    callback.onRelease = [uiExtensionCallbacks](int32_t arg) {
-        uiExtensionCallbacks->OnRelease(arg);
+    callback.onRelease = [uiExtensionCallbacks, isSts](int32_t arg) {
+        if (isSts && uiExtensionCallbacks) {
+            StsUIExtensionCallback* callbackPtr = static_cast<StsUIExtensionCallback*>(uiExtensionCallbacks.get());
+            if (callbackPtr) {
+                callbackPtr->OnRelease(arg);
+            }
+        } else {
+            uiExtensionCallbacks->OnRelease(arg);
+        }
     };
-    callback.onResult = [uiExtensionCallbacks](int32_t arg1, const OHOS::AAFwk::Want arg2) {
-        uiExtensionCallbacks->OnResult(arg1, arg2);
+    callback.onResult = [uiExtensionCallbacks, isSts](int32_t arg1, const OHOS::AAFwk::Want arg2) {
+        if (isSts && uiExtensionCallbacks) {
+            StsUIExtensionCallback* callbackPtr = static_cast<StsUIExtensionCallback*>(uiExtensionCallbacks.get());
+            if (callbackPtr) {
+                callbackPtr->OnResult(arg1, arg2);
+            }
+        } else {
+            uiExtensionCallbacks->OnResult(arg1, arg2);
+        }
     };
-
     Ace::ModalUIExtensionConfig config;
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
         TAG_LOGE(AAFwkTag::CONTEXT, "createModalUIExtension failed");
         return ERR_INVALID_VALUE;
     }
-    uiExtensionCallbacks->SetUIContent(uiContent);
-    uiExtensionCallbacks->SetSessionId(sessionId);
+    SetUIContentAndSessionId(uiExtensionCallbacks, isSts, uiContent, sessionId);
     return ERR_OK;
 }
 
@@ -1092,6 +1106,42 @@ std::shared_ptr<AAFwk::Want> AbilityContextImpl::GetWant()
         return nullptr;
     }
     return abilityCallback->GetWant();
+}
+
+bool AbilityContextImpl::IsStsAbility(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
+{
+    if (!abilityInfo) {
+        return false;
+    }
+    return abilityInfo->codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2;
+}
+
+AAFwk::Want AbilityContextImpl::UpdateWantAndParams(const std::string &type, AAFwk::WantParams &wantParams)
+{
+    wantParams.SetParam(UIEXTENSION_TARGET_TYPE_KEY, AAFwk::String::Box(type));
+    AAFwk::Want want;
+    want.SetParams(wantParams);
+    if (wantParams.HasParam(FLAG_AUTH_READ_URI_PERMISSION)) {
+        int32_t flag = wantParams.GetIntParam(FLAG_AUTH_READ_URI_PERMISSION, 0);
+        want.SetFlags(flag);
+        wantParams.Remove(FLAG_AUTH_READ_URI_PERMISSION);
+    }
+    return want;
+}
+
+void AbilityContextImpl::SetUIContentAndSessionId(const std::shared_ptr<JsUIExtensionCallback> uiExtensionCallbacks,
+    bool isSts, Ace::UIContent *uiContent, int32_t sessionId)
+{
+    if (isSts && uiExtensionCallbacks) {
+        StsUIExtensionCallback* callbackPtr = static_cast<StsUIExtensionCallback*>(uiExtensionCallbacks.get());
+        if (callbackPtr) {
+            callbackPtr->SetUIContent(uiContent);
+            callbackPtr->SetSessionId(sessionId);
+        }
+    } else {
+        uiExtensionCallbacks->SetUIContent(uiContent);
+        uiExtensionCallbacks->SetSessionId(sessionId);
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
