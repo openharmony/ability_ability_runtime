@@ -38,7 +38,6 @@ const char STS_CREATE_VM[] = "ANI_CreateVM";
 const char STS_ANI_GET_CREATEDVMS[] = "ANI_GetCreatedVMs";
 const char STS_LIB_PATH[] = "libarkruntime.so";
 const char BOOT_PATH[] = "/system/framework/bootpath.json";
-const char SANDBOX_ARK_CACHE_PATH[] = "/data/storage/ark-cache/";
 
 using GetDefaultVMInitArgsSTSRuntimeType = ets_int (*)(EtsVMInitArgs* vmArgs);
 using GetCreatedVMsSTSRuntimeType = ets_int (*)(EtsVM** vmBuf, ets_size bufLen, ets_size* nVms);
@@ -194,7 +193,7 @@ void STSEnvironment::InitSTSSysNS(const std::string& path)
     dlns_inherit(&ns, &ndk, "allow_all_shared_libs");
 }
 
-bool STSEnvironment::StartRuntime(napi_env napiEnv, const AbilityRuntime::Runtime::Options& runtimeOptions)
+bool STSEnvironment::StartRuntime(napi_env napiEnv, std::vector<ani_option>& options)
 {
     TAG_LOGE(AAFwkTag::STSRUNTIME, "StartRuntime call");
     if (isRuntimeStarted_) {
@@ -208,7 +207,6 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv, const AbilityRuntime::Runtim
 
     const std::string optionPrefix = "--ext:";
     // Create boot-panda-files options
-    std::vector<ani_option> options;
     std::string bootString = optionPrefix + "--boot-panda-files=" + bootfiles;
     TAG_LOGI(AAFwkTag::STSRUNTIME, "bootString %{public}s", bootString.c_str());
     options.push_back(ani_option{bootString.c_str(), nullptr});
@@ -219,15 +217,6 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv, const AbilityRuntime::Runtim
     std::string forbiddenJIT = optionPrefix + "--compiler-enable-jit=false";
     ani_option forbiddenJITOption = {forbiddenJIT.data(), nullptr};
     options.push_back(forbiddenJITOption);
-
-    std::string aotFileString = "";
-    if (!runtimeOptions.arkNativeFilePath.empty()) {
-        std::string aotFilePath = SANDBOX_ARK_CACHE_PATH + runtimeOptions.arkNativeFilePath +
-                                  runtimeOptions.moduleName + ".an";
-        aotFileString = optionPrefix + "--aot-file=" + aotFilePath;
-        options.push_back(ani_option{aotFileString.c_str(), nullptr});
-        TAG_LOGI(AAFwkTag::STSRUNTIME, "aotFileString %{public}s", aotFileString.c_str());
-    }
 
     options.push_back(ani_option{"--ext:--log-level=info", nullptr});
 
