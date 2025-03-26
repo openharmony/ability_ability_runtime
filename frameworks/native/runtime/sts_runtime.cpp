@@ -79,6 +79,7 @@ const std::string STS_SYSLIB_PATH =
 const std::string STS_CHIPSDK_PATH = "/system/lib/chipset-pub-sdk";
 #endif
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
+constexpr char SANDBOX_ARK_CACHE_PATH[] = "/data/storage/ark-cache/";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
 constexpr char ENTRY_PATH_MAP_FILE[] = "/system/framework/entrypath.json";
 constexpr char ENTRY_PATH_MAP_KEY[] = "entryPath";
@@ -396,7 +397,17 @@ bool STSRuntime::CreateStsEnv(const Options& options)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
     stsEnv_ = std::make_shared<StsEnv::STSEnvironment>(std::make_unique<OHOSStsEnvironmentImpl>(options.eventRunner));
-    if (stsEnv_ == nullptr || !stsEnv_->StartRuntime(STSRuntime::jsRuntime_->GetNapiEnv(), options)) {
+    
+    std::vector<ani_option> aniOptions;
+    std::string aotFileString = "";
+    if (!options.arkNativeFilePath.empty()) {
+        std::string aotFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath + options.moduleName + ".an";
+        aotFileString = "--ext:--aot-file=" + aotFilePath;
+        aniOptions.push_back(ani_option{aotFileString.c_str(), nullptr});
+        TAG_LOGI(AAFwkTag::STSRUNTIME, "aotFileString: %{public}s", aotFileString.c_str());
+    }
+    
+    if (stsEnv_ == nullptr || !stsEnv_->StartRuntime(STSRuntime::jsRuntime_->GetNapiEnv(), aniOptions)) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Init StsEnv failed");
         return false;
     }
