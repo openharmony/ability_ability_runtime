@@ -23,6 +23,21 @@ class ExtensionAbility{}
 
 export default class UIExtensionAbility extends ExtensionAbility {
 
+  private isOnDestroyAsync: boolean = true;
+  private destroyCallbackPoint: long;
+  private native nativeOnDestroyCallback(): void;
+  private callOnDestroy(): boolean {
+    let p = this.onDestroyAsync();
+    if (this.isOnDestroyAsync) {
+      p.then<void>((a:undefined): void => {
+        this.nativeOnDestroyCallback();
+      });
+    } else {
+      this.onDestroy();
+    }
+    return this.isOnDestroyAsync;
+  }
+
   context: UIExtensionContext = {};
 
   onCreate(launchParam: AbilityConstant.LaunchParam): void {}
@@ -35,6 +50,10 @@ export default class UIExtensionAbility extends ExtensionAbility {
 
   onBackground(): void {}
 
-  //onDestroy(): void | Promise<void>;
   onDestroy(): void {}
+
+  onDestroyAsync(): Promise<void> {
+    this.isOnDestroyAsync = false;
+    return new Promise<void>((resolve: (a: undefined)=>void, reject: (err: Error)=>void): void => {});
+  }
 }

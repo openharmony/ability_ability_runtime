@@ -185,7 +185,7 @@ private:
     ani_object CreateSTSContext(ani_env *env, std::shared_ptr<UIExtensionContext> context, int32_t screenMode);
     // napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
     //     bool withResult = false);
-    ani_ref CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
+    bool CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
     // bool CheckPromise(napi_value result);
     // bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
 
