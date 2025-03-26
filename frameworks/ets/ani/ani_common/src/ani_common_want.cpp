@@ -265,23 +265,75 @@ bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams
     return true;
 }
 
-void UnWrapAbilityResult(ani_env *env, ani_object param, int &resultCode, AAFwk::Want &want)
+bool GetAbilityResultClass(ani_env *env, ani_class &cls)
 {
-    resultCode = GetIntOrUndefined(env, param, "resultCode");
-    ani_status status = ANI_ERROR;
-    ani_ref wantRef = nullptr;
+    ani_status status = env->FindClass("Lability/abilityResult/AbilityResultInner;", &cls);
+    if (status != ANI_OK || cls == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetResultCode(ani_env *env, ani_object param, ani_class cls, int &resultCode)
+{
+    ani_method method {};
+    ani_status status = env->Class_FindMethod(cls, "<get>resultCode", nullptr, &method);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
+        return false;
+    }
+    ani_double dResultCode = 0.0;
+    status = env->Object_CallMethod_Double(param, method, &dResultCode);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
+        return false;
+    }
+    resultCode = static_cast<int>(dResultCode);
+    return true;
+}
+
+bool GetWantReference(ani_env *env, ani_object param, ani_class cls, ani_ref &wantRef)
+{
+    ani_method method {};
+    ani_status status = env->Class_FindMethod(cls, "<get>want", nullptr, &method);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
+        return false;
+    }
+    status = env->Object_CallMethod_Ref(param, method, &wantRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
+        return false;
+    }
     ani_boolean isUndefined = true;
-    if ((status = env->Object_GetFieldByName_Ref(param, "want", &wantRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    status = env->Reference_IsUndefined(wantRef, &isUndefined);
+    if (status != ANI_OK || isUndefined) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
+        return false;
     }
-    if ((status = env->Reference_IsUndefined(wantRef, &isUndefined)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    return true;
+}
+
+bool UnWrapAbilityResult(ani_env *env, ani_object param, int &resultCode, AAFwk::Want &want)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "env is null");
+        return false;
     }
-    if (isUndefined){
-        TAG_LOGE(AAFwkTag::JSNAPI, "want undefined");
-        return;
-    } 
-    UnwrapWant(env, reinterpret_cast<ani_object>(wantRef), want);
+    ani_class cls {};
+    if (!GetAbilityResultClass(env, cls)) {
+        return false;
+    }
+    if (!GetResultCode(env, param, cls, resultCode)) {
+        return false;
+    }
+    ani_ref wantRef = nullptr;
+    if (!GetWantReference(env, param, cls, wantRef)) {
+        return false;
+    }
+    return UnwrapWant(env, reinterpret_cast<ani_object>(wantRef), want);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

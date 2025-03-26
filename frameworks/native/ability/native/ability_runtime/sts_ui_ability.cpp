@@ -1176,16 +1176,13 @@ bool StsUIAbility::CallObjectMethod(bool withResult, const char *name, const cha
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         return false;
     }
-    if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "get '%{public}s' from ability object failed", name);
-        return false;
-    }
     if (withResult) {
         ani_boolean res = 0;
         va_list args;
         va_start(args, signature);
         if ((status = env->Object_CallMethod_Boolean(obj, method, &res, args)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+            return false;
         }
         va_end(args);
         return res;
@@ -1195,6 +1192,7 @@ bool StsUIAbility::CallObjectMethod(bool withResult, const char *name, const cha
     va_start(args, signature);
     if ((status = env->Object_CallMethod_Void_V(obj, method, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return false;
     }
     va_end(args);
     int64_t timeEnd = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
