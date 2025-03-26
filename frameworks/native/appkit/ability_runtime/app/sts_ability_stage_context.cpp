@@ -19,8 +19,7 @@
 #include "configuration_convertor.h"
 #include "ohos_application.h"
 #include "ani_common_configuration.h"
-#include "ani_common_context.h"
-
+#include "sts_context_utils.h"
 namespace OHOS {
 namespace AbilityRuntime {
 

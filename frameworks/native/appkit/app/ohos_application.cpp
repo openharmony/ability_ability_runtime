@@ -44,7 +44,7 @@
 #include "window.h"
 #endif
 #include "ani.h"
-#include "ani_common_context.h"
+#include "sts_context_utils.h"
 #include "sts_runtime.h"
 
 namespace OHOS {
