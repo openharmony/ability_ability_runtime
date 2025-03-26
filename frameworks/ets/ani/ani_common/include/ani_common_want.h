@@ -33,7 +33,7 @@ ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams);
 
 bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want);
 bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams);
-void UnWrapAbilityResult(ani_env *env, ani_object param, int &resultCode, AAFwk::Want &want);
+bool UnWrapAbilityResult(ani_env *env, ani_object param, int &resultCode, AAFwk::Want &want);
 
 } // namespace AppExecFwk
 } // namespace OHOS
