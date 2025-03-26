@@ -101,6 +101,8 @@ public:
         const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance) override;
     void PreloadModule(const std::string& moduleName, const std::string& srcPath,
         const std::string& hapPath, bool isEsMode, bool useCommonTrunk) override;
+    void PreloadModule(const std::string& moduleName, const std::string& hapPath,
+        bool isEsMode, bool useCommonTrunk) override {}
     bool PopPreloadObj(const std::string& key, std::unique_ptr<NativeReference>& obj);
     void StartDebugMode(const DebugOption debugOption) override;
     void DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug);
