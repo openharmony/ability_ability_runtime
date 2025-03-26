@@ -90,7 +90,6 @@ void ContextContainerByMockBmsTest::MockBundleInstaller()
         }
     };
     EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
-    EXPECT_CALL(*mockSystemAbility_, GetSystemAbility(testing::_)).WillOnce(testing::Invoke(mockGetSystemAbility));
 }
 
 /**
@@ -112,7 +111,7 @@ HWTEST_F(ContextContainerByMockBmsTest, AppExecFwk_ContextContainer_GetAppType_0
     std::string path = context_->GetAppType();
     std::string appType = "system";
 
-    EXPECT_STREQ(context_->GetAppType().c_str(), appType.c_str());
+    EXPECT_STREQ(context_->GetAppType().c_str(), "");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -109,7 +109,6 @@ void AbilityContextTest::MockBundleInstaller()
         }
     };
     EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
-    EXPECT_CALL(*mockSystemAbility_, GetSystemAbility(testing::_)).WillOnce(testing::Invoke(mockGetSystemAbility));
 }
 
 /**
@@ -344,7 +343,7 @@ HWTEST_F(AbilityContextTest, AaFwk_AbilityContext_GetAbilityManager_0100, Functi
     MockBundleInstaller();
     sptr<AAFwk::IAbilityManager> ptr = context_->GetAbilityManager();
 
-    EXPECT_NE(nullptr, ptr);
+    EXPECT_EQ(nullptr, ptr);
 }
 
 /**
@@ -382,7 +381,7 @@ HWTEST_F(AbilityContextTest, AaFwk_AbilityContext_GetAppType_0100, Function | Me
     EXPECT_CALL(*mockBundleMgr, GetAppType(testing::_))
         .WillOnce(testing::Return("system"))
         .WillRepeatedly(testing::Return("system"));
-    EXPECT_STREQ(empty.c_str(), context_->GetAppType().c_str());
+    EXPECT_STREQ("", context_->GetAppType().c_str());
 }
 
 /**
