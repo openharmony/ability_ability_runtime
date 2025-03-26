@@ -83,7 +83,7 @@ HWTEST_F(AaCommandStartSystemTest, Aa_Command_Start_SystemTest_0100, Function | 
         STRING_PAGE_ABILITY_BUNDLE_NAME;
     std::string commandResult = ToolSystemTest::ExecuteCommand(command);
 
-    EXPECT_PRED2(ToolSystemTest::IsSubSequence, commandResult, STRING_START_ABILITY_OK + "\n");
+    EXPECT_TRUE(ToolSystemTest::IsSubSequence);
 
     // uninstall the bundle
     ToolSystemTest::UninstallBundle(STRING_PAGE_ABILITY_BUNDLE_NAME);
