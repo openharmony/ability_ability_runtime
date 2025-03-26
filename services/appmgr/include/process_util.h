@@ -30,15 +30,15 @@ namespace ProcessUtil {
 
 static bool ProcessExist(pid_t pid)
 {
-    char pid_path[128] = {0};
-    struct stat stat_buf;
+    char pidPath[128] = {0};
+    struct stat statBuf;
     if (!pid) {
         return false;
     }
-    if (snprintf_s(pid_path, sizeof(pid_path), sizeof(pid_path) - 1, "/proc/%d/status", pid) < 0) {
+    if (snprintf_s(pidPath, sizeof(pidPath), sizeof(pidPath) - 1, "/proc/%d/status", pid) < 0) {
         return false;
     }
-    if (stat(pid_path, &stat_buf) == 0) {
+    if (stat(pidPath, &statBuf) == 0) {
         return true;
     }
     return false;
@@ -47,11 +47,11 @@ static bool ProcessExist(pid_t pid)
 static bool ReadProcessName(pid_t pid, std::string &pidProcessName)
 {
     pidProcessName.clear();
-    char pid_path[128] = {0};
-    if (snprintf_s(pid_path, sizeof(pid_path), sizeof(pid_path) - 1, "/proc/%d/cmdline", pid) < 0) {
+    char pidPath[128] = {0};
+    if (snprintf_s(pidPath, sizeof(pidPath), sizeof(pidPath) - 1, "/proc/%d/cmdline", pid) < 0) {
         return false;
     }
-    std::string processPath = pid_path;
+    std::string processPath = pidPath;
     std::string name;
     OHOS::LoadStringFromFile(processPath, name);
     if (name.empty()) {
@@ -109,6 +109,8 @@ static bool IsAllProcessKilled(std::list<SimpleProcessInfo> &processInfos)
     bool processExists = false;
     for (auto &item : processInfos) {
         if (ProcessExist(item.pid, item.processName)) {
+            TAG_LOGI(AAFwkTag::APPMGR, "process not exit %{public}d, %{public}s",
+                static_cast<int32_t>(item.pid), item.processName.c_str());
             return false;
         }
     }
