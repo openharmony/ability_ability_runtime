@@ -304,8 +304,8 @@ private:
     bool CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
     ani_object CreateAppWindowStage();
     std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
-    void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
-        std::shared_ptr<AAFwk::Want> want, const std::string &moduleName, const std::string &srcPath);
+    void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want,
+        const std::string &moduleName, const std::string &srcPath, const std::shared_ptr<OHOSApplication> &application);
     void DoOnForegroundForSceneIsNull(const Want &want);
     void AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
     void AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
@@ -313,7 +313,8 @@ private:
     bool BackPressDefaultValue();
     void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &moduleName, const std::string &srcPath);
-    void CreateAniContext(ani_env *env, ani_ref contextGlobalRef, int32_t screenMode);
+    void CreateAniContext(ani_env *env, ani_ref contextGlobalRef, int32_t screenMode,
+        const std::shared_ptr<OHOSApplication> &application);
 
     STSRuntime &stsRuntime_;
     std::shared_ptr<STSNativeReference> shellContextRef_;
