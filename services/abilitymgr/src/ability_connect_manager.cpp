@@ -2003,6 +2003,7 @@ void AbilityConnectManager::TerminateAbilityWindowLocked(const std::shared_ptr<A
     std::lock_guard guard(serialMutex_);
     eventInfo.errCode = TerminateAbilityInner(abilityRecord->GetToken());
     if (eventInfo.errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "terminate ability window locked failed: %{public}d", eventInfo.errCode);
         EventReport::SendAbilityEvent(EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
     }
 }
