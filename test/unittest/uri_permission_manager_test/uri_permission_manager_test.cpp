@@ -443,5 +443,28 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionPrivil
     auto res = upmc.GrantUriPermissionPrivileged(uriVec, flag, bundleName, appIndex, 0, 0);
     EXPECT_EQ(res, CHECK_PERMISSION_FAILED);
 }
+
+/*
+ * Feature: UriPermissionManagerClient
+ * Function: GrantUriPermissionPrivileged
+ * SubFunction: GrantUriPermissionPrivileged
+ * FunctionPoints: Write Uri by raw data, more than 128M
+ * CaseDescription: Verify UriPermissionManagerClient GrantUriPermissionPrivileged
+ */
+HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionPrivileged_006, TestSize.Level1)
+{
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::string uriStr = "file://docs/storage/Users/currentUser/";
+    for (int32_t i = 0; i < 100; i++) {
+        uriStr += "aaaaaaaaaaaa/";
+    }
+    uriStr += "1.txt";
+    std::vector<Uri> uriVec(MAX_URI_COUNT, Uri(uriStr));
+    uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
+    std::string bundleName = "com.example.test1001";
+    int32_t appIndex = 0;
+    auto res = upmc.GrantUriPermissionPrivileged(uriVec, flag, bundleName, appIndex, 0, 0);
+    EXPECT_EQ(res, INNER_ERR);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

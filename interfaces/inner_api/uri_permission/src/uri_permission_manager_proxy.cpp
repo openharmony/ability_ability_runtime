@@ -35,13 +35,14 @@ inline size_t GetPadSize(size_t size)
 
 bool CheckUseRawData(const std::vector<std::string> &uriVec)
 {
-    int32_t oriSize = sizeof(int32_t);
+    size_t oriSize = sizeof(int32_t);
     for (auto &uri : uriVec) {
-        int32_t desire = uri.length() + sizeof(char) + sizeof(int32_t);
-        int32_t padSize = GetPadSize(desire);
+        // calculate ipc data size of string uri, reference to parcel.h
+        size_t desire = uri.length() + sizeof(char) + sizeof(int32_t);
+        size_t padSize = GetPadSize(desire);
         oriSize += (desire + padSize);
         if (oriSize > MAX_PARCEL_IPC_DATA_SIZE) {
-            TAG_LOGI(AAFwkTag::URIPERMMGR, "use raw data %{public}d", oriSize);
+            TAG_LOGI(AAFwkTag::URIPERMMGR, "use raw data %{public}d", static_cast<int32_t>(oriSize));
             return true;
         }
     }
