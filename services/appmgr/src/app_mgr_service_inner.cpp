@@ -4959,7 +4959,7 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
         TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
         return ERR_INVALID_OPERATION;
     }
-    auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, info, "");
+    auto appRecord = CreateAppRunningRecord(appInfo, processName, info);
     CHECK_POINTER_AND_RETURN_VALUE(appRecord, ERR_INVALID_VALUE);
 
     auto isDebug = want.GetBoolParam(DEBUG_APP, false);
@@ -4997,6 +4997,20 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
     TAG_LOGI(AAFwkTag::APPMGR, "startEmptyProcess pid: [%{public}d]", appRecord->GetPid());
 
     return ERR_OK;
+}
+
+std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(std::shared_ptr<ApplicationInfo> appInfo,
+    const std::string &processName, const BundleInfo &bundleInfo)
+{
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid appRunningManager");
+        return nullptr;
+    }
+    auto isSupportMultiInstance = AAFwk::AppUtils::GetInstance().IsSupportMultiInstance();
+    if (isSupportMultiInstance) {
+        return appRunningManager_->CreateAppRunningRecord(appInfo, processName, bundleInfo, "app_instance_0");
+    }
+    return appRunningManager_->CreateAppRunningRecord(appInfo, processName, bundleInfo, "");
 }
 
 int AppMgrServiceInner::FinishUserTest(
