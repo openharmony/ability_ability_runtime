@@ -37,6 +37,7 @@
 #include "ani_common_ability_result.h"
 #include "open_link_options.h"
 #include "start_options.h"
+#include "sts_ui_extension_callback.h"
 #include "tokenid_kit.h"
 #include "ui_ability_servicehost_stub_impl.h"
 #include "ui_service_extension_connection_constants.h"
@@ -401,6 +402,40 @@ void StsAbilityContext::reportDrawnCompletedSync(
     AsyncCallback(env, callback, WrapBusinessError(env, static_cast<int32_t>(ret)), nullptr);
 }
 
+ani_int StsAbilityContext::StartAbilityByTypeSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_string aniType, ani_ref aniWantParam, ani_object startCallback)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "call");
+    auto context = GetAbilityContext(env, aniObj);
+    ErrCode ret = ERR_INVALID_VALUE;
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext failed.");
+        return ret;
+    }
+
+    std::string type;
+    if (!AppExecFwk::GetStdString(env, aniType, type)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetStdString failed");
+        return ret;
+    }
+
+    AAFwk::WantParams wantParam;
+    if (!AppExecFwk::UnwrapWantParams(env, aniWantParam, wantParam)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "UnwrapWantParams failed");
+        return ret;
+    }
+
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetVM failed");
+        return ret;
+    }
+    std::shared_ptr<StsUIExtensionCallback> callback = std::make_shared<StsUIExtensionCallback>();
+    callback->SetStsCallbackObject(aniVM, startCallback);
+    ret = context->StartAbilityByType(type, wantParam, callback);
+    return ret;
+}
+
 ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context)
 {
     TAG_LOGE(AAFwkTag::UIABILITY, "start");
@@ -435,6 +470,8 @@ ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityConte
             reinterpret_cast<void*>(StsAbilityContext::TerminateSelfWithResult) },
         ani_native_function { "nativeReportDrawnCompletedSync", "Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
             reinterpret_cast<ani_int*>(StsAbilityContext::reportDrawnCompletedSync) },
+        ani_native_function { "nativeStartAbilityByTypeSync", nullptr,
+            reinterpret_cast<void*>(StsAbilityContext::StartAbilityByTypeSync) },
     };
 
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
