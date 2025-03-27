@@ -2159,6 +2159,7 @@ private:
     bool JudgeMultiUserConcurrency(const int32_t userId);
     bool CheckCrossUser(const int32_t userId, AppExecFwk::ExtensionAbilityType extensionType);
     void SendExtensionReport(EventInfo &eventInfo, int32_t errCode, bool isService = false);
+    void SendIntentReport(EventInfo &eventInfo, int32_t errCode, const std::string &intentName);
     /**
      * dumpsys info
      *

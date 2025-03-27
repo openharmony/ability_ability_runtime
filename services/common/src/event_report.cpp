@@ -64,6 +64,7 @@ constexpr const char *EVENT_KEY_LIFE_CYCLE_STATE = "LIFE_CYCLE_STATE";
 constexpr const char *EVENT_KEY_ERR_REASON = "ERR_REASON";
 constexpr const char *EVENT_KEY_LIFE_CYCLE = "LIFE_CYCLE";
 constexpr const char *EVENT_KEY_PERSISTENT_ID = "PERSISTENT_ID";
+constexpr const char *EVENT_KEY_INTENT_NAME = "INTENT_NAME";
 
 constexpr const int32_t DEFAULT_EXTENSION_TYPE = -1;
 }
@@ -734,13 +735,56 @@ void EventReport::SendStartAbilityOtherExtensionEvent(const EventName &eventName
         "CALLER_BUNLED_NAME", eventInfo.callerBundleName);
 }
 
+void EventReport::SendExecuteIntentEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+{
+    std::string name = ConvertEventName(eventName);
+    if (name == INVALID_EVENT_NAME) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
+        return;
+    }
+    HiSysEventWrite(
+        HiSysEvent::Domain::AAFWK,
+        name,
+        type,
+        EVENT_KEY_USERID, eventInfo.userId,
+        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
+        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
+        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
+        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
+        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
+        EVENT_KEY_ERR_REASON, eventInfo.errReason,
+        EVENT_KEY_INTENT_NAME, eventInfo.intentName);
+}
+
+void EventReport::SendLaunchFrameworkEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+{
+    std::string name = ConvertEventName(eventName);
+    if (name == INVALID_EVENT_NAME) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
+        return;
+    }
+    HiSysEventWrite(
+        HiSysEvent::Domain::AAFWK,
+        name,
+        type,
+        EVENT_KEY_USERID, eventInfo.userId,
+        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
+        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
+        EVENT_KEY_PROCESS_NAME, eventInfo.processName,
+        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
+        EVENT_KEY_ERR_REASON, eventInfo.errReason);
+}
+
 std::string EventReport::ConvertEventName(const EventName &eventName)
 {
     const char* eventNames[] = {
         // fault event
         "START_ABILITY_ERROR", "TERMINATE_ABILITY_ERROR", "START_EXTENSION_ERROR",
         "STOP_EXTENSION_ERROR", "CONNECT_SERVICE_ERROR", "DISCONNECT_SERVICE_ERROR",
-        "UI_EXTENSION_ERROR", "UI_SERVICE_EXTENSION_ERROR",
+        "UI_EXTENSION_ERROR", "UI_SERVICE_EXTENSION_ERROR", "EXECUTE_INSIGHT_INTENT_ERROR",
+        "STARTUP_TASK_ERROR",
 
         // ability behavior event
         "START_ABILITY", "TERMINATE_ABILITY", "CLOSE_ABILITY",

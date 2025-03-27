@@ -154,6 +154,30 @@ UI_SERVICE_EXTENSION_ERROR:
   APP_INDEX: {type: INT32, desc: app index}
   ERROR_REASON: {type: STRING, desc: error reason}
 
+EXECUTE_INSIGHT_INTENT_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, tag: ability, desc: execute insight intent error}
+  USER_ID: {type: INT32, desc: userId}
+  ERROR_CODE: {type: INT32, desc: error code}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  MODULE_NAME: {type: STRING, desc: module name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
+  CALLER_BUNDLE_NAME: {type: STRING, desc: caller bundle name}
+  INTENTION_NAME: {type: STRING, desc: intention name}
+  APP_INDEX: {type: INT32, desc: app index}
+  ERROR_REASON: {type: STRING, desc: error reason}
+  TIME: {type: INT64, desc: error time}
+
+STARTUP_TASK_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, tag: ability, desc: execute insight intent error}
+  USER_ID: {type: INT32, desc: userId}
+  ERROR_CODE: {type: INT32, desc: error code}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  MODULE_NAME: {type: STRING, desc: module name}
+  PROCESS_NAME: {type: STRING, desc: process name}
+  APP_INDEX: {type: INT32, desc: app index}
+  ERROR_REASON: {type: STRING, desc: error reason}
+  TIME: {type: INT64, desc: error time}
+
 # ability behavior event
 
 START_ABILITY:
