@@ -21,6 +21,7 @@
 #include "js_service_extension.h"
 #include "runtime.h"
 #include "service_extension_context.h"
+#include "sts_service_extension.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -46,7 +47,8 @@ ServiceExtension* ServiceExtension::Create(const std::unique_ptr<Runtime>& runti
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
             return JsServiceExtension::Create(runtime);
-
+        case Runtime::Language::STS:
+            return StsServiceExtension::Create(runtime);
         default:
             return new ServiceExtension();
     }
