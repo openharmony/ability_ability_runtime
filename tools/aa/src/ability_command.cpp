@@ -338,7 +338,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The application specified by the aa tool is a Release version and does not support Debug mode",
         {ERR_NOT_IN_APP_PROVISION_MODE_SOLUTION_ONE});
     messageMap_[ERR_NOT_DEBUG_APP] = GetAaToolErrorInfo("10106701",
-        "The target application is not a debug application.",
+        "error: cannot debug app using release certificate.",
         "The developer forgot to configure the target application as a Debug application",
         {ERR_NOT_DEBUG_APP_SOLUTION_ONE});
     messageMap_[ERR_APP_CLONE_INDEX_INVALID] = GetAaToolErrorInfo("10103102",
