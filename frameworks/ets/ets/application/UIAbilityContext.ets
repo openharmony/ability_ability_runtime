@@ -20,6 +20,7 @@ import { BusinessError, AsyncCallback } from '@ohos.base';
 import { AbilityResult } from 'ability.abilityResult';
 import AbilityStartCallback from 'application.AbilityStartCallback';
 import { Configuration } from '@ohos.app.ability.Configuration';
+import { Context } from './Context'
 
 export class AsyncCallbackWrapper<T> {
   myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
@@ -34,7 +35,7 @@ export class AsyncCallbackWrapper<T> {
   }
 }
 
-export default class UIAbilityContext {
+export default class UIAbilityContext extends Context {
 
   public nativeContext : long;
   public config: Configuration;
