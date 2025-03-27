@@ -111,6 +111,25 @@ void AppMgrServiceInnerTest::InitAppInfo(const std::string& deviceName,
     abilityInfo_ = std::make_shared<AbilityInfo>(abilityInfo);
 }
 
+class MockIUserCallback : public AAFwk::IUserCallback {
+public:
+    MockIUserCallback() = default;
+    virtual ~MockIUserCallback() = default;
+
+    void OnStopUserDone(int userId, int errcode) override
+    {}
+    void OnStartUserDone(int userId, int errcode) override
+    {}
+
+    void OnLogoutUserDone(int userId, int errcode)  override
+    {}
+
+    sptr<IRemoteObject> AsObject() override
+    {
+        return {};
+    }
+};
+
 void AppMgrServiceInnerTest::SetUpTestCase(void)
 {
     MockNativeToken::SetNativeToken();
@@ -4848,6 +4867,44 @@ HWTEST_F(AppMgrServiceInnerTest, SendAppSpawnUninstallDebugHapMsg_001, TestSize.
     EXPECT_NE(appMgrServiceInner, nullptr);
     appMgrServiceInner->SendAppSpawnUninstallDebugHapMsg(0);
     TAG_LOGI(AAFwkTag::TEST, "SendAppSpawnUninstallDebugHapMsg_001 end");
+}
+
+/**
+ * @tc.name: DoAllProcessExitCallback_001
+ * @tc.desc: DoAllProcessExitCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, DoAllProcessExitCallback_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DoAllProcessExitCallback_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    std::list<SimpleProcessInfo> processInfos;
+    int32_t userId = 100;
+    sptr<AAFwk::IUserCallback> callback = nullptr;
+    int64_t startTime = 0;
+    auto ret = appMgrServiceInner->DoAllProcessExitCallback(processInfos, userId, callback, startTime);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "DoAllProcessExitCallback_001 end");
+}
+
+/**
+ * @tc.name: DoAllProcessExitCallback_002
+ * @tc.desc: DoAllProcessExitCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, DoAllProcessExitCallback_002, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DoAllProcessExitCallback_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    std::list<SimpleProcessInfo> processInfos;
+    int32_t userId = 100;
+    sptr<AAFwk::IUserCallback> callback = new MockIUserCallback();
+    int64_t startTime = 0;
+    auto ret = appMgrServiceInner->DoAllProcessExitCallback(processInfos, userId, callback, startTime);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "DoAllProcessExitCallback_002 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

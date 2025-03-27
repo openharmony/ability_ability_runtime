@@ -708,6 +708,15 @@ enum {
      */
     ERR_EXTENSION_START_ABILITY_CONTROLEED = 2097305,
 
+    /*
+    * Result (2097318 - 2097328) for login and logout user.
+    */
+    ERR_LOGOUT_USER_TASK_HANDLE_NULL = 2097318,
+
+    ERR_LOGOUT_USER_APP_MANAGER_NULL = 2097319,
+
+    ERR_LOGOUT_USER_KILL_PROCESS_TIMEOUT = 2097320,
+
     /**
      * Result (2097312) for interceptor executer is nullptr.
      */

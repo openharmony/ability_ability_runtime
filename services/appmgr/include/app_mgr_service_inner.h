@@ -1597,8 +1597,8 @@ private:
     int32_t WaitProcessesExitAndKill(std::list<SimpleProcessInfo> &processInfos, const int64_t startTime,
         const std::string& reason, int32_t userId, sptr<AAFwk::IUserCallback> callback);
 
-    void DoAllProcessExitCallback(std::list<SimpleProcessInfo> &processInfos, int32_t userId,
-        sptr<AAFwk::IUserCallback> callback);
+    bool DoAllProcessExitCallback(std::list<SimpleProcessInfo> &processInfos, int32_t userId,
+        sptr<AAFwk::IUserCallback> callback, int64_t startTime);
 
     /**
      * SystemTimeMillisecond, Get system time.
