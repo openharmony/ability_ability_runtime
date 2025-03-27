@@ -18,6 +18,7 @@
 #include <want_params.h>
 
 #include "ability_transaction_callback_info.h"
+#include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_constant.h"
 #include "insight_intent_execute_result.h"
@@ -284,6 +285,11 @@ void JsInsightIntentExecutor::ReplyFailed(InsightIntentExecutorAsyncCallback* ca
     }
     AppExecFwk::InsightIntentExecuteResult errorResult{};
     errorResult.innerErr = innerErr;
+    AAFwk::EventInfo eventInfo;
+    eventInfo.errCode = innerErr;
+    eventInfo.errReason = "ReplyFailed";
+    AAFwk::EventReport::SendExecuteIntentEvent(
+        AAFwk::EventName::EXECUTE_INSIGHT_INTENT_ERROR, HiSysEventType::FAULT, eventInfo);
     callback->Call(errorResult);
     delete callback;
 }
