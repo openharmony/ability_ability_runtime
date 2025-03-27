@@ -12,30 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * @file
- * @kit AbilityKit
- */
 
 import { AbilityResult } from 'ability.abilityResult';
 import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
-// import ConnectOptions from '../ability/connectOptions';
-// import ExtensionContext from './ExtensionContext';
-// import type Want from '../@ohos.app.ability.Want';
-// import type StartOptions from '../@ohos.app.ability.StartOptions';
-// import type AtomicServiceOptions from '../@ohos.app.ability.AtomicServiceOptions';
-// import OpenLinkOptions from '../@ohos.app.ability.OpenLinkOptions';
-// import type ConfigurationConstant from '../@ohos.app.ability.ConfigurationConstant';
-// import type UIServiceProxy from './UIServiceProxy';
-// import type UIServiceExtensionConnectCallback from './UIServiceExtensionConnectCallback';
-//import hilog from './@ohos.hilog';
+import hilog from '@ohos.hilog';
 
-export class AsyncCallbackWrapper<T> {
-  myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
+export class AsyncCallbackContextWrapper<T> {
+  myFun_: AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
 
   constructor(myFun:AsyncCallback<T, void>){
-    console.log("AsyncCallbackWrapper");
     this.myFun_ = myFun;
   }
 
@@ -45,18 +31,18 @@ export class AsyncCallbackWrapper<T> {
 }
 
 export default class UIExtensionContext {
-  public nativeUIExtensionContext:long = 0;
-  public native  terminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
-  public native  terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
+  nativeUIExtensionContext: long = 0;
+  native terminateSelfSync(callback:AsyncCallbackContextWrapper<void>): void;
+  native terminateSelfWithResultSync(parameter: AbilityResult, callback: AsyncCallbackContextWrapper<void>): void;
 
   terminateSelf(callback:AsyncCallback<void>): void {
-    let myCall = new AsyncCallbackWrapper<void>(callback);
+    let myCall = new AsyncCallbackContextWrapper<void>(callback);
     launch this.terminateSelfSync(myCall);
   }
 
   terminateSelf(): Promise<void> {
-    let p = new Promise<void>((resolve: () => void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+    let p = new Promise<void>((resolve: () => void, reject:(err: BusinessError<void>) => void): void => {
+      let myCall = new AsyncCallbackContextWrapper<void>((err: BusinessError<void>) => {
         if (err.code == 0) {
           resolve();
         } else {
@@ -69,15 +55,15 @@ export default class UIExtensionContext {
   }
 
   terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<void>): void {
-    let myCall = new AsyncCallbackWrapper<void>(callback);
+    let myCall = new AsyncCallbackContextWrapper<void>(callback);
     launch this.terminateSelfWithResultSync(parameter, myCall);
   }
 
-  terminateSelfWithResult(parameter: AbilityResult): Promise<void>{
-    let p = new Promise<void>((resolve: ()=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+  terminateSelfWithResult(parameter: AbilityResult): Promise<void> {
+    let p = new Promise<void>((resolve: (data: undefined)=>void, reject:(err: BusinessError<void>) => void): void => {
+      let myCall = new AsyncCallbackContextWrapper<void>((err: BusinessError<void>) => {
         if (err.code == 0) {
-          resolve();
+          resolve(undefined);
         } else {
           reject(err);
         }

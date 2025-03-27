@@ -42,6 +42,7 @@ ohos_shared_library("ui_extension_ability_ani_kit") {
 
   sources = [
     "./src/sts_ui_extension.cpp",
+    "./src/sts_ui_extension_common.cpp",
     "./src/sts_ui_extension_content_session.cpp",
     "./src/sts_ui_extension_context.cpp",
   ]

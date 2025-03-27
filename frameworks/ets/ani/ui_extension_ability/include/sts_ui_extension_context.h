@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef OHOS_ABILITY_RUNTIME_STS_UI_EXTENSION_CONTEXT_H
 #define OHOS_ABILITY_RUNTIME_STS_UI_EXTENSION_CONTEXT_H
 
@@ -34,8 +33,6 @@ public:
     explicit StsUIExtensionContext(const std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext>& context)
         : context_(context) {}
     virtual ~StsUIExtensionContext() = default;
-    static bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
-    static ani_object WrapBusinessError(ani_env *env, ani_int code);
 protected:
     std::weak_ptr<OHOS::AbilityRuntime::UIExtensionContext> context_;
 };

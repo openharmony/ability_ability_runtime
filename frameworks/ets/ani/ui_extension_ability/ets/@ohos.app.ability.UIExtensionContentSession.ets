@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,54 +13,82 @@
  * limitations under the License.
  */
 
-// import type { AbilityResult } from './ability/abilityResult';
-// import type AbilityStartCallback from './application/AbilityStartCallback';
-// import type Want from './@ohos.app.ability.Want';
-// import type StartOptions from './@ohos.app.ability.StartOptions';
-//import type uiExtensionHost from './@ohos.uiExtensionHost';
-// import type uiExtension from './@ohos.arkui.uiExtension';
-//import type LocalStorage from './LocalStorage';
-import { BusinessError, AsyncCallback } from '@ohos.base';
+import { AbilityResult } from 'ability.abilityResult';
+import { AsyncCallback } from '@ohos.base';
+import { BusinessError } from '@ohos.base';
+import { LocalStorage } from '@ohos.arkui.component.CommonTsEtsApi';
+import hilog from '@ohos.hilog';
+
+export class AsyncCallbackSessionWrapper<T> {
+  myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
+
+  constructor(myFun:AsyncCallback<T, void>) {
+    this.myFun_ = myFun;
+  }
+
+  invoke(err: BusinessError<void>, data: T) : void {
+    this.myFun_(err, data);
+  }
+}
 
 export default class UIExtensionContentSession {
-  public nativeContextSession:long = 0;
-  //native sendData(data: Record<string, Object>): void;
-  //native loadContent(path: string, storage?: LocalStorage): void;
-  //public native setWindowBackgroundColor(color: string): void;
+  nativeContextSession:long = 0;
+  native nativeSendData(data: Record<string, Object>): void;
+  native loadContent(path: string, storage?: LocalStorage): void;
+  native setWindowBackgroundColor(color: string): void;
   //native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
-  native setReceiveDataCallbackSync(): void;
-  native terminateSelfSync(): void;
+  native setReceiveDataCallbackASync(): void;
+  native terminateSelfSync(callback:AsyncCallbackSessionWrapper<void>): void;
+  native terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackSessionWrapper<void>): void;
 
-  terminateSelf( callback: AsyncCallback<void>):void{
-    console.log("ability.finishTest terminateSelfSync start");
-    let p1 = taskpool.execute(():undefined => {this.terminateSelfSync();  return undefined});
-    console.log("ability.finishTest terminateSelfSync end");
-           p1.then((e :NullishType)=>{
-             console.log("ability.finishTest terminateSelfSync");
-             let resultCode: Int  = 1;
-             let r: BusinessError = { code: resultCode.intValue(), data: undefined };
-               callback(r, undefined);
-           }, (err:Object): void => {
-           });
-   }
-   terminateSelf():Promise<void>{
-     let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
-         let p1 = taskpool.execute(():undefined => {this.terminateSelfSync();  return undefined});
-         p1.then((e :NullishType)=>{
-           let PromiseLike = e as PromiseLike<void>;
-           resolve(PromiseLike);
-         }, (err:Object): void => {
-         });
-     });
-     return p;
-   }
+  sendData(data: Record<string, Object>): void {
+    this.nativeSendData(data);
+  }
 
-   setReceiveDataCallback(callback: (data: Record<string, Object>) => void): void{
-     let p1 = taskpool.execute(():undefined => {new UIExtensionContentSession().setReceiveDataCallbackSync();  return undefined});
-         p1.then((e :NullishType)=>{
+   setReceiveDataCallback(callback: (data: Record<string, Object>) => void): void {
+     let p1 = taskpool.execute(():undefined => {this.setReceiveDataCallbackASync(); return undefined});
+         p1.then((e: NullishType)=>{
             let result = e as Record<string, Object>;
               callback(result);
          }, (err:Object): void => {
          });
    }
+
+  terminateSelf(callback:AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackSessionWrapper<void>(callback);
+    launch this.terminateSelfSync(myCall);
+  }
+
+  terminateSelf(): Promise<void> {
+    let p = new Promise<void>((resolve: () => void, reject:(err: BusinessError<void>) => void): void => {
+      let myCall = new AsyncCallbackSessionWrapper<void>((err: BusinessError<void>) => {
+        if (err.code == 0) {
+          resolve();
+        } else {
+          reject(err);
+        }
+      });
+      launch this.terminateSelfSync(myCall);
+    });
+    return p;
+  }
+
+  terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackSessionWrapper<void>(callback);
+    launch this.terminateSelfWithResultSync(parameter, myCall);
+  }
+
+  terminateSelfWithResult(parameter: AbilityResult): Promise<void> {
+    let p = new Promise<void>((resolve: (data: undefined) => void, reject:(err: BusinessError<void>) => void): void => {
+      let myCall = new AsyncCallbackSessionWrapper<void>((err: BusinessError<void>) => {
+        if (err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      launch this.terminateSelfWithResultSync(parameter, myCall);
+    });
+    return p;
+  }
 }
