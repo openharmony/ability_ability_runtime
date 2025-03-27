@@ -678,6 +678,7 @@ ohos_shared_library("insight_intent_executor") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
+    "${ability_runtime_services_path}/common:event_report",
   ]
 
   external_deps = [
@@ -688,6 +689,7 @@ ohos_shared_library("insight_intent_executor") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
     "ipc:ipc_core",

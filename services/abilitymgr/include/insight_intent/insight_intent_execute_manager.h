@@ -19,6 +19,7 @@
 #include <map>
 #include "ability_connect_callback_stub.h"
 #include "cpp/mutex.h"
+#include "event_report.h"
 #include "insight_intent_execute_param.h"
 #include "insight_intent_execute_result.h"
 #include "iremote_object.h"
@@ -111,6 +112,7 @@ private:
     static int32_t IsValidCall(const Want &want);
 
     static int32_t CheckCallerPermission();
+    void SendIntentReport(EventInfo &eventInfo, int32_t errCode);
 };
 } // namespace AAFwk
 } // namespace OHOS
