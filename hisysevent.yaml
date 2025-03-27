@@ -127,6 +127,33 @@ DISCONNECT_SERVICE_ERROR:
   MODULE_NAME: {type: STRING, desc: module name}
   ABILITY_NAME: {type: STRING, desc: ability name}
 
+UI_EXTENSION_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, tag: ability, desc: ui extension error}
+  USER_ID: {type: INT32, desc: userId}
+  ERROR_CODE: {type: INT32, desc: error code}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  MODULE_NAME: {type: STRING, desc: module name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
+  CALLER_BUNDLE_NAME: {type: STRING, desc: caller bundle name}
+  CALLER_UID: {type: INT32, desc: caller app uid}
+  LIFE_CYCLE: {type: STRING, desc: life cycle}
+  APP_INDEX: {type: INT32, desc: app index}
+  ERROR_REASON: {type: STRING, desc: error reason}
+  PERSISTENT_ID: {type: INT32, desc: persistent id}
+
+UI_SERVICE_EXTENSION_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, tag: ability, desc: ui service extension error}
+  USER_ID: {type: INT32, desc: userId}
+  ERROR_CODE: {type: INT32, desc: error code}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  MODULE_NAME: {type: STRING, desc: module name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
+  CALLER_BUNDLE_NAME: {type: STRING, desc: caller bundle name}
+  CALLER_UID: {type: INT32, desc: caller app uid}
+  LIFE_CYCLE: {type: STRING, desc: life cycle}
+  APP_INDEX: {type: INT32, desc: app index}
+  ERROR_REASON: {type: STRING, desc: error reason}
+
 # ability behavior event
 
 START_ABILITY:
