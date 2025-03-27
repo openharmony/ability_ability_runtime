@@ -26,9 +26,9 @@ ani_object CreateStsAbilityDelegator(ani_env *aniEnv)
     TAG_LOGD(AAFwkTag::DELEGATOR, "CreateJsAbilityDelegator");
     ani_class abilityDelegator = nullptr;
     ani_status status = ANI_ERROR;
-    status = aniEnv->FindClass("L@ohos/ability/AbilityDelegator/AbilityDelegatorInner;", &abilityDelegator);
+    status = aniEnv->FindClass("Lapplication/AbilityDelegator/AbilityDelegatorInner;", &abilityDelegator);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegator failed status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegatorInner failed status : %{public}d", status);
         return {};
     }
     TAG_LOGD(AAFwkTag::DELEGATOR, "find AbilityDelegator success");
@@ -226,9 +226,9 @@ ani_object CreateStsAbilityDelegatorArguments(
     TAG_LOGD(AAFwkTag::DELEGATOR, "CreateJsAbilityDelegatorArguments");
     ani_class arguments = nullptr;
     ani_status status = ANI_ERROR;
-    status = aniEnv->FindClass("L@ohos/ability/abilityDelegatorArgs/AbilityDelegatorArgsInner;", &arguments);
+    status = aniEnv->FindClass("Lapplication/abilityDelegatorArgs/AbilityDelegatorArgsInner;", &arguments);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegatorArgs failed status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "find abilityDelegatorArgs failed status : %{public}d", status);
         return {};
     }
     TAG_LOGD(AAFwkTag::DELEGATOR, "find AbilityDelegatorArgs success");
