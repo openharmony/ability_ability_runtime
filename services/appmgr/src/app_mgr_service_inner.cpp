@@ -19,7 +19,6 @@
 #include <csignal>
 #include <cstdint>
 #include <mutex>
-#include <nlohmann/json.hpp>
 #include <queue>
 #include <securec.h>
 #include <sstream>
@@ -29,7 +28,6 @@
 #include "ability_manager_errors.h"
 #include "ability_window_configuration.h"
 #include "accesstoken_kit.h"
-#include "ams_configuration_parameter.h"
 #include "app_config_data_manager.h"
 #include "app_mem_info.h"
 #include "app_mgr_service.h"
@@ -216,8 +214,6 @@ constexpr const char* GPU_PROCESS_NAME = ":gpu";
 constexpr const char* GPU_PROCESS_TYPE = "gpu";
 constexpr const char* KILL_REASON_USER_REQUEST = "User Request";
 const std::string TOKEN_ID = "TOKEN_ID";
-const std::string CUSTOM_SANDBOX_KEY = "com.huawei.service.sandboxmode.custom";
-const std::string DEVELOPERMODE_STATE = "const.security.developermode.state";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
@@ -3750,7 +3746,7 @@ int32_t AppMgrServiceInner::CreateStartMsg(const CreateStartMsgParam &param, App
     SetAtomicServiceInfo(param.bundleType, startMsg);
     SetOverlayInfo(bundleInfo.name, userId, startMsg);
     SetAppInfo(bundleInfo, startMsg);
-    SetStartMsgCustomSandboxFlag(startMsg, userId);
+    SetStartMsgCustomSandboxFlag(startMsg, bundleInfo.applicationInfo.accessTokenId);
     GetKernelPermissions(bundleInfo.applicationInfo.accessTokenId, startMsg.jitPermissionsMap);
     TAG_LOGI(AAFwkTag::APPMGR, "apl: %{public}s, bundleName: %{public}s, startFlags: %{public}d, userId: %{public}d",
         startMsg.apl.c_str(), bundleInfo.name.c_str(), param.startFlags, userId);
@@ -3759,44 +3755,10 @@ int32_t AppMgrServiceInner::CreateStartMsg(const CreateStartMsgParam &param, App
     return ERR_OK;
 }
 
-void AppMgrServiceInner::SetStartMsgCustomSandboxFlag(AppSpawnStartMsg &startMsg, int32_t userId)
+void AppMgrServiceInner::SetStartMsgCustomSandboxFlag(AppSpawnStartMsg &startMsg, uint32_t accessTokenId)
 {
-    if (AAFwk::AmsConfigurationParameter::GetInstance().CustomSandbox() == 0 ||
-        !AAFwk::AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Not in PC mode or developer mode");
-        return;
-    }
-
-    if (remoteClientManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "remoteClientManager null");
-        return;
-    }
-    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
-    if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
-        return;
-    }
-
-    AppExecFwk::AppProvisionInfo appProvisionInfo;
-    if (bundleMgrHelper->GetAppProvisionInfo(startMsg.bundleName, userId, appProvisionInfo) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Failed to get app provision info");
-        return;
-    }
-    std::string jsonString = appProvisionInfo.appServiceCapabilities;
-    if (jsonString.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "JSON string is empty");
-        return;
-    }
-
-    nlohmann::json jsonData = nlohmann::json::parse(jsonString);
-    if (jsonData.is_discarded()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "failed to parse json string");
-        return;
-    }
-    if (jsonData.contains(CUSTOM_SANDBOX_KEY)) {
+    if (AAFwk::PermissionVerification::GetInstance()->VerifyCustomSandbox(accessTokenId)) {
         startMsg.isCustomSandboxFlag = true;
-    } else {
-        TAG_LOGD(AAFwkTag::APPMGR, "jsonData is not contains %{public}s", CUSTOM_SANDBOX_KEY.c_str());
     }
 }
 
