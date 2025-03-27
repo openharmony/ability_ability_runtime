@@ -500,5 +500,42 @@ HWTEST_F(AppMgrServiceInnerFourthTest, KillAppSelfWithInstanceKey_001, TestSize.
     EXPECT_EQ(ret, ERR_NO_INIT);
     TAG_LOGI(AAFwkTag::TEST, "KillAppSelfWithInstanceKey_001 end");
 }
+
+/**
+ * @tc.name: CreateAppRunningRecord_001
+ * @tc.Function: CreateAppRunningRecord
+ */
+HWTEST_F(AppMgrServiceInnerFourthTest, CreateAppRunningRecord_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CreateAppRunningRecord_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    BundleInfo bundleInfo;
+    std::string processName = "com.test.bundle";
+    auto record = appMgrServiceInner->CreateAppRunningRecord(appInfo, processName, bundleInfo);
+    EXPECT_EQ(record, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "CreateAppRunningRecord_001 end");
+}
+
+/**
+ * @tc.name: CreateAppRunningRecord_002
+ * @tc.Function: CreateAppRunningRecord
+ */
+HWTEST_F(AppMgrServiceInnerFourthTest, CreateAppRunningRecord_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CreateAppRunningRecord_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    BundleInfo bundleInfo;
+    std::string processName = "com.test.bundle";
+    auto record = appMgrServiceInner->CreateAppRunningRecord(appInfo, processName, bundleInfo);
+    EXPECT_NE(record, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "CreateAppRunningRecord_002 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS
