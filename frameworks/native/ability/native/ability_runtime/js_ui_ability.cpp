@@ -67,7 +67,9 @@ constexpr const char* SUPPORT_COLLABORATE_INDEX = "ohos.extra.param.key.supportC
 constexpr const char* COLLABORATE_KEY = "ohos.dms.collabToken";
 enum CollaborateResult {
     ACCEPT = 0,
-    REJECT,
+    REJECT = 1,
+    ON_COLLABORATE_NOT_IMPLEMENTED = 10,
+    ON_COLLABORATE_ERR = 11,
 };
 #endif
 constexpr const int32_t API12 = 12;
@@ -1217,7 +1219,7 @@ int32_t JsUIAbility::OnCollaborate(WantParams &wantParam)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "OnCollaborate: %{public}s", GetAbilityName().c_str());
-    int32_t ret = CollaborateResult::REJECT;
+    int32_t ret = CollaborateResult::ON_COLLABORATE_ERR;
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
 
@@ -1236,6 +1238,10 @@ int32_t JsUIAbility::OnCollaborate(WantParams &wantParam)
         jsWantParams,
     };
     auto result = CallObjectMethod("onCollaborate", argv, ArraySize(argv), true);
+    if (result == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "onCollaborate not implemented");
+        return CollaborateResult::ON_COLLABORATE_NOT_IMPLEMENTED;
+    }
     OHOS::AppExecFwk::UnwrapWantParams(env, jsWantParams, wantParam);
 
     if (!ConvertFromJsValue(env, result, ret)) {
