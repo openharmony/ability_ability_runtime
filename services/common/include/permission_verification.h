@@ -123,6 +123,8 @@ struct VerificationInfo {
 
     bool VerifyFusionAccessPermission() const;
 
+    bool VerifyCustomSandbox(uint32_t accessTokenId) const;
+
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);
 

@@ -37,7 +37,6 @@ ohos_fuzztest("AbilityStubPrepareTerminateAbilityFuzzTest") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "${ability_runtime_services_path}/abilitymgr:ams_configuration_parameter",
   ]
 
   external_deps = [
