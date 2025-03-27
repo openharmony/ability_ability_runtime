@@ -90,7 +90,7 @@ public:
      * @return execute error code
      */
     int AbilityWindowConfigTransactionDone(
-        const sptr<IRemoteObject> &token, const AppExecFwk::WindowConfig &windowConfig);
+        const sptr<IRemoteObject> &token, const WindowConfig &windowConfig);
 
     /**
      * attach ability thread ipc object.
