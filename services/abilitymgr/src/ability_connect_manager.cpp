@@ -1686,7 +1686,6 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
         if (DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId() == userId_) {
             RestartAbility(abilityRecord, userId_);
         }
-        PrintTimeOutLog(abilityRecord, AbilityManagerService::LOAD_TIMEOUT_MSG);
         return;
     }
     if (IsAbilityNeedKeepAlive(abilityRecord)) {
@@ -2424,13 +2423,6 @@ void AbilityConnectManager::HandleAbilityDiedTask(
     }
 
     std::string serviceKey = GetServiceKey(abilityRecord);
-    if (GetServiceRecordByElementName(serviceKey) == nullptr &&
-        (!IsCacheExtensionAbilityType(abilityRecord) ||
-        AbilityCacheManager::GetInstance().FindRecordByToken(abilityRecord->GetToken()) == nullptr)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "%{public}s ability not in service map or cache.", serviceKey.c_str());
-        return;
-    }
-
     bool isRemove = false;
     if (IsCacheExtensionAbilityType(abilityRecord) &&
         AbilityCacheManager::GetInstance().FindRecordByToken(abilityRecord->GetToken()) != nullptr) {
@@ -2446,13 +2438,15 @@ void AbilityConnectManager::HandleAbilityDiedTask(
         }
         isRemove = true;
     }
+    if (!isRemove) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "%{public}s ability not in service map or cache.", serviceKey.c_str());
+        return;
+    }
 
     if (IsAbilityNeedKeepAlive(abilityRecord)) {
         KeepAbilityAlive(abilityRecord, currentUserId);
     } else {
-        if (isRemove) {
-            HandleNotifyAssertFaultDialogDied(abilityRecord);
-        }
+        HandleNotifyAssertFaultDialogDied(abilityRecord);
     }
 }
 
@@ -2988,7 +2982,7 @@ void AbilityConnectManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord>
         .bundleName = ability->GetAbilityInfo().bundleName,
         .msg = msgContent
     };
-    if (!IsUIExtensionAbility(ability)) {
+    if (!IsUIExtensionAbility(ability) && !ability->IsSceneBoard()) {
         info.needKillProcess = false;
     }
     AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info);
