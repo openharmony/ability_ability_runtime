@@ -156,6 +156,8 @@ constexpr int64_t MICROSECONDS = 1000000;
 constexpr int KILL_PROCESS_TIMEOUT_MICRO_SECONDS = 1000;
 // Kill process delay time setting
 constexpr int KILL_PROCESS_DELAYTIME_MICRO_SECONDS = 200;
+// kill process for logout user time out setting
+constexpr int LOGOUT_USER_TIMEOUT_MILLISION_SECONDS = 5000;
 // delay register focus listener to wms
 constexpr int REGISTER_FOCUS_DELAY = 5000;
 constexpr int REGISTER_VISIBILITY_DELAY = 5000;
@@ -1660,21 +1662,23 @@ int32_t AppMgrServiceInner::WaitProcessesExitAndKill(std::list<pid_t> &pids, con
     return result;
 }
 
-void AppMgrServiceInner::DoAllProcessExitCallback(std::list<SimpleProcessInfo> &processInfos,
-    int32_t userId, sptr<AAFwk::IUserCallback> callback)
+bool AppMgrServiceInner::DoAllProcessExitCallback(std::list<SimpleProcessInfo> &processInfos,
+    int32_t userId, sptr<AAFwk::IUserCallback> callback, int64_t startTime)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "DoAllProcessExitCallback call");
     if (callback == nullptr) {
-        return;
+        TAG_LOGE(AAFwkTag::APPMGR, "callback nullptr");
+        return false;
     }
-    if (ProcessUtil::IsAllProcessKilled(processInfos)) {
-        TAG_LOGI(AAFwkTag::APPMGR, "all process exit");
-        callback->OnLogoutUserDone(userId, ERR_OK);
-        return;
-    }
-    auto checkProcessExistCallback = [processInfos, userId, callback] () mutable {
+    auto checkProcessExistCallback = [processInfos, userId, callback, startTime,
+        appMgrInner = shared_from_this()] () mutable {
         TAG_LOGI(AAFwkTag::APPMGR, "checkProcessExistCallback call");
         if (callback == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "callback nullptr");
+            return;
+        }
+        if (appMgrInner == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "appMgrInner nullptr");
+            callback->OnLogoutUserDone(userId, AAFwk::ERR_LOGOUT_USER_APP_MANAGER_NULL);
             return;
         }
         if (ProcessUtil::IsAllProcessKilled(processInfos)) {
@@ -1682,13 +1686,22 @@ void AppMgrServiceInner::DoAllProcessExitCallback(std::list<SimpleProcessInfo> &
             callback->OnLogoutUserDone(userId, ERR_OK);
             return;
         }
-        TAG_LOGI(AAFwkTag::APPMGR, "not all process exit");
-        callback->OnLogoutUserDone(userId, AAFwk::KILL_PROCESS_FAILED);
+        int64_t currentTime = appMgrInner->SystemTimeMillisecond();
+        if (currentTime - startTime > LOGOUT_USER_TIMEOUT_MILLISION_SECONDS) {
+            TAG_LOGE(AAFwkTag::APPMGR, "kill process timeout");
+            callback->OnLogoutUserDone(userId, AAFwk::ERR_LOGOUT_USER_KILL_PROCESS_TIMEOUT);
+            return;
+        }
+        appMgrInner->DoAllProcessExitCallback(processInfos, userId, callback, startTime);
     };
-    if (taskHandler_) {
-        taskHandler_->SubmitTaskJust(checkProcessExistCallback, "DelayCheckProcessExit",
-            AMSEventHandler::DELAY_CHECK_ALL_PROCESSES_EXITED);
+    if (taskHandler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ nullptr");
+        callback->OnLogoutUserDone(userId, AAFwk::ERR_LOGOUT_USER_TASK_HANDLE_NULL);
+        return false;
     }
+    taskHandler_->SubmitTaskJust(checkProcessExistCallback, "DelayCheckProcessExit",
+        AMSEventHandler::DELAY_CHECK_ALL_PROCESSES_EXITED);
+    return true;
 }
 
 int32_t AppMgrServiceInner::WaitProcessesExitAndKill(std::list<SimpleProcessInfo> &processInfos,
@@ -1710,7 +1723,7 @@ int32_t AppMgrServiceInner::WaitProcessesExitAndKill(std::list<SimpleProcessInfo
             result = singleRet;
         }
     }
-    DoAllProcessExitCallback(processInfos, userId, callback);
+    DoAllProcessExitCallback(processInfos, userId, callback, startTime);
     return result;
 }
 
