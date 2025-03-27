@@ -399,13 +399,13 @@ int MissionListManager::GetTargetMission(const AbilityRequest &abilityRequest, s
     if (targetAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped.");
         targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
-        return ERR_UI_ABILITY_IS_STARTING;
+        return ERR_OK;
     } else {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is not FOREGROUND  or BACKGROUND");
         targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
         if (targetAbilityRecord->IsLoading()) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "ability: %{public}s is loading", abilityRequest.abilityInfo.name.c_str());
-            return ERR_UI_ABILITY_IS_STARTING;
+            return ERR_OK;
         }
     }
 
