@@ -34,7 +34,7 @@ bool HiddenStartObserverProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-bool HiddenStartObserverProxy::IsHiddenStart(int32_t uid)
+bool HiddenStartObserverProxy::IsHiddenStart(int32_t pid)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -43,7 +43,7 @@ bool HiddenStartObserverProxy::IsHiddenStart(int32_t uid)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "WriteInterfaceToken failed");
         return false;
     }
-    data.WriteInt32(uid);
+    data.WriteInt32(pid);
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IHiddenStartObserver::Message::TRANSACT_ON_IS_HIDDEN_START),
         data, reply, option);

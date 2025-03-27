@@ -3022,7 +3022,7 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
 
     do {
-        if (HiddenStartObserverManager::GetInstance().IsHiddenStart(abilityRecord->GetApplicationInfo().uid)) {
+        if (HiddenStartObserverManager::GetInstance().IsHiddenStart(abilityRecord->GetPid())) {
             if (!IsCallerInStatusBar(abilityRecord->GetInstanceKey())) {
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "no status bar while detaching.");
                 break;
