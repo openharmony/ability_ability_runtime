@@ -29,10 +29,10 @@ public:
     /**
      * IsHiddenStart, return if the given app is started hidden.
      *
-     * @param uid Uid of the given app.
+     * @param pid Pid of the given app's process.
      * @return if the given app is started hidden
      */
-    virtual bool IsHiddenStart(int32_t uid) = 0;
+    virtual bool IsHiddenStart(int32_t pid) = 0;
 
     enum class Message {
         TRANSACT_ON_IS_HIDDEN_START = 0,
