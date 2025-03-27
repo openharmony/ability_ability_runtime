@@ -61,6 +61,9 @@ constexpr const char *EVENT_KEY_SUB_REASON = "SUB_REASON";
 constexpr const char *INVALID_EVENT_NAME = "INVALIDEVENTNAME";
 constexpr const char *EVENT_KEY_APP_INDEX = "APP_INDEX";
 constexpr const char *EVENT_KEY_LIFE_CYCLE_STATE = "LIFE_CYCLE_STATE";
+constexpr const char *EVENT_KEY_ERR_REASON = "ERR_REASON";
+constexpr const char *EVENT_KEY_LIFE_CYCLE = "LIFE_CYCLE";
+constexpr const char *EVENT_KEY_PERSISTENT_ID = "PERSISTENT_ID";
 
 constexpr const int32_t DEFAULT_EXTENSION_TYPE = -1;
 }
@@ -239,6 +242,43 @@ void EventReport::LogStartAbilityByAppLinking(const std::string &name, HiSysEven
     }
 }
 
+void EventReport::LogUIExtensionErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+{
+    HiSysEventWrite(
+        HiSysEvent::Domain::AAFWK,
+        name,
+        type,
+        EVENT_KEY_USERID, eventInfo.userId,
+        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
+        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
+        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
+        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
+        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
+        EVENT_KEY_ERR_REASON, eventInfo.errReason,
+        EVENT_KEY_LIFE_CYCLE, eventInfo.lifeCycle,
+        EVENT_KEY_CALLER_UID, eventInfo.callerUid,
+        EVENT_KEY_PERSISTENT_ID, eventInfo.persistentId);
+}
+
+void EventReport::LogUIServiceExtErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+{
+    HiSysEventWrite(
+        HiSysEvent::Domain::AAFWK,
+        name,
+        type,
+        EVENT_KEY_USERID, eventInfo.userId,
+        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
+        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
+        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
+        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
+        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
+        EVENT_KEY_ERR_REASON, eventInfo.errReason,
+        EVENT_KEY_CALLER_UID, eventInfo.callerUid,
+        EVENT_KEY_LIFE_CYCLE, eventInfo.lifeCycle);
+}
+
 void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -370,6 +410,12 @@ void EventReport::SendExtensionEvent(const EventName &eventName, HiSysEventType 
             break;
         case EventName::DISCONNECT_SERVICE_ERROR:
             HiSysEventWrite(HiSysEvent::Domain::AAFWK, name, type, EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+            break;
+        case EventName::UI_EXTENSION_ERROR:
+            LogUIExtensionErrorEvent(name, type, eventInfo);
+            break;
+        case EventName::UI_SERVICE_EXTENSION_ERROR:
+            LogUIServiceExtErrorEvent(name, type, eventInfo);
             break;
         default:
             break;
@@ -694,6 +740,7 @@ std::string EventReport::ConvertEventName(const EventName &eventName)
         // fault event
         "START_ABILITY_ERROR", "TERMINATE_ABILITY_ERROR", "START_EXTENSION_ERROR",
         "STOP_EXTENSION_ERROR", "CONNECT_SERVICE_ERROR", "DISCONNECT_SERVICE_ERROR",
+        "UI_EXTENSION_ERROR", "UI_SERVICE_EXTENSION_ERROR",
 
         // ability behavior event
         "START_ABILITY", "TERMINATE_ABILITY", "CLOSE_ABILITY",
