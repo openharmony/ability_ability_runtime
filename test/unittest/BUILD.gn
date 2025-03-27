@@ -314,7 +314,7 @@ ohos_source_set("abilityms_test_source") {
 group("unittest") {
   testonly = true
 
-  deps = []
+  deps = [ "runtime_test:stsunittest" ]
   if (!use_libfuzzer) {
     deps += []
 
