@@ -47,7 +47,7 @@ export default class UIAbilityContext {
   public native nativeTerminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
   public native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
   public native nativeReportDrawnCompletedSync(callback:AsyncCallbackWrapper<void>): void;
-  public native nativeStartAbilityByTypeSync(type: string, wantParam: string, startCallback: AbilityStartCallback, callback:AsyncCallbackWrapper<void>): void;
+  public native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): int;
 
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -169,22 +169,32 @@ export default class UIAbilityContext {
   }
 
   startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback, callback: AsyncCallback<void>): void {
-    let jsonStr = ""; //convert form value;
-    let myCall = new AsyncCallbackWrapper<void>(callback);
-    launch this.nativeStartAbilityByTypeSync(type, jsonStr, startCallback, myCall);
+    let p1 = taskpool.execute((): int => {
+      return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
+    });
+    p1.then((e: NullishType) => {
+      let retError = new BusinessError<void>();
+      let resultCode: int = e as int;
+      retError.code = resultCode;
+      callback(retError, undefined);
+    });
   }
  
   startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): Promise<void> {
-    let p = new Promise<void>((resolve: ()=>void, reject:(err: BusinessError)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError)=>{
-        if (err.code == 0) {
-          resolve();
+    let p = new Promise<void>((resolve: (v: undefined) => void, reject: (error: BusinessError<void>) => void): void => {
+      let p1 = taskpool.execute((): int => {
+        return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
+      });
+      p1.then((e: NullishType) => {
+        let retError = new BusinessError<void>();
+        let resultCode: int = e as int;
+        if (resultCode === 0) {
+          resolve(undefined);
         } else {
-          reject(err);
+          retError.code = resultCode;
+          reject(retError);
         }
       });
-      let jsonStr = ""; //convert form value;
-      launch this.nativeStartAbilityByTypeSync(type, jsonStr, startCallback, myCall);
     });
     return p;
   }

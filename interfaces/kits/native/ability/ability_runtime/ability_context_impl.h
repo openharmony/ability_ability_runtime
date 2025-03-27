@@ -317,6 +317,10 @@ private:
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);
     sptr<IRemoteObject> GetSessionToken();
     void SetWindowRectangleParams(AAFwk::Want &want);
+    bool IsStsAbility(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
+    AAFwk::Want UpdateWantAndParams(const std::string &type, AAFwk::WantParams &wantParams);
+    void SetUIContentAndSessionId(const std::shared_ptr<JsUIExtensionCallback> uiExtensionCallbacks, bool isSts,
+        Ace::UIContent *uiContent, int32_t sessionId);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
