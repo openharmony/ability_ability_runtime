@@ -3757,6 +3757,11 @@ int32_t AppMgrServiceInner::CreateStartMsg(const CreateStartMsgParam &param, App
 
 void AppMgrServiceInner::SetStartMsgCustomSandboxFlag(AppSpawnStartMsg &startMsg, uint32_t accessTokenId)
 {
+    if (!AAFwk::AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not supported device");
+        return;
+    }
+
     if (AAFwk::PermissionVerification::GetInstance()->VerifyCustomSandbox(accessTokenId)) {
         startMsg.isCustomSandboxFlag = true;
     }
