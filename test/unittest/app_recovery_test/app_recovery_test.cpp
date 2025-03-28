@@ -33,6 +33,7 @@
 #define private public
 #include "context/application_context.h"
 
+using FreezeFunction = std::function<void()>;
 using namespace testing::ext;
 namespace OHOS {
 namespace AppExecFwk {
@@ -756,6 +757,207 @@ HWTEST_F(AppRecoveryUnitTest, ClearPageStack_001, TestSize.Level1)
     AbilityRuntime::ApplicationContext::GetInstance()->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     AppRecovery::GetInstance().ClearPageStack("ClearPageStack_001");
     EXPECT_NE(AbilityRuntime::Context::GetApplicationContext(), nullptr);
+}
+
+/**
+ * @tc.name:  AddAbility_001
+ * @tc.desc:  AddAbility testcase.
+ */
+HWTEST_F(AppRecoveryUnitTest, AddAbility_005, TestSize.Level1)
+{
+    bool ret = AppRecovery::GetInstance().AddAbility(nullptr, abilityInfo_, nullptr);
+    EXPECT_FALSE(ret);
+
+    ret = AppRecovery::GetInstance().AddAbility(ability_, nullptr, nullptr);
+    EXPECT_FALSE(ret);
+
+    ret = AppRecovery::GetInstance().AddAbility(nullptr, nullptr, nullptr);
+    EXPECT_FALSE(ret);
+
+    AppRecovery::GetInstance().isEnable_ = true;
+    auto abilityRecovery = std::make_shared<AppExecFwk::AbilityRecovery>();
+    AppRecovery::GetInstance().abilityRecoverys_.push_back(abilityRecovery);
+    EXPECT_FALSE(AppRecovery::GetInstance().abilityRecoverys_.empty());
+    abilityInfo_->recoverable = false;
+    ret = AppRecovery::GetInstance().AddAbility(nullptr, nullptr, nullptr);
+    EXPECT_FALSE(ret);
+
+    AppRecovery::GetInstance().abilityRecoverys_.clear();
+    ret = AppRecovery::GetInstance().AddAbility(ability_, abilityInfo_, nullptr);
+    EXPECT_TRUE(ret);
+
+    AppRecovery::GetInstance().abilityRecoverys_.clear();
+    abilityInfo_->recoverable = true;
+    ret = AppRecovery::GetInstance().AddAbility(ability_, abilityInfo_, nullptr);
+    EXPECT_TRUE(ret);
+
+    AppRecovery::GetInstance().abilityRecoverys_.clear();
+    AppRecovery::GetInstance().isEnable_ = false;
+    abilityInfo_->recoverable = false;
+    ret = AppRecovery::GetInstance().AddAbility(ability_, abilityInfo_, nullptr);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name:  RemoveAbility_004
+ * @tc.desc:  RemoveAbility_004 testcase.
+ */
+HWTEST_F(AppRecoveryUnitTest, RemoveAbility_004, TestSize.Level1)
+{
+    bool ret = AppRecovery::GetInstance().RemoveAbility(nullptr);
+    EXPECT_EQ(ret, false);
+
+    AppRecovery::GetInstance().abilityRecoverys_.clear();
+    ret = AppRecovery::GetInstance().RemoveAbility(token_);
+    EXPECT_EQ(ret, true);
+
+    auto abilityRecovery = std::make_shared<AppExecFwk::AbilityRecovery>();
+    abilityRecovery->token_ = token_;
+    AppRecovery::GetInstance().abilityRecoverys_.push_back(abilityRecovery);
+    EXPECT_FALSE(AppRecovery::GetInstance().abilityRecoverys_.empty());
+    EXPECT_EQ(abilityRecovery->GetToken(), token_);
+    ret = AppRecovery::GetInstance().RemoveAbility(token_);
+    EXPECT_TRUE(AppRecovery::GetInstance().abilityRecoverys_.empty());
+    EXPECT_EQ(ret, true); 
+}
+
+/**
+ * @tc.name:  SetFreezeCallback_001
+ * @tc.desc:  SetFreezeCallback_001 testcase.
+ */
+HWTEST_F(AppRecoveryUnitTest, SetFreezeCallback_001, TestSize.Level1)
+{
+    auto callBack1 = []() {};
+    FreezeFunction freezeCallback1 = callBack1;
+    AppRecovery::GetInstance().freezeCallback = freezeCallback1;
+    auto callBack2 = []() {};
+    FreezeFunction freezeCallback2 = callBack2;
+    AppRecovery::GetInstance().SetFreezeCallback(freezeCallback2);
+    EXPECT_NE(&AppRecovery::GetInstance().freezeCallback, &freezeCallback2);
+
+    AppRecovery::GetInstance().freezeCallback = nullptr;
+    AppRecovery::GetInstance().SetFreezeCallback(freezeCallback2);
+    EXPECT_NE(&AppRecovery::GetInstance().freezeCallback, nullptr);
+}
+
+/**
+ * @tc.name:  IsNeedSaveAppState_001
+ * @tc.desc:  IsNeedSaveAppState_001 testcase.
+ */
+HWTEST_F(AppRecoveryUnitTest, IsNeedSaveAppState_001, TestSize.Level1)
+{
+    StateReason reason1 { LIFECYCLE };
+    AppRecovery::GetInstance().isEnable_ = false;
+    bool ret = AppRecovery::GetInstance().IsNeedSaveAppState(reason1);
+    EXPECT_EQ(ret, false);
+
+    AppRecovery::GetInstance().isEnable_ = true;
+    ret = AppRecovery::GetInstance().IsNeedSaveAppState(reason1);
+    EXPECT_EQ(ret, false);
+
+    StateReason reason2 { DEVELOPER_REQUEST };
+    ret = AppRecovery::GetInstance().IsNeedSaveAppState(reason2);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name:  ScheduleRecoverApp_007
+ * @tc.desc:  ScheduleRecoverApp_007 testcase.
+ */
+HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_007, TestSize.Level1)
+{
+    StateReason reason1 { DEVELOPER_REQUEST };
+    AppRecovery::GetInstance().isEnable_ = false;
+    bool ret = AppRecovery::GetInstance().ScheduleRecoverApp(reason1);
+    EXPECT_EQ(ret, false);
+
+    AppRecovery::GetInstance().isEnable_ = true;
+    AppRecovery::GetInstance().restartFlag_ = RestartFlag::NO_RESTART;
+    ret = AppRecovery::GetInstance().ScheduleRecoverApp(reason1);
+    EXPECT_EQ(ret, false);
+
+    AppRecovery::GetInstance().restartFlag_ = RestartFlag::ALWAYS_RESTART;
+    ret = AppRecovery::GetInstance().ScheduleRecoverApp(reason1);
+    EXPECT_EQ(ret, false);
+
+    auto abilityRecovery = std::make_shared<AppExecFwk::AbilityRecovery>();
+    AppRecovery::GetInstance().abilityRecoverys_.push_back(abilityRecovery);
+    ret = AppRecovery::GetInstance().ScheduleRecoverApp(reason1);
+    EXPECT_EQ(ret, true);
+
+    AppRecovery::GetInstance().mainHandler_.reset();
+    ret = AppRecovery::GetInstance().ScheduleRecoverApp(reason1);
+    EXPECT_EQ(ret, false);
+
+    StateReason reason2 { APP_FREEZE };
+    ret = AppRecovery::GetInstance().ScheduleRecoverApp(reason2);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name:  DoRecoverApp_002
+ * @tc.desc:  DoRecoverApp_002 testcase.
+ */
+HWTEST_F(AppRecoveryUnitTest, DoRecoverApp_002, TestSize.Level1)
+{
+    StateReason reason { DEVELOPER_REQUEST };
+    AppRecovery::GetInstance().abilityRecoverys_.clear();
+    AppRecovery::GetInstance().DoRecoverApp(reason);
+
+    AppRecovery::GetInstance().want_ = std::make_shared<AAFwk::Want>();
+
+    auto abilityRecovery1 = std::make_shared<AppExecFwk::AbilityRecovery>();
+    auto ability = std::make_shared<AbilityRuntime::UIAbility>();
+    ability->abilityLifecycleExecutor_ =
+        std::make_shared<AppExecFwk::AbilityLifecycleExecutor>();
+    ability->abilityLifecycleExecutor_->state_ =
+        AbilityLifecycleExecutor::LifecycleState::FOREGROUND_NEW;
+    abilityRecovery1->ability_ = ability;
+            
+    AppRecovery::GetInstance().abilityRecoverys_.push_back(abilityRecovery1);
+    AppRecovery::GetInstance().DoRecoverApp(reason);
+
+    std::shared_ptr<AppExecFwk::AbilityRecovery> abilityRecovery2 = abilityRecovery1;
+    AppRecovery::GetInstance().abilityRecoverys_.push_back(abilityRecovery2);
+    AppRecovery::GetInstance().DoRecoverApp(reason);
+    EXPECT_EQ(AppRecovery::GetInstance().abilityRecoverys_.size(), 2);
+}
+
+/**
+ * @tc.name:  DoSaveAppState_001
+ * @tc.desc:  DoSaveAppState_001 testcase.
+ */
+HWTEST_F(AppRecoveryUnitTest, DoSaveAppState_001, TestSize.Level1)
+{
+    StateReason reason { DEVELOPER_REQUEST };
+    int value = 0;
+    int *ptr = &value;
+    uintptr_t ability = reinterpret_cast<uintptr_t>(ptr);
+    AppRecovery::GetInstance().DoSaveAppState(reason, ability);
+
+    auto abilityRecory = std::make_shared<AppExecFwk::AbilityRecovery>();
+    abilityRecory->jsAbilityPtr_ = ability;
+    AppRecovery::GetInstance().abilityRecoverys_.push_back(abilityRecory);
+    AppRecovery::GetInstance().DoSaveAppState(reason, ability);
+    EXPECT_FALSE(AppRecovery::GetInstance().abilityRecoverys_.empty());
+}
+
+/**
+ * @tc.name:  PersistAppState_004
+ * @tc.desc:  Test PersistAppState when abilityRecoverys is not empty.
+ * @tc.type: FUNC
+ * @tc.require: I5Z7LE
+ */
+HWTEST_F(AppRecoveryUnitTest, PersistAppState_004, TestSize.Level1)
+{
+    auto abilityRecovery = std::make_shared<AppExecFwk::AbilityRecovery>();
+    AppRecovery::GetInstance().abilityRecoverys_.push_back(abilityRecovery);
+    bool ret = AppRecovery::GetInstance().PersistAppState();
+    EXPECT_EQ(ret, false);
+
+    AppRecovery::GetInstance().saveMode_ = SaveModeFlag::SAVE_WITH_FILE;
+    ret = AppRecovery::GetInstance().PersistAppState();
+    EXPECT_EQ(ret, true);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
