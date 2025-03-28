@@ -21,8 +21,7 @@ namespace OHOS {
 namespace AppExecFwk {
 #define SETTER_METHOD_NAME(property) "<set>" #property
 
-ani_int GetIntOrUndefined(ani_env *env, ani_object param, const char *name);
-double GetDoubleOrUndefined(ani_env *env, ani_object param, const char *name);
+bool GetDoubleOrUndefined(ani_env *env, ani_object param, const char *name, ani_double &value);
 bool GetBoolOrUndefined(ani_env *env, ani_object param, const char *name);
 bool GetStringOrUndefined(ani_env *env, ani_object param, const char *name, std::string &res);
 bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value);
