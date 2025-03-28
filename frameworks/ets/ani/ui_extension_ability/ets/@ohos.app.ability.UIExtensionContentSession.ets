@@ -17,19 +17,8 @@ import { AbilityResult } from 'ability.abilityResult';
 import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import { LocalStorage } from '@ohos.arkui.component.CommonTsEtsApi';
+import { AsyncCallbackCommonWrapper } from './UIExtensionCommon';
 import hilog from '@ohos.hilog';
-
-export class AsyncCallbackSessionWrapper<T> {
-  myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
-
-  constructor(myFun:AsyncCallback<T, void>) {
-    this.myFun_ = myFun;
-  }
-
-  invoke(err: BusinessError<void>, data: T) : void {
-    this.myFun_(err, data);
-  }
-}
 
 export default class UIExtensionContentSession {
   nativeContextSession:long = 0;
@@ -38,8 +27,8 @@ export default class UIExtensionContentSession {
   native setWindowBackgroundColor(color: string): void;
   //native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
   native setReceiveDataCallbackASync(): void;
-  native terminateSelfSync(callback:AsyncCallbackSessionWrapper<void>): void;
-  native terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackSessionWrapper<void>): void;
+  native terminateSelfSync(callback:AsyncCallbackCommonWrapper<void>): void;
+  native terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackCommonWrapper<void>): void;
 
   sendData(data: Record<string, Object>): void {
     this.nativeSendData(data);
@@ -55,15 +44,15 @@ export default class UIExtensionContentSession {
    }
 
   terminateSelf(callback:AsyncCallback<void>): void {
-    let myCall = new AsyncCallbackSessionWrapper<void>(callback);
+    let myCall = new AsyncCallbackCommonWrapper<void>(callback);
     launch this.terminateSelfSync(myCall);
   }
 
   terminateSelf(): Promise<void> {
-    let p = new Promise<void>((resolve: () => void, reject:(err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackSessionWrapper<void>((err: BusinessError<void>) => {
+    let p = new Promise<void>((resolve: (data: undefined) => void, reject:(err: BusinessError<void>) => void): void => {
+      let myCall = new AsyncCallbackCommonWrapper<void>((err: BusinessError<void>) => {
         if (err.code == 0) {
-          resolve();
+          resolve(undefined);
         } else {
           reject(err);
         }
@@ -74,13 +63,13 @@ export default class UIExtensionContentSession {
   }
 
   terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<void>): void {
-    let myCall = new AsyncCallbackSessionWrapper<void>(callback);
+    let myCall = new AsyncCallbackCommonWrapper<void>(callback);
     launch this.terminateSelfWithResultSync(parameter, myCall);
   }
 
   terminateSelfWithResult(parameter: AbilityResult): Promise<void> {
     let p = new Promise<void>((resolve: (data: undefined) => void, reject:(err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackSessionWrapper<void>((err: BusinessError<void>) => {
+      let myCall = new AsyncCallbackCommonWrapper<void>((err: BusinessError<void>) => {
         if (err.code == 0) {
           resolve(undefined);
         } else {

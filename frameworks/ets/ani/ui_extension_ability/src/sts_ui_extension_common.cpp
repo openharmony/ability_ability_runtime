@@ -20,10 +20,8 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-static constexpr char UISESSION_CLASS_NAME[] =
-    "L@ohos/app/ability/UIExtensionContentSession/AsyncCallbackSessionWrapper;";
-static constexpr char UICONTEXT_CLASS_NAME[] =
-    "Lapplication/UIExtensionContext/AsyncCallbackContextWrapper;";
+static constexpr char UIEXTENSION_CLASS_NAME[] =
+    "LUIExtensionCommon/AsyncCallbackCommonWrapper;";
 
 ani_object StsUIExtensionCommon::WrapBusinessError(ani_env *env, ani_int code)
 {
@@ -57,15 +55,12 @@ ani_object StsUIExtensionCommon::WrapBusinessError(ani_env *env, ani_int code)
     return obj;
 }
 
-bool StsUIExtensionCommon::AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result,
-    bool isSession)
+bool StsUIExtensionCommon::AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result)
 {
     ani_status status = ANI_ERROR;
     ani_class clsCall = nullptr;
 
-    auto className = (isSession == true) ? UISESSION_CLASS_NAME : UICONTEXT_CLASS_NAME;
-
-    if ((status = env->FindClass(className, &clsCall)) != ANI_OK) {
+    if ((status = env->FindClass(UIEXTENSION_CLASS_NAME, &clsCall)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
         return false;
     }
