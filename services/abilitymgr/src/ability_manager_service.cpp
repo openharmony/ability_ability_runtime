@@ -12898,9 +12898,9 @@ int32_t AbilityManagerService::PreStartInner(const FreeInstallInfo& taskInfo)
 
     AbilityRequest abilityRequest = {
         .requestCode = taskInfo.requestCode,
-        .want = want,
         .callerToken = callerToken,
-        .startSetting = nullptr
+        .startSetting = nullptr,
+        .want = want
     };
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "do not start as caller, UpdateCallerInfo");
