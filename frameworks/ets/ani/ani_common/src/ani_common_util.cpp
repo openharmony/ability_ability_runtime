@@ -23,32 +23,6 @@
 namespace OHOS {
 namespace AppExecFwk {
 
-int GetIntOrUndefined(ani_env *env, ani_object param, const char *name)
-{
-    ani_ref obj = nullptr;
-    ani_boolean isUndefined = true;
-    ani_int res = 0;
-    ani_status status = ANI_ERROR;
-
-    if ((status = env->Object_GetFieldByName_Ref(param, name, &obj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return res;
-    }
-    if ((status = env->Reference_IsUndefined(obj, &isUndefined)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return res;
-    }
-    if (isUndefined){
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s : undefined", name);
-        return res;
-    } 
-    if ((status = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(obj), "intValue", nullptr, &res)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return res;
-    }
-    return res;
-}
-
 bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value)
 {
     ani_int res;
@@ -64,30 +38,30 @@ bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value)
     return true;
 }
 
-double GetDoubleOrUndefined(ani_env *env, ani_object param, const char *name)
+bool GetDoubleOrUndefined(ani_env *env, ani_object param, const char *name, ani_double &value)
 {
     ani_ref obj = nullptr;
     ani_boolean isUndefined = true;
     ani_status status = ANI_ERROR;
-    ani_double res = 0.0;
 
     if ((status = env->Object_GetFieldByName_Ref(param, name, &obj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return res;
+        return false;
     }
     if ((status = env->Reference_IsUndefined(obj, &isUndefined)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return res;
+        return false;
     }
     if (isUndefined){
         TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s : undefined", name);
-        return res;
+        return false;
     } 
-    if ((status = env->Object_CallMethodByName_Double(reinterpret_cast<ani_object>(obj), "doubleValue", nullptr, &res)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Double(
+        reinterpret_cast<ani_object>(obj), "doubleValue", nullptr, &value)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return res;
+        return false;
     }
-    return res;
+    return true;
 }
 
 bool GetBoolOrUndefined(ani_env *env, ani_object param, const char *name)

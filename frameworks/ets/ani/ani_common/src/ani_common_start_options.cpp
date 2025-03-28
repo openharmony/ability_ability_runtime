@@ -33,8 +33,10 @@ bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &sta
         TAG_LOGE(AAFwkTag::JSNAPI, "null env");
         return false;
     }
-    ani_int displayId = GetIntOrUndefined(env, param, "displayId");
-    startOptions.SetDisplayID(displayId);
+    ani_double displayId = 0.0;
+    if (GetDoubleOrUndefined(env, param, "displayId", displayId)) {
+        startOptions.SetDisplayID(static_cast<int>(displayId));
+    }
     return true;
 }
 }  // namespace AppExecFwk
