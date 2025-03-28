@@ -590,6 +590,8 @@ Reason AbilityManagerShellCommand::CovertExitReason(std::string& reasonStr)
         return Reason::REASON_CPP_CRASH;
     } else if (reasonStr.compare("JS_ERROR") == 0) {
         return Reason::REASON_JS_ERROR;
+    } else if (reasonStr.compare("STS_ERROR") == 0) {
+        return Reason::REASON_STS_ERROR;
     } else if (reasonStr.compare("APP_FREEZE") == 0) {
         return Reason::REASON_APP_FREEZE;
     } else if (reasonStr.compare("PERFORMANCE_CONTROL") == 0) {
@@ -2079,6 +2081,8 @@ Reason CovertExitReason(std::string &cmd)
         return Reason::REASON_CPP_CRASH;
     } else if (cmd.compare("JS_ERROR") == 0) {
         return Reason::REASON_JS_ERROR;
+    } else if (reasonStr.compare("STS_ERROR") == 0) {
+        return Reason::REASON_STS_ERROR;
     } else if (cmd.compare("ABILITY_NOT_RESPONDING") == 0) {
         return Reason::REASON_APP_FREEZE;
     } else if (cmd.compare("APP_FREEZE") == 0) {
@@ -2188,6 +2192,8 @@ FaultDataType CovertFaultType(std::string &cmd)
         return FaultDataType::CPP_CRASH;
     } else if (cmd.compare("JS_ERROR") == 0) {
         return FaultDataType::JS_ERROR;
+    } else if (reasonStr.compare("STS_ERROR") == 0) {
+        return FaultDataType::STS_ERROR;
     } else if (cmd.compare("APP_FREEZE") == 0) {
         return FaultDataType::APP_FREEZE;
     } else if (cmd.compare("PERFORMANCE_CONTROL") == 0) {

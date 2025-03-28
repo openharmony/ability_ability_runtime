@@ -18,6 +18,7 @@
 #include <dlfcn.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <thread>
@@ -28,6 +29,11 @@
 #include "hilog_tag_wrapper.h"
 #include "sts_hilog.h"
 #include "sts_invoker.h"
+#include "unwinder.h"
+
+#ifdef SUPPORT_GRAPHICS
+#include "ui_content.h"
+#endif // SUPPORT_GRAPHICS
 
 namespace OHOS {
 namespace StsEnv {
@@ -37,6 +43,8 @@ const char STS_CREATE_VM[] = "ANI_CreateVM";
 const char STS_ANI_GET_CREATEDVMS[] = "ANI_GetCreatedVMs";
 const char STS_LIB_PATH[] = "libarkruntime.so";
 const char BOOT_PATH[] = "/system/framework/bootpath.json";
+const char BACKTRACE[] = "=====================Backtrace========================";
+
 
 using GetDefaultVMInitArgsSTSRuntimeType = ets_int (*)(EtsVMInitArgs* vmArgs);
 using GetCreatedVMsSTSRuntimeType = ets_int (*)(EtsVM** vmBuf, ets_size bufLen, ets_size* nVms);
@@ -115,8 +123,32 @@ bool STSEnvironment::LoadRuntimeApis()
     return true;
 }
 
+std::string STSEnvironment::GetBuildId(std::string stack)
+{
+    std::stringstream ss(stack);
+    std::string tempStr;
+    std::string addBuildId;
+    int i = 0;
+    while (std::getline(ss, tempStr)) {
+        auto spitlPos = tempStr.rfind(" ");
+        if (spitlPos != std::string::npos) {
+            auto elfFile = std::make_shared<HiviewDFX::DfxElf>(tempStr.substr(spitlPos + 1));
+            std::string buildId = elfFile->GetBuildId();
+            if (i != 0 && !buildId.empty()) {
+                addBuildId += tempStr + "(" + buildId + ")" + "\n";
+            } else {
+                addBuildId += tempStr + "\n";
+            }
+        }
+        i++;
+    }
+    return addBuildId;
+}
+
 void STSEnvironment::RegisterUncaughtExceptionHandler(const STSUncaughtExceptionInfo& handle)
 {
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
+    uncaughtExceptionInfo_ = handle;
 }
 
 bool STSEnvironment::PostTask(TaskFuncType task)
@@ -270,7 +302,6 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv, std::vector<ani_option>& opt
         TAG_LOGE(AAFwkTag::STSRUNTIME, "ANI_CreateVM failed %{public}d", status);
         return false;
     }
- 
     ani_size nrVMs;
     if (lazyApis_.ANI_GetCreatedVMs(&vmEntry_.ani_vm, 1, &nrVMs) != ANI_OK) {
         return false;
@@ -374,6 +405,107 @@ void STSEnvironment::ReInitStsEnvImpl(std::unique_ptr<StsEnvironmentImpl> impl)
 ani_env* STSEnvironment::GetAniEnv()
 {
     return vmEntry_.ani_env;
+}
+
+void STSEnvironment::HandleUncaughtError()
+{
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
+    const StsEnv::STSErrorObject errorObj = GetSTSErrorObject();
+    std::string errorStack = errorObj.stack;
+    if (errorStack.empty()) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "errorStack is empty");
+        return;
+    }
+    TAG_LOGE(AAFwkTag::STSRUNTIME, "errorObj.name:%{public}s, errorObj.message:%{public}s,errorObj.stack:%{public}s",
+        errorObj.name.c_str(), errorObj.message.c_str(), errorObj.stack.c_str());
+    std::string summary = "Error name:" + errorObj.name + "\n";
+    summary += "Error message:" + errorObj.message + "\n";
+    if (errorStack.find(BACKTRACE) != std::string::npos) {
+        summary += "Stacktrace:\n" + GetBuildId(errorStack);
+    } else {
+        summary += "Stacktrace:\n" + errorStack;
+    }
+#ifdef SUPPORT_GRAPHICS
+    std::string str = Ace::UIContent::GetCurrentUIStackInfo();
+    if (!str.empty()) {
+        summary.append(str);
+    }
+#endif // SUPPORT_GRAPHICS
+    if (uncaughtExceptionInfo_.uncaughtTask) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "uncaughtTask called");
+        uncaughtExceptionInfo_.uncaughtTask(summary, errorObj);
+    }
+}
+
+StsEnv::STSErrorObject STSEnvironment::GetSTSErrorObject()
+{
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
+    ani_boolean errorExists = ANI_FALSE;
+    ani_status status = ANI_ERROR;
+    auto aniEnv = GetAniEnv();
+    if ((status = aniEnv->ExistUnhandledError(&errorExists)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "ExistUnhandledError failed, status : %{public}d", status);
+        return StsEnv::STSErrorObject();
+    }
+    if (errorExists == ANI_FALSE) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "not exist error");
+        return StsEnv::STSErrorObject();
+    }
+    ani_error aniError = nullptr;
+    if ((status = aniEnv->GetUnhandledError(&aniError)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "GetUnhandledError failed, status : %{public}d", status);
+        return StsEnv::STSErrorObject();
+    }
+    if ((status = aniEnv->ResetError()) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "ResetError failed, status : %{public}d", status);
+        return StsEnv::STSErrorObject();
+    }
+    std::string errorMsg = GetErrorProperty(aniError, "message");
+    std::string errorName = GetErrorProperty(aniError, "name");
+    std::string errorStack = GetErrorProperty(aniError, "stack");
+    const StsEnv::STSErrorObject errorObj = {
+        .name = errorName,
+        .message = errorMsg,
+        .stack = errorStack
+    };
+    return errorObj;
+}
+
+std::string STSEnvironment::GetErrorProperty(ani_error aniError, const char* property)
+{
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
+    auto aniEnv = GetAniEnv();
+    std::string propertyValue;
+    ani_status status = ANI_ERROR;
+    ani_type errorType = nullptr;
+    if ((status = aniEnv->Object_GetType(aniError, &errorType)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Object_GetType failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    ani_method getterMethod = nullptr;
+    if ((status = aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Class_FindGetter failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    ani_ref aniRef = nullptr;
+    if ((status = aniEnv->Object_CallMethod_Ref(aniError, getterMethod, &aniRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Object_CallMethod_Ref failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    ani_string aniString = reinterpret_cast<ani_string>(aniRef);
+    ani_size sz {};
+    if ((status = aniEnv->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "String_GetUTF8Size failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    propertyValue.resize(sz + 1);
+    if ((status = aniEnv->String_GetUTF8SubString(
+        aniString, 0, sz, propertyValue.data(), propertyValue.size(), &sz))!= ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "String_GetUTF8SubString failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    propertyValue.resize(sz);
+    return propertyValue;
 }
 } // namespace StsEnv
 } // namespace OHOS
