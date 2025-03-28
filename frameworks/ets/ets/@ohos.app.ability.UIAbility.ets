@@ -14,8 +14,9 @@
  */
 
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
-import UIAbilityContext from './application/UIAbilityContext';
+import UIAbilityContext from 'application.UIAbilityContext';
 import Want from '@ohos.app.ability.Want';
+import window from '@ohos.window';
 
 export default class UIAbility {
   private isOnDestroyAsync: boolean = true;
@@ -38,7 +39,7 @@ export default class UIAbility {
   lastRequestWant: Want;
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {}
-  // OnWindowStageCreate is not implemented
+  onWindowStageCreate(windowStage: window.WindowStage): void {}
   onWindowStageDestroy(): void {}
   onDestroy(): void {}
   onDestroyAsync(): Promise<void> {

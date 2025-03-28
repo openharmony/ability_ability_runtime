@@ -20,7 +20,8 @@ import { BusinessError, AsyncCallback } from '@ohos.base';
 import { AbilityResult } from 'ability.abilityResult';
 import AbilityStartCallback from 'application.AbilityStartCallback';
 import { Configuration } from '@ohos.app.ability.Configuration';
-import { Context } from './Context'
+import Context from 'application.Context';
+import window from '@ohos.window';
 
 export class AsyncCallbackWrapper<T> {
   myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
@@ -37,19 +38,19 @@ export class AsyncCallbackWrapper<T> {
 
 export default class UIAbilityContext extends Context {
 
-  public nativeContext : long;
-  public config: Configuration;
-  public abilityInfo: AbilityInfo;
+  nativeContext : long;
+  config: Configuration;
+  abilityInfo: AbilityInfo;
+  windowStage: window.WindowStage;
 
-  public native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
-  public native nativeStartAbilitySync(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<void>): void;
-  public native nativeStartAbilityForResult(want: Want, callback:AsyncCallbackWrapper<AbilityResult>): void;
-  public native nativeStartAbilityForResult(want: Want, startOptions: StartOptions, callback:AsyncCallbackWrapper<AbilityResult>): void;
-  public native nativeTerminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
-  public native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
-  public native nativeReportDrawnCompletedSync(callback:AsyncCallbackWrapper<void>): void;
-  public native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): int;
-
+  private native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
+  private native nativeStartAbilitySync(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<void>): void;
+  private native nativeStartAbilityForResult(want: Want, callback:AsyncCallbackWrapper<AbilityResult>): void;
+  private native nativeStartAbilityForResult(want: Want, startOptions: StartOptions, callback:AsyncCallbackWrapper<AbilityResult>): void;
+  private native nativeTerminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
+  private native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
+  private native nativeReportDrawnCompletedSync(callback:AsyncCallbackWrapper<void>): void;
+  private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): int;
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     let p1 = launch this.nativeStartAbilitySync(want, myCall);
