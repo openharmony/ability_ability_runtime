@@ -16,6 +16,7 @@
 import { AbilityResult } from 'ability.abilityResult';
 import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
+import uiExtensionHost from '@ohos.uiExtensionHost';
 import { LocalStorage } from '@ohos.arkui.component.CommonTsEtsApi';
 import { AsyncCallbackCommonWrapper } from './UIExtensionCommon';
 import hilog from '@ohos.hilog';
@@ -25,7 +26,7 @@ export default class UIExtensionContentSession {
   native nativeSendData(data: Record<string, Object>): void;
   native loadContent(path: string, storage?: LocalStorage): void;
   native setWindowBackgroundColor(color: string): void;
-  //native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
+  native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
   native setReceiveDataCallbackASync(): void;
   native terminateSelfSync(callback:AsyncCallbackCommonWrapper<void>): void;
   native terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackCommonWrapper<void>): void;

@@ -1453,6 +1453,7 @@ ohos_shared_library("ui_extension") {
     "ipc:ipc_napi",
     "napi:ace_napi",
     "window_manager:embeddablewindowstage_kit",
+    "window_manager:embeddablewindowstageani_kit",
     "window_manager:extensionwindow_napi",
   ]
 

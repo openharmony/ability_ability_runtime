@@ -22,7 +22,6 @@ generate_static_abc("ui_extension_ability_ani_abc") {
     "./ets/application/UIExtensionContext.ets",
     "./ets/@ohos.app.ability.UIExtensionAbility.ets",
     "./ets/@ohos.app.ability.UIExtensionContentSession.ets",
-    "./ets/@ohos.uiExtensionHost.ets",
     "./ets/UIExtensionCommon.ets",
   ]
 
