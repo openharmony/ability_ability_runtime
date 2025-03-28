@@ -83,6 +83,9 @@ bool AbilityStateData::MarshallingOne(Parcel &parcel) const
     if (!parcel.WriteInt32(processType)) {
         return false;
     }
+    if (!parcel.WriteInt32(callerUid)) {
+        return false;
+    }
     return true;
 }
 
@@ -116,6 +119,7 @@ bool AbilityStateData::ReadFromParcel(Parcel &parcel)
     appCloneIndex = parcel.ReadInt32();
     extensionAbilityType = parcel.ReadInt32();
     processType = parcel.ReadInt32();
+    callerUid = parcel.ReadInt32();
     return true;
 }
 
