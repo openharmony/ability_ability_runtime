@@ -175,7 +175,7 @@ HWTEST_F(AppMgrServiceInnerTest, reportpreLoadTask_001, TestSize.Level0)
     std::shared_ptr<AppRunningRecord> appRecord =
         std::make_shared<AppExecFwk::AppRunningRecord>(info, recordId, processName);
     appRecord->SetUid(1);
-    
+
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     appMgrServiceInner->reportpreLoadTask(appRecord);
 
@@ -283,7 +283,7 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyAppAttachFailed_001, TestSize.Level0)
 {
     std::shared_ptr<AppExecFwk::AppRunningRecord> appRecord =
         std::make_shared<AppExecFwk::AppRunningRecord>(nullptr, 1, "111");
-    
+
     auto moduleRunningRecord =
         std::make_shared<AppExecFwk::ModuleRunningRecord>(nullptr, nullptr);
     sptr<IRemoteObject> iremoteObject =
@@ -339,7 +339,7 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyLoadAbilityFailed_001, TestSize.Level0)
         if (rawPtr) {
             sptr<MockIAppStateCallback> iapp(rawPtr);
             EXPECT_EQ(iapp->dealed, true);
-        }   
+        }
     }
 }
 
@@ -433,7 +433,7 @@ HWTEST_F(AppMgrServiceInnerTest, SetStartMsgStrictMode_001, TestSize.Level0)
     appMgrServiceInner->SetStartMsgStrictMode(startMsg, param);
     EXPECT_EQ(startMsg.isolatedNetworkFlag, false);
     EXPECT_EQ(startMsg.isolatedSELinuxFlag, false);
-    
+
     param.extensionAbilityType = ExtensionAbilityType::INPUTMETHOD;
     startMsg.isolatedSandboxFlagLegacy = false;
     appMgrServiceInner->SetStartMsgStrictMode(startMsg, param);
@@ -660,7 +660,7 @@ HWTEST_F(AppMgrServiceInnerTest, CacheExitInfo_001, TestSize.Level0)
         if (rawPtr) {
             sptr<MockIAppStateCallback> iapp(rawPtr);
             EXPECT_EQ(iapp->dealed, true);
-        }   
+        }
     }
 }
 

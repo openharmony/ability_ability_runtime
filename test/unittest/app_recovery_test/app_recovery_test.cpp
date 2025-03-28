@@ -760,7 +760,7 @@ HWTEST_F(AppRecoveryUnitTest, ClearPageStack_001, TestSize.Level1)
 }
 
 /**
- * @tc.name:  AddAbility_001
+ * @tc.name:  AddAbility_005
  * @tc.desc:  AddAbility testcase.
  */
 HWTEST_F(AppRecoveryUnitTest, AddAbility_005, TestSize.Level1)
@@ -818,7 +818,7 @@ HWTEST_F(AppRecoveryUnitTest, RemoveAbility_004, TestSize.Level1)
     EXPECT_EQ(abilityRecovery->GetToken(), token_);
     ret = AppRecovery::GetInstance().RemoveAbility(token_);
     EXPECT_TRUE(AppRecovery::GetInstance().abilityRecoverys_.empty());
-    EXPECT_EQ(ret, true); 
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -913,7 +913,7 @@ HWTEST_F(AppRecoveryUnitTest, DoRecoverApp_002, TestSize.Level1)
     ability->abilityLifecycleExecutor_->state_ =
         AbilityLifecycleExecutor::LifecycleState::FOREGROUND_NEW;
     abilityRecovery1->ability_ = ability;
-            
+
     AppRecovery::GetInstance().abilityRecoverys_.push_back(abilityRecovery1);
     AppRecovery::GetInstance().DoRecoverApp(reason);
 
