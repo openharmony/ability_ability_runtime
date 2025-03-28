@@ -87,40 +87,6 @@ void ConnectPromiseCallback(ani_env* env, ani_object aniObj, ani_object obj)
     AppExecFwk::AbilityTransactionCallbackInfo<sptr<IRemoteObject>>::Destroy(callbackInfo);
 }
 
-[[maybe_unused]]ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
-{
-    TAG_LOGI(AAFwkTag::DELEGATOR, "ANI_Constructor");
-    ani_env *env = nullptr;
-    ani_status status = ANI_ERROR;
-    status = vm->GetEnv(ANI_VERSION_1, &env);
-    if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::DELEGATOR, "GetEnv failed status : %{public}d", status);
-        return ANI_NOT_FOUND;
-    }
-
-    static const char *className = "L@ohos/app/ability/ServiceExtensionAbility/ServiceExtensionAbility;";
-    ani_class cls;
-    status = env->FindClass(className, &cls);
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "FindClass is fail %{public}d", status);
-        return ANI_ERROR;
-    }
-
-    std::array functions = {
-        ani_native_function { "nativeOnDisconnectCallback", ":V", reinterpret_cast<void*>(DisconnectPromiseCallback) },
-        ani_native_function { "nativeOnConnectCallback", nullptr, reinterpret_cast<void*>(ConnectPromiseCallback) },
-    };
-
-    status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Class_BindNativeMethods is fail %{public}d", status);
-        return ANI_ERROR;
-    };
-    *result = ANI_VERSION_1;
-    TAG_LOGI(AAFwkTag::DELEGATOR, "ANI_Constructor finish");
-    return ANI_OK;
-}
-
 using namespace OHOS::AppExecFwk;
 
 StsServiceExtension* StsServiceExtension::Create(const std::unique_ptr<Runtime>& runtime)
@@ -157,10 +123,10 @@ void StsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
     }
     std::string moduleName(Extension::abilityInfo_->moduleName);
     moduleName.append("::").append(abilityInfo_->name);
-    auto stsObj = stsRuntime_.LoadModule(
+    stsObj_ = stsRuntime_.LoadModule(
         moduleName, srcPath, abilityInfo_->hapPath, abilityInfo_->compileMode == AppExecFwk::CompileMode::ES_MODULE,
         false, abilityInfo_->srcEntrance);
-    if (stsObj == nullptr) {
+    if (stsObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to get stsObj");
         return;
     }
@@ -169,6 +135,16 @@ void StsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
         return;
     }
+    std::array functions = {
+        ani_native_function { "nativeOnDisconnectCallback", ":V", reinterpret_cast<void*>(DisconnectPromiseCallback) },
+        ani_native_function { "nativeOnConnectCallback", nullptr, reinterpret_cast<void*>(ConnectPromiseCallback) },
+    };
+
+    ani_status status = env->Class_BindNativeMethods(stsObj_->aniCls, functions.data(), functions.size());
+    if (ANI_OK != status) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Class_BindNativeMethods is fail %{public}d", status);
+        return;
+    };
 }
 #ifdef SUPPORT_GRAPHICS
 void StsServiceExtension::SystemAbilityStatusChangeListener::OnAddSystemAbility(int32_t systemAbilityId,
@@ -229,6 +205,7 @@ sptr<IRemoteObject> StsServiceExtension::OnConnect(const AAFwk::Want &want)
     auto remoteObj = AniGetNativeRemoteObject(env, obj);
     if (remoteObj == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "remoteObj null");
+        return nullptr;
     }
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "end");
     return remoteObj;
@@ -254,30 +231,21 @@ sptr<IRemoteObject> StsServiceExtension::OnConnect(const AAFwk::Want &want,
     ani_long connectCallbackPoint = (ani_long)callbackInfo;
     ani_status status = ANI_ERROR;
     ani_field field = nullptr;
-    ani_class cls = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/ServiceExtensionAbility/ServiceExtensionAbility;", &cls))
-        != ANI_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
-        return nullptr;
-    }
-    ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
-        return nullptr;
-    }
-    ani_object object = nullptr;
-    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
-    }
-    if ((status = env->Class_FindField(cls, "connectCallbackPoint", &field)) != ANI_OK) {
+    if ((status = env->Class_FindField(stsObj_->aniCls, "connectCallbackPoint", &field)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
     }
-    if ((status = env->Object_SetField_Long(object, field, connectCallbackPoint)) != ANI_OK) {
+    if ((status = env->Object_SetField_Long(stsObj_->aniObj, field, connectCallbackPoint)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
     }
-    CallObjectMethod(false, "callOnConnect", "L@ohos/app/ability/Want/Want;:V", wantRef);
-    return nullptr;
+    ani_ref result =
+        CallObjectMethod(false, "callOnConnect", "L@ohos/app/ability/Want/Want;:L@ohos/rpc/rpc/RemoteObject;", wantRef);
+    auto obj = reinterpret_cast<ani_object>(result);
+    auto remoteObj = AniGetNativeRemoteObject(env, obj);
+    if (remoteObj == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "remoteObj null");
+        return nullptr;
+    }
+    return remoteObj;
 }
 
 void StsServiceExtension::OnDisconnect(const AAFwk::Want &want)
@@ -307,6 +275,11 @@ void StsServiceExtension::OnDisconnect(const AAFwk::Want &want,
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "env not found");
         return;
     }
+    ani_ref wantRef = OHOS::AppExecFwk::WrapWant(env, want);
+    if (wantRef == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null wantRef");
+        return;
+    }
     if (callbackInfo == nullptr) {
         isAsyncCallback = false;
         OnDisconnect(want);
@@ -315,31 +288,15 @@ void StsServiceExtension::OnDisconnect(const AAFwk::Want &want,
     ani_long disconnectCallbackPoint = (ani_long)callbackInfo;
     ani_status status = ANI_ERROR;
     ani_field field = nullptr;
-    ani_class cls = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/ServiceExtensionAbility/ServiceExtensionAbility;", &cls))
-        != ANI_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
-        return;
-    }
-    ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
-        return;
-    }
-    ani_object object = nullptr;
-    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
-        return;
-    }
-    if ((status = env->Class_FindField(cls, "disconnectCallbackPoint", &field)) != ANI_OK) {
+    if ((status = env->Class_FindField(stsObj_->aniCls, "disconnectCallbackPoint", &field)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         return;
     }
-    if ((status = env->Object_SetField_Long(object, field, disconnectCallbackPoint)) != ANI_OK) {
+    if ((status = env->Object_SetField_Long(stsObj_->aniObj, field, disconnectCallbackPoint)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         return;
     }
-    CallObjectMethod(true, "callOnDisconnect", "L@ohos/app/ability/Want/Want;:Z");
+    CallObjectMethod(true, "callOnDisconnect", "L@ohos/app/ability/Want/Want;:V", wantRef);
 }
 
 void StsServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
@@ -356,7 +313,7 @@ void StsServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int s
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null wantRef");
     }
     ani_int iStartId = static_cast<ani_int>(startId);
-    const char* signature  = "L@ohos/app/ability/Want/Want;I:V";
+    const char* signature  = "L@ohos/app/ability/Want/Want;D:V";
     CallObjectMethod(false, "onRequest", signature, wantRef, iStartId);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "end");
     return;
@@ -383,28 +340,14 @@ bool StsServiceExtension::OnInsightIntentExecuteDone(uint64_t intentId,
 ani_ref StsServiceExtension::CallObjectMethod(bool withResult, const char* name, const char* signature, ...)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
-    ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
-    auto env = stsRuntime_.GetAniEnv();
-    if ((status = env->FindClass("L@ohos/app/ability/ServiceExtensionAbility/ServiceExtensionAbility;", &cls))
-        != ANI_OK) {
-        return nullptr;
-    }
-    if (cls == nullptr) {
-        return nullptr;
-    }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    auto env = stsRuntime_.GetAniEnv();
+    if (!env) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "env not found Ability.sts");
         return nullptr;
     }
-    ani_object object = nullptr;
-    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        return nullptr;
-    }
-    if (object == nullptr) {
-        return nullptr;
-    }
-    if ((status = env->Class_FindMethod(cls, name, signature, &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(stsObj_->aniCls, name, signature, &method)) != ANI_OK) {
         return nullptr;
     }
     if (method == nullptr) {
@@ -414,14 +357,14 @@ ani_ref StsServiceExtension::CallObjectMethod(bool withResult, const char* name,
     va_list args;
     if (withResult) {
         va_start(args, signature);
-        if ((status = env->Object_CallMethod_Ref_V(object, method, &res, args)) != ANI_OK) {
+        if ((status = env->Object_CallMethod_Ref_V(stsObj_->aniObj, method, &res, args)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         }
         va_end(args);
         return res;
     }
     va_start(args, signature);
-    if ((status = env->Object_CallMethod_Void_V(object, method, args)) != ANI_OK) {
+    if ((status = env->Object_CallMethod_Void_V(stsObj_->aniObj, method, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
     }
     va_end(args);
