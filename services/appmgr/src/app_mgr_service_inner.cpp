@@ -3505,7 +3505,7 @@ void AppMgrServiceInner::AddMountPermission(uint32_t accessTokenId, std::set<std
         TAG_LOGE(AAFwkTag::APPMGR, "VerifyAccessToken error: %{public}d", result);
         return;
     }
-    for (int i = 0; i < permStateList.size(); i++) {
+    for (size_t i = 0; i < permStateList.size(); i++) {
         if (permStateList[i] == Security::AccessToken::PERMISSION_GRANTED) {
             permissions.insert(tmpPermissionList[i]);
         }
@@ -6469,11 +6469,11 @@ void AppMgrServiceInner::ParseInfoToAppfreeze(const FaultData &faultData, int32_
 {
     if (faultData.faultType == FaultDataType::APP_FREEZE) {
         AppfreezeManager::AppInfo info = {
+            .isOccurException = isOccurException,
             .pid = pid,
             .uid = uid,
             .bundleName = bundleName,
             .processName = processName,
-            .isOccurException = isOccurException,
         };
         AppExecFwk::AppfreezeManager::GetInstance()->AppfreezeHandleWithStack(faultData, info);
     }

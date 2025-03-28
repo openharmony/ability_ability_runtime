@@ -577,14 +577,14 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId, Abili
         bool isExistDefaultApp = IsExistDefaultApp(userId, typeName);
         for (const auto &info : abilityInfos) {
             AddInfoParam param = {
-                .info = info,
-                .userId = userId,
                 .isExtension = isExtension,
                 .isMoreHapList = genReqParam.isMoreHapList,
                 .withDefault = withDefault,
+                .isExistDefaultApp = isExistDefaultApp,
+                .userId = userId,
                 .typeName = typeName,
                 .infoNames = infoNames,
-                .isExistDefaultApp = isExistDefaultApp
+                .info = info
             };
             AddAbilityInfoToDialogInfos(param, dialogAppInfos);
         }

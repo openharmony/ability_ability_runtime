@@ -89,12 +89,12 @@ void KeepAliveProcessManager::StartKeepAliveProcessWithMainElementPerBundle(cons
         return;
     }
     KeepAliveAbilityInfo info = {
-        .bundleName = bundleInfo.name,
-        .moduleName = bundleInfo.entryModuleName,
-        .abilityName = mainElementName,
         .userId = userId,
         .appCloneIndex = bundleInfo.appIndex,
         .uid = bundleInfo.uid,
+        .bundleName = bundleInfo.name,
+        .moduleName = bundleInfo.entryModuleName,
+        .abilityName = mainElementName,
     };
     auto isMultiInstance =
         bundleInfo.applicationInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
