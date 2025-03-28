@@ -128,24 +128,26 @@ bool UnwrapConfiguration(ani_env *env, ani_object param, Configuration &config)
         }
     }
 
-    double fontSizeScale = GetDoubleOrUndefined(env, param, "fontSizeScale");
-    TAG_LOGD(AAFwkTag::JSNAPI, "The parsed fontSizeScale part %{public}lf", fontSizeScale);
-    if (fontSizeScale < FONT_SIZE_MIN_SCALE || fontSizeScale > FONT_SIZE_MAX_SCALE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "invalid fontSizeScale");
-        return false;
-    }
-    if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, std::to_string(fontSizeScale))) {
-        return false;
+    ani_double fontSizeScale = 0.0;
+    if (GetDoubleOrUndefined(env, param, "fontSizeScale", fontSizeScale)) {
+        if (fontSizeScale < FONT_SIZE_MIN_SCALE || fontSizeScale > FONT_SIZE_MAX_SCALE) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid fontSizeScale");
+            return false;
+        }
+        if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, std::to_string(fontSizeScale))) {
+            return false;
+        }
     }
 
-    double fontWeightScale = GetDoubleOrUndefined(env, param, "fontWeightScale");
-    TAG_LOGD(AAFwkTag::JSNAPI, "The parsed fontWeightScale part %{public}lf", fontWeightScale);
-    if (fontWeightScale < FONT_WEIGHT_MIN_SCALE || fontWeightScale > FONT_WEIGHT_MAX_SCALE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "invalid fontWeightScale");
-        return false;
-    }
-    if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE, std::to_string(fontWeightScale))) {
-        return false;
+    ani_double fontWeightScale = 0.0;
+    if (GetDoubleOrUndefined(env, param, "fontWeightScale", fontWeightScale)) {
+        if (fontWeightScale < FONT_WEIGHT_MIN_SCALE || fontWeightScale > FONT_WEIGHT_MAX_SCALE) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid fontWeightScale");
+            return false;
+        }
+        if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE, std::to_string(fontWeightScale))) {
+            return false;
+        }
     }
     return true;
 }

@@ -15,7 +15,7 @@
 
 export default class StartOptions {
     // windowMode?: int;
-    displayId?: int;
+    displayId?: number;
     // withAnimation?: boolean;
     // windowLeft?: int;
     // windowTop?: int;
