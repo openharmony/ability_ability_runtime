@@ -753,7 +753,7 @@ HWTEST_F(PermissionVerificationTest, JudgeStartInvisibleAbility_0001, TestSize.L
  */
 HWTEST_F(PermissionVerificationTest, CheckVerifyStartLocalDebug_0100, TestSize.Level0)
 {
-    int result = AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug();
+    int result = AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug(0);
     EXPECT_EQ(result, false);
 }
 }  // namespace AAFwk

@@ -117,7 +117,7 @@ struct VerificationInfo {
 
     bool VerifySuperviseKiaServicePermission() const;
 
-    bool VerifyStartLocalDebug() const;
+    bool VerifyStartLocalDebug(int32_t tokenId) const;
 
     bool VerifyStartSelfUIAbility(int tokenId) const;
 
