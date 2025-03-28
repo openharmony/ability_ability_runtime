@@ -36,22 +36,23 @@ export default class ServiceExtensionAbility {
   private isOnConnectAsync: boolean = true;
   private connectCallbackPoint: long;
   private native nativeOnConnectCallback(service: rpc.RemoteObject): void;
-  private callOnConnect(want: Want): void {
-    let p = this.onConnectSync(want);
+  private callOnConnect(want: Want): rpc.RemoteObject {
+    let p = this.onConnectAsync(want);
     if (this.isOnConnectAsync) {
       p.then((a:rpc.RemoteObject) => {
         this.nativeOnConnectCallback(a);
       });
+      return new MyService("onConnectAsync")
     } else {
-      this.onConnect(want);
+      return this.onConnect(want);
     }
   }
 
   private isOnDisconnectAsync: boolean = true;
   private disconnectCallbackPoint: long;
   private native nativeOnDisconnectCallback(): void;
-  private callOnDisconnect(want: Want): boolean {
-    let p = this.onDisconnectSync(want);
+  private callOnDisconnect(want: Want): void {
+    let p = this.onDisconnectAsync(want);
     if (this.isOnDisconnectAsync) {
         p.then<void>((a:undefined): void => {
         this.nativeOnDisconnectCallback();
@@ -59,7 +60,6 @@ export default class ServiceExtensionAbility {
     } else {
       this.onDisconnect(want);
     }
-    return this.isOnDisconnectAsync;
   }
   launchWant: Want = new Want();
   lastRequestWant: Want = new Want();
@@ -70,7 +70,7 @@ export default class ServiceExtensionAbility {
   onDestroy(): void {
     console.log("ServiceExtensionAbility onRequest");
   }
-  onRequest(want: Want, startld: int): void {
+  onRequest(want: Want, startld: double): void {
     console.log("onRequest");
   }
   onConnect(want: Want): rpc.RemoteObject {
@@ -78,18 +78,18 @@ export default class ServiceExtensionAbility {
     let myService: rpc.RemoteObject = new MyService("onConnect");
     return myService;
   }
-  onConnectSync(want: Want): Promise<rpc.RemoteObject> {
-    console.log("onConnectSync");
+  onConnectAsync(want: Want): Promise<rpc.RemoteObject> {
+    console.log("onConnectAsync");
     this.isOnConnectAsync = false;
     return new Promise<rpc.RemoteObject>((resolve, reject) => {  
-      resolve(new MyService("onConnectSync")); 
+      resolve(new MyService("onConnectAsync")); 
     });  
   }
   onDisconnect(want: Want): void {
     console.log("onDisconnect");
   }
-  onDisconnectSync(want: Want): Promise<void> {
-    console.log("onDisconnectSync");
+  onDisconnectAsync(want: Want): Promise<void> {
+    console.log("onDisconnectAsync");
     this.isOnDisconnectAsync = false;
     return new Promise<void>((resolve: (a: undefined)=>void, reject: (err: Error)=>void): void => {});
   }
