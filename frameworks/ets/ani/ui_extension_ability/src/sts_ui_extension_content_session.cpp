@@ -25,6 +25,7 @@
 
 #include "ani_common_want.h"
 #include "ani_common_util.h"
+#include "ani_extension_window.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
 #include "remote_object_wrapper.h"
@@ -321,8 +322,8 @@ ani_object StsUIExtensionContentSession::CreateStsUIExtensionContentSession(ani_
             reinterpret_cast<void *>(OHOS::AbilityRuntime::NativeTerminateSelfWithResult)},
         ani_native_function {"setWindowBackgroundColor", nullptr,
             reinterpret_cast<void *>(OHOS::AbilityRuntime::NativeSetWindowBackgroundColor)},
-        // ani_native_function {"getUIExtensionHostWindowProxy", nullptr,
-        //     reinterpret_cast<void *>(OHOS::AbilityRuntime::NativeGetUIExtensionHostWindowProxy)},
+        ani_native_function {"getUIExtensionHostWindowProxy", nullptr,
+            reinterpret_cast<void *>(OHOS::AbilityRuntime::NativeGetUIExtensionHostWindowProxy)},
         ani_native_function {"setReceiveDataCallbackASync", nullptr,
             reinterpret_cast<void *>(OHOS::AbilityRuntime::NativeSetReceiveDataCallback)}
     };
@@ -445,26 +446,25 @@ void StsUIExtensionContentSession::SetWindowBackgroundColor(ani_env* env, ani_st
 
 ani_object StsUIExtensionContentSession::GetUIExtensionHostWindowProxy(ani_env* env, ani_object object)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "GetUIExtensionHostWindowProxy call");
-    // if (sessionInfo_ == nullptr) {
-    //     TAG_LOGE(AAFwkTag::UI_EXT, "Invalid session info");
-    //     ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
-    //     return nullptr;
-    // }
-
-    // ani_value stsExtensionWindow = nullptr;
-    // Rosen::JsExtensionWindow::CreateJsExtensionWindow(env, uiWindow_, sessionInfo_->hostWindowId);
-    // if (jsExtensionWindow == nullptr) {
-    //     TAG_LOGE(AAFwkTag::UI_EXT, "Failed to create jsExtensionWindow object");
-    //     ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
-    //     return nullptr;
-    // }
-    // auto value = StsRuntime::LoadSystemModuleByEngine(env, "application.extensionWindow", &stsExtensionWindow, 1);
-    // if (value == nullptr) {
-    //     ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
-    //     return nullptr;
-    // }
-    return nullptr;
+    TAG_LOGE(AAFwkTag::UI_EXT, "StsUIExtensionContentSession  call");
+    if (sessionInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid session info");
+        return nullptr;
+    }
+    ani_object stsExtensionWindow = nullptr;
+    stsExtensionWindow =
+        Rosen::AniExtensionWindow::CreateAniExtensionWindow(env, uiWindow_, sessionInfo_->hostWindowId);
+    if (stsExtensionWindow == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to create jsExtensionWindow object");
+        return nullptr;
+    }
+    ani_ref resultRef = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->GlobalReference_Create(stsExtensionWindow, &resultRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "status %{public}d", status);
+        return nullptr;
+    }
+    return reinterpret_cast<ani_object>(resultRef);
 }
 
 ani_object StsUIExtensionContentSession::SetReceiveDataCallback(ani_env* env, ani_object object)
