@@ -112,6 +112,7 @@ generate_static_abc("ui_extension_ability_ani_abc") {
     "./ets/@ohos.app.ability.UIExtensionAbility.ets",
     "./ets/@ohos.app.ability.UIExtensionContentSession.ets",
     "./ets/@ohos.uiExtensionHost.ets",
+    "./ets/UIExtensionCommon.ets",
   ]
 
   dst_file = "$target_out_dir/ui_extension_ability_ani.abc"

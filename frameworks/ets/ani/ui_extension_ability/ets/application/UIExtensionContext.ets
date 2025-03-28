@@ -16,35 +16,24 @@
 import { AbilityResult } from 'ability.abilityResult';
 import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
+import { AsyncCallbackCommonWrapper } from '../UIExtensionCommon';
 import hilog from '@ohos.hilog';
-
-export class AsyncCallbackContextWrapper<T> {
-  myFun_: AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
-
-  constructor(myFun:AsyncCallback<T, void>){
-    this.myFun_ = myFun;
-  }
-
-  invoke(err: BusinessError<void>, data: T) : void {
-    this.myFun_(err, data);
-  }
-}
 
 export default class UIExtensionContext {
   nativeUIExtensionContext: long = 0;
-  native terminateSelfSync(callback:AsyncCallbackContextWrapper<void>): void;
-  native terminateSelfWithResultSync(parameter: AbilityResult, callback: AsyncCallbackContextWrapper<void>): void;
+  native terminateSelfSync(callback:AsyncCallbackCommonWrapper<void>): void;
+  native terminateSelfWithResultSync(parameter: AbilityResult, callback: AsyncCallbackCommonWrapper<void>): void;
 
   terminateSelf(callback:AsyncCallback<void>): void {
-    let myCall = new AsyncCallbackContextWrapper<void>(callback);
+    let myCall = new AsyncCallbackCommonWrapper<void>(callback);
     launch this.terminateSelfSync(myCall);
   }
 
   terminateSelf(): Promise<void> {
-    let p = new Promise<void>((resolve: () => void, reject:(err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackContextWrapper<void>((err: BusinessError<void>) => {
+    let p = new Promise<void>((resolve: (data: undefined) => void, reject:(err: BusinessError<void>) => void): void => {
+      let myCall = new AsyncCallbackCommonWrapper<void>((err: BusinessError<void>) => {
         if (err.code == 0) {
-          resolve();
+          resolve(undefined);
         } else {
           reject(err);
         }
@@ -55,13 +44,13 @@ export default class UIExtensionContext {
   }
 
   terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<void>): void {
-    let myCall = new AsyncCallbackContextWrapper<void>(callback);
+    let myCall = new AsyncCallbackCommonWrapper<void>(callback);
     launch this.terminateSelfWithResultSync(parameter, myCall);
   }
 
   terminateSelfWithResult(parameter: AbilityResult): Promise<void> {
     let p = new Promise<void>((resolve: (data: undefined)=>void, reject:(err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackContextWrapper<void>((err: BusinessError<void>) => {
+      let myCall = new AsyncCallbackCommonWrapper<void>((err: BusinessError<void>) => {
         if (err.code == 0) {
           resolve(undefined);
         } else {

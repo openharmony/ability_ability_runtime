@@ -162,7 +162,7 @@ void NativeTerminateSelf(ani_env* env, ani_object obj, [[maybe_unused]] ani_obje
     int32_t resultCode = stsContentSession->TerminateSelfWithResult();
     OHOS::AbilityRuntime::StsUIExtensionCommon::AsyncCallback(env, callback,
         OHOS::AbilityRuntime::StsUIExtensionCommon::WrapBusinessError(
-            env, static_cast<int32_t>(resultCode)), nullptr, true);
+            env, static_cast<int32_t>(resultCode)), nullptr);
     return;
 }
 
@@ -201,7 +201,7 @@ int NativeTerminateSelfWithResult(ani_env* env, ani_object obj, [[maybe_unused]]
     ret = stsContentSession->TerminateSelfWithResult();
     OHOS::AbilityRuntime::StsUIExtensionCommon::AsyncCallback(env, callback,
         OHOS::AbilityRuntime::StsUIExtensionCommon::WrapBusinessError(
-            env, static_cast<int32_t>(ret)), nullptr, true);
+            env, static_cast<int32_t>(ret)), nullptr);
     return ret;
 }
 

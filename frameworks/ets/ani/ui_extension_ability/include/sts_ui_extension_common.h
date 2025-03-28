@@ -30,7 +30,7 @@ public:
     StsUIExtensionCommon() = default;
     virtual ~StsUIExtensionCommon() = default;
     static bool AsyncCallback(ani_env *env, ani_object call, ani_object error,
-        ani_object result, bool isSession = false);
+        ani_object result);
     static ani_object WrapBusinessError(ani_env *env, ani_int code);
 };
 }  // namespace AbilityRuntime
