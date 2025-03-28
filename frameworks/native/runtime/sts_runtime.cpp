@@ -405,6 +405,7 @@ bool STSRuntime::CreateStsEnv(const Options& options)
         aotFileString = "--ext:--aot-file=" + aotFilePath;
         aniOptions.push_back(ani_option{aotFileString.c_str(), nullptr});
         TAG_LOGI(AAFwkTag::STSRUNTIME, "aotFileString: %{public}s", aotFileString.c_str());
+        aniOptions.push_back(ani_option{"--ext:--enable-an", nullptr});
     }
     
     if (stsEnv_ == nullptr || !stsEnv_->StartRuntime(STSRuntime::jsRuntime_->GetNapiEnv(), aniOptions)) {
