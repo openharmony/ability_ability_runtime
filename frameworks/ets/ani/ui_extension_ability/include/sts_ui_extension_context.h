@@ -22,12 +22,22 @@
 #include "ui_extension_context.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "ohos_application.h"
 
 [[maybe_unused]] static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj,
     [[maybe_unused]] ani_object callback);
 [[maybe_unused]] static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env,
     [[maybe_unused]] ani_object obj, [[maybe_unused]] ani_object abilityResult, [[maybe_unused]] ani_object callback);
-ani_object CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context);
+ani_object CreateStsUIExtensionContext(ani_env *env,
+    std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context,
+    const std::shared_ptr<OHOS::AppExecFwk::OHOSApplication> &application);
+
+void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    void* applicationCtxRef, std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context);
+
+void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo);
+
 class StsUIExtensionContext final {
 public:
     explicit StsUIExtensionContext(const std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext>& context)

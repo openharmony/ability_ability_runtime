@@ -12,10 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "common_fun_ani.h"
 #include "sts_ui_extension_context.h"
 #include "ui_extension_context.h"
 #include "ani_common_want.h"
 #include "ability_manager_client.h"
+#include "sts_context_utils.h"
+
 #include "sts_ui_extension_common.h"
 
 const char *INVOKE_METHOD_NAME = "invoke";
@@ -87,9 +90,51 @@ static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env, [[maybe_u
     TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelfWithResultSync end");
 }
 
-ani_object CreateStsUiExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context)
+void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "call");
+    TAG_LOGI(AAFwkTag::APPKIT, "BindExtensionInfo");
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    ani_status status = ANI_OK;
+    if (abilityInfo && hapModuleInfo) {
+        auto isExist = [&abilityInfo](const OHOS::AppExecFwk::ExtensionAbilityInfo& info) {
+            TAG_LOGD(AAFwkTag::CONTEXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
+            return info.bundleName == abilityInfo->bundleName && info.name == abilityInfo->name;
+        };
+        auto infoIter = std::find_if(
+            hapModuleInfo->extensionInfos.begin(), hapModuleInfo->extensionInfos.end(), isExist);
+        if (infoIter == hapModuleInfo->extensionInfos.end()) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "set extensionAbilityInfo fail");
+            return;
+        }
+        ani_field extensionAbilityInfoField;
+        status = aniEnv->Class_FindField(contextClass, "extensionAbilityInfo", &extensionAbilityInfoField);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPKIT, "find extensionAbilityInfo failed status: %{public}d", status);
+            return;
+        }
+        ani_object extAbilityInfoObj = OHOS::AppExecFwk::CommonFunAni::ConvertExtensionInfo(aniEnv, *infoIter);
+        status = aniEnv->Object_SetField_Ref(contextObj, extensionAbilityInfoField,
+            reinterpret_cast<ani_ref>(extAbilityInfoObj));
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed status: %{public}d", status);
+            return;
+        }
+    }
+}
+
+void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    void* applicationCtxRef, std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context)
+{
+    OHOS::AbilityRuntime::ContextUtil::StsCreatContext(aniEnv, contextClass, contextObj, applicationCtxRef, context);
+    BindExtensionInfo(aniEnv, contextClass, contextObj, context, context->GetAbilityInfo());
+}
+
+ani_object CreateStsUIExtensionContext(ani_env *env,
+    std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context,
+    const std::shared_ptr<OHOS::AppExecFwk::OHOSApplication> &application)
+{
+    TAG_LOGI(AAFwkTag::UI_EXT, "CreateStsUIExtensionContext start");
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
     ani_method method = nullptr;
