@@ -18,8 +18,21 @@ import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import { AsyncCallbackCommonWrapper } from '../UIExtensionCommon';
 import hilog from '@ohos.hilog';
+import ExtensionContext from './ExtensionContext';
 
-export default class UIExtensionContext {
+export class AsyncCallbackContextWrapper<T> {
+  myFun_: AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
+
+  constructor(myFun:AsyncCallback<T, void>){
+    this.myFun_ = myFun;
+  }
+
+  invoke(err: BusinessError<void>, data: T) : void {
+    this.myFun_(err, data);
+  }
+}
+
+export default class UIExtensionContext extends ExtensionContext {
   nativeUIExtensionContext: long = 0;
   native terminateSelfSync(callback:AsyncCallbackCommonWrapper<void>): void;
   native terminateSelfWithResultSync(parameter: AbilityResult, callback: AsyncCallbackCommonWrapper<void>): void;
