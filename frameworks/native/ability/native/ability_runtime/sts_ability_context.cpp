@@ -44,6 +44,7 @@
 #include "uri.h"
 #include "want.h"
 #include "common_fun_ani.h"
+#include "sts_context_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -436,15 +437,12 @@ ani_int StsAbilityContext::StartAbilityByTypeSync([[maybe_unused]]ani_env *env, 
     return ret;
 }
 
-ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context)
+bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
-    TAG_LOGE(AAFwkTag::UIABILITY, "start");
-    ani_class cls {};
-    ani_status status = ANI_ERROR;
-
-    if ((env->FindClass("Lapplication/UIAbilityContext/UIAbilityContext;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
+    ani_status status = env->FindClass("Lapplication/UIAbilityContext/UIAbilityContext;", &cls);
+    if (status != ANI_OK || cls == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        return false;
     }
 
     std::array functions = {
@@ -474,38 +472,82 @@ ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityConte
             reinterpret_cast<void*>(StsAbilityContext::StartAbilityByTypeSync) },
     };
 
-    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool SetAbilityInfo(ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context)
+{
+    ani_field field = nullptr;
+    auto abilityInfo = context->GetAbilityInfo();
+    ani_ref abilityInfoRef = AppExecFwk::CommonFunAni::ConvertAbilityInfo(env, *abilityInfo);
+
+    ani_status status = env->Class_FindField(cls, "abilityInfo", &field);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        return false;
+    }
+
+    status = env->Object_SetField_Ref(contextObj, field, abilityInfoRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool SetConfiguration(
+    ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context)
+{
+    ani_field field = nullptr;
+    auto configuration = context->GetConfiguration();
+    ani_ref configurationRef = OHOS::AppExecFwk::WrapConfiguration(env, *configuration);
+
+    ani_status status = env->Class_FindField(cls, "config", &field);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        return false;
+    }
+
+    status = env->Object_SetField_Ref(contextObj, field, configurationRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+ani_ref CreateStsAbilityContext(
+    ani_env *env, const std::shared_ptr<AbilityContext> &context, const std::shared_ptr<OHOSApplication> &application)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    ani_class cls {};
+    if (!BindNativeMethods(env, cls)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "BindNativeMethods failed");
         return nullptr;
     }
     ani_object contextObj = StsAbilityContext::SetAbilityContext(env, context);
     if (contextObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "contextObj null");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null contextObj");
         return nullptr;
     }
-    ani_field field = nullptr;
-    auto abilityInfo = context->GetAbilityInfo();
-    ani_ref abilityInfoRef = AppExecFwk::CommonFunAni::ConvertAbilityInfo(env, *abilityInfo);
-    if ((status = env->Class_FindField(cls, "abilityInfo", &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    if (application == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application");
         return nullptr;
     }
-    if ((status = env->Object_SetField_Ref(contextObj, field, abilityInfoRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    ContextUtil::StsCreatContext(env, cls, contextObj, application->GetApplicationCtxObjRef(), context);
+    if (!SetAbilityInfo(env, cls, contextObj, context)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "SetAbilityInfo failed");
         return nullptr;
     }
-
-    auto configuration = context->GetConfiguration();
-    ani_ref configurationRef = OHOS::AppExecFwk::WrapConfiguration(env, *configuration);
-    if ((status = env->Class_FindField(cls, "config", &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    if (!SetConfiguration(env, cls, contextObj, context)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "SetConfiguration failed");
         return nullptr;
     }
-    if ((status = env->Object_SetField_Ref(contextObj, field, configurationRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
-    }
-    TAG_LOGE(AAFwkTag::UIABILITY, "end");
     return contextObj;
 }
 } // namespace AbilityRuntime
