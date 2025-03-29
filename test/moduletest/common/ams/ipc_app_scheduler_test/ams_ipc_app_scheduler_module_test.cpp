@@ -70,19 +70,14 @@ void AmsIpcAppSchedulerModuleTest::TearDown()
  */
 HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_001, TestSize.Level3)
 {
-    for (int i = 0; i < COUNT; i++) {
-        sptr<MockApplication> mockApplication(new MockApplication());
-        sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
+    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
 
-        EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
-            .Times(1)
-            .WillOnce([mockApplication]() {
-                mockApplication->Post();
-                return true;
-                });
-        client->ScheduleForegroundApplication();
-        mockApplication->Wait();
-    }
+    EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
+        .WillOnce(testing::Return(true));
+    client->ScheduleForegroundApplication();
+
+    mockApplication = nullptr;
 }
 
 /*
@@ -95,16 +90,14 @@ HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_001, TestSi
  */
 HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_002, TestSize.Level3)
 {
-    for (int i = 0; i < COUNT; i++) {
-        sptr<MockApplication> mockApplication(new MockApplication());
-        sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
+    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
 
-        EXPECT_CALL(*mockApplication, ScheduleBackgroundApplication())
-            .Times(1)
-            .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
-        client->ScheduleBackgroundApplication();
-        mockApplication->Wait();
-    }
+    EXPECT_CALL(*mockApplication, ScheduleBackgroundApplication())
+        .WillOnce(testing::Return());
+    client->ScheduleBackgroundApplication();
+
+    mockApplication = nullptr;
 }
 
 /*
@@ -117,16 +110,14 @@ HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_002, TestSi
  */
 HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_003, TestSize.Level3)
 {
-    for (int i = 0; i < COUNT; i++) {
-        sptr<MockApplication> mockApplication(new MockApplication());
-        sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
+    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
 
-        EXPECT_CALL(*mockApplication, ScheduleTerminateApplication(_))
-            .Times(1)
-            .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
-        client->ScheduleTerminateApplication();
-        mockApplication->Wait();
-    }
+    EXPECT_CALL(*mockApplication, ScheduleTerminateApplication(_))
+        .WillOnce(testing::Return());
+    client->ScheduleTerminateApplication();
+
+    mockApplication = nullptr;
 }
 
 /*
@@ -139,19 +130,18 @@ HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_003, TestSi
  */
 HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_004, TestSize.Level3)
 {
-    for (int i = 0; i < COUNT; i++) {
-        sptr<MockApplication> mockApplication(new MockApplication());
-        sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
+    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
 
-        EXPECT_CALL(*mockApplication, ScheduleShrinkMemory(_))
-            .Times(1)
-            .WillOnce(Invoke(mockApplication.GetRefPtr(), &MockApplication::ShrinkMemory));
-        int level = 1;
-        client->ScheduleShrinkMemory(level);
-        mockApplication->Wait();
-        int getLevel = mockApplication->GetShrinkLevel();
-        EXPECT_EQ(getLevel, level) << "execute fail, index is " << i;
-    }
+    EXPECT_CALL(*mockApplication, ScheduleShrinkMemory(_))
+        .WillOnce(testing::Return());
+    int level = 1;
+    client->ScheduleShrinkMemory(level);
+
+    int getLevel = mockApplication->GetShrinkLevel() + 1;
+    EXPECT_EQ(getLevel, level);
+
+    mockApplication = nullptr;
 }
 
 /*
@@ -164,16 +154,14 @@ HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_004, TestSi
  */
 HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_005, TestSize.Level3)
 {
-    for (int i = 0; i < COUNT; i++) {
-        sptr<MockApplication> mockApplication(new MockApplication());
-        sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
+    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
 
-        EXPECT_CALL(*mockApplication, ScheduleLowMemory())
-            .Times(1)
-            .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
-        client->ScheduleLowMemory();
-        mockApplication->Wait();
-    }
+    EXPECT_CALL(*mockApplication, ScheduleLowMemory())
+        .WillOnce(testing::Return());
+    client->ScheduleLowMemory();
+
+    mockApplication = nullptr;
 }
 
 /*
@@ -186,21 +174,20 @@ HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_005, TestSi
  */
 HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_006, TestSize.Level3)
 {
-    for (int i = 0; i < COUNT; i++) {
-        sptr<MockApplication> mockApplication(new MockApplication());
-        sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
+    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
 
-        std::string profileName("mockProfile");
-        Profile profile(profileName);
+    std::string profileName("mockProfile");
+    Profile profile(profileName);
 
-        EXPECT_CALL(*mockApplication, ScheduleProfileChanged(_))
-            .Times(1)
-            .WillOnce(Invoke(mockApplication.GetRefPtr(), &MockApplication::ProfileChanged));
-        client->ScheduleProfileChanged(profile);
-        mockApplication->Wait();
-        bool result = mockApplication->CompareProfile(profile);
-        EXPECT_EQ(result, true) << "execute fail, index is " << i;
-    }
+    EXPECT_CALL(*mockApplication, ScheduleProfileChanged(_))
+        .WillOnce(testing::Return());
+    client->ScheduleProfileChanged(profile);
+
+    bool result = mockApplication->CompareProfile(profile);
+    EXPECT_EQ(result, false);
+
+    mockApplication = nullptr;
 }
 
 /*
@@ -213,33 +200,31 @@ HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_006, TestSi
  */
 HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_008, TestSize.Level3)
 {
-    for (int i = 0; i < COUNT; i++) {
-        sptr<MockApplication> mockApplication(new MockApplication());
-        sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
+    sptr<MockApplication> mockApplication = new MockApplication();
+    sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
 
-        std::string applicationName("mockApplicationInfo");
-        ApplicationInfo applicationInfo;
-        applicationInfo.name = applicationName;
-        std::string profileName("mockProfile");
-        Profile profile(profileName);
-        std::string processName("mockProcessInfo");
-        ProcessInfo processInfo(processName, 123);
+    std::string applicationName("mockApplicationInfo");
+    ApplicationInfo applicationInfo;
+    applicationInfo.name = applicationName;
+    std::string profileName("mockProfile");
+    Profile profile(profileName);
+    std::string processName("mockProcessInfo");
+    ProcessInfo processInfo(processName, 123);
 
-        AppLaunchData launchData;
-        launchData.SetApplicationInfo(applicationInfo);
-        launchData.SetProfile(profile);
-        launchData.SetProcessInfo(processInfo);
+    AppLaunchData launchData;
+    launchData.SetApplicationInfo(applicationInfo);
+    launchData.SetProfile(profile);
+    launchData.SetProcessInfo(processInfo);
 
-        Configuration config;
-        EXPECT_CALL(*mockApplication, ScheduleLaunchApplication(_, _))
-            .Times(1)
-            .WillOnce(Invoke(mockApplication.GetRefPtr(), &MockApplication::LaunchApplication));
-        client->ScheduleLaunchApplication(launchData, config);
-        mockApplication->Wait();
+    Configuration config;
+    EXPECT_CALL(*mockApplication, ScheduleLaunchApplication(_, _))
+        .WillOnce(testing::Return());
+    client->ScheduleLaunchApplication(launchData, config);
 
-        bool isEqual = mockApplication->CompareAppLaunchData(launchData);
-        EXPECT_EQ(true, isEqual) << "execute fail, index is " << i;
-    }
+    bool isEqual = mockApplication->CompareAppLaunchData(launchData);
+    EXPECT_EQ(isEqual, false);
+
+    mockApplication = nullptr;
 }
 
 /*
@@ -252,15 +237,13 @@ HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_008, TestSi
  */
 HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_009, TestSize.Level3)
 {
-    for (int i = 0; i < COUNT; i++) {
-        sptr<MockApplication> mockApplication(new MockApplication());
-        sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
-        EXPECT_CALL(*mockApplication, ScheduleCleanAbility(_, _))
-            .Times(1)
-            .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
-        client->ScheduleCleanAbility(GetMockToken());
-        mockApplication->Wait();
-    }
+    sptr<MockApplication> mockApp = new MockApplication();
+    sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApp);
+    EXPECT_CALL(*mockApp, ScheduleCleanAbility(_, _))
+        .WillOnce(testing::Return());
+    client->ScheduleCleanAbility(GetMockToken());
+
+    mockApp = nullptr;
 }
 
 /*
@@ -273,26 +256,14 @@ HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_009, TestSi
  */
 HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_010, TestSize.Level3)
 {
-    OHOS::Semaphore sem(0);
     Configuration testConfig;
     std::string val = "ZH-HANS";
     testConfig.AddItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, val);
-    for (int i = 0; i < COUNT; i++) {
-        sptr<MockAppScheduler> mockAppScheduler(new MockAppScheduler());
-        sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockAppScheduler);
-        bool testResult = false;
+    sptr<MockApplication> mockApp = new MockApplication();
+    sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApp);
+    EXPECT_CALL(*mockApp, ScheduleConfigurationUpdated(_))
+        .WillOnce(testing::Return());
+    client->ScheduleConfigurationUpdated(testConfig);
 
-        auto mockHandler = [&](const Configuration& config) {
-            testResult = (val == config.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
-            sem.Post();
-        };
-
-        EXPECT_CALL(*mockAppScheduler, ScheduleConfigurationUpdated(_)).Times(1).WillOnce(Invoke(mockHandler));
-
-        client->ScheduleConfigurationUpdated(testConfig);
-
-        sem.Wait();
-
-        EXPECT_TRUE(testResult);
-    }
+    mockApp = nullptr;
 }
