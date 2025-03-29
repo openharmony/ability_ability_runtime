@@ -78,6 +78,7 @@ ohos_shared_library("runtime") {
     "${ability_runtime_native_path}/runtime/ohos_sts_environment_impl.cpp",
     "${ability_runtime_native_path}/runtime/runtime.cpp",
     "${ability_runtime_native_path}/runtime/sts_data_struct_converter.cpp",
+    "${ability_runtime_native_path}/runtime/sts_error_utils.cpp",
     "${ability_runtime_native_path}/runtime/sts_runtime.cpp",
   ]
 
