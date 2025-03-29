@@ -296,7 +296,7 @@ void StsServiceExtension::OnDisconnect(const AAFwk::Want &want,
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         return;
     }
-    CallObjectMethod(true, "callOnDisconnect", "L@ohos/app/ability/Want/Want;:V", wantRef);
+    CallObjectMethod(false, "callOnDisconnect", "L@ohos/app/ability/Want/Want;:V", wantRef);
 }
 
 void StsServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
