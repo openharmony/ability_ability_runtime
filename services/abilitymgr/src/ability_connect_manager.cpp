@@ -1540,20 +1540,17 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Timeout ability record is not exist in service map.");
         return;
     }
-    MoveToTerminatingMap(abilityRecord);
 
-    TAG_LOGW(AAFwkTag::SERVICE_EXT, "Load time out , remove target service record from services map.");
+    TAG_LOGW(AAFwkTag::SERVICE_EXT, "AbilityUri:%{public}s,user:%{public}d", abilityRecord->GetURI().c_str(), userId_);
+    MoveToTerminatingMap(abilityRecord);
     RemoveServiceAbility(abilityRecord);
+    DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
     if (abilityRecord->IsSceneBoard()) {
-        auto isAttached = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->IsProcessAttached(
-            abilityRecord->GetToken()));
-        DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
-        if (!isAttached) {
-            RestartAbility(abilityRecord, userId_);
-        }
+        RestartAbility(abilityRecord, userId_);
+        PrintTimeOutLog(abilityRecord, AbilityManagerService::LOAD_TIMEOUT_MSG);
         return;
     }
-    DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
+    
     if (IsAbilityNeedKeepAlive(abilityRecord)) {
         TAG_LOGW(AAFwkTag::SERVICE_EXT, "Load time out, try to restart");
         RestartAbility(abilityRecord, userId_);
@@ -2221,6 +2218,14 @@ void AbilityConnectManager::HandleAbilityDiedTask(
     }
     if (IsUIExtensionAbility(abilityRecord)) {
         HandleUIExtensionDied(abilityRecord);
+    }
+
+    std::string serviceKey = GetServiceKey(abilityRecord);
+    if (GetServiceRecordByElementName(serviceKey) == nullptr &&
+        (!IsCacheExtensionAbilityType(abilityRecord) ||
+        AbilityCacheManager::GetInstance().FindRecordByToken(abilityRecord->GetToken()) == nullptr)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s ability not in service map or cache.", serviceKey.c_str());
+        return;
     }
 
     bool isRemove = false;
