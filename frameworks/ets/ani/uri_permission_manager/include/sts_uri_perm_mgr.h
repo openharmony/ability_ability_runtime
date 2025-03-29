@@ -21,18 +21,20 @@
 namespace OHOS {
 namespace AbilityRuntime {    
 static ani_int grantUriPermissionPromiseSync([[maybe_unused]]ani_env *env,
-    [[maybe_unused]]ani_object obj, ani_string uri, ani_int flag, ani_string targetName);
+    ani_string uri, ani_enum_item flagEnum, ani_string targetName);
 static void grantUriPermissionPromiseWithAppCloneIndexSync([[maybe_unused]]ani_env *env,
-    [[maybe_unused]]ani_object obj, ani_string uri, ani_int flag, ani_string targetName, ani_int appCloneIndex);
+    ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_int appCloneIndex);
 static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
-    [[maybe_unused]]ani_object obj, ani_string uri, ani_int flag, ani_string targetName);
+    ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_object callback);
 static ani_int revokeUriPermissionPromiseSync([[maybe_unused]]ani_env *env,
-    [[maybe_unused]]ani_object obj, ani_string uri, ani_string targetName);
+    ani_string uri, ani_string targetName);
 static void revokeUriPermissionPromiseWithAppCloneIndexSync([[maybe_unused]]ani_env *env,
-    [[maybe_unused]]ani_object obj, ani_string uri, ani_string targetName, ani_int appCloneIndex);
+    ani_string uri, ani_string targetName, ani_int appCloneIndex);
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
-        [[maybe_unused]]ani_object obj, ani_string uri, ani_string targetName);
+    ani_string uri, ani_string targetName, ani_object callback);
 void CreateJsUriPermMgr(ani_env *env);
+bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
+ani_object WrapBusinessError(ani_env *env, ani_int code);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ABILITY_STAGE_H
