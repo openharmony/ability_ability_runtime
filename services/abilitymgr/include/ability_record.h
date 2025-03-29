@@ -1217,7 +1217,7 @@ private:
     void SetAbilityStateInner(AbilityState state);
 #endif
 
-    static int64_t abilityRecordId;
+    static std::atomic<int64_t> abilityRecordId;
     int recordId_ = 0;                                // record id
     int32_t uiExtensionAbilityId_ = 0;                // uiextension ability id
     AppExecFwk::AbilityInfo abilityInfo_ = {};             // the ability info get from BMS
