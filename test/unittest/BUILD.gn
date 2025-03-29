@@ -440,6 +440,7 @@ group("unittest") {
       "app_mgr_service_inner_second_test:unittest",
       "app_mgr_service_inner_tdd_second_test:unittest",
       "app_mgr_service_inner_tdd_test:unittest",
+      "app_mgr_service_inner_tdd_third_test:unittest",
       "app_mgr_service_inner_test:unittest",
       "app_mgr_service_second_test:unittest",
       "app_mgr_service_test:unittest",
