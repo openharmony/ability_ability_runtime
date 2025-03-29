@@ -17,7 +17,7 @@ import { AbilityResult } from 'ability.abilityResult';
 import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import uiExtensionHost from '@ohos.uiExtensionHost';
-import { LocalStorage } from '@ohos.arkui.component.CommonTsEtsApi';
+import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { AsyncCallbackCommonWrapper } from './UIExtensionCommon';
 import hilog from '@ohos.hilog';
 
