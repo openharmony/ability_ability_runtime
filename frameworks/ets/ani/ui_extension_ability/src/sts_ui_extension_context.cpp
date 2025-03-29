@@ -170,6 +170,13 @@ ani_object CreateStsUIExtensionContext(ani_env *env,
         TAG_LOGE(AAFwkTag::UI_EXT, "set filed status : %{public}d", status);
         return nullptr;
     }
+
+    // bind parent context
+    if (application == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "application is null");
+        return nullptr;
+    }
+    StsCreatExtensionContext(env, cls, contextObj, application->GetApplicationCtxObjRef(), context);
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return contextObj;
 }
