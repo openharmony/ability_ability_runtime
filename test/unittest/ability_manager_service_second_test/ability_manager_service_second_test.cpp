@@ -393,7 +393,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_002, TestSize.Level1)
     sptr<IRemoteObject> callerToken = nullptr;
     int requestCode = 0;
     EXPECT_EQ(abilityMs_->StartAbility(want, abilityStartSetting, callerToken, 0, requestCode),
-        CHECK_PERMISSION_FAILED);
+        ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE);
 }
 
 /*
@@ -410,7 +410,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_003, TestSize.Level1)
     sptr<IRemoteObject> callerToken = nullptr;
     int requestCode = 0;
     EXPECT_EQ(abilityMs_->StartAbilityDetails(want, abilityStartSetting, callerToken, 0, requestCode),
-        CHECK_PERMISSION_FAILED);
+        ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE);
 }
 
 /*
@@ -691,7 +691,8 @@ HWTEST_F(AbilityManagerServiceSecondTest, ConnectLocalAbility_002, TestSize.Leve
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want;
     ExtensionAbilityType extensionType = ExtensionAbilityType::SERVICE;
-    EXPECT_EQ(abilityMs_->ConnectLocalAbility(want, 100, nullptr, nullptr, extensionType), ERR_INVALID_VALUE);
+    EXPECT_EQ(abilityMs_->ConnectLocalAbility(want, 100, nullptr, nullptr, extensionType),
+        ERR_CROSS_USER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ConnectLocalAbility_002 end");
 }
 

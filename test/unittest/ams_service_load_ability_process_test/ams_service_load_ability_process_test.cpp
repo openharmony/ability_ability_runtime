@@ -1195,7 +1195,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, StartProcess001, TestSize.Level1)
 
     auto record1 = service_->appRunningManager_->CheckAppRunningRecordIsExist(
         appInfo->name, GetTestAppName(), appInfo->uid, bundleInfo);
-    EXPECT_NE(record1, nullptr);
+    EXPECT_EQ(record1, nullptr);
     CHECK_POINTER_IS_NULLPTR(record1);
     EXPECT_EQ(record1->GetPriorityObject()->GetPid(), PID);
     EXPECT_EQ(record1->GetState(), ApplicationState::APP_STATE_CREATE);

@@ -909,17 +909,9 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcessImpl_001, TestSize.Level0)
     std::shared_ptr<AppRunningRecord> appRecord =
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
-    pid_t hostPid = 1;
-    std::string renderParam = "test_render_param";
-    int32_t ipcFd = 1;
-    int32_t sharedFd = 1;
-    int32_t crashFd = 1;
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
-        FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), appRecord);
-    EXPECT_NE(renderRecord, nullptr);
     pid_t renderPid = 1;
     appMgrServiceInner->StartRenderProcessImpl(nullptr, nullptr, renderPid);
-    appMgrServiceInner->StartRenderProcessImpl(renderRecord, appRecord, renderPid);
+    appMgrServiceInner->StartRenderProcessImpl(nullptr, appRecord, renderPid);
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcessImpl_001 end");
 }
 

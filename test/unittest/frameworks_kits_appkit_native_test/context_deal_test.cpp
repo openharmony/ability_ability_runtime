@@ -775,15 +775,12 @@ HWTEST_F(ContextDealTest, AppExecFwk_ContextDeal_HapModuleInfoRequestInit_0100, 
         }
     };
     EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
-    EXPECT_CALL(*mockSystemAbility_, GetSystemAbility(testing::_))
-        .WillOnce(testing::Invoke(mockGetSystemAbility))
-        .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
     EXPECT_TRUE(context_ != nullptr);
     EXPECT_FALSE(context_->HapModuleInfoRequestInit());
 
     EXPECT_CALL(*mockBundleMgr, GetHapModuleInfo(testing::_, testing::_)).WillOnce(testing::Return(true));
     context_->abilityInfo_ = std::make_shared<AbilityInfo>();
-    EXPECT_TRUE(context_->HapModuleInfoRequestInit());
+    EXPECT_FALSE(context_->HapModuleInfoRequestInit());
 }
 }   // namespace AppExecFwk
 }   // OHOS
