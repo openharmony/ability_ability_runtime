@@ -17,7 +17,7 @@ import BaseContext from './BaseContext'
 import ApplicationContext from './ApplicationContext'
 import EventHub from './EventHub';
 import contextConstant from '@ohos.app.ability.contextConstant'
-// import ApplicationInfo from 'bms/ApplicationInfo'
+import { ApplicationInfo } from 'bundleManager.ApplicationInfo'
 import resmgr from '@ohos.resourceManager'
 
 export class Context extends BaseContext {
@@ -25,7 +25,7 @@ export class Context extends BaseContext {
     area: contextConstant.AreaMode = contextConstant.AreaMode.EL1;
     filesDir: string = "";
     tempDir: string = "";
-    // applicationInfo?: ApplicationInfo;
+    applicationInfo: ApplicationInfo;
     eventHub: EventHub = new EventHub();
     resourceManager: resmgr.ResourceManager;
 
