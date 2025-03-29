@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { Context } from './Context'
-// import ExtensionAbilityInfo from 'bms/ExtensionAbilityInfo.ets'
+import {ExtensionAbilityInfo} from 'bundleManager.ExtensionAbilityInfo'
 
 export default class ExtensionContext extends Context {
     public nativeContext:long = 0;
-    // extensionAbilityInfo?: ExtensionAbilityInfo
+    extensionAbilityInfo: ExtensionAbilityInfo;
 }
