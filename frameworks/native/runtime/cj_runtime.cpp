@@ -24,6 +24,8 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "hdc_register.h"
+#include "parameters.h"
+#include "bundle_constants.h"
 #include "connect_server_manager.h"
 
 using namespace OHOS::AbilityRuntime;
@@ -222,10 +224,54 @@ bool CJRuntime::RegisterCangjieCallback()
     return true;
 }
 
+void CJRuntime::StartProfiler(const DebugOption dOption)
+{
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "developer Mode false");
+        return;
+    }
+    bool isStartWithDebug = dOption.isStartWithDebug;
+    bool isDebugApp = dOption.isDebugApp;
+    const std::string bundleName = bundleName_;
+    int32_t instanceId = static_cast<int32_t>(instanceId_);
+    std::string appProvisionType = dOption.appProvisionType;
+    std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
+
+    HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
+        HdcRegister::DebugRegisterMode::HDC_DEBUG_REG,
+        [bundleName, isStartWithDebug, isDebugApp, instanceId, appProvisionType](int socketFd, std::string option) {
+            TAG_LOGI(AAFwkTag::CJRUNTIME, "hdcRegister callback call, socket fd: %{public}d, option: %{public}s.",
+                socketFd, option.c_str());
+            bool isSystemDebuggable = system::GetBoolParameter("const.secure", true) == false &&
+            system::GetBoolParameter("const.debuggable", false) == true;
+            // Don't start any server if (system not in debuggable mode) and app is release version
+            // Starting ConnectServer in release app on debuggable system
+            // is only for debug mode, not for profiling mode.
+            if ((!isSystemDebuggable) && appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+                TAG_LOGE(AAFwkTag::CJRUNTIME, "not support release app");
+                return;
+            }
+            if (option.find(DEBUGGER) == std::string::npos) {
+                ConnectServerManager::Get().StopConnectServer(false);
+                TAG_LOGI(AAFwkTag::CJRUNTIME, "start SendInstanceMessage");
+                ConnectServerManager::Get().SendInstanceMessage(instanceId, instanceId, bundleName);
+                ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
+                ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
+                CJRuntime::RegisterCangjieCallback();
+            } else {
+                TAG_LOGE(AAFwkTag::CJRUNTIME, "debugger service unexpected option: %{public}s", option.c_str());
+            }
+        });
+}
+
 void CJRuntime::StartDebugMode(const DebugOption dOption)
 {
     if (debugModel_) {
         TAG_LOGI(AAFwkTag::CJRUNTIME, "already debug mode");
+        return;
+    }
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "developer Mode false");
         return;
     }
 
@@ -233,15 +279,26 @@ void CJRuntime::StartDebugMode(const DebugOption dOption)
     bool isDebugApp = dOption.isDebugApp;
     const std::string bundleName = bundleName_;
     int32_t instanceId = static_cast<int32_t>(instanceId_);
+    std::string appProvisionType = dOption.appProvisionType;
     std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
 
     TAG_LOGI(AAFwkTag::CJRUNTIME, "StartDebugMode %{public}s", bundleName_.c_str());
 
     HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
         HdcRegister::DebugRegisterMode::HDC_DEBUG_REG,
-        [bundleName, isStartWithDebug, isDebugApp, instanceId](int socketFd, std::string option) {
+        [bundleName, isStartWithDebug, isDebugApp, instanceId, appProvisionType](int socketFd, std::string option) {
             TAG_LOGI(AAFwkTag::CJRUNTIME, "hdcRegister callback call, socket fd: %{public}d, option: %{public}s.",
                 socketFd, option.c_str());
+                    // system is debuggable when const.secure is false and const.debuggable is true
+            bool isSystemDebuggable = system::GetBoolParameter("const.secure", true) == false &&
+            system::GetBoolParameter("const.debuggable", false) == true;
+            // Don't start any server if (system not in debuggable mode) and app is release version
+            // Starting ConnectServer in release app on debuggable system
+            // is only for debug mode, not for profiling mode.
+            if ((!isSystemDebuggable) && appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+                TAG_LOGE(AAFwkTag::CJRUNTIME, "not support release app");
+                return;
+            }
             if (option.find(DEBUGGER) == std::string::npos) {
                 ConnectServerManager::Get().StopConnectServer(false);
                 TAG_LOGI(AAFwkTag::CJRUNTIME, "start SendInstanceMessage");
