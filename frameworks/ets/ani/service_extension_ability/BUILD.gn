@@ -19,7 +19,7 @@ generate_static_abc("service_extension_ability") {
   base_url = "./ets"
   files = [
     "./ets/@ohos.app.ability.ServiceExtensionAbility.ets",
-    "./ets/ServiceExtensionContext.ets",
+    "./ets/application/ServiceExtensionContext.ets",
   ]
 
   is_boot_abc = "True"
