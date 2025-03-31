@@ -13,7 +13,12 @@
  * limitations under the License.
  */
 
-import AbilityDelegatorArgs from 'application.abilityDelegatorArgs';
+export default interface AbilityDelegatorArgs {
+    bundleName: string;
+    parameters: Record<string, string>;
+    testCaseNames: string;
+    testRunnerClassName: string;
+}
 
 class AbilityDelegatorArgsInner implements AbilityDelegatorArgs {
     public bundleName: string = '';
