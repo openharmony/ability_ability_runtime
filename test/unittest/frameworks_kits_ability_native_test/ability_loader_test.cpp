@@ -97,7 +97,7 @@ HWTEST_F(AbilityLoaderTest, RegisterExtension_0100, TestSize.Level0)
  * @tc.name: GetAbilityByName
  * @tc.desc: GetAbilityByName Test When Ability is not nullptr.
  */
-HWTEST_F(AbilityLoaderTest, GetAbilityByName_0100, TestSize.Level0)
+HWTEST_F(AbilityLoaderTest, GetAbilityByName_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetAbilityByName_0100 start";
     std::string abilityName = "Ability";
@@ -131,7 +131,7 @@ HWTEST_F(AbilityLoaderTest, GetAbilityByName_0200, TestSize.Level1)
  * @tc.name: GetExtensionByName
  * @tc.desc: GetExtensionByName Test When AbilityRuntime::Extension is not nullptr.
  */
-HWTEST_F(AbilityLoaderTest, GetExtensionByName_0100, TestSize.Level0)
+HWTEST_F(AbilityLoaderTest, GetExtensionByName_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetExtensionByName_0100 start";
     std::string abilityName = "AbilityRuntime::Extension";
@@ -186,7 +186,7 @@ HWTEST_F(AbilityLoaderTest, RegisterUIAbility_0100, TestSize.Level0)
  * @tc.name: GetUIAbilityByName
  * @tc.desc: GetUIAbilityByName Test When UIAbility is not nullptr.
  */
-HWTEST_F(AbilityLoaderTest, GetUIAbilityByName_0100, TestSize.Level0)
+HWTEST_F(AbilityLoaderTest, GetUIAbilityByName_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetUIAbilityByName_0100 start";
     std::string abilityName = "UIAbility";

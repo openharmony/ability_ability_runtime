@@ -58,7 +58,7 @@ void TaskHandlerWrapTest::TearDown()
  * @tc.desc: SubmitTask Test
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, QueueTest_0010, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, QueueTest_0010, TestSize.Level2)
 {
     int input = 0;
     auto taskHandle = queueHandler_->SubmitTask([&input]() {
@@ -74,7 +74,7 @@ HWTEST_F(TaskHandlerWrapTest, QueueTest_0010, TestSize.Level0)
  * @tc.desc: SubmitTask with delay Test
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, QueueTest_0020, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, QueueTest_0020, TestSize.Level2)
 {
     int input = 0;
     auto taskHandle = queueHandler_->SubmitTask([&input]() {
@@ -90,7 +90,7 @@ HWTEST_F(TaskHandlerWrapTest, QueueTest_0020, TestSize.Level0)
  * @tc.desc: SubmitTask Test
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, QueueTest_0030, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, QueueTest_0030, TestSize.Level2)
 {
     auto taskHandle = queueHandler_->SubmitTask([]() {});
     EXPECT_TRUE(taskHandle);
@@ -103,7 +103,7 @@ HWTEST_F(TaskHandlerWrapTest, QueueTest_0030, TestSize.Level0)
  * @tc.desc: SubmitTask with delay Test
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, QueueTest_0040, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, QueueTest_0040, TestSize.Level2)
 {
     auto taskHandle = queueHandler_->SubmitTask([]() {}, 100);
     EXPECT_TRUE(taskHandle);
@@ -116,7 +116,7 @@ HWTEST_F(TaskHandlerWrapTest, QueueTest_0040, TestSize.Level0)
  * @tc.desc: SubmitTask time task test
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, QueueTest_0050, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, QueueTest_0050, TestSize.Level2)
 {
     int input = 0;
     auto taskHandle = queueHandler_->SubmitTask([&input]() {
@@ -133,7 +133,7 @@ HWTEST_F(TaskHandlerWrapTest, QueueTest_0050, TestSize.Level0)
  * @tc.desc: Insert task test
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, QueueTest_0060, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, QueueTest_0060, TestSize.Level2)
 {
     queueHandler_->SetPrintTaskLog(true);
     int input = 0;
@@ -172,7 +172,7 @@ HWTEST_F(TaskHandlerWrapTest, QueueTest_0060, TestSize.Level0)
  * @tc.desc: SubmitTask Test
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, FfrtTest_0010, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, FfrtTest_0010, TestSize.Level2)
 {
     int input = 0;
     auto taskHandle = ffrtHandler_->SubmitTask([&input]() {
@@ -188,7 +188,7 @@ HWTEST_F(TaskHandlerWrapTest, FfrtTest_0010, TestSize.Level0)
  * @tc.desc: SubmitTask with delay Test
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, FfrtTest_0020, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, FfrtTest_0020, TestSize.Level2)
 {
     int input = 0;
     auto taskHandle = ffrtHandler_->SubmitTask([&input]() {
@@ -204,7 +204,7 @@ HWTEST_F(TaskHandlerWrapTest, FfrtTest_0020, TestSize.Level0)
  * @tc.desc: SubmitTask Test
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, FfrtTest_0030, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, FfrtTest_0030, TestSize.Level2)
 {
     auto taskHandle = ffrtHandler_->SubmitTask([]() {});
     EXPECT_TRUE(taskHandle);
@@ -217,7 +217,7 @@ HWTEST_F(TaskHandlerWrapTest, FfrtTest_0030, TestSize.Level0)
  * @tc.desc: SubmitTask with delay Test
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, FfrtTest_0040, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, FfrtTest_0040, TestSize.Level2)
 {
     auto taskHandle = ffrtHandler_->SubmitTask([]() {}, 100);
     EXPECT_TRUE(taskHandle);
@@ -230,7 +230,7 @@ HWTEST_F(TaskHandlerWrapTest, FfrtTest_0040, TestSize.Level0)
  * @tc.desc: Test removing a task from the task handler after submission.
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, RemoveTask_0050, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, RemoveTask_0050, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "RemoveTask_0050 start";
 
@@ -260,7 +260,7 @@ HWTEST_F(TaskHandlerWrapTest, RemoveTask_0050, TestSize.Level0)
  * @tc.desc: Verify the conversion of task QoS and priority to ffrt equivalents.
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, Convert2FfrtQosAndConvert2FfrtPriority_0060, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, Convert2FfrtQosAndConvert2FfrtPriority_0060, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "Convert2FfrtQosAndConvert2FfrtPriority_0060 start";
 
@@ -284,7 +284,7 @@ HWTEST_F(TaskHandlerWrapTest, Convert2FfrtQosAndConvert2FfrtPriority_0060, TestS
  * @tc.desc: Test building task attributes and ensure task execution occurs after delay.
  * @tc.type: FUNC
  */
-HWTEST_F(TaskHandlerWrapTest, BuildFfrtTaskAttr_0070, TestSize.Level0)
+HWTEST_F(TaskHandlerWrapTest, BuildFfrtTaskAttr_0070, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "BuildFfrtTaskAttr_0070 start";
 

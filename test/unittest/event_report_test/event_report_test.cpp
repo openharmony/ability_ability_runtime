@@ -46,7 +46,7 @@ void EventReportTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, ConvertEventName_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, ConvertEventName_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -104,7 +104,7 @@ HWTEST_F(EventReportTest, ConvertEventName_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendAppEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAppEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -119,7 +119,7 @@ HWTEST_F(EventReportTest, SendAppEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI6HXXS
  */
-HWTEST_F(EventReportTest, SendAppEvent_0200, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAppEvent_0200, TestSize.Level2)
 {
     EventName eventName = EventName::APP_STARTUP_TYPE;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "APP_STARTUP_TYPE");
@@ -134,7 +134,7 @@ HWTEST_F(EventReportTest, SendAppEvent_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI6HXXS
  */
-HWTEST_F(EventReportTest, SendAppEvent_0300, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAppEvent_0300, TestSize.Level2)
 {
     EventName eventName = EventName::DRAWN_COMPLETED;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "DRAWN_COMPLETED");
@@ -150,7 +150,7 @@ HWTEST_F(EventReportTest, SendAppEvent_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI6HXXS
  */
-HWTEST_F(EventReportTest, SendAppEvent_0400, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAppEvent_0400, TestSize.Level2)
 {
     EventName eventName = EventName::APP_ATTACH;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "APP_ATTACH");
@@ -165,7 +165,7 @@ HWTEST_F(EventReportTest, SendAppEvent_0400, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendAbilityEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAbilityEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -180,7 +180,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendAbilityEvent_0200, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAbilityEvent_0200, TestSize.Level2)
 {
     EventName eventName = EventName::START_ABILITY_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_ABILITY_ERROR");
@@ -195,7 +195,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendAbilityEvent_0300, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAbilityEvent_0300, TestSize.Level2)
 {
     EventName eventName = EventName::TERMINATE_ABILITY_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "TERMINATE_ABILITY_ERROR");
@@ -210,7 +210,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendAbilityEvent_0400, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAbilityEvent_0400, TestSize.Level2)
 {
     EventName eventName = EventName::START_ABILITY;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_ABILITY");
@@ -225,7 +225,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0400, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendAbilityEvent_0500, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAbilityEvent_0500, TestSize.Level2)
 {
     EventName eventName = EventName::TERMINATE_ABILITY;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "TERMINATE_ABILITY");
@@ -240,7 +240,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0500, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendAbilityEvent_0600, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAbilityEvent_0600, TestSize.Level2)
 {
     EventName eventName = EventName::CLOSE_ABILITY;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "CLOSE_ABILITY");
@@ -255,7 +255,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0600, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendAbilityEvent_0700, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAbilityEvent_0700, TestSize.Level2)
 {
     EventName eventName = EventName::ABILITY_ONFOREGROUND;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "ABILITY_ONFOREGROUND");
@@ -270,7 +270,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0700, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendAbilityEvent_0800, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAbilityEvent_0800, TestSize.Level2)
 {
     EventName eventName = EventName::ABILITY_ONBACKGROUND;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "ABILITY_ONBACKGROUND");
@@ -285,7 +285,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0800, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendAbilityEvent_0900, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAbilityEvent_0900, TestSize.Level2)
 {
     EventName eventName = EventName::ABILITY_ONACTIVE;
     std::string name  = "ABILITY_ONACTIVE";
@@ -301,7 +301,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_0900, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI6A12D
  */
-HWTEST_F(EventReportTest, SendAbilityEvent_1000, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAbilityEvent_1000, TestSize.Level2)
 {
     EventName eventName = EventName::ABILITY_ONINACTIVE;
     std::string name  = "ABILITY_ONINACTIVE";
@@ -317,7 +317,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_1000, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendAbilityEvent_1100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAbilityEvent_1100, TestSize.Level2)
 {
     EventName eventName = EventName::DISCONNECT_SERVICE;
     std::string name  = "DISCONNECT_SERVICE";
@@ -333,7 +333,7 @@ HWTEST_F(EventReportTest, SendAbilityEvent_1100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendExtensionEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendExtensionEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -348,7 +348,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendExtensionEvent_0200, TestSize.Level0)
+HWTEST_F(EventReportTest, SendExtensionEvent_0200, TestSize.Level2)
 {
     EventName eventName = EventName::START_EXTENSION_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_EXTENSION_ERROR");
@@ -363,7 +363,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendExtensionEvent_0300, TestSize.Level0)
+HWTEST_F(EventReportTest, SendExtensionEvent_0300, TestSize.Level2)
 {
     EventName eventName = EventName::STOP_EXTENSION_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "STOP_EXTENSION_ERROR");
@@ -378,7 +378,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendExtensionEvent_0400, TestSize.Level0)
+HWTEST_F(EventReportTest, SendExtensionEvent_0400, TestSize.Level2)
 {
     EventName eventName = EventName::CONNECT_SERVICE_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "CONNECT_SERVICE_ERROR");
@@ -393,7 +393,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0400, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendExtensionEvent_0500, TestSize.Level0)
+HWTEST_F(EventReportTest, SendExtensionEvent_0500, TestSize.Level2)
 {
     EventName eventName = EventName::DISCONNECT_SERVICE_ERROR;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "DISCONNECT_SERVICE_ERROR");
@@ -408,7 +408,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0500, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI67H0J
  */
-HWTEST_F(EventReportTest, SendExtensionEvent_0600, TestSize.Level0)
+HWTEST_F(EventReportTest, SendExtensionEvent_0600, TestSize.Level2)
 {
     EventName eventName = EventName::START_SERVICE;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_SERVICE");
@@ -423,7 +423,7 @@ HWTEST_F(EventReportTest, SendExtensionEvent_0600, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendKeyEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendKeyEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -438,7 +438,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendKeyEvent_0200, TestSize.Level0)
+HWTEST_F(EventReportTest, SendKeyEvent_0200, TestSize.Level2)
 {
     EventName eventName = EventName::GRANT_URI_PERMISSION;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "GRANT_URI_PERMISSION");
@@ -453,7 +453,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendKeyEvent_0300, TestSize.Level0)
+HWTEST_F(EventReportTest, SendKeyEvent_0300, TestSize.Level2)
 {
     EventName eventName = EventName::FA_SHOW_ON_LOCK;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "FA_SHOW_ON_LOCK");
@@ -468,7 +468,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendKeyEvent_0400, TestSize.Level0)
+HWTEST_F(EventReportTest, SendKeyEvent_0400, TestSize.Level2)
 {
     EventName eventName = EventName::START_PRIVATE_ABILITY;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_PRIVATE_ABILITY");
@@ -483,7 +483,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0400, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendKeyEvent_0500, TestSize.Level0)
+HWTEST_F(EventReportTest, SendKeyEvent_0500, TestSize.Level2)
 {
     EventName eventName = EventName::RESTART_PROCESS_BY_SAME_APP;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "RESTART_PROCESS_BY_SAME_APP");
@@ -498,7 +498,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0500, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendKeyEvent_0600, TestSize.Level0)
+HWTEST_F(EventReportTest, SendKeyEvent_0600, TestSize.Level2)
 {
     EventName eventName = EventName::START_SERVICE;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "START_SERVICE");
@@ -513,7 +513,7 @@ HWTEST_F(EventReportTest, SendKeyEvent_0600, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendAppLaunchEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAppLaunchEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -530,7 +530,7 @@ HWTEST_F(EventReportTest, SendAppLaunchEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendAppForegroundEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAppForegroundEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -547,7 +547,7 @@ HWTEST_F(EventReportTest, SendAppForegroundEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendAppBackgroundEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAppBackgroundEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -564,7 +564,7 @@ HWTEST_F(EventReportTest, SendAppBackgroundEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendProcessStartEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendProcessStartEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -583,7 +583,7 @@ HWTEST_F(EventReportTest, SendProcessStartEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendProcessStartFailedEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendProcessStartFailedEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -602,7 +602,7 @@ HWTEST_F(EventReportTest, SendProcessStartFailedEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendProcessExitEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendProcessExitEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -633,7 +633,7 @@ HWTEST_F(EventReportTest, SendProcessExitEvent_0200, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendStartServiceEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendStartServiceEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -650,7 +650,7 @@ HWTEST_F(EventReportTest, SendStartServiceEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendStopServiceEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendStopServiceEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -667,7 +667,7 @@ HWTEST_F(EventReportTest, SendStopServiceEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendConnectServiceEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendConnectServiceEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -684,7 +684,7 @@ HWTEST_F(EventReportTest, SendConnectServiceEvent_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI99FZY
  */
-HWTEST_F(EventReportTest, SendDisconnectServiceEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendDisconnectServiceEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
@@ -700,7 +700,7 @@ HWTEST_F(EventReportTest, SendDisconnectServiceEvent_0100, TestSize.Level0)
  * @tc.desc: Check SendAtomicServiceEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(EventReportTest, SendAtomicServiceEvent_0100, TestSize.Level0)
+HWTEST_F(EventReportTest, SendAtomicServiceEvent_0100, TestSize.Level2)
 {
     EventName eventName = static_cast<EventName>(-1);
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");

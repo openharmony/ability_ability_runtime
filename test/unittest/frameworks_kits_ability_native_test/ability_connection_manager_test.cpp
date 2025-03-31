@@ -97,7 +97,7 @@ HWTEST_F(ConnectionManagerTest, ConnectAbility_0100, TestSize.Level0)
  * @tc.name: ConnectAbilityInner
  * @tc.desc: ConnectAbilityInner Test, connectCaller is nullptr, return ERR_INVALID_CALLER.
  */
-HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0100, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityInner_0100 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -115,7 +115,7 @@ HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0100, TestSize.Level0)
  * @tc.name: ConnectAbilityInner
  * @tc.desc: ConnectAbilityInner Test, connectCallback is nullptr, return ERR_INVALID_CALLER.
  */
-HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0200, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0200, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityInner_0200 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -133,7 +133,7 @@ HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0200, TestSize.Level0)
  * @tc.name: ConnectAbilityInner
  * @tc.desc: ConnectAbilityInner Test, connectCallback is nullptr, connectCaller is nullptr, return ERR_INVALID_CALLER.
  */
-HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0300, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0300, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityInner_0300 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -151,7 +151,7 @@ HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0300, TestSize.Level0)
  * @tc.desc: ConnectAbilityInner Test, connectCallback is not nullptr, connectCaller is not nullptr,
  * return RESOLVE_ABILITY_ERR.
  */
-HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0400, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0400, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityInner_0400 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -170,7 +170,7 @@ HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0400, TestSize.Level0)
  * @tc.name: ConnectAbilityInner
  * @tc.desc: ConnectAbilityInner Test, return INVALID_CONNECTION_STATE.
  */
-HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0500, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0500, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityInner_0500 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -201,7 +201,7 @@ HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0500, TestSize.Level0)
  * @tc.name: ConnectAbilityInner
  * @tc.desc: ConnectAbilityInner Test, return ERR_OK.
  */
-HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0600, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0600, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityInner_0600 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -234,7 +234,7 @@ HWTEST_F(ConnectionManagerTest, ConnectAbilityInner_0600, TestSize.Level0)
  * @tc.name: IsConnectCallerEqual
  * @tc.desc: IsConnectCallerEqual Test, return false.
  */
-HWTEST_F(ConnectionManagerTest, IsConnectCallerEqual_0100, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, IsConnectCallerEqual_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest IsConnectCallerEqual_0100 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -251,7 +251,7 @@ HWTEST_F(ConnectionManagerTest, IsConnectCallerEqual_0100, TestSize.Level0)
  * @tc.name: IsConnectReceiverEqual
  * @tc.desc: IsConnectReceiverEqual Test, return true.
  */
-HWTEST_F(ConnectionManagerTest, IsConnectReceiverEqual_0100, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, IsConnectReceiverEqual_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest IsConnectReceiverEqual_0100 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -271,7 +271,7 @@ HWTEST_F(ConnectionManagerTest, IsConnectReceiverEqual_0100, TestSize.Level0)
  * @tc.desc: CreateConnection Test, return CHECK_PERMISSION_FAILED.
  * return ERR_INVALID_VALUE.
  */
-HWTEST_F(ConnectionManagerTest, CreateConnection_0100, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, CreateConnection_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest CreateConnection_0100 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -391,7 +391,7 @@ HWTEST_F(ConnectionManagerTest, DisconnectAbility_0500, TestSize.Level0)
  * @tc.name: DisconnectCaller
  * @tc.desc: DisconnectCaller Test, connectCaller is nullptr, return false.
  */
-HWTEST_F(ConnectionManagerTest, DisconnectCaller_0100, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, DisconnectCaller_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest DisconnectCaller_0100 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -406,7 +406,7 @@ HWTEST_F(ConnectionManagerTest, DisconnectCaller_0100, TestSize.Level0)
  * @tc.name: DisconnectCaller
  * @tc.desc: DisconnectCaller Test, connectCaller is not nullptr, return false.
  */
-HWTEST_F(ConnectionManagerTest, DisconnectCaller_0200, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, DisconnectCaller_0200, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest DisconnectCaller_0200 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -422,7 +422,7 @@ HWTEST_F(ConnectionManagerTest, DisconnectCaller_0200, TestSize.Level0)
  * @tc.name: DisconnectCaller
  * @tc.desc: DisconnectCaller Test, return true.
  */
-HWTEST_F(ConnectionManagerTest, DisconnectCaller_0300, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, DisconnectCaller_0300, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest DisconnectCaller_0300 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -443,7 +443,7 @@ HWTEST_F(ConnectionManagerTest, DisconnectCaller_0300, TestSize.Level0)
  * @tc.name: RemoveConnection
  * @tc.desc: RemoveConnection Test, return true.
  */
-HWTEST_F(ConnectionManagerTest, RemoveConnection_0100, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, RemoveConnection_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest RemoveConnection_0100 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
@@ -464,7 +464,7 @@ HWTEST_F(ConnectionManagerTest, RemoveConnection_0100, TestSize.Level0)
  * @tc.name: RemoveConnection
  * @tc.desc: RemoveConnection Test, connectReceiver is not nullptr, return false.
  */
-HWTEST_F(ConnectionManagerTest, RemoveConnection_0200, TestSize.Level0)
+HWTEST_F(ConnectionManagerTest, RemoveConnection_0200, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConnectionManagerTest RemoveConnection_0200 start";
     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =

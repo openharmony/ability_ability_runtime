@@ -47,7 +47,7 @@ void TokenIdPermissionTest::TearDown()
  * @tc.name: VerifyProxyAuthorizationUriPermission
  * @tc.desc: Test whether VerifyProxyAuthorizationUriPermission and are called normally.
  */
-HWTEST_F(TokenIdPermissionTest, VerifyProxyAuthorizationUriPermission_0100, TestSize.Level0)
+HWTEST_F(TokenIdPermissionTest, VerifyProxyAuthorizationUriPermission_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "TokenIdPermissionTest VerifyProxyAuthorizationUriPermission_0100 start";
     uint32_t callerTokenId = 1001;
@@ -62,7 +62,7 @@ HWTEST_F(TokenIdPermissionTest, VerifyProxyAuthorizationUriPermission_0100, Test
  * @tc.name: VerifyFileAccessManagerPermission
  * @tc.desc: Test whether VerifyFileAccessManagerPermission and are called normally.
  */
-HWTEST_F(TokenIdPermissionTest, VerifyFileAccessManagerPermission_0100, TestSize.Level0)
+HWTEST_F(TokenIdPermissionTest, VerifyFileAccessManagerPermission_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "TokenIdPermissionTest VerifyFileAccessManagerPermission_0100 start";
     uint32_t callerTokenId = 1001;
@@ -77,7 +77,7 @@ HWTEST_F(TokenIdPermissionTest, VerifyFileAccessManagerPermission_0100, TestSize
  * @tc.name: VerifyReadImageVideoPermission
  * @tc.desc: Test whether VerifyReadImageVideoPermission and are called normally.
  */
-HWTEST_F(TokenIdPermissionTest, VerifyReadImageVideoPermission_0100, TestSize.Level0)
+HWTEST_F(TokenIdPermissionTest, VerifyReadImageVideoPermission_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "TokenIdPermissionTest VerifyReadImageVideoPermission_0100 start";
     uint32_t callerTokenId = 1001;
@@ -92,7 +92,7 @@ HWTEST_F(TokenIdPermissionTest, VerifyReadImageVideoPermission_0100, TestSize.Le
  * @tc.name: VerifyWriteImageVideoPermission
  * @tc.desc: Test whether VerifyWriteImageVideoPermission and are called normally.
  */
-HWTEST_F(TokenIdPermissionTest, VerifyWriteImageVideoPermission_0100, TestSize.Level0)
+HWTEST_F(TokenIdPermissionTest, VerifyWriteImageVideoPermission_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "TokenIdPermissionTest VerifyWriteImageVideoPermission_0100 start";
     uint32_t callerTokenId = 1001;
@@ -107,7 +107,7 @@ HWTEST_F(TokenIdPermissionTest, VerifyWriteImageVideoPermission_0100, TestSize.L
  * @tc.name: VerifyReadAudioPermission
  * @tc.desc: Test whether VerifyReadAudioPermission and are called normally.
  */
-HWTEST_F(TokenIdPermissionTest, VerifyReadAudioPermission_0100, TestSize.Level0)
+HWTEST_F(TokenIdPermissionTest, VerifyReadAudioPermission_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "TokenIdPermissionTest VerifyReadAudioPermission_0100 start";
     uint32_t callerTokenId = 1001;
@@ -122,7 +122,7 @@ HWTEST_F(TokenIdPermissionTest, VerifyReadAudioPermission_0100, TestSize.Level0)
  * @tc.name: VerifyWriteAudioPermission
  * @tc.desc: Test whether VerifyWriteAudioPermission and are called normally.
  */
-HWTEST_F(TokenIdPermissionTest, VerifyWriteAudioPermission_0100, TestSize.Level0)
+HWTEST_F(TokenIdPermissionTest, VerifyWriteAudioPermission_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "TokenIdPermissionTest VerifyWriteAudioPermission_0100 start";
     uint32_t callerTokenId = 1001;

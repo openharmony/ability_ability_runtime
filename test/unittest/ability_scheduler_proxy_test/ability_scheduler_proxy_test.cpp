@@ -286,7 +286,7 @@ HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_012, TestS
  * @tc.type: FUNC
  * @tc.require: AR000GI8IJ
  */
-HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_013, TestSize.Level0)
+HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_013, TestSize.Level2)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
@@ -303,7 +303,7 @@ HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_013, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_014, TestSize.Level0)
+HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_014, TestSize.Level2)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
@@ -319,7 +319,7 @@ HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_014, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_015, TestSize.Level0)
+HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_015, TestSize.Level2)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)

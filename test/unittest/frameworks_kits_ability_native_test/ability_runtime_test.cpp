@@ -85,7 +85,7 @@ HWTEST_F(RuntimeTest, Create_0200, TestSize.Level0)
  * @tc.name: SavePreloaded
  * @tc.desc: Runtime test for SavePreloaded, runtime is not nullptr.
  */
-HWTEST_F(RuntimeTest, SavePreloaded_0100, TestSize.Level0)
+HWTEST_F(RuntimeTest, SavePreloaded_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "RuntimeTest SavePreloaded_0100 start";
     Runtime::Options options;
@@ -101,7 +101,7 @@ HWTEST_F(RuntimeTest, SavePreloaded_0100, TestSize.Level0)
  * @tc.name: GetPreloaded
  * @tc.desc: Runtime test for GetPreloaded, runtime is not nullptr.
  */
-HWTEST_F(RuntimeTest, GetPreloaded_0100, TestSize.Level0)
+HWTEST_F(RuntimeTest, GetPreloaded_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "RuntimeTest GetPreloaded_0100 start";
     Runtime::Options options;
@@ -117,7 +117,7 @@ HWTEST_F(RuntimeTest, GetPreloaded_0100, TestSize.Level0)
  * @tc.name: SetModuleLoadChecker
  * @tc.desc: Runtime test for SetModuleLoadChecker, runtime is not nullptr.
  */
-HWTEST_F(RuntimeTest, SetModuleLoadChecker_0100, TestSize.Level0)
+HWTEST_F(RuntimeTest, SetModuleLoadChecker_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "RuntimeTest SetModuleLoadChecker_0100 start";
     Runtime::Options options;

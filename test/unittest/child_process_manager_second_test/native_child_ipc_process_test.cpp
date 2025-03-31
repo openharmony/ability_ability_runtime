@@ -151,7 +151,7 @@ HWTEST_F(NativeChildIpcProcessTest, Init_0500, TestSize.Level0)
  * @tc.desc: Test NativeChildIpcProcessTest works
  * @tc.type: FUNC
  */
-HWTEST_F(NativeChildIpcProcessTest, UnloadNativeLib_0100, TestSize.Level0)
+HWTEST_F(NativeChildIpcProcessTest, UnloadNativeLib_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "UnloadNativeLib_0100 called.");
     auto childProcess = std::make_shared<NativeChildIpcProcess>();

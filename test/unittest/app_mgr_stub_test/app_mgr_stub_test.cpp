@@ -93,7 +93,7 @@ void AppMgrStubTest::WriteInterfaceToken(MessageParcel& data)
  * @tc.type: FUNC
  * @tc.require: SR000GH1GO
  */
-HWTEST_F(AppMgrStubTest, AppMgrStub_GetProcessRunningInfosByUserId_0100, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, AppMgrStub_GetProcessRunningInfosByUserId_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AppMgrStub_GetProcessRunningInfosByUserId_0100 start";
 
@@ -119,7 +119,7 @@ HWTEST_F(AppMgrStubTest, AppMgrStub_GetProcessRunningInfosByUserId_0100, TestSiz
  * @tc.type: FUNC
  * @tc.require: issueI581VW
  */
-HWTEST_F(AppMgrStubTest, HandleGetAppRunningStateByBundleName_0100, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, HandleGetAppRunningStateByBundleName_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
@@ -146,7 +146,7 @@ HWTEST_F(AppMgrStubTest, HandleGetAppRunningStateByBundleName_0100, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI581VW
  */
-HWTEST_F(AppMgrStubTest, HandleNotifyLoadRepairPatch_0100, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, HandleNotifyLoadRepairPatch_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
@@ -169,7 +169,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyLoadRepairPatch_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581VW
  */
-HWTEST_F(AppMgrStubTest, HandleNotifyHotReloadPage_0100, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, HandleNotifyHotReloadPage_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
@@ -192,7 +192,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyHotReloadPage_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581VW
  */
-HWTEST_F(AppMgrStubTest, HandleNotifyUnLoadRepairPatch_0100, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, HandleNotifyUnLoadRepairPatch_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
@@ -215,7 +215,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyUnLoadRepairPatch_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrStubTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, PreStartNWebSpawnProcess_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     MessageParcel data;
@@ -237,7 +237,7 @@ HWTEST_F(AppMgrStubTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI76JBF
  */
-HWTEST_F(AppMgrStubTest, GetProcessMemoryByPid_001, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, GetProcessMemoryByPid_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     MessageParcel data;
@@ -263,7 +263,7 @@ HWTEST_F(AppMgrStubTest, GetProcessMemoryByPid_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI76JBF
  */
-HWTEST_F(AppMgrStubTest, GetRunningProcessInformation_001, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, GetRunningProcessInformation_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     MessageParcel data;
@@ -639,7 +639,7 @@ HWTEST_F(AppMgrStubTest, PreloadApplication_0100, TestSize.Level1)
  * @tc.desc: The application sets itself whether or not to support process cache.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrStubTest, SetSupportedProcessCacheSelf_001, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, SetSupportedProcessCacheSelf_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     MessageParcel data;
@@ -743,7 +743,7 @@ HWTEST_F(AppMgrStubTest, GetAllRunningInstanceKeysByBundleName_001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueIAGZ7H
  */
-HWTEST_F(AppMgrStubTest, GetSupportedProcessCachePids_001, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, GetSupportedProcessCachePids_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     MessageParcel data;

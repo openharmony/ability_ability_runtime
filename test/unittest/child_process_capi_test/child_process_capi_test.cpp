@@ -56,7 +56,7 @@ void ChildProcessCapiTest::OnNativeChildProcessStarted(int errCode, OHIPCRemoteP
  * @tc.desc: Test API OH_Ability_CreateNativeChildProcess works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessCapiTest, OH_Ability_CreateNativeChildProcess_001, TestSize.Level0)
+HWTEST_F(ChildProcessCapiTest, OH_Ability_CreateNativeChildProcess_001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "OH_Ability_CreateNativeChildProcess_001 begin";
     int ret = OH_Ability_CreateNativeChildProcess(nullptr, ChildProcessCapiTest::OnNativeChildProcessStarted);
@@ -83,7 +83,7 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_CreateNativeChildProcess_001, TestSize
  * @tc.desc: Test API OH_Ability_StartNativeChildProcess_001 works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessCapiTest, OH_Ability_StartNativeChildProcess_001, TestSize.Level0)
+HWTEST_F(ChildProcessCapiTest, OH_Ability_StartNativeChildProcess_001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "OH_Ability_StartNativeChildProcess_001 begin";
     NativeChildProcess_Args args;
@@ -99,7 +99,7 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_StartNativeChildProcess_001, TestSize.
  * @tc.desc: Test API OH_Ability_GetCurrentChildProcessArgs_001 works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessCapiTest, OH_Ability_GetCurrentChildProcessArgs_001, TestSize.Level0)
+HWTEST_F(ChildProcessCapiTest, OH_Ability_GetCurrentChildProcessArgs_001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "OH_Ability_GetCurrentChildProcessArgs_001 begin";
     EXPECT_EQ(OH_Ability_GetCurrentChildProcessArgs(), nullptr);

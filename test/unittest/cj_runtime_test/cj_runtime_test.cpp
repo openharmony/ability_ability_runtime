@@ -102,7 +102,7 @@ HWTEST_F(CjRuntimeTest, CjRuntimeCreate_002, TestSize.Level1)
  * @tc.desc: CjRuntime Test for GetLanguage
  * @tc.type: FUNC
  */
-HWTEST_F(CjRuntimeTest, CjRuntimeGetLanguageTest_001, TestSize.Level0)
+HWTEST_F(CjRuntimeTest, CjRuntimeGetLanguageTest_001, TestSize.Level2)
 {
     auto instance = std::make_unique<CJRuntime>();
 
@@ -116,7 +116,7 @@ HWTEST_F(CjRuntimeTest, CjRuntimeGetLanguageTest_001, TestSize.Level0)
  * @tc.desc: CjRuntime test for StartDebuggerMode.
  * @tc.type: FUNC
  */
-HWTEST_F(CjRuntimeTest, CjRuntimeStartDebuggerMode_001, TestSize.Level0)
+HWTEST_F(CjRuntimeTest, CjRuntimeStartDebuggerMode_001, TestSize.Level2)
 {
     auto instance = std::make_unique<CJRuntime>();
 
