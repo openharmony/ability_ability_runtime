@@ -49,7 +49,7 @@ void AdvancedSecurityModeManagerTest::TearDown()
  * @tc.desc: Test Init works
  * @tc.type: FUNC
  */
-HWTEST_F(AdvancedSecurityModeManagerTest, AdvancedSecurityModeManager_Init_0100, TestSize.Level0)
+HWTEST_F(AdvancedSecurityModeManagerTest, AdvancedSecurityModeManager_Init_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AdvancedSecurityModeManager_Init_0100 start.");
     auto manager = std::make_shared<AdvancedSecurityModeManager>();
@@ -62,7 +62,7 @@ HWTEST_F(AdvancedSecurityModeManagerTest, AdvancedSecurityModeManager_Init_0100,
  * @tc.desc: Test IsJITEnabled works
  * @tc.type: FUNC
  */
-HWTEST_F(AdvancedSecurityModeManagerTest, AdvancedSecurityModeManager_IsJITEnabled_0100, TestSize.Level0)
+HWTEST_F(AdvancedSecurityModeManagerTest, AdvancedSecurityModeManager_IsJITEnabled_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AdvancedSecurityModeManager_IsJITEnabled_0100 start.");
     auto manager = std::make_shared<AdvancedSecurityModeManager>();

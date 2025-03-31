@@ -50,7 +50,7 @@ void AppPreloaderTest::TearDown()
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0100, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_0100 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
@@ -72,7 +72,7 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0100, TestSiz
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0200, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0200, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_0200 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
@@ -94,7 +94,7 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0200, TestSiz
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0300, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0300, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_0300 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
@@ -116,7 +116,7 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0300, TestSiz
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0400, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0400, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_0400 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
@@ -138,7 +138,7 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0400, TestSiz
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0500, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0500, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_0500 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
@@ -160,7 +160,7 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0500, TestSiz
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0600, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0600, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_0600 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
@@ -182,7 +182,7 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0600, TestSiz
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0700, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0700, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_0700 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
@@ -204,7 +204,7 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0700, TestSiz
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0800, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0800, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_0800 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
@@ -226,7 +226,7 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0800, TestSiz
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0100, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_PreCheck_0100 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
@@ -245,7 +245,7 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0100, TestSize.Level0)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0200, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0200, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_PreCheck_0200 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
@@ -264,7 +264,7 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0200, TestSize.Level0)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0300, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0300, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_PreCheck_0300 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
@@ -283,7 +283,7 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0300, TestSize.Level0)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0400, TestSize.Level0)
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0400, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_PreCheck_0400 start.");
     auto manager = std::make_shared<AppPreloader>(remoteClientManager_);

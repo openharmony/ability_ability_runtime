@@ -76,7 +76,7 @@ void OHOSApplicationFirstTest::TearDown()
 * @tc.name: CleanEmptyAbilityStage
 * @tc.desc: Test when all abilityStages are nullptr then the map should be empty.
 */
-HWTEST_F(OHOSApplicationFirstTest, CleanEmptyAbilityStage_0100, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, CleanEmptyAbilityStage_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "CleanEmptyAbilityStage_0100 start");
     ohosApplication_->abilityStages_ = abilityStages_;
@@ -90,7 +90,7 @@ HWTEST_F(OHOSApplicationFirstTest, CleanEmptyAbilityStage_0100, TestSize.Level0)
 * @tc.name: CleanEmptyAbilityStage
 * @tc.desc: Test when some abilityStages are not nullptr then the map should not be empty.
 */
-HWTEST_F(OHOSApplicationFirstTest, CleanEmptyAbilityStage_0200, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, CleanEmptyAbilityStage_0200, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "CleanEmptyAbilityStage_0200 start");
     AppExecFwk::HapModuleInfo info;
@@ -111,7 +111,7 @@ HWTEST_F(OHOSApplicationFirstTest, CleanEmptyAbilityStage_0200, TestSize.Level0)
 * @tc.name: CleanEmptyAbilityStage
 * @tc.desc: Test when all abilityStages are non-empty then the map should not be empty.
 */
-HWTEST_F(OHOSApplicationFirstTest, CleanEmptyAbilityStage_0300, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, CleanEmptyAbilityStage_0300, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "CleanEmptyAbilityStage_0300 start");
     AppExecFwk::HapModuleInfo info;
@@ -135,7 +135,7 @@ HWTEST_F(OHOSApplicationFirstTest, CleanEmptyAbilityStage_0300, TestSize.Level0)
 * @tc.name: IsUpdateColorNeeded
 * @tc.desc: Test when all conditions are met, IsUpdateColorNeeded should return false.
 */
-HWTEST_F(OHOSApplicationFirstTest, IsUpdateColorNeeded_0100, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, IsUpdateColorNeeded_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsUpdateColorNeeded_0100 start");
     Configuration config;
@@ -165,7 +165,7 @@ HWTEST_F(OHOSApplicationFirstTest, IsUpdateColorNeeded_0100, TestSize.Level0)
 * @tc.name: IsUpdateColorNeeded
 * @tc.desc: Test when all conditions are met, IsUpdateColorNeeded should return true.
 */
-HWTEST_F(OHOSApplicationFirstTest, IsUpdateColorNeeded_0200, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, IsUpdateColorNeeded_0200, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsUpdateColorNeeded_0200 start");
     Configuration config;
@@ -185,7 +185,7 @@ HWTEST_F(OHOSApplicationFirstTest, IsUpdateColorNeeded_0200, TestSize.Level0)
 * @tc.name: IsUpdateLanguageNeeded
 * @tc.desc: Test IsUpdateLanguageNeeded should return true.
 */
-HWTEST_F(OHOSApplicationFirstTest, IsUpdateLanguageNeeded_0100, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, IsUpdateLanguageNeeded_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsUpdateLanguageNeeded_0100 start");
     Configuration config;
@@ -206,7 +206,7 @@ HWTEST_F(OHOSApplicationFirstTest, IsUpdateLanguageNeeded_0100, TestSize.Level0)
 * @tc.name: IsUpdateLanguageNeeded
 * @tc.desc: Test IsUpdateLanguageNeeded should return false.
 */
-HWTEST_F(OHOSApplicationFirstTest, IsUpdateLanguageNeeded_0200, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, IsUpdateLanguageNeeded_0200, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsUpdateLanguageNeeded_0200 start");
     Configuration config;
@@ -225,7 +225,7 @@ HWTEST_F(OHOSApplicationFirstTest, IsUpdateLanguageNeeded_0200, TestSize.Level0)
 * @tc.name: IsUpdateLanguageNeeded
 * @tc.desc: Test IsUpdateLanguageNeeded should return false.
 */
-HWTEST_F(OHOSApplicationFirstTest, IsUpdateLanguageNeeded_0300, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, IsUpdateLanguageNeeded_0300, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsUpdateLanguageNeeded_0300 start");
     Configuration config;
@@ -248,7 +248,7 @@ HWTEST_F(OHOSApplicationFirstTest, IsUpdateLanguageNeeded_0300, TestSize.Level0)
 * @tc.name: IsMainProcess
 * @tc.desc: Test when processType is not NORMAL then IsMainProcess returns false.
 */
-HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0100, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsMainProcess_0100 start");
     auto info = std::make_shared<ProcessInfo>("testProcess", 10);
@@ -267,7 +267,7 @@ HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0100, TestSize.Level0)
 * @tc.name: IsMainProcess
 * @tc.desc: Test when processType is not NORMAL then IsMainProcess returns false.
 */
-HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0200, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0200, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsMainProcess_0200 start");
     auto info = std::make_shared<ProcessInfo>("testProcess", 10);
@@ -286,7 +286,7 @@ HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0200, TestSize.Level0)
 * @tc.name: IsMainProcess
 * @tc.desc: Test when processType is NORMAL then IsMainProcess returns true.
 */
-HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0300, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0300, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsMainProcess_0300 start");
     auto info = std::make_shared<ProcessInfo>("testProcess", 10);
@@ -304,7 +304,7 @@ HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0300, TestSize.Level0)
 * @tc.name: IsMainProcess
 * @tc.desc: Test when none of the processInfo are met then IsMainProcess returns false.
 */
-HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0400, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0400, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsMainProcess_0400 start");
     auto info = std::make_shared<ProcessInfo>("testProcess", 10);
@@ -321,7 +321,7 @@ HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0400, TestSize.Level0)
 * @tc.name: IsMainProcess
 * @tc.desc: Test when processInfo is not nullptr then IsMainProcess returns.
 */
-HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0500, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0500, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsMainProcess_0500 start");
     auto res = ohosApplication_->IsMainProcess("testBundleName", "testProcess");
@@ -336,7 +336,7 @@ HWTEST_F(OHOSApplicationFirstTest, IsMainProcess_0500, TestSize.Level0)
 * @tc.name: UpdateAppContextResMgr
 * @tc.desc: Test when context is nullptr then UpdateAppContextResMgr returns.
 */
-HWTEST_F(OHOSApplicationFirstTest, UpdateAppContextResMgr_0100, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, UpdateAppContextResMgr_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "UpdateAppContextResMgr_0100 start");
     Configuration config;
@@ -351,7 +351,7 @@ HWTEST_F(OHOSApplicationFirstTest, UpdateAppContextResMgr_0100, TestSize.Level0)
  * @tc.name: UpdateAppContextResMgr
  * @tc.desc: Test when context is not nullptr then UpdateAppContextResMgr updates the global config.
  */
-HWTEST_F(OHOSApplicationFirstTest, UpdateAppContextResMgr_0200, TestSize.Level0)
+HWTEST_F(OHOSApplicationFirstTest, UpdateAppContextResMgr_0200, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "UpdateAppContextResMgr_0200 start");
     Configuration config;

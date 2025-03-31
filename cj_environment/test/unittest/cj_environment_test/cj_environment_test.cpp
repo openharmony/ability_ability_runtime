@@ -365,7 +365,7 @@ HWTEST_F(CjEnvironmentTest, HasHigherPriorityTask_0100, TestSize.Level1)
  * @tc.desc: Test InitSpawnEnvTask.
  * @tc.type: FUNC
  */
-HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitSpawnEnv_001, TestSize.Level0)
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitSpawnEnv_001, TestSize.Level2)
 {
     CJEnvironment::InitSpawnEnv();
     EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
@@ -376,7 +376,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitSpawnEnv_001, TestSize.Level0)
  * @tc.desc: Test PreloadLibs.
  * @tc.type: FUNC
  */
-HWTEST_F(CjEnvironmentTest, CjEnvironmentTestPreloadLibs_001, TestSize.Level0)
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestPreloadLibs_001, TestSize.Level2)
 {
     CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
     cJEnvironment.PreloadLibs();
@@ -391,7 +391,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestPreloadLibs_001, TestSize.Level0)
  * @tc.desc: Test InitNewCJAppNSTask and InitCJSDKNSTask.
  * @tc.type: FUNC
  */
-HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitNewCJAppNS_001andInitCJSDKNS_0100, TestSize.Level0)
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitNewCJAppNS_001andInitCJSDKNS_0100, TestSize.Level2)
 {
     CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
     cJEnvironment.InitNewCJAppNS("");
@@ -404,7 +404,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitNewCJAppNS_001andInitCJSDKNS_01
  * @tc.desc: Test DetectAppNSModeTask.
  * @tc.type: FUNC
  */
-HWTEST_F(CjEnvironmentTest, CjEnvironmentTestDetectAppNSModeandInitCJNS_0100, TestSize.Level0)
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestDetectAppNSModeandInitCJNS_0100, TestSize.Level2)
 {
     auto test = CJEnvironment::DetectAppNSMode();
     EXPECT_EQ(test, CJEnvironment::NSMode::SINK);

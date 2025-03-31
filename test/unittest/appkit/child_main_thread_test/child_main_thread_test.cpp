@@ -85,7 +85,7 @@ HWTEST_F(ChildMainThreadTest, Init_0100, TestSize.Level0)
  * @tc.desc: Test Attach works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildMainThreadTest, Attach_0100, TestSize.Level0)
+HWTEST_F(ChildMainThreadTest, Attach_0100, TestSize.Level1)
 {
     TAG_LOGD(AAFwkTag::TEST, "Attach_0100 called.");
     sptr<ChildMainThread> thread = sptr<ChildMainThread>(new (std::nothrow) ChildMainThread());
@@ -103,7 +103,7 @@ HWTEST_F(ChildMainThreadTest, Attach_0100, TestSize.Level0)
  * @tc.desc: Test ScheduleLoadChild_0100 works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildMainThreadTest, ScheduleLoadChild_0100, TestSize.Level0)
+HWTEST_F(ChildMainThreadTest, ScheduleLoadChild_0100, TestSize.Level1)
 {
     TAG_LOGD(AAFwkTag::TEST, "ScheduleLoadChild_0100 called.");
     sptr<ChildMainThread> thread = sptr<ChildMainThread>(new (std::nothrow) ChildMainThread());
@@ -123,7 +123,7 @@ HWTEST_F(ChildMainThreadTest, ScheduleLoadChild_0100, TestSize.Level0)
  * @tc.desc: Test HandleLoadJs works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildMainThreadTest, HandleLoadJs_0100, TestSize.Level0)
+HWTEST_F(ChildMainThreadTest, HandleLoadJs_0100, TestSize.Level1)
 {
     TAG_LOGD(AAFwkTag::TEST, "HandleLoadJs_0100 called.");
     sptr<ChildMainThread> thread = sptr<ChildMainThread>(new (std::nothrow) ChildMainThread());
@@ -157,7 +157,7 @@ HWTEST_F(ChildMainThreadTest, HandleLoadJs_0100, TestSize.Level0)
  * @tc.desc: Test HandleLoadArkTs works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildMainThreadTest, HandleLoadArkTs_0100, TestSize.Level0)
+HWTEST_F(ChildMainThreadTest, HandleLoadArkTs_0100, TestSize.Level1)
 {
     TAG_LOGD(AAFwkTag::TEST, "HandleLoadArkTs_0100 called.");
     sptr<ChildMainThread> thread = sptr<ChildMainThread>(new (std::nothrow) ChildMainThread());
@@ -192,7 +192,7 @@ HWTEST_F(ChildMainThreadTest, HandleLoadArkTs_0100, TestSize.Level0)
  * @tc.desc: Test ScheduleExitProcessSafely works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildMainThreadTest, ScheduleExitProcessSafely_0100, TestSize.Level0)
+HWTEST_F(ChildMainThreadTest, ScheduleExitProcessSafely_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "ScheduleExitProcessSafely_0100 called.");
     sptr<ChildMainThread> thread = sptr<ChildMainThread>(new (std::nothrow) ChildMainThread());
@@ -211,7 +211,7 @@ HWTEST_F(ChildMainThreadTest, ScheduleExitProcessSafely_0100, TestSize.Level0)
  * @tc.desc: Test ScheduleRunNativeProc works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildMainThreadTest, ScheduleRunNativeProc_0100, TestSize.Level0)
+HWTEST_F(ChildMainThreadTest, ScheduleRunNativeProc_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "ScheduleRunNativeProc_0100 called.");
     sptr<ChildMainThread> thread = sptr<ChildMainThread>(new (std::nothrow) ChildMainThread());

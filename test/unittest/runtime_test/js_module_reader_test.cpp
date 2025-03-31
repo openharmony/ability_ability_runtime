@@ -51,7 +51,7 @@ void JsModuleReaderTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0100, TestSize.Level0)
+HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0100, TestSize.Level2)
 {
     JsModuleReader jsModuleReader("JsModuleReader", "");
     uint8_t *buff = nullptr;
@@ -67,7 +67,7 @@ HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581RO
  */
-HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0200, TestSize.Level0)
+HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0200, TestSize.Level2)
 {
     JsModuleReader jsModuleReader("JsModuleReader", "");
     uint8_t *buff = nullptr;
@@ -82,7 +82,7 @@ HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0200, TestSize.Level0)
  * @tc.desc: GetPresetAppHapPath Test
  * @tc.type: FUNC
  */
-HWTEST_F(JsModuleReaderTest, GetPresetAppHapPathTest_0100, TestSize.Level0)
+HWTEST_F(JsModuleReaderTest, GetPresetAppHapPathTest_0100, TestSize.Level2)
 {
 JsModuleReader jsModuleReader("JsModuleReader", "");
 std::string hapPath = jsModuleReader.GetPresetAppHapPath("", "");
@@ -94,7 +94,7 @@ EXPECT_TRUE(hapPath.empty());
  * @tc.desc: GetPresetAppHapPath Test
  * @tc.type: FUNC
  */
-HWTEST_F(JsModuleReaderTest, GetPresetAppHapPathTest_0200, TestSize.Level0)
+HWTEST_F(JsModuleReaderTest, GetPresetAppHapPathTest_0200, TestSize.Level2)
 {
 JsModuleReader jsModuleReader("JsModuleReader", "/data/storage/el1/test.hsp");
 std::string hapPath = jsModuleReader.GetPresetAppHapPath("", "");

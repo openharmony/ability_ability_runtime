@@ -82,7 +82,7 @@ HWTEST_F(UIExtensionRecordTest, Update_0200, TestSize.Level0)
  * @tc.name: HandleNotifyUIExtensionTimeout
  * @tc.desc: Test whether HandleNotifyUIExtensionTimeout and are called normally.
  */
-HWTEST_F(UIExtensionRecordTest, HandleNotifyUIExtensionTimeout_0300, TestSize.Level0)
+HWTEST_F(UIExtensionRecordTest, HandleNotifyUIExtensionTimeout_0300, TestSize.Level1)
 {
     std::shared_ptr<AAFwk::AbilityRecord> abilityRecord = nullptr;
     auto extRecord = std::make_shared<AbilityRuntime::UIExtensionRecord>(abilityRecord);

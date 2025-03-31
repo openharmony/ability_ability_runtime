@@ -98,7 +98,7 @@ HWTEST_F(AppMgrServiceTest, OnStop_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify QueryServiceState
  */
-HWTEST_F(AppMgrServiceTest, QueryServiceState_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, QueryServiceState_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     appMgrService->appMgrServiceInner_ = nullptr;
@@ -167,7 +167,7 @@ HWTEST_F(AppMgrServiceTest, AttachApplication_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify ApplicationForegrounded
  */
-HWTEST_F(AppMgrServiceTest, ApplicationForegrounded_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, ApplicationForegrounded_001, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -184,7 +184,7 @@ HWTEST_F(AppMgrServiceTest, ApplicationForegrounded_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify ApplicationBackgrounded
  */
-HWTEST_F(AppMgrServiceTest, ApplicationBackgrounded_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, ApplicationBackgrounded_001, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -201,7 +201,7 @@ HWTEST_F(AppMgrServiceTest, ApplicationBackgrounded_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify ApplicationTerminated
  */
-HWTEST_F(AppMgrServiceTest, ApplicationTerminated_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, ApplicationTerminated_001, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -218,7 +218,7 @@ HWTEST_F(AppMgrServiceTest, ApplicationTerminated_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify AbilityCleaned
  */
-HWTEST_F(AppMgrServiceTest, AbilityCleaned_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, AbilityCleaned_001, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -234,7 +234,7 @@ HWTEST_F(AppMgrServiceTest, AbilityCleaned_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify AbilityCleaned
  */
-HWTEST_F(AppMgrServiceTest, AbilityCleaned_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, AbilityCleaned_002, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -251,7 +251,7 @@ HWTEST_F(AppMgrServiceTest, AbilityCleaned_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify StartupResidentProcess
  */
-HWTEST_F(AppMgrServiceTest, StartupResidentProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, StartupResidentProcess_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -268,7 +268,7 @@ HWTEST_F(AppMgrServiceTest, StartupResidentProcess_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify StartupResidentProcess
  */
-HWTEST_F(AppMgrServiceTest, StartupResidentProcess_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, StartupResidentProcess_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -286,7 +286,7 @@ HWTEST_F(AppMgrServiceTest, StartupResidentProcess_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify ClearUpApplicationData
  */
-HWTEST_F(AppMgrServiceTest, ClearUpApplicationData_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, ClearUpApplicationData_001, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::string bundleName = "bundleName";
@@ -304,7 +304,7 @@ HWTEST_F(AppMgrServiceTest, ClearUpApplicationData_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetAllRunningProcesses
  */
-HWTEST_F(AppMgrServiceTest, GetAllRunningProcesses_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetAllRunningProcesses_001, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::vector<RunningProcessInfo> info;
@@ -321,7 +321,7 @@ HWTEST_F(AppMgrServiceTest, GetAllRunningProcesses_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetAllRunningProcesses
  */
-HWTEST_F(AppMgrServiceTest, GetAllRunningProcesses_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetAllRunningProcesses_002, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::vector<RunningProcessInfo> info;
@@ -340,7 +340,7 @@ HWTEST_F(AppMgrServiceTest, GetAllRunningProcesses_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetProcessRunningInfosByUserId
  */
-HWTEST_F(AppMgrServiceTest, GetProcessRunningInfosByUserId_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetProcessRunningInfosByUserId_001, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::vector<RunningProcessInfo> info;
@@ -358,7 +358,7 @@ HWTEST_F(AppMgrServiceTest, GetProcessRunningInfosByUserId_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetAllRenderProcesses
  */
-HWTEST_F(AppMgrServiceTest, GetAllRenderProcesses_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetAllRenderProcesses_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::vector<RenderProcessInfo> info;
@@ -375,7 +375,7 @@ HWTEST_F(AppMgrServiceTest, GetAllRenderProcesses_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetAllRenderProcesses
  */
-HWTEST_F(AppMgrServiceTest, GetAllRenderProcesses_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetAllRenderProcesses_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::vector<RenderProcessInfo> info;
@@ -395,7 +395,7 @@ HWTEST_F(AppMgrServiceTest, GetAllRenderProcesses_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetAllChildrenProcesses
  */
-HWTEST_F(AppMgrServiceTest, GetAllChildrenProcesses_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetAllChildrenProcesses_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::vector<ChildProcessInfo> info;
@@ -412,7 +412,7 @@ HWTEST_F(AppMgrServiceTest, GetAllChildrenProcesses_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetAllChildrenProcesses
  */
-HWTEST_F(AppMgrServiceTest, GetAllChildrenProcesses_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetAllChildrenProcesses_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::vector<ChildProcessInfo> info;
@@ -432,7 +432,7 @@ HWTEST_F(AppMgrServiceTest, GetAllChildrenProcesses_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify NotifyMemoryLevel
  */
-HWTEST_F(AppMgrServiceTest, NotifyMemoryLevel_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, NotifyMemoryLevel_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     int32_t level = 1;
@@ -449,7 +449,7 @@ HWTEST_F(AppMgrServiceTest, NotifyMemoryLevel_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify NotifyMemoryLevel
  */
-HWTEST_F(AppMgrServiceTest, NotifyMemoryLevel_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, NotifyMemoryLevel_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     int32_t level = 1;
@@ -468,7 +468,7 @@ HWTEST_F(AppMgrServiceTest, NotifyMemoryLevel_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify AddAbilityStageDone
  */
-HWTEST_F(AppMgrServiceTest, AddAbilityStageDone_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, AddAbilityStageDone_001, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -485,7 +485,7 @@ HWTEST_F(AppMgrServiceTest, AddAbilityStageDone_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify AddAbilityStageDone
  */
-HWTEST_F(AppMgrServiceTest, AddAbilityStageDone_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, AddAbilityStageDone_002, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -504,7 +504,7 @@ HWTEST_F(AppMgrServiceTest, AddAbilityStageDone_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify UnregisterApplicationStateObserver
  */
-HWTEST_F(AppMgrServiceTest, UnregisterApplicationStateObserver_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, UnregisterApplicationStateObserver_001, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     sptr<IApplicationStateObserver> observer = nullptr;
@@ -521,7 +521,7 @@ HWTEST_F(AppMgrServiceTest, UnregisterApplicationStateObserver_001, TestSize.Lev
  * EnvConditions: NA
  * CaseDescription: Verify GetForegroundApplications
  */
-HWTEST_F(AppMgrServiceTest, GetForegroundApplications_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetForegroundApplications_001, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::vector<AppStateData> list;
@@ -538,7 +538,7 @@ HWTEST_F(AppMgrServiceTest, GetForegroundApplications_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetForegroundApplications
  */
-HWTEST_F(AppMgrServiceTest, GetForegroundApplications_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetForegroundApplications_002, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::vector<AppStateData> list;
@@ -557,7 +557,7 @@ HWTEST_F(AppMgrServiceTest, GetForegroundApplications_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify StartUserTestProcess
  */
-HWTEST_F(AppMgrServiceTest, StartUserTestProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, StartUserTestProcess_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     Want want;
@@ -577,7 +577,7 @@ HWTEST_F(AppMgrServiceTest, StartUserTestProcess_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify StartUserTestProcess
  */
-HWTEST_F(AppMgrServiceTest, StartUserTestProcess_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, StartUserTestProcess_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     Want want;
@@ -599,7 +599,7 @@ HWTEST_F(AppMgrServiceTest, StartUserTestProcess_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify FinishUserTest
  */
-HWTEST_F(AppMgrServiceTest, FinishUserTest_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, FinishUserTest_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::string msg = "msg";
@@ -618,7 +618,7 @@ HWTEST_F(AppMgrServiceTest, FinishUserTest_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify FinishUserTest
  */
-HWTEST_F(AppMgrServiceTest, FinishUserTest_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, FinishUserTest_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::string msg = "msg";
@@ -639,7 +639,7 @@ HWTEST_F(AppMgrServiceTest, FinishUserTest_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify ScheduleAcceptWantDone
  */
-HWTEST_F(AppMgrServiceTest, ScheduleAcceptWantDone_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, ScheduleAcceptWantDone_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -658,7 +658,7 @@ HWTEST_F(AppMgrServiceTest, ScheduleAcceptWantDone_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify ScheduleAcceptWantDone
  */
-HWTEST_F(AppMgrServiceTest, ScheduleAcceptWantDone_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, ScheduleAcceptWantDone_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -679,7 +679,7 @@ HWTEST_F(AppMgrServiceTest, ScheduleAcceptWantDone_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetAbilityRecordsByProcessID
  */
-HWTEST_F(AppMgrServiceTest, GetAbilityRecordsByProcessID_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetAbilityRecordsByProcessID_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     int pid = 1;
@@ -697,7 +697,7 @@ HWTEST_F(AppMgrServiceTest, GetAbilityRecordsByProcessID_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetAbilityRecordsByProcessID
  */
-HWTEST_F(AppMgrServiceTest, GetAbilityRecordsByProcessID_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetAbilityRecordsByProcessID_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     int pid = 1;
@@ -716,7 +716,7 @@ HWTEST_F(AppMgrServiceTest, GetAbilityRecordsByProcessID_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, PreStartNWebSpawnProcess_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
@@ -732,7 +732,7 @@ HWTEST_F(AppMgrServiceTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceTest, PreStartNWebSpawnProcess_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, PreStartNWebSpawnProcess_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     appMgrService->SetInnerService(nullptr);
@@ -748,7 +748,7 @@ HWTEST_F(AppMgrServiceTest, PreStartNWebSpawnProcess_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify AttachRenderProcess
  */
-HWTEST_F(AppMgrServiceTest, AttachRenderProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, AttachRenderProcess_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -765,7 +765,7 @@ HWTEST_F(AppMgrServiceTest, AttachRenderProcess_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify AttachRenderProcess
  */
-HWTEST_F(AppMgrServiceTest, AttachRenderProcess_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, AttachRenderProcess_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -784,7 +784,7 @@ HWTEST_F(AppMgrServiceTest, AttachRenderProcess_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetRenderProcessTerminationStatus
  */
-HWTEST_F(AppMgrServiceTest, GetRenderProcessTerminationStatus_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetRenderProcessTerminationStatus_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     pid_t renderPid = 1;
@@ -802,7 +802,7 @@ HWTEST_F(AppMgrServiceTest, GetRenderProcessTerminationStatus_001, TestSize.Leve
  * EnvConditions: NA
  * CaseDescription: Verify GetRenderProcessTerminationStatus
  */
-HWTEST_F(AppMgrServiceTest, GetRenderProcessTerminationStatus_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetRenderProcessTerminationStatus_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     pid_t renderPid = 1;
@@ -822,7 +822,7 @@ HWTEST_F(AppMgrServiceTest, GetRenderProcessTerminationStatus_002, TestSize.Leve
  * EnvConditions: NA
  * CaseDescription: Verify GetConfiguration
  */
-HWTEST_F(AppMgrServiceTest, GetConfiguration_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetConfiguration_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     Configuration config;
@@ -839,7 +839,7 @@ HWTEST_F(AppMgrServiceTest, GetConfiguration_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetConfiguration
  */
-HWTEST_F(AppMgrServiceTest, GetConfiguration_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetConfiguration_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     Configuration config;
@@ -858,7 +858,7 @@ HWTEST_F(AppMgrServiceTest, GetConfiguration_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify UpdateConfiguration
  */
-HWTEST_F(AppMgrServiceTest, UpdateConfiguration_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, UpdateConfiguration_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     Configuration config;
@@ -875,7 +875,7 @@ HWTEST_F(AppMgrServiceTest, UpdateConfiguration_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify UpdateConfiguration
  */
-HWTEST_F(AppMgrServiceTest, UpdateConfiguration_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, UpdateConfiguration_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     Configuration config;
@@ -894,7 +894,7 @@ HWTEST_F(AppMgrServiceTest, UpdateConfiguration_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify UpdateConfigurationByBundleName
  */
-HWTEST_F(AppMgrServiceTest, UpdateConfigurationByBundleName_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, UpdateConfigurationByBundleName_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     Configuration config;
@@ -911,7 +911,7 @@ HWTEST_F(AppMgrServiceTest, UpdateConfigurationByBundleName_001, TestSize.Level0
  * EnvConditions: NA
  * CaseDescription: Verify UpdateConfigurationByBundleName
  */
-HWTEST_F(AppMgrServiceTest, UpdateConfigurationByBundleName_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, UpdateConfigurationByBundleName_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     Configuration config;
@@ -930,7 +930,7 @@ HWTEST_F(AppMgrServiceTest, UpdateConfigurationByBundleName_002, TestSize.Level0
  * EnvConditions: NA
  * CaseDescription: Verify RegisterConfigurationObserver
  */
-HWTEST_F(AppMgrServiceTest, RegisterConfigurationObserver_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, RegisterConfigurationObserver_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     sptr<IConfigurationObserver> observer = nullptr;
@@ -947,7 +947,7 @@ HWTEST_F(AppMgrServiceTest, RegisterConfigurationObserver_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify RegisterConfigurationObserver
  */
-HWTEST_F(AppMgrServiceTest, RegisterConfigurationObserver_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, RegisterConfigurationObserver_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     sptr<IConfigurationObserver> observer = nullptr;
@@ -966,7 +966,7 @@ HWTEST_F(AppMgrServiceTest, RegisterConfigurationObserver_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify UnregisterConfigurationObserver
  */
-HWTEST_F(AppMgrServiceTest, UnregisterConfigurationObserver_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, UnregisterConfigurationObserver_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     sptr<IConfigurationObserver> observer = nullptr;
@@ -983,7 +983,7 @@ HWTEST_F(AppMgrServiceTest, UnregisterConfigurationObserver_001, TestSize.Level0
  * EnvConditions: NA
  * CaseDescription: Verify UnregisterConfigurationObserver
  */
-HWTEST_F(AppMgrServiceTest, UnregisterConfigurationObserver_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, UnregisterConfigurationObserver_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     sptr<IConfigurationObserver> observer = nullptr;
@@ -1002,7 +1002,7 @@ HWTEST_F(AppMgrServiceTest, UnregisterConfigurationObserver_002, TestSize.Level0
  * EnvConditions: NA
  * CaseDescription: Verify GetAppRunningStateByBundleName
  */
-HWTEST_F(AppMgrServiceTest, GetAppRunningStateByBundleName_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetAppRunningStateByBundleName_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::string bundleName = "bundleName";
@@ -1019,7 +1019,7 @@ HWTEST_F(AppMgrServiceTest, GetAppRunningStateByBundleName_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetAppRunningStateByBundleName
  */
-HWTEST_F(AppMgrServiceTest, GetAppRunningStateByBundleName_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetAppRunningStateByBundleName_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::string bundleName = "bundleName";
@@ -1038,7 +1038,7 @@ HWTEST_F(AppMgrServiceTest, GetAppRunningStateByBundleName_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify NotifyLoadRepairPatch
  */
-HWTEST_F(AppMgrServiceTest, NotifyLoadRepairPatch_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, NotifyLoadRepairPatch_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::string bundleName = "bundleName";
@@ -1056,7 +1056,7 @@ HWTEST_F(AppMgrServiceTest, NotifyLoadRepairPatch_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify NotifyLoadRepairPatch
  */
-HWTEST_F(AppMgrServiceTest, NotifyLoadRepairPatch_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, NotifyLoadRepairPatch_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::string bundleName = "bundleName";
@@ -1077,7 +1077,7 @@ HWTEST_F(AppMgrServiceTest, NotifyLoadRepairPatch_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify NotifyHotReloadPage
  */
-HWTEST_F(AppMgrServiceTest, NotifyHotReloadPage_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, NotifyHotReloadPage_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::string bundleName = "bundleName";
@@ -1095,7 +1095,7 @@ HWTEST_F(AppMgrServiceTest, NotifyHotReloadPage_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify NotifyHotReloadPage
  */
-HWTEST_F(AppMgrServiceTest, NotifyHotReloadPage_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, NotifyHotReloadPage_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::string bundleName = "bundleName";
@@ -1117,7 +1117,7 @@ HWTEST_F(AppMgrServiceTest, NotifyHotReloadPage_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify SetContinuousTaskProcess
  */
-HWTEST_F(AppMgrServiceTest, SetContinuousTaskProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, SetContinuousTaskProcess_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     int32_t pid = 1;
@@ -1135,7 +1135,7 @@ HWTEST_F(AppMgrServiceTest, SetContinuousTaskProcess_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify SetContinuousTaskProcess
  */
-HWTEST_F(AppMgrServiceTest, SetContinuousTaskProcess_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, SetContinuousTaskProcess_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     int32_t pid = 1;
@@ -1156,7 +1156,7 @@ HWTEST_F(AppMgrServiceTest, SetContinuousTaskProcess_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify NotifyUnLoadRepairPatch
  */
-HWTEST_F(AppMgrServiceTest, NotifyUnLoadRepairPatch_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, NotifyUnLoadRepairPatch_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::string bundleName = "bundleName";
@@ -1174,7 +1174,7 @@ HWTEST_F(AppMgrServiceTest, NotifyUnLoadRepairPatch_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify NotifyUnLoadRepairPatch
  */
-HWTEST_F(AppMgrServiceTest, NotifyUnLoadRepairPatch_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, NotifyUnLoadRepairPatch_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     std::string bundleName = "bundleName";
@@ -1195,7 +1195,7 @@ HWTEST_F(AppMgrServiceTest, NotifyUnLoadRepairPatch_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetProcessMemoryByPid
  */
-HWTEST_F(AppMgrServiceTest, GetProcessMemoryByPid_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetProcessMemoryByPid_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -1215,7 +1215,7 @@ HWTEST_F(AppMgrServiceTest, GetProcessMemoryByPid_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetProcessMemoryByPid
  */
-HWTEST_F(AppMgrServiceTest, GetProcessMemoryByPid_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetProcessMemoryByPid_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -1238,7 +1238,7 @@ HWTEST_F(AppMgrServiceTest, GetProcessMemoryByPid_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetRunningProcessInformation
  */
-HWTEST_F(AppMgrServiceTest, GetRunningProcessInformation_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetRunningProcessInformation_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -1259,7 +1259,7 @@ HWTEST_F(AppMgrServiceTest, GetRunningProcessInformation_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetRunningProcessInformation
  */
-HWTEST_F(AppMgrServiceTest, GetRunningProcessInformation_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetRunningProcessInformation_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -1647,7 +1647,7 @@ HWTEST_F(AppMgrServiceTest, PreloadApplication_0100, TestSize.Level1)
  * EnvConditions: NA
  * CaseDescription: Verify SetSupportedProcessCacheSelf
  */
-HWTEST_F(AppMgrServiceTest, SetSupportedProcessCacheSelf_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, SetSupportedProcessCacheSelf_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -1666,7 +1666,7 @@ HWTEST_F(AppMgrServiceTest, SetSupportedProcessCacheSelf_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify SetSupportedProcessCacheSelf
  */
-HWTEST_F(AppMgrServiceTest, SetSupportedProcessCacheSelf_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, SetSupportedProcessCacheSelf_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -1923,7 +1923,7 @@ HWTEST_F(AppMgrServiceTest, StartNativeChildProcess_0100, TestSize.Level1)
  * EnvConditions: NA
  * CaseDescription: Verify GetSupportedProcessCachePids
  */
-HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -1943,7 +1943,7 @@ HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetSupportedProcessCachePids
  */
-HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -1966,7 +1966,7 @@ HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify RegisterKiaInterceptor
  */
-HWTEST_F(AppMgrServiceTest, RegisterKiaInterceptor_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, RegisterKiaInterceptor_001, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_001 called.");
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
@@ -1990,7 +1990,7 @@ HWTEST_F(AppMgrServiceTest, RegisterKiaInterceptor_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify RegisterKiaInterceptor
  */
-HWTEST_F(AppMgrServiceTest, RegisterKiaInterceptor_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, RegisterKiaInterceptor_002, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_001 called.");
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
@@ -2014,7 +2014,7 @@ HWTEST_F(AppMgrServiceTest, RegisterKiaInterceptor_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify CheckIsKiaProcess
  */
-HWTEST_F(AppMgrServiceTest, CheckIsKiaProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, CheckIsKiaProcess_001, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_001 called.");
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
@@ -2039,7 +2039,7 @@ HWTEST_F(AppMgrServiceTest, CheckIsKiaProcess_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify CheckIsKiaProcess
  */
-HWTEST_F(AppMgrServiceTest, CheckIsKiaProcess_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, CheckIsKiaProcess_002, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_001 called.");
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
