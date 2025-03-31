@@ -114,6 +114,7 @@ declare_args() {
   ability_runtime_upms = true
   cj_frontend = true
   ability_runtime_app_no_response_dialog = false
+  ability_runtime_app_no_response_dialog_wearable = false
   ability_runtime_app_no_response_bundlename = "com.ohos.taskmanager"
   include_app_domain_verify = true
   ability_runtime_start_window_options_with_pixelmap = false
