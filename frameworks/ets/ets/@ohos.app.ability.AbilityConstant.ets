@@ -41,7 +41,9 @@ namespace AbilityConstant {
     APP_FREEZE = 5,
     PERFORMANCE_CONTROL = 6,
     RESOURCE_CONTROL = 7,
-    UPGRADE = 8
+    UPGRADE = 8,
+    USER_REQUEST = 9,
+    SIGNAL = 10
   }
   export enum OnContinueResult {
     AGREE = 0,
