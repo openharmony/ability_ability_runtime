@@ -67,6 +67,7 @@ struct AppSpawnStartMsg {
 #ifdef SUPPORT_CHILD_PROCESS
     int32_t childProcessType = CHILD_PROCESS_TYPE_NOT_CHILD;
 #endif // SUPPORT_CHILD_PROCESS
+    int32_t hostProcessUid = 0; // host process uid, only use for nwebspawn.
     uint32_t accessTokenId;
     uint32_t flags;
     uint32_t hapFlags = 0; // whether is pre installed hap
@@ -216,6 +217,16 @@ public:
      * @param reqHandle, handle for request message
      */
     int32_t AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle);
+
+    /**
+     * Set extra info: parent uid.
+     *
+     * @param startMsg, request message,
+     * @param reqHandle, handle for request message
+     *
+     * Return the Message Set result.
+     */
+    int32_t AppspawnSetExtMsgSec(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle);
 
     /**
      * Create default appspawn msg.
