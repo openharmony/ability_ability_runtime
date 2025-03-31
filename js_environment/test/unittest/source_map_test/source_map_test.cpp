@@ -411,5 +411,116 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_2000, Function | MediumTest | Level1)
     EXPECT_STREQ("packageinfo", packageName.c_str());
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_2000 end";
 }
+
+/**
+ * @tc.number: VlqRevCode_0100
+ * @tc.name: VlqRevCode
+ * @tc.desc: test VlqRevCode
+ * @tc.require: #I6T4K1
+ */
+HWTEST_F(SourceMapTest, VlqRevCode_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "VlqRevCode_0100 start";
+    auto mapObj = std::make_shared<SourceMap>();
+    EXPECT_NE(mapObj, nullptr);
+    std::string str = "@";
+    std::vector<int32_t> ans;
+    auto ret = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret, false);
+
+    str = "A";
+    auto ret1 = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret1, true);
+
+    str = "a";
+    auto ret2 = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret2, true);
+
+    str = "0";
+    auto ret3 = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret3, false);
+
+    str = "+";
+    auto ret4 = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret4, false);
+
+    str = "/";
+    auto ret5 = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret5, false);
+    GTEST_LOG_(INFO) << "VlqRevCode_0100 end";
+}
+
+/**
+ * @tc.number: TranslateUrlPositionBySourceMap_0100
+ * @tc.name: TranslateUrlPositionBySourceMap
+ * @tc.desc: test TranslateUrlPositionBySourceMap
+ * @tc.require: #I6T4K1
+ */
+HWTEST_F(SourceMapTest, TranslateUrlPositionBySourceMap_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "TranslateUrlPositionBySourceMap_0100 start";
+    auto mapObj = std::make_shared<SourceMap>();
+    EXPECT_NE(mapObj, nullptr);
+    std::string url = "test";
+    int line = 1;
+    int column = 1;
+    std::string packageName = "packageName";
+    auto ret = mapObj->TranslateUrlPositionBySourceMap(url, line, column, packageName);
+    EXPECT_EQ(ret, false);
+
+    auto sourceMapData = std::make_shared<SourceMapData>();
+    std::string key = "test";
+    mapObj->sourceMaps_.insert(std::make_pair(key, sourceMapData));
+    ret = mapObj->TranslateUrlPositionBySourceMap(url, line, column, packageName);
+    EXPECT_EQ(ret, true);
+    GTEST_LOG_(INFO) << "TranslateUrlPositionBySourceMap_0100 end";
+}
+
+/**
+ * @tc.number: HandleMappings_0100
+ * @tc.name: HandleMappings
+ * @tc.desc: test HandleMappings
+ * @tc.require: #I6T4K1
+ */
+HWTEST_F(SourceMapTest, HandleMappings_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "HandleMappings_0100 start";
+    auto mapObj = std::make_shared<SourceMap>();
+    EXPECT_NE(mapObj, nullptr);
+    std::string testMapping = "t,es;t";
+    auto keyInfo = mapObj->HandleMappings(testMapping);
+    EXPECT_EQ(keyInfo.empty(), false);
+    GTEST_LOG_(INFO) << "HandleMappings_0100 end";
+}
+
+/**
+ * @tc.number: GetLineAndColumnNumbers_0100
+ * @tc.name: GetLineAndColumnNumbers
+ * @tc.desc: test GetLineAndColumnNumbers
+ * @tc.require: #I6T4K1
+ */
+HWTEST_F(SourceMapTest, GetLineAndColumnNumbers_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetLineAndColumnNumbers_0100 start";
+    auto mapObj = std::make_shared<SourceMap>();
+    EXPECT_NE(mapObj, nullptr);
+    int line = 0;
+    int column = 0;
+    SourceMapData targetMap;
+    std::string url = "url";
+    std::string packageName = "packageName";
+    auto ret = mapObj->GetLineAndColumnNumbers(line, column, targetMap, url, packageName);
+    EXPECT_EQ(ret, false);
+
+    column = 1;
+    auto ret1 = mapObj->GetLineAndColumnNumbers(line, column, targetMap, url, packageName);
+    EXPECT_EQ(ret1, false);
+
+    line = 1;
+    column = 0;
+    auto ret2 = mapObj->GetLineAndColumnNumbers(line, column, targetMap, url, packageName);
+    EXPECT_EQ(ret2, false);
+    GTEST_LOG_(INFO) << "GetLineAndColumnNumbers_0100 end";
+}
 } // namespace AppExecFwk
 } // namespace OHOS
