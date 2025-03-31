@@ -100,7 +100,7 @@ void STSAbilityMonitor::CallLifecycleCBFunction(const std::string &functionName,
     env_->ResetError();
 
     ani_class cls = nullptr;
-    if ((status = env_->FindClass("LAbilityMonitor/AbilityMonitorInner", &cls)) != ANI_OK) {
+    if ((status = env_->FindClass("Lapplication/AbilityMonitor/AbilityMonitorInner", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
         return;
     }

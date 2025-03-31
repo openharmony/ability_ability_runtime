@@ -82,35 +82,98 @@ ohos_shared_library("ability_delegator_registry_ani_kit") {
 
 generate_static_abc("ability_delegator_abc") {
   base_url = "./ets"
-
-  files = [
-    "./ets/@ohos.app.ability.abilityDelegatorRegistry.ets",
-    "./ets/@ohos.ability.AbilityDelegator.ets",
-    "./ets/@ohos.ability.abilityDelegatorArgs.ets",
-    "./ets/@ohos.application.testRunner.ets",
-  ]
-
-  paths_keys = [
-    "@ohos.ability.AbilityDelegator",
-    "@ohos.ability.abilityDelegatorArgs",
-  ]
-
-  paths_values = [
-    "./ets/@ohos.ability.AbilityDelegator.ets",
-    "./ets/@ohos.ability.abilityDelegatorArgs.ets",
-  ]
-
-  dst_file = "$target_out_dir/ability_delegator.abc"
-  out_puts = [ "$target_out_dir/ability_delegator.abc" ]
+  files = [ "./ets/application/AbilityDelegator.ets" ]
 
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/ability_delegator.abc"
+  device_dst_file = "/system/framework/ability_delegator_abc.abc"
 }
 
 ohos_prebuilt_etc("ability_delegator_abc_etc") {
-  source = "$target_out_dir/ability_delegator.abc"
-  deps = [ ":ability_delegator_abc" ]
+  source = "$target_out_dir/ability_delegator_abc.abc"
   module_install_dir = "framework"
   subsystem_name = "ability"
   part_name = "ability_runtime"
+  deps = [ ":ability_delegator_abc" ]
+}
+
+generate_static_abc("ability_shellCmdResult_abc") {
+  base_url = "./ets"
+  files = [ "./ets/application/shellCmdResult.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_shellCmdResult_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_shellCmdResult_abc_etc") {
+  source = "$target_out_dir/ability_shellCmdResult_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_shellCmdResult_abc" ]
+}
+
+generate_static_abc("ability_delegator_args_abc") {
+  base_url = "./ets"
+  files = [ "./ets/application/abilityDelegatorArgs.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_delegator_args_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_delegator_args_abc_etc") {
+  source = "$target_out_dir/ability_delegator_args_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_delegator_args_abc" ]
+}
+
+generate_static_abc("ability_delegator_ability_monitor_abc") {
+  base_url = "./ets"
+  files = [ "./ets/application/AbilityMonitor.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_delegator_ability_monitor_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_delegator_ability_monitor_abc_etc") {
+  source = "$target_out_dir/ability_delegator_ability_monitor_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_delegator_ability_monitor_abc" ]
+}
+
+generate_static_abc("ability_delegator_registry_abc") {
+  base_url = "./ets"
+  files = [ "./ets/@ohos.app.ability.abilityDelegatorRegistry.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_delegator_registry_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_delegator_registry_abc_etc") {
+  source = "$target_out_dir/ability_delegator_registry_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_delegator_registry_abc" ]
+}
+
+generate_static_abc("ability_delegator_application_testRunner_abc") {
+  base_url = "./ets"
+  files = [ "./ets/@ohos.application.testRunner.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_delegator_application_testRunner_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_delegator_application_testRunner_abc_etc") {
+  source = "$target_out_dir/ability_delegator_application_testRunner_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_delegator_application_testRunner_abc" ]
 }

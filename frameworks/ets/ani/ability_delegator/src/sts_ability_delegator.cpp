@@ -111,7 +111,7 @@ ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmd
     }
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
-    status = env->FindClass("LAbilityDelegator/ShellCmdResult;", &cls);
+    status = env->FindClass("Lapplication/shellCmdResult/ShellCmdResult;", &cls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegator failed status : %{public}d", status);
         return {};
@@ -250,10 +250,9 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
         return;
     }
     ani_class monitorCls;
-    ani_status status = ANI_ERROR;
-    status = env->FindClass("L@ohos/ability/AbilityDelegator/AbilityMonitor;", &monitorCls);
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed");
+    ani_status status = env->FindClass("Lapplication/AbilityMonitor/AbilityMonitor;", &monitorCls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status : %{public}d", status);
         return;
     }
     ani_field fieldModuleName = nullptr;

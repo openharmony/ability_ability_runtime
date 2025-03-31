@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import AbilityDelegator from '@ohos.ability.AbilityDelegator';
-import AbilityDelegatorArgs from '@ohos.ability.abilityDelegatorArgs';
+import AbilityDelegator from './application/AbilityDelegator';
+import AbilityDelegatorArgs from './application/abilityDelegatorArgs';
 
 export default namespace abilityDelegatorRegistry {
     loadLibrary("ability_delegator_registry_ani_kit.z")
