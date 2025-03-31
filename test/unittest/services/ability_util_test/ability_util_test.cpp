@@ -139,7 +139,7 @@ HWTEST_F(AbilityUtilTest, HandleDlpApp_0600, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI9D3V0
  */
-HWTEST_F(AbilityUtilTest, ProcessWindowMode_0100, TestSize.Level0)
+HWTEST_F(AbilityUtilTest, ProcessWindowMode_0100, TestSize.Level1)
 {
     Want want;
     want.SetParam(Want::PARAM_RESV_WINDOW_MODE, 0);
@@ -157,7 +157,7 @@ HWTEST_F(AbilityUtilTest, ProcessWindowMode_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI9D3V0
  */
-HWTEST_F(AbilityUtilTest, ProcessWindowMode_0200, TestSize.Level0)
+HWTEST_F(AbilityUtilTest, ProcessWindowMode_0200, TestSize.Level1)
 {
     Want want;
     want.SetParam(Want::PARAM_RESV_WINDOW_MODE, 0);
@@ -175,7 +175,7 @@ HWTEST_F(AbilityUtilTest, ProcessWindowMode_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI9D3V0
  */
-HWTEST_F(AbilityUtilTest, ProcessWindowMode_0300, TestSize.Level0)
+HWTEST_F(AbilityUtilTest, ProcessWindowMode_0300, TestSize.Level1)
 {
     Want want;
     want.SetParam(Want::PARAM_RESV_WINDOW_MODE, 0);

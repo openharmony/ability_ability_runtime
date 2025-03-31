@@ -285,7 +285,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_UpdateAbilityState
  * @tc.desc: Test UpdateAbilityState
  * @tc.type: FUNC
  */
-HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_UpdateAbilityState_003, TestSize.Level0)
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_UpdateAbilityState_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_UpdateAbilityState_003 start");
     std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
@@ -569,7 +569,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AbilityAttachTimeO
  * @tc.desc: Test AbilityAttachTimeOut
  * @tc.type: FUNC
  */
-HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AbilityAttachTimeOut_003, TestSize.Level0)
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AbilityAttachTimeOut_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_AbilityAttachTimeOut_003 start");
     auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
@@ -639,7 +639,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_PrepareTerminate_0
  * @tc.desc: Test PrepareTerminate
  * @tc.type: FUNC
  */
-HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_PrepareTerminate_003, TestSize.Level0)
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_PrepareTerminate_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_PrepareTerminate_003 start");
     auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();

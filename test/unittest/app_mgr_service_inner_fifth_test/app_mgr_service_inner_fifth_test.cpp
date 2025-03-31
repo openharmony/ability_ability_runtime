@@ -165,7 +165,7 @@ void AppMgrServiceInnerTest::TearDown()
  * @tc.desc: reportpreLoadTask
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, reportpreLoadTask_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, reportpreLoadTask_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "reportpreLoadTask_001 start");
 
@@ -194,7 +194,7 @@ HWTEST_F(AppMgrServiceInnerTest, reportpreLoadTask_001, TestSize.Level0)
  * @tc.desc: MakeProcessName
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, MakeProcessName_003, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, MakeProcessName_003, TestSize.Level2)
 {
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     std::shared_ptr<AppExecFwk::ApplicationInfo> appInfo =  nullptr;
@@ -247,7 +247,7 @@ HWTEST_F(AppMgrServiceInnerTest, MakeProcessName_003, TestSize.Level0)
  * @tc.desc: LaunchApplicationExt
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, LaunchApplicationExt_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, LaunchApplicationExt_001, TestSize.Level2)
 {
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     std::shared_ptr<AppExecFwk::AppRunningRecord> appRecord =
@@ -264,7 +264,7 @@ HWTEST_F(AppMgrServiceInnerTest, LaunchApplicationExt_001, TestSize.Level0)
  * @tc.desc: IsAllowedNWebPreload
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, IsAllowedNWebPreload_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, IsAllowedNWebPreload_001, TestSize.Level2)
 {
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     appMgrServiceInner->nwebPreloadSet_.clear();
@@ -279,7 +279,7 @@ HWTEST_F(AppMgrServiceInnerTest, IsAllowedNWebPreload_001, TestSize.Level0)
  * @tc.desc: NotifyAppAttachFailed
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, NotifyAppAttachFailed_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, NotifyAppAttachFailed_001, TestSize.Level2)
 {
     std::shared_ptr<AppExecFwk::AppRunningRecord> appRecord =
         std::make_shared<AppExecFwk::AppRunningRecord>(nullptr, 1, "111");
@@ -320,7 +320,7 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyAppAttachFailed_001, TestSize.Level0)
  * @tc.desc: NotifyLoadAbilityFailed
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, NotifyLoadAbilityFailed_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, NotifyLoadAbilityFailed_001, TestSize.Level2)
 {
     OHOS::sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -349,7 +349,7 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyLoadAbilityFailed_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, OpenAppSpawnConnection_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, OpenAppSpawnConnection_002, TestSize.Level2)
 {
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     appMgrServiceInner->remoteClientManager_ = nullptr;
@@ -376,7 +376,7 @@ HWTEST_F(AppMgrServiceInnerTest, OpenAppSpawnConnection_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, SetAppSpawnClient_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SetAppSpawnClient_002, TestSize.Level2)
 {
     std::shared_ptr<AppSpawnClient> spawnClient = nullptr;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -398,7 +398,7 @@ HWTEST_F(AppMgrServiceInnerTest, SetAppSpawnClient_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, SetBundleManagerHelper_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SetBundleManagerHelper_002, TestSize.Level2)
 {
     std::shared_ptr<BundleMgrHelper> bundleMgrHelper = nullptr;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -420,7 +420,7 @@ HWTEST_F(AppMgrServiceInnerTest, SetBundleManagerHelper_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, SetStartMsgStrictMode_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SetStartMsgStrictMode_001, TestSize.Level2)
 {
     CreateStartMsgParam param;
     param.strictMode = true;
@@ -447,7 +447,7 @@ HWTEST_F(AppMgrServiceInnerTest, SetStartMsgStrictMode_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, SetProcessJITState_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SetProcessJITState_001, TestSize.Level2)
 {
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -470,7 +470,7 @@ HWTEST_F(AppMgrServiceInnerTest, SetProcessJITState_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, SendCreateAtomicServiceProcessEvent_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendCreateAtomicServiceProcessEvent_002, TestSize.Level2)
 {
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     BundleType bundleType { BundleType::APP };
@@ -499,7 +499,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendCreateAtomicServiceProcessEvent_002, TestSi
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, SendReStartProcessEvent_006, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendReStartProcessEvent_006, TestSize.Level2)
 {
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
@@ -549,7 +549,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendReStartProcessEvent_006, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, SendPreloadAppStartupTypeEvent_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendPreloadAppStartupTypeEvent_001, TestSize.Level2)
 {
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     std::shared_ptr<AbilityInfo> abilityInfo = nullptr;
@@ -578,7 +578,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendPreloadAppStartupTypeEvent_001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, SendAppStartupTypeEvent_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendAppStartupTypeEvent_001, TestSize.Level2)
 {
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo1 = nullptr;
@@ -610,7 +610,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendAppStartupTypeEvent_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, CacheExitInfo_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, CacheExitInfo_001, TestSize.Level2)
 {
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -670,7 +670,7 @@ HWTEST_F(AppMgrServiceInnerTest, CacheExitInfo_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, HandleConfigurationChange_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, HandleConfigurationChange_001, TestSize.Level2)
 {
     Configuration config;
     int32_t userId = -1;

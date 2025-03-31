@@ -49,7 +49,7 @@ void FilePathUtilsTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, StringStartWith_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, StringStartWith_0100, TestSize.Level2)
 {
     std::string longStr = "abcde";
     const char* shortStr = "abc";
@@ -67,7 +67,7 @@ HWTEST_F(FilePathUtilsTest, StringStartWith_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, StringEndWith_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, StringEndWith_0100, TestSize.Level2)
 {
     std::string longStr = "abcde";
     const char* shortStr = "de";
@@ -85,7 +85,7 @@ HWTEST_F(FilePathUtilsTest, StringEndWith_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, SplitString_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, SplitString_0100, TestSize.Level2)
 {
     std::string longStr = "";
     std::vector<std::string> strVector;
@@ -101,7 +101,7 @@ HWTEST_F(FilePathUtilsTest, SplitString_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, SplitString_0200, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, SplitString_0200, TestSize.Level2)
 {
     std::string longStr = "a";
     std::vector<std::string> strVector;
@@ -117,7 +117,7 @@ HWTEST_F(FilePathUtilsTest, SplitString_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, SplitString_0300, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, SplitString_0300, TestSize.Level2)
 {
     std::string longStr = "abc:abc";
     std::vector<std::string> strVector;
@@ -133,7 +133,7 @@ HWTEST_F(FilePathUtilsTest, SplitString_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, SplitString_0400, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, SplitString_0400, TestSize.Level2)
 {
     std::string longStr = "abc:abc";
     std::vector<std::string> strVector;
@@ -149,7 +149,7 @@ HWTEST_F(FilePathUtilsTest, SplitString_0400, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, JoinString_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, JoinString_0100, TestSize.Level2)
 {
     std::vector<std::string> strVector{ "a", "b", "c", "d", "e" };
     char sep = ':';
@@ -164,7 +164,7 @@ HWTEST_F(FilePathUtilsTest, JoinString_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, JoinString_0200, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, JoinString_0200, TestSize.Level2)
 {
     std::vector<std::string> strVector{ "a", "b", "c", "d", "" };
     char sep = ':';
@@ -179,7 +179,7 @@ HWTEST_F(FilePathUtilsTest, JoinString_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, JoinString_0300, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, JoinString_0300, TestSize.Level2)
 {
     std::vector<std::string> strVector{ "" };
     char sep = ':';
@@ -194,7 +194,7 @@ HWTEST_F(FilePathUtilsTest, JoinString_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, StripString_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, StripString_0100, TestSize.Level2)
 {
     std::string str = "abc";
     const char* charSet = "123";
@@ -212,7 +212,7 @@ HWTEST_F(FilePathUtilsTest, StripString_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, FixExtName_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, FixExtName_0100, TestSize.Level2)
 {
     std::string path = "";
     FixExtName(path);
@@ -241,7 +241,7 @@ HWTEST_F(FilePathUtilsTest, FixExtName_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, GetInstallPath_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, GetInstallPath_0100, TestSize.Level2)
 {
     const std::string& curJsModulePath = "/data/storage/el1/bundle/curJsModulePath";
     bool module = false;
@@ -255,7 +255,7 @@ HWTEST_F(FilePathUtilsTest, GetInstallPath_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, GetInstallPath_0200, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, GetInstallPath_0200, TestSize.Level2)
 {
     const std::string& curJsModulePath = "/data/bundle";
     bool module = false;
@@ -269,7 +269,7 @@ HWTEST_F(FilePathUtilsTest, GetInstallPath_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, GetInstallPath_0300, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, GetInstallPath_0300, TestSize.Level2)
 {
     const std::string& curJsModulePath = "/data/bundlescurJsModulePath";
     bool module = false;
@@ -283,7 +283,7 @@ HWTEST_F(FilePathUtilsTest, GetInstallPath_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, GetInstallPath_0400, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, GetInstallPath_0400, TestSize.Level2)
 {
     const std::string& curJsModulePath = "/data/bundles/curJsModulePath/module";
     bool module = false;
@@ -297,7 +297,7 @@ HWTEST_F(FilePathUtilsTest, GetInstallPath_0400, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, GetInstallPath_0500, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, GetInstallPath_0500, TestSize.Level2)
 {
     const std::string& curJsModulePath = "/data/bundles/curJsModulePath/module";
     bool module = true;
@@ -311,7 +311,7 @@ HWTEST_F(FilePathUtilsTest, GetInstallPath_0500, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, GetInstallPath_0600, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, GetInstallPath_0600, TestSize.Level2)
 {
     const std::string& curJsModulePath = "/data/storage/el1/bundle/module/curJsModulePath";
     bool module = true;
@@ -325,7 +325,7 @@ HWTEST_F(FilePathUtilsTest, GetInstallPath_0600, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, MakeNewJsModulePath_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, MakeNewJsModulePath_0100, TestSize.Level2)
 {
     const std::string& curJsModulePath = "/data/bundles/curJsModulePath/module";
     const std::string& newJsModuleUri = "";
@@ -339,7 +339,7 @@ HWTEST_F(FilePathUtilsTest, MakeNewJsModulePath_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, MakeNewJsModulePath_0200, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, MakeNewJsModulePath_0200, TestSize.Level2)
 {
     const std::string& curJsModulePath = "/data/storage/el1/bundle/module/";
     const std::string& newJsModuleUri = "";
@@ -353,7 +353,7 @@ HWTEST_F(FilePathUtilsTest, MakeNewJsModulePath_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, FindNpmPackageInPath_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, FindNpmPackageInPath_0100, TestSize.Level2)
 {
     std::string lengthPath(PATH_MAX, 'a');
     const std::string& npmPath = lengthPath;
@@ -367,7 +367,7 @@ HWTEST_F(FilePathUtilsTest, FindNpmPackageInPath_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, FindNpmPackageInPath_0200, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, FindNpmPackageInPath_0200, TestSize.Level2)
 {
     const std::string& npmPath = "npmPath";
     std::string newJsModulePath = FindNpmPackageInPath(npmPath);
@@ -380,7 +380,7 @@ HWTEST_F(FilePathUtilsTest, FindNpmPackageInPath_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, FindNpmPackageInTopLevel_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, FindNpmPackageInTopLevel_0100, TestSize.Level2)
 {
     const std::string& moduleInstallPath = "";
     const std::string& npmPackage = "";
@@ -395,7 +395,7 @@ HWTEST_F(FilePathUtilsTest, FindNpmPackageInTopLevel_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, FindNpmPackage_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, FindNpmPackage_0100, TestSize.Level2)
 {
     const std::string& curJsModulePath = "";
     const std::string& npmPackage = "";
@@ -409,7 +409,7 @@ HWTEST_F(FilePathUtilsTest, FindNpmPackage_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, ParseOhmUri_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, ParseOhmUri_0100, TestSize.Level2)
 {
     const std::string& originBundleName = "";
     const std::string& curJsModulePath = "";
@@ -424,7 +424,7 @@ HWTEST_F(FilePathUtilsTest, ParseOhmUri_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, ParseOhmUri_0200, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, ParseOhmUri_0200, TestSize.Level2)
 {
     const std::string& originBundleName = "bundleName1";
     const std::string& curJsModulePath = "/data/storage/el1/bundle/curJsModulePath";
@@ -439,7 +439,7 @@ HWTEST_F(FilePathUtilsTest, ParseOhmUri_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, ParseOhmUri_0300, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, ParseOhmUri_0300, TestSize.Level2)
 {
     const std::string& originBundleName = "";
     const std::string& curJsModulePath = "";
@@ -454,7 +454,7 @@ HWTEST_F(FilePathUtilsTest, ParseOhmUri_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, ParseOhmUri_0400, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, ParseOhmUri_0400, TestSize.Level2)
 {
     const std::string& originBundleName = "";
     const std::string& curJsModulePath = "";
@@ -469,7 +469,7 @@ HWTEST_F(FilePathUtilsTest, ParseOhmUri_0400, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, ParseOhmUri_0500, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, ParseOhmUri_0500, TestSize.Level2)
 {
     const std::string& originBundleName = "";
     const std::string& curJsModulePath = "/data/storage/el1/bundle/module/curJsModulePath";
@@ -484,7 +484,7 @@ HWTEST_F(FilePathUtilsTest, ParseOhmUri_0500, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, ParseOhmUri_0600, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, ParseOhmUri_0600, TestSize.Level2)
 {
     const std::string& originBundleName = "";
     const std::string& curJsModulePath = "";
@@ -499,7 +499,7 @@ HWTEST_F(FilePathUtilsTest, ParseOhmUri_0600, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, ParseOhmUri_0700, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, ParseOhmUri_0700, TestSize.Level2)
 {
     const std::string& originBundleName = "";
     const std::string& curJsModulePath = "/data/bundles/curJsModulePath/module";
@@ -514,7 +514,7 @@ HWTEST_F(FilePathUtilsTest, ParseOhmUri_0700, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, ParseOhmUri_0800, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, ParseOhmUri_0800, TestSize.Level2)
 {
     const std::string& originBundleName = "";
     const std::string& curJsModulePath = "";
@@ -529,7 +529,7 @@ HWTEST_F(FilePathUtilsTest, ParseOhmUri_0800, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, NormalizeUri_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, NormalizeUri_0100, TestSize.Level2)
 {
     const std::string& bundleName = "";
     const std::string& curJsModulePath = "";
@@ -544,7 +544,7 @@ HWTEST_F(FilePathUtilsTest, NormalizeUri_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, NormalizeUri_0200, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, NormalizeUri_0200, TestSize.Level2)
 {
     const std::string& bundleName = "";
     const std::string& curJsModulePath = "";
@@ -559,7 +559,7 @@ HWTEST_F(FilePathUtilsTest, NormalizeUri_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, NormalizeUri_0300, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, NormalizeUri_0300, TestSize.Level2)
 {
     const std::string& bundleName = "";
     const std::string& curJsModulePath = "a";
@@ -574,7 +574,7 @@ HWTEST_F(FilePathUtilsTest, NormalizeUri_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, MakeFilePath_0100, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, MakeFilePath_0100, TestSize.Level2)
 {
     std::string bundleName(PATH_MAX, 'a');
     const std::string& codePath = bundleName;
@@ -590,7 +590,7 @@ HWTEST_F(FilePathUtilsTest, MakeFilePath_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, MakeFilePath_0200, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, MakeFilePath_0200, TestSize.Level2)
 {
     const std::string& codePath = "codePath";
     const std::string& modulePath = "";
@@ -605,7 +605,7 @@ HWTEST_F(FilePathUtilsTest, MakeFilePath_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(FilePathUtilsTest, MakeFilePath_0300, TestSize.Level0)
+HWTEST_F(FilePathUtilsTest, MakeFilePath_0300, TestSize.Level2)
 {
     const std::string& codePath = "../codePath";
     const std::string& modulePath = "";

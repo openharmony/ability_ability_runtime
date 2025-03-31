@@ -50,7 +50,7 @@ void DialogAbilityInfoTest::TearDown()
  * @tc.desc: GetURI Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, GetURI_001, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, GetURI_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetURI_001 is start");
     DialogAbilityInfo dialogAbilityInfo;
@@ -75,7 +75,7 @@ HWTEST_F(DialogAbilityInfoTest, GetURI_001, TestSize.Level0)
  * @tc.desc: GetURI Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, GetURI_002, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, GetURI_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetURI_002 is start");
     DialogAbilityInfo dialogAbilityInfo;
@@ -88,7 +88,7 @@ HWTEST_F(DialogAbilityInfoTest, GetURI_002, TestSize.Level0)
  * @tc.desc: ParseURI Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, ParseURI_002, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, ParseURI_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "ParseURI_002 is start");
     DialogAbilityInfo dialogAbilityInfo;
@@ -101,7 +101,7 @@ HWTEST_F(DialogAbilityInfoTest, ParseURI_002, TestSize.Level0)
  * @tc.desc: ParseURI Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, ParseURI_003, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, ParseURI_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "ParseURI_003 is start");
     DialogAbilityInfo dialogAbilityInfo;
@@ -114,7 +114,7 @@ HWTEST_F(DialogAbilityInfoTest, ParseURI_003, TestSize.Level0)
  * @tc.desc: Split Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, Split_001, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, Split_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "Split_001 is start");
     DialogAbilityInfo dialogAbilityInfo;
@@ -128,7 +128,7 @@ HWTEST_F(DialogAbilityInfoTest, Split_001, TestSize.Level0)
  * @tc.desc: Split Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, Split_002, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, Split_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "Split_002 is start");
     DialogAbilityInfo dialogAbilityInfo;
@@ -143,7 +143,7 @@ HWTEST_F(DialogAbilityInfoTest, Split_002, TestSize.Level0)
  * @tc.desc: Split Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, Split_003, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, Split_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "Split_003 is start");
     DialogAbilityInfo dialogAbilityInfo;
@@ -160,7 +160,7 @@ HWTEST_F(DialogAbilityInfoTest, Split_003, TestSize.Level0)
  * @tc.desc: Split Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, Split_004, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, Split_004, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "Split_004 is start");
     DialogAbilityInfo dialogAbilityInfo;
@@ -176,7 +176,7 @@ HWTEST_F(DialogAbilityInfoTest, Split_004, TestSize.Level0)
  * @tc.desc: ReadFromParcel Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_001, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "ReadFromParcel_001 is start");
     DialogSessionInfo dialogSessionInfo;
@@ -192,7 +192,7 @@ HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_001, TestSize.Level0)
  * @tc.desc: ReadFromParcel Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_002, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "ReadFromParcel_002 is start");
     DialogSessionInfo dialogSessionInfo;
@@ -209,7 +209,7 @@ HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_002, TestSize.Level0)
  * @tc.desc: ReadFromParcel Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_003, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "ReadFromParcel_003 is start");
     DialogSessionInfo dialogSessionInfo;
@@ -228,7 +228,7 @@ HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_003, TestSize.Level0)
  * @tc.desc: ReadFromParcel Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_004, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_004, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "ReadFromParcel_004 is start");
     DialogSessionInfo dialogSessionInfo;
@@ -250,7 +250,7 @@ HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_004, TestSize.Level0)
  * @tc.desc: ReadFromParcel Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_005, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_005, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "ReadFromParcel_005 is start");
     DialogSessionInfo dialogSessionInfo;
@@ -272,7 +272,7 @@ HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_005, TestSize.Level0)
  * @tc.desc: ReadFromParcel Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_006, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_006, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "ReadFromParcel_006 is start");
     DialogSessionInfo dialogSessionInfo;
@@ -297,7 +297,7 @@ HWTEST_F(DialogAbilityInfoTest, ReadFromParcel_006, TestSize.Level0)
  * @tc.desc: Marshalling Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, Marshalling_002, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, Marshalling_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "Marshalling_002 is start");
     Parcel parcel;
@@ -311,7 +311,7 @@ HWTEST_F(DialogAbilityInfoTest, Marshalling_002, TestSize.Level0)
  * @tc.desc: Unmarshalling Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, Unmarshalling_001, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, Unmarshalling_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "Unmarshalling_001 is start");
     Parcel parcel;
@@ -325,7 +325,7 @@ HWTEST_F(DialogAbilityInfoTest, Unmarshalling_001, TestSize.Level0)
  * @tc.desc: Unmarshalling Test
  * @tc.type: FUNC
  */
-HWTEST_F(DialogAbilityInfoTest, Unmarshalling_002, TestSize.Level0)
+HWTEST_F(DialogAbilityInfoTest, Unmarshalling_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "Unmarshalling_002 is start");
     Parcel parcel;

@@ -83,7 +83,7 @@ HWTEST_F(HdcRegisterTest, HdcRegisterTest_0200, TestSize.Level0)
  * @tc.desc: HdcRegisterTest Test
  * @tc.type: FUNC
  */
-HWTEST_F(HdcRegisterTest, HdcRegisterTest_0300, TestSize.Level0)
+HWTEST_F(HdcRegisterTest, HdcRegisterTest_0300, TestSize.Level1)
 {
     const std::string processName = "123";
     const std::string bundleName = "123";
@@ -101,7 +101,7 @@ HWTEST_F(HdcRegisterTest, HdcRegisterTest_0300, TestSize.Level0)
  * @tc.desc: HdcRegisterTest Test
  * @tc.type: FUNC
  */
-HWTEST_F(HdcRegisterTest, HdcRegisterTest_0400, TestSize.Level0)
+HWTEST_F(HdcRegisterTest, HdcRegisterTest_0400, TestSize.Level1)
 {
     const std::string processName = "123";
     const std::string bundleName = "123";
@@ -119,7 +119,7 @@ HWTEST_F(HdcRegisterTest, HdcRegisterTest_0400, TestSize.Level0)
  * @tc.desc: HdcRegisterTest Test
  * @tc.type: FUNC
  */
-HWTEST_F(HdcRegisterTest, HdcRegisterTest_0500, TestSize.Level0)
+HWTEST_F(HdcRegisterTest, HdcRegisterTest_0500, TestSize.Level1)
 {
     const std::string processName = "123";
     const std::string bundleName = "123";
