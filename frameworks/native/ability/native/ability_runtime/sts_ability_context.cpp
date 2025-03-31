@@ -234,7 +234,36 @@ ani_object StsAbilityContext::WrapBusinessError(ani_env *env, int32_t code)
     return obj;
 }
 
-// TO DO: free install
+void StsAbilityContext::AddFreeInstallObserver(
+    ani_env *env, const AAFwk::Want &want, ani_object callback, const std::shared_ptr<AbilityContext> &context)
+{
+    // adapter free install async return install and start result
+    TAG_LOGD(AAFwkTag::CONTEXT, "called");
+    int ret = 0;
+    if (!context) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return;
+    }
+    if (freeInstallObserver_ == nullptr) {
+        ani_vm *etsVm = nullptr;
+        ani_status status = ANI_ERROR;
+        if ((status = env->GetVM(&etsVm)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::STSRUNTIME, "status : %{public}d", status);
+        }
+        freeInstallObserver_ = new StsFreeInstallObserver(etsVm);
+        ret = context->AddFreeInstallObserver(freeInstallObserver_);
+    }
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "addFreeInstallObserver error");
+    }
+    std::string startTime = want.GetStringParam(AAFwk::Want::PARAM_RESV_START_TIME);
+    TAG_LOGI(AAFwkTag::CONTEXT, "addStsObserver");
+    std::string bundleName = want.GetElement().GetBundleName();
+    std::string abilityName = want.GetElement().GetAbilityName();
+    freeInstallObserver_->AddStsObserverObject(
+        env, bundleName, abilityName, startTime, callback);
+}
+
 void StsAbilityContext::StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
     ani_object wantObj, ani_object opt, ani_object call)
 {
@@ -252,6 +281,7 @@ void StsAbilityContext::StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe
         std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
             system_clock::now().time_since_epoch()).count());
         want.SetParam(AAFwk::Want::PARAM_RESV_START_TIME, startTime);
+        AddFreeInstallObserver(env, want, call, context);
     }
     ErrCode resultCode = ERR_INVALID_VALUE;
     if (opt != nullptr) {
@@ -261,9 +291,13 @@ void StsAbilityContext::StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe
     } else {
         resultCode = context->StartAbility(want, -1);
     }
-
     if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
-        // TODO
+        if (resultCode != ERR_OK && freeInstallObserver_ != nullptr) {
+            std::string bundleName = want.GetElement().GetBundleName();
+            std::string abilityName = want.GetElement().GetAbilityName();
+            std::string startTime = want.GetStringParam(AAFwk::Want::PARAM_RESV_START_TIME);
+            freeInstallObserver_->OnInstallFinished(bundleName, abilityName, startTime, resultCode);
+        }
     } else {
         AsyncCallback(env, call, WrapBusinessError(env, static_cast<int>(resultCode)), nullptr);
     }
@@ -274,7 +308,7 @@ void StsAbilityContext::StartAbility1(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    StartAbilityInner(env, aniObj, wantObj, nullptr, call);
+    GetInstance().StartAbilityInner(env, aniObj, wantObj, nullptr, call);
 }
 
 void StsAbilityContext::StartAbility2([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
@@ -282,7 +316,7 @@ void StsAbilityContext::StartAbility2([[maybe_unused]] ani_env *env, [[maybe_unu
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    StartAbilityInner(env, aniObj, wantObj, opt, call);
+    GetInstance().StartAbilityInner(env, aniObj, wantObj, opt, call);
 }
 
 int32_t StsAbilityContext::GenerateRequestCode()

@@ -22,6 +22,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
 
 bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value)
 {
@@ -390,6 +391,27 @@ bool GetRefFieldByName(ani_env *env, ani_object param, const char *name, ani_ref
     return true;
 }
 
+ani_object createDouble(ani_env *env, ani_double value)
+{
+    ani_class persion_cls;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass(CLASSNAME_DOUBLE, &persion_cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return nullptr;
+    }
+    ani_method personInfoCtor;
+    if ((status = env->Class_FindMethod(persion_cls, "<ctor>", "D:V", &personInfoCtor)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return nullptr;
+    }
+    ani_object personInfoObj;
+    if ((status = env->Object_New(persion_cls, personInfoCtor, &personInfoObj, value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return nullptr;
+    }
+    return personInfoObj;
+}
+
 bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::string &value)
 {
     ani_field field = nullptr;
@@ -436,7 +458,12 @@ bool SetFieldDouble(ani_env *env, ani_class cls, ani_object object, const std::s
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return false;
     }
-    status = env->Object_SetField_Double(object, field, value);
+    ani_object obj = createDouble(env, value);
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "createDouble failed");
+        return false;
+    }
+    status = env->Object_SetField_Ref(object, field, reinterpret_cast<ani_ref>(obj));
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return false;

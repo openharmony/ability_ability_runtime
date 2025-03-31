@@ -24,6 +24,7 @@
 #include "configuration.h"
 #include "sts_runtime.h"
 #include "ohos_application.h"
+#include "sts_free_install_observer.h"
 
 class STSNativeReference;
 
@@ -32,6 +33,11 @@ namespace AbilityRuntime {
 using OHOSApplication = AppExecFwk::OHOSApplication;
 class StsAbilityContext final {
 public:
+    static StsAbilityContext &GetInstance()
+    {
+        static StsAbilityContext instance;
+        return instance;
+    }
     static void StartAbility1(
         [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj, ani_object wantObj, ani_object call);
     static void StartAbility2([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj, ani_object wantObj,
@@ -54,13 +60,16 @@ private:
     static ani_object WrapBusinessError(ani_env *env, int32_t code);
     static ani_object WrapError(ani_env *env, const std::string &msg);
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
-    static void StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
+    void StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
         ani_object wantObj, ani_object opt, ani_object call);
     static void StartAbilityForResultInner(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object startOptionsObj, ani_object callback);
     static int32_t GenerateRequestCode();
     static std::string GetErrMsg(int32_t err, const std::string &permission = "");
+    void AddFreeInstallObserver(
+        ani_env *env, const AAFwk::Want &want, ani_object callback, const std::shared_ptr<AbilityContext> &context);
 
+    sptr<StsFreeInstallObserver> freeInstallObserver_ = nullptr;
     static std::mutex requestCodeMutex_;
 };
 
