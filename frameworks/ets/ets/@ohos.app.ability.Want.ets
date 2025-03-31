@@ -220,7 +220,7 @@ export default class Want {
   deviceId?: string;
   uri?: string;
   type?: string;
-  flags: int;
+  flags?: number;
   action?: string;
   parameters?: Record<string, Object>;
   entities?: Array<string>;
