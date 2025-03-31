@@ -13,107 +13,92 @@
  * limitations under the License.
  */
 
- type AsyncCallback<T> = (data: T) => void;
+import wantConstant from '@ohos.app.ability.wantConstant';
+import { BusinessError, AsyncCallback } from '@ohos.base';
 
- namespace uriPermissionManager {
-    export native function grantUriPermissionPromiseSync(uri: string, flag: int, targetBundleName: string): int;
-    export native function grantUriPermissionPromiseWithAppCloneIndexSync(uri: string, flag: int,
+export class AsyncCallbackWrapper<T> {
+  myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
+
+  constructor(myFun:AsyncCallback<T, void>){
+    this.myFun_ = myFun;
+  }
+
+  invoke(err: BusinessError<void>, data: T) : void {
+    this.myFun_(err, data);
+  }
+}
+
+export default namespace uriPermissionManager {
+    loadLibrary("uri_permission_manager_ani_kit.z");
+
+    export native function grantUriPermissionPromiseSync(uri: string, flag: wantConstant.Flags, targetBundleName: string): int;
+    export native function grantUriPermissionPromiseWithAppCloneIndexSync(uri: string, flag: wantConstant.Flags,
         targetBundleName: string, appCloneIndex: int): void;
-    export native function grantUriPermissionCallbackSync(uri: string, flag: int, targetBundleName: string): void;
+    export native function grantUriPermissionCallbackSync(uri: string, flag: wantConstant.Flags, targetBundleName: string,
+        callback: AsyncCallbackWrapper<number>): void;
     export native function revokeUriPermissionPromiseSync(uri: string, targetBundleName: string): int;
     export native function revokeUriPermissionPromiseWithAppCloneIndexSync(uri: string, targetBundleName: string,
         appCloneIndex: int): void;
-    export native function revokeUriPermissionCallbackSync(uri: string, targetBundleName: string): void;
+    export native function revokeUriPermissionCallbackSync(uri: string, targetBundleName: string,
+        callback: AsyncCallbackWrapper<number>): void;
 
-    export function grantUriPermission(uri: string, flag: int, targetBundleName: string): Promise<int> {
-        let tag = "call grantUriPermission promise ";
-        console.log(tag + "1");
+    export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string): Promise<int> {
+        let tag = "v2 call grantUriPermission promise ";
         let p = new Promise<int>((resolve: (a: int) => void): void => {
-            console.log(tag + "3");
             let p1 = launch uriPermissionManager.grantUriPermissionPromiseSync(uri, flag, targetBundleName);
-            console.log(tag + "2");
             p1.then<int>((v: int): void => {
                 resolve(v);
-                console.log(tag + "5");
             });
         });
-        console.log(tag + "2");
         return p;
     }
 
-    export function grantUriPermission(uri: string, flag: int, targetBundleName: string,
+    export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string,
         appCloneIndex: int): Promise<void> {
-        let tag = "call grantUriPermission promise with appCloneIndex ";
-        console.log(tag + "1");
+        let tag = "v1 call grantUriPermission promise with appCloneIndex ";
         let p = new Promise<void>((resolve: (a: int) => void): void => {
-            console.log(tag + "3");
             let p1 = launch uriPermissionManager.grantUriPermissionPromiseWithAppCloneIndexSync(uri,
                 flag, targetBundleName, appCloneIndex);
-            console.log(tag + "4");
             p1.then<void>((): void => {
                 resolve(1);
-                console.log(tag + "5");
             });
         });
-        console.log(tag + "2");
         return p;
     }
 
-    export function grantUriPermission(uri: string, flag: int, targetBundleName: string,
-        callback: AsyncCallback<number>): void {
-        let tag = "call grantUriPermission callback ";
-        console.log(tag + "1");
-        let p1 = launch uriPermissionManager.grantUriPermissionCallbackSync(uri, flag, targetBundleName);
-        console.log(tag + "2");
-        p1.then<void>((): void => {
-            console.log(tag + "3");
-            callback(0);
-        });
-        console.log(tag + "4");
+    export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string,
+        callback: AsyncCallback<number, void>): void {
+        let tag = "v1 call grantUriPermission callback ";
+        let myCall = new AsyncCallbackWrapper<number>(callback);
+        let p1 = launch uriPermissionManager.grantUriPermissionCallbackSync(uri, flag, targetBundleName, myCall);
     }
 
     export function revokeUriPermission(uri: string, targetBundleName: string): Promise<int> {
         let tag = "call revokeUriPermission promise ";
-        console.log(tag + "1");
         let p = new Promise<int>((resolve: (a: int) => void): void => {
-            console.log(tag + "3");
             let p1 = launch uriPermissionManager.revokeUriPermissionPromiseSync(uri, targetBundleName);
-            console.log(tag + "4");
             p1.then<int>((v: int): void => {
                 resolve(v);
-                console.log(tag + "5");
             });
         });
-        console.log(tag + "2");
         return p;
     }
 
     export function revokeUriPermission(uri: string, targetBundleName: string, appCloneIndex: int): Promise<int> {
         let tag = "call revokeUriPermission promise with appCloneIndex ";
-        console.log(tag + "1");
         let p = new Promise<int>((resolve: (a: int) => void): void => {
-            console.log(tag + "3");
             let p1 = launch uriPermissionManager.revokeUriPermissionPromiseWithAppCloneIndexSync(uri, targetBundleName,
                 appCloneIndex);
-            console.log(tag + "4");
             p1.then<void>((): void => {
                 resolve(1);
-                console.log(tag + "5");
             });
         });
-        console.log(tag + "2");
         return p;
     }
 
-    export function revokeUriPermission(uri: string, targetBundleName: string, callback: AsyncCallback<number>): void {
+    export function revokeUriPermission(uri: string, targetBundleName: string, callback: AsyncCallback<number, void>): void {
         let tag = "call revokeUriPermission callback ";
-        console.log(tag + "1");
-        let p1 = launch uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName);
-        console.log(tag + "2");
-        p1.then<void>((): void => {
-            console.log(tag + "3");
-            callback(0);
-        });
-        console.log(tag + "4");
+        let myCall = new AsyncCallbackWrapper<number>(callback);
+        let p1 = launch uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName, myCall);
     }
  }
