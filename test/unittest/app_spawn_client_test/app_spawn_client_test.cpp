@@ -64,7 +64,7 @@ HWTEST_F(AppSpawnClientTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, PreStartNWebSpawnProcessImpl_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, PreStartNWebSpawnProcessImpl_002, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     asc->OpenConnection();
@@ -78,7 +78,7 @@ HWTEST_F(AppSpawnClientTest, PreStartNWebSpawnProcessImpl_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, AppSpawnClient_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, AppSpawnClient_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_001 start");
     const char* serviceName = "appspawn";
@@ -94,7 +94,7 @@ HWTEST_F(AppSpawnClientTest, AppSpawnClient_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, AppSpawnClient_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, AppSpawnClient_002, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_002 start");
     const char* serviceName = "cjappspawn";
@@ -110,7 +110,7 @@ HWTEST_F(AppSpawnClientTest, AppSpawnClient_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, AppSpawnClient_003, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, AppSpawnClient_003, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_003 start");
     const char* serviceName = "nwebRestart";
@@ -126,7 +126,7 @@ HWTEST_F(AppSpawnClientTest, AppSpawnClient_003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, AppSpawnClient_004, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, AppSpawnClient_004, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_004 start");
     const char* serviceName = "nativespawn";
@@ -142,7 +142,7 @@ HWTEST_F(AppSpawnClientTest, AppSpawnClient_004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, AppSpawnClient_005, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, AppSpawnClient_005, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_005 start");
     const char* serviceName = "nwebspawn";
@@ -158,7 +158,7 @@ HWTEST_F(AppSpawnClientTest, AppSpawnClient_005, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, OpenConnection_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, OpenConnection_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 start");
     auto asc = std::make_shared<AppSpawnClient>(true);
@@ -173,7 +173,7 @@ HWTEST_F(AppSpawnClientTest, OpenConnection_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, OpenConnection_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, OpenConnection_002, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 start");
     auto asc = std::make_shared<AppSpawnClient>(false);
@@ -188,7 +188,7 @@ HWTEST_F(AppSpawnClientTest, OpenConnection_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, CloseConnection_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, CloseConnection_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 start");
     auto asc = std::make_shared<AppSpawnClient>(true);
@@ -203,7 +203,7 @@ HWTEST_F(AppSpawnClientTest, CloseConnection_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, CloseConnection_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, CloseConnection_002, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 start");
     auto asc = std::make_shared<AppSpawnClient>(false);
@@ -218,7 +218,7 @@ HWTEST_F(AppSpawnClientTest, CloseConnection_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, SetDacInfo_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, SetDacInfo_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetDacInfo_001 start");
     AppSpawnStartMsg startMsg = {0};
@@ -266,7 +266,7 @@ HWTEST_F(AppSpawnClientTest, SetDacInfo_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, SetMountPermission_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, SetMountPermission_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetMountPermission_001 start");
     AppSpawnStartMsg startMsg = {0};
@@ -314,7 +314,7 @@ HWTEST_F(AppSpawnClientTest, SetMountPermission_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, SetStartFlags_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, SetStartFlags_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetStartFlags_001 start");
     AppSpawnStartMsg startMsg = {0};
@@ -362,7 +362,7 @@ HWTEST_F(AppSpawnClientTest, SetStartFlags_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, AppspawnSetExtMsgMore_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, AppspawnSetExtMsgMore_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppspawnSetExtMsgMore_001 start");
     AppSpawnStartMsg startMsg = {0};
@@ -411,7 +411,7 @@ HWTEST_F(AppSpawnClientTest, AppspawnSetExtMsgMore_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, AppspawnCreateDefaultMsg_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, AppspawnCreateDefaultMsg_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppspawnCreateDefaultMsg_001 start");
     AppSpawnStartMsg startMsg = {0};
@@ -466,7 +466,7 @@ HWTEST_F(AppSpawnClientTest, AppspawnCreateDefaultMsg_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, VerifyMsg_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, VerifyMsg_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_001 start");
     AppSpawnStartMsg startMsg = {0};
@@ -516,7 +516,7 @@ HWTEST_F(AppSpawnClientTest, VerifyMsg_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, VerifyMsg_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, VerifyMsg_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_002 start");
     AppSpawnStartMsg startMsg = {0};
@@ -566,7 +566,7 @@ HWTEST_F(AppSpawnClientTest, VerifyMsg_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, VerifyMsg_003, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, VerifyMsg_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_003 start");
     AppSpawnStartMsg startMsg = {0};
@@ -616,7 +616,7 @@ HWTEST_F(AppSpawnClientTest, VerifyMsg_003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, VerifyMsg_004, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, VerifyMsg_004, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_004 start");
     AppSpawnStartMsg startMsg = {0};
@@ -662,7 +662,7 @@ HWTEST_F(AppSpawnClientTest, VerifyMsg_004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, VerifyMsg_005, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, VerifyMsg_005, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_005 start");
     AppSpawnStartMsg startMsg = {0};
@@ -708,7 +708,7 @@ HWTEST_F(AppSpawnClientTest, VerifyMsg_005, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, SetChildProcessTypeStartFlag_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, SetChildProcessTypeStartFlag_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetChildProcessTypeStartFlag_001 start");
     AppSpawnStartMsg startMsg = {0};
@@ -733,7 +733,7 @@ HWTEST_F(AppSpawnClientTest, SetChildProcessTypeStartFlag_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, SetChildProcessTypeStartFlag_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, SetChildProcessTypeStartFlag_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetChildProcessTypeStartFlag_002 start");
     AppSpawnStartMsg startMsg = {0};
@@ -758,7 +758,7 @@ HWTEST_F(AppSpawnClientTest, SetChildProcessTypeStartFlag_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, SetExtMsgFds_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, SetExtMsgFds_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetExtMsgFds_001 start");
     AppSpawnStartMsg startMsg = {0};
@@ -786,7 +786,7 @@ HWTEST_F(AppSpawnClientTest, SetExtMsgFds_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, SetExtMsgFds_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, SetExtMsgFds_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetExtMsgFds_002 start");
     AppSpawnStartMsg startMsg = {0};
@@ -813,7 +813,7 @@ HWTEST_F(AppSpawnClientTest, SetExtMsgFds_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, SetIsolationModeFlag_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, SetIsolationModeFlag_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetIsolationModeFlag_001 start");
     AppSpawnStartMsg startMsg = {0};
@@ -838,7 +838,7 @@ HWTEST_F(AppSpawnClientTest, SetIsolationModeFlag_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, SetIsolationModeFlag_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, SetIsolationModeFlag_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetIsolationModeFlag_002 start");
     AppSpawnStartMsg startMsg = {0};
@@ -864,7 +864,7 @@ HWTEST_F(AppSpawnClientTest, SetIsolationModeFlag_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, StartProcess_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, StartProcess_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartProcess_001 start");
     AppSpawnStartMsg startMsg = {0};
@@ -908,7 +908,7 @@ HWTEST_F(AppSpawnClientTest, StartProcess_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppSpawnClientTest, StartProcess_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, StartProcess_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartProcess_002 start");
     AppSpawnStartMsg startMsg = {0};
@@ -951,7 +951,7 @@ HWTEST_F(AppSpawnClientTest, StartProcess_002, TestSize.Level0)
  * @tc.desc: appspawn client DumpJITPermissionListToJson_001
  * @tc.type: FUNC
  */
-HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_001, TestSize.Level2)
 {
     std::map<std::string, std::string> jitPermissionsMap = {
         {"ohos.permission.jit1", "1"}, {"ohos.permission.jit2", "{\"cont\": \"1\"}"}
@@ -969,7 +969,7 @@ HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_001, TestSize.Level0)
  * @tc.desc: appspawn client DumpJITPermissionListToJson_002
  * @tc.type: FUNC
  */
-HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_002, TestSize.Level2)
 {
     std::map<std::string, std::string> jitPermissionsMap;
     std::string jsonJITPermissions = DumpJITPermissionListToJson(jitPermissionsMap);
@@ -983,7 +983,7 @@ HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_002, TestSize.Level0)
  * @tc.desc: appspawn client DumpJITPermissionListToJson_003
  * @tc.type: FUNC
  */
-HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_003, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_003, TestSize.Level2)
 {
     std::map<std::string, std::string> jitPermissionsMap = { { "ohos.permission.jit1", "" } };
     std::string jsonJITPermissions = DumpJITPermissionListToJson(jitPermissionsMap);
@@ -997,7 +997,7 @@ HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_003, TestSize.Level0)
  * @tc.desc: SendAppSpawnUninstallDebugHapMsg
  * @tc.type: FUNC
  */
-HWTEST_F(AppSpawnClientTest, SendAppSpawnUninstallDebugHapMsg_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientTest, SendAppSpawnUninstallDebugHapMsg_001, TestSize.Level2)
 {
     auto appSpawnClient = std::make_shared<AppSpawnClient>(false);
     int32_t userId = 0;

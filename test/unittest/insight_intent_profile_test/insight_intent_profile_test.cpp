@@ -95,7 +95,7 @@ void InsightIntentProfileTest::TearDown()
  * @tc.name: TransformToInsightIntentInfo
  * @tc.desc: Test whether TransformToInsightIntentInfo and are called normally.
  */
-HWTEST_F(InsightIntentProfileTest, TransformToInsightIntentInfo_0100, TestSize.Level0)
+HWTEST_F(InsightIntentProfileTest, TransformToInsightIntentInfo_0100, TestSize.Level2)
 {
     InsightIntentProfileInfo insightIntent;
     InsightIntentInfo info;
@@ -118,7 +118,7 @@ HWTEST_F(InsightIntentProfileTest, TransformToInsightIntentInfo_0100, TestSize.L
  * @tc.name: TransformToInsightIntentInfo
  * @tc.desc: Test whether TransformToInsightIntentInfo and are called normally.
  */
-HWTEST_F(InsightIntentProfileTest, TransformToInsightIntentInfo_0200, TestSize.Level0)
+HWTEST_F(InsightIntentProfileTest, TransformToInsightIntentInfo_0200, TestSize.Level2)
 {
     InsightIntentProfileInfo insightIntent;
     InsightIntentInfo info;
@@ -136,7 +136,7 @@ HWTEST_F(InsightIntentProfileTest, TransformToInsightIntentInfo_0200, TestSize.L
  * @tc.name: TransformToInfos
  * @tc.desc: Test whether TransformToInfos and are called normally.
  */
-HWTEST_F(InsightIntentProfileTest, TransformToInfos_0300, TestSize.Level0)
+HWTEST_F(InsightIntentProfileTest, TransformToInfos_0300, TestSize.Level2)
 {
     InsightIntentProfileInfoVec profileInfos;
     InsightIntentProfileInfo insightIntent;
@@ -156,7 +156,7 @@ HWTEST_F(InsightIntentProfileTest, TransformToInfos_0300, TestSize.Level0)
  * @tc.name: TransformToInfos
  * @tc.desc: Test whether TransformToInfos and are called normally.
  */
-HWTEST_F(InsightIntentProfileTest, TransformToInfos_0400, TestSize.Level0)
+HWTEST_F(InsightIntentProfileTest, TransformToInfos_0400, TestSize.Level2)
 {
     InsightIntentProfileInfoVec profileInfos;
     std::vector<InsightIntentInfo> intentInfos;
@@ -173,7 +173,7 @@ HWTEST_F(InsightIntentProfileTest, TransformToInfos_0400, TestSize.Level0)
  * @tc.name: TransformTo
  * @tc.desc: Test whether TransformTo and are called normally.
  */
-HWTEST_F(InsightIntentProfileTest, TransformTo_0500, TestSize.Level0)
+HWTEST_F(InsightIntentProfileTest, TransformTo_0500, TestSize.Level2)
 {
     std::string profileStr = "not a valid json string";
     std::vector<InsightIntentInfo> intentInfos;
@@ -187,7 +187,7 @@ HWTEST_F(InsightIntentProfileTest, TransformTo_0500, TestSize.Level0)
  * @tc.name: TransformTo
  * @tc.desc: Test whether TransformTo and are called normally.
  */
-HWTEST_F(InsightIntentProfileTest, TransformTo_0600, TestSize.Level0)
+HWTEST_F(InsightIntentProfileTest, TransformTo_0600, TestSize.Level2)
 {
     std::vector<InsightIntentInfo> intentInfos;
     bool result = InsightIntentProfile::TransformTo(profileJsonStr, intentInfos);
@@ -200,7 +200,7 @@ HWTEST_F(InsightIntentProfileTest, TransformTo_0600, TestSize.Level0)
  * @tc.name: TransformTo
  * @tc.desc: Test whether TransformTo and are called normally.
  */
-HWTEST_F(InsightIntentProfileTest, TransformTo_0700, TestSize.Level0)
+HWTEST_F(InsightIntentProfileTest, TransformTo_0700, TestSize.Level2)
 {
     std::string profileStr = "{\"insightIntents\":\"test\"}";
     std::vector<InsightIntentInfo> intentInfos;

@@ -322,7 +322,7 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceKeyF
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0100, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0100 start");
 
@@ -339,7 +339,7 @@ HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0200, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0200, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0200 start");
 
@@ -357,7 +357,7 @@ HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0300, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0300, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0300 start");
 
@@ -375,7 +375,7 @@ HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0400, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0400, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0400 start");
 
@@ -393,7 +393,7 @@ HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0400, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0500, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0500, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0500 start");
 
@@ -412,7 +412,7 @@ HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0500, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, StartSelfUIAbilityRecordGuard_0100, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, StartSelfUIAbilityRecordGuard_0100, TestSize.Level2)
 {
     pid_t pid = 8888;
     int32_t tokenId = 1;
@@ -433,7 +433,7 @@ HWTEST_F(AbilityPermissionUtilTest, StartSelfUIAbilityRecordGuard_0100, TestSize
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, RemoveStartSelfUIAbilityRecord_0100, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, RemoveStartSelfUIAbilityRecord_0100, TestSize.Level2)
 {
     pid_t pid = 8888;
     AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.clear();
@@ -458,7 +458,7 @@ HWTEST_F(AbilityPermissionUtilTest, RemoveStartSelfUIAbilityRecord_0100, TestSiz
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, GetTokenIdByPid_0100, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, GetTokenIdByPid_0100, TestSize.Level2)
 {
     pid_t pid = 8888;
     AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.clear();
@@ -476,7 +476,7 @@ HWTEST_F(AbilityPermissionUtilTest, GetTokenIdByPid_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, IsStartSelfUIAbility_0100, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, IsStartSelfUIAbility_0100, TestSize.Level2)
 {
     AAFwk::AppUtils::GetInstance().isStartOptionsWithAnimation_.isLoaded = true;
     AAFwk::AppUtils::GetInstance().isStartOptionsWithAnimation_.value = false;

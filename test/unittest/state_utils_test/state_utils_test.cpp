@@ -48,7 +48,7 @@ void StateUtilsTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: No
  */
-HWTEST_F(StateUtilsTest, StateUtilsTest_StateToStrMap_0100, TestSize.Level0)
+HWTEST_F(StateUtilsTest, StateUtilsTest_StateToStrMap_0100, TestSize.Level2)
 {
     EXPECT_EQ(StateUtils::StateToStrMap(FOREGROUNDING), std::string("FOREGROUNDING"));
     EXPECT_EQ(StateUtils::StateToStrMap(BACKGROUNDING), std::string("BACKGROUNDING"));
@@ -64,7 +64,7 @@ HWTEST_F(StateUtilsTest, StateUtilsTest_StateToStrMap_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: No
  */
-HWTEST_F(StateUtilsTest, StateUtilsTest_AppStateToStrMap_0100, TestSize.Level0)
+HWTEST_F(StateUtilsTest, StateUtilsTest_AppStateToStrMap_0100, TestSize.Level2)
 {
     EXPECT_EQ(StateUtils::AppStateToStrMap(AppState::BACKGROUND), std::string("BACKGROUND"));
     EXPECT_EQ(StateUtils::AppStateToStrMap(AppState::SUSPENDED), std::string("SUSPENDED"));
@@ -80,7 +80,7 @@ HWTEST_F(StateUtilsTest, StateUtilsTest_AppStateToStrMap_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: No
  */
-HWTEST_F(StateUtilsTest, StateUtilsTest_ConvertStateMap_0100, TestSize.Level0)
+HWTEST_F(StateUtilsTest, StateUtilsTest_ConvertStateMap_0100, TestSize.Level2)
 {
     EXPECT_EQ(StateUtils::ConvertStateMap(ABILITY_STATE_FOREGROUND_NEW), FOREGROUND);
     EXPECT_EQ(StateUtils::ConvertStateMap(ABILITY_STATE_WINDOW_FREEZED), FOREGROUND_WINDOW_FREEZED);
