@@ -86,6 +86,7 @@ private:
     int32_t HandleIsAttachDebug(MessageParcel &data, MessageParcel &reply);
     int32_t HandleClearProcessByToken(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsMemorySizeSufficent(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleIsNoRequireBigMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetKeepAliveEnableState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetKeepAliveDkv(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAttachedToStatusBar(MessageParcel &data, MessageParcel &reply);

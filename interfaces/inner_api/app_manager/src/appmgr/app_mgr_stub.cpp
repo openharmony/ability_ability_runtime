@@ -1630,8 +1630,8 @@ int32_t AppMgrStub::HandleGetAllUIExtensionProviderPid(MessageParcel &data, Mess
 
 int32_t AppMgrStub::HandleNotifyMemorySizeStateChanged(MessageParcel &data, MessageParcel &reply)
 {
-    bool isMemorySizeSufficient = data.ReadBool();
-    int result = NotifyMemorySizeStateChanged(isMemorySizeSufficient);
+    int32_t memorySizeState = data.ReadInt32();
+    int result = NotifyMemorySizeStateChanged(memorySizeState);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write result error.");
         return ERR_INVALID_VALUE;

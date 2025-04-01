@@ -2363,10 +2363,15 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "bundle killed");
         return;
     }
-    if (DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent() ||
-        IsLauncher(abilityRecord) || abilityRecord->IsSceneBoard() ||
-        AppUtils::GetInstance().IsAllowResidentInExtremeMemory(abilityInfo.bundleName, abilityInfo.name)) {
+    if (IsLauncher(abilityRecord) || abilityRecord->IsSceneBoard()) {
         RestartAbility(abilityRecord, currentUserId);
+    } else if ((DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent() ||
+        AppUtils::GetInstance().IsAllowResidentInExtremeMemory(abilityInfo.bundleName, abilityInfo.name)) &&
+        (DelayedSingleton<AppScheduler>::GetInstance()->IsNoRequireBigMemory() ||
+        !AppUtils::GetInstance().IsBigMemoryUnrelatedKeepAliveProc(abilityInfo.bundleName))) {
+        RestartAbility(abilityRecord, currentUserId);
+    } else {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "not restart keep alive proc");
     }
 }
 

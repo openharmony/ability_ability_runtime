@@ -569,7 +569,8 @@ HWTEST_F(AppMgrProxyTest, SignRestartAppFlag_0100, TestSize.Level1)
 HWTEST_F(AppMgrProxyTest, NotifyMemorySizeStateChanged_0100, TestSize.Level1)
 {
     EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _)).Times(1);
-    auto res = appMgrProxy_->NotifyMemorySizeStateChanged(true);
+    int32_t memorySizeState = 1;
+    auto res = appMgrProxy_->NotifyMemorySizeStateChanged(memorySizeState);
     EXPECT_EQ(res, NO_ERROR);
 }
 
@@ -581,7 +582,8 @@ HWTEST_F(AppMgrProxyTest, NotifyMemorySizeStateChanged_0100, TestSize.Level1)
 HWTEST_F(AppMgrProxyTest, NotifyMemorySizeStateChanged_0200, TestSize.Level1)
 {
     EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _)).Times(1);
-    auto res = appMgrProxy_->NotifyMemorySizeStateChanged(false);
+    int32_t memorySizeState = 0;
+    auto res = appMgrProxy_->NotifyMemorySizeStateChanged(memorySizeState);
     EXPECT_EQ(res, NO_ERROR);
 }
 

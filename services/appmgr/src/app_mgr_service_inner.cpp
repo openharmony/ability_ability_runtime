@@ -44,7 +44,6 @@
 #include "common_event_support.h"
 #include "datetime_ex.h"
 #include "distributed_data_mgr.h"
-#include "exit_resident_process_manager.h"
 #include "extension_ability_info.h"
 #include "freeze_util.h"
 #include "global_constant.h"
@@ -7555,6 +7554,74 @@ void AppMgrServiceInner::ApplicationTerminatedSendProcessEvent(const std::shared
     SendProcessExitEvent(appRecord);
 }
 
+void AppMgrServiceInner::SubscribeScreenOffEvent()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
+    auto callback = [innerServiceWeak = weak_from_this()]() {
+        auto innerService = innerServiceWeak.lock();
+        CHECK_POINTER_AND_RETURN_LOG(innerService, "on screen off");
+        std::vector<ExitResidentProcessInfo> exitProcessInfos;
+        if (ExitResidentProcessManager::GetInstance().HandleNoRequireBigMemoryOptimization(exitProcessInfos) ==
+            ERR_OK && !exitProcessInfos.empty()) {
+            std::vector<AppExecFwk::BundleInfo> exitBundleInfos;
+            ExitResidentProcessManager::GetInstance().QueryExitBundleInfos(exitProcessInfos, exitBundleInfos);
+            innerService->NotifyStartResidentProcess(exitBundleInfos);
+            innerService->NotifyStartKeepAliveProcess(exitBundleInfos);
+        } else {
+            TAG_LOGE(AAFwkTag::APPMGR, "HandleNoRequireBigMemoryOptimization fail");
+        }
+        auto unSubscribeScreenOffEvent = [innerService]() {
+            innerService->UnSubscribeScreenOffEvent();
+        };
+        auto taskHandler = innerService->GetTaskHandler();
+        if (taskHandler == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid taskHandler pointer");
+            return;
+        }
+        taskHandler->SubmitTask(unSubscribeScreenOffEvent, "UnSubscribeScreenOffEvent");
+    };
+    if (screenOffSubscriber_ == nullptr) {
+        screenOffSubscriber_ = std::make_shared<AppExecFwk::AppMgrEventSubscriber>(subscribeInfo, callback);
+    }
+    bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(screenOffSubscriber_);
+    if (!subResult) {
+        TAG_LOGE(AAFwkTag::APPMGR, "subscribe screen off failed");
+    }
+}
+
+void AppMgrServiceInner::UnSubscribeScreenOffEvent()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    bool subResult = EventFwk::CommonEventManager::UnSubscribeCommonEvent(screenOffSubscriber_);
+    screenOffSubscriber_ = nullptr;
+    TAG_LOGD(AAFwkTag::APPMGR, "Screen off event subscriber unsubscribe result is %{public}d.", subResult);
+}
+
+bool AppMgrServiceInner::IsNeedRestartKeepAliveProcess(const std::string &bundleName, int32_t uid)
+{
+    if (ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(bundleName)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "is killed for upgrade web");
+        return false;
+    }
+
+    if (!AAFwk::AppUtils::GetInstance().IsAllowResidentInExtremeMemory(bundleName) &&
+        ExitResidentProcessManager::GetInstance().RecordExitResidentBundleName(bundleName, uid)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "memory size insufficient");
+        return false;
+    }
+
+    if (AAFwk::AppUtils::GetInstance().IsBigMemoryUnrelatedKeepAliveProc(bundleName) &&
+        ExitResidentProcessManager::GetInstance().RecordExitResidentBundleNameOnRequireBigMemory(bundleName, uid)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "required big memory %{public}s.", bundleName.c_str());
+        return false;
+    }
+    return true;
+}
+
 void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     ClearResidentProcessAppRunningData(appRecord);
@@ -7567,18 +7634,10 @@ void AppMgrServiceInner::ClearResidentProcessAppRunningData(const std::shared_pt
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
         return;
     }
-
     auto userId = GetUserIdByUid(appRecord->GetUid());
     if (appRecord->IsKeepAliveApp() && (userId == 0 || userId == currentUserId_) &&
         appRecord->GetBundleName() != SCENE_BOARD_BUNDLE_NAME) {
-        if (ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(appRecord->GetBundleName())) {
-            TAG_LOGI(AAFwkTag::APPMGR, "is killed for upgrade web");
-            return;
-        }
-        if (!AAFwk::AppUtils::GetInstance().IsAllowResidentInExtremeMemory(appRecord->GetBundleName()) &&
-            ExitResidentProcessManager::GetInstance().RecordExitResidentBundleName(appRecord->GetBundleName(),
-                appRecord->GetUid())) {
-            TAG_LOGI(AAFwkTag::APPMGR, "memory size insufficient");
+        if (!IsNeedRestartKeepAliveProcess(appRecord->GetBundleName(), appRecord->GetUid())) {
             return;
         }
         TAG_LOGI(AAFwkTag::APPMGR, "memory size sufficient");
@@ -8414,10 +8473,9 @@ int32_t AppMgrServiceInner::GetAllUIExtensionProviderPid(pid_t hostPid, std::vec
     return appRunningManager_->GetAllUIExtensionProviderPid(hostPid, providerPids);
 }
 
-int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSufficient)
+int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(int32_t memorySizeState)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "isMemorySizeSufficient: %{public}d",
-        isMemorySizeSufficient);
+    TAG_LOGI(AAFwkTag::APPMGR, "memorySizeState: %{public}d", memorySizeState);
     bool isMemmgrCall = AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(
         MEMMGR_PROC_NAME);
     bool isSupportCall = OHOS::system::GetBoolParameter(SUPPORT_CALL_NOTIFY_MEMORY_CHANGED, false);
@@ -8425,20 +8483,51 @@ int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSuffic
         TAG_LOGE(AAFwkTag::APPMGR, "callerToken not %{public}s", MEMMGR_PROC_NAME);
         return ERR_PERMISSION_DENIED;
     }
-
-    if (!isMemorySizeSufficient) {
-        auto ret = ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent();
-        if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "handleMemorySizeInSufficent fail, ret: %{public}d", ret);
-        }
-        return ret;
-    }
+    int32_t ret = ERR_OK;
     std::vector<ExitResidentProcessInfo> exitProcessInfos;
-    auto ret = ExitResidentProcessManager::GetInstance().HandleMemorySizeSufficient(exitProcessInfos);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "HandleMemorySizeSufficient fail, ret: %{public}d", ret);
-        return ret;
+    switch (memorySizeState) {
+        case MemoryState::LOW_MEMORY:
+            ret = ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent();
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::APPMGR, "handleMemorySizeInSufficent fail, ret: %{public}d", ret);
+            }
+            break;
+        case MemoryState::REQUIRE_BIG_MEMORY:
+            SubscribeScreenOffEvent();
+            ret = ExitResidentProcessManager::GetInstance().HandleRequireBigMemoryOptimization();
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::APPMGR, "HandleRequireBigMemoryOptimization fail, ret: %{public}d", ret);
+            }
+            break;
+        case MemoryState::MEMORY_RECOVERY:
+            ret = ExitResidentProcessManager::GetInstance().HandleMemorySizeSufficient(exitProcessInfos);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::APPMGR, "HandleMemorySizeSufficient fail, ret: %{public}d", ret);
+            }
+            ret = RestartExitKeepAliveProcess(exitProcessInfos);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::APPMGR, "RestartExitKeepAliveProcess fail");
+            }
+            break;
+        case MemoryState::NO_REQUIRE_BIG_MEMORY:
+            ret = ExitResidentProcessManager::GetInstance().HandleNoRequireBigMemoryOptimization(exitProcessInfos);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::APPMGR, "HandleNoRequireBigMemoryOptimization fail, ret: %{public}d", ret);
+            }
+            ret = RestartExitKeepAliveProcess(exitProcessInfos);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::APPMGR, "RestartExitKeepAliveProcess fail");
+            }
+            break;
+        default:
+            TAG_LOGE(AAFwkTag::APPMGR, "NotifyMemorySizeStateChanged failed, memorySizeState is %{public}d.",
+                memorySizeState);
     }
+    return ret;
+}
+
+int32_t AppMgrServiceInner::RestartExitKeepAliveProcess(const std::vector<ExitResidentProcessInfo> &exitProcessInfos)
+{
     auto StartExitKeepAliveProcessTask = [exitProcessInfos, innerServiceWeak = weak_from_this()]() {
         auto innerService = innerServiceWeak.lock();
         CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
@@ -8456,6 +8545,11 @@ int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSuffic
 bool AppMgrServiceInner::IsMemorySizeSufficient()
 {
     return ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient();
+}
+
+bool AppMgrServiceInner::IsNoRequireBigMemory()
+{
+    return ExitResidentProcessManager::GetInstance().IsNoRequireBigMemory();
 }
 
 void AppMgrServiceInner::NotifyAppPreCache(int32_t pid, int32_t userId)

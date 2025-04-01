@@ -52,6 +52,7 @@
 #endif // SUPPORT_CHILD_PROCESS
 #include "cpp/mutex.h"
 #include "event_report.h"
+#include "exit_resident_process_manager.h"
 #include "fault_data.h"
 #include "fd_guard.h"
 #include "hisysevent.h"
@@ -1264,17 +1265,23 @@ public:
     bool IsFinalAppProcessByBundleName(const std::string &bundleName);
 
     /**
-     * @brief Notify memory size state changed to sufficient or insufficient.
-     * @param isMemorySizeSufficient Indicates the memory size state.
+     * @brief Notify memory size state changed: LOW_MEMORY, MEMORY_RECOVERY, REQUIRE_BIG_MEMORY, NO_REQUIRE_BIG_MEMORY.
+     * @param memorySizeState Indicates the memory size state.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficient);
+    int32_t NotifyMemorySizeStateChanged(int32_t memorySizeState);
 
     /**
      * whether memory size is sufficient.
      * @return Returns true is sufficient memory size, others return false.
      */
     bool IsMemorySizeSufficient();
+
+    /**
+     * whether or not requier a big memory
+     * @return Returens true is no big memory, others return false.
+     */
+    bool IsNoRequireBigMemory();
 
     /**
      * Register render state observer.
@@ -1459,6 +1466,11 @@ public:
 
     bool IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
     int32_t GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &info);
+
+    std::shared_ptr<AAFwk::TaskHandlerWrap> GetTaskHandler() const
+    {
+        return taskHandler_;
+    }
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -1939,6 +1951,10 @@ private:
     void GetMultiInstanceInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
         RunningMultiAppInfo &info);
 #endif //SUPPORT_CHILD_PROCESS
+    void SubscribeScreenOffEvent();
+    void UnSubscribeScreenOffEvent();
+    int32_t RestartExitKeepAliveProcess(const int32_t memorySizeState);
+    bool IsNeedRestartKeepAliveProcess(const std::string &bundleName, int32_t uid);
     int32_t GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
         std::vector<std::string> &instanceKeys, int32_t userId);
     int32_t KillProcessByPidInner(const pid_t pid, const std::string& reason,
@@ -2011,6 +2027,7 @@ private:
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> delayKillTaskHandler_;
     std::unordered_set<std::string> nwebPreloadSet_ {};
+    std::shared_ptr<AppExecFwk::AppMgrEventSubscriber> screenOffSubscriber_;
 
     std::mutex childProcessRecordMapMutex_;
 };
