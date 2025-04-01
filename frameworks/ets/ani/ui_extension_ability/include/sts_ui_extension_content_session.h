@@ -98,6 +98,8 @@ private:
     std::shared_ptr<StsUISessionAbilityResultListener> listener_;
     bool isFirstTriggerBindModal_ = true;
 };
+
+StsUIExtensionContentSession* GetStsContentSession(ani_env* env, ani_object obj);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_STS_UI_EXTENSION_CONTENT_SESSION_H
