@@ -15,7 +15,7 @@
 
 import rpc from '@ohos.rpc';
 import Want from '@ohos.app.ability.Want';
-import ServiceExtensionContext from './application/ServiceExtensionContext';
+import ServiceExtensionContext from 'application.ServiceExtensionContext';
 
 class MyService extends rpc.RemoteObject {
     constructor(descriptor: string) {
