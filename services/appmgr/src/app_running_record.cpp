@@ -720,7 +720,7 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
     if (ability->GetWant() != nullptr) {
         abilityStateData.callerAbilityName = ability->GetWant()->GetStringParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
         abilityStateData.callerBundleName = ability->GetWant()->GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-        abilityStateData.callerUid = ability->GetWant()->GetIntParam(Want::PARAM_RESV_CALLER_UID, 0);
+        abilityStateData.callerUid = ability->GetWant()->GetIntParam(Want::PARAM_RESV_CALLER_UID, -1);
     }
     if (applicationInfo && applicationInfo->bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
         abilityStateData.isAtomicService = true;
