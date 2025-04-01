@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Context } from './Context'
+import Context from 'application.Context'
 import {ExtensionAbilityInfo}  from 'bundleManager.ExtensionAbilityInfo'
 
 export default class ExtensionContext extends Context {
