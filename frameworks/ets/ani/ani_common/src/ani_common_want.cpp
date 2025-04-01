@@ -90,7 +90,7 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     SetFieldString(env, cls, object, "moduleName", elementName.GetModuleName());
     SetFieldString(env, cls, object, "uri", want.GetUriString());
     SetFieldString(env, cls, object, "type", want.GetType());
-    SetFieldInt(env, cls, object, "flags", want.GetFlags());
+    SetFieldDouble(env, cls, object, "flags", want.GetFlags());
     SetFieldString(env, cls, object, "action", want.GetAction());
     InnerWrapWantParams(env, cls, object, want.GetParams());
     SetFieldArrayString(env, cls, object, "entities", want.GetEntities());
@@ -186,10 +186,10 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
         want.SetUri(uri);
     }
 
-    int flags = 0;
-    if (GetIntByName(env, param, "flags", flags)) {
-        TAG_LOGI(AAFwkTag::UIABILITY, "flags %{public}d", flags);
-        want.SetFlags(flags);
+    ani_double flags = 0.0;
+    if (GetDoubleOrUndefined(env, param, "flags", flags)) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "flags %{public}f", flags);
+        want.SetFlags(static_cast<int>(flags));
     }
 
     std::string type = "";
