@@ -412,6 +412,36 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_2000, Function | MediumTest | Level1)
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_2000 end";
 }
 
+HWTEST_F(SourceMapTest, JsEnv_SourceMap_2100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2100 start";
+    std::string input = "at anonymous (entry/src/main/ets/pages/Index.ts:111:13)";
+    std::string expected = "entry/src/main/ets/pages/Index.ts";
+    std::string actual = SourceMap::ExtractFileName(input);
+    EXPECT_STREQ(expected.c_str(), actual.c_str());
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2100 end";
+}
+
+HWTEST_F(SourceMapTest, JsEnv_SourceMap_2200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2200 start";
+    std::string input = "at anonymous (@p:ad|entry/src/main/ets/pages/Index.ts:111:13)";
+    std::string expected = "@p:ad|entry/src/main/ets/pages/Index.ts";
+    std::string actual = SourceMap::ExtractFileName(input);
+    EXPECT_STREQ(expected.c_str(), actual.c_str());
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2200 end";
+}
+
+HWTEST_F(SourceMapTest, JsEnv_SourceMap_2300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2300 start";
+    std::string input = "";
+    std::string expected = "";
+    std::string actual = SourceMap::ExtractFileName(input);
+    EXPECT_STREQ(expected.c_str(), actual.c_str());
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2300 end";
+}
+
 /**
  * @tc.number: VlqRevCode_0100
  * @tc.name: VlqRevCode
