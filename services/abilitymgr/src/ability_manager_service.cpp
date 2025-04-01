@@ -59,6 +59,10 @@
 #include "iservice_registry.h"
 #include "keep_alive_process_manager.h"
 #include "keep_alive_utils.h"
+#ifdef MEMMGR_OVERRIDE_ENABLE
+#include "mem_mgr_client.h"
+#include "mem_mgr_process_state_info.h"
+#endif
 #include "mock_session_manager_service.h"
 #include "modal_system_dialog/modal_system_dialog_ui_extension.h"
 #include "modal_system_ui_extension.h"
@@ -198,6 +202,9 @@ constexpr const char* UIEXTENSION_MODAL_TYPE = "ability.want.params.modalType";
 constexpr const char* SUPPORT_CLOSE_ON_BLUR = "supportCloseOnBlur";
 constexpr const char* ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohosSpecifiedProcessFlag";
+#ifdef MEMMGR_OVERRIDE_ENABLE
+constexpr const char* EXPECT_WINDOW_MODE = "expectWindowMode";
+#endif
 
 constexpr char ASSERT_FAULT_DETAIL[] = "assertFaultDialogDetail";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
@@ -2289,7 +2296,21 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo null");
         return ERR_INVALID_VALUE;
     }
-
+#ifdef MEMMGR_OVERRIDE_ENABLE
+    WantParams wantParams = (sessionInfo->want).GetParams();
+    std::string bundleName = (sessionInfo->want).GetElement().GetBundleName();
+    int windowMode = wantParams.GetIntParam(EXPECT_WINDOW_MODE, 0);
+    if (AppUtils::GetInstance().IsRequireBigMemoryProcess(bundleName) &&
+        wantParams.HasParam(EXPECT_WINDOW_MODE) &&
+        (windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_FLOATING ||
+        windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_PRIMARY ||
+        windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "App start ability from with no fullscreen.");
+        Memory::MemMgrProcessStateInfo info;
+        info.noFullScreenStart = 1;
+        Memory::MemMgrClient::GetInstance().NotifyProcessStateChangedAsync(info);
+    }
+#endif
     if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no sceneboard, no allowed");
         return ERR_WRONG_INTERFACE_CALL;

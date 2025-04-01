@@ -88,6 +88,10 @@ config("abilityms_config") {
     defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
   }
 
+  if (memmgr_override_enable) {
+    defines += [ "MEMMGR_OVERRIDE_ENABLE" ]
+  }
+
   if (is_asan || asan_detector) {
     defines += [ "SUPPORT_ASAN" ]
   }
@@ -198,6 +202,10 @@ ohos_shared_library("abilityms") {
 
   if (resource_schedule_service_enable) {
     external_deps += [ "resource_schedule_service:ressched_client" ]
+  }
+
+  if (memmgr_override_enable) {
+    external_deps += [ "memmgr:memmgrclient" ]
   }
 
   if (os_dlp_part_enabled) {

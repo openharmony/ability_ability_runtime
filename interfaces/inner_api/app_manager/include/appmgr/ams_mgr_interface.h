@@ -420,6 +420,12 @@ public:
     virtual bool IsMemorySizeSufficent() = 0;
 
     /**
+     * whether or not requier a big memory
+     * @return Returens true is no big memory, others return false.
+     */
+    virtual bool IsNoRequireBigMemory() = 0;
+
+    /**
      * Notifies that one ability is attached to status bar.
      *
      * @param token the token of the abilityRecord that is attached to status bar.
@@ -533,6 +539,7 @@ public:
         SET_KEEP_ALIVE_DKV,
         KILL_PROCESSES_IN_BATCH,
         PREPARE_TERMINATE_APP,
+        IS_NO_REQUIRE_BIG_MEMORY,
         // Add enumeration values above
         END
     };

@@ -1310,6 +1310,24 @@ bool AmsMgrProxy::IsMemorySizeSufficent()
     return reply.ReadBool();
 }
 
+bool AmsMgrProxy::IsNoRequireBigMemory()
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
+        return true;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::IS_NO_REQUIRE_BIG_MEMORY), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request err: %{public}d", ret);
+        return true;
+    }
+    return reply.ReadBool();
+}
+
 int32_t AmsMgrProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {

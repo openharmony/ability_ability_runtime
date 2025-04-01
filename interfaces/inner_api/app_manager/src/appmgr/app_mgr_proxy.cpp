@@ -1926,13 +1926,13 @@ int32_t AppMgrProxy::GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pid
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::NotifyMemorySizeStateChanged(bool isMemorySizeSufficient)
+int32_t AppMgrProxy::NotifyMemorySizeStateChanged(int32_t memorySizeState)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_INVALID_DATA;
     }
-    PARCEL_UTIL_WRITE_RET_INT(data, Bool, isMemorySizeSufficient);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, memorySizeState);
 
     MessageParcel reply;
     MessageOption option;
