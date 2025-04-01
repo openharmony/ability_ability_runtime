@@ -15,6 +15,7 @@
 
 #include "js_query_erms_observer.h"
 
+#include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "js_error_utils.h"
@@ -36,10 +37,16 @@ void JsQueryERMSObserver::OnQueryFinished(const std::string &appId, const std::s
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
         ([jsObserver, appId, startTime, rule, resultCode](napi_env env, NapiAsyncTask &task, int32_t status) {
             sptr<JsQueryERMSObserver> jsObserverSptr = jsObserver.promote();
-            if (jsObserverSptr) {
-                jsObserverSptr->HandleOnQueryFinished(appId, startTime, rule, resultCode);
+            if (jsObserverSptr == nullptr) {
+                TAG_LOGE(AAFwkTag::QUERY_ERMS, "null jsObserverSptr");
+                return;
             }
-        });
+            if (resultCode == AAFwk::ERR_CAPABILITY_NOT_SUPPORT || resultCode == ERR_OK) {
+                jsObserverSptr->HandleOnQueryFinished(appId, startTime, rule, resultCode);
+                return;
+            }
+            jsObserverSptr->HandleOnQueryFinished(appId, startTime, rule, AAFwk::INNER_ERR);
+    });
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsQueryERMSObserver::OnQueryFinished", env_, std::make_unique<NapiAsyncTask>(callback,
