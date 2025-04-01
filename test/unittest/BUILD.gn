@@ -391,6 +391,7 @@ group("unittest") {
       "ability_runtime_error_util_test:unittest",
       "ability_runtime_start_options_test:unittest",
       "ability_scheduler_proxy_test:unittest",
+      "ability_scheduler_stub_second_test:unittest",
       "ability_scheduler_stub_test:unittest",
       "ability_service_extension_test:unittest",
       "ability_service_log_test:unittest",
