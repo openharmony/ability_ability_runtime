@@ -18,7 +18,7 @@ import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import { AsyncCallbackCommonWrapper } from '../UIExtensionCommon';
 import hilog from '@ohos.hilog';
-import ExtensionContext from './ExtensionContext';
+import ExtensionContext from 'application.ExtensionContext';
 
 export class AsyncCallbackContextWrapper<T> {
   myFun_: AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
