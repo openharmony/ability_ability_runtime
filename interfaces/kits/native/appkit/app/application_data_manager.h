@@ -29,9 +29,11 @@ public:
     void AddErrorObserver(const std::shared_ptr<IErrorObserver> &observer);
     bool NotifyUnhandledException(const std::string &errMsg);
     bool NotifyCJUnhandledException(const std::string &errMsg);
+    bool NotifySTSUnhandledException(const std::string &errMsg);
     void RemoveErrorObserver();
     bool NotifyExceptionObject(const AppExecFwk::ErrorObject &errorObj);
     bool NotifyCJExceptionObject(const AppExecFwk::ErrorObject &errorObj);
+    bool NotifySTSExceptionObject(const AppExecFwk::ErrorObject &errorObj);
 
 private:
     ApplicationDataManager();

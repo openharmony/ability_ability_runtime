@@ -130,6 +130,7 @@ constexpr int32_t START_HIGH_SENSITIVE = 1;
 constexpr int32_t EXIT_HIGH_SENSITIVE = 2;
 constexpr int32_t UNSPECIFIED_USERID = -2;
 constexpr int32_t JS_ERROR_EXIT = -2;
+constexpr int32_t STS_ERROR_EXIT = -3;
 constexpr int32_t TIME_OUT = 120;
 constexpr int32_t DEFAULT_SLEEP_TIME = 100000;
 
@@ -154,6 +155,7 @@ constexpr char EVENT_KEY_APP_RUNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
 constexpr char KILL_REASON[] = "Kill Reason:Js Error";
+constexpr char STS_KILL_REASON[] = "Kill Reason:Sts Error";
 
 const int32_t JSCRASH_TYPE = 3;
 const std::string JSVM_TYPE = "ARK";
@@ -1342,11 +1344,56 @@ JsEnv::UncaughtExceptionInfo MainThread::CreateJsExceptionInfo(const std::string
     return uncaughtExceptionInfo;
 }
 
-StsEnv::STSUncaughtExceptionInfo MainThread::CreateStsExceptionInfo(
-    const std::string& bundleName, uint32_t versionCode, const std::string& hapPath)
+StsEnv::STSUncaughtExceptionInfo MainThread::CreateStsExceptionInfo(const std::string& bundleName, uint32_t versionCode,
+    const std::string& hapPath, std::string& appRunningId, int32_t pid, std::string& processName)
 {
     StsEnv::STSUncaughtExceptionInfo uncaughtExceptionInfo;
-    // need vm support
+    wptr<MainThread> weak = this;
+    uncaughtExceptionInfo.uncaughtTask = [weak, bundleName, versionCode, appRunningId = std::move(appRunningId), pid,
+                                             processName](std::string summary, const StsEnv::STSErrorObject errorObj) {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            return;
+        }
+        time_t timet;
+        time(&timet);
+        HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "STS_ERROR",
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, bundleName, EVENT_KEY_VERSION,
+            std::to_string(versionCode), EVENT_KEY_TYPE, JSCRASH_TYPE, EVENT_KEY_HAPPEN_TIME, timet, EVENT_KEY_REASON,
+            errorObj.name, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, summary, EVENT_KEY_PNAME, processName,
+            EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId);
+        ErrorObject appExecErrorObj = { .name = errorObj.name, .message = errorObj.message, .stack = errorObj.stack };
+        FaultData faultData;
+        faultData.faultType = FaultDataType::STS_ERROR;
+        faultData.errorObject = appExecErrorObj;
+        DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
+        if (ApplicationDataManager::GetInstance().NotifySTSUnhandledException(summary) &&
+            ApplicationDataManager::GetInstance().NotifySTSExceptionObject(appExecErrorObj)) {
+            return;
+        }
+        TAG_LOGE(AAFwkTag::APPKIT,
+            "\n%{public}s is about to exit due to RuntimeError\nError "
+            "type:%{public}s\n%{public}s",
+            bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
+        bool foreground = false;
+        if (appThread->applicationImpl_ &&
+            appThread->applicationImpl_->GetState() == ApplicationImpl::APP_STATE_FOREGROUND) {
+            foreground = true;
+        }
+        int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName, "MSG", STS_KILL_REASON,
+            "FOREGROUND", foreground);
+        TAG_LOGW(AAFwkTag::APPKIT,
+            "hisysevent write result=%{public}d, send event "
+            "[FRAMEWORK,PROCESS_KILL],"
+            " pid=%{public}d, processName=%{public}s, msg=%{public}s, "
+            "foreground=%{public}d",
+            result, pid, processName.c_str(), STS_KILL_REASON, foreground);
+        AAFwk::ExitReason exitReason = { REASON_STS_ERROR, errorObj.name };
+        AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
+        _exit(STS_ERROR_EXIT);
+    };
     return uncaughtExceptionInfo;
 }
 /**
@@ -1658,7 +1705,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     break;
                 }
                 case AbilityRuntime::Runtime::Language::STS: {
-                    auto expectionInfo = CreateStsExceptionInfo(bundleName, versionCode, hapPath);
+                    auto expectionInfo =
+                        CreateStsExceptionInfo(bundleName, versionCode, hapPath, appRunningId, pid, processName);
                     runtime->RegisterUncaughtExceptionHandler((void*)&expectionInfo);
                     break;
                 }

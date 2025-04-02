@@ -6183,6 +6183,9 @@ std::string AppMgrServiceInner::FaultTypeToString(AppExecFwk::FaultDataType type
         case AppExecFwk::FaultDataType::JS_ERROR:
             typeStr = "JS_ERROR";
             break;
+        case AppExecFwk::FaultDataType::STS_ERROR:
+            typeStr = "STS_ERROR";
+            break;
         case AppExecFwk::FaultDataType::APP_FREEZE:
             typeStr = "APP_FREEZE";
             break;

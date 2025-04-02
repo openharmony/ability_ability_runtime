@@ -351,6 +351,7 @@ bool AppRecovery::ShouldSaveAppState(StateReason reason)
         case StateReason::CPP_CRASH:
         case StateReason::JS_ERROR:
         case StateReason::CJ_ERROR:
+        case StateReason::STS_ERROR:
         case StateReason::APP_FREEZE: // appfreeze could not callback to js function safely.
             if ((saveOccasion_ & SaveOccasionFlag::SAVE_WHEN_ERROR) != 0) {
                 ret = true;
@@ -396,6 +397,11 @@ bool AppRecovery::ShouldRecoverApp(StateReason reason)
             }
             break;
 
+        case StateReason::STS_ERROR:
+            if (isAlwaysStart || (restartFlag_ & RestartFlag::RESTART_WHEN_STS_CRASH) != 0) {
+                ret = true;
+            }
+            break;
         case StateReason::APP_FREEZE:
             if (isAlwaysStart || (restartFlag_ & RestartFlag::RESTART_WHEN_APP_FREEZE) != 0) {
                 ret = true;
