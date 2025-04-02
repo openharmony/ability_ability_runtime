@@ -27,14 +27,23 @@ namespace AppExecFwk {
 class EventRunner;
 } // namespace AppExecFwk
 namespace AbilityRuntime {
+namespace {
+const std::string APPLICAITON_CODE_LANGUAGE_ARKTS_1_0 = "1.1";
+const std::string APPLICAITON_CODE_LANGUAGE_ARKTS_1_2 = "1.2";
+const std::string APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID = "hybrid";
+} // namespace
+
 class Runtime {
 public:
     enum class Language {
         JS = 0,
-        CJ
+        CJ,
+        STS,
+        UNKNOWN,
     };
 
     struct Options {
+        std::map<Language, bool> langs;
         Language lang = Language::JS;
         std::string bundleName;
         std::string moduleName;
@@ -79,7 +88,8 @@ public:
         bool isDeveloperMode;
     };
 
-    static std::unique_ptr<Runtime> Create(const Options& options);
+    static std::vector<std::unique_ptr<Runtime>> CreateRuntimes(Options& options);
+    static std::unique_ptr<Runtime> Create(Options& options);
     static void SavePreloaded(std::unique_ptr<Runtime>&& instance);
     static std::unique_ptr<Runtime> GetPreloaded();
 
@@ -107,6 +117,8 @@ public:
         const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance) = 0;
     virtual void PreloadModule(const std::string& moduleName, const std::string& srcPath,
         const std::string& hapPath, bool isEsMode, bool useCommonTrunk) = 0;
+    virtual void PreloadModule(const std::string& moduleName, const std::string& hapPath,
+        bool isEsMode, bool useCommonTrunk) {}
     virtual void FinishPreload() = 0;
     virtual bool LoadRepairPatch(const std::string& patchFile, const std::string& baseFile) = 0;
     virtual bool NotifyHotReloadPage() = 0;
@@ -121,6 +133,7 @@ public:
     Runtime(Runtime&&) = delete;
     Runtime& operator=(const Runtime&) = delete;
     Runtime& operator=(Runtime&&) = delete;
+    virtual void RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo) {}
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

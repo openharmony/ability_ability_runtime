@@ -74,6 +74,7 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "js_runtime.h"
+#include "sts_runtime.h"
 #ifdef CJ_FRONTEND
 #include "cj_runtime.h"
 #endif
@@ -1305,6 +1306,76 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
     return uncaughtExceptionInfo;
 }
 #endif
+JsEnv::UncaughtExceptionInfo MainThread::CreateJsExceptionInfo(const std::string& bundleName, uint32_t versionCode,
+    const std::string& hapPath, std::string& appRunningId, int32_t pid, std::string& processName)
+{
+    JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
+    uncaughtExceptionInfo.hapPath = hapPath;
+    wptr<MainThread> weak = this;
+    uncaughtExceptionInfo.uncaughtTask = [weak, bundleName, versionCode, appRunningId = std::move(appRunningId), pid,
+                                             processName](std::string summary, const JsEnv::ErrorObject errorObj) {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            return;
+        }
+        time_t timet;
+        time(&timet);
+        HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, bundleName, EVENT_KEY_VERSION,
+            std::to_string(versionCode), EVENT_KEY_TYPE, JSCRASH_TYPE, EVENT_KEY_HAPPEN_TIME, timet, EVENT_KEY_REASON,
+            errorObj.name, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, summary, EVENT_KEY_PNAME, processName,
+            EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId);
+        ErrorObject appExecErrorObj = { .name = errorObj.name, .message = errorObj.message, .stack = errorObj.stack };
+        FaultData faultData;
+        faultData.faultType = FaultDataType::JS_ERROR;
+        faultData.errorObject = appExecErrorObj;
+        DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
+        auto napiEnv = (static_cast<AbilityRuntime::JsRuntime&>(
+                            *appThread->application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0)))
+                           .GetNapiEnv();
+        // if (NapiErrorManager::GetInstance()->NotifyUncaughtException(
+        //         napiEnv, summary, appExecErrorObj.name, appExecErrorObj.message, appExecErrorObj.stack)) {
+        //     return;
+        // }
+        if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
+            ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
+            return;
+        }
+        // if app's callback has been registered, let app decide whether exit or
+        // not.
+        TAG_LOGE(AAFwkTag::APPKIT,
+            "\n%{public}s is about to exit due to RuntimeError\nError "
+            "type:%{public}s\n%{public}s",
+            bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
+        bool foreground = false;
+        if (appThread->applicationImpl_ &&
+            appThread->applicationImpl_->GetState() == ApplicationImpl::APP_STATE_FOREGROUND) {
+            foreground = true;
+        }
+        int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName, "MSG", KILL_REASON,
+            "FOREGROUND", foreground);
+        TAG_LOGW(AAFwkTag::APPKIT,
+            "hisysevent write result=%{public}d, send event "
+            "[FRAMEWORK,PROCESS_KILL],"
+            " pid=%{public}d, processName=%{public}s, msg=%{public}s, "
+            "foreground=%{public}d",
+            result, pid, processName.c_str(), KILL_REASON, foreground);
+        AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObj.name };
+        AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
+        _exit(JS_ERROR_EXIT);
+    };
+    return uncaughtExceptionInfo;
+}
+
+StsEnv::STSUncaughtExceptionInfo MainThread::CreateStsExceptionInfo(
+    const std::string& bundleName, uint32_t versionCode, const std::string& hapPath)
+{
+    StsEnv::STSUncaughtExceptionInfo uncaughtExceptionInfo;
+    // need vm support
+    return uncaughtExceptionInfo;
+}
 /**
  *
  * @brief Launch the application.
@@ -1478,6 +1549,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     } else {
 #endif
         AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
+        AbilityRuntime::STSRuntime::SetAppLibPath(appLibPaths);
 #ifdef CJ_FRONTEND
     }
 #endif
@@ -1502,7 +1574,14 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.apiTargetVersion = appInfo.apiTargetVersion;
         options.pkgContextInfoJsonStringMap = pkgContextInfoJsonStringMap;
 #ifdef CJ_FRONTEND
-        options.lang = isCJApp ? AbilityRuntime::Runtime::Language::CJ : AbilityRuntime::Runtime::Language::JS;
+        if (isCJApp) {
+            options.langs.emplace(AbilityRuntime::Runtime::Language::CJ, true);
+            application_->SetCJApplication(true);
+        } else {
+            AddRuntimeLang(appInfo, options);
+        }
+#else
+        AddRuntimeLang(appInfo, options);
 #endif
         if (applicationInfo_->appProvisionType == Constants::APP_PROVISION_TYPE_DEBUG) {
             TAG_LOGD(AAFwkTag::APPKIT, "multi-thread mode: %{public}d", appLaunchData.GetMultiThread());
@@ -1527,12 +1606,13 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     static_cast<int32_t>(hapModuleInfo.aotCompileStatus);
             }
         }
-        auto runtime = AbilityRuntime::Runtime::Create(options);
-        if (!runtime) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        std::vector<std::unique_ptr<Runtime>> runtimes = AbilityRuntime::Runtime::CreateRuntimes(options);
+        
+        if (runtimes.empty()) {
+            TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
             return;
         }
-
+        // need vm support
         if (appInfo.debug && appLaunchData.GetDebugApp()) {
             wptr<MainThread> weak = this;
             auto cb = [weak]() {
@@ -1543,7 +1623,15 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 }
                 return appThread->NotifyDeviceDisConnect();
             };
-            runtime->SetDeviceDisconnectCallback(cb);
+            for (const auto& runtime : runtimes) {
+                runtime->SetDeviceDisconnectCallback(cb);
+            }
+        }
+        // need vm support
+        if (appLaunchData.IsNeedPreloadModule()) {
+            for(auto &runtime : application_->GetRuntime()) {
+                PreloadModule(entryHapModuleInfo, runtime);
+            }
         }
         auto perfCmd = appLaunchData.GetPerfCmd();
 
@@ -1554,11 +1642,13 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             processName = processInfo_->GetProcessName();
             TAG_LOGD(AAFwkTag::APPKIT, "pid is %{public}d, processName is %{public}s", pid, processName.c_str());
         }
-        runtime->SetStopPreloadSoCallback([uid = bundleInfo.applicationInfo.uid, currentPid = pid,
-            bundleName = appInfo.bundleName]()-> void {
-                TAG_LOGD(AAFwkTag::APPKIT, "runtime callback and report load abc completed info to rss.");
-                ResHelper::ReportLoadAbcCompletedInfoToRss(uid, currentPid, bundleName);
-            });
+        for(auto &runtime : application_->GetRuntime()) {
+            runtime->SetStopPreloadSoCallback([uid = bundleInfo.applicationInfo.uid, currentPid = pid,
+                bundleName = appInfo.bundleName]()-> void {
+                    TAG_LOGD(AAFwkTag::APPKIT, "runtime callback and report load abc completed info to rss.");
+                    ResHelper::ReportLoadAbcCompletedInfoToRss(uid, currentPid, bundleName);
+                });
+        }
         AbilityRuntime::Runtime::DebugOption debugOption;
         debugOption.isStartWithDebug = appLaunchData.GetDebugApp();
         debugOption.processName = processName;
@@ -1568,13 +1658,19 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         debugOption.isDebugFromLocal = appLaunchData.GetDebugFromLocal();
         debugOption.perfCmd = perfCmd;
         debugOption.isDeveloperMode = isDeveloperMode_;
-        runtime->SetDebugOption(debugOption);
+        for(auto &runtime : application_->GetRuntime()) {
+            runtime->SetDebugOption(debugOption);
+        }
         if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
             perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
             TAG_LOGD(AAFwkTag::APPKIT, "perfCmd is %{public}s", perfCmd.c_str());
-            runtime->StartProfiler(debugOption);
+            for (const auto& runtime : runtimes) {
+                runtime->StartProfiler(debugOption);
+            }
         } else {
-            runtime->StartDebugMode(debugOption);
+            for (const auto& runtime : runtimes) {
+                runtime->StartDebugMode(debugOption);
+            }
         }
 
         std::vector<HqfInfo> hqfInfos = appInfo.appQuickFix.deployedAppqfInfo.hqfInfos;
@@ -1585,83 +1681,38 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     it->moduleName.c_str(), it->hqfFilePath.c_str());
                 modulePaths.insert(std::make_pair(it->moduleName, it->hqfFilePath));
             }
-            runtime->RegisterQuickFixQueryFunc(modulePaths);
+            // need vm support
+            for (const auto& runtime : runtimes) {
+                runtime->RegisterQuickFixQueryFunc(modulePaths);
+            }
         }
 
         auto bundleName = appInfo.bundleName;
         auto versionCode = appInfo.versionCode;
-#ifdef CJ_FRONTEND
-        if (!isCJApp) {
-#endif
-            JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
-            uncaughtExceptionInfo.hapPath = hapPath;
-            wptr<MainThread> weak = this;
-            uncaughtExceptionInfo.uncaughtTask = [weak, bundleName, versionCode, appRunningId = std::move(appRunningId),
-                pid, processName] (std::string summary, const JsEnv::ErrorObject errorObj) {
-                auto appThread = weak.promote();
-                if (appThread == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
-                    return;
+
+        for (const auto& runtime : runtimes) {
+            switch (runtime->GetLanguage()) {
+                case AbilityRuntime::Runtime::Language::JS: {
+                    auto expectionInfo =
+                        CreateJsExceptionInfo(bundleName, versionCode, hapPath, appRunningId, pid, processName);
+                    runtime->RegisterUncaughtExceptionHandler((void*)&expectionInfo);
+                    break;
                 }
-                time_t timet;
-                time(&timet);
-                HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
-                    OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-                    EVENT_KEY_PACKAGE_NAME, bundleName,
-                    EVENT_KEY_VERSION, std::to_string(versionCode),
-                    EVENT_KEY_TYPE, JSCRASH_TYPE,
-                    EVENT_KEY_HAPPEN_TIME, timet,
-                    EVENT_KEY_REASON, errorObj.name,
-                    EVENT_KEY_JSVM, JSVM_TYPE,
-                    EVENT_KEY_SUMMARY, summary,
-                    EVENT_KEY_PNAME, processName,
-                    EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId);
-                ErrorObject appExecErrorObj = {
-                    .name = errorObj.name,
-                    .message = errorObj.message,
-                    .stack = errorObj.stack
-                };
-                FaultData faultData;
-                faultData.faultType = FaultDataType::JS_ERROR;
-                faultData.errorObject = appExecErrorObj;
-                DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
-                auto napiEnv =
-                    (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
-                if (NapiErrorManager::GetInstance()->NotifyUncaughtException(
-                    napiEnv, summary, appExecErrorObj.name,
-                    appExecErrorObj.message, appExecErrorObj.stack)) {
-                    return;
+                case AbilityRuntime::Runtime::Language::CJ: {
+                    auto expectionInfo = CreateCjExceptionInfo(bundleName, versionCode, hapPath);
+                    runtime->RegisterUncaughtExceptionHandler((void*)&expectionInfo);
+                    break;
                 }
-                if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
-                    ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
-                    return;
+                case AbilityRuntime::Runtime::Language::STS: {
+                    auto expectionInfo = CreateStsExceptionInfo(bundleName, versionCode, hapPath);
+                    runtime->RegisterUncaughtExceptionHandler((void*)&expectionInfo);
+                    break;
                 }
-                // if app's callback has been registered, let app decide whether exit or not.
-                TAG_LOGE(AAFwkTag::APPKIT,
-                    "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n%{public}s",
-                    bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
-                bool foreground = false;
-                if (appThread->applicationImpl_ && appThread->applicationImpl_->GetState() ==
-                    ApplicationImpl::APP_STATE_FOREGROUND) {
-                    foreground = true;
-                }
-                int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
-                    HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName,
-                    "MSG", KILL_REASON, "FOREGROUND", foreground);
-                TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
-                    " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d", result, pid,
-                    processName.c_str(), KILL_REASON, foreground);
-                AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObj.name };
-                AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
-                _exit(JS_ERROR_EXIT);
-            };
-            (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
-#ifdef CJ_FRONTEND
-        } else {
-            auto expectionInfo = CreateCjExceptionInfo(bundleName, versionCode, hapPath);
-            (static_cast<AbilityRuntime::CJRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(expectionInfo);
+                default:
+                    break;
+            }
         }
-#endif
+
         wptr<MainThread> weak = this;
         auto callback = [weak](const AAFwk::ExitReason &exitReason) {
             auto appThread = weak.promote();
@@ -1673,14 +1724,21 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         };
         applicationContext->RegisterProcessSecurityExit(callback);
 
-        application_->SetRuntime(std::move(runtime));
-
+        for (auto& runtime : runtimes) {
+            application_->AddRuntime(std::move(runtime));
+        }
         std::weak_ptr<OHOSApplication> wpApplication = application_;
         AbilityLoader::GetInstance().RegisterUIAbility("UIAbility",
-            [wpApplication]() -> AbilityRuntime::UIAbility* {
+            [wpApplication](const std::string &language) -> AbilityRuntime::UIAbility* {
             auto app = wpApplication.lock();
             if (app != nullptr) {
-                return AbilityRuntime::UIAbility::Create(app->GetRuntime());
+                if (language == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+                    return AbilityRuntime::UIAbility::Create(
+                        app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2));
+                } else {
+                    return AbilityRuntime::UIAbility::Create(
+                        app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0));
+                }
             }
             TAG_LOGE(AAFwkTag::APPKIT, "failed");
             return nullptr;
@@ -1688,33 +1746,38 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 #ifdef CJ_FRONTEND
         if (!isCJApp) {
 #endif
-            auto& jsEngine = (static_cast<AbilityRuntime::JsRuntime&>(*application_->GetRuntime())).GetNativeEngine();
+            auto &runtime = application_->GetRuntime(appInfo.codeLanguage);
             if (application_ != nullptr) {
-                LoadAllExtensions(jsEngine);
+                TAG_LOGE(AAFwkTag::APPKIT, "main_thread bundleName is %{public}s",
+                    appInfo.bundleName.c_str());
+                TAG_LOGE(AAFwkTag::APPKIT, "LoadAllExtensions lan:%{public}s", appInfo.codeLanguage.c_str());
+                LoadAllExtensions();
             }
+            if (appInfo.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0) {
+                auto &jsEngine = (static_cast<AbilityRuntime::JsRuntime &>(*runtime)).GetNativeEngine();
+                IdleTimeCallback callback = [wpApplication](int32_t idleTime) {
+                    auto app = wpApplication.lock();
+                    if (app == nullptr) {
+                        TAG_LOGE(AAFwkTag::APPKIT, "null app");
+                        return;
+                    }
+                    auto& runtime = app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0);
+                    if (runtime == nullptr) {
+                        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+                        return;
+                    }
+                    auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
+                    nativeEngine.NotifyIdleTime(idleTime);
+                };
+                idleTime_ = std::make_shared<IdleTime>(mainHandler_, callback);
+                idleTime_->Start();
 
-            IdleTimeCallback callback = [wpApplication](int32_t idleTime) {
-                auto app = wpApplication.lock();
-                if (app == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPKIT, "null app");
-                    return;
-                }
-                auto &runtime = app->GetRuntime();
-                if (runtime == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
-                    return;
-                }
-                auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
-                nativeEngine.NotifyIdleTime(idleTime);
-            };
-            idleTime_ = std::make_shared<IdleTime>(mainHandler_, callback);
-            idleTime_->Start();
+                IdleNotifyStatusCallback cb = idleTime_->GetIdleNotifyFunc();
+                jsEngine.NotifyIdleStatusControl(cb);
 
-            IdleNotifyStatusCallback cb = idleTime_->GetIdleNotifyFunc();
-            jsEngine.NotifyIdleStatusControl(cb);
-
-            auto helper = std::make_shared<DumpRuntimeHelper>(application_);
-            helper->SetAppFreezeFilterCallback();
+                auto helper = std::make_shared<DumpRuntimeHelper>(application_);
+                helper->SetAppFreezeFilterCallback();
+            }
 #ifdef CJ_FRONTEND
         } else {
             LoadAllExtensions();
@@ -1724,7 +1787,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
-        if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo, bundleInfo.targetVersion)) {
+        if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo, bundleInfo.targetVersion,
+		    appInfo.codeLanguage)) {
             TAG_LOGE(AAFwkTag::APPKIT, "PrepareAbilityDelegator failed");
             return;
         }
@@ -1808,7 +1872,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 #endif
     if (appLaunchData.IsNeedPreloadModule()) {
-        PreloadModule(entryHapModuleInfo, application_->GetRuntime());
+        PreloadModule(entryHapModuleInfo, application_->GetRuntime(entryHapModuleInfo.codeLanguage));
     }
 }
 
@@ -2162,10 +2226,11 @@ void MainThread::LoadAllExtensions()
         std::string file = item.extensionLibFile;
         std::weak_ptr<OHOSApplication> wApp = application_;
         AbilityLoader::GetInstance().RegisterExtension(item.extensionName,
-            [wApp, file]() -> AbilityRuntime::Extension* {
+            [wApp, file](const std::string& language) -> AbilityRuntime::Extension* {
             auto app = wApp.lock();
             if (app != nullptr) {
-                return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str()).Create(app->GetRuntime());
+                return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str())
+                    .Create(app->GetRuntime(language));
             }
             TAG_LOGE(AAFwkTag::APPKIT, "failed");
             return nullptr;
@@ -2175,7 +2240,8 @@ void MainThread::LoadAllExtensions()
 }
 
 bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
-    const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion)
+    const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion,
+    const std::string &applicationCodeLanguage)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "enter, isStageBased = %{public}d", isStageBased);
     if (!record) {
@@ -2185,12 +2251,27 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
     auto args = std::make_shared<AbilityDelegatorArgs>(record->want);
     if (isStageBased) { // Stage model
         TAG_LOGD(AAFwkTag::APPKIT, "Stage model");
-        auto testRunner = TestRunner::Create(application_->GetRuntime(), args, false);
-        auto delegator = IAbilityDelegator::Create(application_->GetRuntime(), application_->GetAppContext(),
-            std::move(testRunner), record->observer);
-        AbilityDelegatorRegistry::RegisterInstance(delegator, args);
-        delegator->SetApiTargetVersion(targetVersion);
-        delegator->Prepare();
+        if (applicationCodeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0) {
+            TAG_LOGI(AAFwkTag::DELEGATOR, "create 1.0 testrunner");
+            auto& runtime = application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0);
+            auto testRunner = TestRunner::Create(runtime, args, false);
+            auto delegator = IAbilityDelegator::Create(runtime, application_->GetAppContext(),
+                std::move(testRunner), record->observer);
+            AbilityDelegatorRegistry::RegisterInstance(delegator, args, AbilityRuntime::Runtime::Language::JS);
+			delegator->SetApiTargetVersion(targetVersion);
+            delegator->Prepare();
+        }
+
+        if (applicationCodeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+            TAG_LOGI(AAFwkTag::DELEGATOR, "create 1.2 testrunner");
+            auto& runtime = application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
+            auto testRunner = TestRunner::Create(runtime, args, false);
+            auto delegator = IAbilityDelegator::Create(runtime, application_->GetAppContext(),
+                std::move(testRunner), record->observer);
+            AbilityDelegatorRegistry::RegisterInstance(delegator, args, AbilityRuntime::Runtime::Language::STS);
+			delegator->SetApiTargetVersion(targetVersion);
+            delegator->Prepare();
+        }
     } else { // FA model
         TAG_LOGD(AAFwkTag::APPKIT, "FA model");
         AbilityRuntime::Runtime::Options options;
@@ -2208,8 +2289,10 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
             return false;
         }
         bool isFaJsModel = entryHapModuleInfo.abilityInfos.front().srcLanguage == "js" ? true : false;
-        static auto runtime = AbilityRuntime::Runtime::Create(options);
-        auto testRunner = TestRunner::Create(runtime, args, isFaJsModel);
+        options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true); // default
+        static auto runtimes = AbilityRuntime::Runtime::CreateRuntimes(options);
+        for (const auto& runtime : runtimes) {
+            auto testRunner = TestRunner::Create(runtime, args, isFaJsModel);
         if (testRunner == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null testRunner");
             return false;
@@ -2220,9 +2303,10 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         }
         auto delegator = std::make_shared<AbilityDelegator>(
             application_->GetAppContext(), std::move(testRunner), record->observer);
-        AbilityDelegatorRegistry::RegisterInstance(delegator, args);
+        AbilityDelegatorRegistry::RegisterInstance(delegator, args, runtime->GetLanguage());
         delegator->SetApiTargetVersion(targetVersion);
         delegator->Prepare();
+        }
     }
     return true;
 }
@@ -2281,8 +2365,11 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
             TAG_LOGE(AAFwkTag::APPKIT, "null application");
             return;
         }
-        auto& runtime = application->GetRuntime();
-        appThread->UpdateRuntimeModuleChecker(runtime);
+        // need vm support
+        auto& runtimes = application->GetRuntime();
+        for (const auto& runtime : runtimes) {
+            appThread->UpdateRuntimeModuleChecker(runtime);
+        }
 #ifdef APP_ABILITY_USE_TWO_RUNNER
         AbilityThread::AbilityThreadMain(application, abilityRecord, stageContext);
 #else
@@ -2308,8 +2395,10 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
         return;
     }
     SetProcessExtensionType(abilityRecord);
-    auto& runtime = application_->GetRuntime();
-    UpdateRuntimeModuleChecker(runtime);
+    auto& runtimes = application_->GetRuntime();
+    for (const auto& runtime : runtimes) {
+        UpdateRuntimeModuleChecker(runtime);
+    }
 #ifdef APP_ABILITY_USE_TWO_RUNNER
     AbilityThread::AbilityThreadMain(application_, abilityRecord, stageContext);
 #else
@@ -2671,12 +2760,14 @@ void MainThread::HandleDumpHeapPrepare()
         TAG_LOGE(AAFwkTag::APPKIT, "null app");
         return;
     }
-    auto &runtime = app->GetRuntime();
-    if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+    auto& runtimes = app->GetRuntime();
+    if (runtimes.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
         return;
     }
-    runtime->GetHeapPrepare();
+    for (const auto& runtime : runtimes) {
+        runtime->GetHeapPrepare();
+    }
 }
 
 void MainThread::HandleDumpHeap(bool isPrivate)
@@ -2691,47 +2782,50 @@ void MainThread::HandleDumpHeap(bool isPrivate)
         TAG_LOGE(AAFwkTag::APPKIT, "null app");
         return;
     }
-    auto &runtime = app->GetRuntime();
-    if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+    auto& runtimes = app->GetRuntime();
+    if (runtimes.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
         return;
     }
-    auto taskFork = [&runtime, &isPrivate] {
-        TAG_LOGD(AAFwkTag::APPKIT, "HandleDump Heap taskFork start");
-        time_t startTime = time(nullptr);
-        int pid = -1;
-        if ((pid = fork()) < 0) {
-            TAG_LOGE(AAFwkTag::APPKIT, "err:%{public}d", errno);
-            return;
-        }
-        if (pid == 0) {
-            runtime->AllowCrossThreadExecution();
-            runtime->DumpHeapSnapshot(isPrivate);
-            TAG_LOGI(AAFwkTag::APPKIT, "HandleDumpHeap successful, now you can check some file");
-            _exit(0);
-        }
-        while (true) {
-            int status = 0;
-            pid_t p = waitpid(pid, &status, 0);
-            if (p < 0) {
-                TAG_LOGE(AAFwkTag::APPKIT, "HandleDumpHeap waitpid return p=%{public}d, err:%{public}d", p, errno);
-                break;
-            }
-            if (p == pid) {
-                TAG_LOGE(AAFwkTag::APPKIT, "HandleDumpHeap dump process exited status: %{public}d", status);
-                break;
-            }
-            if (time(nullptr) > startTime + TIME_OUT) {
-                TAG_LOGE(AAFwkTag::APPKIT, "time out to wait childprocess, killing forkpid %{public}d", pid);
-                kill(pid, SIGKILL);
-                break;
-            }
-            usleep(DEFAULT_SLEEP_TIME);
-        }
-    };
 
-    ffrt::submit(taskFork, {}, {}, ffrt::task_attr().qos(ffrt::qos_user_initiated));
-    runtime->DumpCpuProfile();
+    for (const auto& runtime : runtimes) {
+        auto taskFork = [&runtime, &isPrivate] {
+            TAG_LOGD(AAFwkTag::APPKIT, "HandleDump Heap taskFork start");
+            time_t startTime = time(nullptr);
+            int pid = -1;
+            if ((pid = fork()) < 0) {
+                TAG_LOGE(AAFwkTag::APPKIT, "err:%{public}d", errno);
+                return;
+            }
+            if (pid == 0) {
+                runtime->AllowCrossThreadExecution();
+                runtime->DumpHeapSnapshot(isPrivate);
+                TAG_LOGI(AAFwkTag::APPKIT, "HandleDumpHeap successful, now you can check some file");
+                _exit(0);
+            }
+            while (true) {
+                int status = 0;
+                pid_t p = waitpid(pid, &status, 0);
+                if (p < 0) {
+                    TAG_LOGE(AAFwkTag::APPKIT, "HandleDumpHeap waitpid return p=%{public}d, err:%{public}d", p, errno);
+                    break;
+                }
+                if (p == pid) {
+                    TAG_LOGE(AAFwkTag::APPKIT, "HandleDumpHeap dump process exited status: %{public}d", status);
+                    break;
+                }
+                if (time(nullptr) > startTime + TIME_OUT) {
+                    TAG_LOGE(AAFwkTag::APPKIT, "time out to wait childprocess, killing forkpid %{public}d", pid);
+                    kill(pid, SIGKILL);
+                    break;
+                }
+                usleep(DEFAULT_SLEEP_TIME);
+            }
+        };
+
+        ffrt::submit(taskFork, {}, {}, ffrt::task_attr().qos(ffrt::qos_user_initiated));
+        runtime->DumpCpuProfile();
+    }
 }
 
 void MainThread::DestroyHeapProfiler()
@@ -2744,11 +2838,14 @@ void MainThread::DestroyHeapProfiler()
 
     auto task = [] {
         auto app = applicationForDump_.lock();
-        if (app == nullptr || app->GetRuntime() == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        if (app == nullptr || app->GetRuntime().empty()) {
+            TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
             return;
         }
-        app->GetRuntime()->DestroyHeapProfiler();
+        auto& runtimes = app->GetRuntime();
+        for (const auto& runtime : runtimes) {
+            runtime->DestroyHeapProfiler();
+        }
     };
     mainHandler_->PostTask(task, "MainThread:DestroyHeapProfiler");
 }
@@ -2763,11 +2860,14 @@ void MainThread::ForceFullGC()
 
     auto task = [] {
         auto app = applicationForDump_.lock();
-        if (app == nullptr || app->GetRuntime() == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        if (app == nullptr || app->GetRuntime().empty()) {
+            TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
             return;
         }
-        app->GetRuntime()->ForceFullGC();
+        auto& runtimes = app->GetRuntime();
+        for (const auto& runtime : runtimes) {
+            runtime->ForceFullGC();
+        }
     };
     mainHandler_->PostTask(task, "MainThread:ForceFullGC");
 }
@@ -3472,16 +3572,18 @@ int32_t MainThread::ChangeAppGcState(int32_t state)
         TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return ERR_INVALID_VALUE;
     }
-    auto &runtime = application_->GetRuntime();
-    if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+    auto& runtimes = application_->GetRuntime();
+    if (runtimes.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
         return ERR_INVALID_VALUE;
     }
-    if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::CJ) {
-        return NO_ERROR;
+
+    for (const auto& runtime : runtimes) {
+        if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::JS) {
+            auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
+            nativeEngine.NotifyForceExpandState(state);
+        }
     }
-    auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
-    nativeEngine.NotifyForceExpandState(state);
     return NO_ERROR;
 }
 
@@ -3519,12 +3621,16 @@ int32_t MainThread::OnAttachLocalDebug(bool isDebugFromLocal)
         TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return ERR_INVALID_VALUE;
     }
-    auto &runtime = application_->GetRuntime();
-    if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+
+    auto& runtimes = application_->GetRuntime();
+    if (runtimes.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
         return ERR_INVALID_VALUE;
     }
-    runtime->StartLocalDebugMode(isDebugFromLocal);
+
+    for (const auto& runtime : runtimes) {
+        runtime->StartLocalDebugMode(isDebugFromLocal);
+    }
     return NO_ERROR;
 }
 
@@ -3741,12 +3847,26 @@ void MainThread::HandleCacheProcess()
 
     // force gc
     if (application_ != nullptr) {
-        auto &runtime = application_->GetRuntime();
-        if (runtime == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        auto& runtimes = application_->GetRuntime();
+        if (runtimes.empty()) {
+            TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
             return;
         }
-        runtime->ForceFullGC();
+        for (const auto& runtime : runtimes) {
+            runtime->ForceFullGC();
+        }
+    }
+}
+
+void MainThread::AddRuntimeLang(ApplicationInfo& appInfo, AbilityRuntime::Runtime::Options& options)
+{
+    if (appInfo.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+        options.langs.emplace(AbilityRuntime::Runtime::Language::STS, true);
+    } else if (appInfo.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID) {
+        //options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true);
+        options.langs.emplace(AbilityRuntime::Runtime::Language::STS, true);
+    } else {
+        options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true);
     }
 }
 }  // namespace AppExecFwk

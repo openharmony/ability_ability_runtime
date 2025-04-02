@@ -65,6 +65,12 @@ struct MissionValidResult : public Parcelable {
     int32_t missionId = -1;
     bool isValid = false;
 };
+// enum ContinueState {
+//     ACTIVE = 0,
+//     INACTIVE = 1
+//   }
+[[maybe_unused]] static ContinueState ContinueState_ConvertStsToNative(const int32_t index);
+[[maybe_unused]] static  int32_t ContinueState_ConvertNativeToSts(const ContinueState index);
 }  // namespace AAFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_MISSION_INFO_H

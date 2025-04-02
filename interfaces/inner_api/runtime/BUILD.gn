@@ -40,6 +40,7 @@ config("runtime_public_config") {
   visibility += [ "${ability_runtime_napi_path}/inner/napi_common:napi_common" ]
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_business_error",
+    "${ability_runtime_path}/sts_environment/interfaces/inner_api",
     "include",
   ]
 }
@@ -54,6 +55,8 @@ ohos_shared_library("runtime") {
   include_dirs = [
     "${ability_runtime_path}/services/abilitymgr/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
+    "${ability_runtime_path}/sts_environment/interfaces/inner_api",
+    "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
     "${ability_runtime_utils_path}/global/constant",
   ]
 
@@ -72,7 +75,11 @@ ohos_shared_library("runtime") {
     "${ability_runtime_native_path}/runtime/ohos_js_env_logger.cpp",
     "${ability_runtime_native_path}/runtime/ohos_js_environment_impl.cpp",
     "${ability_runtime_native_path}/runtime/ohos_loop_handler.cpp",
+    "${ability_runtime_native_path}/runtime/ohos_sts_environment_impl.cpp",
     "${ability_runtime_native_path}/runtime/runtime.cpp",
+    "${ability_runtime_native_path}/runtime/sts_data_struct_converter.cpp",
+    "${ability_runtime_native_path}/runtime/sts_error_utils.cpp",
+    "${ability_runtime_native_path}/runtime/sts_runtime.cpp",
   ]
 
   configs = [ ":runtime_config" ]
@@ -87,6 +94,7 @@ ohos_shared_library("runtime") {
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_path}/js_environment/frameworks/js_environment:js_environment",
+    "${ability_runtime_path}/sts_environment/frameworks/sts_environment:sts_environment",
     "${ability_runtime_services_path}/common:app_util",
   ]
 
@@ -116,6 +124,7 @@ ohos_shared_library("runtime") {
     "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "runtime_core:ani",
     "samgr:samgr_proxy",
     "zlib:shared_libz",
   ]
