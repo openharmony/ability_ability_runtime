@@ -583,17 +583,12 @@ bool AppfreezeManager::IsProcessDebug(int32_t pid, std::string bundleName)
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
     auto it = appfreezeFilterMap_.find(bundleName);
     if (it != appfreezeFilterMap_.end() && it->second.pid == pid) {
-        if (g_betaVersion || g_developMode) {
-            TAG_LOGI(AAFwkTag::APPDFR, "filtration current device is beta or development do not report appfreeze");
-            return true;
-        }
-        if (it->second.state == AppFreezeState::APPFREEZE_STATE_CANCELED) {
-            TAG_LOGI(AAFwkTag::APPDFR, "filtration only once");
-            return false;
-        } else {
-            TAG_LOGI(AAFwkTag::APPDFR, "filtration %{public}s", bundleName.c_str());
-            return true;
-        }
+        bool result = it->second.state == AppFreezeState::APPFREEZE_STATE_CANCELED;
+        TAG_LOGW(AAFwkTag::APPDFR, "AppfreezeFilter: %{public}d, "
+            "bundleName=%{public}s, pid:%{public}d, state:%{public}d, g_betaVersion:%{public}d,"
+            " g_developMode:%{public}d",
+            result, bundleName.c_str(), pid, it->second.state, g_betaVersion, g_developMode);
+        return result;
     }
 
     const int buffSize = 128;
@@ -698,7 +693,7 @@ bool AppfreezeManager::IsNeedIgnoreFreezeEvent(int32_t pid, const std::string& e
 bool AppfreezeManager::CancelAppFreezeDetect(int32_t pid, const std::string& bundleName)
 {
     if (bundleName.empty()) {
-        TAG_LOGE(AAFwkTag::APPDFR, "SetAppFreezeFilter bundleName is empty.");
+        TAG_LOGE(AAFwkTag::APPDFR, "SetAppFreezeFilter: failed, bundleName is empty.");
         return false;
     }
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
@@ -706,6 +701,8 @@ bool AppfreezeManager::CancelAppFreezeDetect(int32_t pid, const std::string& bun
     info.pid = pid;
     info.state = AppFreezeState::APPFREEZE_STATE_CANCELING;
     appfreezeFilterMap_.emplace(bundleName, info);
+    TAG_LOGI(AAFwkTag::APPDFR, "SetAppFreezeFilter: success, bundleName=%{public}s, "
+        "pid:%{public}d, state:%{public}d", bundleName.c_str(), info.pid, info.state);
     return true;
 }
 
@@ -714,8 +711,12 @@ void AppfreezeManager::RemoveDeathProcess(std::string bundleName)
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
     auto it = appfreezeFilterMap_.find(bundleName);
     if (it != appfreezeFilterMap_.end()) {
-        TAG_LOGI(AAFwkTag::APPDFR, "Remove bundleName: %{public}s", bundleName.c_str());
+        TAG_LOGI(AAFwkTag::APPDFR, "RemoveAppFreezeFilter:success, bundleName: %{public}s",
+            bundleName.c_str());
         appfreezeFilterMap_.erase(it);
+    } else {
+        TAG_LOGI(AAFwkTag::APPDFR, "RemoveAppFreezeFilter:failed, not found bundleName: "
+            "%{public}s", bundleName.c_str());
     }
 }
 
@@ -723,23 +724,25 @@ void AppfreezeManager::ResetAppfreezeState(int32_t pid, const std::string& bundl
 {
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
     if (appfreezeFilterMap_.find(bundleName) != appfreezeFilterMap_.end()) {
-        TAG_LOGD(AAFwkTag::APPDFR, "bundleName: %{public}s",
-            bundleName.c_str());
         appfreezeFilterMap_[bundleName].state = AppFreezeState::APPFREEZE_STATE_CANCELED;
     }
+    TAG_LOGI(AAFwkTag::APPDFR, "SetAppFreezeFilter: reset state, "
+        "bundleName=%{public}s, pid:%{public}d, state:%{public}d",
+        bundleName.c_str(), pid, appfreezeFilterMap_[bundleName].state);
 }
 
 bool AppfreezeManager::IsValidFreezeFilter(int32_t pid, const std::string& bundleName)
 {
     if (g_betaVersion || g_developMode) {
-        TAG_LOGI(AAFwkTag::APPDFR, "current device is beta or development do not report appfreeze");
+        TAG_LOGI(AAFwkTag::APPDFR, "SetAppFreezeFilter: "
+            "current device is beta or development");
         return true;
     }
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
-    if (appfreezeFilterMap_.find(bundleName) != appfreezeFilterMap_.end()) {
-        return false;
-    }
-    return true;
+    bool ret = appfreezeFilterMap_.find(bundleName) != appfreezeFilterMap_.end();
+    TAG_LOGI(AAFwkTag::APPDFR, "SetAppFreezeFilter: %{public}d, bundleName=%{public}s, "
+        "pid:%{public}d", ret, bundleName.c_str(), pid);
+    return ret;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

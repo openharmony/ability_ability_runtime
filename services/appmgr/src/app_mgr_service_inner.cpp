@@ -6781,17 +6781,21 @@ bool AppMgrServiceInner::SetAppFreezeFilter(int32_t pid)
     }
     std::string bundleName = callerRecord->GetBundleName();
     if (callingPid == pid && AppExecFwk::AppfreezeManager::GetInstance()->IsValidFreezeFilter(pid, bundleName)) {
-        bool cancelResult = AppExecFwk::AppfreezeManager::GetInstance()->CancelAppFreezeDetect(pid, bundleName);
-        auto resetAppfreezeTask = [pid, bundleName]() {
-            AppExecFwk::AppfreezeManager::GetInstance()->ResetAppfreezeState(pid, bundleName);
-        };
-        constexpr int32_t waitTime = 120000; // wait 2min
-        CHECK_POINTER_AND_RETURN_VALUE(dfxTaskHandler_, false);
-        dfxTaskHandler_->SubmitTaskJust(resetAppfreezeTask, "resetAppfreezeTask", waitTime);
-        return cancelResult;
+        bool result = AppExecFwk::AppfreezeManager::GetInstance()->CancelAppFreezeDetect(pid, bundleName);
+        if (result) {
+            auto resetAppfreezeTask = [pid, bundleName]() {
+                AppExecFwk::AppfreezeManager::GetInstance()->ResetAppfreezeState(pid, bundleName);
+            };
+            constexpr int32_t waitTime = 120000; // wait 2min
+            CHECK_POINTER_AND_RETURN_VALUE(dfxTaskHandler_, false);
+            dfxTaskHandler_->SubmitTaskJust(resetAppfreezeTask, "resetAppfreezeTask", waitTime);
+        }
+        TAG_LOGW(AAFwkTag::APPDFR, "SetAppFreezeFilter: %{public}d, bundleName=%{public}s, pid:%{public}d, ",
+            result, bundleName.c_str(), pid);
+        return result;
     }
-    TAG_LOGE(AAFwkTag::APPDFR, "SetAppFreezeFilter failed, pid %{public}d calling pid %{public}d",
-        pid, callingPid);
+    TAG_LOGE(AAFwkTag::APPDFR, "SetAppFreezeFilter: failed, pid %{public}d calling pid %{public}d "
+        "bundleName %{public}s", pid, callingPid, bundleName.c_str());
     return false;
 }
 
