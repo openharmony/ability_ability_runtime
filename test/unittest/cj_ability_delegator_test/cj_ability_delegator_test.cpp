@@ -216,7 +216,8 @@ HWTEST_F(CjAbilityDelegatorTest, CJAbilityDelegatorTestFFIAbilityDelegatorStartA
 {
     Want want;
     WantHandle wantHandle = const_cast<AAFwk::Want *>(&want);
-    auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetCJAbilityDelegator();
+    auto delegator =
+        OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     auto cjDelegator = FFI::FFIData::Create<CJAbilityDelegator>(delegator);
     int64_t id = cjDelegator->GetID();
     int64_t ret = FFIAbilityDelegatorStartAbility(id, wantHandle);
@@ -232,7 +233,8 @@ HWTEST_F(CjAbilityDelegatorTest, CJAbilityDelegatorTestFFIAbilityDelegatorExecut
 {
     const char* cmd = "test";
     int64_t timeoutSec = 1000;
-    auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetCJAbilityDelegator();
+    auto delegator =
+        OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     auto cjDelegator = FFI::FFIData::Create<CJAbilityDelegator>(delegator);
     int64_t id = cjDelegator->GetID();
     auto result = FFIAbilityDelegatorExecuteShellCommand(id, cmd, timeoutSec);
@@ -295,7 +297,8 @@ HWTEST_F(CjAbilityDelegatorTest, CJAbilityDelegatorTestFFIDump_001, TestSize.Lev
  */
 HWTEST_F(CjAbilityDelegatorTest, CJAbilityDelegatorTestFFIAbilityDelegatorApplicationContext_001, TestSize.Level1)
 {
-    auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetCJAbilityDelegator();
+    auto delegator =
+        OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::CJ);
     auto cjDelegator = FFI::FFIData::Create<CJAbilityDelegator>(delegator);
     int64_t id = cjDelegator->GetID();
     auto result = FFIAbilityDelegatorApplicationContext(id);

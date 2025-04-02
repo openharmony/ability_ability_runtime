@@ -16,5 +16,5 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 group("sample") {
   testonly = true
 
-  deps = [ "demo_ui_extension:ui_extension_sample" ]
+  deps = []
 }

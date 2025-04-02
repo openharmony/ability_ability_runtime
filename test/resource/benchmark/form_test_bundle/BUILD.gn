@@ -20,10 +20,7 @@ ohos_hap("formTestWidget1") {
   part_name = "ability_runtime"
   final_hap_path = "$root_out_dir/tests/benchmark/ability_runtime/interfaces/resource/form_test_bundle/${hap_name}.hap"
   testonly = true
-  deps = [
-    ":formtestwidget1_ets_assets",
-    ":formtestwidget1_ets_resources",
-  ]
+  deps = []
   ets2abc = true
   certificate_profile = "./signature/openharmony_sx.p7b"
 }
