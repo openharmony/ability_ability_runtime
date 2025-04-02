@@ -75,7 +75,7 @@ constexpr const char* CONNECT_SUPPORT_CROSS_USER = "const.abilityms.connect_supp
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 constexpr const char* CACHE_ABILITY_BY_LIST_ENABLE = "persist.sys.abilityms.cache_ability_enable";
-constexpr const char* CACHE_ABILITY_LIST_PATH = "/sys_prod/etc/ability/abilityms_cache_ability.json";
+constexpr const char* CACHE_ABILITY_LIST_PATH = "etc/ability/abilityms_cache_ability.json";
 constexpr const char* CACHE_PROCESS_NAME = "cache_list";
 }
 
@@ -514,7 +514,7 @@ bool AppUtils::IsCacheAbilityEnabled()
 void AppUtils::LoadCacheAbilityList()
 {
     nlohmann::json object;
-    if (!JsonUtils::GetInstance().LoadConfiguration(CACHE_ABILITY_LIST_PATH, object, CACHE_ABILITY_LIST_PATH)) {
+    if (!JsonUtils::GetInstance().LoadConfiguration(CACHE_ABILITY_LIST_PATH, object)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "load cache_ability file failed");
         return;
     }
