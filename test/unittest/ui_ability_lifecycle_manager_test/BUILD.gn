@@ -44,8 +44,8 @@ ohos_unittest("ui_ability_lifecycle_manager_test") {
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/status_bar_delegate_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
     "${ability_runtime_services_path}/common/src/event_report.cpp",
-    "ui_ability_lifecycle_manager_test.cpp",
     "mock/include/ipc_skeleton.cpp",
+    "ui_ability_lifecycle_manager_test.cpp",
   ]
 
   deps = [
