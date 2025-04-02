@@ -348,6 +348,20 @@ void STSRuntime::UnLoadSTSAppLibrary()
 
 void STSRuntime::RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo)
 {
+    if (stsEnv_ == nullptr) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "null stsEnv_");
+        return;
+    }
+
+    if (uncaughtExceptionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "null uncaughtExceptionInfo");
+        return;
+    }
+
+    auto handle = static_cast<StsEnv::STSUncaughtExceptionInfo*>(uncaughtExceptionInfo);
+    if (handle != nullptr) {
+        stsEnv_->RegisterUncaughtExceptionHandler(*handle);
+    }
 }
 
 STSRuntime::~STSRuntime()
@@ -612,8 +626,10 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
         return std::make_unique<STSNativeReference>();
     }
     ani_object object = nullptr;
+    aniEnv->ResetError();
     if (aniEnv->Object_New(cls, method, &object, undefined_ref, refArray) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Object_New AbcRuntimeLinker failed");
+        HandleUncaughtError();
         return std::make_unique<STSNativeReference>();
     }
     ani_method loadClassMethod = nullptr;
@@ -666,6 +682,15 @@ bool STSRuntime::RunScript(ani_env* aniEnv, const std::string& moduleName, const
     TAG_LOGE(AAFwkTag::STSRUNTIME, "hapPath[%{public}s], loadPath:%{public}s", hapPath.c_str(), loadPath.c_str());
     // need vm support Aot.
     return true;
+}
+
+void STSRuntime::HandleUncaughtError()
+{
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
+    if (stsEnv_ == nullptr) {
+        return;
+    }
+    stsEnv_->HandleUncaughtError();
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

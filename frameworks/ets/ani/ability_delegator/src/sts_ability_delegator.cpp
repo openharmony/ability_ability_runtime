@@ -21,6 +21,7 @@
 #include "shell_cmd_result.h"
 #include "ani_common_want.h"
 #include "sts_error_utils.h"
+#include "ani_enum_convert.h"
 namespace OHOS {
 namespace AbilityDelegatorSts {
 
@@ -31,48 +32,52 @@ enum ERROR_CODE {
 ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
     std::shared_ptr<AbilityRuntime::Context> context)
 {
-    // bind parent context property
-    ani_status status = ANI_ERROR;
-    ani_method areaSetter;
     ani_object contextObj = nullptr;
     ani_method method = nullptr;
-
-    status = aniEnv->Class_FindMethod(contextClass, "<ctor>", ":V", &method);
+    ani_status status = aniEnv->Class_FindMethod(contextClass, "<ctor>", ":V", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status : %{public}d", status);
         return {};
     }
-    status = aniEnv->Object_New(contextClass, method, &contextObj);
-    if (status != ANI_OK) {
+    if ((status = aniEnv->Object_New(contextClass, method, &contextObj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status : %{public}d", status);
         return {};
     }
-    if (ANI_OK != aniEnv->Class_FindMethod(contextClass, "<set>area", nullptr, &areaSetter)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find set area failed");
+    ani_field areaField;
+    if (aniEnv->Class_FindField(contextClass, "area", &areaField) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find area failed");
+        return {};
     }
-    auto area = context->GetArea();
-    if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, areaSetter, ani_int(area))) {
-        TAG_LOGE(AAFwkTag::APPKIT, "call set area failed");
+    ani_enum_item areaModeItem {};
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(
+        aniEnv, "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;", context->GetArea(), areaModeItem);
+    if (aniEnv->Object_SetField_Ref(contextObj, areaField, (ani_ref)areaModeItem) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Int failed");
+        return {};
     }
-    ani_method filesDirSetter;
-    if (ANI_OK != aniEnv->Class_FindMethod(contextClass, "<set>filesDir", nullptr, &filesDirSetter)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find set filesDir failed");
+    ani_field filesDirField;
+    if (aniEnv->Class_FindField(contextClass, "filesDir", &filesDirField) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find filesDir failed");
+        return {};
     }
-    std::string filesDir = context->GetFilesDir();
+    auto filesDir = context->GetFilesDir();
     ani_string filesDir_string{};
     aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDir_string);
-    if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, filesDirSetter, filesDir_string)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "call set filesDir failed");
+    if (aniEnv->Object_SetField_Ref(contextObj, filesDirField, reinterpret_cast<ani_ref>(filesDir_string)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
+        return {};
     }
-    ani_method tempDirSetter;
-    if (ANI_OK != aniEnv->Class_FindMethod(contextClass, "<set>tempDir", nullptr, &tempDirSetter)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find set tempDir failed");
+    ani_field tempDirField;
+    if (aniEnv->Class_FindField(contextClass, "tempDir", &tempDirField) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find find tempDir failed");
+        return {};
     }
     auto tempDir = context->GetTempDir();
     ani_string tempDir_string{};
     aniEnv->String_NewUTF8(tempDir.c_str(), tempDir.size(), &tempDir_string);
-    if (ANI_OK != aniEnv->Object_CallMethod_Void(contextObj, tempDirSetter, tempDir_string)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "call set tempDir failed");
+    if (aniEnv->Object_SetField_Ref(contextObj, tempDirField, reinterpret_cast<ani_ref>(tempDir_string)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
+        return {};
     }
     return contextObj;
 }

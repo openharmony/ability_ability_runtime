@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import BaseContext from './BaseContext'
-import ApplicationContext from './ApplicationContext'
-import EventHub from './EventHub';
+import BaseContext from 'application.BaseContext'
+import ApplicationContext from 'application.ApplicationContext'
+import EventHub from 'application.EventHub';
 import contextConstant from '@ohos.app.ability.contextConstant'
 import { ApplicationInfo } from 'bundleManager.ApplicationInfo'
 import resmgr from '@ohos.resourceManager'
