@@ -3942,6 +3942,9 @@ int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &
     std::shared_ptr<AbilityConnectManager> connectManager;
     std::shared_ptr<AbilityRecord> targetRecord;
     GetConnectManagerAndUIExtensionBySessionInfo(extensionSessionInfo, connectManager, targetRecord);
+    if(targetRecord == nullptr){
+       targetRecord = GetUIExtensionBySessionFromServiceMap(extensionSessionInfo);     
+    }
     CHECK_POINTER_AND_RETURN(targetRecord, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connectManager, ERR_INVALID_VALUE);
     EventInfo eventInfo = BuildEventInfo(extensionSessionInfo->want, extensionSessionInfo->userId);

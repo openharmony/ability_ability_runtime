@@ -3534,5 +3534,25 @@ int32_t AbilityConnectManager::QueryPreLoadUIExtensionRecordInner(const AppExecF
     return uiExtensionAbilityRecordMgr_->QueryPreLoadUIExtensionRecord(
         element, moduleName, hostBundleName, recordNum);
 }
+
+std::shared_ptr<AbilityRecord> AbilityConnectManager::GetUIExtensionBySessionFromServiceMap(
+    const sptr<SessionInfo> &sessionInfo)
+{
+    int32_t persistentId = sessionInfo->persistentId;
+    auto IsMatch = [persistentId](auto service) {
+        if (!service.second) {
+            return false;
+        }
+        int32_t srcPersistentId = service.second->GetSessionInfo()->persistentId;
+        return srcPersistentId == persistentId;
+    };
+    std::lock_guard lock(serviceMapMutex_);
+    auto serviceRecord = std::find_if(serviceMap_.begin(), serviceMap_.end(), IsMatch);
+    if (serviceRecord != serviceMap_.end()) {
+        TAG_LOGW(AAFwkTag::UI_EXT, "abilityRecord still exists");
+        return serviceRecord->second;
+    }
+    return nullptr;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
