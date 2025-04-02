@@ -18,7 +18,7 @@
 #include "ani_common_want.h"
 #include "ability_manager_client.h"
 #include "sts_context_utils.h"
-
+#include "sts_error_utils.h"
 #include "sts_ui_extension_common.h"
 
 const char *INVOKE_METHOD_NAME = "invoke";
@@ -45,7 +45,7 @@ static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] an
     }
     ret = ((OHOS::AbilityRuntime::UIExtensionContext*)nativeContextLong)->TerminateSelf();
     OHOS::AbilityRuntime::StsUIExtensionCommon::AsyncCallback(env, callback,
-        OHOS::AbilityRuntime::StsUIExtensionCommon::WrapBusinessError(env, static_cast<int32_t>(ret)), nullptr);
+        OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
     TAG_LOGD(AAFwkTag::UI_EXT, "terminateSelfSync end");
 }
 static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj,
@@ -86,7 +86,7 @@ static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env, [[maybe_u
         return;
     }
     OHOS::AbilityRuntime::StsUIExtensionCommon::AsyncCallback(env, callback,
-        OHOS::AbilityRuntime::StsUIExtensionCommon::WrapBusinessError(env, static_cast<int32_t>(ret)), nullptr);
+        OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
     TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelfWithResultSync end");
 }
 

@@ -50,7 +50,7 @@ export default class UIAbilityContext extends Context {
   private native nativeTerminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
   private native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
   private native nativeReportDrawnCompletedSync(callback:AsyncCallbackWrapper<void>): void;
-  private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): int;
+  public native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): BusinessError<void>;
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     let p1 = launch this.nativeStartAbilitySync(want, myCall);
@@ -171,31 +171,31 @@ export default class UIAbilityContext extends Context {
   }
 
   startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute((): int => {
+    let p1 = taskpool.execute((): BusinessError<void> => {
       return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
     });
     p1.then((e: NullishType) => {
-      let retError = new BusinessError<void>();
-      let resultCode: int = e as int;
-      retError.code = resultCode;
+      let retError = e as BusinessError<void>;
       callback(retError, undefined);
+    },(err: BusinessError): void => {
+      callback(err, undefined);
     });
   }
- 
+
   startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): Promise<void> {
     let p = new Promise<void>((resolve: (v: undefined) => void, reject: (error: BusinessError<void>) => void): void => {
-      let p1 = taskpool.execute((): int => {
+      let p1 = taskpool.execute((): BusinessError<void> => {
         return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
       });
       p1.then((e: NullishType) => {
-        let retError = new BusinessError<void>();
-        let resultCode: int = e as int;
-        if (resultCode === 0) {
+        let retError = e as BusinessError<void>;
+        if (retError.code === 0) {
           resolve(undefined);
         } else {
-          retError.code = resultCode;
           reject(retError);
         }
+      }).catch((err: BusinessError): void => {
+        reject(err);
       });
     });
     return p;
