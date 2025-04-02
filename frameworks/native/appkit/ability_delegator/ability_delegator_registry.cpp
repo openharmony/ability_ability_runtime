@@ -17,20 +17,30 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-std::shared_ptr<IAbilityDelegator> AbilityDelegatorRegistry::abilityDelegator_ {};
+std::map<AbilityRuntime::Runtime::Language, std::shared_ptr<IAbilityDelegator>> AbilityDelegatorRegistry::abilityDelegator_ {};
 std::shared_ptr<AbilityDelegatorArgs> AbilityDelegatorRegistry::abilityDelegatorArgs_ {};
 
-std::shared_ptr<AbilityDelegator> AbilityDelegatorRegistry::GetAbilityDelegator()
+std::shared_ptr<AbilityDelegator> AbilityDelegatorRegistry::GetAbilityDelegator(
+    const AbilityRuntime::Runtime::Language &language)
 {
-    auto p = reinterpret_cast<AbilityDelegator*>(abilityDelegator_.get());
-    return std::shared_ptr<AbilityDelegator>(abilityDelegator_, p);
+    auto it = abilityDelegator_.find(language);
+    if (it != abilityDelegator_.end()) {
+        auto p = reinterpret_cast<AbilityDelegator*>(it->second.get());
+        return std::shared_ptr<AbilityDelegator>(it->second, p);
+    }
+    return nullptr; 
 }
 
 #ifdef CJ_FRONTEND
 std::shared_ptr<CJAbilityDelegatorImpl> AbilityDelegatorRegistry::GetCJAbilityDelegator()
 {
-    auto p = reinterpret_cast<CJAbilityDelegatorImpl*>(abilityDelegator_.get());
-    return std::shared_ptr<CJAbilityDelegatorImpl>(abilityDelegator_, p);
+    auto it = abilityDelegator_.find(AbilityRuntime::Runtime::Language::CJ);
+    if (it != abilityDelegator_.end()) {
+        auto p = reinterpret_cast<CJAbilityDelegatorImpl*>(it->second.get());
+        return std::shared_ptr<CJAbilityDelegatorImpl>(it->second, p);
+    }
+    return nullptr; 
+    
 }
 #endif
 
@@ -40,10 +50,11 @@ std::shared_ptr<AbilityDelegatorArgs> AbilityDelegatorRegistry::GetArguments()
 }
 
 void AbilityDelegatorRegistry::RegisterInstance(
-    const std::shared_ptr<IAbilityDelegator>& delegator, const std::shared_ptr<AbilityDelegatorArgs>& args)
+    const std::shared_ptr<IAbilityDelegator> &delegator, const std::shared_ptr<AbilityDelegatorArgs> &args,
+    const AbilityRuntime::Runtime::Language &language)
 {
-    abilityDelegator_ = delegator;
     abilityDelegatorArgs_ = args;
+    abilityDelegator_.emplace(language, delegator);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
