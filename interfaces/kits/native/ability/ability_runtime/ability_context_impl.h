@@ -313,6 +313,23 @@ public:
     ErrCode CreateModalUIExtensionWithApp(const Want &want) override;
     void EraseUIExtension(int32_t sessionId) override;
     bool IsUIExtensionExist(const AAFwk::Want &want);
+    ErrCode RevokeDelegator() override;
+    inline bool GetHookOff() override
+    {
+        return hookOff_;
+    }
+    inline void SetHookOff(bool hookOff) override
+    {
+        hookOff_ = hookOff;
+    }
+    bool IsHook() override
+    {
+        return isHook_;
+    }
+    void SetHook(bool isHook) override
+    {
+        isHook_ = isHook;
+    }
 #endif
 
 private:
@@ -335,6 +352,8 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr_ = nullptr;
     AbilityConfigUpdateCallback abilityConfigUpdateCallback_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> abilityConfiguration_ = nullptr;
+    bool isHook_ = false;
+    bool hookOff_ = false;
 
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);

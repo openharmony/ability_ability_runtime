@@ -1460,6 +1460,8 @@ public:
     bool IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
     int32_t GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &info);
 
+    int32_t LaunchAbility(const sptr<IRemoteObject> &token);
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);

@@ -1824,5 +1824,21 @@ int32_t AppMgrService::GetKilledProcessInfo(int pid, int uid, KilledProcessInfo 
     }
     return appMgrServiceInner_->GetKilledProcessInfo(pid, uid, info);
 }
+
+int32_t AppMgrService::LaunchAbility(const sptr<IRemoteObject> &token)
+{
+    if (!IsReady()) {
+        return AAFwk::ERR_APP_MGR_SERVICE_NOT_READY;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not foundation");
+        return AAFwk::ERR_NO_ALLOW_OUTSIDE_CALL;
+    }
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return AAFwk::ERR_NULL_APP_MGR_SERVICE_INNER;
+    }
+    return appMgrServiceInner_->LaunchAbility(token);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
