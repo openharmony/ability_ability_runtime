@@ -46,6 +46,7 @@
 #include "ani.h"
 #include "sts_context_utils.h"
 #include "sts_runtime.h"
+#include "sts_error_utils.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -210,19 +211,29 @@ static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_u
     ani_class applicationContextCls = nullptr;
     if (env->FindClass(STS_APPLICATION_CONTEXT_CLASS_NAME, &applicationContextCls) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed");
+        AbilityRuntime::ThrowStsInvalidParamError(env, "FindClass failed");
         return;
     }
     ani_field contextField;
     if (env->Class_FindField(applicationContextCls, "nativeApplicationContext", &contextField) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed");
+        AbilityRuntime::ThrowStsInvalidParamError(env, "Class_FindField failed");
         return;
     }
     ani_long nativeContextLong;
     if (env->Object_GetField_Long(aniObj, contextField, &nativeContextLong) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_GetField_Long failed");
+        AbilityRuntime::ThrowStsInvalidParamError(env, "Object_GetField_Long failed");
         return;
     }
-    ((AbilityRuntime::ApplicationContext*)nativeContextLong)->SetSupportedProcessCacheSelf(value);
+    int32_t errCode = ((AbilityRuntime::ApplicationContext*)nativeContextLong)->SetSupportedProcessCacheSelf(value);
+    if (errCode == AAFwk::ERR_CAPABILITY_NOT_SUPPORT) {
+        TAG_LOGE(AAFwkTag::APPKIT, "process cache feature is disabled.");
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_CAPABILITY_NOT_SUPPORT);
+    } else if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "set failed");
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+    }
     TAG_LOGI(AAFwkTag::APPKIT, "SetSupportedProcessCacheSync end");
 }
 

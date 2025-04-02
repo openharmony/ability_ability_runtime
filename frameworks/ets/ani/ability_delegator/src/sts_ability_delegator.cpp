@@ -20,12 +20,15 @@
 #include "hilog_tag_wrapper.h"
 #include "shell_cmd_result.h"
 #include "ani_common_want.h"
+#include "sts_error_utils.h"
 #include "ani_enum_convert.h"
 namespace OHOS {
 namespace AbilityDelegatorSts {
 
 using namespace OHOS::AbilityRuntime;
-
+enum ERROR_CODE {
+    INCORRECT_PARAMETERS    = 401,
+};
 ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
     std::shared_ptr<AbilityRuntime::Context> context)
 {
@@ -164,7 +167,8 @@ ani_object ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object, 
     TAG_LOGD(AAFwkTag::DELEGATOR, "ExecuteShellCommand called");
     if (nullptr == env) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
-        return {};
+        return OHOS::AbilityRuntime::CreateStsError(env, INCORRECT_PARAMETERS,
+            "Parse parameters failed, cmd must be string and timeout must be number.");
     }
     ani_object objValue = nullptr;
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
@@ -249,9 +253,10 @@ void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resStri
 
 void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj)
 {
-    TAG_LOGD(AAFwkTag::DELEGATOR, "AddAbilityMonitorASync");
     if (nullptr == env) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
+        OHOS::AbilityRuntime::ThrowStsError(env, INCORRECT_PARAMETERS,
+            "Parse param monitor failed, monitor must be Monitor.");
         return;
     }
     ani_class monitorCls;
@@ -305,11 +310,15 @@ ani_int StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_class 
     TAG_LOGD(AAFwkTag::DELEGATOR, "StartAbility call");
     if (nullptr == env) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
+        OHOS::AbilityRuntime::ThrowStsError(env, INCORRECT_PARAMETERS,
+            "Parse want failed, want must be Want.");
         return ani_int(-1);
     }
     AAFwk::Want want;
     if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "UnwrapWant  failed");
+        OHOS::AbilityRuntime::ThrowStsError(env, INCORRECT_PARAMETERS,
+            "Parse want failed, want must be Want.");
         return ani_int(-1);
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
