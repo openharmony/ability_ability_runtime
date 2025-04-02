@@ -2849,6 +2849,7 @@ void AppMgrServiceInner::UpdateAbilityState(const sptr<IRemoteObject> &token, co
     }
     if (state == abilityRecord->GetState()) {
         TAG_LOGE(AAFwkTag::APPMGR, "current state is already");
+        OnAbilityStateChanged(abilityRecord, state);
         return;
     }
     if (abilityRecord->GetAbilityInfo() == nullptr) {
@@ -9203,6 +9204,22 @@ void AppMgrServiceInner::SendAbilityEvent(const std::shared_ptr<AbilityRunningRe
         AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONBACKGROUND,
             HiSysEventType::BEHAVIOR, eventInfo);
     }
+}
+
+int32_t AppMgrServiceInner::LaunchAbility(const sptr<IRemoteObject> &token)
+{
+    auto appRecord = GetAppRunningRecordByAbilityToken(token);
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+        return AAFwk::ERR_NULL_APP_RUNNING_MANAGER;
+    }
+    auto ability = appRecord->GetAbilityRunningRecordByToken(token);
+    if (ability == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord null");
+        return ERR_INVALID_VALUE;
+    }
+    appRecord->LaunchAbility(ability);
+    return ERR_OK;
 }
 } // namespace AppExecFwk
 }  // namespace OHOS
