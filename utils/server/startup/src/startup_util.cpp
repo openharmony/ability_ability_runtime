@@ -95,6 +95,7 @@ void StartupUtil::InitAbilityInfoFromExtension(AppExecFwk::ExtensionAbilityInfo 
     abilityInfo.compileMode = extensionInfo.compileMode;
     abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
     abilityInfo.extensionTypeName = extensionInfo.extensionTypeName;
+    abilityInfo.codeLanguage = extensionInfo.codeLanguage;
     if (!extensionInfo.hapPath.empty()) {
         abilityInfo.hapPath = extensionInfo.hapPath;
     }

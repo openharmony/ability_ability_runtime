@@ -59,6 +59,34 @@ static std::string GetSaveAppCachePath(int32_t savedStateId)
     return fileDir + "/" + fileName;
 }
 }
+// enum OnSaveResult {
+//     ALL_AGREE = 0,
+//     CONTINUATION_REJECT = 1,
+//     CONTINUATION_MISMATCH = 2,
+//     RECOVERY_AGREE = 3,
+//     RECOVERY_REJECT = 4,
+//     ALL_REJECT
+//   }
+OnSaveResult OnSaveResult_ConvertStsToNative(const int32_t index)
+{
+    return static_cast<OnSaveResult>(index);
+}
+OnSaveResult OnSaveResult_ConvertNativeToSts(const OnSaveResult value)
+{
+    return value;
+}
+// enum StateType {
+//     CONTINUATION = 0,
+//     APP_RECOVERY = 1
+//   }
+static StateType StateType_ConvertStsToNative(const int32_t index)
+{
+    return static_cast<StateType>(index);
+}
+static int32_t StateType_ConvertNativeToSts(const StateType value)
+{
+    return value;
+}
 
 AbilityRecovery::AbilityRecovery() : isEnable_(false), restartFlag_(RestartFlag::ALWAYS_RESTART),
     saveOccasion_(SaveOccasionFlag::SAVE_WHEN_ERROR), saveMode_(SaveModeFlag::SAVE_WITH_FILE)

@@ -101,6 +101,8 @@ public:
         const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance) override;
     void PreloadModule(const std::string& moduleName, const std::string& srcPath,
         const std::string& hapPath, bool isEsMode, bool useCommonTrunk) override;
+    void PreloadModule(const std::string& moduleName, const std::string& hapPath,
+        bool isEsMode, bool useCommonTrunk) override {}
     bool PopPreloadObj(const std::string& key, std::unique_ptr<NativeReference>& obj);
     void StartDebugMode(const DebugOption debugOption) override;
     void SetDebugOption(const DebugOption debugOption) override;
@@ -148,6 +150,7 @@ public:
     void SetPkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName);
     void UpdatePkgContextInfoJson(const std::string& moduleName, const std::string& hapPath,
         const std::string& packageName);
+    void RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo) override;
 
 private:
     void FinishPreload() override;

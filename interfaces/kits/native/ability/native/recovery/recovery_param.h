@@ -68,7 +68,10 @@ enum StateReason {
     APP_FREEZE,
     CJ_ERROR,
 };
-
+[[maybe_unused]] static OnSaveResult OnSaveResult_ConvertStsToNative(const int32_t index);
+[[maybe_unused]] static OnSaveResult OnSaveResult_ConvertNativeToSts(const OnSaveResult value);
+[[maybe_unused]] static StateType StateType_ConvertStsToNative(const int32_t index);
+[[maybe_unused]] static int32_t StateType_ConvertNativeToSts(const StateType value);
 }  // namespace AAFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ABILITY_RECOVERY_PARAM_H

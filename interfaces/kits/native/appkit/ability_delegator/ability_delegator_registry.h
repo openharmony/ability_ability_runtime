@@ -24,6 +24,7 @@
 #include "cj_ability_delegator_impl.h"
 #endif
 #include "iability_delegator.h"
+#include "runtime.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -34,7 +35,8 @@ public:
      *
      * @return the AbilityDelegator object initialized when the application is started.
      */
-    static std::shared_ptr<AbilityDelegator> GetAbilityDelegator();
+    static std::shared_ptr<AbilityDelegator> GetAbilityDelegator(
+        const AbilityRuntime::Runtime::Language &language = AbilityRuntime::Runtime::Language::JS);
 
 #ifdef CJ_FRONTEND
     /**
@@ -60,10 +62,11 @@ public:
      * @param args, Indicates the AbilityDelegatorArgs object.
      */
     static void RegisterInstance(
-        const std::shared_ptr<IAbilityDelegator>& delegator, const std::shared_ptr<AbilityDelegatorArgs>& args);
+        const std::shared_ptr<IAbilityDelegator> &delegator, const std::shared_ptr<AbilityDelegatorArgs> &args,
+        const AbilityRuntime::Runtime::Language &language);
 
 private:
-    static std::shared_ptr<IAbilityDelegator> abilityDelegator_;
+    static std::map<AbilityRuntime::Runtime::Language, std::shared_ptr<IAbilityDelegator>> abilityDelegator_;
     static std::shared_ptr<AbilityDelegatorArgs> abilityDelegatorArgs_;
 };
 } // namespace AppExecFwk

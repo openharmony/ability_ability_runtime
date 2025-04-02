@@ -39,6 +39,7 @@
 #include "resource_manager.h"
 #include "runtime.h"
 #include "watchdog.h"
+#include "sts_envsetup.h"
 
 #ifdef CJ_FRONTEND
 #include "cj_envsetup.h"
@@ -302,6 +303,10 @@ public:
     CJUncaughtExceptionInfo CreateCjExceptionInfo(const std::string &bundleName, uint32_t versionCode,
         const std::string &hapPath);
 #endif
+    JsEnv::UncaughtExceptionInfo CreateJsExceptionInfo(const std::string& bundleName, uint32_t versionCode,
+        const std::string& hapPath, std::string& appRunningId, int32_t pid, std::string& processName);
+    StsEnv::STSUncaughtExceptionInfo CreateStsExceptionInfo(
+        const std::string& bundleName, uint32_t versionCode, const std::string& hapPath);
     /**
      * @brief Notify NativeEngine GC of status change.
      *
@@ -588,7 +593,8 @@ private:
      *
      */
     bool PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
-        const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion);
+        const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion,
+		const std::string &applicationCodeLanguage);
 
     /**
      * @brief Set current process extension type
@@ -757,6 +763,8 @@ private:
         std::vector<std::pair<std::string, std::string>> &fileMap);
     void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths);
     void SetAppDebug(uint32_t modeFlag, bool isDebug);
+
+    void AddRuntimeLang(ApplicationInfo& appInfo, AbilityRuntime::Runtime::Options& options);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;

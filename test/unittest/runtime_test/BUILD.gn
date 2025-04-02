@@ -199,6 +199,31 @@ ohos_unittest("ohos_js_environment_test") {
   ]
 }
 
+ohos_unittest("ohos_sts_environment_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [ "${ability_runtime_native_path}/runtime" ]
+
+  sources = [ "ohos_sts_environment_test.cpp" ]
+
+  configs = []
+
+  deps = [
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_runtime:runtime",
+    "ability_runtime:sts_environment",
+    "c_utils:utils",
+    "ets_runtime:libark_jsruntime",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "napi:ace_napi",
+    "runtime_core:ani",
+  ]
+}
 ohos_unittest("js_worker_test") {
   module_out_path = module_output_path
 
@@ -243,4 +268,10 @@ group("unittest") {
     ":ohos_js_environment_test",
     ":runtime_test",
   ]
+}
+
+group("stsunittest") {
+  testonly = true
+
+  deps = []
 }

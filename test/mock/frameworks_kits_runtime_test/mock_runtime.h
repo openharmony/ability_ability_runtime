@@ -95,6 +95,11 @@ public:
     {
         return;
     }
+    void PreloadModule(const std::string& moduleName, const std::string& hapPath,
+        bool isEsMode, bool useCommonTrunk) override
+    {
+        return;
+    }
     bool RunScript(const std::string& path, const std::string& hapPath, bool useCommonChunk = false)
     {
         return true;
@@ -129,6 +134,7 @@ public:
 
     void DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary = false) override {}
     void ForceFullGC(uint32_t tid) override {}
+    void RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo) override {}
 public:
     Language language;
 };

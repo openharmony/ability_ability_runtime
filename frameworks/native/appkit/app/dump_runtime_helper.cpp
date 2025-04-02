@@ -39,7 +39,7 @@ void DumpRuntimeHelper::SetAppFreezeFilterCallback()
         TAG_LOGE(AAFwkTag::APPKIT, "null application");
         return;
     }
-    auto& runtime = application_->GetRuntime();
+    auto& runtime = application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0);
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
@@ -62,7 +62,7 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
         TAG_LOGE(AAFwkTag::APPKIT, "null application");
         return;
     }
-    auto& runtime = application_->GetRuntime();
+    auto& runtime = application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0);
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;

@@ -113,5 +113,20 @@ bool RunningProcessInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(pssValue));
     return true;
 }
+// enum ProcessState {
+//     STATE_CREATE,
+//     STATE_FOREGROUND,
+//     STATE_ACTIVE,
+//     STATE_BACKGROUND,
+//     STATE_DESTROY
+//   }
+AppProcessState AppProcessState_ConvertStsToNative(const int32_t index)
+{
+    return static_cast<AppProcessState>(index);
+}
+int32_t AppProcessState_ConvertNativeToSts(const AppProcessState value)
+{
+    return static_cast<int32_t>(value); //todo wlh
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
