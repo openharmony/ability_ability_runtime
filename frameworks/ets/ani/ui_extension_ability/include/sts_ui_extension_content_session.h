@@ -64,21 +64,21 @@ private:
     std::map<int, RuntimeTask> resultCallbacks_;
 };
 
-class StsUIExtensionContentSession {
+class ETSUIExtensionContentSession {
 private:
     class CallbackWrapper;
 public:
-    StsUIExtensionContentSession(sptr<AAFwk::SessionInfo> sessionInfo,
+    ETSUIExtensionContentSession(sptr<AAFwk::SessionInfo> sessionInfo,
         sptr<Rosen::Window> uiWindow, std::weak_ptr<AbilityRuntime::Context>& context,
         std::shared_ptr<StsAbilityResultListeners>& abilityResultListeners);
-    StsUIExtensionContentSession(sptr<AAFwk::SessionInfo> sessionInfo,
+    ETSUIExtensionContentSession(sptr<AAFwk::SessionInfo> sessionInfo,
         sptr<Rosen::Window> uiWindow);
-    virtual ~StsUIExtensionContentSession() = default;
-    static ani_object CreateStsUIExtensionContentSession(ani_env* env,
+    virtual ~ETSUIExtensionContentSession() = default;
+    static ani_object CreateETSUIExtensionContentSession(ani_env* env,
         sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow,
         std::weak_ptr<AbilityRuntime::Context> context,
         std::shared_ptr<StsAbilityResultListeners>& abilityResultListeners,
-        std::shared_ptr<StsUIExtensionContentSession> contentSessionPtr);
+        std::shared_ptr<ETSUIExtensionContentSession> contentSessionPtr);
     void SendData(ani_env* env, ani_object object, ani_object data);
     void LoadContent(ani_env* env, ani_object object, ani_string path, ani_object storage);
     void TerminateSelf();
@@ -99,7 +99,6 @@ private:
     bool isFirstTriggerBindModal_ = true;
 };
 
-StsUIExtensionContentSession* GetStsContentSession(ani_env* env, ani_object obj);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_STS_UI_EXTENSION_CONTENT_SESSION_H
