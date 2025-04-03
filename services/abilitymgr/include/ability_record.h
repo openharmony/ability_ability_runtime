@@ -1163,6 +1163,26 @@ public:
 
     void ScheduleCollaborate(const Want &want);
 
+    bool IsHook () const
+    {
+        return isHook_;
+    }
+
+    inline void SetIsHook(bool isHook)
+    {
+        isHook_ = isHook;
+    }
+
+    bool GetHookOff () const
+    {
+        return hookOff_;
+    }
+
+    inline void SetHookOff(bool hookOff)
+    {
+        hookOff_ = hookOff;
+    }
+
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false,
         const std::string &taskName = "");
 
@@ -1295,6 +1315,8 @@ private:
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isLaunching_ = true;
     bool securityFlag_ = false;
+    bool isHook_ = false;
+    bool hookOff_ = false;
     std::atomic_bool isCallerSetProcess_ = false;       // new version
     std::atomic_bool backgroundAbilityWindowDelayed_ = false;
 

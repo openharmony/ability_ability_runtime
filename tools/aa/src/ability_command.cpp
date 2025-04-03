@@ -353,7 +353,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The specified process does not have the permission",
         "The specified process permission check failed",
         {ERR_STATIC_CFG_PERMISSION_SOLUTION_ONE});
-    messageMap_[ERR_CROWDTEST_EXPIRED] = GetAaToolErrorInfo("10106102",
+    messageMap_[ERR_CROWDTEST_EXPIRED] = GetAaToolErrorInfo("10106103",
         "Failed to unlock the screen in developer mode",
         "The current mode is developer mode, and the screen cannot be unlocked automatically",
         {ERR_CROWDTEST_EXPIRED_SOLUTION_ONE});
@@ -362,7 +362,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The application is suspected of malicious behavior and is restricted from launching by the appStore",
         {ERR_APP_CONTROLLED_SOLUTION_ONE});
     messageMap_[ERR_EDM_APP_CONTROLLED] = GetAaToolErrorInfo("10106106",
-        "The application is controlled by EDM",
+        "The target application is managed by EDM.",
         "The application is under the control of enterprise device management",
         {ERR_EDM_APP_CONTROLLED_SOLUTION_ONE});
     messageMap_[ERR_IMPLICIT_START_ABILITY_FAIL] = GetAaToolErrorInfo("10103101",
