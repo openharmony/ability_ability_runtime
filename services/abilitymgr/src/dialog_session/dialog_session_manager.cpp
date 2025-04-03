@@ -26,7 +26,7 @@
 #include "string_wrapper.h"
 #include "want.h"
 
-const std::string APP_LAUNCH_TRUSTLIST = "ohos.params.appLaunchTrustlist";
+const std::string APP_LAUNCH_TRUSTLIST = "ohos.params.appLaunchTrustList";
 namespace OHOS {
 namespace AAFwk {
 using OHOS::AppExecFwk::BundleInfo;
