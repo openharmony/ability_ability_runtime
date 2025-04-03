@@ -223,24 +223,6 @@ int32_t ConnectionRecord::CallOnAbilityConnectDone(sptr<IAbilityConnection> call
     return ret;
 }
 
-void ConnectionRecord::CompleteDisconnectSync()
-{
-    SetConnectState(ConnectionState::DISCONNECTED);
-    CHECK_POINTER(targetService_);
-    const AppExecFwk::AbilityInfo &abilityInfo = targetService_->GetAbilityInfo();
-    AppExecFwk::ElementName element(targetService_->GetWant().GetDeviceId(), abilityInfo.bundleName,
-        abilityInfo.name, abilityInfo.moduleName);
-    TAG_LOGD(AAFwkTag::CONNECTION, "OnAbilityDisconnectDone");
-    auto connCallback = GetAbilityConnectCallback();
-    if (!connCallback) {
-        TAG_LOGD(AAFwkTag::CONNECTION, "null connCallback");
-        return;
-    }
-    connCallback->OnAbilityDisconnectDone(element, -1);
-    DelayedSingleton<ConnectionStateManager>::GetInstance()->RemoveConnection(shared_from_this(), false);
-    TAG_LOGD(AAFwkTag::CONNECTION, "result: %{public}d, connectState:%{public}d", 0, state_);
-}
-
 void ConnectionRecord::CompleteDisconnect(int resultCode, bool isCallerDied, bool isTargetDied)
 {
     if (resultCode == ERR_OK) {
