@@ -35,10 +35,10 @@
 #include "sts_error_utils.h"
 namespace OHOS {
 namespace AbilityRuntime {
-StsUIExtensionContentSession* GetStsContentSession(ani_env* env, ani_object obj)
+ETSUIExtensionContentSession* GetETSUIExtContentSession(ani_env* env, ani_object obj)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "GetStsContentSession null env");
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetETSUIExtContentSession null env");
         ThrowStsInvalidParamError(env, "context null");
         return nullptr;
     }
@@ -50,7 +50,7 @@ StsUIExtensionContentSession* GetStsContentSession(ani_env* env, ani_object obj)
         ThrowStsInvalidParamError(env, "findClass fail");
         return nullptr;
     }
-    StsUIExtensionContentSession *stsContentSession = nullptr;
+    ETSUIExtensionContentSession *etsContentSession = nullptr;
     ani_field stsContentSessionField;
     status = env->Class_FindField(cls, "nativeContextSession", &stsContentSessionField);
     if (status != ANI_OK) {
@@ -58,50 +58,50 @@ StsUIExtensionContentSession* GetStsContentSession(ani_env* env, ani_object obj)
         ThrowStsInvalidParamError(env, "class find field fail");
         return nullptr;
     }
-    status = env->Object_GetField_Long(obj, stsContentSessionField, reinterpret_cast<ani_long*>(&stsContentSession));
+    status = env->Object_GetField_Long(obj, stsContentSessionField, reinterpret_cast<ani_long*>(&etsContentSession));
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Object_GetField_Long status : %{public}d", status);
         ThrowStsInvalidParamError(env, "object get field Long fail");
         return nullptr;
     }
-    if (stsContentSession == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "stsContentSession is null");
-        ThrowStsInvalidParamError(env, "stsContentSession null");
+    if (etsContentSession == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "etsContentSession is null");
+        ThrowStsInvalidParamError(env, "etsContentSession null");
         return nullptr;
     }
-    return stsContentSession;
+    return etsContentSession;
 }
 ani_object NativeSetReceiveDataCallback(ani_env* env, ani_object obj)
 {
-    auto stsContentSession = GetStsContentSession(env, obj);
+    auto etsContentSession = GetETSUIExtContentSession(env, obj);
     ani_object object = nullptr;
-    if (stsContentSession != nullptr) {
-        object = stsContentSession->SetReceiveDataCallback(env, obj);
+    if (etsContentSession != nullptr) {
+        object = etsContentSession->SetReceiveDataCallback(env, obj);
     }
     return object;
 }
 
 void NativeSendData(ani_env* env, ani_object obj, ani_object data)
 {
-    auto stsContentSession = GetStsContentSession(env, obj);
-    if (stsContentSession != nullptr) {
-        stsContentSession->SendData(env, obj, data);
+    auto etsContentSession = GetETSUIExtContentSession(env, obj);
+    if (etsContentSession != nullptr) {
+        etsContentSession->SendData(env, obj, data);
     }
 }
 
 void NativeLoadContent(ani_env* env, ani_object obj, ani_string path, ani_object storage)
 {
-    auto stsContentSession = GetStsContentSession(env, obj);
-    if (stsContentSession != nullptr) {
-        stsContentSession->LoadContent(env, obj, path, storage);
+    auto etsContentSession = GetETSUIExtContentSession(env, obj);
+    if (etsContentSession != nullptr) {
+        etsContentSession->LoadContent(env, obj, path, storage);
     }
 }
 
 void NativeTerminateSelf(ani_env* env, ani_object obj, [[maybe_unused]] ani_object callback)
 {
-    auto stsContentSession = GetStsContentSession(env, obj);
-    if (stsContentSession != nullptr) {
-        int32_t resultCode = stsContentSession->TerminateSelfWithResult();
+    auto etsContentSession = GetETSUIExtContentSession(env, obj);
+    if (etsContentSession != nullptr) {
+        int32_t resultCode = etsContentSession->TerminateSelfWithResult();
         OHOS::AbilityRuntime::StsUIExtensionCommon::AsyncCallback(env, callback,
             OHOS::AbilityRuntime::StsUIExtensionCommon::WrapBusinessError(
                 env, static_cast<int32_t>(resultCode)), nullptr);
@@ -113,9 +113,9 @@ int NativeTerminateSelfWithResult(ani_env* env, ani_object obj, [[maybe_unused]]
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "NativeTerminateSelfWithResult called");
     int ret = 0;
-    auto stsContentSession = GetStsContentSession(env, obj);
-    if (stsContentSession != nullptr) {
-        ret = stsContentSession->TerminateSelfWithResult();
+    auto etsContentSession = GetETSUIExtContentSession(env, obj);
+    if (etsContentSession != nullptr) {
+        ret = etsContentSession->TerminateSelfWithResult();
         OHOS::AbilityRuntime::StsUIExtensionCommon::AsyncCallback(env, callback,
             OHOS::AbilityRuntime::StsUIExtensionCommon::WrapBusinessError(
                 env, static_cast<int32_t>(ret)), nullptr);
@@ -125,23 +125,23 @@ int NativeTerminateSelfWithResult(ani_env* env, ani_object obj, [[maybe_unused]]
 
 void NativeSetWindowBackgroundColor(ani_env* env, ani_object obj, ani_string color)
 {
-    auto stsContentSession = GetStsContentSession(env, obj);
-    if (stsContentSession != nullptr) {
-        stsContentSession->SetWindowBackgroundColor(env, color);
+    auto etsContentSession = GetETSUIExtContentSession(env, obj);
+    if (etsContentSession != nullptr) {
+        etsContentSession->SetWindowBackgroundColor(env, color);
     }
 }
 
 ani_object NativeGetUIExtensionHostWindowProxy(ani_env* env, ani_object obj)
 {
-    auto stsContentSession = GetStsContentSession(env, obj);
+    auto etsContentSession = GetETSUIExtContentSession(env, obj);
     ani_object object = nullptr;
-    if (stsContentSession != nullptr) {
-        object = stsContentSession->GetUIExtensionHostWindowProxy(env, obj);
+    if (etsContentSession != nullptr) {
+        object = etsContentSession->GetUIExtensionHostWindowProxy(env, obj);
     }
     return object;
 }
 
-StsUIExtensionContentSession::StsUIExtensionContentSession(
+ETSUIExtensionContentSession::ETSUIExtensionContentSession(
     sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow,
     std::weak_ptr<AbilityRuntime::Context> &context,
     std::shared_ptr<StsAbilityResultListeners>& abilityResultListeners)
@@ -155,16 +155,16 @@ StsUIExtensionContentSession::StsUIExtensionContentSession(
     }
 }
 
-StsUIExtensionContentSession::StsUIExtensionContentSession(sptr<AAFwk::SessionInfo> sessionInfo,
+ETSUIExtensionContentSession::ETSUIExtensionContentSession(sptr<AAFwk::SessionInfo> sessionInfo,
     sptr<Rosen::Window> uiWindow) : sessionInfo_(sessionInfo), uiWindow_(uiWindow)
 {
 }
 
-ani_object StsUIExtensionContentSession::CreateStsUIExtensionContentSession(ani_env* env,
+ani_object ETSUIExtensionContentSession::CreateETSUIExtensionContentSession(ani_env* env,
     sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow,
     std::weak_ptr<AbilityRuntime::Context> context,
     std::shared_ptr<StsAbilityResultListeners>& abilityResultListeners,
-    std::shared_ptr<StsUIExtensionContentSession> contentSessionPtr)
+    std::shared_ptr<ETSUIExtensionContentSession> contentSessionPtr)
 {
     ani_object object = nullptr;
     ani_method method = nullptr;
@@ -216,7 +216,7 @@ ani_object StsUIExtensionContentSession::CreateStsUIExtensionContentSession(ani_
     return object;
 }
 
-void StsUIExtensionContentSession::SendData(ani_env* env, ani_object object, ani_object data)
+void ETSUIExtensionContentSession::SendData(ani_env* env, ani_object object, ani_object data)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "SendData call");
     AAFwk::WantParams params;
@@ -237,7 +237,7 @@ void StsUIExtensionContentSession::SendData(ani_env* env, ani_object object, ani
     }
 }
 
-void StsUIExtensionContentSession::LoadContent(ani_env* env, ani_object object, ani_string path, ani_object storage)
+void ETSUIExtensionContentSession::LoadContent(ani_env* env, ani_object object, ani_string path, ani_object storage)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "LoadContent call");
     std::string contextPath;
@@ -269,19 +269,19 @@ void StsUIExtensionContentSession::LoadContent(ani_env* env, ani_object object, 
     return;
 }
 
-void StsUIExtensionContentSession::TerminateSelf()
+void ETSUIExtensionContentSession::TerminateSelf()
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelf call");
     AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(sessionInfo_);
 }
 
-int32_t StsUIExtensionContentSession::TerminateSelfWithResult()
+int32_t ETSUIExtensionContentSession::TerminateSelfWithResult()
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelfWithResult call");
     return AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(sessionInfo_);
 }
 
-void StsUIExtensionContentSession::SetWindowBackgroundColor(ani_env* env, ani_string color)
+void ETSUIExtensionContentSession::SetWindowBackgroundColor(ani_env* env, ani_string color)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "SetWindowBackgroundColor call");
     std::string strColor;
@@ -292,7 +292,7 @@ void StsUIExtensionContentSession::SetWindowBackgroundColor(ani_env* env, ani_st
     if (uiWindow_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "uiWindow_ is nullptr");
         ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INNER);
-         return;
+        return;
     }
     Rosen::WMError ret = uiWindow_->SetBackgroundColor(strColor);
     if (ret == Rosen::WMError::WM_OK) {
@@ -303,9 +303,9 @@ void StsUIExtensionContentSession::SetWindowBackgroundColor(ani_env* env, ani_st
     }
 }
 
-ani_object StsUIExtensionContentSession::GetUIExtensionHostWindowProxy(ani_env* env, ani_object object)
+ani_object ETSUIExtensionContentSession::GetUIExtensionHostWindowProxy(ani_env* env, ani_object object)
 {
-    TAG_LOGE(AAFwkTag::UI_EXT, "StsUIExtensionContentSession  call");
+    TAG_LOGE(AAFwkTag::UI_EXT, "ETSUIExtensionContentSession  call");
     if (sessionInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Invalid session info");
         ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INNER);
@@ -329,7 +329,7 @@ ani_object StsUIExtensionContentSession::GetUIExtensionHostWindowProxy(ani_env* 
     return reinterpret_cast<ani_object>(resultRef);
 }
 
-ani_object StsUIExtensionContentSession::SetReceiveDataCallback(ani_env* env, ani_object object)
+ani_object ETSUIExtensionContentSession::SetReceiveDataCallback(ani_env* env, ani_object object)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "SetReceiveDataCallback call");
     // if (sessionInfo_ == nullptr) {
