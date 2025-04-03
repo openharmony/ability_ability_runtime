@@ -61,6 +61,8 @@ static constexpr uint8_t FREE_ASYNC_INDEX = 6;
 static constexpr uint16_t FREE_ASYNC_MAX = 1000;
 static constexpr int64_t NANOSECONDS = 1000000000;  // NANOSECONDS mean 10^9 nano second
 static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 millias second
+static constexpr int DUMP_STACK_FAILED = -1;
+static constexpr int DUMP_KERNEL_STACK_SUCCESS = 1;
 constexpr uint64_t SEC_TO_MILLISEC = 1000;
 constexpr uint32_t BUFFER_SIZE = 1024;
 const std::string LOG_FILE_PATH = "data/log/eventlog";
@@ -520,12 +522,12 @@ void AppfreezeManager::DeleteStack(int pid)
     }
 }
 
-void AppfreezeManager::FindStackByPid(std::string& ret, int pid) const
+void AppfreezeManager::FindStackByPid(std::string& msg, int pid) const
 {
     std::lock_guard<ffrt::mutex> lock(catchStackMutex_);
     auto it = catchStackMap_.find(pid);
     if (it != catchStackMap_.end()) {
-        ret = it->second;
+        msg = it->second;
     }
 }
 
@@ -535,15 +537,21 @@ std::string AppfreezeManager::CatchJsonStacktrace(int pid, const std::string& fa
     HITRACE_METER_FMT(HITRACE_TAG_APP, "CatchJsonStacktrace pid:%d", pid);
     HiviewDFX::DfxDumpCatcher dumplog;
     std::string msg;
-    size_t defaultMaxFaultNum = 256;
-    if (dumplog.DumpCatchProcess(pid, msg, defaultMaxFaultNum, true) == -1) {
-        TAG_LOGI(AAFwkTag::APPDFR, "appfreeze catch stack failed");
-        msg = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg +
+    int timeout = 3000;
+    int tid = 0;
+    std::pair<int, std::string> dumpResult = dumplog.DumpCatchWithTimeout(pid, msg, timeout, tid, true);
+    if (dumpResult.first == DUMP_STACK_FAILED) {
+        TAG_LOGI(AAFwkTag::APPDFR, "appfreeze catch json stacktrace failed, %{public}s", dumpResult.second.c_str());
+        msg = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + dumpResult.second + "\n" + msg +
             "\nMain thread stack:" + stack;
         if (faultType == AppFreezeType::APP_INPUT_BLOCK) {
             FindStackByPid(msg, pid);
         }
     } else {
+        if (dumpResult.first == DUMP_KERNEL_STACK_SUCCESS) {
+            msg = "Failed to dump normal stacktrace for " + std::to_string(pid) + "\n" + dumpResult.second +
+                "Kernel stack is:\n" + msg;
+        }
         if (faultType == AppFreezeType::THREAD_BLOCK_3S) {
             std::lock_guard<ffrt::mutex> lock(catchStackMutex_);
             catchStackMap_[pid] = msg;
@@ -557,9 +565,15 @@ std::string AppfreezeManager::CatcherStacktrace(int pid, const std::string& stac
     HITRACE_METER_FMT(HITRACE_TAG_APP, "CatcherStacktrace pid:%d", pid);
     HiviewDFX::DfxDumpCatcher dumplog;
     std::string msg;
-    if (dumplog.DumpCatchProcess(pid, msg) == -1) {
-        msg = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg +
+    std::pair<int, std::string> dumpResult = dumplog.DumpCatchWithTimeout(pid, msg);
+    if (dumpResult.first == DUMP_STACK_FAILED) {
+        TAG_LOGI(AAFwkTag::APPDFR, "appfreeze catch stacktrace failed, %{public}s",
+            dumpResult.second.c_str());
+        msg = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + dumpResult.second + "\n" + msg +
             "\nMain thread stack:" + stack;
+    } else if (dumpResult.first == DUMP_KERNEL_STACK_SUCCESS) {
+        msg = "Failed to dump normal stacktrace for " + std::to_string(pid) + "\n" + dumpResult.second +
+            "Kernel stack is:\n" + msg;
     }
     return msg;
 }
@@ -569,17 +583,12 @@ bool AppfreezeManager::IsProcessDebug(int32_t pid, std::string bundleName)
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
     auto it = appfreezeFilterMap_.find(bundleName);
     if (it != appfreezeFilterMap_.end() && it->second.pid == pid) {
-        if (g_betaVersion || g_developMode) {
-            TAG_LOGI(AAFwkTag::APPDFR, "filtration current device is beta or development do not report appfreeze");
-            return true;
-        }
-        if (it->second.state == AppFreezeState::APPFREEZE_STATE_CANCELED) {
-            TAG_LOGI(AAFwkTag::APPDFR, "filtration only once");
-            return false;
-        } else {
-            TAG_LOGI(AAFwkTag::APPDFR, "filtration %{public}s", bundleName.c_str());
-            return true;
-        }
+        bool result = it->second.state == AppFreezeState::APPFREEZE_STATE_CANCELED;
+        TAG_LOGW(AAFwkTag::APPDFR, "AppfreezeFilter: %{public}d, "
+            "bundleName=%{public}s, pid:%{public}d, state:%{public}d, g_betaVersion:%{public}d,"
+            " g_developMode:%{public}d",
+            result, bundleName.c_str(), pid, it->second.state, g_betaVersion, g_developMode);
+        return result;
     }
 
     const int buffSize = 128;
@@ -684,7 +693,7 @@ bool AppfreezeManager::IsNeedIgnoreFreezeEvent(int32_t pid, const std::string& e
 bool AppfreezeManager::CancelAppFreezeDetect(int32_t pid, const std::string& bundleName)
 {
     if (bundleName.empty()) {
-        TAG_LOGE(AAFwkTag::APPDFR, "SetAppFreezeFilter bundleName is empty.");
+        TAG_LOGE(AAFwkTag::APPDFR, "SetAppFreezeFilter: failed, bundleName is empty.");
         return false;
     }
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
@@ -692,6 +701,8 @@ bool AppfreezeManager::CancelAppFreezeDetect(int32_t pid, const std::string& bun
     info.pid = pid;
     info.state = AppFreezeState::APPFREEZE_STATE_CANCELING;
     appfreezeFilterMap_.emplace(bundleName, info);
+    TAG_LOGI(AAFwkTag::APPDFR, "SetAppFreezeFilter: success, bundleName=%{public}s, "
+        "pid:%{public}d, state:%{public}d", bundleName.c_str(), info.pid, info.state);
     return true;
 }
 
@@ -700,8 +711,12 @@ void AppfreezeManager::RemoveDeathProcess(std::string bundleName)
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
     auto it = appfreezeFilterMap_.find(bundleName);
     if (it != appfreezeFilterMap_.end()) {
-        TAG_LOGI(AAFwkTag::APPDFR, "Remove bundleName: %{public}s", bundleName.c_str());
+        TAG_LOGI(AAFwkTag::APPDFR, "RemoveAppFreezeFilter:success, bundleName: %{public}s",
+            bundleName.c_str());
         appfreezeFilterMap_.erase(it);
+    } else {
+        TAG_LOGI(AAFwkTag::APPDFR, "RemoveAppFreezeFilter:failed, not found bundleName: "
+            "%{public}s", bundleName.c_str());
     }
 }
 
@@ -709,23 +724,25 @@ void AppfreezeManager::ResetAppfreezeState(int32_t pid, const std::string& bundl
 {
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
     if (appfreezeFilterMap_.find(bundleName) != appfreezeFilterMap_.end()) {
-        TAG_LOGD(AAFwkTag::APPDFR, "bundleName: %{public}s",
-            bundleName.c_str());
         appfreezeFilterMap_[bundleName].state = AppFreezeState::APPFREEZE_STATE_CANCELED;
     }
+    TAG_LOGI(AAFwkTag::APPDFR, "SetAppFreezeFilter: reset state, "
+        "bundleName=%{public}s, pid:%{public}d, state:%{public}d",
+        bundleName.c_str(), pid, appfreezeFilterMap_[bundleName].state);
 }
 
 bool AppfreezeManager::IsValidFreezeFilter(int32_t pid, const std::string& bundleName)
 {
     if (g_betaVersion || g_developMode) {
-        TAG_LOGI(AAFwkTag::APPDFR, "current device is beta or development do not report appfreeze");
+        TAG_LOGI(AAFwkTag::APPDFR, "SetAppFreezeFilter: "
+            "current device is beta or development");
         return true;
     }
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
-    if (appfreezeFilterMap_.find(bundleName) != appfreezeFilterMap_.end()) {
-        return false;
-    }
-    return true;
+    bool ret = appfreezeFilterMap_.find(bundleName) != appfreezeFilterMap_.end();
+    TAG_LOGI(AAFwkTag::APPDFR, "SetAppFreezeFilter: %{public}d, bundleName=%{public}s, "
+        "pid:%{public}d", ret, bundleName.c_str(), pid);
+    return ret;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

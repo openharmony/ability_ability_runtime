@@ -356,7 +356,7 @@ bool BundleMgrHelper::GetHapModuleInfo(const AbilityInfo &abilityInfo, HapModule
     return bundleMgr->GetHapModuleInfo(abilityInfo, hapModuleInfo);
 }
 
-bool BundleMgrHelper::GetPluginHapModuleInfo(const std::string &hostBundleName, const std::string &pluginBundleName,
+ErrCode BundleMgrHelper::GetPluginHapModuleInfo(const std::string &hostBundleName, const std::string &pluginBundleName,
     const std::string &pluginModuleName, const int32_t userId, HapModuleInfo &hapModuleInfo)
 {
     TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
@@ -366,7 +366,7 @@ bool BundleMgrHelper::GetPluginHapModuleInfo(const std::string &hostBundleName, 
         return false;
     }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->GetHapModuleInfo(hostBundleName, pluginBundleName, pluginModuleName, userId, hapModuleInfo);
+    return bundleMgr->GetPluginHapModuleInfo(hostBundleName, pluginBundleName, pluginModuleName, userId, hapModuleInfo);
 }
 
 std::string BundleMgrHelper::GetAbilityLabel(const std::string &bundleName, const std::string &abilityName)
@@ -1015,33 +1015,6 @@ std::string BundleMgrHelper::GetDataDir(const std::string &bundleName, const int
     std::string dataDir;
     bundleMgr->GetDirByBundleNameAndAppIndex(bundleName, appIndex, dataDir);
     return dataDir;
-}
-
-ErrCode BundleMgrHelper::GetAppProvisionInfo(const std::string &bundleName, int32_t userId,
-    AppExecFwk::AppProvisionInfo &info)
-{
-    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
-    auto bundleMgr = Connect();
-    if (bundleMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
-        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
-    }
-
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->GetAppProvisionInfo(bundleName, userId, info);
-}
-
-ErrCode BundleMgrHelper::GetAllPluginInfo(const std::string &hostBundleName, int32_t userId,
-    std::vector<PluginBundleInfo> &pluginBundleInfos)
-{
-    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
-    auto bundleMgr = Connect();
-    if (bundleMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
-        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
-    }
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->GetAllPluginInfo(hostBundleName, userId, pluginBundleInfos);
 }
 
 ErrCode BundleMgrHelper::GetPluginInfosForSelf(std::vector<PluginBundleInfo> &pluginBundleInfos)

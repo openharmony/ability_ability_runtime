@@ -26,6 +26,7 @@
 #include "string_wrapper.h"
 #include "want.h"
 
+const std::string APP_LAUNCH_TRUSTLIST = "ohos.params.appLaunchTrustlist";
 namespace OHOS {
 namespace AAFwk {
 using OHOS::AppExecFwk::BundleInfo;
@@ -366,6 +367,12 @@ int DialogSessionManager::CreateImplicitSelectorModalDialog(AbilityRequest &abil
     sessionWant.SetParam("showCaller", showCaller);
     sessionWant.SetParam("ohos.ability.params.showDefaultPicker",
         abilityRequest.want.GetBoolParam("ohos.ability.params.showDefaultPicker", false));
+    if (abilityRequest.want.HasParameter(APP_LAUNCH_TRUSTLIST)) {
+        sessionWant.SetParam(APP_LAUNCH_TRUSTLIST,
+            abilityRequest.want.GetStringArrayParam(APP_LAUNCH_TRUSTLIST));
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ImplicitSelector get trustlist %{public}zu",
+            sessionWant.GetStringArrayParam(APP_LAUNCH_TRUSTLIST).size());
+    }
 
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, sessionWant.GetParams(),
         dialogAppInfos, SelectorType::IMPLICIT_START_SELECTOR, needGrantUriPermission);

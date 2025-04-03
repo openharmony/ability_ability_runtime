@@ -75,7 +75,7 @@ void AbilityRuntimeErrorUtilTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(AbilityRuntimeErrorUtilTest, ThrowByInternalErrCode_0200, TestSize.Level0)
+HWTEST_F(AbilityRuntimeErrorUtilTest, ThrowByInternalErrCode_0200, TestSize.Level2)
 {
     ASSERT_NE(env_, nullptr);
     bool result = AbilityRuntimeErrorUtil::ThrowByInternalErrCode(env_, 1);
@@ -88,7 +88,7 @@ HWTEST_F(AbilityRuntimeErrorUtilTest, ThrowByInternalErrCode_0200, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(AbilityRuntimeErrorUtilTest, CreateErrorByInternalErrCode_0100, TestSize.Level0)
+HWTEST_F(AbilityRuntimeErrorUtilTest, CreateErrorByInternalErrCode_0100, TestSize.Level2)
 {
     ASSERT_NE(env_, nullptr);
     napi_value result = AbilityRuntimeErrorUtil::CreateErrorByInternalErrCode(env_, ERR_OK);
@@ -101,7 +101,7 @@ HWTEST_F(AbilityRuntimeErrorUtilTest, CreateErrorByInternalErrCode_0100, TestSiz
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(AbilityRuntimeErrorUtilTest, CreateErrorByInternalErrCode_0200, TestSize.Level0)
+HWTEST_F(AbilityRuntimeErrorUtilTest, CreateErrorByInternalErrCode_0200, TestSize.Level2)
 {
     ASSERT_NE(env_, nullptr);
     napi_value result = AbilityRuntimeErrorUtil::CreateErrorByInternalErrCode(env_, 1);
@@ -114,7 +114,7 @@ HWTEST_F(AbilityRuntimeErrorUtilTest, CreateErrorByInternalErrCode_0200, TestSiz
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(AbilityRuntimeErrorUtilTest, GetErrMessage_0100, TestSize.Level0)
+HWTEST_F(AbilityRuntimeErrorUtilTest, GetErrMessage_0100, TestSize.Level2)
 {
     std::string errMsg = AbilityRuntimeErrorUtil::GetErrMessage(ERR_OK);
     EXPECT_EQ(errMsg, "success");
@@ -126,7 +126,7 @@ HWTEST_F(AbilityRuntimeErrorUtilTest, GetErrMessage_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(AbilityRuntimeErrorUtilTest, GetErrMessage_0200, TestSize.Level0)
+HWTEST_F(AbilityRuntimeErrorUtilTest, GetErrMessage_0200, TestSize.Level2)
 {
     std::string errMsg = AbilityRuntimeErrorUtil::GetErrMessage(1);
     EXPECT_EQ(errMsg, "");
@@ -137,7 +137,7 @@ HWTEST_F(AbilityRuntimeErrorUtilTest, GetErrMessage_0200, TestSize.Level0)
  * @tc.desc: Throw_0100 Test
  * @tc.type: FUNC
  */
-HWTEST_F(AbilityRuntimeErrorUtilTest, Throw_0100, TestSize.Level0)
+HWTEST_F(AbilityRuntimeErrorUtilTest, Throw_0100, TestSize.Level2)
 {
     ASSERT_NE(env_, nullptr);
     std::string errMessage = nullptr;

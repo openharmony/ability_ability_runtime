@@ -42,9 +42,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AppExecFwk {
-namespace {
-constexpr int32_t DEFAULT_USERID = 100;
-}
 class AppMgrServiceInnerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -895,7 +892,7 @@ HWTEST_F(AppMgrServiceInnerTest, GenerateRenderUid_001, TestSize.Level1)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppMgrServiceInnerTest, StartRenderProcessImpl_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcessImpl_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcessImpl_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1014,7 +1011,7 @@ HWTEST_F(AppMgrServiceInnerTest, ChangeAppGcState_001, TestSize.Level1)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1050,7 +1047,7 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_001, TestSize.Level0)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_002 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1086,7 +1083,7 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_002, TestSize.Level0)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_003, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_003 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1116,7 +1113,7 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_003, TestSize.Level0)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_004, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_004, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_004 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();

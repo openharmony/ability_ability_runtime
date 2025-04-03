@@ -57,7 +57,7 @@ void MissionListDumpTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: SR000GH1GO
  */
-HWTEST_F(MissionListDumpTest, MissionListDump_DumpList_0100, TestSize.Level0)
+HWTEST_F(MissionListDumpTest, MissionListDump_DumpList_0100, TestSize.Level2)
 {
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
@@ -90,7 +90,7 @@ HWTEST_F(MissionListDumpTest, MissionListDump_DumpList_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: SR000GH1GO
  */
-HWTEST_F(MissionListDumpTest, MissionListDump_DumpStateByRecordId_0100, TestSize.Level0)
+HWTEST_F(MissionListDumpTest, MissionListDump_DumpStateByRecordId_0100, TestSize.Level2)
 {
     Want want;
     OHOS::AppExecFwk::AbilityInfo abilityInfo;

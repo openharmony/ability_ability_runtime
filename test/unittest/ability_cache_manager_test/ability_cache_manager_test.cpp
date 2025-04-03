@@ -63,7 +63,7 @@ void AbilityCacheManagerTest::TearDown()
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndGetTest_001, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndGetTest_001, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
@@ -111,7 +111,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndGetTest_001, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_001, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_001, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
@@ -151,7 +151,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_002, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_002, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
@@ -191,7 +191,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_002, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_003, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_003, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
@@ -232,7 +232,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_003, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_001, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_001, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(2, 1);
     OHOS::AppExecFwk::AbilityInfo abilityInfo1;
@@ -279,7 +279,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_002, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_002, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(3, 1);
     OHOS::AppExecFwk::AbilityInfo abilityInfo1;
@@ -327,7 +327,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_003, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_003, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(3, 1);
     OHOS::AppExecFwk::AbilityInfo abilityInfo1;
@@ -388,7 +388,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_003, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_004, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_004, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(2, 1);
     OHOS::AppExecFwk::AbilityInfo abilityInfo1;
@@ -436,7 +436,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_004, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndRemoveTest_001, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndRemoveTest_001, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
@@ -471,7 +471,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndRemoveTest_001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindByToken_001, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindByToken_001, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
@@ -506,7 +506,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindByToken_001, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerGetAbilityList_001, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerGetAbilityList_001, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
@@ -536,7 +536,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerGetAbilityList_001, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindBySessionId_001, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindBySessionId_001, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
@@ -573,7 +573,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindBySessionId_001, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindByServiceKey_001, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindByServiceKey_001, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
@@ -609,7 +609,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerFindByServiceKey_001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerSignRestartAppFlag_001, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerSignRestartAppFlag_001, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
@@ -638,7 +638,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerSignRestartAppFlag_001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerDeleteInvalidRecord_001, TestSize.Level0)
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerDeleteInvalidRecord_001, TestSize.Level2)
 {
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
     OHOS::AppExecFwk::AbilityInfo abilityInfo;

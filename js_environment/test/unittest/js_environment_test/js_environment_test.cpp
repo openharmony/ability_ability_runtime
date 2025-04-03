@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#define private public
 #include "js_environment.h"
+#undef private
 
 #include <gtest/gtest.h>
 #include <gtest/hwext/gtest-multithread.h>
@@ -110,7 +112,7 @@ HWTEST_F(JsEnvironmentTest, JsEnvInitialize_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI6KODF
  */
-HWTEST_F(JsEnvironmentTest, LoadScript_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, LoadScript_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -124,7 +126,7 @@ HWTEST_F(JsEnvironmentTest, LoadScript_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI6KODF
  */
-HWTEST_F(JsEnvironmentTest, LoadScript_0200, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, LoadScript_0200, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -142,7 +144,7 @@ HWTEST_F(JsEnvironmentTest, LoadScript_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI6Z5M5
  */
-HWTEST_F(JsEnvironmentTest, JsEnvInitTimerModule_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, JsEnvInitTimerModule_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -164,7 +166,7 @@ HWTEST_F(JsEnvironmentTest, JsEnvInitTimerModule_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(JsEnvironmentTest, PostTask_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, PostTask_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -182,7 +184,7 @@ HWTEST_F(JsEnvironmentTest, PostTask_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(JsEnvironmentTest, RemoveTask_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, RemoveTask_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -197,7 +199,7 @@ HWTEST_F(JsEnvironmentTest, RemoveTask_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(JsEnvironmentTest, InitSyscapModule_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, InitSyscapModule_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -211,7 +213,7 @@ HWTEST_F(JsEnvironmentTest, InitSyscapModule_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(JsEnvironmentTest, RegisterUncaughtExceptionHandler_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, RegisterUncaughtExceptionHandler_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -226,7 +228,7 @@ HWTEST_F(JsEnvironmentTest, RegisterUncaughtExceptionHandler_0100, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(JsEnvironmentTest, StartDebugger_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, StartDebugger_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -244,7 +246,7 @@ HWTEST_F(JsEnvironmentTest, StartDebugger_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(JsEnvironmentTest, StartDebugger_0200, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, StartDebugger_0200, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -265,7 +267,7 @@ HWTEST_F(JsEnvironmentTest, StartDebugger_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(JsEnvironmentTest, StopDebugger_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, StopDebugger_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -279,7 +281,7 @@ HWTEST_F(JsEnvironmentTest, StopDebugger_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(JsEnvironmentTest, StopDebugger_0200, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, StopDebugger_0200, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
 
@@ -295,7 +297,7 @@ HWTEST_F(JsEnvironmentTest, StopDebugger_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(JsEnvironmentTest, StopDebugger_0300, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, StopDebugger_0300, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
 
@@ -312,7 +314,7 @@ HWTEST_F(JsEnvironmentTest, StopDebugger_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(JsEnvironmentTest, InitConsoleModule_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, InitConsoleModule_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -366,7 +368,7 @@ HWTEST_F(JsEnvironmentTest, StartProfiler_0200, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI7C87T
  */
-HWTEST_F(JsEnvironmentTest, PostSyncTask_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, PostSyncTask_0100, TestSize.Level2)
 {
     auto runner = AppExecFwk::EventRunner::Create("TASK_RUNNER");
     ASSERT_NE(runner, nullptr);
@@ -391,7 +393,7 @@ HWTEST_F(JsEnvironmentTest, PostSyncTask_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI82L1A
  */
-HWTEST_F(JsEnvironmentTest, SetRequestAotCallback_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, SetRequestAotCallback_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -407,7 +409,7 @@ HWTEST_F(JsEnvironmentTest, SetRequestAotCallback_0100, TestSize.Level0)
  * @tc.desc: Js environment ParseHdcRegisterOption.
  * @tc.type: FUNC
  */
-HWTEST_F(JsEnvironmentTest, ParseHdcRegisterOption_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, ParseHdcRegisterOption_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -434,7 +436,7 @@ HWTEST_F(JsEnvironmentTest, ParseHdcRegisterOption_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI82L1A
  */
-HWTEST_F(JsEnvironmentTest, SetDeviceDisconnectCallback_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, SetDeviceDisconnectCallback_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     ASSERT_NE(jsEnv, nullptr);
@@ -455,7 +457,7 @@ HWTEST_F(JsEnvironmentTest, SetDeviceDisconnectCallback_0100, TestSize.Level0)
  * @tc.desc: Js environment DestroyHeapProfiler.
  * @tc.type: FUNC
  */
-HWTEST_F(JsEnvironmentTest, DestroyHeapProfiler_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, DestroyHeapProfiler_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     jsEnv->DestroyHeapProfiler();
@@ -467,7 +469,7 @@ HWTEST_F(JsEnvironmentTest, DestroyHeapProfiler_0100, TestSize.Level0)
  * @tc.desc: Js environment NotifyDebugMode.
  * @tc.type: FUNC
  */
-HWTEST_F(JsEnvironmentTest, NotifyDebugMode_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, NotifyDebugMode_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     int tid = 1;
@@ -484,7 +486,7 @@ HWTEST_F(JsEnvironmentTest, NotifyDebugMode_0100, TestSize.Level0)
  * @tc.desc: Js environment GetDebuggerPostTask.
  * @tc.type: FUNC
  */
-HWTEST_F(JsEnvironmentTest, GetDebuggerPostTask_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, GetDebuggerPostTask_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     jsEnv->GetDebuggerPostTask();
@@ -496,7 +498,7 @@ HWTEST_F(JsEnvironmentTest, GetDebuggerPostTask_0100, TestSize.Level0)
  * @tc.desc: Js environment GetDebuggerPostTask.
  * @tc.type: FUNC
  */
-HWTEST_F(JsEnvironmentTest, GetDebuggerPostTask_0200, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, GetDebuggerPostTask_0200, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     auto poster = jsEnv->GetDebuggerPostTask();
@@ -511,7 +513,7 @@ HWTEST_F(JsEnvironmentTest, GetDebuggerPostTask_0200, TestSize.Level0)
  * @tc.desc: Js environment GetHeapPrepare.
  * @tc.type: FUNC
  */
-HWTEST_F(JsEnvironmentTest, GetHeapPrepare_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, GetHeapPrepare_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     jsEnv->GetHeapPrepare();
@@ -523,7 +525,7 @@ HWTEST_F(JsEnvironmentTest, GetHeapPrepare_0100, TestSize.Level0)
  * @tc.desc: Js environment GetHeapPrepare.
  * @tc.type: FUNC
  */
-HWTEST_F(JsEnvironmentTest, GetHeapPrepare_0200, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, GetHeapPrepare_0200, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     panda::RuntimeOption pandaOption;
@@ -537,11 +539,86 @@ HWTEST_F(JsEnvironmentTest, GetHeapPrepare_0200, TestSize.Level0)
  * @tc.desc: Js environment GetSourceMapOperator.
  * @tc.type: FUNC
  */
-HWTEST_F(JsEnvironmentTest, GetSourceMapOperator_0100, TestSize.Level0)
+HWTEST_F(JsEnvironmentTest, GetSourceMapOperator_0100, TestSize.Level2)
 {
     auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
     jsEnv->GetSourceMapOperator();
     ASSERT_NE(jsEnv, nullptr);
+}
+
+/**
+ * @tc.name: initworkermodule_0100
+ * @tc.desc: Js environment initworkermodule.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, initworkermodule_0100, TestSize.Level2)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    std::shared_ptr<WorkerInfo> workerInfo = std::make_shared<WorkerInfo>();
+    jsEnv->InitWorkerModule(workerInfo);
+    ASSERT_NE(jsEnv, nullptr);
+}
+
+/**
+ * @tc.name: InitSourceMap_0100
+ * @tc.desc: Js environment InitSourceMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, InitSourceMap_0100, TestSize.Level2)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    std::shared_ptr<JsEnv::SourceMapOperator> operatorObj = nullptr;
+    jsEnv->InitSourceMap(operatorObj);
+    ASSERT_NE(jsEnv, nullptr);
+}
+
+/**
+ * @tc.name: DeInitLoop_0100
+ * @tc.desc: Js environment DeInitLoop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, DeInitLoop_0100, TestSize.Level2)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    jsEnv->DeInitLoop();
+    ASSERT_NE(jsEnv, nullptr);
+}
+
+/**
+ * @tc.name: SetModuleLoadChecker_0100
+ * @tc.desc: Js environment SetModuleLoadChecker.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, SetModuleLoadChecker_0100, TestSize.Level2)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate = nullptr;
+    jsEnv->SetModuleLoadChecker(moduleCheckerDelegate);
+    ASSERT_NE(jsEnv, nullptr);
+}
+
+/**
+ * @tc.name: ReInitJsEnvImpl_0100
+ * @tc.desc: Js environment ReInitJsEnvImpl.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, ReInitJsEnvImpl_0100, TestSize.Level2)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    jsEnv->ReInitJsEnvImpl(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    ASSERT_NE(jsEnv->impl_, nullptr);
+}
+
+/**
+ * @tc.name: GetDebugMode_0100
+ * @tc.desc: Js environment GetDebugMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, GetDebugMode_0100, TestSize.Level2)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    auto result = jsEnv->GetDebugMode();
+    ASSERT_EQ(result, false);
 }
 } // namespace JsEnv
 } // namespace OHOS

@@ -220,7 +220,7 @@ std::shared_ptr<TestContextImpl> CapiAbilityRuntimeApplicationContextTest::InitA
  * @tc.desc: Function test with applicationContext is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_001, TestSize.Level2)
 {
     constexpr int32_t bufferSize = 1024;
     char buffer[bufferSize];
@@ -258,7 +258,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_001, TestSize
  * @tc.desc: Function test with applicationContextImpl is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_002, TestSize.Level2)
 {
     InitApplicationContext();
     constexpr int32_t bufferSize = 1024;
@@ -297,7 +297,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_002, TestSize
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_003, TestSize.Level2)
 {
     constexpr int32_t bufferSize = 1024;
     char buffer[bufferSize];
@@ -345,7 +345,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_003, TestSize
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_004, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_004, TestSize.Level2)
 {
     constexpr int32_t bufferSize = 1024;
     char buffer[bufferSize];
@@ -395,7 +395,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_004, TestSize
  * @tc.desc: Function test with applicationContext is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetAreaModeTest_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetAreaModeTest_001, TestSize.Level2)
 {
     AbilityRuntime_AreaMode mode = ABILITY_RUNTIME_AREA_MODE_EL1;
 
@@ -415,7 +415,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetAreaModeTest_001, TestSize
  * @tc.desc: Function test with applicationContextImpl is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetAreaModeTest_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetAreaModeTest_002, TestSize.Level2)
 {
     InitApplicationContext();
     AbilityRuntime_AreaMode mode = ABILITY_RUNTIME_AREA_MODE_EL1;
@@ -436,7 +436,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetAreaModeTest_002, TestSize
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetAreaModeTest_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetAreaModeTest_003, TestSize.Level2)
 {
     AbilityRuntime_AreaMode mode = ABILITY_RUNTIME_AREA_MODE_EL1;
 
@@ -484,7 +484,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetAreaModeTest_003, TestSize
  * @tc.desc: Function test with applicationContext is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleNameTest_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleNameTest_001, TestSize.Level2)
 {
     constexpr int32_t bufferSize = 1024;
     char buffer[bufferSize];
@@ -526,7 +526,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleNameTest_001, TestSi
  * @tc.desc: Function test with applicationContextImpl is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleNameTest_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleNameTest_002, TestSize.Level2)
 {
     InitApplicationContext();
     constexpr int32_t bufferSize = 1024;
@@ -569,7 +569,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleNameTest_002, TestSi
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleNameTest_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleNameTest_003, TestSize.Level2)
 {
     constexpr int32_t bufferSize = 1024;
     char buffer[bufferSize];
@@ -615,7 +615,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleNameTest_003, TestSi
  * @tc.desc: Function test with applicationContext is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_001, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -652,7 +652,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_001, TestSize.
  * @tc.desc: Function test with applicationContextImpl is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_002, TestSize.Level2)
 {
     InitApplicationContext();
     char buffer[BUFFER_SIZE] = { 0 };
@@ -690,7 +690,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_002, TestSize.
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_003, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -737,7 +737,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_003, TestSize.
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_004, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_004, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -786,7 +786,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_004, TestSize.
  * @tc.desc: Function test with applicationContext is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_001, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -823,7 +823,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_001, TestSize
  * @tc.desc: Function test with applicationContextImpl is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_002, TestSize.Level2)
 {
     InitApplicationContext();
     char buffer[BUFFER_SIZE] = { 0 };
@@ -861,7 +861,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_002, TestSize
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_003, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -908,7 +908,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_003, TestSize
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_004, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_004, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -957,7 +957,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetFilesDirTest_004, TestSize
  * @tc.desc: Function test with applicationContext is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_001, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -994,7 +994,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_001, TestS
  * @tc.desc: Function test with applicationContextImpl is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_002, TestSize.Level2)
 {
     InitApplicationContext();
     char buffer[BUFFER_SIZE] = { 0 };
@@ -1032,7 +1032,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_002, TestS
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_003, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1080,7 +1080,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_003, TestS
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_004, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_004, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1130,7 +1130,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDatabaseDirTest_004, TestS
  * @tc.desc: Function test with applicationContext is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_001, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1168,7 +1168,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_001, Te
  * @tc.desc: Function test with applicationContextImpl is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_002, TestSize.Level2)
 {
     InitApplicationContext();
     char buffer[BUFFER_SIZE] = { 0 };
@@ -1207,7 +1207,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_002, Te
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_003, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1255,7 +1255,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_003, Te
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_004, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_004, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1305,7 +1305,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetPreferencesDirTest_004, Te
  * @tc.desc: Function test with applicationContext is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_001, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1343,7 +1343,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_001, Tes
  * @tc.desc: Function test with applicationContextImpl is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_002, TestSize.Level2)
 {
     InitApplicationContext();
     char buffer[BUFFER_SIZE] = { 0 };
@@ -1382,7 +1382,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_002, Tes
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_003, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1430,7 +1430,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_003, Tes
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_004, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_004, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1480,7 +1480,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleCodeDirTest_004, Tes
  * @tc.desc: Function test with applicationContext is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_001, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1518,7 +1518,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_00
  * @tc.desc: Function test with applicationContextImpl is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_002, TestSize.Level2)
 {
     InitApplicationContext();
     char buffer[BUFFER_SIZE] = { 0 };
@@ -1557,7 +1557,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_00
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_003, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1606,7 +1606,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_00
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_004, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_004, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1656,7 +1656,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetDistributedFilesDirTest_00
  * @tc.desc: Function test with applicationContext is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_001, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1694,7 +1694,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_001, Test
  * @tc.desc: Function test with applicationContextImpl is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_002, TestSize.Level2)
 {
     InitApplicationContext();
     char buffer[BUFFER_SIZE] = { 0 };
@@ -1733,7 +1733,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_002, Test
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_003, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1781,7 +1781,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_003, Test
  * @tc.desc: Function test
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_004, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_004, TestSize.Level2)
 {
     char buffer[BUFFER_SIZE] = { 0 };
     int32_t writeLength = 0;
@@ -1832,7 +1832,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_004, Test
  * @tc.desc: CheckWant succeeds
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_001, TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -1858,7 +1858,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_001, TestSize.Level
  * @tc.desc: CheckWant fails when want is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_002, TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want* want = nullptr;
@@ -1876,7 +1876,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_002, TestSize.Level
  * @tc.desc: CheckWant fails when bundle name is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_003, TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -1901,7 +1901,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_003, TestSize.Level
  * @tc.desc: CheckWant fails when ability name is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_004, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_004, TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -1926,7 +1926,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_004, TestSize.Level
  * @tc.desc: CheckWant fails when module name is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_005, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_005, TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -1950,7 +1950,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, CheckWant_005, TestSize.Level
  * @tc.desc: OH_AbilityRuntime_StartSelfUIAbility does not return 401 when everything is ok
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_001, TestSize.Level2)
 {
     AbilityBase_Want want;
     char bundleName[] = "com.example.myapplication";
@@ -1972,7 +1972,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
  * @tc.desc: OH_AbilityRuntime_StartSelfUIAbility returns 401 when module name is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_002, TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -1996,7 +1996,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
  * @tc.desc: OH_AbilityRuntime_StartSelfUIAbility does not return 401 when everything is ok
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_003, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_003, TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -2021,7 +2021,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
  * @tc.desc: OH_AbilityRuntime_StartSelfUIAbility returns 401 when bundle name is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_004, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_004, TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -2045,7 +2045,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
  * @tc.desc: OH_AbilityRuntime_StartSelfUIAbility returns 401 when ability name is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_005, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbility_005, TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -2070,7 +2070,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
  * @tc.type: FUNC
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_001,
-    TestSize.Level0)
+    TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -2097,7 +2097,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
  * @tc.type: FUNC
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_002,
-    TestSize.Level0)
+    TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -2124,7 +2124,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
  * @tc.type: FUNC
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_003,
-    TestSize.Level0)
+    TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -2151,7 +2151,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
  * @tc.type: FUNC
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_004,
-    TestSize.Level0)
+    TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -2177,7 +2177,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
  * @tc.type: FUNC
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_005,
-    TestSize.Level0)
+    TestSize.Level2)
 {
     // Arrange
     AbilityBase_Want want;
@@ -2209,7 +2209,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
  * @tc.type: FUNC
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions_006,
-    TestSize.Level0)
+    TestSize.Level2)
 {
     // Act
     AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(nullptr, nullptr);
@@ -2223,7 +2223,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
  * @tc.desc: ConvertToCommonBusinessErrorCode
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToCommonBusinessErrorCode_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToCommonBusinessErrorCode_001, TestSize.Level2)
 {
     int32_t abilityManagerError = OHOS::ERR_OK;
     AbilityRuntime_ErrorCode errCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
@@ -2278,7 +2278,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToCommonBusinessErrorC
  * @tc.desc: ConvertToCommonBusinessErrorCode
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToCommonBusinessErrorCode_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToCommonBusinessErrorCode_002, TestSize.Level2)
 {
     int32_t abilityManagerError = OHOS::ERR_OK;
     AbilityRuntime_ErrorCode errCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
@@ -2333,7 +2333,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToCommonBusinessErrorC
  * @tc.desc: ConvertToAPI18BusinessErrorCode
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToAPI18BusinessErrorCode_001, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToAPI18BusinessErrorCode_001, TestSize.Level2)
 {
     int32_t abilityManagerError = OHOS::ERR_OK;
     AbilityRuntime_ErrorCode errCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
@@ -2396,7 +2396,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToAPI18BusinessErrorCo
  * @tc.desc: ConvertToAPI18BusinessErrorCode
  * @tc.type: FUNC
  */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToAPI18BusinessErrorCode_002, TestSize.Level0)
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToAPI18BusinessErrorCode_002, TestSize.Level2)
 {
     int32_t abilityManagerError = OHOS::ERR_OK;
     AbilityRuntime_ErrorCode errCode = ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;

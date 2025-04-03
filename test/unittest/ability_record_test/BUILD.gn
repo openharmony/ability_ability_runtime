@@ -28,14 +28,15 @@ ohos_unittest("ability_record_test") {
   include_dirs = [
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${ability_runtime_test_path}/mock/common/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "mock/include",
   ]
 
   sources = [
+    "${ability_runtime_native_path}/appkit/ability_bundle_manager_helper/bundle_mgr_helper.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/lifecycle_deal.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/uri_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/uri_utils.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "ability_record_test.cpp",  # add mock file
     "mock/src/mock_my_flag.cpp",
@@ -62,8 +63,6 @@ ohos_unittest("ability_record_test") {
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit:aakit_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_appmgr_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_bundlemgr_mock",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -74,18 +73,26 @@ ohos_unittest("ability_record_test") {
     "ability_base:zuri",
     "ability_runtime:ability_deps_wrapper",
     "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "samgr:samgr_proxy",
     "storage_service:storage_manager_sa_proxy",
   ]
+
+  defines = [ "SUPPORT_UPMS" ]
 
   if (background_task_mgr_continuous_task_enable) {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
@@ -123,7 +130,6 @@ ohos_unittest("ability_record_test_call") {
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit/include",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/ability_scheduler_mock",
-    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
 
   sources = [
@@ -157,8 +163,6 @@ ohos_unittest("ability_record_test_call") {
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit:aakit_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_appmgr_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core:appexecfwk_bundlemgr_mock",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -171,11 +175,15 @@ ohos_unittest("ability_record_test_call") {
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
     "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   if (background_task_mgr_continuous_task_enable) {
@@ -194,5 +202,8 @@ ohos_unittest("ability_record_test_call") {
 group("unittest") {
   testonly = true
 
-  deps = []
+  deps = [
+    ":ability_record_test",
+    ":ability_record_test_call",
+  ]
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1198,7 +1198,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_001, TestS
     MyFlag::flag_ = 1;
     auto result = abilityMs_->StartAbilityInner(want, nullptr, -1, false, -1, false);
     MyFlag::flag_ = 0;
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     abilityMs_->OnStop();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_001 end");
 }
@@ -1226,7 +1226,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_002, TestS
     auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_002 end");
 }
 
@@ -1253,7 +1253,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_003, TestS
     auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_003 end");
 }
 
@@ -1280,7 +1280,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_004, TestS
     auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_004 end");
 }
 
@@ -1308,7 +1308,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_005, TestS
     auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_005 end");
 }
 
@@ -1337,7 +1337,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_006, TestS
     auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_006 end");
 }
 

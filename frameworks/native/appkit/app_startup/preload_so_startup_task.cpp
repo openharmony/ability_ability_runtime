@@ -15,6 +15,7 @@
 
 #include "preload_so_startup_task.h"
 
+#include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "native_module_manager.h"
 
@@ -118,6 +119,7 @@ int32_t PreloadSoStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallb
 {
     std::string soName;
     int32_t code = ParseOhmUrl(ohmUrl_, soName);
+    AAFwk::EventInfo eventInfo;
     if (code != ERR_OK) {
         TAG_LOGW(AAFwkTag::STARTUP, "task %{public}s, parse ohmUrl failed: %{public}s", name_.c_str(), ohmUrl_.c_str());
         return ERR_OK;
@@ -128,6 +130,10 @@ int32_t PreloadSoStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallb
     if (moduleManager == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "moduleManager is null");
         OnCompletedCallback::OnCallback(std::move(callback), ERR_STARTUP_INTERNAL_ERROR);
+        eventInfo.errCode = ERR_NATIVE_MODULE_MANAGER_CONSTRUCTION;
+        eventInfo.errReason = "moduleManager is null";
+        AAFwk::EventReport::SendLaunchFrameworkEvent(
+            AAFwk::EventName::STARTUP_TASK_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
@@ -136,6 +142,10 @@ int32_t PreloadSoStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallb
     if (module == nullptr) {
         TAG_LOGW(AAFwkTag::STARTUP, "module is null, errInfo: %{public}s", errInfo.c_str());
         OnCompletedCallback::OnCallback(std::move(callback), ERR_OK);
+        eventInfo.errCode = ERR_LOAD_NATIVE_MODULE;
+        eventInfo.errReason = errInfo;
+        AAFwk::EventReport::SendLaunchFrameworkEvent(
+            AAFwk::EventName::STARTUP_TASK_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     OnCompletedCallback::OnCallback(std::move(callback), ERR_OK);

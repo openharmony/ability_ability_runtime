@@ -156,6 +156,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     connectionRecord->DisconnectAbility();
     connectionRecord->CompleteConnect();
     connectionRecord->CompleteDisconnect(intParam, boolParam);
+    connectionRecord->CompleteDisconnectSync();
     connectionRecord->ScheduleDisconnectAbilityDone();
     connectionRecord->ScheduleConnectAbilityDone();
     connectionRecord->DisconnectTimeout();

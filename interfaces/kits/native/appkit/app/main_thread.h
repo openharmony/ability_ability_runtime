@@ -642,6 +642,8 @@ private:
 
     bool IsBgWorkingThread(const AbilityInfo &info);
 
+    void HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAppInfo, const std::string &moduleName);
+
     /**
      * @brief parse app configuration params
      *
@@ -758,7 +760,8 @@ private:
         std::vector<std::pair<std::string, std::string>> &fileMap);
     void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths);
     void SetAppDebug(uint32_t modeFlag, bool isDebug);
-    void GetPluginNativeLibPath(std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos, AppLibPathMap &appLibPaths);
+    void GetPluginNativeLibPath(std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
+        AppLibPathMap &appLibPaths);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;

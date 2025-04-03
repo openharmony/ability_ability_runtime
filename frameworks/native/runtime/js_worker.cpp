@@ -172,9 +172,9 @@ std::string AssetHelper::NormalizedFileName(const std::string& fileName) const
 AssetHelper::~AssetHelper()
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "destroyed");
-    if (fd_ != -1) {
-        close(fd_);
-        fd_ = -1;
+    if (file_ != nullptr) {
+        fclose(file_);
+        file_ = nullptr;
     }
 }
 
@@ -287,13 +287,12 @@ bool AssetHelper::GetSafeData(const std::string& ami, uint8_t** buff, size_t* bu
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Realpath file %{private}s caught error: %{public}d", ami.c_str(), errno);
         return false;
     }
-
-    int fd = open(resolvedPath.c_str(), O_RDONLY);
-    if (fd < 0) {
+    FILE *fileF = fopen(resolvedPath.c_str(), "r");
+    if (fileF == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Open file %{private}s caught error: %{public}d", resolvedPath.c_str(), errno);
         return false;
     }
-
+    int fd = fileno(fileF);
     struct stat statbuf;
     if (fstat(fd, &statbuf) < 0) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Get fstat of file %{private}s caught error: %{public}d", resolvedPath.c_str(),
@@ -305,21 +304,25 @@ bool AssetHelper::GetSafeData(const std::string& ami, uint8_t** buff, size_t* bu
     std::unique_ptr<FileMapper> fileMapper = std::make_unique<FileMapper>();
     if (fileMapper == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null fileMapper");
-        close(fd);
+        fclose(fileF);
         return false;
     }
 
     auto result = fileMapper->CreateFileMapper(resolvedPath, false, fd, 0, statbuf.st_size, FileMapperType::SAFE_ABC);
     if (!result) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Create file %{private}s mapper failed", resolvedPath.c_str());
-        close(fd);
+        fclose(fileF);
         return false;
     }
 
     *buff = fileMapper->GetDataPtr();
     *buffSize = fileMapper->GetDataLen();
     *mapper = fileMapper.release();
-    fd_ = fd;
+    if (file_ != nullptr) {
+        fclose(file_);
+        file_ = nullptr;
+    }
+    file_ = fileF;
     return true;
 }
 

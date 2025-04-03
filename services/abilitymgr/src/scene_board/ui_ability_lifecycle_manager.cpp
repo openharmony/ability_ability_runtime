@@ -493,21 +493,6 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
         return ERR_OK;
     }
 
-    auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-    if (abilityInfo.launchMode == AppExecFwk::LaunchMode::SINGLETON && (callerAbility == nullptr ||
-        callerAbility->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD >= API20)) {
-        if (HasAbilityRequest(abilityRequest)) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "multi start request");
-            return ERR_UI_ABILITY_IS_STARTING;
-        }
-        auto abilityRecord = FindRecordFromSessionMap(abilityRequest);
-        if (abilityRecord && abilityRecord->GetPendingState() == AbilityState::FOREGROUNDING) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "ability is starting");
-            return ERR_UI_ABILITY_IS_STARTING;
-        }
-        AddAbilityRequest(abilityRequest, requestId);
-    }
-
     auto sessionInfo = CreateSessionInfo(abilityRequest);
     sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->requestId = requestId;
@@ -3037,7 +3022,7 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
 
     do {
-        if (HiddenStartObserverManager::GetInstance().IsHiddenStart(abilityRecord->GetApplicationInfo().uid)) {
+        if (HiddenStartObserverManager::GetInstance().IsHiddenStart(abilityRecord->GetPid())) {
             if (!IsCallerInStatusBar(abilityRecord->GetInstanceKey())) {
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "no status bar while detaching.");
                 break;

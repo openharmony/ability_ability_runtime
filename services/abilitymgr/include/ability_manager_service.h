@@ -1268,6 +1268,14 @@ public:
 
     void ClearUserData(int32_t userId);
 
+    /**
+     * notify callers disconnect abilities before clearUserData
+     * or can not find connectManager_ by userId when onAbilityDied.
+     *
+     * @param userId userId.
+     */
+    void DisconnectBeforeCleanupByUserId(int32_t userId);
+
     virtual int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler) override;
 
     virtual int32_t GetMissionSnapshot(const std::string& deviceId, int32_t missionId,
@@ -1876,6 +1884,8 @@ public:
 
     bool IsSupportStatusBar(int32_t uid);
 
+    bool IsSceneBoardReady(int32_t userId);
+
     /**
      * Set keep-alive flag for application under a specific user.
      * @param bundleName Bundle name.
@@ -2148,6 +2158,8 @@ private:
 
     bool JudgeMultiUserConcurrency(const int32_t userId);
     bool CheckCrossUser(const int32_t userId, AppExecFwk::ExtensionAbilityType extensionType);
+    void SendExtensionReport(EventInfo &eventInfo, int32_t errCode, bool isService = false);
+    void SendIntentReport(EventInfo &eventInfo, int32_t errCode, const std::string &intentName);
     /**
      * dumpsys info
      *
@@ -2382,6 +2394,7 @@ private:
     int AddStartControlParam(Want &want, const sptr<IRemoteObject> &callerToken);
 
     AAFwk::EventInfo BuildEventInfo(const Want &want, int32_t userId);
+    AAFwk::EventInfo BuildEventInfoByAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
 #ifdef WITH_DLP
     int CheckDlpForExtension(
@@ -2486,6 +2499,7 @@ private:
         AppExecFwk::ExtensionAbilityType extensionType);
 
     bool CheckUIExtensionCallerIsForeground(const AbilityRequest &abilityRequest);
+    bool CheckStartCallHasFloatingWindowForUIExtension(const sptr<IRemoteObject> &callerToken);
     bool CheckUIExtensionCallerIsUIAbility(const AbilityRequest &abilityRequest);
     std::shared_ptr<AbilityRecord> GetUIExtensionRootCaller(const sptr<IRemoteObject> token, int32_t userId);
 

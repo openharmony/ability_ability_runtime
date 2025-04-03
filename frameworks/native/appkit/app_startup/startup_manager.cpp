@@ -18,6 +18,7 @@
 #include <set>
 #include <nlohmann/json.hpp>
 
+#include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "extractor.h"
 #include "hitrace_meter.h"
@@ -759,7 +760,7 @@ int32_t StartupManager::GetStartupConfigString(const ModuleStartupConfigInfo &in
         TAG_LOGE(AAFwkTag::STARTUP, "appStartup invalid");
         return ERR_STARTUP_CONFIG_NOT_FOUND;
     }
-
+    AAFwk::EventInfo eventInfo;
     size_t pos = appStartup.rfind(PROFILE_FILE_PREFIX);
     if ((pos == std::string::npos) || (pos == appStartup.length() - strlen(PROFILE_FILE_PREFIX))) {
         TAG_LOGE(AAFwkTag::STARTUP, "appStartup %{public}s is invalid", appStartup.c_str());
@@ -777,12 +778,20 @@ int32_t StartupManager::GetStartupConfigString(const ModuleStartupConfigInfo &in
     if (!extractor->ExtractToBufByName(profilePath, startupConfig, len)) {
         TAG_LOGE(AAFwkTag::STARTUP, "failed to get startup config, profilePath: %{private}s, hapPath: %{private}s",
             profilePath.c_str(), hapPath.c_str());
+        eventInfo.errCode = ERR_STARTUP_CONFIG_PATH_ERROR;
+        eventInfo.errReason = "failed to get startup";
+        AAFwk::EventReport::SendLaunchFrameworkEvent(
+            AAFwk::EventName::STARTUP_TASK_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_STARTUP_CONFIG_PATH_ERROR;
     }
     std::string configData(startupConfig.get(), startupConfig.get() + len);
     nlohmann::json profileJson = nlohmann::json::parse(configData, nullptr, false);
     if (profileJson.is_discarded()) {
         TAG_LOGE(AAFwkTag::STARTUP, "bad profile file");
+        eventInfo.errCode = ERR_STARTUP_CONFIG_PARSE_ERROR;
+        eventInfo.errReason = "bad profile file";
+        AAFwk::EventReport::SendLaunchFrameworkEvent(
+            AAFwk::EventName::STARTUP_TASK_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_STARTUP_CONFIG_PARSE_ERROR;
     }
     config = profileJson.dump();

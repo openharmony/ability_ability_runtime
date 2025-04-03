@@ -50,7 +50,7 @@ void NativeArgsChildProcessTest::TearDown()
  * @tc.desc: Test NativeArgsChildProcess Create works
  * @tc.type: FUNC
  */
-HWTEST_F(NativeArgsChildProcessTest, NativeArgsChildProcess_0100, TestSize.Level0)
+HWTEST_F(NativeArgsChildProcessTest, NativeArgsChildProcess_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "NativeArgsChildProcess_0100 called.");
     auto process = NativeArgsChildProcess::Create();
@@ -62,7 +62,7 @@ HWTEST_F(NativeArgsChildProcessTest, NativeArgsChildProcess_0100, TestSize.Level
  * @tc.desc: Test NativeArgsChildProcess Init works
  * @tc.type: FUNC
  */
-HWTEST_F(NativeArgsChildProcessTest, NativeArgsChildProcess_0200, TestSize.Level0)
+HWTEST_F(NativeArgsChildProcessTest, NativeArgsChildProcess_0200, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "NativeArgsChildProcess_0200 called.");
     auto process = NativeArgsChildProcess::Create();
@@ -82,7 +82,7 @@ HWTEST_F(NativeArgsChildProcessTest, NativeArgsChildProcess_0200, TestSize.Level
  * @tc.desc: Test NativeArgsChildProcess Init works
  * @tc.type: FUNC
  */
-HWTEST_F(NativeArgsChildProcessTest, NativeArgsChildProcess_0300, TestSize.Level0)
+HWTEST_F(NativeArgsChildProcessTest, NativeArgsChildProcess_0300, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "NativeArgsChildProcess_0300 called.");
     auto process = NativeArgsChildProcess::Create();
@@ -97,7 +97,7 @@ HWTEST_F(NativeArgsChildProcessTest, NativeArgsChildProcess_0300, TestSize.Level
  * @tc.desc: Test NativeArgsChildProcess OnStart works
  * @tc.type: FUNC
  */
-HWTEST_F(NativeArgsChildProcessTest, NativeArgsChildProcess_0400, TestSize.Level0)
+HWTEST_F(NativeArgsChildProcessTest, NativeArgsChildProcess_0400, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "NativeArgsChildProcess_0400 called.");
     auto process = NativeArgsChildProcess::Create();

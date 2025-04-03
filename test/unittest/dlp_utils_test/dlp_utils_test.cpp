@@ -51,7 +51,7 @@ void DlpUtilsTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(DlpUtilsTest, OtherAppsAccessDlpCheck_0100, TestSize.Level0)
+HWTEST_F(DlpUtilsTest, OtherAppsAccessDlpCheck_0100, TestSize.Level2)
 {
     AbilityRequest abilityRequest;
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
@@ -68,7 +68,7 @@ HWTEST_F(DlpUtilsTest, OtherAppsAccessDlpCheck_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581RO
  */
-HWTEST_F(DlpUtilsTest, OtherAppsAccessDlpCheck_0200, TestSize.Level0)
+HWTEST_F(DlpUtilsTest, OtherAppsAccessDlpCheck_0200, TestSize.Level2)
 {
     AbilityRequest abilityRequest;
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
@@ -84,7 +84,7 @@ HWTEST_F(DlpUtilsTest, OtherAppsAccessDlpCheck_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581RO
  */
-HWTEST_F(DlpUtilsTest, DlpAccessOtherAppsCheck_0100, TestSize.Level0)
+HWTEST_F(DlpUtilsTest, DlpAccessOtherAppsCheck_0100, TestSize.Level2)
 {
     AbilityRequest abilityRequest;
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);

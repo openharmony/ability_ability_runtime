@@ -331,7 +331,6 @@ public:
      */
     void InitPluginHapModuleInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
         const std::string &hostBundleName);
-    
 
     /**
      * @brief Set HapModuleInfo
@@ -439,6 +438,8 @@ public:
     void SetProcessName(const std::string &processName);
 
     static const int EL_DEFAULT = 1;
+
+    bool isPlugin_ = false;
 
 protected:
     // Adding a new attribute requires adding a copy in the ShallowCopySelf function
@@ -553,7 +554,6 @@ private:
     std::mutex overlaySubscriberMutex_;
     std::shared_ptr<AppExecFwk::OverlayEventSubscriber> overlaySubscriber_;
     std::string processName_;
-    bool isPlugin_ = false;
 #ifdef SUPPORT_GRAPHICS
     static std::mutex getDisplayConfigCallbackMutex_;
     static GetDisplayConfigCallback getDisplayConfigCallback_;

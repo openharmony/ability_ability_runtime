@@ -390,8 +390,13 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         if (isPlugin) {
             stageContext->SetIsPlugin(true);
             stageContext->InitPluginHapModuleInfo(abilityInfo, abilityRuntimeContext_->GetBundleName());
-            auto rm = stageContext->CreatePluginContext(
-                abilityInfo->bundleName, abilityInfo->moduleName, abilityRuntimeContext_)->GetResourceManager();
+            auto pluginContext = stageContext->CreatePluginContext(
+                abilityInfo->bundleName, abilityInfo->moduleName, abilityRuntimeContext_);
+            if (pluginContext == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "null pluginContext");
+                return nullptr;
+            }
+            auto rm = pluginContext->GetResourceManager();
             stageContext->SetResourceManager(rm);
         } else {
             stageContext->InitHapModuleInfo(abilityInfo);

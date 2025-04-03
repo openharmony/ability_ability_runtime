@@ -48,7 +48,7 @@ void AbilityBusinessErrorTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: issueI581SE
  */
-HWTEST_F(AbilityBusinessErrorTest, GetErrorMsg_0100, TestSize.Level0)
+HWTEST_F(AbilityBusinessErrorTest, GetErrorMsg_0100, TestSize.Level2)
 {
     std::string result = GetErrorMsg(AbilityErrorCode::ERROR_OK);
     EXPECT_TRUE(result == "OK.");
@@ -63,7 +63,7 @@ HWTEST_F(AbilityBusinessErrorTest, GetErrorMsg_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581RO
  */
-HWTEST_F(AbilityBusinessErrorTest, GetJsErrorCodeByNativeError_0100, TestSize.Level0)
+HWTEST_F(AbilityBusinessErrorTest, GetJsErrorCodeByNativeError_0100, TestSize.Level2)
 {
     AbilityErrorCode result = GetJsErrorCodeByNativeError(0);
     EXPECT_TRUE(result == AbilityErrorCode::ERROR_OK);

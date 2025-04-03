@@ -296,7 +296,7 @@ int32_t AppExitReasonDataManager::RecordSignalReason(int32_t pid, int32_t uid, i
     }
     auto ret = 0;
     AAFwk::ExitReason exitReason = {};
-    exitReason.reason = AAFwk::REASON_SIGNAL;
+    exitReason.reason = AAFwk::REASON_NORMAL;
     exitReason.subReason = signal;
     AppExecFwk::RunningProcessInfo processInfo = {};
     processInfo.pid_ = cacheInfo.exitInfo.pid;

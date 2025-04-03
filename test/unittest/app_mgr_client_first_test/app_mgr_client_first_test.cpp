@@ -124,7 +124,7 @@ HWTEST_F(AppMgrClientFirstTest, ForceKillApplication_001, TestSize.Level0)
  * @tc.desc: AppMgrClient test for NotifyProcMemoryLevel.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientFirstTest, NotifyProcMemoryLevel_001, TestSize.Level0)
+HWTEST_F(AppMgrClientFirstTest, NotifyProcMemoryLevel_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "NotifyProcMemoryLevel_001 start");
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -140,7 +140,7 @@ HWTEST_F(AppMgrClientFirstTest, NotifyProcMemoryLevel_001, TestSize.Level0)
  * @tc.desc: AppMgrClient test for IsKilledForUpgradeWeb.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientFirstTest, IsKilledForUpgradeWeb_001, TestSize.Level0)
+HWTEST_F(AppMgrClientFirstTest, IsKilledForUpgradeWeb_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsKilledForUpgradeWeb_001 start");
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -155,7 +155,7 @@ HWTEST_F(AppMgrClientFirstTest, IsKilledForUpgradeWeb_001, TestSize.Level0)
  * @tc.desc: AppMgrClient test for IsProcessContainsOnlyUIAbility.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientFirstTest, IsProcessContainsOnlyUIAbility_001, TestSize.Level0)
+HWTEST_F(AppMgrClientFirstTest, IsProcessContainsOnlyUIAbility_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsProcessContainsOnlyUIAbility_001 start");
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -170,7 +170,7 @@ HWTEST_F(AppMgrClientFirstTest, IsProcessContainsOnlyUIAbility_001, TestSize.Lev
  * @tc.desc: AppMgrClient test for KillProcessesByAccessTokenId.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientFirstTest, KillProcessesByAccessTokenId_001, TestSize.Level0)
+HWTEST_F(AppMgrClientFirstTest, KillProcessesByAccessTokenId_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "KillProcessesByAccessTokenId_001 start");
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -185,7 +185,7 @@ HWTEST_F(AppMgrClientFirstTest, KillProcessesByAccessTokenId_001, TestSize.Level
  * @tc.desc: AppMgrClient test for CleanAbilityByUserRequest.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientFirstTest, CleanAbilityByUserRequest_001, TestSize.Level0)
+HWTEST_F(AppMgrClientFirstTest, CleanAbilityByUserRequest_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "CleanAbilityByUserRequest_001 start");
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -200,7 +200,7 @@ HWTEST_F(AppMgrClientFirstTest, CleanAbilityByUserRequest_001, TestSize.Level0)
  * @tc.desc: AppMgrClient test for IsCallerKilling.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientFirstTest, IsCallerKilling_001, TestSize.Level0)
+HWTEST_F(AppMgrClientFirstTest, IsCallerKilling_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsCallerKilling_001 start");
     auto appMgrClient = std::make_unique<AppMgrClient>();

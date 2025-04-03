@@ -136,7 +136,7 @@ HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_SetStartOptionsWindow
  * @tc.desc: OH_AbilityRuntime_GetStartOptionsWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsWindowMode_001, TestSize.Level0)
+HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsWindowMode_001, TestSize.Level2)
 {
     AbilityRuntime_WindowMode windowMode;
     AbilityRuntime_ErrorCode errorCode = OH_AbilityRuntime_GetStartOptionsWindowMode(nullptr, windowMode);
@@ -148,7 +148,7 @@ HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsWindow
  * @tc.desc: OH_AbilityRuntime_GetStartOptionsWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsWindowMode_002, TestSize.Level0)
+HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_GetStartOptionsWindowMode_002, TestSize.Level2)
 {
     AbilityRuntime_StartOptions *startOptions = OH_AbilityRuntime_CreateStartOptions();
     AbilityRuntime_ErrorCode result = OH_AbilityRuntime_SetStartOptionsWindowMode(startOptions,

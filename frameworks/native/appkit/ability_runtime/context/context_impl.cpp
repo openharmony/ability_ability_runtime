@@ -27,6 +27,7 @@
 #include "configuration_convertor.h"
 #include "constants.h"
 #include "directory_ex.h"
+#include "extractor.h"
 #include "file_ex.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -403,7 +404,7 @@ bool ContextImpl::GetPluginInfo(const std::string &hostBundleName, const std::st
         return false;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "hostBundleName: %{public}s, pluginBundleName: %{public}s, pluginModuleName: %{public}s",
-            hostBundleName.c_str(), pluginBundleName.c_str(), pluginModuleName.c_str());
+        hostBundleName.c_str(), pluginBundleName.c_str(), pluginModuleName.c_str());
     int errCode = GetBundleManager();
     if (errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed, errCode: %{public}d", errCode);
@@ -417,9 +418,9 @@ bool ContextImpl::GetPluginInfo(const std::string &hostBundleName, const std::st
         return false;
     }
 
-    for (auto pluginBundle : pluginBundleInfos) {
-        for (auto pluginModuleInfo : pluginBundle.pluginModuleInfos) {
-            if (pluginBundleName == pluginBundle.pluginBundleName 
+    for (auto &pluginBundle : pluginBundleInfos) {
+        for (auto &pluginModuleInfo : pluginBundle.pluginModuleInfos) {
+            if (pluginBundleName == pluginBundle.pluginBundleName
                 && pluginModuleName == pluginModuleInfo.moduleName) {
                 pluginBundleInfo = pluginBundle;
                 return true;
@@ -443,7 +444,7 @@ std::shared_ptr<Context> ContextImpl::CreatePluginContext(const std::string &plu
     if (pluginBundleName.empty() || moduleName.empty() || inputContext == nullptr) {
         return nullptr;
     }
-    TAG_LOGD(AAFwkTag::APPKIT, "pluginBundleName: %{public}s, moduleName: %{public}s", 
+    TAG_LOGD(AAFwkTag::APPKIT, "pluginBundleName: %{public}s, moduleName: %{public}s",
         pluginBundleName.c_str(), moduleName.c_str());
 
     AppExecFwk::PluginBundleInfo pluginBundleInfo;
@@ -460,30 +461,37 @@ std::shared_ptr<Context> ContextImpl::CreatePluginContext(const std::string &plu
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     std::string hapPath;
     std::vector<std::string> overlayPaths;
-    int32_t appType = 0; //?
+    int32_t appType = 0;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
         pluginBundleName, moduleName, hapPath, overlayPaths, *resConfig, appType));
+    if (resourceManager == nullptr) {
+        return nullptr;
+    }
 
     for (auto pluginModuleInfo : pluginBundleInfo.pluginModuleInfos) {
         TAG_LOGD(AAFwkTag::APPKIT, "moduleName: %{public}s", pluginModuleInfo.moduleName.c_str());
         std::string loadPath = pluginModuleInfo.hapPath;
         TAG_LOGD(AAFwkTag::APPKIT, "loadPath: %{public}s", loadPath.c_str());
         if (loadPath.empty()) {
-            TAG_LOGD(AAFwkTag::APPKIT, "loadPath is empty");
             continue;
         }
-        // "/data/app/el1/bundle/public" + / + "plugin/" + hostbundlename
-        // /data/storage/el1/bundle
         std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + inputContext->GetBundleName());
         loadPath = std::regex_replace(loadPath, pattern, LOCAL_CODE_PATH);
+        bool newCreate = false;
+        std::shared_ptr<AbilityBase::Extractor> extractor =
+            AbilityBase::ExtractorUtil::GetExtractor(loadPath, newCreate, true);
+        if (!extractor) {
+            TAG_LOGE(AAFwkTag::APPKIT, "hapPath[%{private}s]", hapPath.c_str());
+            return nullptr;
+        }
         TAG_LOGD(AAFwkTag::APPKIT, "loadPath: %{public}s", loadPath.c_str());
-        if (resourceManager && resourceManager->AddResource(loadPath.c_str())) {
+        if (!resourceManager->AddResource(loadPath.c_str())) {
             TAG_LOGE(AAFwkTag::APPKIT, "AddResource failed");
         }
     }
     UpdateResConfig(inputContext->GetResourceManager(), resourceManager);
     appContext->SetResourceManager(resourceManager);
-    appContext->SetApplicationInfo(std::make_shared<AppExecFwk::ApplicationInfo>(pluginBundleInfo.applicationInfo));
+    appContext->SetApplicationInfo(std::make_shared<AppExecFwk::ApplicationInfo>(pluginBundleInfo.appInfo));
 
     return appContext;
 }
@@ -523,7 +531,7 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
             TAG_LOGE(AAFwkTag::APPKIT, "moduleName error");
             return nullptr;
         }
-        appContext->InitHapModuleInfo(*info);//?
+        appContext->InitHapModuleInfo(*info);
     }
 
     appContext->SetConfiguration(config_);
@@ -888,7 +896,7 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
         TAG_LOGE(AAFwkTag::APPKIT, "null appContext");
         return;
     }
-    if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE) ||//?
+    if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE) ||
         bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
         std::shared_ptr<Global::Resource::ResourceManager> resourceManager = InitOthersResourceManagerInner(
             bundleInfo, currentBundle, moduleName);
@@ -1224,15 +1232,15 @@ void ContextImpl::InitPluginHapModuleInfo(const std::shared_ptr<AppExecFwk::Abil
     int errCode = GetBundleManager();
     if (errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed, errCode: %{public}d", errCode);
-        return ;
+        return;
     }
     int accountId = GetCurrentAccountId();
     if (accountId == 0) {
         accountId = GetCurrentActiveAccountId();
     }
     hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
-    if(!bundleMgr_->GetPluginHapModuleInfo(hostBundleName, abilityInfo->bundleName,
-        abilityInfo->moduleName, accountId, *hapModuleInfo_)) {
+    if (bundleMgr_->GetPluginHapModuleInfo(hostBundleName, abilityInfo->bundleName,
+        abilityInfo->moduleName, accountId, *hapModuleInfo_) != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "GetPluginHapModuleInfo false");
     }
 }

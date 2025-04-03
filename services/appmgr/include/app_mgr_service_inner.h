@@ -1597,8 +1597,8 @@ private:
     int32_t WaitProcessesExitAndKill(std::list<SimpleProcessInfo> &processInfos, const int64_t startTime,
         const std::string& reason, int32_t userId, sptr<AAFwk::IUserCallback> callback);
 
-    void DoAllProcessExitCallback(std::list<SimpleProcessInfo> &processInfos, int32_t userId,
-        sptr<AAFwk::IUserCallback> callback);
+    bool DoAllProcessExitCallback(std::list<SimpleProcessInfo> &processInfos, int32_t userId,
+        sptr<AAFwk::IUserCallback> callback, int64_t startTime);
 
     /**
      * SystemTimeMillisecond, Get system time.
@@ -1869,7 +1869,7 @@ private:
 
     void SetAppInfo(const BundleInfo &bundleInfo, AppSpawnStartMsg &startMsg);
 
-    void SetStartMsgCustomSandboxFlag(AppSpawnStartMsg &startMsg, int32_t userId);
+    void SetStartMsgCustomSandboxFlag(AppSpawnStartMsg &startMsg, uint32_t accessTokenId);
 
     /**
      * Query ability for one want param
@@ -1950,9 +1950,12 @@ private:
         const std::shared_ptr<AppRunningRecord> &appRecord, const int32_t pid, const int32_t callerUid);
     int32_t SubmitDfxFaultTask(const FaultData &faultData, const std::string &bundleName,
         const std::shared_ptr<AppRunningRecord> &appRecord, const int32_t pid);
+    void SendAbilityEvent(const std::shared_ptr<AbilityRunningRecord> &abilityRecord, const AbilityState &state);
     void AddAbilityStageForSpecified(std::shared_ptr<AppRunningRecord> appRecord);
     void GetKernelPermissions(uint32_t accessTokenId, JITPermissionsMap &permissionsMap);
     void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
+    std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(std::shared_ptr<ApplicationInfo> appInfo,
+        const std::string &processName, const BundleInfo &bundleInfo);
 
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;

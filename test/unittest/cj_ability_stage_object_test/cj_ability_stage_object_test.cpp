@@ -50,7 +50,7 @@ void CjAbilityStageObjectTest::SetUp(void)
 void CjAbilityStageObjectTest::TearDown(void)
 {}
 
-HWTEST_F(CjAbilityStageObjectTest, CjAbilityNoInit_001, TestSize.Level0)
+HWTEST_F(CjAbilityStageObjectTest, CjAbilityNoInit_001, TestSize.Level2)
 {
     std::shared_ptr<CJAbilityStageObject> cjAbilityStageObject = CJAbilityStageObject::LoadModule("test");
     cjAbilityStageObject->OnCreate();
@@ -66,7 +66,7 @@ HWTEST_F(CjAbilityStageObjectTest, CjAbilityNoInit_001, TestSize.Level0)
     EXPECT_NE(level, 0);
 }
 
-HWTEST_F(CjAbilityStageObjectTest, CjAbilityNoInit_002, TestSize.Level0)
+HWTEST_F(CjAbilityStageObjectTest, CjAbilityNoInit_002, TestSize.Level2)
 {
     RegisterCJAbilityStageFuncs(nullptr);
     auto registerFunc = [](CJAbilityStageFuncs *funcs) {

@@ -167,6 +167,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_path}/js_environment/frameworks/js_environment:js_environment",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:app_util",
+    "${ability_runtime_services_path}/common:event_report",
   ]
 
   external_deps = [
@@ -285,6 +286,10 @@ ohos_shared_library("appkit_native") {
 
   if (ability_runtime_app_no_response_dialog) {
     defines += [ "APP_NO_RESPONSE_DIALOG" ]
+  }
+
+  if (ability_runtime_app_no_response_dialog_wearable) {
+    defines += [ "APP_NO_RESPONSE_DIALOG_WEARABLE" ]
   }
 
   if (resource_schedule_service_enable) {

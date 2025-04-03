@@ -503,10 +503,6 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, StartUser_001, TestSize.Level1)
     bool isAppRecovery = false;
     auto retCode = abilityMs_->StartUser(userId, callback, isAppRecovery);
     EXPECT_EQ(retCode, CHECK_PERMISSION_FAILED);
-    if (callback != nullptr) {
-        delete callback;
-        callback = nullptr;
-    }
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_001 end");
 }
 
@@ -528,10 +524,6 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, StartAbilityByCallWithErrMsg_001, Tes
     sptr<IAbilityConnection> connect = new MockIAbilityConnection();
     retCode = abilityMs_->StartAbilityByCallWithErrMsg(want, connect, nullptr, accountId, errMsg);
     EXPECT_EQ(retCode, ERR_INVALID_VALUE);
-    if (connect != nullptr) {
-        delete connect;
-        connect = nullptr;
-    }
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartAbilityByCallWithErrMsg_001 end");
 }
 

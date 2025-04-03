@@ -170,21 +170,27 @@ void SourceMap::SplitSourceMap(const std::string& sourceMapData)
         }
         if (StringStartWith(tmp.c_str(), FLAG_SOURCES)) { // sources
             std::getline(ss, tmp);
-            mapData->sources_ = tmp;
-            continue;
+            if (mapData) {
+                mapData->sources_ = tmp;
+                continue;
+            }
         }
         if (StringStartWith(tmp.c_str(), FLAG_MAPPINGS)) { // mapping
             ExtractSourceMapData(tmp.substr(FLAG_MAPPINGS_LEN, tmp.size() - FLAG_MAPPINGS_LEN - 1), mapData);
             continue;
         }
         if (StringStartWith(tmp.c_str(), FLAG_ENTRY_PACKAGE_INFO)) { // entryPackageInfo
-            mapData->packageName_ = tmp;
-            continue;
+            if (mapData) {
+                mapData->packageName_ = tmp;
+                continue;
+            }
         }
         if (StringStartWith(tmp.c_str(), FLAG_PACKAGE_INFO)) { // packageInfo
-            mapData->packageName_ = tmp;
-            mapData->isPackageInfo_ = true;
-            continue;
+            if (mapData) {
+                mapData->packageName_ = tmp;
+                mapData->isPackageInfo_ = true;
+                continue;
+            }
         }
         if (StringStartWith(tmp.c_str(), FLAG_END)) {
             sourceMaps_[url] = mapData;

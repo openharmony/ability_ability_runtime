@@ -55,9 +55,9 @@ export default class JumpInterceptorServiceExtAbility extends extension {
         jumpWinNum--;
       }
       if (globalThis.params.isDefaultSelector) {
-        this.createWindow('JumpInterceptorDialog' + startId, window.WindowType.TYPE_SYSTEM_ALERT, navigationBarRect);
+        this.createWindow('JumpInterceptorDialog ' + startId, window.WindowType.TYPE_SYSTEM_ALERT, navigationBarRect);
       } else {
-        this.createWindow('JumpInterceptorDialog' + startId, window.WindowType.TYPE_FLOAT, navigationBarRect);
+        this.createWindow('JumpInterceptorDialog ' + startId, window.WindowType.TYPE_FLOAT, navigationBarRect);
       }
       jumpWinNum++;
     });

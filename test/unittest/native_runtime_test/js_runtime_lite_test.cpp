@@ -123,7 +123,7 @@ HWTEST_F(JsRuntimeLiteTest, GetChildOptions_0100, TestSize.Level1)
  * @tc.desc: JsRuntimeLiteTest test for GetPkgContextInfoListMap.
  * @tc.type: FUNC
  */
-HWTEST_F(JsRuntimeLiteTest, GetPkgContextInfoListMap_0100, TestSize.Level0)
+HWTEST_F(JsRuntimeLiteTest, GetPkgContextInfoListMap_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetPkgContextInfoListMap_0100 start");
 
@@ -157,7 +157,7 @@ HWTEST_F(JsRuntimeLiteTest, GetPkgContextInfoListMap_0100, TestSize.Level0)
  * @tc.desc: JsRuntimeLiteTest test for GetPkgContextInfoListMap.
  * @tc.type: FUNC
  */
-HWTEST_F(JsRuntimeLiteTest, GetPkgContextInfoListMap_0200, TestSize.Level0)
+HWTEST_F(JsRuntimeLiteTest, GetPkgContextInfoListMap_0200, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetPkgContextInfoListMap_0200 start");
 

@@ -173,14 +173,14 @@ FreeInstallInfo FreeInstallManager::BuildFreeInstallInfo(const Want &want, int32
         param = std::make_shared<FreeInstallParams>();
     }
     FreeInstallInfo info = {
-        .want = want,
+        .isOpenAtomicServiceShortUrl = param->isOpenAtomicServiceShortUrl,
+        .specifyTokenId = param->specifyTokenId,
         .userId = userId,
         .requestCode = requestCode,
         .callerToken = callerToken,
-        .specifyTokenId = param->specifyTokenId,
-        .isOpenAtomicServiceShortUrl = param->isOpenAtomicServiceShortUrl,
         .originalWant = param->originalWant,
-        .startOptions = param->startOptions
+        .startOptions = param->startOptions,
+        .want = want
     };
     if (!param->isAsync) {
         auto promise = std::make_shared<std::promise<int32_t>>();
@@ -485,10 +485,10 @@ int FreeInstallManager::FreeInstallAbilityFromRemote(const Want &want, const spt
     }
 
     FreeInstallInfo info = {
-        .want = want,
         .userId = userId,
         .requestCode = requestCode,
-        .dmsCallback = callback
+        .dmsCallback = callback,
+        .want = want
     };
 
     {

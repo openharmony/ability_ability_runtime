@@ -45,6 +45,8 @@ public:
 
     bool IsSupportStatusBar(int32_t uid);
 
+    bool IsSceneBoardReady(int32_t userId);
+
     /**
      * get the user id.
      *

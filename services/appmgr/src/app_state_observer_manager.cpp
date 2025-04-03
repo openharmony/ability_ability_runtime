@@ -594,12 +594,12 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(
     TAG_LOGD(AAFwkTag::APPMGR,
         "Handle state change, module:%{public}s, bundle:%{public}s, ability:%{public}s, state:%{public}d,"
         "pid:%{public}d ,uid:%{public}d, abilityType:%{public}d, isAbility:%{public}d, callerBundleName:%{public}s,"
-        "callerAbilityName:%{public}s, isAtomicService:%{public}d",
+        "callerAbilityName:%{public}s, isAtomicService:%{public}d, callerUid:%{public}d",
         abilityStateData.moduleName.c_str(), abilityStateData.bundleName.c_str(),
         abilityStateData.abilityName.c_str(), abilityStateData.abilityState,
         abilityStateData.pid, abilityStateData.uid, abilityStateData.abilityType, isAbility,
         abilityStateData.callerBundleName.c_str(), abilityStateData.callerAbilityName.c_str(),
-        abilityStateData.isAtomicService);
+        abilityStateData.isAtomicService, abilityStateData.callerUid);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;

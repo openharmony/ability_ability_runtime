@@ -223,7 +223,7 @@ HWTEST_F(AbilitySchedulerStubTest, AbilitySchedulerStub_008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000GI8IJ
  */
-HWTEST_F(AbilitySchedulerStubTest, AbilitySchedulerStub_009, TestSize.Level0)
+HWTEST_F(AbilitySchedulerStubTest, AbilitySchedulerStub_009, TestSize.Level2)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -241,7 +241,7 @@ HWTEST_F(AbilitySchedulerStubTest, AbilitySchedulerStub_009, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AbilitySchedulerStubTest, AbilitySchedulerStub_0010, TestSize.Level0)
+HWTEST_F(AbilitySchedulerStubTest, AbilitySchedulerStub_0010, TestSize.Level2)
 {
     MessageParcel data;
     MessageParcel reply;

@@ -36,6 +36,7 @@ ohos_unittest("app_exit_reason_helper_second_test") {
 
   sources = [
     "${ability_runtime_path}/frameworks/native/appkit/ability_bundle_manager_helper/bundle_mgr_helper.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ability_cache_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/app_exit_reason_helper.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/process_options.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
@@ -50,7 +51,6 @@ ohos_unittest("app_exit_reason_helper_second_test") {
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "${ability_runtime_services_path}/abilitymgr:ams_configuration_parameter",
     "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:event_report",
     "${ability_runtime_services_path}/common:perm_verification",
