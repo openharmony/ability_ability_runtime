@@ -99,6 +99,7 @@ constexpr const char* DMS_CALLER_ABILITY_NAME = "ohos.dms.param.sourceCallerAbil
 constexpr const char* DMS_CALLER_NATIVE_NAME = "ohos.dms.param.sourceCallerNativeName";
 constexpr const char* DMS_CALLER_APP_ID = "ohos.dms.param.sourceCallerAppId";
 constexpr const char* DMS_CALLER_APP_IDENTIFIER = "ohos.dms.param.sourceCallerAppIdentifier";
+constexpr const char* IS_HOOK = "ohos.abilityruntime.is_hook";
 const int32_t SHELL_ASSISTANT_DIETYPE = 0;
 std::atomic<int64_t> AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -349,6 +350,7 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     }
     std::lock_guard guard(wantLock_);
     want_.SetParam(ABILITY_OWNER_USERID, ownerMissionUserId_);
+    want_.SetParam(IS_HOOK, isHook_);
     AbilityRuntime::LoadParam loadParam;
     loadParam.abilityRecordId = recordId_;
     loadParam.isShellCall = Rosen::SceneBoardJudgement::IsSceneBoardEnabled() ? isShellCall
@@ -365,6 +367,7 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     }
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         loadParam, abilityInfo_, abilityInfo_.applicationInfo, want_);
+    want_.RemoveParam(IS_HOOK);
     want_.RemoveParam(ABILITY_OWNER_USERID);
     want_.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     if (DelayedSingleton<AppScheduler>::GetInstance()->IsAttachDebug(abilityInfo_.bundleName)) {

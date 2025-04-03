@@ -2190,5 +2190,13 @@ ErrCode AbilityManagerClient::QueryPreLoadUIExtensionRecord(const AppExecFwk::El
     return abms->QueryPreLoadUIExtensionRecord(
         element, moduleName, hostBundleName, recordNum, userId);
 }
+
+ErrCode AbilityManagerClient::RevokeDelegator(const sptr<IRemoteObject> &token)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call RevokeDelegator");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RevokeDelegator(token);
+}
 } // namespace AAFwk
 } // namespace OHOS

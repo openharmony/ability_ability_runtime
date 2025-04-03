@@ -610,6 +610,9 @@ enum class AbilityManagerInterfaceCode {
 
     // start self uiability with startOptions
     START_SELF_UI_ABILITY_WITH_START_OPTIONS = 6138,
+
+    // revoke delegator
+    REVOKE_DELEGATOR = 6139,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
