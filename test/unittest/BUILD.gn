@@ -369,6 +369,7 @@ group("unittest") {
       "ability_manager_proxy_fourth_test:unittest",
       "ability_manager_proxy_second_test:unittest",
       "ability_manager_proxy_test:unittest",
+      "ability_manager_proxy_third_test:unittest",
       "ability_manager_service_dialog_test:unittest",
       "ability_manager_service_eighth_test:unittest",
       "ability_manager_service_eleven_test:unittest",
