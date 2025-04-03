@@ -388,6 +388,8 @@ public:
     void PrepareTerminateAbilityDone(std::shared_ptr<AbilityRecord> abilityRecord, bool isTerminate);
 
     void TryPrepareTerminateByPidsDone(const std::string &moduleName, int32_t prepareTermination, bool isExist);
+    
+    int32_t RevokeDelegator(const sptr<IRemoteObject> &token);
 
 private:
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse) const;
@@ -432,6 +434,7 @@ private:
     int CallAbilityLocked(const AbilityRequest &abilityRequest);
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
+    bool IsHookModule(const AbilityRequest &abilityRequest) const;
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
     std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
     void HandleForegroundCollaborate(const AbilityRequest &abilityRequest,
@@ -477,11 +480,12 @@ private:
     int32_t DoCallerProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord);
     int32_t DoCallerProcessDetachment(std::shared_ptr<AbilityRecord> abilityRecord);
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-        bool &isColdStart);
+        bool &isColdStart, bool &isHook);
     std::shared_ptr<AbilityRecord> FindRecordFromTmpMap(const AbilityRequest &abilityRequest);
     void PostCallTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord);
     bool AddStartCallerTimestamp(int32_t callerUid);
-    std::shared_ptr<AbilityRecord> FindRecordFromSessionMap(const AbilityRequest &abilityRequest);
+    std::shared_ptr<AbilityRecord> FindRecordFromSessionMap(const AbilityRequest &abilityRequest,
+        bool compareAbilityNameFlag);
     bool HasAbilityRequest(const AbilityRequest &abilityRequest);
     void AddAbilityRequest(const AbilityRequest &abilityRequest, int32_t requestId);
     void RemoveAbilityRequest(int32_t requestId);
@@ -512,6 +516,9 @@ private:
         const std::vector<sptr<IRemoteObject>> &tokens);
     void CancelPrepareTerminate(std::shared_ptr<AbilityRecord> abilityRecord);
     bool UpdateSpecifiedFlag(std::shared_ptr<AbilityRecord> abilityRequest, const std::string &flag);
+    bool ProcessColdStartBranch(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, 
+        std::shared_ptr<AbilityRecord> uiAbilityRecord, bool& isColdStart);
+    bool TryProcessHookModule(AbilityRequest& request, bool isHookModule);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
@@ -549,6 +556,7 @@ private:
     std::mutex isTryPrepareTerminateByPidsDoneMutex_;
     std::condition_variable isTryPrepareTerminateByPidsCv_;
     std::vector<std::shared_ptr<PrepareTerminateByPidRecord>> prepareTerminateByPidRecords_;
+    std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> hookSpecifiedMap_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

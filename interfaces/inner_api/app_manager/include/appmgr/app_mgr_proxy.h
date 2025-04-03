@@ -801,6 +801,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &info) override;
+
+    /**
+     * Launch ability when reuseDelegatorWindow is true.
+     *
+     * @param token Ability identify.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t LaunchAbility(const sptr<IRemoteObject> &token) override;
+
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);

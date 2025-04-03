@@ -13647,5 +13647,22 @@ int32_t AbilityManagerService::QueryPreLoadUIExtensionRecord(const AppExecFwk::E
   return connectManager->QueryPreLoadUIExtensionRecordInner(
       element, moduleName, hostBundleName, recordNum);
 }
+
+int32_t AbilityManagerService::RevokeDelegator(const sptr<IRemoteObject> &token)
+{
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "capability not support");
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingTokenId);
+    if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Not TOKEN_HAP");
+        return ERR_NO_PERMISSION_CALLER;
+    }
+    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+    CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
+    return uiAbilityManager->RevokeDelegator(token);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

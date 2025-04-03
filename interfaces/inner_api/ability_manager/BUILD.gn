@@ -419,7 +419,7 @@ ohos_shared_library("ability_connect_callback_stub") {
     "jsoncpp:jsoncpp",
   ]
   if (ability_runtime_graphics) {
-    public_external_deps += [ "graphic_2d:color_manager" ]
+    external_deps += [ "graphic_2d:color_manager" ]
   }
 
   cflags_cc = []

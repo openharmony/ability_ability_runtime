@@ -45,6 +45,7 @@ constexpr const char* FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPe
 constexpr const char* DISPOSED_PROHIBIT_BACK = "APPGALLERY_APP_DISPOSED_PROHIBIT_BACK";
 constexpr const char* IS_WINDOWMODE_FOLLOWHOST = "ohos.uec.params.isWindowModeFollowHost";
 constexpr const char* USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
+constexpr const int32_t ERR_NOT_SUPPORTED = -2;
 
 struct RequestResult {
     int32_t resultCode {0};
@@ -322,6 +323,10 @@ ErrCode AbilityContextImpl::StopServiceExtensionAbility(const AAFwk::Want& want,
 ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, int resultCode)
 {
     isTerminating_.store(true);
+    if (isHook_ && hookOff_) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "is hook and hook off, skip TerminateSession");
+        return ERR_OK;
+    }
     auto sessionToken = GetSessionToken();
     if (sessionToken == nullptr) {
         TAG_LOGW(AAFwkTag::CONTEXT, "withResult null sessionToken");
@@ -641,6 +646,10 @@ ErrCode AbilityContextImpl::TerminateSelf()
     if (sessionToken == nullptr) {
         TAG_LOGW(AAFwkTag::CONTEXT, "null sessionToken");
     }
+    if (isHook_ && hookOff_) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "is hook and hook off, skip TerminateSession");
+        return ERR_OK;
+    }
 #ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
         TAG_LOGI(AAFwkTag::CONTEXT, "scb call, TerminateSelf: %{public}s",
@@ -694,6 +703,10 @@ sptr<IRemoteObject> AbilityContextImpl::GetToken()
 ErrCode AbilityContextImpl::RestoreWindowStage(napi_env env, napi_value contentStorage)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
+    if (isHook_) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "RestoreWindowStage is hook module");
+        return ERR_NOT_SUPPORTED;
+    }
     napi_ref value = nullptr;
     napi_create_reference(env, contentStorage, 1, &value);
     contentStorage_ = std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(value));
@@ -874,6 +887,10 @@ ErrCode AbilityContextImpl::GetMissionId(int32_t &missionId)
 ErrCode AbilityContextImpl::SetMissionContinueState(const AAFwk::ContinueState &state)
 {
     TAG_LOGI(AAFwkTag::CONTEXT, "called, state: %{public}d", state);
+    if (isHook_) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "SetMissionContinueState is hook module");
+        return ERR_NOT_SUPPORTED;
+    }
     auto sessionToken = GetSessionToken();
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->SetMissionContinueState(token_, state, sessionToken);
     if (err != ERR_OK) {
@@ -938,6 +955,10 @@ void AbilityContextImpl::UnregisterAbilityLifecycleObserver(
 ErrCode AbilityContextImpl::SetMissionLabel(const std::string& label)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "label:%{public}s", label.c_str());
+    if (isHook_) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "SetMissionLabel is hook module");
+        return ERR_NOT_SUPPORTED;
+    }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->SetMissionLabel(token_, label);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "failed %{public}d", err);
@@ -1176,6 +1197,10 @@ ErrCode AbilityContextImpl::OpenAtomicService(AAFwk::Want& want, const AAFwk::St
 
 void AbilityContextImpl::SetRestoreEnabled(bool enabled)
 {
+    if (isHook_) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "SetRestoreEnabled is hook module");
+        return;
+    }
     restoreEnabled_.store(enabled);
 }
 
@@ -1211,5 +1236,40 @@ std::shared_ptr<Context> AbilityContextImpl::CreateDisplayContext(uint64_t displ
     return stageContext_ ? stageContext_->CreateDisplayContext(displayId) : nullptr;
 }
 #endif
+
+ErrCode AbilityContextImpl::RevokeDelegator()
+{
+    if (!IsHook() || GetHookOff()) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "repeated called");
+        return AAFwk::ERR_NOT_HOOK;
+    }
+    TAG_LOGI(AAFwkTag::CONTEXT, "called");
+    auto sessionToken = GetSessionToken();
+    if (sessionToken == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "null sessionToken");
+        return ERR_INVALID_VALUE;
+    }
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
+        auto ifaceSessionToken = iface_cast<Rosen::ISession>(sessionToken);
+        ErrCode ret = static_cast<int32_t>(ifaceSessionToken->NotifyDisableDelegatorChange());
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "scb call, revokeDelegator err: %{public}d", ret);
+            return AAFwk::ERR_FROM_WINDOW;
+        }
+    }
+    auto want = GetWant();
+    if (want == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "null want");
+        return ERR_INVALID_VALUE;
+    }
+    want->SetParam("ohos.ability.hookOff", true);
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->RevokeDelegator(token_);
+    if (err == ERR_OK) {
+        SetHookOff(true);
+    } else {
+        TAG_LOGE(AAFwkTag::CONTEXT, "AbilityContextImpl::RevokeDelegator is failed:%{public}d", err);
+    }
+    return err;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
