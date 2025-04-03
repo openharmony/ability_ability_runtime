@@ -128,6 +128,7 @@
           "//foundation/ability/ability_runtime/frameworks/c/ability_runtime:ability_runtime",
           "//foundation/ability/ability_runtime/frameworks/cj:cj_ability_packages",
           "//foundation/ability/ability_runtime/frameworks/js/napi:napi_packages",
+          "//foundation/ability/ability_runtime/frameworks/ets/ani:ani_packages",
           "//foundation/ability/ability_runtime/cj_environment/frameworks/cj_environment:cj_environment",
           "//foundation/ability/ability_runtime/js_environment/frameworks/js_environment:js_environment",
           "//foundation/ability/ability_runtime/sts_environment/frameworks/sts_environment:sts_environment",
@@ -306,6 +307,19 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/frameworks/js/napi/inner/napi_common:napi_common"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/ets/ani/ani_common/include",
+              "header_files": [
+                "ani_common_ability_result.h",
+                "ani_common_configuration.h",
+                "ani_common_start_options.h",
+                "ani_common_util.h",
+                "ani_common_want.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/ets/ani/ani_common:ani_common"
           },
           {
             "header": {
