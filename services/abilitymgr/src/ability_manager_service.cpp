@@ -3941,10 +3941,7 @@ int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &
     auto abilityRecord = Token::GetAbilityRecordByToken(extensionSessionInfo->callerToken);
     std::shared_ptr<AbilityConnectManager> connectManager;
     std::shared_ptr<AbilityRecord> targetRecord;
-    GetConnectManagerAndUIExtensionBySessionInfo(extensionSessionInfo, connectManager, targetRecord);
-    if(targetRecord == nullptr){
-       targetRecord = GetUIExtensionBySessionFromServiceMap(extensionSessionInfo);     
-    }
+    GetConnectManagerAndUIExtensionBySessionInfo(extensionSessionInfo, connectManager, targetRecord, true);
     CHECK_POINTER_AND_RETURN(targetRecord, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connectManager, ERR_INVALID_VALUE);
     EventInfo eventInfo = BuildEventInfo(extensionSessionInfo->want, extensionSessionInfo->userId);
@@ -4008,7 +4005,7 @@ int AbilityManagerService::CloseUIExtensionAbilityBySCB(const sptr<IRemoteObject
 
     std::shared_ptr<AbilityConnectManager> connectManager;
     std::shared_ptr<AbilityRecord> targetRecord;
-    GetConnectManagerAndUIExtensionBySessionInfo(sessionInfo, connectManager, targetRecord);
+    GetConnectManagerAndUIExtensionBySessionInfo(sessionInfo, connectManager, targetRecord, true);
     if (connectManager == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null, ability: %{public}s", abilityRecord->GetURI().c_str());
         return ERR_INVALID_VALUE;
@@ -11145,7 +11142,7 @@ bool AbilityManagerService::CheckCollaboratorType(int32_t type)
 }
 
 void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
-    std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility)
+    std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility, bool needCheck)
 {
     targetAbility = nullptr;
     int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
@@ -11153,6 +11150,9 @@ void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const s
     connectManager = GetConnectManagerByUserId(userId);
     if (connectManager) {
         targetAbility = connectManager->GetUIExtensionBySessionInfo(sessionInfo);
+        if (needCheck) {
+            targetAbility = connectManager->GetUIExtensionBySessionFromServiceMap(sessionInfo);
+        }
     } else {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "connectManager null, userId:%{public}d", userId);
     }
@@ -11161,6 +11161,9 @@ void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const s
         connectManager = GetConnectManagerByUserId(U0_USER_ID);
         if (connectManager) {
             targetAbility = connectManager->GetUIExtensionBySessionInfo(sessionInfo);
+            if (needCheck) {
+                targetAbility = connectManager->GetUIExtensionBySessionFromServiceMap(sessionInfo);
+            }
         } else {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "connectManager null, userId:0");
         }
