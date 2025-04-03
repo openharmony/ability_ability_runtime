@@ -242,7 +242,7 @@ class AbilityContext extends Context {
   };
 
   revokeDelegator() {
-    this.__context_impl__.revokeDelegator();
+    return this.__context_impl__.revokeDelegator();
   }
 }
 
