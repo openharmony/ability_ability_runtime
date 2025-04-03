@@ -56,6 +56,7 @@ constexpr char COMPONENT_STARTUP_NEW_RULES[] = "component.startup.newRules";
 #ifdef SUPPORT_SCREEN
 constexpr int32_t ERR_INVALID_VALUE = -1;
 #endif
+constexpr const char* USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
 }
 UIAbility *UIAbility::Create(const std::unique_ptr<Runtime> &runtime)
 {
@@ -1271,7 +1272,22 @@ int UIAbility::CreateModalUIExtension(const AAFwk::Want &want)
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
         return ERR_INVALID_VALUE;
     }
-    return abilityContextImpl->CreateModalUIExtensionWithApp(want);
+    int result;
+    if (want.HasParameter(USE_GLOBAL_UICONTENT)) {
+        std::weak_ptr<AbilityRuntime::AbilityContext> abilityContextImplWptr = abilityContextImpl;
+        auto task = [abilityContextImplWptr, want, &result]() {
+            std::shared_ptr<AbilityRuntime::AbilityContext> abilityContextImplSptr = abilityContextImplWptr.lock();
+            if (abilityContextImplSptr == nullptr) {
+                TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContextImpl");
+                return;
+            }
+            result = abilityContextImplSptr->CreateModalUIExtensionWithApp(want);
+        };
+        handler_->PostTask(task);
+    } else {
+        result = abilityContextImpl->CreateModalUIExtensionWithApp(want);
+    }
+    return result;
 }
 
 void UIAbility::SetSessionToken(sptr<IRemoteObject> sessionToken)
