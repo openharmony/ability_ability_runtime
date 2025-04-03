@@ -527,5 +527,40 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, StartAbilityByCallWithErrMsg_001, Tes
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartAbilityByCallWithErrMsg_001 end");
 }
 
+/*
+ * Feature: AbilityManagerService
+ * Function: TerminateUIExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService TerminateUIExtensionAbility
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, TerminateUIExtensionAbility_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    sptr<SessionInfo> extensionSessionInfo = new SessionInfo();
+    Rosen::SessionInfo info;
+    extensionSessionInfo->sessionToken = new Rosen::Session(info);
+
+    AbilityRequest abilityRequest{};
+    std::string deviceName = "device";
+    std::string abilityName = "ServiceAbility";
+    std::string appName = "hiservcie";
+    std::string bundleName = "com.ix.hiservcie";
+    std::string moduleName = "entry";
+    abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+    AppExecFwk::ApplicationInfo appInfo;
+    appInfo.accessTokenId = ONE;
+    abilityRequest.appInfo = appInfo;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    extensionSessionInfo->callerToken = abilityRecord->GetToken();
+    IPCSkeleton::SetCallingTokenID(ONE);
+    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(ONE);
+    connectManager->sceneBoardTokenId_ = ONE;
+    connectManager->uiExtensionMap_[extensionSessionInfo->sessionToken] =
+        std::make_pair(abilityRecord, extensionSessionInfo);
+    abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
+    EXPECT_EQ(abilityMs_->TerminateUIExtensionAbility(extensionSessionInfo), ERR_WRONG_INTERFACE_CALL);
+}
 } // namespace AAFwk
 } // namespace OHOS
