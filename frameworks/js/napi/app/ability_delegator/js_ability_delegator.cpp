@@ -44,8 +44,6 @@ constexpr size_t ARGC_TWO = 2;
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
-constexpr size_t API20 = 20;
-constexpr size_t API_VERSION_MOD = 100;
 
 using namespace OHOS::AbilityRuntime;
 std::map<std::shared_ptr<NativeReference>, std::shared_ptr<AbilityMonitor>> g_monitorRecord;
@@ -834,13 +832,7 @@ napi_value JSAbilityDelegator::OnStartAbility(napi_env env, NapiCallbackInfo& in
         }
         int result = delegator->StartAbility(want);
         if (result) {
-            uint32_t apiTargetVersion = delegator->GetApiTargetVersion() % API_VERSION_MOD;
-            if (apiTargetVersion >= API20) {
-                task.Reject(env,
-                    CreateJsError(env, static_cast<int>(GetJsErrorCodeByNativeError(result)), "startAbility failed."));
-            } else {
-                task.Reject(env, CreateJsError(env, result, "startAbility failed."));
-            }
+            task.Reject(env, CreateJsError(env, result, "startAbility failed."));
         } else {
             ResolveWithNoError(env, task);
         }
