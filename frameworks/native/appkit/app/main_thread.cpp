@@ -1727,6 +1727,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         for (auto& runtime : runtimes) {
             application_->AddRuntime(std::move(runtime));
         }
+        if (appInfo.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+            application_->InitAniApplicationContext();
+            application_->InitAniContext();
+        }
         std::weak_ptr<OHOSApplication> wpApplication = application_;
         AbilityLoader::GetInstance().RegisterUIAbility("UIAbility",
             [wpApplication](const std::string &language) -> AbilityRuntime::UIAbility* {
