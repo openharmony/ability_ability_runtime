@@ -66,6 +66,10 @@ KeepAliveProcessManager::~KeepAliveProcessManager() {}
 void KeepAliveProcessManager::StartKeepAliveProcessWithMainElement(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
     int32_t userId)
 {
+    if (!DelayedSingleton<AbilityManagerService>::GetInstance()->IsSceneBoardReady(userId)) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "SCB not ready, do not start keep-alive apps");
+        return;
+    }
     for (const auto &bundleInfo : bundleInfos) {
         StartKeepAliveProcessWithMainElementPerBundle(bundleInfo, userId);
     }
@@ -85,12 +89,12 @@ void KeepAliveProcessManager::StartKeepAliveProcessWithMainElementPerBundle(cons
         return;
     }
     KeepAliveAbilityInfo info = {
-        .bundleName = bundleInfo.name,
-        .moduleName = bundleInfo.entryModuleName,
-        .abilityName = mainElementName,
         .userId = userId,
         .appCloneIndex = bundleInfo.appIndex,
         .uid = bundleInfo.uid,
+        .bundleName = bundleInfo.name,
+        .moduleName = bundleInfo.entryModuleName,
+        .abilityName = mainElementName,
     };
     auto isMultiInstance =
         bundleInfo.applicationInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE;

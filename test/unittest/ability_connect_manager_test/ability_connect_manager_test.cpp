@@ -2161,6 +2161,42 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_HandleAbilityDiedTask_001, T
 
 /*
  * Feature: AbilityConnectManager
+ * Function: DisconnectBeforeCleanup
+ * SubFunction: DisconnectBeforeCleanup
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityConnectManager DisconnectBeforeCleanup
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_DisconnectBeforeCleanup_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(100);
+    ASSERT_NE(connectManager, nullptr);
+    ConnectManager()->SetTaskHandler(TaskHandler());
+    ConnectManager()->SetEventHandler(EventHandler());
+    serviceRecord1_->SetUid(102 * 200000);
+    std::shared_ptr<AbilityRecord> abilityRecord = serviceRecord_;
+    AbilityRequest abilityRequest;
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    OHOS::sptr<IAbilityConnection> callback1 = new AbilityConnectCallback();
+    std::shared_ptr<ConnectionRecord> connection1 =
+        std::make_shared<ConnectionRecord>(callerToken, abilityRecord, callback1, nullptr);
+    connection1->AttachCallerInfo();
+    abilityRequest.abilityInfo.deviceId = "id";
+    abilityRequest.abilityInfo.bundleName = "bundle";
+    abilityRequest.abilityInfo.name = "name";
+    abilityRequest.abilityInfo.moduleName = "module";
+    std::string stringUri = "id/bundle/name/module";
+    abilityRecord->currentState_ = AbilityState::ACTIVE;
+    abilityRecord->AddConnectRecordToList(connection1);
+    connectManager->AddConnectObjectToMap(callback1->AsObject(), abilityRecord->GetConnectRecordList(), false);
+    connectManager->serviceMap_.emplace(stringUri, abilityRecord);
+    connectManager->DisconnectBeforeCleanup();
+    ASSERT_EQ(abilityRecord->GetConnectRecordList().empty(), true);
+    ASSERT_EQ(connectManager->GetConnectRecordListByCallback(callback1).empty(), true);
+}
+
+/*
+ * Feature: AbilityConnectManager
  * Function: RestartAbility
  * SubFunction: RestartAbility
  * FunctionPoints: NA

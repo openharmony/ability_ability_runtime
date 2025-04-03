@@ -248,7 +248,6 @@ int AmsConfigurationParameter::LoadAppConfigurationForStartUpService(nlohmann::j
     UpdateStartUpServiceConfigInteger(Object, AmsConfig::BOOT_ANIMATION_TIMEOUT_TIME, bootAnimationTime_);
     UpdateStartUpServiceConfigInteger(Object, AmsConfig::TIMEOUT_UNIT_TIME, timeoutUnitTime_);
     UpdateStartUpServiceConfigInteger(Object, AmsConfig::MULTI_USER_TYPE, multiUserType_);
-    UpdateStartUpServiceConfigInteger(Object, AmsConfig::CUSTOM_SANDBOX_FEATURE, supportCustomSandbox_);
     return LOAD_CONFIGURATION_SUCCESS;
 }
 
@@ -368,11 +367,6 @@ void AmsConfigurationParameter::UpdateStartUpServiceConfigString(nlohmann::json&
 int AmsConfigurationParameter::MultiUserType() const
 {
     return multiUserType_;
-}
-
-int AmsConfigurationParameter::CustomSandbox() const
-{
-    return supportCustomSandbox_;
 }
 
 void AmsConfigurationParameter::LoadResidentWhiteListConfig(nlohmann::json& Object)

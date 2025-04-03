@@ -73,7 +73,7 @@ void CjTestRunnerObjectTest::TearDown()
  * @tc.desc: CjTestRunnerObjectTest test for LoadModule.
  * @tc.type: FUNC
  */
-HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestLoadModule_Success_001, TestSize.Level0)
+HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestLoadModule_Success_001, TestSize.Level2)
 {
     RegisterCJTestRunnerFuncs(nullptr);
     RegisterCJTestRunnerFuncs(RegisterCangjieFuncs);
@@ -90,7 +90,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestLoadModule_Success_001, T
  * @tc.desc: CjTestRunnerObjectTest test for LoadModule.
  * @tc.type: FUNC
  */
-HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestLoadModule_Failed_NoRegistration_001, TestSize.Level0)
+HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestLoadModule_Failed_NoRegistration_001, TestSize.Level2)
 {
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");
     EXPECT_NE(nullptr, proxy);
@@ -101,7 +101,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestLoadModule_Failed_NoRegis
  * @tc.desc: CjTestRunnerObjectTest test for OnMemoryLevel.
  * @tc.type: FUNC
  */
-HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestLoadModule_Failed_CangjieCreateFailed_001, TestSize.Level0)
+HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestLoadModule_Failed_CangjieCreateFailed_001, TestSize.Level2)
 {
     RegisterCJTestRunnerFuncs(RegisterCangjieFuncs);
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");
@@ -113,7 +113,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestLoadModule_Failed_Cangjie
  * @tc.desc: CjTestRunnerObjectTest test for OnRun.
  * @tc.type: FUNC
  */
-HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnRun_Success_001, TestSize.Level0)
+HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnRun_Success_001, TestSize.Level2)
 {
     RegisterCJTestRunnerFuncs(RegisterCangjieFuncs);
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");
@@ -127,7 +127,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnRun_Success_001, TestSi
  * @tc.desc: CjTestRunnerObjectTest test for OnRun.
  * @tc.type: FUNC
  */
-HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnRun_Failed_NoRegistration_001, TestSize.Level0)
+HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnRun_Failed_NoRegistration_001, TestSize.Level2)
 {
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");
     proxy->OnRun();
@@ -139,7 +139,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnRun_Failed_NoRegistrati
  * @tc.desc: CjTestRunnerObjectTest test for OnPrepare.
  * @tc.type: FUNC
  */
-HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnPrepare_Success_001, TestSize.Level0)
+HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnPrepare_Success_001, TestSize.Level2)
 {
     RegisterCJTestRunnerFuncs(RegisterCangjieFuncs);
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");
@@ -152,7 +152,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnPrepare_Success_001, Te
  * @tc.desc: CjTestRunnerObjectTest test for OnPrepare.
  * @tc.type: FUNC
  */
-HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnPrepare_Failed_NoRegistration_001, TestSize.Level0)
+HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnPrepare_Failed_NoRegistration_001, TestSize.Level2)
 {
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");
     proxy->OnPrepare();
@@ -164,7 +164,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnPrepare_Failed_NoRegist
  * @tc.desc: CjTestRunnerObjectTest test for reset.
  * @tc.type: FUNC
  */
-HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestDestructor_Success_001, TestSize.Level0)
+HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestDestructor_Success_001, TestSize.Level2)
 {
     RegisterCJTestRunnerFuncs(RegisterCangjieFuncs);
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");

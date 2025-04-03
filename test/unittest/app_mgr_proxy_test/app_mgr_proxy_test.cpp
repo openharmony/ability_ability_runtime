@@ -127,7 +127,7 @@ HWTEST_F(AppMgrProxyTest, AppMgrProxy_GetProcessRunningInfosByUserId_0100, TestS
  * @tc.desc: GetAllRenderProcesses
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrProxyTest, AppMgrProxy_GetAllRenderProcesses_0100, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, AppMgrProxy_GetAllRenderProcesses_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AppMgrProxy_GetAllRenderProcesses_0100 start";
 
@@ -150,7 +150,7 @@ HWTEST_F(AppMgrProxyTest, AppMgrProxy_GetAllRenderProcesses_0100, TestSize.Level
  * @tc.desc: GetAllChildrenProcesses
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrProxyTest, AppMgrProxy_GetAllChildrenProcesses_0100, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, AppMgrProxy_GetAllChildrenProcesses_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "AppMgrProxy_GetAllChildrenProcesses_0100 start";
 
@@ -174,7 +174,7 @@ HWTEST_F(AppMgrProxyTest, AppMgrProxy_GetAllChildrenProcesses_0100, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: issueI581VW
  */
-HWTEST_F(AppMgrProxyTest, GetAppRunningStateByBundleName_0100, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, GetAppRunningStateByBundleName_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
@@ -196,7 +196,7 @@ HWTEST_F(AppMgrProxyTest, GetAppRunningStateByBundleName_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581VW
  */
-HWTEST_F(AppMgrProxyTest, NotifyLoadRepairPatch_0100, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, NotifyLoadRepairPatch_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
@@ -219,7 +219,7 @@ HWTEST_F(AppMgrProxyTest, NotifyLoadRepairPatch_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581VW
  */
-HWTEST_F(AppMgrProxyTest, NotifyHotReloadPage_0100, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, NotifyHotReloadPage_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start", __func__);
 
@@ -242,7 +242,7 @@ HWTEST_F(AppMgrProxyTest, NotifyHotReloadPage_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581VW
  */
-HWTEST_F(AppMgrProxyTest, NotifyUnLoadRepairPatch_0100, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, NotifyUnLoadRepairPatch_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
@@ -265,7 +265,7 @@ HWTEST_F(AppMgrProxyTest, NotifyUnLoadRepairPatch_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrProxyTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, PreStartNWebSpawnProcess_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
@@ -285,7 +285,7 @@ HWTEST_F(AppMgrProxyTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI76JBF
  */
-HWTEST_F(AppMgrProxyTest, GetProcessMemoryByPid_001, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, GetProcessMemoryByPid_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
@@ -307,7 +307,7 @@ HWTEST_F(AppMgrProxyTest, GetProcessMemoryByPid_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI76JBF
  */
-HWTEST_F(AppMgrProxyTest, GetRunningProcessInformation_001, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, GetRunningProcessInformation_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
@@ -818,7 +818,7 @@ HWTEST_F(AppMgrProxyTest, PreloadApplication_0800, TestSize.Level1)
  * @tc.desc: The application sets itself whether or not to support process cache.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrProxyTest, SetSupportedProcessCacheSelf_001, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, SetSupportedProcessCacheSelf_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
@@ -919,7 +919,7 @@ HWTEST_F(AppMgrProxyTest, GetAllRunningInstanceKeysByBundleName_001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: issueIAGZ7H
  */
-HWTEST_F(AppMgrProxyTest, GetSupportedProcessCachePids_001, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, GetSupportedProcessCachePids_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 

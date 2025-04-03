@@ -47,7 +47,6 @@ ohos_fuzztest("TerminateAbilityFuzzTest") {
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "${ability_runtime_services_path}/abilitymgr:ams_configuration_parameter",
   ]
 
   external_deps = [

@@ -63,7 +63,7 @@ private:
     bool GetIsStageModel();
 
     std::shared_ptr<JsEnv::WorkerInfo> workerInfo_ = nullptr;
-    int fd_ = -1;
+    FILE *file_ = nullptr;
 };
 
 } // namespace AbilityRuntime

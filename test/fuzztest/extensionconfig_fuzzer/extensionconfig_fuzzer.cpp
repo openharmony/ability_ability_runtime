@@ -54,6 +54,13 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     extensionConfig->GetExtensionAutoDisconnectTime(strParam);
     extensionConfig->IsExtensionStartThirdPartyAppEnable(strParam);
     extensionConfig->IsExtensionStartServiceEnable(strParam, strParam);
+    extensionConfig->HasAbilityAccess(strParam);
+    extensionConfig->HasThridPartyAppAccessFlag(strParam);
+    extensionConfig->HasServiceAccessFlag(strParam);
+    extensionConfig->HasDefaultAccessFlag(strParam);
+    extensionConfig->IsExtensionStartServiceEnableNew(strParam, strParam);
+    extensionConfig->IsExtensionStartThirdPartyAppEnableNew(strParam, strParam);
+    extensionConfig->IsExtensionStartDefaultEnable(strParam, strParam);
     nlohmann::json object;
     extensionConfig->LoadExtensionConfig(object);
     extensionConfig->ReadFileInfoJson(strParam, object);
@@ -61,7 +68,8 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     extensionConfig->LoadExtensionAutoDisconnectTime(object, strParam);
     extensionConfig->LoadExtensionThirdPartyAppBlockedList(object, strParam);
     extensionConfig->LoadExtensionServiceBlockedList(object, strParam);
-    extensionConfig->CheckServiceExtensionUriValid(strParam);
+    extensionConfig->LoadExtensionAbilityAccess(object, strParam);
+    extensionConfig->CheckExtensionUriValid(strParam);
     return true;
 }
 } // namespace OHOS

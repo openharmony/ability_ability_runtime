@@ -98,7 +98,6 @@ protected:
 
 private:
     std::shared_ptr<ContextImpl> contextImpl_;
-    bool isPlugin_ = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -110,7 +110,7 @@ static void SetJITPermissions(uint32_t accessTokenId, std::vector<std::string> &
     if (result != ERR_OK || permStateList.size() != tmpPermissionList.size()) {
         return;
     }
-    for (int i = 0; i < permStateList.size(); i++) {
+    for (size_t i = 0; i < permStateList.size(); i++) {
         if (permStateList[i] == Security::AccessToken::PERMISSION_GRANTED) {
             jitPermissionsList.emplace_back(tmpPermissionList[i]);
         }

@@ -65,6 +65,42 @@ HWTEST_F(ExtensionRecordFactoryTest, PreCheck_0100, TestSize.Level1)
 }
 
 /*
+ * Feature: PreCheck_0200
+ * Function: PreCheck
+ * SubFunction: NA
+ */
+HWTEST_F(ExtensionRecordFactoryTest, PreCheck_0200, TestSize.Level1)
+{
+    auto extensionRecordFactory = std::make_shared<AbilityRuntime::ExtensionRecordFactory>();
+    EXPECT_NE(extensionRecordFactory, nullptr);
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.extensionType = AppExecFwk::ExtensionAbilityType::EMBEDDED_UI;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    std::string hostBundleName = "com.example.unittest";
+    int32_t result = extensionRecordFactory->PreCheck(abilityRequest, "");
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    abilityRequest.abilityInfo.applicationName = "com.example.unittest";
+    abilityRequest.sessionInfo =  new (std::nothrow) AAFwk::SessionInfo();
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::SERVICE;
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto callerToken = callerAbilityRecord->GetToken();
+    abilityRequest.sessionInfo->callerToken = callerToken;
+    result = extensionRecordFactory->PreCheck(abilityRequest, "");
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    result = extensionRecordFactory->PreCheck(abilityRequest, hostBundleName);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRequest.sessionInfo->callerToken = abilityRecord->GetToken();
+    result = extensionRecordFactory->PreCheck(abilityRequest, hostBundleName);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/*
  * Feature: GetExtensionProcessMode_0100
  * Function: GetExtensionProcessMode
  * SubFunction: NA

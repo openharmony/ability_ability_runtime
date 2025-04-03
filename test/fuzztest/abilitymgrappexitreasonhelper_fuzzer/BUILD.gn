@@ -40,6 +40,7 @@ ohos_fuzztest("AbilityMgrAppExitReasonHelperFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/ability_cache_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/app_exit_reason_data_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/app_exit_reason_helper.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/exit_info_data_manager.cpp",
@@ -69,7 +70,6 @@ ohos_fuzztest("AbilityMgrAppExitReasonHelperFuzzTest") {
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "${ability_runtime_services_path}/abilitymgr:ams_configuration_parameter",
     "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:event_report",
     "${ability_runtime_services_path}/common:perm_verification",

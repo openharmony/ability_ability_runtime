@@ -21,7 +21,7 @@ namespace OHOS {
 namespace AAFwk {
     class MockIHiddenStartObserver : public IHiddenStartObserver {
     public:
-        bool IsHiddenStart(int32_t uid) override
+        bool IsHiddenStart(int32_t pid) override
         {
             return true;
         }

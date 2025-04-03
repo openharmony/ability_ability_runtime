@@ -27,6 +27,7 @@
         "ability_runtime_graphics",
         "ability_runtime_power",
         "ability_runtime_app_no_response_dialog",
+        "ability_runtime_app_no_response_dialog_wearable",
         "ability_runtime_app_no_response_bundlename",
         "ability_runtime_start_window_options_with_pixelmap",
         "ability_runtime_check_internet_permission"
@@ -601,6 +602,48 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/interfaces/inner_api/connect_server_manager:connect_server_manager"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/cj/ffi/app/app_manager",
+              "header_files": []
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/cj/ffi/app/app_manager:cj_app_manager_ffi"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/cj/ffi/app/errormanager",
+              "header_files": []
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/cj/ffi/app/errormanager:cj_errormanager_ffi"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/cj/ffi/app/recovery",
+              "header_files": []
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/cj/ffi/app/recovery:cj_app_recovery_ffi"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/cj/ffi/ark_interop_helper",
+              "header_files": []
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/cj/ffi/ark_interop_helper:ark_interop_helper_ffi"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/native/ability/native",
+              "header_files": []
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:uiabilitykit_native"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/native/appkit",
+              "header_files": []
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/native/appkit:appkit_delegator"
           }
         ],
         "test": [

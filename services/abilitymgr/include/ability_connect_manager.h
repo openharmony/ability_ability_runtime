@@ -189,7 +189,7 @@ public:
      * @return execute error code
      */
     int AbilityWindowConfigTransactionDone(
-        const sptr<IRemoteObject> &token, const AppExecFwk::WindowConfig &windowConfig);
+        const sptr<IRemoteObject> &token, const WindowConfig &windowConfig);
 
     /**
      * ScheduleConnectAbilityDoneLocked, service ability call this interface while session was connected.
@@ -231,7 +231,6 @@ public:
     std::shared_ptr<AbilityRecord> GetUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo);
 
     std::shared_ptr<AbilityRecord> GetExtensionByTokenFromServiceMap(const sptr<IRemoteObject> &token);
-    std::shared_ptr<AbilityRecord> GetExtensionByTokenFromAbilityCache(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityRecord> GetExtensionByTokenFromTerminatingMap(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityRecord> GetExtensionByIdFromServiceMap(const int64_t &abilityRecordId);
     std::shared_ptr<AbilityRecord> GetExtensionByIdFromTerminatingMap(const int64_t &abilityRecordId);
@@ -289,6 +288,12 @@ public:
      * @param abilityRecord, service ability record.
      */
     void OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
+
+    /**
+     * DisconnectBeforeCleanup.
+     *
+     */
+    void DisconnectBeforeCleanup();
 
     void DumpState(std::vector<std::string> &info, bool isClient, const std::string &args = "");
 
@@ -558,6 +563,7 @@ private:
      * @param abilityRecord, died ability.
      */
     void HandleAbilityDiedTask(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
+
     void HandleUIExtensionDied(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     void RestartAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
@@ -623,7 +629,8 @@ private:
     void KillProcessesByUserId() const;
     void SetLastExitReason(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetService);
     inline bool IsUIExtensionAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    inline bool IsCacheExtensionAbilityType(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    inline bool IsCacheExtensionAbilityByInfo(const AppExecFwk::AbilityInfo &abilityInfo);
+    inline bool IsCacheExtensionAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
     inline bool CheckUIExtensionAbilityLoaded(const AbilityRequest &abilityRequest);
     inline bool CheckUIExtensionAbilitySessionExist(const std::shared_ptr<AbilityRecord> &abilityRecord);
     inline void RemoveUIExtensionAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);

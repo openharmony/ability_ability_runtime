@@ -117,7 +117,7 @@ HWTEST_F(ExtensionConfigMgrTest, Init_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI581T3
  */
-HWTEST_F(ExtensionConfigMgrTest, AddBlockListItem_0100, TestSize.Level0)
+HWTEST_F(ExtensionConfigMgrTest, AddBlockListItem_0100, TestSize.Level1)
 {
     ExtensionConfigMgr mgr;
     mgr.Init();
@@ -166,7 +166,7 @@ HWTEST_F(ExtensionConfigMgrTest, AddBlockListItem_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5825N
  */
-HWTEST_F(ExtensionConfigMgrTest, AddBlockListItem_0200, TestSize.Level0)
+HWTEST_F(ExtensionConfigMgrTest, AddBlockListItem_0200, TestSize.Level1)
 {
     ExtensionConfigMgr mgr;
     mgr.Init();

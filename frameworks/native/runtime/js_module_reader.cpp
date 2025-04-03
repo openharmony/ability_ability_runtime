@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <regex>
 #include "js_module_reader.h"
 
 #include "bundle_info.h"
@@ -97,7 +98,11 @@ std::string JsModuleReader::GetPluginHspPath(const std::string& inputPath) const
         return presetAppHapPath;
     }
     std::string moduleName = inputPath.substr(inputPath.find_last_of("/") + 1);
-    if (moduleName.empty()) {
+    std::string tmpPath = inputPath.substr(inputPath.find_first_of("/") + 1);
+    const std::string sharedBundleName = tmpPath.substr(0, tmpPath.find_first_of("/"));
+    TAG_LOGI(AAFwkTag::JSRUNTIME, "moduleName: %{public}s, sharedBundleName: %{public}s",
+        moduleName.c_str(), sharedBundleName.c_str());
+    if (moduleName.empty() || sharedBundleName.empty()) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "empty moduleName");
         return presetAppHapPath;
     }
@@ -108,22 +113,22 @@ std::string JsModuleReader::GetPluginHspPath(const std::string& inputPath) const
         return presetAppHapPath;
     }
 
-    for (auto pluginBundleInfo : pluginBundleInfos) {
-        for (auto pluginModuleInfo : pluginBundleInfo.pluginModuleInfos) {
-            if (moduleName == pluginModuleInfo.moduleName) {
+    for (auto &pluginBundleInfo : pluginBundleInfos) {
+        for (auto &pluginModuleInfo : pluginBundleInfo.pluginModuleInfos) {
+            if (moduleName == pluginModuleInfo.moduleName
+                && sharedBundleName == pluginBundleInfo.pluginBundleName) {
                 presetAppHapPath = pluginModuleInfo.hapPath;
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "presetAppHapPath %{public}s", presetAppHapPath.c_str());
+                TAG_LOGD(AAFwkTag::JSRUNTIME, "presetAppHapPath %{public}s", presetAppHapPath.c_str());
                 std::regex pattern(std::string(ABS_DATA_CODE_PATH) + bundleName_ + "/");
-                presetAppHapPath = std::regex_replace(presetAppHapPath, pattern, std::string(ABS_CODE_PATH) + std::string(BUNDLE));
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "presetAppHapPath %{public}s", presetAppHapPath.c_str());
+                presetAppHapPath = std::regex_replace(
+                    presetAppHapPath, pattern, std::string(ABS_CODE_PATH) + std::string(BUNDLE));
+                TAG_LOGD(AAFwkTag::JSRUNTIME, "presetAppHapPath %{public}s", presetAppHapPath.c_str());
                 return presetAppHapPath;
             }
         }
     }
-
     TAG_LOGE(AAFwkTag::JSRUNTIME, "GetPluginHspPath failed");
     return presetAppHapPath;
-
 }
 
 std::string JsModuleReader::GetAppHspPath(const std::string& inputPath) const

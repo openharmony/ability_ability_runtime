@@ -155,6 +155,16 @@ bool PermissionVerification::VerifyRunningInfoPerm() const
     return false;
 }
 
+bool PermissionVerification::VerifyCustomSandbox(uint32_t accessTokenId) const
+{
+    if (VerifyPermissionByTokenId(accessTokenId, PermissionConstants::PERMISSION_CUSTOM_SANDBOX)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+        return true;
+    }
+    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
+    return false;
+}
+
 bool PermissionVerification::VerifyControllerPerm() const
 {
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_SET_ABILITY_CONTROLLER)) {
@@ -567,9 +577,9 @@ bool PermissionVerification::VerifySuperviseKiaServicePermission() const
     return false;
 }
 
-bool PermissionVerification::VerifyStartLocalDebug() const
+bool PermissionVerification::VerifyStartLocalDebug(int32_t tokenId) const
 {
-    if (VerifyCallingPermission(PermissionConstants::PERMISSION_PERFORM_LOCAL_DEBUG)) {
+    if (VerifyPermissionByTokenId(tokenId, PermissionConstants::PERMISSION_PERFORM_LOCAL_DEBUG)) {
         TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
         return true;
     }

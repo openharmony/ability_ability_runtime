@@ -37,7 +37,7 @@ public:
         : FfiContext::CJContext(abilityStageContext.lock()), abilityStageContext_(std::move(abilityStageContext)) {};
 
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo();
-    RetHapModuleInfo GetRetHapModuleInfo();
+    RetHapModuleInfoV2 GetRetHapModuleInfo();
     CConfiguration GetConfiguration();
     std::shared_ptr<Context> GetContext()
     {

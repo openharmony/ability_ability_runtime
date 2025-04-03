@@ -132,7 +132,7 @@ HWTEST_F(PermissionVerificationTest, StartUpServicePermissionCheck_0300, TestSiz
  * @tc.type: FUNC
  * @tc.require: issueI5QXCQ
  */
-HWTEST_F(PermissionVerificationTest, CheckCallAbilityPermission_0100, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallAbilityPermission_0100, TestSize.Level1)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.visible = true;
@@ -147,7 +147,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallAbilityPermission_0100, TestSize.L
  * @tc.type: FUNC
  * @tc.require: issueI5AFTJ
  */
-HWTEST_F(PermissionVerificationTest, CheckSpecificSystemAbilityAccessPermission_0100, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckSpecificSystemAbilityAccessPermission_0100, TestSize.Level1)
 {
     std::string processName;
     bool result = AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(processName);
@@ -173,7 +173,7 @@ HWTEST_F(PermissionVerificationTest, VerifyControllerPerm_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI55UJZ
  */
-HWTEST_F(PermissionVerificationTest, VerifyDlpPermission_0100, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, VerifyDlpPermission_0100, TestSize.Level1)
 {
     Want want;
     want.SetParam(DLP_PARAMS_INDEX, 1);
@@ -188,7 +188,7 @@ HWTEST_F(PermissionVerificationTest, VerifyDlpPermission_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5I8XP
  */
-HWTEST_F(PermissionVerificationTest, VerifyMissionPermission_0100, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, VerifyMissionPermission_0100, TestSize.Level1)
 {
     bool result = AAFwk::PermissionVerification::GetInstance()->VerifyMissionPermission();
     EXPECT_FALSE(result);
@@ -200,7 +200,7 @@ HWTEST_F(PermissionVerificationTest, VerifyMissionPermission_0100, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: issueI581VW
  */
-HWTEST_F(PermissionVerificationTest, VerifyInstallBundlePermission_0100, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, VerifyInstallBundlePermission_0100, TestSize.Level2)
 {
     bool result = AAFwk::PermissionVerification::GetInstance()->VerifyInstallBundlePermission();
     EXPECT_TRUE(result);
@@ -212,7 +212,7 @@ HWTEST_F(PermissionVerificationTest, VerifyInstallBundlePermission_0100, TestSiz
  * @tc.type: FUNC
  * @tc.require: issueI581VW
  */
-HWTEST_F(PermissionVerificationTest, VerifyGetBundleInfoPrivilegedPermission_0100, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, VerifyGetBundleInfoPrivilegedPermission_0100, TestSize.Level2)
 {
     bool result = AAFwk::PermissionVerification::GetInstance()->VerifyGetBundleInfoPrivilegedPermission();
     EXPECT_TRUE(result);
@@ -224,7 +224,7 @@ HWTEST_F(PermissionVerificationTest, VerifyGetBundleInfoPrivilegedPermission_010
  * @tc.type: FUNC
  * @tc.require: issueI5QXCQ
  */
-HWTEST_F(PermissionVerificationTest, CheckCallAbilityPermission_0200, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallAbilityPermission_0200, TestSize.Level1)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.visible = true;
@@ -239,7 +239,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallAbilityPermission_0200, TestSize.L
  * @tc.type: FUNC
  * @tc.require: issueI5QXCQ
  */
-HWTEST_F(PermissionVerificationTest, CheckCallAbilityPermission_0300, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallAbilityPermission_0300, TestSize.Level1)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.visible = false;
@@ -254,7 +254,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallAbilityPermission_0300, TestSize.L
  * @tc.type: FUNC
  * @tc.require: issueI5QXCQ
  */
-HWTEST_F(PermissionVerificationTest, CheckStartByCallPermission_0100, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckStartByCallPermission_0100, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.visible = true;
@@ -269,7 +269,7 @@ HWTEST_F(PermissionVerificationTest, CheckStartByCallPermission_0100, TestSize.L
  * @tc.type: FUNC
  * @tc.require: issueI5QXCQ
  */
-HWTEST_F(PermissionVerificationTest, CheckStartByCallPermission_0200, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckStartByCallPermission_0200, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.visible = false;
@@ -283,7 +283,7 @@ HWTEST_F(PermissionVerificationTest, CheckStartByCallPermission_0200, TestSize.L
  * @tc.type: FUNC
  * @tc.require: issueI5QXCQ
  */
-HWTEST_F(PermissionVerificationTest, CheckStartByCallPermission_0300, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckStartByCallPermission_0300, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.visible = true;
@@ -298,7 +298,7 @@ HWTEST_F(PermissionVerificationTest, CheckStartByCallPermission_0300, TestSize.L
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0100, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0100, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api9 = 9;
@@ -316,7 +316,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0100, Tes
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0200, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0200, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api9 = 9;
@@ -334,7 +334,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0200, Tes
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0300, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0300, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api9 = 9;
@@ -352,7 +352,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0300, Tes
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0400, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0400, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api9 = 9;
@@ -370,7 +370,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0400, Tes
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0500, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0500, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api8 = 8;
@@ -388,7 +388,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0500, Tes
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0600, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0600, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api8 = 8;
@@ -406,7 +406,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0600, Tes
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0700, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0700, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api8 = 8;
@@ -424,7 +424,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0700, Tes
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0800, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0800, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api9 = 9;
@@ -440,7 +440,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0800, Tes
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0900, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0900, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api8 = 8;
@@ -457,7 +457,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_0900, Tes
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_1000, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_1000, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api8 = 8;
@@ -475,7 +475,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceAbilityPermission_1000, Tes
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceExtensionPermission_0100, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceExtensionPermission_0100, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.visible = true;
@@ -490,7 +490,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceExtensionPermission_0100, T
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceExtensionPermission_0200, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceExtensionPermission_0200, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.visible = false;
@@ -505,7 +505,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceExtensionPermission_0200, T
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallServiceExtensionPermission_0300, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallServiceExtensionPermission_0300, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.visible = true;
@@ -520,7 +520,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallServiceExtensionPermission_0300, T
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0100, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0100, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api9 = 9;
@@ -538,7 +538,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0100, TestSi
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0200, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0200, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api9 = 9;
@@ -556,7 +556,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0200, TestSi
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0300, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0300, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api9 = 9;
@@ -574,7 +574,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0300, TestSi
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0400, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0400, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api9 = 9;
@@ -592,7 +592,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0400, TestSi
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0500, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0500, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api8 = 8;
@@ -610,7 +610,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0500, TestSi
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0600, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0600, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api8 = 8;
@@ -628,7 +628,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0600, TestSi
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0700, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0700, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api8 = 8;
@@ -646,7 +646,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0700, TestSi
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0800, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0800, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api9 = 9;
@@ -662,7 +662,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0800, TestSi
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0900, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0900, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api8 = 8;
@@ -680,7 +680,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_0900, TestSi
  * @tc.type: FUNC
  * @tc.require: issueI5PRJ7
  */
-HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_1000, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_1000, TestSize.Level2)
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     int api8 = 8;
@@ -699,7 +699,7 @@ HWTEST_F(PermissionVerificationTest, CheckCallDataAbilityPermission_1000, TestSi
  * @tc.type: FUNC
  * @tc.require: issuesI663VU
  */
-HWTEST_F(PermissionVerificationTest, JudgeCallerIsAllowedToUseSystemAPI_1000, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, JudgeCallerIsAllowedToUseSystemAPI_1000, TestSize.Level2)
 {
     bool result = AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI();
     EXPECT_EQ(result, true);
@@ -711,7 +711,7 @@ HWTEST_F(PermissionVerificationTest, JudgeCallerIsAllowedToUseSystemAPI_1000, Te
  * @tc.type: FUNC
  * @tc.require:   VerifyRunningInfoPerm CheckObserverCallerPermission  etc
  */
-HWTEST_F(PermissionVerificationTest, CheckObserverCallerPermission_0001, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, CheckObserverCallerPermission_0001, TestSize.Level2)
 {
     AAFwk::PermissionVerification::GetInstance()->CheckObserverCallerPermission();
     AAFwk::PermissionVerification::GetInstance()->VerifyStartRecentAbilityPermission();
@@ -725,7 +725,7 @@ HWTEST_F(PermissionVerificationTest, CheckObserverCallerPermission_0001, TestSiz
  * @tc.type: FUNC  VerifyKillProcessDependedOnWebPermission
  * @tc.require: VerifyPrepareTerminatePermission VerifyShellStartExtensionType VerifyPreloadApplicationPermission
  */
-HWTEST_F(PermissionVerificationTest, JudgeStartInvisibleAbility_0001, TestSize.Level0)
+HWTEST_F(PermissionVerificationTest, JudgeStartInvisibleAbility_0001, TestSize.Level1)
 {
     AAFwk::PermissionVerification::GetInstance()->VerifyKillProcessDependedOnWebPermission();
     AAFwk::PermissionVerification::GetInstance()->VerifyPreStartAtomicServicePermission();
@@ -744,6 +744,17 @@ HWTEST_F(PermissionVerificationTest, JudgeStartInvisibleAbility_0001, TestSize.L
     aTkId = 20;
     ret = AAFwk::PermissionVerification::GetInstance()->JudgeStartInvisibleAbility(aTkId, false, sTkId);
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CheckVerifyStartLocalDebug_0100
+ * @tc.desc: CheckVerifyStartLocalDebug Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, CheckVerifyStartLocalDebug_0100, TestSize.Level2)
+{
+    int result = AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug(0);
+    EXPECT_EQ(result, false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

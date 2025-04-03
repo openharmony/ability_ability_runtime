@@ -47,6 +47,9 @@ struct EventInfo {
     int32_t subReason = -1;
     int32_t exitReason = -1;
     int32_t preloadMode = 0;
+    int32_t appIndex = -1;
+    int32_t persistentId = 0;
+    std::string lifeCycleState;
     uint32_t versionCode = 0;
     uint32_t callerVersionCode = -1;
     int64_t time = 0;
@@ -59,6 +62,9 @@ struct EventInfo {
     std::string callerBundleName;
     std::string callerVersionName;
     std::string uri;
+    std::string errReason;
+    std::string lifeCycle;
+    std::string intentName;
 };
 
 enum class EventName {
@@ -69,6 +75,10 @@ enum class EventName {
     STOP_EXTENSION_ERROR,
     CONNECT_SERVICE_ERROR,
     DISCONNECT_SERVICE_ERROR,
+    UI_EXTENSION_ERROR,
+    UI_SERVICE_EXTENSION_ERROR,
+    EXECUTE_INSIGHT_INTENT_ERROR,
+    STARTUP_TASK_ERROR,
 
     // ability behavior event
     START_ABILITY,
@@ -133,6 +143,8 @@ public:
     static void SendDisconnectServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendStartAbilityOtherExtensionEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendGrantUriPermissionEvent(const EventName &eventName, const EventInfo &eventInfo);
+    static void SendExecuteIntentEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
+    static void SendLaunchFrameworkEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
 
 private:
     static std::string ConvertEventName(const EventName &eventName);
@@ -142,8 +154,11 @@ private:
     static void LogAbilityOnForegroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogAbilityOnBackgroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogAbilityOnActiveEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogAbilityOnInactiveEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogStartStandardEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogStartAbilityByAppLinking(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogUIExtensionErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogUIServiceExtErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
 };
 }  // namespace AAFWK
 }  // namespace OHOS

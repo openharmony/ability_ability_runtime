@@ -1495,6 +1495,11 @@ void ConnectionCallback::Reset()
         return;
     }
     ConnectionCallback *data = new(std::nothrow) ConnectionCallback(std::move(*this));
+    if (data == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null data");
+        delete work;
+        return;
+    }
     work->data = data;
     auto ret = uv_queue_work(loop, work, [](uv_work_t*) {}, ClearCallbackWork);
     if (ret != 0) {

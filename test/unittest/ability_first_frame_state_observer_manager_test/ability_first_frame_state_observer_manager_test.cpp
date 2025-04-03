@@ -174,7 +174,7 @@ HWTEST_F(AbilityFirstFrameStateObserverManagerTest, RegisterAbilityFirstFrameSta
  * EnvConditions: NA
  * CaseDescription: Verify RegisterAbilityFirstFrameStateObserver
  */
-HWTEST_F(AbilityFirstFrameStateObserverManagerTest, RegisterAbilityFirstFrameStateObserver_005, TestSize.Level0)
+HWTEST_F(AbilityFirstFrameStateObserverManagerTest, RegisterAbilityFirstFrameStateObserver_005, TestSize.Level2)
 {
     AppExecFwk::AbilityFirstFrameStateObserverManager::GetInstance().Init();
     std::string bundleName = "com.example.test";
@@ -220,7 +220,7 @@ HWTEST_F(AbilityFirstFrameStateObserverManagerTest, RegisterAbilityFirstFrameSta
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnFirstFrameState
  */
-HWTEST_F(AbilityFirstFrameStateObserverManagerTest, HandleOnFirstFrameState_001, TestSize.Level0)
+HWTEST_F(AbilityFirstFrameStateObserverManagerTest, HandleOnFirstFrameState_001, TestSize.Level2)
 {
     AppExecFwk::AbilityFirstFrameStateObserverManager::GetInstance().Init();
     std::string bundleName = "com.example.test";

@@ -53,7 +53,7 @@ void ResSchedUtilTest::TearDown()
  * @tc.desc: Test ReportAbilityStartInfoToRSS works
  * @tc.type: FUNC
  */
-HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0100, TestSize.Level0)
+HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "ResSchedUtilTest_0100 called.");
     AbilityInfo abilityInfo;
@@ -69,7 +69,7 @@ HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0100, TestSize.Level0)
  * @tc.desc: Test ReportAbilityStartInfoToRSS works
  * @tc.type: FUNC
  */
-HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0200, TestSize.Level0)
+HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0200, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "ResSchedUtilTest_0200 called.");
     std::string testName = "ResSchedUtilTest";
@@ -86,7 +86,7 @@ HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0200, TestSize.Level0)
  * @tc.desc: Test ReportLoadingEventToRss works
  * @tc.type: FUNC
  */
-HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0300, TestSize.Level0)
+HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0300, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "ResSchedUtilTest_0300 called.");
     AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::LOAD_BEGIN,
@@ -101,7 +101,7 @@ HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0300, TestSize.Level0)
  * @tc.desc: Test GetThawReasonByAbilityType
  * @tc.type: FUNC
  */
-HWTEST_F(ResSchedUtilTest, GetThawReasonByAbilityType, TestSize.Level0)
+HWTEST_F(ResSchedUtilTest, GetThawReasonByAbilityType, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetThawReasonByAbilityType called.");
     AbilityInfo abilityInfo;

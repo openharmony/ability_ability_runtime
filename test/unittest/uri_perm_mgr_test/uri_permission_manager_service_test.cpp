@@ -97,7 +97,7 @@ HWTEST_F(UriPermissionManagerServiceTest, Init_0100, TestSize.Level0)
  * @tc.name: SelfClean
  * @tc.desc: Test whether SelfClean and are called normally.
  */
-HWTEST_F(UriPermissionManagerServiceTest, SelfClean_0100, TestSize.Level0)
+HWTEST_F(UriPermissionManagerServiceTest, SelfClean_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UriPermissionManagerServiceTest SelfClean_0100 start";
     DelayedSingleton<UriPermissionManagerService>::GetInstance()->SelfClean();

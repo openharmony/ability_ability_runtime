@@ -284,5 +284,39 @@ HWTEST_F(ConnectServerManagerTest, RegisterAddInstanceCallbackTest_0100, TestSiz
     EXPECT_FALSE(connectServerManager.addInstanceCallbacks_.empty());
     TAG_LOGI(AAFwkTag::TEST, "RegisterAddInstanceCallbackTest_0100 is end");
 }
+
+/*
+ * @tc.number    : StoreInstanceMessage_0100
+ * @tc.name      : ConnectServerManager
+ * @tc.desc      : Test Function ConnectServerManager::StoreInstanceMessage
+ */
+HWTEST_F(ConnectServerManagerTest, StoreInstanceMessage_0100, TestSize.Level1)
+{
+    int32_t tid = 1;
+    int32_t instanceId = 1;
+
+    ConnectServerManager &connectServerManager = AbilityRuntime::ConnectServerManager::Get();
+    connectServerManager.instanceMap_.clear();
+    auto result = connectServerManager.StoreInstanceMessage(tid, instanceId);
+    EXPECT_EQ(connectServerManager.instanceMap_.size(), 1);
+    EXPECT_EQ(result, true);
+}
+
+/*
+ * @tc.number    : StoreDebuggerInfo_0100
+ * @tc.name      : StoreDebuggerInfo
+ * @tc.desc      : Test Function ConnectServerManager::StoreDebuggerInfo
+ */
+HWTEST_F(ConnectServerManagerTest, StoreDebuggerInfo_0100, TestSize.Level1)
+{
+    int32_t tid = 1;
+    void* vm = nullptr;
+    panda::JSNApi::DebugOption debugOption;
+    DebuggerPostTask debuggerPostTask = [](std::function<void()>&&) {};
+    bool isDebugApp = false;
+    ConnectServerManager &connectServerManager = AbilityRuntime::ConnectServerManager::Get();
+    connectServerManager.StoreDebuggerInfo(tid, vm, debugOption, debuggerPostTask, isDebugApp);
+    EXPECT_NE(&connectServerManager, nullptr);
+}
 } // namespace AAFwk
 } // namespace OHOS

@@ -45,12 +45,12 @@ char* CreateCStringFromString(const std::string& source)
 }
 
 extern "C" {
-CJ_EXPORT RetHapModuleInfo FFICJGetHapModuleInfo(int64_t id)
+CJ_EXPORT RetHapModuleInfoV2 FFICJGetHapModuleInfo(int64_t id)
 {
     auto abilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
     if (abilityStageContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "get abilityStageContext failed");
-        return RetHapModuleInfo();
+        return RetHapModuleInfoV2();
     }
 
     return abilityStageContext->GetRetHapModuleInfo();
