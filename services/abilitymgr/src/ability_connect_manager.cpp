@@ -768,10 +768,7 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
             }
 
             result = DisconnectRecordNormal(list, connectRecord, callerDied);
-            if (result == ERR_OK) {
-                EventInfo eventInfo = BuildEventInfo(abilityRecord);
-                EventReport::SendDisconnectServiceEvent(EventName::DISCONNECT_SERVICE, eventInfo);
-            } else if (callerDied) {
+            if (result != ERR_OK && callerDied) {
                 DisconnectRecordForce(list, connectRecord);
                 result = ERR_OK;
             }
@@ -1192,6 +1189,8 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
     }
     RemoveConnectionRecordFromMap(connect);
 
+    EventInfo eventInfo = BuildEventInfo(abilityRecord);
+    EventReport::SendDisconnectServiceEvent(EventName::DISCONNECT_SERVICE, eventInfo);
     return ERR_OK;
 }
 
