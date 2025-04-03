@@ -397,6 +397,7 @@ void ChildMainThread::UpdateNativeChildLibModuleName(const AppLibPathMap &appLib
         return;
     }
 
+    std::map<std::string, int32_t> tmpPath;
     std::string nativeLibPath;
     for (const auto &libPathPair : appLibPaths) {
         for (const auto &libDir : libPathPair.second) {
@@ -405,16 +406,23 @@ void ChildMainThread::UpdateNativeChildLibModuleName(const AppLibPathMap &appLib
                 nativeLibPath += '/';
             }
             nativeLibPath += processInfo_->srcEntry;
-            if (access(nativeLibPath.c_str(), F_OK) == 0) {
+            auto ret = access(nativeLibPath.c_str(), F_OK);
+            if (ret == 0) {
                 nativeLibModuleName_ = libPathPair.first;
                 nativeModuleMgr->SetAppLibPath(libPathPair.first, libPathPair.second, isSystemApp);
-                TAG_LOGI(AAFwkTag::APPKIT, "Find native lib in app module: %{public}s", libPathPair.first.c_str());
+                TAG_LOGI(AAFwkTag::APPKIT, "Find native lib in app module: %{public}s--%{public}s",
+                    libPathPair.first.c_str(), nativeLibPath.c_str());
                 return;
+            } else {
+                tmpPath.emplace(nativeLibPath, ret);
             }
         }
     }
 
-    TAG_LOGE(AAFwkTag::APPKIT, "not find native lib(%{private}s)", processInfo_->srcEntry.c_str());
+    TAG_LOGE(AAFwkTag::APPKIT, "not find native lib(%{public}s)", processInfo_->srcEntry.c_str());
+    for (const auto &path : tmpPath) {
+        TAG_LOGE(AAFwkTag::APPKIT, "path: %{public}s, ret: %{public}d", path.first.c_str(), path.second);
+    }
 }
 
 void ChildMainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList,
@@ -427,7 +435,7 @@ void ChildMainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspLi
         }
         std::string libPath = LOCAL_CODE_PATH;
         libPath += (libPath.back() == '/') ? nativeLibraryPath : "/" + nativeLibraryPath;
-        TAG_LOGI(AAFwkTag::APPKIT, "napi lib path = %{private}s", libPath.c_str());
+        TAG_LOGI(AAFwkTag::APPKIT, "napi lib path = %{public}s", libPath.c_str());
         appLibPaths["default"].emplace_back(libPath);
     }
 
