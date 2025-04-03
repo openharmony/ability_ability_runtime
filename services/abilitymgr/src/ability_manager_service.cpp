@@ -11142,7 +11142,8 @@ bool AbilityManagerService::CheckCollaboratorType(int32_t type)
 }
 
 void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
-    std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility, bool needCheck)
+    std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility,
+    bool needCheck)
 {
     targetAbility = nullptr;
     int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
