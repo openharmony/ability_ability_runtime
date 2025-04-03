@@ -233,6 +233,10 @@ public:
 
     void CleanEmptyAbilityStage();
 
+    void InitAniApplicationContext();
+
+    void InitAniContext();
+
 #ifdef SUPPORT_GRAPHICS
     bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
 #endif
