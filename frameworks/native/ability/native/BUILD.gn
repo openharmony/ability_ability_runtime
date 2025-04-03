@@ -256,6 +256,7 @@ ohos_shared_library("abilitykit_native") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
     "${ability_runtime_path}/utils/global/time/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection",
   ]
@@ -275,6 +276,7 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_caller_complex.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_uiservice_ability_connection.cpp",
+    "${ability_runtime_native_path}/ability/native/ability_runtime/sts_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/ui_ability_servicehost_stub_impl.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_handler.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_manager.cpp",
@@ -292,6 +294,7 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/ability/native/query_erms_observer_proxy.cpp",
     "${ability_runtime_native_path}/ability/native/query_erms_observer_stub.cpp",
     "${ability_runtime_native_path}/ability/native/service_ability_impl.cpp",
+    "${ability_runtime_native_path}/ability/native/sts_free_install_observer.cpp",
     "${ability_runtime_native_path}/appkit/app/app_context.cpp",
     "${ability_runtime_native_path}/appkit/app/context_container.cpp",
     "${ability_runtime_native_path}/appkit/app/context_deal.cpp",
@@ -329,6 +332,7 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:event_report",
@@ -345,6 +349,7 @@ ohos_shared_library("abilitykit_native") {
     "access_token:libtokenid_sdk",
     "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_base",
+    "bundle_framework:bms_ani_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -729,6 +734,7 @@ config("uiability_config") {
 
 ohos_shared_library("uiabilitykit_native") {
   include_dirs = [
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
@@ -737,6 +743,7 @@ ohos_shared_library("uiabilitykit_native") {
 
   sources = [
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ui_ability.cpp",
+    "${ability_runtime_native_path}/ability/native/ability_runtime/sts_ui_ability.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_handler_stage.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_manager_stage.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/reverse_continuation_scheduler_primary_stage.cpp",
@@ -767,6 +774,7 @@ ohos_shared_library("uiabilitykit_native") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:event_report",
   ]
@@ -788,6 +796,7 @@ ohos_shared_library("uiabilitykit_native") {
     "resource_management:global_resmgr",
     "runtime_core:ani",
     "samgr:samgr_proxy",
+    "window_manager:windowstageani_kit",
   ]
   public_external_deps = [
     "bundle_framework:appexecfwk_core",
