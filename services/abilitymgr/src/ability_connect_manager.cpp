@@ -3543,7 +3543,11 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetUIExtensionBySessionFro
         if (!service.second) {
             return false;
         }
-        int32_t srcPersistentId = service.second->GetSessionInfo()->persistentId;
+        auto sessionInfoPtr = service.second->GetSessionInfo();
+        if (!sessionInfoPtr) {
+            return false;
+        }
+        int32_t srcPersistentId = sessionInfoPtr->persistentId;
         return srcPersistentId == persistentId;
     };
     std::lock_guard lock(serviceMapMutex_);
