@@ -149,6 +149,18 @@ public:
      */
     bool IsSceneBoard() const;
 
+    bool IsHook() const
+    {
+        return want_ && want_->GetBoolParam("ohos.abilityruntime.is_hook", false);
+    }
+
+    void SetHook(bool isHook)
+    {
+        if (want_) {
+            want_->SetParam("ohos.abilityruntime.is_hook", isHook);
+        }
+    }
+
 private:
     bool isTerminating_ = false;
     bool isFocused_ = false;

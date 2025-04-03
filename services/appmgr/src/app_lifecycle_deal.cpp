@@ -18,9 +18,11 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "in_process_call_wrapper.h"
 #include "time_util.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
+#include "bundle_mgr_helper.h"
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
@@ -79,8 +81,29 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
             FreezeUtil::GetInstance().AddLifecycleEvent(ability->GetToken(), entry);
         }
         TAG_LOGD(AAFwkTag::APPMGR, "Launch");
+        bool isHookAbility = ability->IsHook();
+        if (isHookAbility) {
+            auto bundleManagerHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+            HapModuleInfo hapModuleInfo;
+            if (!bundleManagerHelper->GetHapModuleInfo(*abilityInfo, hapModuleInfo)) {
+                TAG_LOGW(AAFwkTag::APPMGR, "GetHapModuleInfo fail");
+                return;
+            }
+            int32_t BASE_USER_RANGE = 200000;
+            auto userId = abilityInfo->uid / BASE_USER_RANGE;
+            abilityInfo = std::make_shared<AbilityInfo>();
+            Want want;
+            want.SetElementName("", hapModuleInfo.bundleName, hapModuleInfo.abilitySrcEntryDelegator,
+                hapModuleInfo.abilityStageSrcEntryDelegator);
+            if (!IN_PROCESS_CALL(bundleManagerHelper->QueryAbilityInfo(
+                want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, *abilityInfo))) {
+                TAG_LOGW(AAFwkTag::APPMGR, "QueryAbilityInfo fail");
+                return;
+            }
+        }
         appThread->ScheduleLaunchAbility(*abilityInfo, ability->GetToken(),
             ability->GetWant(), ability->GetAbilityRecordId());
+        ability->SetHook(false);
     } else {
         TAG_LOGW(AAFwkTag::APPMGR, "null appThread or ability");
     }
