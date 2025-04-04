@@ -15,5 +15,13 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 group("ani_packages") {
-  deps = [ "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common" ]
+  deps = [
+    "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_abc_etc",
+    "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_ability_monitor_abc_etc",
+    "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_application_testRunner_abc_etc",
+    "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_args_abc_etc",
+    "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_registry_abc_etc",
+    "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_registry_ani_kit",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+  ]
 }
