@@ -114,7 +114,7 @@ bool UIAbilityLifecycleManager::ProcessColdStartBranch(AbilityRequest &abilityRe
                 pThis->StartSpecifiedRequest(*nextRequest);
                 });
         }
-        return true;
+        return false;
     }
     AddCallerRecord(abilityRequest, sessionInfo, uiAbilityRecord);
     uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
@@ -133,9 +133,10 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     auto isCallBySCB = sessionInfo->want.GetBoolParam(ServerConstant::IS_CALL_BY_SCB, true);
     sessionInfo->want.RemoveParam(ServerConstant::IS_CALL_BY_SCB);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartUIAbility session:%{public}d. bundle:%{public}s, ability:%{public}s, "
-        "instanceKey:%{public}s, requestId: %{public}d, isCallBySCB: %{public}d", sessionInfo->persistentId,
-        abilityRequest.abilityInfo.bundleName.c_str(), abilityRequest.abilityInfo.name.c_str(),
-        sessionInfo->instanceKey.c_str(), sessionInfo->requestId, isCallBySCB);
+        "instanceKey:%{public}s, requestId: %{public}d, isCallBySCB: %{public}d, reuseDelegator: %{public}d",
+        sessionInfo->persistentId, abilityRequest.abilityInfo.bundleName.c_str(),
+        abilityRequest.abilityInfo.name.c_str(), sessionInfo->instanceKey.c_str(),
+        sessionInfo->requestId, isCallBySCB, sessionInfo->reuseDelegatorWindow);
     RemoveAbilityRequest(sessionInfo->requestId);
     abilityRequest.sessionInfo = sessionInfo;
     bool isHook = false;
@@ -218,6 +219,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
         if (uiAbilityRecord == nullptr) {
             uiAbilityRecord = CreateAbilityRecord(abilityRequest, sessionInfo);
             bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
+            abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, sessionInfo->instanceKey);
             auto abilityRecord = FindRecordFromSessionMap(abilityRequest, false);
             if (isUIAbility && IsHookModule(abilityRequest) && abilityRecord == nullptr &&
                 (sessionInfo->processOptions == nullptr ||
@@ -225,6 +227,8 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "only first need call SetIsHook");
                 uiAbilityRecord->SetIsHook(true);
             }
+        } else {
+            uiAbilityRecord->SetInstanceKey(sessionInfo->instanceKey);
         }
         isColdStart = true;
         UpdateProcessName(abilityRequest, uiAbilityRecord);
@@ -1227,6 +1231,7 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
         return;
     }
     isColdStart = true;
+    uiAbilityRecord->SetInstanceKey(sessionInfo->instanceKey);
 
     MoreAbilityNumbersSendEventInfo(sessionInfo->userId, sessionInfo->want.GetElement().GetBundleName(),
         sessionInfo->want.GetElement().GetAbilityName(), sessionInfo->want.GetElement().GetModuleName());
@@ -1316,7 +1321,23 @@ bool UIAbilityLifecycleManager::IsHookModule(const AbilityRequest &abilityReques
         abilityRequest.abilityInfo, hapModuleInfo)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "module:%{public}s, ability:%{public}s",
             hapModuleInfo.abilityStageSrcEntryDelegator.c_str(), hapModuleInfo.abilitySrcEntryDelegator.c_str());
-        return !hapModuleInfo.abilitySrcEntryDelegator.empty() && !hapModuleInfo.abilityStageSrcEntryDelegator.empty();
+        if (hapModuleInfo.abilitySrcEntryDelegator.empty() || hapModuleInfo.abilityStageSrcEntryDelegator.empty()) {
+            return false;
+        }
+        if (hapModuleInfo.abilityStageSrcEntryDelegator == hapModuleInfo.moduleName) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "not support");
+            return false;
+        }
+        Want want;
+        want.SetElementName("", hapModuleInfo.bundleName, hapModuleInfo.abilitySrcEntryDelegator,
+            hapModuleInfo.abilityStageSrcEntryDelegator);
+        AppExecFwk::AbilityInfo abilityInfo;
+        if (!IN_PROCESS_CALL(DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance()->QueryAbilityInfo(
+            want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId_, abilityInfo))) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "Query hookAbilityInfo fail");
+            return false;
+        }
+        return true;
     }
     return false;
 }
