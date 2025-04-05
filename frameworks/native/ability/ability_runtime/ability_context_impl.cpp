@@ -44,6 +44,7 @@ constexpr const char* UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExten
 constexpr const char* FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
 constexpr const char* DISPOSED_PROHIBIT_BACK = "APPGALLERY_APP_DISPOSED_PROHIBIT_BACK";
 constexpr const char* IS_WINDOWMODE_FOLLOWHOST = "ohos.uec.params.isWindowModeFollowHost";
+constexpr const char* USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
 constexpr const int32_t ERR_NOT_SUPPORTED = -2;
 
 struct RequestResult {
@@ -1111,7 +1112,7 @@ ErrCode AbilityContextImpl::CreateModalUIExtensionWithApp(const AAFwk::Want &wan
         TAG_LOGE(AAFwkTag::CONTEXT, "null uiContent");
         return ERR_INVALID_VALUE;
     }
-    if (IsUIExtensionExist(want)) {
+    if (IsUIExtensionExist(want) && !want.GetBoolParam(USE_GLOBAL_UICONTENT, false)) {
         TAG_LOGD(AAFwkTag::CONTEXT, "exist uIExtension");
         return ERR_OK;
     }
