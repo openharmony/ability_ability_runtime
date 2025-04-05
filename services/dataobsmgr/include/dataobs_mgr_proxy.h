@@ -43,7 +43,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
 
-    virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
+    virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        int32_t userId = -1) override;
 
     /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
@@ -53,7 +54,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
+    virtual int UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        int32_t userId = -1) override;
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uri.
@@ -62,7 +64,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int NotifyChange(const Uri &uri) override;
+    virtual int NotifyChange(const Uri &uri, int32_t userId = -1) override;
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.

@@ -49,6 +49,7 @@ public:
         NOTIFY_PROCESS,
         TRANS_BUTT,
     };
+
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
      *
@@ -57,7 +58,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) = 0;
+    virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1) = 0;
 
     /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
@@ -67,7 +68,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) = 0;
+    virtual int UnregisterObserver(const Uri &uri,
+        sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1) = 0;
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uri.
@@ -76,7 +78,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int NotifyChange(const Uri &uri) = 0;
+    virtual int NotifyChange(const Uri &uri, int32_t userId = -1) = 0;
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.

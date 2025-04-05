@@ -35,9 +35,9 @@ namespace OHOS {
 namespace AAFwk {
 class MockDataObsMgrStub : public DataObsManagerStub {
 public:
-    MOCK_METHOD2(RegisterObserver, int(const Uri&, sptr<IDataAbilityObserver>));
-    MOCK_METHOD2(UnregisterObserver, int(const Uri&, sptr<IDataAbilityObserver>));
-    MOCK_METHOD1(NotifyChange, int(const Uri&));
+    MOCK_METHOD3(RegisterObserver, int(const Uri&, sptr<IDataAbilityObserver>, int32_t userId));
+    MOCK_METHOD3(UnregisterObserver, int(const Uri&, sptr<IDataAbilityObserver>, int32_t userId));
+    MOCK_METHOD2(NotifyChange, int(const Uri&, int32_t userId));
 
     MOCK_METHOD3(RegisterObserverExt, Status(const Uri&, sptr<IDataAbilityObserver>, bool));
     MOCK_METHOD2(UnregisterObserverExt, Status(const Uri&, sptr<IDataAbilityObserver>));
