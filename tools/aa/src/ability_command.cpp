@@ -14,9 +14,11 @@
  */
 #include "ability_command.h"
 
+#include <charconv>
 #include <csignal>
 #include <cstdlib>
 #include <getopt.h>
+#include <iostream>
 #include <regex>
 #include "ability_manager_client.h"
 #include "app_mgr_client.h"
@@ -791,10 +793,9 @@ Reason AbilityManagerShellCommand::CovertExitReason(std::string& reasonStr)
 pid_t AbilityManagerShellCommand::ConvertPid(std::string& inputPid)
 {
     pid_t pid = 0;
-    try {
-        pid = static_cast<pid_t>(std::stoi(inputPid));
-    } catch (...) {
-        TAG_LOGW(AAFwkTag::AA_TOOL, "pid stoi(%{public}s) failed", inputPid.c_str());
+    auto res = std::from_chars(inputPid.c_str(), inputPid.c_str() + inputPid.size(), pid);
+    if (res.ec != std::errc()) {
+        TAG_LOGE(AAFwkTag::AA_TOOL, "pid stoi(%{public}s) failed", inputPid.c_str());
     }
     return pid;
 }
@@ -2358,7 +2359,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
     }
 
     ExitReason exitReason = { CovertExitReason(reason), "Force exit app by aa." };
-    result = AbilityManagerClient::GetInstance()->ForceExitApp(std::stoi(pid), exitReason);
+    result = AbilityManagerClient::GetInstance()->ForceExitApp(ConvertPid(pid), exitReason);
     if (result == OHOS::ERR_OK) {
         resultReceiver_ = STRING_BLOCK_AMS_SERVICE_OK + "\n";
     } else {
@@ -2489,7 +2490,7 @@ ErrCode AbilityManagerShellCommand::RunAsNotifyAppFaultCommand()
     faultData.errorObject.message = errorMessage;
     faultData.errorObject.stack = errorStack;
     faultData.faultType = CovertFaultType(faultType);
-    faultData.pid = std::stoi(pid);
+    faultData.pid = ConvertPid(pid);
     DelayedSingleton<AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
     return result;
 }
