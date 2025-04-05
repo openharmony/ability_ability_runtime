@@ -516,7 +516,7 @@ private:
         const std::vector<sptr<IRemoteObject>> &tokens);
     void CancelPrepareTerminate(std::shared_ptr<AbilityRecord> abilityRecord);
     bool UpdateSpecifiedFlag(std::shared_ptr<AbilityRecord> abilityRequest, const std::string &flag);
-    bool ProcessColdStartBranch(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, 
+    bool ProcessColdStartBranch(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         std::shared_ptr<AbilityRecord> uiAbilityRecord, bool& isColdStart);
     bool TryProcessHookModule(AbilityRequest& request, bool isHookModule);
 

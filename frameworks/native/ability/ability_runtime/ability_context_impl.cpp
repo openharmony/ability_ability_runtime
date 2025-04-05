@@ -1239,24 +1239,15 @@ std::shared_ptr<Context> AbilityContextImpl::CreateDisplayContext(uint64_t displ
 
 ErrCode AbilityContextImpl::RevokeDelegator()
 {
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "capability not support");
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+    }
     if (!IsHook() || GetHookOff()) {
         TAG_LOGE(AAFwkTag::CONTEXT, "repeated called");
         return AAFwk::ERR_NOT_HOOK;
     }
-    TAG_LOGI(AAFwkTag::CONTEXT, "called");
-    auto sessionToken = GetSessionToken();
-    if (sessionToken == nullptr) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "null sessionToken");
-        return ERR_INVALID_VALUE;
-    }
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
-        auto ifaceSessionToken = iface_cast<Rosen::ISession>(sessionToken);
-        ErrCode ret = static_cast<int32_t>(ifaceSessionToken->NotifyDisableDelegatorChange());
-        if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "scb call, revokeDelegator err: %{public}d", ret);
-            return AAFwk::ERR_FROM_WINDOW;
-        }
-    }
+    TAG_LOGI(AAFwkTag::CONTEXT, "RevokeDelegator called");
     auto want = GetWant();
     if (want == nullptr) {
         TAG_LOGW(AAFwkTag::CONTEXT, "null want");
@@ -1264,12 +1255,23 @@ ErrCode AbilityContextImpl::RevokeDelegator()
     }
     want->SetParam("ohos.ability.hookOff", true);
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->RevokeDelegator(token_);
-    if (err == ERR_OK) {
-        SetHookOff(true);
-    } else {
-        TAG_LOGE(AAFwkTag::CONTEXT, "AbilityContextImpl::RevokeDelegator is failed:%{public}d", err);
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "RevokeDelegator is failed:%{public}d", err);
+        return err;
     }
-    return err;
+    auto sessionToken = GetSessionToken();
+    if (sessionToken == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "null sessionToken");
+        return ERR_INVALID_VALUE;
+    }
+    auto ifaceSessionToken = iface_cast<Rosen::ISession>(sessionToken);
+    err = static_cast<int32_t>(ifaceSessionToken->NotifyDisableDelegatorChange());
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "scb call, revokeDelegator err: %{public}d", err);
+        return AAFwk::ERR_FROM_WINDOW;
+    }
+    SetHookOff(true);
+    return ERR_OK;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

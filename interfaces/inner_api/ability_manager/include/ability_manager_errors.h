@@ -702,9 +702,6 @@ enum {
     ERR_NULL_APP_MGR_SERVICE_INNER = 2097302,
     ERR_NULL_APP_MGR_PROXY = 2097303,
     ERR_NO_APP_RECORD = 2097304,
-    ERR_NOT_HOOK = 2097305,
-    ERR_FROM_WINDOW = 2097306,
-    ERR_INVALID_CONTEXT = 2097307,
 
     /*
      * Result(2097305) for extension starting ability controlled
@@ -779,6 +776,9 @@ enum {
      * Result (2097317) for session info is nullptr.
      */
     ERR_NULL_SESSION_INFO = 2097317,
+    ERR_NOT_HOOK = 2097321,
+    ERR_FROM_WINDOW = 2097322,
+    ERR_INVALID_CONTEXT = 2097323,
     INTENT_NOT_EXIST = 2097329,
     INTENT_STATE_NOT_EXECUTING = 2097330,
     /**
