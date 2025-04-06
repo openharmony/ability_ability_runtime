@@ -303,7 +303,8 @@ public:
      * @param  uid, uid.
      * @return 0 if success.
      */
-    int UpdateApplicationInfoInstalled(const std::string &bundleName, const int32_t uid, const std::string &moduleName);
+    int UpdateApplicationInfoInstalled(const std::string &bundleName, const int32_t uid, const std::string &moduleName,
+        bool isPlugin);
 
     /**
      * Ability attach timeout. If start ability encounter failure, attach timeout to terminate.

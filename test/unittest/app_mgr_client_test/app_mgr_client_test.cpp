@@ -660,7 +660,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateApplicationInfoInstalled_001, Test
     std::string bundleName = "";
     int uid = 1;
     std::string moduleName = "";
-    appMgrClient->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    appMgrClient->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, false);
 }
 
 /**
