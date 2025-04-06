@@ -79,7 +79,8 @@ private:
 
     STSRuntime& stsRuntime_;
 
-    void SetJsAbilityStage(const std::shared_ptr<Context> &context);
+    void SetJsAbilityStage(const std::shared_ptr<Context> &context,
+        const std::weak_ptr<AppExecFwk::OHOSApplication> application);
     std::unique_ptr<STSNativeReference> stsAbilityStageObj_;
     ani_object stageObj_ = nullptr;
 };
