@@ -444,19 +444,19 @@ HWTEST_F(AppMgrServiceInnerFourthTest, UpdateApplicationInfoInstalled_0100, Test
     int uid = 0;
     std::string moduleName;
     appMgrServiceInner->appRunningManager_ = nullptr;
-    auto res = appMgrServiceInner->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    auto res = appMgrServiceInner->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, false);
     EXPECT_EQ(res, ERR_NO_INIT);
     appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
     IPCSkeleton::SetCallingUid(RECORD_ID);
-    res = appMgrServiceInner->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    res = appMgrServiceInner->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, false);
     EXPECT_EQ(res, ERR_PERMISSION_DENIED);
     IPCSkeleton::SetCallingUid(ROOT_UID);
     appMgrServiceInner->remoteClientManager_ = nullptr;
-    res = appMgrServiceInner->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    res = appMgrServiceInner->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, false);
     EXPECT_EQ(res, ERR_NO_INIT);
     appMgrServiceInner->remoteClientManager_ = std::make_shared<RemoteClientManager>();
     appMgrServiceInner->remoteClientManager_->SetBundleManagerHelper(nullptr);
-    res = appMgrServiceInner->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    res = appMgrServiceInner->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, false);
     EXPECT_EQ(res, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "UpdateApplicationInfoInstalled_0100 end");
 }

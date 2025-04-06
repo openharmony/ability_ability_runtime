@@ -76,7 +76,7 @@ void StartAbilityUtilsFuzztest1(bool boolParam, std::string &stringParam, int32_
     StartAbilityUtils::CheckAppProvisionMode(want, int32Param);
     std::shared_ptr<StartAbilityInfoWrap>  startAbilityInfoWrap =
         std::make_shared<StartAbilityInfoWrap>(want, int32Param, int32Param, callerToken, boolParam);
-    StartAbilityInfo::CreateStartAbilityInfo(want, int32Param, int32Param);
+    StartAbilityInfo::CreateStartAbilityInfo(want, int32Param, int32Param, nullptr);
     StartAbilityInfo::CreateCallerAbilityInfo(nullptr);
     StartAbilityInfo::CreateCallerAbilityInfo(callerToken);
 }
