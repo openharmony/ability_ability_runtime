@@ -386,8 +386,23 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     auto iterator = abilityStages_.find(moduleName);
     if (iterator == abilityStages_.end()) {
         auto stageContext = std::make_shared<AbilityRuntime::AbilityStageContext>();
-        stageContext->SetParentContext(abilityRuntimeContext_);
-        stageContext->InitHapModuleInfo(abilityInfo);
+        bool isPlugin = abilityInfo->applicationInfo.bundleType == AppExecFwk::BundleType::APP_PLUGIN;
+        if (isPlugin) {
+            stageContext->SetIsPlugin(true);
+            stageContext->InitPluginHapModuleInfo(abilityInfo, abilityRuntimeContext_->GetBundleName());
+            auto pluginContext = stageContext->CreatePluginContext(
+                abilityInfo->bundleName, abilityInfo->moduleName, abilityRuntimeContext_);
+            if (pluginContext == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "null pluginContext");
+                return nullptr;
+            }
+            auto rm = pluginContext->GetResourceManager();
+            stageContext->SetResourceManager(rm);
+        } else {
+            stageContext->InitHapModuleInfo(abilityInfo);
+            stageContext->SetParentContext(abilityRuntimeContext_);
+        }
+
         stageContext->SetConfiguration(GetConfiguration());
         stageContext->SetProcessName(GetProcessName());
         std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfo = stageContext->GetHapModuleInfo();

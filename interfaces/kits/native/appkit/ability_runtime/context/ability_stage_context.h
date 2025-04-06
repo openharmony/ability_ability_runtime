@@ -30,6 +30,8 @@ public:
 
     void InitHapModuleInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo);
     void InitHapModuleInfo(const AppExecFwk::HapModuleInfo &hapModuleInfo);
+    void InitPluginHapModuleInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
+        const std::string &hostBundleName);
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo() const override;
 
     void SetConfiguration(const std::shared_ptr<AppExecFwk::Configuration> &config);
@@ -41,6 +43,8 @@ public:
     std::string GetBundleName() const override;
     std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo() const override;
 
+    std::shared_ptr<Context> CreatePluginContext(const std::string &pluginBundleName,
+        const std::string &moduleName, std::shared_ptr<Context> inputContext);
     std::shared_ptr<Context> CreateBundleContext(const std::string &bundleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;
@@ -70,6 +74,7 @@ public:
 
     bool IsUpdatingConfigurations() override;
     bool PrintDrawnCompleted() override;
+    void SetIsPlugin(bool isPlugin);
 
     sptr<IRemoteObject> GetToken() override;
     void SetToken(const sptr<IRemoteObject> &token) override;
