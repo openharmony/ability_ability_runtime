@@ -99,11 +99,11 @@ int AppScheduler::TerminateAbility(const sptr<IRemoteObject> &token, bool clearM
 }
 
 int AppScheduler::UpdateApplicationInfoInstalled(const std::string &bundleName, const int32_t uid,
-    const std::string &moduleName)
+    const std::string &moduleName, bool isPlugin)
 {
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Start to update the application info after new module installed.");
-    int ret = (int)appMgrClient_->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    int ret = (int)appMgrClient_->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, isPlugin);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to UpdateApplicationInfoInstalled");
         return INNER_ERR;

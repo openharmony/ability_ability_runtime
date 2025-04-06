@@ -264,13 +264,13 @@ AppMgrResultCode AppMgrClient::AttachPidToParent(const sptr<IRemoteObject> &toke
 }
 
 AppMgrResultCode AppMgrClient::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
-    const std::string &moduleName)
+    const std::string &moduleName, bool isPlugin)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            int32_t result = amsService->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+            int32_t result = amsService->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, isPlugin);
             if (result == ERR_OK) {
                 return AppMgrResultCode::RESULT_OK;
             }

@@ -337,13 +337,13 @@ void AmsMgrScheduler::PrepareTerminate(const sptr<IRemoteObject> &token, bool cl
 }
 
 int32_t AmsMgrScheduler::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
-    const std::string &moduleName)
+    const std::string &moduleName, bool isPlugin)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
 
-    return amsMgrServiceInner_->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    return amsMgrServiceInner_->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, isPlugin);
 }
 
 int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex)

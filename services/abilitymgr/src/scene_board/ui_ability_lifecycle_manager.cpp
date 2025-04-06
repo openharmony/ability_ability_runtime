@@ -521,8 +521,9 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     // When 'processMode' is set to new process mode, the priority is higher than 'isolationProcess'.
     bool isNewProcessMode = abilityRequest.processOptions &&
         ProcessOptions::IsNewProcessMode(abilityRequest.processOptions->processMode);
+    auto isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
     if (!isNewProcessMode && abilityInfo.isolationProcess && AppUtils::GetInstance().IsStartSpecifiedProcess()
-        && isUIAbility) {
+        && isUIAbility && !isPlugin) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess");
         auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
         specifiedRequest->specifiedProcessState = SpecifiedProcessState::STATE_PROCESS;
@@ -530,7 +531,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
         return ERR_OK;
     }
     auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
-    if (isSpecified) {
+    if (isSpecified && !isPlugin) {
         auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
         specifiedRequest->preCreateProcessName = true;
         AddSpecifiedRequest(specifiedRequest);
@@ -575,8 +576,9 @@ int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const Ab
     // When 'processMode' is set to new process mode, the priority is higher than 'isolationProcess'.
     bool isNewProcessMode = abilityRequest.processOptions &&
         ProcessOptions::IsNewProcessMode(abilityRequest.processOptions->processMode);
+    auto isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
     if (!isNewProcessMode && abilityInfo.isolationProcess && AppUtils::GetInstance().IsStartSpecifiedProcess()
-        && isUIAbility) {
+        && isUIAbility && !isPlugin) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess");
         auto specifiedRequest = std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest);
         specifiedRequest->specifiedProcessState = SpecifiedProcessState::STATE_PROCESS;
@@ -584,7 +586,7 @@ int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const Ab
         return ERR_OK;
     }
     auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
-    if (isSpecified) {
+    if (isSpecified && !isPlugin) {
         auto specifiedRequest = std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest);
         specifiedRequest->preCreateProcessName = true;
         AddSpecifiedRequest(specifiedRequest);

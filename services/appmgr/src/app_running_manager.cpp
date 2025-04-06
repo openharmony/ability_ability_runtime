@@ -388,6 +388,13 @@ int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(
             continue;
         }
         auto appInfoList = appRecord->GetAppInfoList();
+        if (appInfo.bundleType == BundleType::APP_PLUGIN) {
+            if (appRecord->GetUid() == appInfo.uid) {
+                TAG_LOGI(AAFwkTag::APPMGR, "UpdateApplicationInfoInstalled: %{public}s", moduleName.c_str());
+                appRecord->UpdateApplicationInfoInstalled(appInfo, moduleName);
+                continue;
+            }
+        }
         for (auto iter : appInfoList) {
             if (iter->bundleName == appInfo.bundleName && iter->uid == appInfo.uid) {
                 appRecord->UpdateApplicationInfoInstalled(appInfo, moduleName);

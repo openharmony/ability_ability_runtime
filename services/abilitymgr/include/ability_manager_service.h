@@ -2530,6 +2530,8 @@ private:
         bool isSendDialogResult, uint32_t specifyTokenId,
         const std::string& callerBundleName);
 
+    int32_t CheckStartPlugin(const Want& want, sptr<IRemoteObject> callerToken);
+
     int StartAbilityByConnectManager(const Want& want, const AbilityRequest& abilityRequest,
         const AppExecFwk::AbilityInfo& abilityInfo, int validUserId, sptr<IRemoteObject> callerToken);
 

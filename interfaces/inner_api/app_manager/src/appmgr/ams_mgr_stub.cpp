@@ -577,7 +577,7 @@ int32_t AmsMgrStub::HandleUpdateApplicationInfoInstalled(MessageParcel &data, Me
     std::string bundleName = data.ReadString();
     int uid = data.ReadInt32();
     std::string moduleName = data.ReadString();
-    int32_t result = UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    int32_t result = UpdateApplicationInfoInstalled(bundleName, uid, moduleName, data.ReadBool());
     reply.WriteInt32(result);
     return NO_ERROR;
 }

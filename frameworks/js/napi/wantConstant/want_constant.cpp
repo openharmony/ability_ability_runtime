@@ -129,6 +129,7 @@ napi_value WantConstantInit(napi_env env, napi_value exports)
     SetNamedProperty(env, params, "ohos.extra.param.key.createAppInstance", "CREATE_APP_INSTANCE_KEY");
     SetNamedProperty(env, params, "ohos.param.callerAppCloneIndex", "CALLER_APP_CLONE_INDEX");
     SetNamedProperty(env, params, "ohos.media.params.hideSensitiveType", "HIDE_SENSITIVE_TYPE");
+    SetNamedProperty(env, params, "ohos.ability.params.pluginAbility", "DESTINATION_PLUGIN_ABILITY");
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("Action", action),
         DECLARE_NAPI_PROPERTY("Entity", entity),

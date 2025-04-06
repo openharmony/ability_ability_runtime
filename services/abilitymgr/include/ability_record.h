@@ -1161,6 +1161,11 @@ public:
         return securityFlag_;
     }
 
+    bool IsPluginAbility() const
+    {
+        return isPluginAbility_;
+    }
+
     void ScheduleCollaborate(const Want &want);
 
     bool IsHook () const
@@ -1317,6 +1322,7 @@ private:
     bool securityFlag_ = false;
     bool isHook_ = false;
     bool hookOff_ = false;
+    bool isPluginAbility_ = false;
     std::atomic_bool isCallerSetProcess_ = false;       // new version
     std::atomic_bool backgroundAbilityWindowDelayed_ = false;
 
