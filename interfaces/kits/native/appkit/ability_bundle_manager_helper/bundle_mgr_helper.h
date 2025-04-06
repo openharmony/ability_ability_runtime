@@ -114,6 +114,11 @@ public:
         const std::string &bundleName, const std::string &moduleName, uint32_t resId, int32_t userId);
     std::string GetDataDir(const std::string &bundleName, const int32_t appIndex);
     ErrCode GetPluginInfosForSelf(std::vector<PluginBundleInfo> &pluginBundleInfos);
+    ErrCode GetPluginAbilityInfo(const std::string &hostBundleName, const std::string &pluginBundleName,
+        const std::string &pluginModuleName, const std::string &pluginAbilityName, int32_t userId,
+        AbilityInfo &pluginAbilityInfo);
+    ErrCode RegisterPluginEventCallback(sptr<IBundleEventCallback> pluginEventCallback);
+    ErrCode UnregisterPluginEventCallback(sptr<IBundleEventCallback> pluginEventCallback);
 
 private:
     sptr<IBundleMgr> Connect();

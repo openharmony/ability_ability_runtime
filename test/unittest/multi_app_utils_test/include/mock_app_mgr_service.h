@@ -39,7 +39,7 @@ public:
     MOCK_METHOD1(ApplicationBackgrounded, void(const int32_t recordId));
     MOCK_METHOD1(ApplicationTerminated, void(const int32_t recordId));
     MOCK_METHOD1(AbilityCleaned, void(const sptr<IRemoteObject>& token));
-    MOCK_METHOD3(UpdateApplicationInfoInstalled, int(const std::string&, const int uid, const std::string&));
+    MOCK_METHOD4(UpdateApplicationInfoInstalled, int(const std::string&, const int uid, const std::string&, bool));
     MOCK_METHOD3(KillApplication, int32_t(const std::string& appName, const bool clearPageStack, int32_t appIndex));
     MOCK_METHOD3(ForceKillApplication, int32_t(const std::string& appName, const int userId, const int appIndex));
     MOCK_METHOD1(KillProcessesByAccessTokenId, int32_t(const uint32_t accessTokenId));

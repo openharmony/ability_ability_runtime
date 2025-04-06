@@ -152,7 +152,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
-        const std::string &moduleName) = 0;
+        const std::string &moduleName, bool isPlugin) = 0;
 
     /**
      * KillApplication, call KillApplication() through proxy object, kill the application.

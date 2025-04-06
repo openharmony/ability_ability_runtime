@@ -287,7 +287,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
-        const std::string &moduleName);
+        const std::string &moduleName, bool isPlugin);
 
     /**
      * KillApplication, kill the application.

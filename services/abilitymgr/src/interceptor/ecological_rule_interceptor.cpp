@@ -105,7 +105,7 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
 
     int32_t appIndex = 0;
     auto startAbilityInfo = StartAbilityInfo::CreateStartAbilityInfo(want,
-        userId, appIndex);
+        userId, appIndex, nullptr);
     if (startAbilityInfo == nullptr || startAbilityInfo->status != ERR_OK) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "Get targetApplicationInfo failed");
         return false;
@@ -142,7 +142,7 @@ ErrCode EcologicalRuleInterceptor::QueryAtomicServiceStartupRule(Want &want, spt
     want.SetElement(launchWant.GetElement());
 
     int32_t appIndex = 0;
-    StartAbilityUtils::startAbilityInfo = StartAbilityInfo::CreateStartAbilityInfo(want, userId, appIndex);
+    StartAbilityUtils::startAbilityInfo = StartAbilityInfo::CreateStartAbilityInfo(want, userId, appIndex, nullptr);
     CHECK_RET_RETURN_RET(StartAbilityUtils::startAbilityInfo->status, "Get targetApplicationInfo failed");
 
     ErmsCallerInfo callerInfo;
