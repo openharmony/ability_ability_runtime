@@ -49,7 +49,6 @@ constexpr const char *TASKPOOL_LOWER = "taskpool";
 namespace {
 void RegisterStopPreloadSoCallback(STSRuntime& stsRuntime)
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
     std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
     if (startupManager == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null startupManager");
@@ -61,7 +60,6 @@ void RegisterStopPreloadSoCallback(STSRuntime& stsRuntime)
 
 bool STSAbilityStage::UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleInfo)
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
     for (auto &md: hapModuleInfo.metadata) {
         if (md.name == "USE_COMMON_CHUNK") {
             if (md.value != "true") {
@@ -77,7 +75,6 @@ bool STSAbilityStage::UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleI
 std::shared_ptr<AbilityStage> STSAbilityStage::Create(
     const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo)
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
     if (runtime == nullptr) {
         TAG_LOGW(AAFwkTag::APPKIT, "null runtime");
         return nullptr;
@@ -132,7 +129,6 @@ STSAbilityStage::~STSAbilityStage()
 void STSAbilityStage::Init(const std::shared_ptr<Context> &context,
     const std::weak_ptr<AppExecFwk::OHOSApplication> application)
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
     AbilityStage::Init(context, application);
 
     if (!context) {
@@ -145,12 +141,11 @@ void STSAbilityStage::Init(const std::shared_ptr<Context> &context,
         return;
     }
 
-    SetJsAbilityStage(context);
+    SetJsAbilityStage(context, application);
 }
 
 void STSAbilityStage::OnCreate(const AAFwk::Want &want) const
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
     AbilityStage::OnCreate(want);
 
     if (!stsAbilityStageObj_) {
@@ -169,7 +164,7 @@ void STSAbilityStage::OnCreate(const AAFwk::Want &want) const
     ani_method method = nullptr;
     status = env->Class_FindMethod(stsAbilityStageObj_->aniCls, "onCreate", ":V", &method);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "Class_FindMethod FAILED");
+        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindMethod FAILED");
         STSAbilityStageContext::ResetEnv(env);
         return;
     }
@@ -193,7 +188,6 @@ void STSAbilityStage::OnCreate(const AAFwk::Want &want) const
 
 void STSAbilityStage::OnDestroy() const
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
     AbilityStage::OnDestroy();
     if (!stsAbilityStageObj_) {
         TAG_LOGW(AAFwkTag::APPKIT, "Not found AbilityStage.js");
@@ -211,7 +205,7 @@ void STSAbilityStage::OnDestroy() const
     ani_method method = nullptr;
     status = env->Class_FindMethod(stsAbilityStageObj_->aniCls, "onDestroy", ":V", &method);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "Class_FindMethod FAILED");
+        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindMethod FAILED");
         STSAbilityStageContext::ResetEnv(env);
         return;
     }
@@ -229,19 +223,16 @@ void STSAbilityStage::OnDestroy() const
 
 std::string STSAbilityStage::OnAcceptWant(const AAFwk::Want &want)
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
     return std::string();
 }
 
 std::string STSAbilityStage::OnNewProcessRequest(const AAFwk::Want &want)
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
     return std::string();
 }
 
 void STSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
     AbilityStage::OnConfigurationUpdated(configuration);
     auto env = stsRuntime_.GetAniEnv();
     if (env == nullptr) {
@@ -274,7 +265,6 @@ void STSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& co
 
 void STSAbilityStage::OnMemoryLevel(int32_t level)
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
 }
 
 int32_t STSAbilityStage::RunAutoStartupTask(const std::function<void()> &callback, bool &isAsyncCallback,
@@ -318,19 +308,18 @@ napi_value STSAbilityStage::CallObjectMethod(const char* name, napi_value const 
 
 std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> STSAbilityStage::CreateStageProperty() const
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
     auto property = std::make_shared<AppExecFwk::DelegatorAbilityStageProperty>();
     return property;
 }
 
 std::string STSAbilityStage::GetHapModuleProp(const std::string &propName) const
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s called", __func__);
     return std::string();
 }
 
 
-void STSAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
+void STSAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context,
+    const std::weak_ptr<AppExecFwk::OHOSApplication> application)
 {
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "context nullptr");
@@ -344,7 +333,7 @@ void STSAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
 
     STSAbilityStageContext::ResetEnv(env);
 
-	ani_object stageCtxObj = STSAbilityStageContext::CreateStsAbilityStageContext(env, context, application_);
+    ani_object stageCtxObj = STSAbilityStageContext::CreateStsAbilityStageContext(env, context, application);
     if (stageCtxObj == nullptr) {
         STSAbilityStageContext::ResetEnv(env);
         TAG_LOGE(AAFwkTag::ABILITY, "CreateStsAbilityStageContext failed");
