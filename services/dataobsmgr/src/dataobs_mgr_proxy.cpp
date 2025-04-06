@@ -50,7 +50,8 @@ bool DataObsManagerProxy::WriteParam(MessageParcel &data, const Uri &uri, sptr<I
     return true;
 }
 
-int32_t DataObsManagerProxy::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
+int32_t DataObsManagerProxy::RegisterObserver(const Uri &uri,
+    sptr<IDataAbilityObserver> dataObserver, int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -61,6 +62,9 @@ int32_t DataObsManagerProxy::RegisterObserver(const Uri &uri, sptr<IDataAbilityO
     }
 
     if (!WriteParam(data, uri, dataObserver)) {
+        return INVALID_PARAM;
+    }
+    if (!data.WriteInt32(userId)) {
         return INVALID_PARAM;
     }
 
@@ -75,7 +79,8 @@ int32_t DataObsManagerProxy::RegisterObserver(const Uri &uri, sptr<IDataAbilityO
     return reply.ReadInt32(res) ? res : IPC_ERROR;
 }
 
-int32_t DataObsManagerProxy::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
+int32_t DataObsManagerProxy::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+    int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -86,6 +91,9 @@ int32_t DataObsManagerProxy::UnregisterObserver(const Uri &uri, sptr<IDataAbilit
     }
 
     if (!WriteParam(data, uri, dataObserver)) {
+        return INVALID_PARAM;
+    }
+    if (!data.WriteInt32(userId)) {
         return INVALID_PARAM;
     }
 
@@ -99,7 +107,7 @@ int32_t DataObsManagerProxy::UnregisterObserver(const Uri &uri, sptr<IDataAbilit
     return reply.ReadInt32(res) ? res : IPC_ERROR;
 }
 
-int32_t DataObsManagerProxy::NotifyChange(const Uri &uri)
+int32_t DataObsManagerProxy::NotifyChange(const Uri &uri, int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -111,6 +119,9 @@ int32_t DataObsManagerProxy::NotifyChange(const Uri &uri)
     if (!data.WriteString(uri.ToString())) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "write uri error, uri:%{public}s",
             CommonUtils::Anonymous(uri.ToString()).c_str());
+        return INVALID_PARAM;
+    }
+    if (!data.WriteInt32(userId)) {
         return INVALID_PARAM;
     }
     auto error = SendTransactCmd(IDataObsMgr::NOTIFY_CHANGE, data, reply, option);
