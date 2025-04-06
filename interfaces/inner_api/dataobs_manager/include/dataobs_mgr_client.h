@@ -46,7 +46,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
+    ErrCode RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1);
 
     /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
@@ -56,7 +56,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
+    ErrCode UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1);
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uri.
@@ -65,7 +65,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode NotifyChange(const Uri &uri);
+    ErrCode NotifyChange(const Uri &uri, int32_t userId = -1);
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
@@ -147,7 +147,13 @@ private:
     static constexpr int RESUB_INTERVAL = 2;
     static std::mutex mutex_;
     sptr<IDataObsMgr> dataObsManger_;
-    ConcurrentMap<sptr<IDataAbilityObserver>, std::list<Uri>> observers_;
+
+    struct ObserverInfo {
+        Uri uri;
+        int32_t userId;
+        ObserverInfo(Uri uri, int32_t userId) : uri(uri), userId(userId) {};
+    };
+    ConcurrentMap<sptr<IDataAbilityObserver>, std::list<struct ObserverInfo>> observers_;
 
     struct Param {
         Param(const Uri &uri, bool isDescendants) : uri(uri), isDescendants(isDescendants){};
