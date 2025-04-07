@@ -287,7 +287,7 @@ void AmsMgrProxy::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnM
     TAG_LOGD(AAFwkTag::APPMGR, "ending");
 }
 
-void AmsMgrProxy::KillProcessesByPids(std::vector<int32_t> &pids)
+void AmsMgrProxy::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -307,6 +307,10 @@ void AmsMgrProxy::KillProcessesByPids(std::vector<int32_t> &pids)
             TAG_LOGE(AAFwkTag::APPMGR, "Write pid failed");
             return;
         }
+    }
+    if (!data.WriteString(reason)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write reason failed");
+        return;
     }
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_BY_PIDS), data, reply, option);
