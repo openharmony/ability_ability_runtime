@@ -27,7 +27,7 @@ namespace AbilityDelegatorSts {
 
 using namespace OHOS::AbilityRuntime;
 enum ERROR_CODE {
-    INCORRECT_PARAMETERS    = 401,
+    INCORRECT_PARAMETERS = 401,
 };
 ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
     std::shared_ptr<AbilityRuntime::Context> context)
@@ -167,8 +167,8 @@ ani_object ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object, 
     TAG_LOGD(AAFwkTag::DELEGATOR, "ExecuteShellCommand called");
     if (nullptr == env) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
-        return OHOS::AbilityRuntime::CreateStsError(env, INCORRECT_PARAMETERS,
-            "Parse parameters failed, cmd must be string and timeout must be number.");
+        OHOS::AbilityRuntime::ThrowStsError(env, INCORRECT_PARAMETERS);
+        return {};
     }
     ani_object objValue = nullptr;
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
@@ -255,8 +255,7 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
 {
     if (nullptr == env) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
-        OHOS::AbilityRuntime::ThrowStsError(env, INCORRECT_PARAMETERS,
-            "Parse param monitor failed, monitor must be Monitor.");
+        OHOS::AbilityRuntime::ThrowStsError(env, INCORRECT_PARAMETERS);
         return;
     }
     ani_class monitorCls;
@@ -310,8 +309,7 @@ ani_int StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_class 
     TAG_LOGD(AAFwkTag::DELEGATOR, "StartAbility call");
     if (nullptr == env) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
-        OHOS::AbilityRuntime::ThrowStsError(env, INCORRECT_PARAMETERS,
-            "Parse want failed, want must be Want.");
+        OHOS::AbilityRuntime::ThrowStsError(env, INCORRECT_PARAMETERS);
         return ani_int(-1);
     }
     AAFwk::Want want;

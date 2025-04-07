@@ -226,7 +226,7 @@ private:
     std::shared_ptr<AbilityHandler> handler_ = nullptr;
     std::shared_ptr<StsAbilityResultListeners> abilityResultListeners_ = nullptr;
     ani_ref contentSession_;
-    std::shared_ptr<StsUIExtensionContentSession> stsUiExtContentSession_;
+    std::shared_ptr<ETSUIExtensionContentSession> etsUiExtContentSession_;
 
 #ifdef SUPPORT_GRAPHICS
     class StsUIExtensionAbilityDisplayListener : public OHOS::Rosen::IDisplayInfoChangedListener {

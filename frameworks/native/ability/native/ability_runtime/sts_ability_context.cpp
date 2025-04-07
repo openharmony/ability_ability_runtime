@@ -285,24 +285,24 @@ void StsAbilityContext::StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe
         want.SetParam(AAFwk::Want::PARAM_RESV_START_TIME, startTime);
         AddFreeInstallObserver(env, want, call, context);
     }
-    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    ErrCode innerErrCode = ERR_OK;
     if (opt != nullptr) {
         AAFwk::StartOptions startOptions;
         OHOS::AppExecFwk::UnwrapStartOptionsWithProcessOption(env, opt, startOptions);
-        *innerErrCode = context->StartAbility(want, startOptions, -1);
+        innerErrCode = context->StartAbility(want, startOptions, -1);
     } else {
-        *innerErrCode = context->StartAbility(want, -1);
+        innerErrCode = context->StartAbility(want, -1);
     }
     ani_object aniObject = CreateStsError(env, AbilityErrorCode::ERROR_OK);
-    if (*innerErrCode != ERR_OK) {
-        aniObject = CreateStsErrorByNativeErr(env, *innerErrCode);
+    if (innerErrCode != ERR_OK) {
+        aniObject = CreateStsErrorByNativeErr(env, innerErrCode);
     }
     if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
-        if (*innerErrCode != ERR_OK && freeInstallObserver_ != nullptr) {
+        if (innerErrCode != ERR_OK && freeInstallObserver_ != nullptr) {
             std::string bundleName = want.GetElement().GetBundleName();
             std::string abilityName = want.GetElement().GetAbilityName();
             std::string startTime = want.GetStringParam(AAFwk::Want::PARAM_RESV_START_TIME);
-            freeInstallObserver_->OnInstallFinished(bundleName, abilityName, startTime, *innerErrCode);
+            freeInstallObserver_->OnInstallFinished(bundleName, abilityName, startTime, innerErrCode);
         }
     } else {
         AsyncCallback(env, call, aniObject, nullptr);
