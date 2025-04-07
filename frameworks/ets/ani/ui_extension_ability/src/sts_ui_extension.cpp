@@ -664,10 +664,10 @@ bool StsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAF
         }
         // create UIExtensionContentSession
         std::weak_ptr<Context> wkctx = context;
-        stsUiExtContentSession_ = std::make_shared<StsUIExtensionContentSession>(sessionInfo, uiWindow,
+        etsUiExtContentSession_ = std::make_shared<ETSUIExtensionContentSession>(sessionInfo, uiWindow,
             wkctx, abilityResultListeners_);
-        ani_object sessonObj = StsUIExtensionContentSession::CreateStsUIExtensionContentSession(env,
-            sessionInfo, uiWindow, context, abilityResultListeners_, stsUiExtContentSession_);
+        ani_object sessonObj = ETSUIExtensionContentSession::CreateETSUIExtensionContentSession(env,
+            sessionInfo, uiWindow, context, abilityResultListeners_, etsUiExtContentSession_);
         // napi_value nativeContentSession = JsUIExtensionContentSession::CreateJsUIExtensionContentSession(
         //     env, sessionInfo, uiWindow, context, abilityResultListeners_);
         // napi_ref ref = nullptr;
@@ -812,7 +812,7 @@ void StsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
     //         //create UIEXtensionSessioni obj
     //         auto uiWindow = uiWindowMap_[componentId];
     //         auto env = stsRuntime_.GetAniEnv();
-    //         ani_object sessionObj = StsUIExtensionContentSession::CreateStsUIExtensionContentSession(env,
+    //         ani_object sessionObj = ETSUIExtensionContentSession::CreateETSUIExtensionContentSession(env,
     //             sessionInfo, uiWindow, GetContext(), abilityResultListeners_);
     //         CallObjectMethod(false, "onSessionDestroy", nullptr, sessionObj);
     //     }
