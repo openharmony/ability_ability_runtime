@@ -725,8 +725,13 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
     if (applicationInfo && applicationInfo->bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
         abilityStateData.isAtomicService = true;
     }
-    if (abilityInfo->type == AbilityType::EXTENSION) {
-        abilityStateData.extensionAbilityType = static_cast<int32_t>(abilityInfo->extensionAbilityType);
+    bool isUIExtension = AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType);
+    if (isUIExtension) {
+        if (!isAbility) {
+            abilityStateData.extensionAbilityType = static_cast<int32_t>(abilityInfo->extensionAbilityType);
+        } else {
+            abilityStateData.isUIExtNotifyOnAbility = true;
+        }
     }
     abilityStateData.processType = static_cast<int32_t>(processType_);
     auto serviceInner = appMgrServiceInner_.lock();
@@ -820,8 +825,7 @@ void AppRunningRecord::UpdateAbilityState(const sptr<IRemoteObject> &token, cons
         TAG_LOGE(AAFwkTag::APPMGR, "can not find ability record");
         return;
     }
-    if (state == AbilityState::ABILITY_STATE_CREATE &&
-        !AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->extensionAbilityType)) {
+    if (state == AbilityState::ABILITY_STATE_CREATE) {
         StateChangedNotifyObserver(
             abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_CREATE), true, false);
         return;
@@ -868,10 +872,9 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         }
 
         moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_FOREGROUND);
-        if (!AAFwk::UIExtensionUtils::IsUIExtension(ability->GetAbilityInfo()->extensionAbilityType)) {
-            StateChangedNotifyObserver(
-                ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND), true, false);
-        }
+        StateChangedNotifyObserver(
+            ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND), true, false);
+
         auto serviceInner = appMgrServiceInner_.lock();
         if (serviceInner) {
             serviceInner->OnAppStateChanged(shared_from_this(), curState_, false, false);
@@ -1022,10 +1025,8 @@ void AppRunningRecord::PopForegroundingAbilityTokens()
         auto moduleRecord = GetModuleRunningRecordByToken(*iter);
         if (moduleRecord != nullptr) {
             moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_FOREGROUND);
-            if (!AAFwk::UIExtensionUtils::IsUIExtension(ability->GetAbilityInfo()->extensionAbilityType)) {
-                StateChangedNotifyObserver(
-                    ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND), true, false);
-            }
+            StateChangedNotifyObserver(
+                ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND), true, false);
         } else {
             TAG_LOGW(AAFwkTag::APPMGR, "null moduleRecord");
         }
@@ -1048,7 +1049,7 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
     if (abilityRecord) {
         TAG_LOGI(AAFwkTag::APPMGR, "TerminateAbility:%{public}s", abilityRecord->GetName().c_str());
     }
-    if (!isTimeout && !AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->extensionAbilityType)) {
+    if (!isTimeout) {
         StateChangedNotifyObserver(
             abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
