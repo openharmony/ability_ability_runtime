@@ -140,7 +140,6 @@ constexpr const char* ARGS_USER_ID = "-u";
 constexpr const char* ARGS_CLIENT = "-c";
 constexpr const char* ILLEGAL_INFOMATION = "The arguments are illegal and you can enter '-h' for help.";
 
-
 constexpr int32_t NEW_RULE_VALUE_SIZE = 6;
 constexpr int32_t APP_ALIVE_TIME_MS = 1000;  // Allow background startup within 1 second after application startup
 constexpr int32_t REGISTER_FOCUS_DELAY = 5000;
@@ -11246,6 +11245,24 @@ int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector
     return uiAbilityManager->TryPrepareTerminateByPids(pids);
 }
 
+bool AbilityManagerService::ProcessLowMemoryKill(int32_t pid, const ExitReason &reason)
+{
+    if (reason.reason != Reason::REASON_RESOURCE_CONTROL || reason.exitMsg != GlobalConstant::LOW_MEMORY_KILL) {
+        return false;
+    }
+    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+    if (uiAbilityManager == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "null uiAbilityManager");
+        return false;
+    }
+    if (uiAbilityManager->IsBundleStarting(pid)) {
+        return true;
+    }
+    // set ability record kill reason
+    uiAbilityManager->RecordPidKilling(pid, GlobalConstant::LOW_MEMORY_KILL);
+    return false;
+}
+
 int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReason &reason)
 {
     bool supportShell = AmsConfigurationParameter::GetInstance().IsSupportAAKillWithReason();
@@ -11255,6 +11272,12 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
     if (!isCallingPerm && !(supportShell && isShellCall)) {
         TAG_LOGE(AAFwkTag::APPMGR, "permission verification fail");
         return ERR_PERMISSION_DENIED;
+    }
+
+    if (ProcessLowMemoryKill(pid, reason)) {
+        // if app is already starting, return
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}d is starting", pid);
+        return ERR_OK;
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, reason:%{public}d, subReason:%{public}d, killMsg:%{public}s",
