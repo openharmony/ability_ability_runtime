@@ -100,7 +100,7 @@ constexpr const char* DMS_CALLER_NATIVE_NAME = "ohos.dms.param.sourceCallerNativ
 constexpr const char* DMS_CALLER_APP_ID = "ohos.dms.param.sourceCallerAppId";
 constexpr const char* DMS_CALLER_APP_IDENTIFIER = "ohos.dms.param.sourceCallerAppIdentifier";
 const int32_t SHELL_ASSISTANT_DIETYPE = 0;
-int64_t AbilityRecord::abilityRecordId = 0;
+std::atomic<int64_t> AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
 const int32_t SEND_RESULT_CANCELED = -1;
 const int VECTOR_SIZE = 2;
@@ -520,6 +520,7 @@ void AbilityRecord::RemoveLoadTimeoutTask()
 {
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER(handler);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "RemoveLoadTimeoutTask: recordId:%{public}" PRId64, GetAbilityRecordId());
     handler->RemoveEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, GetAbilityRecordId());
     handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, GetAbilityRecordId());
 }
