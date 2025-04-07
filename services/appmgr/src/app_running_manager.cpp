@@ -689,6 +689,10 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
         }
         appRecord->StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(
             AbilityState::ABILITY_STATE_TERMINATED), true, false);
+        if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+            appRecord->StateChangedNotifyObserver(abilityRecord,
+                static_cast<int32_t>(ExtensionState::EXTENSION_STATE_TERMINATED), false, false);
+        }
     }
 
     if ((isPage || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||

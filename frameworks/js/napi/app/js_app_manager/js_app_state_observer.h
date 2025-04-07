@@ -57,6 +57,7 @@ private:
     napi_env env_;
     volatile bool valid_ = true;
     std::map<int32_t, std::shared_ptr<NativeReference>> jsObserverObjectMap_;
+    static std::unordered_map<int32_t, int32_t> extensionStateToAbilityState_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
