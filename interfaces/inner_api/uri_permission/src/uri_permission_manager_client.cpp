@@ -27,6 +27,7 @@ namespace AAFwk {
 namespace {
 const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 const int MAX_URI_COUNT = 200000;
+constexpr size_t MAX_IPC_RAW_DATA_SIZE = 128 * 1024 * 1024; // 128M
 constexpr int32_t MAX_PARCEL_IPC_DATA_SIZE = 200 * 1024; // 200K
 
 inline size_t GetPadSize(size_t size)
@@ -100,6 +101,10 @@ int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVe
     if (isWriteUriByRawData) {
         UriPermissionRawData rawData;
         StringVecToRawData(uriStrVec, rawData);
+        if (rawData.size > MAX_IPC_RAW_DATA_SIZE) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "rawData is too large");
+            return INNER_ERR;
+        }
         res = uriPermMgr->GrantUriPermission(rawData, flag, targetBundleName, appIndex, initiatorTokenId, funcResult);
         if (res != ERR_OK) {
             TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
@@ -139,6 +144,10 @@ int32_t UriPermissionManagerClient::GrantUriPermissionPrivileged(const std::vect
     if (isWriteUriByRawData) {
         UriPermissionRawData rawData;
         StringVecToRawData(uriStrVec, rawData);
+        if (rawData.size > MAX_IPC_RAW_DATA_SIZE) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "rawData is too large");
+            return INNER_ERR;
+        }
         res = uriPermMgr->GrantUriPermissionPrivileged(rawData, flag, targetBundleName, appIndex,
             initiatorTokenId, hideSensitiveType, funcResult);
         if (res != ERR_OK) {
@@ -223,6 +232,10 @@ std::vector<bool> UriPermissionManagerClient::CheckUriAuthorization(const std::v
         UriPermissionRawData resRawData;
         UriPermissionRawData rawData;
         StringVecToRawData(uriVec, rawData);
+        if (rawData.size > MAX_IPC_RAW_DATA_SIZE) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "rawData is too large");
+            return errorRes;
+        }
         uriPermMgr->CheckUriAuthorization(rawData, flag, tokenId, resRawData);
         auto result = RawDataToBoolVec(resRawData, errorRes);
         if (!result) {
@@ -235,7 +248,7 @@ std::vector<bool> UriPermissionManagerClient::CheckUriAuthorization(const std::v
         errorRes = funcResult;
     }
     if (errorRes.size() != uriVec.size()) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "ReadBatchResultByRawData failed");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "invalid result");
         errorRes = std::vector<bool>(uriVec.size(), false);
     }
     return errorRes;
@@ -406,10 +419,18 @@ void UriPermissionManagerClient::StringVecToRawData(const std::vector<std::strin
 int32_t UriPermissionManagerClient::Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    if (policy.empty() || policy.size() > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
+        return ERR_URI_LIST_OUT_OF_RANGE;
+    }
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
         UriPermissionRawData policyRawData;
         PolicyInfoToRawData(policy, policyRawData);
+        if (policyRawData.size > MAX_IPC_RAW_DATA_SIZE) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "rawData is too large");
+            return INNER_ERR;
+        }
         int32_t funcResult = -1;
         auto res = uriPermMgr->Active(policyRawData, result, funcResult);
         if (res != ERR_OK) {

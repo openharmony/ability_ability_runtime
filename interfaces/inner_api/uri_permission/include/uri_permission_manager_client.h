@@ -19,13 +19,11 @@
 #include <functional>
 #include <sstream>
 
+#include "iuri_permission_manager.h"
 #include "uri.h"
 #include "uri_permission_raw_data.h"
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
-#include "iuri_permission_manager_with_sand_box_mgr.h"
 #include "policy_info.h"
-#else
-#include "iuri_permission_manager.h"
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 
 namespace OHOS {
@@ -33,9 +31,6 @@ namespace AAFwk {
 using ProxyClearProxyCallback = std::function<void()>;
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 using namespace AccessControl::SandboxManager;
-using IUriPermissionManager = IUriPermissionManagerWithSandBoxMgr;
-#else
-using IUriPermissionManager = IUriPermissionManager;
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 class UriPermissionManagerClient {
 public:

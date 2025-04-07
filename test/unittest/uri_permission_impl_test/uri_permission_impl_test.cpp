@@ -249,6 +249,314 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_008, TestSize.Level1)
 
 /*
  * Feature: URIPermissionManagerService
+ * Function: GrantUriPermission
+ * SubFunction: NA
+ * FunctionPoints: URIPermissionManagerService GrantUriPermission
+ */
+HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_009, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
+    std::vector<std::string> uriStrVec = { uriStr };
+
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uriStrVec, rawData);
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    unsigned int flag = 0;
+    std::string targetBundleName = "name2";
+    int32_t funcResult = -1;
+    upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, INNER_ERR);
+}
+
+/*
+ * Feature: URIPermissionManagerService
+ * Function: GrantUriPermission
+ * SubFunction: NA
+ * FunctionPoints: URIPermissionManagerService GrantUriPermission
+ */
+HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_010, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
+    std::vector<std::string> uriStrVec = { uriStr };
+
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uriStrVec, rawData);
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    unsigned int flag = 1;
+    std::string targetBundleName = "name2";
+    int32_t funcResult = -1;
+    upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, INNER_ERR);
+}
+
+/*
+ * Feature: URIPermissionManagerService
+ * Function: GrantUriPermission
+ * SubFunction: NA
+ * FunctionPoints: URIPermissionManagerService GrantUriPermission
+ */
+HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_011, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
+    std::vector<std::string> uriStrVec = { uriStr };
+
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uriStrVec, rawData);
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    unsigned int flag = 2;
+    MockSystemAbilityManager::isNullptr = false;
+    std::string targetBundleName = "name2";
+    int32_t funcResult = -1;
+    upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, INNER_ERR);
+    MockSystemAbilityManager::isNullptr = true;
+}
+
+/*
+ * Feature: URIPermissionManagerService
+ * Function: GrantUriPermission
+ * SubFunction: NA
+ * FunctionPoints: URIPermissionManagerService GrantUriPermission
+ */
+HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_012, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
+    std::vector<std::string> uriStrVec = { uriStr };
+
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uriStrVec, rawData);
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    unsigned int flag = 2;
+    std::string targetBundleName = "name2";
+    MockSystemAbilityManager::isNullptr = false;
+    StorageManager::StorageManagerServiceMock::isZero = false;
+    int32_t funcResult = -1;
+    upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, INNER_ERR);
+    MockSystemAbilityManager::isNullptr = true;
+    StorageManager::StorageManagerServiceMock::isZero = true;
+}
+
+/*
+ * Feature: URIPermissionManagerService
+ * Function: GrantUriPermission
+ * SubFunction: NA
+ * FunctionPoints: URIPermissionManagerService GrantUriPermission
+ */
+HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_013, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    unsigned int tmpFlag = 1;
+    uint32_t fromTokenId = 2;
+    uint32_t targetTokenId = 3;
+    std::string targetBundleName = "name2";
+    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId };
+    std::list<GrantInfo> infoList = { info };
+    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
+    upms->uriMap_.emplace(uriStr, infoList);
+    std::vector<std::string> uriStrVec = { uriStr };
+
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uriStrVec, rawData);
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    MockSystemAbilityManager::isNullptr = false;
+    int32_t funcResult = -1;
+    upms->GrantUriPermission(stubRawData, tmpFlag, targetBundleName, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, INNER_ERR);
+    MockSystemAbilityManager::isNullptr = true;
+}
+
+/*
+ * Feature: GrantUriPermission
+ * Function: GrantUriPermission
+ * SubFunction: NA
+ * FunctionPoints: URIPermissionManagerService GrantUriPermission
+ */
+HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_014, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    unsigned int tmpFlag = 1;
+    uint32_t fromTokenId = 2;
+    uint32_t targetTokenId = 3;
+    std::string targetBundleName = "name2";
+    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId };
+    std::list<GrantInfo> infoList = { info };
+    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
+    upms->uriMap_.emplace(uriStr, infoList);
+    std::vector<std::string> uriStrVec = { uriStr };
+
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uriStrVec, rawData);
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    MockSystemAbilityManager::isNullptr = false;
+    unsigned int flag = 2;
+    int32_t funcResult = -1;
+    upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, INNER_ERR);
+    MockSystemAbilityManager::isNullptr = true;
+}
+
+/*
+ * Feature: URIPermissionManagerService
+ * Function: GrantUriPermission
+ * SubFunction: NA
+ * FunctionPoints: URIPermissionManagerService GrantUriPermission
+ */
+HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_015, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    unsigned int tmpFlag = 1;
+    uint32_t fromTokenId = 2;
+    uint32_t targetTokenId = 3;
+    std::string targetBundleName = "name2";
+    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId };
+    std::list<GrantInfo> infoList = { info };
+    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
+    upms->uriMap_.emplace(uriStr, infoList);
+    std::vector<std::string> uriStrVec = { uriStr };
+
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uriStrVec, rawData);
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    MockSystemAbilityManager::isNullptr = false;
+    unsigned int flag = 2;
+    int32_t funcResult = -1;
+    upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, INNER_ERR);
+    MockSystemAbilityManager::isNullptr = true;
+}
+
+/*
+ * Feature: URIPermissionManagerService
+ * Function: GrantUriPermission
+ * SubFunction: NA
+ * FunctionPoints: URIPermissionManagerService GrantUriPermission
+ */
+HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_016, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    MyFlag::flag_ &= (~MyFlag::IS_SA_CALL);
+    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
+    std::vector<std::string> uriStrVec = { uriStr };
+
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uriStrVec, rawData);
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    uint32_t flag = 1;
+    std::string targetBundleName = "name1001";
+    int32_t funcResult = -1;
+    upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: URIPermissionManagerService
+ * Function: GrantUriPermission
+ * SubFunction: NA
+ * FunctionPoints: URIPermissionManagerService GrantUriPermission
+ */
+HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_017, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    MyFlag::flag_ &= (~MyFlag::IS_SA_CALL);
+    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
+    std::vector<std::string> uriStrVec(200000 + 1, uriStr);
+
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uriStrVec, rawData);
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    uint32_t flag = 1;
+    std::string targetBundleName = "name1001";
+    int32_t funcResult = -1;
+    upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, ERR_URI_LIST_OUT_OF_RANGE);
+}
+
+/*
+ * Feature: URIPermissionManagerService
+ * Function: GrantUriPermission
+ * SubFunction: NA
+ * FunctionPoints: URIPermissionManagerService GrantUriPermission
+ */
+HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_018, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    MyFlag::flag_ &= (~MyFlag::IS_SA_CALL);
+    std::vector<std::string> uriStrVec;
+
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uriStrVec, rawData);
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    uint32_t flag = 1;
+    std::string targetBundleName = "name1001";
+    int32_t funcResult = -1;
+    upms->GrantUriPermission(stubRawData, flag, targetBundleName, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, ERR_URI_LIST_OUT_OF_RANGE);
+}
+
+/*
+ * Feature: URIPermissionManagerService
  * Function: RevokeUriPermissionManually
  * SubFunction: NA
  * FunctionPoints: URIPermissionManagerService RevokeUriPermissionManually
@@ -849,6 +1157,200 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_006, TestSize.Level
 
 /*
  * Feature: UriPermissionManagerStubImpl
+ * Function: GrantUriPermissionPrivileged
+ * SubFunction: NA
+ * FunctionPoints: do not have permission to call GrantUriPermissionPrivileged.
+*/
+HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_007, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+
+    MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "tempProcess");
+    IPCSkeleton::callerTokenId = 1001;
+    MyFlag::permissionPrivileged_ = false;
+
+    auto uri1 = Uri("file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt");
+    std::string targetBundleName = "com.example.app1002";
+    uint32_t flag = 1;
+    const std::vector<Uri> uris = { uri1 };
+    std::vector<std::string> stringUris;
+    for (const Uri& uri : uris) {
+        stringUris.push_back(uri.ToString());
+    }
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(stringUris, rawData);
+    int32_t funcResult = -1;
+    upms->GrantUriPermissionPrivileged(rawData, flag, targetBundleName, 0, 0, 0, funcResult);
+    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: GrantUriPermissionPrivileged
+ * SubFunction: NA
+ * FunctionPoints: flag is 0.
+*/
+HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_008, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+
+    MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
+    IPCSkeleton::callerTokenId = 1001;
+    MyFlag::permissionPrivileged_ = true;
+
+    auto uri1 = Uri("file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt");
+    std::string targetBundleName = "com.example.app1002";
+    uint32_t flag = 0;
+    const std::vector<Uri> uris = { uri1 };
+    std::vector<std::string> stringUris;
+    for (const Uri& uri : uris) {
+        stringUris.push_back(uri.ToString());
+    }
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(stringUris, rawData);
+    int32_t funcResult = -1;
+    upms->GrantUriPermissionPrivileged(rawData, flag, targetBundleName, 0, 0, 0, funcResult);
+    MyFlag::permissionPrivileged_ = false;
+    EXPECT_EQ(funcResult, ERR_CODE_INVALID_URI_FLAG);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: GrantUriPermissionPrivileged
+ * SubFunction: NA
+ * FunctionPoints: targetBundleName is invalid.
+*/
+HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_009, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+
+    MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
+    IPCSkeleton::callerTokenId = 1001;
+    MyFlag::permissionPrivileged_ = true;
+
+    auto uri1 = Uri("file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt");
+    std::string targetBundleName = "com.example.invalid";
+    uint32_t flag = 1;
+    const std::vector<Uri> uris = { uri1 };
+    std::vector<std::string> stringUris;
+    for (const Uri& uri : uris) {
+        stringUris.push_back(uri.ToString());
+    }
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(stringUris, rawData);
+    int32_t funcResult = -1;
+    upms->GrantUriPermissionPrivileged(rawData, flag, targetBundleName, 0, 0, 0, funcResult);
+    MyFlag::permissionPrivileged_ = false;
+    EXPECT_EQ(funcResult, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: GrantUriPermissionPrivileged
+ * SubFunction: NA
+ * FunctionPoints: type of uri is invalid.
+*/
+HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_010, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+
+    MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
+    IPCSkeleton::callerTokenId = 1001;
+    MyFlag::permissionPrivileged_ = true;
+
+    auto uri1 = Uri("http://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt");
+    std::string targetBundleName = "com.example.app1002";
+    uint32_t flag = 1;
+    const std::vector<Uri> uris = { uri1 };
+    std::vector<std::string> stringUris;
+    for (const Uri& uri : uris) {
+        stringUris.push_back(uri.ToString());
+    }
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(stringUris, rawData);
+    int32_t funcResult = -1;
+    upms->GrantUriPermissionPrivileged(rawData, flag, targetBundleName, 0, 0, 0, funcResult);
+    MyFlag::permissionPrivileged_ = false;
+    EXPECT_EQ(funcResult, ERR_CODE_INVALID_URI_TYPE);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: GrantUriPermissionPrivileged
+ * SubFunction: NA
+ * FunctionPoints: Create Share File failed.
+*/
+HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_011, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+
+    MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
+    IPCSkeleton::callerTokenId = 1001;
+    MyFlag::permissionPrivileged_ = true;
+
+    auto uri1 = Uri("file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt");
+    std::string targetBundleName = "com.example.app1002";
+    uint32_t flag = 1;
+    const std::vector<Uri> uris = { uri1 };
+    std::vector<std::string> stringUris;
+    for (const Uri& uri : uris) {
+        stringUris.push_back(uri.ToString());
+    }
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(stringUris, rawData);
+    upms->storageManager_ = new StorageManager::StorageManagerServiceMock();
+    StorageManager::StorageManagerServiceMock::isZero = false;
+    int32_t funcResult = -1;
+    upms->GrantUriPermissionPrivileged(rawData, flag, targetBundleName, 0, 0, -1, funcResult);
+    MyFlag::permissionPrivileged_ = false;
+    EXPECT_EQ(funcResult, INNER_ERR);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: GrantUriPermissionPrivileged
+ * SubFunction: NA
+ * FunctionPoints: Grant Uri permission success.
+*/
+HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_012, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
+    IPCSkeleton::callerTokenId = 1001;
+    MyFlag::permissionPrivileged_ = true;
+
+    auto uri1 = Uri("file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt");
+    std::string targetBundleName = "com.example.app1002";
+    uint32_t flag = 1;
+    const std::vector<Uri> uris = { uri1 };
+    std::vector<std::string> stringUris;
+    for (const Uri& uri : uris) {
+        stringUris.push_back(uri.ToString());
+    }
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(stringUris, rawData);
+    upms->storageManager_ = new StorageManager::StorageManagerServiceMock();
+    StorageManager::StorageManagerServiceMock::isZero = true;
+    int32_t funcResult = -1;
+    upms->GrantUriPermissionPrivileged(rawData, flag, targetBundleName, 0, 0, -1, funcResult);
+    MyFlag::permissionPrivileged_ = false;
+    EXPECT_EQ(funcResult, ERR_OK);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
  * Function: CheckUriAuthorization
  * SubFunction: NA
  * FunctionPoints: CheckUriAuthorization not called by SA or SystemApp.
@@ -1010,6 +1512,117 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_005, TestSize.Level1)
 
 /*
  * Feature: UriPermissionManagerStubImpl
+ * Function: CheckUriAuthorization
+ * SubFunction: NA
+ * FunctionPoints: CheckUriAuthorization not called by SA or SystemApp.
+*/
+HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_006, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::flag_ &= (~MyFlag::IS_SA_CALL);
+    std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
+    const std::vector<std::string> uris = { uri };
+    std::vector<bool> funcResult(1, false);
+    uint32_t flag = 1;
+    uint32_t tokenId = 1001;
+    upms->CheckUriAuthorization(uris, flag, tokenId, funcResult);
+
+    std::vector<bool> expectRes(1, false);
+    EXPECT_EQ(expectRes, funcResult);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckUriAuthorization
+ * SubFunction: NA
+ * FunctionPoints: flag is 0.
+*/
+HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_007, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
+    const std::vector<std::string> uris = { uri };
+    std::vector<bool> funcResult(1, false);
+    uint32_t flag = 0;
+    uint32_t tokenId = 1001;
+    upms->CheckUriAuthorization(uris, flag, tokenId, funcResult);
+
+    std::vector<bool> expectRes(1, false);
+    EXPECT_EQ(expectRes, funcResult);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckUriAuthorization
+ * SubFunction: NA
+ * FunctionPoints: uri is invalid.
+*/
+HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_008, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    std::string uri = "http://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
+    const std::vector<std::string> uris = { uri };
+    std::vector<bool> funcResult(1, false);
+    uint32_t flag = 1;
+    uint32_t tokenId = 1001;
+    upms->CheckUriAuthorization(uris, flag, tokenId, funcResult);
+
+    std::vector<bool> expectRes(1, false);
+    EXPECT_EQ(expectRes, funcResult);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckUriAuthorization
+ * SubFunction: NA
+ * FunctionPoints: check uri authorization failed, have no permission.
+*/
+HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_009, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
+    const std::vector<std::string> uris = { uri };
+    std::vector<bool> funcResult(1, false);
+    uint32_t flag = 1;
+    uint32_t tokenId = 1002;
+    upms->CheckUriAuthorization(uris, flag, tokenId, funcResult);
+
+    std::vector<bool> expectRes(1, false);
+    EXPECT_EQ(expectRes, funcResult);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckUriAuthorization
+ * SubFunction: NA
+ * FunctionPoints: check uri authorization success.
+*/
+HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_010, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
+    const std::vector<std::string> uris = { uri };
+    std::vector<bool> funcResult(1, false);
+    uint32_t flag = 1;
+    uint32_t tokenId = 1001;
+    MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_HAP, "", "com.example.app1001");
+    upms->CheckUriAuthorization(uris, flag, tokenId, funcResult);
+
+    std::vector<bool> expectRes(1, true);
+    EXPECT_EQ(expectRes, funcResult);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
  * Function: RawDataToPolicyInfo
  * SubFunction: NA
  * FunctionPoints: call PolicyInfoToRawData and RawDataToPolicyInfo sucess.
@@ -1042,6 +1655,97 @@ HWTEST_F(UriPermissionImplTest, RawDataToPolicyInfo_001, TestSize.Level1)
     for (int32_t i = 0; i < policyInfoArray.size(); ++i) {
         if (policyInfoArray[i].path != resultPolicyInfo[i].path ||
             policyInfoArray[i].mode != resultPolicyInfo[i].mode) {
+            result = false;
+            break;
+        }
+    }
+    EXPECT_TRUE(result);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: RawDataToStringVec
+ * SubFunction: NA
+ * FunctionPoints: call StringVecToRawData and RawDataToStringVec sucess.
+*/
+HWTEST_F(UriPermissionImplTest, RawDataToStringVec_001, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
+    const std::vector<std::string> uris = { uri };
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uris, rawData);
+
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    std::vector<std::string> resultStringVec;
+    upms->RawDataToStringVec(stubRawData, resultStringVec);
+    EXPECT_EQ(uris.size(), resultStringVec.size());
+    bool result = true;
+    for (int32_t i = 0; i < uris.size(); ++i) {
+        if (uris[i].compare(resultStringVec[i]) != 0) {
+            result = false;
+            break;
+        }
+    }
+    EXPECT_TRUE(result);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: RawDataToStringVec
+ * SubFunction: NA
+ * FunctionPoints: call StringVecToRawData and RawDataToStringVec fail.
+*/
+HWTEST_F(UriPermissionImplTest, RawDataToStringVec_002, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::string uri = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
+    const std::vector<std::string> uris(300000, uri);
+    UriPermissionRawData rawData;
+    upmc.StringVecToRawData(uris, rawData);
+
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    std::vector<std::string> resultStringVec;
+    auto result = upms->RawDataToStringVec(stubRawData, resultStringVec);
+    EXPECT_EQ(result, ERR_URI_LIST_OUT_OF_RANGE);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: BoolVecToRawData
+ * SubFunction: NA
+ * FunctionPoints: call BoolVecToRawData and RawDataToBoolVec sucess.
+*/
+HWTEST_F(UriPermissionImplTest, BoolVecToRawData_001, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::vector<bool> boolVec(1, true);
+    UriPermissionRawData rawData;
+    std::vector<char> boolVecToCharVec;
+    upms->BoolVecToRawData(boolVec, rawData, boolVecToCharVec);
+
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    std::vector<bool> resultBoolVec(1, false);
+    upmc.RawDataToBoolVec(stubRawData, resultBoolVec);
+    EXPECT_EQ(boolVec.size(), resultBoolVec.size());
+    bool result = true;
+    for (int32_t i = 0; i < boolVec.size(); ++i) {
+        if (boolVec[i] != resultBoolVec[i]) {
             result = false;
             break;
         }

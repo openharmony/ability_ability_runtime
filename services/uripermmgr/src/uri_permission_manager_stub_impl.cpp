@@ -189,6 +189,10 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const std::vector<std::
     const std::string& targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t& funcResult)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
+        return ERR_URI_LIST_OUT_OF_RANGE;
+    }
     TAG_LOGI(AAFwkTag::URIPERMMGR, "BundleName:%{public}s, appIndex:%{public}d, flag:%{public}u, uris:%{public}zu",
         targetBundleName.c_str(), appIndex, flag, uriVec.size());
     if (!UPMSUtils::IsSAOrSystemAppCall()) {
@@ -233,52 +237,19 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const std::vector<std::
 ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const UriPermissionRawData& rawData, uint32_t flag,
     const std::string& targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t& funcResult)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (!UPMSUtils::IsSAOrSystemAppCall()) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "not SA/SystemApp");
-        funcResult = CHECK_PERMISSION_FAILED;
-        return ERR_OK;
-    }
-    auto checkResult = CheckCalledBySandBox();
-    if (checkResult != ERR_OK) {
-        funcResult = checkResult;
-        return ERR_OK;
-    }
     std::vector<std::string> uriVec;
     auto res = RawDataToStringVec(rawData, uriVec);
     if (res != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "raw data to vec failed");
         funcResult = res;
-        return ERR_OK;
+        return res;
     }
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "BundleName:%{public}s, appIndex:%{public}d, flag:%{public}u, uris:%{public}zu",
-        targetBundleName.c_str(), appIndex, flag, uriVec.size());
-    if (uriVec.size() == 0 || uriVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "out of range: %{public}u", uriVec.size());
-        funcResult = ERR_URI_LIST_OUT_OF_RANGE;
-        return ERR_OK;
+    auto errCode = GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId, funcResult);
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "GrantUriPermission failed, errCode:%{public}d", errCode);
+        return errCode;
     }
-    if ((flag & FLAG_READ_WRITE_URI) == 0) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "invalid flag: %{public}u", flag);
-        funcResult = ERR_CODE_INVALID_URI_FLAG;
-        return ERR_OK;
-    }
-    uint32_t targetTokenId = 0;
-    auto ret = UPMSUtils::GetTokenIdByBundleName(targetBundleName, appIndex, targetTokenId);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "get tokenId by bundle name failed");
-        funcResult = ret;
-        return ERR_OK;
-    }
-    uint32_t callerTokenId = initiatorTokenId;
-    if (!UPMSUtils::IsFoundationCall()) {
-        callerTokenId = IPCSkeleton::GetCallingTokenID();
-    }
-    std::vector<Uri> uriVecInner;
-    for (const auto& str : uriVec) {
-        uriVecInner.emplace_back(str);
-    }
-    funcResult = GrantUriPermissionInner(uriVecInner, flag, callerTokenId, targetTokenId, targetBundleName);
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "GrantUriPermission finished.");
     return ERR_OK;
 }
 
@@ -419,18 +390,19 @@ int32_t UriPermissionManagerStubImpl::AddTempUriPermission(const std::string &ur
     return ERR_OK;
 }
 
-ErrCode UriPermissionManagerStubImpl::CheckGrantUriPermissionPrivileged(const std::vector<std::string>& uriVec,
-    uint32_t flag, int32_t& funcResult)
+ErrCode UriPermissionManagerStubImpl::CheckGrantUriPermissionPrivileged(uint32_t callerTokenId, uint32_t flag,
+    int32_t& funcResult)
 {
-    if (uriVec.size() == 0 || uriVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "out of range: %{public}u", uriVec.size());
-        funcResult = ERR_URI_LIST_OUT_OF_RANGE;
-        return ERR_INVALID_DATA;
+    auto permissionName = PermissionConstants::PERMISSION_GRANT_URI_PERMISSION_PRIVILEGED;
+    if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(callerTokenId, permissionName)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "No permission to call");
+        funcResult = CHECK_PERMISSION_FAILED;
+        return CHECK_PERMISSION_FAILED;
     }
     if ((flag & FLAG_READ_WRITE_URI) == 0) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "invalid flag:%{public}u", flag);
         funcResult = ERR_CODE_INVALID_URI_FLAG;
-        return ERR_INVALID_DATA;
+        return ERR_CODE_INVALID_URI_FLAG;
     }
     return ERR_OK;
 }
@@ -440,16 +412,15 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermissionPrivileged(const std::ve
     int32_t hideSensitiveType, int32_t& funcResult)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (uriVec.size() == 0 || uriVec.size() > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "out of range: %{public}u", uriVec.size());
+        funcResult = ERR_URI_LIST_OUT_OF_RANGE;
+        return ERR_URI_LIST_OUT_OF_RANGE;
+    }
     TAG_LOGI(AAFwkTag::URIPERMMGR, "BundleName:%{public}s, appIndex:%{public}d, flag:%{public}u, uris:%{public}zu",
         targetBundleName.c_str(), appIndex, flag, uriVec.size());
     uint32_t callerTokenId = IPCSkeleton::GetCallingTokenID();
-    auto permissionName = PermissionConstants::PERMISSION_GRANT_URI_PERMISSION_PRIVILEGED;
-    if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(callerTokenId, permissionName)) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "No permission to call");
-        funcResult = CHECK_PERMISSION_FAILED;
-        return ERR_OK;
-    }
-    auto checkRes = CheckGrantUriPermissionPrivileged(uriVec, flag, funcResult);
+    auto checkRes = CheckGrantUriPermissionPrivileged(callerTokenId, flag, funcResult);
     if (checkRes != ERR_OK) {
         return ERR_OK;
     }
@@ -483,49 +454,20 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermissionPrivileged(const UriPerm
     const std::string& targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType,
     int32_t& funcResult)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    uint32_t callerTokenId = IPCSkeleton::GetCallingTokenID();
-    auto permissionName = PermissionConstants::PERMISSION_GRANT_URI_PERMISSION_PRIVILEGED;
-    if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(callerTokenId, permissionName)) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "No permission to call");
-        funcResult = CHECK_PERMISSION_FAILED;
-        return ERR_OK;
-    }
-    std::vector<std::string> uriVec;
-    auto res = RawDataToStringVec(rawData, uriVec);
+    std::vector<std::string> uriStrVec;
+    auto res = RawDataToStringVec(rawData, uriStrVec);
     if (res != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "raw data to vec failed");
         funcResult = res;
-        return ERR_OK;
+        return res;
     }
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "BundleName:%{public}s, appIndex:%{public}d, flag:%{public}u, uris:%{public}zu",
-        targetBundleName.c_str(), appIndex, flag, uriVec.size());
-        auto checkRes = CheckGrantUriPermissionPrivileged(uriVec, flag, funcResult);
-    if (checkRes != ERR_OK) {
-        return ERR_OK;
+    auto errCode = GrantUriPermissionPrivileged(uriStrVec, flag, targetBundleName, appIndex, initiatorTokenId,
+        hideSensitiveType, funcResult);
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "GrantUriPermissionPrivileged failed, errCode:%{public}d", errCode);
+        return errCode;
     }
-    uint32_t targetTokenId = 0;
-    auto ret = UPMSUtils::GetTokenIdByBundleName(targetBundleName, appIndex, targetTokenId);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "get tokenId failed, bundleName:%{public}s", targetBundleName.c_str());
-        funcResult = ret;
-        return ERR_OK;
-    }
-    if (UPMSUtils::IsFoundationCall()) {
-        callerTokenId = initiatorTokenId;
-    } else {
-        hideSensitiveType = 0;
-    }
-    std::string targetAlterBundleName = "";
-    UPMSUtils::GetDirByBundleNameAndAppIndex(targetBundleName, appIndex, targetAlterBundleName);
-    std::vector<Uri> uriVecInner;
-    for (auto& uri : uriVec) {
-        uriVecInner.emplace_back(uri);
-    }
-    ret = GrantUriPermissionPrivilegedInner(uriVecInner, flag, callerTokenId, targetTokenId, targetAlterBundleName,
-        hideSensitiveType);
     TAG_LOGI(AAFwkTag::URIPERMMGR, "GrantUriPermissionPrivileged finished.");
-    funcResult = ret;
     return ERR_OK;
 }
 
@@ -607,47 +549,28 @@ ErrCode UriPermissionManagerStubImpl::CheckUriAuthorization(const std::vector<st
 ErrCode UriPermissionManagerStubImpl::CheckUriAuthorization(const UriPermissionRawData& rawData, uint32_t flag,
     uint32_t tokenId, UriPermissionRawData& funcResult)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::vector<std::string> uriVec;
-    auto res = RawDataToStringVec(rawData, uriVec);
-    std::vector<char> boolVecToCharVec;
+    std::vector<std::string> uriStringVec;
+    std::vector<char> resultCharVec;
+    auto res = RawDataToStringVec(rawData, uriStringVec);
     if (res != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "raw data to vec failed");
-        std::vector<bool> checkResult(1, false);
-        BoolVecToRawData(checkResult, funcResult, boolVecToCharVec);
+        std::vector<bool> defaultFalseResult(1, false);
+        BoolVecToRawData(defaultFalseResult, funcResult, resultCharVec);
         return res;
     }
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "tokenId:%{private}u, flag:%{public}u, uris:%{public}zu",
-        tokenId, flag, uriVec.size());
-    std::vector<bool> result(uriVec.size(), false);
-    if (uriVec.size() == 0 || uriVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
-        BoolVecToRawData(result, funcResult, boolVecToCharVec);
-        return ERR_URI_LIST_OUT_OF_RANGE;
+    std::vector<bool> resultBoolVec(uriStringVec.size(), false);
+    auto errCode = CheckUriAuthorization(uriStringVec, flag, tokenId, resultBoolVec);
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "CheckUriAuthorization failed, errCode:%{public}d", errCode);
+        return errCode;
     }
-    if (!UPMSUtils::IsSAOrSystemAppCall()) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "not SA/SystemApp");
-        BoolVecToRawData(result, funcResult, boolVecToCharVec);
-        return ERR_OK;
-    }
-    if ((flag & FLAG_READ_WRITE_URI) == 0) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "Flag invalid");
-        BoolVecToRawData(result, funcResult, boolVecToCharVec);
-        return ERR_OK;
-    }
-    std::vector<Uri> uriVecInner;
-    for (auto& uriStr: uriVec) {
-        uriVecInner.emplace_back(uriStr);
-    }
-    TokenIdPermission tokenIdPermission(tokenId);
-    result = CheckUriPermission(tokenIdPermission, uriVecInner, flag);
+    BoolVecToRawData(resultBoolVec, funcResult, resultCharVec);
     if (funcResult.size > MAX_IPC_RAW_DATA_SIZE) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "funcResultSize is too large");
-        std::vector<bool> resultInner(uriVec.size(), false);
-        BoolVecToRawData(result, funcResult, boolVecToCharVec);
+        std::vector<bool> defaultFalseResult(1, false);
+        BoolVecToRawData(defaultFalseResult, funcResult, resultCharVec);
         return ERR_DEAD_OBJECT;
     }
-    BoolVecToRawData(result, funcResult, boolVecToCharVec);
     return ERR_OK;
 }
 
@@ -1055,6 +978,14 @@ void UriPermissionManagerStubImpl::BoolVecToRawData(const std::vector<bool>& boo
 ErrCode UriPermissionManagerStubImpl::RawDataToStringVec(const UriPermissionRawData& rawData,
     std::vector<std::string>& stringVec)
 {
+    if (rawData.data == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null data");
+        return ERR_DEAD_OBJECT;
+    }
+    if (rawData.size == 0 || rawData.size > MAX_IPC_RAW_DATA_SIZE) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "size invalid: %{public}zu", rawData.size);
+        return ERR_DEAD_OBJECT;
+    }
     std::stringstream ss;
     ss.write(reinterpret_cast<const char *>(rawData.data), rawData.size);
     uint32_t stringVecSize = 0;
@@ -1065,7 +996,7 @@ ErrCode UriPermissionManagerStubImpl::RawDataToStringVec(const UriPermissionRawD
         ss.read(reinterpret_cast<char *>(&strLen), sizeof(strLen));
         if (strLen > ssLength - static_cast<uint32_t>(ss.tellg())) {
             TAG_LOGE(AAFwkTag::URIPERMMGR, "string length:%{public}u is invalid", strLen);
-            return ERR_INVALID_DATA;
+            return ERR_DEAD_OBJECT;
         }
         std::string str;
         str.resize(strLen);
@@ -1085,16 +1016,16 @@ ErrCode UriPermissionManagerStubImpl::Active(const UriPermissionRawData& policyR
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
-    if (policyRawData.size == 0 || policyRawData.size > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "policy empty or exceed maxSize %{public}d", MAX_URI_COUNT);
-        return ERR_URI_LIST_OUT_OF_RANGE;
-    }
     std::vector<PolicyInfo> policy;
     auto result = RawDataToPolicyInfo(policyRawData, policy);
     if (!result) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "RawDataToPolicyInfo failed");
         funcResult = INVALID_PARAMETERS_ERR;
         return funcResult;
+    }
+    if (policy.empty() || policy.size() > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "policy empty or exceed maxSize %{public}d", MAX_URI_COUNT);
+        return ERR_URI_LIST_OUT_OF_RANGE;
     }
     uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()).count());
