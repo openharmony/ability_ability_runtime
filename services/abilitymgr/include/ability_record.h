@@ -585,6 +585,16 @@ public:
         isStartingWindow_ = isStartingWindow;
     }
 
+    inline void SetKillReason(const std::string &reason)
+    {
+        killReason_ = reason;
+    }
+
+    inline std::string GetKillReason()
+    {
+        return killReason_;
+    }
+
     void PostCancelStartingWindowHotTask();
 
     /**
@@ -1389,6 +1399,8 @@ private:
     std::atomic_bool isPrepareTerminateAbilityCalled_ = false;
     std::atomic_bool isPrepareTerminateAbilityDone_ = false;
     bool isPrepareTerminate_ = false;
+
+    std::string killReason_ = "";
 };
 }  // namespace AAFwk
 }  // namespace OHOS

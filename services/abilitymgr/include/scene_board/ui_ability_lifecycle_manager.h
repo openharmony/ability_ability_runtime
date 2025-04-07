@@ -390,7 +390,14 @@ public:
 
     void TryPrepareTerminateByPidsDone(const std::string &moduleName, int32_t prepareTermination, bool isExist);
 
+    bool IsBundleStarting(pid_t pid);
+
+    void RecordPidKilling(pid_t pid, const std::string &reason);
+
 private:
+    void AddStartingPid(pid_t pid);
+    void RemoveStartingPid(pid_t pid);
+    void MarkStartingFlag(const AbilityRequest &abilityRequest);
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse) const;
     int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
     int32_t GetReusedStandardPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
@@ -517,6 +524,7 @@ private:
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
     std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
+    std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> lowMemKillAbilityMap_;
     std::unordered_map<int64_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
     std::unordered_map<std::shared_ptr<AbilityRecord>, std::list<AbilityRequest>> callRequestCache_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
@@ -550,6 +558,9 @@ private:
     std::mutex isTryPrepareTerminateByPidsDoneMutex_;
     std::condition_variable isTryPrepareTerminateByPidsCv_;
     std::vector<std::shared_ptr<PrepareTerminateByPidRecord>> prepareTerminateByPidRecords_;
+
+    std::mutex startingPidsMutex_;
+    std::vector<pid_t> startingPids_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

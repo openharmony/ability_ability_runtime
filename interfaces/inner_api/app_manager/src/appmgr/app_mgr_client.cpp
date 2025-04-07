@@ -236,13 +236,13 @@ AppMgrResultCode AppMgrClient::KillProcessesByUserId(int32_t userId, bool isNeed
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::KillProcessesByPids(std::vector<int32_t> &pids)
+AppMgrResultCode AppMgrClient::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            amsService->KillProcessesByPids(pids);
+            amsService->KillProcessesByPids(pids, reason);
             return AppMgrResultCode::RESULT_OK;
         }
     }
