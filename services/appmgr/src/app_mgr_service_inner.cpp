@@ -707,6 +707,11 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     if (want && (want->GetBoolParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, false))) {
         TAG_LOGI(AAFwkTag::APPMGR, "load plugin ability");
         appRecord = GetAppRunningRecordByAbilityToken(loadParam->preToken);
+        while (appRecord && appRecord->GetProcessType() != ProcessType::NORMAL) {
+            auto callerPid = appRecord->GetCallerPid();
+            TAG_LOGI(AAFwkTag::APPMGR, "pre host: %{public}d", callerPid);
+            appRecord = GetAppRunningRecordByPid(callerPid);
+        }
         if (!appRecord) {
             TAG_LOGE(AAFwkTag::APPMGR, "plugin appRecord null");
             return;
@@ -721,7 +726,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         }
         isProcCache = DelayedSingleton<CacheProcessManager>::GetInstance()->ReuseCachedProcess(appRecord);
     } else {
-        if (!GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo)) {
+        if (!GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
             TAG_LOGE(AAFwkTag::APPMGR, "getBundleAndHapInfo fail");
             return;
         }
