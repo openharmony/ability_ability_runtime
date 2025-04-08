@@ -921,10 +921,8 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
         return;
     }
     moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_BACKGROUND);
-    if (!AAFwk::UIExtensionUtils::IsUIExtension(ability->GetAbilityInfo()->extensionAbilityType)) {
-        StateChangedNotifyObserver(
-            ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_BACKGROUND), true, false);
-    }
+    StateChangedNotifyObserver(
+        ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_BACKGROUND), true, false);
     if (curState_ != ApplicationState::APP_STATE_FOREGROUND && curState_ != ApplicationState::APP_STATE_CACHED) {
         TAG_LOGW(AAFwkTag::APPMGR, "wrong state");
         return;
