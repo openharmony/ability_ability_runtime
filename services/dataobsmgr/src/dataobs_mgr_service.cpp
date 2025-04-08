@@ -151,7 +151,7 @@ int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserve
     }
     int status;
     if (const_cast<Uri &>(uri).GetScheme() == SHARE_PREFERENCES) {
-        status = dataObsMgrInnerPref_->HandleRegisterObserver(uri, dataObserver);
+        status = dataObsMgrInnerPref_->HandleRegisterObserver(uri, observerNode);
     } else {
         status = dataObsMgrInner_->HandleRegisterObserver(uri, observerNode);
     }
@@ -186,7 +186,7 @@ int DataObsMgrService::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObser
     }
     int status;
     if (const_cast<Uri &>(uri).GetScheme() == SHARE_PREFERENCES) {
-        status = dataObsMgrInnerPref_->HandleUnregisterObserver(uri, dataObserver);
+        status = dataObsMgrInnerPref_->HandleUnregisterObserver(uri, observerNode);
     } else {
         status = dataObsMgrInner_->HandleUnregisterObserver(uri, observerNode);
     }
@@ -236,10 +236,10 @@ int DataObsMgrService::NotifyChange(const Uri &uri, int32_t userId)
     ChangeInfo changeInfo = { ChangeInfo::ChangeType::OTHER, { uri } };
     handler_->SubmitTask([this, uri, changeInfo, userId]() {
         if (const_cast<Uri &>(uri).GetScheme() == SHARE_PREFERENCES) {
-            dataObsMgrInnerPref_->HandleNotifyChange(uri);
+            dataObsMgrInnerPref_->HandleNotifyChange(uri, userId);
         } else {
             dataObsMgrInner_->HandleNotifyChange(uri, userId);
-            dataObsMgrInnerExt_->HandleNotifyChange(changeInfo);
+            dataObsMgrInnerExt_->HandleNotifyChange(changeInfo, userId);
         }
         std::lock_guard<ffrt::mutex> lck(taskCountMutex_);
         --taskCount_;
@@ -263,8 +263,15 @@ Status DataObsMgrService::RegisterObserverExt(const Uri &uri, sptr<IDataAbilityO
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
 
+    int userId = GetCallingUserId();
+    if (userId == -1) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "GetCallingUserId fail, uri:%{public}s, userId:%{public}d",
+            CommonUtils::Anonymous(uri.ToString()).c_str(), userId);
+        return DATAOBS_INVALID_USERID;
+    }
+
     auto innerUri = uri;
-    return dataObsMgrInnerExt_->HandleRegisterObserver(innerUri, dataObserver, isDescendants);
+    return dataObsMgrInnerExt_->HandleRegisterObserver(innerUri, dataObserver, userId, isDescendants);
 }
 
 Status DataObsMgrService::UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
@@ -332,6 +339,14 @@ Status DataObsMgrService::NotifyChangeExt(const ChangeInfo &changeInfo)
             dataObsMgrInner_ == nullptr);
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
+
+    int userId = GetCallingUserId();
+    if (userId == -1) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "GetCallingUserId fail, type:%{public}d, userId:%{public}d",
+            changeInfo.changeType_, userId);
+        return DATAOBS_INVALID_USERID;
+    }
+
     ChangeInfo changes;
     Status result = DeepCopyChangeInfo(changeInfo, changes);
     if (result != SUCCESS) {
@@ -354,10 +369,10 @@ Status DataObsMgrService::NotifyChangeExt(const ChangeInfo &changeInfo)
         ++taskCount_;
     }
 
-    handler_->SubmitTask([this, changes]() {
-        dataObsMgrInnerExt_->HandleNotifyChange(changes);
+    handler_->SubmitTask([this, changes, userId]() {
+        dataObsMgrInnerExt_->HandleNotifyChange(changes, userId);
         for (auto &uri : changes.uris_) {
-            dataObsMgrInner_->HandleNotifyChange(uri, 0);
+            dataObsMgrInner_->HandleNotifyChange(uri, userId);
         }
         delete [] static_cast<uint8_t *>(changes.data_);
         std::lock_guard<ffrt::mutex> lck(taskCountMutex_);
