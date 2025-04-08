@@ -56,7 +56,7 @@ CJ_EXPORT void* FfiContextGetContext(int64_t id, int32_t type)
 CJ_EXPORT RetApplicationInfoV2 FfiContextGetApplicationInfo(int64_t id, int32_t type)
 {
     (void)type;
-    RetApplicationInfoV2 appInfo;
+    RetApplicationInfoV2 appInfo = {};
     std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id);
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
