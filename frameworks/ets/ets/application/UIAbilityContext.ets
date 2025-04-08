@@ -50,7 +50,7 @@ export default class UIAbilityContext extends Context {
   private native nativeTerminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
   private native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
   private native nativeReportDrawnCompletedSync(callback:AsyncCallbackWrapper<void>): void;
-  public native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): BusinessError<void>;
+  private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): BusinessError<void>;
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     let p1 = launch this.nativeStartAbilitySync(want, myCall);
