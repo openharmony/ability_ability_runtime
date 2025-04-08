@@ -1484,7 +1484,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     std::map<std::string, std::string> pkgContextInfoJsonStringMap;
     std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
     AppLibPathMap appLibPaths {};
-    if (bundleInfo.hasPlugin) {
+    if (appInfo.hasPlugin) {
         if (bundleMgrHelper->GetPluginInfosForSelf(pluginBundleInfos) != ERR_OK) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "GetPluginInfosForSelf failed");
         }
