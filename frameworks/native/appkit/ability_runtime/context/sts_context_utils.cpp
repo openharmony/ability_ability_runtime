@@ -19,6 +19,7 @@
 #include "application_context.h"
 #include "application_context_manager.h"
 #include "hilog_tag_wrapper.h"
+#include "sts_error_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -105,6 +106,7 @@ ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unuse
         return appContextObj->aniObj;
     }
     TAG_LOGI(AAFwkTag::APPKIT, "called GetApplicationContextSync finish");
+    ThrowStsInvalidParamError(env, "appContextObj null");
     return {};
 }
 }
