@@ -31,7 +31,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 CConfiguration CallConvertConfig(std::shared_ptr<AppExecFwk::Configuration> configuration)
 {
-    CConfiguration cCfg;
+    CConfiguration cCfg = {};
     void* handle = dlopen(CJ_ABILITY_LIBNAME, RTLD_LAZY);
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
@@ -51,7 +51,7 @@ CConfiguration CallConvertConfig(std::shared_ptr<AppExecFwk::Configuration> conf
 
 RetHapModuleInfoV2 CallConvertHapInfo(std::shared_ptr<AppExecFwk::HapModuleInfo> hapInfo)
 {
-    RetHapModuleInfoV2 retInfo;
+    RetHapModuleInfoV2 retInfo = {};
     void* handle = dlopen(CJ_BUNDLE_MGR_LIBNAME, RTLD_LAZY);
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null handle");

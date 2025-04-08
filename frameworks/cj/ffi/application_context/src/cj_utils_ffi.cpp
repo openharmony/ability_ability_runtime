@@ -144,7 +144,7 @@ CConfiguration CreateCConfiguration(const OHOS::AppExecFwk::Configuration &confi
 extern "C" {
 CJ_EXPORT CConfiguration OHOS_ConvertConfiguration(void* param)
 {
-    CConfiguration cCfg;
+    CConfiguration cCfg = {};
     auto config = reinterpret_cast<AppExecFwk::Configuration*>(param);
     if (config == nullptr) {
         return cCfg;
