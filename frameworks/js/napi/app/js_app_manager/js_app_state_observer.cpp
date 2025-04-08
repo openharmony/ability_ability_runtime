@@ -128,7 +128,7 @@ void JSAppStateObserver::OnExtensionStateChanged(const AbilityStateData &ability
     }
     AbilityStateData newAbilityStateData = abilityStateData;
     if (abilityStateData.extensionAbilityType >= 0) {
-        newAbilityStateData.abilityState = extensionStateToAbilityState_[abilityStateData.abilityState];
+        newAbilityStateData.abilityState = innerStateToState_[abilityStateData.abilityState];
     }
     wptr<JSAppStateObserver> jsObserver = this;
     auto asyncTask = [jsObserver, newAbilityStateData, env = env_]() {
