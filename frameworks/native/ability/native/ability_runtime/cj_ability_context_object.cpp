@@ -590,7 +590,7 @@ int32_t FFIAbilityContextSetMissionContinueState(int64_t id, int32_t intState)
 
 CConfiguration CallConvertConfig(std::shared_ptr<AppExecFwk::Configuration> configuration)
 {
-    CConfiguration cCfg;
+    CConfiguration cCfg = {};
     void* handle = dlopen(CJ_ABILITY_LIBNAME, RTLD_LAZY);
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
@@ -610,7 +610,7 @@ CConfiguration CallConvertConfig(std::shared_ptr<AppExecFwk::Configuration> conf
 
 CConfiguration FFIAbilityContextPropConfiguration(int64_t id, int32_t* errCode)
 {
-    CConfiguration cCfg;
+    CConfiguration cCfg = {};
     auto context = FFIData::GetData<CJAbilityContext>(id);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null CJAbilityContext");
@@ -628,7 +628,7 @@ CConfiguration FFIAbilityContextPropConfiguration(int64_t id, int32_t* errCode)
 
 RetAbilityInfoV2 CallConvertAbilityInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
 {
-    RetAbilityInfoV2 retInfo;
+    RetAbilityInfoV2 retInfo = {};
     void* handle = dlopen(CJ_BUNDLE_MGR_LIBNAME, RTLD_LAZY);
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
@@ -648,7 +648,7 @@ RetAbilityInfoV2 CallConvertAbilityInfo(std::shared_ptr<AppExecFwk::AbilityInfo>
 
 RetAbilityInfoV2 FFIAbilityContextPropAbilityInfo(int64_t id, int32_t* errCode)
 {
-    RetAbilityInfoV2 ret;
+    RetAbilityInfoV2 ret = {};
     auto context = FFIData::GetData<CJAbilityContext>(id);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null CJAbilityContext");
@@ -666,7 +666,7 @@ RetAbilityInfoV2 FFIAbilityContextPropAbilityInfo(int64_t id, int32_t* errCode)
 
 RetHapModuleInfoV2 CallConvertHapInfo(std::shared_ptr<AppExecFwk::HapModuleInfo> hapInfo)
 {
-    RetHapModuleInfoV2 retInfo;
+    RetHapModuleInfoV2 retInfo = {};
     void* handle = dlopen(CJ_BUNDLE_MGR_LIBNAME, RTLD_LAZY);
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
@@ -686,7 +686,7 @@ RetHapModuleInfoV2 CallConvertHapInfo(std::shared_ptr<AppExecFwk::HapModuleInfo>
 
 RetHapModuleInfoV2 FFIAbilityContextPropCurrentHapModuleInfo(int64_t id, int32_t* errCode)
 {
-    RetHapModuleInfoV2 ret;
+    RetHapModuleInfoV2 ret = {};
     auto context = FFIData::GetData<CJAbilityContext>(id);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null CJAbilityContext");
