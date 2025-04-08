@@ -39,9 +39,7 @@ int DataObsMgrInner::HandleRegisterObserver(const Uri &uri, struct ObserverNode 
     }
 
     for (auto obs = obsPair->second.begin(); obs != obsPair->second.end(); obs++) {
-        // compare user
-        if ((*obs).observer_->AsObject() == observerNode.observer_->AsObject() &&
-            (*obs).userId_ == observerNode.userId_) {
+        if ((*obs).observer_->AsObject() == observerNode.observer_->AsObject()) {
             TAG_LOGE(AAFwkTag::DBOBSMGR, "obs registered:%{public}s",
                 CommonUtils::Anonymous(uri.ToString()).c_str());
             return OBS_EXIST;
@@ -70,8 +68,7 @@ int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, struct ObserverNod
         CommonUtils::Anonymous(uri.ToString()).c_str());
     auto obs = obsPair->second.begin();
     for (; obs != obsPair->second.end(); obs++) {
-        if ((*obs).observer_->AsObject() == observerNode.observer_->AsObject() &&
-            (*obs).userId_ == observerNode.userId_) {
+        if ((*obs).observer_->AsObject() == observerNode.observer_->AsObject()) {
             break;
         }
     }

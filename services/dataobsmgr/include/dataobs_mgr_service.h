@@ -50,7 +50,7 @@ public:
     DataObsServiceRunningState QueryServiceState() const;
 
     std::pair<bool, struct ObserverNode> ConstructObserverNode(sptr<IDataAbilityObserver> dataObserver,
-        int32_t userId);
+        int32_t userId = -1);
     virtual int RegisterObserver(const Uri &uri,
         sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1) override;
     virtual int UnregisterObserver(const Uri &uri,
