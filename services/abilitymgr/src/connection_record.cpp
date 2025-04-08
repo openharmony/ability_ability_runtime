@@ -299,6 +299,7 @@ void ConnectionRecord::CancelConnectTimeoutTask()
         TAG_LOGE(AAFwkTag::CONNECTION, "fail to get AbilityTaskHandler");
     } else {
         std::string taskName = std::string("ConnectTimeout_") + std::to_string(recordId_);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "CancelConnectTimeoutTask taskName:%{public}s", taskName.c_str());
         handler->CancelTask(taskName);
     }
 }
