@@ -86,7 +86,7 @@ bool AbilityStateData::MarshallingOne(Parcel &parcel) const
     if (!parcel.WriteInt32(callerUid)) {
         return false;
     }
-    if (!parcel.WriteBool(isUIExtNotifyOnAbility)) {
+    if (!parcel.WriteBool(isInnerNotify)) {
         return false;
     }
     return true;
@@ -123,7 +123,7 @@ bool AbilityStateData::ReadFromParcel(Parcel &parcel)
     extensionAbilityType = parcel.ReadInt32();
     processType = parcel.ReadInt32();
     callerUid = parcel.ReadInt32();
-    isUIExtNotifyOnAbility = parcel.ReadBool();
+    isInnerNotify = parcel.ReadBool();
     return true;
 }
 

@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 constexpr size_t ARGC_ONE = 1;
-std::unordered_map<int32_t, int32_t> JSAppStateObserver::extensionStateToAbilityState_ = {
+std::unordered_map<int32_t, int32_t> JSAppStateObserver::innerStateToState_ = {
     {static_cast<int32_t>(AppExecFwk::ExtensionState::EXTENSION_STATE_CREATE),
         static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_CREATE)},
     {static_cast<int32_t>(AppExecFwk::ExtensionState::EXTENSION_STATE_READY),
@@ -88,7 +88,7 @@ void JSAppStateObserver::OnAbilityStateChanged(const AbilityStateData &abilitySt
         TAG_LOGE(AAFwkTag::APPMGR, "appMgr may has cancelled storage");
         return;
     }
-    if (abilityStateData.isUIExtNotifyOnAbility) {
+    if (abilityStateData.isInnerNotify) {
         TAG_LOGE(AAFwkTag::APPMGR, "uiExt not notify");
         return;
     }

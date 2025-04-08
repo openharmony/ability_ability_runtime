@@ -66,7 +66,7 @@ struct AbilityStateData : public Parcelable {
     std::string abilityName;
     std::string callerBundleName;
     std::string callerAbilityName;
-    bool isUIExtNotifyOnAbility = false;
+    bool isInnerNotify = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

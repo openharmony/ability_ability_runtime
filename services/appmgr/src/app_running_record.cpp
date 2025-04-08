@@ -730,7 +730,7 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
         if (!isAbility) {
             abilityStateData.extensionAbilityType = static_cast<int32_t>(abilityInfo->extensionAbilityType);
         } else {
-            abilityStateData.isUIExtNotifyOnAbility = true;
+            abilityStateData.isInnerNotify = true;
         }
     }
     abilityStateData.processType = static_cast<int32_t>(processType_);
