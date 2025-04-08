@@ -24,7 +24,6 @@ namespace AppExecFwk {
 
 ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want &want)
 {
-    TAG_LOGE(AAFwkTag::STSRUNTIME, "WrapAbilityResult");
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
     ani_method ctor = nullptr;
