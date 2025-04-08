@@ -825,6 +825,7 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
     if (taskHandler_) {
         taskHandler_->SubmitTask(reportLoadTask, "reportLoadTask");
     }
+    //UIExtension notifies Extension & Ability state changes
     if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
         UpdateExtensionState(loadParam->token, ExtensionState::EXTENSION_STATE_CREATE);
     }
@@ -4298,6 +4299,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
 
     for (const auto &item : appRecord->GetAbilities()) {
         const auto &abilityRecord = item.second;
+        //UIExtension notifies Extension & Ability state changes
         if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
             appRecord->StateChangedNotifyObserver(abilityRecord,
                 static_cast<int32_t>(ExtensionState::EXTENSION_STATE_TERMINATED), false, false);
