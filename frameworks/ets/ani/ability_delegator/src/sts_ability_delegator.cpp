@@ -20,10 +20,15 @@
 #include "hilog_tag_wrapper.h"
 #include "shell_cmd_result.h"
 #include "ani_common_want.h"
+#include "sts_error_utils.h"
 namespace OHOS {
 namespace AbilityDelegatorSts {
 
 using namespace OHOS::AbilityRuntime;
+
+enum ERROR_CODE {
+    INCORRECT_PARAMETERS = 401,
+};
 
 ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
     std::shared_ptr<AbilityRuntime::Context> context)
@@ -284,6 +289,8 @@ ani_int StartAbility(ani_env* env, ani_class aniClass, ani_object wantObj)
     AAFwk::Want want;
     if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "UnwrapWant  failed");
+        OHOS::AbilityRuntime::ThrowStsError(env, INCORRECT_PARAMETERS,
+            "Parse want failed, want must be Want.");
         return ani_int(-1);
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
