@@ -44,10 +44,9 @@ export default namespace uriPermissionManager {
 
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string): Promise<int> {
         let p = new Promise<int>((resolve: (a: int) => void): void => {
-            let p1 = launch uriPermissionManager.grantUriPermissionPromiseSync(uri, flag, targetBundleName);
-            p1.then<int>((v: int): void => {
-                resolve(v);
-            });
+            taskpool.execute((): void => {
+                uriPermissionManager.grantUriPermissionPromiseSync(uri, flag, targetBundleName);
+            })
         });
         return p;
     }
@@ -55,11 +54,10 @@ export default namespace uriPermissionManager {
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string,
         appCloneIndex: int): Promise<void> {
         let p = new Promise<void>((resolve: (a: int) => void): void => {
-            let p1 = launch uriPermissionManager.grantUriPermissionPromiseWithAppCloneIndexSync(uri,
-                flag, targetBundleName, appCloneIndex);
-            p1.then<void>((): void => {
-                resolve(1);
-            });
+            taskpool.execute((): void => {
+                uriPermissionManager.grantUriPermissionPromiseWithAppCloneIndexSync(uri,
+                    flag, targetBundleName, appCloneIndex);
+            })
         });
         return p;
     }
@@ -67,32 +65,34 @@ export default namespace uriPermissionManager {
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string,
         callback: AsyncCallback<number, void>): void {
         let myCall = new AsyncCallbackWrapper<number>(callback);
-        let p1 = launch uriPermissionManager.grantUriPermissionCallbackSync(uri, flag, targetBundleName, myCall);
+        taskpool.execute((): void => {
+            uriPermissionManager.grantUriPermissionCallbackSync(uri, flag, targetBundleName, myCall);
+        })
     }
 
     export function revokeUriPermission(uri: string, targetBundleName: string): Promise<int> {
         let p = new Promise<int>((resolve: (a: int) => void): void => {
-            let p1 = launch uriPermissionManager.revokeUriPermissionPromiseSync(uri, targetBundleName);
-            p1.then<int>((v: int): void => {
-                resolve(v);
-            });
+            taskpool.execute((): void => {
+                uriPermissionManager.revokeUriPermissionPromiseSync(uri, targetBundleName);
+            })
         });
         return p;
     }
 
     export function revokeUriPermission(uri: string, targetBundleName: string, appCloneIndex: int): Promise<int> {
         let p = new Promise<int>((resolve: (a: int) => void): void => {
-            let p1 = launch uriPermissionManager.revokeUriPermissionPromiseWithAppCloneIndexSync(uri, targetBundleName,
-                appCloneIndex);
-            p1.then<void>((): void => {
-                resolve(1);
-            });
+            taskpool.execute((): void => {
+                uriPermissionManager.revokeUriPermissionPromiseWithAppCloneIndexSync(uri, targetBundleName,
+                    appCloneIndex);
+            })
         });
         return p;
     }
 
     export function revokeUriPermission(uri: string, targetBundleName: string, callback: AsyncCallback<number, void>): void {
         let myCall = new AsyncCallbackWrapper<number>(callback);
-        let p1 = launch uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName, myCall);
+        taskpool.execute((): void => {
+            uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName, myCall);
+        })
     }
  }
