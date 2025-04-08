@@ -232,6 +232,30 @@ HWTEST_F(MultiUserConfigMgrTest, HandleConfiguration_0200, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleConfiguration_0300
+ * @tc.desc: HandleConfiguration.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(MultiUserConfigMgrTest, HandleConfiguration_0300, TestSize.Level1)
+ {
+     AppExecFwk::Configuration configLanguage;
+     configLanguage.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "chinese");
+ 
+     std::vector<std::string> changeKeyV;
+     bool isNotifyUser0 = true;
+     auto multiUserConfigurationMgr = std::make_shared<AppExecFwk::MultiUserConfigurationMgr>();
+     multiUserConfigurationMgr->HandleConfiguration(100, configLanguage, changeKeyV, isNotifyUser0);
+ 
+     auto configColor = std::make_shared<AppExecFwk::Configuration>();
+     configColor->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark");
+     multiUserConfigurationMgr->InitConfiguration(configColor);
+
+     auto resultConfig = multiUserConfigurationMgr->GetConfigurationByUserId(100);
+     EXPECT_EQ(resultConfig->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE), "chinese");
+     EXPECT_EQ(resultConfig->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE), "dark");
+ }
+
+/**
  * @tc.name: InitConfiguration_0200
  * @tc.desc: InitConfiguration.
  * @tc.type: FUNC
