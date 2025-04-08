@@ -3625,33 +3625,40 @@ int AbilityManagerProxy::StartAbilityByCallWithErrMsg(const Want &want, const sp
     MessageOption option;
 
     if (!WriteInterfaceToken(data)) {
+        errMsg = "WriteInterfaceToken error";
         return INNER_ERR;
     }
     if (!data.WriteParcelable(&want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "want write fail");
+        errMsg = "want write fail";
         return ERR_INVALID_VALUE;
     }
     if (connect == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "resolve fail, null connect");
+        errMsg = "null connect";
         return ERR_INVALID_VALUE;
     }
     if (!data.WriteRemoteObject(connect->AsObject())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "resolve write fail");
+        errMsg = "resolve write fail";
         return ERR_INVALID_VALUE;
     }
     if (callerToken) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(callerToken)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag and callerToken failed");
+            errMsg = "callerToken write fail";
             return ERR_INVALID_VALUE;
         }
     } else {
         if (!data.WriteBool(false)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag failed");
+            errMsg = "write flag failed";
             return ERR_INVALID_VALUE;
         }
     }
     if (!data.WriteInt32(accountId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "accountId write fail");
+        errMsg = "accountId write fail";
         return ERR_INVALID_VALUE;
     }
 
