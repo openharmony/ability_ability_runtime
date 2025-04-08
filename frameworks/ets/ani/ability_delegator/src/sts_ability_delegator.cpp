@@ -81,7 +81,7 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
 
 ani_object GetAppContext(ani_env* env, ani_class clss)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "GetAppContext call");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "called");
     ani_class cls;
     ani_object nullobj = nullptr;
     if (ANI_OK != env->FindClass("Lapplication/Context/Context;", &cls)) {
@@ -99,71 +99,100 @@ ani_object GetAppContext(ani_env* env, ani_class clss)
         return nullobj;
     }
     ani_object object = CreateStsBaseContext(env, cls, context);
-    TAG_LOGI(AAFwkTag::DELEGATOR, "GetAppContext end");
     return object;
 }
 
-
-ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmdResult> result)
+ani_object CreateShellCmdResultObject(ani_env* env)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "wrapShellCmdResult called");
-    if (result == nullptr) {
-        return {};
-    }
     ani_class cls = nullptr;
-    ani_status status = ANI_ERROR;
-    status = env->FindClass("Lapplication/AbilityDelegator/ShellCmdResult;", &cls);
+    ani_status status = env->FindClass("Lapplication/AbilityDelegator/ShellCmdResult;", &cls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegator failed status : %{public}d", status);
         return {};
     }
+
     ani_method method = nullptr;
     status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status : %{public}d", status);
         return {};
     }
+
     ani_object object = nullptr;
     if (env->Object_New(cls, method, &object) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status : %{public}d", status);
         return {};
     }
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Object_New success");
 
-    //stdResult
-    ani_field filed;
-    status = env->Class_FindField(cls, "stdResult", &filed);
+    return object;
+}
+
+bool SetStdResultField(ani_env* env, ani_object object, const std::string& stdResult)
+{
+    ani_class cls = nullptr;
+    ani_field field = nullptr;
+    ani_status status = env->Class_FindField(cls, "stdResult", &field);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "Class_FindField configObj failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField stdResult failed");
+        return false;
     }
 
     ani_string aniStringVal {};
-    std::string strResult = result->GetStdResult();
-    status = env->String_NewUTF8(strResult.c_str(), strResult.size(), &aniStringVal);
+    status = env->String_NewUTF8(stdResult.c_str(), stdResult.size(), &aniStringVal);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "String_NewUTF8 mcc failed");
-    }
-    if (env->Object_SetField_Ref(object, filed, aniStringVal) != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "Object_SetField_Ref mcc failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "String_NewUTF8 stdResult failed");
+        return false;
     }
 
-    //exitCode
-    int32_t exitCode = result->GetExitCode();
-    status = env->Class_FindField(cls, "exitCode", &filed);
-    if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "Class_FindField configObj failed");
-    }
-    status = env->Object_SetField_Int(object, filed, exitCode);
-    if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "Object_SetField_Int exitCode failed");
+    if (env->Object_SetField_Ref(object, field, aniStringVal) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Ref stdResult failed");
+        return false;
     }
 
+    return true;
+}
+
+bool SetExitCodeField(ani_env* env, ani_object object, int32_t exitCode)
+{
+    ani_class cls = nullptr;
+    ani_field field = nullptr;
+    ani_status status = env->Class_FindField(cls, "exitCode", &field);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField exitCode failed");
+        return false;
+    }
+
+    status = env->Object_SetField_Int(object, field, exitCode);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Int exitCode failed");
+        return false;
+    }
+
+    return true;
+}
+
+ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmdResult> result)
+{
+    TAG_LOGD(AAFwkTag::DELEGATOR, "called");
+    if (result == nullptr) {
+        return {};
+    }
+    ani_object object = CreateShellCmdResultObject(env);
+    if (object == nullptr) {
+        return {};
+    }
+    if (!SetStdResultField(env, object, result->GetStdResult())) {
+        return {};
+    }
+    if (!SetExitCodeField(env, object, result->GetExitCode())) {
+        return {};
+    }
     return object;
 }
 
 ani_object ExecuteShellCommand(ani_env* env, std::string &cmd, double timeoutSecs)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "ExecuteShellCommand called");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "called");
     ani_object objValue = nullptr;
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (delegator != nullptr) {
@@ -191,13 +220,13 @@ ani_int FinishTestSync(std::string &msg, double &code)
 
 void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "PrintSync");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "PrintSync");
     std::string msgStr;
     ani_size sz {};
     env->String_GetUTF8Size(msg, &sz);
     msgStr.resize(sz + 1);
     env->String_GetUTF8SubString(msg, 0, sz, msgStr.data(), msgStr.size(), &sz);
-    TAG_LOGI(AAFwkTag::DELEGATOR, "PrintSync %{public}s", msgStr.c_str());
+    TAG_LOGD(AAFwkTag::DELEGATOR, "PrintSync %{public}s", msgStr.c_str());
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (delegator == nullptr) {
@@ -229,7 +258,7 @@ void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resStri
 
 void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "AddAbilityMonitorASync");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "AddAbilityMonitorASync");
     ani_class monitorCls;
     ani_status status = env->FindClass("Lapplication/AbilityMonitor/AbilityMonitor;", &monitorCls);
     if (status != ANI_OK) {
@@ -240,14 +269,14 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
     ani_field fieldModuleName = nullptr;
     status = env->Class_FindField(monitorCls, "moduleName", &fieldModuleName);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::DELEGATOR, "Class_GetField failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_GetField failed");
         return;
     }
 
     ani_ref moduleNameRef;
     status = env->Object_GetField_Ref(monitorObj, fieldModuleName, &moduleNameRef);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
         return;
     }
     std::string strModuleName;
@@ -257,14 +286,14 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
     ani_field fieldAbilityName = nullptr;
     status = env->Class_FindField(monitorCls, "abilityName", &fieldAbilityName);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::DELEGATOR, "Class_GetField failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_GetField failed");
         return;
     }
 
     ani_ref abilityNameRef;
     status = env->Object_GetField_Ref(monitorObj, fieldAbilityName, &abilityNameRef);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
         return;
     }
 
@@ -285,7 +314,7 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
 
 ani_int StartAbility(ani_env* env, ani_class aniClass, ani_object wantObj)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "StartAbility call");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "called");
     AAFwk::Want want;
     if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "UnwrapWant  failed");
