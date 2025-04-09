@@ -53,10 +53,10 @@ CJ_EXPORT void* FfiContextGetContext(int64_t id, int32_t type)
     return nativeContext.get();
 }
 
-CJ_EXPORT RetApplicationInfo FfiContextGetApplicationInfo(int64_t id, int32_t type)
+CJ_EXPORT RetApplicationInfoV2 FfiContextGetApplicationInfo(int64_t id, int32_t type)
 {
     (void)type;
-    RetApplicationInfo appInfo;
+    RetApplicationInfoV2 appInfo;
     std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id);
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
@@ -67,7 +67,7 @@ CJ_EXPORT RetApplicationInfo FfiContextGetApplicationInfo(int64_t id, int32_t ty
         TAG_LOGE(AAFwkTag::CONTEXT, "null applicationInfo");
         return appInfo;
     }
-    return Convert::ConvertApplicationInfo(*applicationInfo);
+    return Convert::ConvertApplicationInfoV2(*applicationInfo);
 }
 
 CJ_EXPORT char* FfiContextGetFilesDir(int64_t id, int32_t type)
