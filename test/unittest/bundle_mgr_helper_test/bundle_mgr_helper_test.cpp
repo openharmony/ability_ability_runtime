@@ -865,5 +865,34 @@ HWTEST_F(BundleMgrHelperTest, BundleMgrHelperTest_GetSignatureInfoByBundleName_0
     auto ret = bundleMgrHelper->GetSignatureInfoByBundleName(bundleName, signatureInfo);
     EXPECT_NE(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: BundleMgrHelperTest_InitPluginHapModuleInfo_001
+ * @tc.desc: GetSignatureInfoByBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleMgrHelperTest, BundleMgrHelperTest_InitPluginHapModuleInfo_001, TestSize.Level1)
+{
+    std::string hostBundleName = "";
+    std::string pluginBundleName = "";
+    std::string pluginModuleName = "";
+    int32_t userId = 100;
+    HapModuleInfo hapModuleInfo;
+    auto ret = bundleMgrHelper->GetPluginHapModuleInfo(hostBundleName,
+        pluginBundleName, pluginModuleName, userId, hapModuleInfo);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: BundleMgrHelperTest_GetPluginInfosForSelf_001
+ * @tc.desc: GetSignatureInfoByBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleMgrHelperTest, BundleMgrHelperTest_GetPluginInfosForSelf_001, TestSize.Level1)
+{
+    std::vector<PluginBundleInfo> pluginBundleInfos;
+    auto ret = bundleMgrHelper->GetPluginInfosForSelf(pluginBundleInfos);
+    EXPECT_NE(ret, ERR_OK);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
