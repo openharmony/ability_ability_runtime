@@ -539,7 +539,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, TerminateUIExtensionAbility_001, Test
     sptr<SessionInfo> extensionSessionInfo = new SessionInfo();
     Rosen::SessionInfo info;
     extensionSessionInfo->sessionToken = new Rosen::Session(info);
-
+    extensionSessionInfo->persistentId = TWO;
     AbilityRequest abilityRequest{};
     std::string deviceName = "device";
     std::string abilityName = "ServiceAbility";
@@ -559,6 +559,8 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, TerminateUIExtensionAbility_001, Test
     connectManager->sceneBoardTokenId_ = ONE;
     connectManager->uiExtensionMap_[extensionSessionInfo->sessionToken] =
         std::make_pair(abilityRecord, extensionSessionInfo);
+    abilityRecord->SetSessionInfo(extensionSessionInfo);
+    connectManager->serviceMap_.insert(std::make_pair("test", abilityRecord));
     abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
     EXPECT_EQ(abilityMs_->TerminateUIExtensionAbility(extensionSessionInfo), ERR_WRONG_INTERFACE_CALL);
 }
