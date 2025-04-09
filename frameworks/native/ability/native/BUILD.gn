@@ -1575,7 +1575,11 @@ config("ui_extension_public_config") {
 }
 
 ohos_shared_library("ui_extension") {
-  include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection" ]
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
+    "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/include",
+  ]
   sources = [
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_embeddable_ui_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension.cpp",
@@ -1586,6 +1590,10 @@ ohos_shared_library("ui_extension") {
     "${ability_runtime_native_path}/ability/native/ui_extension_base/js_uiservice_uiext_connection.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_base/ui_extension_context.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_base/ui_extension_servicehost_stub_impl.cpp",
+    "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/src/sts_ui_extension.cpp",
+    "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/src/sts_ui_extension_common.cpp",
+    "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/src/sts_ui_extension_content_session.cpp",
+    "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/src/sts_ui_extension_context.cpp",
   ]
 
   public_configs = [ ":ui_extension_public_config" ]
@@ -1604,6 +1612,7 @@ ohos_shared_library("ui_extension") {
     "${ability_runtime_native_path}/ability/native:insight_intent_executor",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
   ]
 
   external_deps = [
@@ -1613,6 +1622,7 @@ ohos_shared_library("ui_extension") {
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
+    "bundle_framework:bms_ani_common",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
@@ -1621,6 +1631,7 @@ ohos_shared_library("ui_extension") {
     "ipc:ipc_napi",
     "napi:ace_napi",
     "window_manager:embeddablewindowstage_kit",
+    "window_manager:embeddablewindowstageani_kit",
     "window_manager:extensionwindow_napi",
     "window_manager:windowstage_kit",
   ]
