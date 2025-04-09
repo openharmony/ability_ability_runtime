@@ -33,6 +33,8 @@ constexpr int32_t TEST_USER_ID = 10001;
 constexpr int32_t TEST_ERMS_ISALLOW_RESULTCODE = 9;
 const std::string TEST_BUNDLE_NAME = "com.test.demo";
 const std::string TEST_DIALOG_SESSION_ID = "dialogSessionId";
+const std::string APP_LAUNCH_TRUSTLIST = "ohos.params.appLaunchTrustList";
+const std::string SHOW_DEFAULT_PICKER_FLAG = "ohos.ability.params.showDefaultPicker";
 }
 
 class DialogSessionManagerTest : public testing::Test {
@@ -354,6 +356,84 @@ HWTEST_F(DialogSessionManagerTest, UpdateExtensionWantWithDialogCallerInfo_0700,
     EXPECT_EQ(abilityRequest.want.GetUriString(), uri);
     EXPECT_EQ(abilityRequest.want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM).size(), 1);
     GTEST_LOG_(INFO) << "UpdateExtensionWantWithDialogCallerInfo_0700 end";
+}
+
+/**
+ * @tc.name: CreateImplicitSelectorModalDialog_0001
+ * @tc.desc: No APP_LAUNCH_TRUSTLIST
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, CreateImplicitSelectorModalDialog_0001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateImplicitSelectorModalDialog_0001 start";
+    std::string dialogSessionId = "1000001";
+    AbilityRequest abilityRequest;
+    abilityRequest.want.SetParam(TEST_DIALOG_SESSION_ID, dialogSessionId);
+    AAFwk::Want want;
+    int32_t userId = 0;
+    std::vector<DialogAppInfo> dialogAppInfos;
+    abilityRequest.want.SetParam("deviceType", 1);
+    abilityRequest.want.SetParam("userId", userId);
+    std::string mockAction = "mockAction";
+    abilityRequest.want.SetParam("action", mockAction);
+    std::string mockType = "mockType";
+    abilityRequest.want.SetParam("wantType", mockType);
+    std::string mockUri = "mockUri";
+    abilityRequest.want.SetParam("uri", mockUri);
+    std::vector<std::string> mockEntities = {"mockEntities"};
+    abilityRequest.want.SetParam("entities", mockEntities);
+    abilityRequest.want.SetParam("appselector.selectorType", static_cast<int>(SelectorType::IMPLICIT_START_SELECTOR));
+    abilityRequest.want.SetParam("showCaller", false);
+    abilityRequest.want.SetParam(SHOW_DEFAULT_PICKER_FLAG, false);
+
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    DialogSessionManager dialogSessionManager;
+    dialogSessionManager.dialogCallerInfoMap_[dialogSessionId] = dialogCallerInfo;
+    auto ret = dialogSessionManager.CreateImplicitSelectorModalDialog(abilityRequest,
+        want, userId, dialogAppInfos, false);
+
+    EXPECT_NE(ret, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "CreateImplicitSelectorModalDialog_0001 end";
+}
+
+/**
+ * @tc.name: CreateImplicitSelectorModalDialog_0002
+ * @tc.desc: Has APP_LAUNCH_TRUSTLIST
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, CreateImplicitSelectorModalDialog_0002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateImplicitSelectorModalDialog_0002 start";
+    std::string dialogSessionId = "1000001";
+    AbilityRequest abilityRequest;
+    abilityRequest.want.SetParam(TEST_DIALOG_SESSION_ID, dialogSessionId);
+    AAFwk::Want want;
+    int32_t userId = 0;
+    std::vector<DialogAppInfo> dialogAppInfos;
+    abilityRequest.want.SetParam("deviceType", 1);
+    abilityRequest.want.SetParam("userId", userId);
+    std::string mockAction = "mockAction";
+    abilityRequest.want.SetParam("action", mockAction);
+    std::string mockType = "mockType";
+    abilityRequest.want.SetParam("wantType", mockType);
+    std::string mockUri = "mockUri";
+    abilityRequest.want.SetParam("uri", mockUri);
+    std::vector<std::string> mockEntities = {"mockEntities"};
+    abilityRequest.want.SetParam("entities", mockEntities);
+    abilityRequest.want.SetParam("appselector.selectorType", static_cast<int>(SelectorType::IMPLICIT_START_SELECTOR));
+    abilityRequest.want.SetParam("showCaller", false);
+    abilityRequest.want.SetParam(SHOW_DEFAULT_PICKER_FLAG, false);
+    std::vector<std::string> mockTrustlist = {"abc", "bca", "cab"};
+    abilityRequest.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    DialogSessionManager dialogSessionManager;
+    dialogSessionManager.dialogCallerInfoMap_[dialogSessionId] = dialogCallerInfo;
+    auto ret = dialogSessionManager.CreateImplicitSelectorModalDialog(abilityRequest,
+        want, userId, dialogAppInfos, false);
+
+    EXPECT_NE(ret, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "CreateImplicitSelectorModalDialog_0002 end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS
