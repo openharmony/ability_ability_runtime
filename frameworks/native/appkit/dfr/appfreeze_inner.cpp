@@ -197,7 +197,7 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
     int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
     GetMainHandlerDump(msgContent);
     TAG_LOGW(AAFwkTag::APPDFR, "get mainhandler dump, eventName:%{public}s, endTime:%{public}s, "
-        "interval:%{public}lld ms", info.errorObject.name.c_str(),
+        "interval:%{public}" PRId64 " ms", info.errorObject.name.c_str(),
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
         AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime);
 
