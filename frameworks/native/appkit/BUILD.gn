@@ -76,6 +76,7 @@ config("appkit_public_config") {
 ohos_shared_library("appkit_native") {
   include_dirs = [
     "native",
+    "${ability_runtime_path}/frameworks/ets/ani/context/context_util/include",
     "${ability_runtime_path}/interfaces/inner_api/error_utils/include",
     "${ability_runtime_path}/interfaces/inner_api",
     "${ability_runtime_path}/interfaces/kits/native/appkit",
@@ -88,6 +89,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_path}/sts_environment/interfaces/inner_api",
     "${ability_runtime_innerkits_path}/deps_wrapper/include",
     "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/recovery",
     "${ability_runtime_path}/utils/global/time/include",
@@ -95,6 +97,9 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_napi_path}/inner/napi_common",
     "${ability_runtime_utils_path}/global/constant",
+    "${ability_runtime_napi_path}/inner/napi_common/ani_common",
+    "${ability_runtime_path}/frameworks/ets/ani/app_manager/include/",
+    "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
   ]
 
   configs = [
@@ -108,6 +113,8 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit/ability_runtime/app/ability_stage.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/app/js_ability_stage.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/app/js_ability_stage_context.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/app/sts_ability_stage.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/app/sts_ability_stage_context.cpp",
     "${ability_runtime_native_path}/appkit/app/ability_record_mgr.cpp",
     "${ability_runtime_native_path}/appkit/app/app_loader.cpp",
     "${ability_runtime_native_path}/appkit/app/application_cleaner.cpp",
@@ -168,6 +175,8 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:application_context_manager",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/frameworks/ets/ani/app_manager:ability_app_manager_ani_kit",
     "${ability_runtime_path}/js_environment/frameworks/js_environment:js_environment",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:app_util",
@@ -182,6 +191,7 @@ ohos_shared_library("appkit_native") {
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:bms_ani_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ets_runtime:libark_jsruntime",
@@ -209,6 +219,7 @@ ohos_shared_library("appkit_native") {
     "napi:ace_napi",
     "preferences:native_preferences",
     "resource_management:global_resmgr",
+    "resource_management:resourceManager_ani",
     "runtime_core:ani",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
