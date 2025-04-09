@@ -28,16 +28,11 @@ namespace {
 constexpr const char* ABILITY_SUPPORT_ECOLOGICAL_RULEMGRSERVICE =
     "persist.sys.abilityms.support.ecologicalrulemgrservice";
 constexpr const char* BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
-constexpr const char* START_ABILITY_AS_CALLER_SKIP_ERMS = "ability.params.skipErms";
 constexpr int32_t ERMS_ISALLOW_RESULTCODE = 10;
 }
 ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (param.isStartAsCaller && param.want.GetBoolParam(START_ABILITY_AS_CALLER_SKIP_ERMS, false)) {
-        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "start as caller, skip erms");
-        return ERR_OK;
-    }
     if (StartAbilityUtils::skipErms) {
         StartAbilityUtils::skipErms = false;
         return ERR_OK;
@@ -51,6 +46,10 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
     ExperienceRule rule;
     AAFwk::Want newWant = param.want;
     newWant.RemoveAllFd();
+    if (param.isStartAsCaller) {
+        TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "isAsCaller");
+        callerInfo.isAsCaller = true;
+    }
     InitErmsCallerInfo(newWant, param.abilityInfo, callerInfo, param.userId, param.callerToken);
 
     int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
@@ -217,6 +216,9 @@ void EcologicalRuleInterceptor::InitErmsCallerInfo(const Want &want,
     callerInfo.pid = want.GetIntParam(Want::PARAM_RESV_CALLER_PID, IPCSkeleton::GetCallingPid());
     callerInfo.embedded = want.GetIntParam("send_to_erms_embedded", 0);
     callerInfo.userId = userId;
+    if (want.GetElement().GetBundleName().empty() && abilityInfo != nullptr) {
+        callerInfo.targetBundleName = abilityInfo->bundleName;
+    }
     
     GetEcologicalTargetInfo(want, abilityInfo, callerInfo);
     GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
