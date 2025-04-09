@@ -30,7 +30,6 @@
 #include <iterator>
 #include <memory>
 #include <string>
-#include <vector>
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -63,7 +62,7 @@ bool STSAbilityStage::UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleI
     for (auto &md: hapModuleInfo.metadata) {
         if (md.name == "USE_COMMON_CHUNK") {
             if (md.value != "true") {
-                TAG_LOGW(AAFwkTag::APPKIT, "USE_COMMON_CHUNK = %s{public}s", md.value.c_str());
+                TAG_LOGE(AAFwkTag::APPKIT, "USE_COMMON_CHUNK = %s{public}s", md.value.c_str());
                 return false;
             }
             return true;
@@ -76,7 +75,7 @@ std::shared_ptr<AbilityStage> STSAbilityStage::Create(
     const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo)
 {
     if (runtime == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "null runtime");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return nullptr;
     }
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "STSAbilityStage::Create");
@@ -114,7 +113,6 @@ std::shared_ptr<AbilityStage> STSAbilityStage::Create(
     }
     auto moduleObj = stsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
         hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag, hapModuleInfo.srcEntrance);
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s finished", __func__);
     return std::make_shared<STSAbilityStage>(stsRuntime, std::move(moduleObj));
 }
 
@@ -149,7 +147,7 @@ void STSAbilityStage::OnCreate(const AAFwk::Want &want) const
     AbilityStage::OnCreate(want);
 
     if (!stsAbilityStageObj_) {
-        TAG_LOGW(AAFwkTag::APPKIT, "Not found AbilityStage.js");
+        TAG_LOGE(AAFwkTag::APPKIT, "Not found AbilityStage.js");
         return;
     }
 
@@ -174,8 +172,6 @@ void STSAbilityStage::OnCreate(const AAFwk::Want &want) const
         TAG_LOGE(AAFwkTag::ABILITY, "CALL Object_CallMethod FAILED: %{public}d", status);
         STSAbilityStageContext::ResetEnv(env);
         return;
-    } else {
-        TAG_LOGI(AAFwkTag::ABILITY, "CALL Object_CallMethod SUCCEED");
     }
 
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "STSAbilityStage::OnCreate end");
@@ -183,20 +179,19 @@ void STSAbilityStage::OnCreate(const AAFwk::Want &want) const
     if (delegator) {
         delegator->PostPerformStageStart(CreateStageProperty());
     }
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s finished", __func__);
 }
 
 void STSAbilityStage::OnDestroy() const
 {
     AbilityStage::OnDestroy();
     if (!stsAbilityStageObj_) {
-        TAG_LOGW(AAFwkTag::APPKIT, "Not found AbilityStage.js");
+        TAG_LOGE(AAFwkTag::APPKIT, "Not found AbilityStage.js");
         return;
     }
     ani_status status = ANI_OK;
     auto env = stsRuntime_.GetAniEnv();
     if (env == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITY, "env nullptr");
+        TAG_LOGE(AAFwkTag::ABILITY, "env nullptr");
         return;
     }
 
@@ -215,10 +210,7 @@ void STSAbilityStage::OnDestroy() const
         TAG_LOGE(AAFwkTag::ABILITY, "CALL Object_CallMethod FAILED: %{public}d", status);
         STSAbilityStageContext::ResetEnv(env);
         return;
-    } else {
-        TAG_LOGI(AAFwkTag::ABILITY, "CALL Object_CallMethod SUCCEED");
     }
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s finished", __func__);
 }
 
 std::string STSAbilityStage::OnAcceptWant(const AAFwk::Want &want)
@@ -236,7 +228,7 @@ void STSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& co
     AbilityStage::OnConfigurationUpdated(configuration);
     auto env = stsRuntime_.GetAniEnv();
     if (env == nullptr) {
-        TAG_LOGI(AAFwkTag::ABILITY, "env nullptr");
+        TAG_LOGE(AAFwkTag::ABILITY, "env nullptr");
         return;
     }
 
@@ -247,7 +239,7 @@ void STSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& co
     ani_status status = env->Class_FindMethod(stsAbilityStageObj_->aniCls,
         "onConfigurationUpdate", "L@ohos/app/ability/Configuration/Configuration;:V", &method);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::ABILITY, "Class_FindMethod FAILED");
+        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindMethod FAILED");
         STSAbilityStageContext::ResetEnv(env);
         return;
     }
@@ -257,10 +249,7 @@ void STSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& co
         TAG_LOGE(AAFwkTag::ABILITY, "CALL Object_CallMethod FAILED: %{public}d", status);
         STSAbilityStageContext::ResetEnv(env);
         return;
-    } else {
-        TAG_LOGI(AAFwkTag::ABILITY, "CALL Object_CallMethod SUCCEED");
     }
-    TAG_LOGI(AAFwkTag::ABILITY, "STS %{public}s finished", __func__);
 }
 
 void STSAbilityStage::OnMemoryLevel(int32_t level)
