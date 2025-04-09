@@ -39,13 +39,11 @@ OHOS::sptr<OHOS::AppExecFwk::IAppMgr> GetAppManagerInstance()
 static void PreloadApplication(ani_env *env, [[maybe_unused]]ani_class aniClass,
     ani_string bundleName, ani_int userId, ani_int mode, ani_int appIndex)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "PreloadApplication");
     std::string bundleNameStr;
     ani_size sz {};
     env->String_GetUTF8Size(bundleName, &sz);
     bundleNameStr.resize(sz + 1);
     env->String_GetUTF8SubString(bundleName, 0, sz, bundleNameStr.data(), bundleNameStr.size(), &sz);
-    TAG_LOGI(AAFwkTag::DELEGATOR, "PreloadApplication bundleName %{public}s", bundleNameStr.c_str());
 
     sptr<OHOS::AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
     if (appMgr == nullptr) {
@@ -53,12 +51,10 @@ static void PreloadApplication(ani_env *env, [[maybe_unused]]ani_class aniClass,
         return;
     }
     appMgr->PreloadApplication(bundleNameStr, userId, static_cast<AppExecFwk::PreloadMode>(mode), appIndex);
-    TAG_LOGI(AAFwkTag::DELEGATOR, "PreloadApplication END");
 }
 
 void StsAppManagerRegistryInit(ani_env *env)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "StsAppManagerRegistryInit call");
     ani_status status = ANI_ERROR;
     if (env->ResetError() != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "ResetError failed");
@@ -83,8 +79,6 @@ void StsAppManagerRegistryInit(ani_env *env)
     if (env->ResetError() != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "ResetError failed");
     }
-
-    TAG_LOGI(AAFwkTag::DELEGATOR, "StsAppManagerRegistryInit end");
 }
 } // namespace AbilityDelegatorSts
 } // namespace OHOS
