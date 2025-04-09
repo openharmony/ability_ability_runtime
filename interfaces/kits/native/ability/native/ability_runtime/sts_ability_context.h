@@ -49,7 +49,7 @@ public:
     static void TerminateSelfWithResult(ani_env *env, ani_object aniObj, ani_object abilityResult, ani_object callback);
     static void reportDrawnCompletedSync(
         [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj, ani_object call);
-    static ani_int StartAbilityByTypeSync([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniObj,
+    static ani_object StartAbilityByTypeSync([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniObj,
         ani_string aniType, ani_ref aniWantParam, ani_object startCallback);
 
     static ani_object SetAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context);

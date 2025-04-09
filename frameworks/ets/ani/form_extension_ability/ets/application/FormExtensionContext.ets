@@ -13,15 +13,8 @@
  * limitations under the License.
  */
 
-import Context from 'application.Context'
+import ExtensionContext from './ExtensionContext';
 
-export default class ApplicationContext extends Context {
-    public native setSupportedProcessCacheSync(isSupported : boolean):void;
-    public nativeApplicationContext:long = 0;
-
-    setSupportedProcessCache(isSupported : boolean):void {
-        taskpool.execute((): void => {
-            this.setSupportedProcessCacheSync(isSupported);
-        });
-    }
+export default class FormExtensionContext extends ExtensionContext {
+  public nativeContext: long = 0;
 }

@@ -50,15 +50,19 @@ export default class UIAbilityContext extends Context {
   private native nativeTerminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
   private native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
   private native nativeReportDrawnCompletedSync(callback:AsyncCallbackWrapper<void>): void;
-  public native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): BusinessError<void>;
+  private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): BusinessError<void>;
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
-    let p1 = launch this.nativeStartAbilitySync(want, myCall);
+    taskpool.execute((): void => {
+      this.nativeStartAbilitySync(want, myCall);
+    });
   }
 
   startAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
-    let p1 = launch this.nativeStartAbilitySync(want, options, myCall);
+    taskpool.execute((): void => {
+      this.nativeStartAbilitySync(want, options, myCall);
+    });
   }
 
   startAbility(want: Want): Promise<void> {
@@ -70,7 +74,9 @@ export default class UIAbilityContext extends Context {
           reject(err);
         }
       });
-      launch this.nativeStartAbilitySync(want, myCall);
+      taskpool.execute((): void => {
+        this.nativeStartAbilitySync(want, myCall);
+      });
     });
     return p;
   }
@@ -84,19 +90,25 @@ export default class UIAbilityContext extends Context {
           reject(err);
         }
       });
-      launch this.nativeStartAbilitySync(want, options, myCall);
+      taskpool.execute((): void => {
+        this.nativeStartAbilitySync(want, options, myCall);
+      });
     });
     return p;
   }
 
   startAbilityForResult(want: Want, callback: AsyncCallback<AbilityResult, void>): void {
     let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
-    launch this.nativeStartAbilityForResult(want, myCall);
+    taskpool.execute((): void => {
+      this.nativeStartAbilityForResult(want, myCall);
+    });
   }
 
   startAbilityForResult(want: Want, startOptions: StartOptions, callback: AsyncCallback<AbilityResult, void>): void {
     let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
-    launch this.nativeStartAbilityForResult(want, startOptions, myCall);
+    taskpool.execute((): void => {
+      this.nativeStartAbilityForResult(want, startOptions, myCall);
+    });
   }
 
   startAbilityForResult(want: Want): Promise<AbilityResult>{
@@ -108,7 +120,9 @@ export default class UIAbilityContext extends Context {
           reject(err);
         }
       });
-      launch this.nativeStartAbilityForResult(want, myCall);
+      taskpool.execute((): void => {
+        this.nativeStartAbilityForResult(want, myCall);
+      });
     });
     return p;
   }
@@ -122,14 +136,18 @@ export default class UIAbilityContext extends Context {
           reject(err);
         }
       });
-      launch this.nativeStartAbilityForResult(want, startOptions, myCall);
+      taskpool.execute((): void => {
+        this.nativeStartAbilityForResult(want, startOptions, myCall);
+      });
     });
     return p;
   }
 
   terminateSelf(callback:AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
-    launch this.nativeTerminateSelfSync(myCall);
+    taskpool.execute((): void => {
+      this.nativeTerminateSelfSync(myCall);
+    });
   }
 
   terminateSelf(): Promise<void> {
@@ -141,14 +159,18 @@ export default class UIAbilityContext extends Context {
           reject(err);
         }
       });
-      launch this.nativeTerminateSelfSync(myCall);
+      taskpool.execute((): void => {
+        this.nativeTerminateSelfSync(myCall);
+      });
     });
     return p;
   }
 
   terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
-    launch this.nativeTerminateSelfWithResult(parameter, myCall);
+    taskpool.execute((): void => {
+      this.nativeTerminateSelfWithResult(parameter, myCall);
+    });
   }
 
   terminateSelfWithResult(parameter: AbilityResult): Promise<void>{
@@ -160,14 +182,18 @@ export default class UIAbilityContext extends Context {
           reject(err);
         }
       });
-      launch this.nativeTerminateSelfWithResult(parameter, myCall);
+      taskpool.execute((): void => {
+        this.nativeTerminateSelfWithResult(parameter, myCall);
+      });
     });
     return p;
   }
 
   reportDrawnCompleted(callback:AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
-    launch this.nativeReportDrawnCompletedSync(myCall);
+    taskpool.execute((): void => {
+      this.nativeReportDrawnCompletedSync(myCall);
+    });
   }
 
   startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback, callback: AsyncCallback<void>): void {
