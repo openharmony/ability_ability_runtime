@@ -15,10 +15,13 @@
 
 #include "sts_context_utils.h"
 
+#include "ani_common_util.h"
 #include "ani_enum_convert.h"
 #include "application_context.h"
 #include "application_context_manager.h"
+#include "common_fun_ani.h"
 #include "hilog_tag_wrapper.h"
+#include "resourceManager.h"
 #include "sts_error_utils.h"
 
 namespace OHOS {
@@ -40,9 +43,46 @@ void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object cont
     }
 }
 
+void BindApplicationInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    std::shared_ptr<Context> context)
+{
+    ani_field applicationInfoField;
+    if (ANI_OK != aniEnv->Class_FindField(contextClass, "applicationInfo", &applicationInfoField)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find applicationInfo failed");
+        return;
+    }
+    auto appInfo = context->GetApplicationInfo();
+    ani_object appInfoObj = AppExecFwk::CommonFunAni::ConvertApplicationInfo(aniEnv, *appInfo);
+    if (aniEnv->Object_SetField_Ref(contextObj, applicationInfoField,
+        reinterpret_cast<ani_ref>(appInfoObj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
+        return;
+    }
+}
+
+void BindResourceManager(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    std::shared_ptr<Context> context)
+{
+    ani_field resourceManagerField;
+    if (ANI_OK != aniEnv->Class_FindField(contextClass, "resourceManager", &resourceManagerField)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find resourceManager failed");
+        return;
+    }
+    auto resourceManager = context->GetResourceManager();
+    ani_object resourceMgrObj = Global::Resource::ResMgrAddon::CreateResMgr(aniEnv, "", resourceManager, context);
+    if (aniEnv->Object_SetField_Ref(contextObj, resourceManagerField,
+        reinterpret_cast<ani_ref>(resourceMgrObj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
+        return;
+    }
+}
+
 void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context)
 {
+    BindApplicationInfo(aniEnv, contextClass, contextObj, context);
+    BindResourceManager(aniEnv, contextClass, contextObj, context);
+
     // bind parent context property
     ani_field areaField;
     if (ANI_OK != aniEnv->Class_FindField(contextClass, "area", &areaField)) {
