@@ -985,6 +985,9 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly, bool isAppCloneSelector)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!isStartAsCaller || isImplicit) {
+        (const_cast<Want &>(want)).RemoveParam("ability.params.picker.erms.policy");
+    }
     std::string dialogSessionId = want.GetStringParam("dialogSessionId");
     bool isSendDialogResult = false;
 #ifdef SUPPORT_SCREEN
@@ -1172,8 +1175,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             return result;
         }
     #ifdef SUPPORT_SCREEN
-        if (result != ERR_OK && isReplaceWantExist && !isSendDialogResult &&
-            callerBundleName != BUNDLE_NAME_DIALOG) {
+        if (result != ERR_OK && isReplaceWantExist && callerBundleName != BUNDLE_NAME_DIALOG) {
             return DialogSessionManager::GetInstance().HandleErmsResult(abilityRequest, GetUserId(), newWant);
         }
         if (result == ERR_OK &&
