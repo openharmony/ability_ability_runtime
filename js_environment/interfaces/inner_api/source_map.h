@@ -82,7 +82,8 @@ public:
                                  std::string& packageName);
     static void ExtractStackInfo(const std::string& stackStr, std::vector<std::string>& res);
     void SplitSourceMap(const std::string& sourceMapData);
-    
+    static std::string ExtractFileName(const std::string& str);
+
 private:
     void ExtractSourceMapData(const std::string& allmappings, std::shared_ptr<SourceMapData>& curMapData);
     void ExtractKeyInfo(const std::string& sourceMap, std::vector<std::string>& sourceKeyInfo);
