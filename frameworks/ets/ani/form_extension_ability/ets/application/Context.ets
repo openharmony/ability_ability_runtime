@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-import Context from 'application.Context'
+import BaseContext from './BaseContext.ets'
+import ApplicationContext from './ApplicationContext'
 
-export default class ApplicationContext extends Context {
-    public native setSupportedProcessCacheSync(isSupported : boolean):void;
-    public nativeApplicationContext:long = 0;
+export class Context extends BaseContext {
+  area: int = 0;
+  filesDir: string = "";
+  tempDir: string = "";
+  private applicationContext?: ApplicationContext;
 
-    setSupportedProcessCache(isSupported : boolean):void {
-        taskpool.execute((): void => {
-            this.setSupportedProcessCacheSync(isSupported);
-        });
-    }
+  getApplicationContext(): ApplicationContext | undefined {
+    return this.applicationContext;
+  }
 }

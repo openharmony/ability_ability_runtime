@@ -45,6 +45,7 @@
 #include "want.h"
 #include "common_fun_ani.h"
 #include "sts_context_utils.h"
+#include "sts_error_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -273,6 +274,7 @@ void StsAbilityContext::StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe
     auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "context null");
+        ThrowStsInvalidParamError(env, "context null");
         return;
     }
     InheritWindowMode(env, aniObj, want);
@@ -283,23 +285,27 @@ void StsAbilityContext::StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe
         want.SetParam(AAFwk::Want::PARAM_RESV_START_TIME, startTime);
         AddFreeInstallObserver(env, want, call, context);
     }
-    ErrCode resultCode = ERR_INVALID_VALUE;
+    ErrCode innerErrCode = ERR_OK;
     if (opt != nullptr) {
         AAFwk::StartOptions startOptions;
         OHOS::AppExecFwk::UnwrapStartOptionsWithProcessOption(env, opt, startOptions);
-        resultCode = context->StartAbility(want, startOptions, -1);
+        innerErrCode = context->StartAbility(want, startOptions, -1);
     } else {
-        resultCode = context->StartAbility(want, -1);
+        innerErrCode = context->StartAbility(want, -1);
+    }
+    ani_object aniObject = CreateStsError(env, AbilityErrorCode::ERROR_OK);
+    if (innerErrCode != ERR_OK) {
+        aniObject = CreateStsErrorByNativeErr(env, innerErrCode);
     }
     if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
-        if (resultCode != ERR_OK && freeInstallObserver_ != nullptr) {
+        if (innerErrCode != ERR_OK && freeInstallObserver_ != nullptr) {
             std::string bundleName = want.GetElement().GetBundleName();
             std::string abilityName = want.GetElement().GetAbilityName();
             std::string startTime = want.GetStringParam(AAFwk::Want::PARAM_RESV_START_TIME);
-            freeInstallObserver_->OnInstallFinished(bundleName, abilityName, startTime, resultCode);
+            freeInstallObserver_->OnInstallFinished(bundleName, abilityName, startTime, innerErrCode);
         }
     } else {
-        AsyncCallback(env, call, WrapBusinessError(env, static_cast<int>(resultCode)), nullptr);
+        AsyncCallback(env, call, aniObject, nullptr);
     }
 }
 
@@ -334,6 +340,7 @@ void StsAbilityContext::StartAbilityForResultInner(ani_env *env, ani_object aniO
     auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext is nullptr");
+        ThrowStsErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
         return;
     }
     AAFwk::Want want;
@@ -371,7 +378,8 @@ void StsAbilityContext::StartAbilityForResultInner(ani_env *env, ani_object aniO
             resultCode = ERR_INVALID_VALUE;
         }
         auto errCode = isInner ? resultCode : 0;
-        AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef), WrapBusinessError(env, errCode), abilityResult);
+        AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
+            OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, errCode), abilityResult);
     };
     auto requestCode = GenerateRequestCode();
     (startOptionsObj == nullptr) ? context->StartAbilityForResult(want, requestCode, std::move(task)) :
@@ -397,23 +405,34 @@ void StsAbilityContext::StartAbilityForResult2(ani_env *env, ani_object aniObj, 
 void StsAbilityContext::TerminateSelf(
     ani_env *env, ani_object aniObj, ani_object callback)
 {
+    ani_object aniObject = nullptr;
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "context null");
+        aniObject = CreateStsInvalidParamError(env, "context null");
+        AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
     ErrCode ret = context->TerminateSelf();
-    AsyncCallback(env, callback, WrapBusinessError(env, static_cast<int32_t>(ret)), nullptr);
+    if (ret == static_cast<ErrCode>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT) || ret == ERR_OK) {
+        aniObject = CreateStsError(env, static_cast<AbilityErrorCode>(ret));
+    } else {
+        aniObject = CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret));
+    }
+    AsyncCallback(env, callback, aniObject, nullptr);
 }
 
 void StsAbilityContext::TerminateSelfWithResult(
     ani_env *env, ani_object aniObj, ani_object abilityResult, ani_object callback)
 {
+    ani_object aniObject = nullptr;
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext is nullptr");
+        aniObject = CreateStsInvalidParamError(env, "context null");
+        AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
     AAFwk::Want want;
@@ -421,54 +440,78 @@ void StsAbilityContext::TerminateSelfWithResult(
     OHOS::AppExecFwk::UnWrapAbilityResult(env, abilityResult, resultCode, want);
     context->SetTerminating(true);
     ErrCode ret = context->TerminateAbilityWithResult(want, resultCode);
-    AsyncCallback(env, callback, WrapBusinessError(env, static_cast<int32_t>(ret)), nullptr);
+    if (ret == static_cast<ErrCode>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT) || ret == ERR_OK) {
+        aniObject = CreateStsError(env, static_cast<AbilityErrorCode>(ret));
+    } else {
+        aniObject = CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret));
+    }
+    AsyncCallback(env, callback, aniObject, nullptr);
 }
 
 void StsAbilityContext::reportDrawnCompletedSync(
     [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj, ani_object callback)
 {
+    ani_object aniObject = nullptr;
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     auto context = GetAbilityContext(env, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "context null");
+        aniObject = CreateStsInvalidParamError(env, "context null");
+        AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
     ErrCode ret = context->ReportDrawnCompleted();
-    AsyncCallback(env, callback, WrapBusinessError(env, static_cast<int32_t>(ret)), nullptr);
+    if (ret == ERR_OK) {
+        aniObject = CreateStsError(env, static_cast<AbilityErrorCode>(ret));
+    } else {
+        aniObject = CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret));
+    }
+    AsyncCallback(env, callback, aniObject, nullptr);
 }
 
-ani_int StsAbilityContext::StartAbilityByTypeSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+ani_object StsAbilityContext::StartAbilityByTypeSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
     ani_string aniType, ani_ref aniWantParam, ani_object startCallback)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "call");
     auto context = GetAbilityContext(env, aniObj);
-    ErrCode ret = ERR_INVALID_VALUE;
+    ani_object aniObject = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext failed.");
-        return ret;
+        TAG_LOGE(AAFwkTag::UIABILITY, "get abilityContext failed.");
+        ThrowStsInvalidParamError(env, "context null");
+        return aniObject;
     }
 
     std::string type;
     if (!AppExecFwk::GetStdString(env, aniType, type)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "GetStdString failed");
-        return ret;
+        TAG_LOGE(AAFwkTag::UI_EXT, "parse type failed");
+        ThrowStsInvalidParamError(env, "Parse param type failed, type must be string.");
+        return aniObject;
     }
 
     AAFwk::WantParams wantParam;
     if (!AppExecFwk::UnwrapWantParams(env, aniWantParam, wantParam)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "UnwrapWantParams failed");
-        return ret;
+        TAG_LOGE(AAFwkTag::UI_EXT, "parse wantParam failed");
+        ThrowStsInvalidParamError(env, "Parse param want failed, want must be Want.");
+        return aniObject;
     }
 
     ani_vm *aniVM = nullptr;
     if (env->GetVM(&aniVM) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "GetVM failed");
-        return ret;
+        TAG_LOGE(AAFwkTag::UI_EXT, "get aniVM failed");
+        ThrowStsInvalidParamError(env, "Get aniVm failed.");
+        return aniObject;
     }
+    ErrCode innerErrCode = ERR_OK;
     std::shared_ptr<StsUIExtensionCallback> callback = std::make_shared<StsUIExtensionCallback>();
     callback->SetStsCallbackObject(aniVM, startCallback);
-    ret = context->StartAbilityByType(type, wantParam, callback);
-    return ret;
+    innerErrCode = context->StartAbilityByType(type, wantParam, callback);
+    if (innerErrCode == ERR_OK) {
+        return aniObject;
+    } else if (innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
+        return CreateStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+    } else {
+        return CreateStsErrorByNativeErr(env, innerErrCode);
+    }
 }
 
 bool BindNativeMethods(ani_env *env, ani_class &cls)

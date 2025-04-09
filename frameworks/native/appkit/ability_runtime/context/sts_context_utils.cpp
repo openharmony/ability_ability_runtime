@@ -19,6 +19,7 @@
 #include "application_context.h"
 #include "application_context_manager.h"
 #include "hilog_tag_wrapper.h"
+#include "sts_error_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -33,7 +34,6 @@ void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object cont
         return;
     }
     ani_ref applicationContextRef = reinterpret_cast<ani_ref>(applicationCtxRef);
-    TAG_LOGI(AAFwkTag::APPKIT, "applicationContextRef: %{public}p", applicationContextRef);
     if (aniEnv->Object_SetField_Ref(contextObj, applicationContextField, applicationContextRef) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
         return;
@@ -50,7 +50,6 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
         return;
     }
     auto area = context->GetArea();
-    TAG_LOGI(AAFwkTag::APPKIT, "ani area:%{public}d", area);
     ani_enum_item areaModeItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(
         aniEnv, "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;", area, areaModeItem);
@@ -66,7 +65,6 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
         return;
     }
     auto filesDir = context->GetFilesDir();
-    TAG_LOGI(AAFwkTag::APPKIT, "ani filesDir:%{public}s", filesDir.c_str());
     ani_string filesDir_string{};
     aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDir_string);
     if (aniEnv->Object_SetField_Ref(contextObj, filesDirField, reinterpret_cast<ani_ref>(filesDir_string)) != ANI_OK) {
@@ -80,7 +78,6 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
         return;
     }
     auto tempDir = context->GetTempDir();
-    TAG_LOGI(AAFwkTag::APPKIT, "ani tempDir:%{public}s", tempDir.c_str());
     ani_string tempDir_string{};
     aniEnv->String_NewUTF8(tempDir.c_str(), tempDir.size(), &tempDir_string);
     if (aniEnv->Object_SetField_Ref(contextObj, tempDirField, reinterpret_cast<ani_ref>(tempDir_string)) != ANI_OK) {
@@ -98,13 +95,12 @@ void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object context
 
 ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj)
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "called GetApplicationContextSync");
     auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetStsGlobalObject(env);
     if (appContextObj != nullptr) {
-        TAG_LOGI(AAFwkTag::APPKIT, "appContextObj is not nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "appContextObj is not nullptr");
         return appContextObj->aniObj;
     }
-    TAG_LOGI(AAFwkTag::APPKIT, "called GetApplicationContextSync finish");
+    ThrowStsInvalidParamError(env, "appContextObj null");
     return {};
 }
 }

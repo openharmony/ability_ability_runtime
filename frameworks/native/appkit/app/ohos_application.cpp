@@ -50,6 +50,7 @@
 #include "ani.h"
 #include "sts_context_utils.h"
 #include "sts_runtime.h"
+#include "sts_error_utils.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -221,29 +222,36 @@ void OHOSApplication::SetApplicationContext(
 
 static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
     ani_boolean value) {
-    TAG_LOGI(AAFwkTag::APPKIT, "SetSupportedProcessCacheSync called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     ani_class applicationContextCls = nullptr;
     if (env->FindClass(STS_APPLICATION_CONTEXT_CLASS_NAME, &applicationContextCls) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed");
+        AbilityRuntime::ThrowStsInvalidParamError(env, "FindClass failed");
         return;
     }
     ani_field contextField;
     if (env->Class_FindField(applicationContextCls, "nativeApplicationContext", &contextField) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed");
+        AbilityRuntime::ThrowStsInvalidParamError(env, "Class_FindField failed");
         return;
     }
     ani_long nativeContextLong;
     if (env->Object_GetField_Long(aniObj, contextField, &nativeContextLong) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_GetField_Long failed");
+        AbilityRuntime::ThrowStsInvalidParamError(env, "Object_GetField_Long failed");
         return;
     }
-    ((AbilityRuntime::ApplicationContext*)nativeContextLong)->SetSupportedProcessCacheSelf(value);
-    TAG_LOGI(AAFwkTag::APPKIT, "SetSupportedProcessCacheSync end");
+    int32_t errCode = ((AbilityRuntime::ApplicationContext*)nativeContextLong)->SetSupportedProcessCacheSelf(value);
+    if (errCode == AAFwk::ERR_CAPABILITY_NOT_SUPPORT) {
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_CAPABILITY_NOT_SUPPORT);
+    } else if (errCode != ERR_OK) {
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+    }
 }
 
 void OHOSApplication::InitAniApplicationContext()
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "init application context");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto& runtime = GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
     auto aniEnv = static_cast<AbilityRuntime::STSRuntime &>(*runtime).GetAniEnv();
     ani_class applicationContextCls = nullptr;
@@ -288,12 +296,11 @@ void OHOSApplication::InitAniApplicationContext()
     AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().AddStsGlobalObject(aniEnv, stsReference);
     applicationContextObjRef_ = reinterpret_cast<void*>(applicationContextObjectRef);
     abilityRuntimeContext_->SetApplicationCtxObjRef(applicationContextObjRef_);
-    TAG_LOGI(AAFwkTag::APPKIT, "init application context success");
 }
 
 void OHOSApplication::InitAniContext()
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "init context");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto& runtime = GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
     auto aniEnv = static_cast<AbilityRuntime::STSRuntime &>(*runtime).GetAniEnv();
     ani_class contextCls = nullptr;
@@ -307,7 +314,6 @@ void OHOSApplication::InitAniContext()
     };
     aniEnv->Class_BindNativeMethods(contextCls, contextFunctions.data(),
         contextFunctions.size());
-    TAG_LOGI(AAFwkTag::APPKIT, "init context success");
 }
 
 /**

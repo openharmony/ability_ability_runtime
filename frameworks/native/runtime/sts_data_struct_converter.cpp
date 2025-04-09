@@ -31,11 +31,13 @@ void ClassSetter(
     ani_method setter;
     if ((status = env->Class_FindMethod(cls, setterName, nullptr, &setter)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return;
     }
     va_list args;
     va_start(args, setterName);
     if ((status = env->Object_CallMethod_Void_V(object, setter, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return;
     }
     va_end(args);
 }
@@ -61,19 +63,24 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
     ani_class cls = nullptr;
     if ((status = env->FindClass("L@ohos/app/ability/AbilityConstant/LaunchParamImpl;", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
     }
     if (cls == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null cls");
+        return nullptr;
     }
 
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
     }
     if (method == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null method");
+        return nullptr;
     }
     if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        return nullptr;
     }
     if (object == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null object");
