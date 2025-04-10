@@ -66,6 +66,7 @@ struct AbilityStateData : public Parcelable {
     std::string abilityName;
     std::string callerBundleName;
     std::string callerAbilityName;
+    bool isInnerNotify = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
