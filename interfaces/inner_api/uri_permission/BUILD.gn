@@ -29,62 +29,9 @@ config("uripermkit_public_config") {
 }
 
 idl_gen_interface("uri_permission_manager_interface") {
-  sources = [
-    "IUriPermissionManager.idl",
-    "IUriPermissionManagerWithSandBoxMgr.idl",
-  ]
+  sources = [ "IUriPermissionManager.idl" ]
   log_domainid = "0xD001315"
   log_tag = "UriPermMgr"
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
-ohos_source_set("uri_permission_manager_proxy") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
-  public_configs = [ ":uripermkit_public_config" ]
-
-  output_values = get_target_outputs(":uri_permission_manager_interface")
-  sources = filter_include(output_values, [ "*_proxy.cpp" ])
-
-  deps = [ ":uri_permission_manager_interface" ]
-  external_deps = [
-    "ability_base:zuri",
-    "access_token:libaccesstoken_sdk",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "ipc:ipc_single",
-    "samgr:samgr_proxy",
-  ]
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
-ohos_source_set("uri_permission_manager_stub") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-  configs = [ "${ability_runtime_services_path}/common:common_config" ]
-  public_configs = [ ":uripermkit_public_config" ]
-
-  output_values = get_target_outputs(":uri_permission_manager_interface")
-  sources = filter_include(output_values, [ "*_stub.cpp" ])
-
-  deps = [ ":uri_permission_manager_interface" ]
-  external_deps = [
-    "ability_base:zuri",
-    "access_token:libaccesstoken_sdk",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "ipc:ipc_single",
-    "samgr:samgr_proxy",
-  ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -102,11 +49,11 @@ ohos_shared_library("uri_permission_mgr") {
   public_configs = [ ":uripermkit_public_config" ]
 
   sources = []
+  output_values = get_target_outputs(":uri_permission_manager_interface")
+  sources += filter_include(output_values, [ "*_proxy.cpp" ])
+  sources += filter_include(output_values, [ "*_stub.cpp" ])
 
-  deps = [
-    ":uri_permission_manager_proxy",
-    ":uri_permission_manager_stub",
-  ]
+  deps = [ ":uri_permission_manager_interface" ]
 
   external_deps = [
     "ability_base:zuri",

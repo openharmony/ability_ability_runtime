@@ -26,15 +26,14 @@
 #include "istorage_manager.h"
 #include "tokenid_permission.h"
 #include "uri.h"
+#include "uri_permission_manager_stub.h"
 #include "uri_permission_raw_data.h"
 #include "access_token.h"
 
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 #include "policy_info.h"
-#include "uri_permission_manager_with_sand_box_mgr_stub.h"
 #else
 #include "upms_policy_info.h"
-#include "uri_permission_manager_stub.h"
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 
 namespace OHOS::AAFwk {
@@ -61,13 +60,8 @@ struct GrantPolicyInfo {
     }
 };
 
-class UriPermissionManagerStubImpl :
-#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
-    public UriPermissionManagerWithSandBoxMgrStub,
-#else
-    public UriPermissionManagerStub,
-#endif
-    public std::enable_shared_from_this<UriPermissionManagerStubImpl> {
+class UriPermissionManagerStubImpl : public UriPermissionManagerStub,
+                                     public std::enable_shared_from_this<UriPermissionManagerStubImpl> {
 public:
     UriPermissionManagerStubImpl() = default;
     virtual ~UriPermissionManagerStubImpl() = default;
@@ -181,8 +175,7 @@ private:
 
     ErrCode RawDataToStringVec(const UriPermissionRawData& rawData, std::vector<std::string>& stringVec);
 
-    ErrCode CheckGrantUriPermissionPrivileged(const std::vector<std::string>& uriVec, uint32_t flag,
-        int32_t& funcResult);
+    ErrCode CheckGrantUriPermissionPrivileged(uint32_t callerTokenId, uint32_t flag, int32_t& funcResult);
 
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     ErrCode Active(const UriPermissionRawData& policyRawData, std::vector<uint32_t>& res, int32_t& funcResult) override;
