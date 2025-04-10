@@ -2357,7 +2357,6 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
             DoRebootExt("panic", reason.c_str());
         }
     }
-
     if (DelayedSingleton<AppScheduler>::GetInstance()->IsKilledForUpgradeWeb(abilityInfo.bundleName)) {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "bundle killed");
         return;
