@@ -423,7 +423,7 @@ public:
      * whether or not requier a big memory
      * @return Returens true is no big memory, others return false.
      */
-    virtual bool IsNoRequireBigMemory() = 0;
+    virtual bool IsNoRequireBigMemory() { return true; }
 
     /**
      * Notifies that one ability is attached to status bar.

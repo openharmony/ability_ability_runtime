@@ -7622,9 +7622,12 @@ void AppMgrServiceInner::SubscribeScreenOffEvent()
         }
         taskHandler->SubmitTask(unSubscribeScreenOffEvent, "UnSubscribeScreenOffEvent");
     };
-    if (screenOffSubscriber_ == nullptr) {
-        screenOffSubscriber_ = std::make_shared<AppExecFwk::AppMgrEventSubscriber>(subscribeInfo, callback);
+    std::lock_guard<std::mutex> lock(screenOffSubscriberMutex_);
+    if (screenOffSubscriber_ != nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "don't repeat subscribe screen off event.");
+        return;
     }
+    screenOffSubscriber_ = std::make_shared<AppExecFwk::AppMgrEventSubscriber>(subscribeInfo, callback);
     bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(screenOffSubscriber_);
     if (!subResult) {
         TAG_LOGE(AAFwkTag::APPMGR, "subscribe screen off failed");
@@ -7634,6 +7637,7 @@ void AppMgrServiceInner::SubscribeScreenOffEvent()
 void AppMgrServiceInner::UnSubscribeScreenOffEvent()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::lock_guard<std::mutex> lock(screenOffSubscriberMutex_);
     bool subResult = EventFwk::CommonEventManager::UnSubscribeCommonEvent(screenOffSubscriber_);
     screenOffSubscriber_ = nullptr;
     TAG_LOGD(AAFwkTag::APPMGR, "Screen off event subscriber unsubscribe result is %{public}d.", subResult);
