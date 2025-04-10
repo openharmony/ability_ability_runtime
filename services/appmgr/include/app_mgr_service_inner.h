@@ -1955,7 +1955,7 @@ private:
 #endif //SUPPORT_CHILD_PROCESS
     void SubscribeScreenOffEvent();
     void UnSubscribeScreenOffEvent();
-    int32_t RestartExitKeepAliveProcess(const int32_t memorySizeState);
+    int32_t RestartExitKeepAliveProcess(const std::vector<ExitResidentProcessInfo> &exitProcessInfos);
     bool IsNeedRestartKeepAliveProcess(const std::string &bundleName, int32_t uid);
     int32_t GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
         std::vector<std::string> &instanceKeys, int32_t userId);
