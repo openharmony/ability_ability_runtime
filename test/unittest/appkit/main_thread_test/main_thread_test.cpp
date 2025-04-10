@@ -2458,5 +2458,100 @@ HWTEST_F(MainThreadTest, ScheduleChangeAppGcState_0100, TestSize.Level1)
     auto ret = mainThread_->ScheduleChangeAppGcState(0);
     EXPECT_EQ(ret, NO_ERROR);
 }
+
+/**
+ * @tc.name: GetPluginNativeLibPath_0100
+ * @tc.desc: Get native library path when lib compressed and not isolated.
+ * @tc.type: FUNC
+ * @tc.require: issueI7KMGU
+ */
+HWTEST_F(MainThreadTest, GetPluginNativeLibPath_0100, TestSize.Level1)
+{
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+
+    AppExecFwk::PluginBundleInfo pluginBundleInfo1;
+    pluginBundleInfo1.pluginBundleName = "pluginBundleName";
+    std::vector<AppExecFwk::PluginModuleInfo> pluginModuleInfos;
+    AppExecFwk::PluginModuleInfo pluginModuleInfo1;
+    pluginModuleInfo1.moduleName = "moduleName";
+    pluginModuleInfo1.nativeLibraryPath = "libs/arm";
+    pluginModuleInfo1.isLibIsolated = true;
+
+    pluginModuleInfos.emplace_back(pluginModuleInfo1);
+    pluginBundleInfo1.pluginModuleInfos = pluginModuleInfos;
+    pluginBundleInfos.emplace_back(pluginBundleInfo1);
+
+    AppLibPathMap appLibPaths;
+
+    mainThread_->GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
+    ASSERT_EQ(appLibPaths.size(), size_t(1));
+    EXPECT_EQ(appLibPaths["pluginBundleName/moduleName"][0],
+        "/data/storage/el1/bundle/+plugins/libs/arm");
+}
+
+/**
+ * @tc.name: GetPluginNativeLibPath_0200
+ * @tc.desc: Get native library path when lib compressed and not isolated.
+ * @tc.type: FUNC
+ * @tc.require: issueI7KMGU
+ */
+HWTEST_F(MainThreadTest, GetPluginNativeLibPath_0200, TestSize.Level1)
+{
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+
+    AppExecFwk::PluginBundleInfo pluginBundleInfo1;
+    pluginBundleInfo1.pluginBundleName = "pluginBundleName";
+    pluginBundleInfo1.nativeLibraryPath = "test";
+    std::vector<AppExecFwk::PluginModuleInfo> pluginModuleInfos;
+    AppExecFwk::PluginModuleInfo pluginModuleInfo1;
+    pluginModuleInfo1.moduleName = "moduleName";
+    pluginModuleInfo1.nativeLibraryPath = "libs/arm";
+    pluginModuleInfo1.isLibIsolated = false;
+
+    pluginModuleInfos.emplace_back(pluginModuleInfo1);
+    pluginBundleInfo1.pluginModuleInfos = pluginModuleInfos;
+    pluginBundleInfos.emplace_back(pluginBundleInfo1);
+
+    AppLibPathMap appLibPaths;
+
+    mainThread_->GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
+    ASSERT_EQ(appLibPaths.size(), size_t(1));
+    EXPECT_EQ(appLibPaths["pluginBundleName/moduleName"][0],
+        "/data/storage/el1/bundle/+plugins/test");
+}
+
+/**
+ * @tc.name: HandleUpdatePluginInfoInstalled_0100
+ * @tc.desc: Get native library path when lib compressed and not isolated.
+ * @tc.type: FUNC
+ * @tc.require: issueI7KMGU
+ */
+HWTEST_F(MainThreadTest, HandleUpdatePluginInfoInstalled_0100, TestSize.Level1)
+{
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+
+    AppExecFwk::PluginBundleInfo pluginBundleInfo1;
+    pluginBundleInfo1.pluginBundleName = "pluginBundleName";
+    pluginBundleInfo1.nativeLibraryPath = "test";
+    std::vector<AppExecFwk::PluginModuleInfo> pluginModuleInfos;
+    AppExecFwk::PluginModuleInfo pluginModuleInfo1;
+    pluginModuleInfo1.moduleName = "moduleName";
+    pluginModuleInfo1.nativeLibraryPath = "libs/arm";
+    pluginModuleInfo1.isLibIsolated = false;
+
+    pluginModuleInfos.emplace_back(pluginModuleInfo1);
+    pluginBundleInfo1.pluginModuleInfos = pluginModuleInfos;
+    pluginBundleInfos.emplace_back(pluginBundleInfo1);
+
+    AppLibPathMap appLibPaths;
+
+    ApplicationInfo appInfo;
+    mainThread_->HandleUpdatePluginInfoInstalled(appInfo, "moduleName");
+
+    mainThread_->GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
+    ASSERT_EQ(appLibPaths.size(), size_t(1));
+    EXPECT_EQ(appLibPaths["pluginBundleName/moduleName"][0],
+        "/data/storage/el1/bundle/+plugins/test");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

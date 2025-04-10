@@ -776,6 +776,9 @@ enum {
      * Result (2097317) for session info is nullptr.
      */
     ERR_NULL_SESSION_INFO = 2097317,
+    ERR_NOT_HOOK = 2097321,
+    ERR_FROM_WINDOW = 2097322,
+    ERR_INVALID_CONTEXT = 2097323,
     INTENT_NOT_EXIST = 2097329,
     INTENT_STATE_NOT_EXECUTING = 2097330,
     /**

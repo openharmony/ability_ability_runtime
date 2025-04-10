@@ -33,6 +33,8 @@
 #include "startup_util.h"
 #include "ability_manager_service.h"
 #include "ability_scheduler_mock.h"
+#include "ipc_skeleton.h"
+#include "status_bar_delegate_interface.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -61,6 +63,27 @@ void UIAbilityLifecycleManagerTest::TearDownTestCase() {}
 void UIAbilityLifecycleManagerTest::SetUp() {}
 
 void UIAbilityLifecycleManagerTest::TearDown() {}
+
+class MockIStatusBarDelegate : public OHOS::AbilityRuntime::IStatusBarDelegate {
+public:
+    int32_t CheckIfStatusBarItemExists(uint32_t accessTokenId, const std::string &instanceKey,
+        bool& isExist)
+    {
+        return 0;
+    }
+    int32_t AttachPidToStatusBarItem(uint32_t accessTokenId, int32_t pid, const std::string &instanceKey)
+    {
+        return 0;
+    }
+    int32_t DetachPidToStatusBarItem(uint32_t accessTokenId, int32_t pid, const std::string &instanceKey)
+    {
+        return 0;
+    }
+    sptr<IRemoteObject> AsObject()
+    {
+        return nullptr;
+    }
+};
 
 class UIAbilityLifcecycleManagerTestStub : public IRemoteStub<IAbilityConnection> {
 public:
@@ -4359,6 +4382,234 @@ HWTEST_F(UIAbilityLifecycleManagerTest, UpdateSpecifiedFlag_0400, TestSize.Level
     EXPECT_NE(abilityRecord, nullptr);
     auto ret = uiAbilityLifecycleManager->UpdateSpecifiedFlag(abilityRecord, flag);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_HandleForegroundCollaborate_0100
+ * @tc.desc: HandleForegroundCollaborate
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, HandleForegroundCollaborate_0100, TestSize.Level1)
+{
+    AbilityRequest abilityRequest;
+    abilityRequest.want.SetElementName("bundleName", "abilityName");
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+
+    abilityRecord->currentState_ = AbilityState::FOREGROUND;
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    uiAbilityLifecycleManager->HandleForegroundCollaborate(abilityRequest, abilityRecord);
+    EXPECT_EQ(abilityRecord->GetWant().operation_.bundleName_, "bundleName");
+    EXPECT_EQ(abilityRecord->GetWant().operation_.abilityName_, "abilityName");
+
+    abilityRecord->currentState_ = AbilityState::BACKGROUND;
+    uiAbilityLifecycleManager->HandleForegroundCollaborate(abilityRequest, abilityRecord);
+    EXPECT_EQ(abilityRecord->GetWant().operation_.bundleName_, "bundleName");
+    EXPECT_EQ(abilityRecord->GetWant().operation_.abilityName_, "abilityName");
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_SetKillForPermissionUpdateFlag_0100
+ * @tc.desc: SetKillForPermissionUpdateFlag
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, SetKillForPermissionUpdateFlag_0100, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    uint32_t accessTokenId = 1;
+    AbilityRequest abilityRequest;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->abilityInfo_.applicationInfo.accessTokenId = accessTokenId;
+    abilityRecord->abilityInfo_.applicationInfo.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
+    abilityRecord->abilityInfo_.type = AppExecFwk::AbilityType::PAGE;
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(std::make_pair(accessTokenId, abilityRecord));
+    uiAbilityLifecycleManager->SetKillForPermissionUpdateFlag(accessTokenId);
+    for (auto& item : uiAbilityLifecycleManager->sessionAbilityMap_) {
+        if (item.second != nullptr) {
+            EXPECT_EQ(item.second->GetKillForPermissionUpdateFlag(), true);
+        }
+    }
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_SetKillForPermissionUpdateFlag_0200
+ * @tc.desc: SetKillForPermissionUpdateFlag
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, SetKillForPermissionUpdateFlag_0200, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    uint32_t accessTokenId = 1;
+    AbilityRequest abilityRequest;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+
+    abilityRecord->abilityInfo_.applicationInfo.accessTokenId = 2;
+    abilityRecord->abilityInfo_.applicationInfo.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
+    abilityRecord->abilityInfo_.type = AppExecFwk::AbilityType::PAGE;
+    auto abilityRecord2 = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(std::make_pair(accessTokenId, abilityRecord2));
+    uiAbilityLifecycleManager->SetKillForPermissionUpdateFlag(accessTokenId);
+    for (auto& item : uiAbilityLifecycleManager->sessionAbilityMap_) {
+        if (item.second != nullptr) {
+            EXPECT_EQ(item.second->isKillForPermissionUpdate_, false);
+        }
+    }
+    uiAbilityLifecycleManager->sessionAbilityMap_.clear();
+
+    abilityRecord->abilityInfo_.applicationInfo.accessTokenId = 1;
+    abilityRecord->abilityInfo_.applicationInfo.bundleType = AppExecFwk::BundleType::APP;
+    abilityRecord->abilityInfo_.type = AppExecFwk::AbilityType::PAGE;
+    auto abilityRecord3 = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(std::make_pair(accessTokenId, abilityRecord3));
+    uiAbilityLifecycleManager->SetKillForPermissionUpdateFlag(accessTokenId);
+    for (auto& item : uiAbilityLifecycleManager->sessionAbilityMap_) {
+        if (item.second != nullptr) {
+            EXPECT_EQ(item.second->isKillForPermissionUpdate_, false);
+        }
+    }
+    uiAbilityLifecycleManager->sessionAbilityMap_.clear();
+
+    abilityRecord->abilityInfo_.applicationInfo.accessTokenId = 1;
+    abilityRecord->abilityInfo_.applicationInfo.bundleType = AppExecFwk::BundleType::APP;
+    abilityRecord->abilityInfo_.type = AppExecFwk::AbilityType::SERVICE;
+    auto abilityRecord4 = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(std::make_pair(accessTokenId, abilityRecord4));
+    uiAbilityLifecycleManager->SetKillForPermissionUpdateFlag(accessTokenId);
+    for (auto& item : uiAbilityLifecycleManager->sessionAbilityMap_) {
+        if (item.second != nullptr) {
+            EXPECT_EQ(item.second->isKillForPermissionUpdate_, false);
+        }
+    }
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_HandleStartSpecifiedCold_0100
+ * @tc.desc: HandleStartSpecifiedCold
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, HandleStartSpecifiedCold_0100, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    uint32_t sceneFlag = 1;
+    auto result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, nullptr, sceneFlag);
+    EXPECT_EQ(result, false);
+
+    sptr<SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::STANDARD;
+    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag);
+    EXPECT_EQ(result, false);
+
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    sessionInfo->requestId = 1;
+    auto specifiedRequest = std::make_shared<AAFwk::SpecifiedRequest>(0, abilityRequest);
+    specifiedRequest->isCold = true;
+    specifiedRequest->requestId = sessionInfo->requestId;
+    std::list<std::shared_ptr<SpecifiedRequest>> Lists;
+    Lists.push_back(specifiedRequest);
+    uiAbilityLifecycleManager->specifiedRequestList_.emplace("key1", Lists);
+    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag);
+    EXPECT_EQ(result, true);
+
+    Lists.clear();
+    uiAbilityLifecycleManager->specifiedRequestList_.clear();
+    specifiedRequest->isCold = false;
+    specifiedRequest->requestId = sessionInfo->requestId;
+    Lists.push_back(specifiedRequest);
+    uiAbilityLifecycleManager->specifiedRequestList_.emplace("key2", Lists);
+    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag);
+    EXPECT_EQ(result, false);
+
+    Lists.clear();
+    uiAbilityLifecycleManager->specifiedRequestList_.clear();
+    specifiedRequest->isCold = true;
+    specifiedRequest->requestId = 2;
+    Lists.push_back(specifiedRequest);
+    uiAbilityLifecycleManager->specifiedRequestList_.emplace("key3", Lists);
+    result = uiAbilityLifecycleManager->HandleStartSpecifiedCold(abilityRequest, sessionInfo, sceneFlag);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_HasAbilityRequest_0100
+ * @tc.desc: HasAbilityRequest
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, HasAbilityRequest_0100, TestSize.Level1)
+{
+    AbilityRequest abilityRequest;
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+
+    auto abilityRequest1 = std::make_shared<AbilityRequest>(abilityRequest);
+    uiAbilityLifecycleManager->startAbilityCheckMap_.emplace(1, abilityRequest1);
+    auto result = uiAbilityLifecycleManager->HasAbilityRequest(abilityRequest);
+    EXPECT_EQ(result, true);
+
+    uiAbilityLifecycleManager->startAbilityCheckMap_.clear();
+    auto abilityRequest2 = std::make_shared<AbilityRequest>();
+    abilityRequest2->abilityInfo.bundleName = "otherBundleName";
+    uiAbilityLifecycleManager->startAbilityCheckMap_.emplace(1, abilityRequest2);
+    result = uiAbilityLifecycleManager->HasAbilityRequest(abilityRequest);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_TryPrepareTerminateByPidsDone_0100
+ * @tc.desc: TryPrepareTerminateByPidsDone
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, TryPrepareTerminateByPidsDone_0100, TestSize.Level1)
+{
+    std::string moduleName = "moduleName";
+    int32_t prepareTermination = 1;
+    bool isExist = false;
+
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    uiAbilityLifecycleManager->prepareTerminateByPidRecords_.clear();
+    uiAbilityLifecycleManager->TryPrepareTerminateByPidsDone(moduleName, prepareTermination, isExist);
+
+    auto prepareTerminateByPidRecord =
+        std::make_shared<UIAbilityLifecycleManager::PrepareTerminateByPidRecord>(1,
+        moduleName, true, prepareTermination, isExist);
+    prepareTerminateByPidRecord->pid_ = 1;
+    prepareTerminateByPidRecord->moduleName_ = "moduleName";
+    uiAbilityLifecycleManager->prepareTerminateByPidRecords_.push_back(prepareTerminateByPidRecord);
+    uiAbilityLifecycleManager->TryPrepareTerminateByPidsDone(moduleName, prepareTermination, isExist);
+    EXPECT_EQ(uiAbilityLifecycleManager->prepareTerminateByPidRecords_.size(), 0);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_DoCallerProcessDetachment_0100
+ * @tc.desc: DoCallerProcessDetachment
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, DoCallerProcessDetachment_0100, TestSize.Level1)
+{
+    AbilityRequest abilityRequest;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto ret = uiAbilityLifecycleManager->DoCallerProcessDetachment(abilityRecord);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_RegisterStatusBarDelegate_0100
+ * @tc.desc: RegisterStatusBarDelegate
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, RegisterStatusBarDelegate_0100, TestSize.Level1)
+{
+    sptr<AbilityRuntime::IStatusBarDelegate> delegate = sptr<MockIStatusBarDelegate>::MakeSptr();
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto ret = uiAbilityLifecycleManager->RegisterStatusBarDelegate(delegate);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_IsInStatusBar_0100
+ * @tc.desc: IsInStatusBar
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, IsInStatusBar_0100, TestSize.Level1)
+{
+    uint32_t accessTokenId = 1;
+    bool isMultiInstance = false;
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto ret = uiAbilityLifecycleManager->IsInStatusBar(accessTokenId, isMultiInstance);
+    EXPECT_EQ(ret, false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

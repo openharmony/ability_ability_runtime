@@ -29,17 +29,17 @@ public:
     MockDataObsMgrService() = default;
     virtual ~MockDataObsMgrService() = default;
 
-    int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override
+    int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId) override
     {
         onChangeCall_++;
         return NO_ERROR;
     }
-    int UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override
+    int UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId) override
     {
         onChangeCall_++;
         return NO_ERROR;
     }
-    int NotifyChange(const Uri &uri) override
+    int NotifyChange(const Uri &uri, int32_t userId) override
     {
         onChangeCall_++;
         return NO_ERROR;

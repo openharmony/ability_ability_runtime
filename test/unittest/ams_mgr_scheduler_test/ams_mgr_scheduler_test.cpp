@@ -1041,7 +1041,7 @@ HWTEST_F(AmsMgrSchedulerTest, UpdateApplicationInfoInstalled_001, TestSize.Level
     const std::string bundleName = "";
     const int uid = 0;
     const std::string moduleName = "";
-    auto iret = amsMgrScheduler->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    auto iret = amsMgrScheduler->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, false);
     ASSERT_EQ(iret, 38);
 }
 
@@ -1062,7 +1062,7 @@ HWTEST_F(AmsMgrSchedulerTest, UpdateApplicationInfoInstalled_002, TestSize.Level
     const std::string bundleName = "";
     const int uid = 0;
     const std::string moduleName = "";
-    auto iret = amsMgrScheduler->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    auto iret = amsMgrScheduler->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, false);
     ASSERT_EQ(iret, 0);
 }
 

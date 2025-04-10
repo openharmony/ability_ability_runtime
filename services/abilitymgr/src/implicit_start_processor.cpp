@@ -36,6 +36,7 @@
 namespace OHOS {
 namespace AAFwk {
 const size_t IDENTITY_LIST_MAX_SIZE = 10;
+const size_t TRUSTLIST_MAX_SIZE = 50;
 
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 const std::string ACTION_VIEW = "ohos.want.action.viewData";
@@ -50,7 +51,9 @@ const int NFC_QUERY_LENGTH = 2;
 const std::string OPEN_LINK_APP_LINKING_ONLY = "appLinkingOnly";
 const std::string HTTP_SCHEME_NAME = "http";
 const std::string HTTPS_SCHEME_NAME = "https";
+const std::string FILE_SCHEME_NAME = "file";
 const std::string APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
+const std::string APP_LAUNCH_TRUSTLIST = "ohos.params.appLaunchTrustList";
 constexpr const char* SUPPORT_ACTION_START_SELECTOR = "persist.sys.ability.support.action_start_selector";
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
@@ -180,6 +183,11 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     int32_t tokenId = request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
         static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
     AddIdentity(tokenId, identity);
+
+    if (!isAppCloneSelector && request.want.HasParameter(APP_LAUNCH_TRUSTLIST)) {
+        TrustlistIntersectionProcess(request, dialogAppInfos);
+    }
+
     if (dialogAppInfos.size() == 0 &&
         (request.want.GetFlags() & Want::FLAG_START_WITHOUT_TIPS) == Want::FLAG_START_WITHOUT_TIPS) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "hint dialog generate fail");
@@ -1083,6 +1091,37 @@ bool ImplicitStartProcessor::FindAbilityAppClone(std::vector<AppExecFwk::Ability
         }
     }
     return true;
+}
+
+void ImplicitStartProcessor::TrustlistIntersectionProcess(const AbilityRequest &request,
+    std::vector<DialogAppInfo> &dialogAppInfos)
+{
+    if (request.want.GetUri().GetScheme() == FILE_SCHEME_NAME) {
+        return;
+    }
+    std::vector<std::string> appLaunchTrustlist = request.want.GetStringArrayParam(APP_LAUNCH_TRUSTLIST);
+    if (appLaunchTrustlist.size() <= 0) {
+        return;
+    }
+    std::vector<DialogAppInfo> dialogIntersectionAppInfos;
+    if (appLaunchTrustlist.size() > TRUSTLIST_MAX_SIZE) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "trustlist size is %{public}zu, more than %{public}zu.",
+            appLaunchTrustlist.size(), TRUSTLIST_MAX_SIZE);
+        appLaunchTrustlist.resize(TRUSTLIST_MAX_SIZE);
+    }
+    for (const auto &info : dialogAppInfos) {
+        auto it = std::find(appLaunchTrustlist.begin(), appLaunchTrustlist.end(), info.bundleName);
+        if (it != appLaunchTrustlist.end()) {
+            dialogIntersectionAppInfos.emplace_back(info);
+        }
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "trustlist size: %{public}zu, Intersection size: %{public}zu.",
+            appLaunchTrustlist.size(), dialogIntersectionAppInfos.size());
+    if (dialogIntersectionAppInfos.size() <= 1) {
+        dialogAppInfos = dialogIntersectionAppInfos;
+    }
+    return;
 }
 
 bool ImplicitStartProcessor::FindExtensionAppClone(std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos)

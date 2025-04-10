@@ -31,7 +31,7 @@ using namespace testing;
 namespace OHOS {
 namespace AAFwk {
 using Uri = OHOS::Uri;
-using ObsListType = std::list<sptr<IDataAbilityObserver>>;
+using ObsListType = std::list<struct ObserverNode>;
 using ObsRecipientMapType = OHOS::AAFwk::DataObsMgrInner::ObsRecipientMapType;
 class DataObsMgrInnerTest : public testing::Test {
 public:
@@ -48,6 +48,8 @@ void DataObsMgrInnerTest::SetUp()
     dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
 }
 void DataObsMgrInnerTest::TearDown() {}
+
+static constexpr int64_t USER_TEST = 100;
 
 /*
  * Feature: DataObsMgrInner
@@ -67,10 +69,10 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0100, TestS
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
 
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(observer));
-    dataObsMgrInner_->HandleRegisterObserver(uri, callback);
+    dataObsMgrInner_->HandleRegisterObserver(uri, ObserverNode(callback, USER_TEST));
 
     EXPECT_EQ(dataObsMgrInner_->HaveRegistered(callback), true);
-    dataObsMgrInner_->HandleUnregisterObserver(uri, callback);
+    dataObsMgrInner_->HandleUnregisterObserver(uri, ObserverNode(callback, USER_TEST));
     EXPECT_EQ(dataObsMgrInner_->HaveRegistered(callback), false);
 }
 
@@ -89,9 +91,9 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0200, TestS
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(observer));
     ObsListType obsList;
-    obsList.push_back(callback);
+    obsList.push_back(ObserverNode(callback, USER_TEST));
     dataObsMgrInner->observers_.emplace(uri.ToString(), obsList);
-    int res = dataObsMgrInner->HandleRegisterObserver(uri, callback);
+    int res = dataObsMgrInner->HandleRegisterObserver(uri, ObserverNode(callback, USER_TEST));
     EXPECT_EQ(res, OBS_EXIST);
 }
 
@@ -111,9 +113,9 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0300, TestS
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(observer));
     const sptr<IDataAbilityObserver> callback1(new (std::nothrow) DataAbilityObserverProxy(observer));
     ObsListType obsList;
-    obsList.push_back(callback1);
+    obsList.push_back(ObserverNode(callback1, USER_TEST));
     dataObsMgrInner->observers_.emplace(uri.ToString(), obsList);
-    int res = dataObsMgrInner->HandleRegisterObserver(uri, callback);
+    int res = dataObsMgrInner->HandleRegisterObserver(uri, ObserverNode(callback, USER_TEST));
     EXPECT_EQ(res, OBS_EXIST);
 }
 
@@ -132,7 +134,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0100, Tes
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(observer));
     dataObsMgrInner->observers_.clear();
-    int res = dataObsMgrInner->HandleUnregisterObserver(uri, callback);
+    int res = dataObsMgrInner->HandleUnregisterObserver(uri, ObserverNode(callback, USER_TEST));
     EXPECT_EQ(res, NO_OBS_FOR_URI);
 }
 
@@ -151,9 +153,9 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0200, Tes
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(observer));
     ObsListType obsList;
-    obsList.push_back(callback);
+    obsList.push_back(ObserverNode(callback, USER_TEST));
     dataObsMgrInner->observers_.emplace(uri.ToString(), obsList);
-    int res = dataObsMgrInner->HandleUnregisterObserver(uri, callback);
+    int res = dataObsMgrInner->HandleUnregisterObserver(uri, ObserverNode(callback, USER_TEST));
     EXPECT_EQ(res, NO_ERROR);
 }
 
@@ -173,11 +175,11 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0300, Tes
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(observer));
     const sptr<IDataAbilityObserver> callback2(new (std::nothrow) DataAbilityObserverProxy(observer));
     ObsListType obsList;
-    obsList.push_back(callback);
-    obsList.push_back(callback2);
+    obsList.push_back(ObserverNode(callback, USER_TEST));
+    obsList.push_back(ObserverNode(callback2, USER_TEST));
     dataObsMgrInner->observers_.emplace(uri.ToString(), obsList);
     dataObsMgrInner->observers_.emplace("exit", obsList);
-    int res = dataObsMgrInner->HandleUnregisterObserver(uri, callback);
+    int res = dataObsMgrInner->HandleUnregisterObserver(uri, ObserverNode(callback, USER_TEST));
     EXPECT_EQ(res, NO_ERROR);
 }
 
@@ -200,8 +202,8 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_0100, TestSize.
     EXPECT_CALL(*mockDataAbilityObserverStub, OnChange()).Times(1);
 
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));
-    dataObsMgrInner_->HandleRegisterObserver(uri, callback);
-    dataObsMgrInner_->HandleNotifyChange(uri);
+    dataObsMgrInner_->HandleRegisterObserver(uri, ObserverNode(callback, USER_TEST));
+    dataObsMgrInner_->HandleNotifyChange(uri, USER_TEST);
 }
 
 /*
@@ -217,7 +219,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_0200, TestSize.
     std::shared_ptr<DataObsMgrInner> dataObsMgrInner = std::make_shared<DataObsMgrInner>();
     Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
     dataObsMgrInner->observers_.clear();
-    int res = dataObsMgrInner->HandleNotifyChange(uri);
+    int res = dataObsMgrInner->HandleNotifyChange(uri, USER_TEST);
     EXPECT_EQ(res, NO_OBS_FOR_URI);
 }
 
@@ -234,9 +236,9 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_0300, TestSize.
     std::shared_ptr<DataObsMgrInner> dataObsMgrInner = std::make_shared<DataObsMgrInner>();
     Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
     ObsListType obsList;
-    obsList.push_back(nullptr);
+    obsList.push_back(ObserverNode(nullptr, USER_TEST));
     dataObsMgrInner->observers_.emplace(uri.ToString(), obsList);
-    int res = dataObsMgrInner->HandleNotifyChange(uri);
+    int res = dataObsMgrInner->HandleNotifyChange(uri, USER_TEST);
     EXPECT_EQ(res, NO_ERROR);
 }
 
@@ -256,13 +258,13 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RemoveObs_HaveRegistered_0100, Tes
     Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
     sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));
-    dataObsMgrInner_->HandleRegisterObserver(uri, callback);
+    dataObsMgrInner_->HandleRegisterObserver(uri, ObserverNode(callback, USER_TEST));
 
     sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub2(new (std::nothrow) MockDataAbilityObserverStub());
     const sptr<IDataAbilityObserver> callback2(
         new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub2));
 
-    dataObsMgrInner_->HandleRegisterObserver(uri, callback2);
+    dataObsMgrInner_->HandleRegisterObserver(uri, ObserverNode(callback2, USER_TEST));
     auto obsPair = dataObsMgrInner_->observers_.find(uri.ToString());
     EXPECT_EQ((std::size_t)2, obsPair->second.size());
     EXPECT_EQ(true, dataObsMgrInner_->HaveRegistered(callback));
@@ -333,9 +335,9 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RemoveObs_0100, TestSize.Level1)
     ObsListType obsList1;
     ObsListType obsList2;
     ObsListType obsList3;
-    obsList1.push_back(callback1);
-    obsList2.push_back(callback1);
-    obsList2.push_back(callback2);
+    obsList1.push_back(ObserverNode(callback1, USER_TEST));
+    obsList2.push_back(ObserverNode(callback1, USER_TEST));
+    obsList2.push_back(ObserverNode(callback2, USER_TEST));
     dataObsMgrInner->observers_.emplace(uri1, obsList1);
     dataObsMgrInner->observers_.emplace(uri2, obsList2);
     dataObsMgrInner->RemoveObs(callback2->AsObject());

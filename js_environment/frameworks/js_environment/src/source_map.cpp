@@ -44,6 +44,8 @@ const std::string FLAG_MAPPINGS = "    \"mappings\": \"";
 const std::string FLAG_ENTRY_PACKAGE_INFO = "    \"entry-package-info\": \"";
 const std::string FLAG_PACKAGE_INFO = "    \"package-info\": \"";
 const std::string FLAG_END = "  }";
+const std::string FLAG_CLOSE_BRACE = ")";
+const std::string FLAG_OPEN_BRACE = "(";
 static constexpr size_t FLAG_MAPPINGS_LEN = 17;
 static constexpr size_t FLAG_ENTRY_PACKAGE_INFO_SIZE = 27;
 static constexpr size_t FLAG_PACKAGE_INFO_SIZE = 21;
@@ -102,10 +104,28 @@ void SourceMap::Init(bool& hasFile, const std::string& hapPath)
     SplitSourceMap(sourceMapData);
 }
 
+std::string SourceMap::ExtractFileName(const std::string& str)
+{
+    // at funcName (@param:version|url:line:column)
+    // Find the position of the last colon in the character string.
+    size_t lastColon = str.rfind(':');
+    if (lastColon != std::string::npos) {
+        // Find the position of the last but one colon in the character string.
+        size_t prevColon = str.rfind(':', lastColon - 1);
+        if (prevColon != std::string::npos) {
+            // Find the position of the first brace in the character string.
+            size_t openBrace = str.find(FLAG_OPEN_BRACE);
+            if (openBrace != std::string::npos) {
+                // Extract the character string between colons and braces as the file name.
+                return str.substr(openBrace + 1, prevColon - openBrace - 1);
+            }
+        }
+    }
+    return str;
+}
+
 std::string SourceMap::TranslateBySourceMap(const std::string& stackStr)
 {
-    std::string closeBrace = ")";
-    std::string openBrace = "(";
     std::string ans = "";
 
     // find per line of stack
@@ -115,14 +135,9 @@ std::string SourceMap::TranslateBySourceMap(const std::string& stackStr)
     // collect error info first
     for (uint32_t i = 0; i < res.size(); i++) {
         std::string temp = res[i];
-        size_t start = temp.find(openBrace);
-        size_t end = temp.find(":");
-        if (end <= start) {
-            continue;
-        }
-        std::string key = temp.substr(start + 1, end - start - 1);
-        auto closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
-        auto openBracePos = static_cast<int32_t>(temp.find(openBrace));
+        std::string key = ExtractFileName(temp);
+        auto closeBracePos = static_cast<int32_t>(temp.find(FLAG_CLOSE_BRACE));
+        auto openBracePos = static_cast<int32_t>(temp.find(FLAG_OPEN_BRACE));
         std::string line;
         std::string column;
         GetPosInfo(temp, closeBracePos, line, column);

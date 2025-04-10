@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <regex>
 #include "js_module_reader.h"
 
 #include "bundle_info.h"
@@ -31,6 +32,7 @@ using namespace OHOS::AbilityBase;
 namespace OHOS {
 namespace AbilityRuntime {
 using IBundleMgr = AppExecFwk::IBundleMgr;
+bool JsModuleReader::needFindPluginHsp_ = true;
 
 JsModuleReader::JsModuleReader(const std::string& bundleName, const std::string& hapPath, bool isFormRender)
     : JsModuleSearcher(bundleName), isFormRender_(isFormRender)
@@ -58,6 +60,16 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
         return false;
     }
 
+    if (needFindPluginHsp_) {
+        // find plugin
+        realHapPath = GetPluginHspPath(inputPath);
+        if (realHapPath.empty()) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
+            return false;
+        }
+        needFindPluginHsp_ = true;
+    }
+
     bool newCreate = false;
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(realHapPath, newCreate);
     if (extractor == nullptr) {
@@ -75,6 +87,48 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
     *buff = data->GetDataPtr();
     *buffSize = data->GetDataLen();
     return true;
+}
+
+std::string JsModuleReader::GetPluginHspPath(const std::string& inputPath) const
+{
+    std::string presetAppHapPath = "";
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null bundleMgrHelper");
+        return presetAppHapPath;
+    }
+    std::string moduleName = inputPath.substr(inputPath.find_last_of("/") + 1);
+    std::string tmpPath = inputPath.substr(inputPath.find_first_of("/") + 1);
+    const std::string sharedBundleName = tmpPath.substr(0, tmpPath.find_first_of("/"));
+    TAG_LOGI(AAFwkTag::JSRUNTIME, "moduleName: %{public}s, sharedBundleName: %{public}s",
+        moduleName.c_str(), sharedBundleName.c_str());
+    if (moduleName.empty() || sharedBundleName.empty()) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "empty moduleName");
+        return presetAppHapPath;
+    }
+
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+    if (bundleMgrHelper->GetPluginInfosForSelf(pluginBundleInfos) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "GetPluginInfosForSelf failed");
+        return presetAppHapPath;
+    }
+
+    for (auto &pluginBundleInfo : pluginBundleInfos) {
+        for (auto &pluginModuleInfo : pluginBundleInfo.pluginModuleInfos) {
+            if (moduleName == pluginModuleInfo.moduleName
+                && sharedBundleName == pluginBundleInfo.pluginBundleName) {
+                presetAppHapPath = pluginModuleInfo.hapPath;
+                TAG_LOGD(AAFwkTag::JSRUNTIME, "presetAppHapPath %{public}s", presetAppHapPath.c_str());
+                std::regex pattern(std::string(ABS_DATA_CODE_PATH) + bundleName_ + "/");
+                presetAppHapPath = std::regex_replace(
+                    presetAppHapPath, pattern, std::string(ABS_CODE_PATH) + std::string(BUNDLE));
+                TAG_LOGD(AAFwkTag::JSRUNTIME, "presetAppHapPath %{public}s", presetAppHapPath.c_str());
+                return presetAppHapPath;
+            }
+        }
+    }
+    TAG_LOGE(AAFwkTag::JSRUNTIME, "GetPluginHspPath failed");
+    return presetAppHapPath;
 }
 
 std::string JsModuleReader::GetAppHspPath(const std::string& inputPath) const
@@ -148,6 +202,7 @@ std::string JsModuleReader::GetOtherHspPath(const std::string& bundleName, const
     for (const auto &info : baseSharedBundleInfos) {
         if ((info.bundleName == sharedBundleName) && (info.moduleName == moduleName)) {
             presetAppHapPath = info.hapPath;
+            needFindPluginHsp_ = false;
             break;
         }
     }
@@ -161,6 +216,7 @@ std::string JsModuleReader::GetOtherHspPath(const std::string& bundleName, const
     for (const auto &info : bundleInfo.hapModuleInfos) {
         if (info.moduleName == moduleName) {
             presetAppHapPath = info.hapPath;
+            needFindPluginHsp_ = false;
             break;
         }
     }
@@ -191,6 +247,7 @@ std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath, co
         for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
             if (hapModuleInfo.moduleName == moduleName) {
                 presetAppHapPath = hapModuleInfo.hapPath;
+                needFindPluginHsp_ = false;
                 break;
             }
         }

@@ -46,6 +46,26 @@ public:
     {
         return;
     }
+    virtual ErrCode RevokeDelegator()
+    {
+        return ERR_OK;
+    }
+    virtual bool GetHookOff()
+    {
+        return false;
+    }
+    virtual void SetHookOff(bool hookOff)
+    {
+        return;
+    }
+    virtual bool IsHook()
+    {
+        return false;
+    }
+    virtual void SetHook(bool isHook)
+    {
+        return;
+    }
     virtual std::string GetBundleName() const
     {
         return "MockAbilityContext for tdd";
