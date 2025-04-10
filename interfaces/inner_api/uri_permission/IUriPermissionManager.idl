@@ -35,4 +35,6 @@ interface OHOS.AAFwk.IUriPermissionManager {
     UriPermissionRawData CheckUriAuthorization([in] UriPermissionRawData rawData, [in] unsigned int flag,
         [in] unsigned int tokenId);
     int ClearPermissionTokenByMap([in] unsigned int tokenId);
+    [macrodef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER]int Active([in] UriPermissionRawData policyRawData,
+        [out] unsigned int[] res);
 }

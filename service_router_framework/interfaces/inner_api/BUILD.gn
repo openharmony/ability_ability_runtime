@@ -94,11 +94,13 @@ ohos_shared_library("srms_fwk") {
     "src/service_router_load_callback.cpp",
     "src/service_router_mgr_helper.cpp",
   ]
+  output_values = get_target_outputs(":service_router_mgr_interface")
+  sources += filter_include(output_values, [ "*_proxy.cpp" ])
 
   public_configs = [ ":srms_fwk_config" ]
 
   deps = [ "${ability_runtime_innerkits_path}/ability_manager:ability_manager" ]
-  deps += [ ":service_router_mgr_proxy" ]
+  deps += [ ":service_router_mgr_interface" ]
 
   external_deps = [
     "ability_base:session_info",
