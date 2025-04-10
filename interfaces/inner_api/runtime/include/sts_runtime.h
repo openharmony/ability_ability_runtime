@@ -97,6 +97,7 @@ public:
         const std::string& srcEntrance);
     bool RunScript(ani_env* aniEnv, const std::string& moduleName, const std::string& abcPath,
         const std::string& hapPath, const std::string& srcEntrance);
+    void HandleUncaughtError();
 private:
     bool StartDebugger();
     bool LoadSTSAppLibrary(const AppLibPathVec& appLibPaths);

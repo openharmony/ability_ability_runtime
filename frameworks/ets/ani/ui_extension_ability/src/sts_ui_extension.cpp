@@ -714,6 +714,7 @@ bool StsUIExtension::CallObjectMethod(bool withResult, const char *name, const c
         va_start(args, signature);
         if ((status = env->Object_CallMethod_Boolean(stsObj_->aniObj, method, &res, args)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
+            stsRuntime_.HandleUncaughtError();
         }
         va_end(args);
         return res;
@@ -722,6 +723,7 @@ bool StsUIExtension::CallObjectMethod(bool withResult, const char *name, const c
     va_start(args, signature);
     if ((status = env->Object_CallMethod_Void_V(stsObj_->aniObj, method, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
+        stsRuntime_.HandleUncaughtError();
         return false;
     }
     va_end(args);

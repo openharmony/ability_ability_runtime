@@ -45,6 +45,7 @@ ohos_shared_library("sts_environment") {
   external_deps = [
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "faultloggerd:libunwinder",
     "ffrt:libffrt",
     "hilog:libhilog",
     "json:nlohmann_json_static",
