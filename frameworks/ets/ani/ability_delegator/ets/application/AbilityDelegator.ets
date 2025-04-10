@@ -17,6 +17,7 @@ import AbilityMonitor from './AbilityMonitor';
 import Want from '@ohos.app.ability.Want';
 import { Context } from './Context';
 import { BusinessError, AsyncCallback } from '@ohos.base';
+import ShellCmdResult  from './shellCmdResult';
 
 export default interface AbilityDelegator {
     printSync(msg: string): void;
@@ -32,11 +33,6 @@ export default interface AbilityDelegator {
     startAbility(want: Want, callback: AsyncCallback<void>): void;
     startAbility(want: Want): Promise<void>;
     // other api
-}
-
-class ShellCmdResult {
-  stdResult: string = "";
-  exitCode: int;
 }
 
 class AbilityDelegatorInner implements AbilityDelegator {
