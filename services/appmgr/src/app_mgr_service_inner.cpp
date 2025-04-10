@@ -8558,8 +8558,7 @@ int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(int32_t memorySizeState
             }
             break;
         default:
-            TAG_LOGE(AAFwkTag::APPMGR, "NotifyMemorySizeStateChanged failed, memorySizeState is %{public}d.",
-                memorySizeState);
+            TAG_LOGE(AAFwkTag::APPMGR, "NotifyMemory failed, memorySizeState is %{public}d.", memorySizeState);
     }
     return ret;
 }
