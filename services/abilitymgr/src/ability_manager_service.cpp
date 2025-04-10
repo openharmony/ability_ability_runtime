@@ -527,9 +527,12 @@ void AbilityManagerService::OnStop()
     if (abilityBundleEventCallback_) {
         auto bms = AbilityUtil::GetBundleManagerHelper();
         if (bms) {
-            bool ret = IN_PROCESS_CALL(bms->UnregisterBundleEventCallback(abilityBundleEventCallback_));
-            if (ret != ERR_OK) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "unsubscribe bundle event failed, err:%{public}d", ret);
+            if (!IN_PROCESS_CALL(bms->UnregisterBundleEventCallback(abilityBundleEventCallback_))) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "unsubscribe bundle event failed");
+            }
+            auto pluginRet = IN_PROCESS_CALL(bms->UnregisterPluginEventCallback(abilityBundleEventCallback_));
+            if (pluginRet != ERR_OK) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "UnregisterPluginEventCallback failed: %{public}d", pluginRet);
             }
         }
     }
@@ -1136,6 +1139,9 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
 #endif // WITH_DLP
     }
+    if (auto pluginRet = CheckStartPlugin(want, callerToken); pluginRet != ERR_OK) {
+        return pluginRet;
+    }
 
     AbilityUtil::RemoveWindowModeKey(const_cast<Want &>(want));
     if (callerToken != nullptr && !VerificationAllToken(callerToken) && !isSendDialogResult) {
@@ -1515,6 +1521,9 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
         return CHECK_PERMISSION_FAILED;
     }
 #endif // WITH_DLP
+    if (auto pluginRet = CheckStartPlugin(want, callerToken); pluginRet != ERR_OK) {
+        return pluginRet;
+    }
 
     if ((want.GetFlags() & Want::FLAG_ABILITY_PREPARE_CONTINUATION) == Want::FLAG_ABILITY_PREPARE_CONTINUATION &&
         IPCSkeleton::GetCallingUid() != DMS_UID) {
@@ -1845,6 +1854,9 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return CHECK_PERMISSION_FAILED;
     }
 #endif // WITH_DLP
+    if (auto pluginRet = CheckStartPlugin(want, callerToken); pluginRet != ERR_OK) {
+        return pluginRet;
+    }
 
     if ((want.GetFlags() & Want::FLAG_ABILITY_PREPARE_CONTINUATION) == Want::FLAG_ABILITY_PREPARE_CONTINUATION &&
         IPCSkeleton::GetCallingUid() != DMS_UID) {
@@ -2828,6 +2840,10 @@ void AbilityManagerService::SubscribeBundleEventCallback()
         bool ret = IN_PROCESS_CALL(bms->RegisterBundleEventCallback(abilityBundleEventCallback_));
         if (!ret) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "registerBundleEventCallback failed");
+        }
+        auto pluginRet = IN_PROCESS_CALL(bms->RegisterPluginEventCallback(abilityBundleEventCallback_));
+        if (pluginRet != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "RegisterPluginEventCallback failed %{public}d", pluginRet);
         }
     } else {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get bundleManager failed");
@@ -3962,7 +3978,7 @@ int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &
     auto abilityRecord = Token::GetAbilityRecordByToken(extensionSessionInfo->callerToken);
     std::shared_ptr<AbilityConnectManager> connectManager;
     std::shared_ptr<AbilityRecord> targetRecord;
-    GetConnectManagerAndUIExtensionBySessionInfo(extensionSessionInfo, connectManager, targetRecord);
+    GetConnectManagerAndUIExtensionBySessionInfo(extensionSessionInfo, connectManager, targetRecord, true);
     CHECK_POINTER_AND_RETURN(targetRecord, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connectManager, ERR_INVALID_VALUE);
     EventInfo eventInfo = BuildEventInfo(extensionSessionInfo->want, extensionSessionInfo->userId);
@@ -4026,7 +4042,7 @@ int AbilityManagerService::CloseUIExtensionAbilityBySCB(const sptr<IRemoteObject
 
     std::shared_ptr<AbilityConnectManager> connectManager;
     std::shared_ptr<AbilityRecord> targetRecord;
-    GetConnectManagerAndUIExtensionBySessionInfo(sessionInfo, connectManager, targetRecord);
+    GetConnectManagerAndUIExtensionBySessionInfo(sessionInfo, connectManager, targetRecord, true);
     if (connectManager == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null, ability: %{public}s", abilityRecord->GetURI().c_str());
         return ERR_INVALID_VALUE;
@@ -6821,7 +6837,7 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
             localWant.SetParam(Want::PARAM_RESV_CALLER_TOKEN, static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
             localWant.SetParam(Want::PARAM_RESV_CALLER_UID, IPCSkeleton::GetCallingUid());
         }
-        abilityInfo = StartAbilityInfo::CreateStartAbilityInfo(localWant, userId, appIndex);
+        abilityInfo = StartAbilityInfo::CreateStartAbilityInfo(localWant, userId, appIndex, callerToken);
     }
     CHECK_POINTER_AND_RETURN(abilityInfo, GET_ABILITY_SERVICE_FAILED);
     if (abilityInfo->status != ERR_OK) {
@@ -10381,6 +10397,10 @@ bool AbilityManagerService::CheckUIExtensionCallerIsForeground(const AbilityRequ
         return true;
     }
 
+    if (CheckStartCallHasFloatingWindowForUIExtension(abilityRequest.callerToken)) {
+        return true;
+    }
+
     auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (callerAbility != nullptr) {
         if (UIExtensionUtils::IsUIExtension(callerAbility->GetAbilityInfo().extensionAbilityType)) {
@@ -10404,6 +10424,26 @@ bool AbilityManagerService::CheckUIExtensionCallerIsForeground(const AbilityRequ
 
     TAG_LOGE(AAFwkTag::ABILITYMGR, "caller app not foreground, can't start %{public}s",
         abilityRequest.want.GetElement().GetURI().c_str());
+    return false;
+}
+
+bool AbilityManagerService::CheckStartCallHasFloatingWindowForUIExtension(const sptr<IRemoteObject> &callerToken)
+{
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+        CHECK_POINTER_AND_RETURN_LOG(sceneSessionManager, CHECK_PERMISSION_FAILED, "sceneSessionManager is nullptr");
+        bool hasFloatingWindow = false;
+        auto err = sceneSessionManager->HasFloatingWindowForeground(callerToken, hasFloatingWindow);
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+            "check floatingwindow permission. Ret: %{public}d, hasFloatingWindow: %{public}d",
+            static_cast<int32_t>(err), hasFloatingWindow);
+        if (err != Rosen::WMError::WM_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR,
+                "checking floatingwindow err: %{public}d", static_cast<int32_t>(err));
+        } else if (hasFloatingWindow) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -10799,6 +10839,12 @@ bool AbilityManagerService::JudgeSelfCalled(const std::shared_ptr<AbilityRecord>
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
     CHECK_POINTER_RETURN_BOOL(abilityRecord);
     auto tokenID = abilityRecord->GetApplicationInfo().accessTokenId;
+    if (abilityRecord->IsPluginAbility()) {
+        auto caller = abilityRecord->GetCallerRecord();
+        if (caller) {
+            tokenID = caller->GetApplicationInfo().accessTokenId;
+        }
+    }
     if (callingTokenId != tokenID) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no self, no enabled, callingTokenId:%{public}u, tokenId:%{public}u", callingTokenId, tokenID);
         return false;
@@ -11139,7 +11185,8 @@ bool AbilityManagerService::CheckCollaboratorType(int32_t type)
 }
 
 void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
-    std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility)
+    std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility,
+    bool needCheck)
 {
     targetAbility = nullptr;
     int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
@@ -11147,6 +11194,9 @@ void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const s
     connectManager = GetConnectManagerByUserId(userId);
     if (connectManager) {
         targetAbility = connectManager->GetUIExtensionBySessionInfo(sessionInfo);
+        if (needCheck) {
+            targetAbility = connectManager->GetUIExtensionBySessionFromServiceMap(sessionInfo);
+        }
     } else {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "connectManager null, userId:%{public}d", userId);
     }
@@ -11155,6 +11205,9 @@ void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const s
         connectManager = GetConnectManagerByUserId(U0_USER_ID);
         if (connectManager) {
             targetAbility = connectManager->GetUIExtensionBySessionInfo(sessionInfo);
+            if (needCheck) {
+                targetAbility = connectManager->GetUIExtensionBySessionFromServiceMap(sessionInfo);
+            }
         } else {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "connectManager null, userId:0");
         }
@@ -13643,6 +13696,52 @@ int32_t AbilityManagerService::QueryPreLoadUIExtensionRecord(const AppExecFwk::E
   }
   return connectManager->QueryPreLoadUIExtensionRecordInner(
       element, moduleName, hostBundleName, recordNum);
+}
+
+int32_t AbilityManagerService::RevokeDelegator(const sptr<IRemoteObject> &token)
+{
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "capability not support");
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingTokenId);
+    if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Not TOKEN_HAP");
+        return ERR_NO_PERMISSION_CALLER;
+    }
+    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+    CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
+    return uiAbilityManager->RevokeDelegator(token);
+}
+
+int32_t AbilityManagerService::CheckStartPlugin(const Want& want, sptr<IRemoteObject> callerToken)
+{
+    if (!AbilityRuntime::StartupUtil::IsStartPlugin(want)) {
+        return ERR_OK;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "start plugin ability");
+    // bundleName, abilityName, moduoleName not empty
+    auto element = want.GetElement();
+    if (element.GetBundleName().empty() || element.GetAbilityName().empty() || element.GetModuleName().empty()) {
+        return INVALID_PARAMETERS_ERR;
+    }
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (!abilityRecord) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord null");
+        return RESOLVE_ABILITY_ERR;
+    }
+    if (!(abilityRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE ||
+        (abilityRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::EXTENSION &&
+        abilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::EMBEDDED_UI))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "type is not UIAbility or embedded_ui");
+        return RESOLVE_ABILITY_ERR;
+    }
+    if (abilityRecord->IsPluginAbility()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not host ability");
+        return RESOLVE_ABILITY_ERR;
+    }
+    return ERR_OK;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

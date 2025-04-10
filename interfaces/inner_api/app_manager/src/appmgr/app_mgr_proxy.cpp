@@ -2260,5 +2260,24 @@ int32_t AppMgrProxy::GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &i
     info = *infoReply;
     return ERR_OK;
 }
+
+int32_t AppMgrProxy::LaunchAbility(const sptr<IRemoteObject> &token)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write token");
+        return ERR_INVALID_DATA;
+    }
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::LAUNCH_ABILITY, data, reply, option);
+    return reply.ReadInt32();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

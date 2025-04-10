@@ -388,6 +388,13 @@ int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(
             continue;
         }
         auto appInfoList = appRecord->GetAppInfoList();
+        if (appInfo.bundleType == BundleType::APP_PLUGIN) {
+            if (appRecord->GetUid() == appInfo.uid) {
+                TAG_LOGI(AAFwkTag::APPMGR, "UpdateApplicationInfoInstalled: %{public}s", moduleName.c_str());
+                appRecord->UpdateApplicationInfoInstalled(appInfo, moduleName);
+                continue;
+            }
+        }
         for (auto iter : appInfoList) {
             if (iter->bundleName == appInfo.bundleName && iter->uid == appInfo.uid) {
                 appRecord->UpdateApplicationInfoInstalled(appInfo, moduleName);
@@ -689,6 +696,11 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
         }
         appRecord->StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(
             AbilityState::ABILITY_STATE_TERMINATED), true, false);
+        //UIExtension notifies Extension & Ability state changes
+        if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+            appRecord->StateChangedNotifyObserver(abilityRecord,
+                static_cast<int32_t>(ExtensionState::EXTENSION_STATE_TERMINATED), false, false);
+        }
     }
 
     if ((isPage || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||

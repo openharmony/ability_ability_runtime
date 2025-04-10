@@ -939,6 +939,17 @@ public:
     {
         return 0;
     }
+
+    /**
+     * Launch ability when reuseDelegatorWindow is true.
+     *
+     * @param token Ability identify.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t LaunchAbility(const sptr<IRemoteObject> &token)
+    {
+        return 0;
+    }
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

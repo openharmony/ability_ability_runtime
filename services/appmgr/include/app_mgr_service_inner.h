@@ -288,7 +288,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
-        const std::string &moduleName);
+        const std::string &moduleName, bool isPlugin);
 
     /**
      * KillApplication, kill the application.
@@ -1471,6 +1471,8 @@ public:
     {
         return taskHandler_;
     }
+
+    int32_t LaunchAbility(const sptr<IRemoteObject> &token);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,

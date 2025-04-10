@@ -27,7 +27,8 @@ public:
 
     AbilityEventUtil() = default;
 
-    void HandleModuleInfoUpdated(const std::string &bundleName, const int uid, const std::string &moduleName);
+    void HandleModuleInfoUpdated(const std::string &bundleName, const int uid, const std::string &moduleName,
+        bool isPlugin);
 };
 
 } // namespace AAFwk

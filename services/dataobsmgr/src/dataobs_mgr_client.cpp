@@ -74,19 +74,19 @@ DataObsMgrClient::~DataObsMgrClient()
  *
  * @return Returns ERR_OK on success, others on failure.
  */
-ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
+ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int userId)
 {
     auto [errCode, dataObsManger] = GetObsMgr();
     if (errCode != SUCCESS) {
         LOG_ERROR("Failed to get ObsMgr, errCode: %{public}d.", errCode);
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
-    auto status = dataObsManger->RegisterObserver(uri, dataObserver);
+    auto status = dataObsManger->RegisterObserver(uri, dataObserver, userId);
     if (status != NO_ERROR) {
         return status;
     }
-    observers_.Compute(dataObserver, [&uri](const auto &key, auto &value) {
-        value.emplace_back(uri);
+    observers_.Compute(dataObserver, [&uri, userId](const auto &key, auto &value) {
+        value.emplace_back(uri, userId);
         return true;
     });
     return status;
@@ -100,19 +100,19 @@ ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, sptr<IDataAbilityObse
  *
  * @return Returns ERR_OK on success, others on failure.
  */
-ErrCode DataObsMgrClient::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
+ErrCode DataObsMgrClient::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int userId)
 {
     auto [errCode, dataObsManger] = GetObsMgr();
     if (errCode != SUCCESS) {
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
-    auto status = dataObsManger->UnregisterObserver(uri, dataObserver);
+    auto status = dataObsManger->UnregisterObserver(uri, dataObserver, userId);
     if (status != NO_ERROR) {
         return status;
     }
-    observers_.Compute(dataObserver, [&uri](const auto &key, auto &value) {
-        value.remove_if([&uri](const auto &val) {
-            return uri == val;
+    observers_.Compute(dataObserver, [&uri, userId](const auto &key, auto &value) {
+        value.remove_if([&uri, userId](const auto &val) {
+            return uri == val.uri && userId == val.userId;
         });
         return !value.empty();
     });
@@ -126,13 +126,13 @@ ErrCode DataObsMgrClient::UnregisterObserver(const Uri &uri, sptr<IDataAbilityOb
  *
  * @return Returns ERR_OK on success, others on failure.
  */
-ErrCode DataObsMgrClient::NotifyChange(const Uri &uri)
+ErrCode DataObsMgrClient::NotifyChange(const Uri &uri, int userId)
 {
     auto [errCode, dataObsManger] = GetObsMgr();
     if (errCode != SUCCESS) {
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
-    return dataObsManger->NotifyChange(uri);
+    return dataObsManger->NotifyChange(uri, userId);
 }
 
 /**
@@ -271,11 +271,11 @@ void DataObsMgrClient::ReRegister()
     decltype(observers_) observers(std::move(observers_));
     observers_.Clear();
     observers.ForEach([this](const auto &key, const auto &value) {
-        for (const auto &uri : value) {
-            auto ret = RegisterObserver(uri, key);
+        for (const auto &val : value) {
+            auto ret = RegisterObserver(val.uri, key, val.userId);
             if (ret != SUCCESS) {
                 LOG_ERROR("RegisterObserver failed, uri:%{public}s, ret:%{public}d",
-                    CommonUtils::Anonymous(uri.ToString()).c_str(), ret);
+                    CommonUtils::Anonymous(val.uri.ToString()).c_str(), ret);
             }
         }
         return false;

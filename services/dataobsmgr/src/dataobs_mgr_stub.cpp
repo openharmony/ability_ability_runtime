@@ -75,7 +75,8 @@ int DataObsManagerStub::RegisterObserverInner(MessageParcel &data, MessageParcel
 
     auto remote = data.ReadRemoteObject();
     auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
-    int32_t result = RegisterObserver(uri, observer);
+    int32_t userId = data.ReadInt32();
+    int32_t result = RegisterObserver(uri, observer, userId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -90,7 +91,8 @@ int DataObsManagerStub::UnregisterObserverInner(MessageParcel &data, MessageParc
 
     auto remote = data.ReadRemoteObject();
     auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
-    int32_t result = UnregisterObserver(uri, observer);
+    int32_t userId = data.ReadInt32();
+    int32_t result = UnregisterObserver(uri, observer, userId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -102,8 +104,9 @@ int DataObsManagerStub::NotifyChangeInner(MessageParcel &data, MessageParcel &re
         TAG_LOGE(AAFwkTag::DBOBSMGR, "invalid uri");
         return IPC_STUB_INVALID_DATA_ERR;
     }
+    int32_t userId = data.ReadInt32();
 
-    int32_t result = NotifyChange(uri);
+    int32_t result = NotifyChange(uri, userId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

@@ -356,6 +356,19 @@ bool BundleMgrHelper::GetHapModuleInfo(const AbilityInfo &abilityInfo, HapModule
     return bundleMgr->GetHapModuleInfo(abilityInfo, hapModuleInfo);
 }
 
+ErrCode BundleMgrHelper::GetPluginHapModuleInfo(const std::string &hostBundleName, const std::string &pluginBundleName,
+    const std::string &pluginModuleName, const int32_t userId, HapModuleInfo &hapModuleInfo)
+{
+    TAG_LOGI(AAFwkTag::BUNDLEMGRHELPER, "GetPluginHapModuleInfo");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetPluginHapModuleInfo(hostBundleName, pluginBundleName, pluginModuleName, userId, hapModuleInfo);
+}
+
 std::string BundleMgrHelper::GetAbilityLabel(const std::string &bundleName, const std::string &abilityName)
 {
     TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
@@ -1002,6 +1015,57 @@ std::string BundleMgrHelper::GetDataDir(const std::string &bundleName, const int
     std::string dataDir;
     bundleMgr->GetDirByBundleNameAndAppIndex(bundleName, appIndex, dataDir);
     return dataDir;
+}
+
+ErrCode BundleMgrHelper::GetPluginInfosForSelf(std::vector<PluginBundleInfo> &pluginBundleInfos)
+{
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetPluginInfosForSelf(pluginBundleInfos);
+}
+
+ErrCode BundleMgrHelper::GetPluginAbilityInfo(const std::string &hostBundleName, const std::string &pluginBundleName,
+    const std::string &pluginModuleName, const std::string &pluginAbilityName, int32_t userId,
+    AbilityInfo &pluginAbilityInfo)
+{
+    TAG_LOGI(AAFwkTag::BUNDLEMGRHELPER, "GetPluginAbilityInfo");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetPluginAbilityInfo(hostBundleName, pluginBundleName, pluginModuleName, pluginAbilityName,
+        userId, pluginAbilityInfo);
+}
+
+ErrCode BundleMgrHelper::RegisterPluginEventCallback(sptr<IBundleEventCallback> pluginEventCallback)
+{
+    TAG_LOGI(AAFwkTag::BUNDLEMGRHELPER, "RegisterPluginEventCallback");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->RegisterPluginEventCallback(pluginEventCallback);
+}
+
+ErrCode BundleMgrHelper::UnregisterPluginEventCallback(sptr<IBundleEventCallback> pluginEventCallback)
+{
+    TAG_LOGI(AAFwkTag::BUNDLEMGRHELPER, "UnregisterPluginEventCallback");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->UnregisterPluginEventCallback(pluginEventCallback);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

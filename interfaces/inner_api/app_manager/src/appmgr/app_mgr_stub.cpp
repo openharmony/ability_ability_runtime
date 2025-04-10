@@ -384,6 +384,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleUpdateProcessMemoryState(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_KILLED_PROCESS_INFO):
             return HandleGetKilledProcessInfo(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::LAUNCH_ABILITY):
+            return HandleLaunchAbility(data, reply);
     }
     return INVALID_FD;
 }
@@ -1863,5 +1865,19 @@ int32_t AppMgrStub::HandleGetKilledProcessInfo(MessageParcel &data, MessageParce
     return ret;
 }
 
+int32_t AppMgrStub::HandleLaunchAbility(MessageParcel &data, MessageParcel &reply)
+{
+    sptr token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "read data failed.");
+        return ERR_INVALID_VALUE;
+    }
+    auto result = LaunchAbility(token);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

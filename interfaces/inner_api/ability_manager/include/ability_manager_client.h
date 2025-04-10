@@ -1741,6 +1741,14 @@ public:
                                           int32_t &recordNum,
                                           int32_t userId = DEFAULT_INVAL_VALUE);
 
+    /**
+     * Revoke delegator.
+     *
+     * @param token, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RevokeDelegator(const sptr<IRemoteObject> &token);
+
 private:
     AbilityManagerClient();
     DISALLOW_COPY_AND_MOVE(AbilityManagerClient);

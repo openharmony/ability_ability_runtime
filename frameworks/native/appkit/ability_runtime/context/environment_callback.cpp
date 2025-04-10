@@ -72,7 +72,7 @@ void JsEnvironmentCallback::OnConfigurationUpdated(const AppExecFwk::Configurati
     );
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsEnvironmentCallback::OnConfigurationUpdated",
+    NapiAsyncTask::ScheduleLowQos("JsEnvironmentCallback::OnConfigurationUpdated",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 

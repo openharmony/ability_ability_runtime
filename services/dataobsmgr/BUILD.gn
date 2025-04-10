@@ -50,6 +50,7 @@ ohos_shared_library("dataobsms") {
 
   external_deps = [
     "ability_base:zuri",
+    "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
@@ -91,6 +92,7 @@ ohos_static_library("dataobsms_static") {
 
   external_deps = [
     "ability_base:zuri",
+    "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",

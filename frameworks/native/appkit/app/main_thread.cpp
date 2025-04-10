@@ -235,6 +235,27 @@ void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &h
     }
 }
 
+void MainThread::GetPluginNativeLibPath(std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
+    AppLibPathMap &appLibPaths)
+{
+    for (auto &pluginBundleInfo : pluginBundleInfos) {
+        for (auto &pluginModuleInfo : pluginBundleInfo.pluginModuleInfos) {
+            std::string libPath = pluginModuleInfo.nativeLibraryPath;
+            if (!pluginModuleInfo.isLibIsolated) {
+                libPath = pluginBundleInfo.nativeLibraryPath;
+            }
+            if (libPath.empty()) {
+                continue;
+            }
+            std::string appLibPathKey = pluginBundleInfo.pluginBundleName + "/" + pluginModuleInfo.moduleName;
+            libPath = std::string(LOCAL_CODE_PATH) + "/+plugins/" + libPath;
+            TAG_LOGD(AAFwkTag::APPKIT, "appLibPathKey: %{private}s, libPath: %{private}s",
+                appLibPathKey.c_str(), libPath.c_str());
+            appLibPaths[appLibPathKey].emplace_back(libPath);
+        }
+    }
+}
+
 /**
  *
  * @brief Notify the AppMgrDeathRecipient that the remote is dead.
@@ -702,7 +723,11 @@ void MainThread::ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &a
             TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
-        appThread->HandleUpdateApplicationInfoInstalled(appInfo, moduleName);
+        if (appInfo.bundleType != AppExecFwk::BundleType::APP_PLUGIN) {
+            appThread->HandleUpdateApplicationInfoInstalled(appInfo, moduleName);
+        } else {
+            appThread->HandleUpdatePluginInfoInstalled(appInfo, moduleName);
+        }
     };
     if (!mainHandler_->PostTask(task, "MainThread:UpdateApplicationInfoInstalled")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
@@ -1457,11 +1482,24 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
     std::map<std::string, std::string> pkgContextInfoJsonStringMap;
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+    AppLibPathMap appLibPaths {};
+    if (appInfo.hasPlugin) {
+        if (bundleMgrHelper->GetPluginInfosForSelf(pluginBundleInfos) != ERR_OK) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "GetPluginInfosForSelf failed");
+        }
+        GetPluginNativeLibPath(pluginBundleInfos, appLibPaths);
+        for (auto &pluginBundleInfo : pluginBundleInfos) {
+            for (auto &pluginModuleInfo : pluginBundleInfo.pluginModuleInfos) {
+                pkgContextInfoJsonStringMap[pluginModuleInfo.moduleName] = pluginModuleInfo.hapPath;
+            }
+        }
+    }
+
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         pkgContextInfoJsonStringMap[hapModuleInfo.moduleName] = hapModuleInfo.hapPath;
     }
 
-    AppLibPathMap appLibPaths {};
     GetNativeLibPath(bundleInfo, hspList, appLibPaths);
     bool isSystemApp = bundleInfo.applicationInfo.isSystemApp;
     TAG_LOGD(AAFwkTag::APPKIT, "the application isSystemApp: %{public}d", isSystemApp);
@@ -1519,6 +1557,15 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         AbilityRuntime::ChildProcessManager::GetInstance().SetForkProcessDebugOption(appInfo.bundleName,
             appLaunchData.GetDebugApp(), appInfo.debug, appLaunchData.isNativeStart());
 #endif // SUPPORT_CHILD_PROCESS
+        if (!pluginBundleInfos.empty()) {
+            for (auto &pluginBundleInfo : pluginBundleInfos) {
+                for (auto &pluginModuleInfo : pluginBundleInfo.pluginModuleInfos) {
+                    options.packageNameList[pluginModuleInfo.moduleName] = pluginModuleInfo.packageName;
+                    TAG_LOGI(AAFwkTag::APPKIT, "moduleName %{public}s, packageName %{public}s",
+                        pluginModuleInfo.moduleName.c_str(), pluginModuleInfo.packageName.c_str());
+                }
+            }
+        }
         if (!bundleInfo.hapModuleInfos.empty()) {
             for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
                 options.hapModulePath[hapModuleInfo.moduleName] = hapModuleInfo.hapPath;
@@ -2067,17 +2114,26 @@ void MainThread::ChangeToLocalPath(const std::string &bundleName,
     }
 }
 
-void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& appInfo, const std::string& moduleName)
+void MainThread::HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAppInfo, const std::string &moduleName)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!application_) {
         TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
-    application_->UpdateApplicationInfoInstalled(appInfo);
-#ifndef CJ_FRONTEND
     auto& runtime = application_->GetRuntime();
     if (runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        return;
+    }
+
+    if (runtime->GetLanguage() != Runtime::Language::JS) {
+        TAG_LOGE(AAFwkTag::APPKIT, "only support js");
+        return;
+    }
+
+    AbilityRuntime::JsRuntime* jsRuntime = static_cast<AbilityRuntime::JsRuntime*>(runtime.get());
+    if (jsRuntime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
@@ -2088,19 +2144,60 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& app
         return;
     }
 
-    AbilityInfo abilityInfo;
-    abilityInfo.bundleName = appInfo.bundleName;
-    abilityInfo.package = moduleName;
-    HapModuleInfo hapModuleInfo;
-    if (bundleMgrHelper->GetHapModuleInfo(abilityInfo, hapModuleInfo) == false) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetHapModuleInfo failed");
+    std::vector<AppExecFwk::PluginBundleInfo> pluginBundleInfos;
+    if (bundleMgrHelper->GetPluginInfosForSelf(pluginBundleInfos) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "GetPluginInfosForSelf failed");
         return;
     }
-    runtime->UpdatePkgContextInfoJson(hapModuleInfo.moduleName, hapModuleInfo.hapPath, hapModuleInfo.packageName);
-    TAG_LOGI(AAFwkTag::APPKIT,
-        "UpdatePkgContextInfoJson moduleName: %{public}s, hapPath: %{public}s, packageName: %{public}s",
-        hapModuleInfo.moduleName.c_str(), hapModuleInfo.hapPath.c_str(), hapModuleInfo.packageName.c_str());
-#endif
+    for (auto &pluginBundleInfo : pluginBundleInfos) {
+        for (auto &pluginModuleInfo : pluginBundleInfo.pluginModuleInfos) {
+            if (moduleName == pluginModuleInfo.moduleName &&
+                pluginBundleInfo.pluginBundleName == pluginAppInfo.name) {
+                jsRuntime->UpdatePkgContextInfoJson(moduleName, pluginModuleInfo.hapPath, pluginModuleInfo.packageName);
+                TAG_LOGI(AAFwkTag::APPKIT,
+                    "UpdatePkgContextInfoJson moduleName: %{public}s, hapPath: %{public}s",
+                    moduleName.c_str(), pluginModuleInfo.hapPath.c_str());
+            }
+        }
+    }
+}
+
+void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& appInfo, const std::string& moduleName)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (!application_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
+        return;
+    }
+    application_->UpdateApplicationInfoInstalled(appInfo);
+
+    auto& runtime = application_->GetRuntime();
+    if (runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        return;
+    }
+
+    if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::JS) {
+        auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
+        if (bundleMgrHelper == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
+            return;
+        }
+    
+        AbilityInfo abilityInfo;
+        abilityInfo.bundleName = appInfo.bundleName;
+        abilityInfo.package = moduleName;
+        HapModuleInfo hapModuleInfo;
+        if (bundleMgrHelper->GetHapModuleInfo(abilityInfo, hapModuleInfo) == false) {
+            TAG_LOGE(AAFwkTag::APPKIT, "GetHapModuleInfo failed");
+            return;
+        }
+        static_cast<AbilityRuntime::JsRuntime&>(*runtime).UpdatePkgContextInfoJson(hapModuleInfo.moduleName,
+            hapModuleInfo.hapPath, hapModuleInfo.packageName);
+        TAG_LOGI(AAFwkTag::APPKIT,
+            "UpdatePkgContextInfoJson moduleName: %{public}s, hapPath: %{public}s, packageName: %{public}s",
+            hapModuleInfo.moduleName.c_str(), hapModuleInfo.hapPath.c_str(), hapModuleInfo.packageName.c_str());
+    }
 }
 
 void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)

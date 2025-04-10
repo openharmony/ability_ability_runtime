@@ -510,7 +510,7 @@ int32_t AmsMgrProxy::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
 }
 
 int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
-    const std::string &moduleName)
+    const std::string &moduleName, bool isPlugin)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "start.");
     MessageParcel data;
@@ -529,6 +529,10 @@ int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleNam
     }
     if (!data.WriteString(moduleName)) {
         TAG_LOGE(AAFwkTag::APPMGR, "moduleName WriteString failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isPlugin)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "isPlugin Write failed");
         return ERR_FLATTEN_OBJECT;
     }
     int32_t ret =

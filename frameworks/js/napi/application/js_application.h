@@ -34,10 +34,12 @@ public:
     static napi_value CreateModuleContext(napi_env env, napi_callback_info info);
     static napi_value CreateBundleContext(napi_env env, napi_callback_info info);
     static napi_value GetApplicationContext(napi_env env, napi_callback_info info);
+    static napi_value CreatePluginModuleContext(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnCreateModuleContext(napi_env env, NapiCallbackInfo &info);
     napi_value OnCreateBundleContext(napi_env env, NapiCallbackInfo &info);
+    napi_value OnCreatePluginModuleContext(napi_env env, NapiCallbackInfo &info);
     napi_value CreateJsContext(napi_env env, const std::shared_ptr<Context> &context);
     void SetCreateCompleteCallback(std::shared_ptr<std::shared_ptr<Context>> contextPtr,
         NapiAsyncTask::CompleteCallback &complete);

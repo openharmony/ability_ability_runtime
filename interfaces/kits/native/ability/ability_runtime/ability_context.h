@@ -369,6 +369,9 @@ public:
     virtual void SetAbilityConfiguration(const AppExecFwk::Configuration &config) = 0;
     virtual void SetAbilityColorMode(int32_t colorMode) = 0;
     virtual void SetAbilityResourceManager(std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr) = 0;
+    virtual bool GetHookOff() = 0;
+    virtual void SetHookOff(bool hookOff) = 0;
+    virtual ErrCode RevokeDelegator() = 0;
 
     virtual std::shared_ptr<AAFwk::Want> GetWant() = 0;
 
@@ -424,6 +427,8 @@ public:
 #endif
 #endif
     virtual bool IsTerminating() = 0;
+    virtual bool IsHook() = 0;
+    virtual void SetHook(bool isHook) = 0;
     virtual void SetTerminating(bool state) = 0;
     virtual void InsertResultCallbackTask(int requestCode, RuntimeTask&& task) = 0;
     virtual void RemoveResultCallbackTask(int requestCode) = 0;
