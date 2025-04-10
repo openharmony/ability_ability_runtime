@@ -449,7 +449,7 @@ public:
         return 0;
     }
 
-    virtual int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficient)
+    virtual int32_t NotifyMemorySizeStateChanged(int32_t memorySizeState)
     {
         return 0;
     }

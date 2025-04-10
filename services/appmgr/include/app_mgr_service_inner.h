@@ -2031,6 +2031,7 @@ private:
     std::unordered_set<std::string> nwebPreloadSet_ {};
     std::shared_ptr<AppExecFwk::AppMgrEventSubscriber> screenOffSubscriber_;
 
+    std::mutex screenOffSubscriberMutex_;
     std::mutex childProcessRecordMapMutex_;
 };
 }  // namespace AppExecFwk

@@ -2360,16 +2360,30 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "bundle killed");
         return;
     }
-    if (IsLauncher(abilityRecord) || abilityRecord->IsSceneBoard()) {
+    if (IsNeedToRestart(abilityRecord, abilityInfo.bundleName, abilityInfo.name)) {
         RestartAbility(abilityRecord, currentUserId);
-    } else if ((DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent() ||
-        AppUtils::GetInstance().IsAllowResidentInExtremeMemory(abilityInfo.bundleName, abilityInfo.name)) &&
-        (DelayedSingleton<AppScheduler>::GetInstance()->IsNoRequireBigMemory() ||
-        !AppUtils::GetInstance().IsBigMemoryUnrelatedKeepAliveProc(abilityInfo.bundleName))) {
-        RestartAbility(abilityRecord, currentUserId);
-    } else {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "not restart keep alive proc");
     }
+}
+
+bool AbilityConnectManager::IsNeedToRestart(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    const std::string &bundleName, const std::string &abilityName)
+{
+    if (IsLauncher(abilityRecord) || abilityRecord->IsSceneBoard()) {
+        return true;
+    }
+
+    if (DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent()) {
+        if (DelayedSingleton<AppScheduler>::GetInstance()->IsNoRequireBigMemory() ||
+        !AppUtils::GetInstance().IsBigMemoryUnrelatedKeepAliveProc(bundleName)) {
+            TAG_LOGD(AAFwkTag::SERVICE_EXT, "restart keep alive ability");
+            return true;
+        }
+    } else if (AppUtils::GetInstance().IsAllowResidentInExtremeMemory(bundleName, abilityName)) {
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "restart keep alive ability");
+        return true;
+    }
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "not restart keep alive ability");
+    return false;
 }
 
 void AbilityConnectManager::DisconnectBeforeCleanup()

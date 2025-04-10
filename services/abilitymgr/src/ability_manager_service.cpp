@@ -2320,7 +2320,10 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
         TAG_LOGD(AAFwkTag::ABILITYMGR, "App start ability from with no fullscreen.");
         Memory::MemMgrProcessStateInfo info;
         info.noFullScreenStart = 1;
-        Memory::MemMgrClient::GetInstance().NotifyProcessStateChangedAsync(info);
+        int32_t result = Memory::MemMgrClient::GetInstance().NotifyProcessStateChangedAsync(info);
+        if (result != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyProcessStateChangedAsync error. result: %{public}d", result);
+        }
     }
 #endif
     if (!IsCallerSceneBoard()) {
