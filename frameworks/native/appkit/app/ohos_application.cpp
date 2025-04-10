@@ -398,6 +398,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             }
             auto rm = pluginContext->GetResourceManager();
             stageContext->SetResourceManager(rm);
+            stageContext->SetParentContext(pluginContext);
         } else {
             stageContext->InitHapModuleInfo(abilityInfo);
             stageContext->SetParentContext(abilityRuntimeContext_);
