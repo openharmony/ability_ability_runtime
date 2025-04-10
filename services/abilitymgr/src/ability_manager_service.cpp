@@ -10864,7 +10864,7 @@ void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const s
     connectManager = GetConnectManagerByUserId(userId);
     if (connectManager) {
         targetAbility = connectManager->GetUIExtensionBySessionInfo(sessionInfo);
-        if (needCheck) {
+        if (needCheck && targetAbility == nullptr) {
             targetAbility = connectManager->GetUIExtensionBySessionFromServiceMap(sessionInfo);
         }
     } else {
@@ -10875,7 +10875,7 @@ void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const s
         connectManager = GetConnectManagerByUserId(U0_USER_ID);
         if (connectManager) {
             targetAbility = connectManager->GetUIExtensionBySessionInfo(sessionInfo);
-            if (needCheck) {
+            if (needCheck && targetAbility == nullptr) {
                 targetAbility = connectManager->GetUIExtensionBySessionFromServiceMap(sessionInfo);
             }
         } else {
