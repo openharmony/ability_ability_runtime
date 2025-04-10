@@ -2350,8 +2350,7 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
             sceneBoardCrashCount = 0;
             tickCount = tickNow;
         }
-        ++sceneBoardCrashCount;
-        if (sceneBoardCrashCount >= maxCount) {
+        if ((++sceneBoardCrashCount) >= maxCount) {
             std::string reason = "SceneBoard exits " + std::to_string(sceneBoardCrashCount) +
                 "times in " + std::to_string(maxTime) + "ms";
             DoRebootExt("panic", reason.c_str());
