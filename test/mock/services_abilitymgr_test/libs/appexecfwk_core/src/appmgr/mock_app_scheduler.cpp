@@ -190,6 +190,11 @@ bool AppScheduler::IsMemorySizeSufficent() const
     return true;
 }
 
+bool AppScheduler::IsNoRequireBigMemory() const
+{
+    return true;
+}
+
 void AppScheduler::StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)
 {}
 
