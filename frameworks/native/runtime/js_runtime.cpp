@@ -193,7 +193,9 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
     HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp, debugMode,
         [bundleName, isStartWithDebug, instanceId, weak, isDebugApp, appProvisionType]
         (int socketFd, std::string option) {
-        TAG_LOGI(AAFwkTag::JSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s", socketFd, option.c_str());
+        TAG_LOGI(AAFwkTag::JSRUNTIME,
+            "HdcRegister msg, fd %{public}d, option %{public}s, isStartWithDebug %{public}d, isDebugApp %{public}d",
+            socketFd, option.c_str(), isStartWithDebug, isDebugApp);
         if (weak == nullptr) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "null weak");
             return;
