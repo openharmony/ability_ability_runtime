@@ -1343,8 +1343,8 @@ HWTEST_F(AppMgrClientTest, SetSupportedProcessCacheSelf_001, TestSize.Level2)
 HWTEST_F(AppMgrClientTest, NotifyMemorySizeStateChanged_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
-    bool isMemorySizeSufficient = false;
-    int32_t ret = appMgrClient->NotifyMemorySizeStateChanged(isMemorySizeSufficient);
+    int32_t memorySizeState = 0;
+    int32_t ret = appMgrClient->NotifyMemorySizeStateChanged(memorySizeState);
     EXPECT_EQ(ret, 1);
 }
 

@@ -560,6 +560,12 @@ public:
     virtual bool IsMemorySizeSufficent() const;
 
     /**
+     * whether or not requier a big memory
+     * @return Returens true is no big memory, others return false.
+     */
+    virtual bool IsNoRequireBigMemory() const;
+
+    /**
      * Notifies that one ability is attached to status bar.
      *
      * @param token the token of the abilityRecord that is attached to status bar.
