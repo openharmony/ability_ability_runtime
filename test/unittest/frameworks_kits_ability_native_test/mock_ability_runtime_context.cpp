@@ -72,7 +72,7 @@ std::string MockAbilityRuntimeContext::GetTempDir()
     return {};
 };
 
-std::string MockAbilityRuntimeContext::GetResourceDir()
+std::string MockAbilityRuntimeContext::GetResourceDir(const std::string &moduleName)
 {
     return {};
 };

@@ -104,9 +104,9 @@ std::string AbilityContextImpl::GetTempDir()
     return stageContext_ ? stageContext_->GetTempDir() : "";
 }
 
-std::string AbilityContextImpl::GetResourceDir()
+std::string AbilityContextImpl::GetResourceDir(const std::string &moduleName)
 {
-    return stageContext_ ? stageContext_->GetResourceDir() : "";
+    return stageContext_ ? stageContext_->GetResourceDir(moduleName) : "";
 }
 
 std::string AbilityContextImpl::GetFilesDir()

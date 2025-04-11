@@ -274,6 +274,35 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetCloudFileDir(
     return WriteStringToBuffer(cloudFileDir, buffer, bufferSize, writeLength);
 }
 
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(const char* moduleName,
+    char* buffer, const int32_t bufferSize, int32_t* writeLength)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getResourceDir called");
+    if (moduleName == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "moduleName is null");
+        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
+    if (std::strlen(moduleName) == 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "moduleName is empty");
+        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
+    auto ret = CheckParameters(buffer, writeLength);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    const auto appContext = Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    const std::string resourceDir = appContext->GetResourceDir(moduleName);
+    if (resourceDir.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "resourceDir is empty");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    return WriteStringToBuffer(resourceDir, buffer, bufferSize, writeLength);
+}
+
 AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbility(AbilityBase_Want *want)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "startSelfUIAbility called");
