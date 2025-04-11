@@ -20,7 +20,6 @@ import { AsyncCallbackCommonWrapper } from '../UIExtensionCommon';
 import ExtensionContext from 'application.ExtensionContext';
 
 export default class UIExtensionContext extends ExtensionContext {
-  nativeUIExtensionContext: long = 0;
   native terminateSelfSync(callback:AsyncCallbackCommonWrapper<void>): void;
   native terminateSelfWithResultSync(parameter: AbilityResult, callback: AsyncCallbackCommonWrapper<void>): void;
 
