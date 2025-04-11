@@ -59,6 +59,15 @@ bool ApplicationDataManager::NotifyCJUnhandledException(const std::string &errMs
     return AppRecovery::GetInstance().TryRecoverApp(StateReason::CJ_ERROR);
 }
 
+bool ApplicationDataManager::NotifySTSUnhandledException(const std::string &errMsg)
+{
+    if (errorObserver_) {
+        errorObserver_->OnUnhandledException(errMsg);
+        return true;
+    }
+    return AppRecovery::GetInstance().TryRecoverApp(StateReason::STS_ERROR);
+}
+
 void ApplicationDataManager::RemoveErrorObserver()
 {
     errorObserver_ = nullptr;
@@ -87,6 +96,16 @@ bool ApplicationDataManager::NotifyCJExceptionObject(const AppExecFwk::ErrorObje
     // if apprecovery is enabled, we could callback to save current state
     // and restart as developer wants
     return AppRecovery::GetInstance().TryRecoverApp(StateReason::CJ_ERROR);
+}
+
+bool ApplicationDataManager::NotifySTSExceptionObject(const AppExecFwk::ErrorObject &errorObj)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Notify Exception error observer come");
+    if (errorObserver_) {
+        errorObserver_->OnExceptionObject(errorObj);
+        return true;
+    }
+    return AppRecovery::GetInstance().TryRecoverApp(StateReason::STS_ERROR);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
