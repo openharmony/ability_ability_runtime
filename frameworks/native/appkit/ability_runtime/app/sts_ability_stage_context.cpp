@@ -70,24 +70,23 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
         return nullptr;
     }
     ani_field contextField;
-    status = env->Class_FindField(abilityStageCtxCls, "stageContext", &contextField);
+    status = env->Class_FindField(abilityStageCtxCls, "nativeContext", &contextField);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "call Class_FindField stageContext failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "call Class_FindField nativeContext failed");
     }
-    auto pCtx = workContext->lock();
-    if(pCtx != nullptr) {
-        status = env->Object_SetField_Long(obj, contextField, reinterpret_cast<ani_long>(pCtx.get()));
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ABILITY, "call Object_SetField_Long contextField failed");
-            return nullptr;
-
-        }
+    ani_long nativeContextLong = (ani_long)workContext;
+    status = env->Object_SetField_Long(obj, contextField, nativeContextLong);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "call Object_SetField_Long contextField failed");
+        delete workContext;
+        return nullptr;
     }
 
     // bind parent context
     auto app = application.lock();
     if (app == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "application is null");
+        delete workContext;
         return nullptr;
     }
     ContextUtil::StsCreatContext(env, abilityStageCtxCls, obj, app->GetApplicationCtxObjRef(), context);
