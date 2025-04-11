@@ -640,6 +640,15 @@ bool AppScheduler::IsMemorySizeSufficent() const
     return appMgrClient_->IsMemorySizeSufficent();
 }
 
+bool AppScheduler::IsNoRequireBigMemory() const
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
+        return true;
+    }
+    return appMgrClient_->IsNoRequireBigMemory();
+}
+
 void AppScheduler::AttachedToStatusBar(const sptr<IRemoteObject> &token)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");

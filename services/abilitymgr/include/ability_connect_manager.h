@@ -621,6 +621,8 @@ private:
     void RemoveExtensionDelayDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
 
 private:
+    bool IsNeedToRestart(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        const std::string &bundleName, const std::string &abilityName);
     void TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord);
     int DisconnectRecordNormal(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord,
         bool callerDied) const;

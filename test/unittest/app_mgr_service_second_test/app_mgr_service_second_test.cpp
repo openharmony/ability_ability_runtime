@@ -191,11 +191,12 @@ HWTEST_F(AppMgrServiceSecondTest, NotifyMemorySizeStateChanged_0100, TestSize.Le
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
 
-    auto ret = appMgrService->NotifyMemorySizeStateChanged(true);
+    int32_t memorySizeState = 1;
+    auto ret = appMgrService->NotifyMemorySizeStateChanged(memorySizeState);
     EXPECT_NE(ret, ERR_OK);
 
     ReadyToRun(appMgrService);
-    ret = appMgrService->NotifyMemorySizeStateChanged(true);
+    ret = appMgrService->NotifyMemorySizeStateChanged(memorySizeState);
     EXPECT_NE(ret, ERR_OK);
 }
 

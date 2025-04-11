@@ -690,6 +690,19 @@ bool AmsMgrScheduler::IsMemorySizeSufficent()
     return amsMgrServiceInner_->IsMemorySizeSufficient();
 }
 
+bool AmsMgrScheduler::IsNoRequireBigMemory()
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return true;
+    }
+    if (amsMgrServiceInner_->VerifyRequestPermission() != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        return true;
+    }
+    return amsMgrServiceInner_->IsNoRequireBigMemory();
+}
+
 void AmsMgrScheduler::AttachedToStatusBar(const sptr<IRemoteObject> &token)
 {
     if (!IsReady()) {

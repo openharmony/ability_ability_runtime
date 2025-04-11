@@ -16,11 +16,29 @@
 #include "app_mgr_event.h"
 
 #include "accesstoken_kit.h"
+#include "common_event_support.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace AppExecFwk {
+
+AppMgrEventSubscriber::AppMgrEventSubscriber(
+    const EventFwk::CommonEventSubscribeInfo &subscribeInfo, const std::function<void()> &callback)
+    : EventFwk::CommonEventSubscriber(subscribeInfo), callback_(callback)
+{}
+
+void AppMgrEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &data)
+{
+    const AAFwk::Want &want = data.GetWant();
+    std::string action = want.GetAction();
+    TAG_LOGD(AAFwkTag::APPMGR, "The action: %{public}s.", action.c_str());
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
+        if (callback_ != nullptr) {
+            callback_();
+        }
+    }
+}
 
 int32_t AppMgrEventUtil::GetCallerPid(const std::shared_ptr<AppRunningRecord> &callerAppRecord)
 {

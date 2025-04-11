@@ -2350,23 +2350,40 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
             sceneBoardCrashCount = 0;
             tickCount = tickNow;
         }
-        ++sceneBoardCrashCount;
-        if (sceneBoardCrashCount >= maxCount) {
+        if ((++sceneBoardCrashCount) >= maxCount) {
             std::string reason = "SceneBoard exits " + std::to_string(sceneBoardCrashCount) +
                 "times in " + std::to_string(maxTime) + "ms";
             DoRebootExt("panic", reason.c_str());
         }
     }
-
     if (DelayedSingleton<AppScheduler>::GetInstance()->IsKilledForUpgradeWeb(abilityInfo.bundleName)) {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "bundle killed");
         return;
     }
-    if (DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent() ||
-        IsLauncher(abilityRecord) || abilityRecord->IsSceneBoard() ||
-        AppUtils::GetInstance().IsAllowResidentInExtremeMemory(abilityInfo.bundleName, abilityInfo.name)) {
+    if (IsNeedToRestart(abilityRecord, abilityInfo.bundleName, abilityInfo.name)) {
         RestartAbility(abilityRecord, currentUserId);
     }
+}
+
+bool AbilityConnectManager::IsNeedToRestart(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    const std::string &bundleName, const std::string &abilityName)
+{
+    if (IsLauncher(abilityRecord) || abilityRecord->IsSceneBoard()) {
+        return true;
+    }
+
+    if (DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent()) {
+        if (DelayedSingleton<AppScheduler>::GetInstance()->IsNoRequireBigMemory() ||
+        !AppUtils::GetInstance().IsBigMemoryUnrelatedKeepAliveProc(bundleName)) {
+            TAG_LOGD(AAFwkTag::SERVICE_EXT, "restart keep alive ability");
+            return true;
+        }
+    } else if (AppUtils::GetInstance().IsAllowResidentInExtremeMemory(bundleName, abilityName)) {
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "restart keep alive ability");
+        return true;
+    }
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "not restart keep alive ability");
+    return false;
 }
 
 void AbilityConnectManager::DisconnectBeforeCleanup()

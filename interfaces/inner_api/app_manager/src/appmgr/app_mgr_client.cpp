@@ -1275,14 +1275,14 @@ int32_t AppMgrClient::GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pi
     return service->GetAllUIExtensionProviderPid(hostPid, providerPids);
 }
 
-int32_t AppMgrClient::NotifyMemorySizeStateChanged(bool isMemorySizeSufficient)
+int32_t AppMgrClient::NotifyMemorySizeStateChanged(int32_t memorySizeState)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    return service->NotifyMemorySizeStateChanged(isMemorySizeSufficient);
+    return service->NotifyMemorySizeStateChanged(memorySizeState);
 }
 
 bool AppMgrClient::IsMemorySizeSufficent() const
@@ -1298,6 +1298,21 @@ bool AppMgrClient::IsMemorySizeSufficent() const
         return true;
     }
     return amsService->IsMemorySizeSufficent();
+}
+
+bool AppMgrClient::IsNoRequireBigMemory() const
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return true;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "amsService is nullptr.");
+        return true;
+    }
+    return amsService->IsNoRequireBigMemory();
 }
 
 int32_t AppMgrClient::PreloadApplication(const std::string &bundleName, int32_t userId,
