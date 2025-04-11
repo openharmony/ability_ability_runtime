@@ -16,5 +16,5 @@
 import ExtensionContext from './ExtensionContext';
 
 export default class FormExtensionContext extends ExtensionContext {
-  public nativeContext: long = 0;
+
 }

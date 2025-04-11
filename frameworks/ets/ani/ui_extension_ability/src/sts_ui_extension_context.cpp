@@ -35,7 +35,7 @@ static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] an
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return;
     }
-    if ((status = env->Class_FindField(cls, "nativeUIExtensionContext", &contextField)) != ANI_OK) {
+    if ((status = env->Class_FindField(cls, "nativeContext", &contextField)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return;
     }
@@ -60,7 +60,7 @@ static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env, [[maybe_u
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return;
     }
-    if ((status = env->Class_FindField(cls, "nativeUIExtensionContext", &contextField)) != ANI_OK) {
+    if ((status = env->Class_FindField(cls, "nativeContext", &contextField)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return;
     }
@@ -159,7 +159,7 @@ ani_object CreateStsUIExtensionContext(ani_env *env,
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Class_FindField(cls, "nativeUIExtensionContext", &field)) != ANI_OK) {
+    if ((status = env->Class_FindField(cls, "nativeContext", &field)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return nullptr;
     }

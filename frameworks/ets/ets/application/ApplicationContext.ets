@@ -17,7 +17,6 @@ import Context from 'application.Context'
 
 export default class ApplicationContext extends Context {
     public native setSupportedProcessCacheSync(isSupported : boolean):void;
-    public nativeApplicationContext:long = 0;
 
     setSupportedProcessCache(isSupported : boolean):void {
         taskpool.execute((): void => {
