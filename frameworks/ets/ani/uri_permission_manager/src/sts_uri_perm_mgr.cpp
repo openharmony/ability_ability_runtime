@@ -55,7 +55,7 @@ static ani_int grantUriPermissionPromiseSync([[maybe_unused]]ani_env *env,
     TAG_LOGI(AAFwkTag::URIPERMMGR, "grantUriPermissionPromiseSync run");
     std::string uriStr = GetStdString(env, uri);
     Uri uriVec(uriStr);
-    ani_int flag;
+    ani_int flag = 0;
     AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(env, flagEnum, flag);
     int32_t flagId = static_cast<int32_t>(flag);
     std::string targetBundleName = GetStdString(env, targetName);
@@ -68,7 +68,7 @@ static void grantUriPermissionPromiseWithAppCloneIndexSync([[maybe_unused]]ani_e
     TAG_LOGI(AAFwkTag::URIPERMMGR, "grantUriPermissionPromiseWithAppCloneIndexSync run");
     std::string uriStr = GetStdString(env, uri);
     Uri uriVec(uriStr);
-    ani_int flag;
+    ani_int flag = 0;
     AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(env, flagEnum, flag);
     int32_t flagId = static_cast<int32_t>(flag);
     std::string targetBundleName = GetStdString(env, targetName);
@@ -82,7 +82,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     TAG_LOGI(AAFwkTag::URIPERMMGR, "grantUriPermissionCallbackSync run");
     std::string uriStr = GetStdString(env, uri);
     Uri uriVec(uriStr);
-    ani_int flag;
+    ani_int flag = 0;
     AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(env, flagEnum, flag);
     int32_t flagId = static_cast<int32_t>(flag);
     std::string targetBundleName = GetStdString(env, targetName);

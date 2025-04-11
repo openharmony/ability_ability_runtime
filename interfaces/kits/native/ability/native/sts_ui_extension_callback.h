@@ -40,7 +40,7 @@ private:
     ani_env* GetAniEnv();
     void CloseModalUIExtension();
     ani_vm* aniVM_ = nullptr;
-    ani_ref startAbilityAniCallback_;
+    ani_ref startAbilityAniCallback_ = nullptr;
     int32_t aniSessionId_ = 0;
     Ace::UIContent* aniUIContent_ = nullptr;
 };
