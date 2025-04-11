@@ -26,7 +26,8 @@ DataObsMgrInnerExt::DataObsMgrInnerExt() : root_(std::make_shared<Node>("root"))
 
 DataObsMgrInnerExt::~DataObsMgrInnerExt() {}
 
-Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver, bool isDescendants)
+Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+    int32_t userId, bool isDescendants)
 {
     if (dataObserver->AsObject() == nullptr) {
         return DATA_OBSERVER_IS_NULL;
@@ -39,7 +40,8 @@ Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObs
 
     std::vector<std::string> path = { uri.GetScheme(), uri.GetAuthority() };
     uri.GetPathSegments(path);
-    if (root_ != nullptr && !root_->AddObserver(path, 0, Entry(dataObserver, deathRecipientRef, isDescendants))) {
+    if (root_ != nullptr && !root_->AddObserver(path, 0, Entry(dataObserver, userId,
+        deathRecipientRef, isDescendants))) {
         TAG_LOGE(AAFwkTag::DBOBSMGR,
             "subscribers:%{public}s num maxed",
             CommonUtils::Anonymous(uri.ToString()).c_str());
@@ -80,7 +82,7 @@ Status DataObsMgrInnerExt::HandleUnregisterObserver(sptr<IDataAbilityObserver> d
     return SUCCESS;
 }
 
-Status DataObsMgrInnerExt::HandleNotifyChange(const ChangeInfo &changeInfo)
+Status DataObsMgrInnerExt::HandleNotifyChange(const ChangeInfo &changeInfo, int32_t userId)
 {
     ObsMap changeRes;
     std::vector<std::string> path;
@@ -91,7 +93,7 @@ Status DataObsMgrInnerExt::HandleNotifyChange(const ChangeInfo &changeInfo)
             path.emplace_back(uri.GetScheme());
             path.emplace_back(uri.GetAuthority());
             uri.GetPathSegments(path);
-            root_->GetObs(path, 0, uri, changeRes);
+            root_->GetObs(path, 0, uri, userId, changeRes);
         }
     }
     if (changeRes.empty()) {
@@ -169,10 +171,16 @@ void DataObsMgrInnerExt::OnCallBackDied(const wptr<IRemoteObject> &remote)
 
 DataObsMgrInnerExt::Node::Node(const std::string &name) : name_(name) {}
 
-void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint32_t index, Uri &uri, ObsMap &obsRes)
+void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint32_t index,
+    Uri &uri, int32_t userId, ObsMap &obsRes)
 {
     if (path.size() == index) {
         for (auto entry : entrys_) {
+            if (entry.userId != userId && entry.userId != 0 && userId != 0) {
+                TAG_LOGW(AAFwkTag::DBOBSMGR, "Not allow across user notify, uri:%{public}s, from %{public}d to"
+                    "%{public}d", CommonUtils::Anonymous(uri.ToString()).c_str(), userId, entry.userId);
+                continue;
+            }
             obsRes.try_emplace(entry.observer, std::list<Uri>()).first->second.push_back(uri);
         }
         return;
@@ -188,7 +196,7 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
     if (it == childrens_.end()) {
         return;
     }
-    it->second->GetObs(path, ++index, uri, obsRes);
+    it->second->GetObs(path, ++index, uri, userId, obsRes);
 
     return;
 }
@@ -227,6 +235,7 @@ bool DataObsMgrInnerExt::Node::RemoveObserver(const std::vector<std::string> &pa
     return entrys_.empty() && childrens_.empty();
 }
 
+// remove observer of all users
 bool DataObsMgrInnerExt::Node::RemoveObserver(sptr<IRemoteObject> dataObserver)
 {
     for (auto child = childrens_.begin(); child != childrens_.end();) {

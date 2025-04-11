@@ -26,11 +26,11 @@ DataObsMgrInnerPref::DataObsMgrInnerPref() {}
 
 DataObsMgrInnerPref::~DataObsMgrInnerPref() {}
 
-int DataObsMgrInnerPref::HandleRegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
+int DataObsMgrInnerPref::HandleRegisterObserver(const Uri &uri, struct ObserverNode observerNode)
 {
     std::lock_guard<std::mutex> lock(preferenceMutex_);
 
-    auto [obsPair, flag] = observers_.try_emplace(uri.ToString(), std::list<sptr<IDataAbilityObserver>>());
+    auto [obsPair, flag] = observers_.try_emplace(uri.ToString(), std::list<struct ObserverNode>());
     if (!flag && obsPair->second.size() > OBS_NUM_MAX) {
         TAG_LOGE(AAFwkTag::DBOBSMGR,
             "subscribers num:%{public}s num maxed",
@@ -39,20 +39,21 @@ int DataObsMgrInnerPref::HandleRegisterObserver(const Uri &uri, sptr<IDataAbilit
     }
 
     for (auto obs = obsPair->second.begin(); obs != obsPair->second.end(); obs++) {
-        if ((*obs)->AsObject() == dataObserver->AsObject()) {
+        if ((*obs).observer_->AsObject() == observerNode.observer_->AsObject()) {
             TAG_LOGE(AAFwkTag::DBOBSMGR, "registered obs:%{public}s",
                 CommonUtils::Anonymous(uri.ToString()).c_str());
             return OBS_EXIST;
         }
     }
 
-    obsPair->second.push_back(dataObserver);
+    obsPair->second.push_back(observerNode);
 
-    AddObsDeathRecipient(dataObserver);
+    AddObsDeathRecipient(observerNode.observer_);
+
     return NO_ERROR;
 }
 
-int DataObsMgrInnerPref::HandleUnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
+int DataObsMgrInnerPref::HandleUnregisterObserver(const Uri &uri, struct ObserverNode observerNode)
 {
     std::lock_guard<std::mutex> lock(preferenceMutex_);
 
@@ -67,7 +68,7 @@ int DataObsMgrInnerPref::HandleUnregisterObserver(const Uri &uri, sptr<IDataAbil
         CommonUtils::Anonymous(uri.ToString()).c_str());
     auto obs = obsPair->second.begin();
     for (; obs != obsPair->second.end(); obs++) {
-        if ((*obs)->AsObject() == dataObserver->AsObject()) {
+        if ((*obs).observer_->AsObject() == observerNode.observer_->AsObject()) {
             break;
         }
     }
@@ -81,15 +82,15 @@ int DataObsMgrInnerPref::HandleUnregisterObserver(const Uri &uri, sptr<IDataAbil
         observers_.erase(obsPair);
     }
 
-    if (!HaveRegistered(dataObserver)) {
-        RemoveObsDeathRecipient(dataObserver->AsObject());
+    if (!HaveRegistered(observerNode.observer_)) {
+        RemoveObsDeathRecipient(observerNode.observer_->AsObject());
     }
     return NO_ERROR;
 }
 
-int DataObsMgrInnerPref::HandleNotifyChange(const Uri &uri)
+int DataObsMgrInnerPref::HandleNotifyChange(const Uri &uri, int32_t userId)
 {
-    std::list<sptr<IDataAbilityObserver>> obsList;
+    std::list<struct ObserverNode> obsList;
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     {
         std::string uriStr = uri.ToString();
@@ -110,9 +111,15 @@ int DataObsMgrInnerPref::HandleNotifyChange(const Uri &uri)
     }
 
     for (auto &obs : obsList) {
-        if (obs != nullptr) {
-            obs->OnChangePreferences(const_cast<Uri &>(uri).GetQuery());
+        if (obs.observer_ == nullptr) {
+            continue;
         }
+        if (obs.userId_ != 0 && userId != 0 && obs.userId_ != userId) {
+            TAG_LOGW(AAFwkTag::DBOBSMGR, "Not allow across user notify, %{public}d to %{public}d, %{public}s",
+                userId, obs.userId_, CommonUtils::Anonymous(uri.ToString()).c_str());
+            continue;
+        }
+        obs.observer_->OnChangePreferences(const_cast<Uri &>(uri).GetQuery());
     }
 
     TAG_LOGD(AAFwkTag::DBOBSMGR, "uri end:%{public}s,obs num:%{public}zu",
@@ -181,7 +188,7 @@ void DataObsMgrInnerPref::RemoveObs(sptr<IRemoteObject> dataObserver)
     for (auto iter = observers_.begin(); iter != observers_.end();) {
         auto &obsList = iter->second;
         for (auto it = obsList.begin(); it != obsList.end(); it++) {
-            if ((*it)->AsObject() == dataObserver) {
+            if ((*it).observer_->AsObject() == dataObserver) {
                 TAG_LOGD(AAFwkTag::DBOBSMGR, "erase");
                 obsList.erase(it);
                 break;
@@ -199,9 +206,10 @@ void DataObsMgrInnerPref::RemoveObs(sptr<IRemoteObject> dataObserver)
 bool DataObsMgrInnerPref::HaveRegistered(sptr<IDataAbilityObserver> dataObserver)
 {
     for (auto &[key, value] : observers_) {
-        auto obs = std::find(value.begin(), value.end(), dataObserver);
-        if (obs != value.end()) {
-            return true;
+        for (struct ObserverNode& node: value) {
+            if (node.observer_ == dataObserver) {
+                return true;
+            }
         }
     }
     return false;

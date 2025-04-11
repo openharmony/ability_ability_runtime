@@ -24,20 +24,21 @@
 #include <string>
 
 #include "data_ability_observer_interface.h"
+#include "dataobs_mgr_inner_common.h"
 
 namespace OHOS {
 namespace AAFwk {
 class DataObsMgrInnerPref : public std::enable_shared_from_this<DataObsMgrInnerPref> {
 public:
-    using ObsMapType = std::map<std::string, std::list<sptr<IDataAbilityObserver>>>;
+    using ObsMapType = std::map<std::string, std::list<struct ObserverNode>>;
     using ObsRecipientMapType = std::map<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>>;
 
     DataObsMgrInnerPref();
     virtual ~DataObsMgrInnerPref();
 
-    int HandleRegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
-    int HandleUnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
-    int HandleNotifyChange(const Uri &uri);
+    int HandleRegisterObserver(const Uri &uri, struct ObserverNode observerNode);
+    int HandleUnregisterObserver(const Uri &uri, struct ObserverNode observerNode);
+    int HandleNotifyChange(const Uri &uri, int32_t userId);
     void OnCallBackDied(const wptr<IRemoteObject> &remote);
 
 private:
