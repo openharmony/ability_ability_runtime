@@ -17,7 +17,7 @@
 
 class UIAbility{ }
 
-export default interface AbilityMonitor {
+export interface AbilityMonitor {
 
   onAbilityCreate(ability: UIAbility):void;
 
