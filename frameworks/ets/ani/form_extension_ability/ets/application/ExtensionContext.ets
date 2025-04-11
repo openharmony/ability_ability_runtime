@@ -16,5 +16,5 @@
 import { Context } from './Context'
 
 export default class ExtensionContext extends Context {
-  public nativeContext: long = 0;
+
 }
