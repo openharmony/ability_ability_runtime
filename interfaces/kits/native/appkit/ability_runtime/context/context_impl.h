@@ -84,7 +84,7 @@ public:
      */
     std::string GetTempDir() override;
 
-    std::string GetResourceDir() override;
+    std::string GetResourceDir(const std::string &moduleName = "") override;
 
     /**
      * @brief Get all temporary directories.
