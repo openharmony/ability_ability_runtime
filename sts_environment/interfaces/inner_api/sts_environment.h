@@ -107,6 +107,7 @@ public:
             enter = nullptr;
             ani_vm = nullptr;
             ani_env = nullptr;
+            emitEvent = nullptr;
         }
     };
 

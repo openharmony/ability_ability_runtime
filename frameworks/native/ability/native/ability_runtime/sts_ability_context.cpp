@@ -81,14 +81,11 @@ std::shared_ptr<AbilityContext> StsAbilityContext::GetAbilityContext(ani_env *en
 
 ani_object StsAbilityContext::SetAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context)
 {
-    auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(context);
-    ani_long nativeContextLong = (ani_long)workContext;
     ani_class cls {};
     ani_status status = ANI_ERROR;
     ani_object contextObj = nullptr;
     ani_method method {};
     ani_field field = nullptr;
-
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null context");
         return nullptr;
@@ -109,10 +106,21 @@ ani_object StsAbilityContext::SetAbilityContext(ani_env *env, const std::shared_
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Object_SetField_Long(contextObj, field, nativeContextLong)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(context);
+    if (workContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "workContext nullptr");
         return nullptr;
     }
+    ani_long nativeContextLong = (ani_long)workContext;
+
+    if ((status = env->Object_SetField_Long(contextObj, field, nativeContextLong)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        delete workContext;
+        workContext = nullptr;
+        return nullptr;
+    }
+    delete workContext;
+    workContext = nullptr;
     return contextObj;
 }
 

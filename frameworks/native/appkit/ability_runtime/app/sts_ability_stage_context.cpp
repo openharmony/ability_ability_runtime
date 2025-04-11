@@ -65,6 +65,11 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
 
     //bind context
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::Context>(context);
+    if (workContext == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "workContext nullptr");
+        delete workContext;
+        return nullptr;
+    }
     ani_field contextField;
     status = env->Class_FindField(abilityStageCtxCls, "stageContext", &contextField);
     if (status != ANI_OK) {
@@ -85,6 +90,7 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
     auto app = application.lock();
     if (app == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "application is null");
+        delete workContext;
         return nullptr;
     }
     ContextUtil::StsCreatContext(env, abilityStageCtxCls, obj, app->GetApplicationCtxObjRef(), context);
@@ -122,15 +128,8 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
             TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Ref moduleInfoField failed");
         }
     }
+    delete workContext;
     return obj;
- }
-
-ani_object STSAbilityStageContext::Createfiguration(ani_env *env, const std::shared_ptr<Context> &context)
-{
-    if (context == nullptr || env == nullptr) {
-        return nullptr;
-    }
-    return Createfiguration(env, context->GetConfiguration());
 }
 
 ani_object STSAbilityStageContext::CreateHapModuleInfo(ani_env* env, const std::shared_ptr<Context> &context)
@@ -159,136 +158,6 @@ ani_object STSAbilityStageContext::CreateHapModuleInfo(ani_env* env, const std::
         return nullptr;
     }
     return obj;
-}
-
-ani_object STSAbilityStageContext::Createfiguration(ani_env* env,
-    const std::shared_ptr<AppExecFwk::Configuration> &configuration)
-{
-    if (env == nullptr || configuration == nullptr) {
-        return nullptr;
-    }
-    ani_status status = ANI_OK;
-    ani_class configCls;
-    status = env->FindClass(STS_CONFIGURATION_CLASS_NAME, &configCls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "call FindClass Configuration failed");
-        return nullptr;
-    }
-    ani_method initMethod = nullptr;
-    status = env->Class_FindMethod(configCls, "<ctor>", ":V", &initMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "call Class_FindMethod ctor failed");
-        return nullptr;
-    }
-    ani_object configObj = nullptr;
-    status = env->Object_New(configCls, initMethod, &configObj);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_New configObj failed");
-        return nullptr;
-    }
-
-    //set config fields
-    ani_field filed;
-    status = env->Class_FindField(configCls, "language", &filed);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField configObj failed");
-    }
-
-    //language
-    auto strLanguage = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    ani_string aniStringVal {};
-    status = env->String_NewUTF8(strLanguage.c_str(), strLanguage.size(), &aniStringVal);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "String_NewUTF8 strLanguage failed");
-    }
-    if (env->Object_SetField_Ref(configObj, filed, aniStringVal) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Ref language failed");
-    }
-
-    //displayId
-    int32_t displayId = AppExecFwk::ConvertDisplayId(
-        configuration->GetItem(AppExecFwk::ConfigurationInner::APPLICATION_DISPLAYID));
-    status = env->Class_FindField(configCls, "displayId", &filed);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField displayId failed");
-    }
-    TAG_LOGD(AAFwkTag::ABILITY, "Object_SetField_Int displayId:%{public}d", displayId);
-    status = env->Object_SetField_Int(configObj, filed, displayId);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Int displayId failed");
-    }
-
-    //hasPointerDevice
-    std::string hasPointerDevice = configuration->GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    TAG_LOGD(AAFwkTag::ABILITY, "hasPointerDevice:%{public}s", hasPointerDevice.c_str());
-    status = env->Class_FindField(configCls, "hasPointerDevice", &filed);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField hasPointerDevice failed");
-    }
-    ani_boolean bval = (hasPointerDevice == "true" ? true : false);
-    if (env->Object_SetField_Boolean(configObj, filed, bval) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField hasPointerDevice failed");
-    }
-
-    //fontSizeScale
-    std::string fontSizeScale = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    TAG_LOGD(AAFwkTag::ABILITY, "fontSizeScale:%{public}s", fontSizeScale.c_str());
-    status = env->Class_FindField(configCls, "fontSizeScale", &filed);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField fontSizeScale failed");
-    }
-
-    ani_double dval = (fontSizeScale != "" ? std::stod(fontSizeScale) : 1.0);
-    TAG_LOGD(AAFwkTag::ABILITY, "fontSizeScale:%{public}f", dval);
-    if (env->Object_SetField_Double(configObj, filed, dval) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Double fontSizeScale failed");
-    }
-
-    //fontWeightScale
-    std::string fontWeightScale = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
-    TAG_LOGD(AAFwkTag::ABILITY, "fontWeightScale:%{public}s", fontWeightScale.c_str());
-    status = env->Class_FindField(configCls, "fontWeightScale", &filed);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField fontWeightScale failed");
-    }
-
-    dval = (fontWeightScale != "" ? std::stod(fontWeightScale) : 1.0);
-    TAG_LOGD(AAFwkTag::ABILITY, "dval:%{public}f", dval);
-    if (env->Object_SetField_Double(configObj, filed, dval) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Double fontSizeScale failed");
-    }
-
-    //mcc
-    std::string strMcc = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
-    TAG_LOGD(AAFwkTag::ABILITY, "strMcc:%{public}s", strMcc.c_str());
-    status = env->Class_FindField(configCls, "mcc", &filed);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField mcc failed");
-    }
-    status = env->String_NewUTF8(strMcc.c_str(), strMcc.size(), &aniStringVal);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "String_NewUTF8 mcc failed");
-    }
-    if (env->Object_SetField_Ref(configObj, filed, aniStringVal) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Ref mcc failed");
-    }
-
-    //mnc
-    std::string strMnc = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
-    TAG_LOGD(AAFwkTag::ABILITY, "strMnc:%{public}s", strMnc.c_str());
-    status = env->Class_FindField(configCls, "mnc", &filed);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField mnc failed");
-    }
-    status = env->String_NewUTF8(strMnc.c_str(), strMnc.size(), &aniStringVal);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "String_NewUTF8 mnc failed");
-    }
-    if (env->Object_SetField_Ref(configObj, filed, aniStringVal) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Ref mcc failed");
-    }
-
-    return configObj;
 }
 
 void STSAbilityStageContext::ConfigurationUpdated(ani_env* env, const std::shared_ptr<AppExecFwk::Configuration> &config)
