@@ -38,7 +38,6 @@ export class AsyncCallbackWrapper<T> {
 
 export default class UIAbilityContext extends Context {
 
-  nativeContext : long;
   config: Configuration;
   abilityInfo: AbilityInfo;
   windowStage: window.WindowStage;

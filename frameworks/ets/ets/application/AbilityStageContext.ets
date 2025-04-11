@@ -17,6 +17,5 @@ import Context from 'application.Context'
 import { Configuration } from '@ohos.app.ability.Configuration'
 
 export default class AbilityStageContext extends Context {
-    public nativeContext:long = 0; 
     config?: Configuration;
 }
