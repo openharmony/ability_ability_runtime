@@ -31,6 +31,7 @@ std::shared_ptr<IAbilityDelegator> IAbilityDelegator::Create(const std::unique_p
 
     switch (runtime->GetLanguage()) {
         case AbilityRuntime::Runtime::Language::JS:
+        case AbilityRuntime::Runtime::Language::STS:
             return AbilityDelegator::Create(context, std::move(runner), observer);
 #ifdef CJ_FRONTEND
         case AbilityRuntime::Runtime::Language::CJ:
