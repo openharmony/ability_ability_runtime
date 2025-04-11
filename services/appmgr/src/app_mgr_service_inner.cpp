@@ -7301,8 +7301,7 @@ int32_t AppMgrServiceInner::DetachAppDebug(const std::string &bundleName)
 
 int32_t AppMgrServiceInner::SetAppWaitingDebug(const std::string &bundleName, bool isPersist)
 {
-    TAG_LOGD(AAFwkTag::APPMGR,
-        "Called, bundle name is %{public}s, persist flag is %{public}d.", bundleName.c_str(), isPersist);
+    TAG_LOGI(AAFwkTag::APPMGR, "SetWaitDebug bundlename %{public}s, persist %{public}d", bundleName.c_str(), isPersist);
     if (!AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not shell call");
         return ERR_PERMISSION_DENIED;
@@ -7458,6 +7457,7 @@ bool AppMgrServiceInner::IsWaitingDebugApp(const std::string &bundleName)
 
     for (const auto &item : waitingDebugBundleList_) {
         if (item.first == bundleName) {
+            TAG_LOGI(AAFwkTag::APPMGR, "bundlename %{public}s isWaitingDebug", bundleName.c_str());
             return true;
         }
     }
