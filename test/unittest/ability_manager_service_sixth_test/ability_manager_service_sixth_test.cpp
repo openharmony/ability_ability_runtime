@@ -2033,12 +2033,10 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartExtensionAbilityInner_001, TestSiz
     result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
         isImplicit, isDlp);
     EXPECT_EQ(result, ERR_IMPLICIT_START_ABILITY_FAIL);
-    std::shared_ptr<AbilityRecord> ability = nullptr;
-    callerToken = new OHOS::AAFwk::Token(ability);
+    callerToken = sptr<MockAbilityToken>::MakeSptr();
     result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
         isImplicit, isDlp);
     EXPECT_EQ(result, ERR_INVALID_CALLER);
-    delete callerToken;
 }
 
 /*
