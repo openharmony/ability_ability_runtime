@@ -45,38 +45,38 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
     }
     ani_field areaField;
     if (aniEnv->Class_FindField(contextClass, "area", &areaField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find area failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "find area failed");
         return {};
     }
     ani_enum_item areaModeItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(
         aniEnv, "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;", context->GetArea(), areaModeItem);
     if (aniEnv->Object_SetField_Ref(contextObj, areaField, (ani_ref)areaModeItem) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Int failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Int failed");
         return {};
     }
     ani_field filesDirField;
     if (aniEnv->Class_FindField(contextClass, "filesDir", &filesDirField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find filesDir failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "find filesDir failed");
         return {};
     }
     auto filesDir = context->GetFilesDir();
     ani_string filesDir_string{};
     aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDir_string);
     if (aniEnv->Object_SetField_Ref(contextObj, filesDirField, reinterpret_cast<ani_ref>(filesDir_string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref failed");
         return {};
     }
     ani_field tempDirField;
     if (aniEnv->Class_FindField(contextClass, "tempDir", &tempDirField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find find tempDir failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "find find tempDir failed");
         return {};
     }
     auto tempDir = context->GetTempDir();
     ani_string tempDir_string{};
     aniEnv->String_NewUTF8(tempDir.c_str(), tempDir.size(), &tempDir_string);
     if (aniEnv->Object_SetField_Ref(contextObj, tempDirField, reinterpret_cast<ani_ref>(tempDir_string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref failed");
         return {};
     }
     return contextObj;
@@ -139,25 +139,25 @@ ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmd
     ani_field filed;
     status = env->Class_FindField(cls, "stdResult", &filed);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField configObj failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindField configObj failed");
     }
     ani_string aniStringVal {};
     std::string strResult = result->GetStdResult();
     status = env->String_NewUTF8(strResult.c_str(), strResult.size(), &aniStringVal);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "String_NewUTF8 mcc failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "String_NewUTF8 mcc failed");
     }
     if (env->Object_SetField_Ref(object, filed, aniStringVal) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Ref mcc failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref mcc failed");
     }
     int32_t exitCode = result->GetExitCode();
     status = env->Class_FindField(cls, "exitCode", &filed);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField configObj failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindField configObj failed");
     }
     status = env->Object_SetField_Int(object, filed, exitCode);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Int exitCode failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Int exitCode failed");
     }
     return object;
 }
