@@ -23,8 +23,10 @@ ohos_unittest("uncaught_exception_callback_test") {
   external_deps = [
     "ability_runtime:js_environment",
     "ability_runtime:runtime",
+    "c_utils:utils",
     "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
+    "faultloggerd:libunwinder",
     "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",
