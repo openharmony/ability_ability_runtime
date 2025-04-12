@@ -88,7 +88,7 @@ void StsAbilityDelegatorRegistryInit(ani_env *env)
     TAG_LOGD(AAFwkTag::DELEGATOR, "StsAbilityDelegatorRegistryInit call");
     ani_status status = ANI_ERROR;
     if (env->ResetError() != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "ResetError failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "ResetError failed");
     }
 
     ani_namespace ns;
@@ -109,7 +109,7 @@ void StsAbilityDelegatorRegistryInit(ani_env *env)
     }
 
     if (env->ResetError() != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "ResetError failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "ResetError failed");
     }
     TAG_LOGD(AAFwkTag::DELEGATOR, "StsAbilityDelegatorRegistryInit end");
 }
@@ -122,7 +122,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ani_status status = ANI_ERROR;
     status = vm->GetEnv(ANI_VERSION_1, &env);
     if (status != ANI_OK) {
-        TAG_LOGD(AAFwkTag::DELEGATOR, "GetEnv failed status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "GetEnv failed status : %{public}d", status);
         return ANI_NOT_FOUND;
     }
 
