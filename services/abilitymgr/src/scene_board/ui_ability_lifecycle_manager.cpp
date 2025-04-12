@@ -229,6 +229,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
             }
         } else {
             uiAbilityRecord->SetInstanceKey(sessionInfo->instanceKey);
+            uiAbilityRecord->SetSessionInfo(sessionInfo);
         }
         isColdStart = true;
         UpdateProcessName(abilityRequest, uiAbilityRecord);
@@ -383,7 +384,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
     FreezeUtil::GetInstance().DeleteLifecycleEvent(token);
 
     abilityRecord->SetScheduler(scheduler);
-    if (DoProcessAttachment(abilityRecord) != ERR_OK) {
+    if (processAttachResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "process attachment failed, close ability");
         TerminateSession(abilityRecord);
         return ERR_INVALID_VALUE;
