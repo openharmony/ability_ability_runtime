@@ -1274,7 +1274,7 @@ int UIAbility::CreateModalUIExtension(const AAFwk::Want &want)
         return ERR_INVALID_VALUE;
     }
     int result;
-    if (want.HasParameter(USE_GLOBAL_UICONTENT)) {
+    if (want.HasParameter(USE_GLOBAL_UICONTENT) && want.GetBoolParam(USE_GLOBAL_UICONTENT, false) && handler_) {
         std::weak_ptr<AbilityRuntime::AbilityContext> abilityContextImplWptr = abilityContextImpl;
         auto task = [abilityContextImplWptr, want, &result]() {
             std::shared_ptr<AbilityRuntime::AbilityContext> abilityContextImplSptr = abilityContextImplWptr.lock();
