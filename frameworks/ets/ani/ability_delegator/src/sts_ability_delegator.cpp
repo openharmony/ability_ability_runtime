@@ -304,7 +304,7 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
     delegator->AddAbilityMonitor(monitor);
 }
 
-ani_int StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_class aniClass, ani_object wantObj)
+ani_int StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_object wantObj)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "StartAbility call");
     if (nullptr == env) {
