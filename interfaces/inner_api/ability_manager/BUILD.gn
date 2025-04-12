@@ -62,6 +62,7 @@ config("ability_manager_public_config") {
 }
 
 ohos_shared_library("ability_manager") {
+  use_exceptions = true
   branch_protector_ret = "pac_ret"
 
   sources = [

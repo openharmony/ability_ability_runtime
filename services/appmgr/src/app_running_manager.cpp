@@ -940,8 +940,12 @@ void AppRunningManager::SetAbilityForegroundingFlagToAppRecord(const pid_t pid)
 void AppRunningManager::ClipStringContent(const std::regex &re, const std::string &source, std::string &afterCutStr)
 {
     std::smatch basket;
-    if (std::regex_search(source, basket, re)) {
-        afterCutStr = basket.prefix().str() + basket.suffix().str();
+    try {
+        if (std::regex_search(source, basket, re)) {
+            afterCutStr = basket.prefix().str() + basket.suffix().str();
+        }
+    } catch (...) {
+        TAG_LOGE(AAFwkTag::APPMGR, "regex failed");
     }
 }
 
