@@ -91,7 +91,6 @@ ohos_unittest("ability_manager_service_mock_test") {
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
-    "dlp_permission_service:libdlpparse",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "faultloggerd:libbacktrace_local",
@@ -131,6 +130,7 @@ ohos_unittest("ability_manager_service_mock_test") {
   cflags_cc = []
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
+    external_deps += [ "dlp_permission_service:libdlpparse" ]
   }
 }
 
