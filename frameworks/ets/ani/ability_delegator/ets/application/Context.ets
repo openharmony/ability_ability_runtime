@@ -19,7 +19,6 @@ import ApplicationContext from './ApplicationContext'
 // import ApplicationInfo from 'bms/ApplicationInfo'
 
 export class Context extends BaseContext {
-    public nativeContext:long;
     area: int = 0;
     filesDir: string = "";
     tempDir: string = "";

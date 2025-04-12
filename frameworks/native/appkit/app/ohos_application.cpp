@@ -230,7 +230,7 @@ static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_u
         return;
     }
     ani_field contextField;
-    if (env->Class_FindField(applicationContextCls, "nativeApplicationContext", &contextField) != ANI_OK) {
+    if (env->Class_FindField(applicationContextCls, "nativeContext", &contextField) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed");
         AbilityRuntime::ThrowStsInvalidParamError(env, "Class_FindField failed");
         return;
@@ -277,7 +277,7 @@ void OHOSApplication::InitAniApplicationContext()
         return;
     }
     ani_field contextField;
-    if (aniEnv->Class_FindField(applicationContextCls, "nativeApplicationContext", &contextField) != ANI_OK) {
+    if (aniEnv->Class_FindField(applicationContextCls, "nativeContext", &contextField) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed");
         return;
     }
