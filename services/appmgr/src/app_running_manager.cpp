@@ -147,8 +147,11 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
                  customProcessFlag: %{public}s",
                 appInfoList.size(), appRecord->GetProcessName().c_str(), specifiedProcessFlag.c_str(),
                 customProcessFlag.c_str());
-            auto isExist = [&appName, &uid](const std::shared_ptr<ApplicationInfo> &appInfo) {
+            auto isExist = [&appName, &uid, &appRecord](const std::shared_ptr<ApplicationInfo> &appInfo) {
                 TAG_LOGD(AAFwkTag::APPMGR, "appInfo->name: %{public}s", appInfo->name.c_str());
+                if (appInfo->bundleType == BundleType::APP_PLUGIN) {
+                    return appRecord->GetUid() == uid;
+                }
                 return appInfo->name == appName && appInfo->uid == uid;
             };
             auto appInfoIter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
