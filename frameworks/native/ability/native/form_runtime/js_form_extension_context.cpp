@@ -44,6 +44,7 @@ constexpr size_t ARGC_TWO = 2;
 const int UPDATE_FORM_PARAMS_SIZE = 2;
 
 std::map<ConnectionKey, sptr<JSFormExtensionConnection>, key_compare> g_connects;
+std::mutex g_connectsMutex_;
 int64_t g_serialNumber = 0;
 
 void RemoveConnection(int64_t connectId)
@@ -517,6 +518,7 @@ void JSFormExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFwk::
     TAG_LOGD(AAFwkTag::FORM_EXT, "size:%{public}zu", g_connects.size());
     std::string bundleName = element.GetBundleName();
     std::string abilityName = element.GetAbilityName();
+    std::lock_guard<std::mutex> lock(g_connectsMutex_);
     auto item = std::find_if(g_connects.begin(),
         g_connects.end(),
         [bundleName, abilityName, connectionId = connectionId_](
