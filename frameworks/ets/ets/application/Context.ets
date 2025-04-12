@@ -21,7 +21,6 @@ import { ApplicationInfo } from 'bundleManager.ApplicationInfo'
 import resmgr from '@ohos.resourceManager'
 
 export class Context extends BaseContext {
-    public nativeContext:long;
     area: contextConstant.AreaMode = contextConstant.AreaMode.EL1;
     filesDir: string = "";
     tempDir: string = "";
