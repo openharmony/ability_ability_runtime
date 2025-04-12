@@ -32,6 +32,7 @@ void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg)
 void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitor);
 ani_int StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_object wantObj);
 [[maybe_unused]]static void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resString);
+ani_ref GetCurrentTopAbilitySync(ani_env* env);
 } // namespace AbilityDelegatorSts
 } // namespace OHOS
 
