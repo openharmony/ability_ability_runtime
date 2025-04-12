@@ -115,14 +115,6 @@ int ImplicitStartProcessor::CheckImplicitCallPermission(const AbilityRequest& ab
         TAG_LOGD(AAFwkTag::ABILITYMGR, "hap not background");
         return ERR_OK;
     }
-#ifdef SUPPORT_SCREEN
-    int32_t HasFloatingWindowRet =
-        AbilityPermissionUtil::GetInstance().CheckStartCallHasFloatingWindow(abilityRequest.callerToken);
-    if (HasFloatingWindowRet == ERR_OK) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "has floatingwindow");
-        return ERR_OK;
-    }
-#endif // SUPPORT_SCREEN
     auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyBackgroundCallPermission(isBackgroundCall);
     if (!ret) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckImplicitCallPermission failed");
