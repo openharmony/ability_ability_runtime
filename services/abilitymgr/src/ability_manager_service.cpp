@@ -10235,8 +10235,7 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
         }
     }
 
-    int result = AAFwk::AbilityPermissionUtil::GetInstance().CheckCallServiceExtensionPermissionOrHasFloatingWindow(
-        verificationInfo, abilityRequest.callerToken);
+    int result = AAFwk::PermissionVerification::GetInstance()->CheckCallServiceExtensionPermission(verificationInfo);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "without start serviceExtension or sataShareExtension permission");
     }
@@ -10572,8 +10571,8 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
         return ERR_INVALID_VALUE;
     }
 
-    int result = AAFwk::AbilityPermissionUtil::GetInstance().CheckCallAbilityPermissionOrHasFloatingWindow(
-        verificationInfo, abilityRequest.callerToken, isCallByShortcut);
+    int result = AAFwk::PermissionVerification::GetInstance()->CheckCallAbilityPermission(
+        verificationInfo, isCallByShortcut);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "without start pageAbility(FA) or ability(Stage) permission");
     }
@@ -10598,8 +10597,7 @@ int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abil
         return ERR_INVALID_VALUE;
     }
 
-    if (AAFwk::AbilityPermissionUtil::GetInstance().CheckStartByCallPermissionOrHasFloatingWindow(
-        verificationInfo, abilityRequest.callerToken) != ERR_OK) {
+    if (AAFwk::PermissionVerification::GetInstance()->CheckStartByCallPermission(verificationInfo) != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "without startAbilityByCall permission");
         return RESOLVE_CALL_NO_PERMISSIONS;
     }
@@ -10640,6 +10638,15 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
             isBackgroundCall = false;
             return ERR_OK;
         }
+#ifdef SUPPORT_SCREEN
+        if (AppUtils::GetInstance().IsStartOptionsWithAnimation() &&
+            callerAbility->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE &&
+            AbilityPermissionUtil::GetInstance().CheckStartCallHasFloatingWindow(
+            abilityRequest.callerToken) == ERR_OK) {
+            isBackgroundCall = false;
+            return ERR_OK;
+        }
+#endif // SUPPORT_SCREEN
         auto abilityState = callerAbility->GetAbilityState();
         if (abilityState == AbilityState::BACKGROUND || abilityState == AbilityState::BACKGROUNDING ||
             // If uiability or uiextensionability ability state is foreground when terminate,
