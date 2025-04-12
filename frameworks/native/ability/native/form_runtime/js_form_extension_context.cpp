@@ -529,7 +529,6 @@ void JSFormExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFwk::
         });
     if (item != g_connects.end()) {
         // match bundleName && abilityName
-        1
         g_connects.erase(item);
         TAG_LOGD(AAFwkTag::FORM_EXT, "erase size:%{public}zu", g_connects.size());
     }
