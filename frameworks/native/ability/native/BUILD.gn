@@ -252,6 +252,7 @@ ohos_shared_library("configuration_helper") {
 }
 
 ohos_shared_library("abilitykit_native") {
+  use_exceptions = true
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
