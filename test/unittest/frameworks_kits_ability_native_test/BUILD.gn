@@ -1698,6 +1698,7 @@ config("data_uri_utils_test_config") {
   defines = [ "AMS_LOG_TAG = \"AbilityUnitTest\"" ]
 }
 ohos_unittest("data_uri_utils_test") {
+  use_exceptions = true
   module_out_path = module_output_path
 
   configs = [
