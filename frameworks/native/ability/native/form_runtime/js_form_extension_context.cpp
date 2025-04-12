@@ -49,6 +49,7 @@ int64_t g_serialNumber = 0;
 
 void RemoveConnection(int64_t connectId)
 {
+    std::lock_guard<std::mutex> lock(g_connectsMutex_);
     auto item = std::find_if(g_connects.begin(), g_connects.end(),
     [&connectId](const auto &obj) {
         return connectId == obj.first.id;
@@ -332,6 +333,7 @@ private:
     void FindConnection(AAFwk::Want& want, sptr<JSFormExtensionConnection>& connection, int64_t& connectId) const
     {
         TAG_LOGD(AAFwkTag::FORM_EXT, "connection:%{public}d", static_cast<int32_t>(connectId));
+        std::lock_guard<std::mutex> lock(g_connectsMutex_);
         auto item = std::find_if(g_connects.begin(),
             g_connects.end(),
             [&connectId](const auto &obj) {
