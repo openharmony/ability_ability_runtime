@@ -1265,6 +1265,10 @@ ErrCode AbilityContextImpl::RevokeDelegator()
         return ERR_INVALID_VALUE;
     }
     auto ifaceSessionToken = iface_cast<Rosen::ISession>(sessionToken);
+    if (ifaceSessionToken == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "null ifaceSessionToken");
+        return ERR_INVALID_VALUE;
+    }
     err = static_cast<int32_t>(ifaceSessionToken->NotifyDisableDelegatorChange());
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "scb call, revokeDelegator err: %{public}d", err);

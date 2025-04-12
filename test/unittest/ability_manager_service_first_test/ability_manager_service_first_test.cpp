@@ -2345,5 +2345,25 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityByCallWithInsightIntent_010
     auto res = abilityMs->StartAbilityByCallWithInsightIntent(want, callerToken, param);
     EXPECT_EQ(res, RESOLVE_ABILITY_ERR);
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Name: RevokeDelegator_001
+ * Function: RevokeDelegator
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RevokeDelegator
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, RevokeDelegator_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest RevokeDelegator_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    auto retCode = abilityMs->RevokeDelegator(nullptr);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(retCode, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        EXPECT_EQ(retCode, AAFwk::ERR_NO_PERMISSION_CALLER);
+    }
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest RevokeDelegator_001 end");
+}
 } // namespace AAFwk
 } // namespace OHOS
