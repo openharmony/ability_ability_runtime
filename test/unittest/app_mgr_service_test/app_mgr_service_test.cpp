@@ -2162,5 +2162,22 @@ HWTEST_F(AppMgrServiceTest, RegisterApplicationStateObserver_0100, TestSize.Leve
     auto ret = appMgrService->RegisterApplicationStateObserver(nullptr, bundleNameList);
     EXPECT_NE(ret, ERR_OK);
 }
+
+/*
+ * Feature: AppMgrService
+ * Function: LaunchAbility
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService LaunchAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify LaunchAbility
+ */
+HWTEST_F(AppMgrServiceTest, LaunchAbility_0200, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+    int32_t res = appMgrService->LaunchAbility(nullptr);
+    EXPECT_EQ(res, AAFwk::ERR_NO_ALLOW_OUTSIDE_CALL);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

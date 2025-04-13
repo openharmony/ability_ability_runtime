@@ -241,5 +241,17 @@ HWTEST_F(AbilityManagerClientBranchSecondTest, AbilityManagerClient_BlockAllAppS
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_BlockAllAppStartTest_0100 end");
 }
+
+/**
+ * @tc.number: AbilityManagerClient_RevokeDelegator_0100
+ * @tc.name: RevokeDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchSecondTest, AbilityManagerClient_RevokeDelegator_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_RevokeDelegator_0100 start");
+    EXPECT_EQ(client_->RevokeDelegator(nullptr), ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_RevokeDelegator_0100 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

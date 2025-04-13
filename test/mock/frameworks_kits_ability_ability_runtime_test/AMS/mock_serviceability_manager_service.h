@@ -319,6 +319,11 @@ public:
 
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject>& abilityToken) override {}
 
+    int RevokeDelegator(const sptr<IRemoteObject> &token) override
+    {
+        return 0;
+    }
+
 #ifdef ABILITY_COMMAND_FOR_TEST
     int ForceTimeoutForTest(const std::string& abilityName, const std::string& state) override
     {

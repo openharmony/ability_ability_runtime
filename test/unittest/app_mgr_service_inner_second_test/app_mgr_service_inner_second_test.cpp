@@ -2303,5 +2303,36 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillRenderPr
     appMgrServiceInner->KillRenderProcess(appRunningRecord);
     TAG_LOGI(AAFwkTag::TEST, "KillRenderProcess_0100 end");
 }
+
+/**
+ * @tc.name: AppMgrServiceInnerSecondTest_LaunchAbility_0100
+ * @tc.type: FUNC
+ * @tc.Function: LaunchAbility
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LaunchAbility_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LaunchAbility_0100 start";
+
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    int32_t result = appMgrServiceInner->LaunchAbility(nullptr);
+    EXPECT_EQ(result, AAFwk::ERR_NULL_APP_RUNNING_MANAGER);
+
+    BundleInfo bundleInfo;
+    HapModuleInfo hapModuleInfo;
+    std::shared_ptr<AAFwk::Want> want;
+    std::string processName = "test_processName";
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    OHOS::sptr<IRemoteObject> token1 = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    loadParam->token = token1;
+    std::shared_ptr<AppRunningRecord> appRecord1 = appMgrServiceInner->CreateAppRunningRecord(loadParam,
+        applicationInfo_, abilityInfo_, processName, bundleInfo, hapModuleInfo, want);
+    EXPECT_NE(appRecord1, nullptr);
+    result = appMgrServiceInner->LaunchAbility(token1);
+    EXPECT_EQ(result, 0);
+
+    GTEST_LOG_(INFO) << "LaunchAbility_0100 end";
+}
 } // namespace AppExecFwk
 } // namespace OHOS
