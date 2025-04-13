@@ -323,8 +323,8 @@ ErrCode AbilityContextImpl::StopServiceExtensionAbility(const AAFwk::Want& want,
 ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, int resultCode)
 {
     isTerminating_.store(true);
-    if (isHook_ && hookOff_) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "is hook and hook off, skip TerminateSession");
+    if (isDelegator_ && delegatorOff_) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "is delegator and delegator off, skip TerminateSession");
         return ERR_OK;
     }
     auto sessionToken = GetSessionToken();
@@ -646,8 +646,8 @@ ErrCode AbilityContextImpl::TerminateSelf()
     if (sessionToken == nullptr) {
         TAG_LOGW(AAFwkTag::CONTEXT, "null sessionToken");
     }
-    if (isHook_ && hookOff_) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "is hook and hook off, skip TerminateSession");
+    if (isDelegator_ && delegatorOff_) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "is delegator and delegator off, skip TerminateSession");
         return ERR_OK;
     }
 #ifdef SUPPORT_SCREEN
@@ -703,8 +703,8 @@ sptr<IRemoteObject> AbilityContextImpl::GetToken()
 ErrCode AbilityContextImpl::RestoreWindowStage(napi_env env, napi_value contentStorage)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
-    if (isHook_) {
-        TAG_LOGD(AAFwkTag::CONTEXT, "RestoreWindowStage is hook module");
+    if (isDelegator_) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "RestoreWindowStage is delegator module");
         return ERR_NOT_SUPPORTED;
     }
     napi_ref value = nullptr;
@@ -887,8 +887,8 @@ ErrCode AbilityContextImpl::GetMissionId(int32_t &missionId)
 ErrCode AbilityContextImpl::SetMissionContinueState(const AAFwk::ContinueState &state)
 {
     TAG_LOGI(AAFwkTag::CONTEXT, "called, state: %{public}d", state);
-    if (isHook_) {
-        TAG_LOGD(AAFwkTag::CONTEXT, "SetMissionContinueState is hook module");
+    if (isDelegator_) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "SetMissionContinueState is delegator module");
         return ERR_NOT_SUPPORTED;
     }
     auto sessionToken = GetSessionToken();
@@ -955,8 +955,8 @@ void AbilityContextImpl::UnregisterAbilityLifecycleObserver(
 ErrCode AbilityContextImpl::SetMissionLabel(const std::string& label)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "label:%{public}s", label.c_str());
-    if (isHook_) {
-        TAG_LOGD(AAFwkTag::CONTEXT, "SetMissionLabel is hook module");
+    if (isDelegator_) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "SetMissionLabel is delegator module");
         return ERR_NOT_SUPPORTED;
     }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->SetMissionLabel(token_, label);
@@ -1197,8 +1197,8 @@ ErrCode AbilityContextImpl::OpenAtomicService(AAFwk::Want& want, const AAFwk::St
 
 void AbilityContextImpl::SetRestoreEnabled(bool enabled)
 {
-    if (isHook_) {
-        TAG_LOGD(AAFwkTag::CONTEXT, "SetRestoreEnabled is hook module");
+    if (isDelegator_) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "SetRestoreEnabled is delegator module");
         return;
     }
     restoreEnabled_.store(enabled);
@@ -1243,17 +1243,11 @@ ErrCode AbilityContextImpl::RevokeDelegator()
         TAG_LOGE(AAFwkTag::CONTEXT, "capability not support");
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
-    if (!IsHook() || GetHookOff()) {
+    if (!isDelegator_ || delegatorOff_) {
         TAG_LOGE(AAFwkTag::CONTEXT, "repeated called");
-        return AAFwk::ERR_NOT_HOOK;
+        return AAFwk::ERR_NOT_DELEGATOR;
     }
     TAG_LOGI(AAFwkTag::CONTEXT, "RevokeDelegator called");
-    auto want = GetWant();
-    if (want == nullptr) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "null want");
-        return ERR_INVALID_VALUE;
-    }
-    want->SetParam("ohos.ability.hookOff", true);
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->RevokeDelegator(token_);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "RevokeDelegator is failed:%{public}d", err);
@@ -1274,7 +1268,13 @@ ErrCode AbilityContextImpl::RevokeDelegator()
         TAG_LOGE(AAFwkTag::CONTEXT, "scb call, revokeDelegator err: %{public}d", err);
         return AAFwk::ERR_FROM_WINDOW;
     }
-    SetHookOff(true);
+    auto abilityCallback = abilityCallback_.lock();
+    if (abilityCallback == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "null abilityCallback");
+        return ERR_INVALID_VALUE;
+    }
+    abilityCallback->NotifyWindowDestroy();
+    SetDelegatorOff(true);
     return ERR_OK;
 }
 } // namespace AbilityRuntime
