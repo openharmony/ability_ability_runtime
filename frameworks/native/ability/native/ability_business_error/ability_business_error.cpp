@@ -102,7 +102,8 @@ constexpr const char* ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT = "Creating a ne
 constexpr const char* ERROR_MSG_UI_ABILITY_IS_STARTING = "The UIAbility is being started.";
 constexpr const char* ERROR_MSG_EXTENSION_START_ABILITY_CONTROLLED =
     "The extension can not start the ability due to extension control.";
-constexpr const char* ERROR_MSG_NOT_HOOK = "The context does not belong to HookAbility; multiple calls are invoked.";
+constexpr const char* ERROR_MSG_NOT_DELEGATOR =
+    "The context does not belong to HookAbility; multiple calls are invoked.";
 constexpr const char* ERROR_MSG_FROM_WINDOW = "Failed to cancel the hook of the window module.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
@@ -177,7 +178,7 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT, ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT },
     { AbilityErrorCode::ERROR_CODE_UI_ABILITY_IS_STARTING, ERROR_MSG_UI_ABILITY_IS_STARTING},
     { AbilityErrorCode::ERROR_CODE_EXTENSION_START_ABILITY_CONTROLLED, ERROR_MSG_EXTENSION_START_ABILITY_CONTROLLED },
-    { AbilityErrorCode::ERROR_CODE_NOT_HOOK, ERROR_MSG_NOT_HOOK},
+    { AbilityErrorCode::ERROR_CODE_NOT_DELEGATOR, ERROR_MSG_NOT_DELEGATOR},
     { AbilityErrorCode::ERROR_CODE_FROM_WINDOW, ERROR_MSG_FROM_WINDOW},
 };
 
@@ -255,7 +256,7 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_CREATE_NEW_INSTANCE_NOT_SUPPORT, AbilityErrorCode::ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT},
     {ERR_UI_ABILITY_IS_STARTING, AbilityErrorCode::ERROR_CODE_UI_ABILITY_IS_STARTING},
     {ERR_EXTENSION_START_ABILITY_CONTROLEED, AbilityErrorCode::ERROR_CODE_EXTENSION_START_ABILITY_CONTROLLED},
-    {ERR_NOT_HOOK, AbilityErrorCode::ERROR_CODE_NOT_HOOK},
+    {ERR_NOT_DELEGATOR, AbilityErrorCode::ERROR_CODE_NOT_DELEGATOR},
     {ERR_FROM_WINDOW, AbilityErrorCode::ERROR_CODE_FROM_WINDOW},
     {ERR_INVALID_CONTEXT, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT},
 };

@@ -50,19 +50,19 @@ public:
     {
         return ERR_OK;
     }
-    virtual bool GetHookOff()
+    virtual bool IsDelegatorOff()
     {
         return false;
     }
-    virtual void SetHookOff(bool hookOff)
+    virtual void SetDelegatorOff(bool delegatorOff)
     {
         return;
     }
-    virtual bool IsHook()
+    virtual bool IsDelegator()
     {
         return false;
     }
-    virtual void SetHook(bool isHook)
+    virtual void SetDelegator(bool isDelegator)
     {
         return;
     }

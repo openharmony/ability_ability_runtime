@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@ namespace AppExecFwk {
 namespace {
 constexpr const char* BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
 constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.MainAbility";
+constexpr const char* IS_DELEGATOR = "ohos.ability_runtime.is_delegator";
 static const std::string EMPTY_NAME;
 }
 AbilityRunningRecord::AbilityRunningRecord(std::shared_ptr<AbilityInfo> info,
@@ -164,6 +165,11 @@ bool AbilityRunningRecord::IsSceneBoard() const
         return false;
     }
     return info_->name == SCENEBOARD_ABILITY_NAME && info_->bundleName == BUNDLE_NAME_SCENEBOARD;
+}
+
+bool AbilityRunningRecord::IsDelegator() const
+{
+    return want_ && want_->GetBoolParam(IS_DELEGATOR, false);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
