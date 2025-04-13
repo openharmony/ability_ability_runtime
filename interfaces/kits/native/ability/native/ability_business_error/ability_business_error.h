@@ -186,10 +186,10 @@ enum class AbilityErrorCode {
     // extension can not start the ability due to extension control.
     ERROR_CODE_EXTENSION_START_ABILITY_CONTROLLED = 16000083,
 
-    // The context does not belong to HookAbility; multiple calls are invoked.
-    ERROR_CODE_NOT_HOOK = 16000084,
+    // Only allow DelegatorAbility to call the method once.
+    ERROR_CODE_NOT_DELEGATOR = 16000084,
 
-    // Failed to cancel the hook of the window module.
+    // The interaction process between Ability and the Window encountered an error.
     ERROR_CODE_FROM_WINDOW = 16000085,
 
     // invalid caller.
