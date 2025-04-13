@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export default interface AbilityDelegatorArgs {
+export interface AbilityDelegatorArgs {
     bundleName: string;
     parameters: Record<string, string>;
     testCaseNames: string;
