@@ -188,6 +188,8 @@ public:
      */
     void SetContinueState(int32_t state) override;
 
+    void NotifyWindowDestroy() override;
+
 #ifdef SUPPORT_SCREEN
 public:
     /**
@@ -383,6 +385,7 @@ private:
     std::shared_ptr<NativeReference> jsAbilityObj_;
     std::shared_ptr<int32_t> screenModePtr_;
     sptr<IRemoteObject> remoteCallee_;
+    bool reusingWindow_ = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -434,7 +434,7 @@ private:
     int CallAbilityLocked(const AbilityRequest &abilityRequest);
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
-    bool IsHookModule(const AbilityRequest &abilityRequest) const;
+    bool IsDelegatorModule(const AbilityRequest &abilityRequest) const;
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
     std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
     void HandleForegroundCollaborate(const AbilityRequest &abilityRequest,
@@ -480,7 +480,7 @@ private:
     int32_t DoCallerProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord);
     int32_t DoCallerProcessDetachment(std::shared_ptr<AbilityRecord> abilityRecord);
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-        bool &isColdStart, bool &isHook);
+        bool &isColdStart);
     std::shared_ptr<AbilityRecord> FindRecordFromTmpMap(const AbilityRequest &abilityRequest);
     void PostCallTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord);
     bool AddStartCallerTimestamp(int32_t callerUid);
@@ -518,7 +518,7 @@ private:
     bool UpdateSpecifiedFlag(std::shared_ptr<AbilityRecord> abilityRequest, const std::string &flag);
     bool ProcessColdStartBranch(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         std::shared_ptr<AbilityRecord> uiAbilityRecord, bool& isColdStart);
-    bool TryProcessHookModule(AbilityRequest& request, bool isHookModule);
+    bool TryProcessDelegatorModule(SpecifiedRequest &specifiedRequest, bool isDelegatorModule);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
@@ -556,7 +556,7 @@ private:
     std::mutex isTryPrepareTerminateByPidsDoneMutex_;
     std::condition_variable isTryPrepareTerminateByPidsCv_;
     std::vector<std::shared_ptr<PrepareTerminateByPidRecord>> prepareTerminateByPidRecords_;
-    std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> hookSpecifiedMap_;
+    std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> delegatorSpecifiedMap_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

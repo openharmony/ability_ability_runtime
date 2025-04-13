@@ -123,7 +123,7 @@ void UIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     abilityLifecycleExecutor_->DispatchLifecycleState(AppExecFwk::AbilityLifecycleExecutor::LifecycleState::INITIAL);
     if (abilityContext_ != nullptr) {
         abilityContext_->RegisterAbilityCallback(weak_from_this());
-        abilityContext_->SetHook(record->IsHook());
+        abilityContext_->SetDelegator(record->IsDelegator());
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
