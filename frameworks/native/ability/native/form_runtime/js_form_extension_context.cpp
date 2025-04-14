@@ -320,7 +320,10 @@ private:
         key.id = g_serialNumber;
         key.want = want;
         connection->SetConnectionId(key.id);
-        g_connects.emplace(key, connection);
+        {
+            std::lock_guard<std::mutex> lock(g_connectsMutex_);
+            g_connects.emplace(key, connection);
+        }
         if (g_serialNumber < INT32_MAX) {
             g_serialNumber++;
         } else {
