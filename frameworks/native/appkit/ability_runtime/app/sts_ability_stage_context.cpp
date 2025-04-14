@@ -67,7 +67,6 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::Context>(context);
     if (workContext == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "workContext nullptr");
-        delete workContext;
         return nullptr;
     }
     ani_field contextField;
@@ -80,7 +79,6 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
         status = env->Object_SetField_Long(obj, contextField, reinterpret_cast<ani_long>(pCtx.get()));
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::ABILITY, "call Object_SetField_Long contextField failed");
-            delete workContext;
             return nullptr;
 
         }
@@ -90,7 +88,6 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
     auto app = application.lock();
     if (app == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "application is null");
-        delete workContext;
         return nullptr;
     }
     ContextUtil::StsCreatContext(env, abilityStageCtxCls, obj, app->GetApplicationCtxObjRef(), context);
@@ -128,7 +125,6 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
             TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Ref moduleInfoField failed");
         }
     }
-    delete workContext;
     return obj;
 }
 
