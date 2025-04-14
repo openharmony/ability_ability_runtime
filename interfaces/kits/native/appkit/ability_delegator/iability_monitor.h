@@ -22,6 +22,7 @@
 #include <string>
 
 #include "ability_delegator_infos.h"
+#include "sts_runtime.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -135,6 +136,13 @@ public:
      */
     virtual void OnWindowStageDestroy(const std::weak_ptr<NativeReference> &abilityObj);
 
+    virtual void OnSTSAbilityStart(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj);
+    virtual void OnSTSAbilityForeground(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj);
+    virtual void OnSTSAbilityBackground(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj);
+    virtual void OnSTSAbilityStop(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj);
+    virtual void OnSTSWindowStageCreate(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj);
+    virtual void OnSTSWindowStageRestore(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj);
+    virtual void OnSTSWindowStageDestroy(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj);
 private:
     std::string abilityName_;
     std::string moduleName_;
