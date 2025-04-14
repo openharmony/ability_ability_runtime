@@ -106,8 +106,6 @@ public:
     virtual std::shared_ptr<AAFwk::Want> GetWant() = 0;
 
     virtual void SetContinueState(int32_t state) {};
-
-    virtual void NotifyWindowDestroy() {}
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

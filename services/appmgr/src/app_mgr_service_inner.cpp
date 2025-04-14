@@ -182,7 +182,6 @@ constexpr const char* PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUN
 constexpr const char* PERMISSION_PROTECT_SCREEN_LOCK_DATA = "ohos.permission.PROTECT_SCREEN_LOCK_DATA";
 constexpr const char* PERMISSION_TEMP_JIT_ALLOW = "TEMPJITALLOW";
 constexpr const char* TARGET_UID_KEY = "ohos.aafwk.param.targetUid";
-constexpr const char* REUSING_WINDOW = "ohos.ability_runtime.reusing_window";
 constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
 constexpr const int32_t KILL_PROCESS_BY_USER_DELAY_BASE = 500;
 constexpr const int64_t PRELOAD_FREEZE_TIMEOUT = 11000;
@@ -9353,12 +9352,6 @@ int32_t AppMgrServiceInner::LaunchAbility(const sptr<IRemoteObject> &token)
         TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord null");
         return ERR_INVALID_VALUE;
     }
-    auto want = ability->GetWant();
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "want null");
-        return ERR_INVALID_VALUE;
-    }
-    want->SetParam(REUSING_WINDOW, true);
     appRecord->LaunchAbility(ability);
     return ERR_OK;
 }
