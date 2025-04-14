@@ -17,6 +17,8 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 group("ani_packages") {
   deps = [
     "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_registry_ani_kit",
+    "${ability_runtime_path}/frameworks/ets/ani/ability_manager:ability_ability_manager_abc_etc",
+    "${ability_runtime_path}/frameworks/ets/ani/ability_manager:ability_ability_manager_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_path}/frameworks/ets/ani/native_constructor:context_ani",
     "${ability_runtime_path}/frameworks/ets/ani/uri_permission_manager:uri_permission_manager_ani_kit",
