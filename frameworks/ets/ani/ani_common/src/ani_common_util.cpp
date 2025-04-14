@@ -23,6 +23,7 @@ namespace OHOS {
 namespace AppExecFwk {
 constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
 constexpr const char* CLASSNAME_BOOL = "Lstd/core/Boolean;";
+constexpr const char* CLASSNAME_INT = "Lstd/core/Int;";
 constexpr const char* CLASSNAME_ARRAY = "Lescompat/Array;";
 constexpr const char* CLASSNAME_ASYNC_CALLBACK_WRAPPER = "Lutils/AbilityUtils/AsyncCallbackWrapper;";
 
@@ -451,6 +452,50 @@ ani_object CreateBoolean(ani_env *env, ani_boolean value)
         return nullptr;
     }
     return obj;
+}
+
+ani_object CreateInt(ani_env *env, ani_int value)
+{
+    ani_class cls;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass(CLASSNAME_INT, &cls)) != ANI_OK || cls == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "FindClass status : %{public}d", status);
+        return nullptr;
+    }
+    ani_method ctor;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK || ctor == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Class_FindMethod status : %{public}d", status);
+        return nullptr;
+    }
+    ani_object object;
+    if ((status = env->Object_New(cls, ctor, &object, value)) != ANI_OK || object == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Object_New status : %{public}d", status);
+        return nullptr;
+    }
+    return object;
+}
+
+bool SetOptionalFieldInt(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, int value)
+{
+    ani_field field = nullptr;
+    ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
+    if (status != ANI_OK || field == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Class_FindField failed or null field, status=%{public}d, fieldName=%{public}s",
+            status, fieldName.c_str());
+        return false;
+    }
+    ani_object intObj = CreateInt(env, value);
+    if (intObj == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null intObj");
+        return false;
+    }
+    status = env->Object_SetField_Ref(object, field, intObj);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Object_SetField_Ref failed, status=%{public}d, fieldName=%{public}s",
+            status, fieldName.c_str());
+        return false;
+    }
+    return true;
 }
 
 bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result)
