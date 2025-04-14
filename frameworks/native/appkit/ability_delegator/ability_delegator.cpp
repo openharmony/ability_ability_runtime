@@ -390,7 +390,12 @@ void AbilityDelegator::PostPerformStart(const std::shared_ptr<ADelegatorAbilityP
         }
 
         if (monitor->Match(ability, true)) {
-            monitor->OnAbilityStart(ability->object_);
+            if (!ability->stsObject_.expired()) {
+                monitor->OnSTSAbilityStart(ability->stsObject_);
+            }
+            if (!ability->object_.expired()) {
+                monitor->OnAbilityStart(ability->object_);
+            }
         }
     }
 }
