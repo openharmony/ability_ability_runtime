@@ -348,7 +348,7 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
     }
     TAG_LOGW(AAFwkTag::APPDFR,
         "reportEvent:%{public}s, pid:%{public}d, tid:%{public}d, bundleName:%{public}s, appRunningUniqueId:%{public}s"
-        ", endTime:%{public}s, interval:%{public}lld ms, eventId:%{public}d hisysevent write ret: %{public}d",
+        ", endTime:%{public}s, interval:%{public}" PRId64 " ms, eventId:%{public}d hisysevent write ret: %{public}d",
         faultData.errorObject.name.c_str(), appInfo.pid, faultData.tid, appInfo.bundleName.c_str(),
         appRunningUniqueId.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
         AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime, faultData.eventId, ret);
