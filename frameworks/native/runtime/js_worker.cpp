@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,8 @@
 #include "singleton.h"
 #include "syscap_ts.h"
 #include "system_ability_definition.h"
+#include "js_environment_impl.h"
+#include "worker_info.h"
 #ifdef SUPPORT_SCREEN
 using OHOS::Ace::ContainerScope;
 #endif
@@ -167,6 +169,14 @@ std::string AssetHelper::NormalizedFileName(const std::string& fileName) const
         normalizedFilePath = fileName.substr(0, index) + ".abc";
     }
     return normalizedFilePath;
+}
+
+AssetHelper::AssetHelper(std::shared_ptr<JsEnv::WorkerInfo> workerInfo) : workerInfo_(workerInfo)
+{
+    panda::panda_file::StringPacProtect codePath = panda::panda_file::StringPacProtect(workerInfo_->codePath);
+    if (!(codePath.GetOriginString()).empty() && (codePath.GetOriginString()).back() != '/') {
+        (workerInfo_->codePath).Append('/');
+    }
 }
 
 AssetHelper::~AssetHelper()
