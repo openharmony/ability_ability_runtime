@@ -220,7 +220,7 @@ void JsAutoFillExtension::BindContext(napi_env env, napi_value obj)
 
 void JsAutoFillExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
+    TAG_LOGI(AAFwkTag::AUTOFILL_EXT, "OnStart");
     Extension::OnStart(want);
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
@@ -231,7 +231,7 @@ void JsAutoFillExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionIn
 
 void JsAutoFillExtension::OnStop()
 {
-    TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
+    TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "OnStop");
     AutoFillExtension::OnStop();
     HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onDestroy");
