@@ -42,14 +42,11 @@
 #include "iprepare_terminate_callback_interface.h"
 #include "keep_alive_info.h"
 #include "mission_info.h"
-#include "mission_listener_interface.h"
-#include "mission_snapshot.h"
 #include "query_erms_observer_interface.h"
 #include "remote_mission_listener_interface.h"
 #include "remote_on_listener_interface.h"
 #include "running_process_info.h"
 #include "sender_info.h"
-#include "snapshot.h"
 #include "start_options.h"
 #include "user_callback.h"
 #include "system_memory_attr.h"
@@ -77,6 +74,10 @@ class IStatusBarDelegate;
 }
 
 namespace AAFwk {
+class Snapshot;
+class IMissionListener;
+class ISnapshotHandler;
+struct MissionSnapshot;
 using KeepAliveInfo = AbilityRuntime::KeepAliveInfo;
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 using InsightIntentExecuteParam = AppExecFwk::InsightIntentExecuteParam;
