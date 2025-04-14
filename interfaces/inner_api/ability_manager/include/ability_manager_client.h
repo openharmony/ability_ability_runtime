@@ -25,6 +25,7 @@
 #include "auto_startup_info.h"
 #include "iremote_object.h"
 #include "mission_info.h"
+#include "snapshot.h"
 #include "system_memory_attr.h"
 #include "ui_extension_window_command.h"
 #include "want.h"
@@ -33,8 +34,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-class Snapshot;
-class ISnapshotHandler;
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 /**
  * @class AbilityManagerClient

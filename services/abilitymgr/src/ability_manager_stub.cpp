@@ -22,9 +22,6 @@
 #include "hitrace_meter.h"
 #include "status_bar_delegate_interface.h"
 #include <iterator>
-#include "mission_listener_interface.h"
-#include "mission_snapshot.h"
-#include "snapshot.h"
 
 namespace OHOS {
 namespace AAFwk {

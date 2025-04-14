@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,9 +29,6 @@
 #include "session/host/include/session.h"
 #include "scene_board_judgement.h"
 #include "status_bar_delegate_interface.h"
-#include "mission_listener_interface.h"
-#include "mission_snapshot.h"
-#include "snapshot.h"
 
 using namespace testing::ext;
 using namespace testing;
