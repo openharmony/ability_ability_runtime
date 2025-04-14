@@ -119,8 +119,6 @@ ani_object StsAbilityContext::SetAbilityContext(ani_env *env, const std::shared_
         workContext = nullptr;
         return nullptr;
     }
-    delete workContext;
-    workContext = nullptr;
     return contextObj;
 }
 
