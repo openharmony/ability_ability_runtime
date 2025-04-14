@@ -22,6 +22,8 @@
 #include "ani_common_want.h"
 #include "sts_error_utils.h"
 #include "ani_enum_convert.h"
+#include "sts_ability_monitor.h"
+#include <sstream>
 namespace OHOS {
 namespace AbilityDelegatorSts {
 
@@ -233,22 +235,20 @@ void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg)
     return;
 }
 
-void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resString)
+void RetrieveStringFromAni(ani_env *env, ani_string str, std::string &res)
 {
-    ani_status status = ANI_OK;
-    ani_size result = 0U;
-    status = env->String_GetUTF8Size(string, &result);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "String_GetUTF8Size failed status : %{public}d", status);
+    ani_size sz {};
+    ani_status status = ANI_ERROR;
+    if ((status = env->String_GetUTF8Size(str, &sz)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "status : %{public}d", status);
         return;
     }
-    ani_size substrOffset = 0U;
-    ani_size substrSize = result;
-    const ani_size bufferExtension = 10U;
-    resString.resize(substrSize + bufferExtension);
-    ani_size resSize = resString.size();
-    result = 0U;
-    status = env->String_GetUTF8SubString(string, substrOffset, substrSize, resString.data(), resSize, &result);
+    res.resize(sz + 1);
+    if ((status = env->String_GetUTF8SubString(str, 0, sz, res.data(), res.size(), &sz)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "status : %{public}d", status);
+        return;
+    }
+    res.resize(sz);
 }
 
 void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj)
@@ -294,8 +294,8 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
     std::string strAbilityName;
     ani_string aniAbilityName = static_cast<ani_string>(abilityNameRef);
     RetrieveStringFromAni(env, aniAbilityName, strAbilityName);
-    std::shared_ptr<AppExecFwk::IAbilityMonitor> monitor =
-        std::make_shared<AppExecFwk::IAbilityMonitor>(strAbilityName, strModuleName);
+    std::shared_ptr<STSAbilityMonitor> monitor = std::make_shared<STSAbilityMonitor>(strAbilityName);
+    monitor->SetSTSAbilityMonitor(env, monitorObj);
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (delegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");

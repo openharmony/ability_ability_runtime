@@ -19,6 +19,7 @@
 #include <string>
 #include "ability_lifecycle_executor.h"
 #include "iremote_object.h"
+#include "sts_runtime.h"
 
 class NativeReference;
 
@@ -37,6 +38,8 @@ struct ADelegatorAbilityProperty {
     AbilityLifecycleExecutor::LifecycleState lifecycleState_ {AbilityLifecycleExecutor::LifecycleState::UNINITIALIZED};
     // ability object in jsruntime
     std::weak_ptr<NativeReference> object_;
+
+    std::weak_ptr<AbilityRuntime::STSNativeReference> stsObject_;
 };
 
 struct DelegatorAbilityStageProperty {

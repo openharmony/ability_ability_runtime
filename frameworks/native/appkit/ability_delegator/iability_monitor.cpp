@@ -112,5 +112,26 @@ void IAbilityMonitor::OnWindowStageRestore(const std::weak_ptr<NativeReference> 
 
 void IAbilityMonitor::OnWindowStageDestroy(const std::weak_ptr<NativeReference> &abilityObj)
 {}
+
+void IAbilityMonitor::OnSTSAbilityStart(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
+{}
+
+void IAbilityMonitor::OnSTSAbilityForeground(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
+{}
+
+void IAbilityMonitor::OnSTSAbilityBackground(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
+{}
+
+void IAbilityMonitor::OnSTSAbilityStop(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
+{}
+
+void IAbilityMonitor::OnSTSWindowStageCreate(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
+{}
+
+void IAbilityMonitor::OnSTSWindowStageRestore(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
+{}
+
+void IAbilityMonitor::OnSTSWindowStageDestroy(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
+{}
 }  // namespace AppExecFwk
 }  // namespace OHOS
