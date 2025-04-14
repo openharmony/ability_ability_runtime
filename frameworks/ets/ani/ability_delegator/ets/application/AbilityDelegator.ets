@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AbilityMonitor } from './AbilityMonitor';
+import AbilityMonitor from './AbilityMonitor';
 import Want from '@ohos.app.ability.Want';
 import Context from 'application.Context';
 import { BusinessError, AsyncCallback } from '@ohos.base';
@@ -112,20 +112,21 @@ class AbilityDelegatorInner implements AbilityDelegator {
 
     addAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallback<void>): void {
         let p1 = taskpool.execute(():undefined => {this.addAbilityMonitorAsync(monitor);  return undefined});
-            p1.then((e :NullishType)=>{
-                let resultCode: Int  = e as Int;
+        p1.then((e: NullishType)=>{
+                let resultCode: Int  = 0;
                 let r: BusinessError = { code: resultCode.intValue(), data: undefined };
                 callback(r, undefined);
-            }, (err:Object): void => {
+            }, (err: BusinessError): void => {
+                callback(err, undefined);
             });
 
     }
     addAbilityMonitor(monitor: AbilityMonitor): Promise<void> {
         let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Error) => void) => {
             let p1 = taskpool.execute(():undefined => {this.addAbilityMonitorAsync(monitor);  return undefined});
-            p1.then((e :NullishType)=>{
-            let PromiseLike = e as PromiseLike<void>;
-            resolve(PromiseLike);
+            p1.then((e: NullishType)=>{
+                let PromiseLike = e as PromiseLike<void>;
+                resolve(PromiseLike);
             }, (err:Object): void => {
             });
         });
