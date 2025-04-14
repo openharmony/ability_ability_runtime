@@ -295,7 +295,8 @@ void StsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     CallObjectMethod(false, "onCreate", signature, wantRef, launchParamRef);
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+        AbilityRuntime::Runtime::Language::STS);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStart");
         delegator->PostPerformStart(CreateADelegatorAbilityProperty());
@@ -408,7 +409,8 @@ void StsUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callback
 
 void StsUIAbility::OnStopCallback()
 {
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+        AbilityRuntime::Runtime::Language::STS);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStop");
         delegator->PostPerformStop(CreateADelegatorAbilityProperty());
@@ -463,7 +465,8 @@ void StsUIAbility::OnSceneCreated()
         AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     }
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+        AbilityRuntime::Runtime::Language::STS);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceCreated");
         delegator->PostPerformScenceCreated(CreateADelegatorAbilityProperty());
@@ -523,7 +526,8 @@ void StsUIAbility::onSceneDestroyed()
         }
     }
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+        AbilityRuntime::Runtime::Language::STS);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceDestroyed");
         delegator->PostPerformScenceDestroyed(CreateADelegatorAbilityProperty());
@@ -584,7 +588,8 @@ void StsUIAbility::CallOnForegroundFunc(const Want &want)
     CallObjectMethod(false, "onForeground", nullptr, wantRef);
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+        AbilityRuntime::Runtime::Language::STS);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformForeground");
         delegator->PostPerformForeground(CreateADelegatorAbilityProperty());
@@ -614,7 +619,8 @@ void StsUIAbility::OnBackground()
 
     UIAbility::OnBackground();
 
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+        AbilityRuntime::Runtime::Language::STS);
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformBackground");
         delegator->PostPerformBackground(CreateADelegatorAbilityProperty());
@@ -1213,6 +1219,7 @@ std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> StsUIAbility::CreateADele
         }
     }
     property->lifecycleState_ = GetState();
+    property->stsObject_ = stsAbilityObj_;
     return property;
 }
 

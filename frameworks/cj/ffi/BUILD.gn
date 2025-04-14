@@ -66,6 +66,7 @@ ohos_shared_library("cj_ability_ffi") {
     "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
+    "runtime_core:ani",
   ]
 
   sources = [

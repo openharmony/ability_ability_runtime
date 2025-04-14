@@ -12,48 +12,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// import UIAbility from '../../ui_ability/ets/@ohos.app.ability.UIAbility';
-//import UIAbility from '.@ohos.app.ability.UIAbility';
-
-class UIAbility{ }
+import UIAbility from '@ohos.app.ability.UIAbility';
 
 export default interface AbilityMonitor {
 
-  onAbilityCreate(ability: UIAbility):void;
-
-  onAbilityForeground(ability: UIAbility):void;
-
-  onAbilityBackground(ability: UIAbility):void;
-
-  onAbilityDestroy(ability: UIAbility):void;
-
-  onWindowStageCreate(ability: UIAbility):void;
-
-  onWindowStageRestore(ability: UIAbility):void;
-
-  onWindowStageDestroy(ability: UIAbility):void;
-
   moduleName: string;
   abilityName: string;
+
+  onAbilityCreate:(ability: UIAbility)=>void;
+
+  onAbilityForeground:(ability: UIAbility)=>void;
+
+  onAbilityBackground:(ability: UIAbility)=>void;
+
+  onAbilityDestroy:(ability: UIAbility)=>void;
+
+  onWindowStageCreate:(ability: UIAbility)=>void;
+
+  onWindowStageRestore:(ability: UIAbility)=>void;
+
+  onWindowStageDestroy:(ability: UIAbility)=>void;
+
 }
 
 class AbilityMonitorInner implements AbilityMonitor {
 
-  onAbilityCreate(ability: UIAbility):void {}
-
-  onAbilityForeground(ability: UIAbility):void {}
-
-  onAbilityBackground(ability: UIAbility):void{}
-
-  onAbilityDestroy(ability: UIAbility):void{}
-
-  onWindowStageCreate(ability: UIAbility):void{}
-
-  onWindowStageRestore(ability: UIAbility):void{}
-
-  onWindowStageDestroy(ability: UIAbility):void{}
-
   moduleName: string = "";
   abilityName: string = "";
+  onAbilityCreate:(ability: UIAbility)=>void = (ability: UIAbility) => {};
+
+  onAbilityForeground:(ability: UIAbility)=>void = (ability: UIAbility) => {};
+
+  onAbilityBackground:(ability: UIAbility)=>void = (ability: UIAbility) => {};
+
+  onAbilityDestroy:(ability: UIAbility)=>void = (ability: UIAbility) => {};
+
+  onWindowStageCreate:(ability: UIAbility)=>void = (ability: UIAbility) => {};
+
+  onWindowStageRestore:(ability: UIAbility)=>void = (ability: UIAbility) => {};
+
+  onWindowStageDestroy:(ability: UIAbility)=>void = (ability: UIAbility) => {};
 
 }
