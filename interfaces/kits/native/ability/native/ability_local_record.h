@@ -75,7 +75,10 @@ public:
 
     const std::shared_ptr<AAFwk::Want> &GetWant();
     
-    bool IsDelegator() const;
+    bool IsHook() const
+    {
+        return want_ && want_->GetBoolParam("ohos.abilityruntime.is_hook", false);
+    }
 private:
     std::shared_ptr<AbilityInfo> abilityInfo_ = nullptr;
     sptr<IRemoteObject> token_ = nullptr;

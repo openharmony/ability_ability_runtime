@@ -19,9 +19,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-namespace {
-constexpr const char* IS_DELEGATOR = "ohos.ability_runtime.is_delegator";
-}
 AbilityLocalRecord::AbilityLocalRecord(const std::shared_ptr<AbilityInfo> &info, const sptr<IRemoteObject> &token,
     const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId)
     : abilityInfo_(info), token_(token), want_(want), abilityRecordId_(abilityRecordId) {}
@@ -56,11 +53,6 @@ void AbilityLocalRecord::SetAbilityThread(const sptr<AbilityThread> &abilityThre
 const std::shared_ptr<AAFwk::Want> &AbilityLocalRecord::GetWant()
 {
     return want_;
-}
-
-bool AbilityLocalRecord::IsDelegator() const
-{
-    return want_ && want_->GetBoolParam(IS_DELEGATOR, false);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

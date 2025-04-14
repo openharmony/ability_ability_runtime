@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,10 +27,6 @@
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
-namespace {
-constexpr const char* REUSING_WINDOW = "ohos.ability_runtime.reusing_window";
-constexpr const char* IS_DELEGATOR = "ohos.ability_runtime.is_delegator";
-}
 AppLifeCycleDeal::AppLifeCycleDeal()
 {}
 
@@ -85,8 +81,8 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
             FreezeUtil::GetInstance().AddLifecycleEvent(ability->GetToken(), entry);
         }
         TAG_LOGD(AAFwkTag::APPMGR, "Launch");
-        bool IsDelegatorAbility = ability->IsDelegator();
-        if (IsDelegatorAbility) {
+        bool isHookAbility = ability->IsHook();
+        if (isHookAbility) {
             auto bundleManagerHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
             HapModuleInfo hapModuleInfo;
             if (!bundleManagerHelper->GetHapModuleInfo(*abilityInfo, hapModuleInfo)) {
@@ -107,10 +103,7 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
         }
         appThread->ScheduleLaunchAbility(*abilityInfo, ability->GetToken(),
             ability->GetWant(), ability->GetAbilityRecordId());
-        if (ability->GetWant() != nullptr) {
-            ability->GetWant()->RemoveParam(REUSING_WINDOW);
-            ability->GetWant()->RemoveParam(IS_DELEGATOR);
-        }
+        ability->SetHook(false);
     } else {
         TAG_LOGW(AAFwkTag::APPMGR, "null appThread or ability");
     }
