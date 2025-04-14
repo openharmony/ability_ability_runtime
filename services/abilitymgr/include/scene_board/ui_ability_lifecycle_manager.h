@@ -434,7 +434,7 @@ private:
     int CallAbilityLocked(const AbilityRequest &abilityRequest);
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
-    bool IsDelegatorModule(const AbilityRequest &abilityRequest) const;
+    bool IsHookModule(const AbilityRequest &abilityRequest) const;
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
     std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
     void HandleForegroundCollaborate(const AbilityRequest &abilityRequest,
@@ -518,7 +518,7 @@ private:
     bool UpdateSpecifiedFlag(std::shared_ptr<AbilityRecord> abilityRequest, const std::string &flag);
     bool ProcessColdStartBranch(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         std::shared_ptr<AbilityRecord> uiAbilityRecord, bool& isColdStart);
-    bool TryProcessDelegatorModule(SpecifiedRequest &specifiedRequest, bool isDelegatorModule);
+    bool TryProcessHookModule(SpecifiedRequest &specifiedRequest, bool isHookModule);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
@@ -556,7 +556,7 @@ private:
     std::mutex isTryPrepareTerminateByPidsDoneMutex_;
     std::condition_variable isTryPrepareTerminateByPidsCv_;
     std::vector<std::shared_ptr<PrepareTerminateByPidRecord>> prepareTerminateByPidRecords_;
-    std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> delegatorSpecifiedMap_;
+    std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> hookSpecifiedMap_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

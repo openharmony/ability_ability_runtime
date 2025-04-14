@@ -314,21 +314,21 @@ public:
     void EraseUIExtension(int32_t sessionId) override;
     bool IsUIExtensionExist(const AAFwk::Want &want);
     ErrCode RevokeDelegator() override;
-    inline bool IsDelegatorOff() override
+    inline bool GetHookOff() override
     {
-        return delegatorOff_;
+        return hookOff_;
     }
-    inline void SetDelegatorOff(bool delegatorOff) override
+    inline void SetHookOff(bool hookOff) override
     {
-        delegatorOff_ = delegatorOff;
+        hookOff_ = hookOff;
     }
-    bool IsDelegator() override
+    bool IsHook() override
     {
-        return isDelegator_;
+        return isHook_;
     }
-    void SetDelegator(bool isDelegator) override
+    void SetHook(bool isHook) override
     {
-        isDelegator_ = isDelegator;
+        isHook_ = isHook;
     }
 #endif
 
@@ -352,8 +352,8 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr_ = nullptr;
     AbilityConfigUpdateCallback abilityConfigUpdateCallback_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> abilityConfiguration_ = nullptr;
-    bool isDelegator_ = false;
-    bool delegatorOff_ = false;
+    bool isHook_ = false;
+    bool hookOff_ = false;
 
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);
