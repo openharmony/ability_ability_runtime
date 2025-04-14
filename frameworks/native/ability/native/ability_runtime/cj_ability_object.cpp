@@ -75,7 +75,7 @@ char* CreateCStringFromString(const std::string& source)
 
 CConfiguration CallConvertConfig(std::shared_ptr<AppExecFwk::Configuration> configuration)
 {
-    CConfiguration cCfg;
+    CConfiguration cCfg = {};
     void* handle = dlopen(CJ_ABILITY_LIBNAME, RTLD_LAZY);
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
