@@ -231,7 +231,7 @@ void JsAutoFillExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionIn
 
 void JsAutoFillExtension::OnStop()
 {
-    TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "OnStop");
+    TAG_LOGI(AAFwkTag::AUTOFILL_EXT, "OnStop");
     AutoFillExtension::OnStop();
     HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onDestroy");
