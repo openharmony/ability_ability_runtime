@@ -75,7 +75,7 @@ public:
 
     const std::shared_ptr<AAFwk::Want> &GetWant();
     
-    bool IsDelegator() const;
+    bool IsHook() const;
 private:
     std::shared_ptr<AbilityInfo> abilityInfo_ = nullptr;
     sptr<IRemoteObject> token_ = nullptr;

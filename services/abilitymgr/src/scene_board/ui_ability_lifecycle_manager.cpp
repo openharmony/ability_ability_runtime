@@ -106,7 +106,7 @@ bool UIAbilityLifecycleManager::ProcessColdStartBranch(AbilityRequest &abilityRe
     sptr<SessionInfo> sessionInfo, std::shared_ptr<AbilityRecord> uiAbilityRecord,
     bool &isColdStart)
 {
-    if (isColdStart && uiAbilityRecord->IsDelegator()) {
+    if (isColdStart && uiAbilityRecord->IsHook()) {
         auto nextRequest = PopAndGetNextSpecified(sessionInfo->requestId);
         if (nextRequest) {
             TaskHandlerWrap::GetFfrtHandler()->SubmitTask([nextRequest, pThis = shared_from_this()]() {
@@ -220,11 +220,11 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
             bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
             abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, sessionInfo->instanceKey);
             auto abilityRecord = FindRecordFromSessionMap(abilityRequest, false);
-            if (isUIAbility && IsDelegatorModule(abilityRequest) && abilityRecord == nullptr &&
+            if (isUIAbility && IsHookModule(abilityRequest) && abilityRecord == nullptr &&
                 (sessionInfo->processOptions == nullptr ||
                 sessionInfo->processOptions->startupVisibility == StartupVisibility::STARTUP_SHOW)) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "only first need call SetDelegator");
-                uiAbilityRecord->SetDelegator(true);
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "only first need call SetIsHook");
+                uiAbilityRecord->SetIsHook(true);
             }
         } else {
             uiAbilityRecord->SetInstanceKey(sessionInfo->instanceKey);
@@ -548,14 +548,14 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     }
     sessionInfo->userId = userId_;
     sessionInfo->isAtomicService = (abilityInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE);
-    if (IsDelegatorModule(abilityRequest)) {
+    if (IsHookModule(abilityRequest)) {
         auto abilityRecord = FindRecordFromSessionMap(abilityRequest, false);
         if (abilityRecord != nullptr) {
-            if (abilityRecord->IsDelegator() && !abilityRecord->IsDelegatorOff()) {
+            if (abilityRecord->IsHook() && !abilityRecord->GetHookOff()) {
                 AbilityRequest request;
                 request.callerToken = abilityRequest.callerToken;
-                sptr<SessionInfo> delegatorSessionInfo = abilityRecord->GetSessionInfo();
-                int ret = NotifySCBPendingActivation(delegatorSessionInfo, request);
+                sptr<SessionInfo> hookSessionInfo = abilityRecord->GetSessionInfo();
+                int ret = NotifySCBPendingActivation(hookSessionInfo, request);
                 return ret;
             }
         }
@@ -1316,7 +1316,7 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
     return static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));
 }
 
-bool UIAbilityLifecycleManager::IsDelegatorModule(const AbilityRequest &abilityRequest) const
+bool UIAbilityLifecycleManager::IsHookModule(const AbilityRequest &abilityRequest) const
 {
     AppExecFwk::HapModuleInfo hapModuleInfo;
     if (DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance()->GetHapModuleInfo(
@@ -1336,7 +1336,7 @@ bool UIAbilityLifecycleManager::IsDelegatorModule(const AbilityRequest &abilityR
         AppExecFwk::AbilityInfo abilityInfo;
         if (!IN_PROCESS_CALL(DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance()->QueryAbilityInfo(
             want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId_, abilityInfo))) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "Query delegatorAbilityInfo fail");
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "Query hookAbilityInfo fail");
             return false;
         }
         return true;
@@ -1972,8 +1972,8 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnAcceptWantResponse, %{public}d", requestId);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard guard(sessionLock_);
-    auto iter = delegatorSpecifiedMap_.find(requestId);
-    if (iter != delegatorSpecifiedMap_.end() && iter->second != nullptr) {
+    auto iter = hookSpecifiedMap_.find(requestId);
+    if (iter != hookSpecifiedMap_.end() && iter->second != nullptr) {
         auto abilityRecord = iter->second;
         abilityRecord->SetSpecifiedFlag(flag);
         auto sessionInfo = abilityRecord->GetSessionInfo();
@@ -1983,11 +1983,11 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
         request.callerToken = abilityRecord->GetToken();
         int ret = NotifySCBPendingActivation(sessionInfo, request);
         if (ret == ERR_OK) {
-            abilityRecord->SetDelegatorOff(true);
-            abilityRecord->SetDelegator(false);
+            abilityRecord->SetHookOff(true);
+            abilityRecord->SetIsHook(false);
         }
         sessionInfo->reuseDelegatorWindow = false;
-        delegatorSpecifiedMap_.erase(iter);
+        hookSpecifiedMap_.erase(iter);
         return;
     }
     auto request = GetSpecifiedRequest(requestId);
@@ -2056,12 +2056,12 @@ void UIAbilityLifecycleManager::OnStartSpecifiedAbilityTimeoutResponse(int32_t r
 void UIAbilityLifecycleManager::OnStartSpecifiedFailed(int32_t requestId)
 {
     std::lock_guard lock(sessionLock_);
-    auto iter = delegatorSpecifiedMap_.find(requestId);
-    if (iter != delegatorSpecifiedMap_.end() && iter->second != nullptr) {
+    auto iter = hookSpecifiedMap_.find(requestId);
+    if (iter != hookSpecifiedMap_.end() && iter->second != nullptr) {
         std::shared_ptr<AbilityRecord> abilityRecord = iter->second;
         NotifySCBToHandleException(abilityRecord,
             static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT), "handleLoadTimeout");
-        delegatorSpecifiedMap_.erase(iter);
+        hookSpecifiedMap_.erase(iter);
         return;
     }
     auto curRequest = GetSpecifiedRequest(requestId);
@@ -3411,17 +3411,17 @@ void UIAbilityLifecycleManager::AddSpecifiedRequest(std::shared_ptr<SpecifiedReq
     }
 }
 
-bool UIAbilityLifecycleManager::TryProcessDelegatorModule(SpecifiedRequest &specifiedRequest, bool isDelegatorModule)
+bool UIAbilityLifecycleManager::TryProcessHookModule(SpecifiedRequest &specifiedRequest, bool isHookModule)
 {
-    if (!isDelegatorModule) {
+    if (!isHookModule) {
         return false;
     }
     auto abilityRecord = FindRecordFromSessionMap(specifiedRequest.abilityRequest, false);
-    if (abilityRecord == nullptr || !abilityRecord->IsDelegator() || abilityRecord->IsDelegatorOff()) {
+    if (abilityRecord == nullptr || !abilityRecord->IsHook() || abilityRecord->GetHookOff()) {
         return false;
     }
-    sptr<SessionInfo> delegatorSessionInfo = abilityRecord->GetSessionInfo();
-    NotifySCBPendingActivation(delegatorSessionInfo, specifiedRequest.abilityRequest);
+    sptr<SessionInfo> hookSessionInfo = abilityRecord->GetSessionInfo();
+    NotifySCBPendingActivation(hookSessionInfo, specifiedRequest.abilityRequest);
     auto nextRequest = PopAndGetNextSpecified(specifiedRequest.requestId);
     if (nextRequest) {
         TaskHandlerWrap::GetFfrtHandler()->SubmitTask([nextRequest, pThis = shared_from_this()]() {
@@ -3444,8 +3444,8 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
         if (specifiedRequest.preCreateProcessName) {
             PreCreateProcessName(request);
         }
-        auto isDelegatorModule = IsDelegatorModule(request);
-        if (TryProcessDelegatorModule(specifiedRequest, isDelegatorModule)) {
+        auto isHookModule = IsHookModule(request);
+        if (TryProcessHookModule(specifiedRequest, isHookModule)) {
             return;
         }
         if (specifiedRequest.specifiedProcessState == SpecifiedProcessState::STATE_NONE &&
@@ -3460,7 +3460,7 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
             NotifySCBPendingActivation(sessionInfo, request);
             sessionInfo->want.RemoveAllFd();
         }
-        if (specifiedRequest.isCold && isDelegatorModule) {
+        if (specifiedRequest.isCold && isHookModule) {
             return;
         }
         DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(request.want,
@@ -3645,14 +3645,14 @@ int32_t UIAbilityLifecycleManager::RevokeDelegator(const sptr<IRemoteObject> &to
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ability not foreground");
         return ERR_ABILITY_NOT_FOREGROUND;
     }
-    if (!abilityRecord->IsDelegator()) {
-        return ERR_NOT_DELEGATOR;
+    if (!abilityRecord->IsHook()) {
+        return ERR_NOT_HOOK;
     }
     auto abilityInfo = abilityRecord->GetAbilityInfo();
     auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified) {
         auto requestId = GetRequestId();
-        delegatorSpecifiedMap_.emplace(requestId, abilityRecord);
+        hookSpecifiedMap_.emplace(requestId, abilityRecord);
         DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(abilityRecord->GetWant(),
             abilityInfo, requestId);
         return ERR_OK;
@@ -3667,8 +3667,8 @@ int32_t UIAbilityLifecycleManager::RevokeDelegator(const sptr<IRemoteObject> &to
         AAFwkTag::ABILITYMGR, "Reused sessionId: %{public}d, ret: %{public}d.", sessionInfo->persistentId, ret);
     sessionInfo->reuseDelegatorWindow = false;
     if (ret == ERR_OK) {
-        abilityRecord->SetDelegatorOff(true);
-        abilityRecord->SetDelegator(false);
+        abilityRecord->SetHookOff(true);
+        abilityRecord->SetIsHook(false);
         return ERR_OK;
     } else {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "scb error");

@@ -1168,24 +1168,24 @@ public:
 
     void ScheduleCollaborate(const Want &want);
 
-    bool IsDelegator() const
+    bool IsHook () const
     {
-        return isDelegator_;
+        return isHook_;
     }
 
-    inline void SetDelegator(bool isDelegator)
+    inline void SetIsHook(bool isHook)
     {
-        isDelegator_ = isDelegator;
+        isHook_ = isHook;
     }
 
-    bool IsDelegatorOff() const
+    bool GetHookOff () const
     {
-        return delegatorOff_;
+        return hookOff_;
     }
 
-    inline void SetDelegatorOff(bool delegatorOff)
+    inline void SetHookOff(bool hookOff)
     {
-        delegatorOff_ = delegatorOff;
+        hookOff_ = hookOff;
     }
 
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false,
@@ -1320,8 +1320,8 @@ private:
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isLaunching_ = true;
     bool securityFlag_ = false;
-    bool isDelegator_ = false;
-    bool delegatorOff_ = false;
+    bool isHook_ = false;
+    bool hookOff_ = false;
     bool isPluginAbility_ = false;
     std::atomic_bool isCallerSetProcess_ = false;       // new version
     std::atomic_bool backgroundAbilityWindowDelayed_ = false;

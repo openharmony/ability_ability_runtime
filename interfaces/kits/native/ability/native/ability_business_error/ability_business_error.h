@@ -187,7 +187,7 @@ enum class AbilityErrorCode {
     ERROR_CODE_EXTENSION_START_ABILITY_CONTROLLED = 16000083,
 
     // Only allow DelegatorAbility to call the method once.
-    ERROR_CODE_NOT_DELEGATOR = 16000084,
+    ERROR_CODE_NOT_HOOK = 16000084,
 
     // The interaction process between Ability and the Window encountered an error.
     ERROR_CODE_FROM_WINDOW = 16000085,

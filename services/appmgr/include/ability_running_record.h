@@ -149,7 +149,7 @@ public:
      */
     bool IsSceneBoard() const;
 
-    bool IsDelegator() const;
+    bool IsHook() const;
 
 private:
     bool isTerminating_ = false;
