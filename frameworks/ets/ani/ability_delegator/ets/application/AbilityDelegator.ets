@@ -88,7 +88,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
     }
     executeShellCommand (cmd: string, timeoutSecs?: number) : Promise<ShellCmdResult>{
         if (timeoutSecs == null) {
-        let pPromise2 = new Promise<ShellCmdResult>((resolve: (v: ShellCmdResult) => void, reject: (error: Object) => void) => {
+        let pPromise2 = new Promise<ShellCmdResult>((resolve: (v: ShellCmdResult) => void, reject: (error: Error) => void) => {
             let pPromise1 = taskpool.execute(():ShellCmdResult => {return this.executeShellCommandsync(cmd, 0);});
             pPromise1.then((e :NullishType)=>{
             let r : ShellCmdResult =  e as ShellCmdResult;
@@ -98,7 +98,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
         });
         return pPromise2;
         } else {
-        let pPromise = new Promise<ShellCmdResult>((resolve: (v: ShellCmdResult) => void, reject: (error: Object) => void) => {
+        let pPromise = new Promise<ShellCmdResult>((resolve: (v: ShellCmdResult) => void, reject: (error: Error) => void) => {
             let pPromise1 = taskpool.execute(():ShellCmdResult=> {return  this.executeShellCommandsync(cmd, timeoutSecs as double)});
             pPromise1.then((e :NullishType)=>{
             let r : ShellCmdResult =  e as ShellCmdResult;
@@ -122,7 +122,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
 
     }
     addAbilityMonitor(monitor: AbilityMonitor): Promise<void> {
-        let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
+        let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Error) => void) => {
             let p1 = taskpool.execute(():undefined => {this.addAbilityMonitorAsync(monitor);  return undefined});
             p1.then((e: NullishType)=>{
                 let PromiseLike = e as PromiseLike<void>;
@@ -144,7 +144,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
 
     }
     startAbility(want: Want): Promise<void> {
-        let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
+        let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Error) => void) => {
             let p1 = taskpool.execute(():undefined => {this.startAbilityAsync(want);  return undefined});
             p1.then((e :NullishType)=>{
             let PromiseLike = e as PromiseLike<void>;
