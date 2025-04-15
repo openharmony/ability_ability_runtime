@@ -5021,8 +5021,10 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(std
         return nullptr;
     }
     auto isSupportMultiInstance = AAFwk::AppUtils::GetInstance().IsSupportMultiInstance();
-    if (isSupportMultiInstance) {
-        return appRunningManager_->CreateAppRunningRecord(appInfo, processName, bundleInfo, "app_instance_0");
+    auto isMultiInstance =
+        appInfo == nullptr ? false : appInfo->multiAppMode.multiAppModeType == MultiAppModeType::MULTI_INSTANCE;
+    if (isSupportMultiInstance && isMultiInstance) {
+        return appRunningManager_->CreateAppRunningRecord(appInfo, processName, bundleInfo, APP_INSTANCE_KEY_0);
     }
     return appRunningManager_->CreateAppRunningRecord(appInfo, processName, bundleInfo, "");
 }
