@@ -8860,7 +8860,7 @@ int AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr<
         ConnectServices();
         StartUserApps();
     }
-#ifdef AMS_ENABLE_SCENE_BOARD
+#ifdef ABILITY_ENABLE_SCENE_BOARD
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
     auto ret = StartHighestPriorityAbility(userId, isBoot, isAppRecovery);
     if (ret != ERR_OK) {
