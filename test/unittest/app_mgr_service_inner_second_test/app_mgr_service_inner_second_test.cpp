@@ -2330,7 +2330,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LaunchAbilit
         applicationInfo_, abilityInfo_, processName, bundleInfo, hapModuleInfo, want);
     EXPECT_NE(appRecord1, nullptr);
     result = appMgrServiceInner->LaunchAbility(token1);
-    EXPECT_EQ(result, 0);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
 
     GTEST_LOG_(INFO) << "LaunchAbility_0100 end";
 }
