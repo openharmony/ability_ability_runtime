@@ -225,7 +225,7 @@ private:
     sptr<IRemoteObject> token_ = nullptr;
     std::shared_ptr<AbilityHandler> handler_ = nullptr;
     std::shared_ptr<StsAbilityResultListeners> abilityResultListeners_ = nullptr;
-    ani_ref contentSession_;
+    ani_ref contentSession_ = nullptr;
     std::shared_ptr<StsUIExtensionContentSession> stsUiExtContentSession_;
 
 #ifdef SUPPORT_GRAPHICS

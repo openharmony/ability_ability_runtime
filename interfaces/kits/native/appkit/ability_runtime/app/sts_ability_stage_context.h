@@ -44,11 +44,9 @@ public:
     }
     static ani_object CreateStsAbilityStageContext(ani_env* env, std::shared_ptr<Context> context,
         std::weak_ptr<AppExecFwk::OHOSApplication> application);
-    static ani_object Createfiguration(ani_env* env, const std::shared_ptr<AppExecFwk::Configuration> &configuration);
     static void ResetEnv(ani_env* env);
 
 private:
-    static ani_object Createfiguration(ani_env* env, const std::shared_ptr<Context> &context);
     static ani_object CreateHapModuleInfo(ani_env* env, const std::shared_ptr<Context> &context);
 
 private:
