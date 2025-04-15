@@ -16,29 +16,29 @@
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 
 export interface Configuration {
-    language?: string;
-    colorMode?: ConfigurationConstant.ColorMode;
-    direction?: ConfigurationConstant.Direction;
-    screenDensity?: ConfigurationConstant.ScreenDensity;
-    displayId: int;
-    hasPointerDevice: boolean;
-    fontId?: string;
-    fontSizeScale: double;
-    fontWeightScale: double;
-    mcc?: string;
-    mnc?: string;
+  language?: string;
+  colorMode?: ConfigurationConstant.ColorMode;
+  direction?: ConfigurationConstant.Direction;
+  screenDensity?: ConfigurationConstant.ScreenDensity;
+  displayId?: number;
+  hasPointerDevice?: boolean;
+  fontId?: string;
+  fontSizeScale?: number;
+  fontWeightScale?: number;
+  mcc?: string;
+  mnc?: string;
 }
 
 class ConfigurationImpl implements Configuration {
-    language?: string|undefined;
-    colorMode?: ConfigurationConstant.ColorMode|undefined;
-    direction?: ConfigurationConstant.Direction|undefined;
-    screenDensity?: ConfigurationConstant.ScreenDensity|undefined;
-    displayId: int;
-    hasPointerDevice: boolean;
-    fontId?: string|undefined;
-    fontSizeScale: double;
-    fontWeightScale: double;
-    mcc?: string|undefined;
-    mnc?: string|undefined;
+  language?: string;
+  colorMode?: ConfigurationConstant.ColorMode;
+  direction?: ConfigurationConstant.Direction;
+  screenDensity?: ConfigurationConstant.ScreenDensity;
+  displayId?: number;
+  hasPointerDevice?: boolean;
+  fontId?: string;
+  fontSizeScale?: number;
+  fontWeightScale?: number;
+  mcc?: string;
+  mnc?: string;
 }
