@@ -17,5 +17,13 @@ import Context from 'application.Context'
 import {ExtensionAbilityInfo}  from 'bundleManager.ExtensionAbilityInfo'
 
 export default class ExtensionContext extends Context {
+    static {
+        loadLibrary("context_ani");
+    }
     extensionAbilityInfo: ExtensionAbilityInfo;
+    native constructor();
+    constructor(extensionAbilityInfo: ExtensionAbilityInfo) {
+        super();
+        this.extensionAbilityInfo = extensionAbilityInfo;
+    }
 }
