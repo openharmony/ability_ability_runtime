@@ -13,38 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_SCOPE_GUARD_H
-#define OHOS_ABILITY_RUNTIME_SCOPE_GUARD_H
+#ifndef OHOS_ABILITY_RUNTIME_HMSF_UTILS_H
+#define OHOS_ABILITY_RUNTIME_HMSF_UTILS_H
 
 #include <string>
 
+#include "hilog_tag_wrapper.h"
+
 namespace OHOS {
 namespace AbilityRuntime {
-class ScopeGuard final {
+class HmfsUtils final {
 public:
-    using Function = std::function<void()>;
-    explicit ScopeGuard(Function fn)
-        : fn_(fn),
-          dismissed_(false)
-    {
-    }
-
-    ~ScopeGuard()
-    {
-        if (!dismissed_) {
-            fn_();
-        }
-    }
-
-    void Dismiss()
-    {
-        dismissed_ = true;
-    }
-
-private:
-    Function fn_;
-    bool dismissed_;
+    static void AddDeleteDfx(const std::string &path);
 };
-}
-}
-#endif
+}  // namespace AAFwk
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_HMSF_UTILS_H

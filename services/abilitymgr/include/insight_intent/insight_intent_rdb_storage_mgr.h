@@ -20,22 +20,29 @@
 #include <string>
 #include "insight_intent_rdb_data_mgr.h"
 #include "hilog_tag_wrapper.h"
-#include "extra_insight_intent_total_info.h"
+#include "extract_insight_intent_profile.h"
 
 namespace OHOS {
-namespace AAFwk {
+namespace AbilityRuntime {
 class InsightRdbStorageMgr : public std::enable_shared_from_this<InsightRdbStorageMgr> {
     DECLARE_DELAYED_SINGLETON(InsightRdbStorageMgr)
 public:
+    int32_t LoadInsightIntentInfos(const int32_t userId, std::vector<ExtractInsightIntentInfo> &totalInfos);
+    int32_t LoadInsightIntentInfoByName(const std::string &bundleName, const int32_t userId,
+        std::vector<ExtractInsightIntentInfo> &totalInfos);
+    int32_t LoadInsightIntentInfo(const std::string &bundleName, const std::string &moduleName,
+        const std::string &intentName, const int32_t userId, ExtractInsightIntentInfo &totalInfo);
+    int32_t SaveStorageInsightIntentData(const std::string &bundleName, const std::string &moduleName,
+        const int32_t userId, ExtractInsightIntentProfileInfoVec &profileInfos);
+    int32_t DeleteStorageInsightIntentData(const std::string &bundleName, const int32_t userId);
+    int32_t DeleteStorageInsightIntentByUserId(const int32_t userId);
 
-    int32_t LoadInsightIntentInfos(std::vector<ExtraInsightIntentTotalInfo> &genericInfos);
-    int32_t SaveStorageInsightIntentData(const std::string bundleName, const std::string moduleName,
-        std::vector<ExtraInsightIntentTotalInfo> &genericInfos);
-    int32_t DeleteStorageInsightIntentData(const std::string bundleName);
 private:
+    void Transform(std::unordered_map<std::string, std::string> value,
+        std::vector<ExtractInsightIntentInfo> &totalInfos);
     mutable std::mutex rdbStorePtrMutex_;
 };
-}  // namespace AAFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS
 
 #endif // OHOS_INSIGHT_INTENT_RDB_STORAGE_MGR_H

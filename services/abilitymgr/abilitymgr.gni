@@ -151,6 +151,7 @@ abilityms_files = [
   "src/utils/dms_util.cpp",
   "src/utils/dump_utils.cpp",
   "src/utils/extension_permissions_util.cpp",
+  "src/utils/hmsf_utils.cpp",
   "src/utils/keep_alive_utils.cpp",
   "src/utils/main_element_utils.cpp",
   "src/utils/modal_system_dialog_util.cpp",
