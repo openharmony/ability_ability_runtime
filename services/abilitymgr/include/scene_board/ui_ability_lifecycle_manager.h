@@ -391,7 +391,14 @@ public:
     
     int32_t RevokeDelegator(const sptr<IRemoteObject> &token);
 
+    bool IsBundleStarting(pid_t pid);
+
+    void RecordPidKilling(pid_t pid, const std::string &reason);
+
 private:
+    void AddStartingPid(pid_t pid);
+    void RemoveStartingPid(pid_t pid);
+    void MarkStartingFlag(const AbilityRequest &abilityRequest);
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse) const;
     int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
     int32_t GetReusedStandardPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
@@ -557,6 +564,9 @@ private:
     std::condition_variable isTryPrepareTerminateByPidsCv_;
     std::vector<std::shared_ptr<PrepareTerminateByPidRecord>> prepareTerminateByPidRecords_;
     std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> hookSpecifiedMap_;
+
+    std::mutex startingPidsMutex_;
+    std::vector<pid_t> startingPids_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

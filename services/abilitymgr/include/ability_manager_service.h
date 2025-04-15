@@ -2564,6 +2564,8 @@ private:
 
     void StartKeepAliveAppsInner(int32_t userId);
 
+    bool ProcessLowMemoryKill(int32_t pid, const ExitReason &reason);
+
     struct StartSelfUIAbilityParam {
         Want want;
         StartOptions options;

@@ -24,6 +24,8 @@ constexpr int32_t TIMEOUT_UNIT_TIME = 1000;
 
 constexpr int32_t PREPARE_TERMINATE_TIMEOUT_TIME = 10000;
 
+constexpr const char* LOW_MEMORY_KILL = "LowMemoryKill";
+
 #ifdef SUPPORT_ASAN
 constexpr int32_t COLDSTART_TIMEOUT_MULTIPLE = 15000;
 constexpr int32_t LOAD_TIMEOUT_MULTIPLE = 15000;
