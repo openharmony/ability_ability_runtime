@@ -28,6 +28,9 @@ ohos_shared_library("cj_context_ffi") {
     "AMS_LOG_TAG = \"CJ_ABILITY_FFI\"",
     "AMS_LOG_DOMAIN = 0xD001150",
   ]
+
+  branch_protector_ret = "pac_ret"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -67,8 +70,6 @@ ohos_shared_library("cj_context_ffi") {
   sources = [ "cj_context.cpp" ]
 
   cflags = [
-    "-fstack-protector-all",
-    "-fstack-protector-strong",
     "-O2",
     "-D_FORTIFY_SOURCE=2",
   ]
