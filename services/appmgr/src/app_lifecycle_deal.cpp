@@ -29,7 +29,7 @@ using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
 namespace {
 constexpr const char* REUSING_WINDOW = "ohos.ability_runtime.reusing_window";
-constexpr const char* IS_DELEGATOR = "ohos.ability_runtime.is_delegator";
+constexpr const char* IS_HOOK = "ohos.ability_runtime.is_hook";
 }
 AppLifeCycleDeal::AppLifeCycleDeal()
 {}
@@ -85,8 +85,8 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
             FreezeUtil::GetInstance().AddLifecycleEvent(ability->GetToken(), entry);
         }
         TAG_LOGD(AAFwkTag::APPMGR, "Launch");
-        bool IsDelegatorAbility = ability->IsDelegator();
-        if (IsDelegatorAbility) {
+        bool isHookAbility = ability->IsHook();
+        if (isHookAbility) {
             auto bundleManagerHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
             HapModuleInfo hapModuleInfo;
             if (!bundleManagerHelper->GetHapModuleInfo(*abilityInfo, hapModuleInfo)) {
@@ -109,7 +109,7 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
             ability->GetWant(), ability->GetAbilityRecordId());
         if (ability->GetWant() != nullptr) {
             ability->GetWant()->RemoveParam(REUSING_WINDOW);
-            ability->GetWant()->RemoveParam(IS_DELEGATOR);
+            ability->GetWant()->RemoveParam(IS_HOOK);
         }
     } else {
         TAG_LOGW(AAFwkTag::APPMGR, "null appThread or ability");
