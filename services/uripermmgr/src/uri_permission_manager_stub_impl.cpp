@@ -921,13 +921,13 @@ ErrCode UriPermissionManagerStubImpl::ClearPermissionTokenByMap(const uint32_t t
     if (!isCallingPermission) {
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         funcResult = ERR_PERMISSION_DENIED;
-        return funcResult;
+        return ERR_OK;
     }
     std::lock_guard<std::mutex> lock(ptMapMutex_);
     if (permissionTokenMap_.find(tokenId) == permissionTokenMap_.end()) {
         TAG_LOGD(AAFwkTag::URIPERMMGR, "permissionTokenMap_ empty");
         funcResult = ERR_OK;
-        return funcResult;
+        return ERR_OK;
     }
     RevokeMapUriPermission(tokenId);
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
@@ -939,12 +939,12 @@ ErrCode UriPermissionManagerStubImpl::ClearPermissionTokenByMap(const uint32_t t
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "ClearPermission failed, ret is %{public}d", ret);
         funcResult = ret;
-        return funcResult;
+        return ERR_OK;
     }
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     permissionTokenMap_.erase(tokenId);
     funcResult = ERR_OK;
-    return funcResult;
+    return ERR_OK;
 }
 
 void UriPermissionManagerStubImpl::BoolVecToCharVec(const std::vector<bool>& boolVector, std::vector<char>& charVector)
@@ -1036,12 +1036,12 @@ ErrCode UriPermissionManagerStubImpl::Active(const UriPermissionRawData& policyR
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "StartAccessingPolicy failed, ret is %{public}d", ret);
         funcResult = ret;
-        return funcResult;
+        return ERR_OK;
     }
     std::lock_guard<std::mutex> lock(ptMapMutex_);
     permissionTokenMap_.insert(tokenId);
     funcResult = ERR_OK;
-    return funcResult;
+    return ERR_OK;
 }
 
 bool UriPermissionManagerStubImpl::RawDataToPolicyInfo(const UriPermissionRawData& policyRawData,
