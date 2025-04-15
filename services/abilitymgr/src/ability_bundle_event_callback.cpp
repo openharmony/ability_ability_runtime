@@ -58,6 +58,7 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "OnReceiveEvent, action:%{public}s.", action.c_str());
 
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
+        DelayedSingleton<AppScheduler>::GetInstance()->KillApplicationByUid(bundleName, uid, "UninstallAppEnd");
         // uninstall bundle
         HandleRemoveUriPermission(tokenId);
         HandleUpdatedModuleInfo(bundleName, uid, moduleName);
