@@ -170,7 +170,7 @@ HWTEST_F(WatchdogTest, AppExecFwk_watchdog_ReportEvent_0004, Function | MediumTe
  * @tc.name: Init
  * @tc.desc: Verify that function Init.
  */
-HWTEST_F(WatchdogTest, WatchdogTest_Init_001, TestSize.Level1)
+HWTEST_F(WatchdogTest, WatchdogTest_Init_001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_Init_001 start";
     std::shared_ptr<EventHandler> eventHandler = std::make_shared<EventHandler>();
@@ -199,7 +199,7 @@ HWTEST_F(WatchdogTest, WatchdogTest_Init_002, TestSize.Level1)
  * @tc.name: Stop
  * @tc.desc: Verify that function Init.
  */
-HWTEST_F(WatchdogTest, WatchdogTest_Stop_001, TestSize.Level1)
+HWTEST_F(WatchdogTest, WatchdogTest_Stop_001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_Stop_001 start";
     std::shared_ptr<EventHandler> eventHandler = std::make_shared<EventHandler>();
@@ -229,7 +229,7 @@ HWTEST_F(WatchdogTest, WatchdogTest_Stop_002, TestSize.Level1)
  * @tc.name: SetAppMainThreadState
  * @tc.desc: Verify that function SetAppMainThreadState.
  */
-HWTEST_F(WatchdogTest, WatchdogTest_SetAppMainThreadState_001, TestSize.Level1)
+HWTEST_F(WatchdogTest, WatchdogTest_SetAppMainThreadState_001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_SetAppMainThreadState_001 start";
     bool appMainThreadState = true;
@@ -244,7 +244,7 @@ HWTEST_F(WatchdogTest, WatchdogTest_SetAppMainThreadState_001, TestSize.Level1)
  * @tc.name: SetBackgroundStatus
  * @tc.desc: Verify that function SetBackgroundStatus.
  */
-HWTEST_F(WatchdogTest, WatchdogTest_SetBackgroundStatus_001, TestSize.Level1)
+HWTEST_F(WatchdogTest, WatchdogTest_SetBackgroundStatus_001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_SetBackgroundStatus_001 start";
     bool isInBackground = false;

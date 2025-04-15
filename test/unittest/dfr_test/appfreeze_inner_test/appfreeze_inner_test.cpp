@@ -61,7 +61,7 @@ void AppfreezeInnerTest::TearDown(void)
  * @tc.name: SetMainHandler
  * @tc.desc: Verify that function SetMainHandler.
  */
-HWTEST_F(AppfreezeInnerTest, AppfreezeInner__SetMainHandler_001, TestSize.Level1)
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner__SetMainHandler_001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "AppfreezeInner__SetMainHandler_001 start";
     std::shared_ptr<EventHandler> eventHandler = std::make_shared<EventHandler>();
@@ -75,7 +75,7 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner__SetMainHandler_001, TestSize.Level1
  * @tc.name: SetApplicationInfo
  * @tc.desc: Verify that function SetApplicationInfo.
  */
-HWTEST_F(AppfreezeInnerTest, AppfreezeInner__SetApplicationInfo_001, TestSize.Level1)
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner__SetApplicationInfo_001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "AppfreezeInner__SetApplicationInfo_001 start";
     std::shared_ptr<ApplicationInfo> applicationInfo = std::make_shared<ApplicationInfo>();
