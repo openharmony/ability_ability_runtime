@@ -23,23 +23,30 @@
 #include "insight_intent_rdb_storage_mgr.h"
 
 namespace OHOS {
-namespace AAFwk {
+namespace AbilityRuntime {
 class InsightIntentDbCache : public std::enable_shared_from_this<InsightIntentDbCache> {
     DECLARE_DELAYED_SINGLETON(InsightIntentDbCache)
 public:
-    void InitInsightIntentCache();
-    void GetAllInsightIntentTotalInfo(std::vector<ExtraInsightIntentTotalInfo> &totalInfos);
-    void GetInsightIntentTotalInfoByName(const std::string bundleName,
-        std::vector<ExtraInsightIntentTotalInfo> &totalInfos);
-    void GetInsightIntentTotalInfo(const std::string bundleName, const std::string intentName,
-        std::vector<ExtraInsightIntentTotalInfo> &totalInfos);
-    int32_t SaveInsightIntentTotalInfo(const std::string bundleName, const std::string moduleName,
-        std::vector<ExtraInsightIntentTotalInfo> totalInfos);
-    int32_t DeleteInsightIntentTotalInfo(const std::string bundleName);
+    void InitInsightIntentCache(const int32_t userId);
+    void GetAllInsightIntentGenericInfo(std::vector<ExtractInsightIntentGenericInfo> &genericInfos);
+    void GetInsightIntentGenericInfoByName(const std::string &bundleName,
+        std::vector<ExtractInsightIntentGenericInfo> &genericInfos);
+    void GetInsightIntentGenericInfo(const std::string &bundleName, const std::string &moduleName,
+        const std::string &intentName, ExtractInsightIntentGenericInfo &genericInfos);
+    void GetAllInsightIntentInfo(const int32_t userId, std::vector<ExtractInsightIntentInfo> &infos);
+    void GetInsightIntentInfoByName(const std::string &bundleName, const int32_t userId,
+        std::vector<ExtractInsightIntentInfo> &infos);
+    void GetInsightIntentInfo(const std::string &bundleName, const std::string &moduleName,
+        const std::string &intentName, const int32_t userId, ExtractInsightIntentInfo &infos);
+    int32_t SaveInsightIntentTotalInfo(const std::string &bundleName, const std::string &moduleName,
+        const int32_t userId, ExtractInsightIntentProfileInfoVec profileInfos);
+    int32_t DeleteInsightIntentTotalInfo(const std::string &bundleName, const int32_t userId);
+    int32_t DeleteInsightIntentByUserId(const int32_t userId);
 private:
-    mutable std::mutex totalInfosMutex_;
-    std::map<std::string, std::vector<ExtraInsightIntentTotalInfo>> intentTotalInfos_;
+    int32_t userId_ = -1;
+    mutable std::mutex genericInfosMutex_;
+    std::map<std::string, std::vector<ExtractInsightIntentGenericInfo>> intentGenericInfos_;
 };
-}  // namespace AAFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif  // OHOS_INSIGHT_INTENT_DB_CACHE_H
