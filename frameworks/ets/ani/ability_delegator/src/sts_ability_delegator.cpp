@@ -324,5 +324,23 @@ ani_int StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_object
     return ani_int(result);
 }
 
+ani_ref GetCurrentTopAbilitySync(ani_env* env)
+{
+    TAG_LOGD(AAFwkTag::DELEGATOR, "called");
+    ani_object objValue = nullptr;
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
+    if (delegator != nullptr) {
+        auto property = delegator->GetCurrentTopAbility();
+        if (!property || property->stsObject_.expired()) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "invalid property");
+            return {};
+        }
+        return property->stsObject_.lock()->aniRef;
+    } else {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "delegator is nullptr");
+        return {};
+    }
+    return objValue;
+}
 } // namespace AbilityDelegatorSts
 } // namespace OHOS
