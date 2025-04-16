@@ -12266,9 +12266,9 @@ int32_t AbilityManagerService::GetUIExtensionRootHostInfo(const sptr<IRemoteObje
     }
 
     hostInfo.elementName_ = callerRecord->GetElementName();
-    auto session = callerRecord->GetSessionInfo();
-    if (session != nullptr) {
-        hostInfo.sessionName = session->sessionName;
+    auto sessionInfo = callerRecord->GetSessionInfo();
+    if (sessionInfo != nullptr) {
+        hostInfo.sessionName = sessionInfo->sessionName;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "uri: %{public}s, sessionName: %{public}s.",
              hostInfo.elementName_.GetURI().c_str(),hostInfo.sessionName.c_str());
