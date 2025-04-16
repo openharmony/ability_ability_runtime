@@ -23,6 +23,7 @@
 #include "sts_error_utils.h"
 #include "ani_enum_convert.h"
 #include "sts_ability_monitor.h"
+#include "sts_context_utils.h"
 #include <sstream>
 namespace OHOS {
 namespace AbilityDelegatorSts {
@@ -81,25 +82,9 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref failed");
         return {};
     }
-    BindResourceManager(aniEnv, contextClass, contextObj, context);
+    ContextUtil::BindApplicationInfo(aniEnv, contextClass, contextObj, context);
+    ContextUtil::BindResourceManager(aniEnv, contextClass, contextObj, context);
     return contextObj;
-}
-
-void BindResourceManager(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<AbilityRuntime::Context> context)
-{
-    ani_field resourceManagerField;
-    if (ANI_OK != aniEnv->Class_FindField(contextClass, "resourceManager", &resourceManagerField)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find resourceManager failed");
-        return;
-    }
-    auto resourceManager = context->GetResourceManager();
-    ani_object resourceMgrObj = Global::Resource::ResMgrAddon::CreateResMgr(aniEnv, "", resourceManager, context);
-    if (aniEnv->Object_SetField_Ref(contextObj, resourceManagerField,
-        reinterpret_cast<ani_ref>(resourceMgrObj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
-        return;
-    }
 }
 
 ani_object GetAppContext(ani_env* env, [[maybe_unused]]ani_object object, ani_class clss)
