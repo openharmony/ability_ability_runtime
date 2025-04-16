@@ -57,7 +57,7 @@ void AppFreezeStateTest::TearDown(void)
  * @tc.desc: Verify that function SetAppFreezeState and CancelAppFreezeState.
  * @tc.type: FUNC
  */
-HWTEST_F(AppFreezeStateTest, AppfreezeStateTest_001, TestSize.Level1)
+HWTEST_F(AppFreezeStateTest, AppfreezeStateTest_001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "AppfreezeStateTest_001 start";
     uint32_t flag = 1;
