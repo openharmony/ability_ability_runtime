@@ -23,6 +23,7 @@
 #include "sts_error_utils.h"
 #include "ani_enum_convert.h"
 #include "sts_ability_monitor.h"
+#include "sts_context_utils.h"
 #include <sstream>
 namespace OHOS {
 namespace AbilityDelegatorSts {
@@ -81,6 +82,8 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref failed");
         return {};
     }
+    ContextUtil::BindApplicationInfo(aniEnv, contextClass, contextObj, context);
+    ContextUtil::BindResourceManager(aniEnv, contextClass, contextObj, context);
     return contextObj;
 }
 
