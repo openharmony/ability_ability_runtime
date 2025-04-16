@@ -328,7 +328,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "Designate the process as a persistent process and ensure that the device has sufficient memory",
         {KILL_PROCESS_KEEP_ALIVE_SOLUTION_ONE});
     messageMap_[ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE] = GetAaToolErrorInfo("10106102",
-        "The device screen is locked during the application launch.",
+        "The device screen is locked during the application launch, unlock screen failed.",
         "The current mode is developer mode, and the screen cannot be unlocked automatically",
         {ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE_SOLUTION_ONE});
     messageMap_[ERR_NOT_SUPPORTED_PRODUCT_TYPE] = GetAaToolErrorInfo("10106107",
