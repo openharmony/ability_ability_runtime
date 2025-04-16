@@ -19,64 +19,73 @@
 namespace OHOS {
 namespace AbilityDelegatorSts {
 using namespace OHOS::AbilityRuntime;
-STSAbilityMonitor::STSAbilityMonitor(ani_env* env_, const std::string &abilityName) : env_(env_), abilityName_(abilityName)
+STSAbilityMonitor::STSAbilityMonitor(const std::string &abilityName)
+    : IAbilityMonitor(abilityName), abilityName_(abilityName)
 {}
 
-STSAbilityMonitor::STSAbilityMonitor(ani_env* env_, const std::string &abilityName, const std::string &moduleName)
-    : env_(env_), abilityName_(abilityName), moduleName_(moduleName)
+STSAbilityMonitor::STSAbilityMonitor(const std::string &abilityName, const std::string &moduleName)
+    : IAbilityMonitor(abilityName), abilityName_(abilityName), moduleName_(moduleName)
 {}
 
-void STSAbilityMonitor::OnAbilityCreate(const std::weak_ptr<STSNativeReference> &abilityObj)
+void STSAbilityMonitor::OnSTSAbilityStart(const std::weak_ptr<STSNativeReference> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called OnAbilityCreate");
     CallLifecycleCBFunction("onAbilityCreate", abilityObj);
 }
 
-void STSAbilityMonitor::OnAbilityForeground(const std::weak_ptr<STSNativeReference> &abilityObj)
+void STSAbilityMonitor::OnSTSAbilityForeground(const std::weak_ptr<STSNativeReference> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called OnAbilityForeground");
     CallLifecycleCBFunction("onAbilityForeground", abilityObj);
 }
 
-void STSAbilityMonitor::OnAbilityBackground(const std::weak_ptr<STSNativeReference> &abilityObj)
+void STSAbilityMonitor::OnSTSAbilityBackground(const std::weak_ptr<STSNativeReference> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called OnAbilityBackground");
     CallLifecycleCBFunction("onAbilityBackground", abilityObj);
 }
 
-void STSAbilityMonitor::OnAbilityDestroy(const std::weak_ptr<STSNativeReference> &abilityObj)
+void STSAbilityMonitor::OnSTSAbilityDestroy(const std::weak_ptr<STSNativeReference> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called OnAbilityDestroy");
     CallLifecycleCBFunction("onAbilityDestroy", abilityObj);
 }
 
-void STSAbilityMonitor::OnWindowStageCreate(const std::weak_ptr<STSNativeReference> &abilityObj)
+void STSAbilityMonitor::OnSTSWindowStageCreate(const std::weak_ptr<STSNativeReference> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called OnWindowStageCreate");
     CallLifecycleCBFunction("onWindowStageCreate", abilityObj);
 }
 
-void STSAbilityMonitor::OnWindowStageRestore(const std::weak_ptr<STSNativeReference> &abilityObj)
+void STSAbilityMonitor::OnSTSWindowStageRestore(const std::weak_ptr<STSNativeReference> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called OnWindowStageRestore");
     CallLifecycleCBFunction("onWindowStageRestore", abilityObj);
 }
 
-void STSAbilityMonitor::OnWindowStageDestroy(const std::weak_ptr<STSNativeReference> &abilityObj)
+void STSAbilityMonitor::OnSTSWindowStageDestroy(const std::weak_ptr<STSNativeReference> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called OnWindowStageDestroy");
     CallLifecycleCBFunction("onWindowStageDestroy", abilityObj);
 }
 
-void STSAbilityMonitor::SetStsAbilityMonitor(ani_object abilityMonitorObj)
+void STSAbilityMonitor::SetSTSAbilityMonitor(ani_env *env, ani_object &abilityMonitorObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called SetStsAbilityMonitor");
-    stsAbilityMonitor_ = std::unique_ptr<STSNativeReference>();
 
+    stsAbilityMonitor_ = std::make_unique<STSNativeReference>();
     ani_ref objRef = nullptr;
-    if (env_->GlobalReference_Create(abilityMonitorObj, &objRef) != ANI_OK) {
+    if (env->GlobalReference_Create(abilityMonitorObj, &objRef) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "GlobalReference_Create failed");
+        return;
     }
+
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "GetVM failed");
+        return;
+    }
+    vm_ = aniVM;
     stsAbilityMonitor_->aniObj = abilityMonitorObj;
     stsAbilityMonitor_->aniRef = objRef;
 }
@@ -84,7 +93,7 @@ void STSAbilityMonitor::SetStsAbilityMonitor(ani_object abilityMonitorObj)
 void STSAbilityMonitor::CallLifecycleCBFunction(const std::string &functionName,
     const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
 {
-    TAG_LOGI(AAFwkTag::UI_EXT, "CallLifecycleCBFunction, name: %{public}s start", functionName.c_str());
+    TAG_LOGI(AAFwkTag::DELEGATOR, "CallLifecycleCBFunction, name: %{public}s start", functionName.c_str());
     if (functionName.empty()) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "empty funcName");
         return;
@@ -95,42 +104,40 @@ void STSAbilityMonitor::CallLifecycleCBFunction(const std::string &functionName,
         return;
     }
 
+    ani_env *env = GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
+        return;
+    }
+
     ani_status status = ANI_OK;
-    env_->DescribeError();
-    env_->ResetError();
-
-    ani_class cls = nullptr;
-    if ((status = env_->FindClass("Lapplication/AbilityMonitor/AbilityMonitorInner", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
-        return;
-    }
-
-    ani_method method = nullptr;
-    status = env_->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    ani_object monitorObj = reinterpret_cast<ani_object>(stsAbilityMonitor_->aniRef);
+    ani_ref funRef;
+    status = env->Object_GetPropertyByName_Ref(monitorObj, functionName.c_str(), &funRef);
     if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::UI_EXT, "call Class_FindMethod ctor failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref failed");
         return;
     }
 
-    ani_object obj = nullptr;
-    status = env_->Object_New(cls, method, &obj);
-    if (status != ANI_OK) {
-        TAG_LOGI(AAFwkTag::UI_EXT, "call Object_New obj failed");
+    ani_fn_object onFn = reinterpret_cast<ani_fn_object>(funRef);
+    ani_ref resutlt;
+    std::vector<ani_ref> argv = { abilityObj.lock()->aniRef };
+    if ((status = env->FunctionalObject_Call(onFn, 1, argv.data(), &resutlt)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "FunctionalObject_Call failed, status : %{public}d", status);
         return;
     }
+}
 
-    method = nullptr;
-    if ((status = env_->Class_FindMethod(cls, functionName.c_str(), nullptr, &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Class_FindMethod status : %{public}d", status);
-        return;
+ani_env* STSAbilityMonitor::GetAniEnv()
+{
+    if (vm_ == nullptr) {
+        return nullptr;
     }
-
-    auto lockedPtr = const_cast<std::weak_ptr<AbilityRuntime::STSNativeReference>&>(abilityObj).lock();
-
-    if (lockedPtr && (status = env_->Object_CallMethod_Void(obj, method, nullptr, lockedPtr->aniObj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Object_CallMethod_Void_V status : %{public}d", status);
+    ani_env* aniEnv = nullptr;
+    if (vm_->GetEnv(ANI_VERSION_1, &aniEnv) != ANI_OK) {
+        return nullptr;
     }
-    TAG_LOGI(AAFwkTag::UI_EXT, "CallLifecycleCBFunction, name: %{public}s end", functionName.c_str());
+    return aniEnv;
 }
 }  // namespace AbilityDelegatorJs
 }  // namespace OHOS

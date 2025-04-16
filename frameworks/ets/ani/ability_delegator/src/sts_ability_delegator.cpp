@@ -22,6 +22,8 @@
 #include "ani_common_want.h"
 #include "sts_error_utils.h"
 #include "ani_enum_convert.h"
+#include "sts_ability_monitor.h"
+#include <sstream>
 namespace OHOS {
 namespace AbilityDelegatorSts {
 
@@ -45,38 +47,38 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
     }
     ani_field areaField;
     if (aniEnv->Class_FindField(contextClass, "area", &areaField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find area failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "find area failed");
         return {};
     }
     ani_enum_item areaModeItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(
         aniEnv, "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;", context->GetArea(), areaModeItem);
     if (aniEnv->Object_SetField_Ref(contextObj, areaField, (ani_ref)areaModeItem) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Int failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Int failed");
         return {};
     }
     ani_field filesDirField;
     if (aniEnv->Class_FindField(contextClass, "filesDir", &filesDirField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find filesDir failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "find filesDir failed");
         return {};
     }
     auto filesDir = context->GetFilesDir();
     ani_string filesDir_string{};
     aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDir_string);
     if (aniEnv->Object_SetField_Ref(contextObj, filesDirField, reinterpret_cast<ani_ref>(filesDir_string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref failed");
         return {};
     }
     ani_field tempDirField;
     if (aniEnv->Class_FindField(contextClass, "tempDir", &tempDirField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find find tempDir failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "find find tempDir failed");
         return {};
     }
     auto tempDir = context->GetTempDir();
     ani_string tempDir_string{};
     aniEnv->String_NewUTF8(tempDir.c_str(), tempDir.size(), &tempDir_string);
     if (aniEnv->Object_SetField_Ref(contextObj, tempDirField, reinterpret_cast<ani_ref>(tempDir_string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref failed");
         return {};
     }
     return contextObj;
@@ -139,25 +141,25 @@ ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmd
     ani_field filed;
     status = env->Class_FindField(cls, "stdResult", &filed);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField configObj failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindField configObj failed");
     }
     ani_string aniStringVal {};
     std::string strResult = result->GetStdResult();
     status = env->String_NewUTF8(strResult.c_str(), strResult.size(), &aniStringVal);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "String_NewUTF8 mcc failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "String_NewUTF8 mcc failed");
     }
     if (env->Object_SetField_Ref(object, filed, aniStringVal) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Ref mcc failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref mcc failed");
     }
     int32_t exitCode = result->GetExitCode();
     status = env->Class_FindField(cls, "exitCode", &filed);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindField configObj failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindField configObj failed");
     }
     status = env->Object_SetField_Int(object, filed, exitCode);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Int exitCode failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Int exitCode failed");
     }
     return object;
 }
@@ -233,22 +235,20 @@ void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg)
     return;
 }
 
-void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resString)
+void RetrieveStringFromAni(ani_env *env, ani_string str, std::string &res)
 {
-    ani_status status = ANI_OK;
-    ani_size result = 0U;
-    status = env->String_GetUTF8Size(string, &result);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "String_GetUTF8Size failed status : %{public}d", status);
+    ani_size sz {};
+    ani_status status = ANI_ERROR;
+    if ((status = env->String_GetUTF8Size(str, &sz)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "status : %{public}d", status);
         return;
     }
-    ani_size substrOffset = 0U;
-    ani_size substrSize = result;
-    const ani_size bufferExtension = 10U;
-    resString.resize(substrSize + bufferExtension);
-    ani_size resSize = resString.size();
-    result = 0U;
-    status = env->String_GetUTF8SubString(string, substrOffset, substrSize, resString.data(), resSize, &result);
+    res.resize(sz + 1);
+    if ((status = env->String_GetUTF8SubString(str, 0, sz, res.data(), res.size(), &sz)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "status : %{public}d", status);
+        return;
+    }
+    res.resize(sz);
 }
 
 void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj)
@@ -264,29 +264,18 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status : %{public}d", status);
         return;
     }
-    ani_field fieldModuleName = nullptr;
-    status = env->Class_FindField(monitorCls, "moduleName", &fieldModuleName);
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_GetField failed");
-        return;
-    }
     ani_ref moduleNameRef;
-    status = env->Object_GetField_Ref(monitorObj, fieldModuleName, &moduleNameRef);
+    status = env->Object_GetPropertyByName_Ref(monitorObj, "moduleName", &moduleNameRef);
     if (ANI_OK != status) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
         return;
     }
+
     std::string strModuleName;
     ani_string aniModuleString = static_cast<ani_string>(moduleNameRef);
     RetrieveStringFromAni(env, aniModuleString, strModuleName);
-    ani_field fieldAbilityName = nullptr;
-    status = env->Class_FindField(monitorCls, "abilityName", &fieldAbilityName);
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_GetField failed");
-        return;
-    }
     ani_ref abilityNameRef;
-    status = env->Object_GetField_Ref(monitorObj, fieldAbilityName, &abilityNameRef);
+    status = env->Object_GetPropertyByName_Ref(monitorObj, "abilityName", &abilityNameRef);
     if (ANI_OK != status) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
         return;
@@ -294,8 +283,9 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
     std::string strAbilityName;
     ani_string aniAbilityName = static_cast<ani_string>(abilityNameRef);
     RetrieveStringFromAni(env, aniAbilityName, strAbilityName);
-    std::shared_ptr<AppExecFwk::IAbilityMonitor> monitor =
-        std::make_shared<AppExecFwk::IAbilityMonitor>(strAbilityName, strModuleName);
+    TAG_LOGI(AAFwkTag::DELEGATOR, "abilityName %{public}s ", strAbilityName.c_str());
+    std::shared_ptr<STSAbilityMonitor> monitor = std::make_shared<STSAbilityMonitor>(strAbilityName);
+    monitor->SetSTSAbilityMonitor(env, monitorObj);
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (delegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
@@ -304,7 +294,7 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
     delegator->AddAbilityMonitor(monitor);
 }
 
-ani_int StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_class aniClass, ani_object wantObj)
+ani_int StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_object wantObj)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "StartAbility call");
     if (nullptr == env) {

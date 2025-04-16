@@ -60,6 +60,7 @@ template("delegator") {
       "ipc:ipc_napi",
       "ipc:ipc_single",
       "napi:ace_napi",
+      "runtime_core:ani",
     ]
 
     cflags_cc = []
