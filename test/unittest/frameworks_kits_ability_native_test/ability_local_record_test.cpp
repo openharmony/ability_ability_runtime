@@ -109,3 +109,15 @@ HWTEST_F(AbilityLocalRecordTest, GetToken_0100, TestSize.Level2)
     EXPECT_TRUE(record->GetToken() != nullptr);
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetToken_0100 end";
 }
+
+/**
+ * @tc.number: IsHook_0100
+ * @tc.name: IsHook
+ * @tc.desc: IsHook Test.
+ */
+HWTEST_F(AbilityLocalRecordTest, IsHook_0100, TestSize.Level2)
+{
+    auto want = std::make_shared<AAFwk::Want>();
+    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, want, 0);
+    EXPECT_FALSE(record->IsHook());
+}
