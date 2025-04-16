@@ -542,6 +542,11 @@ void ConnectionStateManager::InitAppStateObserver()
     appStateObserver_ = new (std::nothrow)InnerAppStateObserver([](int32_t pid) {
         DelayedSingleton<ConnectionStateManager>::GetInstance()->HandleAppDied(pid);
     });
+    if (!appStateObserver_) {
+        TAG_LOGE(AAFwkTag::CONNECTION, "init app state observer err");
+        return;
+    }
+
     int32_t err = appManager->RegisterApplicationStateObserver(appStateObserver_);
     if (err != 0) {
         TAG_LOGE(AAFwkTag::CONNECTION, "register to appmgr err:%{public}d", err);
