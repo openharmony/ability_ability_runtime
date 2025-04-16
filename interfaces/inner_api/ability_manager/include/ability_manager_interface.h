@@ -2120,7 +2120,7 @@ public:
      * @param token, ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t RevokeDelegator(const sptr<IRemoteObject> &token)
+    virtual int32_t RevokeDelegator(sptr<IRemoteObject> token)
     {
         return 0;
     }

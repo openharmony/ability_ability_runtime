@@ -1472,7 +1472,7 @@ public:
         return taskHandler_;
     }
 
-    int32_t LaunchAbility(const sptr<IRemoteObject> &token);
+    int32_t LaunchAbility(sptr<IRemoteObject> token);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,

@@ -138,7 +138,7 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, FindRecordFromSessionMap_001, Test
     int32_t appIndex = 0;
     const int32_t sessionId = 100;
 
-    auto ret = mgr->FindRecordFromSessionMap(abilityRequest, false);
+    auto ret = mgr->FindRecordFromSessionMap(abilityRequest);
     EXPECT_EQ(ret, nullptr);
 
     (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
@@ -153,7 +153,7 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, FindRecordFromSessionMap_001, Test
 
     const auto info = abilityRecord->GetAbilityInfo();
 
-    ret = mgr->FindRecordFromSessionMap(abilityRequest, false);
+    ret = mgr->FindRecordFromSessionMap(abilityRequest);
     EXPECT_NE(ret, nullptr);
     EXPECT_EQ(ret, abilityRecord);
     EXPECT_EQ(info.bundleName, abilityRequest.abilityInfo.bundleName);

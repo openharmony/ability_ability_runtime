@@ -1747,7 +1747,7 @@ public:
      * @param token, ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode RevokeDelegator(const sptr<IRemoteObject> &token);
+    ErrCode RevokeDelegator(sptr<IRemoteObject> token);
 
 private:
     AbilityManagerClient();
