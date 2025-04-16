@@ -264,29 +264,18 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status : %{public}d", status);
         return;
     }
-    ani_field fieldModuleName = nullptr;
-    status = env->Class_FindField(monitorCls, "moduleName", &fieldModuleName);
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_GetField failed");
-        return;
-    }
     ani_ref moduleNameRef;
-    status = env->Object_GetField_Ref(monitorObj, fieldModuleName, &moduleNameRef);
+    status = env->Object_GetPropertyByName_Ref(monitorObj, "moduleName", &moduleNameRef);
     if (ANI_OK != status) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
         return;
     }
+
     std::string strModuleName;
     ani_string aniModuleString = static_cast<ani_string>(moduleNameRef);
     RetrieveStringFromAni(env, aniModuleString, strModuleName);
-    ani_field fieldAbilityName = nullptr;
-    status = env->Class_FindField(monitorCls, "abilityName", &fieldAbilityName);
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_GetField failed");
-        return;
-    }
     ani_ref abilityNameRef;
-    status = env->Object_GetField_Ref(monitorObj, fieldAbilityName, &abilityNameRef);
+    status = env->Object_GetPropertyByName_Ref(monitorObj, "abilityName", &abilityNameRef);
     if (ANI_OK != status) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
         return;
@@ -294,6 +283,7 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
     std::string strAbilityName;
     ani_string aniAbilityName = static_cast<ani_string>(abilityNameRef);
     RetrieveStringFromAni(env, aniAbilityName, strAbilityName);
+    TAG_LOGI(AAFwkTag::DELEGATOR, "abilityName %{public}s ", strAbilityName.c_str());
     std::shared_ptr<STSAbilityMonitor> monitor = std::make_shared<STSAbilityMonitor>(strAbilityName);
     monitor->SetSTSAbilityMonitor(env, monitorObj);
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
