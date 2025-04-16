@@ -345,6 +345,21 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_03
 }
 
 /**
+ * @tc.name: Ability_Context_Impl_SetMissionContinueState_0400
+ * @tc.desc: test set mission continue state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_0400, Function | MediumTest | Level1)
+{
+    auto context = std::make_unique<AbilityContextImpl>();
+    context->isHook_ = true;
+    AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_MAX;
+    auto ret = context->SetMissionContinueState(state);
+    int32_t resultCode = -2;
+    EXPECT_EQ(ret, resultCode);
+}
+
+/**
  * @tc.name: Ability_Context_Impl_SetMissionLabel_0100
  * @tc.desc: test set mission label.
  * @tc.type: FUNC
@@ -376,6 +391,21 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionLabel_0100, Func
     abilityCallback.reset();
     context_->RegisterAbilityCallback(abilityCallback);
     AAFwk::AbilityManagerClient::GetInstance()->proxy_ = nullptr;
+}
+
+/**
+ * @tc.name: Ability_Context_Impl_SetMissionLabel_0200
+ * @tc.desc: test set mission label.
+ * @tc.type: FUNC
+ * @tc.require: I5OB2Y
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionLabel_0200, Function | MediumTest | Level1)
+{
+    auto context = std::make_unique<AbilityContextImpl>();
+    context->isHook_ = true;
+    auto ret = context->SetMissionLabel(TEST_LABEL);
+    int32_t resultCode = -2;
+    EXPECT_EQ(ret, resultCode);
 }
 
 /**
@@ -482,6 +512,20 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_TerminateSelf_0100, Functi
 }
 
 /**
+ * @tc.number: Ability_Context_Impl_TerminateSelf_0200
+ * @tc.name: TerminateSelf
+ * @tc.desc: Terminate Self
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_TerminateSelf_0200, Function | MediumTest | Level1)
+{
+    auto context = std::make_unique<AbilityContextImpl>();
+    context->isHook_ = true;
+    context->hookOff_ = true;
+    auto ret = context->TerminateSelf();
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
  * @tc.number: Ability_Context_Impl_SetAbilityInfo_0100
  * @tc.name: SetAbilityInfo
  * @tc.desc: Set AbilityInfo
@@ -534,6 +578,22 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_TerminateAbilityWithResult
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_EQ(ret, ERR_OK);
     }
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_TerminateAbilityWithResult_0200
+ * @tc.name: TerminateAbilityWithResult
+ * @tc.desc: Terminate Ability With Result
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_TerminateAbilityWithResult_0200, Function | MediumTest | Level1)
+{
+    auto context = std::make_unique<AbilityContextImpl>();
+    context->isHook_ = true;
+    context->hookOff_ = true;
+    AAFwk::Want want;
+    int32_t resultCode = 1;
+    auto ret = context->TerminateAbilityWithResult(want, resultCode);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
@@ -1620,6 +1680,22 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_RestoreWindowStage_0100, F
 
     RequestDialogResultTask task = RequestDialogResultTaskCallBack;
     context_->RequestDialogService(want, std::move(task));
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_RestoreWindowStage_0200
+ * @tc.name: RestoreWindowStage
+ * @tc.desc: RestoreWindowStage  RequestDialogService
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_RestoreWindowStage_0200, Function | MediumTest | Level1)
+{
+    auto context = std::make_unique<AbilityContextImpl>();
+    context->isHook_ = true;
+    napi_env env = nullptr;
+    napi_value contentStorage = nullptr;
+    auto ret = context->RestoreWindowStage(env, contentStorage);
+    int32_t resultCode = -2;
+    EXPECT_EQ(ret, resultCode);
 }
 
 /**
