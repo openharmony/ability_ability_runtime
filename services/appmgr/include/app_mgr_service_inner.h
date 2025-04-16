@@ -1830,6 +1830,7 @@ private:
     bool NotifyMemMgrPriorityChanged(const std::shared_ptr<AppRunningRecord> appRecord);
 
     void HandlePreloadApplication(const PreloadRequest &request);
+    void SetPreloadDebugApp(std::shared_ptr<AAFwk::Want> want, std::shared_ptr<ApplicationInfo> appInfo);
 
     void reportpreLoadTask(const std::shared_ptr<AppRunningRecord> appRecord);
 
@@ -1910,6 +1911,7 @@ private:
     void SendReStartProcessEvent(AAFwk::EventInfo &eventInfo, int32_t appUid);
     void SendAppLaunchEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void InitAppWaitingDebugList();
+    bool IsWaitingDebugAppInner(const std::string &bundleName);
     void HandleConfigurationChange(const Configuration &config, const int32_t userId = -1);
     bool CheckIsThreadInFoundation(pid_t pid);
     bool CheckAppFault(const std::shared_ptr<AppRunningRecord> &appRecord, const FaultData &faultData);
