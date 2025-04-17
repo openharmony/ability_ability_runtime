@@ -14,7 +14,7 @@
  */
 import UIAbility from '@ohos.app.ability.UIAbility';
 
-export default interface AbilityMonitor {
+export interface AbilityMonitor {
 
   moduleName: string;
   abilityName: string;
