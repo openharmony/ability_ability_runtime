@@ -1594,7 +1594,6 @@ ohos_shared_library("ui_extension") {
     "${ability_runtime_native_path}/ability/native/ui_extension_base/ui_extension_context.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_base/ui_extension_servicehost_stub_impl.cpp",
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/src/sts_ui_extension.cpp",
-    "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/src/sts_ui_extension_common.cpp",
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/src/sts_ui_extension_content_session.cpp",
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/src/sts_ui_extension_context.cpp",
   ]
