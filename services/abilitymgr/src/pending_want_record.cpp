@@ -91,6 +91,7 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
 
     bool sendFinish = (senderInfo.finishedReceiver != nullptr);
     int32_t res = ExecuteOperation(pendingWantManager, senderInfo, want);
+    TAG_LOGI(AAFwkTag::WANTAGENT, "ExecuteOperation return %{public}d, sendFinish %{public}d", res, sendFinish);
     if (sendFinish && res != START_CANCELED) {
         WantParams wantParams = {};
         senderInfo.finishedReceiver->PerformReceive(want, senderInfo.code, "", wantParams, false, false, 0);
