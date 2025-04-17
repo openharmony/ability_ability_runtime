@@ -284,7 +284,7 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(
  *
  * @return Returns a pointer to the arguments passed to current child process.\n
  * For details, see {@link NativeChildProcess_Args}.
- * @since 16
+ * @since 17
  */
 NativeChildProcess_Args* OH_Ability_GetCurrentChildProcessArgs();
 
