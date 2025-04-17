@@ -327,6 +327,9 @@ public:
      */
     virtual int32_t OnShare(AAFwk::WantParams &wantParams);
 
+    void BindHybridContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+        const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record);
+
     bool CheckIsSilentForeground() const;
 
     void SetIsSilentForeground(bool isSilentForeground);
@@ -354,6 +357,10 @@ private:
     void SetLaunchParam(const AAFwk::LaunchParam &launchParam);
     void InitConfigurationProperties(const AppExecFwk::Configuration &changeConfiguration,
         ResourceConfigHelper &resourceConfig);
+    void BindStsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+        const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record);
+    void BindJsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+        const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record);
 
     std::shared_ptr<AppExecFwk::ContinuationHandlerStage> continuationHandler_ = nullptr;
     std::shared_ptr<AppExecFwk::ContinuationManagerStage> continuationManager_ = nullptr;

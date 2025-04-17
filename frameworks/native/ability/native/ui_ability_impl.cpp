@@ -49,6 +49,7 @@ void UIAbilityImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
         new (std::nothrow) WindowLifeCycleImpl(token_, shared_from_this())));
 #endif
     ability_->Init(record, application, handler, token);
+    ability_->BindHybridContext(application, record);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
