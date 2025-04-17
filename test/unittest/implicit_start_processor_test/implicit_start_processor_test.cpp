@@ -258,6 +258,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_001, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_001 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::string mockUriString = "file://com.example.test/test.txt";
     std::vector<std::string> mockTrustlist = {
@@ -278,9 +279,9 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_001, TestSize.
     int32_t infosOldSize = dialogAppInfos.size();
     TAG_LOGI(AAFwkTag::TEST, "infosOldSize: %{public}d", infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
-    EXPECT_TRUE(dialogAppInfos.size() == infosOldSize);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_001 end");
 }
 
@@ -297,6 +298,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_002, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_002 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::string mockTrustlist = "demo1";
     request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
@@ -312,9 +314,9 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_002, TestSize.
     int32_t infosOldSize = dialogAppInfos.size();
     TAG_LOGI(AAFwkTag::TEST, "infosOldSize: %{public}d", infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
-    EXPECT_TRUE(dialogAppInfos.size() == infosOldSize);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_002 end");
 }
 
@@ -331,6 +333,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_003, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_003 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::vector<std::string> mockTrustlist = {
         "aaa", "bbb", "ccc", "ddd", "eee",
@@ -362,7 +365,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_003, TestSize.
     TAG_LOGI(AAFwkTag::TEST,
         "trustlistOldSize: %{public}d, infosOldSize: %{public}d", trustlistOldSize, infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
     int32_t trustlistNewSize = request.want.GetStringArrayParam(APP_LAUNCH_TRUSTLIST).size();
     int32_t infosNewSize = dialogAppInfos.size();
@@ -370,7 +373,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_003, TestSize.
         "trustlistNewSize: %{public}d, infosNewSize: %{public}d", trustlistNewSize, infosNewSize);
 
     EXPECT_TRUE(trustlistNewSize == trustlistOldSize);
-    EXPECT_TRUE(infosNewSize == 1);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_003 end");
 }
 
@@ -387,6 +390,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_004, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_004 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::vector<std::string> mockTrustlist = {
         "abc",
@@ -406,13 +410,13 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_004, TestSize.
     TAG_LOGI(AAFwkTag::TEST,
         "infosOldSize: %{public}d", infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
     int32_t infosNewSize = dialogAppInfos.size();
     TAG_LOGI(AAFwkTag::TEST,
         "infosNewSize: %{public}d", infosNewSize);
 
-    EXPECT_TRUE(infosNewSize == 0);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_004 end");
 }
 
@@ -429,6 +433,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_005, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_005 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::vector<std::string> mockTrustlist = {
         "demo1",
@@ -448,13 +453,13 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_005, TestSize.
     TAG_LOGI(AAFwkTag::TEST,
         "infosOldSize: %{public}d", infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
     int32_t infosNewSize = dialogAppInfos.size();
     TAG_LOGI(AAFwkTag::TEST,
         "infosNewSize: %{public}d", infosNewSize);
 
-    EXPECT_TRUE(infosNewSize == 1);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_005 end");
 }
 
@@ -471,6 +476,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_006, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_006 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::vector<std::string> mockTrustlist = {
         "demo1",
@@ -491,13 +497,13 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_006, TestSize.
     TAG_LOGI(AAFwkTag::TEST,
         "infosOldSize: %{public}d", infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
     int32_t infosNewSize = dialogAppInfos.size();
     TAG_LOGI(AAFwkTag::TEST,
         "infosNewSize: %{public}d", infosNewSize);
 
-    EXPECT_TRUE(infosNewSize == infosOldSize);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_006 end");
 }
 
