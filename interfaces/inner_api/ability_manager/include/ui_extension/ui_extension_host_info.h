@@ -31,6 +31,7 @@ public:
     static UIExtensionHostInfo *Unmarshalling(Parcel &parcel);
 
     AppExecFwk::ElementName elementName_;
+    std::string sessionName;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
