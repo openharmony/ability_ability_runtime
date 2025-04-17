@@ -24,6 +24,7 @@ namespace OHOS {
 namespace AppExecFwk {
 constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
 constexpr const char* CLASSNAME_BOOLEAN = "Lstd/core/Boolean;";
+constexpr const char* CLASSNAME_INT = "Lstd/core/Int;";
 
 bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value)
 {
@@ -434,6 +435,27 @@ ani_object createBoolean(ani_env *env, ani_boolean value)
     return personInfoObj;
 }
 
+ani_object createInt(ani_env *env, ani_int value)
+{
+    ani_class cls;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass(CLASSNAME_INT, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "FindClass status : %{public}d", status);
+        return nullptr;
+    }
+    ani_method ctor;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Class_FindMethod status : %{public}d", status);
+        return nullptr;
+    }
+    ani_object object;
+    if ((status = env->Object_New(cls, ctor, &object, value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Object_New status : %{public}d", status);
+        return nullptr;
+    }
+    return object;
+}
+
 bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::string &value)
 {
     ani_field field = nullptr;
@@ -522,6 +544,29 @@ bool SetFieldInt(ani_env *env, ani_class cls, ani_object object, const std::stri
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}s", fieldName.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool SetOptionalFieldInt(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, int value)
+{
+    ani_field field = nullptr;
+    ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
+    if (status != ANI_OK || field == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Class_FindField failed or null field, status=%{public}d, fieldName=%{public}s",
+            status, fieldName.c_str());
+        return false;
+    }
+    ani_object intObj = createInt(env, value);
+    if (intObj == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null intObj");
+        return false;
+    }
+    status = env->Object_SetField_Ref(object, field, intObj);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Object_SetField_Ref failed, status=%{public}d, fieldName=%{public}s",
+            status, fieldName.c_str());
         return false;
     }
     return true;
