@@ -311,6 +311,9 @@ void OHOSApplication::InitAniContext()
     std::array contextFunctions = {
         ani_native_function {"getApplicationContextSync", ":Lapplication/ApplicationContext/ApplicationContext;",
             reinterpret_cast<void *>(AbilityRuntime::ContextUtil::GetApplicationContextSync)},
+        ani_native_function {"createModuleResourceManagerSync", "Lstd/core/String;Lstd/core/String;"
+            ":L@ohos/resourceManager/resourceManager/ResourceManager;",
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::CreateModuleResourceManagerSync)},
     };
     aniEnv->Class_BindNativeMethods(contextCls, contextFunctions.data(),
         contextFunctions.size());
