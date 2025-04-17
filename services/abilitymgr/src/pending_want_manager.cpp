@@ -203,6 +203,8 @@ bool PendingWantManager::CheckPendingWantRecordByKey(
 
 int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo)
 {
+    SenderInfo info = senderInfo;
+
     if (target == nullptr) {
         if (senderInfo.finishedReceiver != nullptr) {
             Want want;
@@ -226,12 +228,12 @@ int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target, const Sende
     if (!CheckPermission(record)) {
         if (senderInfo.finishedReceiver != nullptr) {
             Want want;
+            record->BuildSendWant(info, want);
             WantParams wantParams = {};
             senderInfo.finishedReceiver->PerformReceive(want, senderInfo.code, "", wantParams, false, false, 0);
         }
         return ERR_INVALID_VALUE;
     }
-    SenderInfo info = senderInfo;
     return record->SenderInner(info);
 }
 
@@ -389,6 +391,7 @@ int32_t PendingWantManager::PendingRecordIdCreate()
 sptr<PendingWantRecord> PendingWantManager::GetPendingWantRecordByCode(int32_t code)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::WANTAGENT, "resuest code:%{public}d", code);
 
     std::lock_guard<ffrt::mutex> locker(mutex_);
     auto iter = std::find_if(wantRecords_.begin(), wantRecords_.end(), [&code](const auto &pair) {
