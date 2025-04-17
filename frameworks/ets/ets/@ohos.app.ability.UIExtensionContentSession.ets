@@ -18,8 +18,7 @@ import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import uiExtensionHost from '@ohos.uiExtensionHost';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
-import { AsyncCallbackCommonWrapper } from './UIExtensionCommon';
-
+import AsyncCallbackWrapper from './utils/AbilityUtils';
 export default class UIExtensionContentSession {
   nativeContextSession:long = 0;
   native nativeSendData(data: Record<string, Object>): void;
@@ -27,8 +26,8 @@ export default class UIExtensionContentSession {
   native setWindowBackgroundColor(color: string): void;
   native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
   native setReceiveDataCallbackASync(): void;
-  native terminateSelfSync(callback:AsyncCallbackCommonWrapper<void>): void;
-  native terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackCommonWrapper<void>): void;
+  native terminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
+  native terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
 
   sendData(data: Record<string, Object>): void {
     this.nativeSendData(data);
@@ -44,7 +43,7 @@ export default class UIExtensionContentSession {
    }
 
   terminateSelf(callback:AsyncCallback<void>): void {
-    let myCall = new AsyncCallbackCommonWrapper<void>(callback);
+    let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.terminateSelfSync(myCall);
     });
@@ -52,7 +51,7 @@ export default class UIExtensionContentSession {
 
   terminateSelf(): Promise<void> {
     let p = new Promise<void>((resolve: (data: undefined) => void, reject:(err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackCommonWrapper<void>((err: BusinessError<void>) => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
         if (err.code == 0) {
           resolve(undefined);
         } else {
@@ -67,7 +66,7 @@ export default class UIExtensionContentSession {
   }
 
   terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<void>): void {
-    let myCall = new AsyncCallbackCommonWrapper<void>(callback);
+    let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.terminateSelfWithResultSync(parameter, myCall);
     });
@@ -75,7 +74,7 @@ export default class UIExtensionContentSession {
 
   terminateSelfWithResult(parameter: AbilityResult): Promise<void> {
     let p = new Promise<void>((resolve: (data: undefined) => void, reject:(err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackCommonWrapper<void>((err: BusinessError<void>) => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
         if (err.code == 0) {
           resolve(undefined);
         } else {
