@@ -16,11 +16,15 @@
 #include <gtest/gtest.h>
 
 #include "ability_manager_errors.h"
+#define private public
+#define protected public
 #include "ability_record.h"
+#include "scene_board/ui_ability_lifecycle_manager.h"
+#undef protected
+#undef private
 #include "ability_start_setting.h"
 #include "app_scheduler.h"
 #include "app_utils.h"
-#include "scene_board/ui_ability_lifecycle_manager.h"
 #include "app_mgr_client.h"
 #include "mock_ability_info_callback_stub.h"
 #include "process_options.h"
@@ -230,6 +234,229 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, PrepareTerminateAppAndGetRemaining
     AppUtils::isStartOptionsWithAnimation_ = true;
     ret = uiAbilityLifecycleManager->PrepareTerminateAppAndGetRemaining(pid, tokens);
     EXPECT_EQ(ret, remainingTokens);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ProcessColdStartBranch_001
+ * @tc.desc: ProcessColdStartBranch
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, ProcessColdStartBranch_001, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    bool isColdStart = false;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    auto ret = uiAbilityLifecycleManager->ProcessColdStartBranch(abilityRequest, nullptr, abilityRecord, isColdStart);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ProcessColdStartBranch_002
+ * @tc.desc: ProcessColdStartBranch
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, ProcessColdStartBranch_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->requestId = 100;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->SetIsHook(true);
+    bool isColdStart = true;
+    auto ret = uiAbilityLifecycleManager->ProcessColdStartBranch(abilityRequest, sessionInfo, abilityRecord,
+        isColdStart);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_TryProcessHookModule_001
+ * @tc.desc: TryProcessHookModule
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, TryProcessHookModule_001, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    auto specifiedRequest = std::make_shared<AAFwk::SpecifiedRequest>(0, abilityRequest);
+    auto ret = uiAbilityLifecycleManager->TryProcessHookModule(*specifiedRequest, false);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_TryProcessHookModule_002
+ * @tc.desc: TryProcessHookModule
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, TryProcessHookModule_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    int32_t appIndex = 0;
+    const int32_t sessionId = 100;
+    (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
+    auto instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
+
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->SetIsHook(true);
+    abilityRecord->SetHookOff(true);
+    uiAbilityLifecycleManager->sessionAbilityMap_[sessionId] = abilityRecord;
+
+    auto specifiedRequest = std::make_shared<AAFwk::SpecifiedRequest>(0, abilityRequest);
+    auto ret = uiAbilityLifecycleManager->TryProcessHookModule(*specifiedRequest, true);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_TryProcessHookModule_003
+ * @tc.desc: TryProcessHookModule
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, TryProcessHookModule_003, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    int32_t appIndex = 0;
+    const int32_t sessionId = 100;
+    (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
+    auto instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
+
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->SetIsHook(true);
+    uiAbilityLifecycleManager->sessionAbilityMap_[sessionId] = abilityRecord;
+    auto specifiedRequest = std::make_shared<AAFwk::SpecifiedRequest>(100, abilityRequest);
+    auto ret = uiAbilityLifecycleManager->TryProcessHookModule(*specifiedRequest, true);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_RevokeDelegator_001
+ * @tc.desc: RevokeDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_001, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    sptr<IRemoteObject> token = nullptr;
+    auto ret = uiAbilityLifecycleManager->RevokeDelegator(token);
+    EXPECT_EQ(ret, ERR_INVALID_CONTEXT);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_RevokeDelegator_002
+ * @tc.desc: RevokeDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    Rosen::SessionInfo info;
+    sptr<Rosen::ISession> session = new Rosen::Session(info);
+    EXPECT_NE(session, nullptr);
+    auto ret = uiAbilityLifecycleManager->RevokeDelegator(session->AsObject());
+    EXPECT_EQ(ret, ERR_INVALID_CONTEXT);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_RevokeDelegator_003
+ * @tc.desc: RevokeDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_003, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto abilityRecord = InitAbilityRecord();
+    auto ret = uiAbilityLifecycleManager->RevokeDelegator(abilityRecord->GetToken());
+    EXPECT_EQ(ret, ERR_INVALID_CONTEXT);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_RevokeDelegator_004
+ * @tc.desc: RevokeDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_004, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->currentState_ = AbilityState::BACKGROUND;
+    abilityRecord->isAbilityForegrounding_ = false;
+    auto ret = uiAbilityLifecycleManager->RevokeDelegator(abilityRecord->GetToken());
+    EXPECT_EQ(ret, ERR_ABILITY_NOT_FOREGROUND);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_RevokeDelegator_005
+ * @tc.desc: RevokeDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_005, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->isAbilityForegrounding_ = true;
+    auto ret = uiAbilityLifecycleManager->RevokeDelegator(abilityRecord->GetToken());
+    EXPECT_EQ(ret, ERR_NOT_HOOK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_RevokeDelegator_006
+ * @tc.desc: RevokeDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_006, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->isAbilityForegrounding_ = true;
+    abilityRecord->isHook_ = true;
+    abilityRecord->abilityInfo_.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    auto ret = uiAbilityLifecycleManager->RevokeDelegator(abilityRecord->GetToken());
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_RevokeDelegator_007
+ * @tc.desc: RevokeDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_007, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->isAbilityForegrounding_ = true;
+    abilityRecord->isHook_ = true;
+    auto ret = uiAbilityLifecycleManager->RevokeDelegator(abilityRecord->GetToken());
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_RevokeDelegator_008
+ * @tc.desc: RevokeDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_008, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.sessionInfo = new SessionInfo();
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->isAbilityForegrounding_ = true;
+    abilityRecord->isHook_ = true;
+    auto ret = uiAbilityLifecycleManager->RevokeDelegator(abilityRecord->GetToken());
+    EXPECT_EQ(ret, ERR_FROM_WINDOW);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
