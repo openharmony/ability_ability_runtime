@@ -350,5 +350,20 @@ HWTEST_F(AbilityRunningRecordTest, SetUIExtensionAbilityId_001, TestSize.Level1)
     TAG_LOGD(AAFwkTag::TEST, "SetUIExtensionAbilityId_001 end.");
 }
 
+/*
+ * Feature: AbilityRunningRecord
+ * Function: IsHook
+ * SubFunction: NA
+ * FunctionPoints: AbilityRunningRecord IsHook
+ * EnvConditions: NA
+ * CaseDescription: IsHook
+ */
+HWTEST_F(AbilityRunningRecordTest, IsHook_001, TestSize.Level1)
+{
+    auto record = std::make_shared<AbilityRunningRecord>(nullptr, nullptr, 1);
+    auto want = std::make_shared<AAFwk::Want>();
+    record->SetWant(want);
+    EXPECT_FALSE(record->IsHook());
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

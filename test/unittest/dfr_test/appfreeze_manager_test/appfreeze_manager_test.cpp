@@ -65,7 +65,7 @@ void AppfreezeManagerTest::TearDown(void)
  * @tc.desc: add testcase codecoverage
  * @tc.type: FUNC
  */
-HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_001, TestSize.Level1)
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_001, TestSize.Level0)
 {
     bool ret = appfreezeManager->IsHandleAppfreeze("");
     EXPECT_TRUE(ret);
@@ -228,7 +228,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_007, TestSize.Level1)
  * @tc.desc: add testcase codecoverage
  * @tc.type: FUNC
  */
-HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_001, TestSize.Level1)
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_001, TestSize.Level0)
 {
     int32_t pid = static_cast<int32_t>(getprocpid());
     EXPECT_TRUE(!appfreezeManager->CancelAppFreezeDetect(pid, ""));
