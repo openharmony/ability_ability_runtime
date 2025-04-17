@@ -25,7 +25,9 @@ export default class UIExtensionContext extends ExtensionContext {
 
   terminateSelf(callback:AsyncCallback<void>): void {
     let myCall = new AsyncCallbackCommonWrapper<void>(callback);
-    launch this.terminateSelfSync(myCall);
+    taskpool.execute((): void => {
+      this.terminateSelfSync(myCall);
+    });
   }
 
   terminateSelf(): Promise<void> {
@@ -37,14 +39,18 @@ export default class UIExtensionContext extends ExtensionContext {
           reject(err);
         }
       });
-      launch this.terminateSelfSync(myCall);
+      taskpool.execute((): void => {
+        this.terminateSelfSync(myCall);
+      });
     });
     return p;
   }
 
   terminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackCommonWrapper<void>(callback);
-    launch this.terminateSelfWithResultSync(parameter, myCall);
+    taskpool.execute((): void => {
+      this.terminateSelfWithResultSync(parameter, myCall);
+    });
   }
 
   terminateSelfWithResult(parameter: AbilityResult): Promise<void> {
@@ -56,7 +62,9 @@ export default class UIExtensionContext extends ExtensionContext {
           reject(err);
         }
       });
-      launch this.terminateSelfWithResultSync(parameter, myCall);
+      taskpool.execute((): void => {
+        this.terminateSelfWithResultSync(parameter, myCall);
+      });
     });
     return p;
   }
