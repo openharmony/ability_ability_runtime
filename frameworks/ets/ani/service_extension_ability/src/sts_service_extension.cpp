@@ -238,7 +238,7 @@ sptr<IRemoteObject> StsServiceExtension::OnConnect(const AAFwk::Want &want,
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
     }
     ani_ref result =
-        CallObjectMethod(false, "callOnConnect", "L@ohos/app/ability/Want/Want;:L@ohos/rpc/rpc/RemoteObject;", wantRef);
+        CallObjectMethod(true, "callOnConnect", "L@ohos/app/ability/Want/Want;:L@ohos/rpc/rpc/RemoteObject;", wantRef);
     auto obj = reinterpret_cast<ani_object>(result);
     auto remoteObj = AniGetNativeRemoteObject(env, obj);
     if (remoteObj == nullptr) {
