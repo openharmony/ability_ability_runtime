@@ -80,7 +80,7 @@ public:
      *
      * @param abilityObj Indicates the ability object.
      */
-    void OnSTSAbilityDestroy(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj);
+    void OnSTSAbilityStop(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj) override;
 
     /**
      * Called when window stage is created.
