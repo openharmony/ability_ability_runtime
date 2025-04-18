@@ -30,6 +30,9 @@ namespace AppExecFwk {
 
 ani_object WrapWant(ani_env *env, const AAFwk::Want &want);
 ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams);
+ani_object WrapElementName(ani_env *env, const AppExecFwk::ElementName &elementNameParam);
+ani_object WrapElementNameInner(ani_env *env, ani_class elementNameObj, ani_object object,
+    const AppExecFwk::ElementName &elementNameParam);
 
 bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want);
 bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams);
