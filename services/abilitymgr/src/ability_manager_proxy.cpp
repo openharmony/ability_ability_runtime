@@ -6353,7 +6353,7 @@ int32_t AbilityManagerProxy::QueryPreLoadUIExtensionRecord(const AppExecFwk::Ele
     return NO_ERROR;
 }
 
-int32_t AbilityManagerProxy::RevokeDelegator(const sptr<IRemoteObject> &token)
+int32_t AbilityManagerProxy::RevokeDelegator(sptr<IRemoteObject> token)
 {
     MessageParcel data;
     MessageParcel reply;

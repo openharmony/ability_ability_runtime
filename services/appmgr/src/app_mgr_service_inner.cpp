@@ -9362,7 +9362,7 @@ void AppMgrServiceInner::SendAbilityEvent(const std::shared_ptr<AbilityRunningRe
     }
 }
 
-int32_t AppMgrServiceInner::LaunchAbility(const sptr<IRemoteObject> &token)
+int32_t AppMgrServiceInner::LaunchAbility(sptr<IRemoteObject> token)
 {
     auto appRecord = GetAppRunningRecordByAbilityToken(token);
     if (appRecord == nullptr) {

@@ -13736,7 +13736,7 @@ int32_t AbilityManagerService::QueryPreLoadUIExtensionRecord(const AppExecFwk::E
       element, moduleName, hostBundleName, recordNum);
 }
 
-int32_t AbilityManagerService::RevokeDelegator(const sptr<IRemoteObject> &token)
+int32_t AbilityManagerService::RevokeDelegator(sptr<IRemoteObject> token)
 {
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "capability not support");
