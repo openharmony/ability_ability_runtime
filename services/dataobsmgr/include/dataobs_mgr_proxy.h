@@ -44,7 +44,7 @@ public:
      */
 
     virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
-        int32_t userId = -1) override;
+        int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
 
     /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
@@ -55,7 +55,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
-        int32_t userId = -1) override;
+        int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uri.
@@ -64,7 +64,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int NotifyChange(const Uri &uri, int32_t userId = -1) override;
+    virtual int NotifyChange(const Uri &uri, int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
@@ -76,7 +76,7 @@ public:
      * @return Returns SUCCESS on success, others on failure.
      */
     virtual Status RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
-        bool isDescendants) override;
+        bool isDescendants, DataObsOption opt = DataObsOption()) override;
 
     /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
@@ -86,7 +86,8 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
+    virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        DataObsOption opt = DataObsOption()) override;
 
     /**
      * Deregisters dataObserver used for DataObsMgr specified
@@ -95,7 +96,8 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver) override;
+    virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver,
+        DataObsOption opt = DataObsOption()) override;
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uris.
@@ -104,7 +106,7 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) override;
+    virtual Status NotifyChangeExt(const ChangeInfo &changeInfo, DataObsOption opt = DataObsOption()) override;
 
     /**
      * Notifies the process observer with the given progress key and cancel observer.
@@ -115,11 +117,13 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer) override;
+    virtual Status NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer,
+        DataObsOption opt = DataObsOption()) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     bool WriteParam(MessageParcel &data, const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
+    bool WriteObsOpt(MessageParcel &data, DataObsOption opt);
     int SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
 private:
