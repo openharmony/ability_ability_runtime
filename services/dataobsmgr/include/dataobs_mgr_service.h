@@ -52,16 +52,19 @@ public:
     std::pair<bool, struct ObserverNode> ConstructObserverNode(sptr<IDataAbilityObserver> dataObserver,
         int32_t userId = -1);
     virtual int RegisterObserver(const Uri &uri,
-        sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1) override;
+        sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
     virtual int UnregisterObserver(const Uri &uri,
-        sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1) override;
-    virtual int NotifyChange(const Uri &uri, int32_t userId = -1) override;
+        sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
+    virtual int NotifyChange(const Uri &uri, int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
     virtual Status RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
-        bool isDescendants) override;
-    virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
-    virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver) override;
-    virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) override;
-    virtual Status NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer) override;
+        bool isDescendants, DataObsOption opt = DataObsOption()) override;
+    virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        DataObsOption opt = DataObsOption()) override;
+    virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver,
+        DataObsOption opt = DataObsOption()) override;
+    virtual Status NotifyChangeExt(const ChangeInfo &changeInfo, DataObsOption opt = DataObsOption()) override;
+    virtual Status NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer,
+        DataObsOption opt = DataObsOption()) override;
 
     /**
      * @brief DataObs hidumper.
