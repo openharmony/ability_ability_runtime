@@ -155,11 +155,16 @@ public:
      * @param info The dump info to show.
      */
     virtual void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
+
+    void ResetEnv(ani_env* env);
  
 private:
     ani_ref CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
  
-    void BindContext(napi_env env, napi_value obj);
+    void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want,
+        const std::shared_ptr<OHOSApplication> &application);
+    ani_object CreateSTSContext(ani_env *env, std::shared_ptr<ServiceExtensionContext> context,
+        int32_t screenMode, const std::shared_ptr<OHOSApplication> &application);
  
     void GetSrcPath(std::string &srcPath);
  

@@ -26,6 +26,8 @@
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "js_service_extension_context.h"
+#include "sts_service_extension_context.h"
+
 #ifdef SUPPORT_GRAPHICS
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -109,7 +111,7 @@ void StsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "record null");
         return;
     }
-    Extension::Init(record, application, handler, token);
+    ServiceExtension::Init(record, application, handler, token);
     if (Extension::abilityInfo_ == nullptr || Extension::abilityInfo_->srcEntrance.empty()) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "StsServiceExtension Init abilityInfo error");
         return;
@@ -143,8 +145,9 @@ void StsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
     ani_status status = env->Class_BindNativeMethods(stsObj_->aniCls, functions.data(), functions.size());
     if (ANI_OK != status) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Class_BindNativeMethods is fail %{public}d", status);
-        return;
     };
+    BindContext(env, record->GetWant(), application);
+    return;
 }
 #ifdef SUPPORT_GRAPHICS
 void StsServiceExtension::SystemAbilityStatusChangeListener::OnAddSystemAbility(int32_t systemAbilityId,
@@ -152,6 +155,59 @@ void StsServiceExtension::SystemAbilityStatusChangeListener::OnAddSystemAbility(
 {
 }
 #endif //SUPPORT_GRAPHICS
+
+ani_object StsServiceExtension::CreateSTSContext(ani_env* env, std::shared_ptr<ServiceExtensionContext> context,
+    int32_t screenMode, const std::shared_ptr<OHOSApplication> &application)
+{
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "CreateSTSContext");
+    ani_object obj = CreateStsServiceExtensionContext(env, context, application);
+    return obj;
+}
+
+void StsServiceExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want,
+    const std::shared_ptr<OHOSApplication> &application)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "StsServiceExtension BindContext Call");
+    if (env == nullptr || want == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Want info is null or env is null");
+        return;
+    }
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to get context");
+        return;
+    }
+    int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
+    ani_object contextObj = CreateSTSContext(env, context, screenMode, application);
+    if (contextObj == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null contextObj");
+        return;
+    }
+    //bind StsServiceExtension
+    ani_field contextField;
+    auto status = env->Class_FindField(stsObj_->aniCls, "context", &contextField);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Class_GetField context failed");
+        ResetEnv(env);
+        return;
+    }
+    ani_ref contextRef = nullptr;
+    if (env->GlobalReference_Create(contextObj, &contextRef) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "GlobalReference_Create contextObj failed");
+        return;
+    }
+    if (env->Object_SetField_Ref(stsObj_->aniObj, contextField, contextRef) != ANI_OK) {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "Object_SetField_Ref contextObj failed");
+        ResetEnv(env);
+    }
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "BindContext end");
+}
+
+void StsServiceExtension::ResetEnv(ani_env* env)
+{
+    env->DescribeError();  // 打印异常信息
+    env->ResetError();  // 清除异常，避免影响后续 ANI 调用
+}
 
 void StsServiceExtension::OnStart(const AAFwk::Want &want)
 {
