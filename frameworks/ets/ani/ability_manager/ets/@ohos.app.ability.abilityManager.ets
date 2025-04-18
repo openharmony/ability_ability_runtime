@@ -14,11 +14,26 @@
  */
 
 import AbilityStateData from 'application.AbilityStateData';
+import { ElementName } from './bundleManager/ElementName';
+import { BusinessError, AsyncCallback } from '@ohos.base';
+
+export class AsyncCallbackWrapper<T> {
+  myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
+  constructor(myFun:AsyncCallback<T, void>){
+    this.myFun_ = myFun;
+  }
+  invoke(err: BusinessError<void>, data: T) : void {
+    this.myFun_(err, data);
+  }
+}
 
 export default namespace abilityManager {
   loadLibrary("ability_ability_manager_ani_kit.z")
 
   export native function nativeGetForegroundUIAbilities(): Array<AbilityStateData>;
+  export native function getForegroundUIAbilitiesCallback(callback:AsyncCallbackWrapper<Array<AbilityStateData>>) : void;
+  export native function nativeGetTopAbility(callback:AsyncCallbackWrapper<ElementName>) : void;
+
   export function getForegroundUIAbilities():Promise<Array<AbilityStateData>> {
     let p = new Promise<Array<AbilityStateData>>((resolve: (data: Array<AbilityStateData>) => void, reject: (error: Error) => void): void => {
       let executeFunc = (): Array<AbilityStateData> => {
@@ -34,6 +49,34 @@ export default namespace abilityManager {
     });
     return p;
   }
+
+  export function getForegroundUIAbilities(callback: AsyncCallback<Array<AbilityStateData>, void>): void {
+      let myCall = new AsyncCallbackWrapper<Array<AbilityStateData>>(callback);
+      taskpool.execute((): void => {
+        abilityManager.getForegroundUIAbilitiesCallback(myCall);
+      })
+  }
+
+  export function getTopAbility():Promise<ElementName> {
+    let p = new Promise<ElementName>((resolve: (data: ElementName)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<ElementName>((err: BusinessError<void>, data: ElementName)=>{
+        if (err.code == 0) {
+          resolve(data);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        abilityManager.nativeGetTopAbility(myCall);
+      });
+    });
+    return p;
 }
 
-
+export function getTopAbility(callback: AsyncCallback<ElementName, void>): void {
+    let myCall = new AsyncCallbackWrapper<ElementName>(callback);
+    taskpool.execute( (): void => {
+        abilityManager.nativeGetTopAbility(myCall);
+    });
+}
+}

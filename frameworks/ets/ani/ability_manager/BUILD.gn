@@ -30,6 +30,8 @@ ohos_shared_library("ability_ability_manager_ani_kit") {
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/inner_api/runtime/include",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+    "${ability_runtime_services_path}/common/include",
   ]
 
   configs = []
@@ -46,6 +48,7 @@ ohos_shared_library("ability_ability_manager_ani_kit") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_innerkits_path}/error_utils:ability_runtime_error_util",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -87,4 +90,20 @@ ohos_prebuilt_etc("ability_ability_manager_abc_etc") {
   subsystem_name = "ability"
   part_name = "ability_runtime"
   deps = [ ":ability_ability_manager_abc" ]
+}
+
+generate_static_abc("ability_elementname_abc") {
+  base_url = "./ets"
+  files = [ "./ets/bundleManager/ElementName.ets" ]
+  dst_file = "$target_out_dir/ability_elementname.abc"
+  out_puts = [ "$target_out_dir/ability_elementname.abc" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_elementname.abc"
+}
+ohos_prebuilt_etc("ability_elementname_abc_etc") {
+  source = "$target_out_dir/ability_elementname.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_elementname_abc" ]
 }
