@@ -278,6 +278,10 @@ int32_t AppMgrStub::OnRemoteRequestInnerFifth(uint32_t code, MessageParcel &data
         case static_cast<uint32_t>(AppMgrInterfaceCode::START_CHILD_PROCESS):
             return HandleStartChildProcess(data, reply);
     #endif // SUPPORT_CHILD_PROCESS
+        case static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_NATIVE_CHILD_EXIT_NOTIFY):
+            return HandleRegisterNativeChildExitNotify(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_NATIVE_CHILD_EXIT_NOTIFY):
+            return HandleUnregisterNativeChildExitNotify(data, reply);
     }
     return INVALID_FD;
 }
@@ -1499,6 +1503,50 @@ int32_t AppMgrStub::HandleExitChildProcessSafely(MessageParcel &data, MessagePar
     return NO_ERROR;
 }
 #endif // SUPPORT_CHILD_PROCESS
+
+int32_t AppMgrStub::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleRegisterNativeChildExitNotify(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    auto callback = iface_cast<AppExecFwk::INativeChildNotify>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = RegisterNativeChildExitNotify(callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUnregisterNativeChildExitNotify(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    auto callback = iface_cast<AppExecFwk::INativeChildNotify>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = UnregisterNativeChildExitNotify(callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
 
 int32_t AppMgrStub::HandleIsFinalAppProcess(MessageParcel &data, MessageParcel &reply)
 {
