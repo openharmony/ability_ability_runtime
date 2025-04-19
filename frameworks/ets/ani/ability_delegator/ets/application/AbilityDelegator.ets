@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import AbilityMonitor from './AbilityMonitor';
+import { AbilityMonitor } from './AbilityMonitor';
 import Want from '@ohos.app.ability.Want';
 import Context from 'application.Context';
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import ShellCmdResult  from './shellCmdResult';
 
-export default interface AbilityDelegator {
+export interface AbilityDelegator {
     printSync(msg: string): void;
     getAppContext(): Context;
     finishTest(msg: string, code: number, callback: AsyncCallback<void>):void;
