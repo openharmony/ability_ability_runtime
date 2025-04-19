@@ -730,6 +730,20 @@ public:
     int32_t UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer);
 
     /**
+     * Register native child exit notify.
+     * @param notify, callback to notify.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify);
+
+    /**
+     * Unregister native child exit notify.
+     * @param notify, callback to notify.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify);
+
+    /**
      * @brief Notify AbilityManagerService the page show.
      * @param token Ability identify.
      * @param pageStateData The data of ability's page state.

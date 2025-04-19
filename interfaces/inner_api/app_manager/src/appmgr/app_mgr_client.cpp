@@ -1145,6 +1145,24 @@ int32_t AppMgrClient::UnregisterApplicationStateObserver(const sptr<IApplication
     return service->UnregisterApplicationStateObserver(observer);
 }
 
+int32_t AppMgrClient::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->RegisterNativeChildExitNotify(notify);
+}
+
+int32_t AppMgrClient::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->UnregisterNativeChildExitNotify(notify);
+}
+
 int32_t AppMgrClient::NotifyPageShow(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());

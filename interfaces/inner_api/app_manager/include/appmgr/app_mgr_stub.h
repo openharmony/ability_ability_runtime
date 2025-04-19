@@ -64,6 +64,20 @@ public:
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName,
         std::vector<int32_t> &pidList) override;
 
+    /**
+     * Register native child exit callback to notify.
+     * @param notify, Callback used to notify caller the info of native child exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify) override;
+
+    /**
+     * Unregister native child exit callback to notify.
+     * @param notify, Callback used to notify caller the info of native child exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify) override;
+
 private:
     int32_t HandleAttachApplication(MessageParcel &data, MessageParcel &reply);
     int32_t HandlePreloadApplication(MessageParcel &data, MessageParcel &reply);
@@ -81,6 +95,8 @@ private:
 #ifdef SUPPORT_CHILD_PROCESS
     int32_t HandleGetAllChildrenProcesses(MessageParcel &data, MessageParcel &reply);
 #endif  // SUPPORT_CHILD_PROCESS
+    int32_t HandleRegisterNativeChildExitNotify(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleUnregisterNativeChildExitNotify(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAddAbilityStageDone(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyMemoryLevel(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyProcMemoryLevel(MessageParcel &data, MessageParcel &reply);
