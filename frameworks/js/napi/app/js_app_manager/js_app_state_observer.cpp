@@ -24,6 +24,22 @@
 namespace OHOS {
 namespace AbilityRuntime {
 constexpr size_t ARGC_ONE = 1;
+std::unordered_map<int32_t, int32_t> JSAppStateObserver::innerStateToState_ = {
+    {static_cast<int32_t>(AppExecFwk::ExtensionState::EXTENSION_STATE_CREATE),
+        static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_CREATE)},
+    {static_cast<int32_t>(AppExecFwk::ExtensionState::EXTENSION_STATE_READY),
+        static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_READY)},
+    {static_cast<int32_t>(AppExecFwk::ExtensionState::EXTENSION_STATE_CONNECTED),
+        static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_CONNECTED)},
+    {static_cast<int32_t>(AppExecFwk::ExtensionState::EXTENSION_STATE_DISCONNECTED),
+        static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_DISCONNECTED)},
+    {static_cast<int32_t>(AppExecFwk::ExtensionState::EXTENSION_STATE_TERMINATED),
+        static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_TERMINATED)},
+    {static_cast<int32_t>(AppExecFwk::ExtensionState::EXTENSION_STATE_FOREGROUND),
+        static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_FOREGROUND)},
+    {static_cast<int32_t>(AppExecFwk::ExtensionState::EXTENSION_STATE_BACKGROUND),
+        static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_BACKGROUND)},
+};
 
 JSAppStateObserver::JSAppStateObserver(napi_env env) : env_(env) {}
 
@@ -72,6 +88,10 @@ void JSAppStateObserver::OnAbilityStateChanged(const AbilityStateData &abilitySt
         TAG_LOGE(AAFwkTag::APPMGR, "appMgr may has cancelled storage");
         return;
     }
+    if (abilityStateData.isInnerNotify) {
+        TAG_LOGE(AAFwkTag::APPMGR, "uiExt not notify");
+        return;
+    }
     wptr<JSAppStateObserver> jsObserver = this;
     auto asyncTask = [jsObserver, abilityStateData, env = env_]() {
         HandleScope handleScope(env);
@@ -106,15 +126,19 @@ void JSAppStateObserver::OnExtensionStateChanged(const AbilityStateData &ability
         TAG_LOGE(AAFwkTag::APPMGR, "appMgr may destroyed");
         return;
     }
+    AbilityStateData newAbilityStateData = abilityStateData;
+    if (abilityStateData.extensionAbilityType >= 0) {
+        newAbilityStateData.abilityState = innerStateToState_[abilityStateData.abilityState];
+    }
     wptr<JSAppStateObserver> jsObserver = this;
-    auto asyncTask = [jsObserver, abilityStateData, env = env_]() {
+    auto asyncTask = [jsObserver, newAbilityStateData, env = env_]() {
         HandleScope handleScope(env);
         sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
         if (!jsObserverSptr) {
             TAG_LOGW(AAFwkTag::APPMGR, "null jsObserverSptr");
             return;
         }
-        jsObserverSptr->HandleOnExtensionStateChanged(abilityStateData);
+        jsObserverSptr->HandleOnExtensionStateChanged(newAbilityStateData);
     };
     napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
     if (ret != napi_status::napi_ok) {
