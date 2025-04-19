@@ -25,14 +25,19 @@ namespace AbilityRuntime {
 
 class NativeChildCallback : public OHOS::AppExecFwk::NativeChildNotifyStub {
 public:
-    explicit NativeChildCallback(OH_Ability_OnNativeChildProcessStarted cb);
+    explicit NativeChildCallback(OH_Ability_OnNativeChildProcessStarted cb,
+        OH_Ability_OnNativeChildProcessExit exitCb = nullptr);
     ~NativeChildCallback() = default;
 
     void OnNativeChildStarted(const sptr<IRemoteObject> &nativeChild) override;
     void OnError(int32_t errCode) override;
+    void OnNativeChildExit(int32_t pid, int32_t signal) override;
+
+    OH_Ability_OnNativeChildProcessExit getNativeChildProcessExitCallback() const;
 
 private:
     OH_Ability_OnNativeChildProcessStarted callback_ = nullptr;
+    OH_Ability_OnNativeChildProcessExit exitCallback_ = nullptr;
 };
 
 } // namespace AbilityRuntime

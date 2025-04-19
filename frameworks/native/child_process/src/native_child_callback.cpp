@@ -21,8 +21,9 @@
 namespace OHOS {
 namespace AbilityRuntime {
 
-NativeChildCallback::NativeChildCallback(OH_Ability_OnNativeChildProcessStarted cb)
-    : NativeChildNotifyStub(), callback_(cb)
+NativeChildCallback::NativeChildCallback(OH_Ability_OnNativeChildProcessStarted cb,
+    OH_Ability_OnNativeChildProcessExit exitCb)
+    : NativeChildNotifyStub(), callback_(cb), exitCallback_(exitCb)
 {
 }
 
@@ -65,6 +66,22 @@ void NativeChildCallback::OnError(int32_t errCode)
     
     callback_ = nullptr;
     ChildCallbackManager::GetInstance().RemoveRemoteObject(this);
+}
+
+void NativeChildCallback::OnNativeChildExit(int32_t pid, int32_t signal)
+{
+    if (exitCallback_ == nullptr) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null exit callback_");
+        return;
+    }
+
+    TAG_LOGI(AAFwkTag::PROCESSMGR, "Native child process exit");
+    exitCallback_(pid, signal);
+}
+
+OH_Ability_OnNativeChildProcessExit NativeChildCallback::getNativeChildProcessExitCallback() const
+{
+    return exitCallback_;
 }
 
 } // namespace AbilityRuntime
