@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 
-import Context from 'application.Context'
-import {ExtensionAbilityInfo}  from 'bundleManager.ExtensionAbilityInfo'
-import { Configuration } from '@ohos.app.ability.Configuration';
-
-export default class ExtensionContext extends Context {
-    extensionAbilityInfo: ExtensionAbilityInfo;
-    config: Configuration;
+interface ShellCmdResult {
+   stdResult: string;
+   exitCode: number;
 }
+
+export default ShellCmdResult;
