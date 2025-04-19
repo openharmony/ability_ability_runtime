@@ -1583,5 +1583,97 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_004, TestSize.Level2)
     manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_CREATE);
 }
+/*
+ * Feature: AppStateObserverManager
+ * Function: OnProcessReused
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager OnProcessReused
+ * EnvConditions: NA
+ * CaseDescription: Verify OnProcessReused
+ */
+HWTEST_F(AppSpawnSocketTest, OnProcessReused_001, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    manager->OnProcessReused(appRecord);
+}
+/*
+ * Feature: AppStateObserverManager
+ * Function: OnProcessReused
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager OnProcessReused
+ * EnvConditions: NA
+ * CaseDescription: Verify OnProcessReused
+ */
+HWTEST_F(AppSpawnSocketTest, OnProcessReused_002, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    manager->Init();
+    manager->OnProcessReused(appRecord);
+}
+/*
+ * Feature: AppStateObserverManager
+ * Function: AddObserverCount
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager AddObserverCount
+ * EnvConditions: NA
+ * CaseDescription: Verify AddObserverCount
+ */
+HWTEST_F(AppSpawnSocketTest, AddObserverCount_001, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    sptr<IApplicationStateObserver> obs = new MockApplicationStateObserver();
+    int32_t uid = 1000;
+    
+    manager->AddObserverCount(uid);
+    ASSERT_EQ(manager->observerCountMap_[uid], 1);
+    ASSERT_EQ(manager->observerAmount_, 1);
+}
+/*
+ * Feature: AppStateObserverManager
+ * Function: DecreaseObserverCount
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager DecreaseObserverCount
+ * EnvConditions: NA
+ * CaseDescription: Verify DecreaseObserverCount
+ */
+HWTEST_F(AppSpawnSocketTest, DecreaseObserverCount_001, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    sptr<IApplicationStateObserver> obs = new MockApplicationStateObserver();
+    int32_t uid = 1000;
+    
+    manager->AddObserverCount(uid);
+    ASSERT_EQ(manager->observerCountMap_[uid], 1);
+    ASSERT_EQ(manager->observerAmount_, 1);
+    
+    manager->DecreaseObserverCount(uid);
+    ASSERT_TRUE(manager->observerCountMap_.empty());
+    ASSERT_EQ(manager->observerAmount_, 0);
+}
+/*
+ * Feature: AppStateObserverManager
+ * Function: WrapAppStateData
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager WrapAppStateData
+ * EnvConditions: NA
+ * CaseDescription: Verify WrapAppStateData
+ */
+HWTEST_F(AppSpawnSocketTest, WrapAppStateData_001, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->SetUid(1001);
+    appRecord->mainBundleName_ = "com.test.app";
+    
+    AppStateData data = manager->WrapAppStateData(appRecord, ApplicationState::APP_STATE_FOREGROUND);
+    
+    EXPECT_EQ(data.uid, 1001);
+    EXPECT_EQ(data.bundleName, "com.test.app");
+    EXPECT_EQ(data.state, static_cast<int32_t>(ApplicationState::APP_STATE_FOREGROUND));
+}
 } // namespace AppExecFwk
 } // namespace OHOS
