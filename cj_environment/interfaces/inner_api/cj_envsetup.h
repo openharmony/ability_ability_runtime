@@ -56,6 +56,8 @@ struct CJEnvMethods {
     bool (*checkLoadCJLibrary)() = nullptr;
     void (*registerArkVMInRuntime)(unsigned long long arkVM) = nullptr;
     void (*registerStackInfoCallbacks)(UpdateStackInfoFuncType uFunc) = nullptr;
+    void (*dumpHeapSnapshot) (int fd) = nullptr;
+    void (*forceFullGC) () = nullptr;
 };
 
 class CJEnv {

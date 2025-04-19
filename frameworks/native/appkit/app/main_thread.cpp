@@ -634,6 +634,30 @@ void MainThread::ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info)
 
 /**
  *
+ * @brief the application triggerGC and dump cjheap memory.
+ *
+ * @param info, pid, tid, needGC, needSnapshot.
+ */
+void MainThread::ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "pid: %{public}d, needGc: %{public}d, needSnapshot: %{public}d",
+        info.pid, info.needGc, info.needSnapshot);
+    wptr<MainThread> weak = this;
+    auto task = [weak, info]() {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            return;
+        }
+        appThread->HandleCjHeapMemory(info);
+    };
+    if (!mainHandler_->PostTask(task, "MainThread:HandleCjHeapMemory")) {
+        TAG_LOGE(AAFwkTag::APPKIT, "PostTask HandleCjHeapMemory failed");
+    }
+}
+
+/**
+ *
  * @brief Schedule the application process exit safely.
  *
  */
@@ -948,6 +972,22 @@ void MainThread::HandleJsHeapMemory(const OHOS::AppExecFwk::JsHeapDumpInfo &info
     }
     auto helper = std::make_shared<DumpRuntimeHelper>(app);
     helper->DumpJsHeap(info);
+}
+
+void MainThread::HandleCjHeapMemory(const OHOS::AppExecFwk::CjHeapDumpInfo &info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (mainHandler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler");
+        return;
+    }
+    auto app = applicationForDump_.lock();
+    if (app == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null app");
+        return;
+    }
+    auto helper = std::make_shared<DumpRuntimeHelper>(app);
+    helper->DumpCjHeap(info);
 }
 
 /**

@@ -18,6 +18,7 @@
 #include "ability_info.h"
 #include "ability_manager_errors.h"
 #include "app_jsheap_mem_info.h"
+#include "app_cjheap_mem_info.h"
 #include "app_malloc_info.h"
 #include "app_mgr_proxy.h"
 #include "app_scheduler_interface.h"
@@ -176,6 +177,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSecond(uint32_t code, MessageParcel &dat
             return HandleDumpHeapMemory(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::DUMP_JSHEAP_MEMORY_PROCESS):
             return HandleDumpJsHeapMemory(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::DUMP_CJHEAP_MEMORY_PROCESS):
+            return HandleDumpCjHeapMemory(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_RUNNING_MULTIAPP_INFO_BY_BUNDLENAME):
             return HandleGetRunningMultiAppInfoByBundleName(data, reply);
     }
@@ -723,6 +726,23 @@ int32_t AppMgrStub::HandleDumpJsHeapMemory(MessageParcel &data, MessageParcel &r
         return ERR_INVALID_VALUE;
     }
     auto result = DumpJsHeapMemory(*info);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write result error");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleDumpCjHeapMemory(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrStub::HandleDumpCjHeapMemory.");
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::unique_ptr<CjHeapDumpInfo> info(data.ReadParcelable<CjHeapDumpInfo>());
+    if (info == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub read configuration error");
+        return ERR_INVALID_VALUE;
+    }
+    auto result = DumpCjHeapMemory(*info);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "write result error");
         return ERR_INVALID_VALUE;
