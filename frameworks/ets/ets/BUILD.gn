@@ -327,6 +327,23 @@ ohos_prebuilt_etc("ability_runtime_ability_state_data_abc_etc") {
   deps = [ ":ability_runtime_ability_state_data_abc" ]
 }
 
+generate_static_abc("ability_runtime_shell_cmd_result_abc") {
+  base_url = "./"
+  files = [ "./application/shellCmdResult.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_runtime_shell_cmd_result_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_shell_cmd_result_abc_etc") {
+  source = "$target_out_dir/ability_runtime_shell_cmd_result_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_shell_cmd_result_abc" ]
+}
+
 group("ets_packages") {
   deps = [
     ":ability_runtime_abilityResult_abc_etc",
