@@ -22,6 +22,7 @@
 #include "child_process_manager.h"
 #include "child_callback_manager.h"
 #include "child_process_manager_error_utils.h"
+#include "app_mgr_client.h"
 
 using namespace OHOS;
 using namespace OHOS::AbilityRuntime;
@@ -124,4 +125,65 @@ NativeChildProcess_Args* OH_Ability_GetCurrentChildProcessArgs()
         TAG_LOGE(AAFwkTag::PROCESSMGR, "GetChildProcessArgs null");
     }
     return result;
+}
+
+Ability_NativeChildProcess_ErrCode OH_Ability_RegisterNativeChildProcessExitCallback(
+    OH_Ability_OnNativeChildProcessExit onProcessExit)
+{
+    if (onProcessExit == nullptr) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null callback func pointer");
+        return NCP_ERR_INVALID_PARAM;
+    }
+
+    sptr<OHOS::AppExecFwk::INativeChildNotify> callbackStub(new (std::nothrow)) NativeChildCallback(nullptr, onProcessExit);
+    if (!callbackStub) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null callbackStub");
+        return NCP_ERR_INTERNAL;
+    }
+
+    auto appMgrClient = std::make_shared<OHOS::AppExecFwk::AppMgrClient>();
+    if (!appMgrClient) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null appMgrClient");
+        return NCP_ERR_INTERNAL;
+    }
+
+    auto ret = appMgrClient->RegisterNativeChildExitNotify(callbackStub);
+    if (ret != NCP_NO_ERROR) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "register native child exit notify failed, %{public}d", ret);
+        return NCP_ERR_INTERNAL;
+    }
+
+    return NCP_NO_ERROR;
+}
+
+Ability_NativeChildProcess_ErrCode OH_Ability_UnregisterNativeChildProcessExitCallback(
+    OH_Ability_OnNativeChildProcessExit onProcessExit)
+{
+    if (onProcessExit == nullptr) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null callback func pointer");
+        return NCP_ERR_INVALID_PARAM;
+    }
+
+    sptr<OHOS::AppExecFwk::INativeChildNotify> callbackStub(new (std::nothrow)) NativeChildCallback(nullptr, onProcessExit);
+    if (!callbackStub) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null callbackStub");
+        return NCP_ERR_INTERNAL;
+    }
+
+    auto appMgrClient = std::make_shared<OHOS::AppExecFwk::AppMgrClient>();
+    if (!appMgrClient) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null appMgrClient");
+        return NCP_ERR_INTERNAL;
+    }
+
+    auto ret = appMgrClient->UnregisterNativeChildExitNotify(callbackStub);
+    if (ret == AAFwk::ERR_NATIVE_CHILD_EXIT_CALLBACK_NOT_EXIST) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "native chlid exit callback not exist, %{public}d", ret);
+        return NCP_ERR_CALLBACK_NOT_EXIST;
+    } else if (ret != NCP_NO_ERROR) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "unregister native child exit notify failed, %{public}d", ret);
+        return NCP_ERR_INTERNAL;
+    }
+
+    return NCP_NO_ERROR;
 }
