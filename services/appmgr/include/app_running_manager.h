@@ -24,6 +24,7 @@
 #include "ability_info.h"
 #include "app_debug_listener_interface.h"
 #include "app_jsheap_mem_info.h"
+#include "app_cjheap_mem_info.h"
 #include "app_malloc_info.h"
 #include "app_mem_info.h"
 #include "app_running_record.h"
@@ -243,6 +244,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info);
+
+    /**
+     * DumpCjHeapMemory, call DumpCjHeapMemory() through proxy project.
+     * triggerGC and dump the application's cjheap memory info.
+     *
+     * @param info, pid, needGc, needSnapshot
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info);
 
     /**
      * Set AbilityForegroundingFlag of an app-record to true.

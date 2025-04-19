@@ -104,6 +104,8 @@ public:
     void InitRuntimeNS();
     void InitCJNS(const std::string& path);
     static NSMode DetectAppNSMode();
+    void DumpHeapSnapshot(int fd);
+    void ForceFullGC();
 
     static const char *cjAppNSName;
     static const char *cjSDKNSName;
