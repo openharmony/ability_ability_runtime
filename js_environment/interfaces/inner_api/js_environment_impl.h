@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,24 +20,9 @@
 #include "event_handler.h"
 #include "native_engine/native_engine.h"
 
-#include "native_engine/native_engine.h"
-
-#include "data_protect.h"
-
 namespace OHOS {
 namespace JsEnv {
-struct WorkerInfo {
-    panda::panda_file::StringPacProtect codePath;
-    bool isDebugVersion = false;
-    bool isBundle = true;
-    std::string packagePathStr;
-    std::vector<std::string> assetBasePathStr;
-    panda::panda_file::StringPacProtect hapPath;
-    panda::panda_file::BoolPacProtect isStageModel = panda::panda_file::BoolPacProtect(true);
-    std::string moduleName;
-    panda::panda_file::DataProtect apiTargetVersion = panda::panda_file::DataProtect();
-};
-
+struct WorkerInfo;
 class JsEnvironmentImpl {
 public:
     JsEnvironmentImpl() {}
