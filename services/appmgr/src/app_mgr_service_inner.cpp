@@ -421,14 +421,13 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
         TAG_LOGI(AAFwkTag::APPMGR, "BundleName: %{public}s preload preCheck: not allow.", bundleName.c_str());
         return AAFwk::ERR_NOT_ALLOW_PRELOAD_BY_RSS;
     }
-
     PreloadRequest request;
     auto ret = appPreloader_->GeneratePreloadRequest(bundleName, userId, appIndex, request);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication GeneratePreloadRequest failed.");
         return ret;
     }
-
+    SetPreloadDebugApp(request.want, request.appInfo);
     request.preloadMode = preloadMode;
     auto task = [inner = shared_from_this(), request] () {
         if (!inner) {
@@ -445,6 +444,20 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
         bundleName.c_str(), userId);
     taskHandler_->SubmitTask(task, PRELOAD_APPLIATION_TASK);
     return ERR_OK;
+}
+
+void AppMgrServiceInner::SetPreloadDebugApp(std::shared_ptr<AAFwk::Want> want, std::shared_ptr<ApplicationInfo> appInfo)
+{
+    CHECK_POINTER_AND_RETURN_LOG(want, "SetPreloadDebugApp want null");
+    CHECK_POINTER_AND_RETURN_LOG(appInfo, "SetPreloadDebugApp appInfo null");
+    if (!appInfo->debug ||
+        appInfo->appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG ||
+        !system::GetBoolParameter(DEVELOPER_MODE_STATE, false) ||
+        !IsWaitingDebugAppInner(appInfo->bundleName)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Not meeting the set debugging conditions.");
+        return;
+    }
+    want->SetParam(DEBUG_APP, true);
 }
 
 void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
@@ -6583,7 +6596,12 @@ bool AppMgrServiceInner::IsWaitingDebugApp(const std::string &bundleName)
         TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
         return false;
     }
+    return IsWaitingDebugAppInner(bundleName);
+}
 
+bool AppMgrServiceInner::IsWaitingDebugAppInner(const std::string &bundleName)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     InitAppWaitingDebugList();
 
     std::lock_guard<ffrt::mutex> lock(waitingDebugLock_);
