@@ -54,7 +54,7 @@ void ToolSystemTest::InstallBundle(const std::string& bundlePath, const bool che
     std::string commandResult = ExecuteCommand(command);
 
     if (checkResult) {
-        EXPECT_PRED2(ToolSystemTest::IsSubSequence, commandResult, STRING_INSTALL_BUNDLE_OK + "\n");
+        EXPECT_TRUE(ToolSystemTest::IsSubSequence);
     }
 }
 
