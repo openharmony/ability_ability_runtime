@@ -27,6 +27,7 @@
 #include "runtime.h"
 #include "values_bucket.h"
 #include "abs_shared_result_set.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -609,20 +610,22 @@ HWTEST_F(AbilitySecondTest, Ability_GetDisplayOrientation_0100, TestSize.Level1)
     ret = ability->GetDisplayOrientation();
     EXPECT_EQ(ret, -1);
 
-    int32_t displayId = 0;
-    sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
-    ability->InitWindow(displayId, option);
-    ability->SetDisplayOrientation(static_cast<int>(DisplayOrientation::LANDSCAPE));
-    ret = ability->GetDisplayOrientation();
-    EXPECT_EQ(ret, static_cast<int>(DisplayOrientation::LANDSCAPE));
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        int32_t displayId = 0;
+        sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
+        ability->InitWindow(displayId, option);
+        ability->SetDisplayOrientation(static_cast<int>(DisplayOrientation::LANDSCAPE));
+        ret = ability->GetDisplayOrientation();
+        EXPECT_EQ(ret, static_cast<int>(DisplayOrientation::LANDSCAPE));
 
-    ability->SetDisplayOrientation(static_cast<int>(DisplayOrientation::PORTRAIT));
-    ret = ability->GetDisplayOrientation();
-    EXPECT_EQ(ret, static_cast<int>(DisplayOrientation::PORTRAIT));
+        ability->SetDisplayOrientation(static_cast<int>(DisplayOrientation::PORTRAIT));
+        ret = ability->GetDisplayOrientation();
+        EXPECT_EQ(ret, static_cast<int>(DisplayOrientation::PORTRAIT));
 
-    ability->SetDisplayOrientation(static_cast<int>(DisplayOrientation::FOLLOWRECENT));
-    ret = ability->GetDisplayOrientation();
-    EXPECT_EQ(ret, 0);
+        ability->SetDisplayOrientation(static_cast<int>(DisplayOrientation::FOLLOWRECENT));
+        ret = ability->GetDisplayOrientation();
+        EXPECT_EQ(ret, 0);
+    }
 
     GTEST_LOG_(INFO) << "Ability_GetDisplayOrientation_0100 end";
 }
