@@ -2064,7 +2064,10 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
-
+    if (startOptions.GetDisplayID() == -1) {
+        abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID,
+            DisplayUtil::GetDefaultDisplayId());
+    }
     auto ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
