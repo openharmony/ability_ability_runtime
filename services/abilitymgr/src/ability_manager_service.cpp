@@ -1913,6 +1913,11 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, callerToken);
         }
         TAG_LOGD(AAFwkTag::ABILITYMGR, "implicit start ability");
+        abilityRequest.want.RemoveParam(KEY_REQUEST_ID);
+        if (!startOptions.requestId_.empty()) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "set implicit requestId:%{public}s", startOptions.requestId_.c_str());
+            abilityRequest.want.SetParam(KEY_REQUEST_ID, startOptions.requestId_);
+        }
         result = implicitStartProcessor_->ImplicitStartAbility(abilityRequest, validUserId,
             startOptions.GetWindowMode());
         if (result != ERR_OK) {
@@ -2007,6 +2012,10 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             DisplayUtil::GetDefaultDisplayId());
     } else {
         abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
+    }
+    abilityRequest.want.RemoveParam(KEY_REQUEST_ID);
+    if (!startOptions.requestId_.empty()) {
+        abilityRequest.want.SetParam(KEY_REQUEST_ID, startOptions.requestId_);
     }
     AbilityUtil::ProcessWindowMode(abilityRequest.want, abilityInfo.applicationInfo.accessTokenId,
         startOptions.GetWindowMode());

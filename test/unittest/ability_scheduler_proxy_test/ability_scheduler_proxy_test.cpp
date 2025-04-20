@@ -481,5 +481,45 @@ HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_024, TestS
 
     EXPECT_EQ(IAbilityScheduler::SCHEDULE_ABILITY_COMMAND_WINDOW, mock_->code_);
 }
+
+/*
+ * Feature: AbilitySchedulerProxy
+ * Function: ScheduleAbilityRequestFailure
+ * SubFunction: NA
+ * FunctionPoints: AbilitySchedulerProxy ScheduleAbilityRequestFailure
+ * EnvConditions: NA
+ * CaseDescription: verify ScheduleAbilityRequestFailure Normal case
+ */
+HWTEST_F(AbilitySchedulerProxyTest, ScheduleAbilityRequestFailure_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilitySchedulerMock::InvokeSendRequest));
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    abilitySchedulerProxy_->ScheduleAbilityRequestFailure(requestId, element, message);
+    EXPECT_EQ(IAbilityScheduler::SCHEDULE_ABILITY_REQUEST_FAILURE, mock_->code_);
+}
+
+/*
+ * Feature: AbilitySchedulerProxy
+ * Function: ScheduleAbilityRequestSuccess
+ * SubFunction: NA
+ * FunctionPoints: AbilitySchedulerProxy ScheduleAbilityRequestSuccess
+ * EnvConditions: NA
+ * CaseDescription: verify ScheduleAbilityRequestSuccess Normal case
+ */
+HWTEST_F(AbilitySchedulerProxyTest, ScheduleAbilityRequestSuccess_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilitySchedulerMock::InvokeSendRequest));
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "success";
+    abilitySchedulerProxy_->ScheduleAbilityRequestSuccess(requestId, element, message);
+    EXPECT_EQ(IAbilityScheduler::SCHEDULE_ABILITY_REQUEST_SUCCESS, mock_->code_);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
