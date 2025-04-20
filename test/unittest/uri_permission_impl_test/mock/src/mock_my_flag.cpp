@@ -31,6 +31,7 @@ bool MyFlag::permissionReadWriteDownload_ = false;
 bool MyFlag::permissionReadWriteDesktop_ = false;
 bool MyFlag::permissionReadWriteDocuments_ = false;
 bool MyFlag::IsSystempAppCall_ = false;
+bool MyFlag::permissionFileAccessPersist_ = false;
 TokenInfoMap MyFlag::tokenInfos = {};
 } // namespace AAFwk
 } // namespace OHOS
