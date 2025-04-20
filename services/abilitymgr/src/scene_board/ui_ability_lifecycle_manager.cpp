@@ -253,8 +253,9 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
 {
     std::shared_ptr<AbilityRecord> uiAbilityRecord = nullptr;
     auto iter = sessionAbilityMap_.find(sessionInfo->persistentId);
-    if (iter == sessionAbilityMap_.end() ||
-        (iter->second && iter->second->GetKillReason() == GlobalConstant::LOW_MEMORY_KILL)) {
+    bool isLowMemKill = (iter != sessionAbilityMap_.end()) &&
+        (iter->second != nullptr) && (iter->second->GetKillReason() == GlobalConstant::LOW_MEMORY_KILL);
+    if (iter == sessionAbilityMap_.end() || isLowMemKill) {
         uiAbilityRecord = FindRecordFromTmpMap(abilityRequest);
         auto abilityInfo = abilityRequest.abilityInfo;
         if (uiAbilityRecord == nullptr) {
@@ -289,7 +290,16 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
         }
         MoreAbilityNumbersSendEventInfo(
             abilityRequest.userId, abilityInfo.bundleName, abilityInfo.name, abilityInfo.moduleName);
-        sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
+        if (isLowMemKill) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "killed by low-mem, created a new record, "
+                "replacing old record id=%{public}s, new record id=%{public}s",
+                std::to_string(sessionAbilityMap_[sessionInfo->persistentId]->GetAbilityRecordId()).c_str(),
+                std::to_string(uiAbilityRecord->GetAbilityRecordId()).c_str());
+            lowMemKillAbilityMap_.emplace(sessionInfo->persistentId, sessionAbilityMap_[sessionInfo->persistentId]);
+            sessionAbilityMap_[sessionInfo->persistentId] = uiAbilityRecord;
+        } else {
+            sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
+        }
     } else {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "NewWant:%{public}d", sessionInfo->isNewWant);
         uiAbilityRecord = iter->second;
@@ -944,6 +954,13 @@ void UIAbilityLifecycleManager::EraseAbilityRecord(const std::shared_ptr<Ability
     for (auto iter = sessionAbilityMap_.begin(); iter != sessionAbilityMap_.end(); iter++) {
         if (iter->second != nullptr && iter->second->GetToken()->AsObject() == abilityRecord->GetToken()->AsObject()) {
             sessionAbilityMap_.erase(iter);
+            AbilityRecordDeathManager::GetInstance().AddRecordToDeadList(abilityRecord);
+            break;
+        }
+    }
+    for (auto iter = lowMemKillAbilityMap_.begin(); iter != lowMemKillAbilityMap_.end(); iter++) {
+        if (iter->second != nullptr && iter->second->GetToken()->AsObject() == abilityRecord->GetToken()->AsObject()) {
+            lowMemKillAbilityMap_.erase(iter);
             AbilityRecordDeathManager::GetInstance().AddRecordToDeadList(abilityRecord);
             break;
         }

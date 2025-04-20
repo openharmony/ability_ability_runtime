@@ -11291,7 +11291,8 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
         TAG_LOGW(AAFwkTag::ABILITYMGR, "RecordAppExitReason failed, ret:%{public}d", ret);
     }
     std::vector<int32_t> pidToBeKilled = { pid };
-    IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByPids(pidToBeKilled));
+    IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByPids(pidToBeKilled,
+        reason.exitMsg));
     return ERR_OK;
 }
 
