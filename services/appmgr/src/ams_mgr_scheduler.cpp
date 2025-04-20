@@ -242,7 +242,7 @@ void AmsMgrScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSp
     amsHandler_->SubmitTask(killProcessesByUserIdFunc, TASK_KILL_PROCESSES_BY_USERID);
 }
 
-void AmsMgrScheduler::KillProcessesByPids(std::vector<int32_t> &pids)
+void AmsMgrScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason)
 {
     if (!IsReady()) {
         return;
@@ -255,8 +255,9 @@ void AmsMgrScheduler::KillProcessesByPids(std::vector<int32_t> &pids)
         return;
     }
 
-    std::function<void()> killProcessesByPidsFunc = [amsMgrServiceInner = amsMgrServiceInner_, pids]() mutable {
-        amsMgrServiceInner->KillProcessesByPids(pids);
+    std::function<void()> killProcessesByPidsFunc = [amsMgrServiceInner = amsMgrServiceInner_,
+        pidsInner = pids, reasonInner = reason]() {
+        amsMgrServiceInner->KillProcessesByPids(pidsInner, reasonInner);
     };
     amsHandler_->SubmitTask(killProcessesByPidsFunc, TASK_KILL_PROCESSES_BY_PIDS);
 }
