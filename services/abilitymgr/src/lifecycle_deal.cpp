@@ -200,5 +200,21 @@ void LifecycleDeal::ScheduleCollaborate(const Want &want)
     CHECK_POINTER(abilityScheduler);
     abilityScheduler->ScheduleCollaborate(want);
 }
+
+void LifecycleDeal::NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    auto abilityScheduler = GetScheduler();
+    CHECK_POINTER(abilityScheduler);
+    abilityScheduler->ScheduleAbilityRequestFailure(requestId, element, message);
+}
+
+void LifecycleDeal::NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    auto abilityScheduler = GetScheduler();
+    CHECK_POINTER(abilityScheduler);
+    abilityScheduler->ScheduleAbilityRequestSuccess(requestId, element, message);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

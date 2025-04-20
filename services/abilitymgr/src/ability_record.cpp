@@ -32,6 +32,7 @@
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "image_source.h"
+#include "json_utils.h"
 #include "keep_alive_process_manager.h"
 #include "last_exit_detail_info.h"
 #include "multi_instance_utils.h"
@@ -111,6 +112,7 @@ const int MAX_URI_COUNT = 500;
 const int RESTART_SCENEBOARD_DELAY = 500;
 constexpr int32_t DMS_UID = 5522;
 constexpr int32_t SCHEDULER_DIED_TIMEOUT = 60000;
+const std::string JSON_KEY_ERR_MSG = "errMsg";
 
 auto g_addLifecycleEventTask = [](sptr<Token> token, std::string &methodName) {
     CHECK_POINTER_LOG(token, "token is nullptr");
@@ -3824,6 +3826,26 @@ void AbilityRecord::ScheduleCollaborate(const Want &want)
     std::lock_guard guard(collaborateWantLock_);
     CHECK_POINTER(lifecycleDeal_);
     lifecycleDeal_->ScheduleCollaborate(want);
+}
+
+void AbilityRecord::NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    CHECK_POINTER(lifecycleDeal_);
+    nlohmann::json jsonObject = nlohmann::json {
+        { JSON_KEY_ERR_MSG, message },
+    };
+    lifecycleDeal_->NotifyAbilityRequestFailure(requestId, element, jsonObject.dump());
+}
+
+void AbilityRecord::NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    CHECK_POINTER(lifecycleDeal_);
+    nlohmann::json jsonObject = nlohmann::json {
+        { JSON_KEY_ERR_MSG, message },
+    };
+    lifecycleDeal_->NotifyAbilityRequestSuccess(requestId, element, jsonObject.dump());
 }
 }  // namespace AAFwk
 }  // namespace OHOS

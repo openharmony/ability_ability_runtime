@@ -112,5 +112,45 @@ HWTEST_F(JsUiAbilityTest, JSUIAbility_OnDidBackground_0100, TestSize.Level1)
     ability->OnDidBackground();
     GTEST_LOG_(INFO) << "JSUIAbility_OnDidBackground_0100 end";
 }
+
+/**
+ * @tc.name: JSUIAbility_OnAbilityRequestFailure_0100
+ * @tc.desc: OnAbilityRequestFailure test
+ * @tc.desc: Verify function OnAbilityRequestFailure.
+ */
+HWTEST_F(JsUiAbilityTest, JSUIAbility_OnAbilityRequestFailure_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JSUIAbility_OnAbilityRequestFailure_0100 start";
+    AbilityRuntime::Runtime::Options options;
+    options.lang = AbilityRuntime::Runtime::Language::JS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    auto ability = AbilityRuntime::JsUIAbility::Create(runtime);
+    ASSERT_NE(ability, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    ability->OnAbilityRequestFailure(requestId, element, message);
+    GTEST_LOG_(INFO) << "JSUIAbility_OnAbilityRequestFailure_0100 end";
+}
+
+/**
+ * @tc.name: JSUIAbility_OnAbilityRequestSuccess_0100
+ * @tc.desc: OnAbilityRequestSuccess test
+ * @tc.desc: Verify function OnAbilityRequestSuccess.
+ */
+HWTEST_F(JsUiAbilityTest, JSUIAbility_OnAbilityRequestSuccess_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JSUIAbility_OnAbilityRequestSuccess_0100 start";
+    AbilityRuntime::Runtime::Options options;
+    options.lang = AbilityRuntime::Runtime::Language::JS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    auto ability = AbilityRuntime::JsUIAbility::Create(runtime);
+    ASSERT_NE(ability, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "success";
+    ability->OnAbilityRequestSuccess(requestId, element, message);
+    GTEST_LOG_(INFO) << "JSUIAbility_OnAbilityRequestSuccess_0100 end";
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

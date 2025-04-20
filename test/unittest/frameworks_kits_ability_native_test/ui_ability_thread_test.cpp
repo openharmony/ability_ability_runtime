@@ -1304,5 +1304,83 @@ HWTEST_F(UIAbilityThreadTest, AbilityRuntime_CreateModalUIExtension_0200, Functi
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "AbilityRuntime_CreateModalUIExtension_0200 end";
 }
+
+/**
+ * @tc.number: AbilityRuntime_ScheduleAbilityRequestFailure_0100
+ * @tc.name: ScheduleAbilityRequestFailure
+ * @tc.desc: Test ScheduleAbilityRequestFailure function
+ */
+HWTEST_F(UIAbilityThreadTest, AbilityRuntime_ScheduleAbilityRequestFailure_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestFailure_0100 start";
+    AbilityRuntime::UIAbilityThread *abilitythread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    EXPECT_NE(abilitythread, nullptr);
+    abilitythread->abilityImpl_ = std::make_shared<AbilityRuntime::UIAbilityImpl>();
+    EXPECT_NE(abilitythread->abilityImpl_, nullptr);
+    abilitythread->abilityHandler_ = std::make_shared<AbilityHandler>(nullptr);
+    EXPECT_NE(abilitythread->abilityHandler_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    abilitythread->ScheduleAbilityRequestFailure(requestId, element, message);
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestFailure_0100 end";
+}
+
+/**
+ * @tc.number: AbilityRuntime_ScheduleAbilityRequestFailure_0200
+ * @tc.name: ScheduleAbilityRequestFailure
+ * @tc.desc: Test ScheduleAbilityRequestFailure function
+ */
+HWTEST_F(UIAbilityThreadTest, AbilityRuntime_ScheduleAbilityRequestFailure_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestFailure_0200 start";
+    AbilityRuntime::UIAbilityThread *abilitythread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    EXPECT_NE(abilitythread, nullptr);
+    EXPECT_EQ(abilitythread->abilityImpl_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    abilitythread->ScheduleAbilityRequestFailure(requestId, element, message);
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestFailure_0200 end";
+}
+
+/**
+ * @tc.number: AbilityRuntime_ScheduleAbilityRequestSuccess_0100
+ * @tc.name: ScheduleAbilityRequestSuccess
+ * @tc.desc: Test ScheduleAbilityRequestSuccess function
+ */
+HWTEST_F(UIAbilityThreadTest, AbilityRuntime_ScheduleAbilityRequestSuccess_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0100 start";
+    AbilityRuntime::UIAbilityThread *abilitythread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    EXPECT_NE(abilitythread, nullptr);
+    abilitythread->abilityImpl_ = std::make_shared<AbilityRuntime::UIAbilityImpl>();
+    EXPECT_NE(abilitythread->abilityImpl_, nullptr);
+    abilitythread->abilityHandler_ = std::make_shared<AbilityHandler>(nullptr);
+    EXPECT_NE(abilitythread->abilityHandler_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "success";
+    abilitythread->ScheduleAbilityRequestSuccess(requestId, element, message);
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0100 end";
+}
+
+/**
+ * @tc.number: AbilityRuntime_ScheduleAbilityRequestSuccess_0200
+ * @tc.name: ScheduleAbilityRequestSuccess
+ * @tc.desc: Test ScheduleAbilityRequestSuccess function
+ */
+HWTEST_F(UIAbilityThreadTest, AbilityRuntime_ScheduleAbilityRequestSuccess_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0200 start";
+    AbilityRuntime::UIAbilityThread *abilitythread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    EXPECT_NE(abilitythread, nullptr);
+    EXPECT_EQ(abilitythread->abilityImpl_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "success";
+    abilitythread->ScheduleAbilityRequestSuccess(requestId, element, message);
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0200 end";
+}
 } // namespace AppExecFwk
 } // namespace OHOS
