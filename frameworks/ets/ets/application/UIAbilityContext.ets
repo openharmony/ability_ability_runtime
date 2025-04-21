@@ -22,19 +22,7 @@ import AbilityStartCallback from 'application.AbilityStartCallback';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import Context from 'application.Context';
 import window from '@ohos.window';
-
-export class AsyncCallbackWrapper<T> {
-  myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
-
-  constructor(myFun:AsyncCallback<T, void>){
-    console.log("AsyncCallbackWrapper");
-    this.myFun_ = myFun;
-  }
-
-  invoke(err: BusinessError<void>, data: T) : void {
-    this.myFun_(err, data);
-  }
-}
+import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
 export default class UIAbilityContext extends Context {
 
