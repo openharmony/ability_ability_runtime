@@ -1680,7 +1680,7 @@ public:
      * @param token, ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t RevokeDelegator(const sptr<IRemoteObject> &token) override;
+    virtual int32_t RevokeDelegator(sptr<IRemoteObject> token) override;
 
 private:
     template <typename T>

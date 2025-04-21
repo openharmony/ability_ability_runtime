@@ -22,6 +22,9 @@
 #include "ipc_capacity_wrap.h"
 #include "server_constant.h"
 #include "status_bar_delegate_interface.h"
+#include "mission_listener_interface.h"
+#include "mission_snapshot.h"
+#include "snapshot.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -6353,7 +6356,7 @@ int32_t AbilityManagerProxy::QueryPreLoadUIExtensionRecord(const AppExecFwk::Ele
     return NO_ERROR;
 }
 
-int32_t AbilityManagerProxy::RevokeDelegator(const sptr<IRemoteObject> &token)
+int32_t AbilityManagerProxy::RevokeDelegator(sptr<IRemoteObject> token)
 {
     MessageParcel data;
     MessageParcel reply;

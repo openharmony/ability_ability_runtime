@@ -35,15 +35,15 @@ namespace OHOS {
 namespace AAFwk {
 class MockDataObsMgrStub : public DataObsManagerStub {
 public:
-    MOCK_METHOD3(RegisterObserver, int(const Uri&, sptr<IDataAbilityObserver>, int32_t userId));
-    MOCK_METHOD3(UnregisterObserver, int(const Uri&, sptr<IDataAbilityObserver>, int32_t userId));
-    MOCK_METHOD2(NotifyChange, int(const Uri&, int32_t userId));
+    MOCK_METHOD4(RegisterObserver, int(const Uri&, sptr<IDataAbilityObserver>, int32_t userId, DataObsOption opt));
+    MOCK_METHOD4(UnregisterObserver, int(const Uri&, sptr<IDataAbilityObserver>, int32_t userId, DataObsOption opt));
+    MOCK_METHOD3(NotifyChange, int(const Uri&, int32_t userId, DataObsOption opt));
 
-    MOCK_METHOD3(RegisterObserverExt, Status(const Uri&, sptr<IDataAbilityObserver>, bool));
-    MOCK_METHOD2(UnregisterObserverExt, Status(const Uri&, sptr<IDataAbilityObserver>));
-    MOCK_METHOD1(UnregisterObserverExt, Status(sptr<IDataAbilityObserver>));
-    MOCK_METHOD1(NotifyChangeExt, Status(const ChangeInfo&));
-    MOCK_METHOD2(NotifyProcessObserver, Status(const std::string&, const sptr<IRemoteObject>&));
+    MOCK_METHOD4(RegisterObserverExt, Status(const Uri&, sptr<IDataAbilityObserver>, bool, DataObsOption opt));
+    MOCK_METHOD3(UnregisterObserverExt, Status(const Uri&, sptr<IDataAbilityObserver>, DataObsOption opt));
+    MOCK_METHOD2(UnregisterObserverExt, Status(sptr<IDataAbilityObserver>, DataObsOption opt));
+    MOCK_METHOD2(NotifyChangeExt, Status(const ChangeInfo&, DataObsOption opt));
+    MOCK_METHOD3(NotifyProcessObserver, Status(const std::string&, const sptr<IRemoteObject>&, DataObsOption opt));
 };
 
 class MockDataAbilityObserverStub : public AAFwk::DataAbilityObserverStub {

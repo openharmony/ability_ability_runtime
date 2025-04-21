@@ -103,9 +103,8 @@ bool CompareTwoRequest(const AbilityRequest &left, const AbilityRequest &right)
 
 UIAbilityLifecycleManager::UIAbilityLifecycleManager(int32_t userId): userId_(userId) {}
 
-bool UIAbilityLifecycleManager::ProcessColdStartBranch(AbilityRequest &abilityRequest,
-    sptr<SessionInfo> sessionInfo, std::shared_ptr<AbilityRecord> uiAbilityRecord,
-    bool &isColdStart)
+bool UIAbilityLifecycleManager::ProcessColdStartBranch(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
+    std::shared_ptr<AbilityRecord> uiAbilityRecord, bool isColdStart)
 {
     if (isColdStart && uiAbilityRecord->IsHook()) {
         auto nextRequest = PopAndGetNextSpecified(sessionInfo->requestId);
@@ -254,15 +253,16 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
 {
     std::shared_ptr<AbilityRecord> uiAbilityRecord = nullptr;
     auto iter = sessionAbilityMap_.find(sessionInfo->persistentId);
-    if (iter == sessionAbilityMap_.end() ||
-        (iter->second && iter->second->GetKillReason() == GlobalConstant::LOW_MEMORY_KILL)) {
+    bool isLowMemKill = (iter != sessionAbilityMap_.end()) &&
+        (iter->second != nullptr) && (iter->second->GetKillReason() == GlobalConstant::LOW_MEMORY_KILL);
+    if (iter == sessionAbilityMap_.end() || isLowMemKill) {
         uiAbilityRecord = FindRecordFromTmpMap(abilityRequest);
         auto abilityInfo = abilityRequest.abilityInfo;
         if (uiAbilityRecord == nullptr) {
             uiAbilityRecord = CreateAbilityRecord(abilityRequest, sessionInfo);
             bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
             abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, sessionInfo->instanceKey);
-            auto abilityRecord = FindRecordFromSessionMap(abilityRequest, false);
+            auto abilityRecord = FindRecordFromSessionMap(abilityRequest);
             if (isUIAbility && IsHookModule(abilityRequest) && abilityRecord == nullptr &&
                 (sessionInfo->processOptions == nullptr ||
                 sessionInfo->processOptions->startupVisibility == StartupVisibility::STARTUP_SHOW)) {
@@ -290,7 +290,16 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
         }
         MoreAbilityNumbersSendEventInfo(
             abilityRequest.userId, abilityInfo.bundleName, abilityInfo.name, abilityInfo.moduleName);
-        sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
+        if (isLowMemKill) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "killed by low-mem, created a new record, "
+                "replacing old record id=%{public}s, new record id=%{public}s",
+                std::to_string(sessionAbilityMap_[sessionInfo->persistentId]->GetAbilityRecordId()).c_str(),
+                std::to_string(uiAbilityRecord->GetAbilityRecordId()).c_str());
+            lowMemKillAbilityMap_.emplace(sessionInfo->persistentId, sessionAbilityMap_[sessionInfo->persistentId]);
+            sessionAbilityMap_[sessionInfo->persistentId] = uiAbilityRecord;
+        } else {
+            sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
+        }
     } else {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "NewWant:%{public}d", sessionInfo->isNewWant);
         uiAbilityRecord = iter->second;
@@ -620,7 +629,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     sessionInfo->userId = userId_;
     sessionInfo->isAtomicService = (abilityInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE);
     if (IsHookModule(abilityRequest)) {
-        auto abilityRecord = FindRecordFromSessionMap(abilityRequest, false);
+        auto abilityRecord = FindRecordFromSessionMap(abilityRequest);
         if (abilityRecord != nullptr) {
             if (abilityRecord->IsHook() && !abilityRecord->GetHookOff()) {
                 AbilityRequest request;
@@ -945,6 +954,13 @@ void UIAbilityLifecycleManager::EraseAbilityRecord(const std::shared_ptr<Ability
     for (auto iter = sessionAbilityMap_.begin(); iter != sessionAbilityMap_.end(); iter++) {
         if (iter->second != nullptr && iter->second->GetToken()->AsObject() == abilityRecord->GetToken()->AsObject()) {
             sessionAbilityMap_.erase(iter);
+            AbilityRecordDeathManager::GetInstance().AddRecordToDeadList(abilityRecord);
+            break;
+        }
+    }
+    for (auto iter = lowMemKillAbilityMap_.begin(); iter != lowMemKillAbilityMap_.end(); iter++) {
+        if (iter->second != nullptr && iter->second->GetToken()->AsObject() == abilityRecord->GetToken()->AsObject()) {
+            lowMemKillAbilityMap_.erase(iter);
             AbilityRecordDeathManager::GetInstance().AddRecordToDeadList(abilityRecord);
             break;
         }
@@ -3419,8 +3435,7 @@ void UIAbilityLifecycleManager::EnableListForSCBRecovery()
     coldStartInSCBRecovery_.clear();
 }
 
-std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::FindRecordFromSessionMap(
-    const AbilityRequest &abilityRequest, bool compareAbilityNameFlag)
+std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::FindRecordFromSessionMap(const AbilityRequest &abilityRequest)
 {
     int32_t appIndex = 0;
     (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
@@ -3428,8 +3443,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::FindRecordFromSessionM
     for (const auto &[sessionId, abilityRecord] : sessionAbilityMap_) {
         if (abilityRecord) {
             const auto &info = abilityRecord->GetAbilityInfo();
-            if ((!compareAbilityNameFlag || info.name == abilityRequest.abilityInfo.name) &&
-                info.bundleName == abilityRequest.abilityInfo.bundleName &&
+            if (info.bundleName == abilityRequest.abilityInfo.bundleName &&
                 info.moduleName == abilityRequest.abilityInfo.moduleName &&
                 appIndex == abilityRecord->GetAppIndex() && instanceKey == abilityRecord->GetInstanceKey()) {
                 return abilityRecord;
@@ -3494,7 +3508,7 @@ bool UIAbilityLifecycleManager::TryProcessHookModule(SpecifiedRequest &specified
     if (!isHookModule) {
         return false;
     }
-    auto abilityRecord = FindRecordFromSessionMap(specifiedRequest.abilityRequest, false);
+    auto abilityRecord = FindRecordFromSessionMap(specifiedRequest.abilityRequest);
     if (abilityRecord == nullptr || !abilityRecord->IsHook() || abilityRecord->GetHookOff()) {
         return false;
     }
@@ -3705,7 +3719,7 @@ bool UIAbilityLifecycleManager::UpdateSpecifiedFlag(std::shared_ptr<AbilityRecor
     return true;
 }
 
-int32_t UIAbilityLifecycleManager::RevokeDelegator(const sptr<IRemoteObject> &token)
+int32_t UIAbilityLifecycleManager::RevokeDelegator(sptr<IRemoteObject> token)
 {
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null token");

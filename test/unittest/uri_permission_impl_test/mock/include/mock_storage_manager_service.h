@@ -108,7 +108,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetUserStorageStatsIpc(int32_t userId, StorageStats &storageStats) override
+    virtual int32_t GetUserStorageStats(int32_t userId, StorageStats &storageStats) override
     {
         return E_OK;
     }

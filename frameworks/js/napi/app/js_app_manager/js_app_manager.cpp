@@ -900,7 +900,7 @@ private:
         }
 
         std::string bundleName;
-        if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+        if (!ConvertFromJsValue(env, argv[0], bundleName) || bundleName.empty()) {
             TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed");
             ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
             return CreateJsUndefined(env);
@@ -919,8 +919,11 @@ private:
             auto ret = appManager->ClearUpApplicationData(bundleName, 0);
             if (ret == 0) {
                 task->ResolveWithNoError(env, CreateJsUndefined(env));
-            } else {
+            } else if (ret == AAFwk::CHECK_PERMISSION_FAILED || ret == AAFwk::ERR_NOT_SYSTEM_APP) {
                 task->Reject(env, CreateJsErrorByNativeErr(env, ret, "clear up application failed."));
+            } else {
+                task->Reject(env, CreateJsErrorByNativeErr(env,
+                    static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "clear up application failed."));
             }
             delete task;
         };
