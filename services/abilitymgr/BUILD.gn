@@ -272,10 +272,6 @@ ohos_shared_library("abilityms") {
     external_deps += [ "image_framework:image_native" ]
   }
 
-  if (window_manager_use_sceneboard) {
-    defines += [ "ABILITY_ENABLE_SCENE_BOARD" ]
-  }
-
   version_script = "libabilityms.map"
   subsystem_name = "ability"
   innerapi_tags = [ "platformsdk_indirect" ]
