@@ -21,6 +21,7 @@
 #include "sts_context_utils.h"
 #include "sts_error_utils.h"
 #include "sts_ui_extension_common.h"
+#include "ets_extension_context.h"
 
 const char *INVOKE_METHOD_NAME = "invoke";
 static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj,
@@ -89,84 +90,6 @@ static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env, [[maybe_u
         OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
 }
 
-bool SetExtensionAbilityInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo)
-{
-    bool iRet = false;
-    auto hapModuleInfo = context->GetHapModuleInfo();
-    ani_status status = ANI_OK;
-    if (abilityInfo && hapModuleInfo) {
-        auto isExist = [&abilityInfo](const OHOS::AppExecFwk::ExtensionAbilityInfo& info) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
-            return info.bundleName == abilityInfo->bundleName && info.name == abilityInfo->name;
-        };
-        auto infoIter = std::find_if(
-            hapModuleInfo->extensionInfos.begin(), hapModuleInfo->extensionInfos.end(), isExist);
-        if (infoIter == hapModuleInfo->extensionInfos.end()) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "set extensionAbilityInfo fail");
-            return iRet;
-        }
-        ani_field extensionAbilityInfoField;
-        status = aniEnv->Class_FindField(contextClass, "extensionAbilityInfo", &extensionAbilityInfoField);
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
-            return iRet;
-        }
-        ani_object extAbilityInfoObj = OHOS::AppExecFwk::CommonFunAni::ConvertExtensionInfo(aniEnv, *infoIter);
-        status = aniEnv->Object_SetField_Ref(contextObj, extensionAbilityInfoField,
-            reinterpret_cast<ani_ref>(extAbilityInfoObj));
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
-            return iRet;
-        }
-        iRet = true;
-    }
-    return iRet;
-}
-
-bool SetConfiguration(
-    ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<OHOS::AbilityRuntime::Context> &context)
-{
-    ani_field field = nullptr;
-    auto configuration = context->GetConfiguration();
-    ani_ref configurationRef = OHOS::AppExecFwk::WrapConfiguration(env, *configuration);
-
-    ani_status status = env->Class_FindField(cls, "config", &field);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
-        return false;
-    }
-
-    status = env->Object_SetField_Ref(contextObj, field, configurationRef);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
-        return false;
-    }
-    return true;
-}
-
-void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo)
-{
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
-    if (!SetExtensionAbilityInfo(aniEnv, contextClass, contextObj, context, abilityInfo)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "SetExtensionAbilityInfo fail");
-        return;
-    }
-
-    if (!SetConfiguration(aniEnv, contextClass, contextObj, context)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "SetConfiguration fail");
-        return;
-    }
-}
-
-void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context)
-{
-    OHOS::AbilityRuntime::ContextUtil::StsCreatContext(aniEnv, contextClass, contextObj, applicationCtxRef, context);
-    BindExtensionInfo(aniEnv, contextClass, contextObj, context, context->GetAbilityInfo());
-}
-
 ani_object CreateStsUIExtensionContext(ani_env *env,
     std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context,
     const std::shared_ptr<OHOS::AppExecFwk::OHOSApplication> &application)
@@ -208,11 +131,11 @@ ani_object CreateStsUIExtensionContext(ani_env *env,
         return nullptr;
     }
 
-    // bind parent context
     if (application == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "application null");
         return nullptr;
     }
-    StsCreatExtensionContext(env, cls, contextObj, application->GetApplicationCtxObjRef(), context);
+    OHOS::AbilityRuntime::CreatEtsExtensionContext(env, cls, contextObj,
+        application->GetApplicationCtxObjRef(), context, context->GetAbilityInfo());
     return contextObj;
 }

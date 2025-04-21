@@ -22,7 +22,6 @@ group("ani_packages") {
     "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_args_abc_etc",
     "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_registry_abc_etc",
     "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_registry_ani_kit",
-    "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_shellCmdResult_abc_etc",
     "${ability_runtime_path}/frameworks/ets/ani/ability_manager:ability_ability_manager_abc_etc",
     "${ability_runtime_path}/frameworks/ets/ani/ability_manager:ability_ability_manager_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
@@ -33,5 +32,6 @@ group("ani_packages") {
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability:ui_extension_ability_ani_etc",
     "${ability_runtime_path}/frameworks/ets/ani/uri_permission_manager:uri_permission_manager_abc_etc",
     "${ability_runtime_path}/frameworks/ets/ani/uri_permission_manager:uri_permission_manager_ani_kit",
+    "${ability_runtime_path}/frameworks/ets/ani/wantagent:aniwantagent",
   ]
 }

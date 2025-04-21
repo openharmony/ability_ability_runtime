@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-interface ShellCmdResult {
-   stdResult: string;
-   exitCode: number;
-}
+import { BusinessError, AsyncCallback } from '@ohos.base';
 
-class ShellCmdResultImpl implements ShellCmdResult {
-   public stdResult: string = '';
-   public exitCode: number = 0;
-}
+export default class AsyncCallbackWrapper<T> {
+  private myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
 
-export default ShellCmdResult;
+  constructor(myFun:AsyncCallback<T, void>){
+    this.myFun_ = myFun;
+  }
+
+  invoke(err: BusinessError<void>, data: T) : void {
+    this.myFun_(err, data);
+  }
+}
