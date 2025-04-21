@@ -14,13 +14,19 @@
  */
 
 import Context from 'application.Context'
+import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 
 export default class ApplicationContext extends Context {
     public native setSupportedProcessCacheSync(isSupported : boolean):void;
+    public native nativeOnSync(type: 'environment', callback: EnvironmentCallback): number;
 
     setSupportedProcessCache(isSupported : boolean):void {
         taskpool.execute((): void => {
             this.setSupportedProcessCacheSync(isSupported);
         });
+    }
+
+    on(type: 'environment', callback: EnvironmentCallback): number {
+        return this.nativeOnSync(type, callback);
     }
 }

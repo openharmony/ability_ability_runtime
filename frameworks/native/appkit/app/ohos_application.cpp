@@ -262,6 +262,9 @@ void OHOSApplication::InitAniApplicationContext()
     std::array applicationContextFunctions = {
         ani_native_function {"setSupportedProcessCacheSync", "Z:V",
             reinterpret_cast<void *>(SetSupportedProcessCacheSync)},
+        ani_native_function {"nativeOnSync",
+            "Lstd/core/String;L@ohos/app/ability/EnvironmentCallback/EnvironmentCallback;:D",
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeOnSync)}
     };
     aniEnv->Class_BindNativeMethods(applicationContextCls, applicationContextFunctions.data(),
         applicationContextFunctions.size());
