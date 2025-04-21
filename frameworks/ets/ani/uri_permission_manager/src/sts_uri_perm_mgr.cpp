@@ -55,6 +55,10 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_int appCloneIndex, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "grantUriPermissionCallbackSync run");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "env null");
+        return;
+    }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
     ani_object stsErrCode = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
@@ -87,6 +91,10 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     ani_string uri, ani_string targetName, ani_int appCloneIndex, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "revokeUriPermissionCallbackSync run");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "env null");
+        return;
+    }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
     ani_object stsErrCode = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
