@@ -986,7 +986,7 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
             displayId = strtol(strDisplayId.c_str(), nullptr, BASE_DISPLAY_ID_NUM);
             TAG_LOGD(AAFwkTag::UIABILITY, "displayId: %{public}d", displayId);
         } else {
-            TAG_LOGW(AAFwkTag::UIABILITY, "formatRegex: [%{public}s] failed", strDisplayId.c_str());
+            TAG_LOGW(AAFwkTag::UIABILITY, "formatRegex: [%{public}s]", strDisplayId.c_str());
         }
     }
     auto option = GetWindowOption(want);

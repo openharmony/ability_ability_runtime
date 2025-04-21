@@ -2191,7 +2191,7 @@ ErrCode AbilityManagerClient::QueryPreLoadUIExtensionRecord(const AppExecFwk::El
         element, moduleName, hostBundleName, recordNum, userId);
 }
 
-ErrCode AbilityManagerClient::RevokeDelegator(const sptr<IRemoteObject> &token)
+ErrCode AbilityManagerClient::RevokeDelegator(sptr<IRemoteObject> token)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call RevokeDelegator");
     auto abms = GetAbilityManager();

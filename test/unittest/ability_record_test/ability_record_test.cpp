@@ -67,6 +67,7 @@ public:
     void SetUp();
     void TearDown();
     std::shared_ptr<AbilityRecord> GetAbilityRecord();
+    AbilityRequest CreateValidAbilityRequest();
 
     std::shared_ptr<AbilityRecord> abilityRecord_{ nullptr };
     std::shared_ptr<AbilityResult> abilityResult_{ nullptr };
@@ -106,6 +107,16 @@ std::shared_ptr<AbilityRecord> AbilityRecordTest::GetAbilityRecord()
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     return std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+}
+
+AbilityRequest AbilityRecordTest::CreateValidAbilityRequest()
+{
+    AbilityRequest request;
+    request.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    request.abilityInfo.bundleName = "com.example.test";
+    request.abilityInfo.name = "TestAbility";
+    request.appInfo.name = "TestApp";
+    return request;
 }
 
 bool IsTestAbilityExist(const std::string& data)
@@ -795,6 +806,45 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_CreateAbilityRecord_001, TestSize.Le
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     auto res = abilityRecord_->CreateAbilityRecord(abilityRequest);
     EXPECT_NE(res, nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: CreateAbilityRecord
+ * SubFunction: CreateAbilityRecord
+ * FunctionPoints: Test ability recordId thread safe,no same recordId
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord CreateAbilityRecord
+ */
+HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_CreateAbilityRecord_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_AbilityMS_CreateAbilityRecord_002 start";
+    std::vector<std::thread> threads;
+    std::vector<int64_t> recordIds;
+    std::mutex mutex;
+
+    for (int i = 0; i < 10; ++i) {
+        threads.emplace_back([&]() {
+            for (int j = 0; j < 50; ++j) {
+                auto request = CreateValidAbilityRequest();
+                auto abilityRecord = AbilityRecord::CreateAbilityRecord(request);
+                ASSERT_NE(abilityRecord, nullptr);
+
+                std::lock_guard<std::mutex> lock(mutex);
+                recordIds.push_back(abilityRecord->GetAbilityRecordId());
+            }
+        });
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    std::sort(recordIds.begin(), recordIds.end());
+    auto last = std::unique(recordIds.begin(), recordIds.end());
+    ASSERT_EQ(last, recordIds.end()) << "Dulpicate ability RecordId";
+
+    GTEST_LOG_(INFO) << "AaFwk_AbilityMS_CreateAbilityRecord_002 end";
 }
 
 /*

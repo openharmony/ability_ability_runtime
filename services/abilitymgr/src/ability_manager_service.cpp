@@ -2120,7 +2120,10 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_NULL_MISSION_LIST_MANAGER;
     }
-
+    if (startOptions.GetDisplayID() == -1) {
+        abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID,
+            DisplayUtil::GetDefaultDisplayId());
+    }
     auto ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
@@ -8859,11 +8862,15 @@ int AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr<
         ConnectServices();
         StartUserApps();
     }
+#ifdef ABILITY_ENABLE_SCENE_BOARD
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
     auto ret = StartHighestPriorityAbility(userId, isBoot, isAppRecovery);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartHighestPriorityAbility failed: %{public}d", ret);
     }
+#else
+    auto ret = ERR_OK;
+#endif
     if (callback) {
         callback->OnStartUserDone(userId, ret);
     }
@@ -11288,7 +11295,8 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
         TAG_LOGW(AAFwkTag::ABILITYMGR, "RecordAppExitReason failed, ret:%{public}d", ret);
     }
     std::vector<int32_t> pidToBeKilled = { pid };
-    IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByPids(pidToBeKilled));
+    IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByPids(pidToBeKilled,
+        reason.exitMsg));
     return ERR_OK;
 }
 
@@ -13736,7 +13744,7 @@ int32_t AbilityManagerService::QueryPreLoadUIExtensionRecord(const AppExecFwk::E
       element, moduleName, hostBundleName, recordNum);
 }
 
-int32_t AbilityManagerService::RevokeDelegator(const sptr<IRemoteObject> &token)
+int32_t AbilityManagerService::RevokeDelegator(sptr<IRemoteObject> token)
 {
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "capability not support");
