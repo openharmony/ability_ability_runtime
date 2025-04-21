@@ -38,6 +38,7 @@ namespace {
 const char *INVOKE_METHOD_NAME = "invoke";
 const int32_t ERR_OK = 0;
 const int32_t ERR_FAILURE = -1;
+constexpr const char* NOT_SYSTEM_APP = "The application is not system-app, can not use system-api.";
 
 static std::string GetStdString(ani_env* env, ani_string str)
 {
@@ -54,6 +55,15 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_int appCloneIndex, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "grantUriPermissionCallbackSync run");
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    ani_object stsErrCode = CreateStsError(env, AbilityErrorCode::ERROR_OK);
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
+        stsErrCode = CreateStsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
+            NOT_SYSTEM_APP);
+        AsyncCallback(env, callback, stsErrCode, createDouble(env, ERR_FAILURE));
+        return;
+    }
     std::string uriStr = GetStdString(env, uri);
     Uri uriVec(uriStr);
     ani_int flag = 0;
@@ -63,7 +73,6 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     int32_t appCloneIndexId = static_cast<int32_t>(appCloneIndex);
     int32_t errCode = ERR_OK;
     int32_t result = ERR_OK;
-    ani_object stsErrCode = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     errCode = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId, targetBundleName, appCloneIndexId);
     if (errCode != ERR_OK) {
         result = ERR_FAILURE;
@@ -77,12 +86,20 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     ani_string uri, ani_string targetName, ani_int appCloneIndex, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "revokeUriPermissionCallbackSync run");
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    ani_object stsErrCode = CreateStsError(env, AbilityErrorCode::ERROR_OK);
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
+        stsErrCode = CreateStsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
+            NOT_SYSTEM_APP);
+        AsyncCallback(env, callback, stsErrCode, createDouble(env, ERR_FAILURE));
+        return;
+    }
     std::string uriStr = GetStdString(env, uri);
     Uri uriVec(uriStr);
     std::string targetBundleName = GetStdString(env, targetName);
     int32_t errCode = ERR_OK;
     int32_t result = ERR_OK;
-    ani_object stsErrCode = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     errCode = AAFwk::UriPermissionManagerClient::GetInstance().RevokeUriPermissionManually(uriVec,
         targetBundleName, appCloneIndex);
     if (errCode != ERR_OK) {
