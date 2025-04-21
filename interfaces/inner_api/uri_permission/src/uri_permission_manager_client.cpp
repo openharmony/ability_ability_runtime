@@ -415,7 +415,7 @@ void UriPermissionManagerClient::StringVecToRawData(const std::vector<std::strin
     rawData.size = rawData.ownedData.size();
 }
 
-#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGE
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 int32_t UriPermissionManagerClient::Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
