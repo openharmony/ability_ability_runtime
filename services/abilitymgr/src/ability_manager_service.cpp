@@ -8862,15 +8862,11 @@ int AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr<
         ConnectServices();
         StartUserApps();
     }
-#ifdef ABILITY_ENABLE_SCENE_BOARD
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
     auto ret = StartHighestPriorityAbility(userId, isBoot, isAppRecovery);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartHighestPriorityAbility failed: %{public}d", ret);
     }
-#else
-    auto ret = ERR_OK;
-#endif
     if (callback) {
         callback->OnStartUserDone(userId, ret);
     }
