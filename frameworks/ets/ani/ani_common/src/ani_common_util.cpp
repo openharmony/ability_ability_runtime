@@ -63,13 +63,14 @@ bool GetBoolOrUndefined(ani_env *env, ani_object param, const char *name)
 {
     ani_ref obj = nullptr;
     ani_status status = ANI_ERROR;
-    ani_boolean res = 0.0;
+    ani_boolean res = false;
     ani_boolean hasValue = true;
     if (GetPropertyRef(env, param, name, obj, hasValue) && hasValue) {
         TAG_LOGW(AAFwkTag::JSNAPI, "%{public}s : undefined", name);
         return false;
     }
-    if ((status = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(obj), "booleanValue", nullptr, &res)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(obj), "unboxed", ":Z", &res)) !=
+        ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return res;
     }
