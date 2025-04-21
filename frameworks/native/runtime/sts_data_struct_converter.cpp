@@ -22,25 +22,6 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
-#define SETTER_METHOD_NAME(property) "<set>" #property
-
-void ClassSetter(
-    ani_env* env, ani_class cls, ani_object object, const char* setterName, ...)
-{
-    ani_status status = ANI_ERROR;
-    ani_method setter;
-    if ((status = env->Class_FindMethod(cls, setterName, nullptr, &setter)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return;
-    }
-    va_list args;
-    va_start(args, setterName);
-    if ((status = env->Object_CallMethod_Void_V(object, setter, args)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return;
-    }
-    va_end(args);
-}
 
 ani_string GetAniString(ani_env *env, const std::string &str)
 {
@@ -86,16 +67,18 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
         TAG_LOGE(AAFwkTag::UIABILITY, "null object");
         return nullptr;
     }
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(lastExitMessage), GetAniString(env, launchParam.lastExitMessage));
+    env->Object_SetPropertyByName_Ref(object, "lastExitMessage", GetAniString(env, launchParam.lastExitMessage));
+
     ani_enum_item launchReasonItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
         "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchReason;", launchParam.launchReason, launchReasonItem);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(launchReason), launchReasonItem);
+    env->Object_SetPropertyByName_Ref(object, "launchReason", launchReasonItem);
+
     ani_enum_item lastExitReasonItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
         "L@ohos/app/ability/AbilityConstant/AbilityConstant/LastExitReason;",
         launchParam.lastExitReason, lastExitReasonItem);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(lastExitReason), lastExitReasonItem);
+    env->Object_SetPropertyByName_Ref(object, "lastExitReason", lastExitReasonItem);
 
     return object;
 }
