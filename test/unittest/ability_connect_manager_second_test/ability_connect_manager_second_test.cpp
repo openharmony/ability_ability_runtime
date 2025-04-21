@@ -16,7 +16,11 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+#define private public
+#define protected public
 #include "ability_connect_manager.h"
+#undef private
+#undef protected
 #include "extension_record_factory.h"
 #include "ability_util.h"
 #include "hilog_tag_wrapper.h"
@@ -224,5 +228,52 @@ HWTEST_F(AbilityConnectManagerSecondTest, UpdateKeepAliveEnableState_001, TestSi
     TAG_LOGI(AAFwkTag::TEST, "RUpdateKeepAliveEnableState_001 end");
 }
 
+/*
+ * Feature: AbilityConnectManager
+ * Function: HandleCommandTimeoutTask
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, HandleCommandTimeoutTask_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleCommandTimeoutTask_001 start");
+
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(100);
+    EXPECT_NE(connectManager, nullptr);
+
+    ASSERT_NE(serviceRecord_, nullptr);
+    serviceRecord_->SetAbilityState(AbilityState::INACTIVE);
+
+    std::string serviceKey = serviceRecord_->GetURI();
+    connectManager->AddToServiceMap(serviceKey, serviceRecord_);
+
+    connectManager->HandleCommandTimeoutTask(serviceRecord_);
+    auto serviceMap = connectManager->GetServiceMap();
+    EXPECT_TRUE(serviceMap.find(serviceKey) == serviceMap.end());
+
+    TAG_LOGI(AAFwkTag::TEST, "HandleCommandTimeoutTask_001 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: HandleInactiveTimeout
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, HandleInactiveTimeout_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleInactiveTimeout_001 start");
+
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(100);
+    EXPECT_NE(connectManager, nullptr);
+
+    ASSERT_NE(serviceRecord_, nullptr);
+    serviceRecord_->SetAbilityState(AbilityState::INACTIVE);
+
+    std::string serviceKey = serviceRecord_->GetURI();
+    connectManager->AddToServiceMap(serviceKey, serviceRecord_);
+
+    connectManager->HandleInactiveTimeout(serviceRecord_);
+    auto serviceMap = connectManager->GetServiceMap();
+    EXPECT_TRUE(serviceMap.find(serviceKey) == serviceMap.end());
+
+    TAG_LOGI(AAFwkTag::TEST, "HandleInactiveTimeout_001 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -202,9 +202,11 @@ public:
      * kill the processes by pid list given.
      *
      * @param pids, the pid list of processes are going to be killed.
+     * @param reason, the reason to kill the processes.
      * @return
      */
-    virtual void KillProcessesByPids(std::vector<int32_t> &pids);
+    virtual void KillProcessesByPids(const std::vector<int32_t> &pids,
+        const std::string &reason = "KillProcessesByPids");
 
     /**
      * KillProcessesInBatch, kill processes in batch;
@@ -1472,7 +1474,7 @@ public:
         return taskHandler_;
     }
 
-    int32_t LaunchAbility(const sptr<IRemoteObject> &token);
+    int32_t LaunchAbility(sptr<IRemoteObject> token);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,

@@ -558,7 +558,10 @@ ohos_shared_library("appkit_manager_helper") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [ "${ability_runtime_services_path}/common:app_util" ]
+  deps = [
+    "${ability_runtime_services_path}/common:app_util",
+    "${ability_runtime_services_path}/common:record_cost_time_util",
+  ]
 
   external_deps = [
     "ability_base:want",
