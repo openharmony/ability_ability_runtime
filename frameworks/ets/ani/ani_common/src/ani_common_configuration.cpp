@@ -32,54 +32,55 @@ void SetBasicConfiguration(
     ani_env *env, ani_class cls, ani_object object, const AppExecFwk::Configuration &configuration)
 {
     std::string str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(language), GetAniString(env, str));
+    env->Object_SetPropertyByName_Ref(object, "language", GetAniString(env, str));
 
     ani_enum_item colorModeItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
         "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;",
         ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE)), colorModeItem);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(colorMode), colorModeItem);
+    env->Object_SetPropertyByName_Ref(object, "colorMode", colorModeItem);
 
     int32_t displayId = ConvertDisplayId(configuration.GetItem(ConfigurationInner::APPLICATION_DISPLAYID));
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(displayId), displayId);
+    env->Object_SetPropertyByName_Ref(object, "displayId", createDouble(env, static_cast<ani_double>(displayId)));
 
     std::string direction = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
     ani_enum_item directionItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
         "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/Direction;", ConvertDirection(direction),
         directionItem);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(direction), directionItem);
+    env->Object_SetPropertyByName_Ref(object, "direction", directionItem);
 
     std::string density = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI);
     ani_enum_item densityItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
         "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ScreenDensity;", ConvertDensity(density),
         densityItem);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(screenDensity), densityItem);
+    env->Object_SetPropertyByName_Ref(object, "screenDensity", densityItem);
 }
 
 void SetAdditionalConfiguration(
     ani_env *env, ani_class cls, ani_object object, const AppExecFwk::Configuration &configuration)
 {
     std::string hasPointerDevice = configuration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(hasPointerDevice), hasPointerDevice == "true" ? true : false);
+    env->Object_SetPropertyByName_Ref(
+        object, "hasPointerDevice", createBoolean(env, hasPointerDevice == "true" ? true : false));
 
     std::string str = configuration.GetItem(AAFwk::GlobalConfigurationKey::APPLICATION_FONT);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(fontId), GetAniString(env, str));
+    env->Object_SetPropertyByName_Ref(object, "fontId", GetAniString(env, str));
 
     std::string fontSizeScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    ClassSetter(
-        env, cls, object, SETTER_METHOD_NAME(fontSizeScale), fontSizeScale != "" ? std::stod(fontSizeScale) : 1.0);
+    env->Object_SetPropertyByName_Ref(
+        object, "fontSizeScale", createDouble(env, fontSizeScale != "" ? std::stod(fontSizeScale) : 1.0));
 
     std::string fontWeightScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(fontWeightScale),
-        fontWeightScale != "" ? std::stod(fontWeightScale) : 1.0);
+    env->Object_SetPropertyByName_Ref(
+        object, "fontWeightScale", createDouble(env, fontWeightScale != "" ? std::stod(fontWeightScale) : 1.0));
 
     str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(mcc), GetAniString(env, str));
+    env->Object_SetPropertyByName_Ref(object, "mcc", GetAniString(env, str));
 
     str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
-    ClassSetter(env, cls, object, SETTER_METHOD_NAME(mnc), GetAniString(env, str));
+    env->Object_SetPropertyByName_Ref(object, "mnc", GetAniString(env, str));
 }
 
 ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &configuration)
