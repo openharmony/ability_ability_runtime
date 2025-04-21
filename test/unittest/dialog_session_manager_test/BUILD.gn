@@ -52,6 +52,7 @@ ohos_unittest("dialog_session_manager_test") {
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:app_util",
+    "${ability_runtime_services_path}/common:record_cost_time_util",
     "${ability_runtime_services_path}/common:task_handler_wrap",
   ]
 

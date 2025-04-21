@@ -1037,7 +1037,7 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
         TAG_LOGW(AAFwkTag::ABILITYMGR, "getcolormode failed");
     }
 
-    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager(false));
     resourceMgr->UpdateResConfig(*resConfig);
 
     std::string loadPath;

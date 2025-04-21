@@ -319,7 +319,7 @@ public:
 
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject>& abilityToken) override {}
 
-    int RevokeDelegator(const sptr<IRemoteObject> &token) override
+    int RevokeDelegator(sptr<IRemoteObject> token) override
     {
         return 0;
     }
