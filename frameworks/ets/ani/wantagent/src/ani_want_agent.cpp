@@ -437,17 +437,6 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
             env, reinterpret_cast<ani_enum_item>(actionTypeRef), paras.operationType);
     }
 
-    ani_boolean hasOperationType = true;
-    ani_ref operationTypeRef = nullptr;
-    if (!AppExecFwk::GetPropertyRef(env, info, "operationType", operationTypeRef, hasOperationType)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
-        return PARAMETER_ERROR;
-    }
-    if (hasActionType && !hasOperationType) {
-        AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(
-            env, reinterpret_cast<ani_enum_item>(operationTypeRef), paras.operationType);
-    }
-
     ani_double dRequestCode = 0.0;
     if ((status = env->Object_GetPropertyByName_Double(info, "requestCode", &dRequestCode)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "status : %{public}d", status);
@@ -478,51 +467,6 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
             AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(
                 env, reinterpret_cast<ani_object>(actionFlagRef), actionFlag);
             paras.wantAgentFlags.emplace_back(static_cast<WantAgentConstant::Flags>(actionFlag));
-        }
-    }
-
-    ani_boolean hasWantAgentFlags = true;
-    ani_ref wantAgentFlagsRef = nullptr;
-    if (!AppExecFwk::GetPropertyRef(env, info, "wantAgentFlags", wantAgentFlagsRef, hasWantAgentFlags)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
-        return PARAMETER_ERROR;
-    }
-    ani_array_ref wantAgentFlagsArr = reinterpret_cast<ani_array_ref>(wantAgentFlagsRef);
-    if (!hasWantAgentFlags) {
-        ani_size wantAgentFlagsLen = 0;
-        if ((status = env->Array_GetLength(wantAgentFlagsArr, &wantAgentFlagsLen)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "status : %{public}d", status);
-            return PARAMETER_ERROR;
-        }
-        for (size_t i = 0; i < wantAgentFlagsLen; i++) {
-            ani_ref wantAgentFlagRef = nullptr;
-            int32_t wantAgentFlag = 0;
-            if ((status = env->Array_Get_Ref(wantAgentFlagsArr, i, &wantAgentFlagRef)) != ANI_OK) {
-                TAG_LOGE(AAFwkTag::WANTAGENT, "status : %{public}d", status);
-                return PARAMETER_ERROR;
-            }
-            AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(
-                env, reinterpret_cast<ani_object>(wantAgentFlagRef), wantAgentFlag);
-            paras.wantAgentFlags.emplace_back(static_cast<WantAgentConstant::Flags>(wantAgentFlag));
-        }
-    }
-
-    ani_boolean hasExtraInfo = true;
-    ani_ref extraInfoRef = nullptr;
-    if (!AppExecFwk::GetPropertyRef(env, info, "extraInfos", extraInfoRef, hasExtraInfo)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
-        return PARAMETER_ERROR;
-    }
-    if (hasExtraInfo) {
-        if (!AppExecFwk::GetPropertyRef(env, info, "extraInfo", extraInfoRef, hasExtraInfo)) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
-            return PARAMETER_ERROR;
-        }
-    }
-    if (!hasExtraInfo) {
-        if (!UnwrapWantParams(env, extraInfoRef, paras.extraInfo)) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "Convert extraInfo failed");
-            return PARAMETER_ERROR;
         }
     }
     return BUSINESS_ERROR_CODE_OK;
@@ -585,11 +529,6 @@ int32_t EtsWantAgent::GetTriggerInfo(ani_env *env, ani_object triggerInfoObj, Tr
         }
     }
 
-    std::string permission = "";
-    if (!AppExecFwk::GetStringOrUndefined(env, triggerInfoObj, "permission", permission)) {
-        TAG_LOGW(AAFwkTag::WANTAGENT, "permission null");
-    }
-
     std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
     ani_ref extraInfoRef = nullptr;
     if (!AppExecFwk::GetPropertyRef(env, triggerInfoObj, "extraInfos", extraInfoRef, isUndefined)) {
@@ -624,6 +563,7 @@ int32_t EtsWantAgent::GetTriggerInfo(ani_env *env, ani_object triggerInfoObj, Tr
         }
     }
 
+    std::string permission = "";
     TriggerInfo triggerInfoData(permission, extraInfo, want, startOptions, code);
     triggerInfo = triggerInfoData;
     return BUSINESS_ERROR_CODE_OK;
@@ -654,11 +594,13 @@ void EtsWantAgent::OnGetWantAgent(ani_env *env, ani_object info, ani_object call
 
     WantAgent* pWantAgent = nullptr;
     ani_object error = CreateStsErrorByNativeErr(env, ERR_NOT_OK);
+    ani_object retObj = createLong(env, 0);
     if (wantAgent != nullptr) {
         pWantAgent = new (std::nothrow) WantAgent(wantAgent->GetPendingWant());
         error = CreateStsError(env, AbilityErrorCode::ERROR_OK);
+        retObj = WrapWantAgent(env, pWantAgent);
     }
-    AsyncCallback(env, call, error, WrapWantAgent(env, pWantAgent));
+    AsyncCallback(env, call, error, retObj);
 }
 
 ani_object EtsWantAgent::WrapWantAgent(ani_env *env, WantAgent *wantAgent)
