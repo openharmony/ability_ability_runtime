@@ -73,7 +73,8 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     int32_t appCloneIndexId = static_cast<int32_t>(appCloneIndex);
     int32_t errCode = ERR_OK;
     int32_t result = ERR_OK;
-    errCode = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId, targetBundleName, appCloneIndexId);
+    errCode = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId,
+        targetBundleName, appCloneIndexId);
     if (errCode != ERR_OK) {
         result = ERR_FAILURE;
         stsErrCode = CreateStsErrorByNativeErr(env, errCode);
