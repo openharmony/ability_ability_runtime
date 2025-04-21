@@ -18,6 +18,7 @@
 
 #include "sts_runtime.h"
 #include "context.h"
+#include "ets_enviroment_callback.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -42,6 +43,9 @@ void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object context
     void* applicationCtxRef, std::shared_ptr<Context> context);
 
 ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj);
+
+ani_double NativeOnSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_string type, ani_object envCallback);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
