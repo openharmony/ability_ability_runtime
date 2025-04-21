@@ -51,6 +51,8 @@
 #include "sts_context_utils.h"
 #include "sts_runtime.h"
 #include "sts_error_utils.h"
+#include "ani_common_util.h"
+#include "ability_runtime_error_util.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -220,6 +222,47 @@ void OHOSApplication::SetApplicationContext(
 #endif
 }
 
+static void killAllProcesses([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_boolean clearPageStack, ani_object call)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "killAllProcesses Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_class applicationContextCls = nullptr;
+    if ((status = env->FindClass(STS_APPLICATION_CONTEXT_CLASS_NAME, &applicationContextCls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed status: %{public}d", status);
+        AbilityRuntime::ThrowStsInvalidParamError(env, "FindClass failed");
+        return;
+    }
+    ani_field contextField;
+    if ((status = env->Class_FindField(applicationContextCls, "nativeContext", &contextField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", status);
+        AbilityRuntime::ThrowStsInvalidParamError(env, "Class_FindField failed");
+        return;
+    }
+    ani_long nativeContextLong;
+    if ((status = env->Object_GetField_Long(aniObj, contextField, &nativeContextLong)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_GetField_Long failed status: %{public}d", status);
+        AbilityRuntime::ThrowStsInvalidParamError(env, "Object_GetField_Long failed");
+        return;
+    }
+
+    ani_object aniObject = AbilityRuntime::CreateStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_OK);
+    ErrCode innerErrCode = ERR_OK;
+    if (nativeContextLong == 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "nativeContextLong is nullptr");
+        innerErrCode = AbilityRuntime::ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        aniObject = AbilityRuntime::CreateStsError(env, innerErrCode, "applicationContext is already released.");
+        AppExecFwk::AsyncCallback(env, call, aniObject, nullptr);
+        return;
+    }
+    AppExecFwk::AsyncCallback(env, call, aniObject, nullptr);
+    ((AbilityRuntime::ApplicationContext*)nativeContextLong)->KillProcessBySelf(clearPageStack);
+}
+
 static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
     ani_boolean value) {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
@@ -262,6 +305,8 @@ void OHOSApplication::InitAniApplicationContext()
     std::array applicationContextFunctions = {
         ani_native_function {"setSupportedProcessCacheSync", "Z:V",
             reinterpret_cast<void *>(SetSupportedProcessCacheSync)},
+        ani_native_function {"nativekillAllProcessesSync", "ZLutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(killAllProcesses)},
     };
     aniEnv->Class_BindNativeMethods(applicationContextCls, applicationContextFunctions.data(),
         applicationContextFunctions.size());
