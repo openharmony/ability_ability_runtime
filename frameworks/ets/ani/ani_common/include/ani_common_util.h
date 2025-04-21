@@ -29,22 +29,24 @@ bool GetStringArrayOrUndefined(ani_env *env, ani_object param, const char *name,
 bool GetStdString(ani_env *env, ani_string str, std::string &res);
 
 ani_string GetAniString(ani_env *env, const std::string &str);
-ani_array_ref GetAniArrayString(ani_env *env, const std::vector<std::string> &values);
 bool GetRefFieldByName(ani_env *env, ani_object param, const char *name, ani_ref &ref);
 
 ani_object createDouble(ani_env *env, ani_double value);
 ani_object createBoolean(ani_env *env, ani_boolean value);
 ani_object createInt(ani_env *env, ani_int value);
-ani_object createString(ani_env *env, ani_string value);
+ani_object createLong(ani_env *env, ani_long value);
 bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::string &value);
-bool SetFieldDouble(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, double value);
 bool SetFieldBoolean(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, bool value);
 bool SetFieldInt(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, int value);
 bool SetOptionalFieldInt(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, int value);
-bool SetOptionalFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName,
-    std::string value);
+
+bool SetStringProperty(ani_env *env, ani_object param, const char *name, const std::string &value);
 bool SetFieldArrayString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::vector<std::string> &values);
 bool SetFieldRef(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, ani_ref value);
+
+bool GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_ref &ref, ani_boolean &isUndefined);
+bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ANI_COMMON_UTIL_H
+ 

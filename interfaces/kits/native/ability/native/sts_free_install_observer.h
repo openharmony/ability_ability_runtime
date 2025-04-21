@@ -21,6 +21,7 @@
 
 #include "native_engine/native_engine.h"
 #include "sts_runtime.h"
+#include "sts_error_utils.h"
 #include "free_install_observer_stub.h"
 
 namespace OHOS {
@@ -46,10 +47,6 @@ public:
         const std::string &startTime, ani_object callBack);
 
 private:
-    std::string GetErrMsg(int32_t err, const std::string &permission = "");
-    ani_object WrapError(ani_env *env, const std::string &msg);
-    bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
-    ani_object WrapBusinessError(ani_env *env, int32_t resultCode);
     void CallCallback(ani_object callback, int32_t resultCode);
     void HandleOnInstallFinished(const std::string &bundleName, const std::string &abilityName,
         const std::string &startTime, const int &resultCode);

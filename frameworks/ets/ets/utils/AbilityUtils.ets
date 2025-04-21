@@ -13,22 +13,16 @@
  * limitations under the License.
  */
 
-export interface ElementName {
-    deviceId?: string;
+import { BusinessError, AsyncCallback } from '@ohos.base';
 
-    bundleName: string;
-  
-    abilityName: string;
-  
-    uri?: string;
+export default class AsyncCallbackWrapper<T> {
+  private myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
 
-    shortName?: string;
+  constructor(myFun:AsyncCallback<T, void>){
+    this.myFun_ = myFun;
   }
 
-  export default class ElementNameInner implements ElementName {
-      public deviceId?:string = '';
-      public bundleName: string = '';
-      public abilityName: string = '';
-      public uri?:string  = '';
-      public shortName?:string = '';
+  invoke(err: BusinessError<void>, data: T) : void {
+    this.myFun_(err, data);
   }
+}

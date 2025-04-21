@@ -56,16 +56,12 @@ public:
     static std::shared_ptr<AbilityContext> GetAbilityContext(ani_env *env, ani_object aniObj);
 
 private:
-    static bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
-    static ani_object WrapBusinessError(ani_env *env, int32_t code);
-    static ani_object WrapError(ani_env *env, const std::string &msg);
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
     void StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
         ani_object wantObj, ani_object opt, ani_object call);
     static void StartAbilityForResultInner(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object startOptionsObj, ani_object callback);
     static int32_t GenerateRequestCode();
-    static std::string GetErrMsg(int32_t err, const std::string &permission = "");
     void AddFreeInstallObserver(
         ani_env *env, const AAFwk::Want &want, ani_object callback, const std::shared_ptr<AbilityContext> &context);
 
