@@ -2336,6 +2336,161 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedAbilityBySCB_001, TestSize
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedProcessRequest_001
+ * @tc.desc: StartSpecifiedProcessRequest, test isolationProcess mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedProcessRequest_001, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = true;
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.isolationProcess = false;
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.isStageBasedModel = true;
+    auto ret = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = false;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedProcessRequest_002
+ * @tc.desc: StartSpecifiedProcessRequest, test UIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedProcessRequest_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = true;
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.isolationProcess = true;
+    // isUIAbility is false
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::SERVICE;
+    abilityRequest.abilityInfo.isStageBasedModel = true;
+    auto ret = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = false;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedProcessRequest_003
+ * @tc.desc: StartSpecifiedProcessRequest, test UIAbility stage mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedProcessRequest_003, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = true;
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.isolationProcess = true;
+    // isUIAbility is false
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.isStageBasedModel = false;
+    auto ret = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = false;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedProcessRequest_004
+ * @tc.desc: StartSpecifiedProcessRequest, test isNewProcessMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedProcessRequest_004, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = true;
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.isolationProcess = true;
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.isStageBasedModel = true;
+    // isNewProcessMode is true
+    abilityRequest.processOptions = std::make_shared<ProcessOptions>();
+    abilityRequest.processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
+    auto ret = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = false;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedProcessRequest_005
+ * @tc.desc: StartSpecifiedProcessRequest, test isPlugin
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedProcessRequest_005, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = true;
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.isolationProcess = true;
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.isStageBasedModel = true;
+    // isPlugin ios true
+    abilityRequest.want.SetParam(Want::DESTINATION_PLUGIN_ABILITY, true);
+    auto ret = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = false;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedProcessRequest_006
+ * @tc.desc: StartSpecifiedProcessRequest, test START_SPECIFIED_PROCESS param
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedProcessRequest_006, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    // START_SPECIFIED_PROCESS is false
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.isolationProcess = true;
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.isStageBasedModel = true;
+    auto ret = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = false;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedProcessRequest_007
+ * @tc.desc: StartSpecifiedProcessRequest, test ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedProcessRequest_007, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = true;
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.isolationProcess = true;
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.isStageBasedModel = true;
+    auto ret = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = false;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
+    EXPECT_EQ(ret, true);
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_NotifyRestartSpecifiedAbility_0100
  * @tc.desc: NotifyRestartSpecifiedAbility
  * @tc.type: FUNC
