@@ -268,6 +268,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
                 sessionInfo->processOptions->startupVisibility == StartupVisibility::STARTUP_SHOW)) {
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "only first need call SetIsHook");
                 uiAbilityRecord->SetIsHook(true);
+                uiAbilityRecord->SetLaunchWant(std::make_shared<Want>(abilityRequest.want));
             }
         } else {
             uiAbilityRecord->SetInstanceKey(sessionInfo->instanceKey);
@@ -317,6 +318,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
             auto ret = IN_PROCESS_CALL(appMgr->LaunchAbility(uiAbilityRecord->GetToken()));
             sessionInfo->want.CloseAllFd();
             if (ret == ERR_OK) {
+                uiAbilityRecord->SetIsNewWant(false);
                 return uiAbilityRecord;
             }
             return nullptr;
@@ -618,6 +620,24 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
         return ERR_OK;
     }
 
+    if (IsHookModule(abilityRequest)) {
+        auto abilityRecord = FindRecordFromSessionMap(abilityRequest);
+        if (abilityRecord != nullptr) {
+            if (abilityRecord->IsHook() && !abilityRecord->GetHookOff()) {
+                AbilityRequest request;
+                request.callerToken = abilityRequest.callerToken;
+                sptr<SessionInfo> hookSessionInfo = abilityRecord->GetSessionInfo();
+                if (hookSessionInfo != nullptr) {
+                    hookSessionInfo->want = abilityRequest.want;
+                }
+                int ret = NotifySCBPendingActivation(hookSessionInfo, request);
+                if (hookSessionInfo != nullptr) {
+                    hookSessionInfo->want.RemoveAllFd();
+                }
+                return ret;
+            }
+        }
+    }
     auto sessionInfo = CreateSessionInfo(abilityRequest);
     sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->requestId = requestId;
@@ -628,18 +648,6 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     }
     sessionInfo->userId = userId_;
     sessionInfo->isAtomicService = (abilityInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE);
-    if (IsHookModule(abilityRequest)) {
-        auto abilityRecord = FindRecordFromSessionMap(abilityRequest);
-        if (abilityRecord != nullptr) {
-            if (abilityRecord->IsHook() && !abilityRecord->GetHookOff()) {
-                AbilityRequest request;
-                request.callerToken = abilityRequest.callerToken;
-                sptr<SessionInfo> hookSessionInfo = abilityRecord->GetSessionInfo();
-                int ret = NotifySCBPendingActivation(hookSessionInfo, request);
-                return ret;
-            }
-        }
-    }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Reused sessionId: %{public}d, userId: %{public}d, requestId: %{public}d",
         sessionInfo->persistentId, userId_, requestId);
     int ret = NotifySCBPendingActivation(sessionInfo, abilityRequest);
@@ -3757,15 +3765,24 @@ int32_t UIAbilityLifecycleManager::RevokeDelegator(sptr<IRemoteObject> token)
     auto sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     sessionInfo->reuseDelegatorWindow = true;
+    auto launchWant = abilityRecord->GetLaunchWant();
+    if (launchWant == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "launchWant is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sessionInfo->want = *launchWant;
+    abilityRecord->SetWant(sessionInfo->want);
     AbilityRequest request;
     request.callerToken = token;
     int ret = NotifySCBPendingActivation(sessionInfo, request);
     TAG_LOGI(
         AAFwkTag::ABILITYMGR, "Reused sessionId: %{public}d, ret: %{public}d.", sessionInfo->persistentId, ret);
     sessionInfo->reuseDelegatorWindow = false;
+    sessionInfo->want.RemoveAllFd();
     if (ret == ERR_OK) {
         abilityRecord->SetHookOff(true);
         abilityRecord->SetIsHook(false);
+        abilityRecord->SetLaunchWant(nullptr);
         return ERR_OK;
     } else {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "scb error");
