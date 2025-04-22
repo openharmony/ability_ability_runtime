@@ -78,6 +78,7 @@
 #include "running_multi_info.h"
 #include "multi_user_config_mgr.h"
 #include "user_callback.h"
+#include "native_child_notify_interface.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -96,6 +97,12 @@ class WindowVisibilityChangedListener;
 class WindowPidVisibilityChangedListener;
 using LoadAbilityTaskFunc = std::function<void()>;
 constexpr int32_t BASE_USER_RANGE = 200000;
+
+class AppMgrServiceInner;
+struct NativeSpawnContext {
+    std::shared_ptr<int> fd_;
+    std::weak_ptr<AppMgrServiceInner> weakInner_;
+}
 
 class AppMgrServiceInner : public std::enable_shared_from_this<AppMgrServiceInner> {
 public:
@@ -567,6 +574,11 @@ public:
         const HapModuleInfo &hapModuleInfo,
         std::shared_ptr<AAFwk::Want> want,
         bool isKia = false);
+
+    void InitNativeSpawnMsgPipe();
+    // pid is parent pid
+    sptr<INativeChildNotify>& GetNativeChildCallbackByPid(int32_t pid);
+    void RemoveNativeChildCallbackByPid(int32_t pid);
 
     /**
      * OnStop, Application management service stopped.
@@ -1249,6 +1261,10 @@ public:
         const std::string &libName, int32_t childProcessCount, const sptr<IRemoteObject> &callback);
 #endif // SUPPORT_CHILD_PROCESS
 
+    virtual int32_t RegisterNativeChildExitNotify(const sprt<INativeChildNotify> &callback);
+
+    virtual int32_t UnregisterNativeChildExitNotify(const sprt<INativeChildNotify> &callback);
+
     /**
      * To clear the process by ability token.
      *
@@ -1459,6 +1475,19 @@ public:
 
     bool IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
     int32_t GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &info);
+
+    int GetNRfd() const
+    {
+        return nrFd_;
+    }
+    int GetNWfd() const
+    {
+        return nwFd_;
+    }
+
+    static int32_t CallOnNativeChildExit(sptr<INativeChildNotify> callback, int32_t pid, int32_t signal);
+
+    int32_t NotifyChildProcessExitTask(int32_t pid, int32_t signal, const std::string &bundleName);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -2011,6 +2040,13 @@ private:
     std::unordered_set<std::string> nwebPreloadSet_ {};
 
     std::mutex childProcessRecordMapMutex_;
+
+    //native spawn use
+    int nrFd_ = -1;
+    int nwFd_ = -1;
+    std::shared_ptr<NativeSpawnContext> nsc_ = std::make_shared<NativeSpawnContext>();
+    ffrt::mutex nativeChildCallbackLock_;
+    std::map<pid_t, sptr<INativeChildNotify>> nativeChildCallbackMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
