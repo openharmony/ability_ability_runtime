@@ -465,6 +465,10 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
 
 bool SetAbilityInfo(ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context)
 {
+    if (env == nullptr || context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env or context");
+        return false;
+    }
     ani_field field = nullptr;
     auto abilityInfo = context->GetAbilityInfo();
     ani_ref abilityInfoRef = AppExecFwk::CommonFunAni::ConvertAbilityInfo(env, *abilityInfo);
@@ -486,6 +490,10 @@ bool SetAbilityInfo(ani_env *env, ani_class cls, ani_object contextObj, const st
 bool SetConfiguration(
     ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context)
 {
+    if (env == nullptr || context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env or context");
+        return false;
+    }
     ani_field field = nullptr;
     auto configuration = context->GetConfiguration();
     ani_ref configurationRef = OHOS::AppExecFwk::WrapConfiguration(env, *configuration);
@@ -504,10 +512,39 @@ bool SetConfiguration(
     return true;
 }
 
+bool SetHapModuleInfo(
+    ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context)
+{
+    if (env == nullptr || context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env or context");
+        return false;
+    }
+    ani_status status = ANI_OK;
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    if (hapModuleInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "hapModuleInfo is nullptr");
+        return false;
+    }
+    ani_ref hapModuleInfoRef = AppExecFwk::CommonFunAni::ConvertHapModuleInfo(env, *hapModuleInfo);
+    if (hapModuleInfoRef != nullptr) {
+        status = env->Object_SetPropertyByName_Ref(contextObj, "currentHapModuleInfo", hapModuleInfoRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ABILITY, "Object_SetPropertyByName_Ref failed, status : %{public}d", status);
+            return false;
+        }
+    }
+    return true;
+}
+
+
 ani_ref CreateStsAbilityContext(
     ani_env *env, const std::shared_ptr<AbilityContext> &context, const std::shared_ptr<OHOSApplication> &application)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    if (env == nullptr || context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env or context");
+        return nullptr;
+    }
     ani_class cls {};
     if (!BindNativeMethods(env, cls)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "BindNativeMethods failed");
@@ -529,6 +566,10 @@ ani_ref CreateStsAbilityContext(
     }
     if (!SetConfiguration(env, cls, contextObj, context)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "SetConfiguration failed");
+        return nullptr;
+    }
+    if (!SetHapModuleInfo(env, cls, contextObj, context)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "SetHapModuleInfo failed");
         return nullptr;
     }
     return contextObj;
