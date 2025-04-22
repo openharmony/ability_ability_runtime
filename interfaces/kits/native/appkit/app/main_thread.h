@@ -305,8 +305,8 @@ public:
 #endif
     JsEnv::UncaughtExceptionInfo CreateJsExceptionInfo(const std::string& bundleName, uint32_t versionCode,
         const std::string& hapPath, std::string& appRunningId, int32_t pid, std::string& processName);
-    StsEnv::STSUncaughtExceptionInfo CreateStsExceptionInfo(
-        const std::string& bundleName, uint32_t versionCode, const std::string& hapPath);
+    StsEnv::STSUncaughtExceptionInfo CreateStsExceptionInfo(const std::string& bundleName, uint32_t versionCode,
+        const std::string& hapPath, std::string& appRunningId, int32_t pid, std::string& processName);
     /**
      * @brief Notify NativeEngine GC of status change.
      *
