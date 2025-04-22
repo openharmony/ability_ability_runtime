@@ -996,7 +996,15 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "scene_->Init");
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken != nullptr) {
         abilityContext_->SetWeakSessionToken(sessionToken);
-        ret = scene_->Init(displayId, abilityContext_, sceneListener_, option, sessionToken, identityToken);
+        ret = scene_->Init(displayId, abilityContext_, sceneListener_, option, sessionToken, identityToken,
+            reusingWindow_);
+        if (abilityContext_->IsHook()) {
+            TAG_LOGI(AAFwkTag::UIABILITY, "to set element");
+            Rosen::WMError result = scene_->SetHookedWindowElementInfo(want.GetElement());
+            if (result != Rosen::WMError::WM_OK) {
+                TAG_LOGW(AAFwkTag::UIABILITY, "scene error:%{public}d", result);
+            }
+        }
     } else {
         ret = scene_->Init(displayId, abilityContext_, sceneListener_, option);
     }
@@ -1977,6 +1985,10 @@ void JsUIAbility::NotifyWindowDestroy()
         return;
     }
     TAG_LOGI(AAFwkTag::UIABILITY, "Notify scene to destroy Window.");
+    Rosen::WMError ret = scene_->GoDestroyHookWindow();
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGW(AAFwkTag::UIABILITY, "scene return error.");
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

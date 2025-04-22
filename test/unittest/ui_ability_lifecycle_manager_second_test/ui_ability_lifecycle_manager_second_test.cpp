@@ -456,6 +456,25 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_008, TestSize.Leve
     abilityRecord->isAbilityForegrounding_ = true;
     abilityRecord->isHook_ = true;
     auto ret = uiAbilityLifecycleManager->RevokeDelegator(abilityRecord->GetToken());
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_RevokeDelegator_009
+ * @tc.desc: RevokeDelegator
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_009, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.sessionInfo = new SessionInfo();
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->isAbilityForegrounding_ = true;
+    abilityRecord->isHook_ = true;
+    abilityRecord->SetLaunchWant(std::make_shared<Want>());
+    auto ret = uiAbilityLifecycleManager->RevokeDelegator(abilityRecord->GetToken());
     EXPECT_EQ(ret, ERR_FROM_WINDOW);
 }
 }  // namespace AAFwk
