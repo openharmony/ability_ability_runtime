@@ -421,6 +421,35 @@ ani_object StsAbilityContext::StartAbilityByTypeSync([[maybe_unused]]ani_env *en
     }
 }
 
+void StsAbilityContext::StartServiceExtensionAbilitySync([[maybe_unused]]ani_env *env,
+    [[maybe_unused]]ani_object aniObj, [[maybe_unused]] ani_object wantObj, [[maybe_unused]] ani_object callbackobj)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "call");
+    ani_object errorObject = nullptr;
+    ErrCode ret = ERR_OK;
+    auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext is nullptr");
+        ret = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        errorObject = CreateStsError(env, static_cast<AbilityErrorCode>(ret));
+        AppExecFwk::AsyncCallback(env, callbackobj, errorObject, nullptr);
+        return;
+    }
+    AAFwk::Want want;
+    if (!OHOS::AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "UnwrapWant filed");
+        errorObject = CreateStsInvalidParamError(env, "UnwrapWant filed");
+        AppExecFwk::AsyncCallback(env, callbackobj, errorObject, nullptr);
+    }
+    ret = context->StartServiceExtensionAbility(want);
+    if (ret == ERR_OK) {
+        errorObject = CreateStsError(env, static_cast<AbilityErrorCode>(ret));
+    } else {
+        errorObject = CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret));
+    }
+    AppExecFwk::AsyncCallback(env, callbackobj, errorObject, nullptr);
+}
+
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
     ani_status status = env->FindClass("Lapplication/UIAbilityContext/UIAbilityContext;", &cls);
@@ -453,6 +482,8 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             reinterpret_cast<ani_int*>(StsAbilityContext::reportDrawnCompletedSync) },
         ani_native_function { "nativeStartAbilityByTypeSync", nullptr,
             reinterpret_cast<void*>(StsAbilityContext::StartAbilityByTypeSync) },
+        ani_native_function { "nativeStartServiceExtensionAbilitySync", nullptr,
+            reinterpret_cast<void*>(StsAbilityContext::StartServiceExtensionAbilitySync) },
     };
 
     status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
