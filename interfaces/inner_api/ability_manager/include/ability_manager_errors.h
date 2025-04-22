@@ -802,6 +802,11 @@ enum {
      * Result (2097334) for app selector not exists.
      */
     ERR_APP_SELECTOR_NOT_EXISTS = 2097334,
+
+    /**
+     * Result (2097335) for canceled wantagent.
+     */
+    ERR_WANTAGENT_CANCELED = 2097335,
     
     /**
      * Native error(3000000) for target bundle not exist.

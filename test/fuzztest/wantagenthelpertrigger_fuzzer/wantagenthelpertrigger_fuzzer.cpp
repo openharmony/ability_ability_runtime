@@ -61,7 +61,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     if (wantAgent) {
         // trigger want agent
         TriggerInfo triggerInfo(GET_BUNDLE_INFO_PERMISSION, extraInfo, want, resultCode);
-        WantAgentHelper::TriggerWantAgent(wantAgent, nullptr, triggerInfo);
+        sptr<CompletedDispatcher> completedData;
+        WantAgentHelper::TriggerWantAgent(wantAgent, nullptr, triggerInfo, completedData, nullptr);
     }
 
     if (params) {

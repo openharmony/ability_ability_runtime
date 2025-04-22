@@ -20,6 +20,7 @@
 
 #include "parcel.h"
 
+#include "iremote_object.h"
 #include "start_options.h"
 #include "want.h"
 
@@ -34,6 +35,7 @@ struct SenderInfo : public Parcelable {
     std::string resolvedType;
     std::string requiredPermission;
     Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

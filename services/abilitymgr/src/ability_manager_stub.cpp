@@ -1879,6 +1879,9 @@ int AbilityManagerStub::SendWantSenderInner(MessageParcel &data, MessageParcel &
         return ERR_INVALID_VALUE;
     }
     int32_t result = SendWantSender(wantSender, *senderInfo);
+    if (!reply.WriteParcelable(senderInfo.get())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "completedData write fail");
+    }
     reply.WriteInt32(result);
     return NO_ERROR;
 }

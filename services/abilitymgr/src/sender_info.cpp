@@ -48,6 +48,13 @@ bool SenderInfo::ReadFromParcel(Parcel &parcel)
     if (parcel.ReadBool()) {
         startOptions = parcel.ReadParcelable<StartOptions>();
     }
+    if (parcel.ReadBool()) {
+        callerToken = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
+        if (callerToken == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null remote object");
+            return false;
+        }
+    }
     return true;
 }
 
@@ -71,8 +78,6 @@ SenderInfo *SenderInfo::Unmarshalling(Parcel &parcel)
 
 bool SenderInfo::Marshalling(Parcel &parcel) const
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
-
     if (!parcel.WriteInt32(code)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write code failed");
         return false;
@@ -110,6 +115,13 @@ bool SenderInfo::Marshalling(Parcel &parcel) const
     if (startOptions) {
         if (!parcel.WriteParcelable(startOptions)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "write startOptions failed");
+            return false;
+        }
+    }
+    if (callerToken) {
+        if (!parcel.WriteBool(true) ||
+            !(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(callerToken)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken failed");
             return false;
         }
     }
