@@ -173,7 +173,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
         });
     }
     getCurrentTopAbility() : Promise<UIAbility>{
-        let p = new Promise<UIAbility>((resolve: (v: UIAbility) => void, reject: (error: Object) => void) => {
+        let p = new Promise<UIAbility>((resolve: (v: UIAbility) => void, reject: (error: Error) => void) => {
             console.log("getCurrentTopAbility promise1_01");
             let pPromise1 = taskpool.execute(():UIAbility => {return this.GetCurrentTopAbilitySync();});
             pPromise1.then((e :NullishType)=>{

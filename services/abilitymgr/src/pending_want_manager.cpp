@@ -20,6 +20,7 @@
 #include "distributed_client.h"
 #include "hitrace_meter.h"
 #include "permission_constants.h"
+#include "scene_board_judgement.h"
 #include "session_manager_lite.h"
 #include "utils/app_mgr_util.h"
 #include "wm_common.h"
@@ -692,6 +693,10 @@ bool PendingWantManager::CheckCallerPermission()
 
 bool PendingWantManager::CheckWindowState(int32_t pid)
 {
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        TAG_LOGW(AAFwkTag::WANTAGENT, "scene board not enabled");
+        return true;
+    }
     auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
     if (sceneSessionManager == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null manager");

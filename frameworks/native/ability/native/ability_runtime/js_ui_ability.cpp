@@ -124,10 +124,10 @@ napi_value OnPrepareTerminatePromiseCallback(napi_env env, napi_callback_info in
     return nullptr;
 }
 
-napi_value AttachJsAbilityContext(napi_env env, void *value, void *extValue)
+napi_value AttachJsAbilityContext(napi_env env, void *value, void *)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    if (value == nullptr || extValue == nullptr) {
+    if (value == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "invalid params");
         return nullptr;
     }
@@ -152,7 +152,7 @@ napi_value AttachJsAbilityContext(napi_env env, void *value, void *extValue)
     }
     CHECK_POINTER_AND_RETURN(systemModule, nullptr);
     auto contextObj = systemModule->GetNapiValue();
-    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, value, extValue);
+    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(ptr);
     if (workContext != nullptr) {
         napi_status status = napi_wrap(env, contextObj, workContext,
