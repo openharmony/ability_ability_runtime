@@ -445,7 +445,12 @@ void AbilityDelegator::PostPerformScenceCreated(const std::shared_ptr<ADelegator
         }
 
         if (monitor->Match(ability)) {
-            monitor->OnWindowStageCreate(ability->object_);
+            if (!ability->stsObject_.expired()) {
+                monitor->OnSTSWindowStageCreate(ability->stsObject_);
+            }
+            if (!ability->object_.expired()) {
+                monitor->OnWindowStageCreate(ability->object_);
+            }
         }
     }
 }
@@ -473,7 +478,12 @@ void AbilityDelegator::PostPerformScenceRestored(const std::shared_ptr<ADelegato
         }
 
         if (monitor->Match(ability)) {
-            monitor->OnWindowStageRestore(ability->object_);
+            if (!ability->stsObject_.expired()) {
+                monitor->OnSTSWindowStageRestore(ability->stsObject_);
+            }
+            if (!ability->object_.expired()) {
+                monitor->OnWindowStageRestore(ability->object_);
+            }
         }
     }
 }
@@ -501,7 +511,12 @@ void AbilityDelegator::PostPerformScenceDestroyed(const std::shared_ptr<ADelegat
         }
 
         if (monitor->Match(ability)) {
-            monitor->OnWindowStageDestroy(ability->object_);
+            if (!ability->stsObject_.expired()) {
+                monitor->OnSTSWindowStageDestroy(ability->stsObject_);
+            }
+            if (!ability->object_.expired()) {
+                monitor->OnWindowStageDestroy(ability->object_);
+            }
         }
     }
 }
@@ -529,7 +544,12 @@ void AbilityDelegator::PostPerformForeground(const std::shared_ptr<ADelegatorAbi
         }
 
         if (monitor->Match(ability)) {
-            monitor->OnAbilityForeground(ability->object_);
+            if (!ability->stsObject_.expired()) {
+                monitor->OnSTSAbilityForeground(ability->stsObject_);
+            }
+            if (!ability->object_.expired()) {
+                monitor->OnAbilityForeground(ability->object_);
+            }
         }
     }
 }
@@ -557,7 +577,12 @@ void AbilityDelegator::PostPerformBackground(const std::shared_ptr<ADelegatorAbi
         }
 
         if (monitor->Match(ability)) {
-            monitor->OnAbilityBackground(ability->object_);
+            if (!ability->stsObject_.expired()) {
+                monitor->OnSTSAbilityBackground(ability->stsObject_);
+            }
+            if (!ability->object_.expired()) {
+                monitor->OnAbilityBackground(ability->object_);
+            }
         }
     }
 }
@@ -585,7 +610,12 @@ void AbilityDelegator::PostPerformStop(const std::shared_ptr<ADelegatorAbilityPr
         }
 
         if (monitor->Match(ability)) {
-            monitor->OnAbilityStop(ability->object_);
+            if (!ability->stsObject_.expired()) {
+                monitor->OnSTSAbilityStop(ability->stsObject_);
+            }
+            if (!ability->object_.expired()) {
+                monitor->OnAbilityStop(ability->object_);
+            }
         }
     }
 
