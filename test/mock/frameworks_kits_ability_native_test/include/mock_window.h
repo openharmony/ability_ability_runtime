@@ -71,7 +71,7 @@ public:
         const Rect& rect = Rect::EMPTY_RECT, int32_t apiVersion = API_VERSION_INVALID) {return WMError::WM_OK;}
     virtual WMError SetLayoutFullScreen(bool status) {return WMError::WM_OK;}
     virtual WMError SetFullScreen(bool status) {return WMError::WM_OK;}
-    virtual WMError Destroy() {return WMError::WM_OK;}
+    virtual WMError Destroy(uint32_t reason = 0) {return WMError::WM_OK;}
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
         bool withFocus = true) {return WMError::WM_OK;}
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false,
