@@ -324,7 +324,6 @@ public:
     std::shared_ptr<ChildProcessRecord> OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
     bool IsChildProcessReachLimit(uint32_t accessTokenId);
 #endif //SUPPORT_CHILD_PROCESS
-    std::shared_ptr<ChildProcessRecord> RemoveChildProcessRecordByChildPid(int32_t pid);
 
     /**
      * @brief Obtain number of app through bundlename.

@@ -601,7 +601,7 @@ int32_t AppMgrService::UnregisterApplicationStateObserver(const sptr<IApplicatio
     return appMgrServiceInner_->UnregisterApplicationStateObserver(observer);
 }
 
-int32_t AppMgrService::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify)
+int32_t AppMgrService::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "begin");
     if (!IsReady()) {
@@ -611,7 +611,7 @@ int32_t AppMgrService::RegisterNativeChildExitNotify(const sptr<INativeChildNoti
     return appMgrServiceInner_->RegisterNativeChildExitNotify(notify);
 }
 
-int32_t AppMgrService::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify)
+int32_t AppMgrService::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "begin");
     if (!IsReady()) {

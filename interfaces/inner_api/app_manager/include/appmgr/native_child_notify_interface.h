@@ -45,7 +45,7 @@ public:
      * @param pid child process pid
      * @param signal child process exit signal
      */
-    virtual void OnNativeChildExit(int32_t pid, int32_t signal) = 0;
+    virtual int32_t OnNativeChildExit(int32_t pid, int32_t signal) = 0;
 
     enum {
         // ipc id for OnNativeChildStarted

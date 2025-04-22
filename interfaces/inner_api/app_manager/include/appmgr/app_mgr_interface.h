@@ -876,14 +876,20 @@ public:
      * @param notify, Callback used to notify caller the info of native child exit.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify) = 0;
+    virtual int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
+    {
+        return 0;
+    }
 
     /**
      * Unregister native child exit callback to notify.
      * @param notify, Callback used to notify caller the info of native child exit.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify) = 0;
+    virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
+    {
+        return 0;
+    }
 
     /**
      * Notify that the process depends on web by itself.

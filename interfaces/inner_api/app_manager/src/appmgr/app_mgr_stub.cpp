@@ -1504,18 +1504,6 @@ int32_t AppMgrStub::HandleExitChildProcessSafely(MessageParcel &data, MessagePar
 }
 #endif // SUPPORT_CHILD_PROCESS
 
-int32_t AppMgrStub::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    return NO_ERROR;
-}
-
-int32_t AppMgrStub::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    return NO_ERROR;
-}
-
 int32_t AppMgrStub::HandleRegisterNativeChildExitNotify(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");

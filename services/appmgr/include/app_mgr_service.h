@@ -789,14 +789,14 @@ public:
      * @param notify, callback to notify
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify &notify) override;
+    virtual int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify) override;
 
     /**
      * Unregister callback to notify native child exit.
      * @param notify, callback to notify
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify &notify) override;
+    virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> notify) override;
 
     /**
      * Notify that the process depends on web by itself.
