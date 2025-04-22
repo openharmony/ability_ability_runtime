@@ -32,8 +32,8 @@ export default namespace uriPermissionManager {
     loadLibrary("uri_permission_manager_ani_kit.z");
 
     export native function grantUriPermissionCallbackSync(uri: string, flag: wantConstant.Flags, targetBundleName: string,
-        appCloneIndex: int, callback: AsyncCallbackWrapper<number>): void;
-    export native function revokeUriPermissionCallbackSync(uri: string, targetBundleName: string, appCloneIndex: int,
+        appCloneIndex: number, callback: AsyncCallbackWrapper<number>): void;
+    export native function revokeUriPermissionCallbackSync(uri: string, targetBundleName: string, appCloneIndex: number,
         callback: AsyncCallbackWrapper<number>): void;
 
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string): Promise<number> {
@@ -53,7 +53,7 @@ export default namespace uriPermissionManager {
     }
 
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string,
-        appCloneIndex: int): Promise<void> {
+        appCloneIndex: number): Promise<void> {
         let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
             let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
                 if (err.code == 0) {
@@ -94,7 +94,7 @@ export default namespace uriPermissionManager {
         return p;
     }
 
-    export function revokeUriPermission(uri: string, targetBundleName: string, appCloneIndex: int): Promise<void> {
+    export function revokeUriPermission(uri: string, targetBundleName: string, appCloneIndex: number): Promise<void> {
         let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
             let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
                 if (err.code == 0) {
