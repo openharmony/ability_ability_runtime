@@ -19,7 +19,6 @@ import StartOptions from '@ohos.app.ability.StartOptions';
 export interface TriggerInfo {
   code: number;
   want?: Want;
-  permission?: string;
   extraInfo?: Record<string,Object>;
   extraInfos?: Record<string, Object>;
   startOptions?: StartOptions;
@@ -28,7 +27,6 @@ export interface TriggerInfo {
 class TriggerInfoImpl implements TriggerInfo {
   public code: number;
   public want?: Want;
-  public permission?: string;
   public extraInfo?: Record<string,Object>;
   public extraInfos?: Record<string, Object>;
   public startOptions?: StartOptions;

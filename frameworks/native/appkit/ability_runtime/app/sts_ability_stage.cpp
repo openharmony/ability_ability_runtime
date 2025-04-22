@@ -111,8 +111,12 @@ std::shared_ptr<AbilityStage> STSAbilityStage::Create(
             }
         }
     }
-    auto moduleObj = stsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
-        hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag, hapModuleInfo.srcEntrance);
+    std::unique_ptr<STSNativeReference> moduleObj;
+    if (!hapModuleInfo.srcEntrance.empty()) {
+        moduleObj = stsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
+            hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag,
+            hapModuleInfo.srcEntrance);
+    }
     return std::make_shared<STSAbilityStage>(stsRuntime, std::move(moduleObj));
 }
 
