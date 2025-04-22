@@ -314,6 +314,7 @@
               "header_base": "//foundation/ability/ability_runtime/frameworks/ets/ani/ani_common/include",
               "header_files": [
                 "ani_common_ability_result.h",
+                "ani_common_ability_state_data.h",                
                 "ani_common_configuration.h",
                 "ani_common_start_options.h",
                 "ani_common_util.h",
