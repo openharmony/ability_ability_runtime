@@ -20,6 +20,7 @@
 #include "ohos_application.h"
 #include "ani_common_configuration.h"
 #include "sts_context_utils.h"
+#include "common_fun_ani.h"
 namespace OHOS {
 namespace AbilityRuntime {
 
@@ -132,26 +133,12 @@ ani_object STSAbilityStageContext::CreateHapModuleInfo(ani_env* env, const std::
     if (env == nullptr || context == nullptr) {
         return nullptr;
     }
-    ani_status status = ANI_OK;
-    ani_class cls;
     auto hapModuleInfo = context->GetHapModuleInfo();
-    status = env->FindClass(STS_HAPMODULEINFO_CLASS_NAME, &cls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "call FindClass HapModuleInfo failed");
+    if (hapModuleInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "hapModuleInfo is nullptr");
         return nullptr;
     }
-    ani_method initMethod = nullptr;
-    status = env->Class_FindMethod(cls, "<ctor>", ":V", &initMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "call Class_FindMethod ctor failed");
-        return nullptr;
-    }
-    ani_object obj = nullptr;
-    status = env->Object_New(cls, initMethod, &obj);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Object_New obj failed");
-        return nullptr;
-    }
+    ani_object obj = AppExecFwk::CommonFunAni::ConvertHapModuleInfo(env, *hapModuleInfo);
     return obj;
 }
 
