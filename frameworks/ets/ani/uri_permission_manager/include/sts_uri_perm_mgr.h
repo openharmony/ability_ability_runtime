@@ -13,25 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_SIMULATOR_STS_ABILITY_CONTEXT_H
-#define OHOS_ABILITY_RUNTIME_SIMULATOR_STS_ABILITY_CONTEXT_H
+#ifndef OHOS_ABILITY_RUNTIME_STS_URI_PERM_MGR_H
+#define OHOS_ABILITY_RUNTIME_STS_URI_PERM_MGR_H
 
 #include "sts_runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {    
-static ani_int grantUriPermissionPromiseSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_enum_item flagEnum, ani_string targetName);
-static void grantUriPermissionPromiseWithAppCloneIndexSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_int appCloneIndex);
 static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_object callback);
-static ani_int revokeUriPermissionPromiseSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_string targetName);
-static void revokeUriPermissionPromiseWithAppCloneIndexSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_string targetName, ani_int appCloneIndex);
+    ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_double appCloneIndex, ani_object callback);
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_string targetName, ani_object callback);
+    ani_string uri, ani_string targetName, ani_double appCloneIndex, ani_object callback);
 void CreateJsUriPermMgr(ani_env *env);
 bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
 ani_object WrapBusinessError(ani_env *env, ani_int code);
@@ -41,4 +33,4 @@ ani_object createDouble(ani_env *env, int32_t res);
 std::string GetErrMsg(int32_t err, const std::string &permission = "");
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ABILITY_STAGE_H
+#endif  // OHOS_ABILITY_RUNTIME_STS_URI_PERM_MGR_H

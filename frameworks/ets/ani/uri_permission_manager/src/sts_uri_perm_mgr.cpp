@@ -29,6 +29,7 @@
 #include "uri.h"
 #include "uri_permission_manager_client.h"
 #include "sts_runtime.h"
+#include "sts_error_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -37,6 +38,7 @@ namespace {
 const char *INVOKE_METHOD_NAME = "invoke";
 const int32_t ERR_OK = 0;
 const int32_t ERR_FAILURE = -1;
+constexpr const char* NOT_SYSTEM_APP = "The application is not system-app, can not use system-api.";
 
 static std::string GetStdString(ani_env* env, ani_string str)
 {
@@ -49,90 +51,71 @@ static std::string GetStdString(ani_env* env, ani_string str)
     return result;
 }
 
-static ani_int grantUriPermissionPromiseSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_enum_item flagEnum, ani_string targetName)
-{
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "grantUriPermissionPromiseSync run");
-    std::string uriStr = GetStdString(env, uri);
-    Uri uriVec(uriStr);
-    ani_int flag = 0;
-    AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(env, flagEnum, flag);
-    int32_t flagId = static_cast<int32_t>(flag);
-    std::string targetBundleName = GetStdString(env, targetName);
-    return AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId, targetBundleName, 0);
-}
-
-static void grantUriPermissionPromiseWithAppCloneIndexSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_int appCloneIndex)
-{
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "grantUriPermissionPromiseWithAppCloneIndexSync run");
-    std::string uriStr = GetStdString(env, uri);
-    Uri uriVec(uriStr);
-    ani_int flag = 0;
-    AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(env, flagEnum, flag);
-    int32_t flagId = static_cast<int32_t>(flag);
-    std::string targetBundleName = GetStdString(env, targetName);
-    int32_t appCloneIndexId = static_cast<int32_t>(appCloneIndex);
-    AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId, targetBundleName, appCloneIndexId);
-}
-
 static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_object callback)
+    ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_double appCloneIndex, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "grantUriPermissionCallbackSync run");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "env null");
+        return;
+    }
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    ani_object stsErrCode = CreateStsError(env, AbilityErrorCode::ERROR_OK);
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
+        stsErrCode = CreateStsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
+            NOT_SYSTEM_APP);
+        AsyncCallback(env, callback, stsErrCode, createDouble(env, ERR_FAILURE));
+        return;
+    }
     std::string uriStr = GetStdString(env, uri);
     Uri uriVec(uriStr);
     ani_int flag = 0;
     AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(env, flagEnum, flag);
     int32_t flagId = static_cast<int32_t>(flag);
     std::string targetBundleName = GetStdString(env, targetName);
+    int32_t appCloneIndexId = static_cast<int32_t>(appCloneIndex);
     int32_t errCode = ERR_OK;
     int32_t result = ERR_OK;
-    errCode = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId, targetBundleName, 0);
+    errCode = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId,
+        targetBundleName, appCloneIndexId);
     if (errCode != ERR_OK) {
         result = ERR_FAILURE;
+        stsErrCode = CreateStsErrorByNativeErr(env, errCode);
     }
-    AsyncCallback(env, callback, WrapBusinessError(env, errCode), createDouble(env, result));
-}
-
-static ani_int revokeUriPermissionPromiseSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_string targetName)
-{
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "revokeUriPermissionPromiseSync run");
-    std::string uriStr = GetStdString(env, uri);
-    Uri uriVec(uriStr);
-    std::string targetBundleName = GetStdString(env, targetName);
-    return AAFwk::UriPermissionManagerClient::GetInstance().RevokeUriPermissionManually(uriVec,
-        targetBundleName, 0);
-}
-
-static void revokeUriPermissionPromiseWithAppCloneIndexSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_string targetName, ani_int appCloneIndex)
-{
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "revokeUriPermissionPromiseWithAppCloneIndexSync run");
-    std::string uriStr = GetStdString(env, uri);
-    Uri uriVec(uriStr);
-    std::string targetBundleName = GetStdString(env, targetName);
-    int32_t appCloneIndexId = static_cast<int32_t>(appCloneIndex);
-    AAFwk::UriPermissionManagerClient::GetInstance().RevokeUriPermissionManually(uriVec,
-        targetBundleName, appCloneIndexId);
+    
+    AsyncCallback(env, callback, stsErrCode, createDouble(env, result));
 }
 
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_string targetName, ani_object callback)
+    ani_string uri, ani_string targetName, ani_double appCloneIndex, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "revokeUriPermissionCallbackSync run");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "env null");
+        return;
+    }
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    ani_object stsErrCode = CreateStsError(env, AbilityErrorCode::ERROR_OK);
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
+        stsErrCode = CreateStsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
+            NOT_SYSTEM_APP);
+        AsyncCallback(env, callback, stsErrCode, createDouble(env, ERR_FAILURE));
+        return;
+    }
     std::string uriStr = GetStdString(env, uri);
     Uri uriVec(uriStr);
     std::string targetBundleName = GetStdString(env, targetName);
     int32_t errCode = ERR_OK;
     int32_t result = ERR_OK;
     errCode = AAFwk::UriPermissionManagerClient::GetInstance().RevokeUriPermissionManually(uriVec,
-        targetBundleName, 0);
+        targetBundleName, appCloneIndex);
     if (errCode != ERR_OK) {
         result = ERR_FAILURE;
+        stsErrCode = CreateStsErrorByNativeErr(env, errCode);
     }
-    AsyncCallback(env, callback, WrapBusinessError(env, errCode), createDouble(env, result));
+    AsyncCallback(env, callback, stsErrCode, createDouble(env, result));
 }
 
 ani_object createDouble(ani_env *env, int32_t res)
@@ -163,32 +146,14 @@ void StsUriPermissionManagerInit(ani_env *env)
     }
     std::array functions = {
         ani_native_function {
-            "grantUriPermissionPromiseSync",
-            "Lstd/core/String;L@ohos/app/ability/wantConstant/wantConstant/Flags;Lstd/core/String;:I",
-            reinterpret_cast<void*>(grantUriPermissionPromiseSync)
-        },
-        ani_native_function {
-            "grantUriPermissionPromiseWithAppCloneIndexSync",
-            "Lstd/core/String;L@ohos/app/ability/wantConstant/wantConstant/Flags;Lstd/core/String;I:V",
-            reinterpret_cast<void*>(grantUriPermissionPromiseWithAppCloneIndexSync)
-        },
-        ani_native_function {
             "grantUriPermissionCallbackSync",
-            "Lstd/core/String;L@ohos/app/ability/wantConstant/wantConstant/Flags;Lstd/core/String;"
+            "Lstd/core/String;L@ohos/app/ability/wantConstant/wantConstant/Flags;Lstd/core/String;D"
             "L@ohos/application/uriPermissionManager/AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(grantUriPermissionCallbackSync)
         },
         ani_native_function {
-            "revokeUriPermissionPromiseSync", "Lstd/core/String;Lstd/core/String;:I",
-            reinterpret_cast<void*>(revokeUriPermissionPromiseSync)
-        },
-        ani_native_function {
-            "revokeUriPermissionPromiseWithAppCloneIndexSync", "Lstd/core/String;Lstd/core/String;I:V",
-            reinterpret_cast<void*>(revokeUriPermissionPromiseWithAppCloneIndexSync)
-        },
-        ani_native_function {
             "revokeUriPermissionCallbackSync",
-            "Lstd/core/String;Lstd/core/String;"
+            "Lstd/core/String;Lstd/core/String;D"
             "L@ohos/application/uriPermissionManager/AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(revokeUriPermissionCallbackSync)
         },
