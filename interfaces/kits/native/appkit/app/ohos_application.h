@@ -172,7 +172,10 @@ public:
      *
      * @param runtime
      */
-    const std::vector<std::unique_ptr<AbilityRuntime::Runtime>>& GetRuntime() const;
+    const std::vector<std::unique_ptr<AbilityRuntime::Runtime>>& GetRuntime() const
+    {
+        return runtimes_;
+    }
 
     /**
      * @brief return the application runtime

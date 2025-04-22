@@ -41,6 +41,19 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
+const std::unique_ptr<Runtime>& GetRuntime(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    Runtime::Language language)
+{
+    static std::unique_ptr<Runtime> runtimeNullptr = nullptr;
+    auto &runtimes = application->GetRuntime();
+    for (auto& runtime : runtimes) {
+        if (runtime->GetLanguage() == language) {
+            return runtime;
+        }
+    }
+    return runtimeNullptr;
+}
+
 constexpr char DMS_SESSION_ID[] = "sessionId";
 constexpr char DMS_ORIGIN_DEVICE_ID[] = "deviceId";
 constexpr int32_t DEFAULT_DMS_SESSION_ID = 0;
@@ -653,6 +666,81 @@ void UIAbility::EnableAbilityRecovery(const std::shared_ptr<AppExecFwk::AbilityR
 int32_t UIAbility::OnShare(AAFwk::WantParams &wantParams)
 {
     return ERR_OK;
+}
+
+void UIAbility::BindHybridContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (application == nullptr || record == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application or record");
+        return;
+    }
+    auto appInfo = application->GetApplicationInfo();
+    if (appInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null appInfo");
+        return;
+    }
+    if (appInfo->codeLanguage != AppExecFwk::Constants::CODE_LANGUAGE_HYBRID) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "not hybrid app, no need to create hybrid context");
+        return;
+    }
+
+    auto abilityInfo = record->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo");
+        return;
+    }
+    if (abilityInfo->codeLanguage == APPLICAITON_CODE_LANGUAGE_ARKTS_1_0) {
+        BindStsContext(application, record);
+    } else if (abilityInfo->codeLanguage == APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+        BindJsContext(application, record);
+    } else {
+        TAG_LOGE(AAFwkTag::UIABILITY, "unknown codeLanguage");
+    }
+}
+
+void UIAbility::BindStsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (abilityContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
+        return;
+    }
+    auto& bindingObject = abilityContext_->GetBindingObject();
+    if (bindingObject == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObject");
+        return;
+    }
+
+    auto* ptr = bindingObject->Get<ani_ref>();
+    if (ptr != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "sts context already binded");
+        return;
+    }
+    StsUIAbility::CreateAndBindContext(
+        application, record, abilityContext_, GetRuntime(application, Runtime::Language::STS));
+}
+
+void UIAbility::BindJsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (abilityContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
+        return;
+    }
+    auto& bindingObject = abilityContext_->GetBindingObject();
+    if (bindingObject == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObject");
+        return;
+    }
+
+    auto* ptr = bindingObject->Get<NativeReference>();
+    if (ptr != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "sts context already binded");
+        return;
+    }
+    JsUIAbility::CreateAndBindContext(
+        application, record, abilityContext_, GetRuntime(application, Runtime::Language::JS));
 }
 
 bool UIAbility::CheckIsSilentForeground() const

@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_START_OPTIONS_H
-#define OHOS_ABILITY_RUNTIME_ANI_COMMON_START_OPTIONS_H
+import { BusinessError, AsyncCallback } from '@ohos.base';
 
-#include "start_options.h"
-#include "ani_common_util.h"
+export default class AsyncCallbackWrapper<T> {
+  private myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
 
-namespace OHOS {
-namespace AppExecFwk {
+  constructor(myFun:AsyncCallback<T, void>){
+    this.myFun_ = myFun;
+  }
 
-bool UnwrapStartOptionsWithProcessOption(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions);
-bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions);
-}  // namespace AppExecFwk
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_NAPI_COMMON_START_OPTIONS_H
+  invoke(err: BusinessError<void>, data: T) : void {
+    this.myFun_(err, data);
+  }
+}

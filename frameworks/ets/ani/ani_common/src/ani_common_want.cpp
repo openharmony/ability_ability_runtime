@@ -84,18 +84,16 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     }
 
     auto elementName = want.GetElement();
-    SetFieldString(env, cls, object, "deviceId", elementName.GetDeviceID());
-    SetFieldString(env, cls, object, "bundleName", elementName.GetBundleName());
-    SetFieldString(env, cls, object, "abilityName", elementName.GetAbilityName());
-    SetFieldString(env, cls, object, "moduleName", elementName.GetModuleName());
-    SetFieldString(env, cls, object, "uri", want.GetUriString());
-    SetFieldString(env, cls, object, "type", want.GetType());
-    SetFieldDouble(env, cls, object, "flags", want.GetFlags());
-    SetFieldString(env, cls, object, "action", want.GetAction());
+    env->Object_SetFieldByName_Ref(object, "deviceId", GetAniString(env, elementName.GetDeviceID()));
+    env->Object_SetFieldByName_Ref(object, "bundleName", GetAniString(env, elementName.GetBundleName()));
+    env->Object_SetFieldByName_Ref(object, "abilityName", GetAniString(env, elementName.GetAbilityName()));
+    env->Object_SetFieldByName_Ref(object, "moduleName", GetAniString(env, elementName.GetModuleName()));
+    env->Object_SetFieldByName_Ref(object, "uri", GetAniString(env, want.GetUriString()));
+    env->Object_SetFieldByName_Ref(object, "type", GetAniString(env, want.GetType()));
+    env->Object_SetFieldByName_Ref(object, "flags", createDouble(env, want.GetFlags()));
+    env->Object_SetFieldByName_Ref(object, "action", GetAniString(env, want.GetAction()));
     InnerWrapWantParams(env, cls, object, want.GetParams());
     SetFieldArrayString(env, cls, object, "entities", want.GetEntities());
-
-    // TODO
     return object;
 }
 
@@ -210,7 +208,7 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
         }
     }
 
-    TAG_LOGE(AAFwkTag::UIABILITY,
+    TAG_LOGD(AAFwkTag::UIABILITY,
         "DeviceID %{public}s, BundleName %{public}s, AbilityName %{public}s, ModuleName %{public}s",
         natElementName.GetDeviceID().c_str(), natElementName.GetBundleName().c_str(),
         natElementName.GetAbilityName().c_str(), natElementName.GetModuleName().c_str());

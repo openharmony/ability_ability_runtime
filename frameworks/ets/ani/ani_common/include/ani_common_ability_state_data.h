@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_START_OPTIONS_H
-#define OHOS_ABILITY_RUNTIME_ANI_COMMON_START_OPTIONS_H
+#ifndef OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_STATE_DATA_H
+#define OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_STATE_DATA_H
 
-#include "start_options.h"
-#include "ani_common_util.h"
+#include "sts_runtime.h"
+#include "ability_state_data.h"
 
 namespace OHOS {
 namespace AppExecFwk {
+    ani_object WrapAbilityStateData(ani_env *env, const AbilityStateData &data);
+    ani_object WrapAbilityStateDataInner(ani_env *env, ani_class cls, ani_object object,
+        const AbilityStateData &data);
+    ani_object CreateAniAbilityStateDataArray(ani_env *env, const std::vector<AbilityStateData> &list);
+} // namespace AppExecFwk
+} // namespace OHOS
 
-bool UnwrapStartOptionsWithProcessOption(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions);
-bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions);
-}  // namespace AppExecFwk
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_NAPI_COMMON_START_OPTIONS_H
+#endif // OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_STATE_DATA_H

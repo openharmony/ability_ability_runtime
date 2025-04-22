@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_START_OPTIONS_H
-#define OHOS_ABILITY_RUNTIME_ANI_COMMON_START_OPTIONS_H
+#ifndef OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_H
+#define OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_H
 
-#include "start_options.h"
-#include "ani_common_util.h"
+#include "sts_runtime.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-
-bool UnwrapStartOptionsWithProcessOption(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions);
-bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions);
-}  // namespace AppExecFwk
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_NAPI_COMMON_START_OPTIONS_H
+namespace AbilityManagerSts {
+void StsAbilityManagerRegistryInit(ani_env *env);
+} // namespace AbilityManagerSts
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_H

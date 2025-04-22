@@ -803,11 +803,6 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::GetAppContext() const
     return abilityRuntimeContext_;
 }
 
-const std::vector<std::unique_ptr<AbilityRuntime::Runtime>>& OHOSApplication::GetRuntime() const
-{
-    return runtimes_;
-}
-
 void OHOSApplication::SetConfiguration(const Configuration &config)
 {
     if (!configuration_) {
