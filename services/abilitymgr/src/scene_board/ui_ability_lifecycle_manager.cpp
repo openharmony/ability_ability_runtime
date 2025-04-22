@@ -594,22 +594,12 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
         AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(DMS_PROCESS_NAME)) {
         return StartWithPersistentIdByDistributed(abilityRequest, persistentId);
     }
-
-    const auto &abilityInfo = abilityRequest.abilityInfo;
-    bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
-    auto requestId = GetRequestId();
-    // When 'processMode' is set to new process mode, the priority is higher than 'isolationProcess'.
-    bool isNewProcessMode = abilityRequest.processOptions &&
-        ProcessOptions::IsNewProcessMode(abilityRequest.processOptions->processMode);
-    auto isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
-    if (!isNewProcessMode && abilityInfo.isolationProcess && AppUtils::GetInstance().IsStartSpecifiedProcess()
-        && isUIAbility && !isPlugin) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess");
-        auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
-        specifiedRequest->specifiedProcessState = SpecifiedProcessState::STATE_PROCESS;
-        AddSpecifiedRequest(specifiedRequest);
+    if (StartSpecifiedProcessRequest(abilityRequest)) {
         return ERR_OK;
     }
+    const auto &abilityInfo = abilityRequest.abilityInfo;
+    auto requestId = GetRequestId();
+    auto isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
     auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified && !isPlugin) {
         auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
@@ -651,20 +641,11 @@ int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const Ab
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    const auto &abilityInfo = abilityRequest.abilityInfo;
-    bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
-    // When 'processMode' is set to new process mode, the priority is higher than 'isolationProcess'.
-    bool isNewProcessMode = abilityRequest.processOptions &&
-        ProcessOptions::IsNewProcessMode(abilityRequest.processOptions->processMode);
-    auto isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
-    if (!isNewProcessMode && abilityInfo.isolationProcess && AppUtils::GetInstance().IsStartSpecifiedProcess()
-        && isUIAbility && !isPlugin) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess");
-        auto specifiedRequest = std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest);
-        specifiedRequest->specifiedProcessState = SpecifiedProcessState::STATE_PROCESS;
-        AddSpecifiedRequest(specifiedRequest);
+    if (StartSpecifiedProcessRequest(abilityRequest)) {
         return ERR_OK;
     }
+    const auto &abilityInfo = abilityRequest.abilityInfo;
+    auto isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
     auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified && !isPlugin) {
         auto specifiedRequest = std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest);
@@ -2224,6 +2205,37 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessTimeoutResponse(int32_t r
     }
 }
 
+bool UIAbilityLifecycleManager::StartSpecifiedProcessRequest(const AbilityRequest &abilityRequest)
+{
+    const auto &abilityInfo = abilityRequest.abilityInfo;
+    if (!abilityInfo.isolationProcess) {
+        return false;
+    }
+    if (!AppUtils::GetInstance().IsStartSpecifiedProcess()) {
+        return false;
+    }
+    bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
+    if (!isUIAbility) {
+        return false;
+    }
+    // When 'processMode' is set to new process mode, the priority is higher than 'isolationProcess'.
+    bool isNewProcessMode = abilityRequest.processOptions &&
+        ProcessOptions::IsNewProcessMode(abilityRequest.processOptions->processMode);
+    if (isNewProcessMode) {
+        return false;
+    }
+    bool isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
+    if (isPlugin) {
+        return false;
+    }
+    auto requestId = GetRequestId();
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess, requestId:%{public}d", requestId);
+    auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
+    specifiedRequest->specifiedProcessState = SpecifiedProcessState::STATE_PROCESS;
+    AddSpecifiedRequest(specifiedRequest);
+    return true;
+}
+
 void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -2237,6 +2249,10 @@ void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want)
     }
     abilityRequest.isFromIcon = true;
     std::lock_guard guard(sessionLock_);
+    // support specified process mode
+    if (StartSpecifiedProcessRequest(abilityRequest)) {
+        return;
+    }
     AddSpecifiedRequest(std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest));
 }
 
