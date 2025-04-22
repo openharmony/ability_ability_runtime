@@ -196,6 +196,17 @@ public:
         return 0;
     }
 
+    /**
+     * @brief kill processes by bundleName.
+     * @param bundleName the bundleName of processes to be killed.
+     * @param userId the user id of processes to be killed.
+     * @return 0 when on success or else failed.
+     */
+    virtual int32_t NotifyKillProcesses(const std::string &bundleName, int32_t userId)
+    {
+        return 0;
+    }
+
     enum {
         NOTIFY_START_ABILITY = 1,
         NOTIFY_MISSION_CREATED,
@@ -216,6 +227,7 @@ public:
         CHECK_STATIC_CFG_PERMISSION,
         UPDATE_CALLER_IF_NEED,
         UPDATE_TARGET_IF_NEED,
+        NOTIFY_KILL_PROCESSES,
     };
 };
 }  // namespace AAFwk

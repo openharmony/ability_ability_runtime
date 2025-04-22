@@ -90,6 +90,7 @@ public:
     MOCK_METHOD2(OpenFile, int(const Uri& uri, uint32_t flag));
     MOCK_METHOD2(NotifyMissionBindPid, void(int32_t missionId, int32_t pid));
     MOCK_METHOD2(CheckStaticCfgPermission, int32_t(const Want &want, bool isImplicit));
+    MOCK_METHOD2(NotifyKillProcesses, int32_t(const std::string &, int32_t));
 
     int InvokeSendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
     {
