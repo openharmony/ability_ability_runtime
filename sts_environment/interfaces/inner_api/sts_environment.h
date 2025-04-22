@@ -83,6 +83,7 @@ public:
     EtsEnv* GetEtsEnv();
     void ReInitStsEnvImpl(std::unique_ptr<StsEnvironmentImpl> impl);
     ani_env* GetAniEnv();
+    void HandleUncaughtError();
 
     static const char* stsAppNSName;
     static const char* stsSDKNSName;
@@ -119,12 +120,16 @@ private:
     bool LoadSymbolANIGetCreatedVMs(void* handle, STSRuntimeAPI& apis);
     bool LoadBootPathFile(std::string& bootfiles);
     void Schedule();
+    std::string GetBuildId(std::string stack);
+    StsEnv::STSErrorObject GetSTSErrorObject();
+    std::string GetErrorProperty(ani_error aniError, const char* property);
     static STSRuntimeAPI lazyApis_;
     bool isRuntimeStarted_{ false };
     bool isUISchedulerStarted_{ false };
     void* uiScheduler_{ nullptr };
     VMEntry vmEntry_;
     std::unique_ptr<StsEnvironmentImpl> impl_ = nullptr;
+    STSUncaughtExceptionInfo uncaughtExceptionInfo_;
 };
 } // namespace StsEnv
 } // namespace OHOS
