@@ -45,7 +45,7 @@ void STSAbilityMonitor::OnSTSAbilityBackground(const std::weak_ptr<STSNativeRefe
     CallLifecycleCBFunction("onAbilityBackground", abilityObj);
 }
 
-void STSAbilityMonitor::OnSTSAbilityDestroy(const std::weak_ptr<STSNativeReference> &abilityObj)
+void STSAbilityMonitor::OnSTSAbilityStop(const std::weak_ptr<STSNativeReference> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called OnAbilityDestroy");
     CallLifecycleCBFunction("onAbilityDestroy", abilityObj);
