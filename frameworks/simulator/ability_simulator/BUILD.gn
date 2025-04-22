@@ -21,7 +21,7 @@ config("ability_simulator_public_config") {
 }
 
 ohos_shared_library("ability_simulator_inner") {
-  if (is_mingw || is_mac) {
+  if (is_mingw || is_mac || is_linux) {
     if (is_mingw) {
       defines = [
         "WINDOWS_PLATFORM",
@@ -43,6 +43,7 @@ ohos_shared_library("ability_simulator_inner") {
       "${windowmanager_path}/interfaces/innerkits/wm",
       "${windowmanager_path}/interfaces/kits/napi/window_runtime/window_stage_napi",
       "include/bundle_parser",
+      "${resource_management_path}/interfaces/inner_api/include",
     ]
 
     sources = [
@@ -101,8 +102,10 @@ ohos_shared_library("ability_simulator_inner") {
 
     if (is_mingw) {
       external_deps += [ "resource_management:win_resmgr" ]
-    } else {
+    } else if (is_mac) {
       external_deps += [ "resource_management:mac_resmgr" ]
+    } else if (is_linux) {
+      external_deps += [ "resource_management:linux_resmgr" ]
     }
   }
 
@@ -113,7 +116,7 @@ ohos_shared_library("ability_simulator_inner") {
 }
 
 group("ability_simulator") {
-  if (is_mingw || is_mac) {
+  if (is_mingw || is_mac || is_linux) {
     public_deps = [ ":ability_simulator_inner" ]
   }
 }
