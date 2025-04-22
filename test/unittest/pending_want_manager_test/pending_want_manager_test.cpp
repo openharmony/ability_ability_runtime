@@ -488,7 +488,7 @@ HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_1400, TestSize.Level1)
     EXPECT_NE(pendingWantRecord, nullptr);
     SenderInfo info;
     info.finishedReceiver = new CancelReceiver();
-    EXPECT_EQ(pendingManager_->SendWantSender(pendingWantRecord, info), -1);
+    EXPECT_EQ(pendingManager_->SendWantSender(pendingWantRecord, info), ERR_INVALID_VALUE);
     EXPECT_TRUE(CancelReceiver::performReceiveCount == 100);
     CancelReceiver::performReceiveCount = 0;
 }

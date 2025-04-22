@@ -84,8 +84,8 @@ const std::map<int32_t, std::string> ERROR_MSG_MAP = {
         "Invalid wantagent object." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_WANTAGENT_NOT_FOUND,
         "The wantAgent object does not exist." },
-    { ERR_ABILITY_RUNTIME_EXTERNAL_WANTAGENT_CANCELED,
-        "The wantAgent object has been canceled." },
+    { ERR_ABILITY_RUNTIME_EXTERNAL_NOT_ABILITY_CONTEXT,
+        "The context is not ability context." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_NO_SUCH_URI_ABILITY,
         "Input error. The specified uri does not exist." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_FA_NOT_SUPPORT_OPERATION,
@@ -150,6 +150,8 @@ const std::map<int32_t, std::string> ERROR_MSG_MAP = {
         "Restart too frequently. Try again at least 3s later." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_NOT_SYSTEM_HSP,
         "The input bundleName and moduleName is not system HSP" },
+    { ERR_ABILITY_RUNTIME_EXTERNAL_WANTAGENT_CANCELED,
+        "The WantAgent has been canceled." },
 };
 }
 

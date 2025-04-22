@@ -86,6 +86,9 @@ enum class AbilityErrorCode {
 
     // implicit start can not match any component.
     ERROR_CODE_CANNOT_MATCH_ANY_COMPONENT = 16000019,
+    
+    // the context is not ability context.
+    ERR_ABILITY_RUNTIME_EXTERNAL_NOT_ABILITY_CONTEXT = 16000020,
 
     // free install network abnormal.
     ERROR_CODE_NETWORK_ABNORMAL = 16000051,

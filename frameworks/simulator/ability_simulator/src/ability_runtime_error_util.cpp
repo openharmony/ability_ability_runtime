@@ -37,6 +37,8 @@ const std::map<int32_t, std::string> ERROR_MSG_MAP = {
         "Incorrect ability type." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_NO_SUCH_ID,
         "The specified ID does not exist." },
+    { ERR_ABILITY_RUNTIME_EXTERNAL_NOT_ABILITY_CONTEXT,
+        "The context is not ability context." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_VISIBILITY_VERIFICATION_FAILED,
         "Failed to start the invisible ability." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_CROSS_USER_OPERATION,
