@@ -55,7 +55,7 @@ public:
         IPC_ID_ON_ERROR = 1,
 
         IPC_ID_ON_NATIVE_CHILD_EXIT = 2
-    }
+    };
 };
 
 } // OHOS

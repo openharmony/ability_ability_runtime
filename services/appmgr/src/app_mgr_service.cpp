@@ -601,6 +601,26 @@ int32_t AppMgrService::UnregisterApplicationStateObserver(const sptr<IApplicatio
     return appMgrServiceInner_->UnregisterApplicationStateObserver(observer);
 }
 
+int32_t AppMgrService::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "begin");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->RegisterNativeChildExitNotify(notify);
+}
+
+int32_t AppMgrService::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "begin");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->UnregisterNativeChildExitNotify(notify);
+}
+
 int32_t AppMgrService::RegisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
