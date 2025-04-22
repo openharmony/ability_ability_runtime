@@ -894,5 +894,21 @@ HWTEST_F(BundleMgrHelperTest, BundleMgrHelperTest_GetPluginInfosForSelf_001, Tes
     auto ret = bundleMgrHelper->GetPluginInfosForSelf(pluginBundleInfos);
     EXPECT_NE(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: BundleMgrHelperTest_GetCloneBundleInfoExt_001
+ * @tc.desc: GetSignatureInfoByBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleMgrHelperTest, BundleMgrHelperTest_GetCloneBundleInfoExt_001, TestSize.Level1)
+{
+    std::string bundleName;
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    uint32_t flag = 0;
+    AppExecFwk::BundleInfo bundleInfo;
+    auto ret = bundleMgrHelper->GetCloneBundleInfoExt(bundleName, flag, appIndex, userId, bundleInfo);
+    EXPECT_NE(ret, ERR_OK);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

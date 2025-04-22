@@ -1067,5 +1067,18 @@ ErrCode BundleMgrHelper::UnregisterPluginEventCallback(sptr<IBundleEventCallback
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->UnregisterPluginEventCallback(pluginEventCallback);
 }
+
+ErrCode BundleMgrHelper::GetCloneBundleInfoExt(const std::string &bundleName, uint32_t flags, int32_t appIndex,
+    int32_t userId, BundleInfo &bundleInfo)
+{
+    TAG_LOGI(AAFwkTag::BUNDLEMGRHELPER, "GetCloneBundleInfoExt");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetCloneBundleInfoExt(bundleName, flags, appIndex, userId, bundleInfo);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

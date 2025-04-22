@@ -119,6 +119,9 @@ public:
         AbilityInfo &pluginAbilityInfo);
     ErrCode RegisterPluginEventCallback(sptr<IBundleEventCallback> pluginEventCallback);
     ErrCode UnregisterPluginEventCallback(sptr<IBundleEventCallback> pluginEventCallback);
+    // for collaborator (along with normal)
+    ErrCode GetCloneBundleInfoExt(const std::string &bundleName, uint32_t flags, int32_t appIndex,
+        int32_t userId, BundleInfo &bundleInfo);
 
 private:
     sptr<IBundleMgr> Connect();

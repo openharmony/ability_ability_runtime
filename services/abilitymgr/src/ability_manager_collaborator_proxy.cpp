@@ -537,6 +537,37 @@ int32_t AbilityManagerCollaboratorProxy::UpdateCallerIfNeed(Want &want)
     return NO_ERROR;
 }
 
+int32_t AbilityManagerCollaboratorProxy::NotifyKillProcesses(const std::string &bundleName, int32_t userId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteString16(Str8ToStr16(bundleName))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "bundleName write fail");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "userId write fail");
+        return ERR_INVALID_OPERATION;
+    }
+    auto remote = Remote();
+    if (!remote) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null remote");
+        return ERR_INVALID_OPERATION;
+    }
+    int32_t ret = remote->SendRequest(
+        IAbilityManagerCollaborator::NOTIFY_KILL_PROCESSES, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", ret);
+        return ret;
+    }
+    return NO_ERROR;
+}
+
 int32_t AbilityManagerCollaboratorProxy::UpdateTargetIfNeed(Want &want)
 {
     MessageParcel data;
