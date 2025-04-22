@@ -67,8 +67,7 @@ int32_t NativeChildNotifyStub::HandleOnNativeChildExit(MessageParcel &data, Mess
 {
     int pid = data.ReadInt32();
     int signal = data.ReadInt32();
-    OnNativeChildExit(pid, signal);
-    return ERR_NONE;
+    return OnNativeChildExit(pid, signal);
 }
 
 int32_t NativeChildNotifyStub::HandleOnError(MessageParcel &data, MessageParcel &reply)

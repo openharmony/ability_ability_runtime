@@ -1145,7 +1145,7 @@ int32_t AppMgrClient::UnregisterApplicationStateObserver(const sptr<IApplication
     return service->UnregisterApplicationStateObserver(observer);
 }
 
-int32_t AppMgrClient::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify)
+int32_t AppMgrClient::RegisterNativeChildExitNotify(sptr<INativeChildNotify> notify)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
@@ -1154,7 +1154,7 @@ int32_t AppMgrClient::RegisterNativeChildExitNotify(const sptr<INativeChildNotif
     return service->RegisterNativeChildExitNotify(notify);
 }
 
-int32_t AppMgrClient::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify)
+int32_t AppMgrClient::UnregisterNativeChildExitNotify(sptr<INativeChildNotify> notify)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {

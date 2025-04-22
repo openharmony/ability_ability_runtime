@@ -114,7 +114,6 @@ typedef enum Ability_NativeChildProcess_ErrCode {
 
     /**
      * @error The callback does not exist; it may not have been registered or has already been unregistered.
-     * @since 20
      */
     NCP_ERR_CALLBACK_NOT_EXIST = 16010009,
 } Ability_NativeChildProcess_ErrCode;

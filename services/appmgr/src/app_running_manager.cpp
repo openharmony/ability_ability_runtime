@@ -43,6 +43,7 @@
 #include "task_handler_wrap.h"
 #include "time_util.h"
 #include "ui_extension_utils.h"
+#include "app_native_spawn_manager.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -611,6 +612,11 @@ void AppRunningManager::RemoveAppRunningRecordById(const int32_t recordId)
     if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
         RemoveUIExtensionLauncherItem(appRecord->GetPid());
         AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(appRecord->GetPid());
+    }
+
+    // unregister child process exit notify when parent exit
+    if (appRecord != nullptr) {
+        AppNativeSpawnManager::GetInstance().RemoveNativeChildCallbackByPid(appRecord->GetPid());
     }
 }
 
@@ -1532,10 +1538,9 @@ std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(
         });
     if (it != appRunningRecordMap_.end()) {
         auto appRecord = it->second;
-        if (childRecord->IsNativeSpawnStarted()) {
-            TAG_LOGI(AAFwkTag::APPMGR, "nativespawn started later remove pid:%{public}d, uid:%{public}d", childRecord->GetPid(),
-                childRecord->GetUid());
-            return childRecord;
+        if (childRecord->IsNativeSpawnStarted() &&
+            AppNativeSpawnManager::GetInstance().GetNativeChildCallbackByPid(appRecord->GetPid()) != nullptr) {
+            AppNativeSpawnManager::GetInstance().AddChildRelation(childRecord->GetPid(), appRecord->GetPid());
         }
         appRecord->RemoveChildProcessRecord(childRecord);
         TAG_LOGI(AAFwkTag::APPMGR, "RemoveChildProcessRecord pid:%{public}d, uid:%{public}d", childRecord->GetPid(),
@@ -1545,41 +1550,6 @@ std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(
     return nullptr;
 }
 #endif //SUPPORT_CHILD_PROCESS
-
-std::shared_ptr<ChildProcessRecord> AppRunningManager::RemoveChildProcessRecordByChildPid(int32_t pid)
-{
-    std::lock_guard guard(runningRecordMapMutex_);
-    std::shared_ptr<ChildProcessRecord> childRecord;
-    const auto &it = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(),
-        [&object, &childRecord](const auto &pair) {
-            auto appRecord = pair.second;
-            if (!appRecord) {
-                return false;
-            }
-            auto childRecordMap = appRecord->GetChildProcessRecordMap();
-            if (childRecordMap.empty()) {
-                return false;
-            }
-            for (auto iter : childRecordMap) {
-                if (iter.second == nullptr) {
-                    continue;
-                }
-                if (iter.first == pid) {
-                    childRecord = iter.second;
-                    return true;
-                }
-            }
-            return false;
-        });
-    if (it != appRunningRecordMap_.end()) {
-        auto appRecord = it->second;
-        appRecord->RemoveChildProcessRecord(childRecord);
-        TAG_LOGI(AAFwkTag::APPMGR, "RemoveChildProcessRecord pid:%{public}d, uid:%{public}d", childRecord->GetPid(),
-            childRecord->GetUid());
-        return childRecord;
-    }
-    return nullptr;
-}
 
 int32_t AppRunningManager::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {

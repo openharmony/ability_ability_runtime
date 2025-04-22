@@ -34,6 +34,7 @@ ohos_unittest("AMSEventHandlerTest") {
     "${ability_runtime_services_path}/appmgr/src/app_mgr_event.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_mgr_service_event_handler.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_mgr_service_inner.cpp",
+    "${ability_runtime_services_path}/appmgr/src/app_native_spawn_manager.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_preloader.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_running_manager.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_running_record.cpp",
@@ -101,6 +102,8 @@ ohos_unittest("AMSEventHandlerTest") {
     "resource_schedule_service:ressched_client",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "json:nlohmann_json_static",
+    "jsoncpp:jsoncpp",
   ]
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]

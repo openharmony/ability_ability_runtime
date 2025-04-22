@@ -26,6 +26,7 @@
 #include "mock_application.h"
 #include "mock_app_mgr_service.h"
 #include "mock_kia_interceptor.h"
+#include "native_child_notify_stub.h"
 
 using namespace testing::ext;
 
@@ -38,6 +39,17 @@ using testing::Return;
 
 namespace OHOS {
 namespace AppExecFwk {
+
+class NativeChildCallbackMock : public NativeChildNotifyStub {
+public:
+    NativeChildCallbackMock() = default;
+    virtual ~NativeChildCallbackMock() = default;
+    
+    void OnNativeChildStarted(const sptr<IRemoteObject> &nativeChild) {}
+    void OnError(int32_t errCode) {}
+    int32_t OnNativeChildExit(int32_t pid, int32_t signal) { return 0; }
+};
+
 class AmsIpcAppMgrInterfaceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -236,6 +248,52 @@ HWTEST_F(AmsIpcAppMgrInterfaceTest, UnregisterApplicationStateObserver_001, Test
     EXPECT_EQ(OHOS::NO_ERROR, err);
 
     TAG_LOGD(AAFwkTag::TEST, "UnregisterApplicationStateObserver_001 end");
+}
+
+/*
+ * @tc.name: RegisterNativeChildExitNotify_001
+ * @tc.desc: Register native child exit notify test.
+ * @tc.type: FUNC
+ * @tc.require: issueI5822Q
+ */
+HWTEST_F(AmsIpcAppMgrInterfaceTest, RegisterNativeChildExitNotify_001, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "RegisterNativeChildExitNotify_001 start");
+
+    sptr<INativeChildNotify> notify = new NativeChildCallbackMock();
+    sptr<MockAppMgrService> mockAppMgr(new MockAppMgrService());
+    sptr<IAppMgr> appMgrClient = iface_cast<IAppMgr>(mockAppMgr);
+
+    EXPECT_CALL(*mockAppMgr, RegisterNativeChildExitNotify(_)).Times(1).WillOnce(Return(OHOS::NO_ERROR));
+
+    int32_t err = appMgrClient->RegisterNativeChildExitNotify(notify);
+
+    EXPECT_EQ(OHOS::NO_ERROR, err);
+
+    TAG_LOGD(AAFwkTag::TEST, "RegisterNativeChildExitNotify_001 end");
+}
+
+/*
+ * @tc.name: UnregisterNativeChildExitNotify_001
+ * @tc.desc: Unregister native child exit notify test.
+ * @tc.type: FUNC
+ * @tc.require: issueI5822Q
+ */
+HWTEST_F(AmsIpcAppMgrInterfaceTest, UnregisterNativeChildExitNotify_001, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "UnregisterNativeChildExitNotify_001 start");
+
+    sptr<INativeChildNotify> notify = new NativeChildCallbackMock();
+    sptr<MockAppMgrService> mockAppMgr(new MockAppMgrService());
+    sptr<IAppMgr> appMgrClient = iface_cast<IAppMgr>(mockAppMgr);
+
+    EXPECT_CALL(*mockAppMgr, UnregisterNativeChildExitNotify(_)).Times(1).WillOnce(Return(OHOS::NO_ERROR));
+
+    int32_t err = appMgrClient->UnregisterNativeChildExitNotify(notify);
+
+    EXPECT_EQ(OHOS::NO_ERROR, err);
+
+    TAG_LOGD(AAFwkTag::TEST, "UnregisterNativeChildExitNotify_001 end");
 }
 
 /*

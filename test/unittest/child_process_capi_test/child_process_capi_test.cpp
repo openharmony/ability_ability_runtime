@@ -30,6 +30,7 @@ public:
     static void TearDownTestCase(void);
 
     static void OnNativeChildProcessStarted(int errCode, OHIPCRemoteProxy *remoteProxy);
+    static void OnNativeChildProcessExit(int32_t pid, int32_t signal);
 
     void SetUp();
     void TearDown();
@@ -48,6 +49,10 @@ void ChildProcessCapiTest::TearDown(void)
 {}
 
 void ChildProcessCapiTest::OnNativeChildProcessStarted(int errCode, OHIPCRemoteProxy *remoteProxy)
+{
+}
+
+void ChildProcessCapiTest::OnNativeChildProcessExit(int32_t pid, int32_t signal)
 {
 }
 
@@ -92,6 +97,38 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_StartNativeChildProcess_001, TestSize.
     auto ret = OH_Ability_StartNativeChildProcess(nullptr, args, options, &pid);
     EXPECT_EQ(ret, NCP_ERR_INVALID_PARAM);
     GTEST_LOG_(INFO) << "OH_Ability_StartNativeChildProcess_001 begin";
+}
+
+/**
+ * @tc.number: OH_Ability_RegisterNativeChildProcessExitCallback_001
+ * @tc.desc: Test API OH_Ability_RegisterNativeChildProcessExitCallback_001 works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessCapiTest, OH_Ability_RegisterNativeChildProcessExitCallback_001, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "OH_Ability_RegisterNativeChildProcessExitCallback_001 begin";
+    auto ret = OH_Ability_RegisterNativeChildProcessExitCallback(nullptr);
+    EXPECT_EQ(ret, NCP_ERR_INVALID_PARAM);
+    ret = OH_Ability_RegisterNativeChildProcessExitCallback(ChildProcessCapiTest::OnNativeChildProcessExit);
+    EXPECT_EQ(ret, NCP_ERR_INTERNAL);
+    ret = OH_Ability_UnregisterNativeChildProcessExitCallback(ChildProcessCapiTest::OnNativeChildProcessExit);
+    EXPECT_EQ(ret, NCP_ERR_INTERNAL);
+    GTEST_LOG_(INFO) << "OH_Ability_RegisterNativeChildProcessExitCallback_001 end";
+}
+
+/**
+ * @tc.number: OH_Ability_UnregisterNativeChildProcessExitCallback_001
+ * @tc.desc: Test API OH_Ability_UnregisterNativeChildProcessExitCallback_001 works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessCapiTest, OH_Ability_UnregisterNativeChildProcessExitCallback_001, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "OH_Ability_UnregisterNativeChildProcessExitCallback_001 begin";
+    auto ret = OH_Ability_UnregisterNativeChildProcessExitCallback(nullptr);
+    EXPECT_EQ(ret, NCP_ERR_INVALID_PARAM);
+    ret = OH_Ability_UnregisterNativeChildProcessExitCallback(ChildProcessCapiTest::OnNativeChildProcessExit);
+    EXPECT_EQ(ret, NCP_ERR_CALLBACK_NOT_EXIST);
+    GTEST_LOG_(INFO) << "OH_Ability_UnregisterNativeChildProcessExitCallback_001 end";
 }
 
 /**

@@ -515,6 +515,40 @@ HWTEST_F(AppMgrServiceTest, UnregisterApplicationStateObserver_001, TestSize.Lev
 
 /*
  * Feature: AppMgrService
+ * Function: RegisterNativeChildExitNotify
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService RegisterNativeChildExitNotify
+ * EnvConditions: NA
+ * CaseDescription: Verify RegisterNativeChildExitNotify
+ */
+HWTEST_F(AppMgrServiceTest, RegisterNativeChildExitNotify_001, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    sptr<INativeChildNotify> notify = nullptr;
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->RegisterNativeChildExitNotify(notify);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: UnregisterNativeChildExitNotify
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService UnregisterNativeChildExitNotify
+ * EnvConditions: NA
+ * CaseDescription: Verify UnregisterNativeChildExitNotify
+ */
+HWTEST_F(AppMgrServiceTest, UnregisterNativeChildExitNotify_001, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    sptr<INativeChildNotify> notify = nullptr;
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->UnregisterNativeChildExitNotify(notify);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
  * Function: GetForegroundApplications
  * SubFunction: NA
  * FunctionPoints: AppMgrService GetForegroundApplications

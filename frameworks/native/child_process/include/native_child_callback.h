@@ -19,25 +19,28 @@
 #include "native_child_notify_stub.h"
 #include "native_child_process.h"
 #include "child_callback_manager.h"
+#include <list>
 
 namespace OHOS {
 namespace AbilityRuntime {
 
 class NativeChildCallback : public OHOS::AppExecFwk::NativeChildNotifyStub {
 public:
-    explicit NativeChildCallback(OH_Ability_OnNativeChildProcessStarted cb,
-        OH_Ability_OnNativeChildProcessExit exitCb = nullptr);
+    explicit NativeChildCallback(OH_Ability_OnNativeChildProcessStarted cb);
     ~NativeChildCallback() = default;
 
     void OnNativeChildStarted(const sptr<IRemoteObject> &nativeChild) override;
     void OnError(int32_t errCode) override;
-    void OnNativeChildExit(int32_t pid, int32_t signal) override;
+    int32_t OnNativeChildExit(int32_t pid, int32_t signal) override;
 
-    OH_Ability_OnNativeChildProcessExit getNativeChildProcessExitCallback() const;
+    bool IsCallbacksEmpty();
+    void AddExitCallback(OH_Ability_OnNativeChildProcessExit callback);
+    int32_t RemoveExitCallback(OH_Ability_OnNativeChildProcessExit callback);
 
 private:
     OH_Ability_OnNativeChildProcessStarted callback_ = nullptr;
-    OH_Ability_OnNativeChildProcessExit exitCallback_ = nullptr;
+    std::mutex exitCallbackListMutex_;
+    std::list<OH_Ability_OnNativeChildProcessExit> exitCallbacks_;
 };
 
 } // namespace AbilityRuntime

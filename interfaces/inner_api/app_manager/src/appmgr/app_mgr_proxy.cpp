@@ -324,8 +324,6 @@ int AppMgrProxy::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
     return result;
 }
 
-
-
 int32_t AppMgrProxy::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
 {
     MessageParcel data;
@@ -2019,7 +2017,7 @@ int32_t AppMgrProxy::StartNativeChildProcess(const std::string &libName, int32_t
 }
 #endif // SUPPORT_CHILD_PROCESS
 
-int AppMgrProxy::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify)
+int AppMgrProxy::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
 {
     if (!notify) {
         TAG_LOGE(AAFwkTag::APPMGR, "notify null");
@@ -2033,20 +2031,15 @@ int AppMgrProxy::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &n
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteRemoteObject(notify->AsObject())) {
-        TAG_LOGE(AAFwkTag::APPMGR, "observer write failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "notify write failed.");
         return ERR_FLATTEN_OBJECT;
     }
 
-    auto error = SendRequest(AppMgrInterfaceCode::REGISTER_NATIVE_CHILD_EXIT_NOTIFY,
-        data, reply, option);
-    if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Send request error: %{public}d", error);
-        return error;
-    }
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::REGISTER_NATIVE_CHILD_EXIT_NOTIFY, data, reply, option);
     return reply.ReadInt32();
 }
 
-int AppMgrProxy::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &notify)
+int AppMgrProxy::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
 {
     if (!notify) {
         TAG_LOGE(AAFwkTag::APPMGR, "notify null");
@@ -2060,10 +2053,9 @@ int AppMgrProxy::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> 
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteRemoteObject(notify->AsObject())) {
-        TAG_LOGE(AAFwkTag::APPMGR, "observer write failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "notify write failed.");
         return ERR_FLATTEN_OBJECT;
     }
-    PARCEL_UTIL_WRITE_RET_INT(data, RemoteObject, notify->AsObject());
 
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::UNREGISTER_NATIVE_CHILD_EXIT_NOTIFY, data, reply, option);
     return reply.ReadInt32();

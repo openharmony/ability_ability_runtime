@@ -25,7 +25,6 @@
 #include <sstream>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <sys/epoll.h>
 
 #include "ability_manager_errors.h"
 #include "ability_window_configuration.h"
@@ -40,7 +39,6 @@
 #include "app_utils.h"
 #include "appfreeze_manager.h"
 #include "application_state_observer_stub.h"
-#include "appspawn.h"
 #include "appspawn_util.h"
 #include "bundle_constants.h"
 #include "common_event.h"
@@ -51,9 +49,6 @@
 #include "exit_resident_process_manager.h"
 #include "extension_ability_info.h"
 #include "freeze_util.h"
-#include "ffrt.h"
-#include "ffrt_inner.h"
-#include "c/executor_task.h"
 #include "global_constant.h"
 #include "hap_token_info.h"
 #include "hilog_tag_wrapper.h"
@@ -66,6 +61,7 @@
 #include "killing_process_manager.h"
 #include "last_exit_detail_info.h"
 #include "os_account_manager.h"
+#include "app_native_spawn_manager.h"
 #ifdef SUPPORT_SCREEN
 #include "locale_config.h"
 #endif
@@ -265,7 +261,6 @@ constexpr const char* ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
 constexpr const char* PROCESS_EXIT_EVENT_TASK = "Send Process Exit Event Task";
 constexpr const char* KILL_PROCESS_REASON_PREFIX = "Kill Reason:";
 constexpr const char* PRELOAD_APPLIATION_TASK = "PreloadApplicactionTask";
-constexpr const char* NOTIFY_CHILD_PROCESS_EXIT_TASK = "NotifyChildProcessExitTask";
 constexpr const char* KEY_WATERMARK_BUSINESS_NAME = "com.ohos.param.watermarkBusinessName";
 constexpr const char* KEY_IS_WATERMARK_ENABLED = "com.ohos.param.isWatermarkEnabled";
 
@@ -431,7 +426,7 @@ void AppMgrServiceInner::Init()
     otherTaskHandler_->SubmitTask([pThis = shared_from_this()]() {
         pThis->nwebPreloadSet_ = AAFwk::ResSchedUtil::GetInstance().GetNWebPreloadSet();
         }, NWEB_PRELOAD_DELAY);
-    InitNativeSpawnMsgPipe();
+    AppNativeSpawnManager::GetInstance().InitNativeSpawnMsgPipe(appRunningManager_);
 }
 
 AppMgrServiceInner::~AppMgrServiceInner()
@@ -1510,8 +1505,6 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     }
 
     KillRenderProcess(appRecord);
-    // unregister child process exit notify when parent exit normally
-    RemoveNativeChildCallbackByPid(appRecord->GetPid());
 #ifdef SUPPORT_CHILD_PROCESS
     KillChildProcess(appRecord);
     KillAttachedChildProcess(appRecord);
@@ -4293,8 +4286,6 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
         TAG_LOGI(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
-    // unregister child process exit notify when parent exit abnormally
-    RemoveNativeChildCallbackByPid(appRecord->GetPid());
     AppExecFwk::AppfreezeManager::GetInstance()->RemoveDeathProcess(appRecord->GetBundleName());
     std::vector<sptr<IRemoteObject>> abilityTokens;
     for (const auto &token : appRecord->GetAbilities()) {
@@ -8739,232 +8730,20 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
 
 int32_t AppMgrServiceInner::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback)
 {
-    int32_t callingPid = IPCSkeleton::GetCallingPid();
-    std::lock_guard lock(nativeChildCallbackLock_);
-    nativeChildCallbackMap_[callingPid] = callback;
-    TAG_LOGI(AAFwkTag::APPMGR, "register native child exit:%{public}d", callingPid);
-    return ERR_OK;
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    return AppNativeSpawnManager::GetInstance().RegisterNativeChildExitNotify(callback);
 }
 
 int32_t AppMgrServiceInner::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback)
 {
-    int32_t callingPid = IPCSkeleton::GetCallingPid();
-    std::lock_guard lock(nativeChildCallbackLock_);
-    if (nativeChildCallbackMap_.find(callingPid) != nativeChildCallbackMap_.end() &&
-        nativeChildCallbackMap_[callingPid] == callback) {
-        nativeChildCallbackMap_.erase(callingPid);
-        TAG_LOGI(AAFwkTag::APPMGR, "unregister native child exit:%{public}d", callingPid);
-    } else {
-        nativeChildCallbackMap_.erase(callingPid);
-        TAG_LOGW(AAFwkTag::APPMGR, "unregister callback not exist or not same:%{public}d", callingPid);
-    }
-    return ERR_OK;
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    return AppNativeSpawnManager::GetInstance().UnregisterNativeChildExitNotify(callback);
 }
 
 void AppMgrServiceInner::CacheLoadAbilityTask(const LoadAbilityTaskFunc&& func)
 {
     std::lock_guard lock(loadTaskListMutex_);
     loadAbilityTaskFuncList_.emplace_back(std::move(func));
-}
-
-static void AppNativeSpawnStartCallback(const char *key, const char *value, void *context)
-{
-    auto weak = static_cast<std::weak_ptr<AppMgrServiceInner>*>(context);
-    if (weak == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "context null");
-        return;
-    }
-    auto appms = weak->lock();
-    if (appms == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrServiceInner null");
-        return;
-    }
-    int nrFd = appms->GetNRfd();
-    int nwFd = appms->GetNWfd();
-    TAG_LOGI(AAFwkTag::APPMGR, "nrFd is: %{public}d, nwFd is: %{public}d", nrFd, nwFd);
-    // send fd
-    int ret = NativeSpawnListenFdSet(nwFd);
-    if (ret != 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "send fd to native spawn failed, ret: %{public}d", ret);
-        close(nrFd);
-        close(nwFd);
-        return;
-    }
-    // set flag
-    ret = NativeSpawnListenCloseSet();
-    if (ret != 0) {
-        TAG_LOGI(AAFwkTag::APPMGR, "NativeSpawnListenCloseSet failed");
-    }
-}
-
-int32_t AppMgrServiceInner::CallOnNativeChildExit(sptr<INativeChildNotify> callback, int32_t pid, int32_t signal)
-{
-    CHECK_POINTER_AND_RETURN_VALUE(callback, ERR_INVALID_VALUE);
-    sptr<OHOS::IRemoteObject> obj = callback->AsObject();
-    CHECK_POINTER_AND_RETURN_VALUE(obj, ERR_INVALID_VALUE);
-    if (!obj->IsProxyObject()) {
-        callback->OnNativeChildExit(pid, signal);
-        return ERR_OK;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-
-    if (!data.WriteInterfaceToken(INativeChildNotify::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::APPMGR "WriteInterfaceToken fail");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!data.WriteInt32(pid)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "pid error");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!data.WriteInt32(signal)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "signal error");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    int32_t ret = obj->SendRequest(INativeChildNotify::IPC_ID_ON_NATIVE_CHILD_EXIT, data, reply, option);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "fail. ret: %{public}d", ret);
-    }
-    return ret;
-}
-
-int32_t AppMgrServiceInner::NotifyChildProcessExitTask(int32_t pid, int32_t signal, const std::string &bundleName)
-{
-    if (!otherTaskHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null otherTaskHandler_");
-        return ERR_INVALID_VALUE;
-    }
-
-    auto task = [innerServiceWeak = weak_from_this(), appRunningManager = appRunningManager_,
-        pid, signal, bundleName] () {
-        CHECK_POINTER_AND_RETURN_LOG(appRunningManager, "get appRunningManager fail");
-        auto appRecord = appRunningManager->GetAppRunningRecordByChildProcessPid(pid);
-        if (!appRecord) {
-            TAG_LOGE(AAFwkTag::APPMGR, "no appRecord, childPid:%{public}d", pid);
-            return;
-        }
-        appRunningManager->RemoveChildProcessRecordByChildPid(pid);
-        auto pPid = appRecord->GetPid();
-        auto pBundleName = appRecord->GetBundleName();
-        if (pBundleName != bundleName) {
-            TAG_LOGW(AAFwkTag::APPMGR, "parent:%{public}s, child:%{public}s", pBundleName.c_str(), bundleName.c_str());
-            return;
-        }
-        auto innerSerive = innerServiceWeak.lock();
-        CHECK_POINTER_AND_RETURN_LOG(innerSerivce, "get appMgrServiceInner fail");
-        auto nativeChildCallbacks = innerSerive->GetNativeChildCallbackByPid(pPid);
-        if (!nativeChildCallbacks) {
-            TAG_LOGW(AAFwkTag::APPMGR, "not found native child process callback");
-            return;
-        }
-        auto ret = AppMgrServiceInner::CallOnNativeChildExit(nativeChildCallbacks, pid, signal);
-        if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "OnNativeChildExit failed, pid: %{public}d", pid);
-        }
-    }
-    otherTaskHandler_->SubmitTask(task, NOTIFY_CHILD_PROCESS_EXIT_TASK);
-    return ERR_OK;
-}
-
-static void ProcessSignalData(void *token, uint32_t event)
-{
-    auto nsc = reinterpret_cast<OHOS::AppExecFwk::NativeSpawnContext*>(token);
-    if (nsc == nullptr || nsc->fd_ == nullptr || (nsc->weakInner_).lock() == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "native spawn context interpret failed");
-        return;
-    }
-
-    int rFd = *(nsc->fd_);
-    // read data from nativespawn
-    char buffer[PIPE_MSG_READ_BUFFER] = {0};
-    std::string readResult = "";
-    int count = read(rFd, buffer, PIPE_MSG_READ_BUFFER -1);
-    if (count == -1) {
-        TAG_LOGE(AAFwkTag::APPMGR, "read pipe failed");
-    } else if (count == 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "write end closed");
-        close(rFd);
-    } else {
-        int32_t pid = -1;
-        int32_t signal = -1;
-        int32_t uid = 0;
-        std::string bundleName = "";
-        std::string bufferStr = buffer;
-        TAG_LOGD(AAFwkTag::APPMGR, "buffer read: %{public}s", bufferStr.c_str());
-        nlohmann::json jsonObject = nlohmann::json::parse(bufferStr, nullptr, nullptr);
-        if (jsonObject.is_discard()) {
-            TAG_LOGE(AAFwkTag::APPMGR, "parse json string failed");
-            return;
-        }
-        if (!jsonObject.contains("pid") || !jsonObject.contains("signal") || !jsonObject.contains("uid")
-            || !jsonObject.contains("bundleName")) {
-            TAG_LOGE(AAFwkTag::APPMGR, "info lost!");
-            return;
-        }
-        pid = jsonObject["pid"];
-        signal = jsonObject["signal"];
-        uid = jsonObject["uid"];
-        bundleName = jsonObject["bundleName"];
-        if (signal == 0) {
-            TAG_LOGD(AAFwkTag::APPMGR, "ignore signal 0, pid: %{public}d", pid);
-            return;
-        }
-        TAG_LOGI(AAFwkTag::APPMGR, "pid:%{public}d, signal:%{public}d, uid:%{public}d, bundleName:%{public}s",
-            pid, signal, uid, bundleName.c_str());
-        auto serviceInner = (nsc->weakInner_).lock();
-        if (serviceInner->NotifyChildProcessExitTask(pid, signal, bundleName) != ERR_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "notify child process exit err");
-        }
-    }
-}
-
-sptr<INativeChildNotify>& AppMgrServiceInner::GetNativeChildCallbackByPid(int32_t pid)
-{
-    std::lock_guard lock(nativeChildCallbackLock_);
-    auto it = nativeChildCallbackMap_.find(pid);
-    return it != nativeChildCallbackMap_.end() ? it->second : nullptr;
-}
-
-sptr<INativeChildNotify>& AppMgrServiceInner::RemoveNativeChildCallbackByPid(int32_t pid)
-{
-    TAG_LOGI(AAFwkTag::APPMGR, "remove native child callback, pid:%{public}d", pid);
-    std::lock_guard lock(nativeChildCallbackLock_);
-    nativeChildCallbackMap_.erase(pid);
-}
-
-void AppMgrServiceInner::InitNativeSpawnMsgPipe()
-{
-    int pipeFd[2];
-    if (pipe(pipeFd) != 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "create native pipe failed");
-        return;
-    }
-    nrFd_ = pipeFd[0];
-    nwFd_ = pipeFd[1];
-    auto context = new (std::nothrow) std::weak_ptr<AppMgrServiceInner>(shared_from_this());
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "context null");
-        return;
-    }
-    nsc_->fd_ = std::make_shared<int>(nrFd_);
-    nsc_->weakInner_ = *context;
-    int ret = WatchParameter(NATIVESPAWN_STARTED, AppNativeSpawnStartCallback, context);
-    if (ret != 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "watch native parameter, ret :%{public}d", ret);
-        return;
-    }
-    ffrt_qos_t taskQos = 0;
-    ret = ffrt_epoll_ctl(taskQos, EPOLL_CTL_ADD, nrFd_, EPOLLIN, static_cast<void*>(nsc_.get()), ProcessSignalData);
-    if (ret != 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ffrt_epoll_ctl failed, ret :%{public}d", ret);
-        close(nrFd_);
-        return;
-    }
-    TAG_LOGI(AAFwkTag::APPMGR, "Listen native signal msg ...");
 }
 
 void AppMgrServiceInner::SubmitCacheLoadAbilityTask()
