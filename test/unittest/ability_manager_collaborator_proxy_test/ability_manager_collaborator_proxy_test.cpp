@@ -299,5 +299,21 @@ HWTEST_F(AbilityManagerCollaboratorProxyTest, CheckStaticCfgPermission_0100, Tes
     EXPECT_EQ(res, NO_ERROR);
     EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::CHECK_STATIC_CFG_PERMISSION), mock_->GetCode());
 }
+
+/**
+ * @tc.number: NotifyKillProcesses_0100
+ * @tc.desc: NotifyKillProcesses
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyKillProcesses_0100, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
+    std::string bundleName;
+    int32_t res = proxy_->NotifyKillProcesses(bundleName, 0);
+    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::NOTIFY_KILL_PROCESSES), mock_->GetCode());
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
