@@ -1553,5 +1553,65 @@ HWTEST_F(AbilityManagerServiceFourthTest, OnAbilityConnectDone_001, TestSize.Lev
     EXPECT_FALSE(iRemoteObject->isSuccess_);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnAbilityConnectDone_001 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnStartTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnStartTest
+ */
+HWTEST_F(AbilityManagerServiceFourthTest, OnStartTest_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnStartTest_001 start");
+
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    abilityManagerService->OnStart();
+    EXPECT_EQ(abilityManagerService->QueryServiceState(), ServiceRunningState::STATE_RUNNING);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnStartTest_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnStartTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnStartTest
+ */
+HWTEST_F(AbilityManagerServiceFourthTest, OnStartTest_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnStartTest_002 start");
+
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityManagerService, nullptr);
+    auto taskHandler = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
+    auto eventHandler = std::make_shared<AbilityEventHandler>(taskHandler, abilityManagerService);
+    abilityManagerService->subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler, eventHandler);
+    EXPECT_NE(abilityManagerService->subManagersHelper_, nullptr);
+    abilityManagerService->OnStart();
+    EXPECT_EQ(abilityManagerService->QueryServiceState(), ServiceRunningState::STATE_RUNNING);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnStartTest_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIExtensionAbility
+ */
+HWTEST_F(AbilityManagerServiceFourthTest, StartUIExtensionAbilityTset_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartUIExtensionAbilityTset_001 start");
+
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    sptr<SessionInfo> extensionSessionInfoTest = new (std::nothrow) SessionInfo();
+    EXPECT_NE(extensionSessionInfoTest, nullptr);
+    extensionSessionInfoTest->uiExtensionUsage = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    EXPECT_EQ(abilityManagerService->StartUIExtensionAbility(extensionSessionInfoTest, 1), ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartUIExtensionAbilityTset_001 end");
+}
+
+
 } // namespace AAFwk
 } // namespace OHOS

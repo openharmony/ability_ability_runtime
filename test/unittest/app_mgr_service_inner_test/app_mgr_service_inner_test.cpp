@@ -1624,6 +1624,47 @@ HWTEST_F(AppMgrServiceInnerTest, KillProcessesByUserId_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WaitProcessesExitAndKill_001
+ * @tc.desc: kill process by user id.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+ HWTEST_F(AppMgrServiceInnerTest, WaitProcessesExitAndKill_001, TestSize.Level1)
+ {
+     TAG_LOGI(AAFwkTag::TEST, "WaitProcessesExitAndKill_001 start");
+     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+     EXPECT_NE(appMgrServiceInner, nullptr);
+     sptr<AAFwk::IUserCallback> callback = new MockIUserCallback();
+     std::list<SimpleProcessInfo> processInfos;
+     int64_t startTime = 0;
+     std::string reason = "KillProcessesByUserId";
+     int32_t userId = 0;
+     int ret = appMgrServiceInner->WaitProcessesExitAndKill(processInfos, startTime, reason, userId, callback);
+     EXPECT_EQ(ret, ERR_OK);
+     TAG_LOGI(AAFwkTag::TEST, "WaitProcessesExitAndKill_001 end");
+ }
+
+ /**
+ * @tc.name: WaitProcessesExitAndKill_002
+ * @tc.desc: kill process by user id.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+ HWTEST_F(AppMgrServiceInnerTest, WaitProcessesExitAndKill_002, TestSize.Level1)
+ {
+     TAG_LOGI(AAFwkTag::TEST, "WaitProcessesExitAndKill_002 start");
+     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+     EXPECT_NE(appMgrServiceInner, nullptr);
+     std::list<SimpleProcessInfo> processInfos;
+     int64_t startTime = 0;
+     std::string reason = "KillProcessesByUserId";
+     int32_t userId = 0;
+     int ret = appMgrServiceInner->WaitProcessesExitAndKill(processInfos, startTime, reason, userId, nullptr);
+     EXPECT_EQ(ret, ERR_OK);
+     TAG_LOGI(AAFwkTag::TEST, "WaitProcessesExitAndKill_001 end");
+ }
+
+/**
  * @tc.name: StartAbility_001
  * @tc.desc: start ability.
  * @tc.type: FUNC
