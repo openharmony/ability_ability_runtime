@@ -330,6 +330,23 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_KillProcessByRecord_0100, 
 }
 
 /**
+ * @tc.name: CacheProcessManager_KillProcessByRecord_0200
+ * @tc.desc: Test the state of KillProcessByRecord
+ * @tc.type: FUNC
+ */
+HWTEST_F(CacheProcessManagerTest, CacheProcessManager_KillProcessByRecord_0200, TestSize.Level1)
+{
+    auto cacheProcMgr = std::make_shared<CacheProcessManager>();
+    EXPECT_EQ(cacheProcMgr->KillProcessByRecord(nullptr), false);
+
+    auto appRecord = MockAppRecord();
+    EXPECT_NE(appRecord, nullptr);
+    auto appMgrInner = std::make_shared<MockAppMgrServiceInner>();
+    cacheProcMgr->SetAppMgr(appMgrInner);
+    EXPECT_EQ(cacheProcMgr->KillProcessByRecord(appRecord), true);
+}
+
+/**
  * @tc.name: CacheProcessManager_IsAppShouldCache_0100
  * @tc.desc: Test the state of IsAppShouldCache
  * @tc.type: FUNC
