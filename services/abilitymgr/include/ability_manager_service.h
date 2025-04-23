@@ -70,6 +70,7 @@
 #include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
 #endif
+#include "insight_intent_event_mgr.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -2611,6 +2612,8 @@ private:
     std::map<std::string, std::list<std::string>> whiteListMap_;
 
     std::list<std::string> exportWhiteList_;
+
+    std::shared_ptr<AbilityRuntime::InsightIntentEventMgr> insightIntentEventMgr_;
 
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
 
