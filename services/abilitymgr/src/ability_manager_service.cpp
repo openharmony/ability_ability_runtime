@@ -11291,9 +11291,6 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
         TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}d is starting", pid);
         return ERR_OK;
     }
-
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, reason:%{public}d, subReason:%{public}d, killMsg:%{public}s",
-        pid, reason.reason, reason.subReason, reason.exitMsg.c_str());
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
     auto ret = appExitReasonHelper_->RecordProcessExitReason(pid, reason, true);
     if (ret != ERR_OK) {
