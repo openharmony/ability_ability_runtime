@@ -1204,6 +1204,16 @@ public:
         hookOff_ = hookOff;
     }
 
+    inline void SetLaunchWant(std::shared_ptr<Want> launchWant)
+    {
+        launchWant_ = launchWant;
+    }
+
+    inline std::shared_ptr<Want> GetLaunchWant() const
+    {
+        return launchWant_;
+    }
+
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false,
         const std::string &taskName = "");
 
@@ -1438,6 +1448,7 @@ private:
     bool isPrepareTerminate_ = false;
 
     std::string killReason_ = "";
+    std::shared_ptr<Want> launchWant_ = nullptr;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
