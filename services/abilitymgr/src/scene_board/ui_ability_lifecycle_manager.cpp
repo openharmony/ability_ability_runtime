@@ -22,6 +22,7 @@
 #include "app_exit_reason_data_manager.h"
 #include "app_mgr_util.h"
 #include "app_utils.h"
+#include "display_util.h"
 #include "ffrt.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
@@ -2939,6 +2940,11 @@ int UIAbilityLifecycleManager::MoveMissionToFront(int32_t sessionId, std::shared
         TAG_LOGI(AAFwkTag::ABILITYMGR, "MoveMissionToFront, setting displayId=%{public}d",
             startOptions->GetDisplayID());
         (sessionInfo->want).SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions->GetDisplayID());
+        if (startOptions->GetDisplayID() == 0) {
+            (sessionInfo->want).SetParam(Want::PARAM_RESV_DISPLAY_ID, DisplayUtil::GetDefaultDisplayId());
+        }
+    } else {
+        (sessionInfo->want).SetParam(Want::PARAM_RESV_DISPLAY_ID, -1);
     }
     sessionInfo->processOptions = nullptr;
     sessionInfo->startWindowOption = nullptr;
