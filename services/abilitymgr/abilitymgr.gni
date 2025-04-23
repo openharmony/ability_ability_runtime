@@ -129,6 +129,7 @@ abilityms_files = [
   "src/insight_intent/insight_intent_execute_result.cpp",
   "src/insight_intent/insight_intent_profile.cpp",
   "src/insight_intent/insight_intent_utils.cpp",
+  "src/insight_intent/extract_insight_intent_profile.cpp",
 
   # keep alive
   "src/keep_alive/ability_keep_alive_data_manager.cpp",
