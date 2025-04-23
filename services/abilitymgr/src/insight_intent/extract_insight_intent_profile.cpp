@@ -68,14 +68,14 @@ enum DecoratorType {
 
 DecoratorType StringToEnum(const std::string& input)
 {
-    static const std::unordered_map<const char *, DecoratorType> mapping = {
+    static const std::unordered_map<std::string, DecoratorType> mapping = {
         {AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_LINK, DecoratorType::DECORATOR_LINK},
         {AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_PAGE, DecoratorType::DECORATOR_PAGE},
         {AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY, DecoratorType::DECORATOR_ENTRY},
         {AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_FUNCTION, DecoratorType::DECORATOR_FUNCTION},
         {AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_FORM, DecoratorType::DECORATOR_FORM}
     };
-    auto it = mapping.find(input.c_str());
+    auto it = mapping.find(input);
     return (it != mapping.end()) ? it->second : DecoratorType::DECORATOR_UNKNOWN;
 }
 

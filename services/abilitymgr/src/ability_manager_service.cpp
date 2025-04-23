@@ -410,6 +410,8 @@ bool AbilityManagerService::Init()
 
     SubscribeScreenUnlockedEvent();
     appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(subManagersHelper_);
+    insightIntentEventMgr_ = std::make_shared<AbilityRuntime::InsightIntentEventMgr>();
+    insightIntentEventMgr_->SubscribeSysEventReceiver();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "init success");
     return true;
 }
