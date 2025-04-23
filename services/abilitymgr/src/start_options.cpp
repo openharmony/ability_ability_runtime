@@ -48,6 +48,7 @@ StartOptions::StartOptions(const StartOptions &other)
     windowFocused_ = other.windowFocused_;
     startWindowOption = other.startWindowOption;
     supportWindowModes_ = other.supportWindowModes_;
+    requestId_ = other.requestId_;
 }
 
 StartOptions &StartOptions::operator=(const StartOptions &other)
@@ -76,6 +77,7 @@ StartOptions &StartOptions::operator=(const StartOptions &other)
         windowFocused_ = other.windowFocused_;
         startWindowOption = other.startWindowOption;
         supportWindowModes_ = other.supportWindowModes_;
+        requestId_ = other.requestId_;
     }
     return *this;
 }
@@ -112,6 +114,7 @@ bool StartOptions::ReadFromParcel(Parcel &parcel)
     for (int i = 0; i < size; i++) {
         supportWindowModes_.emplace_back(AppExecFwk::SupportWindowMode(parcel.ReadInt32()));
     }
+    requestId_ = parcel.ReadString();
     return true;
 }
 
@@ -170,6 +173,7 @@ bool StartOptions::Marshalling(Parcel &parcel) const
             return false;
         }
     }
+    parcel.WriteString(requestId_);
     return true;
 }
 
