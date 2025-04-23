@@ -24,13 +24,21 @@ export class Context extends BaseContext {
     area: contextConstant.AreaMode = contextConstant.AreaMode.EL1;
     filesDir: string = "";
     tempDir: string = "";
+    preferencesDir: string = "";
+    databaseDir: string = "";
+    cacheDir: string = "";
     applicationInfo: ApplicationInfo;
     eventHub: EventHub = new EventHub();
     resourceManager: resmgr.ResourceManager;
 
     public native getApplicationContextSync(): ApplicationContext;
+    public native createModuleResourceManagerSync(bundleName: string, moduleName: string): resmgr.ResourceManager;
 
     getApplicationContext(): ApplicationContext {
         return this.getApplicationContextSync();
+    }
+
+    createModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager {
+        return this.createModuleResourceManagerSync(bundleName, moduleName);
     }
 }
