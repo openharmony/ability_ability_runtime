@@ -24,6 +24,8 @@ ohos_unittest("ability_bundle_event_callback_test") {
     "${ability_runtime_path}/interfaces/inner_api/uri_permission/include",
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
     "${ability_runtime_path}/services/abilitymgr/src/",
+    "${ability_runtime_path}/services/abilitymgr/include/utils",
+    "${ability_runtime_path}/services/abilitymgr/include/insight_intent",
   ]
 
   sources = [
@@ -31,6 +33,12 @@ ohos_unittest("ability_bundle_event_callback_test") {
     "${ability_runtime_path}/services/abilitymgr/src/ability_auto_startup_service.cpp",
     "${ability_runtime_path}/services/abilitymgr/src/utils/ability_event_util.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_bundle_event_callback.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/hmsf_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_rdb_data_mgr.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_rdb_storage_mgr.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_db_cache.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/extract_insight_intent_profile.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_event_mgr.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "ability_bundle_event_callback_test.cpp",
   ]
