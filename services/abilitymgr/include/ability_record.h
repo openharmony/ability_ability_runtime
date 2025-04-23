@@ -1176,6 +1176,12 @@ public:
         return isPluginAbility_;
     }
 
+    void NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
+
+    void NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
+
     void ScheduleCollaborate(const Want &want);
 
     bool IsHook () const

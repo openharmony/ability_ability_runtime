@@ -157,6 +157,14 @@ public:
     }
     void ScheduleCollaborate(const Want &want) override
     {}
+
+    void ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override
+    {}
+
+    void ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override
+    {}
 };
 sptr<Token> GetFuzzAbilityToken(AbilityType type)
 {

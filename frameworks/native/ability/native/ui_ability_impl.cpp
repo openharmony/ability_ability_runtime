@@ -904,5 +904,27 @@ void UIAbilityImpl::ScheduleCollaborate(const Want &want)
     }
     ability_->HandleCollaboration(want);
 }
+
+void UIAbilityImpl::ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "ScheduleAbilityRequestFailure called");
+    if (ability_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
+        return;
+    }
+    ability_->OnAbilityRequestFailure(requestId, element, message);
+}
+
+void UIAbilityImpl::ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "ScheduleAbilityRequestSuccess called");
+    if (ability_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
+        return;
+    }
+    ability_->OnAbilityRequestSuccess(requestId, element, message);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
