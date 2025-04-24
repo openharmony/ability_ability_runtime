@@ -46,6 +46,12 @@ static ani_object GetForegroundUIAbilities(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call GetForegroundUIAbilities");
 
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+        return nullptr;
+    }
+
     sptr<AppExecFwk::IAbilityManager> abilityManager = GetAbilityManagerInstance();
     if (abilityManager == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityManager is null");
@@ -82,16 +88,10 @@ static void GetTopAbility(ani_env *env, ani_object callback)
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
         AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
-        return
-    }
-#endif
-    sptr<AppExecFwk::IAbilityManager> abilityManager = GetAbilityManagerInstance();
-    if (abilityManager == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityManager is nullptr");
-        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
         return;
     }
-    AppExecFwk::ElementName elementName = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(); 
+#endif
+    AppExecFwk::ElementName elementName = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility();
     int resultCode = 0;
     ani_object elementNameobj = AppExecFwk::WrapElementName(env, elementName);
     if (elementNameobj == nullptr) {
@@ -131,7 +131,7 @@ void StsAbilityManagerRegistryInit(ani_env *env)
     std::array methods = {
         ani_native_function {
             "nativeGetForegroundUIAbilities",
-            nullptr,
+            ":Lescompat/Array;",
             reinterpret_cast<void *>(GetForegroundUIAbilities)
         },
         ani_native_function {"nativeGetTopAbility", nullptr, reinterpret_cast<void *>(GetTopAbility)},
@@ -149,10 +149,11 @@ extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "in AbilityManagerSts.ANI_Constructor");
-    if (vm == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null vm");
-        return ANI_NOT_FOUND;
+    if (vm == nullptr || result == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null vm or result");
+        return ANI_INVALID_ARGS;
     }
+
     ani_env *env = nullptr;
     ani_status status = ANI_ERROR;
     status = vm->GetEnv(ANI_VERSION_1, &env);
