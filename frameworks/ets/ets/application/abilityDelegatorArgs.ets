@@ -13,11 +13,17 @@
  * limitations under the License.
  */
 
-import { AbilityDelegator } from './application/AbilityDelegator';
-import { AbilityDelegatorArgs } from './application/abilityDelegatorArgs';
-
-export default namespace abilityDelegatorRegistry {
-    loadLibrary("ability_delegator_registry_ani_kit.z")
-    export native function getAbilityDelegator(): AbilityDelegator;
-    export native function getArguments(): AbilityDelegatorArgs;
-}
+export interface AbilityDelegatorArgs {
+    bundleName: string;
+    parameters: Record<string, string>;
+    testCaseNames: string;
+    testRunnerClassName: string;
+  }
+  
+  class AbilityDelegatorArgsInner implements AbilityDelegatorArgs {
+    public bundleName: string = '';
+    public parameters: Record<string, string> = {};
+    public testCaseNames: string = '';
+    public testRunnerClassName: string = '';
+  }
+  

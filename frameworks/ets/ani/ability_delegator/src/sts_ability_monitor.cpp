@@ -72,7 +72,10 @@ void STSAbilityMonitor::OnSTSWindowStageDestroy(const std::weak_ptr<STSNativeRef
 void STSAbilityMonitor::SetSTSAbilityMonitor(ani_env *env, ani_object &abilityMonitorObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called SetStsAbilityMonitor");
-
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
+        return;
+    }
     stsAbilityMonitor_ = std::make_unique<STSNativeReference>();
     ani_ref objRef = nullptr;
     if (env->GlobalReference_Create(abilityMonitorObj, &objRef) != ANI_OK) {
@@ -86,6 +89,10 @@ void STSAbilityMonitor::SetSTSAbilityMonitor(ani_env *env, ani_object &abilityMo
         return;
     }
     vm_ = aniVM;
+    if (stsAbilityMonitor_ == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null stsAbilityMonitor_");
+        return;
+    }
     stsAbilityMonitor_->aniObj = abilityMonitorObj;
     stsAbilityMonitor_->aniRef = objRef;
 }
@@ -105,8 +112,8 @@ void STSAbilityMonitor::CallLifecycleCBFunction(const std::string &functionName,
     }
 
     ani_env *env = GetAniEnv();
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
+    if (env == nullptr || stsAbilityMonitor_ == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null env or stsAbilityMonitor_");
         return;
     }
 
@@ -123,7 +130,7 @@ void STSAbilityMonitor::CallLifecycleCBFunction(const std::string &functionName,
     ani_ref resutlt;
     std::vector<ani_ref> argv = { abilityObj.lock()->aniRef };
     if ((status = env->FunctionalObject_Call(onFn, 1, argv.data(), &resutlt)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "FunctionalObject_Call failed, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "FunctionalObject_Call failed, status: %{public}d", status);
         return;
     }
 }

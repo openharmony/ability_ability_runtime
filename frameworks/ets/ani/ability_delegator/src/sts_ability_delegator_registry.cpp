@@ -86,6 +86,10 @@ static ani_object GetArguments(ani_env *env, [[maybe_unused]]ani_class aniClass)
 void StsAbilityDelegatorRegistryInit(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "StsAbilityDelegatorRegistryInit call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
+        return;
+    }
     ani_status status = ANI_ERROR;
     if (env->ResetError() != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "ResetError failed");
@@ -94,7 +98,7 @@ void StsAbilityDelegatorRegistryInit(ani_env *env)
     ani_namespace ns;
     status = env->FindNamespace("L@ohos/app/ability/abilityDelegatorRegistry/abilityDelegatorRegistry;", &ns);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "FindNamespace abilityDelegatorRegistry failed status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "FindNamespace abilityDelegatorRegistry failed status: %{public}d", status);
         return;
     }
 
@@ -105,7 +109,7 @@ void StsAbilityDelegatorRegistryInit(ani_env *env)
 
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Namespace_BindNativeFunctions failed status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Namespace_BindNativeFunctions failed status: %{public}d", status);
     }
 
     if (env->ResetError() != ANI_OK) {
@@ -120,9 +124,13 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     TAG_LOGD(AAFwkTag::DELEGATOR, "ANI_Constructor");
     ani_env *env = nullptr;
     ani_status status = ANI_ERROR;
+    if (vm == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null vm");
+        return ANI_ERROR;
+    }
     status = vm->GetEnv(ANI_VERSION_1, &env);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "GetEnv failed status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "GetEnv failed status: %{public}d", status);
         return ANI_NOT_FOUND;
     }
 
