@@ -542,13 +542,13 @@ void STSRuntime::PreloadModule(const std::string& moduleName, const std::string&
         TAG_LOGE(AAFwkTag::STSRUNTIME, "GetUndefined failed");
         return;
     }
-    ani_array_ref refArray;
-    if (aniEnv->Array_New_Ref(stringCls, 1, undefined_ref, &refArray) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_New_Ref Failed");
+    ani_array refArray;
+    if (aniEnv->Array_New(1, undefined_ref, &refArray) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_New Failed");
         return;
     }
-    if (aniEnv->Array_Set_Ref(refArray, 0, ani_str) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_Set_Ref Failed");
+    if (aniEnv->Array_Set(refArray, 0, ani_str) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_Set Failed");
         return;
     }
     ani_class cls = nullptr;
@@ -557,7 +557,7 @@ void STSRuntime::PreloadModule(const std::string& moduleName, const std::string&
         return;
     }
     ani_method method = nullptr;
-    if (aniEnv->Class_FindMethod(cls, "<ctor>", "Lstd/core/RuntimeLinker;[Lstd/core/String;:V", &method) != ANI_OK) {
+    if (aniEnv->Class_FindMethod(cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V", &method) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Class_FindMethod ctor failed");
         return;
     }
@@ -628,13 +628,13 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
         TAG_LOGE(AAFwkTag::STSRUNTIME, "GetUndefined failed");
         return std::make_unique<STSNativeReference>();
     }
-    ani_array_ref refArray;
-    if (aniEnv->Array_New_Ref(stringCls, 1, undefined_ref, &refArray) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_New_Ref Failed");
+    ani_array refArray;
+    if (aniEnv->Array_New(1, undefined_ref, &refArray) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_New Failed");
         return std::make_unique<STSNativeReference>();
     }
-    if (aniEnv->Array_Set_Ref(refArray, 0, ani_str) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_Set_Ref Failed");
+    if (aniEnv->Array_Set(refArray, 0, ani_str) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Array_Set Failed");
         return std::make_unique<STSNativeReference>();
     }
 
@@ -644,7 +644,7 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
         return std::make_unique<STSNativeReference>();
     }
     ani_method method = nullptr;
-    if (aniEnv->Class_FindMethod(cls, "<ctor>", "Lstd/core/RuntimeLinker;[Lstd/core/String;:V", &method) != ANI_OK) {
+    if (aniEnv->Class_FindMethod(cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V", &method) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Class_FindMethod ctor failed");
         return std::make_unique<STSNativeReference>();
     }
