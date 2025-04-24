@@ -125,6 +125,9 @@ private:
 
     int CheckImplicitCallPermission(const AbilityRequest& abilityRequest);
 
+    void TrustlistIntersectionProcess(const AbilityRequest &request,
+        std::vector<DialogAppInfo> &dialogAppInfos, int32_t userId);
+
     int32_t FindAppClone(std::vector<AppExecFwk::AbilityInfo> &abilityInfos,
         std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos, bool &isAppCloneSelector);
 
