@@ -313,6 +313,7 @@ public:
     ErrCode CreateModalUIExtensionWithApp(const Want &want) override;
     void EraseUIExtension(int32_t sessionId) override;
     bool IsUIExtensionExist(const AAFwk::Want &want);
+    ErrCode RevokeDelegator() override;
 #endif
 
 private:

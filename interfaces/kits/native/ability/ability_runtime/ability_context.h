@@ -367,6 +367,7 @@ public:
     virtual void SetAbilityConfiguration(const AppExecFwk::Configuration &config) = 0;
     virtual void SetAbilityColorMode(int32_t colorMode) = 0;
     virtual void SetAbilityResourceManager(std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr) = 0;
+    virtual ErrCode RevokeDelegator() = 0;
 
     virtual std::shared_ptr<AAFwk::Want> GetWant() = 0;
 
