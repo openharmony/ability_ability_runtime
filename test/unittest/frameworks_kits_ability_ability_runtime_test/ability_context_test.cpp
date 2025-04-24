@@ -46,6 +46,10 @@ public:
     {
         return;
     }
+    virtual ErrCode RevokeDelegator()
+    {
+        return ERR_OK;
+    }
     virtual std::string GetBundleName() const
     {
         return "MockAbilityContext for tdd";

@@ -240,6 +240,10 @@ class AbilityContext extends Context {
   setColorMode(colorMode) {
     this.__context_impl__.setColorMode(colorMode);
   };
+
+  revokeDelegator() {
+    return this.__context_impl__.revokeDelegator();
+  }
 }
 
 export default AbilityContext;
