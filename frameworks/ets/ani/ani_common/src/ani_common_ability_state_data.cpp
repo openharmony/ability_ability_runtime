@@ -87,7 +87,7 @@ ani_object WrapAbilityStateData(ani_env *env, const AbilityStateData &data)
     ani_status status = ANI_ERROR;
     ani_method ctor = nullptr;
     ani_object object = {};
-    static const char *className = "Laplication/AbilityStateData/AbilityStateData;";
+    static const char *className = "Lapplication/AbilityStateData/AbilityStateData;";
 
     if ((status = env->FindClass(className, &cls)) != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "FindClass status : %{public}d or null cls", status);
