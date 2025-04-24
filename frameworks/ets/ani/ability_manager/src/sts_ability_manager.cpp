@@ -39,6 +39,12 @@ static ani_object GetForegroundUIAbilities(ani_env *env)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call GetForegroundUIAbilities");
 
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+        return nullptr;
+    }
+
     sptr<AppExecFwk::IAbilityManager> abilityManager = GetAbilityManagerInstance();
     if (abilityManager == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityManager is null");
@@ -66,6 +72,10 @@ static ani_object GetForegroundUIAbilities(ani_env *env)
 void StsAbilityManagerRegistryInit(ani_env *env)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call StsAbilityManagerRegistryInit");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
 
     ani_status status = ANI_ERROR;
     if (env->ResetError() != ANI_OK) {
@@ -81,8 +91,8 @@ void StsAbilityManagerRegistryInit(ani_env *env)
 
     std::array methods = {
         ani_native_function {
-            "GetForegroundUIAbilities",
-            ":Lescompat/Array",
+            "nativeGetForegroundUIAbilities",
+            ":Lescompat/Array;",
             reinterpret_cast<void *>(GetForegroundUIAbilities)
         },
     };
@@ -101,6 +111,11 @@ extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "in AbilityManagerSts.ANI_Constructor");
+    if (vm == nullptr || result == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null vm or result");
+        return ANI_INVALID_ARGS;
+    }
+
     ani_env *env = nullptr;
     ani_status status = ANI_ERROR;
     status = vm->GetEnv(ANI_VERSION_1, &env);
