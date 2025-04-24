@@ -101,7 +101,7 @@ enum class InfoType: uint8_t {
     None
 };
 
-struct ExtraInsightIntentGenericInfo {
+struct ExtractInsightIntentGenericInfo {
     std::string bundleName;
     std::string moduleName;
     std::string intentName;
@@ -119,7 +119,7 @@ struct ExtraInsightIntentGenericInfo {
 
     InfoType currentType = InfoType::None;
 
-    ExtraInsightIntentGenericInfo() : data(std::monostate{}) {}
+    ExtractInsightIntentGenericInfo() : data(std::monostate{}) {}
 
     template<typename T>
     void set()
@@ -162,7 +162,7 @@ struct ExtractInsightIntentInfo {
     std::string icon;
     std::string llmDescription;
     std::vector<std::string> keywords;
-    ExtraInsightIntentGenericInfo genericInfo;
+    ExtractInsightIntentGenericInfo genericInfo;
 
     ExtractInsightIntentInfo() = default;
 };
