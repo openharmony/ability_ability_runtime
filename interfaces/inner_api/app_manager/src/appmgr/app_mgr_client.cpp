@@ -35,7 +35,10 @@ class AppMgrRemoteHolder : public std::enable_shared_from_this<AppMgrRemoteHolde
 public:
     AppMgrRemoteHolder() = default;
 
-    virtual ~AppMgrRemoteHolder() = default;
+    ~AppMgrRemoteHolder()
+    {
+        RemoveDeathRecipient();
+    }
 
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr)
     {
@@ -99,6 +102,28 @@ private:
         }
 
         return AppMgrResultCode::RESULT_OK;
+    }
+
+    void RemoveDeathRecipient()
+    {
+        TAG_LOGI(AAFwkTag::APPMGR, "RemoveDeathRecipient");
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (remote_ == nullptr) {
+            TAG_LOGI(AAFwkTag::APPMGR, "null remote_");
+            return;
+        }
+        if (deathRecipient_ == nullptr) {
+            TAG_LOGI(AAFwkTag::APPMGR, "null deathRecipient_");
+            return;
+        }
+        bool ret = remote_->RemoveDeathRecipient(deathRecipient_);
+        if (!ret) {
+            TAG_LOGW(AAFwkTag::APPMGR, "RemoveDeathRecipient fail");
+            return;
+        }
+        remote_ = nullptr;
+        deathRecipient_ = nullptr;
+        TAG_LOGI(AAFwkTag::APPMGR, "RemoveDeathRecipient success");
     }
 
     class AppMgrDeathRecipient : public IRemoteObject::DeathRecipient {
