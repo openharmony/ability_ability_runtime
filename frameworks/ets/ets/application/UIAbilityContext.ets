@@ -22,6 +22,7 @@ import AbilityStartCallback from 'application.AbilityStartCallback';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import Context from 'application.Context';
 import window from '@ohos.window';
+import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
 export default class UIAbilityContext extends Context {
@@ -29,6 +30,7 @@ export default class UIAbilityContext extends Context {
   config: Configuration;
   abilityInfo: AbilityInfo;
   windowStage: window.WindowStage;
+  currentHapModuleInfo: HapModuleInfo;
 
   private native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
   private native nativeStartAbilitySync(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<void>): void;
@@ -38,6 +40,7 @@ export default class UIAbilityContext extends Context {
   private native nativeTerminateSelfWithResult(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
   private native nativeReportDrawnCompletedSync(callback:AsyncCallbackWrapper<void>): void;
   private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): BusinessError<void>;
+  private native nativeStartServiceExtensionAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
@@ -210,6 +213,25 @@ export default class UIAbilityContext extends Context {
       }).catch((err: BusinessError): void => {
         reject(err);
       });
+    });
+    return p;
+  }
+
+  startServiceExtensionAbility(want: Want, callback: AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    this.nativeStartServiceExtensionAbilitySync(want, myCall);
+  }
+
+  startServiceExtensionAbility(want: Want): Promise<void> {
+    let p = new Promise<void>((resolve: (data: undefined)=>void, reject:(err: BusinessError<void>) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
+        if (err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      this.nativeStartServiceExtensionAbilitySync(want, myCall);
     });
     return p;
   }

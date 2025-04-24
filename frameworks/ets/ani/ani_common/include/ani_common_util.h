@@ -41,6 +41,7 @@ bool SetFieldInt(ani_env *env, ani_class cls, ani_object object, const std::stri
 bool SetOptionalFieldInt(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, int value);
 bool SetFieldArrayString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::vector<std::string> &values);
 bool SetFieldRef(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, ani_ref value);
+bool AniStringToStdString(ani_env *env, ani_string aniString, std::string &stdString);
 
 bool GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_ref &ref, ani_boolean &isUndefined);
 bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);

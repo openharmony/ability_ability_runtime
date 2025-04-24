@@ -23,13 +23,9 @@
 #include "hilog_tag_wrapper.h"
 #include "int_wrapper.h"
 #include "ipc_skeleton.h"
-#include "js_runtime_utils.h"
 #include "long_wrapper.h"
-#include "napi_remote_object.h"
-#include "remote_object_wrapper.h"
 #include "short_wrapper.h"
 #include "string_wrapper.h"
-#include "tokenid_kit.h"
 #include "want_params_wrapper.h"
 #include "zchar_wrapper.h"
 

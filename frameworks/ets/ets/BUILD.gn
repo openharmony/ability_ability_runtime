@@ -408,6 +408,25 @@ ohos_prebuilt_etc("ability_runtime_ability_utils_abc_etc") {
   deps = [ ":ability_runtime_ability_utils_abc" ]
 }
 
+generate_static_abc("service_extension_ability") {
+  base_url = "./"
+  files = [
+    "./@ohos.app.ability.ServiceExtensionAbility.ets",
+    "./application/ServiceExtensionContext.ets",
+  ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/service_extension_ability.abc"
+}
+
+ohos_prebuilt_etc("service_extension_ability_abc_etc") {
+  source = "$target_out_dir/service_extension_ability.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":service_extension_ability" ]
+}
+
 group("ets_packages") {
   deps = [
     ":ability_runtime_abilityResult_abc_etc",
@@ -434,5 +453,7 @@ group("ets_packages") {
     ":ability_runtime_want_agent_abc_etc",
     ":ability_runtime_want_agent_info_abc_etc",
     ":ability_runtime_want_constant_abc_etc",
+    ":ability_runtime_ability_utils_abc_etc",
+    ":service_extension_ability_abc_etc",
   ]
 }
