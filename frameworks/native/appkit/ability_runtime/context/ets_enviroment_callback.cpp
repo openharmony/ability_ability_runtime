@@ -58,33 +58,34 @@ void EtsEnviromentCallback::OnConfigurationUpdated(const AppExecFwk::Configurati
     for (auto &callback : enviromentAniCallbacks_) {
         ani_status status = ANI_ERROR;
         if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "callback object is null");
             return;
         }
         ani_object envCallback = reinterpret_cast<ani_object>(callback.second);
-        ani_ref OnConfigurationUpdatedRef {};
+        ani_ref onConfigurationUpdatedRef {};
 
         if ((status = ani_env_->Object_GetFieldByName_Ref(envCallback,
-            "onConfigurationUpdated", &OnConfigurationUpdatedRef)) != ANI_OK) {
+            "onConfigurationUpdated", &onConfigurationUpdatedRef)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "get onConfigurationUpdated failed, status: %{public}d", status);
             return;
         }
-        ani_fn_object OnConfigurationUpdatedFunc = reinterpret_cast<ani_fn_object>(OnConfigurationUpdatedRef);
+        ani_fn_object onConfigurationUpdatedFunc = reinterpret_cast<ani_fn_object>(onConfigurationUpdatedRef);
 
         ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(ani_env_, config);
         if (configObj == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "create configObj failed");
             return;
         }
-        ani_ref configref = nullptr;
-        status = ani_env_->GlobalReference_Create(configObj, &configref);
+        ani_ref configRef = nullptr;
+        status = ani_env_->GlobalReference_Create(configObj, &configRef);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "create configref failed, status: %{public}d", status);
+            TAG_LOGE(AAFwkTag::APPKIT, "create configRef failed, status: %{public}d", status);
             return;
         }
 
-        ani_ref argv[] = {configref};
+        ani_ref argv[] = {configRef};
         ani_ref result;
-        status = ani_env_->FunctionalObject_Call(OnConfigurationUpdatedFunc, 1, argv, &result);
+        status = ani_env_->FunctionalObject_Call(onConfigurationUpdatedFunc, 1, argv, &result);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "FunctionalObject_Call failed, status: %{public}d", status);
             return;

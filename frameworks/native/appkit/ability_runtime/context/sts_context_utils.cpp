@@ -31,6 +31,7 @@ namespace {
     std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_ = nullptr;
 }
 
+static std::weak_ptr<Context> context_;
 void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     void* applicationCtxRef)
 {
@@ -130,11 +131,129 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
     }
 }
 
+void BindContextDir(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    std::shared_ptr<Context> context)
+{
+    if (aniEnv == nullptr || context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "aniEnv or context is nullptr");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_field preferencesDirField;
+    if ((status = aniEnv->Class_FindField(contextClass, "preferencesDir", &preferencesDirField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find preferencesDir failed, status: %{public}d", status);
+        return;
+    }
+    auto preferencesDir = context->GetPreferencesDir();
+    TAG_LOGI(AAFwkTag::APPKIT, "ani preferencesDir:%{public}s", preferencesDir.c_str());
+    ani_string preferencesDirString{};
+    aniEnv->String_NewUTF8(preferencesDir.c_str(), preferencesDir.size(), &preferencesDirString);
+    if ((status = aniEnv->Object_SetField_Ref(contextObj, preferencesDirField,
+        reinterpret_cast<ani_ref>(preferencesDirString))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed status: %{public}d", status);
+        return;
+    }
+
+    ani_field databaseDirField;
+    if ((status = aniEnv->Class_FindField(contextClass, "databaseDir", &databaseDirField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find databaseDir failed status: %{public}d", status);
+        return;
+    }
+    auto databaseDir = context->GetDatabaseDir();
+    TAG_LOGI(AAFwkTag::APPKIT, "ani databaseDir:%{public}s", databaseDir.c_str());
+    ani_string databaseDirString{};
+    aniEnv->String_NewUTF8(databaseDir.c_str(), databaseDir.size(), &databaseDirString);
+    if ((status = aniEnv->Object_SetField_Ref(contextObj, databaseDirField,
+        reinterpret_cast<ani_ref>(databaseDirString))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed status: %{public}d", status);
+        return;
+    }
+
+    ani_field cacheDirField;
+    if ((status = aniEnv->Class_FindField(contextClass, "cacheDir", &cacheDirField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find cacheDir failed status: %{public}d", status);
+        return;
+    }
+    auto cacheDir = context->GetCacheDir();
+    TAG_LOGI(AAFwkTag::APPKIT, "ani cacheDir:%{public}s", cacheDir.c_str());
+    ani_string cacheDirString{};
+    aniEnv->String_NewUTF8(cacheDir.c_str(), cacheDir.size(), &cacheDirString);
+    if ((status = aniEnv->Object_SetField_Ref(contextObj, cacheDirField,
+        reinterpret_cast<ani_ref>(cacheDirString))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed, status: %{public}d", status);
+        return;
+    }
+}
+
 void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     void* applicationCtxRef, std::shared_ptr<Context> context)
 {
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "aniEnv is nullptr");
+        return;
+    }
     BindApplicationCtx(aniEnv, contextClass, contextObj, applicationCtxRef);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "context is nullptr");
+        return;
+    }
+    context_ = context;
     BindParentProperty(aniEnv, contextClass, contextObj, context);
+    BindContextDir(aniEnv, contextClass, contextObj, context);
+}
+
+ani_object CreateModuleResourceManagerSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_string bundleName, ani_string moduleName)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
+        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "env is null");
+    }
+    std::string bundleName_ = "";
+    AppExecFwk::AniStringToStdString(env, bundleName, bundleName_);
+    std::string moduleName_ = "";
+    AppExecFwk::AniStringToStdString(env, moduleName, moduleName_);
+    ani_status status = ANI_ERROR;
+
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return {};
+    }
+
+    auto resourceManager = context->CreateModuleResourceManager(bundleName_, moduleName_);
+    ani_class resourceManagerCls = nullptr;
+    if ((status = env->FindClass("L@ohos/resourceManager/resourceManager/ResourceManagerInner;",
+        &resourceManagerCls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed status: %{public}d", status);
+        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "findClass fail");
+    }
+
+    ani_method CtorMethod = nullptr;
+    if ((status = env->Class_FindMethod(resourceManagerCls, "<ctor>", ":V", &CtorMethod)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod ctor failed status: %{public}d", status);
+        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "Class_FindMethod ctor failed");
+    }
+
+    ani_object Object = nullptr;
+    if ((status = env->Object_New(resourceManagerCls, CtorMethod, &Object)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_New failed status: %{public}d", status);
+        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "Object_New failed");
+    }
+
+    ani_field Field;
+    if ((status = env->Class_FindField(resourceManagerCls, "nativeResMgr", &Field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", status);
+        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "Class_FindField failed");
+    }
+
+    if ((status = env->Object_SetField_Long(Object, Field, (ani_long)resourceManager.get())) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Long failed status: %{public}d", status);
+        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "Object_SetField_Long failed");
+    }
+
+    return Object;
 }
 
 ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj)
