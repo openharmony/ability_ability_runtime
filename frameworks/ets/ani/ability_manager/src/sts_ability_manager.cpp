@@ -41,7 +41,6 @@ static ani_object GetForegroundUIAbilities(ani_env *env)
 
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
-        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
         return nullptr;
     }
 
