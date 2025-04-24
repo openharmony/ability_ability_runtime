@@ -782,7 +782,7 @@ bool UnWrapArrayString(ani_env *env, ani_object arrayObj, std::vector<std::strin
     ani_ref ref;
     ani_size idx;
     for (idx = 0; idx < size; idx++) {
-        if ((status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(arrayObj), idx, &ref)) != ANI_OK) {
+        if ((status = env->Array_Get(reinterpret_cast<ani_array>(arrayObj), idx, &ref)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d, index: %{public}zu", status, idx);
             return false;
         }
@@ -857,7 +857,7 @@ bool UnWrapArrayDouble(ani_env *env, ani_object arrayObj, std::vector<int32_t> &
     ani_ref ref;
     ani_size idx;
     for (idx = 0; idx < size; idx++) {
-        if ((status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(arrayObj), idx, &ref)) != ANI_OK) {
+        if ((status = env->Array_Get(reinterpret_cast<ani_array>(arrayObj), idx, &ref)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d, index: %{public}zu", status, idx);
             return false;
         }
