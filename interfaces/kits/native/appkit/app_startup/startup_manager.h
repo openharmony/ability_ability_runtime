@@ -100,6 +100,8 @@ public:
 private:
     // read only after initialization
     std::vector<ModuleStartupConfigInfo> moduleStartupConfigInfos_;
+    std::string bundleName_;
+
     std::mutex appStartupConfigInitializationMutex_;
     std::atomic<bool> isAppStartupConfigInited_ = false;
 
@@ -143,17 +145,17 @@ private:
         std::unique_ptr<StartupTaskResultCallback> callback);
 
     static int32_t GetStartupConfigString(const ModuleStartupConfigInfo& info, std::string& config);
-    static bool AnalyzeStartupConfig(const ModuleStartupConfigInfo& info, const std::string& startupConfig,
+    bool AnalyzeStartupConfig(const ModuleStartupConfigInfo& info, const std::string& startupConfig,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos, std::string& pendingConfigEntry);
     static bool AnalyzeAppStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos);
-    static bool AnalyzePreloadSoStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
+    bool AnalyzePreloadSoStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
     static bool AnalyzeAppStartupTaskInner(const ModuleStartupConfigInfo& info,
         const nlohmann::json &startupTaskJson,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos);
-    static bool AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigInfo& info,
+    bool AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigInfo& info,
         const nlohmann::json &preloadStartupTaskJson,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
     static void SetOptionalParameters(const nlohmann::json& module, AppExecFwk::ModuleType moduleType,
