@@ -561,6 +561,27 @@ bool SetFieldRef(ani_env *env, ani_class cls, ani_object object, const std::stri
     return true;
 }
 
+bool AniStringToStdString(ani_env *env, ani_string aniString, std::string &stdString)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
+        return false;
+    }
+    ani_size sz {};
+    ani_status status = ANI_ERROR;
+    if ((status = env->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "String_ToUTF8Size failed, status: %{public}d", status);
+        return false;
+    }
+    stdString.resize(sz + 1);
+    if ((status = env->String_GetUTF8SubString(aniString, 0, sz, stdString.data(), stdString.size(), &sz))
+        != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "String_GetUTF8SubString failed status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 bool GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_ref &ref, ani_boolean &isUndefined)
 {
     ani_status status = env->Object_GetPropertyByName_Ref(obj, name, &ref);
