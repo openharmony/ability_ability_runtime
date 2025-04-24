@@ -1210,5 +1210,14 @@ std::shared_ptr<Context> AbilityContextImpl::CreateDisplayContext(uint64_t displ
     return stageContext_ ? stageContext_->CreateDisplayContext(displayId) : nullptr;
 }
 #endif
+
+ErrCode AbilityContextImpl::RevokeDelegator()
+{
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "capability not support");
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    return ERR_OK;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
