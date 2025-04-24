@@ -23,8 +23,6 @@ namespace AbilityRuntime {
 EtsEnviromentCallback::EtsEnviromentCallback(ani_env *env)
     : ani_env_(env) {}
 
-int32_t EtsEnviromentCallback::serialNumber_ = 0;
-
 int32_t EtsEnviromentCallback::Register(ani_object aniCallback)
 {
     if (ani_env_ == nullptr) {

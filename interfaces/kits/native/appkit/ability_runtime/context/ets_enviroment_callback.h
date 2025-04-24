@@ -33,7 +33,7 @@ public:
 private:
     ani_env *ani_env_ = nullptr;
     std::map<int32_t, ani_ref> enviromentAniCallbacks_;
-    static int32_t serialNumber_ = 0;
+    int32_t serialNumber_ = 0;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

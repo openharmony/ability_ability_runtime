@@ -15,18 +15,62 @@
 
 import Context from 'application.Context'
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
+import { BusinessError, AsyncCallback } from '@ohos.base'
+import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
 export default class ApplicationContext extends Context {
-    public native setSupportedProcessCacheSync(isSupported : boolean):void;
-    public native nativeOnSync(type: 'environment', callback: EnvironmentCallback): number;
+  public native nativekillAllProcessesSync(clearPageStack: boolean, callback: AsyncCallbackWrapper<void>): void;
+  public native nativeOnSync(type: 'environment', callback: EnvironmentCallback): number;
+  public native setSupportedProcessCacheSync(isSupported: boolean): void;
 
-    setSupportedProcessCache(isSupported : boolean):void {
-        taskpool.execute((): void => {
-            this.setSupportedProcessCacheSync(isSupported);
+  setSupportedProcessCache(isSupported: boolean): void {
+    taskpool.execute((): void => {
+      this.setSupportedProcessCacheSync(isSupported);
+    });
+  }
+
+  on(type: 'environment', callback: EnvironmentCallback): number {
+    return this.nativeOnSync(type, callback);
+  }
+
+  killAllProcesses(callback: AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativekillAllProcessesSync(false, myCall);
+    });
+  }
+
+  killAllProcesses(): Promise<void> {
+    let p =
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
+          if (err.code == 0) {
+            resolve(undefined);
+          } else {
+            reject(err);
+          }
         });
-    }
+        taskpool.execute((): void => {
+          this.nativekillAllProcessesSync(false, myCall);
+        });
+      });
+    return p;
+  }
 
-    on(type: 'environment', callback: EnvironmentCallback): number {
-        return this.nativeOnSync(type, callback);
-    }
+  killAllProcesses(clearPageStack: boolean): Promise<void> {
+    let p =
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
+          if (err.code == 0) {
+            resolve(undefined);
+          } else {
+            reject(err);
+          }
+        });
+        taskpool.execute((): void => {
+          this.nativekillAllProcessesSync(clearPageStack, myCall);
+        });
+      });
+    return p;
+  }
 }
