@@ -42,7 +42,7 @@ const char STS_GET_DEFAULT_VM_INIT_ARGS[] = "ETS_GetDefaultVMInitArgs";
 const char STS_GET_CREATED_VMS[] = "ETS_GetCreatedVMs";
 const char STS_CREATE_VM[] = "ANI_CreateVM";
 const char STS_ANI_GET_CREATEDVMS[] = "ANI_GetCreatedVMs";
-const char STS_LIB_PATH[] = "libarkruntime.so";
+const char STS_LIB_PATH[] = "libets_interop_js_napi.z.so";
 const char BOOT_PATH[] = "/system/framework/bootpath.json";
 const char BACKTRACE[] = "=====================Backtrace========================";
 
