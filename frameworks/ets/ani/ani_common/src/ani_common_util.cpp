@@ -457,6 +457,37 @@ bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::s
     return true;
 }
 
+bool SetStringProperty(ani_env *env, ani_object param, const char *name, const std::string &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
+        return false;
+    }
+    ani_string string = nullptr;
+    ani_status status;
+    if (value.empty()) {
+        ani_ref nullRef = nullptr;
+        if ((status = env->GetNull(&nullRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+            return false;
+        }
+        if ((status = env->Object_SetPropertyByName_Ref(param, name, nullRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+            return false;
+        }
+        return true;
+    }
+    if ((status = env->String_NewUTF8(value.c_str(), value.size(), &string)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_SetPropertyByName_Ref(param, name, string)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 bool SetFieldBoolean(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, bool value)
 {
     ani_field field = nullptr;
