@@ -13,20 +13,14 @@
  * limitations under the License.
  */
 
-import Context from 'application.Context'
-import {ExtensionAbilityInfo}  from 'bundleManager.ExtensionAbilityInfo'
-import { Configuration } from '@ohos.app.ability.Configuration';
-
-export default class ExtensionContext extends Context {
-    static {
-        loadLibrary("context_ani");
-    }
-    extensionAbilityInfo: ExtensionAbilityInfo;
-    config: Configuration;
-    native constructor();
-    constructor(config: Configuration, extensionAbilityInfo: ExtensionAbilityInfo) {
-        super();
-        this.config = config;
-        this.extensionAbilityInfo = extensionAbilityInfo;
-    }
+interface ShellCmdResult {
+   stdResult: string;
+   exitCode: number;
 }
+
+class ShellCmdResultImpl implements ShellCmdResult {
+   public stdResult: string = '';
+   public exitCode: number = 0;
+}
+
+export default ShellCmdResult;

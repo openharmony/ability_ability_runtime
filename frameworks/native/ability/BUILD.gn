@@ -59,6 +59,7 @@ ohos_shared_library("ability_context_native") {
     "ability_runtime/connection_manager.cpp",
     "ability_runtime/dialog_request_callback_impl.cpp",
     "ability_runtime/dialog_ui_extension_callback.cpp",
+    "ability_runtime/ets_extension_context.cpp",
     "ability_runtime/js_extension_context.cpp",
     "ability_runtime/local_call_container.cpp",
     "ability_runtime/local_call_record.cpp",
@@ -95,6 +96,7 @@ ohos_shared_library("ability_context_native") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "runtime_core:ani",
+    "bundle_framework:bms_ani_common",
   ]
   public_external_deps = [
     "ability_base:extractortool",

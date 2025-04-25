@@ -34,12 +34,6 @@ namespace AbilityRuntime {
 ani_object CreateStsUIExtensionContext(ani_env *env, std::shared_ptr<UIExtensionContext> context,
     const std::shared_ptr<AppExecFwk::OHOSApplication> &application);
 
-void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<ExtensionContext> context);
-
-void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<Context> context, std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
-
 bool BindNativeMethods(ani_env *env, ani_class &cls);
 
 class StsUIExtensionContext final {
