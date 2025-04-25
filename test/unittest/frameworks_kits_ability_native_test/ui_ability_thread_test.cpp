@@ -1360,8 +1360,7 @@ HWTEST_F(UIAbilityThreadTest, AbilityRuntime_ScheduleAbilityRequestSuccess_0100,
     EXPECT_NE(abilitythread->abilityHandler_, nullptr);
     std::string requestId = "1234567890";
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
-    std::string message = "success";
-    abilitythread->ScheduleAbilityRequestSuccess(requestId, element, message);
+    abilitythread->ScheduleAbilityRequestSuccess(requestId, element);
     GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0100 end";
 }
 
@@ -1378,8 +1377,7 @@ HWTEST_F(UIAbilityThreadTest, AbilityRuntime_ScheduleAbilityRequestSuccess_0200,
     EXPECT_EQ(abilitythread->abilityImpl_, nullptr);
     std::string requestId = "1234567890";
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
-    std::string message = "success";
-    abilitythread->ScheduleAbilityRequestSuccess(requestId, element, message);
+    abilitythread->ScheduleAbilityRequestSuccess(requestId, element);
     GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0200 end";
 }
 } // namespace AppExecFwk

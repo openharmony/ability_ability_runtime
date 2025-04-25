@@ -21,6 +21,7 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "json_utils.h"
 #include "ohos_application.h"
 #include "process_options.h"
 #ifdef SUPPORT_SCREEN
@@ -30,6 +31,8 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+const std::string JSON_KEY_ERR_MSG = "errMsg";
+
 void UIAbilityImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
     const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &record, std::shared_ptr<UIAbility> &ability,
     std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token)
@@ -916,15 +919,17 @@ void UIAbilityImpl::ScheduleAbilityRequestFailure(const std::string &requestId, 
     ability_->OnAbilityRequestFailure(requestId, element, message);
 }
 
-void UIAbilityImpl::ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+void UIAbilityImpl::ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "ScheduleAbilityRequestSuccess called");
     if (ability_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return;
     }
-    ability_->OnAbilityRequestSuccess(requestId, element, message);
+    nlohmann::json jsonObject = nlohmann::json {
+        { JSON_KEY_ERR_MSG, "success" },
+    };
+    ability_->OnAbilityRequestSuccess(requestId, element, jsonObject.dump());
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

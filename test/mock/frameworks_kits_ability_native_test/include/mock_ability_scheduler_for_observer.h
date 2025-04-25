@@ -86,8 +86,8 @@ public:
         const std::string &message) override
     {}
 
-    virtual void ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message) override
+    virtual void ScheduleAbilityRequestSuccess(const std::string &requestId,
+        const AppExecFwk::ElementName &element) override
     {}
 };
 }  // namespace AppExecFwk
