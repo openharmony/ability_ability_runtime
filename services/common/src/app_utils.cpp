@@ -73,6 +73,9 @@ constexpr const char* CONNECT_SUPPORT_CROSS_USER = "const.abilityms.connect_supp
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
+constexpr const char* CACHE_ABILITY_BY_LIST_ENABLE = "persist.sys.abilityms.cache_ability_enable";
+constexpr const char* CACHE_ABILITY_LIST_PATH = "etc/ability/abilityms_cache_ability.json";
+constexpr const char* CACHE_PROCESS_NAME = "cache_list";
 }
 
 AppUtils::~AppUtils() {}
@@ -493,5 +496,62 @@ bool AppUtils::IsPrepareTerminateEnabled()
     }
     return false;
 }
+
+    bool AppUtils::IsCacheAbilityEnabled()
+    {
+        return system::GetBoolParameter(CACHE_ABILITY_BY_LIST_ENABLE, false);
+    }
+
+    void AppUtils::LoadCacheAbilityList()
+    {
+        nlohmann::json object;
+        if (!JsonUtils::GetInstance().LoadConfiguration(CACHE_ABILITY_LIST_PATH, object)) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "load cache_ability file failed");
+            return;
+        }
+        if (!object.contains(CACHE_PROCESS_NAME) ||
+            !object.at(CACHE_PROCESS_NAME).is_array()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "cache_ability file invalid");
+            return;
+        }
+
+        for (auto &item : object.at(CACHE_PROCESS_NAME).items()) {
+            const nlohmann::json& jsonObject = item.value();
+            if (!jsonObject.contains(BUNDLE_NAME) || !jsonObject.at(BUNDLE_NAME).is_string()) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "load cache_ability bundleName failed");
+                return;
+            }
+            if (!jsonObject.contains(ABILITY_NAME) || !jsonObject.at(ABILITY_NAME).is_string()) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "load cache_ability abilityName failed");
+                return;
+            }
+            std::string bundleName = jsonObject.at(BUNDLE_NAME).get<std::string>();
+            std::string abilityName = jsonObject.at(ABILITY_NAME).get<std::string>();
+            cacheAbilityList_.value.emplace_back(std::make_pair(bundleName, abilityName));
+        }
+    }
+
+    bool AppUtils::IsCacheExtensionAbilityByList(const std::string& bundleName, const std::string& abilityName)
+    {
+        /* only load once, mutex lock already in caller function */
+        if (!cacheAbilityList_.isLoaded) {
+            LoadCacheAbilityList();
+            cacheAbilityList_.isLoaded = true;
+        }
+
+        if (cacheAbilityList_.value.empty() || !IsCacheAbilityEnabled()) {
+            return false;
+        }
+
+        for (auto &element : cacheAbilityList_.value) {
+            if (bundleName == element.first && abilityName == element.second) {
+                TAG_LOGI(AAFwkTag::DEFAULT, "cache_ability: %{public}s, %{public}s",
+                         bundleName.c_str(), abilityName.c_str());
+                return true;
+            }
+        }
+        return false;
+    }
+
 }  // namespace AAFwk
 }  // namespace OHOS
