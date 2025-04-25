@@ -294,7 +294,6 @@ static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_u
 
 void OHOSApplication::InitAniApplicationContext()
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto& runtime = GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
     auto aniEnv = static_cast<AbilityRuntime::STSRuntime &>(*runtime).GetAniEnv();
     ani_class applicationContextCls = nullptr;
@@ -305,6 +304,9 @@ void OHOSApplication::InitAniApplicationContext()
     std::array applicationContextFunctions = {
         ani_native_function {"setSupportedProcessCacheSync", "Z:V",
             reinterpret_cast<void *>(SetSupportedProcessCacheSync)},
+        ani_native_function {"nativeOnSync",
+            "Lstd/core/String;L@ohos/app/ability/EnvironmentCallback/EnvironmentCallback;:D",
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeOnSync)},
         ani_native_function {"nativekillAllProcessesSync", "ZLutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(killAllProcesses)},
     };

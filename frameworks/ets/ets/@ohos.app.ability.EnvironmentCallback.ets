@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License"),
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -13,17 +13,12 @@
  * limitations under the License.
  */
 
-import { AsyncCallback } from '@ohos.base';
-import { BusinessError } from '@ohos.base';
+import AbilityConstant from '@ohos.app.ability.AbilityConstant';
+import { Configuration } from '@ohos.app.ability.Configuration';
 
-export class AsyncCallbackCommonWrapper<T> {
-  public myFun_: AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
+export default class EnvironmentCallback {
 
-  constructor(myFun:AsyncCallback<T, void>) {
-    this.myFun_ = myFun;
-  }
+  public onConfigurationUpdated: (config: Configuration) => void = (config: Configuration) => {}
+  public onMemoryLevel: (level: AbilityConstant.MemoryLevel) => void = (level: AbilityConstant.MemoryLevel) => {}
 
-  invoke(err: BusinessError<void>, data: T): void {
-    this.myFun_(err, data);
-  }
 }
