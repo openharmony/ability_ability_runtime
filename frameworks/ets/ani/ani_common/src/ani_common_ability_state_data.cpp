@@ -78,11 +78,16 @@ ani_object WrapAbilityStateDataInner(ani_env *env, ani_class cls, ani_object obj
 
 ani_object WrapAbilityStateData(ani_env *env, const AbilityStateData &data)
 {
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return nullptr;
+    }
+
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
     ani_method ctor = nullptr;
     ani_object object = {};
-    static const char *className = "Lability/AbilityStateData/AbilityStateData;";
+    static const char *className = "Lapplication/AbilityStateData/AbilityStateData;";
 
     if ((status = env->FindClass(className, &cls)) != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "FindClass status : %{public}d or null cls", status);
@@ -105,6 +110,11 @@ ani_object WrapAbilityStateData(ani_env *env, const AbilityStateData &data)
 ani_object CreateAniAbilityStateDataArray(ani_env *env, const std::vector<AbilityStateData> &list)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call CreateAniAbilityStateDataArray, list.size=%{public}zu", list.size());
+
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return nullptr;
+    }
 
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
@@ -134,7 +144,7 @@ ani_object CreateAniAbilityStateDataArray(ani_env *env, const std::vector<Abilit
             TAG_LOGE(AAFwkTag::ABILITYMGR, "null obj");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(object, "$_set", "Istd/core/Object;:V", index, obj)) {
+        if (ANI_OK != env->Object_CallMethodByName_Void(object, "$_set", "ILstd/core/Object;:V", index, obj)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Object_CallMethodByName_Void failed");
             return nullptr;
         }

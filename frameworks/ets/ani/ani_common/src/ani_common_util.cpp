@@ -63,13 +63,14 @@ bool GetBoolOrUndefined(ani_env *env, ani_object param, const char *name)
 {
     ani_ref obj = nullptr;
     ani_status status = ANI_ERROR;
-    ani_boolean res = 0.0;
+    ani_boolean res = false;
     ani_boolean hasValue = true;
     if (GetPropertyRef(env, param, name, obj, hasValue) && hasValue) {
         TAG_LOGW(AAFwkTag::JSNAPI, "%{public}s : undefined", name);
         return false;
     }
-    if ((status = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(obj), "booleanValue", nullptr, &res)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(obj), "unboxed", ":Z", &res)) !=
+        ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return res;
     }
@@ -456,6 +457,37 @@ bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::s
     return true;
 }
 
+bool SetStringProperty(ani_env *env, ani_object param, const char *name, const std::string &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
+        return false;
+    }
+    ani_string string = nullptr;
+    ani_status status;
+    if (value.empty()) {
+        ani_ref nullRef = nullptr;
+        if ((status = env->GetNull(&nullRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+            return false;
+        }
+        if ((status = env->Object_SetPropertyByName_Ref(param, name, nullRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+            return false;
+        }
+        return true;
+    }
+    if ((status = env->String_NewUTF8(value.c_str(), value.size(), &string)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_SetPropertyByName_Ref(param, name, string)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 bool SetFieldBoolean(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, bool value)
 {
     ani_field field = nullptr;
@@ -524,6 +556,27 @@ bool SetFieldRef(ani_env *env, ani_class cls, ani_object object, const std::stri
     status = env->Object_SetField_Ref(object, field, value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "SetField_Ref %{public}s failed, status: %{public}d", fieldName.c_str(), status);
+        return false;
+    }
+    return true;
+}
+
+bool AniStringToStdString(ani_env *env, ani_string aniString, std::string &stdString)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
+        return false;
+    }
+    ani_size sz {};
+    ani_status status = ANI_ERROR;
+    if ((status = env->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "String_ToUTF8Size failed, status: %{public}d", status);
+        return false;
+    }
+    stdString.resize(sz + 1);
+    if ((status = env->String_GetUTF8SubString(aniString, 0, sz, stdString.data(), stdString.size(), &sz))
+        != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "String_GetUTF8SubString failed status: %{public}d", status);
         return false;
     }
     return true;

@@ -39,11 +39,15 @@ bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::s
 bool SetFieldBoolean(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, bool value);
 bool SetFieldInt(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, int value);
 bool SetOptionalFieldInt(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, int value);
+
+bool SetStringProperty(ani_env *env, ani_object param, const char *name, const std::string &value);
 bool SetFieldArrayString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::vector<std::string> &values);
 bool SetFieldRef(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, ani_ref value);
+bool AniStringToStdString(ani_env *env, ani_string aniString, std::string &stdString);
 
 bool GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_ref &ref, ani_boolean &isUndefined);
 bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ANI_COMMON_UTIL_H
+ 

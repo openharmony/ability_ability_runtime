@@ -15,8 +15,12 @@
 
 #include "sts_ability_manager.h"
 
+#include "ability_manager_client.h"
 #include "ability_business_error.h"
+#include "ability_manager_errors.h"
+#include "ability_runtime_error_util.h"
 #include "ani_common_ability_state_data.h"
+#include "ani_common_want.h"
 #include "hilog_tag_wrapper.h"
 #include "ability_manager_interface.h"
 #include "if_system_ability_manager.h"
@@ -26,6 +30,9 @@
 
 namespace OHOS {
 namespace AbilityManagerSts {
+
+constexpr int32_t ERR_FAILURE = -1;
+
 sptr<AppExecFwk::IAbilityManager> GetAbilityManagerInstance()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
@@ -37,7 +44,12 @@ sptr<AppExecFwk::IAbilityManager> GetAbilityManagerInstance()
 
 static ani_object GetForegroundUIAbilities(ani_env *env)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call GetForegroundUIAbilities");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call GetForegroundUIAbilities");
+
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return nullptr;
+    }
 
     sptr<AppExecFwk::IAbilityManager> abilityManager = GetAbilityManagerInstance();
     if (abilityManager == nullptr) {
@@ -53,7 +65,7 @@ static ani_object GetForegroundUIAbilities(ani_env *env)
         AbilityRuntime::ThrowStsError(env, code);
         return nullptr;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "GetForegroundUIAbilities succeeds, list.size=%{public}zu", list.size());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "GetForegroundUIAbilities succeeds, list.size=%{public}zu", list.size());
     ani_object aniArray = AppExecFwk::CreateAniAbilityStateDataArray(env, list);
     if (aniArray == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null aniArray");
@@ -63,35 +75,70 @@ static ani_object GetForegroundUIAbilities(ani_env *env)
     return aniArray;
 }
 
+static void GetTopAbility(ani_env *env, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call GetTopAbility");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
+#ifdef ENABLE_ERRCODE
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return;
+    }
+#endif
+    AppExecFwk::ElementName elementName = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility();
+    int resultCode = 0;
+    ani_object elementNameobj = AppExecFwk::WrapElementName(env, elementName);
+    if (elementNameobj == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null elementNameobj");
+        resultCode = ERR_FAILURE;
+    }
+    ani_ref callbackRef = nullptr;
+    auto status = env->GlobalReference_Create(callback, &callbackRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Create Gloabl ref for abilitymanager failed %{public}d", status);
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+        return;
+    }
+    AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
+        OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, resultCode),
+        elementNameobj);
+    return;
+}
+
 void StsAbilityManagerRegistryInit(ani_env *env)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call StsAbilityManagerRegistryInit");
-
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call StsAbilityManagerRegistryInit");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
     ani_status status = ANI_ERROR;
     if (env->ResetError() != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ResetError failed");
     }
-
     ani_namespace ns;
     status = env->FindNamespace("L@ohos/app/ability/abilityManager/abilityManager;", &ns);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "FindNamespace abilityManager failed status : %{public}d", status);
         return;
     }
-
     std::array methods = {
         ani_native_function {
-            "GetForegroundUIAbilities",
-            ":Lescompat/Array",
+            "nativeGetForegroundUIAbilities",
+            ":Lescompat/Array;",
             reinterpret_cast<void *>(GetForegroundUIAbilities)
         },
+        ani_native_function {"nativeGetTopAbility", nullptr, reinterpret_cast<void *>(GetTopAbility)},
     };
-
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Namespace_BindNativeFunctions failed status : %{public}d", status);
     }
-
     if (env->ResetError() != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ResetError failed");
     }
@@ -100,7 +147,12 @@ void StsAbilityManagerRegistryInit(ani_env *env)
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "in AbilityManagerSts.ANI_Constructor");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "in AbilityManagerSts.ANI_Constructor");
+    if (vm == nullptr || result == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null vm or result");
+        return ANI_INVALID_ARGS;
+    }
+
     ani_env *env = nullptr;
     ani_status status = ANI_ERROR;
     status = vm->GetEnv(ANI_VERSION_1, &env);
@@ -108,10 +160,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "GetEnv failed, status=%{public}d", status);
         return ANI_NOT_FOUND;
     }
-
     StsAbilityManagerRegistryInit(env);
     *result = ANI_VERSION_1;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilityManagerSts.ANI_Constructor finished");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerSts.ANI_Constructor finished");
     return ANI_OK;
 }
 }
