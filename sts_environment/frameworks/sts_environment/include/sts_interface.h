@@ -20,28 +20,16 @@
 
 namespace OHOS {
 
-// NOLINTBEGIN(modernize-use-using, readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
-
-// #ifdef __cplusplus
-// #include <cstdint>
-// #include <cstdarg>
-// #else
-// #include <stdint.h>
-// #include <stdarg.h>
-// #endif
-
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
-
 // Version Constants
 #define ETS_NAPI_VERSION_1_0 0x00010000
 
 // General return value constants
-#define ETS_OK 0            // success
-#define ETS_ERR (-1)        // unknown error
-#define ETS_ERR_VER (-2)    // ETS version error
-#define ETS_ERR_NOMEM (-3)  // not enough memory
-#define ETS_ERR_EXIST (-4)  // VM already created
-#define ETS_ERR_INVAL (-5)  // invalid arguments
+#define ETS_OK 0
+#define ETS_ERR (-1)
+#define ETS_ERR_VER (-2)
+#define ETS_ERR_NOMEM (-3)
+#define ETS_ERR_EXIST (-4)
+#define ETS_ERR_INVAL (-5)
 
 // Boolean Constants
 #define ETS_FALSE 0

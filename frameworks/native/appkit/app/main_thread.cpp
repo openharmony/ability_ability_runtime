@@ -1337,10 +1337,6 @@ JsEnv::UncaughtExceptionInfo MainThread::CreateJsExceptionInfo(const std::string
         auto napiEnv = (static_cast<AbilityRuntime::JsRuntime&>(
                             *appThread->application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0)))
                            .GetNapiEnv();
-        // if (NapiErrorManager::GetInstance()->NotifyUncaughtException(
-        //         napiEnv, summary, appExecErrorObj.name, appExecErrorObj.message, appExecErrorObj.stack)) {
-        //     return;
-        // }
         if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
             ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
             return;
@@ -1785,12 +1781,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             [wpApplication](const std::string &language) -> AbilityRuntime::UIAbility* {
             auto app = wpApplication.lock();
             if (app != nullptr) {
-                if (language == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
-                    return AbilityRuntime::UIAbility::Create(
-                        app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2));
+                if (language ==  AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
+                    return AbilityRuntime::UIAbility::Create(app->GetRuntime(
+                        AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2));
                 } else {
-                    return AbilityRuntime::UIAbility::Create(
-                        app->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0));
+                    return AbilityRuntime::UIAbility::Create(app->GetRuntime(
+                        AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0));
                 }
             }
             TAG_LOGE(AAFwkTag::APPKIT, "failed");

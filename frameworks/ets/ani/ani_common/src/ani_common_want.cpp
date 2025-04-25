@@ -95,7 +95,6 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     InnerWrapWantParams(env, cls, object, want.GetParams());
     SetFieldArrayString(env, cls, object, "entities", want.GetEntities());
 
-    // TODO
     return object;
 }
 
@@ -143,7 +142,6 @@ bool InnerWrapWantParamsString(
     if (ao == nullptr) {
         return false;
     }
-    // TODO
     return true;
 }
 
