@@ -234,7 +234,6 @@ void STSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& co
 
     ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, configuration);
 
-
     ani_method method = nullptr;
     ani_status status = env->Class_FindMethod(stsAbilityStageObj_->aniCls,
         "onConfigurationUpdate", "L@ohos/app/ability/Configuration/Configuration;:V", &method);
@@ -273,7 +272,8 @@ int32_t STSAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &ca
     return ERR_OK;
 }
 
-std::unique_ptr<STSNativeReference> STSAbilityStage::LoadJsOhmUrl(const std::string &srcEntry, const std::string &ohmUrl,
+std::unique_ptr<STSNativeReference> STSAbilityStage::LoadJsOhmUrl(
+    const std::string &srcEntry, const std::string &ohmUrl,
     const std::string &moduleName, const std::string &hapPath, bool esmodule)
 {
     return nullptr;

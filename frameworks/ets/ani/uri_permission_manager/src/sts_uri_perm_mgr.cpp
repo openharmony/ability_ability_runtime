@@ -73,7 +73,8 @@ static void grantUriPermissionPromiseWithAppCloneIndexSync([[maybe_unused]]ani_e
     int32_t flagId = static_cast<int32_t>(flag);
     std::string targetBundleName = GetStdString(env, targetName);
     int32_t appCloneIndexId = static_cast<int32_t>(appCloneIndex);
-    AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId, targetBundleName, appCloneIndexId);
+    AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(
+        uriVec, flagId, targetBundleName, appCloneIndexId);
 }
 
 static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,

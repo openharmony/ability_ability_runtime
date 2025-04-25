@@ -575,8 +575,9 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadModule(const std::string& mo
     return stsNativeReference;
 }
 
-std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string& moduleName, const std::string& path, const std::string& hapPath,
-    const std::string& srcEntrance)
+std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string &moduleName,
+    const std::string &path, const std::string &hapPath,
+    const std::string &srcEntrance)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "Load sts module(%{public}s, %{public}s, %{public}s, %{public}s)",
         moduleName.c_str(), path.c_str(), hapPath.c_str(), srcEntrance.c_str());
@@ -674,8 +675,10 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
     return stsNativeReference;
 }
 
-bool STSRuntime::RunScript(ani_env* aniEnv, const std::string& moduleName, const std::string& abcPath, const std::string& hapPath,
-    const std::string& srcEntrance)
+bool STSRuntime::RunScript(ani_env *aniEnv, const std::string &moduleName,
+    const std::string &abcPath,
+    const std::string &hapPath,
+    const std::string &srcEntrance)
 {
     bool newCreate = false;
     std::string loadPath = ExtractorUtil::GetLoadFilePath(hapPath);
