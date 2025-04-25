@@ -54,7 +54,6 @@ bool InsightIntentRdbDataMgr::InitIntentTable(const IntentRdbConfig &intentRdbCo
         + " (INTENT_KEY TEXT NOT NULL PRIMARY KEY, INTENT_VALUE TEXT NOT NULL);";
     int32_t ret = NativeRdb::E_OK;
     ret = rdbStore->ExecuteSql(createTableSql);
-
     if (ret != NativeRdb::E_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "Create rdb table failed, ret:%{public}d", ret);
         return false;
@@ -118,7 +117,6 @@ bool InsightIntentRdbDataMgr::IsIntentRdbLoaded()
         + " (INTENT_KEY TEXT NOT NULL PRIMARY KEY, INTENT_VALUE TEXT NOT NULL);";
     int32_t ret = NativeRdb::E_OK;
     ret = rdbStore->ExecuteSql(createTableSql);
-
     if (ret != NativeRdb::E_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "Create rdb table failed, ret:%{public}d", ret);
         return false;
@@ -281,26 +279,24 @@ bool InsightIntentRdbDataMgr::QueryDataBeginWithKey(const std::string &key,
     }
     ScopeGuard stateGuard([&] { absSharedResultSet->Close(); });
 
-    if (absSharedResultSet->GoToFirstRow() != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "GoToFirstRow failed");
-        return false;
+    if (absSharedResultSet->GoToFirstRow() == NativeRdb::E_OK) {
+        do {
+            std::string key;
+            if (absSharedResultSet->GetString(INTENT_KEY_INDEX, key) != NativeRdb::E_OK) {
+                TAG_LOGE(AAFwkTag::INTENT, "GetString key failed");
+                return false;
+            }
+
+            std::string value;
+            if (absSharedResultSet->GetString(INTENT_VALUE_INDEX, value) != NativeRdb::E_OK) {
+                TAG_LOGE(AAFwkTag::INTENT, "GetString value failed");
+                return false;
+            }
+
+            datas.emplace(key, value);
+        } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
     }
-    do {
-        std::string key;
-        if (absSharedResultSet->GetString(INTENT_KEY_INDEX, key) != NativeRdb::E_OK) {
-            TAG_LOGE(AAFwkTag::INTENT, "GetString key failed");
-            return false;
-        }
-
-        std::string value;
-        if (absSharedResultSet->GetString(INTENT_VALUE_INDEX, value) != NativeRdb::E_OK) {
-            TAG_LOGE(AAFwkTag::INTENT, "GetString value failed");
-            return false;
-        }
-
-        datas.emplace(key, value);
-    } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
-    return !datas.empty();
+    return true;
 }
 
 bool InsightIntentRdbDataMgr::QueryAllData(std::unordered_map<std::string, std::string> &datas)
@@ -320,27 +316,24 @@ bool InsightIntentRdbDataMgr::QueryAllData(std::unordered_map<std::string, std::
     }
     ScopeGuard stateGuard([&] { absSharedResultSet->Close(); });
 
-    if (absSharedResultSet->GoToFirstRow() != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "GoToFirstRow failed");
-        return false;
+    if (absSharedResultSet->GoToFirstRow() == NativeRdb::E_OK) {
+        do {
+            std::string key;
+            if (absSharedResultSet->GetString(INTENT_KEY_INDEX, key) != NativeRdb::E_OK) {
+                TAG_LOGE(AAFwkTag::INTENT, "GetString key failed");
+                return false;
+            }
+
+            std::string value;
+            if (absSharedResultSet->GetString(INTENT_VALUE_INDEX, value) != NativeRdb::E_OK) {
+                TAG_LOGE(AAFwkTag::INTENT, "GetString value failed");
+                return false;
+            }
+
+            datas.emplace(key, value);
+        } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
     }
-
-    do {
-        std::string key;
-        if (absSharedResultSet->GetString(INTENT_KEY_INDEX, key) != NativeRdb::E_OK) {
-            TAG_LOGE(AAFwkTag::INTENT, "GetString key failed");
-            return false;
-        }
-
-        std::string value;
-        if (absSharedResultSet->GetString(INTENT_VALUE_INDEX, value) != NativeRdb::E_OK) {
-            TAG_LOGE(AAFwkTag::INTENT, "GetString value failed");
-            return false;
-        }
-
-        datas.emplace(key, value);
-    } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
-    return !datas.empty();
+    return true;
 }
 
 void InsightIntentRdbDataMgr::BackupRdb()

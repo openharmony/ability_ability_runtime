@@ -86,7 +86,7 @@ private:
     void DelayCloseRdbStore();
 
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_;
-    static std::mutex rdbStoreMutex_;
+    std::mutex rdbStoreMutex_;
     IntentRdbConfig intentRdbConfig_;
 };
 } // namespace AbilityRuntime
