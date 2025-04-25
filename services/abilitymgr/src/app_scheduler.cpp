@@ -160,11 +160,11 @@ void AppScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawn
     appMgrClient_->KillProcessesByUserId(userId, isNeedSendAppSpawnMsg, callback);
 }
 
-void AppScheduler::KillProcessesByPids(std::vector<int32_t> &pids)
+void AppScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->KillProcessesByPids(pids);
+    appMgrClient_->KillProcessesByPids(pids, reason);
 }
 
 void AppScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken)
