@@ -35,11 +35,14 @@ bool GetRefFieldByName(ani_env *env, ani_object param, const char *name, ani_ref
 ani_object createDouble(ani_env *env, ani_double value);
 ani_object createBoolean(ani_env *env, ani_boolean value);
 
-bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::string &value);
+bool SetFieldString(ani_env *env, ani_class cls, ani_object object,
+                    const std::string &fieldName, const std::string &value);
 bool SetFieldDouble(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, double value);
 bool SetFieldBoolean(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, bool value);
 bool SetFieldInt(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, int value);
-bool SetFieldArrayString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::vector<std::string> &values);
+bool SetFieldArrayString(ani_env *env, ani_class cls, ani_object object,
+                         const std::string &fieldName,
+                         const std::vector<std::string> &values);
 bool SetFieldRef(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, ani_ref value);
 }  // namespace AppExecFwk
 }  // namespace OHOS

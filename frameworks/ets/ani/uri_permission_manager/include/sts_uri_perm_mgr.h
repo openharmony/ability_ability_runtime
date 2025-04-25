@@ -19,7 +19,7 @@
 #include "sts_runtime.h"
 
 namespace OHOS {
-namespace AbilityRuntime {    
+namespace AbilityRuntime {
 static ani_int grantUriPermissionPromiseSync([[maybe_unused]]ani_env *env,
     ani_string uri, ani_enum_item flagEnum, ani_string targetName);
 static void grantUriPermissionPromiseWithAppCloneIndexSync([[maybe_unused]]ani_env *env,
