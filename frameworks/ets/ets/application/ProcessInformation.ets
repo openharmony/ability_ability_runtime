@@ -30,7 +30,7 @@ export interface ProcessInformation {
 export default class ProcessInformationInner implements ProcessInformation {
   pid: number;
   uid: number;
-  processName: string = "";
+  processName: string = '';
   bundleNames: Array<string> = [];
   state: appManager.ProcessState = appManager.ProcessState.STATE_CREATE;
   bundleType: bundleManager.BundleType = bundleManager.BundleType.APP;

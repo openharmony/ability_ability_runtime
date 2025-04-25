@@ -194,26 +194,27 @@ export function on(type: 'applicationState', observer: ApplicationStateObserver,
   return appManager.nativeOn('applicationState', observer, bundleNameList);
 }
 
-export native function nativeOff(type:string, observerId: number) : void;
+export native function nativeOff(type:string, observerId: number, callback: AsyncCallbackWrapper<void>) : void;
 export function off(type: 'applicationState', observerId: number, callback: AsyncCallback<void>): void {
-  let p1 = taskpool.execute(():undefined => {appManager.nativeOff(type, observerId); return undefined;});
-      p1.then((e :NullishType)=>{
-        let resultCode: Int  = 0;
-        let error: BusinessError = { code: resultCode.intValue(), data: undefined };
-        callback(error, undefined);
-        }, (err: Object) : void => {
-      });
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      appManager.nativeOff(type, observerId, myCall);
+    });
 }
 
 export function off(type: 'applicationState', observerId: number): Promise<void> {
-    let p = new Promise<void>((resolve: (v: PromiseLike<void>) => void, reject: (error: Object) => void) => {
-      let p1 = taskpool.execute(():undefined => {appManager.nativeOff(type, observerId);  return undefined});
-      p1.then((e :NullishType)=>{
-      let PromiseLike = e as PromiseLike<void>;
-      resolve(PromiseLike);
-      }, (err:Object): void => {
+    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+        if (err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
       });
-  });
-  return p;
+      taskpool.execute((): void => {
+        appManager.nativeOff(type, observerId, myCall);
+      });
+    });
+    return p;
 }
 } // namespace appManager

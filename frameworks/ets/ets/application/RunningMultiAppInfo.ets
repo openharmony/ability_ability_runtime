@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 import { MultiAppMode } from 'application.MultiAppMode';
 
 export interface RunningMultiAppInfo {
@@ -24,7 +23,7 @@ export interface RunningMultiAppInfo {
 }
 
 export default class RunningMultiAppInfoInner implements RunningMultiAppInfo {
-  bundleName: string = "";
+  bundleName: string = '';
   mode: MultiAppMode = MultiAppMode.NOT_SUPPORTED;
   runningMultiInstances?: Array<RunningMultiInstanceInfo>;
   runningAppClones?: Array<RunningAppClone>;
@@ -35,7 +34,7 @@ export interface RunningMultiInstanceInfo {
 }
 
 class RunningMultiInstanceInfoInner implements RunningMultiInstanceInfo {
-  instanceKey: string = "";
+  instanceKey: string = '';
 }
 
 export interface RunningAppClone {
