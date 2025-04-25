@@ -24,6 +24,7 @@
 #include "common_event_support.h"
 #include "exit_resident_process_manager.h"
 #include "freeze_util.h"
+#include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "killing_process_manager.h"
@@ -127,7 +128,8 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
             (pair.second->GetCustomProcessFlag() == customProcessFlag) &&
             (pair.second->GetSignCode() == signCode) && (pair.second->GetProcessName() == processName) &&
             (pair.second->GetJointUserId() == jointUserId) && !(pair.second->IsTerminating()) &&
-            !(pair.second->IsKilling()) && !(pair.second->GetRestartAppFlag());
+            !(pair.second->IsKilling()) && !(pair.second->GetRestartAppFlag()) &&
+            (pair.second->GetKillReason() != AbilityRuntime::GlobalConstant::LOW_MEMORY_KILL);
     };
     auto appRunningMap = GetAppRunningRecordMap();
     if (!jointUserId.empty()) {
@@ -140,7 +142,9 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
             (specifiedProcessFlag.empty() || appRecord->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
             (appRecord->GetCustomProcessFlag() == customProcessFlag) &&
             !(appRecord->IsTerminating()) && !(appRecord->IsKilling()) && !(appRecord->GetRestartAppFlag()) &&
-            !(appRecord->IsUserRequestCleaning()) && !(appRecord->IsCaching() && appRecord->GetProcessCacheBlocked())) {
+            !(appRecord->IsUserRequestCleaning()) &&
+            !(appRecord->IsCaching() && appRecord->GetProcessCacheBlocked()) &&
+            appRecord->GetKillReason() != AbilityRuntime::GlobalConstant::LOW_MEMORY_KILL) {
             auto appInfoList = appRecord->GetAppInfoList();
             TAG_LOGD(AAFwkTag::APPMGR,
                 "appInfoList: %{public}zu, processName: %{public}s, specifiedProcessFlag: %{public}s, \
