@@ -26,11 +26,23 @@ import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
 export default class UIAbilityContext extends Context {
+  static {
+    loadLibrary("context_ani");
+  }
 
   config: Configuration;
   abilityInfo: AbilityInfo;
   windowStage: window.WindowStage;
   currentHapModuleInfo: HapModuleInfo;
+
+  native constructor();
+  constructor(config: Configuration, abilityInfo: AbilityInfo, windowStage: window.WindowStage, currentHapModuleInfo: HapModuleInfo) {
+    super();
+    this.config = config;
+    this.abilityInfo = abilityInfo;
+    this.windowStage = windowStage;
+    this.currentHapModuleInfo = currentHapModuleInfo;
+  }
 
   private native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
   private native nativeStartAbilitySync(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<void>): void;

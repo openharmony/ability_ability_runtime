@@ -34,9 +34,9 @@ export default class UIAbility {
     return this.isOnDestroyAsync;
   }
 
-  context: UIAbilityContext;
-  launchWant: Want;
-  lastRequestWant: Want;
+  context: UIAbilityContext = new UIAbilityContext();
+  launchWant: Want = new Want();
+  lastRequestWant: Want = new Want();
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {}
   onWindowStageCreate(windowStage: window.WindowStage): void {}

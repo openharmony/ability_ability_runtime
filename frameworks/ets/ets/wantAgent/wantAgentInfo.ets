@@ -24,7 +24,7 @@ export interface WantAgentInfo {
 }
 
 class WantAgentInfoImpl implements WantAgentInfo {
-  public wants: Array<Want>;
+  public wants: Array<Want> = new Array<Want>;
   public actionType?: abilityWantAgent.OperationType;
   public requestCode: number;
   public actionFlags?: Array<abilityWantAgent.WantAgentFlags>;
