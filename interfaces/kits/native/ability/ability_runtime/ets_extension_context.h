@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-import Context from 'application.Context'
-import {ExtensionAbilityInfo}  from 'bundleManager.ExtensionAbilityInfo'
-import { Configuration } from '@ohos.app.ability.Configuration';
+#ifndef OHOS_ABILITY_RUNTIME_STS_EXTENSION_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_STS_EXTENSION_CONTEXT_H
+ 
+#include "extension_context.h"
+#include "ani.h"
 
-export default class ExtensionContext extends Context {
-    static {
-        loadLibrary("context_ani");
-    }
-    extensionAbilityInfo: ExtensionAbilityInfo;
-    config: Configuration;
-    native constructor();
-    constructor(config: Configuration, extensionAbilityInfo: ExtensionAbilityInfo) {
-        super();
-        this.config = config;
-        this.extensionAbilityInfo = extensionAbilityInfo;
-    }
-}
+namespace OHOS {
+namespace AbilityRuntime {
+void CreatEtsExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context,
+    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo);
+} // namespace AbilityRuntime
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_STS_EXTENSION_CONTEXT_H

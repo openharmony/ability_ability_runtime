@@ -77,11 +77,11 @@ void SetAppStateData(ani_env *env, ani_object object, const AppExecFwk::AppState
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed status:%{public}d", status);
     }
-    status = env->Object_SetFieldByName_Boolean(object, "state", appStateData.isSplitScreenMode);
+    status = env->Object_SetFieldByName_Boolean(object, "isSplitScreenMode", appStateData.isSplitScreenMode);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed status:%{public}d", status);
     }
-    status = env->Object_SetFieldByName_Boolean(object, "state", appStateData.isFloatingWindowMode);
+    status = env->Object_SetFieldByName_Boolean(object, "isFloatingWindowMode", appStateData.isFloatingWindowMode);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed status:%{public}d", status);
     }
@@ -254,38 +254,6 @@ ani_object WrapProcessInformation(ani_env *env, const AppExecFwk::RunningProcess
     return object;
 }
 
-ani_object CreateEmptyArray(ani_env *env)
-{
-    ani_class arrayCls = nullptr;
-    ani_status status = ANI_OK;
-
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null env");
-        return nullptr;
-    }
-
-    status = env->FindClass("Lescompat/Array;", &arrayCls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
-        return nullptr;
-    }
-
-    ani_method arrayCtor;
-    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
-        return nullptr;
-    }
-
-    ani_object arrayObj;
-    status = env->Object_New(arrayCls, arrayCtor, &arrayObj, 0);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
-        return arrayObj;
-    }
-    return arrayObj;
-}
-
 ani_object CreateRunningProcessInfoArray(ani_env *env, std::vector<AppExecFwk::RunningProcessInfo> infos)
 {
     ani_class arrayCls = nullptr;
@@ -440,7 +408,7 @@ void SetRunningMultiAppInfo(ani_env *env, ani_object object,
     }
     ani_enum_item modeItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
-        "L@ohos/MultiAppMode/MultiAppMode;", runningMultiAppInfo.mode, modeItem);
+        "Lapplication/MultiAppMode/MultiAppMode;", runningMultiAppInfo.mode, modeItem);
     status = env->Object_SetPropertyByName_Ref(object, "mode", modeItem);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed status:%{public}d", status);

@@ -17,7 +17,7 @@ import AbilityMonitor from './AbilityMonitor';
 import Want from '@ohos.app.ability.Want';
 import Context from 'application.Context';
 import { BusinessError, AsyncCallback } from '@ohos.base';
-import ShellCmdResult  from './shellCmdResult';
+import { ShellCmdResult }  from 'application.shellCmdResult';
 import UIAbility from '@ohos.app.ability.UIAbility';
 
 export interface AbilityDelegator {

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 export default class AppStateData {
-    bundleName: string = "";
+    bundleName: string = '';
     uid: number;
     state: number;
     isSplitScreenMode: boolean;

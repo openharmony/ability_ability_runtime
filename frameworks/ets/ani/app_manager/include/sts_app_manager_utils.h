@@ -45,7 +45,6 @@ void SetRunningAppClone(ani_env *env, ani_object object, const AppExecFwk::Runni
 ani_object WrapProcessData(ani_env *env, const AppExecFwk::ProcessData &processData);
 void SetProcessData(ani_env* env, ani_object object, const AppExecFwk::ProcessData &processData);
 bool UnWrapArrayString(ani_env *env, ani_object arrayObj, std::vector<std::string> stringList);
-ani_object CreateEmptyArray (ani_env *env);
 
 } // namespace AppManagerSts
 } // namespace OHOS
