@@ -19,6 +19,7 @@
 #include "ability_manager_client.h"
 #include "sts_context_utils.h"
 #include "sts_error_utils.h"
+#include "ets_extension_context.h"
 #include "ani_common_start_options.h"
 
 namespace OHOS {
@@ -217,50 +218,6 @@ void StsUIExtensionContext::StartAbilityInner([[maybe_unused]] ani_env *env, [[m
     }
 }
 
-void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<Context> context, std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
-{
-    TAG_LOGD(AAFwkTag::UI_EXT, "BindExtensionInfo");
-    if (aniEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
-        return;
-    }
-    auto hapModuleInfo = context->GetHapModuleInfo();
-    ani_status status = ANI_OK;
-    if (abilityInfo && hapModuleInfo) {
-        auto isExist = [&abilityInfo](const AppExecFwk::ExtensionAbilityInfo& info) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
-            return info.bundleName == abilityInfo->bundleName && info.name == abilityInfo->name;
-        };
-        auto infoIter = std::find_if(
-            hapModuleInfo->extensionInfos.begin(), hapModuleInfo->extensionInfos.end(), isExist);
-        if (infoIter == hapModuleInfo->extensionInfos.end()) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "set extensionAbilityInfo fail");
-            return;
-        }
-        ani_field extensionAbilityInfoField;
-        status = aniEnv->Class_FindField(contextClass, "extensionAbilityInfo", &extensionAbilityInfoField);
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
-            return;
-        }
-        ani_object extAbilityInfoObj = AppExecFwk::CommonFunAni::ConvertExtensionInfo(aniEnv, *infoIter);
-        status = aniEnv->Object_SetField_Ref(contextObj, extensionAbilityInfoField,
-            reinterpret_cast<ani_ref>(extAbilityInfoObj));
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
-            return;
-        }
-    }
-}
-
-void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<ExtensionContext> context)
-{
-    ContextUtil::StsCreatContext(aniEnv, contextClass, contextObj, applicationCtxRef, context);
-    BindExtensionInfo(aniEnv, contextClass, contextObj, context, context->GetAbilityInfo());
-}
-
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
     ani_status status = ANI_ERROR;
@@ -324,7 +281,9 @@ ani_object CreateStsUIExtensionContext(ani_env *env, std::shared_ptr<UIExtension
         TAG_LOGE(AAFwkTag::UI_EXT, "application null");
         return nullptr;
     }
-    StsCreatExtensionContext(env, cls, contextObj, application->GetApplicationCtxObjRef(), context);
+    OHOS::AbilityRuntime::ContextUtil::StsCreatContext(env, cls, contextObj,
+        application->GetApplicationCtxObjRef(), context);
+    OHOS::AbilityRuntime::CreatEtsExtensionContext(env, cls, contextObj, context, context->GetAbilityInfo());
     return contextObj;
 }
 } // AbilityRuntime
