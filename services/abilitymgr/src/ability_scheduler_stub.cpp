@@ -776,8 +776,7 @@ int AbilitySchedulerStub::ScheduleAbilityRequestSuccessInner(MessageParcel &data
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null element");
         return ERR_INVALID_VALUE;
     }
-    std::string message = data.ReadString();
-    ScheduleAbilityRequestSuccess(requestId, *element, message);
+    ScheduleAbilityRequestSuccess(requestId, *element);
     return NO_ERROR;
 }
 
