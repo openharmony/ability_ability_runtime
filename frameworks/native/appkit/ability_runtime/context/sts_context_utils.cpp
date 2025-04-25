@@ -27,6 +27,10 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace ContextUtil {
+namespace {
+    std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_ = nullptr;
+}
+
 static std::weak_ptr<Context> context_;
 void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     void* applicationCtxRef)
@@ -261,6 +265,50 @@ ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unuse
     }
     ThrowStsInvalidParamError(env, "appContextObj null");
     return {};
+}
+
+ani_double NativeOnSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_string type, ani_object envCallback)
+{
+    ani_status status = ANI_ERROR;
+    TAG_LOGD(AAFwkTag::APPKIT, "NativeOnSync Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
+        return ANI_ERROR;
+    }
+    ani_class applicationContextCls = nullptr;
+    if ((status = env->FindClass("Lapplication/ApplicationContext/ApplicationContext;",
+        &applicationContextCls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed status: %{public}d", status);
+        AbilityRuntime::ThrowStsInvalidParamError(env, "FindClass failed");
+        return ANI_ERROR;
+    }
+    ani_field contextField;
+    if ((status = env->Class_FindField(applicationContextCls, "nativeContext", &contextField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", status);
+        AbilityRuntime::ThrowStsInvalidParamError(env, "Class_FindField failed");
+        return ANI_ERROR;
+    }
+    ani_long nativeContextLong;
+    if ((status = env->Object_GetField_Long(aniObj, contextField, &nativeContextLong)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_GetField_Long failed status: %{public}d", status);
+        AbilityRuntime::ThrowStsInvalidParamError(env, "Object_GetField_Long failed");
+        return ANI_ERROR;
+    }
+    if (nativeContextLong == 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "nativeContext is null");
+        AbilityRuntime::ThrowStsInvalidParamError(env, "nativeContext is null");
+        return ANI_ERROR;
+    }
+    if (etsEnviromentCallback_ != nullptr) {
+        return ani_double(etsEnviromentCallback_->Register(envCallback));
+    }
+
+    etsEnviromentCallback_ = std::make_shared<EtsEnviromentCallback>(env);
+    int32_t callbackId = etsEnviromentCallback_->Register(envCallback);
+    ((AbilityRuntime::ApplicationContext*)nativeContextLong)->RegisterEnvironmentCallback(etsEnviromentCallback_);
+
+    return ani_double(callbackId);
 }
 }
 } // namespace AbilityRuntime
