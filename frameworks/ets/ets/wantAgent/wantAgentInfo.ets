@@ -14,27 +14,18 @@
  */
 
 import Want from '@ohos.app.ability.Want';
-import wantAgent from '@ohos.app.ability.wantAgent';
 import type abilityWantAgent from '@ohos.app.ability.wantAgent';
 
 export interface WantAgentInfo {
   wants: Array<Want>;
-  operationType?: wantAgent.OperationType;
   actionType?: abilityWantAgent.OperationType;
   requestCode: number;
-  wantAgentFlags?: Array<wantAgent.WantAgentFlags>;
   actionFlags?: Array<abilityWantAgent.WantAgentFlags>;
-  extraInfo?: Record<string,Object>;
-  extraInfos?: Record<string, Object>;
 }
 
 class WantAgentInfoImpl implements WantAgentInfo {
-  public wants: Array<Want>;
-  public operationType?: wantAgent.OperationType;
+  public wants: Array<Want> = new Array<Want>;
   public actionType?: abilityWantAgent.OperationType;
   public requestCode: number;
-  public wantAgentFlags?: Array<wantAgent.WantAgentFlags>;
   public actionFlags?: Array<abilityWantAgent.WantAgentFlags>;
-  public extraInfo?: Record<string,Object>;
-  public extraInfos?: Record<string, Object>;
 }

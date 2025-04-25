@@ -135,7 +135,8 @@ ani_object CreateStsUIExtensionContext(ani_env *env,
         TAG_LOGE(AAFwkTag::UI_EXT, "application null");
         return nullptr;
     }
-    OHOS::AbilityRuntime::CreatEtsExtensionContext(env, cls, contextObj,
-        application->GetApplicationCtxObjRef(), context, context->GetAbilityInfo());
+    OHOS::AbilityRuntime::ContextUtil::StsCreatContext(env, cls, contextObj,
+        application->GetApplicationCtxObjRef(), context);
+    OHOS::AbilityRuntime::CreatEtsExtensionContext(env, cls, contextObj, context, context->GetAbilityInfo());
     return contextObj;
 }

@@ -34,7 +34,7 @@ bool SetExtensionAbilityInfo(ani_env* aniEnv, ani_class contextClass, ani_object
     ani_status status = ANI_OK;
     if (abilityInfo && hapModuleInfo) {
         auto isExist = [&abilityInfo](const OHOS::AppExecFwk::ExtensionAbilityInfo& info) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
+            TAG_LOGD(AAFwkTag::CONTEXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
             return info.bundleName == abilityInfo->bundleName && info.name == abilityInfo->name;
         };
         auto infoIter = std::find_if(
@@ -87,9 +87,11 @@ bool SetConfiguration(
     return true;
 }
 
-void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo)
+void CreatEtsExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context,
+    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo)
 {
+    TAG_LOGD(AAFwkTag::CONTEXT, "CreatEtsExtensionContext Call");
     if (aniEnv == nullptr || context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "aniEnv or context is nullptr");
         return;
@@ -105,14 +107,5 @@ void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object conte
         return;
     }
 }
-
-void CreatEtsExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context,
-    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo)
-{
-    TAG_LOGD(AAFwkTag::CONTEXT, "CreatEtsExtensionContext Call");
-    OHOS::AbilityRuntime::ContextUtil::StsCreatContext(aniEnv, contextClass, contextObj, applicationCtxRef, context);
-    BindExtensionInfo(aniEnv, contextClass, contextObj, context, abilityInfo);
-}
-}// namespace AbilityRuntime
-}// namespace OHOS
+} // namespace AbilityRuntime
+} // namespace OHOS

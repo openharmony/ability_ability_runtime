@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
- #ifndef OHOS_ABILITY_RUNTIME_STS_EXTENSION_CONTEXT_H
- #define OHOS_ABILITY_RUNTIME_STS_EXTENSION_CONTEXT_H
+#ifndef OHOS_ABILITY_RUNTIME_STS_EXTENSION_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_STS_EXTENSION_CONTEXT_H
  
- #include "extension_context.h"
- #include "ani.h"
+#include "extension_context.h"
+#include "ani.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 void CreatEtsExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context,
+    std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context,
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo);
 } // namespace AbilityRuntime
 } // namespace OHOS

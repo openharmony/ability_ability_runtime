@@ -54,6 +54,8 @@ public:
 
     static ani_object SetAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context);
     static std::shared_ptr<AbilityContext> GetAbilityContext(ani_env *env, ani_object aniObj);
+    static void StartServiceExtensionAbilitySync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        [[maybe_unused]] ani_object wantObj, [[maybe_unused]] ani_object callbackobj);
 
 private:
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
@@ -72,6 +74,8 @@ private:
 bool BindNativeMethods(ani_env *env, ani_class &cls);
 bool SetAbilityInfo(ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context);
 bool SetConfiguration(
+    ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context);
+bool SetHapModuleInfo(
     ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context);
 ani_ref CreateStsAbilityContext(
     ani_env *env, const std::shared_ptr<AbilityContext> &context, const std::shared_ptr<OHOSApplication> &application);

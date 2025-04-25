@@ -11,25 +11,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-generate_static_abc("service_extension_ability") {
-  base_url = "./ets"
-  files = [
-    "./ets/@ohos.app.ability.ServiceExtensionAbility.ets",
-    "./ets/application/ServiceExtensionContext.ets",
+ohos_shared_library("context_ani") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  sources = [
+    "context_native_constructor.cpp",
   ]
 
-  is_boot_abc = "True"
-  device_dst_file = "/system/framework/service_extension_ability.abc"
-}
+  include_dirs = [
+    "${ability_runtime_services_path}/common/include",
+  ]
 
-ohos_prebuilt_etc("service_extension_ability_abc_etc") {
-  source = "$target_out_dir/service_extension_ability.abc"
-  module_install_dir = "framework"
+  external_deps = [
+    "hilog:libhilog",
+    "runtime_core:ani",
+  ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
-  deps = [ ":service_extension_ability" ]
+  output_extension = "so"
 }

@@ -23,13 +23,9 @@
 #include "hilog_tag_wrapper.h"
 #include "int_wrapper.h"
 #include "ipc_skeleton.h"
-#include "js_runtime_utils.h"
 #include "long_wrapper.h"
-#include "napi_remote_object.h"
-#include "remote_object_wrapper.h"
 #include "short_wrapper.h"
 #include "string_wrapper.h"
-#include "tokenid_kit.h"
 #include "want_params_wrapper.h"
 #include "zchar_wrapper.h"
 
@@ -143,6 +139,61 @@ bool InnerWrapWantParamsString(
     }
     // TODO
     return true;
+}
+
+ani_object WrapElementName(ani_env *env, const AppExecFwk::ElementName &elementNameParam)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "WrapElementName");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return nullptr;
+    }
+    ani_class elementNameObj = nullptr;
+    ani_status status = ANI_ERROR;
+    ani_method method = nullptr;
+    ani_object object = {};
+    static const char *className = "LbundleManager/ElementNameInner/ElementNameInner;";
+    if ((status = env->FindClass(className, &elementNameObj)) != ANI_OK || elementNameObj == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "FindClass status : %{public}d or null elementNameObj", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(elementNameObj, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Class_FindMethod status : %{public}d or null method", status);
+        return nullptr;
+    }
+    if ((status = env->Object_New(elementNameObj, method, &object)) != ANI_OK || object == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Object_New status : %{public}d or null object", status);
+        return nullptr;
+    }
+    return WrapElementNameInner(env, elementNameObj, object, elementNameParam);
+}
+
+ani_object WrapElementNameInner(ani_env *env, ani_class elementNameObj, ani_object object,
+    const AppExecFwk::ElementName &elementNameParam)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "WrapElementNameInner");
+    if (env == nullptr || elementNameObj == nullptr || object == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid args");
+        return nullptr;
+    }
+    if (!SetFieldString(env, elementNameObj, object, "bundleName", elementNameParam.GetBundleName())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "set bundleName failed");
+        return nullptr;
+    }
+    if (!SetFieldString(env, elementNameObj, object, "abilityName", elementNameParam.GetAbilityName())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "set abilityName failed");
+        return nullptr;
+    }
+    if (!SetStringProperty(env, object, "deviceId", elementNameParam.GetDeviceID())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "set deviceId failed");
+    }
+    if (!SetStringProperty(env, object, "moduleName", elementNameParam.GetModuleName())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "set moduleName failed");
+    }
+    if (!SetStringProperty(env, object, "uri", elementNameParam.GetURI())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "set uri failed");
+    }
+    return object;
 }
 
 bool UnwrapElementName(ani_env *env, ani_object param, ElementName &elementName)

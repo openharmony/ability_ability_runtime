@@ -15,7 +15,17 @@
 
 import Context from 'application.Context'
 import { Configuration } from '@ohos.app.ability.Configuration'
+import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 
 export default class AbilityStageContext extends Context {
+    static {
+        loadLibrary("context_ani");
+    }
     config?: Configuration;
+    currentHapModuleInfo: HapModuleInfo;
+    native constructor();
+    constructor(currentHapModuleInfo: HapModuleInfo) {
+        super();
+        this.currentHapModuleInfo = currentHapModuleInfo;
+    }
 }
