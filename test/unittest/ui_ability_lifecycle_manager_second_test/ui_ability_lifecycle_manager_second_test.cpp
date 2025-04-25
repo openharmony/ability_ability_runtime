@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "ability_manager_errors.h"
+#include "ability_util.h"
 #define private public
 #define protected public
 #include "ability_record.h"
@@ -31,7 +32,11 @@
 #include "session/host/include/session.h"
 #include "session_info.h"
 #include "startup_util.h"
+#define private public
+#define protected public
 #include "ability_manager_service.h"
+#undef protected
+#undef private
 #include "ability_scheduler_mock.h"
 #include "hilog_tag_wrapper.h"
 #include "mock_my_flag.h"
@@ -476,6 +481,301 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_009, TestSize.Leve
     abilityRecord->SetLaunchWant(std::make_shared<Want>());
     auto ret = uiAbilityLifecycleManager->RevokeDelegator(abilityRecord->GetToken());
     EXPECT_EQ(ret, ERR_FROM_WINDOW);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckSpecified_0100
+ * @tc.desc: CheckSpecified
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckSpecified_001, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    mgr->specifiedFlagMap_.clear();
+    mgr->specifiedFlagMap_.emplace(1, "2");
+    AbilityRequest abilityRequest;
+    auto abilityRecord = std::make_shared<AbilityRecord>(
+        abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
+
+    mgr->CheckSpecified(1, abilityRecord);
+
+    EXPECT_EQ(mgr->specifiedFlagMap_.size(), 0);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_AbilityWindowConfigTransactionDone_0100
+ * @tc.desc: AbilityWindowConfigTransactionDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, AbilityWindowConfigTransactionDone_001, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    mgr->specifiedFlagMap_.emplace(1, "2");
+    WindowConfig windowConfig;
+
+    auto ret = mgr->AbilityWindowConfigTransactionDone(nullptr, windowConfig);
+
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_AddStartCallerTimestamp_0100
+ * @tc.desc: AddStartCallerTimestamp
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, AddStartCallerTimestamp_001, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    std::map<int32_t, std::vector<int64_t>> startUIAbilityCallerTimestamps;
+    std::vector<int64_t> callerTimestamps = {};
+    constexpr int32_t START_UI_ABILITY_PER_SECOND_UPPER_LIMIT = 20;
+    auto curTimeNs = AbilityUtil::GetSysTimeNs();
+    for (int i = 0; i < START_UI_ABILITY_PER_SECOND_UPPER_LIMIT + 2; i++) {
+        callerTimestamps.emplace_back(curTimeNs);
+    }
+    startUIAbilityCallerTimestamps.emplace(2, callerTimestamps);
+    mgr->startUIAbilityCallerTimestamps_ = startUIAbilityCallerTimestamps;
+
+    auto ret = mgr->AddStartCallerTimestamp(2);
+
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_AddStartCallerTimestamp_0200
+ * @tc.desc: AddStartCallerTimestamp
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, AddStartCallerTimestamp_002, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    std::map<int32_t, std::vector<int64_t>> startUIAbilityCallerTimestamps_;
+    constexpr int32_t START_UI_ABILITY_PER_SECOND_UPPER_LIMIT = 20;
+    for (int i = 0; i < START_UI_ABILITY_PER_SECOND_UPPER_LIMIT - 3; i++) {
+        startUIAbilityCallerTimestamps_.emplace(i, std::vector<int64_t>{1, 2});
+    }
+
+    auto ret = mgr->AddStartCallerTimestamp(2);
+
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_NotifySCBToRecoveryAfterInterception_0100
+ * @tc.desc: NotifySCBToRecoveryAfterInterception
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, NotifySCBToRecoveryAfterInterception_001, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest = {};
+
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.isStageBasedModel = false;
+    abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED;
+
+    auto ret = mgr->NotifySCBToRecoveryAfterInterception(abilityRequest);
+
+    EXPECT_EQ(ret, 22);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_NotifySCBToRecoveryAfterInterception_0200
+ * @tc.desc: NotifySCBToRecoveryAfterInterception
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, NotifySCBToRecoveryAfterInterception_002, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest ={};
+    bool isNewProcessMode = abilityRequest.processOptions &&
+    ProcessOptions::IsNewProcessMode(abilityRequest.processOptions->processMode);
+    abilityRequest.processOptions = nullptr;
+    abilityRequest.abilityInfo.isolationProcess = true;
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.isStageBasedModel = true;
+    AppUtils::GetInstance().isStartOptionsWithAnimation_ = true;
+
+    auto ret = mgr->NotifySCBToRecoveryAfterInterception(abilityRequest);
+
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_DispatchBackground_0100
+ * @tc.desc: DispatchBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, DispatchBackground_001, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    auto abilityRecord = std::make_shared<AbilityRecord>(
+        abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
+    abilityRecord->currentState_ = AbilityState::INITIAL;
+
+    auto ret = mgr->DispatchBackground(abilityRecord);
+
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_PreCreateProcessName_0100
+ * @tc.desc: PreCreateProcessName
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, PreCreateProcessName_001, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.processOptions = std::make_shared<ProcessOptions>();
+    abilityRequest.processOptions->processMode = ProcessMode::UNSPECIFIED;
+    abilityRequest.processOptions->processName = "fffAAABBBCCCggg";
+
+    mgr->PreCreateProcessName(abilityRequest);
+
+    EXPECT_EQ(abilityRequest.processOptions->processName, "fffAAABBBCCCggg");
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_PreCreateProcessName_0200
+ * @tc.desc: PreCreateProcessName
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, PreCreateProcessName_002, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.processOptions = std::make_shared<ProcessOptions>();
+    abilityRequest.processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
+    abilityRequest.processOptions->processName = "fffAAABBBCCCggg";
+    abilityRequest.abilityInfo.bundleName = "BHi";
+    abilityRequest.abilityInfo.moduleName = "MHi";
+    abilityRequest.abilityInfo.name = "NHi";
+
+    mgr->PreCreateProcessName(abilityRequest);
+
+    auto processName = abilityRequest.processOptions->processName;
+    auto processNameSub = processName.substr(0, processName.find_last_of(':'));
+    EXPECT_EQ(processNameSub, "BHi:MHi:NHi");
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_BackToCallerAbilityWithResult_0700
+ * @tc.desc: BackToCallerAbilityWithResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, BackToCallerAbilityWithResult_007, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+
+    auto ret = mgr->BackToCallerAbilityWithResult(nullptr, 1, nullptr, 0);
+
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_BackToCallerAbilityWithResult_0800
+ * @tc.desc: BackToCallerAbilityWithResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, BackToCallerAbilityWithResult_008, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.name = "TestAbility";
+    abilityRequest.abilityInfo.applicationInfo.accessTokenId = 12345;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+
+    int64_t callerRequestCode = 123456789;
+    CallerRequestInfo requestInfo;
+    requestInfo.requestCode = 1;
+    requestInfo.pid = 100;
+    requestInfo.backFlag = false;
+
+    auto ret = mgr->BackToCallerAbilityWithResult(abilityRecord, 0, nullptr, callerRequestCode);
+
+    EXPECT_EQ(ret, ERR_CALLER_NOT_EXISTS);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_SetLastExitReason_0100
+ * @tc.desc: SetLastExitReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, SetLastExitReason_001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    abilityRecord->abilityInfo_.bundleName = "not empty";
+    abilityRecord->sessionInfo_ = nullptr;
+
+    mgr->SetLastExitReason(abilityRecord);
+
+    EXPECT_NE(abilityRecord, nullptr);
+    EXPECT_NE(abilityRecord->GetAbilityInfo().bundleName.empty(), true);
+    EXPECT_EQ(abilityRecord->GetSessionInfo(), nullptr);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_UninstallApp_0100
+ * @tc.desc: UninstallApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, UninstallApp_001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    mgr->sessionAbilityMap_.clear();
+    auto abilityRequest1 = std::make_shared<AbilityRequest>();
+    abilityRequest1->appInfo.uid = 1;
+    mgr->startAbilityCheckMap_.emplace(1, abilityRequest1);
+    auto abilityRequest2 = std::make_shared<AbilityRequest>();
+    abilityRequest2->appInfo.uid = 2;
+    mgr->startAbilityCheckMap_.emplace(2, abilityRequest2);
+
+    std::string bundleName = "HelloWorld";
+    int32_t uid = 1;
+    mgr->UninstallApp(bundleName, uid);
+
+    auto mapSize = mgr->startAbilityCheckMap_.size();
+    EXPECT_EQ(mapSize, 1);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_PrepareCloseUIAbility_0100
+ * @tc.desc: PrepareCloseUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, PrepareCloseUIAbility_001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    mgr->terminateAbilityList_.clear();
+
+    mgr->PrepareCloseUIAbility(nullptr, 0, nullptr, true);
+
+    auto listSize = mgr->terminateAbilityList_.size();
+    EXPECT_EQ(listSize, 0);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_NotifySCBToHandleAtomicServiceException_0100
+ * @tc.desc: NotifySCBToHandleAtomicServiceException
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerSecondTest, NotifySCBToHandleAtomicServiceException_001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    auto sessionInfo = std::make_shared<SessionInfo>();
+    Rosen::SessionInfo info1;
+    auto session = std::make_shared<Rosen::Session>(info1);
+    sessionInfo->sessionToken = nullptr;
+    sessionInfo->errorCode = 0;
+    std::string errorReason = "";
+
+    mgr->NotifySCBToHandleAtomicServiceException(nullptr, 5, errorReason);
+
+    EXPECT_EQ(sessionInfo->errorCode, 0);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
