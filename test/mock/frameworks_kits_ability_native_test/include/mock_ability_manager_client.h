@@ -158,8 +158,7 @@ public:
         const std::string &message)
     {}
 
-    virtual void ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message)
+    virtual void ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)
     {}
 };
 }  // namespace AppExecFwk

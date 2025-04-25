@@ -1267,7 +1267,7 @@ void AbilitySchedulerProxy::ScheduleAbilityRequestFailure(const std::string &req
 }
 
 void AbilitySchedulerProxy::ScheduleAbilityRequestSuccess(const std::string &requestId,
-    const AppExecFwk::ElementName &element, const std::string &message)
+    const AppExecFwk::ElementName &element)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1286,11 +1286,6 @@ void AbilitySchedulerProxy::ScheduleAbilityRequestSuccess(const std::string &req
     if (!data.WriteParcelable(&element)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write element failed");
         AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "write want failed");
-        return;
-    }
-    if (!data.WriteString(message)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write message failed");
-        AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "write message failed");
         return;
     }
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_REQUEST_SUCCESS, data, reply, option);
