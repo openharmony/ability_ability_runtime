@@ -1041,9 +1041,15 @@ void ContextImpl::GetOverlayPath(std::shared_ptr<Global::Resource::ResourceManag
     } else {
         std::vector<std::string> overlayPaths;
         for (auto it : overlayModuleInfos) {
-            if (std::regex_search(it.hapPath, std::regex(GetBundleNameWithContext(inputContext)))) {
+            bool isMatched = false;
+            try {
+                isMatched = std::regex_search(it.hapPath, std::regex(GetBundleNameWithContext(inputContext)));
+            } catch (...) {
+                TAG_LOGE(AAFwkTag::APPKIT, "hapPath: %{private}s", it.hapPath.c_str());
+            }
+            if (isMatched) {
                 it.hapPath = std::regex_replace(it.hapPath, std::regex(std::string(ABS_CODE_PATH) +
-        std::string(FILE_SEPARATOR) + GetBundleNameWithContext(inputContext)), LOCAL_CODE_PATH);
+                    std::string(FILE_SEPARATOR) + GetBundleNameWithContext(inputContext)), LOCAL_CODE_PATH);
             } else {
                 it.hapPath = std::regex_replace(it.hapPath, std::regex(ABS_CODE_PATH), LOCAL_BUNDLES);
             }
