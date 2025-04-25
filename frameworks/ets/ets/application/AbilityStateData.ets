@@ -14,9 +14,9 @@
  */
 
 export default class AbilityStateData {
-  readonly moduleName: string;
-  readonly bundleName: string;
-  readonly abilityName: string;
+  readonly moduleName: string = '';
+  readonly bundleName: string = '';
+  readonly abilityName: string = '';
   readonly pid: int;
   readonly uid: int;
   readonly state: int;
