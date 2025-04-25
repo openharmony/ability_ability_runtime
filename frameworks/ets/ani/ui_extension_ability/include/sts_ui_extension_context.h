@@ -23,21 +23,34 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ohos_application.h"
+#include "sts_free_install_observer.h"
+namespace OHOS {
+namespace AbilityRuntime {
 
 [[maybe_unused]] static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj,
     [[maybe_unused]] ani_object callback);
 [[maybe_unused]] static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env,
     [[maybe_unused]] ani_object obj, [[maybe_unused]] ani_object abilityResult, [[maybe_unused]] ani_object callback);
-ani_object CreateStsUIExtensionContext(ani_env *env,
-    std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context,
-    const std::shared_ptr<OHOS::AppExecFwk::OHOSApplication> &application);
+ani_object CreateStsUIExtensionContext(ani_env *env, std::shared_ptr<UIExtensionContext> context,
+    const std::shared_ptr<AppExecFwk::OHOSApplication> &application);
+
+bool BindNativeMethods(ani_env *env, ani_class &cls);
 
 class StsUIExtensionContext final {
 public:
-    explicit StsUIExtensionContext(const std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext>& context)
-        : context_(context) {}
-    virtual ~StsUIExtensionContext() = default;
-protected:
-    std::weak_ptr<OHOS::AbilityRuntime::UIExtensionContext> context_;
+    static StsUIExtensionContext &GetInstance()
+    {
+        static StsUIExtensionContext instance;
+        return instance;
+    }
+    void StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
+        ani_object wantObj, ani_object opt, ani_object call);
+    static UIExtensionContext* GetAbilityContext(ani_env *env, ani_object obj);
+    void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want,
+        ani_object callback, UIExtensionContext* context);
+private:
+    sptr<StsFreeInstallObserver> freeInstallObserver_ = nullptr;
 };
+}  // namespace AbilityRuntime
+}  // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_STS_UI_EXTENSION_CONTEXT_H

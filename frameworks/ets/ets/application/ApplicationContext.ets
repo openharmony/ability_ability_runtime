@@ -14,18 +14,23 @@
  */
 
 import Context from 'application.Context'
+import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { BusinessError, AsyncCallback } from '@ohos.base'
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
 export default class ApplicationContext extends Context {
   public native nativekillAllProcessesSync(clearPageStack: boolean, callback: AsyncCallbackWrapper<void>): void;
-
+  public native nativeOnSync(type: 'environment', callback: EnvironmentCallback): number;
   public native setSupportedProcessCacheSync(isSupported: boolean): void;
 
   setSupportedProcessCache(isSupported: boolean): void {
     taskpool.execute((): void => {
       this.setSupportedProcessCacheSync(isSupported);
     });
+  }
+
+  on(type: 'environment', callback: EnvironmentCallback): number {
+    return this.nativeOnSync(type, callback);
   }
 
   killAllProcesses(callback: AsyncCallback<void>): void {

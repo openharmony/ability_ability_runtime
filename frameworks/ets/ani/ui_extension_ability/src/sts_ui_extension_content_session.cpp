@@ -31,7 +31,6 @@
 #include "remote_object_wrapper.h"
 #include "tokenid_kit.h"
 #include "want_params_wrapper.h"
-#include "sts_ui_extension_common.h"
 #include "sts_error_utils.h"
 namespace OHOS {
 namespace AbilityRuntime {
@@ -102,9 +101,8 @@ void NativeTerminateSelf(ani_env* env, ani_object obj, [[maybe_unused]] ani_obje
     auto stsContentSession = GetStsContentSession(env, obj);
     if (stsContentSession != nullptr) {
         int32_t resultCode = stsContentSession->TerminateSelfWithResult();
-        OHOS::AbilityRuntime::StsUIExtensionCommon::AsyncCallback(env, callback,
-            OHOS::AbilityRuntime::StsUIExtensionCommon::WrapBusinessError(
-                env, static_cast<int32_t>(resultCode)), nullptr);
+        OHOS::AppExecFwk::AsyncCallback(env, callback,
+            OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, static_cast<int32_t>(resultCode)), nullptr);
     }
 }
 
@@ -116,9 +114,8 @@ int NativeTerminateSelfWithResult(ani_env* env, ani_object obj, [[maybe_unused]]
     auto stsContentSession = GetStsContentSession(env, obj);
     if (stsContentSession != nullptr) {
         ret = stsContentSession->TerminateSelfWithResult();
-        OHOS::AbilityRuntime::StsUIExtensionCommon::AsyncCallback(env, callback,
-            OHOS::AbilityRuntime::StsUIExtensionCommon::WrapBusinessError(
-                env, static_cast<int32_t>(ret)), nullptr);
+        OHOS::AppExecFwk::AsyncCallback(env, callback,
+            OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
     }
     return ret;
 }
