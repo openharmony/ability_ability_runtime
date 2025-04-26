@@ -21,6 +21,7 @@
 #include "ability_manager_client.h"
 #include "configuration_utils.h"
 #include "display_util.h"
+#include "freeze_util.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_execute_param.h"
@@ -162,6 +163,7 @@ void JsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    FreezeUtil::GetInstance().AddLifecycleEvent(token, "JsServiceExtension::Init");
     ServiceExtension::Init(record, application, handler, token);
     std::string srcPath = "";
     GetSrcPath(srcPath);
@@ -177,6 +179,7 @@ void JsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
 
+    FreezeUtil::GetInstance().AddLifecycleEvent(token, "JsServiceExtension::Init LoadModule");
     jsObj_ = jsRuntime_.LoadModule(
         moduleName, srcPath, abilityInfo_->hapPath, abilityInfo_->compileMode == CompileMode::ES_MODULE,
         false, abilityInfo_->srcEntrance);
@@ -372,14 +375,25 @@ sptr<IRemoteObject> JsServiceExtension::OnConnect(const AAFwk::Want &want)
     return remoteObj;
 }
 
+void JsServiceExtension::AddLifecycleEventForJSCall(const std::string &eventStr)
+{
+    auto entry = std::string("JsServiceExtension::") + eventStr;
+    auto context = GetContext();
+    if (context) {
+        FreezeUtil::GetInstance().AddLifecycleEvent(context->GetToken(), entry);
+    }
+}
+
 sptr<IRemoteObject> JsServiceExtension::OnConnect(const AAFwk::Want &want,
     AppExecFwk::AbilityTransactionCallbackInfo<sptr<IRemoteObject>> *callbackInfo, bool &isAsyncCallback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HandleScope handleScope(jsRuntime_);
+    AddLifecycleEventForJSCall("OnConnect begin");
     napi_env env = jsRuntime_.GetNapiEnv();
     napi_value result = CallOnConnect(want);
     bool isPromise = CheckPromise(result);
+    AddLifecycleEventForJSCall("OnConnect end");
     if (!isPromise) {
         isAsyncCallback = false;
         sptr<IRemoteObject> remoteObj = GetNativeRemoteObject(env, result);
@@ -415,11 +429,10 @@ sptr<IRemoteObject> JsServiceExtension::OnConnect(const AAFwk::Want &want,
         callResult = true;
     } while (false);
 
+    isAsyncCallback = true;
     if (!callResult) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "call promise error");
         isAsyncCallback = false;
-    } else {
-        isAsyncCallback = true;
     }
     return nullptr;
 }

@@ -14,6 +14,7 @@
  */
 
 #include "ams_mgr_proxy.h"
+#include "freeze_util.h"
 #include "ipc_types.h"
 #include "iremote_object.h"
 #include "param.h"
@@ -116,6 +117,8 @@ void AmsMgrProxy::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
     int32_t ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::LOAD_ABILITY), data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
+        AbilityRuntime::FreezeUtil::GetInstance().AddLifecycleEvent(loadParam->token,
+            "AmsMgrProxy::LoadAbility fail, ipc error " + std::to_string(ret));
     }
     TAG_LOGD(AAFwkTag::APPMGR, "end");
 }

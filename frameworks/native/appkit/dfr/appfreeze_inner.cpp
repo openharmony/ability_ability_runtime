@@ -210,6 +210,10 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
             faultData.errorObject.message += "client actions for ability:\n" +
                 FreezeUtil::GetInstance().GetLifecycleEvent(it->token) + "\nclient actions for app:\n" +
                 FreezeUtil::GetInstance().GetAppLifecycleEvent(0) + "\n";
+            if (info.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) {
+                FreezeUtil::GetInstance().DeleteLifecycleEvent(it->token);
+                FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
+            }
         }
         faultData.errorObject.name = it->errorObject.name;
         faultData.timeoutMarkers = it->timeoutMarkers;
