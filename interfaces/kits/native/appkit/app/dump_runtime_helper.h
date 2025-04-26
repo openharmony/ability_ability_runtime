@@ -55,8 +55,8 @@ private:
     static void CreateDirDelay(const std::string &path);
     static bool Check2CQuota();
     static bool Check2DQuota(bool needDecreaseQuota);
-    static bool  SafeStoll(const std::string &str, long long &value);
-    static bool GetCompressQuota (const std::vector<int64_t> &quotas);
+    static bool SafeStoll(const std::string &str, long long &value);
+    static int GetCompressQuota (const std::vector<int64_t> &quotas);
 };
 } // namespace AppExecFwk
 } // namespace OHOS
