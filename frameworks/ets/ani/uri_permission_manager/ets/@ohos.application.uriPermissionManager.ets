@@ -116,4 +116,4 @@ export default namespace uriPermissionManager {
             uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName, 0, myCall);
         })
     }
- }
+}
