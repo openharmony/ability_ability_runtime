@@ -373,5 +373,10 @@ void InsightIntentExecuteManager::SendIntentReport(EventInfo &eventInfo, int32_t
     eventInfo.errCode = errCode;
     EventReport::SendExecuteIntentEvent(EventName::EXECUTE_INSIGHT_INTENT_ERROR, HiSysEventType::FAULT, eventInfo);
 }
+
+int32_t InsightIntentExecuteManager::CheckPermissionForCaller()
+{
+    return CheckCallerPermission();
+}
 } // namespace AAFwk
 } // namespace OHOS

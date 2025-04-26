@@ -2199,5 +2199,39 @@ ErrCode AbilityManagerClient::RevokeDelegator(sptr<IRemoteObject> token)
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->RevokeDelegator(token);
 }
+
+ErrCode AbilityManagerClient::GetAllInsightIntentInfo(
+    AbilityRuntime::GetInsightIntentFlag flag,
+    std::vector<InsightIntentInfoForBack> &infos)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "call GetAllInsightIntentInfo");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetAllInsightIntentInfo(flag, infos);
+}
+
+ErrCode AbilityManagerClient::GetInsightIntentInfoByBundleName(
+    AbilityRuntime::GetInsightIntentFlag flag,
+    const std::string &bundleName,
+    std::vector<InsightIntentInfoForBack> &infos)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "call GetInsightIntentInfoByBundleName");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+}
+
+ErrCode AbilityManagerClient::GetInsightIntentInfoByIntentName(
+    AbilityRuntime::GetInsightIntentFlag flag,
+    const std::string &bundleName,
+    const std::string &moduleName,
+    const std::string &intentName,
+    InsightIntentInfoForBack &info)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "call GetInsightIntentInfoByIntentName");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
+}
 } // namespace AAFwk
 } // namespace OHOS
