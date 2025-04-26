@@ -330,7 +330,7 @@ void DumpRuntimeHelper::CreateDirDelay(const std::string &path)
             return;
         }
         TAG_LOGI(AAFwkTag::APPKIT, "success to AclSetAccess, path: %{public}s", path.c_str());
-    }, {}, {}, {ffrt::task_attr().name("ffrt_dfr_CreateDir")});
+        }, {}, {}, {ffrt::task_attr().name("ffrt_dfr_CreateDir")});
 }
 
 bool DumpRuntimeHelper::Init2DOOMDumpQuota(const std::string &path, uint32_t oomDumpProcessMaxQuota)
@@ -397,7 +397,7 @@ bool DumpRuntimeHelper::Check2DOOMDumpQuota(uint32_t oomDumpMaxQuota, uint32_t o
     return true;
 }
 
-bool DumpRuntimeHelper::GetQuota(const std::string &path,const std::string &property,
+bool DumpRuntimeHelper::GetQuota(const std::string &path, const std::string &property,
                                  std::vector<int64_t> &output, size_t size)
 {
     std::string value;
