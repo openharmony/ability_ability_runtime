@@ -225,10 +225,14 @@ int UriPermissionManagerStub::HandleActive(MessageParcel &data, MessageParcel &r
     std::vector<uint32_t> result;
     int res = Active(policy, result);
     if (!reply.WriteUInt32Vector(result)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write result failed");
+        return ERR_DEAD_OBJECT;
+    }
+    if (!reply.WriteInt32(res)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Write res failed");
         return ERR_DEAD_OBJECT;
     }
-    return res;
+    return ERR_OK;
 }
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 }  // namespace AAFwk
