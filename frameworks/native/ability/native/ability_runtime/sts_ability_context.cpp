@@ -51,7 +51,9 @@ namespace OHOS {
 namespace AbilityRuntime {
 const char *INVOKE_METHOD_NAME = "invoke";
 std::mutex StsAbilityContext::requestCodeMutex_;
-
+namespace {
+    static std::once_flag g_bindNativeMethodsFlag;
+}
 
 std::shared_ptr<AbilityContext> StsAbilityContext::GetAbilityContext(ani_env *env, ani_object aniObj)
 {
@@ -527,35 +529,35 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
         TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
         return false;
     }
-
-    std::array functions = {
-        ani_native_function { "nativeStartAbilitySync",
-            "L@ohos/app/ability/Want/Want;Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void*>(StsAbilityContext::StartAbility1) },
-        ani_native_function { "nativeStartAbilitySync",
-            "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lapplication/UIAbilityContext/"
-            "AsyncCallbackWrapper;:V",
-            reinterpret_cast<void*>(StsAbilityContext::StartAbility2) },
-        ani_native_function { "nativeStartAbilityForResult",
-            "L@ohos/app/ability/Want/Want;Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void*>(StsAbilityContext::StartAbilityForResult1) },
-        ani_native_function { "nativeStartAbilityForResult",
-            "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lapplication/UIAbilityContext/"
-            "AsyncCallbackWrapper;:V",
-            reinterpret_cast<void*>(StsAbilityContext::StartAbilityForResult2) },
-        ani_native_function { "nativeTerminateSelfSync",
-            "Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void*>(StsAbilityContext::TerminateSelf) },
-        ani_native_function { "nativeTerminateSelfWithResult",
-            "Lability/abilityResult/AbilityResult;Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void*>(StsAbilityContext::TerminateSelfWithResult) },
-        ani_native_function { "nativeReportDrawnCompletedSync", "Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
-            reinterpret_cast<ani_int*>(StsAbilityContext::reportDrawnCompletedSync) },
-        ani_native_function { "nativeStartAbilityByTypeSync", nullptr,
-            reinterpret_cast<void*>(StsAbilityContext::StartAbilityByTypeSync) },
-    };
-
-    status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
+    std::call_once(g_bindNativeMethodsFlag, [&status, env, cls]() {
+        std::array functions = {
+            ani_native_function { "nativeStartAbilitySync",
+                "L@ohos/app/ability/Want/Want;Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void*>(StsAbilityContext::StartAbility1) },
+            ani_native_function { "nativeStartAbilitySync",
+                "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lapplication/"
+                "UIAbilityContext/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void*>(StsAbilityContext::StartAbility2) },
+            ani_native_function { "nativeStartAbilityForResult",
+                "L@ohos/app/ability/Want/Want;Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void*>(StsAbilityContext::StartAbilityForResult1) },
+            ani_native_function { "nativeStartAbilityForResult",
+                "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lapplication/"
+                "UIAbilityContext/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void*>(StsAbilityContext::StartAbilityForResult2) },
+            ani_native_function { "nativeTerminateSelfSync", "Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void*>(StsAbilityContext::TerminateSelf) },
+            ani_native_function { "nativeTerminateSelfWithResult",
+                "Lability/abilityResult/AbilityResult;Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void*>(StsAbilityContext::TerminateSelfWithResult) },
+            ani_native_function { "nativeReportDrawnCompletedSync",
+                "Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
+                reinterpret_cast<ani_int*>(StsAbilityContext::reportDrawnCompletedSync) },
+            ani_native_function { "nativeStartAbilityByTypeSync", nullptr,
+                reinterpret_cast<void*>(StsAbilityContext::StartAbilityByTypeSync) },
+        };
+        status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
+    });
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
         return false;
