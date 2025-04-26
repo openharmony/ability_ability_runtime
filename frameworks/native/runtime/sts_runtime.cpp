@@ -558,7 +558,7 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadModule(const std::string& mo
         moduleName_ = path;
     }
     TAG_LOGD(AAFwkTag::STSRUNTIME, "moduleName_(%{public}s, path %{public}s",
-        moduleName_.c_str(),path.c_str());
+        moduleName_.c_str(), path.c_str());
 
     std::string fileName;
     if (!hapPath.empty()) {

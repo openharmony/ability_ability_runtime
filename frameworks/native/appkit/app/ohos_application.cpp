@@ -221,7 +221,8 @@ void OHOSApplication::SetApplicationContext(
 }
 
 static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
-    ani_boolean value) {
+    ani_boolean value)
+{
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     ani_class applicationContextCls = nullptr;
     if (env->FindClass(STS_APPLICATION_CONTEXT_CLASS_NAME, &applicationContextCls) != ANI_OK) {
