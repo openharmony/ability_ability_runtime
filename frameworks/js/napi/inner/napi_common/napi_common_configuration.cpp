@@ -54,6 +54,9 @@ napi_value WrapConfiguration(napi_env env, const AppExecFwk::Configuration &conf
     jsValue = WrapStringToJS(env, configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
     SetPropertyValueByPropertyName(env, jsObject, "language", jsValue);
 
+    jsValue = WrapLocaleToJS(env, configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE));
+    SetPropertyValueByPropertyName(env, jsObject, "locale", jsValue);
+
     jsValue = WrapInt32ToJS(
         env, ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE)));
     SetPropertyValueByPropertyName(env, jsObject, "colorMode", jsValue);
@@ -109,6 +112,15 @@ bool UnwrapConfiguration(napi_env env, napi_value param, Configuration &config)
         TAG_LOGD(AAFwkTag::JSNAPI, "The parsed language part %{public}s", language.c_str());
         if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language)) {
             TAG_LOGE(AAFwkTag::JSNAPI, "language Parsing failed");
+            return false;
+        }
+    }
+
+    std::string locale {""};
+    if (UnwrapLocaleByPropertyName(env, param, "locale", locale)) {
+        TAG_LOGD(AAFwkTag::JSNAPI, "The parsed locale part %{public}s", locale.c_str());
+        if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE, locale)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "locale Parsing failed");
             return false;
         }
     }

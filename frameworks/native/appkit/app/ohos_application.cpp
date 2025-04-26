@@ -240,7 +240,9 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
     bool isUpdateAppColor = IsUpdateColorNeeded(config, level);
     bool isUpdateAppFontSize = isUpdateFontSize(config, level);
     bool isUpdateAppLanguage = IsUpdateLanguageNeeded(config, level);
-    if (!isUpdateAppColor && !isUpdateAppFontSize && !isUpdateAppLanguage && config.GetItemSize() == 0) {
+    bool isUpdateAppLocale = IsUpdateLocaleNeeded(*configuration_, config);
+    if (!isUpdateAppColor && !isUpdateAppFontSize && !isUpdateAppLanguage && !isUpdateAppLocale &&
+        config.GetItemSize() == 0) {
         TAG_LOGD(AAFwkTag::APPKIT, "configuration need not updated");
         return;
     }
@@ -953,6 +955,28 @@ bool OHOSApplication::IsUpdateLanguageNeeded(Configuration &config, AbilityRunti
     AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(level);
     config.AddItem(AAFwk::GlobalConfigurationKey::IS_PREFERRED_LANGUAGE,
         level == AbilityRuntime::SetLevel::Application ? "1" : "0");
+    return true;
+}
+
+bool OHOSApplication::IsUpdateLocaleNeeded(const Configuration& updatedConfig, Configuration &config)
+{
+    std::string language = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    std::string locale = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE);
+    if (language.empty() && locale.empty()) {
+        TAG_LOGW(AAFwkTag::APPKIT, "language and locale empty");
+        return false;
+    }
+    std::string updatedLocale;
+    if (!language.empty() && !locale.empty()) {
+        updatedLocale = ApplicationConfigurationManager::GetUpdatedLocale(locale, language);
+    } else if (!language.empty()) {
+        updatedLocale = ApplicationConfigurationManager::GetUpdatedLocale(
+            updatedConfig.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE), language);
+    } else {
+        updatedLocale = ApplicationConfigurationManager::GetUpdatedLocale(locale,
+            updatedConfig.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
+    }
+    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE, updatedLocale);
     return true;
 }
 
