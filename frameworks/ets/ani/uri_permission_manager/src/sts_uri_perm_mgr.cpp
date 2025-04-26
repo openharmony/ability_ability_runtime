@@ -149,13 +149,13 @@ void StsUriPermissionManagerInit(ani_env *env)
         ani_native_function {
             "grantUriPermissionCallbackSync",
             "Lstd/core/String;L@ohos/app/ability/wantConstant/wantConstant/Flags;Lstd/core/String;D"
-            "L@ohos/application/uriPermissionManager/AppExecFwk::AsyncCallbackWrapper;:V",
+            "L@ohos/application/uriPermissionManager/AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(grantUriPermissionCallbackSync)
         },
         ani_native_function {
             "revokeUriPermissionCallbackSync",
             "Lstd/core/String;Lstd/core/String;D"
-            "L@ohos/application/uriPermissionManager/AppExecFwk::AsyncCallbackWrapper;:V",
+            "L@ohos/application/uriPermissionManager/AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(revokeUriPermissionCallbackSync)
         },
     };
