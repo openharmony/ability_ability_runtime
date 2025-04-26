@@ -131,14 +131,14 @@ bool DumpRuntimeHelper::Check2CQuota()
     int appQuota = static_cast<int>(quota2C[INDEX_APP_QUOTA]);
     int leftQuota = MIN(compressQuota, appQuota) - static_cast<int>(quota2C[INDEX_HAS_SENT]);
     if (leftQuota <= 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "invalid quota, compress: %{public}d, app: %{public}d, sent: %{public}ld",
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid quota, compress: %{public}d, app: %{public}d, sent: %{public}" PRId64,
             compressQuota, appQuota, quota2C[INDEX_HAS_SENT]);
         return false;
     }
 
     uint64_t now = GetCurrentTimestamp();
     if (quota2C[INDEX_DELIVERY_TS] < 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "invalid quota2C[%{public}d]: %{public}ld",
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid quota2C[%{public}d]: %{public}" PRId64,
             INDEX_DELIVERY_TS, quota2C[INDEX_DELIVERY_TS]);
         return false;
     }
