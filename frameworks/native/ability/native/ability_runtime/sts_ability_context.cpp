@@ -44,6 +44,7 @@
 #include "uri.h"
 #include "want.h"
 #include "common_fun_ani.h"
+#include "sts_caller_complex.h"
 #include "sts_context_utils.h"
 #include "sts_error_utils.h"
 
@@ -52,8 +53,52 @@ namespace AbilityRuntime {
 std::mutex StsAbilityContext::requestCodeMutex_;
 namespace {
     static std::once_flag g_bindNativeMethodsFlag;
+
+constexpr int32_t CALLER_TIME_OUT = 10; // 10s
+struct StartAbilityByCallData {
+    sptr<IRemoteObject> remoteCallee;
+    std::mutex mutexlock;
+    std::condition_variable condition;
+};
+
+void GenerateCallerCallBack(std::shared_ptr<StartAbilityByCallData> calls,
+    std::shared_ptr<CallerCallBack> callerCallBack)
+{
+    if (calls == nullptr || callerCallBack == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null calls or null callerCallBack");
+        return;
+    }
+    auto callBackDone = [weakData = std::weak_ptr<StartAbilityByCallData>(calls)] (const sptr<IRemoteObject> &obj) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "callBackDone called start");
+        auto calldata = weakData.lock();
+        if (calldata == nullptr) {
+            TAG_LOGW(AAFwkTag::UIABILITY, "calldata released");
+            return;
+        }
+        std::lock_guard lock(calldata->mutexlock);
+        calldata->remoteCallee = obj;
+        calldata->condition.notify_all();
+    };
+
+    callerCallBack->SetCallBack(callBackDone);
 }
 
+void WaitForCalleeObj(std::shared_ptr<StartAbilityByCallData> callData)
+{
+    if (callData == nullptr) {
+        return;
+    }
+    if (callData->remoteCallee == nullptr) {
+        std::unique_lock lock(callData->mutexlock);
+        if (callData->remoteCallee != nullptr) {
+            return;
+        }
+        if (callData->condition.wait_for(lock, std::chrono::seconds(CALLER_TIME_OUT)) == std::cv_status::timeout) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "callExecute waiting callee timeout");
+        }
+    }
+}
+}
 std::shared_ptr<AbilityContext> StsAbilityContext::GetAbilityContext(ani_env *env, ani_object aniObj)
 {
     ani_long nativeContextLong;
@@ -451,6 +496,53 @@ void StsAbilityContext::StartServiceExtensionAbilitySync([[maybe_unused]]ani_env
     AppExecFwk::AsyncCallback(env, callbackobj, errorObject, nullptr);
 }
 
+ani_object StsAbilityContext::StartAbilityByCall(ani_env *env, ani_object aniObj, ani_object wantObj)
+{
+    TAG_LOGI(AAFwkTag::UIABILITY, "StartAbilityByCall");
+    auto context = GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext is nullptr");
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return nullptr;
+    }
+
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "parse want failed");
+        ThrowStsInvalidParamError(env, "Parse param want failed, want must be Want.");
+        return nullptr;
+    }
+    auto callData = std::make_shared<StartAbilityByCallData>();
+    auto callerCallBack = std::make_shared<CallerCallBack>();
+    GenerateCallerCallBack(callData, callerCallBack);
+    auto ret = context->StartAbilityByCall(want, callerCallBack, -1);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "startAbility failed");
+        ThrowStsErrorByNativeErr(env, ret);
+        return nullptr;
+    }
+    WaitForCalleeObj(callData);
+
+    if (callData->remoteCallee == nullptr) {
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return nullptr;
+    }
+
+    std::weak_ptr<AbilityContext> abilityContext(context);
+    auto releaseCallFunc = [abilityContext] (std::shared_ptr<CallerCallBack> callback) -> ErrCode {
+        auto contextForRelease = abilityContext.lock();
+        if (contextForRelease == nullptr) {
+            return -1;
+        }
+        return contextForRelease->ReleaseCall(callback);
+    };
+    auto caller = CreateEtsCaller(env, releaseCallFunc, callData->remoteCallee, callerCallBack);
+    if (caller == nullptr) {
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INNER);
+    }
+    return caller;
+}
+
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
     ani_status status = env->FindClass("Lapplication/UIAbilityContext/UIAbilityContext;", &cls);
@@ -485,6 +577,9 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void*>(StsAbilityContext::StartAbilityByTypeSync) },
             ani_native_function { "nativeStartServiceExtensionAbilitySync", nullptr,
                 reinterpret_cast<void*>(StsAbilityContext::StartServiceExtensionAbilitySync) },
+            ani_native_function { "nativeStartAbilityByCallSync",
+                "L@ohos/app/ability/Want/Want;:L@ohos/app/ability/UIAbility/Caller;",
+                reinterpret_cast<void*>(StsAbilityContext::StartAbilityByCall) },
         };
         status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
     });

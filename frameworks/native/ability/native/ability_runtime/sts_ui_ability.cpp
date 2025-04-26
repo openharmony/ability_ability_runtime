@@ -23,6 +23,7 @@
 #include "ability_manager_client.h"
 #include "ability_recovery.h"
 #include "ability_start_setting.h"
+#include "ani_remote_object.h"
 #include "app_recovery.h"
 #include "connection_manager.h"
 #include "context/application_context.h"
@@ -36,6 +37,7 @@
 #include "insight_intent_execute_param.h"
 #include "ohos_application.h"
 #include "sts_ability_context.h"
+#include "sts_caller_complex.h"
 #include "sts_data_struct_converter.h"
 #ifdef SUPPORT_SCREEN
 #include "ani_window_stage.h"
@@ -185,6 +187,10 @@ void StsUIAbility::UpdateAbilityObj(
     }
     if ((status = env->Class_BindNativeMethods(stsAbilityObj_->aniCls, functions.data(), functions.size())) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+    }
+    auto callee = CreateEtsCallee(env);
+    if ((status = env->Object_SetFieldByName_Ref(stsAbilityObj_->aniObj, "callee", callee)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "set callee status : %{public}d", status);
     }
 }
 
@@ -1188,17 +1194,26 @@ void StsUIAbility::OnAbilityResult(int requestCode, int resultCode, const Want &
 
 sptr<IRemoteObject> StsUIAbility::CallRequest()
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGI(AAFwkTag::UIABILITY, "CallRequest");
     if (stsAbilityObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
         return nullptr;
     }
 
-    if (remoteCallee_ != nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null remoteCallee_");
-        return remoteCallee_;
+    auto env = stsRuntime_.GetAniEnv();
+    auto obj = stsAbilityObj_->aniObj;
+    ani_status status = ANI_ERROR;
+    ani_ref calleeRef = nullptr;
+    status = env->Object_GetFieldByName_Ref(obj, "callee", &calleeRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "get callee: %{public}d", status);
+        return nullptr;
     }
-    return remoteCallee_;
+    auto remoteObj = AniGetNativeRemoteObject(env, reinterpret_cast<ani_object>(calleeRef));
+    if (remoteObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "AniGetNativeRemoteObject null");
+    }
+    return remoteObj;
 }
 
 bool StsUIAbility::CallObjectMethod(bool withResult, const char *name, const char *signature, ...)
