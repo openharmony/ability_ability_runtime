@@ -50,6 +50,9 @@ constexpr const char* FOUNDATION_PROCESS = "foundation";
 #ifndef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
 constexpr int32_t CAPABILITY_NOT_SUPPORT = 801;
 #endif // ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+constexpr int32_t SANDBOX_MANAGER_PERMISSION_DENIED = 1;
+#endif
 }
 
 bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId)
@@ -817,11 +820,16 @@ int32_t UriPermissionManagerStubImpl::ClearPermissionTokenByMap(const uint32_t t
 int32_t UriPermissionManagerStubImpl::Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto tokenId = IPCSkeleton::GetCallingTokenID();
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "active %{private}d permission", tokenId);
+    auto permissionName = PermissionConstants::PERMISSION_FILE_ACCESS_PERSIST;
+    if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenId, permissionName)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "No permission to call");
+        return SANDBOX_MANAGER_PERMISSION_DENIED;
+    }
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()).count());
-    auto tokenId = IPCSkeleton::GetCallingTokenID();
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "active %{private}d permission", tokenId);
     auto ret = SandboxManagerKit::StartAccessingPolicy(policy, result, false, tokenId, timeNow);
     TAG_LOGI(AAFwkTag::URIPERMMGR, "active permission end");
     if (ret != ERR_OK) {
