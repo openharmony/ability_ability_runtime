@@ -249,7 +249,7 @@ public:
     /**
      * @brief Attach app debug.
      */
-    void AttachAppDebug() override;
+    void AttachAppDebug(bool isDebugFromLocal) override;
 
      /**
      * @brief Detach app debug.

@@ -66,6 +66,7 @@ ohos_shared_library("ability_context_native") {
   ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
@@ -107,10 +108,6 @@ ohos_shared_library("ability_context_native") {
 
   if (hichecker_enabled) {
     external_deps += [ "hichecker:libhichecker" ]
-  }
-
-  if (cj_frontend) {
-    sources += [ "ability_runtime/cj_extension_context_instance.cpp" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

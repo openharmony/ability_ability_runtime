@@ -594,5 +594,30 @@ HWTEST_F(AbilityRecoveryUnitTest, TestLoadSavedState_001, TestSize.Level1)
     abilityRecovery_->missionId_ = 10;
     EXPECT_TRUE(!abilityRecovery_->LoadSavedState(StateReason::DEVELOPER_REQUEST));
 }
+
+/**
+ * @tc.name:  Test IsOnForeground
+ * @tc.desc:  add testcase
+ * @tc.type: Bugfix
+ */
+HWTEST_F(AbilityRecoveryUnitTest, IsOnForeground_001, TestSize.Level1)
+{
+    bool ret = abilityRecovery_->IsOnForeground();
+    EXPECT_EQ(ret, false);
+
+    std::shared_ptr<AbilityRuntime::UIAbility> ability =
+        std::make_shared<AbilityRuntime::UIAbility>();
+    abilityRecovery_->ability_ = ability;
+    ret = abilityRecovery_->IsOnForeground();
+    EXPECT_EQ(ret, false);
+
+    ability->abilityLifecycleExecutor_ =
+        std::make_shared<AppExecFwk::AbilityLifecycleExecutor>();
+    ability->abilityLifecycleExecutor_->state_ =
+        AbilityLifecycleExecutor::LifecycleState::FOREGROUND_NEW;
+    abilityRecovery_->ability_ = ability;
+    ret = abilityRecovery_->IsOnForeground();
+    EXPECT_EQ(ret, true);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

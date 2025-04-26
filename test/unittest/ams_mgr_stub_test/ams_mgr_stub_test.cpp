@@ -159,7 +159,7 @@ HWTEST_F(AmsMgrStubTest, HandleUnregisterAppDebugListener_0200, TestSize.Level1)
 HWTEST_F(AmsMgrStubTest, HandleAttachAppDebug_0100, TestSize.Level1)
 {
     EXPECT_NE(mockAmsMgrScheduler_, nullptr);
-    EXPECT_CALL(*mockAmsMgrScheduler_, AttachAppDebug(_)).Times(1);
+    EXPECT_CALL(*mockAmsMgrScheduler_, AttachAppDebug(_, _)).Times(1);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -179,7 +179,7 @@ HWTEST_F(AmsMgrStubTest, HandleAttachAppDebug_0100, TestSize.Level1)
 HWTEST_F(AmsMgrStubTest, HandleAttachAppDebug_0200, TestSize.Level1)
 {
     EXPECT_NE(mockAmsMgrScheduler_, nullptr);
-    EXPECT_CALL(*mockAmsMgrScheduler_, AttachAppDebug(_)).Times(0);
+    EXPECT_CALL(*mockAmsMgrScheduler_, AttachAppDebug(_, _)).Times(0);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);

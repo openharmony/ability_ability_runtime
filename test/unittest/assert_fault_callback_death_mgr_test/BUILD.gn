@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("assert_fault_callback_death_mgr_test") {
-  module_out_path = "ability_runtime/service_extension"
+  module_out_path = "ability_runtime/ability_runtime/service_extension"
   sanitize = {
     cfi = true
     cfi_cross_dso = true

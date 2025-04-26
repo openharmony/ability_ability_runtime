@@ -55,7 +55,7 @@ public:
         const sptr<IQuickFixCallback>& callback, const int32_t recordId));
     MOCK_METHOD1(ScheduleNotifyAppFault, int32_t(const FaultData &faultData));
     MOCK_METHOD1(ScheduleChangeAppGcState, int32_t(int32_t state));
-    MOCK_METHOD0(AttachAppDebug, void());
+    MOCK_METHOD1(AttachAppDebug, void(bool isDebugFromLocal));
     MOCK_METHOD0(DetachAppDebug, void());
     MOCK_METHOD1(ScheduleJsHeapMemory, void(OHOS::AppExecFwk::JsHeapDumpInfo &info));
     MOCK_METHOD2(SetAppWaitingDebug, int32_t(const std::string &bundleName, bool isPersist));

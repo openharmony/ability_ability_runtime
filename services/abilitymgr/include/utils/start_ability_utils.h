@@ -28,7 +28,7 @@ namespace AAFwk {
 
 struct StartAbilityInfo {
     static std::shared_ptr<StartAbilityInfo> CreateStartAbilityInfo(const Want &want, int32_t userId,
-        int32_t appIndex);
+        int32_t appIndex, sptr<IRemoteObject> callerToken);
     static std::shared_ptr<StartAbilityInfo> CreateCallerAbilityInfo(const sptr<IRemoteObject> &callerToken);
 
     static std::shared_ptr<StartAbilityInfo> CreateStartExtensionInfo(const Want &want, int32_t userId,

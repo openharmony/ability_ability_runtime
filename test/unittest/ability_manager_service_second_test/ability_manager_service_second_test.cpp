@@ -612,10 +612,10 @@ HWTEST_F(AbilityManagerServiceSecondTest, CloseUIAbilityBySCB_001, TestSize.Leve
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_EQ(abilityMs_->CloseUIAbilityBySCB(nullptr), ERR_INVALID_VALUE);
+    EXPECT_EQ(abilityMs_->CloseUIAbilityBySCB(nullptr, false), ERR_INVALID_VALUE);
 
     sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
-    EXPECT_EQ(abilityMs_->CloseUIAbilityBySCB(sessionInfo), ERR_INVALID_VALUE);
+    EXPECT_EQ(abilityMs_->CloseUIAbilityBySCB(sessionInfo, false), ERR_INVALID_VALUE);
 }
 
 /*

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -304,7 +304,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0300, TestSize.Leve
     Want want1;
     want1.SetElementName(DEVICE_MANAGER_BUNDLE_NAME, DEVICE_MANAGER_NAME);
     auto ret = abilityMs->StartAbilityDetails(want1, abilityStartSetting_, nullptr, MAIN_USER_ID, -1, false);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_NULL_INTERCEPTOR_EXECUTER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0300 end");
 }
 
@@ -445,6 +445,31 @@ HWTEST_F(AbilityManagerServiceSixthTest, CheckProcessOptions_001, TestSize.Level
         EXPECT_EQ(ret, ERR_CAPABILITY_NOT_SUPPORT);
     }
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckProcessOptions_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckStartSelfUIAbilityStartOptions
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckStartSelfUIAbilityStartOptions
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, CheckStartSelfUIAbilityStartOptions_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckStartSelfUIAbilityStartOptions_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+
+    Want want;
+    StartOptions startOptions;
+    auto ret = abilityMs->CheckStartSelfUIAbilityStartOptions(want, startOptions);
+    EXPECT_EQ(ret, ERR_OK);
+
+    startOptions.processOptions = std::make_shared<ProcessOptions>();
+    startOptions.processOptions->isStartFromNDK = true;
+    ret = abilityMs->CheckStartSelfUIAbilityStartOptions(want, startOptions);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_CAPABILITY_NOT_SUPPORT);
+    }
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckStartSelfUIAbilityStartOptions_001 end");
 }
 
 /*
@@ -1879,6 +1904,154 @@ HWTEST_F(AbilityManagerServiceSixthTest, SendStartAbilityOtherExtensionEvent_001
     specifyTokenId = 0;
     abilityMs->SendStartAbilityOtherExtensionEvent(abilityInfo, want, specifyTokenId);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest SendStartAbilityOtherExtensionEvent_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ConnectAbilityCommon
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ConnectAbilityCommon
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_003, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    MyFlag::systemAppFlag_ = 1;
+    auto ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
+        INT_MAX, false);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ConnectAbilityCommon
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ConnectAbilityCommon
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_004, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    want.SetUri("http://www.so.com");
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(Return(false));
+    auto ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
+        -1, false);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    want.SetFlags(Want::FLAG_INSTALL_ON_DEMAND);
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(Return(true));
+    ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
+        -1, false);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ExtensionAbilityInfo extensionInfo;
+    extensionInfo.name = "extension";
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(extensionInfo), Return(true)));
+    extensionInfo.bundleName = "extensionBundle";
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(extensionInfo), Return(true)));
+    ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
+        -1, false);
+    want.SetUri("file://kia-file-uri");
+    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    ret = abilityMs->ConnectAbilityCommon(want, impl, nullptr, ExtensionAbilityType::UI_SERVICE,
+        -1, false);
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ConnectAbilityCommon
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ConnectAbilityCommon
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_005, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    auto ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
+        -1, false);
+    EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartExtensionAbilityInner
+ * FunctionPoints: AbilityManagerService StartExtensionAbilityInner
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, StartExtensionAbilityInner_001, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int32_t userId = 0;
+    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UI_SERVICE;
+    bool checkSystemCaller = false;
+    bool isImplicit = true;
+    bool isDlp = true;
+    int appIndex = -1;
+    want.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
+    auto result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
+        isImplicit, isDlp);
+    EXPECT_EQ(result, ERR_APP_CLONE_INDEX_INVALID);
+    appIndex = 0;
+    want.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
+    result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
+        isImplicit, isDlp);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    abilityMs->implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
+    result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
+        isImplicit, isDlp);
+    EXPECT_EQ(result, ERR_IMPLICIT_START_ABILITY_FAIL);
+    callerToken = sptr<MockAbilityToken>::MakeSptr();
+    result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
+        isImplicit, isDlp);
+    EXPECT_EQ(result, ERR_INVALID_CALLER);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SendIntentReport
+ * FunctionPoints: AbilityManagerService SendIntentReport
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, SendIntentReport_001, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    std::string intentName = "test";
+    EventInfo eventInfo;
+    abilityMs->SendIntentReport(eventInfo, ERR_OK, intentName);
+    EXPECT_EQ(eventInfo.intentName, intentName);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

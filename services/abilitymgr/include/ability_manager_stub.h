@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,6 +94,7 @@ private:
     int UninstallAppInner(MessageParcel &data, MessageParcel &reply);
     int32_t UpgradeAppInner(MessageParcel &data, MessageParcel &reply);
     int StartSelfUIAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int StartSelfUIAbilityWithStartOptionsInner(MessageParcel &data, MessageParcel &reply);
     int StartAbilityInner(MessageParcel &data, MessageParcel &reply);
     int StartAbilityInnerSpecifyTokenId(MessageParcel &data, MessageParcel &reply);
     int StartAbilityByUIContentSessionAddCallerInner(MessageParcel &data, MessageParcel &reply);
@@ -247,6 +248,7 @@ private:
     int32_t ForceExitAppInner(MessageParcel &data, MessageParcel &reply);
     int32_t RecordAppExitReasonInner(MessageParcel &data, MessageParcel &reply);
     int32_t RecordProcessExitReasonInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RecordProcessExitReasonPlusInner(MessageParcel &data, MessageParcel &reply);
     int32_t SetResidentProcessEnableInner(MessageParcel &data, MessageParcel &reply);
 
     int SetRootSceneSessionInner(MessageParcel &data, MessageParcel &reply);
@@ -318,8 +320,11 @@ private:
     int32_t QueryAtomicServiceStartupRuleInner(MessageParcel &data, MessageParcel &reply);
     int32_t PrepareTerminateAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
     int32_t KillProcessWithPrepareTerminateDoneInner(MessageParcel &data, MessageParcel &reply);
+    int32_t KillProcessForPermissionUpdateInner(MessageParcel &data, MessageParcel &reply);
     int32_t RegisterHiddenStartObserverInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterHiddenStartObserverInner(MessageParcel &data, MessageParcel &reply);
+    int32_t QueryPreLoadUIExtensionRecordInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RevokeDelegatorInner(MessageParcel &data, MessageParcel &reply);
 
     int OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);

@@ -503,6 +503,74 @@ int32_t AbilityManagerCollaboratorProxy::CheckStaticCfgPermission(const Want &wa
     return reply.ReadInt32();
 }
 
+int32_t AbilityManagerCollaboratorProxy::UpdateCallerIfNeed(Want &want)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
+    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token failed");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write want failed");
+        return ERR_INVALID_OPERATION;
+    }
+    int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::UPDATE_CALLER_IF_NEED,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "update caller error:%{public}d", ret);
+        return ret;
+    }
+    ret = reply.ReadInt32();
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "update caller failed:%{public}d", ret);
+        return ERR_INVALID_OPERATION;
+    }
+    std::unique_ptr<Want> wantInfo(reply.ReadParcelable<Want>());
+    if (!wantInfo) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "read want failed");
+        return ERR_INVALID_OPERATION;
+    }
+    want = *wantInfo;
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerCollaboratorProxy::UpdateTargetIfNeed(Want &want)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    AAFwk::ExtendMaxIpcCapacityForInnerWant(data);
+    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token failed");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write want failed");
+        return ERR_INVALID_OPERATION;
+    }
+    int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::UPDATE_TARGET_IF_NEED,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "update target error:%{public}d", ret);
+        return ret;
+    }
+    ret = reply.ReadInt32();
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "update target failed:%{public}d", ret);
+        return ERR_INVALID_OPERATION;
+    }
+    std::unique_ptr<Want> wantInfo(reply.ReadParcelable<Want>());
+    if (!wantInfo) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "read want failed");
+        return ERR_INVALID_OPERATION;
+    }
+    want = *wantInfo;
+    return NO_ERROR;
+}
+
 int32_t AbilityManagerCollaboratorProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {

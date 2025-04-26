@@ -1,0 +1,40 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+sequenceable OHOS.Uri;
+rawdata OHOS.AAFwk.UriPermissionRawData;
+
+interface OHOS.AAFwk.IUriPermissionManager {
+    int GrantUriPermission([in] Uri uri, [in] unsigned int flag,
+        [in] String targetBundleName, [in] int appIndex, [in] unsigned int initiatorTokenId);
+    int GrantUriPermission([in] String[] uriVec, [in] unsigned int flag,
+        [in] String targetBundleName, [in] int appIndex, [in] unsigned int initiatorTokenId);
+    int GrantUriPermission([in] UriPermissionRawData rawData, [in] unsigned int flag,
+        [in] String targetBundleName, [in] int appIndex, [in] unsigned int initiatorTokenId);
+    int GrantUriPermissionPrivileged([in] String[] uriVec, [in] unsigned int flag, [in] String targetBundleName,
+        [in] int appIndex, [in] unsigned int initiatorTokenId, [in] int hideSensitiveType);
+    int GrantUriPermissionPrivileged([in] UriPermissionRawData rawData, [in] unsigned int flag,
+        [in] String targetBundleName, [in] int appIndex, [in] unsigned int initiatorTokenId,
+        [in] int hideSensitiveType);
+    int RevokeAllUriPermissions([in] unsigned int tokenId);
+    int RevokeUriPermissionManually([in] Uri uri, [in] String bundleName, [in] int appIndex);
+    boolean VerifyUriPermission([in] Uri uri, [in] unsigned int flag, [in] unsigned int tokenId);
+    boolean[] CheckUriAuthorization([in] String[] uriVec, [in] unsigned int flag, [in] unsigned int tokenId);
+    UriPermissionRawData CheckUriAuthorization([in] UriPermissionRawData rawData, [in] unsigned int flag,
+        [in] unsigned int tokenId);
+    int ClearPermissionTokenByMap([in] unsigned int tokenId);
+    [macrodef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER]int Active([in] UriPermissionRawData policyRawData,
+        [out] unsigned int[] res);
+}

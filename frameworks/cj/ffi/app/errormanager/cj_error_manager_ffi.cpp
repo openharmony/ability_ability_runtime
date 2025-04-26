@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include <cstring.h>
+#include <cstring>
 #include "cj_error_manager_ffi.h"
 #include "cj_error_observer.h"
 #include "application_data_manager.h"
@@ -117,6 +117,9 @@ int32_t FfiOHOSErrorManagerLoopObserverOn(int64_t timeout, CLoopObserver observe
         g_loopObserver->callbackOnLoopTimeout = CJLambda::Create(observer.callbackOnLoopTimeout);
     }
     g_loopObserver->mainRunner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+    if (g_loopObserver->mainRunner == nullptr) {
+        return ERR_PARAM;
+    }
     g_loopObserver->mainRunner->SetTimeout(timeout);
     g_loopObserver->mainRunner->SetTimeoutCallback(CallbackTimeout);
     return SUCCESS_CODE;

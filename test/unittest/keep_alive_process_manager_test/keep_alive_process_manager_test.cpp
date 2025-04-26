@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,9 @@
 #include <gtest/gtest.h>
 
 #include "errors.h"
+#define private public
 #include "keep_alive_process_manager.h"
-
+#undef private
 #include "ability_keep_alive_service.h"
 #include "ability_manager_service.h"
 #include "ability_util.h"
@@ -764,6 +765,145 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_023, TestSize.Leve
         updataEnable, isByEDM, isInner);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_023 end";
+}
+
+/*
+ * Feature: CheckStatusBarTask
+ * Function: Cancel
+ * SubFunction: NA
+ * FunctionPoints:CheckStatusBarTask Cancel
+ * EnvConditions: NA
+ * CaseDescription: Verify Cancel
+ */
+HWTEST_F(KeepAliveProcessManagerTest, Cancel_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest Cancel_001 start";
+    int32_t uid = 1;
+    bool dealed = false;
+    auto task = [&dealed]() { dealed = true; };
+    CheckStatusBarTask checkStatusBarTask(uid, std::move(task));
+    ASSERT_NE(checkStatusBarTask.task_, nullptr);
+    checkStatusBarTask.Cancel();
+    EXPECT_EQ(checkStatusBarTask.task_, nullptr);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest Cancel_001 end";
+}
+
+/*
+ * Feature: CheckStatusBarTask
+ * Function: Run
+ * SubFunction: NA
+ * FunctionPoints:CheckStatusBarTask Run
+ * EnvConditions: NA
+ * CaseDescription: Verify Cancel
+ */
+HWTEST_F(KeepAliveProcessManagerTest, Run_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest Run_001 start";
+    int32_t uid = 1;
+    bool dealed = false;
+    CheckStatusBarTask checkStatusBarTask1(uid, nullptr);
+    checkStatusBarTask1.Run();
+    EXPECT_EQ(checkStatusBarTask1.task_, nullptr);
+
+    auto task = [&dealed]() { dealed = true; };
+    CheckStatusBarTask checkStatusBarTask2(uid, std::move(task));
+    checkStatusBarTask2.Run();
+    EXPECT_EQ(dealed, true);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest Run_001 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: Run
+ * SubFunction: NA
+ * FunctionPoints:RemoveCheckStatusBarTask
+ * EnvConditions: NA
+ * CaseDescription: Verify RemoveCheckStatusBarTask
+ */
+HWTEST_F(KeepAliveProcessManagerTest, RemoveCheckStatusBarTask_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RemoveCheckStatusBarTask_001 start";
+    int32_t uid = 1;
+    bool shouldCancel = false;
+    bool dealed = false;
+    auto task = [&dealed]() { dealed = true; };
+
+    auto checkStatusBarTask = std::make_shared<CheckStatusBarTask>(uid, std::move(task));
+    EXPECT_NE(checkStatusBarTask, nullptr);
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    EXPECT_NE(keepAliveProcessManager, nullptr);
+    keepAliveProcessManager->RemoveCheckStatusBarTask(uid, shouldCancel);
+    EXPECT_NE(checkStatusBarTask->task_, nullptr);
+
+    keepAliveProcessManager->checkStatusBarTasks_.push_back(checkStatusBarTask);
+    keepAliveProcessManager->RemoveCheckStatusBarTask(2, shouldCancel);
+    for (const auto &checkStatusBarTask1 : keepAliveProcessManager->checkStatusBarTasks_) {
+        EXPECT_NE(checkStatusBarTask1->task_, nullptr);
+    }
+    shouldCancel = true;
+    keepAliveProcessManager->RemoveCheckStatusBarTask(uid, shouldCancel);
+    for (const auto &checkStatusBarTask2 : keepAliveProcessManager->checkStatusBarTasks_) {
+        EXPECT_EQ(checkStatusBarTask2->task_, nullptr);
+    }
+    EXPECT_TRUE(keepAliveProcessManager->checkStatusBarTasks_.empty());
+    GTEST_LOG_(INFO) << "RemoveCheckStatusBarTask_001 end";
+}
+
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: Run
+ * SubFunction: NA
+ * FunctionPoints:AfterStartKeepAliveApp
+ * EnvConditions: NA
+ * CaseDescription: Verify RemoveCheckStatusBarTask
+ */
+HWTEST_F(KeepAliveProcessManagerTest, AfterStartKeepAliveApp_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AfterStartKeepAliveApp_001 start";
+    int32_t uid = 1;
+    std::string bundleName = "com,ohos.example.bundleName";
+    uint32_t accessTokenId = 1;
+    int32_t userId = 1;
+    bool isMultiInstance = false;
+
+    bool dealed = false;
+    auto task = [&dealed]() { dealed = true; };
+    auto checkStatusBarTask =
+        std::make_shared<CheckStatusBarTask>(2, std::move(task));
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->checkStatusBarTasks_.emplace_back(checkStatusBarTask);
+    keepAliveProcessManager->AfterStartKeepAliveApp(bundleName,
+        accessTokenId, uid, userId, isMultiInstance);
+    EXPECT_EQ(keepAliveProcessManager->checkStatusBarTasks_.size(), 2);
+    GTEST_LOG_(INFO) << "AfterStartKeepAliveApp_001 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: Run
+ * SubFunction: NA
+ * FunctionPoints:OnAppStateChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify RemoveCheckStatusBarTask
+ */
+HWTEST_F(KeepAliveProcessManagerTest, OnAppStateChanged_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "OnAppStateChanged_001 start";
+
+    AppInfo info;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    info.state = AppState::READY;
+    keepAliveProcessManager->OnAppStateChanged(info);
+
+    info.state = AppState::BEGIN;
+    info.pid = -1;
+    keepAliveProcessManager->OnAppStateChanged(info);
+
+    info.pid = getpid();
+    keepAliveProcessManager->OnAppStateChanged(info);
+    EXPECT_NE(keepAliveProcessManager, nullptr);
+    GTEST_LOG_(INFO) << "OnAppStateChanged_001 end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -77,6 +77,7 @@ constexpr const char* FOUNDATION_PROCESS = "foundation";
 constexpr const char* BS_PROCESS_NAME = "bgtaskmgr_service";
 constexpr int32_t USER_UID = 2000;
 constexpr const char* HIVIEW_PROCESS_NAME = "hiview";
+constexpr const char* DEBUG_FROM = "ohos.param.debugFrom";
 }  // namespace
 
 REGISTER_SYSTEM_ABILITY_BY_ID(AppMgrService, APP_MGR_SERVICE_ID, true);
@@ -1189,8 +1190,10 @@ int32_t AppMgrService::StartNativeProcessForDebugger(const AAFwk::Want &want)
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
-    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
-    if (!isShellCall) {
+    bool isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    bool isLocalDebugCall = AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug(callingTokenId);
+    if (!isShellCall && !isLocalDebugCall) {
         TAG_LOGE(AAFwkTag::APPMGR, "permission denied");
         return ERR_INVALID_OPERATION;
     }
@@ -1595,14 +1598,14 @@ int32_t AppMgrService::GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<p
     return appMgrServiceInner_->GetAllUIExtensionProviderPid(hostPid, providerPids);
 }
 
-int32_t AppMgrService::NotifyMemorySizeStateChanged(bool isMemorySizeSufficient)
+int32_t AppMgrService::NotifyMemorySizeStateChanged(int32_t memorySizeState)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
 
-    return appMgrServiceInner_->NotifyMemorySizeStateChanged(isMemorySizeSufficient);
+    return appMgrServiceInner_->NotifyMemorySizeStateChanged(memorySizeState);
 }
 
 int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
@@ -1802,6 +1805,36 @@ int32_t AppMgrService::UpdateProcessMemoryState(const std::vector<ProcessMemoryS
         return ERR_INVALID_VALUE;
     }
     return appMgrServiceInner_->UpdateProcessMemoryState(procMemState);
+}
+
+int32_t AppMgrService::GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &info)
+{
+    if (!IsReady()) {
+        return AAFwk::ERR_APP_MGR_SERVICE_NOT_READY;
+    }
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t currentPid = getprocpid();
+    if (callingPid != currentPid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "other process");
+        return AAFwk::ERR_NO_ALLOW_OUTSIDE_CALL;
+    }
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return AAFwk::ERR_NULL_APP_MGR_SERVICE_INNER;
+    }
+    return appMgrServiceInner_->GetKilledProcessInfo(pid, uid, info);
+}
+
+int32_t AppMgrService::LaunchAbility(sptr<IRemoteObject> token)
+{
+    if (!IsReady()) {
+        return AAFwk::ERR_APP_MGR_SERVICE_NOT_READY;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not foundation");
+        return AAFwk::ERR_NO_ALLOW_OUTSIDE_CALL;
+    }
+    return appMgrServiceInner_->LaunchAbility(token);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

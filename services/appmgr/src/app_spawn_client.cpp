@@ -43,7 +43,7 @@ constexpr const char* APPSPAWN_CLIENT_USER_NAME = "APP_MANAGER_SERVICE";
 constexpr int32_t RIGHT_SHIFT_STEP = 1;
 constexpr int32_t START_FLAG_TEST_NUM = 1;
 constexpr const char* JITPERMISSIONSLIST_NAME = "name";
-constexpr const char* JITPERMISSIONSLIST_NAME_VALUE = "JITPermissions";
+constexpr const char* JITPERMISSIONSLIST_NAME_VALUE = "Permissions";
 constexpr const char* JITPERMISSIONSLIST_COUNT = "ohos.encaps.count";
 constexpr const char* JITPERMISSIONSLIST_PERMISSIONS_NAME = "permissions";
 constexpr const char* UNINSTALL_BUNDLE_NAME = "uninstallDebugHapMsg";
@@ -177,13 +177,19 @@ static std::string DumpAppEnvToJson(const std::map<std::string, std::string> &ap
     return appEnvJson.dump();
 }
 
-static std::string DumpJITPermissionListToJson(const JITPermissionsList &jitPermissionsList)
+static std::string DumpJITPermissionListToJson(const JITPermissionsMap &jitPermissionsMap)
 {
     nlohmann::json jitPermissionsListJson;
     jitPermissionsListJson[JITPERMISSIONSLIST_NAME] = JITPERMISSIONSLIST_NAME_VALUE;
-    jitPermissionsListJson[JITPERMISSIONSLIST_COUNT] = jitPermissionsList.size();
-    for (auto& jitPermission : jitPermissionsList) {
-        jitPermissionsListJson[JITPERMISSIONSLIST_PERMISSIONS_NAME].emplace_back(jitPermission);
+    jitPermissionsListJson[JITPERMISSIONSLIST_COUNT] = jitPermissionsMap.size();
+    for (const auto &[permissionName, permissionValue] : jitPermissionsMap) {
+        nlohmann::json temp;
+        if (permissionValue.empty()) {
+            temp[permissionName] = true;
+        } else {
+            temp[permissionName] = permissionValue;
+        }
+        jitPermissionsListJson[JITPERMISSIONSLIST_PERMISSIONS_NAME].emplace_back(temp);
     }
     return jitPermissionsListJson.dump();
 }
@@ -265,6 +271,14 @@ int32_t AppSpawnClient::SetStartFlags(const AppSpawnStartMsg &startMsg, AppSpawn
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             return ret;
         }
+    }
+    if (startMsg.isCustomSandboxFlag) {
+        ret = AppSpawnReqMsgSetAppFlag(reqHandle, APP_FLAGS_CUSTOM_SANDBOX);
+        if (ret != 0) {
+            TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
+            return ret;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "Set APP_FLAGS_CUSTOM_SANDBOX flag success.");
     }
 #ifdef SUPPORT_CHILD_PROCESS
     ret = SetChildProcessTypeStartFlag(reqHandle, startMsg.childProcessType);
@@ -416,8 +430,8 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
         }
     }
 
-    if (!startMsg.jitPermissionsList.empty()) {
-        std::string jitPermissionsStr = DumpJITPermissionListToJson(startMsg.jitPermissionsList);
+    if (!startMsg.jitPermissionsMap.empty()) {
+        std::string jitPermissionsStr = DumpJITPermissionListToJson(startMsg.jitPermissionsMap);
         ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_JIT_PERMISSIONS, jitPermissionsStr.c_str());
         if (ret) {
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
@@ -426,6 +440,20 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
         TAG_LOGD(AAFwkTag::APPMGR, "Send JIT Permission: %{public}s", jitPermissionsStr.c_str());
     }
 
+    return AppspawnSetExtMsgSec(startMsg, reqHandle);
+}
+
+int32_t AppSpawnClient::AppspawnSetExtMsgSec(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle)
+{
+    int32_t ret = 0;
+    if (startMsg.hostProcessUid != 0) {
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_PARENT_UID,
+            std::to_string(startMsg.hostProcessUid).c_str());
+        if (ret) {
+            TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
+            return ret;
+        }
+    }
     return ret;
 }
 

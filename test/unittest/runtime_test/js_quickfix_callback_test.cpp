@@ -47,7 +47,7 @@ void JsQuickfixCallbackTest::TearDown()
  * @tc.desc: JsQuickfixCallbackTest Test
  * @tc.type: FUNC
  */
-HWTEST_F(JsQuickfixCallbackTest, JsQuickfixCallbackTest_0100, TestSize.Level0)
+HWTEST_F(JsQuickfixCallbackTest, JsQuickfixCallbackTest_0100, TestSize.Level2)
 {
     std::string moudel = "<moudelName>";
     std::string hqfFile = "<hqfFile>";
@@ -68,7 +68,7 @@ HWTEST_F(JsQuickfixCallbackTest, JsQuickfixCallbackTest_0100, TestSize.Level0)
  * @tc.desc: JsQuickfixCallbackTest Test
  * @tc.type: FUNC
  */
-HWTEST_F(JsQuickfixCallbackTest, JsQuickfixCallbackTest_0200, TestSize.Level0)
+HWTEST_F(JsQuickfixCallbackTest, JsQuickfixCallbackTest_0200, TestSize.Level2)
 {
     std::string moudel = "<moudelName>";
     std::string hqfFile = "<hqfFile>";
@@ -89,7 +89,7 @@ HWTEST_F(JsQuickfixCallbackTest, JsQuickfixCallbackTest_0200, TestSize.Level0)
  * @tc.desc: JsQuickfixCallbackTest Test
  * @tc.type: FUNC
  */
-HWTEST_F(JsQuickfixCallbackTest, JsQuickfixCallbackTest_0300, TestSize.Level0)
+HWTEST_F(JsQuickfixCallbackTest, JsQuickfixCallbackTest_0300, TestSize.Level2)
 {
     std::string moudel = "<moudelName>";
     std::string hqfFile = "<hqfFile>";
@@ -110,7 +110,7 @@ HWTEST_F(JsQuickfixCallbackTest, JsQuickfixCallbackTest_0300, TestSize.Level0)
  * @tc.desc: JsQuickfixCallbackTest Test
  * @tc.type: FUNC
  */
-HWTEST_F(JsQuickfixCallbackTest, JsQuickfixCallbackTest_0400, TestSize.Level0)
+HWTEST_F(JsQuickfixCallbackTest, JsQuickfixCallbackTest_0400, TestSize.Level2)
 {
     std::string moudel = "bundle";
     std::string hqfFile = "<hqfFile>";

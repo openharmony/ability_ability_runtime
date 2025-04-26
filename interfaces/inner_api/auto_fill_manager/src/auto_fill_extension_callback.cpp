@@ -123,6 +123,10 @@ int32_t AutoFillExtensionCallback::ReloadInModal(const AAFwk::WantParams &wantPa
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     std::lock_guard<std::mutex> lock(closeMutex_);
+    if (autoFillWindowType_ != AutoFill::AutoFillWindowType::POPUP_WINDOW) {
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "not popup window, not reload any more");
+        return AutoFill::AUTO_FILL_PREVIOUS_REQUEST_NOT_FINISHED;
+    }
     auto uiContent = GetUIContent();
     if (uiContent == nullptr) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null uiContent");
@@ -333,7 +337,7 @@ void AutoFillExtensionCallback::UpdateCustomPopupUIExtension(const AbilityBase::
 
 void AutoFillExtensionCallback::SendAutoFillSuccess(const AAFwk::Want &want)
 {
-    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "called");
+    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "SendAutoFillSuccess");
     std::lock_guard<std::mutex> lock(requestCallbackMutex_);
     if (fillCallback_ != nullptr) {
         std::string dataStr = want.GetStringParam(WANT_PARAMS_VIEW_DATA_KEY);
@@ -352,7 +356,7 @@ void AutoFillExtensionCallback::SendAutoFillSuccess(const AAFwk::Want &want)
 
 void AutoFillExtensionCallback::SendAutoFillFailed(int32_t errCode, const AAFwk::Want &want)
 {
-    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "called");
+    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "SendAutoFillFailed");
     std::lock_guard<std::mutex> lock(requestCallbackMutex_);
     if (fillCallback_ != nullptr) {
         std::string fillContent = want.GetStringParam(WANT_PARAMS_FILL_CONTENT);
@@ -370,6 +374,7 @@ void AutoFillExtensionCallback::SendAutoFillFailed(int32_t errCode, const AAFwk:
 
 void AutoFillExtensionCallback::CloseUIExtension()
 {
+    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "CloseUIExtension");
     Ace::UIContent* uiContent = nullptr;
     {
         std::lock_guard<std::mutex> lock(closeMutex_);

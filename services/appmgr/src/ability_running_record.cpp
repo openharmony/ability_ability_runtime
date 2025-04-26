@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,15 @@
  */
 
 #include "ability_running_record.h"
+#include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
 constexpr const char* BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
 constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.MainAbility";
+constexpr const char* IS_HOOK = "ohos.ability_runtime.is_hook";
+static const std::string EMPTY_NAME;
 }
 AbilityRunningRecord::AbilityRunningRecord(std::shared_ptr<AbilityInfo> info,
     sptr<IRemoteObject> token, int32_t abilityRecordId)
@@ -31,16 +34,28 @@ AbilityRunningRecord::~AbilityRunningRecord()
 
 const std::string &AbilityRunningRecord::GetName() const
 {
+    if (info_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetName info_ nullptr");
+        return EMPTY_NAME;
+    }
     return info_->name;
 }
 
 const std::string &AbilityRunningRecord::GetBundleName() const
 {
+    if (info_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetBundleName info_ nullptr");
+        return EMPTY_NAME;
+    }
     return info_->bundleName;
 }
 
 const std::string &AbilityRunningRecord::GetModuleName() const
 {
+    if (info_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetModuleName info_ nullptr");
+        return EMPTY_NAME;
+    }
     return info_->moduleName;
 }
 
@@ -151,13 +166,10 @@ bool AbilityRunningRecord::IsSceneBoard() const
     }
     return info_->name == SCENEBOARD_ABILITY_NAME && info_->bundleName == BUNDLE_NAME_SCENEBOARD;
 }
-void AbilityRunningRecord::SetPersistentId(const int32_t persistentId)
+
+bool AbilityRunningRecord::IsHook() const
 {
-    persistentId_ = persistentId;
-}
-int32_t AbilityRunningRecord::GetPersistentId() const
-{
-    return persistentId_;
+    return want_ && want_->GetBoolParam(IS_HOOK, false);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

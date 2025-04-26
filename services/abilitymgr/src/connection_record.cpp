@@ -105,16 +105,21 @@ int ConnectionRecord::DisconnectAbility()
     bool isAbilityUIServiceExt = (extAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE);
     if (connectNums == 1 || isAbilityUIServiceExt) {
         /* post timeout task to taskhandler */
+        auto disconnectTask = [thisWeakPtr = weak_from_this()]() {
+            auto connectionRecord = thisWeakPtr.lock();
+            if (connectionRecord == nullptr) {
+                TAG_LOGE(AAFwkTag::CONNECTION, "null connectionRecord");
+                return;
+            }
+            TAG_LOGE(AAFwkTag::CONNECTION, "Disconnect timeout");
+            connectionRecord->DisconnectTimeout();
+        };
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
         if (handler == nullptr) {
             TAG_LOGE(AAFwkTag::CONNECTION, "null handler");
         } else {
             std::string taskName("DisconnectTimeout_");
             taskName += std::to_string(recordId_);
-            auto disconnectTask = [connectionRecord = shared_from_this()]() {
-                TAG_LOGE(AAFwkTag::CONNECTION, "Disconnect timeout");
-                connectionRecord->DisconnectTimeout();
-            };
             int disconnectTimeout =
                 AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * DISCONNECT_TIMEOUT_MULTIPLE;
             handler->SubmitTask(disconnectTask, taskName, disconnectTimeout);
@@ -294,13 +299,12 @@ void ConnectionRecord::ScheduleConnectAbilityDone()
 
 void ConnectionRecord::CancelConnectTimeoutTask()
 {
-    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-    if (handler == nullptr) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "fail to get AbilityTaskHandler");
-    } else {
-        std::string taskName = std::string("ConnectTimeout_") + std::to_string(recordId_);
-        handler->CancelTask(taskName);
-    }
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
+    CHECK_POINTER(handler);
+    std::string taskName = std::to_string(recordId_);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "CancelConnectTimeoutTask taskName:%{public}s", taskName.c_str());
+    handler->RemoveEvent(AbilityManagerService::CONNECT_TIMEOUT_MSG, taskName);
+    handler->RemoveEvent(AbilityManagerService::CONNECT_HALF_TIMEOUT_MSG, taskName);
 }
 
 void ConnectionRecord::DisconnectTimeout()
@@ -331,8 +335,10 @@ std::string ConnectionRecord::ConvertConnectionState(const ConnectionState &stat
 
 void ConnectionRecord::Dump(std::vector<std::string> &info) const
 {
-    info.emplace_back("       > " + GetAbilityRecord()->GetAbilityInfo().bundleName + "/" +
-                      GetAbilityRecord()->GetAbilityInfo().name + "   connectionState #" +
+    auto abilityRecord = GetAbilityRecord();
+    CHECK_POINTER(abilityRecord);
+    info.emplace_back("       > " + abilityRecord->GetAbilityInfo().bundleName + "/" +
+                      abilityRecord->GetAbilityInfo().name + "   connectionState #" +
                       ConvertConnectionState(GetConnectState()));
 }
 

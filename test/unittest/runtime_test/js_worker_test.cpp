@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 #include <cstdarg>
 #include <string>
 
+#include "extractor.h"
+#include "file_mapper.h"
 #include "js_environment_impl.h"
 #define private public
 #define protected public
@@ -24,6 +26,7 @@
 #undef private
 #undef protected
 #include "native_engine.h"
+#include "worker_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -88,7 +91,9 @@ HWTEST_F(JsWorkerTest, AssetHelper_0100, TestSize.Level1)
     bool useSecureMem;
     bool isRestricted = false;
     auto func = TestGetGetAssetFunc();
-    func("/data", &buff, &buffSize, content, ami, useSecureMem, isRestricted);
+    std::unique_ptr<AbilityBase::FileMapper> fileMapper = std::make_unique<AbilityBase::FileMapper>();
+    void* mapper = static_cast<void*>(fileMapper.get());
+    func("/data", &buff, &buffSize, content, ami, useSecureMem, &mapper, isRestricted);
     EXPECT_EQ(useSecureMem, false);
 }
 
@@ -114,7 +119,9 @@ HWTEST_F(JsWorkerTest, AssetHelper_0200, TestSize.Level1)
 
     uint8_t *buff = nullptr;
     size_t buffSize;
-    auto ret = helper.GetSafeData("test.txt", &buff, &buffSize);
+    std::unique_ptr<AbilityBase::FileMapper> fileMapper = std::make_unique<AbilityBase::FileMapper>();
+    void* mapper = static_cast<void*>(fileMapper.get());
+    auto ret = helper.GetSafeData("test.txt", &buff, &buffSize, &mapper);
     EXPECT_EQ(ret, false);
 }
 } // namespace AbilityRuntime

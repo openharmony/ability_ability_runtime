@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/abilitymgr"
+module_output_path = "ability_runtime/ability_runtime/abilitymgr"
 
 ohos_unittest("startup_util_test") {
   module_out_path = module_output_path
@@ -30,8 +30,10 @@ ohos_unittest("startup_util_test") {
   external_deps = [
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "ipc:ipc_core",
   ]
 }
 

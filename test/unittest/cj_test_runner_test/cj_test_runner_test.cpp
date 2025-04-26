@@ -107,7 +107,7 @@ void CjTestRunnerTest::TearDown()
  * @tc.desc: CjTestRunnerTest test for OnMemoryLevel.
  * @tc.type: FUNC
  */
-HWTEST_F(CjTestRunnerTest, CjTestRunnerTestCreate_Failed_RuntimeNull_001, TestSize.Level0)
+HWTEST_F(CjTestRunnerTest, CjTestRunnerTestCreate_Failed_RuntimeNull_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "CjTestRunnerTestInitialize_Success_001 is called");
     std::map<std::string, std::string> paras;

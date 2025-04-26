@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,7 @@
 #include "system_ability_definition.h"
 #include "source_map.h"
 #include "source_map_operator.h"
+#include "worker_info.h"
 
 #ifdef SUPPORT_SCREEN
 #include "hot_reloader.h"
@@ -160,7 +161,8 @@ std::unique_ptr<JsRuntime> JsRuntime::Create(const Options& options)
 void JsRuntime::StartDebugMode(const DebugOption dOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "localDebug %{public}d", dOption.isDebugFromLocal);
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "developer Mode false");
         return;
     }
@@ -183,15 +185,29 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
     uint32_t instanceId = instanceId_;
     auto weak = jsEnv_;
     std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
-    HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp, [bundleName,
-            isStartWithDebug, instanceId, weak, isDebugApp, appProvisionType] (int socketFd, std::string option) {
-            TAG_LOGI(AAFwkTag::JSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s",
-                socketFd, option.c_str());
+    HdcRegister::DebugRegisterMode debugMode = HdcRegister::DebugRegisterMode::HDC_DEBUG_REG;
+    if (debugOption_.isDebugFromLocal && debugOption_.isDeveloperMode) {
+        debugMode = HdcRegister::DebugRegisterMode::BOTH_REG;
+    } else if (debugOption_.isDebugFromLocal) {
+        debugMode = HdcRegister::DebugRegisterMode::LOCAL_DEBUG_REG;
+    }
+    HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp, debugMode,
+        [bundleName, isStartWithDebug, instanceId, weak, isDebugApp, appProvisionType]
+        (int socketFd, std::string option) {
+        TAG_LOGI(AAFwkTag::JSRUNTIME,
+            "HdcRegister msg, fd %{public}d, option %{public}s, isStartWithDebug %{public}d, isDebugApp %{public}d",
+            socketFd, option.c_str(), isStartWithDebug, isDebugApp);
         if (weak == nullptr) {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "null weak");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null weak");
             return;
         }
-        if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+        // system is unlocked when const.boot.oemmode is rd
+        std::string oemmode = OHOS::system::GetParameter("const.boot.oemmode", "");
+        bool unlocked = "rd" == oemmode;
+        TAG_LOGI(AAFwkTag::JSRUNTIME, "unlocked= %{public}d, oemmode= %{public}s", unlocked, oemmode.c_str());
+        // Don't start any server if (system is locked) and app is release version
+        // Starting ConnectServer in release app on debuggable system is only for debug mode, not for profiling mode.
+        if ((!unlocked) && appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "not support release app");
             return;
         }
@@ -217,6 +233,7 @@ void JsRuntime::DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug
 {
     ConnectServerManager::Get().StoreInstanceMessage(getproctid(), instanceId_);
     EcmaVM* vm = GetEcmaVm();
+    CHECK_POINTER(jsEnv_);
     auto dTask = jsEnv_->GetDebuggerPostTask();
     panda::JSNApi::DebugOption option = {ARK_DEBUGGER_LIB_PATH, isDebugApp ? isStartWithDebug : false};
     ConnectServerManager::Get().StoreDebuggerInfo(getproctid(), reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
@@ -307,7 +324,8 @@ int32_t JsRuntime::JsperfProfilerCommandParse(const std::string &command, int32_
 void JsRuntime::StartProfiler(const DebugOption dOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "localDebug %{public}d", dOption.isDebugFromLocal);
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "developer Mode false");
         return;
     }
@@ -325,6 +343,7 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
     uint32_t instanceId = instanceId_;
     std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
     HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
+        HdcRegister::DebugRegisterMode::HDC_DEBUG_REG,
         [bundleName, isStartWithDebug, instanceId, weak, isDebugApp, appProvisionType](int socketFd, std::string option) {
         TAG_LOGI(AAFwkTag::JSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s", socketFd, option.c_str());
         if (weak == nullptr) {
@@ -364,6 +383,7 @@ void JsRuntime::DebuggerConnectionManager(bool isDebugApp, bool isStartWithDebug
         interval = JsperfProfilerCommandParse(dOption.perfCmd, DEFAULT_INTER_VAL);
     }
     EcmaVM* vm = GetEcmaVm();
+    CHECK_POINTER(jsEnv_);
     auto dTask = jsEnv_->GetDebuggerPostTask();
     panda::JSNApi::DebugOption option = {ARK_DEBUGGER_LIB_PATH, isDebugApp ? isStartWithDebug : false};
     ConnectServerManager::Get().StoreDebuggerInfo(getproctid(), reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
@@ -547,7 +567,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "ModuleName %{public}s", moduleName.c_str());
     if (env == nullptr) {
-        TAG_LOGI(AAFwkTag::JSRUNTIME, "null env");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
         return nullptr;
     }
 
@@ -890,6 +910,7 @@ void JsRuntime::InitSourceMap(const std::string hqfFilePath)
         return;
     }
     std::string str(soureMapBuffer.begin(), soureMapBuffer.end());
+    CHECK_POINTER(jsEnv_);
     auto sourceMapOperator = jsEnv_->GetSourceMapOperator();
     if (sourceMapOperator != nullptr) {
         auto sourceMapObj = sourceMapOperator->GetSourceMapObj();
@@ -1089,6 +1110,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
         return false;
     }
     if (newCreate) {
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "newCreate");
         panda::JSNApi::LoadAotFile(vm, moduleName_);
         auto resourceManager = AbilityBase::ExtractResourceManager::GetExtractResourceManager().GetGlobalObject();
         if (resourceManager) {
@@ -1190,12 +1212,16 @@ void JsRuntime::DumpHeapSnapshot(bool isPrivate)
     nativeEngine->DumpHeapSnapshot(true, DumpFormat::JSON, isPrivate, false);
 }
 
-void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC)
+void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary)
 {
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
     panda::ecmascript::DumpSnapShotOption dumpOption;
-    dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
+    if (isBinary) {
+        dumpOption.dumpFormat = panda::ecmascript::DumpFormat::BINARY;
+    } else {
+        dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
+    }
     dumpOption.isVmMode = true;
     dumpOption.isPrivate = false;
     dumpOption.captureNumericValue = true;
@@ -1622,13 +1648,14 @@ std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
     return systemKitsMap;
 }
 
-void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName)
+void JsRuntime::SetPkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName)
 {
     auto iterator = pkgContextInfoJsonStringMap_.find(moduleName);
     if (iterator == pkgContextInfoJsonStringMap_.end()) {
         pkgContextInfoJsonStringMap_[moduleName] = hapPath;
         packageNameList_[moduleName] = packageName;
         auto vm = GetEcmaVm();
+        CHECK_POINTER_AND_RETURN(vm,);
         std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
         std::map<std::string, std::string> pkgAliasMap;
         JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(
@@ -1639,7 +1666,7 @@ void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hap
     }
 }
 
-void JsRuntime::UpdatePkgContextInfoJsonEx(const std::string& moduleName, const std::string& hapPath,
+void JsRuntime::UpdatePkgContextInfoJson(const std::string& moduleName, const std::string& hapPath,
     const std::string& packageName)
 {
     std::map<std::string, std::string> pkgContextInfoJsonStringMap;
@@ -1647,6 +1674,7 @@ void JsRuntime::UpdatePkgContextInfoJsonEx(const std::string& moduleName, const 
     std::map<std::string, std::string> packageNameList;
     packageNameList[moduleName] = packageName;
     auto vm = GetEcmaVm();
+    CHECK_POINTER_AND_RETURN(vm,);
     std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
     std::map<std::string, std::string> pkgAliasMap;
     JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(pkgContextInfoJsonStringMap, pkgContextInfoMap, pkgAliasMap);
@@ -1655,5 +1683,15 @@ void JsRuntime::UpdatePkgContextInfoJsonEx(const std::string& moduleName, const 
     panda::JSNApi::UpdatePkgNameList(vm, packageNameList);
 }
 
+void JsRuntime::SetDebugOption(const DebugOption debugOption)
+{
+    debugOption_ = debugOption;
+}
+
+void JsRuntime::StartLocalDebugMode(bool isDebugFromLocal)
+{
+    debugOption_.isDebugFromLocal = isDebugFromLocal;
+    StartDebugMode(debugOption_);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

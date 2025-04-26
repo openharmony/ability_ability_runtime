@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@
 #include "ability_info.h"
 #include "ability_lifecycle_observer_interface.h"
 #include "caller_callback.h"
-#include "configuration.h"
 #include "context.h"
 #include "free_install_observer_interface.h"
 #include "iability_callback.h"
@@ -39,6 +38,9 @@
 #endif
 
 namespace OHOS {
+namespace AppExecFwk {
+class Configuration;
+}
 namespace Ace {
 class UIContent;
 }
@@ -48,6 +50,7 @@ using RuntimeTask = std::function<void(int, const AAFwk::Want&, bool)>;
 using PermissionRequestTask = std::function<void(const std::vector<std::string>&, const std::vector<int>&)>;
 using RequestDialogResultTask = std::function<void(int32_t resultCode, const AAFwk::Want&)>;
 using AbilityConfigUpdateCallback = std::function<void(AppExecFwk::Configuration &config)>;
+using OnRequestResult = std::function<void(const AppExecFwk::ElementName&, const std::string&)>;
 class LocalCallContainer;
 constexpr int32_t DEFAULT_INVAL_VALUE = -1;
 class AbilityContext : public Context {
@@ -367,6 +370,9 @@ public:
     virtual void SetAbilityConfiguration(const AppExecFwk::Configuration &config) = 0;
     virtual void SetAbilityColorMode(int32_t colorMode) = 0;
     virtual void SetAbilityResourceManager(std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr) = 0;
+    virtual bool GetHookOff() = 0;
+    virtual void SetHookOff(bool hookOff) = 0;
+    virtual ErrCode RevokeDelegator() = 0;
 
     virtual std::shared_ptr<AAFwk::Want> GetWant() = 0;
 
@@ -422,11 +428,44 @@ public:
 #endif
 #endif
     virtual bool IsTerminating() = 0;
+    virtual bool IsHook() = 0;
+    virtual void SetHook(bool isHook) = 0;
     virtual void SetTerminating(bool state) = 0;
     virtual void InsertResultCallbackTask(int requestCode, RuntimeTask&& task) = 0;
     virtual void RemoveResultCallbackTask(int requestCode) = 0;
     using SelfType = AbilityContext;
     static const size_t CONTEXT_TYPE_ID;
+
+    /**
+     * @brief Add CompletioHandler.
+     *
+     * @param requestId, the requestId.
+     * @param onRequestSucc, the callback ot be called upon request success.
+     * @param onRequestFail, the callback ot be called upon request failure.
+     * @return ERR_OK on success, otherwise failure.
+     */
+    virtual ErrCode AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
+        OnRequestResult onRequestFail) = 0;
+
+    /**
+     * @brief Callback on request success.
+     *
+     * @param requestId, the requestId.
+     * @param element, the want element of startAbility.
+     * @param message, the message returned to the callback.
+     */
+    virtual void OnRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) = 0;
+
+    /**
+     * @brief Callback on request failure.
+     *
+     * @param requestId, the requestId.
+     * @param element, the want element of startAbility.
+     * @param message, the message returned to the callback.
+     */
+    virtual void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) = 0;
 
 protected:
     bool IsContext(size_t contextTypeId) override

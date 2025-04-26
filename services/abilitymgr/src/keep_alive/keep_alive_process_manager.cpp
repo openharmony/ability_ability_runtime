@@ -66,6 +66,10 @@ KeepAliveProcessManager::~KeepAliveProcessManager() {}
 void KeepAliveProcessManager::StartKeepAliveProcessWithMainElement(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
     int32_t userId)
 {
+    if (!DelayedSingleton<AbilityManagerService>::GetInstance()->IsSceneBoardReady(userId)) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "SCB not ready, do not start keep-alive apps");
+        return;
+    }
     for (const auto &bundleInfo : bundleInfos) {
         StartKeepAliveProcessWithMainElementPerBundle(bundleInfo, userId);
     }
@@ -85,12 +89,12 @@ void KeepAliveProcessManager::StartKeepAliveProcessWithMainElementPerBundle(cons
         return;
     }
     KeepAliveAbilityInfo info = {
-        .bundleName = bundleInfo.name,
-        .moduleName = bundleInfo.entryModuleName,
-        .abilityName = mainElementName,
         .userId = userId,
         .appCloneIndex = bundleInfo.appIndex,
         .uid = bundleInfo.uid,
+        .bundleName = bundleInfo.name,
+        .moduleName = bundleInfo.entryModuleName,
+        .abilityName = mainElementName,
     };
     auto isMultiInstance =
         bundleInfo.applicationInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
@@ -130,11 +134,11 @@ int32_t KeepAliveProcessManager::StartKeepAliveMainAbility(const KeepAliveAbilit
         " appCloneIndex: %{public}d", info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(),
         info.appCloneIndex);
     StartOptions options;
-    options.processOptions = std::make_shared<ProcessOptions>();
-    options.processOptions->isRestartKeepAlive = true;
-    options.processOptions->startupVisibility =
-        DelayedSingleton<AbilityManagerService>::GetInstance()->IsSupportStatusBar(info.uid) ?
-        StartupVisibility::STARTUP_HIDE : StartupVisibility::STARTUP_SHOW;
+    if (DelayedSingleton<AbilityManagerService>::GetInstance()->IsSupportStatusBar(info.uid)) {
+        options.processOptions = std::make_shared<ProcessOptions>();
+        options.processOptions->isRestartKeepAlive = true;
+        options.processOptions->startupVisibility = StartupVisibility::STARTUP_HIDE;
+    }
     auto ret = IN_PROCESS_CALL(DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want,
         options, nullptr, info.userId, DEFAULT_INVAL_VALUE));
     MainElementUtils::UpdateMainElement(info.bundleName, info.moduleName, info.abilityName, true, info.userId);

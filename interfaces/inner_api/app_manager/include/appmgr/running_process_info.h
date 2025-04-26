@@ -57,12 +57,14 @@ struct RunningProcessInfo : public Parcelable {
     bool isAbilityForegrounding = false;
     bool isTestMode = false;
     bool isStrictMode = false;
+    bool isDebugApp = false;
     std::int32_t pid_;
     std::int32_t uid_;
     std::int32_t bundleType = 0;
     std::int32_t appCloneIndex = -1;
     std::int32_t rssValue = 0;
     std::int32_t pssValue = 0;
+    PreloadMode preloadMode_ = PreloadMode::PRELOAD_NONE;
     AppProcessState state_;
     std::int64_t startTimeMillis_;
     std::vector<std::string> bundleNames;

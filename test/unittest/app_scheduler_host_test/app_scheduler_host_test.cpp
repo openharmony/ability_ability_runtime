@@ -110,7 +110,7 @@ HWTEST_F(AppSchedulerHostTest, ScheduleChangeAppGcState_001, TestSize.Level1)
 HWTEST_F(AppSchedulerHostTest, HandleAttachAppDebug_001, TestSize.Level1)
 {
     EXPECT_NE(mockAppScheduler_, nullptr);
-    EXPECT_CALL(*mockAppScheduler_, AttachAppDebug()).Times(1);
+    EXPECT_CALL(*mockAppScheduler_, AttachAppDebug(_)).Times(1);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -129,7 +129,7 @@ HWTEST_F(AppSchedulerHostTest, HandleAttachAppDebug_001, TestSize.Level1)
 HWTEST_F(AppSchedulerHostTest, HandleAttachAppDebug_002, TestSize.Level1)
 {
     EXPECT_NE(mockAppScheduler_, nullptr);
-    EXPECT_CALL(*mockAppScheduler_, AttachAppDebug()).Times(0);
+    EXPECT_CALL(*mockAppScheduler_, AttachAppDebug(_)).Times(0);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;

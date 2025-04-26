@@ -38,8 +38,6 @@ public:
 private:
     int32_t HandleIsHiddenStart(MessageParcel &data, MessageParcel &reply);
 
-    static std::mutex callbackMutex_;
-
     DISALLOW_COPY_AND_MOVE(HiddenStartObserverStub);
 };
 } // namespace AAFwk

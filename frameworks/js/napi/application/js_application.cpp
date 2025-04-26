@@ -31,6 +31,7 @@ namespace {
     constexpr size_t ARGC_ZERO = 0;
     constexpr size_t ARGC_ONE = 1;
     constexpr size_t ARGC_TWO = 2;
+    constexpr size_t ARGC_THREE = 3;
     constexpr const char* PERMISSION_GET_BUNDLE_INFO = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
 }
 void JsApplication::Finalizer(napi_env env, void *data, void *hint)
@@ -71,6 +72,73 @@ napi_value JsApplication::CreateModuleContext(napi_env env, napi_callback_info i
 napi_value JsApplication::CreateBundleContext(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsApplication, OnCreateBundleContext);
+}
+
+napi_value JsApplication::CreatePluginModuleContext(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsApplication, OnCreatePluginModuleContext);
+}
+
+
+napi_value JsApplication::OnCreatePluginModuleContext(napi_env env, NapiCallbackInfo &info)
+{
+    if (info.argc < ARGC_THREE) {
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    bool stageMode = false;
+    napi_status status = OHOS::AbilityRuntime::IsStageContext(env, info.argv[ARGC_ZERO], stageMode);
+    if (status != napi_ok || !stageMode) {
+        ThrowInvalidParamError(env, "Parse param context failed, must be a context of stageMode.");
+        return CreateJsUndefined(env);
+    }
+
+    auto context = OHOS::AbilityRuntime::GetStageModeContext(env, info.argv[ARGC_ZERO]);
+    if (context == nullptr) {
+        ThrowInvalidParamError(env, "Parse param context failed, must not be nullptr.");
+        return CreateJsUndefined(env);
+    }
+
+    auto inputContextPtr = Context::ConvertTo<Context>(context);
+    if (inputContextPtr == nullptr) {
+        ThrowInvalidParamError(env, "Parse param context failed, must be a context.");
+        return CreateJsUndefined(env);
+    }
+
+    std::shared_ptr<std::shared_ptr<Context>> moduleContext = std::make_shared<std::shared_ptr<Context>>();
+    std::shared_ptr<ContextImpl> contextImpl = std::make_shared<ContextImpl>();
+    if (contextImpl == nullptr) {
+        ThrowInvalidParamError(env, "create context failed.");
+        return CreateJsUndefined(env);
+    }
+    contextImpl->SetProcessName(context->GetProcessName());
+    std::string moduleName = "";
+    std::string pluginBundleName = "";
+
+    if (!ConvertFromJsValue(env, info.argv[ARGC_TWO], moduleName)
+        || !ConvertFromJsValue(env, info.argv[ARGC_ONE], pluginBundleName)) {
+        ThrowInvalidParamError(env, "Parse param failed, moduleName and pluginBundleName must be string.");
+        return CreateJsUndefined(env);
+    }
+
+    TAG_LOGD(AAFwkTag::APPKIT, "moduleName: %{public}s, pluginBundleName: %{public}s",
+        moduleName.c_str(), pluginBundleName.c_str());
+    NapiAsyncTask::ExecuteCallback execute = [moduleName, pluginBundleName, contextImpl,
+        moduleContext, inputContextPtr]() {
+        if (contextImpl != nullptr) {
+            *moduleContext = contextImpl->CreatePluginContext(pluginBundleName, moduleName, inputContextPtr);
+        }
+    };
+
+    NapiAsyncTask::CompleteCallback complete;
+    SetCreateCompleteCallback(moduleContext, complete);
+
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsApplication::OnCreatePluginModuleContext",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+
+    return result;
 }
 
 napi_value JsApplication::OnCreateModuleContext(napi_env env, NapiCallbackInfo &info)
@@ -352,6 +420,9 @@ napi_value ApplicationInit(napi_env env, napi_value exportObj)
 
     BindNativeFunction(env, exportObj, "createBundleContext", moduleName,
         JsApplication::CreateBundleContext);
+
+    BindNativeFunction(env, exportObj, "createPluginModuleContext", moduleName,
+        JsApplication::CreatePluginModuleContext);
     return CreateJsUndefined(env);
 }
 } // namespace AbilityRuntime

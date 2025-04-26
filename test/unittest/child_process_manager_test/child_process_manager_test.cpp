@@ -90,7 +90,7 @@ HWTEST_F(ChildProcessManagerTest, StartChildProcessBySelfFork_0100, TestSize.Lev
  * @tc.desc: Test StartChildProcessBySelfFork works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, StartChildProcessBySelfFork_0200, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, StartChildProcessBySelfFork_0200, TestSize.Level1)
 {
     TAG_LOGD(AAFwkTag::TEST, "StartChildProcessBySelfFork_0200 called.");
     AAFwk::AppUtils::GetInstance().isMultiProcessModel_.isLoaded = true;
@@ -105,7 +105,7 @@ HWTEST_F(ChildProcessManagerTest, StartChildProcessBySelfFork_0200, TestSize.Lev
  * @tc.desc: Test StartChildProcessByAppSpawnFork works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, StartChildProcessByAppSpawnFork_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, StartChildProcessByAppSpawnFork_0100, TestSize.Level1)
 {
     TAG_LOGD(AAFwkTag::TEST, "StartChildProcessByAppSpawnFork_0100 called.");
     pid_t pid;
@@ -118,7 +118,7 @@ HWTEST_F(ChildProcessManagerTest, StartChildProcessByAppSpawnFork_0100, TestSize
  * @tc.desc: Test StartChildProcessWithArgs works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, StartChildProcessWithArgs_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, StartChildProcessWithArgs_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "StartChildProcessWithArgs_0100 called.");
     pid_t pid;
@@ -134,7 +134,7 @@ HWTEST_F(ChildProcessManagerTest, StartChildProcessWithArgs_0100, TestSize.Level
  * @tc.desc: Test IsChildProcess works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, IsChildProcess_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, IsChildProcess_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "IsChildProcess_0100 called.");
     auto manager = std::make_shared<ChildProcessManager>();
@@ -147,7 +147,7 @@ HWTEST_F(ChildProcessManagerTest, IsChildProcess_0100, TestSize.Level0)
  * @tc.desc: Test IsChildProcessBySelfFork works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, IsChildProcessBySelfFork_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, IsChildProcessBySelfFork_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "IsChildProcessBySelfFork_0100 called.");
     auto manager = std::make_shared<ChildProcessManager>();
@@ -160,7 +160,7 @@ HWTEST_F(ChildProcessManagerTest, IsChildProcessBySelfFork_0100, TestSize.Level0
  * @tc.desc: Test GetBundleInfo works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, GetBundleInfo_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, GetBundleInfo_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "GetBundleInfo_0100 called.");
     AppExecFwk::BundleInfo bundleInfo;
@@ -173,7 +173,7 @@ HWTEST_F(ChildProcessManagerTest, GetBundleInfo_0100, TestSize.Level0)
  * @tc.desc: Test GetHapModuleInfo works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, GetHapModuleInfo_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, GetHapModuleInfo_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "GetHapModuleInfo_0100 called.");
     AppExecFwk::BundleInfo bundleInfo;
@@ -190,7 +190,7 @@ HWTEST_F(ChildProcessManagerTest, GetHapModuleInfo_0100, TestSize.Level0)
  * @tc.desc: Test GetEntryHapModuleInfo works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, GetEntryHapModuleInfo_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, GetEntryHapModuleInfo_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "GetEntryHapModuleInfo_0100 called.");
     AppExecFwk::BundleInfo bundleInfo;
@@ -207,7 +207,7 @@ HWTEST_F(ChildProcessManagerTest, GetEntryHapModuleInfo_0100, TestSize.Level0)
  * @tc.desc: Test CreateRuntime works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, CreateRuntime_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, CreateRuntime_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "CreateRuntime_0100 called.");
     std::unique_ptr<AbilityRuntime::Runtime> CreateRuntime(const AppExecFwk::BundleInfo &bundleInfo,
@@ -229,7 +229,7 @@ HWTEST_F(ChildProcessManagerTest, CreateRuntime_0100, TestSize.Level0)
  * @tc.desc: Test ChildProcessErrorUtils.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, ChildProcessErrorUtils_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, ChildProcessErrorUtils_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "ChildProcessErrorUtils_0100 called.");
     auto err = ChildProcessManagerErrorUtil::GetAbilityErrorCode(ChildProcessManagerErrorCode::ERR_OK);
@@ -241,7 +241,7 @@ HWTEST_F(ChildProcessManagerTest, ChildProcessErrorUtils_0100, TestSize.Level0)
  * @tc.desc: Test HandleChildProcessBySelfFork works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, HandleChildProcessBySelfFork, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, HandleChildProcessBySelfFork, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "HandleChildProcessBySelfFork_0100 called.");
     AppExecFwk::BundleInfo bundleInfo;
@@ -254,7 +254,7 @@ HWTEST_F(ChildProcessManagerTest, HandleChildProcessBySelfFork, TestSize.Level0)
  * @tc.desc: Test LoadJsFile works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, LoadJsFile_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, LoadJsFile_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "LoadJsFile_0100 called.");
     std::unique_ptr<Runtime> runtime;
@@ -268,7 +268,7 @@ HWTEST_F(ChildProcessManagerTest, LoadJsFile_0100, TestSize.Level0)
  * @tc.desc: Test LoadJsFile works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, LoadJsFile_0200, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, LoadJsFile_0200, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "LoadJsFile_0200 called.");
     std::unique_ptr<Runtime> runtime;
@@ -283,7 +283,7 @@ HWTEST_F(ChildProcessManagerTest, LoadJsFile_0200, TestSize.Level0)
  * @tc.desc: Test SetForkProcessDebugOption.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, SetForkProcessDebugOption_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, SetForkProcessDebugOption_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "SetForkProcessDebugOption called.");
     AbilityRuntime::Runtime::DebugOption debugOption;
@@ -296,7 +296,7 @@ HWTEST_F(ChildProcessManagerTest, SetForkProcessDebugOption_0100, TestSize.Level
  * @tc.desc: Test StartNativeChildProcessByAppSpawnFork works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, StartNativeChildProcessByAppSpawnFork_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, StartNativeChildProcessByAppSpawnFork_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "StartNativeChildProcessByAppSpawnFork_0100 called.");
     sptr<IRemoteObject> callback;
@@ -309,7 +309,7 @@ HWTEST_F(ChildProcessManagerTest, StartNativeChildProcessByAppSpawnFork_0100, Te
  * @tc.desc: Test GetModuleNameFromSrcEntry works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, GetModuleNameFromSrcEntry_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, GetModuleNameFromSrcEntry_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "GetModuleNameFromSrcEntry_0100 called.");
     std::string srcEntry = "entry/./ets/process/AProcess.ts";
@@ -322,7 +322,7 @@ HWTEST_F(ChildProcessManagerTest, GetModuleNameFromSrcEntry_0100, TestSize.Level
  * @tc.desc: Test GetModuleNameFromSrcEntry works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, GetModuleNameFromSrcEntry_0200, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, GetModuleNameFromSrcEntry_0200, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "GetModuleNameFromSrcEntry_0200 called.");
     std::string srcEntry = "AProcess.ts";
@@ -335,7 +335,7 @@ HWTEST_F(ChildProcessManagerTest, GetModuleNameFromSrcEntry_0200, TestSize.Level
  * @tc.desc: Test GetModuleNameFromSrcEntry works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, GetModuleNameFromSrcEntry_0300, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, GetModuleNameFromSrcEntry_0300, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "GetModuleNameFromSrcEntry_0300 called.");
     std::string srcEntry = "./ets/process/AProcess.ts";
@@ -348,7 +348,7 @@ HWTEST_F(ChildProcessManagerTest, GetModuleNameFromSrcEntry_0300, TestSize.Level
  * @tc.desc: Test SetAppSpawnForkDebugOption works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, SetAppSpawnForkDebugOption_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, SetAppSpawnForkDebugOption_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "SetAppSpawnForkDebugOption_0100 called.");
     Runtime::DebugOption debugOption;
@@ -361,7 +361,7 @@ HWTEST_F(ChildProcessManagerTest, SetAppSpawnForkDebugOption_0100, TestSize.Leve
  * @tc.desc: Test SetAppSpawnForkDebugOption works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, SetAppSpawnForkDebugOption_0200, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, SetAppSpawnForkDebugOption_0200, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "SetAppSpawnForkDebugOption_0200 called.");
     Runtime::DebugOption debugOption;
@@ -377,7 +377,7 @@ HWTEST_F(ChildProcessManagerTest, SetAppSpawnForkDebugOption_0200, TestSize.Leve
  * @tc.desc: Test LoadNativeLibWithArgs works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, LoadNativeLibWithArgs_0100, TestSize.Level0)
+HWTEST_F(ChildProcessManagerTest, LoadNativeLibWithArgs_0100, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "LoadNativeLibWithArgs_0100 called.");
     auto ret = ChildProcessManager::GetInstance().LoadNativeLibWithArgs("entry", "libentry.so", "Main", nullptr);

@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/service_extension"
+module_output_path = "ability_runtime/ability_runtime/service_extension"
 
 ohos_unittest("js_service_extension_test") {
   module_out_path = module_output_path

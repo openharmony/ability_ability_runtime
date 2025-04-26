@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("quick_fix_manager_service_test") {
-  module_out_path = "ability_runtime/quick_fix"
+  module_out_path = "ability_runtime/ability_runtime/quick_fix"
 
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
@@ -67,7 +67,7 @@ ohos_unittest("quick_fix_manager_service_test") {
 }
 
 ohos_unittest("quick_fix_manager_apply_task_test") {
-  module_out_path = "ability_runtime/quick_fix"
+  module_out_path = "ability_runtime/ability_runtime/quick_fix"
 
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",

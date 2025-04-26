@@ -51,7 +51,7 @@ HWTEST_F(ExtensionPermissionsUtilTest, CheckSAPermission_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "ExtensionPermissionsUtilTest CheckSAPermission_001 start");
     MyFlag::flag_ = 0;
-    EXPECT_TRUE(ExtensionPermissionsUtil::CheckSAPermission(ExtensionAbilityType::FORM));
+    EXPECT_FALSE(ExtensionPermissionsUtil::CheckSAPermission(ExtensionAbilityType::FORM));
     TAG_LOGI(AAFwkTag::TEST, "ExtensionPermissionsUtilTest CheckSAPermission_001 end");
 }
 
@@ -87,6 +87,23 @@ HWTEST_F(ExtensionPermissionsUtilTest, CheckSAPermission_003, TestSize.Level1)
     EXPECT_FALSE(ExtensionPermissionsUtil::CheckSAPermission(ExtensionAbilityType::FORM));
     MyFlag::flag_ = 0;
     TAG_LOGI(AAFwkTag::TEST, "ExtensionPermissionsUtilTest CheckSAPermission_002 end");
+}
+
+/*
+ * Feature: ExtensionPermissionsUtil
+ * Function: CheckSAPermission
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckSAPermission
+ */
+HWTEST_F(ExtensionPermissionsUtilTest, CheckSAPermission_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ExtensionPermissionsUtilTest CheckSAPermission_004 start");
+
+    MyFlag::flag_ = 2;
+    MyFlag::hasPerm_ = false;
+    EXPECT_TRUE(ExtensionPermissionsUtil::CheckSAPermission(ExtensionAbilityType::INPUTMETHOD));
+    MyFlag::flag_ = 0;
+    TAG_LOGI(AAFwkTag::TEST, "ExtensionPermissionsUtilTest CheckSAPermission_004 end");
 }
 
 /*

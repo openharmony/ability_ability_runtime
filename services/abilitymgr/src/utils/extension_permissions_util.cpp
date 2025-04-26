@@ -23,15 +23,18 @@ namespace AAFwk {
 
 bool ExtensionPermissionsUtil::CheckSAPermission(const AppExecFwk::ExtensionAbilityType &extensionType)
 {
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckSAPermission, extensionType: %{public}d.", extensionType);
     auto checkRet = false;
     if (extensionType == AppExecFwk::ExtensionAbilityType::ASSET_ACCELERATION) {
         return PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_ASSET_ACCELERATION_EXTENSION");
+    } else if (extensionType == AppExecFwk::ExtensionAbilityType::DISTRIBUTED) {
+        return PermissionVerification::GetInstance()->VerifyCallingPermission(
+            "ohos.permission.CONNECT_DISTRIBUTED_EXTENSION");
     }
-    if (!PermissionVerification::GetInstance()->IsSACall()) {
+    if (PermissionVerification::GetInstance()->IsShellCall()) {
         return true;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckSAPermission, extensionType: %{public}d.", extensionType);
     if (extensionType == AppExecFwk::ExtensionAbilityType::FORM) {
         checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_FORM_EXTENSION");
@@ -59,9 +62,6 @@ bool ExtensionPermissionsUtil::CheckSAPermission(const AppExecFwk::ExtensionAbil
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::PRINT) {
         checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_PRINT_EXTENSION");
-    } else if (extensionType == AppExecFwk::ExtensionAbilityType::VPN) {
-        checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
-            "ohos.permission.CONNECT_VPN_EXTENSION");
     } else {
         checkRet = CheckSAPermissionMore(extensionType);
     }

@@ -152,9 +152,12 @@ int32_t InsightIntentExecuteManager::ExecuteIntentDone(uint64_t intentId, int32_
     const AppExecFwk::InsightIntentExecuteResult &result)
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
+    EventInfo eventInfo;
     auto findResult = records_.find(intentId);
     if (findResult == records_.end()) {
         TAG_LOGE(AAFwkTag::INTENT, "intent not found, id: %{public}" PRIu64, intentId);
+        eventInfo.errReason = "intent not found";
+        SendIntentReport(eventInfo, INTENT_NOT_EXIST);
         return ERR_INVALID_VALUE;
     }
 
@@ -167,6 +170,8 @@ int32_t InsightIntentExecuteManager::ExecuteIntentDone(uint64_t intentId, int32_
     TAG_LOGD(AAFwkTag::INTENT, "callback start, id:%{public}" PRIu64, intentId);
     if (record->state != InsightIntentExecuteState::EXECUTING) {
         TAG_LOGW(AAFwkTag::INTENT, "insight intent execute state is not EXECUTING, id:%{public}" PRIu64, intentId);
+        eventInfo.errReason = "intent state error";
+        SendIntentReport(eventInfo, INTENT_STATE_NOT_EXECUTING);
         return ERR_INVALID_OPERATION;
     }
     record->state = InsightIntentExecuteState::EXECUTE_DONE;
@@ -361,6 +366,12 @@ std::map<int32_t, int64_t> InsightIntentExecuteManager::GetAllIntentExemptionInf
 {
     std::lock_guard<ffrt::mutex> guard(intentExemptionLock_);
     return intentExemptionDeadlineTime_;
+}
+
+void InsightIntentExecuteManager::SendIntentReport(EventInfo &eventInfo, int32_t errCode)
+{
+    eventInfo.errCode = errCode;
+    EventReport::SendExecuteIntentEvent(EventName::EXECUTE_INSIGHT_INTENT_ERROR, HiSysEventType::FAULT, eventInfo);
 }
 } // namespace AAFwk
 } // namespace OHOS

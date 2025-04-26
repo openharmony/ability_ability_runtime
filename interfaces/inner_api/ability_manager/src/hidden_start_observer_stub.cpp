@@ -21,7 +21,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-std::mutex HiddenStartObserverStub::callbackMutex_;
 int HiddenStartObserverStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
@@ -41,8 +40,8 @@ int HiddenStartObserverStub::OnRemoteRequest(
 
 int32_t HiddenStartObserverStub::HandleIsHiddenStart(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t uid = data.ReadInt32();
-    bool result = IsHiddenStart(uid);
+    int32_t pid = data.ReadInt32();
+    bool result = IsHiddenStart(pid);
     reply.WriteBool(result);
     return NO_ERROR;
 }

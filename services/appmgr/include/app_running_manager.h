@@ -62,7 +62,7 @@ public:
      */
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(const std::shared_ptr<ApplicationInfo> &appInfo,
         const std::string &processName, const BundleInfo &bundleInfo, const std::string &instanceKey,
-        const std::string &customProcessFlag = "", int32_t persistentId = 0);
+        const std::string &customProcessFlag = "");
 
     /**
      * CheckAppRunningRecordIsExist, Get process record by application name and process Name.
@@ -302,7 +302,7 @@ public:
      * @param bundleName The application bundle name.
      * @param isAttachDebug Determine if it is in attach debug mode.
      */
-    void SetAttachAppDebug(const std::string &bundleName, const bool &isAttachDebug);
+    void SetAttachAppDebug(const std::string &bundleName, const bool &isAttachDebug, bool isDebugFromLocal);
 
     /**
      * @brief Obtain app debug infos through bundleName.
@@ -373,7 +373,7 @@ public:
     bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
-
+    std::shared_ptr<AppRunningRecord> QueryAppRecordPlus(int32_t pid, int32_t uid);
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     int32_t AssignRunningProcessInfoByAppRecord(
@@ -381,10 +381,13 @@ private:
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
     void NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
         const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner);
+    void AddRecordToDeadList(std::shared_ptr<AppRunningRecord> appRecord);
+    void RemoveTimeoutDeadAppRecord();
 
 private:
     std::mutex runningRecordMapMutex_;
     std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> appRunningRecordMap_;
+    std::list<std::pair<int64_t, std::shared_ptr<AppRunningRecord>>> deadAppRecordList_; // dead time and record
 
     std::mutex uiExtensionMapLock_;
     std::map<int32_t, std::pair<pid_t, pid_t>> uiExtensionLauncherMap_;

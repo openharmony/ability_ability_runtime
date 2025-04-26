@@ -136,6 +136,9 @@ napi_value CreateJsConfiguration(napi_env env, const AppExecFwk::Configuration& 
     napi_set_named_property(env, object, "fontSizeScale",
         CreateJsValue(env, fontSizeScale == "" ? 1.0 : std::stod(fontSizeScale)));
 
+    napi_set_named_property(env, object, "fontId", CreateJsValue(env,
+        configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_ID)));
+
     std::string fontWeightScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
     napi_set_named_property(env, object, "fontWeightScale",
         CreateJsValue(env, fontWeightScale == "" ? 1.0 : std::stod(fontWeightScale)));

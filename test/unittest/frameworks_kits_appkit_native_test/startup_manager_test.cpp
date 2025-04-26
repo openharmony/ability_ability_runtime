@@ -16,12 +16,13 @@
 #define private public
 #define protected public
 #include "startup_manager.h"
+#include "extractor.h"
 #undef private
 #undef protected
 
 using namespace testing::ext;
 using namespace OHOS::AbilityRuntime;
-
+using Extractor = OHOS::AbilityBase::Extractor;
 namespace OHOS {
 namespace AppExecFwk {
 class StartupManagerTest : public testing::Test {
@@ -979,5 +980,39 @@ HWTEST_F(StartupManagerTest, AnalyzePreloadSoStartupTaskInner_0200, Function | M
     EXPECT_EQ(ret, false);
     GTEST_LOG_(INFO) << "StartupManagerTest AnalyzePreloadSoStartupTaskInner_0200 end";
 }
+
+/**
+ * @tc.name: GetStartupConfigString_0200
+ * @tc.type: FUNC
+ * @tc.Function: GetStartupConfigString
+ */
+HWTEST_F(StartupManagerTest, GetStartupConfigString_0200, Function | MediumTest | Level1)
+{
+    std::string name = "test_name";
+    std::string config = "test_config";
+    std::string startupConfig = "$profile:test";
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    EXPECT_TRUE(startupManager != nullptr);
+    std::shared_ptr<Extractor> extractorPtr = std::make_shared<Extractor>("test");
+    AbilityBase::ExtractorUtil::extractorMap_.insert(std::make_pair("hap", extractorPtr));
+    ModuleStartupConfigInfo info(name, startupConfig, "hap", AppExecFwk::ModuleType::UNKNOWN, false);
+    int32_t ret = startupManager->GetStartupConfigString(info, config);
+    EXPECT_EQ(ret, ERR_STARTUP_CONFIG_PATH_ERROR);
+}
+
+/**
+ * @tc.name: PreloadSoStartupTask_0100
+ * @tc.type: FUNC
+ * @tc.Function: RunTaskInit
+ */
+HWTEST_F(StartupManagerTest, PreloadSoStartupTask_0100, Function | MediumTest | Level1)
+{
+    std::string name = "test_name";
+    std::string ohmUrl = "@normalized:Y&&<bundleName>&<IMPORT_PATH>&<VERSION>";
+    std::shared_ptr<PreloadSoStartupTask> startupTask = std::make_shared<PreloadSoStartupTask>(name, ohmUrl);
+    auto ret = startupTask->RunTaskInit(nullptr);
+    EXPECT_EQ(ret, ERR_STARTUP_INTERNAL_ERROR);
+}
+
 }
 }

@@ -13,7 +13,8 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/service_router_framework/srms.gni")
 
-module_output_path = "ability_runtime/serviceroutermanagerservice"
+module_output_path =
+    "ability_runtime/ability_runtime/serviceroutermanagerservice"
 
 ohos_unittest("ServiceRouterMgrInterfaceTest") {
   use_exceptions = true
@@ -29,6 +30,7 @@ ohos_unittest("ServiceRouterMgrInterfaceTest") {
 
   deps = [
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
+    "${srms_inner_api_path}:service_router_mgr_proxy",
     "${srms_inner_api_path}:srms_fwk",
   ]
 

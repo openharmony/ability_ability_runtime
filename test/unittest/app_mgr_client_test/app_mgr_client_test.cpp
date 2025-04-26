@@ -94,7 +94,7 @@ AbilityRequest AppMgrClientTest::GenerateAbilityRequest(const std::string& devic
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_PreStartNWebSpawnProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_PreStartNWebSpawnProcess_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -111,7 +111,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_PreStartNWebSpawnProcess_001, TestSize.L
  * @tc.desc: update extension state.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateExtensionState_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateExtensionState_001, TestSize.Level2)
 {
     sptr<IRemoteObject> token;
     ExtensionState state = ExtensionState::EXTENSION_STATE_CREATE;
@@ -131,7 +131,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateExtensionState_001, TestSize.Level
  * @tc.desc: get all running processes.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRunningProcesses_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRunningProcesses_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetAllRunningProcesses_001 start");
     AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
@@ -161,7 +161,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRunningProcesses_001, TestSize.Lev
  * @tc.desc: can not get the not running process info by token.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_GetRunningProcessInfoByToken_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetRunningProcessInfoByToken_001, TestSize.Level1)
 {
     std::string deviceName = "device";
     std::string abilityName = "FirstAbility";
@@ -187,7 +187,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetRunningProcessInfoByToken_001, TestSi
  * @tc.desc: can not get the not running process info by AccessTokenID.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_IsMemorySizeSufficent_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_IsMemorySizeSufficent_001, TestSize.Level2)
 {
     AppExecFwk::RunningProcessInfo info;
 
@@ -206,7 +206,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_IsMemorySizeSufficent_001, TestSize.Leve
  * @tc.desc: can not get the not running process info by AccessTokenID.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_GetRunningProcessInfoByPid_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetRunningProcessInfoByPid_001, TestSize.Level1)
 {
     AppExecFwk::RunningProcessInfo info;
 
@@ -226,7 +226,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetRunningProcessInfoByPid_001, TestSize
  * @tc.desc: can not get application info by wrong process ID.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_GetApplicationInfoByProcessID_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetApplicationInfoByProcessID_001, TestSize.Level1)
 {
     std::string deviceName = "device";
     std::string abilityName = "FirstAbility";
@@ -253,7 +253,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetApplicationInfoByProcessID_001, TestS
  * @tc.desc: test NotifyAppMgrRecordExitReason.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_NotifyAppMgrRecordExitReason_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_NotifyAppMgrRecordExitReason_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -273,7 +273,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_NotifyAppMgrRecordExitReason_001, TestSi
  * @tc.desc: get all render processes.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRenderProcesses_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRenderProcesses_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetAllRenderProcesses_001 start");
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -291,7 +291,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRenderProcesses_001, TestSize.Leve
  * @tc.desc: get all children processes.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllChildrenProcesses_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllChildrenProcesses_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetAllChildrenProcesses_001 start");
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -309,7 +309,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllChildrenProcesses_001, TestSize.Le
  * @tc.desc: can not get render process termination status with error pid.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_GetRenderProcessTerminationStatus_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetRenderProcessTerminationStatus_001, TestSize.Level2)
 {
     std::string deviceName = "device";
     std::string abilityName = "FirstAbility";
@@ -338,7 +338,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetRenderProcessTerminationStatus_001, T
  * @tc.desc: can not get ability records by wrong process ID.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_GetAbilityRecordsByProcessID_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetAbilityRecordsByProcessID_001, TestSize.Level2)
 {
     std::string deviceName = "device";
     std::string abilityName = "FirstAbility";
@@ -364,7 +364,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAbilityRecordsByProcessID_001, TestSi
  * @tc.desc: can not kill processes by wrong user ID.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessesByUserId_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessesByUserId_001, TestSize.Level2)
 {
     std::string deviceName = "device";
     std::string abilityName = "FirstAbility";
@@ -393,7 +393,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessesByUserId_001, TestSize.Leve
  * @tc.desc: can not kill processes by wrong user ID.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessesByPids_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessesByPids_001, TestSize.Level2)
 {
     std::string deviceName = "device";
     std::string abilityName = "FirstAbility";
@@ -420,7 +420,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessesByPids_001, TestSize.Level0
  * @tc.desc: can not kill processes by wrong user ID.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_AttachPidToParent_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_AttachPidToParent_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     sptr<IRemoteObject> token = nullptr;
@@ -434,7 +434,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_AttachPidToParent_001, TestSize.Level0)
  * @tc.desc: can not start user test process with wrong param.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_StartUserTestProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_StartUserTestProcess_001, TestSize.Level2)
 {
     AAFwk::Want want;
     sptr<IRemoteObject> observer = nullptr;
@@ -456,7 +456,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_StartUserTestProcess_001, TestSize.Level
  * @tc.desc: kill application self.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_KillApplicationSelf_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_KillApplicationSelf_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     auto result = appMgrClient->ConnectAppMgrService();
@@ -471,7 +471,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_KillApplicationSelf_001, TestSize.Level0
  * @tc.desc: ability attach timeout.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_AbilityAttachTimeOut_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_AbilityAttachTimeOut_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     auto result = appMgrClient->ConnectAppMgrService();
@@ -486,7 +486,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_AbilityAttachTimeOut_001, TestSize.Level
  * @tc.desc: prepare terminate.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_PrepareTerminate_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_PrepareTerminate_001, TestSize.Level2)
 {
     sptr<IRemoteObject> token = nullptr;
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -503,7 +503,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_PrepareTerminate_001, TestSize.Level0)
  * @tc.desc: add ability stage done.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_AddAbilityStageDone_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_AddAbilityStageDone_001, TestSize.Level2)
 {
     int32_t recordId = INIT_VALUE;
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -520,7 +520,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_AddAbilityStageDone_001, TestSize.Level0
  * @tc.desc: startup resident process.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_StartupResidentProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_StartupResidentProcess_001, TestSize.Level2)
 {
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -537,7 +537,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_StartupResidentProcess_001, TestSize.Lev
  * @tc.desc: start specified ability.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_StartSpecifiedAbility_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_StartSpecifiedAbility_001, TestSize.Level2)
 {
     AAFwk::Want want;
     AppExecFwk::AbilityInfo abilityInfo;
@@ -555,7 +555,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_StartSpecifiedAbility_001, TestSize.Leve
  * @tc.desc: register start specified ability response.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterStartSpecifiedAbilityResponse_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterStartSpecifiedAbilityResponse_001, TestSize.Level2)
 {
     sptr<IStartSpecifiedAbilityResponse> response = nullptr;
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -572,7 +572,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterStartSpecifiedAbilityResponse_00
  * @tc.desc: schedule accept want done.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_ScheduleAcceptWantDone_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_ScheduleAcceptWantDone_001, TestSize.Level2)
 {
     int32_t recordId = INIT_VALUE;
     AAFwk::Want want;
@@ -591,7 +591,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_ScheduleAcceptWantDone_001, TestSize.Lev
  * @tc.desc: finish user test.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_FinishUserTest_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_FinishUserTest_001, TestSize.Level2)
 {
     std::string msg = EMPTY_STRING;
     int64_t resultCode = INIT_VALUE;
@@ -612,7 +612,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_FinishUserTest_001, TestSize.Level0)
  * @tc.desc: can not start render process with wrong param.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_StartRenderProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_StartRenderProcess_001, TestSize.Level2)
 {
     std::string renderParam = EMPTY_STRING;
     pid_t renderPid;
@@ -632,7 +632,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_StartRenderProcess_001, TestSize.Level0)
  * @tc.desc: set current userId.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_SetCurrentUserId_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_SetCurrentUserId_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -649,7 +649,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_SetCurrentUserId_001, TestSize.Level0)
  * @tc.desc: UpdateApplicationInfoInstalled.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateApplicationInfoInstalled_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateApplicationInfoInstalled_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -660,7 +660,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateApplicationInfoInstalled_001, Test
     std::string bundleName = "";
     int uid = 1;
     std::string moduleName = "";
-    appMgrClient->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    appMgrClient->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, false);
 }
 
 /**
@@ -668,7 +668,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateApplicationInfoInstalled_001, Test
  * @tc.desc: GetProcessRunningInformation.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_GetProcessRunningInformation_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetProcessRunningInformation_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -685,7 +685,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetProcessRunningInformation_001, TestSi
  * @tc.desc: DumpHeapMemory.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_DumpHeapMemory_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_DumpHeapMemory_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -703,7 +703,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_DumpHeapMemory_001, TestSize.Level0)
  * @tc.desc: DumpJsHeapMemory.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_DumpJsHeapMemory_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_DumpJsHeapMemory_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     auto result = appMgrClient->ConnectAppMgrService();
@@ -719,7 +719,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_DumpJsHeapMemory_001, TestSize.Level0)
  * @tc.desc: NotifyMemoryLevel.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, NotifyMemoryLevel_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, NotifyMemoryLevel_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     MemoryLevel level = MEMORY_LEVEL_MODERATE;
@@ -732,7 +732,7 @@ HWTEST_F(AppMgrClientTest, NotifyMemoryLevel_001, TestSize.Level0)
  * @tc.desc: NotifyProcMemoryLevel.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, NotifyProcMemoryLevel_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, NotifyProcMemoryLevel_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     std::map<pid_t, MemoryLevel> procLevelMap;
@@ -745,7 +745,7 @@ HWTEST_F(AppMgrClientTest, NotifyProcMemoryLevel_001, TestSize.Level0)
  * @tc.desc: StartNativeProcessForDebugger.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_StartNativeProcessForDebugger_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_StartNativeProcessForDebugger_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -908,7 +908,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_AttachAppDebug_001, TestSize.Level1)
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
     std::string bundleName = "bundleName";
-    auto resultCode = appMgrClient->AttachAppDebug(bundleName);
+    auto resultCode = appMgrClient->AttachAppDebug(bundleName, false);
     EXPECT_EQ(resultCode, ERR_OK);
 }
 
@@ -1029,7 +1029,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_StartSpecifiedProcess_001, TestSize.Leve
  * @tc.desc: RegisterAppRunningStatusListener.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterAppRunningStatusListener_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterAppRunningStatusListener_001, TestSize.Level1)
 {
     sptr<IRemoteObject> listener = nullptr;
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -1044,7 +1044,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterAppRunningStatusListener_001, Te
  * @tc.desc: UnregisterAppRunningStatusListener.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterAppRunningStatusListener_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterAppRunningStatusListener_001, TestSize.Level1)
 {
     sptr<IRemoteObject> listener = nullptr;
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -1059,7 +1059,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterAppRunningStatusListener_001, 
  * @tc.desc: IsFinalAppProcess.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_IsFinalAppProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_IsFinalAppProcess_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrClient_IsFinalAppProcess_001 start");
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -1078,7 +1078,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_IsFinalAppProcess_001, TestSize.Level0)
  * @tc.desc: ClearProcessByToken.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_ClearProcessByToken_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_ClearProcessByToken_001, TestSize.Level1)
 {
     sptr<IRemoteObject> token = nullptr;
     auto appMgrClient = std::make_unique<AppMgrClient>();
@@ -1091,7 +1091,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_ClearProcessByToken_001, TestSize.Level0
  * @tc.desc: Get all ui extension root host pid.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, GetAllUIExtensionRootHostPid_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, GetAllUIExtensionRootHostPid_001, TestSize.Level2)
 {
     pid_t pid = 0;
     std::vector<pid_t> hostPids;
@@ -1107,7 +1107,7 @@ HWTEST_F(AppMgrClientTest, GetAllUIExtensionRootHostPid_001, TestSize.Level0)
  * @tc.desc: Get all ui extension provider pid.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, GetAllUIExtensionProviderPid_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, GetAllUIExtensionProviderPid_001, TestSize.Level1)
 {
     pid_t hostPid = 0;
     std::vector<pid_t> providerPids;
@@ -1123,7 +1123,7 @@ HWTEST_F(AppMgrClientTest, GetAllUIExtensionProviderPid_001, TestSize.Level0)
  * @tc.desc: Preload application.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, PreloadApplication_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, PreloadApplication_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -1144,7 +1144,7 @@ HWTEST_F(AppMgrClientTest, PreloadApplication_001, TestSize.Level0)
  * @tc.desc: UpdateConfiguration.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, UpdateConfiguration_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, UpdateConfiguration_001, TestSize.Level1)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     Configuration config;
@@ -1157,7 +1157,7 @@ HWTEST_F(AppMgrClientTest, UpdateConfiguration_001, TestSize.Level0)
  * @tc.desc: UpdateConfigurationByBundleName.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, UpdateConfigurationByBundleName_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, UpdateConfigurationByBundleName_001, TestSize.Level1)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     Configuration config;
@@ -1171,7 +1171,7 @@ HWTEST_F(AppMgrClientTest, UpdateConfigurationByBundleName_001, TestSize.Level0)
  * @tc.desc: RegisterConfigurationObserver.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, RegisterConfigurationObserver_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, RegisterConfigurationObserver_001, TestSize.Level1)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     sptr<IConfigurationObserver> observer;
@@ -1184,7 +1184,7 @@ HWTEST_F(AppMgrClientTest, RegisterConfigurationObserver_001, TestSize.Level0)
  * @tc.desc: SetAppWaitingDebug.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, SetAppWaitingDebug_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, SetAppWaitingDebug_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     std::string bundleName;
@@ -1198,7 +1198,7 @@ HWTEST_F(AppMgrClientTest, SetAppWaitingDebug_001, TestSize.Level0)
  * @tc.desc: CancelAppWaitingDebug.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, CancelAppWaitingDebug_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, CancelAppWaitingDebug_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     appMgrClient->CancelAppWaitingDebug();
@@ -1210,7 +1210,7 @@ HWTEST_F(AppMgrClientTest, CancelAppWaitingDebug_001, TestSize.Level0)
  * @tc.desc: GetWaitingDebugApp.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, GetWaitingDebugApp_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, GetWaitingDebugApp_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     std::vector<std::string> debugInfoList;
@@ -1223,7 +1223,7 @@ HWTEST_F(AppMgrClientTest, GetWaitingDebugApp_001, TestSize.Level0)
  * @tc.desc: IsWaitingDebugApp.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, IsWaitingDebugApp_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, IsWaitingDebugApp_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     std::string bundleName;
@@ -1236,7 +1236,7 @@ HWTEST_F(AppMgrClientTest, IsWaitingDebugApp_001, TestSize.Level0)
  * @tc.desc: ClearNonPersistWaitingDebugFlag.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, ClearNonPersistWaitingDebugFlag_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, ClearNonPersistWaitingDebugFlag_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     appMgrClient->ClearNonPersistWaitingDebugFlag();
@@ -1248,7 +1248,7 @@ HWTEST_F(AppMgrClientTest, ClearNonPersistWaitingDebugFlag_001, TestSize.Level0)
  * @tc.desc: IsAttachDebug.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, IsAttachDebug_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, IsAttachDebug_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     std::string bundleName;
@@ -1261,7 +1261,7 @@ HWTEST_F(AppMgrClientTest, IsAttachDebug_001, TestSize.Level0)
  * @tc.desc: IsAmsServiceReady.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, IsAmsServiceReady_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, IsAmsServiceReady_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     appMgrClient->IsAmsServiceReady();
@@ -1273,7 +1273,7 @@ HWTEST_F(AppMgrClientTest, IsAmsServiceReady_001, TestSize.Level0)
  * @tc.desc: RegisterRenderStateObserver.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, RegisterRenderStateObserver_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, RegisterRenderStateObserver_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     sptr<IRenderStateObserver> observer;
@@ -1286,7 +1286,7 @@ HWTEST_F(AppMgrClientTest, RegisterRenderStateObserver_001, TestSize.Level0)
  * @tc.desc: UnregisterRenderStateObserver.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterRenderStateObserver_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterRenderStateObserver_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     sptr<IRenderStateObserver> observer;
@@ -1299,7 +1299,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterRenderStateObserver_001, TestS
  * @tc.desc: UpdateRenderState.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, UpdateRenderState_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, UpdateRenderState_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     pid_t renderPid = 0;
@@ -1313,7 +1313,7 @@ HWTEST_F(AppMgrClientTest, UpdateRenderState_001, TestSize.Level0)
  * @tc.desc: GetAppRunningUniqueIdByPid.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, GetAppRunningUniqueIdByPid_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, GetAppRunningUniqueIdByPid_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     pid_t pid = 0;
@@ -1327,7 +1327,7 @@ HWTEST_F(AppMgrClientTest, GetAppRunningUniqueIdByPid_001, TestSize.Level0)
  * @tc.desc: SetSupportedProcessCacheSelf.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, SetSupportedProcessCacheSelf_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, SetSupportedProcessCacheSelf_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     bool isSupport = false;
@@ -1340,11 +1340,11 @@ HWTEST_F(AppMgrClientTest, SetSupportedProcessCacheSelf_001, TestSize.Level0)
  * @tc.desc: NotifyMemorySizeStateChanged.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, NotifyMemorySizeStateChanged_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, NotifyMemorySizeStateChanged_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
-    bool isMemorySizeSufficient = false;
-    int32_t ret = appMgrClient->NotifyMemorySizeStateChanged(isMemorySizeSufficient);
+    int32_t memorySizeState = 0;
+    int32_t ret = appMgrClient->NotifyMemorySizeStateChanged(memorySizeState);
     EXPECT_EQ(ret, 1);
 }
 
@@ -1353,7 +1353,7 @@ HWTEST_F(AppMgrClientTest, NotifyMemorySizeStateChanged_001, TestSize.Level0)
  * @tc.desc: AttachRenderProcess.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AttachRenderProcess_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AttachRenderProcess_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     appMgrClient->AttachRenderProcess(nullptr);
@@ -1365,7 +1365,7 @@ HWTEST_F(AppMgrClientTest, AttachRenderProcess_001, TestSize.Level0)
  * @tc.desc: SetKeepAliveEnableState.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, SetKeepAliveEnableState_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, SetKeepAliveEnableState_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     std::string bundleName = "com.ix.First.Test";
@@ -1379,7 +1379,7 @@ HWTEST_F(AppMgrClientTest, SetKeepAliveEnableState_001, TestSize.Level0)
  * @tc.desc: SetKeepAliveDkv.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, SetKeepAliveDkv_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, SetKeepAliveDkv_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     std::string bundleName = "com.ix.First.Test";
@@ -1393,7 +1393,7 @@ HWTEST_F(AppMgrClientTest, SetKeepAliveDkv_001, TestSize.Level0)
  * @tc.desc: SaveBrowserChannel.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, SaveBrowserChannel_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, SaveBrowserChannel_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     appMgrClient->SaveBrowserChannel(nullptr);
@@ -1405,7 +1405,7 @@ HWTEST_F(AppMgrClientTest, SaveBrowserChannel_001, TestSize.Level0)
  * @tc.desc: can not block process cache by wrong user ID.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_BlockProcessCacheByPids_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_BlockProcessCacheByPids_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -1423,7 +1423,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_BlockProcessCacheByPids_001, TestSize.Le
  * @tc.desc: can not attach to status bar by wrong token.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_AttachedToStatusBar_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_AttachedToStatusBar_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -1441,7 +1441,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_AttachedToStatusBar_001, TestSize.Level0
  * @tc.desc: Can not attach to status bar by wrong token.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_SetAppFreezeFilter_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_SetAppFreezeFilter_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -1455,7 +1455,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_SetAppFreezeFilter_001, TestSize.Level0)
  * @tc.desc: Can not attach to status bar by wrong token.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_NotifyProcessDependedOnWeb_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_NotifyProcessDependedOnWeb_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
@@ -1468,7 +1468,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_NotifyProcessDependedOnWeb_001, TestSize
  * @tc.desc: Can not attach to status bar by wrong token.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessDependedOnWeb_001, TestSize.Level0)
+HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessDependedOnWeb_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);

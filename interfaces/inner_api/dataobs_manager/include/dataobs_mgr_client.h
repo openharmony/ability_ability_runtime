@@ -46,7 +46,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
+    ErrCode RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1,
+        DataObsOption opt = DataObsOption());
 
     /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
@@ -56,7 +57,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
+    ErrCode UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1,
+        DataObsOption opt = DataObsOption());
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uri.
@@ -65,7 +67,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode NotifyChange(const Uri &uri);
+    ErrCode NotifyChange(const Uri &uri, int32_t userId = -1, DataObsOption opt = DataObsOption());
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
@@ -75,7 +77,8 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    Status RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, bool isDescendants);
+    Status RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, bool isDescendants,
+        DataObsOption opt = DataObsOption());
 
     /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
@@ -85,7 +88,8 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
+    Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        DataObsOption opt = DataObsOption());
 
     /**
      * Deregisters observers used for DataObsMgr specified.
@@ -94,7 +98,7 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver);
+    Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver, DataObsOption opt = DataObsOption());
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uris.
@@ -103,7 +107,7 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    Status NotifyChangeExt(const ChangeInfo &changeInfo);
+    Status NotifyChangeExt(const ChangeInfo &changeInfo, DataObsOption opt = DataObsOption());
 
     /**
      * Notifies the process observer with the given progress key and cancel observer.
@@ -114,7 +118,8 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    Status NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer);
+    Status NotifyProcessObserver(const std::string &key, const sptr<IRemoteObject> &observer,
+        DataObsOption opt = DataObsOption());
 
 private:
     class SystemAbilityStatusChangeListener;
@@ -147,7 +152,13 @@ private:
     static constexpr int RESUB_INTERVAL = 2;
     static std::mutex mutex_;
     sptr<IDataObsMgr> dataObsManger_;
-    ConcurrentMap<sptr<IDataAbilityObserver>, std::list<Uri>> observers_;
+
+    struct ObserverInfo {
+        Uri uri;
+        int32_t userId;
+        ObserverInfo(Uri uri, int32_t userId) : uri(uri), userId(userId) {};
+    };
+    ConcurrentMap<sptr<IDataAbilityObserver>, std::list<struct ObserverInfo>> observers_;
 
     struct Param {
         Param(const Uri &uri, bool isDescendants) : uri(uri), isDescendants(isDescendants){};

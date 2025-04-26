@@ -92,6 +92,7 @@ access_token_path = "//base/security/access_token"
 declare_args() {
   background_task_mgr_continuous_task_enable = true
   resource_schedule_service_enable = true
+  memmgr_override_enable = true
   ability_runtime_feature_sandboxmanager = false
   ability_runtime_power = true
   ability_runtime_relational = true
@@ -114,6 +115,7 @@ declare_args() {
   ability_runtime_upms = true
   cj_frontend = true
   ability_runtime_app_no_response_dialog = false
+  ability_runtime_app_no_response_dialog_wearable = false
   ability_runtime_app_no_response_bundlename = "com.ohos.taskmanager"
   include_app_domain_verify = true
   ability_runtime_start_window_options_with_pixelmap = false
@@ -137,6 +139,10 @@ declare_args() {
     resource_schedule_service_enable = false
   }
 
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.resourceschedule_memmgr_override)) {
+    memmgr_override_enable = false
+  }
   if (defined(global_parts_info) &&
       !defined(global_parts_info.powermgr_power_manager)) {
     ability_runtime_power = false

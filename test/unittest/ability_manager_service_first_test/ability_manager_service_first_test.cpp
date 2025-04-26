@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -257,6 +257,46 @@ HWTEST_F(AbilityManagerServiceFirstTest, GetDlpConnectionInfos_001, TestSize.Lev
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GetDlpConnectionInfos_001 end");
 }
 #endif // WITH_DLP
+
+/*
+ * Feature: AbilityManagerService
+ * Function: KillProcessForPermissionUpdate
+ * SubFunction: NA
+ * FunctionPoints: no PERMISSION_KILL_APP_PROCESSES permission
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, KillProcessForPermissionUpdate_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST,
+        "AbilityManagerServiceFirstTest KillProcessForPermissionUpdate_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    uint32_t accessTokenId = 1;
+    EXPECT_EQ(abilityMs_->KillProcessForPermissionUpdate(accessTokenId), ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST,
+        "AbilityManagerServiceFirstTest KillProcessForPermissionUpdate_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: KillProcessForPermissionUpdate
+ * SubFunction: NA
+ * FunctionPoints: has PERMISSION_KILL_APP_PROCESSES permission
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, KillProcessForPermissionUpdate_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST,
+        "AbilityManagerServiceFirstTest KillProcessForPermissionUpdate_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    abilityMs_->subManagersHelper_->currentUIAbilityManager_ = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(abilityMs_, nullptr);
+    uint32_t accessTokenId = 1;
+    AAFwk::IsMockSaCall::IsMockKillAppProcessesPermission();
+    TAG_LOGI(AAFwkTag::TEST, "MockKillAppProcessesPermission");
+    EXPECT_EQ(abilityMs_->KillProcessForPermissionUpdate(accessTokenId), ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST,
+        "AbilityManagerServiceFirstTest KillProcessForPermissionUpdate_002 end");
+}
 
 /*
  * Feature: AbilityManagerService
@@ -1158,7 +1198,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_001, TestS
     MyFlag::flag_ = 1;
     auto result = abilityMs_->StartAbilityInner(want, nullptr, -1, false, -1, false);
     MyFlag::flag_ = 0;
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     abilityMs_->OnStop();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_001 end");
 }
@@ -1186,7 +1226,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_002, TestS
     auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_002 end");
 }
 
@@ -1213,7 +1253,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_003, TestS
     auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_003 end");
 }
 
@@ -1240,7 +1280,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_004, TestS
     auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_004 end");
 }
 
@@ -1268,7 +1308,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_005, TestS
     auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_005 end");
 }
 
@@ -1297,7 +1337,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_006, TestS
     auto result = abilityMs_->StartAbilityInner(want, callerToken, requestCode, false, userId, false);
     MyFlag::flag_ = 0;
     abilityMs_->OnStop();
-    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_NULL_INTERCEPTOR_EXECUTER, result);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_006 end");
 }
 
@@ -1428,7 +1468,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, AttachAppDebug_001, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::string bundleName;
-    abilityMs_->AttachAppDebug(bundleName);
+    abilityMs_->AttachAppDebug(bundleName, false);
     EXPECT_NE(abilityMs_, nullptr);
 }
 
@@ -1442,7 +1482,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, DetachAppDebug_001, TestSize.Level1)
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
     std::string bundleName;
-    auto result = abilityMs_->DetachAppDebug(bundleName);
+    auto result = abilityMs_->DetachAppDebug(bundleName, false);
     EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
 }
 
@@ -2304,6 +2344,26 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityByCallWithInsightIntent_010
     auto abilityMs = std::make_shared<AbilityManagerService>();
     auto res = abilityMs->StartAbilityByCallWithInsightIntent(want, callerToken, param);
     EXPECT_EQ(res, RESOLVE_ABILITY_ERR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: RevokeDelegator_001
+ * Function: RevokeDelegator
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RevokeDelegator
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, RevokeDelegator_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest RevokeDelegator_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    auto retCode = abilityMs->RevokeDelegator(nullptr);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(retCode, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        EXPECT_EQ(retCode, AAFwk::ERR_NO_PERMISSION_CALLER);
+    }
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest RevokeDelegator_001 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

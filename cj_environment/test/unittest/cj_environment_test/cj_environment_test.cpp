@@ -359,4 +359,54 @@ HWTEST_F(CjEnvironmentTest, HasHigherPriorityTask_0100, TestSize.Level1)
     auto res = cjEnv->HasHigherPriorityTask();
     EXPECT_EQ(res, false);
 }
+
+/**
+ * @tc.name: InitSpawnEnv_0100
+ * @tc.desc: Test InitSpawnEnvTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitSpawnEnv_001, TestSize.Level2)
+{
+    CJEnvironment::InitSpawnEnv();
+    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
+}
+
+/**
+ * @tc.name: PreloadLibs_0100
+ * @tc.desc: Test PreloadLibs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestPreloadLibs_001, TestSize.Level2)
+{
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    cJEnvironment.PreloadLibs();
+    std::string appPath = "com/ohos/unittest/test/";
+    cJEnvironment.isUISchedulerStarted_ = true;
+    cJEnvironment.InitCJNS(appPath);
+    EXPECT_EQ(cJEnvironment.isLoadCJLibrary_, false);
+}
+
+/**
+ * @tc.name: InitNewCJAppNS_0100andInitCJSDKNS_0100
+ * @tc.desc: Test InitNewCJAppNSTask and InitCJSDKNSTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitNewCJAppNS_001andInitCJSDKNS_0100, TestSize.Level2)
+{
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    cJEnvironment.InitNewCJAppNS("");
+    cJEnvironment.InitCJSDKNS("com/ohos/unittest/test/");
+    EXPECT_EQ(cJEnvironment.isLoadCJLibrary_, false);
+}
+
+/**
+ * @tc.name: DetectAppNSMode_0100
+ * @tc.desc: Test DetectAppNSModeTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestDetectAppNSModeandInitCJNS_0100, TestSize.Level2)
+{
+    auto test = CJEnvironment::DetectAppNSMode();
+    EXPECT_EQ(test, CJEnvironment::NSMode::SINK);
+}
 } // namespace OHOS

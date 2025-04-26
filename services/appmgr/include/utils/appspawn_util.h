@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,8 @@ constexpr const char*
     JIT_PERMISSION_DISABLE_CODE_MEMORY_PROTECTION = "ohos.permission.kernel.DISABLE_CODE_MEMORY_PROTECTION";
 constexpr const char*
     JIT_PERMISSION_ALLOW_EXECUTABLE_FORT_MEMORY = "ohos.permission.kernel.ALLOW_EXECUTABLE_FORT_MEMORY";
+constexpr const char*
+    JIT_PERMISSION_DISABLE_GOTPLT_RO_PROTECTION = "ohos.permission.kernel.DISABLE_GOTPLT_RO_PROTECTION";
 
 static uint32_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &applicationInfo)
 {
@@ -92,13 +94,14 @@ static uint32_t BuildStartFlags(const AAFwk::Want &want, const AbilityInfo &abil
     return startFlags;
 }
 
-static void SetJITPermissions(uint32_t accessTokenId, JITPermissionsList &jitPermissionsList)
+static void SetJITPermissions(uint32_t accessTokenId, std::vector<std::string> &jitPermissionsList)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::vector<std::string> tmpPermissionList = {
         JIT_PERMISSION_ALLOW_WRITABLE_CODE_MEMORY,
         JIT_PERMISSION_DISABLE_CODE_MEMORY_PROTECTION,
-        JIT_PERMISSION_ALLOW_EXECUTABLE_FORT_MEMORY
+        JIT_PERMISSION_ALLOW_EXECUTABLE_FORT_MEMORY,
+        JIT_PERMISSION_DISABLE_GOTPLT_RO_PROTECTION
     };
 
     std::vector<int32_t> permStateList;
@@ -107,7 +110,7 @@ static void SetJITPermissions(uint32_t accessTokenId, JITPermissionsList &jitPer
     if (result != ERR_OK || permStateList.size() != tmpPermissionList.size()) {
         return;
     }
-    for (int i = 0; i < permStateList.size(); i++) {
+    for (size_t i = 0; i < permStateList.size(); i++) {
         if (permStateList[i] == Security::AccessToken::PERMISSION_GRANTED) {
             jitPermissionsList.emplace_back(tmpPermissionList[i]);
         }

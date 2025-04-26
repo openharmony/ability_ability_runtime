@@ -285,7 +285,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_UpdateAbilityState
  * @tc.desc: Test UpdateAbilityState
  * @tc.type: FUNC
  */
-HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_UpdateAbilityState_003, TestSize.Level0)
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_UpdateAbilityState_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_UpdateAbilityState_003 start");
     std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
@@ -569,7 +569,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AbilityAttachTimeO
  * @tc.desc: Test AbilityAttachTimeOut
  * @tc.type: FUNC
  */
-HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AbilityAttachTimeOut_003, TestSize.Level0)
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AbilityAttachTimeOut_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_AbilityAttachTimeOut_003 start");
     auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
@@ -639,7 +639,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_PrepareTerminate_0
  * @tc.desc: Test PrepareTerminate
  * @tc.type: FUNC
  */
-HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_PrepareTerminate_003, TestSize.Level0)
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_PrepareTerminate_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_PrepareTerminate_003 start");
     auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
@@ -675,7 +675,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_UpdateApplicationI
      * @tc.steps: step1. amsMgrScheduler isReady false
      * @tc.expected: step1. expect taskHandler_ time 0
      */
-    auto ret = amsMgrScheduler->UpdateApplicationInfoInstalled("", 0, "");
+    auto ret = amsMgrScheduler->UpdateApplicationInfoInstalled("", 0, "", false);
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_UpdateApplicationInfoInstalled_001 end");
 }
@@ -692,13 +692,13 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_UpdateApplicationI
     auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("UpdateApplicationInfoInstalled_002");
     std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
         std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler);
-    EXPECT_CALL(*appMgrServiceInner, UpdateApplicationInfoInstalled(_, _, _)).WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*appMgrServiceInner, UpdateApplicationInfoInstalled(_, _, _, _)).WillRepeatedly(Return(ERR_OK));
 
     /**
      * @tc.steps: step1. amsMgrScheduler isReady
      * @tc.expected: step1. expect taskHandler times at least 1
      */
-    auto ret = amsMgrScheduler->UpdateApplicationInfoInstalled("", 0, "");
+    auto ret = amsMgrScheduler->UpdateApplicationInfoInstalled("", 0, "", false);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_UpdateApplicationInfoInstalled_002 end");
 }
@@ -1267,7 +1267,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AttachAppDebug_001
      * @tc.steps: step1. amsMgrScheduler isReady false
      * @tc.expected: step1. expect ERR_INVALID_OPERATION
      */
-    auto ret = amsMgrScheduler->AttachAppDebug("");
+    auto ret = amsMgrScheduler->AttachAppDebug("", false);
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_AttachAppDebug_001 end");
 }
@@ -1289,7 +1289,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AttachAppDebug_002
      * @tc.expected: step1. expect ERR_INVALID_OPERATION
      */
     MyFlag::flag_ = 0;
-    auto ret = amsMgrScheduler->AttachAppDebug("");
+    auto ret = amsMgrScheduler->AttachAppDebug("", false);
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_AttachAppDebug_002 end");
 }
@@ -1311,7 +1311,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_AttachAppDebug_003
      * @tc.expected: step1. expect ERR_INVALID_OPERATION
      */
     MyFlag::flag_ = MyFlag::IS_SA_CALL;
-    auto ret = amsMgrScheduler->AttachAppDebug("");
+    auto ret = amsMgrScheduler->AttachAppDebug("", false);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_AttachAppDebug_003 end");
 }

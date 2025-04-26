@@ -209,6 +209,7 @@ bool JsNapiCommon::CreateConnectionAndConnectAbilityLocked(
     TAG_LOGD(AAFwkTag::JSNAPI, "Create new connection");
     // Create connection
     sptr<NAPIAbilityConnection> connection(new (std::nothrow) NAPIAbilityConnection());
+    CHECK_POINTER_AND_RETURN_LOG(connection, false, "null connection");
     ConnectionKey key;
     id = serialNumber_;
     key.id = id;
@@ -1494,6 +1495,11 @@ void ConnectionCallback::Reset()
         return;
     }
     ConnectionCallback *data = new(std::nothrow) ConnectionCallback(std::move(*this));
+    if (data == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null data");
+        delete work;
+        return;
+    }
     work->data = data;
     auto ret = uv_queue_work(loop, work, [](uv_work_t*) {}, ClearCallbackWork);
     if (ret != 0) {

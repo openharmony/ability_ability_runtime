@@ -134,8 +134,10 @@ public:
      * kill the processes by pid list given.
      *
      * @param pids, the pid list of processes are going to be killed.
+     * @param reason, the reason to kill the processes.
      */
-    virtual AppMgrResultCode KillProcessesByPids(std::vector<int32_t> &pids);
+    virtual AppMgrResultCode KillProcessesByPids(const std::vector<int32_t> &pids,
+        const std::string &reason = "KillProcessesByPids");
 
     /**
      * Set child and parent relationship
@@ -154,7 +156,7 @@ public:
      * @return Returns RESULT_OK on success, others on failure.
      */
     virtual AppMgrResultCode UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
-        const std::string &moduleName);
+        const std::string &moduleName, bool isPlugin);
 
     /**
      * KillApplication, call KillApplication() through proxy object, kill the application.
@@ -642,7 +644,7 @@ public:
      * @param bundleName The application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t AttachAppDebug(const std::string &bundleName);
+    int32_t AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal);
 
     /**
      * @brief Detach app debug.
@@ -824,17 +826,23 @@ public:
     int32_t GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pid_t> &providerPids);
 
     /**
-     * @brief Notify memory size state changed to sufficient or insufficient.
-     * @param isMemorySizeSufficient Indicates the memory size state.
+     * @brief Notify memory size state changed: LOW_MEMORY, MEMORY_RECOVERY, REQUIRE_BIG_MEMORY, NO_REQUIRE_BIG_MEMORY.
+     * @param memorySizeState Indicates the memory size state.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficient);
+    int32_t NotifyMemorySizeStateChanged(int32_t memorySizeState);
 
     /**
      * whether memory size is sufficient.
      * @return Returns true is sufficient memory size, others return false.
      */
     bool IsMemorySizeSufficent() const;
+
+    /**
+     * whether or not requier a big memory
+     * @return Returens true is no big memory, others return false.
+     */
+    bool IsNoRequireBigMemory() const;
 
     /**
      * Record process exit reason to appRunningRecord

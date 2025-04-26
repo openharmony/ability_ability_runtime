@@ -27,6 +27,9 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::HiviewDFX;
+namespace {
+constexpr const int64_t CONNECTING_TIMEOUT = 30000;
+}
 ConnectionManager& ConnectionManager::GetInstance()
 {
     static ConnectionManager connectionManager;
@@ -67,7 +70,8 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connec
     std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     auto connectionIter = abilityConnections_.begin();
     for (; connectionIter != abilityConnections_.end(); ++connectionIter) {
-        if (MatchConnection(connectCaller, want, accountId, *connectionIter)) {
+        if (MatchConnection(connectCaller, want, accountId, *connectionIter) &&
+            !IsConnectingTimeout(connectionIter->first)) {
             break;
         }
     }
@@ -156,6 +160,7 @@ ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCa
     std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     if (ret == ERR_OK) {
         ConnectionInfo connectionInfo(connectCaller, want.GetOperation(), abilityConnection, accountId);
+        connectionInfo.RecordConnectingTime();
         void* uiServiceExtProxy = GetUIServiceExtProxyPtr(want);
         connectionInfo.SetUIServiceExtProxyPtr(uiServiceExtProxy);
         std::vector<sptr<AbilityConnectCallback>> callbacks;
@@ -183,17 +188,21 @@ ErrCode ConnectionManager::DisconnectAbility(const sptr<IRemoteObject>& connectC
         TAG_LOGE(AAFwkTag::CONNECTION, "null connectCaller or connectCallback");
         return AAFwk::ERR_INVALID_CALLER;
     }
-
     auto element = connectReceiver.GetElement();
     TAG_LOGD(AAFwkTag::CONNECTION, "connectReceiver: %{public}s",
         (element.GetBundleName() + ":" + element.GetAbilityName()).c_str());
     std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
-    auto item = std::find_if(abilityConnections_.begin(), abilityConnections_.end(),
-        [&connectCaller, &connectReceiver, this, accountId](const auto& obj) {
-                return MatchConnection(connectCaller, connectReceiver, accountId, obj);
-        });
-    if (item != abilityConnections_.end()) {
-        TAG_LOGD(AAFwkTag::CONNECTION, "remove callback, Size:%{public}zu", item->second.size());
+    bool found = false;
+    auto item = abilityConnections_.begin();
+    while (item != abilityConnections_.end()) {
+        if (!MatchConnection(connectCaller, connectReceiver, accountId, *item) ||
+            std::find(item->second.begin(), item->second.end(), connectCallback) == item->second.end()) {
+            item++;
+            continue;
+        }
+        found = true;
+        TAG_LOGI(AAFwkTag::CONNECTION, "Connection size:%{public}zu, callback size: %{public}zu",
+            abilityConnections_.size(), item->second.size());
         auto iter = item->second.begin();
         while (iter != item->second.end()) {
             if (*iter == connectCallback) {
@@ -202,25 +211,27 @@ ErrCode ConnectionManager::DisconnectAbility(const sptr<IRemoteObject>& connectC
                 iter++;
             }
         }
-
         sptr<AbilityConnection> abilityConnection = item->first.abilityConnection;
-
-        TAG_LOGD(AAFwkTag::CONNECTION, "abilityConnection exist, size:%{public}zu",
-            abilityConnections_.size());
         if (item->second.empty()) {
-            abilityConnections_.erase(item);
-            TAG_LOGD(AAFwkTag::CONNECTION, "no callback left, disconnectAbility");
-            return AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(abilityConnection);
+            item = abilityConnections_.erase(item);
+            TAG_LOGI(AAFwkTag::CONNECTION, "no callback left, disconnectAbility");
+            auto ret = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(abilityConnection);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::CONNECTION, "disconnect err:%{public}d", ret);
+                return ret;
+            }
         } else {
             connectCallback->OnAbilityDisconnectDone(element, ERR_OK);
             abilityConnection->RemoveConnectCallback(connectCallback);
             TAG_LOGD(AAFwkTag::CONNECTION, "callbacks not empty, no need disconnectAbility");
-            return ERR_OK;
+            item++;
         }
-    } else {
+    }
+    if (!found) {
         TAG_LOGE(AAFwkTag::CONNECTION, "not find conn");
         return AAFwk::CONNECTION_NOT_EXIST;
     }
+    return ERR_OK;
 }
 
 bool ConnectionManager::DisconnectCaller(const sptr<IRemoteObject>& connectCaller)
@@ -336,6 +347,23 @@ bool ConnectionManager::IsConnectReceiverEqual(AAFwk::Operation& connectReceiver
 {
     return connectReceiver.GetBundleName() == connectReceiverOther.GetBundleName() &&
         connectReceiver.GetAbilityName() == connectReceiverOther.GetAbilityName();
+}
+
+bool ConnectionManager::IsConnectingTimeout(const ConnectionInfo& info)
+{
+    if (info.connectingTime == 0) {
+        return false;
+    }
+    if (!info.abilityConnection || info.abilityConnection->GetConnectionState() != CONNECTION_STATE_CONNECTING) {
+        return false;
+    }
+    auto now = std::chrono::steady_clock::now().time_since_epoch();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now).count() - info.connectingTime;
+    if (duration >= CONNECTING_TIMEOUT) {
+        TAG_LOGW(AAFwkTag::CONNECTION, "connecting timeout, no reuse");
+        return true;
+    }
+    return false;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

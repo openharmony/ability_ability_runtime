@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,19 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "in_process_call_wrapper.h"
 #include "time_util.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
+#include "bundle_mgr_helper.h"
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
+namespace {
+constexpr const char* REUSING_WINDOW = "ohos.ability_runtime.reusing_window";
+constexpr const char* IS_HOOK = "ohos.ability_runtime.is_hook";
+}
 AppLifeCycleDeal::AppLifeCycleDeal()
 {}
 
@@ -79,8 +85,32 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
             FreezeUtil::GetInstance().AddLifecycleEvent(ability->GetToken(), entry);
         }
         TAG_LOGD(AAFwkTag::APPMGR, "Launch");
+        bool isHookAbility = ability->IsHook();
+        if (isHookAbility) {
+            auto bundleManagerHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+            HapModuleInfo hapModuleInfo;
+            if (!bundleManagerHelper->GetHapModuleInfo(*abilityInfo, hapModuleInfo)) {
+                TAG_LOGW(AAFwkTag::APPMGR, "GetHapModuleInfo fail");
+                return;
+            }
+            int32_t BASE_USER_RANGE = 200000;
+            auto userId = abilityInfo->uid / BASE_USER_RANGE;
+            abilityInfo = std::make_shared<AbilityInfo>();
+            Want want;
+            want.SetElementName("", hapModuleInfo.bundleName, hapModuleInfo.abilitySrcEntryDelegator,
+                hapModuleInfo.abilityStageSrcEntryDelegator);
+            if (!IN_PROCESS_CALL(bundleManagerHelper->QueryAbilityInfo(
+                want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, *abilityInfo))) {
+                TAG_LOGW(AAFwkTag::APPMGR, "QueryAbilityInfo fail");
+                return;
+            }
+        }
         appThread->ScheduleLaunchAbility(*abilityInfo, ability->GetToken(),
             ability->GetWant(), ability->GetAbilityRecordId());
+        if (ability->GetWant() != nullptr) {
+            ability->GetWant()->RemoveParam(REUSING_WINDOW);
+            ability->GetWant()->RemoveParam(IS_HOOK);
+        }
     } else {
         TAG_LOGW(AAFwkTag::APPMGR, "null appThread or ability");
     }
@@ -325,7 +355,7 @@ int32_t AppLifeCycleDeal::ChangeAppGcState(int32_t state)
     return appThread->ScheduleChangeAppGcState(state);
 }
 
-int32_t AppLifeCycleDeal::AttachAppDebug()
+int32_t AppLifeCycleDeal::AttachAppDebug(bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto appThread = GetApplicationClient();
@@ -333,7 +363,7 @@ int32_t AppLifeCycleDeal::AttachAppDebug()
         TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return ERR_INVALID_VALUE;
     }
-    appThread->AttachAppDebug();
+    appThread->AttachAppDebug(isDebugFromLocal);
     return ERR_OK;
 }
 

@@ -45,7 +45,7 @@ struct CurrentHapModuleInfo {
 };
 
 CJ_EXPORT CurrentHapModuleInfo* FFICJCurrentHapModuleInfo(int64_t id);
-CJ_EXPORT OHOS::AbilityRuntime::RetHapModuleInfo FFICJGetHapModuleInfo(int64_t id);
+CJ_EXPORT OHOS::AbilityRuntime::RetHapModuleInfoV2 FFICJGetHapModuleInfo(int64_t id);
 CJ_EXPORT OHOS::AbilityRuntime::CConfiguration FFICJGetConfiguration(int64_t id);
 CJ_EXPORT int64_t FFIAbilityGetAbilityStageContext(AbilityStageHandle abilityStageHandle);
 }

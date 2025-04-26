@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,8 @@ struct DialogCallerInfo {
     sptr<IRemoteObject> callerToken;
     Want targetWant;
     SelectorType type = SelectorType::WITHOUT_SELECTOR;
+    // for app gallery selector
+    bool needGrantUriPermission = false;
 };
 
 struct StartupSessionInfo {
@@ -71,7 +73,7 @@ public:
     int CreateJumpModalDialog(AbilityRequest &abilityRequest, int32_t userId, const Want &replaceWant);
 
     int CreateImplicitSelectorModalDialog(AbilityRequest &abilityRequest, const Want &want, int32_t userId,
-        std::vector<DialogAppInfo> &dialogAppInfos);
+        std::vector<DialogAppInfo> &dialogAppInfos, bool needGrantUriPermission = false);
 
     int CreateCloneSelectorModalDialog(AbilityRequest &abilityRequest, const Want &want, int32_t userId,
         std::vector<DialogAppInfo> &dialogAppInfos, const std::string &replaceWant);
@@ -82,6 +84,8 @@ public:
 
     bool IsCreateCloneSelectorDialog(const std::string &bundleName, int32_t userId);
 
+    bool UpdateExtensionWantWithDialogCallerInfo(AbilityRequest &abilityRequest,
+        const sptr<IRemoteObject> &callerToken, bool isSCBCall);
 private:
     DialogSessionManager() = default;
     std::string GenerateDialogSessionId();
@@ -99,7 +103,8 @@ private:
     void ClearAllDialogContexts();
 
     std::string GenerateDialogSessionRecordCommon(AbilityRequest &abilityRequest, int32_t userId,
-        const AAFwk::WantParams &parameters, std::vector<DialogAppInfo> &dialogAppInfos, SelectorType type);
+        const AAFwk::WantParams &parameters, std::vector<DialogAppInfo> &dialogAppInfos, SelectorType type,
+        bool needGrantUriPermission = false);
 
     void GenerateCallerAbilityInfo(AbilityRequest &abilityRequest, DialogAbilityInfo &callerAbilityInfo);
 
@@ -110,7 +115,8 @@ private:
         std::vector<DialogAbilityInfo> &targetAbilityInfos);
 
     void GenerateDialogCallerInfo(AbilityRequest &abilityRequest, int32_t userId,
-        std::shared_ptr<DialogCallerInfo> dialogCallerInfo, SelectorType type);
+        std::shared_ptr<DialogCallerInfo> dialogCallerInfo, SelectorType type,
+        bool needGrantUriPermission = false);
 
     int CreateModalDialogCommon(const Want &replaceWant, sptr<IRemoteObject> callerToken,
         const std::string &dialogSessionId);
@@ -118,6 +124,8 @@ private:
     void SetQueryERMSInfo(const std::string &dialogSessionId, const AbilityRequest &abilityRequest);
 
     bool NotifyQueryERMSFinished(const std::string &dialogSessionId, bool isAllowed);
+
+    void NotifyAbilityRequestFailure(const std::string &dialogSessionId, const Want &want);
 
     mutable ffrt::mutex dialogSessionRecordLock_;
     std::unordered_map<std::string, sptr<DialogSessionInfo>> dialogSessionInfoMap_;

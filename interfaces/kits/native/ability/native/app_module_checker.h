@@ -16,6 +16,7 @@
 #ifndef OHOS_FORM_FWK_APP_MODULE_CHECKER_H
 #define OHOS_FORM_FWK_APP_MODULE_CHECKER_H
 
+#include <set>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -31,16 +32,15 @@ namespace {
  */
 class AppModuleChecker : public ModuleCheckerDelegate {
 public:
-    AppModuleChecker(int32_t extensionType, std::unordered_map<int32_t, std::unordered_set<std::string>> &&blocklist)
-        : processExtensionType_(extensionType), moduleBlocklist_(std::move(blocklist)) {}
+    AppModuleChecker(int32_t extensionType,
+        const std::unordered_map<int32_t, std::unordered_set<std::string>>& extensionBlocklist);
     ~AppModuleChecker() override = default;
 
     bool CheckModuleLoadable(const char* moduleName,
         std::unique_ptr<ApiAllowListChecker>& apiAllowListChecker, bool isAppModule) override;
     bool DiskCheckOnly() override;
 protected:
-    int32_t processExtensionType_{EXTENSION_TYPE_UNKNOWN};
-    std::unordered_map<int32_t, std::unordered_set<std::string>> moduleBlocklist_;
+    std::set<std::string> blockList_;
 };
 
 #endif /* OHOS_FORM_FWK_APP_MODULE_CHECKER_H */

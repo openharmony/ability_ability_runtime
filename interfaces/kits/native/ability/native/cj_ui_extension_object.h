@@ -72,7 +72,7 @@ protected:
     }
 protected:
     int64_t cjID_;
-    CJExtensionAbilityType type_;
+    CJExtensionAbilityType type_ {};
 };
 
 using WantHandle = void*;

@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("child_main_thread_test") {
-  module_out_path = "ability_runtime/appkit"
+  module_out_path = "ability_runtime/ability_runtime/appkit"
 
   include_dirs =
       [ "${ability_runtime_test_path}/mock/services_appmgr_test/include" ]
@@ -37,6 +37,7 @@ ohos_unittest("child_main_thread_test") {
 
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
   ]

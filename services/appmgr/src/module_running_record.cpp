@@ -74,8 +74,7 @@ std::shared_ptr<AbilityRunningRecord> ModuleRunningRecord::GetAbilityRunningReco
 }
 
 std::shared_ptr<AbilityRunningRecord> ModuleRunningRecord::AddAbility(sptr<IRemoteObject> token,
-    std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId,
-    int32_t persistentId)
+    std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Add ability.");
     if (!token || !abilityInfo) {
@@ -88,7 +87,6 @@ std::shared_ptr<AbilityRunningRecord> ModuleRunningRecord::AddAbility(sptr<IRemo
     }
     auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     abilityRecord->SetWant(want);
-    abilityRecord->SetPersistentId(persistentId);
     if (appInfo_) {
         abilityRecord->SetIsSingleUser(appInfo_->singleton);
     }
@@ -213,6 +211,7 @@ void ModuleRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningReco
         TAG_LOGD(AAFwkTag::APPMGR, "Schedule launch ability, name is %{public}s.", ability->GetName().c_str());
         appLifeCycleDeal_->LaunchAbility(ability);
         ability->SetState(AbilityState::ABILITY_STATE_READY);
+        SetLoaded();
     } else {
         TAG_LOGE(AAFwkTag::APPMGR, "null appThread or ability");
     }

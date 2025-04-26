@@ -95,8 +95,8 @@ HWTEST_F(AppSchedulerProxyTest, AttachAppDebug_001, TestSize.Level1)
     sptr<AppSchedulerProxy> appSchedulerProxy = new AppSchedulerProxy(mockAppScheduler_);
     EXPECT_NE(appSchedulerProxy, nullptr);
 
-    EXPECT_CALL(*mockAppScheduler_, AttachAppDebug()).Times(1);
-    appSchedulerProxy->AttachAppDebug();
+    EXPECT_CALL(*mockAppScheduler_, AttachAppDebug(_)).Times(1);
+    appSchedulerProxy->AttachAppDebug(false);
 }
 
 /**

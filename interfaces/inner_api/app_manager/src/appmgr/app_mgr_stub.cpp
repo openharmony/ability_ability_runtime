@@ -382,6 +382,10 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleUpdateInstanceKeyBySpecifiedId(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_PROCESS_MEMORY_STATE):
             return HandleUpdateProcessMemoryState(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_KILLED_PROCESS_INFO):
+            return HandleGetKilledProcessInfo(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::LAUNCH_ABILITY):
+            return HandleLaunchAbility(data, reply);
     }
     return INVALID_FD;
 }
@@ -1628,8 +1632,8 @@ int32_t AppMgrStub::HandleGetAllUIExtensionProviderPid(MessageParcel &data, Mess
 
 int32_t AppMgrStub::HandleNotifyMemorySizeStateChanged(MessageParcel &data, MessageParcel &reply)
 {
-    bool isMemorySizeSufficient = data.ReadBool();
-    int result = NotifyMemorySizeStateChanged(isMemorySizeSufficient);
+    int32_t memorySizeState = data.ReadInt32();
+    int result = NotifyMemorySizeStateChanged(memorySizeState);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write result error.");
         return ERR_INVALID_VALUE;
@@ -1846,6 +1850,33 @@ ErrCode AppMgrStub::HandleUpdateProcessMemoryState(MessageParcel &data, MessageP
     }
     auto ret = UpdateProcessMemoryState(states);
     reply.WriteInt32(ret);
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetKilledProcessInfo(MessageParcel &data, MessageParcel &reply)
+{
+    int pid = data.ReadInt32();
+    int uid = data.ReadInt32();
+    KilledProcessInfo info;
+    auto ret = GetKilledProcessInfo(pid, uid, info);
+    if (ret == ERR_OK && !reply.WriteParcelable(&info)) {
+        ret = IPC_STUB_ERR;
+    }
+    return ret;
+}
+
+int32_t AppMgrStub::HandleLaunchAbility(MessageParcel &data, MessageParcel &reply)
+{
+    sptr token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "read data failed.");
+        return ERR_INVALID_VALUE;
+    }
+    auto result = LaunchAbility(token);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

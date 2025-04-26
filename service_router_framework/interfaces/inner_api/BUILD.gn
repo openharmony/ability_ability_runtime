@@ -11,25 +11,96 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
+import("//build/config/components/idl_tool/idl.gni")
 import("//foundation/ability/ability_runtime/service_router_framework/srms.gni")
 
+idl_gen_interface("service_router_mgr_interface") {
+  sources = [ "IServiceRouterMgr.idl" ]
+  log_domainid = "0xD001353"
+  log_tag = "ServiceRouter"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 config("srms_fwk_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${target_gen_dir}",
+    "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
+  ]
+}
+
+ohos_source_set("service_router_mgr_proxy") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":srms_fwk_config" ]
+  output_values = get_target_outputs(":service_router_mgr_interface")
+  sources = filter_include(output_values, [ "*_proxy.cpp" ])
+  deps = [ ":service_router_mgr_interface" ]
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:libappexecfwk_common",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_source_set("service_router_mgr_stub") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  configs = [ ":srms_fwk_config" ]
+  output_values = get_target_outputs(":service_router_mgr_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  deps = [ ":service_router_mgr_interface" ]
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
 }
 
 ohos_shared_library("srms_fwk") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "src/service_info.cpp",
     "src/service_router_death_recipient.cpp",
     "src/service_router_load_callback.cpp",
     "src/service_router_mgr_helper.cpp",
-    "src/service_router_mgr_proxy.cpp",
   ]
+  output_values = get_target_outputs(":service_router_mgr_interface")
+  sources += filter_include(output_values, [ "*_proxy.cpp" ])
 
   public_configs = [ ":srms_fwk_config" ]
 
   deps = [ "${ability_runtime_innerkits_path}/ability_manager:ability_manager" ]
+  deps += [ ":service_router_mgr_interface" ]
 
   external_deps = [
     "ability_base:session_info",

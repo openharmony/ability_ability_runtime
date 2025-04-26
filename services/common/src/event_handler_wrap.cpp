@@ -86,6 +86,11 @@ bool EventHandlerWrap::RemoveEvent(uint32_t eventId, int64_t param)
     return RemoveEvent(EventWrap(eventId, param));
 }
 
+bool EventHandlerWrap::RemoveEvent(uint32_t eventId, const std::string &taskName)
+{
+    return RemoveEvent(EventWrap(eventId, taskName));
+}
+
 bool EventHandlerWrap::RemoveEvent(EventWrap event, bool force)
 {
     std::lock_guard<ffrt::mutex> guard(*eventMutex_);

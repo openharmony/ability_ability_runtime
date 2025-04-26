@@ -63,6 +63,7 @@ public:
     void RegisterArkVMInRuntime(unsigned long long externalVM);
     void RegisterStackInfoCallbacks(UpdateStackInfoFuncType uFunc);
     void RegisterCJUncaughtExceptionHandler(const CJUncaughtExceptionInfo& handle);
+    bool RegisterCangjieCallback();
     bool IsUISchedulerStarted()
     {
         return isUISchedulerStarted_;
@@ -123,6 +124,7 @@ private:
     void* uiScheduler_ {nullptr};
     SanitizerKind sanitizerKind_ {SanitizerKind::NONE};
     NSMode nsMode_;
+    std::vector<void*> preloadLibs_;
 };
 
 }

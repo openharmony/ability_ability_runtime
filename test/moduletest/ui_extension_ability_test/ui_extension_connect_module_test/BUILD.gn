@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_moduletest("ui_extension_connect_module_test") {
-  module_out_path = "ability_runtime/ui_extension"
+  module_out_path = "ability_runtime/ability_runtime/ui_extension"
 
   include_dirs = [ "../include" ]
 

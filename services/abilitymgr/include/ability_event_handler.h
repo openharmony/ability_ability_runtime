@@ -46,6 +46,7 @@ private:
     void ProcessInactiveTimeOut(int64_t abilityRecordId);
     void ProcessForegroundTimeOut(const EventWrap &event, bool isHalf = false);
     void ProcessShareDataTimeOut(int64_t uniqueId);
+    void ProcessConnectTimeOut(const EventWrap &event, bool isHalf = false);
 private:
     std::weak_ptr<AbilityManagerService> server_;
 };

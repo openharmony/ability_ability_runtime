@@ -34,6 +34,10 @@ private:
         AppExecFwk::AbilityInfo& callerAbilityInfo);
     bool GetTargetAbilityInfo(const AbilityInterceptorParam& param,
         AppExecFwk::AbilityInfo& callerAbilityInfo);
+    int32_t ProcessInterceptOld(const AbilityInterceptorParam& param,
+        const AppExecFwk::AbilityInfo &targetAbilityInfo, const AppExecFwk::AbilityInfo &callerAbilityInfo);
+    int32_t ProcessInterceptNew(const AbilityInterceptorParam& param,
+        const AppExecFwk::AbilityInfo &targetAbilityInfo, const AppExecFwk::AbilityInfo &callerAbilityInfo);
 };
 } // namespace AAFwk
 } // namespace OHOS

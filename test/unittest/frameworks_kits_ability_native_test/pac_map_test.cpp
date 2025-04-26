@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1676,6 +1676,36 @@ HWTEST_F(PacMapTest, AppExecFwk_ParseJsonItemArrayChar_0100, Function | MediumTe
     EXPECT_EQ(result, true);
     
     GTEST_LOG_(INFO) << "AppExecFwk_ParseJsonItemArrayChar_0100 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_ParseJsonItemArrayChar_0200
+ * @tc.name: ParseJsonItemArrayChar
+ * @tc.desc: Verify ParseJsonItemArrayChar.
+ * @tc.require:
+ */
+HWTEST_F(PacMapTest, AppExecFwk_ParseJsonItemArrayChar_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_ParseJsonItemArrayChar_0200 start";
+
+    PacMapList mapList;
+    std::string key = "this is key";
+    Json::Value item;
+    item["data"] = "test";
+    auto result = pacmap_->ParseJsonItemArrayChar(mapList, key, item);
+    EXPECT_EQ(result, true);
+
+    Json::Value courses(Json::arrayValue);
+    courses.append('a');
+    courses.append(1);
+    courses.append("first");
+    courses.append("second");
+    courses.append("third");
+    item["data"] = courses;
+    result = pacmap_->ParseJsonItemArrayChar(mapList, key, item);
+    EXPECT_EQ(result, false);
+    
+    GTEST_LOG_(INFO) << "AppExecFwk_ParseJsonItemArrayChar_0200 end";
 }
 
 /**

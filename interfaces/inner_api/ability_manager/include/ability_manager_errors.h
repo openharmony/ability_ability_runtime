@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -677,16 +677,110 @@ enum {
     ERR_CREATE_START_MSG_FAILED = 2097283,
 
     /*
-     * Result (2097284) for create apawn process failed.
+     * Result (2097284) for create spawn process failed.
      */
-    ERR_SAPAWN_PROCESS_FAILED = 2097284,
+    ERR_SPAWN_PROCESS_FAILED = 2097284,
 
     /*
      * Result (2097285 - 2097295) for record exit reason failed.
      */
     ERR_RECORD_SIGNAL_REASON_FAILED = 2097285,
     ERR_GET_EXIT_INFO_FAILED = 2097286,
+    ERR_NO_PERMISSION_CALLER = 2097287,
+    ERR_NULL_APP_EXIT_REASON_HELPER = 2097288,
+    ERR_READ_EXIT_REASON_FAILED = 2097289,
+    ERR_IPC_PROXY_WRITE_FAILED = 2097290,
+    ERR_INVALID_ACCESS_TOKEN = 2097291,
+    ERR_GET_KV_STORE_HANDLE_FAILED = 2097292,
 
+    ERR_WRITE_INTERFACE_TOKEN_FAILED = 2097296,
+    ERR_WRITE_RESULT_CODE_FAILED = 2097297,
+    ERR_READ_RESULT_PARCEL_FAILED = 2097298,
+    ERR_NO_ALLOW_OUTSIDE_CALL = 2097299,
+    ERR_APP_MGR_SERVICE_NOT_READY = 2097300,
+    ERR_NULL_APP_RUNNING_MANAGER = 2097301,
+    ERR_NULL_APP_MGR_SERVICE_INNER = 2097302,
+    ERR_NULL_APP_MGR_PROXY = 2097303,
+    ERR_NO_APP_RECORD = 2097304,
+
+    /*
+     * Result(2097305) for extension starting ability controlled
+     */
+    ERR_EXTENSION_START_ABILITY_CONTROLEED = 2097305,
+
+    /*
+     * Result (2097306) for get connectManager by userId failed.
+     */
+    CONNECT_MAMAGER_NOT_FIND_BY_USERID = 2097306,
+
+    /*
+     * Result (2097307) for not containsAbility or not find abilityRecord by callerToken.
+     */
+    INVALID_CALLER_TOKEN = 2097307,
+
+    /*
+     * Result (2097308) for extension ability not exist.
+     */
+    EXTENSION_ABILITY_NOT_EXIST = 2097308,
+
+    /*
+     * Result (2097309) for extension ability info not query by uri.
+     */
+    EXTENSION_ABILITY_INFO_NOT_QUERY_BY_URI = 2097309,
+
+    /*
+     * Result (2097310) for cannot minimize or terminate except ui extension ability.
+     */
+    EXTENSION_TYPE_NOT_UI_EXTENSION = 2097310,
+
+    /*
+     * Result (2097311) for get Local deviceId failed.
+     */
+    GET_LOCAL_DEVICE_ID_FAILED = 2097311,
+
+    /*
+    * Result (2097318 - 2097328) for login and logout user.
+    */
+    ERR_LOGOUT_USER_TASK_HANDLE_NULL = 2097318,
+
+    ERR_LOGOUT_USER_APP_MANAGER_NULL = 2097319,
+
+    ERR_LOGOUT_USER_KILL_PROCESS_TIMEOUT = 2097320,
+
+    /**
+     * Result (2097312) for interceptor executer is nullptr.
+     */
+    ERR_NULL_INTERCEPTOR_EXECUTER = 2097312,
+
+    /**
+     * Result (2097313) for after check executer is nullptr.
+     */
+    ERR_NULL_AFTER_CHECK_EXECUTER = 2097313,
+
+    /**
+     * Result (2097314) for mission list manager is nullptr.
+     */
+    ERR_NULL_MISSION_LIST_MANAGER = 2097314,
+
+    /**
+     * Result (2097315) for invalid ability type.
+     */
+    ERR_ABILITY_TYPE_INVALID = 2097315,
+
+    /**
+     * Result (2097316) for ui ability manager is nullptr.
+     */
+    ERR_NULL_UI_ABILITY_MANAGER = 2097316,
+
+    /**
+     * Result (2097317) for session info is nullptr.
+     */
+    ERR_NULL_SESSION_INFO = 2097317,
+    ERR_NOT_HOOK = 2097321,
+    ERR_FROM_WINDOW = 2097322,
+    ERR_INVALID_CONTEXT = 2097323,
+    INTENT_NOT_EXIST = 2097329,
+    INTENT_STATE_NOT_EXECUTING = 2097330,
     /**
      * Native error(3000000) for target bundle not exist.
      */
@@ -867,6 +961,37 @@ enum NativeFreeInstallError {
      * Result(29360206) for atomic service minimized.
      */
     ATOMIC_SERVICE_MINIMIZED = 29360206,
+
+    /* codes 29360210 - 29360220 are reserved for StartSelfUIAbility with startOptions */
+    /*
+     * Result(29360210) for write interface code failed.
+     */
+    ERR_WRITE_INTERFACE_CODE = 29360210,
+
+    /*
+     * Result(29360211) for write want failed.
+     */
+    ERR_WRITE_WANT = 29360211,
+
+    /*
+     * Result(29360212) for write startOptions failed.
+     */
+    ERR_WRITE_START_OPTIONS = 29360212,
+
+    /*
+     * Result(29360213) for read want failed.
+     */
+    ERR_READ_WANT = 29360213,
+
+    /*
+     * Result(29360214) for read startOptions failed.
+     */
+    ERR_READ_START_OPTIONS = 29360214,
+
+    /*
+     * Result(29360215) for write StartSelfUIAbility result failed.
+     */
+    ERR_WRITE_START_SELF_UI_ABILITY_RESULT = 29360215,
 
     /**
      * Undefine error code.

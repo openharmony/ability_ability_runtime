@@ -183,6 +183,15 @@ enum class AbilityErrorCode {
     // UIAbility is in starting state.
     ERROR_CODE_UI_ABILITY_IS_STARTING = 16000082,
 
+    // extension can not start the ability due to extension control.
+    ERROR_CODE_EXTENSION_START_ABILITY_CONTROLLED = 16000083,
+
+    // Only allow DelegatorAbility to call the method once.
+    ERROR_CODE_NOT_HOOK = 16000084,
+
+    // The interaction process between Ability and the Window encountered an error.
+    ERROR_CODE_FROM_WINDOW = 16000085,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 

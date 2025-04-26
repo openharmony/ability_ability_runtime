@@ -55,7 +55,7 @@ AutoFillManager::~AutoFillManager()
 int32_t AutoFillManager::RequestAutoFill(Ace::UIContent *uiContent, const AutoFill::AutoFillRequest &request,
     const std::shared_ptr<IFillRequestCallback> &fillCallback, AutoFill::AutoFillResult &result)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
+    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "RequestAutoFill");
     if (uiContent == nullptr || fillCallback == nullptr) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null uiContent or fillCallback");
         return AutoFill::AUTO_FILL_OBJECT_IS_NULL;
@@ -71,7 +71,7 @@ int32_t AutoFillManager::RequestAutoFill(Ace::UIContent *uiContent, const AutoFi
 int32_t AutoFillManager::RequestAutoSave(Ace::UIContent *uiContent, const AutoFill::AutoFillRequest &request,
     const std::shared_ptr<ISaveRequestCallback> &saveCallback, AutoFill::AutoFillResult &result)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
+    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "RequestAutoSave");
     if (uiContent == nullptr || saveCallback == nullptr) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null UIContent or saveCallback");
         return AutoFill::AUTO_FILL_OBJECT_IS_NULL;

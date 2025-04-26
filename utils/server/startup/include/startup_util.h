@@ -45,6 +45,10 @@ public:
         AppExecFwk::AbilityInfo &abilityInfo);
     static int64_t GenerateFullRequestCode(int32_t pid, bool backFlag, int32_t requestCode);
     static CallerRequestInfo ParseFullRequestCode(int64_t fullRequestCode);
+    static bool IsStartPlugin(const AAFwk::Want &want)
+    {
+        return want.GetBoolParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, false);
+    }
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

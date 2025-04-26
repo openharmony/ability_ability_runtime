@@ -243,7 +243,9 @@ bool ExtensionRecordManager::IsHostSpecifiedProcessValid(const AAFwk::AbilityReq
 int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &abilityRequest,
     std::shared_ptr<ExtensionRecord> &record)
 {
+    CHECK_POINTER_AND_RETURN(record, ERR_INVALID_VALUE);
     std::shared_ptr<AAFwk::AbilityRecord> abilityRecord = record->abilityRecord_;
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     switch (record->processMode_) {
         case PROCESS_MODE_INSTANCE: {
             std::string process = abilityRequest.abilityInfo.bundleName + SEPARATOR + abilityRequest.abilityInfo.name
@@ -700,6 +702,7 @@ void ExtensionRecordManager::TerminateTimeout(int32_t extensionRecordId)
 void ExtensionRecordManager::GetCallerTokenList(
     const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::list<sptr<IRemoteObject>> &callerList)
 {
+    CHECK_POINTER(abilityRecord);
     auto extensionRecordId = abilityRecord->GetUIExtensionAbilityId();
     auto sessionInfo = abilityRecord->GetSessionInfo();
     if (!sessionInfo) {
@@ -779,6 +782,39 @@ bool ExtensionRecordManager::IsFocused(
         }
     }
     return isFocused;
+}
+
+int32_t ExtensionRecordManager::QueryPreLoadUIExtensionRecord(const AppExecFwk::ElementName &element,
+                                                              const std::string &moduleName,
+                                                              const std::string &hostBundleName,
+                                                              int32_t &recordNum)
+{
+    std::string abilityName = element.GetAbilityName();
+    std::string bundleName = element.GetBundleName();
+    TAG_LOGD(AAFwkTag::UI_EXT,
+             "hostBundleName: %{public}s, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
+             hostBundleName.c_str(), bundleName.c_str(), moduleName.c_str(), abilityName.c_str());
+    if (element.GetAbilityName().empty() || element.GetBundleName().empty() || moduleName.empty() ||
+        hostBundleName.empty()) {
+        recordNum = 0;
+        TAG_LOGD(AAFwkTag::UI_EXT, "element or hostBundleName is null.");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto extensionRecordMapKey =
+        std::make_tuple(abilityName, bundleName, moduleName, hostBundleName);
+    std::lock_guard<std::mutex> lock(preloadUIExtensionMapMutex_);
+    auto item = preloadUIExtensionMap_.find(extensionRecordMapKey);
+    if (item != preloadUIExtensionMap_.end()) {
+        if (!item->second.empty()) {
+            recordNum = item->second.size();
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "UIExtensionAbility has been preloaded,recordNum:%{public}d.", recordNum);
+            return ERR_OK;
+        }
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension is not preloaded.");
+    recordNum = 0;
+    return ERR_OK;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

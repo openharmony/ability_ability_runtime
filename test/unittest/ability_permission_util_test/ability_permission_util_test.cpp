@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -322,7 +322,7 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceKeyF
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0100, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0100 start");
 
@@ -339,7 +339,7 @@ HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0100, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0200, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0200, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0200 start");
 
@@ -357,7 +357,7 @@ HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0200, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0300, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0300, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0300 start");
 
@@ -375,7 +375,7 @@ HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0300, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0400, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0400, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0400 start");
 
@@ -393,7 +393,7 @@ HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0400, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0500, TestSize.Level0)
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0500, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0500 start");
 
@@ -404,6 +404,89 @@ HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0500, TestSize.Level0)
     bool ret = AbilityPermissionUtil::GetInstance().IsDominateScreen(want, isPendingWantCaller);
     EXPECT_FALSE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0500 end");
+}
+
+/**
+ * @tc.name: StartSelfUIAbilityRecordGuard_0100
+ * @tc.desc: StartSelfUIAbilityRecordGuard_0100 Test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, StartSelfUIAbilityRecordGuard_0100, TestSize.Level2)
+{
+    pid_t pid = 8888;
+    int32_t tokenId = 1;
+
+    AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.clear();
+    StartSelfUIAbilityRecordGuard startSelfUIAbilityRecordGuard(pid, tokenId);
+    EXPECT_FALSE(AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.empty());
+
+    AbilityPermissionUtil::GetInstance().AddStartSelfUIAbilityRecord(pid, tokenId);
+    for (const auto &item : AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_) {
+        EXPECT_EQ(item[2], 2);
+    }
+}
+
+/**
+ * @tc.name: RemoveStartSelfUIAbilityRecord_0100
+ * @tc.desc: RemoveStartSelfUIAbilityRecord_0100 Test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, RemoveStartSelfUIAbilityRecord_0100, TestSize.Level2)
+{
+    pid_t pid = 8888;
+    AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.clear();
+    AbilityPermissionUtil::GetInstance().RemoveStartSelfUIAbilityRecord(pid);
+    EXPECT_EQ(AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.size(), 0);
+
+    AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.push_back({pid, 1, 1});
+    EXPECT_EQ(AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.size(), 1);
+    AbilityPermissionUtil::GetInstance().RemoveStartSelfUIAbilityRecord(pid);
+    EXPECT_EQ(AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.size(), 0);
+
+    AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.push_back({pid, 1, 2});
+    AbilityPermissionUtil::GetInstance().RemoveStartSelfUIAbilityRecord(pid);
+    for (const auto &item : AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_) {
+        EXPECT_EQ(item[2], 1);
+    }
+}
+
+/**
+ * @tc.name: GetTokenIdByPid_0100
+ * @tc.desc: GetTokenIdByPid_0100 Test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, GetTokenIdByPid_0100, TestSize.Level2)
+{
+    pid_t pid = 8888;
+    AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.clear();
+    auto ret = AbilityPermissionUtil::GetInstance().GetTokenIdByPid(pid);
+    EXPECT_EQ(ret, -1);
+
+    AbilityPermissionUtil::GetInstance().startSelfUIAbilityRecords_.push_back({pid, 1, 1});
+    ret = AbilityPermissionUtil::GetInstance().GetTokenIdByPid(pid);
+    EXPECT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: IsStartSelfUIAbility_0100
+ * @tc.desc: IsStartSelfUIAbility_0100 Test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, IsStartSelfUIAbility_0100, TestSize.Level2)
+{
+    AAFwk::AppUtils::GetInstance().isStartOptionsWithAnimation_.isLoaded = true;
+    AAFwk::AppUtils::GetInstance().isStartOptionsWithAnimation_.value = false;
+
+    auto ret = AbilityPermissionUtil::GetInstance().IsStartSelfUIAbility();
+    EXPECT_EQ(ret, false);
+
+    AAFwk::AppUtils::GetInstance().isStartOptionsWithAnimation_.value = true;
+    ret = AbilityPermissionUtil::GetInstance().IsStartSelfUIAbility();
+    EXPECT_EQ(ret, false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

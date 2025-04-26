@@ -27,6 +27,7 @@
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "napi/native_api.h"
+#include "app_recovery.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -57,18 +58,23 @@ struct GlobalObserverItem {
 static std::set<GlobalObserverItem> globalObserverList;
 static std::set<GlobalObserverItem> globalPromiseList;
 static std::map<napi_env, std::vector<std::pair<int32_t, std::shared_ptr<NativeReference>>>> observerList;
+static GlobalObserverItem freezeObserver;
 static std::mutex globalErrorMtx;
 static std::mutex globalPromiseMtx;
 static std::recursive_mutex errorMtx;
+static std::mutex freezeMtx;
 static std::shared_ptr<JsLoopObserver> loopObserver_;
 static std::once_flag registerCallbackFlag;
+static bool freezeCallbackRegistered = false;
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t INDEX_TWO = 2;
+constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr const char* ON_OFF_TYPE = "error";
+constexpr const char* FREEZE_TYPE = "freeze";
 constexpr const char* GLOBAL_ON_OFF_TYPE = "globalErrorOccurred";
 constexpr const char* ON_OFF_TYPE_UNHANDLED_REJECTION = "unhandledRejection";
 constexpr const char* GLOBAL_ON_OFF_TYPE_UNHANDLED_REJECTION = "globalUnhandledRejectionDetected";
@@ -161,6 +167,42 @@ static napi_value NotifyUnhandledRejectionHandler(napi_env env, napi_callback_in
     return CreateJsUndefined(env);
 }
 
+static void ClearGlobalObserverReference(napi_env env)
+{
+    std::lock_guard<std::mutex> lock(globalErrorMtx);
+    TAG_LOGI(AAFwkTag::JSNAPI, "Clearing observer refs for env: %{public}p", env);
+    auto it = globalObserverList.begin();
+    while (it != globalObserverList.end()) {
+        if (it->env == env) {
+            if (napi_delete_reference(env, it->ref) != napi_ok) {
+                TAG_LOGW(AAFwkTag::JSNAPI,
+                    "Failed to delete observer reference %{public}p in env %{public}p", it->ref, env);
+            }
+            it = globalObserverList.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+static void ClearGlobalPromiseReference(napi_env env)
+{
+    std::lock_guard<std::mutex> lock(globalPromiseMtx);
+    TAG_LOGI(AAFwkTag::JSNAPI, "Clearing promise refs for env: %{public}p", env);
+    auto it = globalPromiseList.begin();
+    while (it != globalPromiseList.end()) {
+        if (it->env == env) {
+            if (napi_delete_reference(env, it->ref) != napi_ok) {
+                TAG_LOGW(AAFwkTag::JSNAPI,
+                    "Failed to delete promise reference %{public}p in env %{public}p", it->ref, env);
+            }
+            it = globalPromiseList.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 static bool IsobserverListNotEmpty()
 {
     std::lock_guard<std::recursive_mutex> lock(errorMtx);
@@ -190,12 +232,20 @@ static std::string GetContent(napi_env env, napi_value exception, const std::str
     std::string content;
     napi_value propertyNmae = nullptr;
     std::string property = name;
-    napi_create_string_utf8(env, property.c_str(), property.size(), &propertyNmae);
-    napi_get_property(env, exception, propertyNmae, &tempContent);
+    if (napi_create_string_utf8(env, property.c_str(), property.size(), &propertyNmae) != napi_ok) {
+        TAG_LOGW(AAFwkTag::JSNAPI, "Create String Failed");
+    }
+    if (napi_get_property(env, exception, propertyNmae, &tempContent) != napi_ok) {
+        TAG_LOGW(AAFwkTag::JSNAPI, "Get Property Failed");
+    }
     size_t length = 0;
-    napi_get_value_string_utf8(env, tempContent, nullptr, 0, &length);
+    if (napi_get_value_string_utf8(env, tempContent, nullptr, 0, &length) != napi_ok) {
+        TAG_LOGW(AAFwkTag::JSNAPI, "Get Content Failed");
+    }
     content.resize(length);
-    napi_get_value_string_utf8(env, tempContent, content.data(), content.size() + 1, &length);
+    if (napi_get_value_string_utf8(env, tempContent, content.data(), content.size() + 1, &length) != napi_ok) {
+        TAG_LOGW(AAFwkTag::JSNAPI, "Copy Content Failed");
+    }
     return content;
 }
 
@@ -405,6 +455,35 @@ static bool ErrorManagerWorkerCallback(napi_env env, napi_value exception, std::
     return true;
 }
 
+static void FreezeCallback()
+{
+    std::lock_guard<std::mutex> lock(freezeMtx);
+    if (!freezeObserver.ref) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "not register freeze callback");
+        return;
+    }
+    napi_value global = nullptr;
+    if (napi_get_global(freezeObserver.env, &global) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Get Global Failed");
+        return;
+    }
+
+    size_t argc = ARGC_ZERO;
+    napi_value args[] = {};
+
+    napi_value function = nullptr;
+    if (napi_get_reference_value(freezeObserver.env, freezeObserver.ref, &function) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Get Callback Failed");
+        return;
+    }
+
+    napi_value result = nullptr;
+    if (napi_call_function(freezeObserver.env, global, function, argc, args, &result) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Do Callback Failed");
+        return;
+    }
+}
+
 static bool ErrorManagerMainWorkerCallback(
     napi_env env, std::string summary, std::string name, std::string message, std::string stack)
 {
@@ -479,6 +558,8 @@ public:
         TAG_LOGI(AAFwkTag::JSNAPI, "finalizer called");
         std::unique_ptr<JsErrorManager>(static_cast<JsErrorManager*>(data));
         ClearReference(env);
+        ClearGlobalObserverReference(env);
+        ClearGlobalPromiseReference(env);
     }
 
     static napi_value On(napi_env env, napi_callback_info info)
@@ -535,6 +616,22 @@ public:
     }
 
 private:
+
+    napi_value OnFreeze(napi_env env, const size_t argc, napi_value* argv)
+    {
+        if (!AppExecFwk::EventRunner::IsAppMainThread()) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "not mainThread");
+            ThrowInvalidCallerError(env);
+            return CreateJsUndefined(env);
+        }
+        if (argc != ARGC_TWO) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
+            ThrowInvalidNumParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        return OnOnFreeze(env, argv[INDEX_ONE]);
+    }
+
     napi_value OnOn(napi_env env, const size_t argc, napi_value* argv)
     {
         TAG_LOGD(AAFwkTag::JSNAPI, "called");
@@ -573,6 +670,9 @@ private:
                 return CreateJsUndefined(env);
             }
             return OnOnAll(env, argv[INDEX_ONE]);
+        }
+        if (type == FREEZE_TYPE) {
+            return OnFreeze(env, argc, argv);
         }
         return OnOnOld(env, argc, argv);
     }
@@ -659,6 +759,16 @@ private:
         return CreateJsValue(env, observerId);
     }
 
+    napi_value OffFreeze(napi_env env, size_t argc, napi_value* argv)
+    {
+        if (!AppExecFwk::EventRunner::IsAppMainThread()) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "not mainThread");
+            ThrowInvalidCallerError(env);
+            return CreateJsUndefined(env);
+        }
+        return argc == ARGC_TWO ? OnOffFreeze(env, argv[INDEX_ONE]) : OnOffFreeze(env, nullptr);
+    }
+
     napi_value OnOff(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGD(AAFwkTag::JSNAPI, "called");
@@ -688,7 +798,8 @@ private:
                 ThrowInvalidNumParametersError(env);
                 return CreateJsUndefined(env);
             }
-            return OnOffAllUnhandledRejection(env, argv[ARGC_ONE]);
+            return argc == ARGC_TWO ? OnOffAllUnhandledRejection(env, argv[ARGC_ONE])
+                                    : OnOffAllUnhandledRejection(env, nullptr);
         }
         if (type == GLOBAL_ON_OFF_TYPE) {
             if (argc != ARGC_TWO && argc != ARGC_ONE) {
@@ -696,7 +807,11 @@ private:
                 ThrowInvalidNumParametersError(env);
                 return CreateJsUndefined(env);
             }
-            return OnOffAllError(env, argv[ARGC_ONE]);
+            return argc == ARGC_TWO ? OnOffAllError(env, argv[ARGC_ONE])
+                                    : OnOffAllError(env, nullptr);
+        }
+        if (type == FREEZE_TYPE) {
+            return OffFreeze(env, argc, argv);
         }
         return OnOffOld(env, argc, argv);
     }
@@ -708,6 +823,9 @@ private:
         }
         std::lock_guard<std::mutex> lock(globalErrorMtx);
         for (auto &iter : globalObserverList) {
+            if (iter.env != env) {
+                continue;
+            }
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
@@ -722,6 +840,26 @@ private:
         NAPI_CALL(env, napi_create_reference(env, function, INITITAL_REFCOUNT_ONE, &item.ref));
         item.env = env;
         globalObserverList.insert(item);
+        TAG_LOGI(AAFwkTag::JSNAPI, "add observer successfully");
+        return CreateJsUndefined(env);
+    }
+
+    napi_value OnOnFreeze(napi_env env, napi_value function)
+    {
+        if (!ValidateFunction(env, function)) {
+            return nullptr;
+        }
+        std::lock_guard<std::mutex> lock(freezeMtx);
+        if (freezeObserver.ref) {
+            napi_delete_reference(env, freezeObserver.ref);
+        }
+        NAPI_CALL(env, napi_create_reference(env, function, INITITAL_REFCOUNT_ONE, &freezeObserver.ref));
+        freezeObserver.env = env;
+        if (!freezeCallbackRegistered) {
+            AppExecFwk::AppRecovery::GetInstance().SetFreezeCallback(FreezeCallback);
+            freezeCallbackRegistered = true;
+            TAG_LOGI(AAFwkTag::JSNAPI, "Freeze callback registered to AppRecovery successfully");
+        }
         return CreateJsUndefined(env);
     }
 
@@ -732,6 +870,9 @@ private:
         }
         std::lock_guard<std::mutex> lock(globalPromiseMtx);
         for (auto &iter : globalPromiseList) {
+            if (iter.env != env) {
+                continue;
+            }
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
@@ -746,6 +887,7 @@ private:
         NAPI_CALL(env, napi_create_reference(env, function, INITITAL_REFCOUNT_ONE, &item.ref));
         item.env = env;
         globalPromiseList.insert(item);
+        TAG_LOGI(AAFwkTag::JSNAPI, "add observer successfully");
         return CreateJsUndefined(env);
     }
 
@@ -753,11 +895,7 @@ private:
     {
         auto res = CreateJsUndefined(env);
         if (function == nullptr) {
-            std::lock_guard<std::mutex> lock(globalErrorMtx);
-            for (auto &iter : globalObserverList) {
-                NAPI_CALL(env, napi_delete_reference(env, iter.ref));
-            }
-            globalObserverList.clear();
+            ClearGlobalObserverReference(env);
             return res;
         }
         if (!ValidateFunction(env, function)) {
@@ -766,6 +904,9 @@ private:
 
         std::lock_guard<std::mutex> lock(globalErrorMtx);
         for (auto &iter : globalObserverList) {
+            if (iter.env != env) {
+                continue;
+            }
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
@@ -777,7 +918,48 @@ private:
             }
         }
         TAG_LOGI(AAFwkTag::JSNAPI, "remove observer failed");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_OBSERVER_NOT_FOUND);
+        return CreateJsUndefined(env);
+    }
 
+    napi_value OnOffFreeze(napi_env env, napi_value function)
+    {
+        auto res = CreateJsUndefined(env);
+        std::lock_guard<std::mutex> lock(freezeMtx);
+        if (freezeObserver.ref == nullptr) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "null freezeObserver");
+            return res;
+        }
+
+        if (function == nullptr) {
+            NAPI_CALL(env, napi_delete_reference(env, freezeObserver.ref));
+            freezeObserver = {};
+            if (freezeCallbackRegistered) {
+                AppExecFwk::AppRecovery::GetInstance().SetFreezeCallback(nullptr);
+                freezeCallbackRegistered = false;
+                TAG_LOGI(AAFwkTag::JSNAPI, "Freeze callback unregistered from AppRecovery successfully");
+            }
+            return res;
+        }
+        if (!ValidateFunction(env, function)) {
+            return nullptr;
+        }
+        napi_value observer = nullptr;
+        NAPI_CALL(env, napi_get_reference_value(env, freezeObserver.ref, &observer));
+        bool equals = false;
+        NAPI_CALL(env, napi_strict_equals(env, observer, function, &equals));
+        if (equals) {
+            NAPI_CALL(env, napi_delete_reference(env, freezeObserver.ref));
+            freezeObserver = {};
+            if (freezeCallbackRegistered) {
+                AppExecFwk::AppRecovery::GetInstance().SetFreezeCallback(nullptr);
+                freezeCallbackRegistered = false;
+                TAG_LOGI(AAFwkTag::JSNAPI, "Freeze callback unregistered from AppRecovery successfully");
+            }
+            return res;
+        }
+        TAG_LOGI(AAFwkTag::JSNAPI, "remove observer failed");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_OBSERVER_NOT_FOUND);
         return CreateJsUndefined(env);
     }
 
@@ -785,11 +967,7 @@ private:
     {
         auto res = CreateJsUndefined(env);
         if (function == nullptr) {
-            std::lock_guard<std::mutex> lock(globalPromiseMtx);
-            for (auto &iter : globalPromiseList) {
-                NAPI_CALL(env, napi_delete_reference(env, iter.ref));
-            }
-            globalPromiseList.clear();
+            ClearGlobalPromiseReference(env);
             return res;
         }
         if (!ValidateFunction(env, function)) {
@@ -797,6 +975,9 @@ private:
         }
         std::lock_guard<std::mutex> lock(globalPromiseMtx);
         for (auto &iter : globalPromiseList) {
+            if (iter.env != env) {
+                continue;
+            }
             napi_value observer = nullptr;
             NAPI_CALL(env, napi_get_reference_value(env, iter.ref, &observer));
             bool equals = false;
@@ -808,6 +989,7 @@ private:
             }
         }
         TAG_LOGI(AAFwkTag::JSNAPI, "remove observer failed");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_OBSERVER_NOT_FOUND);
         return CreateJsUndefined(env);
     }
     

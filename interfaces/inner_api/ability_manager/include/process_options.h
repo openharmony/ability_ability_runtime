@@ -56,6 +56,7 @@ public:
     static bool IsNewHiddenProcessMode(ProcessMode value);
 
     bool isRestartKeepAlive = false;
+    bool isStartFromNDK = false;
     ProcessMode processMode = ProcessMode::UNSPECIFIED;
     StartupVisibility startupVisibility = StartupVisibility::UNSPECIFIED;
     std::string processName;

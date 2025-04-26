@@ -101,8 +101,10 @@ public:
      * kill the processes by pid list given.
      *
      * @param pids, the pid list of processes are going to be killed.
+     * @param reason, the reason to kill the processes.
      */
-    virtual void KillProcessesByPids(std::vector<int32_t> &pids) override;
+    virtual void KillProcessesByPids(const std::vector<int32_t> &pids,
+        const std::string &reason = "KillProcessesByPids") override;
 
     /**
      * Set child and parent relationship
@@ -140,7 +142,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
-        const std::string &moduleName) override;
+        const std::string &moduleName, bool isPlugin) override;
 
     /**
      * KillApplication, call KillApplication() through proxy object, kill the application.
@@ -296,7 +298,7 @@ public:
      * @param bundleName The application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t AttachAppDebug(const std::string &bundleName) override;
+    int32_t AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal) override;
 
     /**
      * @brief Detach app debug.
@@ -379,6 +381,12 @@ public:
      * @return Returns true is sufficient memory size, others return false.
      */
     virtual bool IsMemorySizeSufficent() override;
+
+    /**
+     * whether or not requier a big memory
+     * @return Returens true is no big memory, others return false.
+     */
+    virtual bool IsNoRequireBigMemory() override;
 
     /**
      * Notifies that one ability is attached to status bar.

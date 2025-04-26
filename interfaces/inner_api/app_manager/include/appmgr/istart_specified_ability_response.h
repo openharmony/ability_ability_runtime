@@ -36,21 +36,22 @@ public:
 
     /**
      * @brief called when the module's onAcceptWant happens time out
-     * @param want request param
      * @param requestId a number represents a request
      */
-    virtual void OnTimeoutResponse(const AAFwk::Want &want, int32_t requestId) = 0;
+    virtual void OnTimeoutResponse(int32_t requestId) = 0;
 
-    virtual void OnNewProcessRequestResponse(const AAFwk::Want &want, const std::string &flag,
-        int32_t requestId) = 0;
+    virtual void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId) = 0;
 
-    virtual void OnNewProcessRequestTimeoutResponse(const AAFwk::Want &want, int32_t requestId) = 0;
+    virtual void OnNewProcessRequestTimeoutResponse(int32_t requestId) = 0;
 
-    enum class Message {
+    virtual void OnStartSpecifiedFailed(int32_t requestId) {};
+
+    enum Message {
         ON_ACCEPT_WANT_RESPONSE = 0,
         ON_TIMEOUT_RESPONSE,
         ON_NEW_PROCESS_REQUEST_RESPONSE,
-        ON_NEW_PROCESS_REQUEST_TIMEOUT_RESPONSE
+        ON_NEW_PROCESS_REQUEST_TIMEOUT_RESPONSE,
+        ON_START_SPECIFIED_FAILED
     };
 };
 }  // namespace AppExecFwk

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,13 +21,15 @@
 #include "js_worker.h"
 #include "ohos_loop_handler.h"
 #include "sys_timer.h"
+#include "worker_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
     std::shared_ptr<AppExecFwk::EventHandler> g_eventHandler = nullptr;
 }
-void OHOSJsEnvironmentImpl::PostTaskToHandler(void* handler, uv_io_cb func, void* work, int status, int priority)
+void OHOSJsEnvironmentImpl::PostTaskToHandler(const char* taskName, uv_io_cb func, void* work, int status,
+                                              int priority)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     if (!func || !work) {
@@ -64,7 +66,11 @@ void OHOSJsEnvironmentImpl::PostTaskToHandler(void* handler, uv_io_cb func, void
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid parameters");
         return;
     }
-    g_eventHandler->PostTask(task, "uv_io_cb", 0, prio);
+    if (taskName == nullptr) {
+        g_eventHandler->PostTask(task, "uv_io_cb", 0, prio);
+    } else {
+        g_eventHandler->PostTask(task, taskName, 0, prio);
+    }
 }
 OHOSJsEnvironmentImpl::OHOSJsEnvironmentImpl()
 {
@@ -146,6 +152,8 @@ bool OHOSJsEnvironmentImpl::InitLoop(NativeEngine* engine, bool isStage)
         TAG_LOGD(AAFwkTag::JSRUNTIME, "uv_register_task_to_event, isStage: %{public}d", isStage);
         if (isStage && (eventHandler_->GetEventRunner()).get() == AppExecFwk::EventRunner::GetMainEventRunner().get()) {
             uv_register_task_to_event(uvLoop, PostTaskToHandler, nullptr);
+            // send signal here to trigger uv tasks generated during initialization.
+            uv_async_send(&uvLoop->wq_async);
         }
     }
 
@@ -171,6 +179,7 @@ void OHOSJsEnvironmentImpl::InitWorkerModule(NativeEngine* engine, std::shared_p
     CHECK_POINTER(workerInfo);
     engine->SetInitWorkerFunc(InitWorkerFunc);
     engine->SetOffWorkerFunc(OffWorkerFunc);
+    engine->SetReleaseWorkerSafeMemFunc(ReleaseWorkerSafeMemFunc);
     engine->SetGetAssetFunc(AssetHelper(workerInfo));
     engine->SetApiVersion(static_cast<int32_t>(workerInfo->apiTargetVersion.GetOriginPointer()));
 

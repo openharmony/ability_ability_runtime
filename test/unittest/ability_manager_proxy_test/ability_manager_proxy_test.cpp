@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,9 @@
 #include "hilog_tag_wrapper.h"
 #include "mission_snapshot.h"
 #include "want_sender_info.h"
+#include "mission_listener_interface.h"
+#include "mission_snapshot.h"
+#include "snapshot.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -510,7 +513,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_027, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000GI8IL
  */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_028, TestSize.Level0)
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_028, TestSize.Level2)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
@@ -528,7 +531,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_028, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: AR000GI8IL
  */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_029, TestSize.Level0)
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_029, TestSize.Level2)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
@@ -547,7 +550,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_029, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: AR000GI8IH
  */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_030, TestSize.Level0)
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_030, TestSize.Level2)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
@@ -564,7 +567,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_030, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: AR000GI8IH
  */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_031, TestSize.Level0)
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_031, TestSize.Level2)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
@@ -603,7 +606,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_032, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000GI8IL
  */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_033, TestSize.Level0)
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_033, TestSize.Level2)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
@@ -2550,7 +2553,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_AttachAppDebug_0100, TestS
 {
     EXPECT_NE(proxy_, nullptr);
     std::string bundleName = "bundleName";
-    auto result = proxy_->AttachAppDebug(bundleName);
+    auto result = proxy_->AttachAppDebug(bundleName, false);
     EXPECT_EQ(result, NO_ERROR);
 }
 
@@ -2563,7 +2566,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_DetachAppDebug_0100, TestS
 {
     EXPECT_NE(proxy_, nullptr);
     std::string bundleName = "bundleName";
-    auto result = proxy_->DetachAppDebug(bundleName);
+    auto result = proxy_->DetachAppDebug(bundleName, false);
     EXPECT_EQ(result, NO_ERROR);
 }
 

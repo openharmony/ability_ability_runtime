@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -149,8 +149,7 @@ public:
      */
     bool IsSceneBoard() const;
 
-    void SetPersistentId(const int32_t persistentId);
-    int32_t GetPersistentId() const;
+    bool IsHook() const;
 
 private:
     bool isTerminating_ = false;
@@ -166,7 +165,6 @@ private:
     std::shared_ptr<AAFwk::Want> want_ = nullptr;
     sptr<IRemoteObject> token_;
     sptr<IRemoteObject> preToken_;
-    int32_t persistentId_ = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -49,7 +49,8 @@ int64_t ResSchedUtil::convertType(int64_t resSchedType)
     return -1;
 }
 
-void ResSchedUtil::ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart)
+void ResSchedUtil::ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart,
+    int32_t warmStartType)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::RES_TYPE_APP_ABILITY_START;
@@ -58,7 +59,8 @@ void ResSchedUtil::ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, i
         { "uid", std::to_string(abilityInfo.applicationInfo.uid) },
         { "bundleName", abilityInfo.applicationInfo.bundleName },
         { "abilityName", abilityInfo.name },
-        { "pid", std::to_string(pid) }
+        { "pid", std::to_string(pid) },
+        { "warmStartType", std::to_string(warmStartType) }
     };
     TAG_LOGD(AAFwkTag::DEFAULT, "call");
     ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, isColdStart ? 1 : 0, eventParams);
@@ -80,6 +82,21 @@ void ResSchedUtil::ReportAbilityAssociatedStartInfoToRSS(
     int64_t type = convertType(resSchedType);
     TAG_LOGD(AAFwkTag::DEFAULT, "call");
     ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, type, eventParams);
+#endif
+}
+
+void ResSchedUtil::ReportPreloadApplicationToRSS(const std::shared_ptr<AbilityInfo>& abilityInfo, int32_t preloadMode)
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    uint32_t resType = ResourceSchedule::ResType::RES_TYPE_PRELOAD_APPLICATION;
+    std::unordered_map<std::string, std::string> eventParams {
+        { "name", "preload_application" },
+        { "uid", std::to_string(abilityInfo->applicationInfo.uid) },
+        { "bundleName", abilityInfo->applicationInfo.bundleName },
+        { "preloadMode", std::to_string(preloadMode) }
+    };
+    TAG_LOGD(AAFwkTag::DEFAULT, "call");
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, preloadMode, eventParams);
 #endif
 }
 

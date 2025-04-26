@@ -84,6 +84,7 @@ void ResidentProcessManager::StartResidentProcessWithMainElementPerBundle(const 
     size_t index, std::set<uint32_t> &needEraseIndexSet, int32_t userId)
 {
     if (userId != 0 && !AmsConfigurationParameter::GetInstance().InResidentWhiteList(bundleInfo.name)) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "not in resident allow list");
         needEraseIndexSet.insert(index);
         return;
     }
@@ -91,6 +92,9 @@ void ResidentProcessManager::StartResidentProcessWithMainElementPerBundle(const 
     bool keepAliveEnable = bundleInfo.isKeepAlive;
     // Check startup permissions
     AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfo.name, keepAliveEnable);
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "Precheck,bundle:%{public}s, process:%{public}s, keepAlive:%{public}d, enable:%{public}d",
+        bundleInfo.name.c_str(), processName.c_str(), bundleInfo.isKeepAlive, keepAliveEnable);
     if (!keepAliveEnable || processName.empty()) {
         needEraseIndexSet.insert(index);
         return;
@@ -125,7 +129,7 @@ void ResidentProcessManager::StartResidentProcessWithMainElementPerBundleHap(
     Want want;
     want.SetElementName(hapModuleInfo.bundleName, mainElement);
     ResidentAbilityInfoGuard residentAbilityInfoGuard(hapModuleInfo.bundleName, mainElement, userId);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call, bundleName: %{public}s, mainElement: %{public}s",
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartResidentAbility, bundleName: %{public}s, mainElement: %{public}s",
         hapModuleInfo.bundleName.c_str(), mainElement.c_str());
     auto ret = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want, userId,
         DEFAULT_INVAL_VALUE);
@@ -139,7 +143,8 @@ void ResidentProcessManager::StartResidentProcessWithMainElementPerBundleHap(
 int32_t ResidentProcessManager::SetResidentProcessEnabled(
     const std::string &bundleName, const std::string &callerName, bool updateEnable)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SetResidentProcessEnabled,bundle:%{public}s,caller:%{public}s,enable:%{public}d",
+        bundleName.c_str(), callerName.c_str(), updateEnable);
     if (bundleName.empty() || callerName.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "input parameter error");
         return INVALID_PARAMETERS_ERR;
@@ -205,8 +210,8 @@ void ResidentProcessManager::UpdateResidentProcessesStatus(
     for (const auto &userId: users) {
         if (!IN_PROCESS_CALL(bms->GetBundleInfo(
             bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "get bundle info failed");
-            break;
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "get bundle info failed, userId:%{public}d", userId);
+            continue;
         }
 
         if (updateEnable && !localEnable) {

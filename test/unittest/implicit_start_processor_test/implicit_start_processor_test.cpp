@@ -37,6 +37,8 @@ const std::string OPEN_LINK_APP_LINKING_ONLY = "appLinkingOnly";
 const int NFC_CALLER_UID = 1027;
 const std::string BUNDLE_NAME = "test_bundle";
 const std::string NAME = "test_name";
+const size_t TRUSTLIST_MAX_SIZE = 50;
+const std::string APP_LAUNCH_TRUSTLIST = "ohos.params.appLaunchTrustList";
 }
 namespace OHOS {
 namespace AAFwk {
@@ -64,16 +66,445 @@ void ImplicitStartProcessorTest::TearDown()
  * SubFunction: NA
  * FunctionPoints:ImplicitStartProcessor ImplicitStartAbility
  * EnvConditions: NA
- * CaseDescription: Verify ImplicitStartAbility
+ * CaseDescription: Verify ImplicitStartAbility; isAppCloneSelector = true
  */
 HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_001, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_001 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
     AbilityRequest request;
     int32_t userId = 0;
     bool res = processor->ImplicitStartAbility(request, userId,
         AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED, "", true);
     EXPECT_TRUE(res);
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_001 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: ImplicitStartAbility
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor ImplicitStartAbility
+ * EnvConditions: NA
+ * CaseDescription: 无trustlist; isAppCloneSelector = false
+ */
+HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_002 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    int32_t userId = 0;
+    std::string mockAction = "action.system.home";
+    request.want.SetAction(mockAction);
+    bool res = processor->ImplicitStartAbility(request, userId,
+        AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED, "", false);
+    EXPECT_TRUE(res);
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_002 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: ImplicitStartAbility
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor ImplicitStartAbility
+ * EnvConditions: NA
+ * CaseDescription: 有trustlist; isAppCloneSelector = true; 不进入交集处理
+ */
+HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_003 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    int32_t userId = 0;
+    std::string mockAction = "action.system.home";
+    std::vector<std::string> mockTrustlist = {
+        "com.example.hmos.advisor",
+        "com.example.hmos.calculator",
+        "com.example.hmos.databackup",
+    };
+    request.want.SetAction(mockAction);
+    request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+    bool res = processor->ImplicitStartAbility(request, userId,
+        AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED, "", true);
+    EXPECT_TRUE(res);
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_003 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: ImplicitStartAbility
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor ImplicitStartAbility
+ * EnvConditions: NA
+ * CaseDescription: 有trustlist; SIZE超过50; isAppCloneSelector = false;
+ */
+HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_004 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    int32_t userId = 0;
+    std::string mockAction = "action.system.home";
+    std::vector<std::string> mockTrustlist = {
+        "aaa", "bbb", "ccc", "ddd", "eee",
+        "anfa", "bfb", "cnc", "ddm", "mje",
+        "asra", "btr", "chtc", "djy", "essse",
+        "bfgb", "gbgbb", "nbbbh", "ttrtry", "eergrge",
+        "aaqwea", "bqwebb", "ccretc", "ddfghd", "enghee",
+        "aretgaa", "fgdbbb", "ccdfgc", "ddgegrd", "ebggggee",
+        "allaa", "bllbb", "ccllc", "llddd", "ellee",
+        "aapa", "bbpb", "cppcc", "ddpd", "epee",
+        "aawsxca", "bbvvvb", "cbvcc", "dbvdd", "ebvee",
+        "areaa", "bbreb", "crecc",
+        "com.example.hmos.advisor",
+        "com.example.hmos.calculator",
+        "com.example.hmos.databackup",
+    };
+    request.want.SetAction(mockAction);
+    request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+    bool res = processor->ImplicitStartAbility(request, userId,
+        AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED, "", false);
+    EXPECT_TRUE(res);
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_004 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: ImplicitStartAbility
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor ImplicitStartAbility
+ * EnvConditions: NA
+ * CaseDescription: 有trustlist; 交集为0; isAppCloneSelector = false;
+ */
+HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_005 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    int32_t userId = 0;
+    std::string mockAction = "action.system.home";
+    std::vector<std::string> mockTrustlist = {""};
+    request.want.SetAction(mockAction);
+    request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+    bool res = processor->ImplicitStartAbility(request, userId,
+        AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED, "", false);
+    EXPECT_TRUE(res);
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_005 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: ImplicitStartAbility
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor ImplicitStartAbility
+ * EnvConditions: NA
+ * CaseDescription: 有trustlist; 交集为1; scheme 为 file;
+ */
+HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_006 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    int32_t userId = 0;
+    std::string mockUriString = "file://com.example.test/test.txt";
+    std::string mockAction = "action.system.home";
+    std::vector<std::string> mockTrustlist = {
+        "com.example.hmos.advisor",
+        "demo1",
+    };
+    request.want.SetUri(mockUriString);
+    request.want.SetAction(mockAction);
+    request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+    bool res = processor->ImplicitStartAbility(request, userId,
+        AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED, "", false);
+    EXPECT_TRUE(res);
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_006 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: ImplicitStartAbility
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor ImplicitStartAbility
+ * EnvConditions: NA
+ * CaseDescription: 有trustlist; 非法输入
+ */
+HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_007 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    int32_t userId = 0;
+    std::string mockAction = "action.system.home";
+    std::string mockTrustlist = "demo1";
+    request.want.SetAction(mockAction);
+    request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+    bool res = processor->ImplicitStartAbility(request, userId,
+        AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED, "", false);
+    EXPECT_TRUE(res);
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_007 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: TrustlistIntersectionProcess
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor TrustlistIntersectionProcess
+ * EnvConditions: NA
+ * CaseDescription: scheme 为 file; 有trustlist; 交集为1; 不修改dialogAppInfos
+ */
+HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_001 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+
+    int32_t userId = 0;
+    AbilityRequest request;
+    std::string mockUriString = "file://com.example.test/test.txt";
+    std::vector<std::string> mockTrustlist = {
+        "com.example.hmos.advisor",
+        "demo1",
+    };
+    request.want.SetUri(mockUriString);
+    request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+
+    std::vector<DialogAppInfo> dialogAppInfos;
+    DialogAppInfo dialogAppInfo1;
+    dialogAppInfo1.bundleName = "demo1";
+    dialogAppInfos.emplace_back(dialogAppInfo1);
+    DialogAppInfo dialogAppInfo2;
+    dialogAppInfo2.bundleName = "demo2";
+    dialogAppInfos.emplace_back(dialogAppInfo2);
+
+    int32_t infosOldSize = dialogAppInfos.size();
+    TAG_LOGI(AAFwkTag::TEST, "infosOldSize: %{public}d", infosOldSize);
+
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
+
+    EXPECT_TRUE(infosOldSize);
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_001 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: TrustlistIntersectionProcess
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor TrustlistIntersectionProcess
+ * EnvConditions: NA
+ * CaseDescription: trustlist 非法输入; 交集为1; 不修改dialogAppInfos
+ */
+HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_002 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+
+    int32_t userId = 0;
+    AbilityRequest request;
+    std::string mockTrustlist = "demo1";
+    request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+
+    std::vector<DialogAppInfo> dialogAppInfos;
+    DialogAppInfo dialogAppInfo1;
+    dialogAppInfo1.bundleName = "demo1";
+    dialogAppInfos.emplace_back(dialogAppInfo1);
+    DialogAppInfo dialogAppInfo2;
+    dialogAppInfo2.bundleName = "demo2";
+    dialogAppInfos.emplace_back(dialogAppInfo2);
+
+    int32_t infosOldSize = dialogAppInfos.size();
+    TAG_LOGI(AAFwkTag::TEST, "infosOldSize: %{public}d", infosOldSize);
+
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
+
+    EXPECT_TRUE(infosOldSize);
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_002 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: TrustlistIntersectionProcess
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor TrustlistIntersectionProcess
+ * EnvConditions: NA
+ * CaseDescription: trustlist 输入为51; 修剪后交集为1; 修改dialogAppInfos
+ */
+HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_003 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+
+    int32_t userId = 0;
+    AbilityRequest request;
+    std::vector<std::string> mockTrustlist = {
+        "aaa", "bbb", "ccc", "ddd", "eee",
+        "anfa", "bfb", "cnc", "ddm", "mje",
+        "asra", "btr", "chtc", "djy", "essse",
+        "bfgb", "gbgbb", "nbbbh", "ttrtry", "eergrge",
+        "aaqwea", "bqwebb", "ccretc", "ddfghd", "enghee",
+        "aretgaa", "fgdbbb", "ccdfgc", "ddgegrd", "ebggggee",
+        "allaa", "bllbb", "ccllc", "llddd", "ellee",
+        "aapa", "bbpb", "cppcc", "ddpd", "epee",
+        "aawsxca", "bbvvvb", "cbvcc", "dbvdd", "ebvee",
+        "areaa", "bbreb", "crecc",
+        "demo1",
+        "rere",
+        "demo2",
+    };
+    request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+
+    std::vector<DialogAppInfo> dialogAppInfos;
+    DialogAppInfo dialogAppInfo1;
+    dialogAppInfo1.bundleName = "demo1";
+    dialogAppInfos.emplace_back(dialogAppInfo1);
+    DialogAppInfo dialogAppInfo2;
+    dialogAppInfo2.bundleName = "demo2";
+    dialogAppInfos.emplace_back(dialogAppInfo2);
+
+    int32_t trustlistOldSize = request.want.GetStringArrayParam(APP_LAUNCH_TRUSTLIST).size();
+    int32_t infosOldSize = dialogAppInfos.size();
+    TAG_LOGI(AAFwkTag::TEST,
+        "trustlistOldSize: %{public}d, infosOldSize: %{public}d", trustlistOldSize, infosOldSize);
+
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
+
+    int32_t trustlistNewSize = request.want.GetStringArrayParam(APP_LAUNCH_TRUSTLIST).size();
+    int32_t infosNewSize = dialogAppInfos.size();
+    TAG_LOGI(AAFwkTag::TEST,
+        "trustlistNewSize: %{public}d, infosNewSize: %{public}d", trustlistNewSize, infosNewSize);
+
+    EXPECT_TRUE(trustlistNewSize == trustlistOldSize);
+    EXPECT_TRUE(infosOldSize);
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_003 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: TrustlistIntersectionProcess
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor TrustlistIntersectionProcess
+ * EnvConditions: NA
+ * CaseDescription: trustlist 输入正常; 交集为0; 修改dialogAppInfos
+ */
+HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_004 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+
+    int32_t userId = 0;
+    AbilityRequest request;
+    std::vector<std::string> mockTrustlist = {
+        "abc",
+        "cba",
+    };
+    request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+
+    std::vector<DialogAppInfo> dialogAppInfos;
+    DialogAppInfo dialogAppInfo1;
+    dialogAppInfo1.bundleName = "demo1";
+    dialogAppInfos.emplace_back(dialogAppInfo1);
+    DialogAppInfo dialogAppInfo2;
+    dialogAppInfo2.bundleName = "demo2";
+    dialogAppInfos.emplace_back(dialogAppInfo2);
+
+    int32_t infosOldSize = dialogAppInfos.size();
+    TAG_LOGI(AAFwkTag::TEST,
+        "infosOldSize: %{public}d", infosOldSize);
+
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
+
+    int32_t infosNewSize = dialogAppInfos.size();
+    TAG_LOGI(AAFwkTag::TEST,
+        "infosNewSize: %{public}d", infosNewSize);
+
+    EXPECT_TRUE(infosOldSize);
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_004 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: TrustlistIntersectionProcess
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor TrustlistIntersectionProcess
+ * EnvConditions: NA
+ * CaseDescription: trustlist 输入正常; 交集为1; 修改dialogAppInfos
+ */
+HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_005 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+
+    int32_t userId = 0;
+    AbilityRequest request;
+    std::vector<std::string> mockTrustlist = {
+        "demo1",
+        "cba",
+    };
+    request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+
+    std::vector<DialogAppInfo> dialogAppInfos;
+    DialogAppInfo dialogAppInfo1;
+    dialogAppInfo1.bundleName = "demo1";
+    dialogAppInfos.emplace_back(dialogAppInfo1);
+    DialogAppInfo dialogAppInfo2;
+    dialogAppInfo2.bundleName = "demo2";
+    dialogAppInfos.emplace_back(dialogAppInfo2);
+
+    int32_t infosOldSize = dialogAppInfos.size();
+    TAG_LOGI(AAFwkTag::TEST,
+        "infosOldSize: %{public}d", infosOldSize);
+
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
+
+    int32_t infosNewSize = dialogAppInfos.size();
+    TAG_LOGI(AAFwkTag::TEST,
+        "infosNewSize: %{public}d", infosNewSize);
+
+    EXPECT_TRUE(infosOldSize);
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_005 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: TrustlistIntersectionProcess
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor TrustlistIntersectionProcess
+ * EnvConditions: NA
+ * CaseDescription: trustlist 输入正常; 交集为2; 不修改dialogAppInfos
+ */
+HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_006 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+
+    int32_t userId = 0;
+    AbilityRequest request;
+    std::vector<std::string> mockTrustlist = {
+        "demo1",
+        "demo2",
+        "sdada"
+    };
+    request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
+
+    std::vector<DialogAppInfo> dialogAppInfos;
+    DialogAppInfo dialogAppInfo1;
+    dialogAppInfo1.bundleName = "demo1";
+    dialogAppInfos.emplace_back(dialogAppInfo1);
+    DialogAppInfo dialogAppInfo2;
+    dialogAppInfo2.bundleName = "demo2";
+    dialogAppInfos.emplace_back(dialogAppInfo2);
+
+    int32_t infosOldSize = dialogAppInfos.size();
+    TAG_LOGI(AAFwkTag::TEST,
+        "infosOldSize: %{public}d", infosOldSize);
+
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
+
+    int32_t infosNewSize = dialogAppInfos.size();
+    TAG_LOGI(AAFwkTag::TEST,
+        "infosNewSize: %{public}d", infosNewSize);
+
+    EXPECT_TRUE(infosOldSize);
+    TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_006 end");
 }
 
 /*

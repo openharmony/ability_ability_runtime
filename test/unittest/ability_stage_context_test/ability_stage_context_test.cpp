@@ -253,6 +253,44 @@ HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_CreateDisplayContext_0
     EXPECT_EQ(displayContext, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "end");
 }
+
+/**
+ * @tc.name: AbilityStageContextTest_InitPluginHapModuleInfo_0100
+ * @tc.desc: Ability stage InitPluginHapModuleInfo test.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_InitPluginHapModuleInfo_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    auto abilityStageContext = std::make_shared<AbilityStageContext>();
+    ASSERT_NE(abilityStageContext, nullptr);
+    auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    abilityStageContext->SetIsPlugin(true);
+    abilityStageContext->InitPluginHapModuleInfo(abilityInfo, "hostBundleName");
+    auto gotHapModuleInfo = abilityStageContext->GetHapModuleInfo();
+    EXPECT_NE(gotHapModuleInfo, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: AbilityStageContextTest_CreatePluginContext_0100
+ * @tc.desc: Ability stage CreatePluginContext test.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_CreatePluginContext_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    auto abilityStageContext = std::make_shared<AbilityStageContext>();
+    ASSERT_NE(abilityStageContext, nullptr);
+
+    std::string hostBundleName = "";
+    std::string pluginBundleName = "";
+    auto pluginContext = abilityStageContext->CreatePluginContext(hostBundleName, pluginBundleName, nullptr);
+    EXPECT_EQ(pluginContext, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
 #endif
 } // namespace AbilityRuntime
 } // namespace OHOS

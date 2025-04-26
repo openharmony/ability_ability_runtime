@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("ability_stage_context_test") {
-  module_out_path = "ability_runtime/context"
+  module_out_path = "ability_runtime/ability_runtime/context"
 
   cflags_cc = []
 

@@ -35,15 +35,15 @@ void AppDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
         TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
-    auto serviceInner = appMgrServiceInner_.lock();
-    if (!serviceInner) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null serviceInner");
-        return;
-    }
 
-    auto onRemoteDiedFunc = [serviceInner, remote,
+    auto onRemoteDiedFunc = [appMgrServiceInner = appMgrServiceInner_, remote,
         isRenderProcess = isRenderProcess_,
         isChildProcess = isChildProcess_]() {
+        auto serviceInner = appMgrServiceInner.lock();
+        if (!serviceInner) {
+            TAG_LOGE(AAFwkTag::APPMGR, "null serviceInner");
+            return;
+        }
         serviceInner->OnRemoteDied(remote, isRenderProcess, isChildProcess);
         TAG_LOGW(AAFwkTag::APPMGR, "OnRemoteDiedTask end");
     };
