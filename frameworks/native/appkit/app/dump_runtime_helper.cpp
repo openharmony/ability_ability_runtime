@@ -131,7 +131,7 @@ bool DumpRuntimeHelper::Check2CQuota()
     int appQuota = static_cast<int>(quota2C[INDEX_APP_QUOTA]);
     int leftQuota = MIN(compressQuota, appQuota) - static_cast<int>(quota2C[INDEX_HAS_SENT]);
     if (leftQuota <= 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "invalid quota, compress: %{public}d, app: %{public}d, sent: %{public}lu",
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid quota, compress: %{public}d, app: %{public}d, sent: %{public}ld",
             compressQuota, appQuota, quota2C[INDEX_HAS_SENT]);
         return false;
     }
