@@ -41,5 +41,93 @@ napi_value CreateJsExecuteResult(napi_env env, const AppExecFwk::InsightIntentEx
     napi_set_named_property(env, objValue, "flags", CreateJsValue(env, result.flags));
     return objValue;
 }
+
+napi_value CreateLinkInfoForBack(napi_env env, const LinkInfoForBack &info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    napi_set_named_property(env, objValue, "uri", CreateJsValue(env, info.uri));
+    return objValue;
+}
+
+napi_value CreatePageInfoForBack(napi_env env, const PageInfoForBack &info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    napi_set_named_property(env, objValue, "uiAbility", CreateJsValue(env, info.uiAbility));
+    napi_set_named_property(env, objValue, "pageRouterName", CreateJsValue(env, info.pageRouterName));
+    napi_set_named_property(env, objValue, "navigationId", CreateJsValue(env, info.navigationId));
+    napi_set_named_property(env, objValue, "navDestination", CreateJsValue(env, info.navDestination));
+    return objValue;
+}
+
+napi_value CreateEntryInfoForBack(napi_env env, const EntryInfoForBack &info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
+    napi_set_named_property(env, objValue, "executeMode", CreateNativeArray(env, info.executeMode));
+    return objValue;
+}
+
+napi_value CreateFunctionInfoForBack(napi_env env, const FunctionInfoForBack &info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    return objValue;
+}
+
+napi_value CreateFormInfoForBack(napi_env env, const FormInfoForBack &info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    return objValue;
+}
+
+napi_value CreateInsightIntentInfoForBack(napi_env env, const InsightIntentInfoForBack &info)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, info.bundleName));
+    napi_set_named_property(env, objValue, "moduleName", CreateJsValue(env, info.moduleName));
+    napi_set_named_property(env, objValue, "intentName", CreateJsValue(env, info.intentName));
+    napi_set_named_property(env, objValue, "domain", CreateJsValue(env, info.domain));
+    napi_set_named_property(env, objValue, "intentVersion", CreateJsValue(env, info.intentVersion));
+    napi_set_named_property(env, objValue, "displayName", CreateJsValue(env, info.displayName));
+    napi_set_named_property(env, objValue, "displayDescription", CreateJsValue(env, info.displayDescription));
+    napi_set_named_property(env, objValue, "schema", CreateJsValue(env, info.schema));
+    napi_set_named_property(env, objValue, "icon", CreateJsValue(env, info.icon));
+    napi_set_named_property(env, objValue, "llmDescription", CreateJsValue(env, info.llmDescription));
+    napi_set_named_property(env, objValue, "intentType", CreateJsValue(env, info.intentType));
+    napi_set_named_property(env, objValue, "parameters", CreateJsValue(env, info.parameters));
+    napi_set_named_property(env, objValue, "keywords", CreateNativeArray(env, info.keywords));
+    if (info.intentType == INSIGHT_INTENTS_TYPE_LINK) {
+        napi_set_named_property(env, objValue, "subIntentInfo", CreateLinkInfoForBack(env, info.linkInfo));
+    } else if (info.intentType == INSIGHT_INTENTS_TYPE_PAGE) {
+        napi_set_named_property(env, objValue, "subIntentInfo", CreatePageInfoForBack(env, info.pageInfo));
+    } else if (info.intentType == INSIGHT_INTENTS_TYPE_ENTRY) {
+        napi_set_named_property(env, objValue, "subIntentInfo", CreateEntryInfoForBack(env, info.entryInfo));
+    } else if (info.intentType == INSIGHT_INTENTS_TYPE_FUNCTION) {
+        napi_set_named_property(env, objValue, "subIntentInfo", CreateFunctionInfoForBack(env, info.functionInfo));
+    } else if (info.intentType == INSIGHT_INTENTS_TYPE_FORM) {
+        napi_set_named_property(env, objValue, "subIntentInfo", CreateFormInfoForBack(env, info.formInfo));
+    } else {
+        napi_value objVal = nullptr;
+        napi_create_object(env, &objValue);
+        napi_set_named_property(env, objValue, "subIntentInfo", objVal);
+    }
+    return objValue;
+}
+
+napi_value CreateInsightIntentInfoForBackArray(napi_env env, const std::vector<InsightIntentInfoForBack> &infos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    uint32_t index = 0;
+    for (const auto &info : infos) {
+        napi_set_element(env, arrayValue, index++, CreateInsightIntentInfoForBack(env, info));
+    }
+    return arrayValue;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
