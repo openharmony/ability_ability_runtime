@@ -267,7 +267,7 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv, std::vector<ani_option>& opt
     }
     std::string bootfiles;
     if (!LoadBootPathFile(bootfiles)) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME,"LoadBootPathFile failed");
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "LoadBootPathFile failed");
         return false;
     }
 
@@ -373,7 +373,8 @@ void STSEnvironment::RemoveTask(const std::string& name)
     }
 }
 
-bool STSEnvironment::InitLoop(bool isStage){
+bool STSEnvironment::InitLoop(bool isStage)
+{
     LOGI("InitLoop");
     if (impl_ != nullptr) {
         return impl_->InitLoop(isStage);

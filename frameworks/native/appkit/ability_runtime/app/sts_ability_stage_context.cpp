@@ -95,7 +95,7 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
     auto configuration = context->GetConfiguration();
     if (configuration != nullptr) {
         ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, *configuration);
-        if(configObj != nullptr) {
+        if (configObj != nullptr) {
             TAG_LOGE(AAFwkTag::ABILITY, "configObj bind");
             ani_ref configObjRef = nullptr;
             if (env->GlobalReference_Create(configObj, &configObjRef) != ANI_OK) {
