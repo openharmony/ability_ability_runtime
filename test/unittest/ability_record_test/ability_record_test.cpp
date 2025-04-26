@@ -3067,8 +3067,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_NotifyAbilityRequestSuccess_001, TestS
     EXPECT_NE(abilityRecord_->lifecycleDeal_, nullptr);
     std::string requestId = "1234567890";
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
-    std::string message = "success";
-    abilityRecord_->NotifyAbilityRequestSuccess(requestId, element, message);
+    abilityRecord_->NotifyAbilityRequestSuccess(requestId, element);
 }
 
 /*
@@ -3087,8 +3086,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_NotifyAbilityRequestSuccess_002, TestS
     EXPECT_EQ(abilityRecord_->lifecycleDeal_, nullptr);
     std::string requestId = "1234567890";
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
-    std::string message = "success";
-    abilityRecord_->NotifyAbilityRequestSuccess(requestId, element, message);
+    abilityRecord_->NotifyAbilityRequestSuccess(requestId, element);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

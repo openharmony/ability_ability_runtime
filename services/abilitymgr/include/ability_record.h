@@ -1179,8 +1179,7 @@ public:
     void NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message);
 
-    void NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message);
+    void NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element);
 
     void ScheduleCollaborate(const Want &want);
 

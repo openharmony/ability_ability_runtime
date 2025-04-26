@@ -309,8 +309,6 @@ HWTEST_F(AbilitySchedulerStubTest, ScheduleAbilityRequestSuccessInner_001, TestS
     data.WriteString(requestId);
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     data.WriteParcelable(&element);
-    std::string message = "success";
-    data.WriteString(message);
     auto res = stub_->OnRemoteRequest(IAbilityScheduler::SCHEDULE_ABILITY_REQUEST_SUCCESS, data, reply, option);
     EXPECT_EQ(res, NO_ERROR);
 }

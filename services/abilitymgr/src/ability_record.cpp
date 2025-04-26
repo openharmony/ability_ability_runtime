@@ -3845,14 +3845,10 @@ void AbilityRecord::NotifyAbilityRequestFailure(const std::string &requestId, co
     lifecycleDeal_->NotifyAbilityRequestFailure(requestId, element, jsonObject.dump());
 }
 
-void AbilityRecord::NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+void AbilityRecord::NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)
 {
     CHECK_POINTER(lifecycleDeal_);
-    nlohmann::json jsonObject = nlohmann::json {
-        { JSON_KEY_ERR_MSG, message },
-    };
-    lifecycleDeal_->NotifyAbilityRequestSuccess(requestId, element, jsonObject.dump());
+    lifecycleDeal_->NotifyAbilityRequestSuccess(requestId, element);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
