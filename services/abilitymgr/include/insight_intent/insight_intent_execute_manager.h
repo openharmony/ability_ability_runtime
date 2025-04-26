@@ -98,6 +98,8 @@ public:
     void SetIntentExemptionInfo(int32_t uid);
 
     bool CheckIntentIsExemption(int32_t uid);
+
+    int32_t CheckPermissionForCaller();
 private:
     mutable ffrt::mutex mutex_;
     mutable ffrt::mutex intentExemptionLock_;
