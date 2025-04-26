@@ -144,13 +144,13 @@ bool DumpRuntimeHelper::Check2CQuota()
     }
     uint64_t deliveryTs = static_cast<uint64_t>(quota2C[INDEX_DELIVERY_TS]);
     if (now < deliveryTs || now - deliveryTs > OOM_DUMP_INTERVAL) {
-        TAG_LOGE(AAFwkTag::APPKIT, "invalid deliveryTs: %{public}lu", deliveryTs);
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid deliveryTs: %{public}" PRIu64, deliveryTs);
         return false;
     }
 
     uint64_t spaceQuota = static_cast<uint64_t>(quota2C[INDEX_ROM_RSV_SIZE]) * KB_PER_MB;
     if (!CheckOOMFreeSpace(spaceQuota)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "rom free space is less than spaceQuota: %{public}lu", spaceQuota);
+        TAG_LOGE(AAFwkTag::APPKIT, "rom free space is less than spaceQuota: %{public}" PRIu64, spaceQuota);
         return false;
     }
 
@@ -337,11 +337,11 @@ bool DumpRuntimeHelper::Init2DOOMDumpQuota(const std::string &path, uint32_t oom
 {
     uint64_t currentTime = GetCurrentTimestamp();
     if (!Set2DQuota(path, currentTime, oomDumpProcessMaxQuota)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Set2DQuota failed, current: %{public}ld, quota: %{public}d",
+        TAG_LOGE(AAFwkTag::APPKIT, "Set2DQuota failed, current: %{public}" PRIu64 ", quota: %{public}d",
             currentTime, oomDumpProcessMaxQuota);
         return false;
     }
-    TAG_LOGI(AAFwkTag::APPKIT, "Init dumpTime: %{public}lu, quota: %{public}d.",
+    TAG_LOGI(AAFwkTag::APPKIT, "Init dumpTime: %{public}" PRIu64 ", quota: %{public}d.",
         currentTime, oomDumpProcessMaxQuota);
     return true;
 }
@@ -392,7 +392,7 @@ bool DumpRuntimeHelper::Check2DOOMDumpQuota(uint32_t oomDumpMaxQuota, uint32_t o
             return false;
         }
     }
-    TAG_LOGI(AAFwkTag::APPKIT, "Last oom time=%{public}lu, currentTime=%{public}lu, quota=%{public}d",
+    TAG_LOGI(AAFwkTag::APPKIT, "Last oom time=%{public}" PRIu64 ", currentTime=%{public}" PRIu64 ", quota=%{public}d",
         g_lastOOMDumpTime, currentTime, g_oomDumpProcessQuota);
     return true;
 }
@@ -480,7 +480,7 @@ bool DumpRuntimeHelper::CheckOOMFreeSpace(uint64_t maxSpace)
     }
 
     unsigned long freeSize = st.f_bsize * st.f_bfree;
-    TAG_LOGI(AAFwkTag::APPKIT, "FreeSize=%{public}lu", freeSize);
+    TAG_LOGI(AAFwkTag::APPKIT, "FreeSize=%{public}" PRIu64, freeSize);
     if (freeSize <= maxSpace) {
         return false;
     }
