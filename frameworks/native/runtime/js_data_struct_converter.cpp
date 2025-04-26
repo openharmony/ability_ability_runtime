@@ -114,6 +114,10 @@ napi_value CreateJsConfiguration(napi_env env, const AppExecFwk::Configuration& 
 
     napi_set_named_property(env, object, "language", CreateJsValue(env,
         configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE)));
+
+    napi_set_named_property(env, object, "locale", CreateJsLocale(env,
+        configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE)));
+
     napi_set_named_property(env, object, "colorMode", CreateJsValue(env,
         ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE))));
 
@@ -172,6 +176,47 @@ napi_value CreateJsHapModuleInfo(napi_env env, const AppExecFwk::HapModuleInfo& 
     }
     AppExecFwk::CommonFunc::ConvertHapModuleInfo(env, hapModuleInfo, object);
     return object;
+}
+
+napi_value CreateJsLocale(napi_env env, const std::string &locale)
+{
+    napi_value global = nullptr;
+    napi_status status = napi_get_global(env, &global);
+    if (status != napi_ok || global == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Load global failed");
+        return nullptr;
+    }
+
+    napi_value intl = nullptr;
+    status = napi_get_named_property(env, global, "Intl", &intl);
+    if (status != napi_ok || intl == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Load Intl failed");
+        return nullptr;
+    }
+
+    napi_value localeConstructor = nullptr;
+    status = napi_get_named_property(env, intl, "Locale", &localeConstructor);
+    if (status != napi_ok || localeConstructor == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Load Intl.Locale constructor failed");
+        return nullptr;
+    }
+
+    napi_value localeJS = nullptr;
+    status = napi_create_string_utf8(env, locale.c_str(), NAPI_AUTO_LENGTH, &localeJS);
+    if (status != napi_ok || localeJS == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create string failed");
+        return nullptr;
+    }
+
+    size_t argc = 1;
+    napi_value argv[1] = { localeJS };
+    napi_value intlLocale = nullptr;
+    status = napi_new_instance(env, localeConstructor, argc, argv, &intlLocale);
+    if (status != napi_ok || intlLocale == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create Intl.Locale instance failed");
+        return nullptr;
+    }
+    return intlLocale;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

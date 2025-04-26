@@ -411,26 +411,29 @@ void UIAbility::InitConfigurationProperties(const AppExecFwk::Configuration &cha
             std::atoi(setting_->GetProperty(AppExecFwk::AbilityStartSetting::WINDOW_DISPLAY_ID_KEY).c_str());
         resourceConfig.SetLanguage(changeConfiguration.GetItem(displayId,
             AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
+        resourceConfig.SetLocale(changeConfiguration.GetItem(displayId,
+            AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE));
         resourceConfig.SetColormode(changeConfiguration.GetItem(displayId,
             AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE));
         resourceConfig.SetHasPointerDevice(changeConfiguration.GetItem(displayId,
             AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE));
-        TAG_LOGD(AAFwkTag::UIABILITY, "displayId: [%{public}d], language: [%{public}s], colormode: [%{public}s], "
-            "hasPointerDevice: [%{public}s] mcc: [%{public}s], mnc: [%{public}s]", displayId,
-            resourceConfig.GetLanguage().c_str(), resourceConfig.GetColormode().c_str(),
-            resourceConfig.GetHasPointerDevice().c_str(), resourceConfig.GetMcc().c_str(),
-            resourceConfig.GetMnc().c_str());
+        TAG_LOGD(AAFwkTag::UIABILITY, "displayId: [%{public}d], language: [%{public}s], locale: [%{public}s], "
+            "colormode: [%{public}s], hasPointerDevice: [%{public}s] mcc: [%{public}s], mnc: [%{public}s]", displayId,
+            resourceConfig.GetLanguage().c_str(), resourceConfig.GetLocale().c_str(),
+            resourceConfig.GetColormode().c_str(), resourceConfig.GetHasPointerDevice().c_str(),
+            resourceConfig.GetMcc().c_str(), resourceConfig.GetMnc().c_str());
     } else {
         resourceConfig.SetLanguage(changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
+        resourceConfig.SetLocale(changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE));
         resourceConfig.SetColormode(changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE));
         resourceConfig.SetHasPointerDevice(changeConfiguration.GetItem(
             AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE));
         TAG_LOGD(AAFwkTag::UIABILITY,
-            "language: [%{public}s], colormode: [%{public}s], hasPointerDevice: [%{public}s] "
+            "language: [%{public}s], locale: [%{public}s], colormode: [%{public}s], hasPointerDevice: [%{public}s], "
             "mcc: [%{public}s], mnc: [%{public}s]",
-            resourceConfig.GetLanguage().c_str(), resourceConfig.GetColormode().c_str(),
-            resourceConfig.GetHasPointerDevice().c_str(), resourceConfig.GetMcc().c_str(),
-            resourceConfig.GetMnc().c_str());
+            resourceConfig.GetLanguage().c_str(), resourceConfig.GetLocale().c_str(),
+            resourceConfig.GetColormode().c_str(), resourceConfig.GetHasPointerDevice().c_str(),
+            resourceConfig.GetMcc().c_str(), resourceConfig.GetMnc().c_str());
     }
 }
 
