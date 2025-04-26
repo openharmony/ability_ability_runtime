@@ -32,6 +32,7 @@ ohos_unittest("ability_record_second_test") {
   ]
 
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/lifecycle_deal.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/uri_utils.cpp",
     "ability_record_second_test.cpp",
     "mock/src/mock_scene_board_judgement.cpp",
