@@ -25,11 +25,11 @@ namespace OHOS {
 namespace AbilityRuntime {
 using ExecuteMode = AppExecFwk::ExecuteMode;
 
-constexpr const char *INSIGHT_INTENTS_DECORATOR_TYPE_LINK = "@InsightIntentLink";
-constexpr const char *INSIGHT_INTENTS_DECORATOR_TYPE_PAGE = "@InsightIntentPage";
-constexpr const char *INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY = "@InsightIntentEntry";
-constexpr const char *INSIGHT_INTENTS_DECORATOR_TYPE_FUNCTION = "@InsightIntentFunction";
-constexpr const char *INSIGHT_INTENTS_DECORATOR_TYPE_FORM = "@InsightIntentForm";
+const std::string INSIGHT_INTENTS_DECORATOR_TYPE_LINK = "@InsightIntentLink";
+const std::string INSIGHT_INTENTS_DECORATOR_TYPE_PAGE = "@InsightIntentPage";
+const std::string INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY = "@InsightIntentEntry";
+const std::string INSIGHT_INTENTS_DECORATOR_TYPE_FUNCTION = "@InsightIntentFunction";
+const std::string INSIGHT_INTENTS_DECORATOR_TYPE_FORM = "@InsightIntentForm";
 
 struct InsightIntentParam {
     std::string paramName;
