@@ -56,6 +56,7 @@ public:
     static std::shared_ptr<AbilityContext> GetAbilityContext(ani_env *env, ani_object aniObj);
     static void StartServiceExtensionAbilitySync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         [[maybe_unused]] ani_object wantObj, [[maybe_unused]] ani_object callbackobj);
+    static ani_object StartAbilityByCall(ani_env *env, ani_object aniObj, ani_object wantObj);
 
 private:
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);

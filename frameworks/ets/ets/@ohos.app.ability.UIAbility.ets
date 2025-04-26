@@ -16,7 +16,19 @@
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import UIAbilityContext from 'application.UIAbilityContext';
 import Want from '@ohos.app.ability.Want';
+import rpc from '@ohos.rpc';
 import window from '@ohos.window';
+
+export type OnReleaseCallback = (msg: string) => void;
+export type CalleeCallback = (indata: rpc.MessageSequence) => rpc.Parcelable;
+export interface Caller {
+  call(method: string, data: rpc.Parcelable): Promise<void>;
+  onRelease(callback: OnReleaseCallback): void;
+  release(): void;
+}
+export interface Callee {
+  on(method: string, callback: CalleeCallback): void;
+}
 
 export default class UIAbility {
   private isOnDestroyAsync: boolean = true;
@@ -37,6 +49,7 @@ export default class UIAbility {
   context: UIAbilityContext = new UIAbilityContext();
   launchWant: Want = new Want();
   lastRequestWant: Want = new Want();
+  callee: Callee | null = null;
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {}
   onWindowStageCreate(windowStage: window.WindowStage): void {}

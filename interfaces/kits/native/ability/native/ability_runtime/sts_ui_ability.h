@@ -325,7 +325,6 @@ private:
     std::shared_ptr<STSNativeReference> shellContextRef_;
     std::shared_ptr<STSNativeReference> stsAbilityObj_;
     std::shared_ptr<int32_t> screenModePtr_;
-    sptr<IRemoteObject> remoteCallee_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
