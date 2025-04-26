@@ -243,7 +243,7 @@ HWTEST_F(AmsIpcAppMgrInterfaceTest, UnregisterApplicationStateObserver_001, Test
  * @tc.desc: Register kia interceptor test.
  * @tc.type: FUNC
  */
-HWTEST_F(AmsIpcAppMgrInterfaceTest, RegisterKiaInterceptor_001, TestSize.Level0)
+HWTEST_F(AmsIpcAppMgrInterfaceTest, RegisterKiaInterceptor_001, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_001 start");
 
@@ -264,7 +264,7 @@ HWTEST_F(AmsIpcAppMgrInterfaceTest, RegisterKiaInterceptor_001, TestSize.Level0)
  * @tc.desc: Register kia interceptor test.
  * @tc.type: FUNC
  */
-HWTEST_F(AmsIpcAppMgrInterfaceTest, RegisterKiaInterceptor_002, TestSize.Level0)
+HWTEST_F(AmsIpcAppMgrInterfaceTest, RegisterKiaInterceptor_002, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_002 start");
 
@@ -285,7 +285,7 @@ HWTEST_F(AmsIpcAppMgrInterfaceTest, RegisterKiaInterceptor_002, TestSize.Level0)
  * @tc.desc: Check if a process is kia protected.
  * @tc.type: FUNC
  */
-HWTEST_F(AmsIpcAppMgrInterfaceTest, CheckIsKiaProcess_001, TestSize.Level0)
+HWTEST_F(AmsIpcAppMgrInterfaceTest, CheckIsKiaProcess_001, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_001 start");
 
@@ -307,7 +307,7 @@ HWTEST_F(AmsIpcAppMgrInterfaceTest, CheckIsKiaProcess_001, TestSize.Level0)
  * @tc.desc: Check if a process is kia protected.
  * @tc.type: FUNC
  */
-HWTEST_F(AmsIpcAppMgrInterfaceTest, CheckIsKiaProcess_002, TestSize.Level0)
+HWTEST_F(AmsIpcAppMgrInterfaceTest, CheckIsKiaProcess_002, TestSize.Level2)
 {
     TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_002 start");
 

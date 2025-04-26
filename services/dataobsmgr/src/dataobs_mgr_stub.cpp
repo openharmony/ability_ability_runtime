@@ -15,6 +15,7 @@
 
 #include "dataobs_mgr_stub.h"
 
+#include "dataobs_mgr_interface.h"
 #include "string_ex.h"
 
 #include "data_ability_observer_proxy.h"
@@ -75,7 +76,9 @@ int DataObsManagerStub::RegisterObserverInner(MessageParcel &data, MessageParcel
 
     auto remote = data.ReadRemoteObject();
     auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
-    int32_t result = RegisterObserver(uri, observer);
+    int32_t userId = data.ReadInt32();
+    DataObsOption opt = DataObsOption(data.ReadBool());
+    int32_t result = RegisterObserver(uri, observer, userId, opt);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -90,7 +93,9 @@ int DataObsManagerStub::UnregisterObserverInner(MessageParcel &data, MessageParc
 
     auto remote = data.ReadRemoteObject();
     auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
-    int32_t result = UnregisterObserver(uri, observer);
+    int32_t userId = data.ReadInt32();
+    DataObsOption opt = DataObsOption(data.ReadBool());
+    int32_t result = UnregisterObserver(uri, observer, userId, opt);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -102,8 +107,9 @@ int DataObsManagerStub::NotifyChangeInner(MessageParcel &data, MessageParcel &re
         TAG_LOGE(AAFwkTag::DBOBSMGR, "invalid uri");
         return IPC_STUB_INVALID_DATA_ERR;
     }
-
-    int32_t result = NotifyChange(uri);
+    int32_t userId = data.ReadInt32();
+    DataObsOption opt = DataObsOption(data.ReadBool());
+    int32_t result = NotifyChange(uri, userId, opt);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -118,7 +124,8 @@ int32_t DataObsManagerStub::RegisterObserverExtInner(MessageParcel &data, Messag
     auto remote = data.ReadRemoteObject();
     auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
     bool isDescendants = data.ReadBool();
-    reply.WriteInt32(RegisterObserverExt(uri, observer, isDescendants));
+    DataObsOption opt = DataObsOption(data.ReadBool());
+    reply.WriteInt32(RegisterObserverExt(uri, observer, isDescendants, opt));
     return SUCCESS;
 }
 
@@ -131,8 +138,8 @@ int32_t DataObsManagerStub::UnregisterObserverExtInner(MessageParcel &data, Mess
     }
     auto remote = data.ReadRemoteObject();
     auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
-
-    reply.WriteInt32(UnregisterObserverExt(uri, observer));
+    DataObsOption opt = DataObsOption(data.ReadBool());
+    reply.WriteInt32(UnregisterObserverExt(uri, observer, opt));
     return SUCCESS;
 }
 
@@ -140,7 +147,8 @@ int32_t DataObsManagerStub::UnregisterObserverExtALLInner(MessageParcel &data, M
 {
     auto remote = data.ReadRemoteObject();
     auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
-    reply.WriteInt32(UnregisterObserverExt(observer));
+    DataObsOption opt = DataObsOption(data.ReadBool());
+    reply.WriteInt32(UnregisterObserverExt(observer, opt));
     return SUCCESS;
 }
 
@@ -151,8 +159,8 @@ int32_t DataObsManagerStub::NotifyChangeExtInner(MessageParcel &data, MessagePar
         LOG_ERROR("Failed to unmarshall changeInfo.");
         return IPC_STUB_INVALID_DATA_ERR;
     }
-
-    reply.WriteInt32(NotifyChangeExt(changeInfo));
+    DataObsOption opt = DataObsOption(data.ReadBool());
+    reply.WriteInt32(NotifyChangeExt(changeInfo, opt));
     return SUCCESS;
 }
 
@@ -160,7 +168,8 @@ int32_t DataObsManagerStub::NotifyProcessObserverInner(MessageParcel &data, Mess
 {
     std::string key = data.ReadString();
     auto observer = data.ReadRemoteObject();
-    reply.WriteInt32(NotifyProcessObserver(key, observer));
+    DataObsOption opt = DataObsOption(data.ReadBool());
+    reply.WriteInt32(NotifyProcessObserver(key, observer, opt));
     return SUCCESS;
 }
 }  // namespace AAFwk

@@ -42,13 +42,12 @@ public:
     bool AddInstance(int32_t tid, int32_t instanceId, const std::string& instanceName = "PandaDebugger");
     void RemoveInstance(int32_t instanceId);
     void SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr);
-    void SendStateProfilerMessage(const std::string &message);
+    void SendMessage(const std::string &message);
     bool StoreInstanceMessage(
         int32_t tid, int32_t instanceId, const std::string& instanceName = "PandaDebugger");
     void StoreDebuggerInfo(int32_t tid, void* vm, const panda::JSNApi::DebugOption& debugOption,
         const DebuggerPostTask& debuggerPostTask, bool isDebugApp);
-    void SetSwitchCallback(const std::function<void(bool)> &setSwitchStatus,
-        const std::function<void(int32_t)> &createLayoutInfo, int32_t instanceId);
+    void SetSwitchCallback(const std::function<void(int32_t)> &createLayoutInfo, int32_t instanceId);
     void SetProfilerCallBack(const std::function<void(bool)> &setStateProfilerStatus);
     void SetConnectedCallback();
     bool SendInstanceMessage(int32_t tid, int32_t instanceId, const std::string& instanceName);

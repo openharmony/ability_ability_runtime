@@ -58,6 +58,7 @@ using Closure = std::function<void()>;
 class AbilityRecord;
 class ConnectionRecord;
 class CallContainer;
+struct EventInfo;
 
 constexpr const char* ABILITY_TOKEN_NAME = "AbilityToken";
 constexpr const char* LAUNCHER_BUNDLE_NAME = "com.ohos.launcher";
@@ -583,6 +584,16 @@ public:
     inline void SetStartingWindow(bool isStartingWindow)
     {
         isStartingWindow_ = isStartingWindow;
+    }
+
+    inline void SetKillReason(const std::string &reason)
+    {
+        killReason_ = reason;
+    }
+
+    inline std::string GetKillReason()
+    {
+        return killReason_;
     }
 
     void PostCancelStartingWindowHotTask();
@@ -1116,6 +1127,9 @@ public:
     void SetRestartAppFlag(bool isRestartApp);
     bool GetRestartAppFlag() const;
 
+    void SetKillForPermissionUpdateFlag(bool isKillForPermissionUpdate);
+    bool GetKillForPermissionUpdateFlag() const;
+
     void UpdateUIExtensionInfo(const WantParams &wantParams);
 
     void SetSpecifyTokenId(const uint32_t specifyTokenId);
@@ -1157,10 +1171,53 @@ public:
         return securityFlag_;
     }
 
+    bool IsPluginAbility() const
+    {
+        return isPluginAbility_;
+    }
+
+    void NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
+
+    void NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
+
     void ScheduleCollaborate(const Want &want);
 
+    bool IsHook () const
+    {
+        return isHook_;
+    }
+
+    inline void SetIsHook(bool isHook)
+    {
+        isHook_ = isHook;
+    }
+
+    bool GetHookOff () const
+    {
+        return hookOff_;
+    }
+
+    inline void SetHookOff(bool hookOff)
+    {
+        hookOff_ = hookOff;
+    }
+
+    inline void SetLaunchWant(std::shared_ptr<Want> launchWant)
+    {
+        launchWant_ = launchWant;
+    }
+
+    inline std::shared_ptr<Want> GetLaunchWant() const
+    {
+        return launchWant_;
+    }
+
+    void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false,
+        const std::string &taskName = "");
+
 protected:
-    void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false);
 
     sptr<Token> token_ = {};                               // used to interact with kit and wms
     std::unique_ptr<LifecycleDeal> lifecycleDeal_ = {};    // life manager used to schedule life
@@ -1212,6 +1269,8 @@ private:
     void SetDebugAppByWaitingDebugFlag();
     void AfterLoaded();
 
+    void CancelPrepareTerminate();
+
 #ifdef SUPPORT_SCREEN
     std::shared_ptr<Want> GetWantFromMission() const;
     void SetShowWhenLocked(const AppExecFwk::AbilityInfo &abilityInfo, sptr<AbilityTransitionInfo> &info) const;
@@ -1254,7 +1313,7 @@ private:
     void SetAbilityStateInner(AbilityState state);
 #endif
 
-    static int64_t abilityRecordId;
+    static std::atomic<int64_t> abilityRecordId;
     bool isReady_ = false;                            // is ability thread attached?
     bool isWindowStarted_ = false;                     // is window hotstart or coldstart?
     bool isWindowAttached_ = false;                   // Is window of this ability attached?
@@ -1287,6 +1346,9 @@ private:
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isLaunching_ = true;
     bool securityFlag_ = false;
+    bool isHook_ = false;
+    bool hookOff_ = false;
+    bool isPluginAbility_ = false;
     std::atomic_bool isCallerSetProcess_ = false;       // new version
     std::atomic_bool backgroundAbilityWindowDelayed_ = false;
 
@@ -1330,6 +1392,7 @@ private:
 
     // page(ability) can be started by multi-pages(abilities), so need to store this ability's caller
     std::list<std::shared_ptr<CallerRecord>> callerList_ = {};
+    mutable ffrt::mutex callerListLock_;
 
     PacMap stateDatas_;             // ability saved ability state data
     WindowConfig windowConfig_;
@@ -1376,11 +1439,16 @@ private:
     ffrt::mutex connectWantLock_;
     std::mutex collaborateWantLock_;
 
+    bool isKillForPermissionUpdate_ = false;
+
     std::mutex isPrepareTerminateAbilityMutex_;
     std::condition_variable isPrepareTerminateAbilityCv_;
     std::atomic_bool isPrepareTerminateAbilityCalled_ = false;
     std::atomic_bool isPrepareTerminateAbilityDone_ = false;
     bool isPrepareTerminate_ = false;
+
+    std::string killReason_ = "";
+    std::shared_ptr<Want> launchWant_ = nullptr;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

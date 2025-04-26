@@ -15,12 +15,19 @@
 
 #include <gtest/gtest.h>
 
-#include "js_environment.h"
+#include "fp_unwinder.h"
 #include "js_runtime.h"
+#include "securec.h"
+#include "string_printf.h"
 #include "uncaught_exception_callback.h"
 
 namespace OHOS {
 namespace JsEnv {
+static const std::string LIB_UNWIND_SO_NAME = "libunwind.so";
+static const std::string LIB_UNWIND_Z_SO_NAME = "libunwind.z.so";
+static const int MAX_STACK_SIZE = 16;
+static const int LOG_BUF_LEN = 1024;
+using UnwBackTraceFunc = int (*)(void**, int);
 using namespace testing::ext;
 class NapiUncaughtExceptionCallbackTest : public testing::Test {
 public:
@@ -237,6 +244,91 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, NapiUncaughtExceptionCallbackTest_04
 
     NapiUncaughtExceptionCallback callback(task, nullptr, env);
     callback(object);
+}
+ 
+#if defined(__aarch64__)
+static inline ARK_INLINE void GetPcFpRegs([[maybe_unused]] void *regs)
+{
+    asm volatile(
+    "1:\n"
+    "adr x12, 1b\n"
+    "stp x12, x29, [%[base], #0]\n"
+    : [base] "+r"(regs)
+    :
+    : "x12", "memory");
+}
+#endif
+
+bool GetPcs(size_t &size, uintptr_t* pcs)
+{
+#if defined(__aarch64__)
+    uintptr_t regs[2] = {0}; // 2: pc and fp reg
+    GetPcFpRegs(regs);
+    uintptr_t pc = regs[0];
+    uintptr_t fp = regs[1];
+    size = OHOS::HiviewDFX::FpUnwinder::GetPtr()->Unwind(pc, fp, pcs, MAX_STACK_SIZE);
+    if (size <= 1) {
+        size = OHOS::HiviewDFX::FpUnwinder::GetPtr()->UnwindSafe(pc, fp, pcs, MAX_STACK_SIZE);
+    }
+#else
+    static UnwBackTraceFunc unwBackTrace = nullptr;
+    if (!unwBackTrace) {
+        void *handle = dlopen(LIB_UNWIND_SO_NAME.c_str(), RTLD_NOW);
+        if (handle == nullptr) {
+            handle = dlopen(LIB_UNWIND_Z_SO_NAME.c_str(), RTLD_NOW);
+            if (handle == nullptr) {
+                return false;
+            }
+        }
+        unwBackTrace = reinterpret_cast<UnwBackTraceFunc>(dlsym(handle, "unw_backtrace"));
+        if (unwBackTrace == nullptr) {
+            return false;
+        }
+    }
+    size = unwBackTrace(reinterpret_cast<void**>(pcs), MAX_STACK_SIZE);
+#endif
+    return true;
+}
+
+void Backtrace(std::ostringstream &stack)
+{
+    uintptr_t pcs[MAX_STACK_SIZE] = {0};
+    size_t unwSz = 0;
+    if (!GetPcs(unwSz, pcs)) {
+        return;
+    }
+    stack << "=====================Backtrace========================";
+#if defined(__aarch64__)
+    size_t i = 0;
+#else
+    size_t i = 1;
+#endif
+    for (; i < unwSz; i++) {
+        Dl_info info;
+        if (!dladdr(reinterpret_cast<void *>(pcs[i]), &info)) {
+            break;
+        }
+        const char *file = info.dli_fname ? info.dli_fname : "";
+        uint64_t offset = info.dli_fbase ? pcs[i] - panda::ecmascript::ToUintPtr(info.dli_fbase) : 0;
+        char buf[LOG_BUF_LEN] = {0};
+        char frameFormatWithMapName[] = "#%02zu pc %016" PRIx64 " %s";
+        if (snprintf_s(buf, sizeof(buf), sizeof(buf) - 1, frameFormatWithMapName, i, offset, file) < 0) {
+            GTEST_LOG_(INFO) << "Backtrace snprintf_s failed";
+            return;
+        }
+        stack << std::endl;
+        stack << buf;
+    }
+}
+
+HWTEST_F(NapiUncaughtExceptionCallbackTest, GetFuncNameAndBuildIdTest_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetFuncNameAndBuildIdTest_0100 start";
+    std::ostringstream stack;
+    Backtrace(stack);
+    std::string stackinfo = NapiUncaughtExceptionCallback::GetFuncNameAndBuildId(stack.str());
+    ASSERT_EQ(stackinfo.find("GetFuncNameAndBuildIdTest") != std::string::npos, true);
+    GTEST_LOG_(INFO) << "GetFuncNameAndBuildIdTest_0100 end" << stackinfo.c_str();
 }
 } // namespace AppExecFwk
 } // namespace OHOS

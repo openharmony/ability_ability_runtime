@@ -291,7 +291,7 @@ public:
 
     void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag) override;
 
-    void OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want) override;
+    void OnStartSpecifiedAbilityTimeoutResponse() override;
     /**
      * resolve the call ipc of ability for scheduling oncall.
      *

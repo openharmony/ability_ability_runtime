@@ -37,8 +37,6 @@ const std::string WRONG_BUNDLE_NAME = "wrong";
 const std::string MIME_TYPE = "html";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string PURPOSE_NAME = "pay";
-const int32_t ERR_COD1 = 8519924;
-const int32_t ERR_COD2 = 8388613;
 }  // namespace
 
 class ServiceRouterMgrInterfaceTest : public testing::Test {
@@ -76,7 +74,7 @@ void ServiceRouterMgrInterfaceTest::TearDown()
  * @tc.desc: 1. system running normally
  *           2. test serviceType is invalid
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0001, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0001, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -96,7 +94,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0001, Func
  * @tc.desc: 1. system running normally
  *           2. test serviceType is valid
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0002, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0002, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -115,7 +113,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0002, Func
  * @tc.name: test BusinessAbilityFilter
  * @tc.desc: BusinessAbilityFilter
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0003, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0003, Function | SmallTest | Level1)
 {
     BusinessAbilityFilter filter;
     filter.mimeType = MIME_TYPE;
@@ -135,7 +133,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0003, Func
  * @tc.desc: 1. system running normally
  *           2. test purposeName empty
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0004, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0004, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -154,7 +152,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0004, Func
  * @tc.desc: 1. system running normally
  *           2. test purposeName is valid
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0005, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0005, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -173,7 +171,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0005, Func
  * @tc.desc: 1. system running normally
  *           2. test bundleName not found
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0006, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0006, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -192,7 +190,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0006, Func
  * @tc.name: test AppInfo
  * @tc.desc: AppInfo
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0007, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0007, Function | SmallTest | Level1)
 {
     AppInfo info;
     info.bundleName = BUNDLE_NAME;
@@ -211,7 +209,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0007, Func
  * @tc.name: test BusinessAbilityInfo
  * @tc.desc: BusinessAbilityInfo
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0008, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0008, Function | SmallTest | Level1)
 {
     BusinessAbilityInfo info;
     info.bundleName = BUNDLE_NAME;
@@ -228,7 +226,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0008, Func
  * @tc.name: test PurposeInfo
  * @tc.desc: PurposeInfo
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0009, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0009, Function | SmallTest | Level1)
 {
     PurposeInfo info;
     info.bundleName = BUNDLE_NAME;
@@ -245,7 +243,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0009, Func
  * @tc.name: test BusinessAbilityFilter
  * @tc.desc: BusinessAbilityFilter
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0010, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0010, Function | SmallTest | Level1)
 {
     BusinessAbilityFilter filter;
     filter.mimeType = MIME_TYPE;
@@ -260,7 +258,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0010, Func
  * @tc.name: test BusinessAbilityFilter
  * @tc.desc: BusinessAbilityFilter
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0011, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0011, Function | SmallTest | Level1)
 {
     BusinessAbilityFilter filter;
     filter.mimeType = MIME_TYPE;
@@ -275,7 +273,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0011, Func
  * @tc.name: test AppInfo
  * @tc.desc: AppInfo
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0012, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0012, Function | SmallTest | Level1)
 {
     AppInfo info;
     info.bundleName = BUNDLE_NAME;
@@ -290,7 +288,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0012, Func
  * @tc.name: test AppInfo
  * @tc.desc: AppInfo
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0013, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0013, Function | SmallTest | Level1)
 {
     AppInfo info;
     info.bundleName = BUNDLE_NAME;
@@ -305,7 +303,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0013, Func
  * @tc.name: test PurposeInfo
  * @tc.desc: PurposeInfo
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0014, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0014, Function | SmallTest | Level1)
 {
     PurposeInfo info;
     info.bundleName = BUNDLE_NAME;
@@ -320,7 +318,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0014, Func
  * @tc.name: test PurposeInfo
  * @tc.desc: PurposeInfo
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0015, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0015, Function | SmallTest | Level1)
 {
     PurposeInfo info;
     info.bundleName = BUNDLE_NAME;
@@ -335,7 +333,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0015, Func
  * @tc.name: test PurposeInfo
  * @tc.desc: PurposeInfo
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0016, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0016, Function | SmallTest | Level1)
 {
     PurposeInfo info;
     info.bundleName = BUNDLE_NAME;
@@ -351,7 +349,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0016, Func
  * @tc.name: test BusinessAbilityInfo
  * @tc.desc: BusinessAbilityInfo
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0017, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0017, Function | SmallTest | Level1)
 {
     BusinessAbilityInfo info;
     info.bundleName = BUNDLE_NAME;
@@ -366,7 +364,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0017, Func
  * @tc.name: test BusinessAbilityInfo
  * @tc.desc: BusinessAbilityInfo
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0018, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0018, Function | SmallTest | Level1)
 {
     BusinessAbilityInfo info;
     info.bundleName = BUNDLE_NAME;
@@ -381,7 +379,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0018, Func
  * @tc.name: test BusinessAbilityInfo
  * @tc.desc: BusinessAbilityInfo
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0019, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0019, Function | SmallTest | Level1)
 {
     BusinessAbilityInfo info;
     info.businessType = BusinessType::SHARE;
@@ -396,7 +394,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0019, Func
  * @tc.name: test LoadAllBundleInfos
  * @tc.desc: test LoadAllBundleInfos function
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0020, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0020, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -411,7 +409,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0020, Func
  * @tc.name: test LoadBundleInfo
  * @tc.desc: test LoadBundleInfo function
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0021, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0021, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -427,7 +425,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0021, Func
  * @tc.name: test UpdateBundleInfoLocked
  * @tc.desc: test UpdateBundleInfoLocked function
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0022, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0022, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -442,7 +440,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0022, Func
  * @tc.name: test DeleteBundleInfo
  * @tc.desc: test DeleteBundleInfo function
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0023, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0023, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -457,7 +455,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0023, Func
  * @tc.name: test GetBusinessType
  * @tc.desc: test GetBusinessType function 1
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0024, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0024, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -474,7 +472,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0024, Func
  * @tc.name: test GetBusinessType
  * @tc.desc: test GetBusinessType function 2
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0025, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0025, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -492,7 +490,7 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0025, Func
  * @tc.name: test ClearAllBundleInfos
  * @tc.desc: test ClearAllBundleInfos function
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0026, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0026, Function | SmallTest | Level1)
 {
     auto serviceRouterMgr = std::make_shared<ServiceRouterDataMgr>();
     EXPECT_NE(serviceRouterMgr, nullptr);
@@ -507,15 +505,16 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, ServiceRouterMgrInterfaceTest_0026, Func
  * @tc.require: I9KS48
  * @tc.desc: QueryBusinessAbilityInfos
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0001, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0001, Function | SmallTest | Level1)
 {
     auto serviceRouterMgrProxy = std::make_shared<ServiceRouterMgrProxy>(nullptr);
     EXPECT_NE(serviceRouterMgrProxy, nullptr);
     BusinessAbilityFilter filter;
+    int32_t funcResult = -1;
     filter.businessType = BusinessType::UNSPECIFIED;
     std::vector<BusinessAbilityInfo> abilityInfos;
-    auto ret = serviceRouterMgrProxy->QueryBusinessAbilityInfos(filter, abilityInfos);
-    EXPECT_EQ(ret, ERR_COD1);
+    auto ret = serviceRouterMgrProxy->QueryBusinessAbilityInfos(filter, abilityInfos, funcResult);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 
 /**
@@ -524,14 +523,15 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0001, Function | S
  * @tc.require: I9KS48
  * @tc.desc: QueryPurposeInfos
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0002, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0002, Function | SmallTest | Level1)
 {
     auto serviceRouterMgrProxy = std::make_shared<ServiceRouterMgrProxy>(nullptr);
     EXPECT_NE(serviceRouterMgrProxy, nullptr);
     Want want;
+    int32_t funcResult = -1;
     std::vector<PurposeInfo> purposeInfos;
-    auto ret = serviceRouterMgrProxy->QueryPurposeInfos(want, "", purposeInfos);
-    EXPECT_EQ(ret, ERR_COD1);
+    auto ret = serviceRouterMgrProxy->QueryPurposeInfos(want, "", purposeInfos, funcResult);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 
 /**
@@ -540,14 +540,15 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0002, Function | S
  * @tc.require: I9KS48
  * @tc.desc: StartUIExtensionAbility
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0003, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0003, Function | SmallTest | Level1)
 {
     auto serviceRouterMgrProxy = std::make_shared<ServiceRouterMgrProxy>(nullptr);
     EXPECT_NE(serviceRouterMgrProxy, nullptr);
-    sptr<SessionInfo> sessionInfo = nullptr;
+    SessionInfo sessionInfo;
     int32_t userId = 1;
-    auto ret = serviceRouterMgrProxy->StartUIExtensionAbility(sessionInfo, userId);
-    EXPECT_EQ(ret, ERR_COD1);
+    int32_t funcResult = -1;
+    auto ret = serviceRouterMgrProxy->StartUIExtensionAbility(sessionInfo, userId, funcResult);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 
 /**
@@ -556,15 +557,16 @@ HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0003, Function | S
  * @tc.require: I9KS48
  * @tc.desc: ConnectUIExtensionAbility
  */
-HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0004, Function | SmallTest | Level0)
+HWTEST_F(ServiceRouterMgrInterfaceTest, serviceRouterMgrProxy_0004, Function | SmallTest | Level1)
 {
     auto serviceRouterMgrProxy = std::make_shared<ServiceRouterMgrProxy>(nullptr);
     EXPECT_NE(serviceRouterMgrProxy, nullptr);
     Want want;
     sptr<IAbilityConnection> connect = nullptr;
-    sptr<SessionInfo> sessionInfo = nullptr;
+    SessionInfo sessionInfo;
     int32_t userId = 1;
-    auto ret = serviceRouterMgrProxy->ConnectUIExtensionAbility(want, connect, sessionInfo, userId);
-    EXPECT_EQ(ret, ERR_COD2);
+    int32_t funcResult = -1;
+    auto ret = serviceRouterMgrProxy->ConnectUIExtensionAbility(want, connect, sessionInfo, userId, funcResult);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 } // OHOS

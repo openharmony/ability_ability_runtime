@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/mstabilitymgrservice"
+module_output_path = "ability_runtime/ability_runtime/mstabilitymgrservice"
 
 ohos_moduletest("running_infos_module_test") {
   module_out_path = module_output_path
@@ -29,6 +29,7 @@ ohos_moduletest("running_infos_module_test") {
   sources = [ "running_infos_module_test.cpp" ]
   sources += [
     "${ability_runtime_services_path}/abilitymgr/src/ability_bundle_event_callback.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ability_cache_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_service.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/app_exit_reason_data_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/assert_fault_callback_death_mgr.cpp",
@@ -61,6 +62,7 @@ ohos_moduletest("running_infos_module_test") {
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/abilitymgr:mission_list",

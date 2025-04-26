@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/error_utils"
+module_output_path = "ability_runtime/ability_runtime/error_utils"
 
 ohos_unittest("ability_runtime_error_utils_test") {
   module_out_path = module_output_path

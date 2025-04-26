@@ -229,9 +229,18 @@ void CJEnvironment::InitSpawnEnv()
 void CJEnvironment::PreloadLibs()
 {
     LOGI("start Preloadlibs");
-    LoadCJLibrary(SDK, "libohos.ability.so");
-    LoadCJLibrary(SDK, "libohos.component.so");
-    LoadCJLibrary(SDK, "libohos.window.so");
+    auto lib = LoadCJLibrary(SDK, "libohos.ability.so");
+    if (lib) {
+        preloadLibs_.emplace_back(lib);
+    }
+    lib = LoadCJLibrary(SDK, "libohos.component.so");
+    if (lib) {
+        preloadLibs_.emplace_back(lib);
+    }
+    lib = LoadCJLibrary(SDK, "libohos.window.so");
+    if (lib) {
+        preloadLibs_.emplace_back(lib);
+    }
 }
 
 void CJEnvironment::SetAppPath(const std::string& appPath)
@@ -266,11 +275,54 @@ CJEnvironment::~CJEnvironment()
     StopRuntime();
 
     delete lazyApis_;
+
+    for (auto lib : preloadLibs_) {
+        dlclose(lib);
+    }
 }
 
 CJEnvironment* CJEnvironment::GetInstance()
 {
     return instance_;
+}
+
+bool CJEnvironment::RegisterCangjieCallback()
+{
+    constexpr char CANGJIE_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
+    auto handlerConnectServerSo = LoadCJLibrary(CJEnvironment::SYSTEM, CANGJIE_DEBUGGER_LIB_PATH);
+    if (handlerConnectServerSo == nullptr) {
+        LOGE("null handlerConnectServerSo: %{public}s", dlerror());
+        return false;
+    }
+    using SendMsgCB = const std::function<void(const std::string& message)>;
+    using SetCangjieCallback = void(*)(const std::function<void(const std::string& message, SendMsgCB)>);
+    using CangjieCallback = void(*)(const std::string& message, SendMsgCB);
+    auto setCangjieCallback = reinterpret_cast<SetCangjieCallback>(
+        DynamicFindSymbol(handlerConnectServerSo, "SetCangjieCallback"));
+    if (setCangjieCallback == nullptr) {
+        LOGE("null setCangjieCallback: %{public}s", dlerror());
+        return false;
+    }
+    #define RTLIB_NAME "libcangjie-runtime.so"
+    auto dso = LoadCJLibrary(CJEnvironment::SDK, RTLIB_NAME);
+    if (!dso) {
+        LOGE("load library failed: %{public}s", RTLIB_NAME);
+        return false;
+    }
+    LOGE("load libcangjie-runtime.so success");
+    #define PROFILERAGENT "ProfilerAgent"
+    CangjieCallback cangjieCallback = reinterpret_cast<CangjieCallback>(DynamicFindSymbol(dso, PROFILERAGENT));
+    if (cangjieCallback == nullptr) {
+        dlclose(handlerConnectServerSo);
+        handlerConnectServerSo = nullptr;
+        LOGE("runtime api not found: %{public}s", PROFILERAGENT);
+        return false;
+    }
+    LOGE("find runtime api success");
+    setCangjieCallback(cangjieCallback);
+    dlclose(handlerConnectServerSo);
+    handlerConnectServerSo = nullptr;
+    return true;
 }
 
 bool CJEnvironment::LoadRuntimeApis()
@@ -298,6 +350,7 @@ bool CJEnvironment::LoadRuntimeApis()
         return false;
     }
 #undef RTLIB_NAME
+    preloadLibs_.emplace_back(dso);
     if (!LoadSymbolInitCJRuntime(dso, *lazyApis_) ||
         !LoadSymbolInitUIScheduler(dso, *lazyApis_) ||
         !LoadSymbolRunUIScheduler(dso, *lazyApis_) ||
@@ -307,11 +360,13 @@ bool CJEnvironment::LoadRuntimeApis()
         !LoadSymbolRegisterStackInfoCallbacks(dso, *lazyApis_) ||
         !LoadSymbolRegisterArkVM(dso, *lazyApis_)) {
         LOGE("load symbol failed");
+        DynamicFreeLibrary(dso);
         return false;
     }
 #ifdef __OHOS__
     if (!LoadSymbolRegisterCJUncaughtExceptionHandler(dso, *lazyApis_)) {
         LOGE("load symbol RegisterCJUncaughtExceptionHandler failed");
+        DynamicFreeLibrary(dso);
         return false;
     }
 #endif
@@ -570,7 +625,7 @@ void* CJEnvironment::LoadCJLibrary(const char* dlName)
         UnLoadCJLibrary(handle);
         return nullptr;
     }
-
+    CJEnvironment::RegisterCangjieCallback();
     isLoadCJLibrary_ = true;
     return handle;
 }
@@ -710,12 +765,6 @@ CJEnvMethods* CJEnvironment::CreateEnvMethods()
         .startDebugger = []() {
             return CJEnvironment::GetInstance()->StartDebugger();
         },
-        .registerArkVMInRuntime = [](unsigned long long arkVM) {
-            CJEnvironment::GetInstance()->RegisterArkVMInRuntime(arkVM);
-        },
-        .registerStackInfoCallbacks = [](UpdateStackInfoFuncType uFunc) {
-            CJEnvironment::GetInstance()->RegisterStackInfoCallbacks(uFunc);
-        },
         .registerCJUncaughtExceptionHandler = [](const CJUncaughtExceptionInfo& handle) {
             return CJEnvironment::GetInstance()->RegisterCJUncaughtExceptionHandler(handle);
         },
@@ -724,6 +773,12 @@ CJEnvMethods* CJEnvironment::CreateEnvMethods()
         },
         .checkLoadCJLibrary = []() {
             return CJEnvironment::GetInstance()->CheckLoadCJLibrary();
+        },
+        .registerArkVMInRuntime = [](unsigned long long arkVM) {
+            CJEnvironment::GetInstance()->RegisterArkVMInRuntime(arkVM);
+        },
+        .registerStackInfoCallbacks = [](UpdateStackInfoFuncType uFunc) {
+            CJEnvironment::GetInstance()->RegisterStackInfoCallbacks(uFunc);
         }
     };
     return &gCJEnvMethods;

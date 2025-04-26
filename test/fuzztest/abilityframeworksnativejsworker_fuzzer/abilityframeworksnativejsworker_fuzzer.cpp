@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +18,15 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "extractor.h"
+#include "file_mapper.h"
 #define private public
 #include "js_worker.h"
 #undef private
 
 #include "ability_record.h"
 #include "securec.h"
+#include "worker_info.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -73,13 +76,15 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string jsonStr(data, size);
     uint8_t *buff = nullptr;
     size_t buffSize;
-    helper.GetSafeData(jsonStr, &buff, &buffSize);
+    std::unique_ptr<AbilityBase::FileMapper> fileMapper = std::make_unique<AbilityBase::FileMapper>();
+    void* mapper = static_cast<void*>(fileMapper.get());
+    helper.GetSafeData(jsonStr, &buff, &buffSize, &mapper);
     helper.NormalizedFileName(jsonStr);
     bool useSecureMem = *data % ENABLE;
     bool isRestricted = *data % ENABLE;
     std::vector<uint8_t> content;
-    helper.ReadAmiData(jsonStr, &buff, &buffSize, content, useSecureMem, isRestricted);
-    helper.ReadFilePathData(jsonStr, &buff, &buffSize, content, useSecureMem, isRestricted);
+    helper.ReadAmiData(jsonStr, &buff, &buffSize, content, useSecureMem, isRestricted, &mapper);
+    helper.ReadFilePathData(jsonStr, &buff, &buffSize, content, useSecureMem, isRestricted, &mapper);
     helper.GetAmi(jsonStr, jsonStr);
     AbilityRuntime::GetContainerId();
     bool isDebugApp = *data % ENABLE;

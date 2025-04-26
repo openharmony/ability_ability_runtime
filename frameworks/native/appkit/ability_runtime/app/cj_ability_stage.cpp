@@ -21,8 +21,9 @@
 #include "ability_delegator_registry.h"
 #include "js_ability_stage_context.h"
 
-using namespace OHOS::AbilityRuntime;
-
+namespace OHOS {
+namespace AbilityRuntime {
+namespace {
 char* CreateCStringFromString(const std::string& source)
 {
     if (source.size() == 0) {
@@ -41,14 +42,15 @@ char* CreateCStringFromString(const std::string& source)
     }
     return res;
 }
+}
 
 extern "C" {
-CJ_EXPORT RetHapModuleInfo FFICJGetHapModuleInfo(int64_t id)
+CJ_EXPORT RetHapModuleInfoV2 FFICJGetHapModuleInfo(int64_t id)
 {
     auto abilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
     if (abilityStageContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "get abilityStageContext failed");
-        return RetHapModuleInfo();
+        return RetHapModuleInfoV2();
     }
 
     return abilityStageContext->GetRetHapModuleInfo();
@@ -308,4 +310,6 @@ std::shared_ptr<OHOS::AppExecFwk::CJDelegatorAbilityStageProperty> CJAbilityStag
     property->srcEntrance_ = hapModuleInfo->srcEntrance;
     property->cjStageObject_ = cjAbilityStageObject_->GetId();
     return property;
+}
+}
 }

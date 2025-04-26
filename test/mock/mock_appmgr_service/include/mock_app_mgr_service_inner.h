@@ -38,7 +38,7 @@ public:
     MOCK_METHOD1(ApplicationTerminated, void(const int32_t recordId));
     MOCK_METHOD2(UpdateAbilityState, void(const sptr<IRemoteObject>& token, const AbilityState state));
     MOCK_METHOD2(TerminateAbility, void(const sptr<IRemoteObject>& token, bool clearMissionFlag));
-    MOCK_METHOD3(UpdateApplicationInfoInstalled, int(const std::string&, const int uid, const std::string&));
+    MOCK_METHOD4(UpdateApplicationInfoInstalled, int(const std::string&, const int uid, const std::string&, bool));
     MOCK_METHOD3(KillApplication, int32_t(const std::string& bundleName, const bool clearPageStack, int32_t appIndex));
     MOCK_METHOD3(KillApplicationByUid, int(const std::string&, const int uid, const std::string&));
     MOCK_METHOD1(AbilityTerminated, void(const sptr<IRemoteObject>& token));
@@ -82,6 +82,9 @@ public:
     MOCK_METHOD2(DumpFfrt, int(const std::vector<int32_t>& pid, std::string& result));
     MOCK_METHOD1(RegisterKiaInterceptor, int32_t(const sptr<IKiaInterceptor> &interceptor));
     MOCK_METHOD2(CheckIsKiaProcess, int32_t(pid_t pid, bool &isKia));
+    MOCK_METHOD1(NotifyProcMemoryLevel, int32_t(const std::map<pid_t, MemoryLevel> &procLevelMap));
+    MOCK_METHOD2(DumpHeapMemory, int32_t(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo));
+    MOCK_METHOD1(GetProcessRunningInformation, int32_t(RunningProcessInfo &info));
 
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)
     {}

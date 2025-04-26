@@ -35,7 +35,7 @@ ohos_shared_library("ark_interop_helper_ffi") {
     debug = false
   }
 
-  deps = []
+  deps = [ "${ability_runtime_napi_path}/inner/napi_common:napi_common" ]
 
   if (build_ohos_sdk) {
     defines += [ "PREVIEW" ]

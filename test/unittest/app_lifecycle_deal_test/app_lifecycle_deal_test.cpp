@@ -82,7 +82,7 @@ HWTEST_F(AppLifecycleDealTest, AttachAppDebug_001, TestSize.Level1)
 {
     auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
     EXPECT_NE(appLifeCycle, nullptr);
-    auto result = appLifeCycle->AttachAppDebug();
+    auto result = appLifeCycle->AttachAppDebug(false);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 
@@ -97,7 +97,7 @@ HWTEST_F(AppLifecycleDealTest, AttachAppDebug_002, TestSize.Level1)
     EXPECT_NE(appLifeCycle, nullptr);
     sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
     appLifeCycle->SetApplicationClient(mockAppScheduler);
-    auto result = appLifeCycle->AttachAppDebug();
+    auto result = appLifeCycle->AttachAppDebug(false);
     EXPECT_EQ(ERR_OK, result);
 }
 

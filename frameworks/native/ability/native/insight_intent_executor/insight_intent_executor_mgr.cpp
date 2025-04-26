@@ -35,6 +35,9 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
     auto executeParam = executeInfo.executeParam;
+    if (callback == nullptr) {
+        return false;
+    }
     if (executeParam == nullptr || executeParam->insightIntentParam_ == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "null executeParam or insightIntentParam_");
         TriggerCallbackInner(std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
@@ -103,7 +106,9 @@ void InsightIntentExecutorMgr::TriggerCallbackInner(
     TAG_LOGD(AAFwkTag::INTENT, "called");
     AppExecFwk::InsightIntentExecuteResult result;
     result.innerErr = errCode;
-    callback->Call(result);
+    if (callback) {
+        callback->Call(result);
+    }
     callback.reset();
 }
 } // namespace AbilityRuntime

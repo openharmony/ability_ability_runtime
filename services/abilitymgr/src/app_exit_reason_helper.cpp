@@ -15,8 +15,10 @@
 
 #include "app_exit_reason_helper.h"
 
+#include "ability_record_death_manager.h"
 #include "accesstoken_kit.h"
 #include "app_exit_reason_data_manager.h"
+#include "app_mgr_util.h"
 #include "bundle_mgr_helper.h"
 #include "os_account_manager_wrapper.h"
 #include "scene_board_judgement.h"
@@ -24,7 +26,27 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
-    constexpr int32_t U0_USER_ID = 0;
+constexpr int32_t U0_USER_ID = 0;
+void AppendAbilities(const std::list<std::shared_ptr<AbilityRecord>> &abilityRecords,
+    std::vector<std::string> &abilities)
+{
+    for (const auto &abilityRecord : abilityRecords) {
+        if (abilityRecord == nullptr) {
+            continue;
+        }
+
+        const auto &abilityInfo = abilityRecord->GetAbilityInfo();
+        if (!abilityInfo.name.empty()) {
+            std::string abilityName = abilityInfo.name;
+            if (abilityInfo.launchMode == AppExecFwk::LaunchMode::STANDARD &&
+                abilityRecord->GetSessionInfo() != nullptr) {
+                abilityName += std::to_string(abilityRecord->GetSessionInfo()->persistentId);
+            }
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "find ability name is %{public}s.", abilityName.c_str());
+            abilities.emplace_back(std::move(abilityName));
+        }
+    }
+}
 }
 
 AppExitReasonHelper::AppExitReasonHelper(std::shared_ptr<SubManagersHelper> subManagersHelper)
@@ -109,7 +131,7 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const Ex
     }
 
     return RecordProcessExitReason(pid, bundleName, application.uid, application.accessTokenId, exitReason,
-        processInfo, fromKillWithReason);
+        processInfo, fromKillWithReason, false);
 }
 
 int32_t AppExitReasonHelper::RecordAppExitReason(const std::string &bundleName, int32_t uid, int32_t appIndex,
@@ -126,12 +148,34 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const std::string &bundleName, 
         "userId: %{public}d, bundleName: %{public}s, appIndex: %{public}d", userId, bundleName.c_str(), appIndex);
     uint32_t accessTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, appIndex);
     AppExecFwk::RunningProcessInfo processInfo;
-    return RecordProcessExitReason(NO_PID, bundleName, uid, accessTokenId, exitReason, processInfo, false);
+    return RecordProcessExitReason(NO_PID, bundleName, uid, accessTokenId, exitReason, processInfo, false, false);
+}
+
+int32_t AppExitReasonHelper::RecordProcessExitReason(int32_t pid, int32_t uid, const ExitReason &exitReason)
+{
+    auto appMgr = AppMgrUtil::GetAppMgr();
+    if (appMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr null");
+        return ERR_NULL_APP_MGR_PROXY;
+    }
+    AppExecFwk::KilledProcessInfo appInfo;
+    auto ret = IN_PROCESS_CALL(appMgr->GetKilledProcessInfo(pid, uid, appInfo));
+    if (ret != ERR_OK) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "GetKilledProcessInfo failed");
+        return ret;
+    }
+
+    AppExecFwk::RunningProcessInfo processInfo;
+    processInfo.pid_ = pid;
+    processInfo.uid_ = uid;
+    processInfo.processName_ = appInfo.processName;
+    return RecordProcessExitReason(pid, appInfo.bundleName, uid, appInfo.accessTokenId, exitReason,
+        processInfo, false, true);
 }
 
 int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const std::string bundleName,
     const int32_t uid, const uint32_t accessTokenId, const ExitReason &exitReason,
-    const AppExecFwk::RunningProcessInfo &processInfo, bool fromKillWithReason)
+    const AppExecFwk::RunningProcessInfo &processInfo, bool fromKillWithReason, bool searchDead)
 {
     if (!IsExitReasonValid(exitReason)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reason invalid");
@@ -149,6 +193,9 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const st
     std::vector<std::string> abilityLists;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         GetActiveAbilityListFromUIAbilityManager(uid, abilityLists, pid);
+        if (searchDead) {
+            AppendAbilities(AbilityRecordDeathManager::GetInstance().QueryDeadAbilityRecord(pid, uid), abilityLists);
+        }
     } else  {
         GetActiveAbilityList(uid, abilityLists, pid);
     }
@@ -293,6 +340,37 @@ int32_t AppExitReasonHelper::GetActiveAbilityListWithPid(int32_t uid, std::vecto
         auto missionListManager = subManagersHelper_->GetMissionListManagerByUid(uid);
         CHECK_POINTER_AND_RETURN(missionListManager, ERR_NULL_OBJECT);
         missionListManager->GetActiveAbilityList(uid, abilityList, pid);
+    }
+    return ERR_OK;
+}
+
+int32_t AppExitReasonHelper::RecordUIAbilityExitReason(const pid_t pid, const std::string &abilityName,
+    const ExitReason &exitReason)
+{
+    AppExecFwk::ApplicationInfo application;
+    bool debug = false;
+    auto ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->GetApplicationInfoByProcessID(pid,
+        application, debug));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getApplicationInfoByProcessID failed");
+        return ret;
+    }
+    auto bundleName = application.bundleName;
+    AppExecFwk::RunningProcessInfo processInfo;
+    if (pid > 0) {
+        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(pid, processInfo);
+    }
+    std::vector<std::string> abilityLists = {};
+    DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+        GetRecordAppAbilityNames(application.accessTokenId, abilityLists);
+    bool isAbilityListsEmpty = abilityLists.empty();
+    abilityLists.emplace_back(abilityName);
+    if (isAbilityListsEmpty) {
+        return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(bundleName,
+            application.accessTokenId, abilityLists, exitReason, processInfo, false);
+    } else {
+        DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+            UpdateAppExitReason(application.accessTokenId, abilityLists, exitReason, processInfo, false);
     }
     return ERR_OK;
 }

@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/dfr_test"
+module_output_path = "ability_runtime/freeze_checker"
 
 ###############################################################################
 config("module_context_config") {
@@ -63,7 +63,10 @@ ohos_unittest("watchdog_test") {
     "watchdog_test.cpp",
   ]
 
-  deps = [ "${ability_runtime_native_path}/appkit:appkit_native" ]
+  deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/appkit:appkit_native",
+  ]
 
   external_deps = [
     "ability_base:base",

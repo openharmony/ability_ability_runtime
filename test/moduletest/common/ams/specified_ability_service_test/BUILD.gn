@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/mstabilitymgrservice"
+module_output_path = "ability_runtime/ability_runtime/mstabilitymgrservice"
 
 ohos_moduletest("specified_ability_service_test") {
   module_out_path = module_output_path
@@ -22,6 +22,7 @@ ohos_moduletest("specified_ability_service_test") {
   include_dirs = [ "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/include" ]
 
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/ability_cache_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/process_options.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_window_option.cpp",
@@ -36,6 +37,7 @@ ohos_moduletest("specified_ability_service_test") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
@@ -59,6 +61,7 @@ ohos_moduletest("specified_ability_service_test") {
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",

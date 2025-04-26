@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,6 +124,9 @@ private:
     bool IsActionImplicitStart(const Want &want, bool findDeafultApp);
 
     int CheckImplicitCallPermission(const AbilityRequest& abilityRequest);
+
+    void TrustlistIntersectionProcess(const AbilityRequest &request,
+        std::vector<DialogAppInfo> &dialogAppInfos, int32_t userId);
 
     int32_t FindAppClone(std::vector<AppExecFwk::AbilityInfo> &abilityInfos,
         std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos, bool &isAppCloneSelector);

@@ -37,7 +37,7 @@ public:
         sptr<AAFwk::IUserCallback> callback));
     MOCK_METHOD4(KillProcessWithAccount, int(const std::string&, const int, const bool clearPageStack, int32_t));
     MOCK_METHOD1(KillProcessesInBatch, int(const std::vector<int32_t> &pids));
-    MOCK_METHOD3(UpdateApplicationInfoInstalled, int(const std::string&, const int uid, const std::string&));
+    MOCK_METHOD4(UpdateApplicationInfoInstalled, int(const std::string&, const int uid, const std::string&, bool));
     MOCK_METHOD3(ForceKillApplication, int32_t(const std::string& appName, const int userId, const int appIndex));
     MOCK_METHOD3(KillApplication, int32_t(const std::string& bundleName, const bool clearPageStack, int32_t appIndex));
     MOCK_METHOD1(KillProcessesByAccessTokenId, int32_t(const uint32_t accessTokenId));
@@ -58,7 +58,7 @@ public:
     MOCK_METHOD3(GetBundleNameByPid, int32_t(const int pid, std::string &bundleName, int32_t &uid));
     MOCK_METHOD1(RegisterAppDebugListener, int32_t(const sptr<IAppDebugListener> &listener));
     MOCK_METHOD1(UnregisterAppDebugListener, int32_t(const sptr<IAppDebugListener> &listener));
-    MOCK_METHOD1(AttachAppDebug, int32_t(const std::string &bundleName));
+    MOCK_METHOD2(AttachAppDebug, int32_t(const std::string &bundleName, bool isDebugFromLocal));
     MOCK_METHOD1(DetachAppDebug, int32_t(const std::string &bundleName));
     MOCK_METHOD1(RegisterAbilityDebugResponse, int32_t(const sptr<IAbilityDebugResponse> &response));
     MOCK_METHOD1(IsAttachDebug, bool(const std::string &bundleName));

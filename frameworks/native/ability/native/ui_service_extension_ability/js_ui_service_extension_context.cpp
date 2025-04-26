@@ -385,7 +385,7 @@ private:
             return CreateJsUndefined(env);
         }
         int64_t connectId = connection->GetConnectionId();
-        auto innerErrorCode = std::make_shared<int>(ERR_OK);
+        auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
         auto execute = GetConnectAbilityExecFunc(want, connection, connectId, innerErrorCode);
         NapiAsyncTask::CompleteCallback complete = [this, connection, connectId, innerErrorCode](napi_env env,
             NapiAsyncTask& task, int32_t status) {
@@ -694,6 +694,5 @@ void JSUIServiceExtensionConnection::CallJsFailed(int32_t errorCode)
     napi_call_function(env_, obj, method, ARGC_ONE, argv, nullptr);
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "CallJsFailed end");
 }
-
 } // namespace AbilityRuntime
 }  // namespace OHOS

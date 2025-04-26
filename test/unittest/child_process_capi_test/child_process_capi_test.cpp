@@ -16,6 +16,7 @@
 #include <gmock/gmock.h>
 #include "native_child_process.h"
 #include "app_utils.h"
+#include "child_process_args_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -55,7 +56,7 @@ void ChildProcessCapiTest::OnNativeChildProcessStarted(int errCode, OHIPCRemoteP
  * @tc.desc: Test API OH_Ability_CreateNativeChildProcess works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessCapiTest, OH_Ability_CreateNativeChildProcess_001, TestSize.Level0)
+HWTEST_F(ChildProcessCapiTest, OH_Ability_CreateNativeChildProcess_001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "OH_Ability_CreateNativeChildProcess_001 begin";
     int ret = OH_Ability_CreateNativeChildProcess(nullptr, ChildProcessCapiTest::OnNativeChildProcessStarted);
@@ -82,7 +83,7 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_CreateNativeChildProcess_001, TestSize
  * @tc.desc: Test API OH_Ability_StartNativeChildProcess_001 works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessCapiTest, OH_Ability_StartNativeChildProcess_001, TestSize.Level0)
+HWTEST_F(ChildProcessCapiTest, OH_Ability_StartNativeChildProcess_001, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "OH_Ability_StartNativeChildProcess_001 begin";
     NativeChildProcess_Args args;
@@ -91,6 +92,21 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_StartNativeChildProcess_001, TestSize.
     auto ret = OH_Ability_StartNativeChildProcess(nullptr, args, options, &pid);
     EXPECT_EQ(ret, NCP_ERR_INVALID_PARAM);
     GTEST_LOG_(INFO) << "OH_Ability_StartNativeChildProcess_001 begin";
+}
+
+/**
+ * @tc.number: OH_Ability_GetCurrentChildProcessArgs_001
+ * @tc.desc: Test API OH_Ability_GetCurrentChildProcessArgs_001 works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessCapiTest, OH_Ability_GetCurrentChildProcessArgs_001, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "OH_Ability_GetCurrentChildProcessArgs_001 begin";
+    EXPECT_EQ(OH_Ability_GetCurrentChildProcessArgs(), nullptr);
+    NativeChildProcess_Args args = { 0 };
+    ChildProcessArgsManager::GetInstance().SetChildProcessArgs(args);
+    EXPECT_NE(OH_Ability_GetCurrentChildProcessArgs(), nullptr);
+    GTEST_LOG_(INFO) << "OH_Ability_GetCurrentChildProcessArgs_001 end";
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

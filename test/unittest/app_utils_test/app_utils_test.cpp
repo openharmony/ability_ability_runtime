@@ -49,7 +49,7 @@ void AppUtilsTest::TearDown()
  * @tc.desc: Test IsInheritWindowSplitScreenMode works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_0100, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_0100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_0100 called.");
     bool isInheritWindowSplitScreenMode = AAFwk::AppUtils::GetInstance().IsInheritWindowSplitScreenMode();
@@ -69,7 +69,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_0100, TestSize.Level0)
  * @tc.desc: Test IsSupportAncoApp works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_0200, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_0200, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_0200 called.");
     bool isSupportAncoApp = AAFwk::AppUtils::GetInstance().IsSupportAncoApp();
@@ -89,7 +89,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_0200, TestSize.Level0)
  * @tc.desc: Test GetTimeoutUnitTimeRatio works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_0300, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_0300, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_0300 called.");
     int32_t timeoutUnitTimeRatio = AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
@@ -109,7 +109,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_0300, TestSize.Level0)
  * @tc.desc: Test IsSelectorDialogDefaultPossion works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_0400, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_0400, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_0400 called.");
     bool isSelectorDialogDefaultPossion = AAFwk::AppUtils::GetInstance().IsSelectorDialogDefaultPossion();
@@ -129,7 +129,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_0400, TestSize.Level0)
  * @tc.desc: Test IsStartSpecifiedProcess works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_0500, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_0500, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_0500 called.");
     bool isStartSpecifiedProcess = AAFwk::AppUtils::GetInstance().IsStartSpecifiedProcess();
@@ -149,7 +149,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_0500, TestSize.Level0)
  * @tc.desc: Test IsUseMultiRenderProcess works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_0600, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_0600, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_0600 called.");
     bool isUseMultiRenderProcess = AAFwk::AppUtils::GetInstance().IsUseMultiRenderProcess();
@@ -169,7 +169,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_0600, TestSize.Level0)
  * @tc.desc: Test IsLimitMaximumOfRenderProcess works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_0700, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_0700, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_0700 called.");
     bool isLimitMaximumOfRenderProcess = AAFwk::AppUtils::GetInstance().IsLimitMaximumOfRenderProcess();
@@ -189,7 +189,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_0700, TestSize.Level0)
  * @tc.desc: Test IsGrantPersistUriPermission works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_0800, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_0800, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_0800 called.");
     bool isGrantPersistUriPermission = AAFwk::AppUtils::GetInstance().IsGrantPersistUriPermission();
@@ -209,7 +209,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_0800, TestSize.Level0)
  * @tc.desc: Test IsStartOptionsWithAnimation works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_0900, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_0900, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_0900 called.");
     bool isStartOptionsWithAnimation = AAFwk::AppUtils::GetInstance().IsStartOptionsWithAnimation();
@@ -229,7 +229,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_0900, TestSize.Level0)
  * @tc.desc: Test IsMultiProcessModel works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_1000, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_1000, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1000 called.");
     bool isMultiProcessModel = AAFwk::AppUtils::GetInstance().IsMultiProcessModel();
@@ -249,7 +249,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1000, TestSize.Level0)
  * @tc.desc: Test IsStartOptionsWithProcessOptions works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_1100, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_1100, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1100 called.");
     bool isStartOptionsWithProcessOptions = AAFwk::AppUtils::GetInstance().IsStartOptionsWithProcessOptions();
@@ -269,7 +269,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1100, TestSize.Level0)
  * @tc.desc: Test EnableMoveUIAbilityToBackgroundApi works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_1200, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_1200, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1200 called.");
     bool enableMoveUIAbilityToBackgroundApi = AAFwk::AppUtils::GetInstance().EnableMoveUIAbilityToBackgroundApi();
@@ -289,7 +289,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1200, TestSize.Level0)
  * @tc.desc: Test MaxChildProcess works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_1300, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_1300, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1300 called.");
     auto maxChildProcess = AAFwk::AppUtils::GetInstance().MaxChildProcess();
@@ -305,7 +305,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1300, TestSize.Level0)
  * @tc.desc: Test IsAllowNativeChildProcess works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_1400, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_1400, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1400 called.");
     auto allow = AAFwk::AppUtils::GetInstance().IsAllowNativeChildProcess("com.test.demo");
@@ -317,7 +317,7 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1400, TestSize.Level0)
  * @tc.desc: Test IsSupportMultiInstance works
  * @tc.type: FUNC
  */
-HWTEST_F(AppUtilsTest, AppUtilsTest_1500, TestSize.Level0)
+HWTEST_F(AppUtilsTest, AppUtilsTest_1500, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1500 called.");
     bool isSupportMultiInstance = AAFwk::AppUtils::GetInstance().IsSupportMultiInstance();

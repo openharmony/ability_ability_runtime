@@ -31,7 +31,7 @@ bool ExtensionManagerProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-int ExtensionManagerProxy::ConnectAbilityCommon(const Want &want, const sptr<IRemoteObject> &connect,
+int ExtensionManagerProxy::ConnectAbilityCommon(const Want &want, sptr<IRemoteObject> connect,
     const sptr<IRemoteObject> &callerToken, AppExecFwk::ExtensionAbilityType extensionType, int32_t userId,
     bool isQueryExtensionOnly)
 {

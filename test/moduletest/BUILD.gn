@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -48,8 +48,8 @@ group("moduletest") {
     deps += [
       "ability_caller_fw_module_test:moduletest",
       "ability_delegator_test:moduletest",
+      "ability_manager_client_other_test:moduletest",
       "ability_manager_client_test:moduletest",
-      "ability_manager_client_test2:moduletest",
       "ability_manager_service_dump_test:moduletest",
       "ability_record_test:moduletest",
       "ability_test:moduletest",

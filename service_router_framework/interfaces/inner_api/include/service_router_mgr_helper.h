@@ -21,7 +21,7 @@
 #include <singleton.h>
 
 #include "service_router_death_recipient.h"
-#include "service_router_mgr_interface.h"
+#include "iservice_router_mgr.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -40,7 +40,7 @@ public:
      * @brief Acquire a service router manager, if it not existed,
      * @return returns the service router manager ipc object, or nullptr for failed.
      */
-    sptr<IServiceRouterManager> GetServiceRouterMgr();
+    sptr<IServiceRouterMgr> GetServiceRouterMgr();
 
     void LoadSA();
     void FinishStartSAFail();
@@ -48,15 +48,15 @@ public:
     void OnRemoteDiedHandle();
 
 private:
-    void SetServiceRouterMgr(const sptr<IServiceRouterManager> &serviceRouterMgr);
-    sptr<IServiceRouterManager> InnerGetServiceRouterMgr();
+    void SetServiceRouterMgr(const sptr<IServiceRouterMgr> &serviceRouterMgr);
+    sptr<IServiceRouterMgr> InnerGetServiceRouterMgr();
 
     std::mutex mgrMutex_;
     std::mutex cvLock_;
     bool isReady = false;
     std::condition_variable mgrConn_;
     sptr<ServiceRouterDeathRecipient> serviceDeathObserver_;
-    sptr<IServiceRouterManager> routerMgr_ = nullptr;
+    sptr<IServiceRouterMgr> routerMgr_ = nullptr;
 };
 } // namespace AbilityRuntime
 }  // namespace OHOS

@@ -151,31 +151,32 @@ bool AbilityRecovery::SerializeDataToFile(int32_t savedStateId, WantParams& para
         TAG_LOGE(AAFwkTag::RECOVERY, "Marshalling want param failed");
         return false;
     }
-    int fd = open(file.c_str(), O_RDWR | O_CREAT, (mode_t)0600);
-    if (fd <= 0) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "open failed %{public}s", file.c_str());
+
+    FILE *fileF = fopen(file.c_str(), "w+");
+    if (fileF == nullptr) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "errno: %{public}d", errno);
         return false;
     }
     size_t sz = parcel.GetDataSize();
     uintptr_t buf = parcel.GetData();
     if (sz == 0 || buf == 0) {
         TAG_LOGE(AAFwkTag::RECOVERY, "get parcel data failed");
-        close(fd);
+        fclose(fileF);
         return false;
     }
 
     if (DefaultRecovery() && (sz > DEFAULT_RECOVERY_MAX_RESTORE_SIZE)) {
         TAG_LOGE(AAFwkTag::RECOVERY, "data is too large, size: %{public}zu", sz);
-        close(fd);
+        fclose(fileF);
         return false;
     }
 
-    ssize_t nwrite = write(fd, reinterpret_cast<uint8_t*>(buf), sz);
+    ssize_t nwrite = fwrite(reinterpret_cast<uint8_t*>(buf), 1, sz, fileF);
     if (nwrite <= 0) {
         TAG_LOGE(AAFwkTag::RECOVERY, "persist parcel data failed %{public}d", errno);
     }
     TAG_LOGD(AAFwkTag::RECOVERY, "file size: %{public}zu", sz);
-    close(fd);
+    fclose(fileF);
     return true;
 }
 
@@ -195,23 +196,23 @@ bool AbilityRecovery::ReadSerializeDataFromFile(int32_t savedStateId, WantParams
         return false;
     }
 
-    int32_t fd = open(path, O_RDONLY);
-    if (fd <= 0) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "fd open error");
+    FILE *fileF = fopen(path, "r");
+    if (fileF == nullptr) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "file open err: %{public}d", errno);
         remove(path);
         return false;
     }
-
+    int fd = fileno(fileF);
     struct stat statbuf;
     if (fstat(fd, &statbuf) < 0) {
-        close(fd);
+        fclose(fileF);
         remove(path);
         return false;
     }
 
     auto mapFile = static_cast<uint8_t*>(mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
     if (mapFile == MAP_FAILED) {
-        close(fd);
+        fclose(fileF);
         remove(path);
         return false;
     }
@@ -219,7 +220,7 @@ bool AbilityRecovery::ReadSerializeDataFromFile(int32_t savedStateId, WantParams
     Parcel parcel(new AppRecoveryParcelAllocator()); // do not dealloc mmap area
     if (!parcel.ParseFrom(reinterpret_cast<uintptr_t>(mapFile), statbuf.st_size)) {
         munmap(mapFile, statbuf.st_size);
-        close(fd);
+        fclose(fileF);
         remove(path);
         return false;
     }
@@ -230,13 +231,13 @@ bool AbilityRecovery::ReadSerializeDataFromFile(int32_t savedStateId, WantParams
         delete parsedParam;
     } else {
         munmap(mapFile, statbuf.st_size);
-        close(fd);
+        fclose(fileF);
         remove(path);
         return false;
     }
 
     munmap(mapFile, statbuf.st_size);
-    close(fd);
+    fclose(fileF);
     remove(path);
     return true;
 }

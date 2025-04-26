@@ -36,6 +36,7 @@
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "runtime.h"
+#include "js_runtime.h"
 #include "startup_manager.h"
 #include "system_ability_definition.h"
 #include "syspara/parameter.h"
@@ -385,8 +386,24 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     auto iterator = abilityStages_.find(moduleName);
     if (iterator == abilityStages_.end()) {
         auto stageContext = std::make_shared<AbilityRuntime::AbilityStageContext>();
-        stageContext->SetParentContext(abilityRuntimeContext_);
-        stageContext->InitHapModuleInfo(abilityInfo);
+        bool isPlugin = abilityInfo->applicationInfo.bundleType == AppExecFwk::BundleType::APP_PLUGIN;
+        if (isPlugin) {
+            stageContext->SetIsPlugin(true);
+            stageContext->InitPluginHapModuleInfo(abilityInfo, abilityRuntimeContext_->GetBundleName());
+            auto pluginContext = stageContext->CreatePluginContext(
+                abilityInfo->bundleName, abilityInfo->moduleName, abilityRuntimeContext_);
+            if (pluginContext == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "null pluginContext");
+                return nullptr;
+            }
+            auto rm = pluginContext->GetResourceManager();
+            stageContext->SetResourceManager(rm);
+            stageContext->SetParentContext(pluginContext);
+        } else {
+            stageContext->InitHapModuleInfo(abilityInfo);
+            stageContext->SetParentContext(abilityRuntimeContext_);
+        }
+
         stageContext->SetConfiguration(GetConfiguration());
         stageContext->SetProcessName(GetProcessName());
         std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfo = stageContext->GetHapModuleInfo();
@@ -394,8 +411,8 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             TAG_LOGE(AAFwkTag::APPKIT, "null hapModuleInfo");
             return nullptr;
         }
-        if (runtime_) {
-            runtime_->UpdatePkgContextInfoJson(
+        if (runtime_ && (runtime_->GetLanguage() == AbilityRuntime::Runtime::Language::JS)) {
+            static_cast<AbilityRuntime::JsRuntime&>(*runtime_).SetPkgContextInfoJson(
                 hapModuleInfo->moduleName, hapModuleInfo->hapPath, hapModuleInfo->packageName);
         }
         SetAppEnv(hapModuleInfo->appEnvironments);
@@ -884,14 +901,6 @@ bool OHOSApplication::IsUpdateColorNeeded(Configuration &config, AbilityRuntime:
 
     bool needUpdate = true;
 
-    if (level < AbilityRuntime::ApplicationConfigurationManager::GetInstance().GetColorModeSetLevel() ||
-        colorMode.empty()) {
-        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-        config.RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
-        TAG_LOGI(AAFwkTag::APPKIT, "color remove");
-        needUpdate = false;
-    }
-
     if (!colorMode.empty()) {
         config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
             AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetColorModeSetLevel(level, colorMode));
@@ -900,6 +909,14 @@ bool OHOSApplication::IsUpdateColorNeeded(Configuration &config, AbilityRuntime:
             config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP,
                 AppExecFwk::ConfigurationInner::IS_SET_BY_APP);
         }
+    }
+
+    if (level < AbilityRuntime::ApplicationConfigurationManager::GetInstance().GetColorModeSetLevel() ||
+        colorMode.empty()) {
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
+        TAG_LOGI(AAFwkTag::APPKIT, "color remove");
+        needUpdate = false;
     }
 
     return needUpdate;

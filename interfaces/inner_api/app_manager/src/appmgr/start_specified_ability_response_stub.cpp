@@ -21,47 +21,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-using namespace std::placeholders;
-StartSpecifiedAbilityResponseStub::StartSpecifiedAbilityResponseStub()
-{
-    auto handleOnAcceptWantResponse = [this](OHOS::MessageParcel &arg1, OHOS::MessageParcel &arg2) {
-        return HandleOnAcceptWantResponse(arg1, arg2);
-    };
-
-    responseFuncMap_.emplace(static_cast<uint32_t>(
-        IStartSpecifiedAbilityResponse::Message::ON_ACCEPT_WANT_RESPONSE),
-        std::move(handleOnAcceptWantResponse));
-
-    auto handleOnTimeoutResponse = [this](OHOS::MessageParcel &arg1, OHOS::MessageParcel &arg2) {
-        return  HandleOnTimeoutResponse(arg1, arg2);
-    };
-
-    responseFuncMap_.emplace(static_cast<uint32_t>(
-        IStartSpecifiedAbilityResponse::Message::ON_TIMEOUT_RESPONSE),
-        std::move(handleOnTimeoutResponse));
-
-    auto handleOnNewProcessRequestResponse = [this](OHOS::MessageParcel &arg1, OHOS::MessageParcel &arg2) {
-        return HandleOnNewProcessRequestResponse(arg1, arg2);
-    };
-
-    responseFuncMap_.emplace(static_cast<uint32_t>(
-        IStartSpecifiedAbilityResponse::Message::ON_NEW_PROCESS_REQUEST_RESPONSE),
-        std::move(handleOnNewProcessRequestResponse));
-
-    auto handleOnNewProcessRequestTimeoutResponse = [this](OHOS::MessageParcel &arg1, OHOS::MessageParcel &arg2) {
-        return HandleOnNewProcessRequestTimeoutResponse(arg1, arg2);
-    };
-
-    responseFuncMap_.emplace(static_cast<uint32_t>(
-        IStartSpecifiedAbilityResponse::Message::ON_NEW_PROCESS_REQUEST_TIMEOUT_RESPONSE),
-        std::move(handleOnNewProcessRequestTimeoutResponse));
-}
-
-StartSpecifiedAbilityResponseStub::~StartSpecifiedAbilityResponseStub()
-{
-    responseFuncMap_.clear();
-}
-
 int32_t StartSpecifiedAbilityResponseStub::HandleOnAcceptWantResponse(MessageParcel &data, MessageParcel &reply)
 {
     AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
@@ -78,42 +37,28 @@ int32_t StartSpecifiedAbilityResponseStub::HandleOnAcceptWantResponse(MessagePar
 
 int32_t StartSpecifiedAbilityResponseStub::HandleOnTimeoutResponse(MessageParcel &data, MessageParcel &reply)
 {
-    AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-
-    OnTimeoutResponse(*want, data.ReadInt32());
-    delete want;
+    OnTimeoutResponse(data.ReadInt32());
     return NO_ERROR;
 }
 
 int32_t StartSpecifiedAbilityResponseStub::HandleOnNewProcessRequestResponse(MessageParcel &data, MessageParcel &reply)
 {
-    AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-
     auto flag = Str16ToStr8(data.ReadString16());
-    OnNewProcessRequestResponse(*want, flag, data.ReadInt32());
-    delete want;
+    OnNewProcessRequestResponse(flag, data.ReadInt32());
     return NO_ERROR;
 }
 
 int32_t StartSpecifiedAbilityResponseStub::HandleOnNewProcessRequestTimeoutResponse(MessageParcel &data,
     MessageParcel &reply)
 {
-    AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
-        return ERR_INVALID_VALUE;
-    }
+    OnNewProcessRequestTimeoutResponse(data.ReadInt32());
+    return NO_ERROR;
+}
 
-    OnNewProcessRequestTimeoutResponse(*want, data.ReadInt32());
-    delete want;
+int32_t StartSpecifiedAbilityResponseStub::HandleOnStartSpecifiedFailed(MessageParcel &data,
+    MessageParcel &reply)
+{
+    OnStartSpecifiedFailed(data.ReadInt32());
     return NO_ERROR;
 }
 
@@ -129,14 +74,15 @@ int StartSpecifiedAbilityResponseStub::OnRemoteRequest(
         return ERR_INVALID_STATE;
     }
 
-    auto itFunc = responseFuncMap_.find(code);
-    if (itFunc != responseFuncMap_.end()) {
-        auto func = itFunc->second;
-        if (func != nullptr) {
-            return func(data, reply);
-        }
+    switch (code) {
+        case Message::ON_ACCEPT_WANT_RESPONSE: return HandleOnAcceptWantResponse(data, reply);
+        case Message::ON_TIMEOUT_RESPONSE: return HandleOnTimeoutResponse(data, reply);
+        case Message::ON_NEW_PROCESS_REQUEST_RESPONSE: return HandleOnNewProcessRequestResponse(data, reply);
+        case Message::ON_NEW_PROCESS_REQUEST_TIMEOUT_RESPONSE:
+            return HandleOnNewProcessRequestTimeoutResponse(data, reply);
+        case Message::ON_START_SPECIFIED_FAILED: return HandleOnStartSpecifiedFailed(data, reply);
+        default: return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

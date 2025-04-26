@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "string_wrapper.h"
 #include "want.h"
 
+const std::string APP_LAUNCH_TRUSTLIST = "ohos.params.appLaunchTrustList";
 namespace OHOS {
 namespace AAFwk {
 using OHOS::AppExecFwk::BundleInfo;
@@ -221,7 +222,7 @@ void DialogSessionManager::GenerateJumpTargetAbilityInfos(AbilityRequest &abilit
 }
 
 void DialogSessionManager::GenerateDialogCallerInfo(AbilityRequest &abilityRequest, int32_t userId,
-    std::shared_ptr<DialogCallerInfo> dialogCallerInfo, SelectorType type)
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo, SelectorType type, bool needGrantUriPermission)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER(dialogCallerInfo);
@@ -230,6 +231,28 @@ void DialogSessionManager::GenerateDialogCallerInfo(AbilityRequest &abilityReque
     dialogCallerInfo->requestCode = abilityRequest.requestCode;
     dialogCallerInfo->targetWant = abilityRequest.want;
     dialogCallerInfo->userId = userId;
+    dialogCallerInfo->needGrantUriPermission = needGrantUriPermission;
+}
+
+void DialogSessionManager::NotifyAbilityRequestFailure(const std::string &dialogSessionId, const Want &want)
+{
+    auto callerInfo = GetDialogCallerInfo(dialogSessionId);
+    CHECK_POINTER(callerInfo);
+    auto requestId = callerInfo->targetWant.GetStringParam(KEY_REQUEST_ID);
+    if (requestId.empty() || callerInfo->callerToken == nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "no need to handle ability request");
+        return;
+    }
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerInfo->callerToken);
+    CHECK_POINTER(abilityRecord);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "handling ability request failure, requestId=%{public}s", requestId.c_str());
+    std::string message = "user refuses to jump";
+    if (callerInfo->type == SelectorType::IMPLICIT_START_SELECTOR) {
+        message = "user closed implicit start selector";
+    } else if (callerInfo->type == SelectorType::APP_CLONE_SELECTOR) {
+        message = "user closed app-clone selector";
+    }
+    abilityRecord->NotifyAbilityRequestFailure(requestId, want.GetElement(), message);
 }
 
 int DialogSessionManager::SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllowed)
@@ -241,6 +264,7 @@ int DialogSessionManager::SendDialogResult(const Want &want, const std::string &
     }
     if (!isAllowed) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "user refuse to jump");
+        NotifyAbilityRequestFailure(dialogSessionId, want);
         ClearDialogContext(dialogSessionId);
         return ERR_OK;
     }
@@ -271,10 +295,7 @@ int DialogSessionManager::SendDialogResult(const Want &want, const std::string &
     }
     sptr<IRemoteObject> callerToken = dialogCallerInfo->callerToken;
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
-    if (!abilityMgr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr null");
-        return INNER_ERR;
-    }
+    CHECK_POINTER_AND_RETURN(abilityMgr, INNER_ERR);
     int ret = abilityMgr->StartAbilityAsCallerDetails(targetWant, callerToken, callerToken, dialogCallerInfo->userId,
         dialogCallerInfo->requestCode, false);
     if (ret == ERR_OK) {
@@ -300,7 +321,8 @@ int32_t DialogSessionManager::NotifySCBToRecoveryAfterInterception(const std::st
 }
 
 std::string DialogSessionManager::GenerateDialogSessionRecordCommon(AbilityRequest &abilityRequest, int32_t userId,
-    const AAFwk::WantParams &parameters, std::vector<DialogAppInfo> &dialogAppInfos, SelectorType type)
+    const AAFwk::WantParams &parameters, std::vector<DialogAppInfo> &dialogAppInfos, SelectorType type,
+    bool needGrantUriPermission)
 {
     auto dialogSessionInfo = sptr<DialogSessionInfo>::MakeSptr();
     CHECK_POINTER_AND_RETURN(dialogSessionInfo, "");
@@ -316,7 +338,7 @@ std::string DialogSessionManager::GenerateDialogSessionRecordCommon(AbilityReque
     dialogSessionInfo->parameters = parameters;
 
     std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
-    GenerateDialogCallerInfo(abilityRequest, userId, dialogCallerInfo, type);
+    GenerateDialogCallerInfo(abilityRequest, userId, dialogCallerInfo, type, needGrantUriPermission);
 
     std::string dialogSessionId = GenerateDialogSessionId();
     SetDialogSessionInfo(dialogSessionId, dialogSessionInfo, dialogCallerInfo);
@@ -347,7 +369,7 @@ int DialogSessionManager::CreateJumpModalDialog(AbilityRequest &abilityRequest, 
 }
 
 int DialogSessionManager::CreateImplicitSelectorModalDialog(AbilityRequest &abilityRequest, const Want &want,
-    int32_t userId, std::vector<DialogAppInfo> &dialogAppInfos)
+    int32_t userId, std::vector<DialogAppInfo> &dialogAppInfos, bool needGrantUriPermission)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
 
@@ -364,9 +386,19 @@ int DialogSessionManager::CreateImplicitSelectorModalDialog(AbilityRequest &abil
     sessionWant.SetParam("showCaller", showCaller);
     sessionWant.SetParam("ohos.ability.params.showDefaultPicker",
         abilityRequest.want.GetBoolParam("ohos.ability.params.showDefaultPicker", false));
+    if (abilityRequest.want.HasParameter(APP_LAUNCH_TRUSTLIST)) {
+        sessionWant.SetParam(APP_LAUNCH_TRUSTLIST,
+            abilityRequest.want.GetStringArrayParam(APP_LAUNCH_TRUSTLIST));
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ImplicitSelector get trustlist %{public}zu",
+            sessionWant.GetStringArrayParam(APP_LAUNCH_TRUSTLIST).size());
+        std::vector<std::string> receiveList = sessionWant.GetStringArrayParam(APP_LAUNCH_TRUSTLIST);
+        for (const std::string& str : receiveList) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "in trustlist: %{public}s", str.c_str());
+        }
+    }
 
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, sessionWant.GetParams(),
-        dialogAppInfos, SelectorType::IMPLICIT_START_SELECTOR);
+        dialogAppInfos, SelectorType::IMPLICIT_START_SELECTOR, needGrantUriPermission);
     if (dialogSessionId == "") {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "generation failed");
         return ERR_INVALID_VALUE;
@@ -488,6 +520,56 @@ bool DialogSessionManager::IsCreateCloneSelectorDialog(const std::string &bundle
         return false;
     }
     return true;
+}
+
+bool DialogSessionManager::UpdateExtensionWantWithDialogCallerInfo(AbilityRequest &abilityRequest,
+    const sptr<IRemoteObject> &callerToken, bool isSCBCall)
+{
+    if (callerToken == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "callerToken null");
+        return false;
+    }
+    std::string dialogSessionId = abilityRequest.want.GetStringParam(DIALOG_SESSION_ID);
+    if (dialogSessionId.empty()) {
+        return false;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "dialogSessionId:%{public}s", dialogSessionId.c_str());
+    auto dialogCallerInfo = GetDialogCallerInfo(dialogSessionId);
+    if (dialogCallerInfo == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "dialogCallerInfo null");
+        return false;
+    }
+    if (!dialogCallerInfo->needGrantUriPermission) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "no need grant uri permission");
+        return false;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "get dialog caller info");
+    auto dialogTargetWant = dialogCallerInfo->targetWant;
+    auto flag = dialogTargetWant.GetFlags();
+    if ((flag & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not grant flag");
+        return false;
+    }
+    if (!isSCBCall && (dialogCallerInfo->callerToken != callerToken)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not scb call or callerToken invalid");
+        return false;
+    }
+    // only reserve grant uri flag
+    abilityRequest.want.SetFlags(dialogTargetWant.GetFlags());
+    abilityRequest.want.SetUri(dialogTargetWant.GetUri());
+    auto uriVec = dialogTargetWant.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
+    abilityRequest.want.SetParam(AbilityConfig::PARAMS_STREAM, uriVec);
+    if (!isSCBCall) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not scb call");
+        return true;
+    }
+    auto abilityRecord = Token::GetAbilityRecordByToken(dialogCallerInfo->callerToken);
+    if (abilityRecord) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "set specifyTokenId");
+        abilityRequest.specifyTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
+        return true;
+    }
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

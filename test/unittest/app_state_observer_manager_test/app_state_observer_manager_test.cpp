@@ -174,7 +174,7 @@ HWTEST_F(AppSpawnSocketTest, UnregisterApplicationStateObserver_001, TestSize.Le
  * EnvConditions: NA
  * CaseDescription: Verify OnAppStarted
  */
-HWTEST_F(AppSpawnSocketTest, OnAppStarted_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnAppStarted_001, TestSize.Level1)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -192,7 +192,7 @@ HWTEST_F(AppSpawnSocketTest, OnAppStarted_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify OnAppStopped
  */
-HWTEST_F(AppSpawnSocketTest, OnAppStopped_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnAppStopped_001, TestSize.Level1)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -210,7 +210,7 @@ HWTEST_F(AppSpawnSocketTest, OnAppStopped_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify OnAppStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, OnAppStateChanged_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnAppStateChanged_001, TestSize.Level1)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -228,7 +228,7 @@ HWTEST_F(AppSpawnSocketTest, OnAppStateChanged_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify OnAppStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, OnAppStateChanged_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnAppStateChanged_002, TestSize.Level1)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -247,7 +247,7 @@ HWTEST_F(AppSpawnSocketTest, OnAppStateChanged_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify OnProcessDied
  */
-HWTEST_F(AppSpawnSocketTest, OnProcessDied_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnProcessDied_001, TestSize.Level1)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -265,7 +265,7 @@ HWTEST_F(AppSpawnSocketTest, OnProcessDied_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify OnRenderProcessDied
  */
-HWTEST_F(AppSpawnSocketTest, OnRenderProcessDied_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnRenderProcessDied_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -283,7 +283,7 @@ HWTEST_F(AppSpawnSocketTest, OnRenderProcessDied_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify OnProcessStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, OnProcessStateChanged_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnProcessStateChanged_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -301,7 +301,7 @@ HWTEST_F(AppSpawnSocketTest, OnProcessStateChanged_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify OnProcessCreated
  */
-HWTEST_F(AppSpawnSocketTest, OnProcessCreated_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnProcessCreated_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -319,7 +319,7 @@ HWTEST_F(AppSpawnSocketTest, OnProcessCreated_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify OnWindowShow
  */
-HWTEST_F(AppSpawnSocketTest, OnWindowShow_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnWindowShow_001, TestSize.Level1)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -337,7 +337,7 @@ HWTEST_F(AppSpawnSocketTest, OnWindowShow_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify OnWindowHidden
  */
-HWTEST_F(AppSpawnSocketTest, OnWindowHidden_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnWindowHidden_001, TestSize.Level1)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -355,7 +355,7 @@ HWTEST_F(AppSpawnSocketTest, OnWindowHidden_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnWindowShow
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnWindowShow_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnWindowShow_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -370,7 +370,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnWindowShow_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnWindowShow
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnWindowShow_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnWindowShow_002, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -379,7 +379,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnWindowShow_002, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnWindowShow(appRecord);
 }
 
@@ -391,7 +391,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnWindowShow_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnWindowHidden
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnWindowHidden_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnWindowHidden_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -406,7 +406,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnWindowHidden_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnWindowHidden
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnWindowHidden_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnWindowHidden_002, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -415,7 +415,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnWindowHidden_002, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnWindowHidden(appRecord);
 }
 
@@ -427,7 +427,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnWindowHidden_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify OnRenderProcessCreated
  */
-HWTEST_F(AppSpawnSocketTest, OnRenderProcessCreated_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnRenderProcessCreated_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -445,7 +445,7 @@ HWTEST_F(AppSpawnSocketTest, OnRenderProcessCreated_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify StateChangedNotifyObserver
  */
-HWTEST_F(AppSpawnSocketTest, StateChangedNotifyObserver_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, StateChangedNotifyObserver_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -464,7 +464,7 @@ HWTEST_F(AppSpawnSocketTest, StateChangedNotifyObserver_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppStarted
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -474,7 +474,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_001, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStarted(appRecord);
 }
 
@@ -486,7 +486,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppStarted
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_002, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -494,7 +494,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_002, TestSize.Level0)
     std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStarted(appRecord);
 }
 
@@ -506,7 +506,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppStarted
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_003, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_003, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -516,7 +516,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_003, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStarted(appRecord);
 }
 
@@ -528,7 +528,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_003, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppStarted
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_004, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_004, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -537,7 +537,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_004, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStarted(appRecord);
 }
 
@@ -549,7 +549,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStarted_004, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppStopped
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -559,7 +559,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_001, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStopped(appRecord);
 }
 
@@ -571,7 +571,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppStopped
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_002, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -579,7 +579,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_002, TestSize.Level0)
     std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStopped(appRecord);
 }
 
@@ -591,7 +591,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppStopped
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_003, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_003, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -601,7 +601,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_003, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStopped(appRecord);
 }
 
@@ -613,7 +613,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_003, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppStopped
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_004, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_004, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -622,7 +622,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_004, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppStopped(appRecord);
 }
 
@@ -634,7 +634,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppStopped_004, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleAppStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -645,7 +645,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_001, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -657,7 +657,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleAppStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_002, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -668,7 +668,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_002, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -680,7 +680,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleAppStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_003, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_003, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -690,7 +690,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_003, TestSize.Level0)
     bool needNotifyApp = false;
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -702,7 +702,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_003, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleAppStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_004, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_004, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -712,7 +712,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_004, TestSize.Level0)
     bool needNotifyApp = false;
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -724,7 +724,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_004, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleAppStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_005, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_005, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -735,7 +735,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_005, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -747,7 +747,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_005, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleAppStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_006, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_006, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -759,7 +759,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_006, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -771,7 +771,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_006, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleAppStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_007, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_007, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -781,7 +781,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_007, TestSize.Level0)
     bool needNotifyApp = false;
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleAppStateChanged(appRecord, state, needNotifyApp, false);
 }
 
@@ -793,7 +793,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_007, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleAppStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_008, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_008, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -812,7 +812,7 @@ HWTEST_F(AppSpawnSocketTest, HandleAppStateChanged_008, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleStateChangedNotifyObserver
  */
-HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -822,7 +822,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_001, TestSize.Leve
     std::string bundleName = "com.ohos.unittest";
     abilityStateData.bundleName = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleStateChangedNotifyObserver(abilityStateData, isAbility, false);
 }
 
@@ -834,7 +834,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_001, TestSize.Leve
  * EnvConditions: NA
  * CaseDescription: Verify HandleStateChangedNotifyObserver
  */
-HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_002, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -843,7 +843,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_002, TestSize.Leve
     std::vector<std::string> bundleNameList;
     std::string bundleName = "com.ohos.unittest";
     abilityStateData.bundleName = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleStateChangedNotifyObserver(abilityStateData, isAbility, false);
 }
 
@@ -855,7 +855,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_002, TestSize.Leve
  * EnvConditions: NA
  * CaseDescription: Verify HandleStateChangedNotifyObserver
  */
-HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_003, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_003, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -866,7 +866,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_003, TestSize.Leve
     std::string bundleName2 = "com.ohos.unittest2";
     abilityStateData.bundleName = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleStateChangedNotifyObserver(abilityStateData, isAbility, false);
 }
 
@@ -878,7 +878,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_003, TestSize.Leve
  * EnvConditions: NA
  * CaseDescription: Verify HandleStateChangedNotifyObserver
  */
-HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_004, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_004, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -888,7 +888,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_004, TestSize.Leve
     std::string bundleName = "com.ohos.unittest";
     abilityStateData.bundleName = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleStateChangedNotifyObserver(abilityStateData, isAbility, false);
 }
 
@@ -900,7 +900,7 @@ HWTEST_F(AppSpawnSocketTest, HandleStateChangedNotifyObserver_004, TestSize.Leve
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppProcessCreated
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppProcessCreated_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppProcessCreated_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -917,7 +917,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppProcessCreated_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnRenderProcessCreated
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnRenderProcessCreated_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnRenderProcessCreated_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -937,7 +937,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnRenderProcessCreated_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessCreated
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -945,7 +945,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_001, TestSize.Level0)
     std::vector<std::string> bundleNameList;
     std::string bundleName = "com.ohos.unittest";
     data.bundleName = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessCreated(data);
 }
 
@@ -957,7 +957,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessCreated
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_002, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -966,7 +966,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_002, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     data.bundleName = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessCreated(data);
 }
 
@@ -978,7 +978,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessCreated
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_003, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_003, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -988,7 +988,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_003, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest";
     data.bundleName = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessCreated(data);
 }
 
@@ -1000,7 +1000,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_003, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessCreated
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_004, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_004, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1009,7 +1009,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_004, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     data.bundleName = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessCreated(data);
 }
 
@@ -1021,7 +1021,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessCreated_004, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1036,7 +1036,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_002, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1045,7 +1045,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_002, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessStateChanged(appRecord);
 }
 
@@ -1057,7 +1057,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_003, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_003, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1065,7 +1065,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_003, TestSize.Level0)
     std::vector<std::string> bundleNameList;
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessStateChanged(appRecord);
 }
 
@@ -1077,7 +1077,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_003, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_004, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_004, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1087,7 +1087,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_004, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessStateChanged(appRecord);
 }
 
@@ -1099,7 +1099,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_004, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_005, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_005, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1108,7 +1108,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_005, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessStateChanged(appRecord);
 }
 
@@ -1120,7 +1120,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessStateChanged_005, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppProcessDied
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppProcessDied_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppProcessDied_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1137,7 +1137,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppProcessDied_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnRenderProcessDied
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnRenderProcessDied_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnRenderProcessDied_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1157,7 +1157,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnRenderProcessDied_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessDied
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1165,7 +1165,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_001, TestSize.Level0)
     std::vector<std::string> bundleNameList;
     std::string bundleName = "com.ohos.unittest";
     data.bundleName = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessDied(data);
 }
 
@@ -1177,7 +1177,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessDied
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_002, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1186,7 +1186,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_002, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     data.bundleName = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessDied(data);
 }
 
@@ -1198,7 +1198,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessDied
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_003, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_003, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1208,7 +1208,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_003, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     data.bundleName = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessDied(data);
 }
 
@@ -1220,7 +1220,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_003, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnProcessDied
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_004, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_004, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1230,7 +1230,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_004, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     data.bundleName = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnProcessDied(data);
 }
 
@@ -1242,7 +1242,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnProcessDied_004, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify ObserverExist
  */
-HWTEST_F(AppSpawnSocketTest, ObserverExist_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, ObserverExist_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     bool res = manager->ObserverExist(nullptr);
@@ -1257,12 +1257,12 @@ HWTEST_F(AppSpawnSocketTest, ObserverExist_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify ObserverExist
  */
-HWTEST_F(AppSpawnSocketTest, ObserverExist_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, ObserverExist_002, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     sptr<IApplicationStateObserver> observer = new MockApplicationStateObserver();
     std::vector<std::string> bundleNameList;
-    manager->appStateObserverMap_.emplace(observer, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, bundleNameList});
     bool res = manager->ObserverExist(observer);
     EXPECT_TRUE(res);
 }
@@ -1277,7 +1277,7 @@ HWTEST_F(AppSpawnSocketTest, RegisterAbilityForegroundStateObserver_0100, TestSi
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
     sptr<IAbilityForegroundStateObserver> observer = new AbilityForegroundStateObserverProxy(nullptr);
-    manager->abilityforegroundObserverSet_.emplace(observer);
+    manager->abilityForegroundObserverMap_.emplace(observer, 0);
     auto res = manager->RegisterAbilityForegroundStateObserver(observer);
     EXPECT_EQ(res, ERR_PERMISSION_DENIED);
 }
@@ -1292,14 +1292,14 @@ HWTEST_F(AppSpawnSocketTest, UnregisterAbilityForegroundStateObserver_0100, Test
     sptr<IAbilityForegroundStateObserver> observer = new AbilityForegroundStateObserverProxy(nullptr);
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
-    manager->abilityforegroundObserverSet_.emplace(observer);
+    manager->abilityForegroundObserverMap_.emplace(observer, 0);
     auto res = manager->UnregisterAbilityForegroundStateObserver(observer);
     EXPECT_EQ(res, ERR_PERMISSION_DENIED);
 }
 
 /**
  * @tc.name: IsAbilityForegroundObserverExist_0100
- * @tc.desc: Test return when abilityforegroundObserverSet_ is not empty and
+ * @tc.desc: Test return when abilityForegroundObserverMap_ is not empty and
  *      the conditions within the loop are met.
  * @tc.type: FUNC
  */
@@ -1309,7 +1309,7 @@ HWTEST_F(AppSpawnSocketTest, IsAbilityForegroundObserverExist_0100, TestSize.Lev
     sptr<IAbilityForegroundStateObserver> observers = new AbilityForegroundStateObserverProxy(nullptr);
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
-    manager->abilityforegroundObserverSet_.emplace(observers);
+    manager->abilityForegroundObserverMap_.emplace(observers, 0);
     auto res = manager->IsAbilityForegroundObserverExist(observer);
     EXPECT_EQ(res, true);
 }
@@ -1413,14 +1413,14 @@ HWTEST_F(AppSpawnSocketTest, UnregisterAppForegroundStateObserver_0100, TestSize
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     sptr<IAppForegroundStateObserver> observer = new (std::nothrow) AppForegroundStateObserver();
-    manager->appForegroundStateObserverSet_.emplace(observer);
+    manager->appForegroundStateObserverMap_.emplace(observer, 0);
     auto res = manager->UnregisterAppForegroundStateObserver(observer);
     EXPECT_EQ(ERR_PERMISSION_DENIED, res);
 }
 
 /**
  * @tc.name: IsAppForegroundObserverExist_0100
- * @tc.desc: Test when observer and appForegroundStateObserverSet is not nullptr
+ * @tc.desc: Test when observer and appForegroundStateObserverMap is not nullptr
  *      and asObject of them is same.
  * @tc.type: FUNC
  */
@@ -1428,7 +1428,7 @@ HWTEST_F(AppSpawnSocketTest, IsAppForegroundObserverExist_0100, TestSize.Level1)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     sptr<IAppForegroundStateObserver> observer = new (std::nothrow) AppForegroundStateObserver();
-    manager->appForegroundStateObserverSet_.emplace(observer);
+    manager->appForegroundStateObserverMap_.emplace(observer, 0);
     auto res = manager->IsAppForegroundObserverExist(observer);
     EXPECT_EQ(true, res);
 }
@@ -1461,7 +1461,7 @@ HWTEST_F(AppSpawnSocketTest, OnObserverDied_0200, TestSize.Level1)
     ObserverType type = ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER;
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnObserverDied(remote, type);
     auto abilityforegroundObserverSetSize =
-        DelayedSingleton<AppStateObserverManager>::GetInstance()->abilityforegroundObserverSet_.size();
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->abilityForegroundObserverMap_.size();
     EXPECT_EQ(0, abilityforegroundObserverSetSize);
 }
 
@@ -1477,7 +1477,7 @@ HWTEST_F(AppSpawnSocketTest, OnObserverDied_0300, TestSize.Level1)
     ObserverType type = ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER;
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnObserverDied(remote, type);
     auto appForegroundStateObserverSetSize =
-        DelayedSingleton<AppStateObserverManager>::GetInstance()->appForegroundStateObserverSet_.size();
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->appForegroundStateObserverMap_.size();
     EXPECT_EQ(0, appForegroundStateObserverSetSize);
 }
 
@@ -1489,7 +1489,7 @@ HWTEST_F(AppSpawnSocketTest, OnObserverDied_0300, TestSize.Level1)
  * EnvConditions: NA
  * CaseDescription: Verify OnAppCacheStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, OnAppCacheStateChanged_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, OnAppCacheStateChanged_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1507,7 +1507,7 @@ HWTEST_F(AppSpawnSocketTest, OnAppCacheStateChanged_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppCacheStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_001, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_001, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1517,7 +1517,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_001, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_CREATE);
 }
 
@@ -1529,7 +1529,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_001, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppCacheStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_002, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_002, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1537,7 +1537,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_002, TestSize.Level0)
     std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_CREATE);
 }
 
@@ -1549,7 +1549,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppCacheStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_003, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_003, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1559,7 +1559,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_003, TestSize.Level0)
     std::string bundleName2 = "com.ohos.unittest2";
     appRecord->mainBundleName_ = bundleName1;
     bundleNameList.push_back(bundleName2);
-    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->appStateObserverMap_.emplace(observer_, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_CREATE);
 }
 
@@ -1571,7 +1571,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_003, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify HandleOnAppCacheStateChanged
  */
-HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_004, TestSize.Level0)
+HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_004, TestSize.Level2)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
@@ -1580,8 +1580,100 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_004, TestSize.Level0)
     std::string bundleName = "com.ohos.unittest";
     appRecord->mainBundleName_ = bundleName;
     bundleNameList.push_back(bundleName);
-    manager->appStateObserverMap_.emplace(nullptr, bundleNameList);
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_CREATE);
+}
+/*
+ * Feature: AppStateObserverManager
+ * Function: OnProcessReused
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager OnProcessReused
+ * EnvConditions: NA
+ * CaseDescription: Verify OnProcessReused
+ */
+HWTEST_F(AppSpawnSocketTest, OnProcessReused_001, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    manager->OnProcessReused(appRecord);
+}
+/*
+ * Feature: AppStateObserverManager
+ * Function: OnProcessReused
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager OnProcessReused
+ * EnvConditions: NA
+ * CaseDescription: Verify OnProcessReused
+ */
+HWTEST_F(AppSpawnSocketTest, OnProcessReused_002, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    manager->Init();
+    manager->OnProcessReused(appRecord);
+}
+/*
+ * Feature: AppStateObserverManager
+ * Function: AddObserverCount
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager AddObserverCount
+ * EnvConditions: NA
+ * CaseDescription: Verify AddObserverCount
+ */
+HWTEST_F(AppSpawnSocketTest, AddObserverCount_001, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    sptr<IApplicationStateObserver> obs = new MockApplicationStateObserver();
+    int32_t uid = 1000;
+    
+    manager->AddObserverCount(uid);
+    ASSERT_EQ(manager->observerCountMap_[uid], 1);
+    ASSERT_EQ(manager->observerAmount_, 1);
+}
+/*
+ * Feature: AppStateObserverManager
+ * Function: DecreaseObserverCount
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager DecreaseObserverCount
+ * EnvConditions: NA
+ * CaseDescription: Verify DecreaseObserverCount
+ */
+HWTEST_F(AppSpawnSocketTest, DecreaseObserverCount_001, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    sptr<IApplicationStateObserver> obs = new MockApplicationStateObserver();
+    int32_t uid = 1000;
+    
+    manager->AddObserverCount(uid);
+    ASSERT_EQ(manager->observerCountMap_[uid], 1);
+    ASSERT_EQ(manager->observerAmount_, 1);
+    
+    manager->DecreaseObserverCount(uid);
+    ASSERT_TRUE(manager->observerCountMap_.empty());
+    ASSERT_EQ(manager->observerAmount_, 0);
+}
+/*
+ * Feature: AppStateObserverManager
+ * Function: WrapAppStateData
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager WrapAppStateData
+ * EnvConditions: NA
+ * CaseDescription: Verify WrapAppStateData
+ */
+HWTEST_F(AppSpawnSocketTest, WrapAppStateData_001, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->SetUid(1001);
+    appRecord->mainBundleName_ = "com.test.app";
+    
+    AppStateData data = manager->WrapAppStateData(appRecord, ApplicationState::APP_STATE_FOREGROUND);
+    
+    EXPECT_EQ(data.uid, 1001);
+    EXPECT_EQ(data.bundleName, "com.test.app");
+    EXPECT_EQ(data.state, static_cast<int32_t>(ApplicationState::APP_STATE_FOREGROUND));
 }
 } // namespace AppExecFwk
 } // namespace OHOS

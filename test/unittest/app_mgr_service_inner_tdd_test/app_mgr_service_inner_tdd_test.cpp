@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #undef private
 #include "app_scheduler.h"
 #include "app_mgr_event.h"
+#include "app_spawn_client.h"
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
@@ -891,7 +892,7 @@ HWTEST_F(AppMgrServiceInnerTest, GenerateRenderUid_001, TestSize.Level1)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppMgrServiceInnerTest, StartRenderProcessImpl_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcessImpl_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcessImpl_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1010,7 +1011,7 @@ HWTEST_F(AppMgrServiceInnerTest, ChangeAppGcState_001, TestSize.Level1)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_001, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1046,7 +1047,7 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_001, TestSize.Level0)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_002, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_002 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1082,7 +1083,7 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_002, TestSize.Level0)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_003, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_003, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_003 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1112,7 +1113,7 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_003, TestSize.Level0)
  * @tc.SubFunction: NA
  * @tc.EnvConditions: NA
  */
-HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_004, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_004, TestSize.Level2)
 {
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_004 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1220,6 +1221,27 @@ HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_004, TestSize.Level1)
     std::string ubsanEnabled = "ubsanEnabled";
     EXPECT_EQ(startMsg.appEnv.find(ubsanEnabled)->second, "1");
     TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_004 end");
+}
+
+/**
+ * @tc.name: GetKernelPermissions_001
+ * @tc.desc: Get kernel permissions
+ * @tc.type: FUNC
+ * @tc.Function: GetKernelPermissions
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetKernelPermissions_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetKernelPermissions_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    AppSpawnStartMsg startMsg;
+    std::map<std::string, std::string> permissionsMap;
+    uint32_t accessTokenId = 0;
+    appMgrServiceInner->GetKernelPermissions(accessTokenId, permissionsMap);
+    EXPECT_EQ(permissionsMap.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetKernelPermissions_001 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

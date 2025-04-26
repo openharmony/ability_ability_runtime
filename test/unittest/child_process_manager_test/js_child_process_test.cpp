@@ -122,7 +122,7 @@ HWTEST_F(JsChildProcessTest, JsChildProcessInit_0300, TestSize.Level0)
  * @tc.desc: Test JsChildProcess OnStart works
  * @tc.type: FUNC
  */
-HWTEST_F(JsChildProcessTest, JsChildProcessOnStart_0100, TestSize.Level0)
+HWTEST_F(JsChildProcessTest, JsChildProcessOnStart_0100, TestSize.Level1)
 {
     TAG_LOGD(AAFwkTag::TEST, "JsChildProcessOnStart_0100 called.");
     std::unique_ptr<Runtime> runtime = std::make_unique<JsRuntime>();
@@ -144,7 +144,7 @@ HWTEST_F(JsChildProcessTest, JsChildProcessOnStart_0100, TestSize.Level0)
  * @tc.desc: Test JsChildProcess OnStart works
  * @tc.type: FUNC
  */
-HWTEST_F(JsChildProcessTest, JsChildProcessOnStart_0200, TestSize.Level0)
+HWTEST_F(JsChildProcessTest, JsChildProcessOnStart_0200, TestSize.Level1)
 {
     TAG_LOGD(AAFwkTag::TEST, "JsChildProcessOnStart_0200 called.");
     std::unique_ptr<Runtime> runtime = std::make_unique<JsRuntime>();

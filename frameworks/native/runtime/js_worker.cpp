@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,8 @@
 #include "singleton.h"
 #include "syscap_ts.h"
 #include "system_ability_definition.h"
+#include "js_environment_impl.h"
+#include "worker_info.h"
 #ifdef SUPPORT_SCREEN
 using OHOS::Ace::ContainerScope;
 #endif
@@ -142,6 +144,16 @@ using FileMapper = AbilityBase::FileMapper;
 using FileMapperType = AbilityBase::FileMapperType;
 using IBundleMgr = AppExecFwk::IBundleMgr;
 
+void ReleaseWorkerSafeMemFunc(void* mapper)
+{
+    TAG_LOGI(AAFwkTag::JSRUNTIME, "called");
+    if (mapper) {
+        FileMapper* myMapper = static_cast<FileMapper*>(mapper);
+        myMapper->SetAutoReleaseMem(true);
+        delete myMapper;
+    }
+}
+
 std::string AssetHelper::NormalizedFileName(const std::string& fileName) const
 {
     std::string normalizedFilePath;
@@ -159,17 +171,25 @@ std::string AssetHelper::NormalizedFileName(const std::string& fileName) const
     return normalizedFilePath;
 }
 
+AssetHelper::AssetHelper(std::shared_ptr<JsEnv::WorkerInfo> workerInfo) : workerInfo_(workerInfo)
+{
+    panda::panda_file::StringPacProtect codePath = panda::panda_file::StringPacProtect(workerInfo_->codePath);
+    if (!(codePath.GetOriginString()).empty() && (codePath.GetOriginString()).back() != '/') {
+        (workerInfo_->codePath).Append('/');
+    }
+}
+
 AssetHelper::~AssetHelper()
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "destroyed");
-    if (fd_ != -1) {
-        close(fd_);
-        fd_ = -1;
+    if (file_ != nullptr) {
+        fclose(file_);
+        file_ = nullptr;
     }
 }
 
 void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buffSize, std::vector<uint8_t>& content,
-    std::string& ami, bool& useSecureMem, bool isRestricted)
+    std::string& ami, bool& useSecureMem, void** mapper, bool isRestricted)
 {
     if (uri.empty() || buff == nullptr || buffSize == nullptr || workerInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Input params invalid");
@@ -215,10 +235,10 @@ void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buf
 
         TAG_LOGD(AAFwkTag::JSRUNTIME, "Get asset, ami: %{private}s", ami.c_str());
         if (ami.find(CACHE_DIRECTORY) != std::string::npos) {
-            if (!ReadAmiData(ami, buff, buffSize, content, useSecureMem, isRestricted)) {
+            if (!ReadAmiData(ami, buff, buffSize, content, useSecureMem, isRestricted, mapper)) {
                 TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by ami failed");
             }
-        } else if (!ReadFilePathData(filePath, buff, buffSize, content, useSecureMem, isRestricted)) {
+        } else if (!ReadFilePathData(filePath, buff, buffSize, content, useSecureMem, isRestricted, mapper)) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by filepath failed");
         }
     } else {
@@ -258,16 +278,16 @@ void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buf
         ami = (workerInfo_->codePath).GetOriginString() + filePath;
         TAG_LOGD(AAFwkTag::JSRUNTIME, "Get asset, ami: %{private}s", ami.c_str());
         if (ami.find(CACHE_DIRECTORY) != std::string::npos) {
-            if (!ReadAmiData(ami, buff, buffSize, content, useSecureMem, isRestricted)) {
+            if (!ReadAmiData(ami, buff, buffSize, content, useSecureMem, isRestricted, mapper)) {
                 TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by ami failed");
             }
-        } else if (!ReadFilePathData(filePath, buff, buffSize, content, useSecureMem, isRestricted)) {
+        } else if (!ReadFilePathData(filePath, buff, buffSize, content, useSecureMem, isRestricted, mapper)) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by filepath failed");
         }
     }
 }
 
-bool AssetHelper::GetSafeData(const std::string& ami, uint8_t** buff, size_t* buffSize)
+bool AssetHelper::GetSafeData(const std::string& ami, uint8_t** buff, size_t* buffSize, void** mapper)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     std::string resolvedPath;
@@ -277,13 +297,12 @@ bool AssetHelper::GetSafeData(const std::string& ami, uint8_t** buff, size_t* bu
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Realpath file %{private}s caught error: %{public}d", ami.c_str(), errno);
         return false;
     }
-
-    int fd = open(resolvedPath.c_str(), O_RDONLY);
-    if (fd < 0) {
+    FILE *fileF = fopen(resolvedPath.c_str(), "r");
+    if (fileF == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Open file %{private}s caught error: %{public}d", resolvedPath.c_str(), errno);
         return false;
     }
-
+    int fd = fileno(fileF);
     struct stat statbuf;
     if (fstat(fd, &statbuf) < 0) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Get fstat of file %{private}s caught error: %{public}d", resolvedPath.c_str(),
@@ -295,25 +314,30 @@ bool AssetHelper::GetSafeData(const std::string& ami, uint8_t** buff, size_t* bu
     std::unique_ptr<FileMapper> fileMapper = std::make_unique<FileMapper>();
     if (fileMapper == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null fileMapper");
-        close(fd);
+        fclose(fileF);
         return false;
     }
 
     auto result = fileMapper->CreateFileMapper(resolvedPath, false, fd, 0, statbuf.st_size, FileMapperType::SAFE_ABC);
     if (!result) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Create file %{private}s mapper failed", resolvedPath.c_str());
-        close(fd);
+        fclose(fileF);
         return false;
     }
 
     *buff = fileMapper->GetDataPtr();
     *buffSize = fileMapper->GetDataLen();
-    fd_ = fd;
+    *mapper = fileMapper.release();
+    if (file_ != nullptr) {
+        fclose(file_);
+        file_ = nullptr;
+    }
+    file_ = fileF;
     return true;
 }
 
 bool AssetHelper::ReadAmiData(const std::string& ami, uint8_t** buff, size_t* buffSize, std::vector<uint8_t>& content,
-    bool& useSecureMem, bool isRestricted)
+    bool& useSecureMem, bool isRestricted, void** mapper)
 {
     // Current function is a private, validity of workerInfo_ has been checked by caller.
     int32_t apiTargetVersion = static_cast<int32_t>(workerInfo_->apiTargetVersion.GetOriginPointer());
@@ -321,8 +345,8 @@ bool AssetHelper::ReadAmiData(const std::string& ami, uint8_t** buff, size_t* bu
     if (GetIsStageModel() && !isRestricted && apiSatisfy) {
         if (apiTargetVersion >= API12) {
             useSecureMem = true;
-            return GetSafeData(ami, buff, buffSize);
-        } else if (GetSafeData(ami, buff, buffSize)) {
+            return GetSafeData(ami, buff, buffSize, mapper);
+        } else if (GetSafeData(ami, buff, buffSize, mapper)) {
             useSecureMem = true;
             return true;
         } else {
@@ -361,7 +385,7 @@ bool AssetHelper::ReadAmiData(const std::string& ami, uint8_t** buff, size_t* bu
 }
 
 bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, size_t* buffSize,
-    std::vector<uint8_t>& content, bool& useSecureMem, bool isRestricted)
+    std::vector<uint8_t>& content, bool& useSecureMem, bool isRestricted, void** mapper)
 {
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
@@ -434,11 +458,13 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, 
                 }
                 *buff = safeData->GetDataPtr();
                 *buffSize = safeData->GetDataLen();
+                *mapper = safeData.release();
                 return true;
             } else if (safeData != nullptr) {
                 useSecureMem = true;
                 *buff = safeData->GetDataPtr();
                 *buffSize = safeData->GetDataLen();
+                *mapper = safeData.release();
                 return true;
             } else {
                 // If api version less than 12 and get secure mem failed, try get normal mem.

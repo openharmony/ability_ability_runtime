@@ -59,6 +59,7 @@ struct BaseSharedBundleInfo;
 using HspList = std::vector<BaseSharedBundleInfo>;
 enum class MainThreadState { INIT, ATTACH, READY, RUNNING };
 struct BundleInfo;
+struct PluginBundleInfo;
 class ContextDeal;
 // class Global::Resource::ResourceManager;
 class AppMgrDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -311,7 +312,7 @@ public:
      */
     int32_t ScheduleChangeAppGcState(int32_t state) override;
 
-    void AttachAppDebug() override;
+    void AttachAppDebug(bool isDebugFromLocal) override;
     void DetachAppDebug() override;
     bool NotifyDeviceDisConnect();
 
@@ -641,6 +642,8 @@ private:
 
     bool IsBgWorkingThread(const AbilityInfo &info);
 
+    void HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAppInfo, const std::string &moduleName);
+
     /**
      * @brief parse app configuration params
      *
@@ -648,6 +651,8 @@ private:
      * @config the config of application
      */
     void ParseAppConfigurationParams(const std::string configuration, Configuration &config);
+
+    int32_t OnAttachLocalDebug(bool isDebugFromLocal);
 
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
     void HandleNWebPreload();
@@ -755,6 +760,8 @@ private:
         std::vector<std::pair<std::string, std::string>> &fileMap);
     void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths);
     void SetAppDebug(uint32_t modeFlag, bool isDebug);
+    void GetPluginNativeLibPath(std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
+        AppLibPathMap &appLibPaths);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;

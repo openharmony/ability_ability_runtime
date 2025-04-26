@@ -124,7 +124,7 @@ void DoSomethingInterestingWithMyAPIaddb(const char* data, size_t size)
     manager->IsApplicationFirstFocused(foregroundingRecord);
     manager->IsApplicationUnfocused(jsonStr);
     bool isAttachDebug = *data % ENABLE;
-    manager->SetAttachAppDebug(jsonStr, isAttachDebug);
+    manager->SetAttachAppDebug(jsonStr, isAttachDebug, false);
     bool isDetachDebug = *data % ENABLE;
     manager->GetAppDebugInfosByBundleName(jsonStr, isDetachDebug);
     std::vector<sptr<IRemoteObject>> abilityTokens;

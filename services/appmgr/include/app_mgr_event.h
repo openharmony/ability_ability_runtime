@@ -21,6 +21,9 @@
 #ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_record.h"
 #endif // SUPPORT_CHILD_PROCESS
+#include "common_event_data.h"
+#include "common_event_subscribe_info.h"
+#include "common_event_subscriber.h"
 #include "event_report.h"
 
 namespace OHOS {
@@ -32,6 +35,19 @@ enum class ProcessStartFailedReason {
     GET_SPAWN_CLIENT_FAILED = 3,
     GENERATE_RENDER_UID_FAILED = 4,
     CHECK_CHILD_FDS_FAILED = 5,
+};
+
+class AppMgrEventSubscriber : public EventFwk::CommonEventSubscriber {
+public:
+    AppMgrEventSubscriber(
+        const EventFwk::CommonEventSubscribeInfo &subcribeInfo, const std::function<void()> &callback);
+
+    ~AppMgrEventSubscriber() override = default;
+
+    void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
+
+private:
+    std::function<void()> callback_;
 };
 
 class AppMgrEventUtil {

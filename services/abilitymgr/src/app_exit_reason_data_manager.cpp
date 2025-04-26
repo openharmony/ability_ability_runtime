@@ -125,6 +125,7 @@ int32_t AppExitReasonDataManager::SetAppExitReason(const std::string &bundleName
         TAG_LOGE(AAFwkTag::ABILITYMGR, "insert data err: %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "set reason info: %{public}s", value.ToString().c_str());
     return ERR_OK;
 }
 
@@ -295,7 +296,7 @@ int32_t AppExitReasonDataManager::RecordSignalReason(int32_t pid, int32_t uid, i
     }
     auto ret = 0;
     AAFwk::ExitReason exitReason = {};
-    exitReason.reason = AAFwk::REASON_SIGNAL;
+    exitReason.reason = AAFwk::REASON_NORMAL;
     exitReason.subReason = signal;
     AppExecFwk::RunningProcessInfo processInfo = {};
     processInfo.pid_ = cacheInfo.exitInfo.pid;
@@ -345,7 +346,6 @@ DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValue(
         { JSON_KEY_ABILITY_LIST, abilityList },
     };
     DistributedKv::Value value(jsonObject.dump());
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "value: %{public}s", value.ToString().c_str());
     return value;
 }
 
@@ -397,14 +397,15 @@ void AppExitReasonDataManager::ConvertReasonFromValue(const nlohmann::json &json
     if (jsonObject.contains(JSON_KEY_SUB_KILL_REASON) && jsonObject[JSON_KEY_SUB_KILL_REASON].is_number_integer()) {
         exitReason.subReason = jsonObject.at(JSON_KEY_SUB_KILL_REASON).get<int32_t>();
     }
-    if (jsonObject.contains(JSON_KEY_EXIT_MSG) && jsonObject[JSON_KEY_EXIT_MSG].is_string()
-        && !jsonObject[JSON_KEY_EXIT_MSG].empty()) {
+    if (jsonObject.contains(JSON_KEY_EXIT_MSG) && jsonObject[JSON_KEY_EXIT_MSG].is_string()) {
         exitReason.exitMsg = jsonObject.at(JSON_KEY_EXIT_MSG).get<std::string>();
     }
-    if (jsonObject.contains(JSON_KEY_KILL_MSG) && jsonObject[JSON_KEY_KILL_MSG].is_string()
-        && !jsonObject[JSON_KEY_KILL_MSG].empty()) {
-        exitReason.exitMsg = jsonObject.at(JSON_KEY_KILL_MSG).get<std::string>();
-        withKillMsg = true;
+    if (jsonObject.contains(JSON_KEY_KILL_MSG) && jsonObject[JSON_KEY_KILL_MSG].is_string()) {
+        auto killMsg = jsonObject.at(JSON_KEY_KILL_MSG).get<std::string>();
+        if (!killMsg.empty()) {
+            exitReason.exitMsg = killMsg;
+            withKillMsg = true;
+        }
     }
 }
 
@@ -588,7 +589,7 @@ int32_t AppExitReasonDataManager::DeleteAbilityRecoverInfo(
         status = kvStorePtr_->Get(key, value);
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed:%{public}d", status);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "DBStatus:%{public}d", status);
         return ERR_INVALID_VALUE;
     }
 
@@ -965,6 +966,43 @@ DistributedKv::Status AppExitReasonDataManager::RestoreKvStore(DistributedKv::St
     TAG_LOGI(AAFwkTag::ABILITYMGR, "recreate db result:%{public}d", status);
     
     return status;
+}
+
+int32_t AppExitReasonDataManager::GetRecordAppAbilityNames(const uint32_t accessTokenId,
+    std::vector<std::string> &abilityLists)
+{
+    auto accessTokenIdStr = std::to_string(accessTokenId);
+    if (accessTokenId == Security::AccessToken::INVALID_TOKENID) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid value");
+        return AAFwk::ERR_INVALID_ACCESS_TOKEN;
+    }
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        if (!CheckKvStore()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStore");
+            return AAFwk::ERR_GET_KV_STORE_HANDLE_FAILED;
+        }
+    }
+
+    std::vector<DistributedKv::Entry> allEntries;
+    DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    if (status != DistributedKv::Status::SUCCESS) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get entries error: %{public}d", status);
+        return AAFwk::ERR_GET_EXIT_INFO_FAILED;
+    }
+
+    AAFwk::ExitReason exitReason = {};
+    int64_t timeStamp = 0;
+    AppExecFwk::RunningProcessInfo processInfo = {};
+    bool withKillMsg = false;
+    for (const auto &item : allEntries) {
+        if (item.key.ToString() == accessTokenIdStr) {
+            ConvertAppExitReasonInfoFromValue(item.value, exitReason, timeStamp, abilityLists, processInfo,
+                withKillMsg);
+        }
+    }
+
+    return ERR_OK;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

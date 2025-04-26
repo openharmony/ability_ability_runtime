@@ -36,6 +36,8 @@ public:
 private:
     void UpdateMultiUserConfiguration(const Configuration& config);
     void UpdateMultiUserConfigurationForGlobal(const Configuration& globalConfig);
+    void SetOrUpdateConfigByUserId(const int32_t userId, const Configuration& config,
+        std::vector<std::string>& changeKeyV);
 
     std::map<int32_t, Configuration> multiUserConfiguration_;
     std::mutex multiUserConfigurationMutex_;

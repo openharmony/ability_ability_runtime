@@ -729,7 +729,7 @@ private:
             }
             if (*innerErrorCode != ERR_OK) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "query failed: %{public}d", *innerErrorCode);
-                observer->OnQueryFinished(appId, startTime, *rule, AAFwk::INNER_ERR);
+                observer->OnQueryFinished(appId, startTime, *rule, *innerErrorCode);
                 return;
             }
             observer->OnQueryFinished(appId, startTime, *rule, ERR_OK);

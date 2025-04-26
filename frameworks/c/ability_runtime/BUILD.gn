@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -39,16 +39,26 @@ ohos_shared_library("ability_runtime") {
 
   include_dirs = [
     "include",
+    "${ability_runtime_path}/interfaces/inner_api/",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/",
   ]
 
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
   public_configs = [ ":ability_runtime_ndk_config" ]
 
-  sources = [ "src/application_context.cpp" ]
+  sources = [
+    "src/ability_business_error_utils.cpp",
+    "src/application_context.cpp",
+    "src/start_options.cpp",
+    "src/start_options_impl.cpp",
+    "src/want_utils.cpp",
+  ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/ability_manager:process_options",
+    "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
     "${ability_runtime_native_path}/appkit:app_context",
   ]
 
@@ -57,7 +67,10 @@ ohos_shared_library("ability_runtime") {
     "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
+    "image_framework:pixelmap",
     "ipc:ipc_core",
+    "napi:ace_napi",
   ]
 
   if (ability_runtime_graphics) {
@@ -69,6 +82,11 @@ ohos_shared_library("ability_runtime") {
       "SUPPORT_GRAPHICS",
       "SUPPORT_SCREEN",
     ]
+  }
+
+  if (ability_runtime_graphics &&
+      ability_runtime_start_window_options_with_pixelmap) {
+    defines += [ "START_WINDOW_OPTIONS_WITH_PIXELMAP" ]
   }
 
   output_extension = "so"

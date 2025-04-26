@@ -31,8 +31,8 @@ public:
         std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo)
         : context_(context), abilityInfo_(abilityInfo) {}
     int32_t GetConfiguration(CConfiguration* cConfig);
-    int32_t GetCurrentHapModuleInfo(RetHapModuleInfo* hapInfo);
-    int32_t GetExtAbilityInfo(RetExtensionAbilityInfo* retInfo);
+    int32_t GetCurrentHapModuleInfo(RetHapModuleInfoV2* hapInfo);
+    int32_t GetExtAbilityInfo(RetExtensionAbilityInfoV2* retInfo);
     std::weak_ptr<ExtensionContext> context_;
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo_;
 };
@@ -60,7 +60,7 @@ int32_t CJExtensionContextImpl::GetConfiguration(CConfiguration* cConfig)
     return SUCCESS_CODE;
 }
 
-int32_t CJExtensionContextImpl::GetExtAbilityInfo(RetExtensionAbilityInfo* retInfo)
+int32_t CJExtensionContextImpl::GetExtAbilityInfo(RetExtensionAbilityInfoV2* retInfo)
 {
     auto context = context_.lock();
     if (context == nullptr) {
@@ -87,11 +87,11 @@ int32_t CJExtensionContextImpl::GetExtAbilityInfo(RetExtensionAbilityInfo* retIn
         TAG_LOGE(AAFwkTag::CONTEXT, "get extensionAbilityInfo fail");
         return ERR_INVALID_INSTANCE_CODE;
     }
-    *retInfo = Convert::ConvertExtensionAbilityInfo(*infoIter);
+    *retInfo = Convert::ConvertExtensionAbilityInfoV2(*infoIter);
     return SUCCESS_CODE;
 }
 
-int32_t CJExtensionContextImpl::GetCurrentHapModuleInfo(RetHapModuleInfo* hapInfo)
+int32_t CJExtensionContextImpl::GetCurrentHapModuleInfo(RetHapModuleInfoV2* hapInfo)
 {
     auto context = context_.lock();
     if (context == nullptr) {
@@ -103,7 +103,7 @@ int32_t CJExtensionContextImpl::GetCurrentHapModuleInfo(RetHapModuleInfo* hapInf
         TAG_LOGE(AAFwkTag::CONTEXT, "GetCurrentHapModuleInfo return nullptr");
         return ERR_INVALID_INSTANCE_CODE;
     }
-    *hapInfo = Convert::ConvertHapModuleInfo(*hapModuleInfo);
+    *hapInfo = Convert::ConvertHapModuleInfoV2(*hapModuleInfo);
     return SUCCESS_CODE;
 }
 
@@ -133,7 +133,7 @@ CJ_EXPORT int32_t FFICJExtCtxGetExtAbilityInfo(int64_t id, void* retInfo)
         TAG_LOGE(AAFwkTag::CONTEXT, "GetCJExtensionContext failed, context is nullptr");
         return ERR_INVALID_INSTANCE_CODE;
     }
-    return cjContext->impl_->GetExtAbilityInfo(static_cast<RetExtensionAbilityInfo*>(retInfo));
+    return cjContext->impl_->GetExtAbilityInfo(static_cast<RetExtensionAbilityInfoV2*>(retInfo));
 }
 
 CJ_EXPORT int32_t FFICJExtCtxGetCurrentHapModuleInfo(int64_t id, void* hapInfo)
@@ -147,7 +147,7 @@ CJ_EXPORT int32_t FFICJExtCtxGetCurrentHapModuleInfo(int64_t id, void* hapInfo)
         TAG_LOGE(AAFwkTag::CONTEXT, "GetCJExtensionContext failed, context is nullptr");
         return ERR_INVALID_INSTANCE_CODE;
     }
-    return cjContext->impl_->GetCurrentHapModuleInfo(static_cast<RetHapModuleInfo*>(hapInfo));
+    return cjContext->impl_->GetCurrentHapModuleInfo(static_cast<RetHapModuleInfoV2*>(hapInfo));
 }
 }
 } // namespace AbilityRuntime

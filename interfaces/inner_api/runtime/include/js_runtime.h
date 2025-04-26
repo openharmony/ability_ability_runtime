@@ -84,7 +84,7 @@ public:
     void DestroyHeapProfiler() override;
     void ForceFullGC() override;
     void ForceFullGC(uint32_t tid) override;
-    void DumpHeapSnapshot(uint32_t tid, bool isFullGC) override;
+    void DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary = false) override;
     void AllowCrossThreadExecution() override;
     void GetHeapPrepare() override;
     void NotifyApplicationState(bool isBackground) override;
@@ -103,6 +103,8 @@ public:
         const std::string& hapPath, bool isEsMode, bool useCommonTrunk) override;
     bool PopPreloadObj(const std::string& key, std::unique_ptr<NativeReference>& obj);
     void StartDebugMode(const DebugOption debugOption) override;
+    void SetDebugOption(const DebugOption debugOption) override;
+    void StartLocalDebugMode(bool isDebugFromLocal) override;
     void DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug);
     void StopDebugMode();
     bool LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath) override;
@@ -143,9 +145,9 @@ public:
         const std::string& moduleName, const napi_value* argv = nullptr, size_t argc = 0);
     void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override;
     void SetStopPreloadSoCallback(const std::function<void()> &callback) override;
-    void UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName) override;
-    void UpdatePkgContextInfoJsonEx(const std::string& moduleName, const std::string& hapPath,
-        const std::string& packageName) override;
+    void SetPkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName);
+    void UpdatePkgContextInfoJson(const std::string& moduleName, const std::string& hapPath,
+        const std::string& packageName);
 
 private:
     void FinishPreload() override;
@@ -172,6 +174,7 @@ private:
     std::map<std::string, std::unique_ptr<NativeReference>> preloadList_;
 
     static std::atomic<bool> hasInstance;
+    DebugOption debugOption_;
 
 private:
     bool CreateJsEnv(const Options& options);

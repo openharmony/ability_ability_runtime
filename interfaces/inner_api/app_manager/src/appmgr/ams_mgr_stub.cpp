@@ -179,6 +179,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
             return HandleAttachPidToParent(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_MEMORY_SIZE_SUFFICIENT):
             return HandleIsMemorySizeSufficent(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_NO_REQUIRE_BIG_MEMORY):
+            return HandleIsNoRequireBigMemory(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::SET_KEEP_ALIVE_ENABLE_STATE):
             return HandleSetKeepAliveEnableState(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::ATTACHED_TO_STATUS_BAR):
@@ -328,8 +330,9 @@ ErrCode AmsMgrStub::HandleKillProcessesByPids(MessageParcel &data, MessageParcel
     for (uint32_t i = 0; i < size; i++) {
         pids.emplace_back(data.ReadInt32());
     }
+    std::string reason = data.ReadString();
 
-    KillProcessesByPids(pids);
+    KillProcessesByPids(pids, reason);
     return NO_ERROR;
 }
 
@@ -577,7 +580,7 @@ int32_t AmsMgrStub::HandleUpdateApplicationInfoInstalled(MessageParcel &data, Me
     std::string bundleName = data.ReadString();
     int uid = data.ReadInt32();
     std::string moduleName = data.ReadString();
-    int32_t result = UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    int32_t result = UpdateApplicationInfoInstalled(bundleName, uid, moduleName, data.ReadBool());
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -651,8 +654,9 @@ int32_t AmsMgrStub::HandleAttachAppDebug(MessageParcel &data, MessageParcel &rep
         TAG_LOGE(AAFwkTag::APPMGR, "Bundle name is empty.");
         return ERR_INVALID_VALUE;
     }
+    auto isDebugFromLocal = data.ReadBool();
 
-    auto result = AttachAppDebug(bundleName);
+    auto result = AttachAppDebug(bundleName, isDebugFromLocal);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;
@@ -822,6 +826,16 @@ int32_t AmsMgrStub::HandleClearProcessByToken(MessageParcel &data, MessageParcel
 int32_t AmsMgrStub::HandleIsMemorySizeSufficent(MessageParcel &data, MessageParcel &reply)
 {
     auto result = IsMemorySizeSufficent();
+    if (!reply.WriteBool(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleIsNoRequireBigMemory(MessageParcel &data, MessageParcel &reply)
+{
+    auto result = IsNoRequireBigMemory();
     if (!reply.WriteBool(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;

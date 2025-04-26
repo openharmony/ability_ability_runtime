@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/appmgr"
+module_output_path = "ability_runtime/ability_runtime/appmgr"
 
 ohos_unittest("app_mgr_service_test") {
   sanitize = {
@@ -40,6 +40,7 @@ ohos_unittest("app_mgr_service_test") {
   configs = [ "${ability_runtime_services_path}/appmgr:appmgr_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/appmgr:libappms",

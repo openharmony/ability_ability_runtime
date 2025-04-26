@@ -100,6 +100,11 @@ constexpr const char* ERROR_MSG_UPPER_LIMIT = "The number of app instances reach
 constexpr const char* ERROR_MSG_APP_INSTANCE_KEY_NOT_SUPPORT = "The APP_INSTANCE_KEY cannot be specified.";
 constexpr const char* ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT = "Creating a new instance is not supported.";
 constexpr const char* ERROR_MSG_UI_ABILITY_IS_STARTING = "The UIAbility is being started.";
+constexpr const char* ERROR_MSG_EXTENSION_START_ABILITY_CONTROLLED =
+    "The extension can not start the ability due to extension control.";
+constexpr const char* ERROR_MSG_NOT_HOOK = "Only allow DelegatorAbility to call the method once.";
+constexpr const char* ERROR_MSG_FROM_WINDOW =
+    "The interaction process between Ability and Window encountered an error.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
@@ -172,6 +177,9 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT, ERROR_MSG_APP_INSTANCE_KEY_NOT_SUPPORT },
     { AbilityErrorCode::ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT, ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT },
     { AbilityErrorCode::ERROR_CODE_UI_ABILITY_IS_STARTING, ERROR_MSG_UI_ABILITY_IS_STARTING},
+    { AbilityErrorCode::ERROR_CODE_EXTENSION_START_ABILITY_CONTROLLED, ERROR_MSG_EXTENSION_START_ABILITY_CONTROLLED },
+    { AbilityErrorCode::ERROR_CODE_NOT_HOOK, ERROR_MSG_NOT_HOOK},
+    { AbilityErrorCode::ERROR_CODE_FROM_WINDOW, ERROR_MSG_FROM_WINDOW},
 };
 
 static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP {
@@ -247,6 +255,10 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_APP_INSTANCE_KEY_NOT_SUPPORT, AbilityErrorCode::ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT},
     {ERR_CREATE_NEW_INSTANCE_NOT_SUPPORT, AbilityErrorCode::ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT},
     {ERR_UI_ABILITY_IS_STARTING, AbilityErrorCode::ERROR_CODE_UI_ABILITY_IS_STARTING},
+    {ERR_EXTENSION_START_ABILITY_CONTROLEED, AbilityErrorCode::ERROR_CODE_EXTENSION_START_ABILITY_CONTROLLED},
+    {ERR_NOT_HOOK, AbilityErrorCode::ERROR_CODE_NOT_HOOK},
+    {ERR_FROM_WINDOW, AbilityErrorCode::ERROR_CODE_FROM_WINDOW},
+    {ERR_INVALID_CONTEXT, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT},
 };
 }
 

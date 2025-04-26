@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,33 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
-const int MAX_URI_COUNT = 500;
+const int MAX_URI_COUNT = 200000;
+constexpr size_t MAX_IPC_RAW_DATA_SIZE = 128 * 1024 * 1024; // 128M
+constexpr int32_t MAX_PARCEL_IPC_DATA_SIZE = 200 * 1024; // 200K
+
+inline size_t GetPadSize(size_t size)
+{
+    const size_t offset = 3;
+    return (((size + offset) & (~offset)) - size);
+}
+
+bool CheckUseRawData(const std::vector<std::string>& uriVec)
+{
+    size_t oriSize = sizeof(int32_t);
+    for (auto& uri : uriVec) {
+        // calculate ipc data size of string uri, reference to parcel.h
+        size_t desire = uri.length() + sizeof(char) + sizeof(int32_t);
+        size_t padSize = GetPadSize(desire);
+        oriSize += (desire + padSize);
+        if (oriSize > MAX_PARCEL_IPC_DATA_SIZE) {
+            TAG_LOGI(AAFwkTag::URIPERMMGR, "use raw data %{public}d", static_cast<int32_t>(oriSize));
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace
+
 UriPermissionManagerClient& UriPermissionManagerClient::GetInstance()
 {
     static UriPermissionManagerClient instance;
@@ -40,7 +65,14 @@ int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int 
     TAG_LOGD(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s", targetBundleName.c_str());
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->GrantUriPermission(uri, flag, targetBundleName, appIndex, initiatorTokenId);
+        int32_t funcResult = -1;
+        auto res = uriPermMgr->GrantUriPermission(uri, flag, targetBundleName, appIndex,
+            initiatorTokenId, funcResult);
+        if (res != ERR_OK) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+            return INNER_ERR;
+        }
+        return funcResult;
     }
     return INNER_ERR;
 }
@@ -48,34 +80,89 @@ int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int 
 int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
     const std::string targetBundleName, int32_t appIndex, uint32_t initiatorTokenId)
 {
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu", targetBundleName.c_str(),
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu", targetBundleName.c_str(),
         uriVec.size());
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        return uriPermMgr->GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId);
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return INNER_ERR;
     }
-    return INNER_ERR;
+    std::vector<std::string> uriStrVec;
+    for (auto &uri : uriVec) {
+        uriStrVec.emplace_back(uri.ToString());
+    }
+    bool isWriteUriByRawData = CheckUseRawData(uriStrVec);
+    ErrCode res = -1;
+    int32_t funcResult = -1;
+    if (isWriteUriByRawData) {
+        UriPermissionRawData rawData;
+        StringVecToRawData(uriStrVec, rawData);
+        if (rawData.size > MAX_IPC_RAW_DATA_SIZE) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "rawData is too large");
+            return INNER_ERR;
+        }
+        res = uriPermMgr->GrantUriPermission(rawData, flag, targetBundleName, appIndex, initiatorTokenId, funcResult);
+        if (res != ERR_OK) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+            return INNER_ERR;
+        }
+        return funcResult;
+    }
+    res = uriPermMgr->GrantUriPermission(uriStrVec, flag, targetBundleName, appIndex, initiatorTokenId, funcResult);
+    if (res != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+        return INNER_ERR;
+    }
+    return funcResult;
 }
 
 int32_t UriPermissionManagerClient::GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
     const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType)
 {
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu",
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu",
         targetBundleName.c_str(), uriVec.size());
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        return uriPermMgr->GrantUriPermissionPrivileged(uriVec, flag, targetBundleName, appIndex,
-            initiatorTokenId, hideSensitiveType);
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return INNER_ERR;
     }
-    return INNER_ERR;
+    std::vector<std::string> uriStrVec;
+    for (auto &uri : uriVec) {
+        uriStrVec.emplace_back(uri.ToString());
+    }
+    bool isWriteUriByRawData = CheckUseRawData(uriStrVec);
+    ErrCode res = -1;
+    int32_t funcResult = -1;
+    if (isWriteUriByRawData) {
+        UriPermissionRawData rawData;
+        StringVecToRawData(uriStrVec, rawData);
+        if (rawData.size > MAX_IPC_RAW_DATA_SIZE) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "rawData is too large");
+            return INNER_ERR;
+        }
+        res = uriPermMgr->GrantUriPermissionPrivileged(rawData, flag, targetBundleName, appIndex,
+            initiatorTokenId, hideSensitiveType, funcResult);
+        if (res != ERR_OK) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+            return INNER_ERR;
+        }
+        return funcResult;
+    }
+    res = uriPermMgr->GrantUriPermissionPrivileged(uriStrVec, flag, targetBundleName, appIndex,
+        initiatorTokenId, hideSensitiveType, funcResult);
+    if (res != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+        return INNER_ERR;
+    }
+    return funcResult;
 }
 
 int UriPermissionManagerClient::RevokeAllUriPermissions(const uint32_t tokenId)
@@ -83,7 +170,13 @@ int UriPermissionManagerClient::RevokeAllUriPermissions(const uint32_t tokenId)
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->RevokeAllUriPermissions(tokenId);
+        int32_t funcResult = -1;
+        auto res = uriPermMgr->RevokeAllUriPermissions(tokenId, funcResult);
+        if (res != ERR_OK) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+            return INNER_ERR;
+        }
+        return funcResult;
     }
     return INNER_ERR;
 }
@@ -94,7 +187,13 @@ int UriPermissionManagerClient::RevokeUriPermissionManually(const Uri &uri, cons
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->RevokeUriPermissionManually(uri, bundleName, appIndex);
+        int32_t funcResult = -1;
+        auto res = uriPermMgr->RevokeUriPermissionManually(uri, bundleName, appIndex, funcResult);
+        if (res != ERR_OK) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+            return INNER_ERR;
+        }
+        return funcResult;
     }
     return INNER_ERR;
 }
@@ -103,7 +202,12 @@ bool UriPermissionManagerClient::VerifyUriPermission(const Uri& uri, uint32_t fl
 {
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->VerifyUriPermission(uri, flag, tokenId);
+        bool funcResult = false;
+        auto res = uriPermMgr->VerifyUriPermission(uri, flag, tokenId, funcResult);
+        if (res != ERR_OK) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC fail, error:%{public}d", res);
+        }
+        return funcResult;
     }
     return false;
 }
@@ -112,15 +216,40 @@ std::vector<bool> UriPermissionManagerClient::CheckUriAuthorization(const std::v
     uint32_t flag, uint32_t tokenId)
 {
     uint32_t size = uriVec.size();
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "flag:%{public}u, tokenId:%{public}u", flag, tokenId);
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "flag:%{public}u, tokenId:%{public}u", flag, tokenId);
     std::vector<bool> errorRes(size, false);
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
         return errorRes;
     }
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        return uriPermMgr->CheckUriAuthorization(uriVec, flag, tokenId);
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return errorRes;
+    }
+    bool isWriteUriByRawData = CheckUseRawData(uriVec);
+    if (isWriteUriByRawData) {
+        UriPermissionRawData resRawData;
+        UriPermissionRawData rawData;
+        StringVecToRawData(uriVec, rawData);
+        if (rawData.size > MAX_IPC_RAW_DATA_SIZE) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "rawData is too large");
+            return errorRes;
+        }
+        uriPermMgr->CheckUriAuthorization(rawData, flag, tokenId, resRawData);
+        auto result = RawDataToBoolVec(resRawData, errorRes);
+        if (!result) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "RawDataToBoolVec failed");
+            return errorRes;
+        }
+    } else {
+        std::vector<bool> funcResult;
+        uriPermMgr->CheckUriAuthorization(uriVec, flag, tokenId, funcResult);
+        errorRes = funcResult;
+    }
+    if (errorRes.size() != uriVec.size()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "invalid result");
+        errorRes = std::vector<bool>(uriVec.size(), false);
     }
     return errorRes;
 }
@@ -238,20 +367,97 @@ int32_t UriPermissionManagerClient::ClearPermissionTokenByMap(const uint32_t tok
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->ClearPermissionTokenByMap(tokenId);
+        int32_t funcResult = -1;
+        auto res = uriPermMgr->ClearPermissionTokenByMap(tokenId, funcResult);
+        if (res != ERR_OK) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+            return INNER_ERR;
+        }
+        return funcResult;
     }
     return INNER_ERR;
+}
+
+bool UriPermissionManagerClient::RawDataToBoolVec(const UriPermissionRawData& rawData, std::vector<bool>& boolVec)
+{
+    std::stringstream ss;
+    ss.write(reinterpret_cast<const char *>(rawData.data), rawData.size);
+    ss.seekg(0, std::ios::beg);
+    uint32_t boolCount = 0;
+    ss.read(reinterpret_cast<char*>(&boolCount), sizeof(boolCount));
+    if (boolCount != boolVec.size()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "vector size not match");
+        return false;
+    }
+    for (uint32_t i = 0; i < boolCount; ++i) {
+        bool resBool = false;
+        ss.read(reinterpret_cast<char *>(&resBool), sizeof(resBool));
+        boolVec.at(i) = static_cast<bool>(resBool);
+    }
+    return true;
+}
+
+void UriPermissionManagerClient::StringVecToRawData(const std::vector<std::string>& stringVec,
+    UriPermissionRawData& rawData)
+{
+    std::stringstream ss;
+    uint32_t stringCount = stringVec.size();
+    ss.write(reinterpret_cast<const char*>(&stringCount), sizeof(stringCount));
+
+    for (uint32_t i = 0; i < stringCount; ++i) {
+        uint32_t strLen = stringVec[i].length();
+        ss.write(reinterpret_cast<const char*>(&strLen), sizeof(strLen));
+        ss.write(stringVec[i].c_str(), strLen);
+    }
+    std::string result = ss.str();
+    rawData.ownedData = std::move(result);
+    rawData.data = rawData.ownedData.data();
+    rawData.size = rawData.ownedData.size();
 }
 
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 int32_t UriPermissionManagerClient::Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    if (policy.empty() || policy.size() > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
+        return ERR_URI_LIST_OUT_OF_RANGE;
+    }
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->Active(policy, result);
+        UriPermissionRawData policyRawData;
+        PolicyInfoToRawData(policy, policyRawData);
+        if (policyRawData.size > MAX_IPC_RAW_DATA_SIZE) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "rawData is too large");
+            return INNER_ERR;
+        }
+        int32_t funcResult = -1;
+        auto res = uriPermMgr->Active(policyRawData, result, funcResult);
+        if (res != ERR_OK) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
+            return INNER_ERR;
+        }
+        return funcResult;
     }
     return INNER_ERR;
+}
+
+void UriPermissionManagerClient::PolicyInfoToRawData(const std::vector<PolicyInfo>& policy,
+    UriPermissionRawData& policyRawData)
+{
+    std::stringstream ss;
+    uint32_t policyNum = policy.size();
+    ss.write(reinterpret_cast<const char *>(&policyNum), sizeof(policyNum));
+    for (uint32_t i = 0; i < policyNum; i++) {
+        uint32_t pathLen = policy[i].path.length();
+        ss.write(reinterpret_cast<const char *>(&pathLen), sizeof(pathLen));
+        ss.write(policy[i].path.c_str(), pathLen);
+        ss.write(reinterpret_cast<const char *>(&policy[i].mode), sizeof(policy[i].mode));
+    }
+    std::string result = ss.str();
+    policyRawData.ownedData = std::move(result);
+    policyRawData.data = policyRawData.ownedData.data();
+    policyRawData.size = policyRawData.ownedData.size();
 }
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 }  // namespace AAFwk

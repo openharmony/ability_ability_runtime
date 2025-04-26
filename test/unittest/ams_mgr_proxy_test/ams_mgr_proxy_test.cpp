@@ -115,11 +115,11 @@ HWTEST_F(AmsMgrProxyTest, AttachAppDebug_0100, TestSize.Level1)
     EXPECT_CALL(*mockAmsMgrScheduler_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Return(0));
-    auto result = amsMgrProxy_->AttachAppDebug(STRING_BUNDLE_NAME);
+    auto result = amsMgrProxy_->AttachAppDebug(STRING_BUNDLE_NAME, false);
     EXPECT_EQ(result, NO_ERROR);
 
     EXPECT_CALL(*mockAmsMgrScheduler_, SendRequest(_, _, _, _)).Times(0);
-    result = amsMgrProxy_->AttachAppDebug(EMPTY_BUNDLE_NAME);
+    result = amsMgrProxy_->AttachAppDebug(EMPTY_BUNDLE_NAME, false);
     EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 

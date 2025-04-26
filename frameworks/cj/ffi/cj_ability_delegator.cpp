@@ -243,15 +243,15 @@ std::shared_ptr<CJAbilityStageMonitor> ParseStageMonitorPara(
 extern "C" {
 int32_t FFIAbilityDelegatorDoAbilityForeground(int64_t id, int64_t abilityId, bool* ret)
 {
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "receiver is nullptr");
+        return COMMON_FAILED;
+    }
+    
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
         *ret = false;
-        return COMMON_FAILED;
-    }
-
-    if (!ret) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "receiver is nullptr");
         return COMMON_FAILED;
     }
 

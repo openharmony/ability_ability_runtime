@@ -287,7 +287,7 @@ void AmsMgrProxy::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnM
     TAG_LOGD(AAFwkTag::APPMGR, "ending");
 }
 
-void AmsMgrProxy::KillProcessesByPids(std::vector<int32_t> &pids)
+void AmsMgrProxy::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -307,6 +307,10 @@ void AmsMgrProxy::KillProcessesByPids(std::vector<int32_t> &pids)
             TAG_LOGE(AAFwkTag::APPMGR, "Write pid failed");
             return;
         }
+    }
+    if (!data.WriteString(reason)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write reason failed");
+        return;
     }
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_BY_PIDS), data, reply, option);
@@ -510,7 +514,7 @@ int32_t AmsMgrProxy::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
 }
 
 int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
-    const std::string &moduleName)
+    const std::string &moduleName, bool isPlugin)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "start.");
     MessageParcel data;
@@ -529,6 +533,10 @@ int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleNam
     }
     if (!data.WriteString(moduleName)) {
         TAG_LOGE(AAFwkTag::APPMGR, "moduleName WriteString failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isPlugin)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "isPlugin Write failed");
         return ERR_FLATTEN_OBJECT;
     }
     int32_t ret =
@@ -991,7 +999,7 @@ int32_t AmsMgrProxy::UnregisterAppDebugListener(const sptr<IAppDebugListener> &l
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::AttachAppDebug(const std::string &bundleName)
+int32_t AmsMgrProxy::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
@@ -1002,6 +1010,11 @@ int32_t AmsMgrProxy::AttachAppDebug(const std::string &bundleName)
 
     if (bundleName.empty() || !data.WriteString(bundleName)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write bundleName failed");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!data.WriteBool(isDebugFromLocal)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write isDebugFromLocal failed");
         return ERR_INVALID_DATA;
     }
 
@@ -1298,6 +1311,24 @@ bool AmsMgrProxy::IsMemorySizeSufficent()
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::IS_MEMORY_SIZE_SUFFICIENT), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request err: %{public}d", ret);
+        return true;
+    }
+    return reply.ReadBool();
+}
+
+bool AmsMgrProxy::IsNoRequireBigMemory()
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
+        return true;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::IS_NO_REQUIRE_BIG_MEMORY), data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGE(AAFwkTag::APPMGR, "Send request err: %{public}d", ret);
         return true;

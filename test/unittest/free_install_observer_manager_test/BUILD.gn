@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/abilitymgr"
+module_output_path = "ability_runtime/ability_runtime/abilitymgr"
 
 ohos_unittest("free_install_observer_manager_test") {
   sanitize = {

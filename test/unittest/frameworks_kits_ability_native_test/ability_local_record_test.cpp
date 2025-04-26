@@ -56,7 +56,7 @@ void AbilityLocalRecordTest::TearDown()
  * @tc.name: GetAbilityThread
  * @tc.desc: GetAbilityThread Test, return is nullptr.
  */
-HWTEST_F(AbilityLocalRecordTest, GetAbilityThread_0100, TestSize.Level0)
+HWTEST_F(AbilityLocalRecordTest, GetAbilityThread_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetAbilityThread_0100 start";
     auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, nullptr, 0);
@@ -71,7 +71,7 @@ HWTEST_F(AbilityLocalRecordTest, GetAbilityThread_0100, TestSize.Level0)
  * @tc.name: GetWant
  * @tc.desc: GetWant Test, return is nullptr.
  */
-HWTEST_F(AbilityLocalRecordTest, GetWant_0100, TestSize.Level0)
+HWTEST_F(AbilityLocalRecordTest, GetWant_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetWant_0100 start";
     std::shared_ptr<AAFwk::Want> want;
@@ -85,7 +85,7 @@ HWTEST_F(AbilityLocalRecordTest, GetWant_0100, TestSize.Level0)
  * @tc.name: GetAbilityInfo
  * @tc.desc: GetAbilityInfo Test, return is not nullptr.
  */
-HWTEST_F(AbilityLocalRecordTest, GetAbilityInfo_0100, TestSize.Level0)
+HWTEST_F(AbilityLocalRecordTest, GetAbilityInfo_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetAbilityInfo_0100 start";
     auto info = std::make_shared<OHOS::AppExecFwk::AbilityInfo>();
@@ -100,7 +100,7 @@ HWTEST_F(AbilityLocalRecordTest, GetAbilityInfo_0100, TestSize.Level0)
  * @tc.name: GetToken
  * @tc.desc: GetToken Test, return is not nullptr.
  */
-HWTEST_F(AbilityLocalRecordTest, GetToken_0100, TestSize.Level0)
+HWTEST_F(AbilityLocalRecordTest, GetToken_0100, TestSize.Level2)
 {
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetToken_0100 start";
     auto info = std::make_shared<OHOS::AppExecFwk::AbilityInfo>();
@@ -108,4 +108,16 @@ HWTEST_F(AbilityLocalRecordTest, GetToken_0100, TestSize.Level0)
     auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     EXPECT_TRUE(record->GetToken() != nullptr);
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetToken_0100 end";
+}
+
+/**
+ * @tc.number: IsHook_0100
+ * @tc.name: IsHook
+ * @tc.desc: IsHook Test.
+ */
+HWTEST_F(AbilityLocalRecordTest, IsHook_0100, TestSize.Level2)
+{
+    auto want = std::make_shared<AAFwk::Want>();
+    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, want, 0);
+    EXPECT_FALSE(record->IsHook());
 }

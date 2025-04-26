@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/ability_test"
+module_output_path = "ability_runtime/ability_runtime/ability_test"
 
 config("coverage_flags") {
   if (ability_runtime_feature_coverage) {
@@ -109,11 +109,13 @@ ohos_unittest("ability_test") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "form_fwk:form_manager",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
+    "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
     "relational_store:native_appdatafwk",
@@ -723,6 +725,7 @@ ohos_unittest("ui_ability_impl_test") {
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
+    "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
@@ -1695,6 +1698,7 @@ config("data_uri_utils_test_config") {
   defines = [ "AMS_LOG_TAG = \"AbilityUnitTest\"" ]
 }
 ohos_unittest("data_uri_utils_test") {
+  use_exceptions = true
   module_out_path = module_output_path
 
   configs = [
@@ -1800,6 +1804,39 @@ ohos_unittest("pac_map_test") {
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
     "samgr:samgr_proxy",
+  ]
+
+  if (ability_runtime_graphics) {
+    external_deps += [
+      "form_fwk:fmskit_native",
+      "i18n:intl_util",
+      "input:libmmi-client",
+    ]
+  }
+}
+
+ohos_unittest("pac_map_second_test") {
+  module_out_path = module_output_path
+  sources = [ "pac_map_second_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:extractortool",
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
   ]
 
   if (ability_runtime_graphics) {
@@ -2421,6 +2458,7 @@ ohos_unittest("ability_handler_test") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:runtime",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -2765,7 +2803,10 @@ ohos_unittest("form_extension_module_loader_test") {
 
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
-  deps = [ "${ability_runtime_native_path}/ability/native:form_extension" ]
+  deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability/native:form_extension",
+  ]
 
   external_deps = [
     "ability_base:configuration",
@@ -3266,6 +3307,82 @@ ohos_unittest("dialog_request_callback_test") {
   }
 }
 
+ohos_unittest("ability_second_test") {
+  module_out_path = module_output_path
+  sources = [
+    "${ability_runtime_native_path}/appkit/app/ability_record_mgr.cpp",
+    "${ability_runtime_native_path}/appkit/app/app_context.cpp",
+    "${ability_runtime_native_path}/appkit/app/app_loader.cpp",
+    "${ability_runtime_native_path}/appkit/app/application_cleaner.cpp",
+    "${ability_runtime_native_path}/appkit/app/ohos_application.cpp",
+    "ability_second_test.cpp",
+  ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
+    "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
+    "${ability_runtime_native_path}/ability/native:ability_thread",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:configuration_helper",
+    "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
+    "${ability_runtime_native_path}/appkit:appkit_native",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:configuration",
+    "ability_base:extractortool",
+    "ability_base:session_info",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:runtime",
+    "ability_runtime:wantagent_innerkits",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "form_fwk:form_manager",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+    "relational_store:native_appdatafwk",
+    "relational_store:native_dataability",
+    "relational_store:native_rdb",
+    "resource_management:global_resmgr",
+    "samgr:samgr_proxy",
+  ]
+
+  if (ability_runtime_graphics) {
+    external_deps += [
+      "form_fwk:fmskit_native",
+      "i18n:intl_util",
+      "image_framework:image_native",
+      "input:libmmi-client",
+      "window_manager:libwm",
+      "window_manager:libwsutils",
+      "window_manager:scene_session",
+    ]
+  }
+}
+
 ###############################################################################
 
 group("unittest") {
@@ -3284,6 +3401,7 @@ group("unittest") {
     ":ability_local_record_test",
     ":ability_permission_test",
     ":ability_process_test",
+    ":ability_second_test",
     ":ability_test",
     ":ability_thread_call_request_test",
     ":ability_thread_dataability_test",
@@ -3313,6 +3431,7 @@ group("unittest") {
     ":form_extension_test",
     ":js_ui_extension_Callback_test",
     ":new_ability_impl_test",
+    ":pac_map_second_test",
     ":pac_map_test",
     ":reserse_continuation_scheduler_primary_proxy_test",
     ":reserse_continuation_scheduler_primary_stub_test",

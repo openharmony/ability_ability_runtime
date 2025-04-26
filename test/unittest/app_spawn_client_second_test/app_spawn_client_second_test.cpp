@@ -44,7 +44,7 @@ void AppSpawnClientSecondTest::TearDown()
 {}
 
 // Scenario1: Test when startMsg.flags is 0 and all other flags are false.
-HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_001, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -60,7 +60,7 @@ HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_001, TestSize.Level0)
 }
 
 // Scenario2: Test when startMsg.flags is START_FLAG_TEST_NUM and all other flags are false.
-HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_002, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -76,7 +76,7 @@ HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_002, TestSize.Level0)
 }
 
 // Scenario3: Test when startMsg.atomicServiceFlag is true and all other flags are false.
-HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_003, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_003, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -92,7 +92,7 @@ HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_003, TestSize.Level0)
 }
 
 // Scenario4: Test when startMsg.strictMode is true and all other flags are false.
-HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_004, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_004, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -108,7 +108,7 @@ HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_004, TestSize.Level0)
 }
 
 // Scenario5: Test when startMsg.isolatedExtension is true and all other flags are false.
-HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_005, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_005, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -124,7 +124,7 @@ HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_005, TestSize.Level0)
 }
 
 // Scenario6: Test when startMsg.childProcessType is not 0 and all other flags are false.
-HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_006, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_006, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -140,7 +140,7 @@ HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_006, TestSize.Level0)
 }
 
 // Scenario7: Test when startMsg.flags is START_FLAG_TEST_NUM and all other flags are true.
-HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_007, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_007, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -155,8 +155,25 @@ HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_007, TestSize.Level0)
     EXPECT_NE(appSpawnClient.SetStartFlags(startMsg, reqHandle), 0);
 }
 
+// Scenario8: Test when startMsg.isCustomSandboxFlag is true and all other flags are false.
+HWTEST_F(AppSpawnClientSecondTest, SetStartFlags_008, TestSize.Level2)
+{
+    AppSpawnClient appSpawnClient;
+    AppSpawnStartMsg startMsg;
+    startMsg.flags = 0;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.isCustomSandboxFlag = true;
+#ifdef SUPPORT_CHILD_PROCESS
+    startMsg.childProcessType = 0;
+#endif // SUPPORT_CHILD_PROCESS
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    EXPECT_NE(appSpawnClient.SetStartFlags(startMsg, reqHandle), 0);
+}
+
 // Scenario1: Test when provisionType is empty then function returns 0.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_001, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -170,7 +187,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_001, TestSize.Level0)
 }
 
 // Scenario2: Test when provisionType is not empty then function returns 0.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_002, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -185,7 +202,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_002, TestSize.Level0)
 }
 
 // Scenario3: Test when extensionSandboxPath is empty then function returns 0.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_003, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_003, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -199,7 +216,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_003, TestSize.Level0)
 }
 
 // Scenario4: Test when extensionSandboxPath is not empty then function returns 0.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_004, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_004, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -214,7 +231,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_004, TestSize.Level0)
 }
 
 // Scenario5: Test when processType is empty then function returns 0.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_005, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_005, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -228,7 +245,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_005, TestSize.Level0)
 }
 
 // Scenario6: Test when processType is not empty then function returns 0.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_006, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_006, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -244,7 +261,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_006, TestSize.Level0)
 
 #ifdef SUPPORT_CHILD_PROCESS
 // Scenario7: Test when maxChildProcess is 0 then function returns 0.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_007, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_007, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -259,7 +276,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_007, TestSize.Level0)
 }
 
 // Scenario8: Test when maxChildProcess is not 0 then function returns 0.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_008, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_008, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -275,7 +292,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_008, TestSize.Level0)
 #endif // SUPPORT_CHILD_PROCESS
 
 // Scenario9: Test when fds is empty then function returns 0.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_009, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_009, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -289,7 +306,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_009, TestSize.Level0)
 }
 
 // Scenario10: Test when fds is not empty then function returns 0.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_010, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_010, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -308,7 +325,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsgMore_010, TestSize.Level0)
  * @tc.desc: AppspawnSetExtMsg.
  * @tc.type: FUNC
  */
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsg_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsg_001, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     AppSpawnStartMsg startMsg;
@@ -327,7 +344,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsg_001, TestSize.Level0)
  * @tc.desc: AppspawnSetExtMsg.
  * @tc.type: FUNC
  */
-HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsg_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsg_002, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     AppSpawnStartMsg startMsg;
@@ -349,7 +366,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsg_002, TestSize.Level0)
 }
 
 // Scenario1: Test when reqHandle is nullptr.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnCreateDefaultMsg_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnCreateDefaultMsg_001, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     AppSpawnReqMsgHandle reqHandle = nullptr;
@@ -359,7 +376,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnCreateDefaultMsg_001, TestSize.Level0
 }
 
 // Scenario1: Test when reqHandle is not nullptr.
-HWTEST_F(AppSpawnClientSecondTest, AppspawnCreateDefaultMsg_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, AppspawnCreateDefaultMsg_002, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     AppSpawnStartMsg startMsg;
@@ -378,7 +395,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnCreateDefaultMsg_002, TestSize.Level0
 }
 
 // Scenario1: Test when startMsg.code is MSG_APP_SPAWN and uid is negative.
-HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenUidIsNegative, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenUidIsNegative, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -388,7 +405,7 @@ HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenUidIsNegative
 }
 
 // Scenario2: Test when startMsg.code is MSG_APP_SPAWN and gid is negative.
-HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenGidIsNegative, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenGidIsNegative, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -398,7 +415,7 @@ HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenGidIsNegative
 }
 
 // Scenario3: Test when startMsg.code is MSG_APP_SPAWN and gids size is more than APP_MAX_GIDS.
-HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenGidsSizeIsMoreThanMax, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenGidsSizeIsMoreThanMax, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -413,7 +430,7 @@ HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenGidsSizeIsMor
 }
 
 // Scenario4: Test when startMsg.code is MSG_APP_SPAWN and gids array contains negative value.
-HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenGidsArrayContainsNegative, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenGidsArrayContainsNegative, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -424,7 +441,7 @@ HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenGidsArrayCont
 }
 
 // Scenario5: Test when startMsg.code is MSG_APP_SPAWN and procName is empty.
-HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenProcNameIsEmpty, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenProcNameIsEmpty, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -434,7 +451,7 @@ HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenProcNameIsEmp
 }
 
 // Scenario6: Test when startMsg.code is MSG_APP_SPAWN and procName size is more than MAX_PROC_NAME_LEN.
-HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenProcNameSizeIsMoreThanMax, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenProcNameSizeIsMoreThanMax, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -445,7 +462,7 @@ HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenProcNameSizeI
 }
 
 // Scenario7: Test when startMsg.code is MSG_GET_RENDER_TERMINATION_STATUS and pid is negative.
-HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenPidIsNegative, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenPidIsNegative, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -455,7 +472,7 @@ HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenPidIsNegative
 }
 
 // Scenario8: Test when startMsg.code is not MSG_APP_SPAWN and not MSG_GET_RENDER_TERMINATION_STATUS.
-HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenCodeIsInvalid, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenCodeIsInvalid, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -464,7 +481,7 @@ HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnFalse_WhenCodeIsInvalid
 }
 
 // Scenario9: Test when startMsg.code is MSG_APP_SPAWN and all conditions are valid.
-HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnTrue_WhenAllConditionsAreValid, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnTrue_WhenAllConditionsAreValid, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -476,7 +493,7 @@ HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnTrue_WhenAllConditionsA
 }
 
 // Scenario10: Test when startMsg.code is MSG_GET_RENDER_TERMINATION_STATUS and pid is valid.
-HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnTrue_WhenPidIsValid, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnTrue_WhenPidIsValid, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -487,7 +504,7 @@ HWTEST_F(AppSpawnClientSecondTest, VerifyMsg_ShouldReturnTrue_WhenPidIsValid, Te
 
 
 // Scenario1: Test when VerifyMsg returns false then StartProcess returns ERR_INVALID_VALUE.
-HWTEST_F(AppSpawnClientSecondTest, StartProcess_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, StartProcess_001, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnStartMsg startMsg;
@@ -496,7 +513,7 @@ HWTEST_F(AppSpawnClientSecondTest, StartProcess_001, TestSize.Level0)
 }
 
 // Scenario2: Test when startMsg.procName is null returns false.
-HWTEST_F(AppSpawnClientSecondTest, StartProcess_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, StartProcess_002, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     AppSpawnStartMsg startMsg;
@@ -515,7 +532,7 @@ HWTEST_F(AppSpawnClientSecondTest, StartProcess_002, TestSize.Level0)
 }
 
 // Scenario1: Test when reqHandle is nullptr returns ERR_OK
-HWTEST_F(AppSpawnClientSecondTest, SetIsolationModeFlag_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetIsolationModeFlag_001, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     AppSpawnReqMsgHandle reqHandle = nullptr;
@@ -526,7 +543,7 @@ HWTEST_F(AppSpawnClientSecondTest, SetIsolationModeFlag_001, TestSize.Level0)
 }
 
 // Scenario2: Test when startMsg.isolationMode is true returns ERR_OK
-HWTEST_F(AppSpawnClientSecondTest, SetIsolationModeFlag_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetIsolationModeFlag_002, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     AppSpawnStartMsg startMsg;
@@ -541,7 +558,7 @@ HWTEST_F(AppSpawnClientSecondTest, SetIsolationModeFlag_002, TestSize.Level0)
 }
 
 // Scenario1: Test when AppSpawnReqMsgAddFd returns ERR_OK for all items in fds.
-HWTEST_F(AppSpawnClientSecondTest, SetExtMsgFds_ShouldReturnErrOk_WhenAllItemsInFdsReturnOk, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetExtMsgFds_ShouldReturnErrOk_WhenAllItemsInFdsReturnOk, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnReqMsgHandle reqHandle = nullptr;
@@ -554,7 +571,7 @@ HWTEST_F(AppSpawnClientSecondTest, SetExtMsgFds_ShouldReturnErrOk_WhenAllItemsIn
 
 // Scenario2: Test when AppSpawnReqMsgAddFd returns ERR_NO_PERMISSION for some items in fds.
 HWTEST_F(AppSpawnClientSecondTest,
-    SetExtMsgFds_ShouldReturnErrNoPermission_WhenSomeItemsInFdsReturnNoPermission, TestSize.Level0)
+    SetExtMsgFds_ShouldReturnErrNoPermission_WhenSomeItemsInFdsReturnNoPermission, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnReqMsgHandle reqHandle = nullptr;
@@ -567,7 +584,7 @@ HWTEST_F(AppSpawnClientSecondTest,
 
 // Scenario3: Test when AppSpawnReqMsgAddFd returns ERR_INVALID_ARGS for some items in fds.
 HWTEST_F(AppSpawnClientSecondTest,
-    SetExtMsgFds_ShouldReturnErrInvalidArgs_WhenSomeItemsInFdsReturnInvalidArgs, TestSize.Level0)
+    SetExtMsgFds_ShouldReturnErrInvalidArgs_WhenSomeItemsInFdsReturnInvalidArgs, TestSize.Level2)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnReqMsgHandle reqHandle = nullptr;
@@ -580,7 +597,7 @@ HWTEST_F(AppSpawnClientSecondTest,
 
 #ifdef SUPPORT_CHILD_PROCESS
 // Scenario1: Test when childProcessType is CHILD_PROCESS_TYPE_NOT_CHILD then AppSpawnReqMsgSetAppFlag is called.
-HWTEST_F(AppSpawnClientSecondTest, SetChildProcessTypeStartFlag_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetChildProcessTypeStartFlag_001, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     AppSpawnReqMsgHandle reqHandle = nullptr;
@@ -592,7 +609,7 @@ HWTEST_F(AppSpawnClientSecondTest, SetChildProcessTypeStartFlag_001, TestSize.Le
 }
 
 // Scenario2: Test when childProcessType is CHILD_PROCESS_TYPE_JS then AppSpawnReqMsgSetAppFlag is called.
-HWTEST_F(AppSpawnClientSecondTest, SetChildProcessTypeStartFlag_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, SetChildProcessTypeStartFlag_002, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     AppSpawnReqMsgHandle reqHandle = nullptr;
@@ -605,7 +622,7 @@ HWTEST_F(AppSpawnClientSecondTest, SetChildProcessTypeStartFlag_002, TestSize.Le
 #endif // SUPPORT_CHILD_PROCESS
 
 // Scenario1: Test when startMsg.procName is null return ERR_INVALID_VALUE.
-HWTEST_F(AppSpawnClientSecondTest, GetRenderProcessTerminationStatus_001, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, GetRenderProcessTerminationStatus_001, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     AppSpawnStartMsg startMsg;
@@ -618,7 +635,7 @@ HWTEST_F(AppSpawnClientSecondTest, GetRenderProcessTerminationStatus_001, TestSi
 }
 
 // Scenario2:  Test when startMsg.procName is not null return ERR_OK.
-HWTEST_F(AppSpawnClientSecondTest, GetRenderProcessTerminationStatus_002, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest, GetRenderProcessTerminationStatus_002, TestSize.Level2)
 {
     auto asc = std::make_shared<AppSpawnClient>(true);
     AppSpawnStartMsg startMsg;

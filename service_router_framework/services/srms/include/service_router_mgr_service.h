@@ -60,8 +60,8 @@ public:
      * @param businessAbilityInfos Indicates the obtained business ability info objects
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t QueryBusinessAbilityInfos(const BusinessAbilityFilter &filter,
-        std::vector<BusinessAbilityInfo> &businessAbilityInfos) override;
+    virtual ErrCode QueryBusinessAbilityInfos(const BusinessAbilityFilter& filter,
+        std::vector<BusinessAbilityInfo>& businessAbilityInfos, int32_t& funcResult) override;
 
     /**
      * @brief Query the PurposeInfo of list by the given Want.
@@ -70,8 +70,8 @@ public:
      * @param purposeInfos Indicates the obtained PurposeInfos object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t QueryPurposeInfos(const Want &want, const std::string purposeName,
-        std::vector<PurposeInfo> &purposeInfos) override;
+    virtual ErrCode QueryPurposeInfos(const Want& want, const std::string& purposeName,
+        std::vector<PurposeInfo>& purposeInfos, int32_t& funcResult) override;
 
     /**
      * Start ui extension ability with extension session info, send extension session info to ability manager service.
@@ -80,8 +80,8 @@ public:
      * @param userId, Designation User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartUIExtensionAbility(const sptr<SessionInfo> &sessionInfo,
-        int32_t userId = DEFAULT_INVAL_VALUE) override;
+    virtual ErrCode StartUIExtensionAbility(const SessionInfo& sessionInfo,
+        int32_t userId, int32_t& funcResult) override;
 
     /**
      * Connect ui extension ability with want, connect session with service ability.
@@ -92,8 +92,8 @@ public:
      * @param userId, Designation User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t ConnectUIExtensionAbility(const Want &want, const sptr<IAbilityConnection> &connect,
-        const sptr<SessionInfo> &sessionInfo, int32_t userId = DEFAULT_INVAL_VALUE) override;
+    virtual ErrCode ConnectUIExtensionAbility(const Want& want, const sptr<IAbilityConnection>& connect,
+        const SessionInfo& sessionInfo, int32_t userId, int32_t& funcResult) override;
 
 private:
     void Init();
@@ -102,6 +102,10 @@ private:
     bool SubscribeCommonEvent();
     bool SubscribeBundleEvent();
     void DelayUnloadTask();
+    bool VerifyCallingPermission(const std::string &permissionName);
+    bool VerifySystemApp();
+    void QueryBusinessAbilityInfosInner(const BusinessAbilityFilter& filter,
+        std::vector<BusinessAbilityInfo>& businessAbilityInfos, int32_t& funcResult);
 
     std::shared_ptr<EventRunner> runner_ = nullptr;
     std::shared_ptr<EventHandler> handler_ = nullptr;

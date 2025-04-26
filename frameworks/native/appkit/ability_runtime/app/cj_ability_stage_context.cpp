@@ -24,14 +24,14 @@ namespace {
 const char* CJ_ABILITY_LIBNAME = "libcj_ability_ffi.z.so";
 const char* FUNC_CONVERT_CONFIGURATION = "OHOS_ConvertConfiguration";
 const char* CJ_BUNDLE_MGR_LIBNAME = "libcj_bundle_manager_ffi.z.so";
-const char* FUNC_CONVERT_HAP_INFO = "OHOS_ConvertHapInfo";
+const char* FUNC_CONVERT_HAP_INFO = "OHOS_ConvertHapInfoV2";
 }
 
 namespace OHOS {
 namespace AbilityRuntime {
 CConfiguration CallConvertConfig(std::shared_ptr<AppExecFwk::Configuration> configuration)
 {
-    CConfiguration cCfg;
+    CConfiguration cCfg = {};
     void* handle = dlopen(CJ_ABILITY_LIBNAME, RTLD_LAZY);
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
@@ -49,15 +49,15 @@ CConfiguration CallConvertConfig(std::shared_ptr<AppExecFwk::Configuration> conf
     return cCfg;
 }
 
-RetHapModuleInfo CallConvertHapInfo(std::shared_ptr<AppExecFwk::HapModuleInfo> hapInfo)
+RetHapModuleInfoV2 CallConvertHapInfo(std::shared_ptr<AppExecFwk::HapModuleInfo> hapInfo)
 {
-    RetHapModuleInfo retInfo;
+    RetHapModuleInfoV2 retInfo = {};
     void* handle = dlopen(CJ_BUNDLE_MGR_LIBNAME, RTLD_LAZY);
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null handle");
         return retInfo;
     }
-    using ConvertHapInfoFunc = RetHapModuleInfo (*)(void*);
+    using ConvertHapInfoFunc = RetHapModuleInfoV2 (*)(void*);
     auto func = reinterpret_cast<ConvertHapInfoFunc>(dlsym(handle, FUNC_CONVERT_HAP_INFO));
     if (func == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null func");
@@ -69,18 +69,18 @@ RetHapModuleInfo CallConvertHapInfo(std::shared_ptr<AppExecFwk::HapModuleInfo> h
     return retInfo;
 }
 
-RetHapModuleInfo CJAbilityStageContext::GetRetHapModuleInfo()
+RetHapModuleInfoV2 CJAbilityStageContext::GetRetHapModuleInfo()
 {
     auto context = GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "context is null, getHapModuleInfo failed. ");
-        return RetHapModuleInfo();
+        return RetHapModuleInfoV2();
     }
 
     auto hapInfo = context->GetHapModuleInfo();
     if (hapInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "CurrentHapMoudleInfo is nullptr.");
-        return RetHapModuleInfo();
+        return RetHapModuleInfoV2();
     }
 
     return CallConvertHapInfo(hapInfo);

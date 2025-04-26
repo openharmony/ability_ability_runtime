@@ -236,6 +236,9 @@ bool NapiAsyncTask::StartWithDefaultQos(const std::string &name, napi_env env)
     if (env == nullptr) {
         return false;
     }
+    if (execute_ == nullptr) {
+        return SendNapiEvent(env, napi_eprio_high);
+    }
     NativeEngine* engine = reinterpret_cast<NativeEngine*>(env);
     work_ = reinterpret_cast<napi_async_work>(engine->CreateAsyncWork(name,
         reinterpret_cast<NativeAsyncExecuteCallback>(Execute),
@@ -376,6 +379,9 @@ bool NapiAsyncTask::Start(const std::string &name, napi_env env)
     if (env == nullptr) {
         return false;
     }
+    if (execute_ == nullptr) {
+        return SendNapiEvent(env, napi_eprio_high);
+    }
     env_ = env;
     NativeEngine* engine = reinterpret_cast<NativeEngine*>(env);
     work_ = reinterpret_cast<napi_async_work>(engine->CreateAsyncWork(name,
@@ -394,6 +400,9 @@ bool NapiAsyncTask::StartHighQos(const std::string &name, napi_env env)
     if (env == nullptr) {
         return false;
     }
+    if (execute_ == nullptr) {
+        return SendNapiEvent(env, napi_eprio_immediate);
+    }
     NativeEngine* engine = reinterpret_cast<NativeEngine*>(env);
     work_ = reinterpret_cast<napi_async_work>(engine->CreateAsyncWork(name,
         reinterpret_cast<NativeAsyncExecuteCallback>(Execute),
@@ -411,11 +420,29 @@ bool NapiAsyncTask::StartLowQos(const std::string &name, napi_env env)
     if (env == nullptr) {
         return false;
     }
+    if (execute_ == nullptr) {
+        return SendNapiEvent(env, napi_eprio_low);
+    }
     NativeEngine* engine = reinterpret_cast<NativeEngine*>(env);
     work_ = reinterpret_cast<napi_async_work>(engine->CreateAsyncWork(name,
         reinterpret_cast<NativeAsyncExecuteCallback>(Execute),
         reinterpret_cast<NativeAsyncCompleteCallback>(Complete), this));
     napi_queue_async_work_with_qos(env, work_, napi_qos_utility);
+    return true;
+}
+
+bool NapiAsyncTask::SendNapiEvent(napi_env env, napi_event_priority eventPriority)
+{
+    if (napi_send_event(
+        env,
+        [env, this]() {
+            napi_status status = napi_ok;
+            Complete(env, status, this);
+        },
+        eventPriority) != napi_ok) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "SendNapiEvent failed");
+        return false;
+    }
     return true;
 }
 

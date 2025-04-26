@@ -14,13 +14,14 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/abilitymgr"
+module_output_path = "ability_runtime/ability_runtime/abilitymgr"
 
 ohos_unittest("ui_ability_lifecycle_manager_test") {
   module_out_path = module_output_path
 
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager/include/status_bar_delegate",
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_services_path}/abilitymgr/include/",
     "${ability_runtime_services_path}/abilitymgr/include/scene_board/",
@@ -43,6 +44,7 @@ ohos_unittest("ui_ability_lifecycle_manager_test") {
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/status_bar_delegate_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
     "${ability_runtime_services_path}/common/src/event_report.cpp",
+    "mock/include/ipc_skeleton.cpp",
     "ui_ability_lifecycle_manager_test.cpp",
   ]
 

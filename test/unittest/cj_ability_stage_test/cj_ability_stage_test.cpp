@@ -81,7 +81,7 @@ void CjAbilityStageTest::TearDown(void)
  * @tc.desc: CjAbilityStageTest test for Create.
  * @tc.type: FUNC
  */
-HWTEST_F(CjAbilityStageTest, CjAbilityStageTestCreate_001, TestSize.Level0)
+HWTEST_F(CjAbilityStageTest, CjAbilityStageTestCreate_001, TestSize.Level2)
 {
     AppExecFwk::HapModuleInfo hapModuleInfo;
     std::unique_ptr<Runtime> nullRuntime = nullptr;
@@ -98,7 +98,7 @@ HWTEST_F(CjAbilityStageTest, CjAbilityStageTestCreate_001, TestSize.Level0)
  * @tc.desc: CjAbilityStageTest test for OnCreate.
  * @tc.type: FUNC
  */
-HWTEST_F(CjAbilityStageTest, CjAbilityStageTestOnCreate_001, TestSize.Level0)
+HWTEST_F(CjAbilityStageTest, CjAbilityStageTestOnCreate_001, TestSize.Level2)
 {
     AAFwk::Want want;
     cjAbilityStage_->OnCreate(want);
@@ -112,7 +112,7 @@ HWTEST_F(CjAbilityStageTest, CjAbilityStageTestOnCreate_001, TestSize.Level0)
  * @tc.desc: CjAbilityStageTest test for OnAcceptWant.
  * @tc.type: FUNC
  */
-HWTEST_F(CjAbilityStageTest, CjAbilityStageTestOnAcceptWant_001, TestSize.Level0)
+HWTEST_F(CjAbilityStageTest, CjAbilityStageTestOnAcceptWant_001, TestSize.Level2)
 {
     AAFwk::Want want;
     auto info = cjAbilityStage_->OnAcceptWant(want);
@@ -126,7 +126,7 @@ HWTEST_F(CjAbilityStageTest, CjAbilityStageTestOnAcceptWant_001, TestSize.Level0
  * @tc.desc: CjAbilityStageTest test for OnMemoryLevel.
  * @tc.type: FUNC
  */
-HWTEST_F(CjAbilityStageTest, CjAbilityStageTestOnMemoryLevel_001, TestSize.Level0)
+HWTEST_F(CjAbilityStageTest, CjAbilityStageTestOnMemoryLevel_001, TestSize.Level2)
 {
     int level = 1;
     cjAbilityStage_->OnMemoryLevel(level);

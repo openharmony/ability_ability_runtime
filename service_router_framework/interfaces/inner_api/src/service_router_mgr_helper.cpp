@@ -41,13 +41,13 @@ void ServiceRouterMgrHelper::OnRemoteDiedHandle()
     isReady = false;
 }
 
-void ServiceRouterMgrHelper::SetServiceRouterMgr(const sptr<IServiceRouterManager> &serviceRouterMgr)
+void ServiceRouterMgrHelper::SetServiceRouterMgr(const sptr<IServiceRouterMgr> &serviceRouterMgr)
 {
     std::unique_lock<std::mutex> lock(mgrMutex_);
     routerMgr_ = serviceRouterMgr;
 }
 
-sptr<IServiceRouterManager> ServiceRouterMgrHelper::InnerGetServiceRouterMgr()
+sptr<IServiceRouterMgr> ServiceRouterMgrHelper::InnerGetServiceRouterMgr()
 {
     std::unique_lock<std::mutex> lock(mgrMutex_);
     return routerMgr_;
@@ -80,7 +80,7 @@ void ServiceRouterMgrHelper::LoadSA()
 void ServiceRouterMgrHelper::FinishStartSASuccess(const sptr<IRemoteObject> &remoteObject)
 {
     TAG_LOGD(AAFwkTag::SER_ROUTER, "Called");
-    SetServiceRouterMgr(OHOS::iface_cast<IServiceRouterManager>(remoteObject));
+    SetServiceRouterMgr(OHOS::iface_cast<IServiceRouterMgr>(remoteObject));
 
     {
         std::unique_lock<std::mutex> lock(cvLock_);
@@ -106,7 +106,7 @@ void ServiceRouterMgrHelper::FinishStartSAFail()
     mgrConn_.notify_one();
 }
 
-sptr<IServiceRouterManager> ServiceRouterMgrHelper::GetServiceRouterMgr()
+sptr<IServiceRouterMgr> ServiceRouterMgrHelper::GetServiceRouterMgr()
 {
     auto routerMgr = InnerGetServiceRouterMgr();
     if (routerMgr != nullptr) {

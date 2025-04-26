@@ -52,7 +52,7 @@ constexpr const char* TASK_ATTACHED_TO_STATUS_BAR = "AttachedToStatusBar";
 constexpr const char* TASK_BLOCK_PROCESS_CACHE_BY_PIDS = "BlockProcessCacheByPids";
 constexpr const char* POWER_OFF_ABILITY = "PoweroffAbility";
 constexpr int32_t SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME = 1000;
-constexpr int32_t LOAD_TASK_TIMEOUT = 30000; // ms
+constexpr int32_t LOAD_TASK_TIMEOUT = 60000; // ms
 };  // namespace
 
 AmsMgrScheduler::AmsMgrScheduler(
@@ -242,7 +242,7 @@ void AmsMgrScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSp
     amsHandler_->SubmitTask(killProcessesByUserIdFunc, TASK_KILL_PROCESSES_BY_USERID);
 }
 
-void AmsMgrScheduler::KillProcessesByPids(std::vector<int32_t> &pids)
+void AmsMgrScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason)
 {
     if (!IsReady()) {
         return;
@@ -255,8 +255,9 @@ void AmsMgrScheduler::KillProcessesByPids(std::vector<int32_t> &pids)
         return;
     }
 
-    std::function<void()> killProcessesByPidsFunc = [amsMgrServiceInner = amsMgrServiceInner_, pids]() mutable {
-        amsMgrServiceInner->KillProcessesByPids(pids);
+    std::function<void()> killProcessesByPidsFunc = [amsMgrServiceInner = amsMgrServiceInner_,
+        pidsInner = pids, reasonInner = reason]() {
+        amsMgrServiceInner->KillProcessesByPids(pidsInner, reasonInner);
     };
     amsHandler_->SubmitTask(killProcessesByPidsFunc, TASK_KILL_PROCESSES_BY_PIDS);
 }
@@ -337,13 +338,13 @@ void AmsMgrScheduler::PrepareTerminate(const sptr<IRemoteObject> &token, bool cl
 }
 
 int32_t AmsMgrScheduler::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
-    const std::string &moduleName)
+    const std::string &moduleName, bool isPlugin)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
 
-    return amsMgrServiceInner_->UpdateApplicationInfoInstalled(bundleName, uid, moduleName);
+    return amsMgrServiceInner_->UpdateApplicationInfoInstalled(bundleName, uid, moduleName, isPlugin);
 }
 
 int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
@@ -550,7 +551,7 @@ int32_t AmsMgrScheduler::UnregisterAppDebugListener(const sptr<IAppDebugListener
     return amsMgrServiceInner_->UnregisterAppDebugListener(listener);
 }
 
-int32_t AmsMgrScheduler::AttachAppDebug(const std::string &bundleName)
+int32_t AmsMgrScheduler::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
@@ -560,7 +561,7 @@ int32_t AmsMgrScheduler::AttachAppDebug(const std::string &bundleName)
         TAG_LOGE(AAFwkTag::APPMGR, "caller is not foundation");
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->AttachAppDebug(bundleName);
+    return amsMgrServiceInner_->AttachAppDebug(bundleName, isDebugFromLocal);
 }
 
 int32_t AmsMgrScheduler::DetachAppDebug(const std::string &bundleName)
@@ -688,6 +689,19 @@ bool AmsMgrScheduler::IsMemorySizeSufficent()
         return true;
     }
     return amsMgrServiceInner_->IsMemorySizeSufficient();
+}
+
+bool AmsMgrScheduler::IsNoRequireBigMemory()
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return true;
+    }
+    if (amsMgrServiceInner_->VerifyRequestPermission() != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        return true;
+    }
+    return amsMgrServiceInner_->IsNoRequireBigMemory();
 }
 
 void AmsMgrScheduler::AttachedToStatusBar(const sptr<IRemoteObject> &token)

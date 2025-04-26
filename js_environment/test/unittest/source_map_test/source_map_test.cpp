@@ -177,7 +177,7 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_0900, Function | MediumTest | Level1)
     int32_t row = 249;
     int32_t col = 3;
     SourceMapData targetMap;
-    targetMap.sources_.emplace_back("sources");
+    targetMap.sources_ = ("sources");
     for (int32_t i = 0; i < 10; i++) {
         for (int32_t j = 0; j < 5; j++) {
             SourceMapInfo mapInfo;
@@ -206,7 +206,7 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_1000, Function | MediumTest | Level1)
     int32_t row = 2;
     int32_t col = 3;
     SourceMapData targetMap;
-    targetMap.sources_.emplace_back("sources");
+    targetMap.sources_ = ("sources");
     for (int32_t i = 0; i < 10; i++) {
         for (int32_t j = 0; j < 5; j++) {
             SourceMapInfo mapInfo;
@@ -241,23 +241,6 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_1300, Function | MediumTest | Level1)
     EXPECT_STREQ(line.c_str(), "5779");
     EXPECT_STREQ(column.c_str(), "5");
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_1300 end";
-}
-
-/**
- * @tc.number: JsEnv_SourceMap_1400
- * @tc.name: GetRelativePath
- * @tc.desc: Verifying GetRelativePath succeeded.
- * @tc.require: #I6T4K1
- */
-HWTEST_F(SourceMapTest, JsEnv_SourceMap_1400, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "JsEnv_SourceMap_1400 start";
-    auto modSourceMap = std::make_shared<SourceMap>();
-
-    std::string sources = "TEST:/data/app/MainAbility.js";
-    auto res = modSourceMap->GetRelativePath(sources);
-    EXPECT_STREQ(res.c_str(), "/data/app/MainAbility.js");
-    GTEST_LOG_(INFO) << "JsEnv_SourceMap_1400 end";
 }
 
 /**
@@ -411,8 +394,7 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_1900, Function | MediumTest | Level1)
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_1900 start";
     SourceMapData targetMap;
     std::string packageName;
-    targetMap.entryPackageInfo_.emplace_back("    \"entry-package-info\": \"entry|1.0.0\n");
-    targetMap.packageInfo_.emplace_back("");
+    targetMap.packageName_ = "    \"entry-package-info\": \"entry|1.0.0\n";
     SourceMap::GetPackageName(targetMap, packageName);
     EXPECT_STREQ("entry", packageName.c_str());
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_1900 end";
@@ -423,11 +405,152 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_2000, Function | MediumTest | Level1)
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_2000 start";
     SourceMapData targetMap;
     std::string packageName;
-    targetMap.entryPackageInfo_.emplace_back("    \"entry-package-info\": \"entrypackageinfo|1.0.0\n");
-    targetMap.packageInfo_.emplace_back("    \"package-info\": \"packageinfo|1.0.0\n");
+    targetMap.packageName_ = "    \"package-info\": \"packageinfo|1.0.0\n";
+    targetMap.isPackageInfo_ = true;
     SourceMap::GetPackageName(targetMap, packageName);
     EXPECT_STREQ("packageinfo", packageName.c_str());
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_2000 end";
+}
+
+HWTEST_F(SourceMapTest, JsEnv_SourceMap_2100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2100 start";
+    std::string input = "at anonymous (entry/src/main/ets/pages/Index.ts:111:13)";
+    std::string expected = "entry/src/main/ets/pages/Index.ts";
+    std::string actual = SourceMap::ExtractFileName(input);
+    EXPECT_STREQ(expected.c_str(), actual.c_str());
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2100 end";
+}
+
+HWTEST_F(SourceMapTest, JsEnv_SourceMap_2200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2200 start";
+    std::string input = "at anonymous (@p:ad|entry/src/main/ets/pages/Index.ts:111:13)";
+    std::string expected = "@p:ad|entry/src/main/ets/pages/Index.ts";
+    std::string actual = SourceMap::ExtractFileName(input);
+    EXPECT_STREQ(expected.c_str(), actual.c_str());
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2200 end";
+}
+
+HWTEST_F(SourceMapTest, JsEnv_SourceMap_2300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2300 start";
+    std::string input = "";
+    std::string expected = "";
+    std::string actual = SourceMap::ExtractFileName(input);
+    EXPECT_STREQ(expected.c_str(), actual.c_str());
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_2300 end";
+}
+
+/**
+ * @tc.number: VlqRevCode_0100
+ * @tc.name: VlqRevCode
+ * @tc.desc: test VlqRevCode
+ * @tc.require: #I6T4K1
+ */
+HWTEST_F(SourceMapTest, VlqRevCode_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "VlqRevCode_0100 start";
+    auto mapObj = std::make_shared<SourceMap>();
+    EXPECT_NE(mapObj, nullptr);
+    std::string str = "@";
+    std::vector<int32_t> ans;
+    auto ret = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret, false);
+
+    str = "A";
+    auto ret1 = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret1, true);
+
+    str = "a";
+    auto ret2 = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret2, true);
+
+    str = "0";
+    auto ret3 = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret3, false);
+
+    str = "+";
+    auto ret4 = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret4, false);
+
+    str = "/";
+    auto ret5 = mapObj->VlqRevCode(str, ans);
+    EXPECT_EQ(ret5, false);
+    GTEST_LOG_(INFO) << "VlqRevCode_0100 end";
+}
+
+/**
+ * @tc.number: TranslateUrlPositionBySourceMap_0100
+ * @tc.name: TranslateUrlPositionBySourceMap
+ * @tc.desc: test TranslateUrlPositionBySourceMap
+ * @tc.require: #I6T4K1
+ */
+HWTEST_F(SourceMapTest, TranslateUrlPositionBySourceMap_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "TranslateUrlPositionBySourceMap_0100 start";
+    auto mapObj = std::make_shared<SourceMap>();
+    EXPECT_NE(mapObj, nullptr);
+    std::string url = "test";
+    int line = 1;
+    int column = 1;
+    std::string packageName = "packageName";
+    auto ret = mapObj->TranslateUrlPositionBySourceMap(url, line, column, packageName);
+    EXPECT_EQ(ret, false);
+
+    auto sourceMapData = std::make_shared<SourceMapData>();
+    std::string key = "test";
+    mapObj->sourceMaps_.insert(std::make_pair(key, sourceMapData));
+    ret = mapObj->TranslateUrlPositionBySourceMap(url, line, column, packageName);
+    EXPECT_EQ(ret, true);
+    GTEST_LOG_(INFO) << "TranslateUrlPositionBySourceMap_0100 end";
+}
+
+/**
+ * @tc.number: HandleMappings_0100
+ * @tc.name: HandleMappings
+ * @tc.desc: test HandleMappings
+ * @tc.require: #I6T4K1
+ */
+HWTEST_F(SourceMapTest, HandleMappings_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "HandleMappings_0100 start";
+    auto mapObj = std::make_shared<SourceMap>();
+    EXPECT_NE(mapObj, nullptr);
+    std::string testMapping = "t,es;t";
+    auto keyInfo = mapObj->HandleMappings(testMapping);
+    EXPECT_EQ(keyInfo.empty(), false);
+    GTEST_LOG_(INFO) << "HandleMappings_0100 end";
+}
+
+/**
+ * @tc.number: GetLineAndColumnNumbers_0100
+ * @tc.name: GetLineAndColumnNumbers
+ * @tc.desc: test GetLineAndColumnNumbers
+ * @tc.require: #I6T4K1
+ */
+HWTEST_F(SourceMapTest, GetLineAndColumnNumbers_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetLineAndColumnNumbers_0100 start";
+    auto mapObj = std::make_shared<SourceMap>();
+    EXPECT_NE(mapObj, nullptr);
+    int line = 0;
+    int column = 0;
+    SourceMapData targetMap;
+    std::string url = "url";
+    std::string packageName = "packageName";
+    auto ret = mapObj->GetLineAndColumnNumbers(line, column, targetMap, url, packageName);
+    EXPECT_EQ(ret, false);
+
+    column = 1;
+    auto ret1 = mapObj->GetLineAndColumnNumbers(line, column, targetMap, url, packageName);
+    EXPECT_EQ(ret1, false);
+
+    line = 1;
+    column = 0;
+    auto ret2 = mapObj->GetLineAndColumnNumbers(line, column, targetMap, url, packageName);
+    EXPECT_EQ(ret2, false);
+    GTEST_LOG_(INFO) << "GetLineAndColumnNumbers_0100 end";
 }
 } // namespace AppExecFwk
 } // namespace OHOS

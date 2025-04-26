@@ -61,6 +61,11 @@ class AppMgrServiceInner;
 class AppRunningRecord;
 class AppRunningManager;
 
+struct SpecifiedRequest {
+    int32_t requestId = 0;
+    AAFwk::Want want;
+};
+
 class AppRunningRecord : public std::enable_shared_from_this<AppRunningRecord> {
 public:
     static int64_t appEventId_;
@@ -275,7 +280,7 @@ public:
      */
     void AddModule(std::shared_ptr<ApplicationInfo> appInfo, std::shared_ptr<AbilityInfo> abilityInfo,
         sptr<IRemoteObject> token, const HapModuleInfo &hapModuleInfo,
-        std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId, int32_t persistentId = 0);
+        std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
 
     /**
      * @brief Batch adding modules whose stages will be loaded
@@ -645,9 +650,9 @@ public:
      */
     int32_t GetSpecifiedRequestId() const;
     /**
-     * Called when one specified request is finished to set the request id to -1
+     * Called when one specified request is finished to clear the request
      */
-    void ResetSpecifiedRequestId();
+    void ResetSpecifiedRequest();
 
     void SchedulePrepareTerminate(const std::string &moduleName);
 
@@ -668,7 +673,7 @@ public:
     AAFwk::Want GetSpecifiedWant() const;
     AAFwk::Want GetNewProcessRequestWant() const;
     int32_t GetNewProcessRequestId() const;
-    void ResetNewProcessRequestId();
+    void ResetNewProcessRequest();
     bool IsDebug();
     void SetDebugApp(bool isDebugApp);
     /**
@@ -801,7 +806,7 @@ public:
      */
     int32_t ChangeAppGcState(int32_t state);
 
-    void SetAttachDebug(bool isAttachDebug);
+    void SetAttachDebug(bool isAttachDebug, bool isDebugFromLocal);
     bool IsAttachDebug() const;
 
     void SetApplicationPendingState(ApplicationPendingState pendingState);
@@ -1049,6 +1054,13 @@ public:
         return reasonExist_;
     }
 
+    void SetDebugFromLocal(bool isDebugFromLocal);
+
+    bool GetDebugFromLocal() const
+    {
+        return isDebugFromLocal_;
+    }
+
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1149,8 +1161,6 @@ private:
     int32_t appRecordId_ = 0;
     int32_t mainUid_;
     int restartResidentProcCount_ = 0;
-    int32_t specifiedRequestId_ = -1;
-    int32_t newProcessRequestId_ = -1;
     int32_t exitReason_ = 0;
     int32_t appIndex_ = 0; // render record
     int32_t requestProcCode_ = 0; // render record
@@ -1162,7 +1172,7 @@ private:
     ProcessType processType_ = ProcessType::NORMAL;
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
     PreloadState preloadState_ = PreloadState::NONE;
-    PreloadMode preloadMode_ = PreloadMode::PRESS_DOWN;
+    PreloadMode preloadMode_ = PreloadMode::PRELOAD_NONE;
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
     int64_t restartTimeMillis_ = 0; // The time of last trying app restart
@@ -1189,9 +1199,9 @@ private:
     std::string appIdentifier_;
 
     mutable std::mutex specifiedMutex_;
-    AAFwk::Want specifiedWant_;
+    std::shared_ptr<SpecifiedRequest> specifiedAbilityRequest_;
+    std::shared_ptr<SpecifiedRequest> specifiedProcessRequest_;
     std::string moduleName_;
-    AAFwk::Want newProcessRequestWant_;
 
     std::string perfCmd_;
     std::string preloadModuleName_;
@@ -1223,6 +1233,7 @@ private:
     int32_t rssValue_ = 0;
     int32_t pssValue_ = 0;
     bool reasonExist_ = false;
+    bool isDebugFromLocal_ = false;
 };
 
 }  // namespace AppExecFwk

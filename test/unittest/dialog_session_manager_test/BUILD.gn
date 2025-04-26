@@ -14,9 +14,10 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/abilitymgr"
+module_output_path = "ability_runtime/ability_runtime/abilitymgr"
 
 ohos_unittest("dialog_session_manager_test") {
+  use_exceptions = true
   module_out_path = module_output_path
 
   sanitize = {
@@ -51,11 +52,13 @@ ohos_unittest("dialog_session_manager_test") {
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:app_util",
+    "${ability_runtime_services_path}/common:record_cost_time_util",
     "${ability_runtime_services_path}/common:task_handler_wrap",
   ]
 
   external_deps = [
     "ability_base:want",
+    "ability_base:zuri",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",

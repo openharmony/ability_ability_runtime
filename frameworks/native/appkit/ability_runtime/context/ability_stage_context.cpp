@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "context.h"
 #include "context_impl.h"
 #include "hilog_tag_wrapper.h"
+#include "resource_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -46,6 +47,26 @@ void AbilityStageContext::InitHapModuleInfo(const std::shared_ptr<AppExecFwk::Ab
     }
 
     contextImpl_->InitHapModuleInfo(abilityInfo);
+}
+
+void AbilityStageContext::InitPluginHapModuleInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
+    const std::string &hostBundleName)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
+        return;
+    }
+
+    contextImpl_->InitPluginHapModuleInfo(abilityInfo, hostBundleName);
+}
+
+void AbilityStageContext::SetIsPlugin(bool isPlugin)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
+        return;
+    }
+    contextImpl_->isPlugin_ = isPlugin;
 }
 
 void AbilityStageContext::InitHapModuleInfo(const AppExecFwk::HapModuleInfo &hapModuleInfo)
@@ -126,6 +147,17 @@ std::shared_ptr<AppExecFwk::ApplicationInfo> AbilityStageContext::GetApplication
     }
 
     return contextImpl_->GetApplicationInfo();
+}
+
+std::shared_ptr<Context> AbilityStageContext::CreatePluginContext(const std::string &pluginBundleName,
+    const std::string &moduleName, std::shared_ptr<Context> inputContext)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
+        return nullptr;
+    }
+
+    return contextImpl_->CreatePluginContext(pluginBundleName, moduleName, inputContext);
 }
 
 std::shared_ptr<Context> AbilityStageContext::CreateBundleContext(const std::string &bundleName)

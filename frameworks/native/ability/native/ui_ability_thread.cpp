@@ -393,7 +393,7 @@ bool UIAbilityThread::SchedulePrepareTerminateAbility()
         TAG_LOGE(AAFwkTag::UIABILITY, "postTask error");
         return false;
     }
-    return false;
+    return true;
 }
 
 bool UIAbilityThread::HandlePrepareTermianteAbility()
@@ -696,6 +696,60 @@ void UIAbilityThread::ScheduleCollaborate(const Want &want)
         }
     };
     bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:ScheduleCollaborate");
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "postTask error");
+        return;
+    }
+}
+
+void UIAbilityThread::ScheduleAbilityRequestFailure(const std::string &requestId,
+    const AppExecFwk::ElementName &element, const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "ScheduleAbilityRequestFailure called");
+    if (abilityImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
+        return;
+    }
+    wptr<UIAbilityThread> weak = this;
+    auto task = [weak, requestId, element, message]() {
+        auto abilityThread = weak.promote();
+        if (abilityThread == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityThread");
+            return;
+        }
+        if (abilityThread->abilityImpl_ != nullptr) {
+            abilityThread->abilityImpl_->ScheduleAbilityRequestFailure(requestId, element, message);
+            return;
+        }
+    };
+    bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:ScheduleAbilityRequestFailure");
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "postTask error");
+        return;
+    }
+}
+
+void UIAbilityThread::ScheduleAbilityRequestSuccess(const std::string &requestId,
+    const AppExecFwk::ElementName &element, const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "ScheduleAbilityRequestSuccess called");
+    if (abilityImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
+        return;
+    }
+    wptr<UIAbilityThread> weak = this;
+    auto task = [weak, requestId, element, message]() {
+        auto abilityThread = weak.promote();
+        if (abilityThread == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityThread");
+            return;
+        }
+        if (abilityThread->abilityImpl_ != nullptr) {
+            abilityThread->abilityImpl_->ScheduleAbilityRequestSuccess(requestId, element, message);
+            return;
+        }
+    };
+    bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:ScheduleAbilityRequestSuccess");
     if (!ret) {
         TAG_LOGE(AAFwkTag::UIABILITY, "postTask error");
         return;

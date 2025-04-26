@@ -173,14 +173,14 @@ FreeInstallInfo FreeInstallManager::BuildFreeInstallInfo(const Want &want, int32
         param = std::make_shared<FreeInstallParams>();
     }
     FreeInstallInfo info = {
-        .want = want,
+        .isOpenAtomicServiceShortUrl = param->isOpenAtomicServiceShortUrl,
+        .specifyTokenId = param->specifyTokenId,
         .userId = userId,
         .requestCode = requestCode,
         .callerToken = callerToken,
-        .specifyTokenId = param->specifyTokenId,
-        .isOpenAtomicServiceShortUrl = param->isOpenAtomicServiceShortUrl,
         .originalWant = param->originalWant,
-        .startOptions = param->startOptions
+        .startOptions = param->startOptions,
+        .want = want
     };
     if (!param->isAsync) {
         auto promise = std::make_shared<std::promise<int32_t>>();
@@ -322,6 +322,16 @@ void FreeInstallManager::HandleOnFreeInstallFail(int32_t recordId, FreeInstallIn
 {
     TAG_LOGI(AAFwkTag::FREE_INSTALL, "install failed");
     freeInstallInfo.isInstalled = false;
+
+    if (freeInstallInfo.startOptions != nullptr && !freeInstallInfo.startOptions->requestId_.empty()) {
+        auto abilityRecord = Token::GetAbilityRecordByToken(freeInstallInfo.callerToken);
+        if (abilityRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::FREE_INSTALL, "null ability record");
+            return;
+        }
+        abilityRecord->NotifyAbilityRequestFailure(freeInstallInfo.startOptions->requestId_,
+            freeInstallInfo.want.GetElement(), "free install failed");
+    }
 
     if (isAsync) {
         if (freeInstallInfo.isPreStartMissionCalled &&
@@ -485,10 +495,10 @@ int FreeInstallManager::FreeInstallAbilityFromRemote(const Want &want, const spt
     }
 
     FreeInstallInfo info = {
-        .want = want,
         .userId = userId,
         .requestCode = requestCode,
-        .dmsCallback = callback
+        .dmsCallback = callback,
+        .want = want
     };
 
     {

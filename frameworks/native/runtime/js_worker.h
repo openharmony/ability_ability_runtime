@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ namespace AbilityRuntime {
 void StartDebuggerInWorkerModule(bool isDebugApp, bool isNativeStart);
 void InitWorkerFunc(NativeEngine* nativeEngine);
 void OffWorkerFunc(NativeEngine* nativeEngine);
+void ReleaseWorkerSafeMemFunc(void* mapper);
 int32_t GetContainerId();
 void UpdateContainerScope(int32_t id);
 void RestoreContainerScope(int32_t id);
@@ -33,36 +34,30 @@ void SetJsFramework();
 
 class AssetHelper final {
 public:
-    explicit AssetHelper(std::shared_ptr<JsEnv::WorkerInfo> workerInfo) : workerInfo_(workerInfo)
-    {
-        panda::panda_file::StringPacProtect codePath = panda::panda_file::StringPacProtect(workerInfo_->codePath);
-        if (!(codePath.GetOriginString()).empty() && (codePath.GetOriginString()).back() != '/') {
-            (workerInfo_->codePath).Append('/');
-        }
-    }
+    explicit AssetHelper(std::shared_ptr<JsEnv::WorkerInfo> workerInfo);
 
     virtual ~AssetHelper();
 
     void operator()(const std::string& uri, uint8_t** buff, size_t* buffSize, std::vector<uint8_t>& content,
-        std::string& ami, bool& useSecureMem, bool isRestricted = false);
+        std::string& ami, bool& useSecureMem, void** mapper, bool isRestricted = false);
 
 private:
     std::string NormalizedFileName(const std::string& fileName) const;
 
     bool ReadAmiData(const std::string& ami, uint8_t** buff, size_t* buffSize, std::vector<uint8_t>& content,
-        bool& useSecureMem, bool isRestricted);
+        bool& useSecureMem, bool isRestricted, void** mapper);
 
     bool ReadFilePathData(const std::string& filePath, uint8_t** buff, size_t* buffSize, std::vector<uint8_t>& content,
-        bool& useSecureMem, bool isRestricted);
+        bool& useSecureMem, bool isRestricted, void** mapper);
 
     void GetAmi(std::string& ami, const std::string& filePath);
 
-    bool GetSafeData(const std::string& ami, uint8_t** buff, size_t* buffSize);
+    bool GetSafeData(const std::string& ami, uint8_t** buff, size_t* buffSize, void** mapper);
     
     bool GetIsStageModel();
 
     std::shared_ptr<JsEnv::WorkerInfo> workerInfo_ = nullptr;
-    int fd_ = -1;
+    FILE *file_ = nullptr;
 };
 
 } // namespace AbilityRuntime

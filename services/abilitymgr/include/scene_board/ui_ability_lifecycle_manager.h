@@ -34,10 +34,16 @@ class StatusBarDelegateManager;
 struct AbilityRunningInfo;
 struct MissionValidResult;
 
+enum class SpecifiedProcessState: u_int8_t {
+    STATE_NONE = 0,
+    STATE_PROCESS = 1,
+    STATE_ABILITY = 2
+};
+
 struct SpecifiedRequest {
     bool preCreateProcessName = false;
     bool isCold = false;
-    bool isSpecifiedProcess = false;
+    SpecifiedProcessState specifiedProcessState = SpecifiedProcessState::STATE_NONE;
     int32_t requestId = 0;
     int32_t persistentId = 0;
     uint32_t sceneFlag = 0;
@@ -84,7 +90,7 @@ public:
      * @return execute error code
      */
     int AbilityWindowConfigTransactionDone(
-        const sptr<IRemoteObject> &token, const AppExecFwk::WindowConfig &windowConfig);
+        const sptr<IRemoteObject> &token, const WindowConfig &windowConfig);
 
     /**
      * attach ability thread ipc object.
@@ -202,29 +208,36 @@ public:
      * @param abilityRequest the flag of the ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId = 0);
+    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId);
 
     /**
      * OnStartSpecifiedProcessResponse.
      *
-     * @param want the want of the ability to start.
-     * @param abilityRequest target ability request.
+     * @param requestId target ability requestId.
      */
-    void OnStartSpecifiedProcessResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId = 0);
+    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId);
 
     /**
      * OnStartSpecifiedAbilityTimeoutResponse.
      *
-     * @param want the want of the ability to start.
+     * @param requestId the requestId of the ability to start.
      */
-    void OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want, int32_t requestId = 0);
+    void OnStartSpecifiedAbilityTimeoutResponse(int32_t requestId);
 
     /**
      * OnStartSpecifiedProcessTimeoutResponse.
      *
-     * @param want the want of the ability to start.
+     * @param requestId the requestId of the ability to start.
      */
-    void OnStartSpecifiedProcessTimeoutResponse(const AAFwk::Want &want, int32_t requestId = 0);
+    void OnStartSpecifiedProcessTimeoutResponse(int32_t requestId);
+
+    /**
+     * OnStartSpecifiedFailed.
+     *
+     * @param requestId request id of the failed request.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    void OnStartSpecifiedFailed(int32_t requestId);
 
     /**
      * Start specified ability by SCB.
@@ -370,11 +383,22 @@ public:
 
     void EnableListForSCBRecovery();
 
+    void SetKillForPermissionUpdateFlag(uint32_t accessTokenId);
+
     void PrepareTerminateAbilityDone(std::shared_ptr<AbilityRecord> abilityRecord, bool isTerminate);
 
     void TryPrepareTerminateByPidsDone(const std::string &moduleName, int32_t prepareTermination, bool isExist);
+    
+    int32_t RevokeDelegator(sptr<IRemoteObject> token);
+
+    bool IsBundleStarting(pid_t pid);
+
+    void RecordPidKilling(pid_t pid, const std::string &reason);
 
 private:
+    void AddStartingPid(pid_t pid);
+    void RemoveStartingPid(pid_t pid);
+    void MarkStartingFlag(const AbilityRequest &abilityRequest);
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse) const;
     int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
     int32_t GetReusedStandardPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
@@ -396,7 +420,7 @@ private:
         AbilityState state = AbilityState::INITIAL);
     void HandleForegroundTimeout(const std::shared_ptr<AbilityRecord> &ability);
     void NotifySCBToHandleException(const std::shared_ptr<AbilityRecord> &ability, int32_t errorCode,
-        const std::string& errorReason);
+        const std::string& errorReason, bool needClearCallerLink = true);
     void MoveToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void PrintTimeOutLog(std::shared_ptr<AbilityRecord> ability, uint32_t msgId, bool isHalf = false);
@@ -417,6 +441,7 @@ private:
     int CallAbilityLocked(const AbilityRequest &abilityRequest);
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
+    bool IsHookModule(const AbilityRequest &abilityRequest) const;
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
     std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
     void HandleForegroundCollaborate(const AbilityRequest &abilityRequest,
@@ -495,10 +520,17 @@ private:
         const std::vector<sptr<IRemoteObject>> &tokens);
     std::vector<sptr<IRemoteObject>> PrepareTerminateAppAndGetRemainingInner(int32_t pid, const std::string &moduleName,
         const std::vector<sptr<IRemoteObject>> &tokens);
+    void CancelPrepareTerminate(std::shared_ptr<AbilityRecord> abilityRecord);
+    bool UpdateSpecifiedFlag(std::shared_ptr<AbilityRecord> abilityRequest, const std::string &flag);
+    bool ProcessColdStartBranch(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
+        std::shared_ptr<AbilityRecord> uiAbilityRecord, bool isColdStart);
+    bool TryProcessHookModule(SpecifiedRequest &specifiedRequest, bool isHookModule);
+    bool StartSpecifiedProcessRequest(const AbilityRequest &abilityRequest);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
     std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
+    std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> lowMemKillAbilityMap_;
     std::unordered_map<int64_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
     std::unordered_map<std::shared_ptr<AbilityRecord>, std::list<AbilityRequest>> callRequestCache_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
@@ -532,6 +564,10 @@ private:
     std::mutex isTryPrepareTerminateByPidsDoneMutex_;
     std::condition_variable isTryPrepareTerminateByPidsCv_;
     std::vector<std::shared_ptr<PrepareTerminateByPidRecord>> prepareTerminateByPidRecords_;
+    std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> hookSpecifiedMap_;
+
+    std::mutex startingPidsMutex_;
+    std::vector<pid_t> startingPids_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -188,6 +188,8 @@ public:
      */
     void SetContinueState(int32_t state) override;
 
+    void NotifyWindowDestroy() override;
+
 #ifdef SUPPORT_SCREEN
 public:
     /**
@@ -241,6 +243,34 @@ public:
      * You can override this function to implement your own processing logic.
      */
     void OnBackground() override;
+    
+    /**
+     * @brief Called before this ability enters the <b>STATE_FOREGROUND</b> state.
+     * The ability in the <b>STATE_FOREGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnWillForeground() override;
+
+    /**
+     * @brief Called after wms show event.
+     * The ability in the <b>STATE_FOREGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnDidForeground() override;
+
+    /**
+     * @brief Called before OnBackground.
+     * The ability in the <b>STATE_BACKGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnWillBackground() override;
+
+    /**
+     * @brief Called after wms hiden event.
+     * The ability in the <b>STATE_BACKGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnDidBackground() override;
 
     /**
      * Called when back press is dispatched.
@@ -306,6 +336,24 @@ public:
      */
     void HandleCollaboration(const Want &want) override;
 
+    /**
+     * @brief Called when startAbility request failed.
+     * @param requestId, the requestId.
+     * @param element, the element to start ability.
+     * @param message, the message to be returned to the calling app.
+     */
+    void OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override;
+
+    /**
+     * @brief Called when startAbility request succeeded.
+     * @param requestId, the requestId.
+     * @param element, the element to start ability.
+     * @param message, the message to be returned to the calling app.
+     */
+    void OnAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override;
+
 protected:
     void DoOnForeground(const Want &want) override;
     void ContinuationRestore(const Want &want) override;
@@ -355,6 +403,7 @@ private:
     std::shared_ptr<NativeReference> jsAbilityObj_;
     std::shared_ptr<int32_t> screenModePtr_;
     sptr<IRemoteObject> remoteCallee_;
+    bool reusingWindow_ = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

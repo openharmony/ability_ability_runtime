@@ -38,7 +38,7 @@ void StartSpecifiedAbilityResponseProxy::OnAcceptWantResponse(
     TAG_LOGD(AAFwkTag::APPMGR, "On accept want by proxy.");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         return;
     }
@@ -55,16 +55,16 @@ void StartSpecifiedAbilityResponseProxy::OnAcceptWantResponse(
     }
 }
 
-void StartSpecifiedAbilityResponseProxy::OnTimeoutResponse(const AAFwk::Want &want, int32_t requestId)
+void StartSpecifiedAbilityResponseProxy::OnTimeoutResponse(int32_t requestId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "On timeout response by proxy.");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    if (!data.WriteParcelable(&want) || !data.WriteInt32(requestId)) {
+    if (!data.WriteInt32(requestId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
         return;
     }
@@ -88,18 +88,16 @@ int32_t StartSpecifiedAbilityResponseProxy::SendTransactCmd(uint32_t code, Messa
     return remote->SendRequest(code, data, reply, option);
 }
 
-void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestResponse(const AAFwk::Want &want, const std::string &flag,
-    int32_t requestId)
+void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestResponse(const std::string &flag, int32_t requestId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "On satrt specified process response by proxy.");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    if (!data.WriteParcelable(&want) || !data.WriteString(flag) ||
-        !data.WriteInt32(requestId)) {
+    if (!data.WriteString(flag) || !data.WriteInt32(requestId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
         return;
     }
@@ -117,17 +115,16 @@ void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestResponse(const AAFwk
     }
 }
 
-void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestTimeoutResponse(const AAFwk::Want &want,
-    int32_t requestId)
+void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestTimeoutResponse(int32_t requestId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "On start specified process timeout response by proxy.");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    if (!data.WriteParcelable(&want) || data.WriteInt32(requestId)) {
+    if (data.WriteInt32(requestId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
         return;
     }
@@ -140,6 +137,26 @@ void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestTimeoutResponse(cons
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(
         IStartSpecifiedAbilityResponse::Message::ON_NEW_PROCESS_REQUEST_TIMEOUT_RESPONSE),
         data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+    }
+}
+
+void StartSpecifiedAbilityResponseProxy::OnStartSpecifiedFailed(int32_t requestId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    if (!data.WriteInt32(requestId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
+        return;
+    }
+
+    int32_t ret = SendTransactCmd(
+        static_cast<uint32_t>(IStartSpecifiedAbilityResponse::Message::ON_START_SPECIFIED_FAILED), data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
     }

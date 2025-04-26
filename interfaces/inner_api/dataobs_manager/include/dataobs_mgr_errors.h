@@ -50,6 +50,9 @@ enum Status : int32_t {
     IPC_PARCEL_ERROR,
     IPC_ERROR,
     INVALID_PARAM,
+    GET_TOKENINFO_ERR,
+    DATAOBS_INVALID_USERID,
+    DATAOBS_NOT_SYSTEM_APP,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

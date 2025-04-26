@@ -18,6 +18,7 @@
 
 #include <string>
 #include <map>
+#include <optional>
 
 #include "nlohmann/json.hpp"
 #include "singleton.h"
@@ -78,6 +79,15 @@ public:
      * @return Whether or not the json object contains certain key.
      */
     bool IsEqual(nlohmann::json &jsonObject, const std::string &key, int32_t value);
+
+    /**
+     * parse json to optional bool.
+     *
+     * @param jsonObject The json object.
+     * @param key The key.
+     * @return optional boolean value.
+     */
+    std::optional<bool> JsonToOptionalBool(const nlohmann::json &jsonObject, const std::string &key);
 
 private:
     std::string GetConfigPath(const std::string& path, const std::string& defaultPath);

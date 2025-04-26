@@ -26,6 +26,7 @@
 
 #include "data_ability_observer_interface.h"
 #include "dataobs_mgr_errors.h"
+#include "dataobs_mgr_inner_common.h"
 #include "iremote_object.h"
 #include "refbase.h"
 
@@ -37,10 +38,11 @@ public:
     DataObsMgrInnerExt();
     virtual ~DataObsMgrInnerExt();
 
-    Status HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver, bool isDescendants = false);
+    Status HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId,
+        bool isDescendants = false);
     Status HandleUnregisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver);
     Status HandleUnregisterObserver(sptr<IDataAbilityObserver> dataObserver);
-    Status HandleNotifyChange(const ChangeInfo &changeInfo);
+    Status HandleNotifyChange(const ChangeInfo &changeInfo, int32_t userId);
     void OnCallBackDied(const wptr<IRemoteObject> &remote);
 
 private:
@@ -51,11 +53,12 @@ private:
     };
 
     struct Entry {
-        Entry(sptr<IDataAbilityObserver> obs, std::shared_ptr<DeathRecipientRef> deathRef, bool isDes)
-            : observer(obs), deathRecipientRef(deathRef), isDescendants(isDes)
+        Entry(sptr<IDataAbilityObserver> obs, int32_t userId, std::shared_ptr<DeathRecipientRef> deathRef, bool isDes)
+            : observer(obs), userId(userId), deathRecipientRef(deathRef), isDescendants(isDes)
         {
         }
         sptr<IDataAbilityObserver> observer;
+        int32_t userId;
         std::shared_ptr<DeathRecipientRef> deathRecipientRef;
         bool isDescendants;
     };
@@ -66,7 +69,7 @@ private:
     class Node {
     public:
         Node(const std::string &name);
-        void GetObs(const std::vector<std::string> &path, uint32_t index, Uri &uri, ObsMap &obsMap);
+        void GetObs(const std::vector<std::string> &path, uint32_t index, Uri &uri, int32_t userId, ObsMap &obsMap);
         bool AddObserver(const std::vector<std::string> &path, uint32_t index, const Entry &entry);
         bool RemoveObserver(const std::vector<std::string> &path, uint32_t index,
             sptr<IDataAbilityObserver> dataObserver);

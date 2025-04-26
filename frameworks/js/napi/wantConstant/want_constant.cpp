@@ -124,10 +124,12 @@ napi_value WantConstantInit(napi_env env, napi_value exports)
     SetNamedProperty(env, params, "ohos.param.atomicservice.subpackageName", "SUB_PACKAGE_NAME");
     SetNamedProperty(env, params, "ohos.extra.param.key.callerRequestCode", "CALLER_REQUEST_CODE");
     SetNamedProperty(env, params, "ability.params.stream", "PARAMS_STREAM");
+    SetNamedProperty(env, params, "ohos.params.appLaunchTrustList", "APP_LAUNCH_TRUSTLIST");
     SetNamedProperty(env, params, "ohos.extra.param.key.appInstance", "APP_INSTANCE_KEY");
     SetNamedProperty(env, params, "ohos.extra.param.key.createAppInstance", "CREATE_APP_INSTANCE_KEY");
     SetNamedProperty(env, params, "ohos.param.callerAppCloneIndex", "CALLER_APP_CLONE_INDEX");
     SetNamedProperty(env, params, "ohos.media.params.hideSensitiveType", "HIDE_SENSITIVE_TYPE");
+    SetNamedProperty(env, params, "ohos.params.pluginAbility", "DESTINATION_PLUGIN_ABILITY");
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("Action", action),
         DECLARE_NAPI_PROPERTY("Entity", entity),

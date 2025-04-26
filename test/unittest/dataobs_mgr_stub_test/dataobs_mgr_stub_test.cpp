@@ -109,7 +109,8 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_RegisterObserver_0
         return;
     }
 
-    EXPECT_CALL(*dataobs, RegisterObserver(testing::_, testing::_)).Times(1).WillOnce(testing::Return(testVal2));
+    EXPECT_CALL(*dataobs, RegisterObserver(testing::_, testing::_, testing::_, testing::_)).Times(1)
+        .WillOnce(testing::Return(testVal2));
 
     const int retval1 = dataobs->OnRemoteRequest(code, data, reply, option);
     const int retval2 = reply.ReadInt32();
@@ -158,7 +159,8 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_UnregisterObserver
         return;
     }
 
-    EXPECT_CALL(*dataobs, UnregisterObserver(testing::_, testing::_)).Times(1).WillOnce(testing::Return(testVal2));
+    EXPECT_CALL(*dataobs, UnregisterObserver(testing::_, testing::_, testing::_, testing::_))
+        .Times(1).WillOnce(testing::Return(testVal2));
 
     const int retval1 = dataobs->OnRemoteRequest(code, data, reply, option);
     const int retval2 = reply.ReadInt32();
@@ -197,7 +199,8 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_NotifyChange_0100,
         return;
     }
 
-    EXPECT_CALL(*dataobs, NotifyChange(testing::_)).Times(1).WillOnce(testing::Return(testVal2));
+    EXPECT_CALL(*dataobs, NotifyChange(testing::_, testing::_, testing::_)).Times(1).
+        WillOnce(testing::Return(testVal2));
 
     const int retval1 = dataobs->OnRemoteRequest(code, data, reply, option);
     const int retval2 = reply.ReadInt32();
@@ -236,7 +239,7 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_RegisterObserverEx
         return;
     }
 
-    EXPECT_CALL(*dataobs, RegisterObserverExt(testing::_, testing::_, testing::_)).Times(1)
+    EXPECT_CALL(*dataobs, RegisterObserverExt(testing::_, testing::_, testing::_, testing::_)).Times(1)
         .WillOnce(testing::Return(testVal2));
 
     const int retval1 = dataobs->OnRemoteRequest(code, data, reply, option);
@@ -276,7 +279,8 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_UnregisterObserver
         return;
     }
 
-    EXPECT_CALL(*dataobs, UnregisterObserverExt(testing::_, testing::_)).Times(1).WillOnce(testing::Return(testVal2));
+    EXPECT_CALL(*dataobs, UnregisterObserverExt(testing::_, testing::_, testing::_)).Times(1)
+        .WillOnce(testing::Return(testVal2));
 
     const int retval1 = dataobs->OnRemoteRequest(code, data, reply, option);
     const int retval2 = reply.ReadInt32();
@@ -315,7 +319,7 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_UnregisterObserver
         return;
     }
 
-    EXPECT_CALL(*dataobs, UnregisterObserverExt(testing::_)).Times(1).WillOnce(testing::Return(testVal2));
+    EXPECT_CALL(*dataobs, UnregisterObserverExt(testing::_, testing::_)).Times(1).WillOnce(testing::Return(testVal2));
 
     const int retval1 = dataobs->OnRemoteRequest(code, data, reply, option);
     const int retval2 = reply.ReadInt32();

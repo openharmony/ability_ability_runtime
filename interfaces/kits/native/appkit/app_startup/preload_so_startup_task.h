@@ -24,7 +24,7 @@ class PreloadSoStartupTask : public AppStartupTask {
 public:
     static const std::string TASK_TYPE;
 
-    explicit PreloadSoStartupTask(const std::string& name, const std::string& ohmUrl);
+    PreloadSoStartupTask(const std::string& name, const std::string& ohmUrl, const std::string& path = "");
 
     ~PreloadSoStartupTask() override;
 
@@ -37,6 +37,7 @@ public:
 
 private:
     std::string ohmUrl_;
+    std::string path_;
     bool isExcludeFromAutoStart_ = false;
 };
 } // namespace AbilityRuntime

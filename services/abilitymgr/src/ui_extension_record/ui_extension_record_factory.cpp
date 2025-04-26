@@ -31,7 +31,12 @@ UIExtensionRecordFactory::~UIExtensionRecordFactory() = default;
 
 bool UIExtensionRecordFactory::NeedReuse(const AAFwk::AbilityRequest &abilityRequest, int32_t &extensionRecordId)
 {
-    int32_t uiExtensionAbilityId = abilityRequest.sessionInfo->want.GetIntParam(UIEXTENSION_ABILITY_ID,
+    auto sessionInfo = abilityRequest.sessionInfo;
+    if (sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null sessionInfo, no reuse");
+        return false;
+    }
+    int32_t uiExtensionAbilityId = sessionInfo->want.GetIntParam(UIEXTENSION_ABILITY_ID,
         INVALID_EXTENSION_RECORD_ID);
     if (uiExtensionAbilityId == INVALID_EXTENSION_RECORD_ID) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "UIEXTENSION_ABILITY_ID is not config, no reuse");
@@ -92,7 +97,7 @@ void UIExtensionRecordFactory::CreateDebugRecord(
             return;
     }
     auto callerBundleName = callerRecord->GetAbilityInfo().bundleName;
-    auto isSameApp = strcmp(callerBundleName.c_str(), abilityRequest.abilityInfo.bundleName.c_str()) == 0;
+    auto isSameApp = callerBundleName == abilityRequest.abilityInfo.bundleName;
     auto isCallerUIAbility = callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE;
     if (isSameApp && isCallerUIAbility) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Setting up debug UIExtension");

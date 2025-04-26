@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -70,7 +70,7 @@ ohos_unittest("photo_editor_extension_module_loader_test") {
     debug = false
   }
 
-  module_out_path = "ability_runtime/photo_editor_extension"
+  module_out_path = "ability_runtime/ability_runtime/photo_editor_extension"
 
   sources = [
     "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/photo_editor_extension_module_loader.cpp",
@@ -87,6 +87,7 @@ ohos_unittest("photo_editor_extension_module_loader_test") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:photo_editor_extension",
     "${ability_runtime_native_path}/ability/native:ui_extension",
@@ -111,7 +112,7 @@ ohos_unittest("photo_editor_extension_test") {
     debug = false
   }
 
-  module_out_path = "ability_runtime/photo_editor_extension"
+  module_out_path = "ability_runtime/ability_runtime/photo_editor_extension"
 
   include_dirs = [
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",

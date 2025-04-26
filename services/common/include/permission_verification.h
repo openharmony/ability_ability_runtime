@@ -117,7 +117,13 @@ struct VerificationInfo {
 
     bool VerifySuperviseKiaServicePermission() const;
 
+    bool VerifyStartLocalDebug(int32_t tokenId) const;
+
     bool VerifyStartSelfUIAbility(int tokenId) const;
+
+    bool VerifyFusionAccessPermission() const;
+
+    bool VerifyCustomSandbox(uint32_t accessTokenId) const;
 
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);

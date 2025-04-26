@@ -113,8 +113,10 @@ public:
      * kill the processes by pid list given.
      *
      * @param pids, the pid list of processes are going to be killed.
+     * @param reason, the reason to kill the processes.
      */
-    virtual void KillProcessesByPids(std::vector<int32_t> &pids) {}
+    virtual void KillProcessesByPids(const std::vector<int32_t> &pids,
+        const std::string &reason = "KillProcessesByPids") {}
 
     /**
      * Set child and parent relationship
@@ -152,7 +154,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid,
-        const std::string &moduleName) = 0;
+        const std::string &moduleName, bool isPlugin) = 0;
 
     /**
      * KillApplication, call KillApplication() through proxy object, kill the application.
@@ -335,7 +337,7 @@ public:
      * @param bundleName The application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t AttachAppDebug(const std::string &bundleName) = 0;
+    virtual int32_t AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal) = 0;
 
     /**
      * @brief Detach app debug.
@@ -418,6 +420,12 @@ public:
      * @return Returns true is sufficient memory size, others return false.
      */
     virtual bool IsMemorySizeSufficent() = 0;
+
+    /**
+     * whether or not requier a big memory
+     * @return Returens true is no big memory, others return false.
+     */
+    virtual bool IsNoRequireBigMemory() { return true; }
 
     /**
      * Notifies that one ability is attached to status bar.
@@ -533,6 +541,7 @@ public:
         SET_KEEP_ALIVE_DKV,
         KILL_PROCESSES_IN_BATCH,
         PREPARE_TERMINATE_APP,
+        IS_NO_REQUIRE_BIG_MEMORY,
         // Add enumeration values above
         END
     };

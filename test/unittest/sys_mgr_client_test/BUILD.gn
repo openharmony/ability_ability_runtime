@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_unittest("sys_mgr_client_test") {
-  module_out_path = "ability_runtime/sys_mgr_client_test"
+  module_out_path = "ability_runtime/ability_runtime/sys_mgr_client_test"
 
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",

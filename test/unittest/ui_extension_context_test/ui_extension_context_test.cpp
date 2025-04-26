@@ -449,6 +449,96 @@ HWTEST_F(UIExtensionContextTest, StartUIServiceExtension_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.number: SetAbilityResourceManager_0100
+ * @tc.name: SetAbilityResourceManager
+ * @tc.desc: SetAbilityResourceManager.
+ */
+HWTEST_F(UIExtensionContextTest, SetAbilityResourceManager_0100, TestSize.Level1)
+{
+    std::shared_ptr<Global::Resource::ResourceManager>
+        abilityResourceMgr(Global::Resource::CreateResourceManager());
+    auto context = std::make_shared<UIExtensionContext>();
+    context->SetAbilityResourceManager(abilityResourceMgr);
+    EXPECT_EQ(context->abilityResourceMgr_, abilityResourceMgr);
+}
+
+/**
+ * @tc.number: RegisterAbilityConfigUpdateCallback_0100
+ * @tc.name: RegisterAbilityConfigUpdateCallback
+ * @tc.desc: RegisterAbilityConfigUpdateCallback.
+ */
+HWTEST_F(UIExtensionContextTest, RegisterAbilityConfigUpdateCallback_0100, TestSize.Level1)
+{
+    auto context = std::make_shared<UIExtensionContext>();
+    auto abilityConfigCallback = [](const AppExecFwk::Configuration &config) {};
+    context->RegisterAbilityConfigUpdateCallback(abilityConfigCallback);
+    EXPECT_NE(context->abilityConfigUpdateCallback_, nullptr);
+}
+
+/**
+ * @tc.number: GetAbilityConfiguration_0100
+ * @tc.name: GetAbilityConfiguration
+ * @tc.desc: GetAbilityConfiguration.
+ */
+HWTEST_F(UIExtensionContextTest, GetAbilityConfiguration_0100, TestSize.Level1)
+{
+    auto context = std::make_shared<UIExtensionContext>();
+    context->abilityConfiguration_ = std::make_shared<AppExecFwk::Configuration>();
+    auto test = context->GetAbilityConfiguration();
+    EXPECT_NE(test, nullptr);
+}
+
+/**
+ * @tc.number: SetAbilityConfiguration_0100
+ * @tc.name: SetAbilityConfiguration
+ * @tc.desc: SetAbilityConfiguration.
+ */
+HWTEST_F(UIExtensionContextTest, SetAbilityConfiguration_0100, TestSize.Level1)
+{
+    auto context = std::make_shared<UIExtensionContext>();
+    ASSERT_TRUE(context->abilityConfiguration_ == nullptr);
+    AppExecFwk::Configuration config;
+    context->SetAbilityConfiguration(config);
+    EXPECT_NE(context->abilityConfiguration_, nullptr);
+}
+
+/**
+ * @tc.number: SetAbilityColorMode_0100
+ * @tc.name: SetAbilityColorMode
+ * @tc.desc: SetAbilityColorMode.
+ */
+HWTEST_F(UIExtensionContextTest, SetAbilityColorMode_0100, TestSize.Level1)
+{
+    auto context = std::make_shared<UIExtensionContext>();
+    int32_t colorMode = -2;
+    context->SetAbilityColorMode(colorMode);
+    colorMode = 0;
+    context->SetAbilityColorMode(colorMode);
+    context->abilityConfigUpdateCallback_ = nullptr;
+    auto abilityConfigCallback = [](const AppExecFwk::Configuration &config) {};
+    context->abilityConfigUpdateCallback_ = abilityConfigCallback;
+    context->SetAbilityColorMode(colorMode);
+    EXPECT_NE(context, nullptr);
+}
+
+/**
+ * @tc.number: SetScreenMode_0100
+ * @tc.name: SetScreenMode
+ * @tc.desc: SetScreenMode.
+ */
+HWTEST_F(UIExtensionContextTest, SetScreenMode_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetScreenMode_0100 start");
+
+    auto context = std::make_shared<UIExtensionContext>();
+    int32_t mode = 1;
+    context->SetScreenMode(mode);
+    EXPECT_EQ(context->screenMode_, mode);
+
+    TAG_LOGI(AAFwkTag::TEST, "SetScreenMode_0100 end");
+}
+
+/**
  * @tc.number: GetScreenMode_0100
  * @tc.name: GetScreenMode
  * @tc.desc: GetScreenMode.
@@ -456,12 +546,13 @@ HWTEST_F(UIExtensionContextTest, StartUIServiceExtension_0100, TestSize.Level1)
 HWTEST_F(UIExtensionContextTest, GetScreenMode_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetScreenMode_0100 start");
+
     auto context = std::make_shared<UIExtensionContext>();
-    EXPECT_NE(context, nullptr);
-    int32_t screenMode = 2;
-    context->SetScreenMode(screenMode);
-    auto ans = context->GetScreenMode();
-    EXPECT_EQ(ans, screenMode);
+    int32_t mode = 1;
+    context->screenMode_ = mode;
+    auto test = context->GetScreenMode();
+    EXPECT_EQ(test, mode);
+
     TAG_LOGI(AAFwkTag::TEST, "GetScreenMode_0100 end");
 }
 
@@ -479,6 +570,105 @@ HWTEST_F(UIExtensionContextTest, StartServiceExtensionAbility_0100, TestSize.Lev
     auto ret = context->StartServiceExtensionAbility(want, -1);
     EXPECT_NE(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "StartServiceExtensionAbility_0100 end");
+}
+
+/**
+ * @tc.number: GetAbilityInfoType_0100
+ * @tc.name: GetAbilityInfoType
+ * @tc.desc: GetAbilityInfoType.
+ */
+HWTEST_F(UIExtensionContextTest, GetAbilityInfoType_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAbilityInfoType_0100 start");
+
+    auto context = std::make_shared<UIExtensionContext>();
+    EXPECT_NE(context, nullptr);
+    auto result = context->GetAbilityInfoType();
+    EXPECT_EQ(result, OHOS::AppExecFwk::AbilityType::UNKNOWN);
+    context->abilityInfo_ = std::make_shared<OHOS::AppExecFwk::AbilityInfo>();
+    context->abilityInfo_->type = OHOS::AppExecFwk::AbilityType::SERVICE;
+    result = context->GetAbilityInfoType();
+    EXPECT_EQ(result, OHOS::AppExecFwk::AbilityType::SERVICE);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetAbilityInfoType_0100 end");
+}
+
+/**
+ * @tc.number: StartAbility_0300
+ * @tc.name: StartAbility
+ * @tc.desc: Start a new ability.
+ */
+HWTEST_F(UIExtensionContextTest, StartAbility_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbility_0200 start");
+
+    auto context = std::make_shared<UIExtensionContext>();
+    AAFwk::Want want;
+    int requestCode = 1;
+    EXPECT_TRUE(context->StartAbility(want, requestCode) != ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbility_0200 end");
+}
+
+/**
+ * @tc.number: OnAbilityResult_0200
+ * @tc.name: OnAbilityResult
+ * @tc.desc: On Ability Result.
+ */
+HWTEST_F(UIExtensionContextTest, OnAbilityResult_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnAbilityResult_0200 start");
+
+    auto context = std::make_shared<UIExtensionContext>();
+    int32_t code = 2;
+    int32_t resultCode = 2;
+    AAFwk::Want resultData;
+    bool dealed = false;
+    auto runtimeTask = [&dealed](int, const AAFwk::Want &, bool) { dealed = true; };
+    context->resultCallbacks_.insert(std::make_pair(code, runtimeTask));
+    EXPECT_NE(context->resultCallbacks_.size(), 0);
+    context->OnAbilityResult(code, resultCode, resultData);
+    EXPECT_EQ(dealed, true);
+    EXPECT_EQ(context->resultCallbacks_.size(), 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnAbilityResult_0200 start");
+}
+
+/**
+ * @tc.number: SetAbilityConfiguration_0200
+ * @tc.name: SetAbilityConfiguration
+ * @tc.desc: SetAbilityConfiguration.
+ */
+HWTEST_F(UIExtensionContextTest, SetAbilityConfiguration_0200, TestSize.Level1)
+{
+    auto context = std::make_shared<UIExtensionContext>();
+    context->abilityConfiguration_ = std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_NE(context->abilityConfiguration_, nullptr);
+    AppExecFwk::Configuration config;
+    context->SetAbilityConfiguration(config);
+
+    std::string val{ "中文" };
+    context->abilityConfiguration_->AddItem(1001, AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, val);
+
+    std::string English{ "中文" };
+    config.AddItem(1002, AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, English);
+    context->SetAbilityConfiguration(config);
+    auto result = context->abilityConfiguration_->GetItem(1002, AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    EXPECT_EQ(result, English);
+}
+
+/**
+ * @tc.number: GetResourceManager_0100
+ * @tc.name: GetResourceManager
+ * @tc.desc: GetResourceManager.
+ */
+HWTEST_F(UIExtensionContextTest, GetResourceManager_0100, TestSize.Level1)
+{
+    auto context = std::make_shared<UIExtensionContext>();
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
+    context->resourceManager_ = resourceMgr;
+    auto ref = context->GetResourceManager();
+    EXPECT_NE(ref, nullptr);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
