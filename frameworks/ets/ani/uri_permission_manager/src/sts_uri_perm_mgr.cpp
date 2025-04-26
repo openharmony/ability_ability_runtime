@@ -19,7 +19,6 @@
 #include "ability_manager_errors.h"
 #include "ability_runtime_error_util.h"
 #include "ani_enum_convert.h"
-#include "ani_common_util.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
 #include "js_error_utils.h"
@@ -66,7 +65,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
         stsErrCode = CreateStsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
             NOT_SYSTEM_APP);
-        AppExecFwk::AsyncCallback(env, callback, stsErrCode, createDouble(env, ERR_FAILURE));
+        AsyncCallback(env, callback, stsErrCode, createDouble(env, ERR_FAILURE));
         return;
     }
     std::string uriStr = GetStdString(env, uri);
@@ -85,7 +84,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         stsErrCode = CreateStsErrorByNativeErr(env, errCode);
     }
     
-    AppExecFwk::AsyncCallback(env, callback, stsErrCode, createDouble(env, result));
+    AsyncCallback(env, callback, stsErrCode, createDouble(env, result));
 }
 
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
@@ -102,7 +101,7 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
         stsErrCode = CreateStsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
             NOT_SYSTEM_APP);
-        AppExecFwk::AsyncCallback(env, callback, stsErrCode, createDouble(env, ERR_FAILURE));
+        AsyncCallback(env, callback, stsErrCode, createDouble(env, ERR_FAILURE));
         return;
     }
     std::string uriStr = GetStdString(env, uri);
@@ -116,7 +115,7 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         result = ERR_FAILURE;
         stsErrCode = CreateStsErrorByNativeErr(env, errCode);
     }
-    AppExecFwk::AsyncCallback(env, callback, stsErrCode, createDouble(env, result));
+    AsyncCallback(env, callback, stsErrCode, createDouble(env, result));
 }
 
 ani_object createDouble(ani_env *env, int32_t res)
@@ -183,6 +182,33 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ANI_Constructor finish");
     return ANI_OK;
 }
+}
+
+bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result)
+{
+    ani_status status = ANI_ERROR;
+    ani_class clsCall {};
+
+    if ((status = env->FindClass("Lapplication/UIAbilityContext/AsyncCallbackWrapper;", &clsCall)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
+        return false;
+    }
+    ani_method method = {};
+    if ((status = env->Class_FindMethod(
+        clsCall, INVOKE_METHOD_NAME, "L@ohos/base/BusinessError;Lstd/core/Object;:V", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
+        return false;
+    }
+    if (result == nullptr) {
+        ani_ref nullRef = nullptr;
+        env->GetNull(&nullRef);
+        result = reinterpret_cast<ani_object>(nullRef);
+    }
+    if ((status = env->Object_CallMethod_Void(call, method, error, result)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
+        return false;
+    }
+    return true;
 }
 
 ani_object WrapError(ani_env *env, const std::string &msg)
