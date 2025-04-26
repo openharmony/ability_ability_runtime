@@ -164,7 +164,7 @@ bool DumpRuntimeHelper::Check2DQuota(bool needDecreaseQuota)
         TAG_LOGE(AAFwkTag::APPKIT, "oom dump is disabled");
         return false;
     }
-    if (!Check2DOOMDumpopt()) {
+    if (!Check2DOOMDumpOpt()) {
         TAG_LOGE(AAFwkTag::APPKIT, "Check2DOOMDumpOpt failed");
         return false;
     }
@@ -480,7 +480,7 @@ bool DumpRuntimeHelper::CheckOOMFreeSpace(uint64_t maxSpace)
     }
 
     unsigned long freeSize = st.f_bsize * st.f_bfree;
-    TAG_LOGI(AAFwkTag::APPKIT, "FreeSize=%{public}" PRIu64, freeSize);
+    TAG_LOGI(AAFwkTag::APPKIT, "FreeSize=%{public}" PRIu, freeSize);
     if (freeSize <= maxSpace) {
         return false;
     }
