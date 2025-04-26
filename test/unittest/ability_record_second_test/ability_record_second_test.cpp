@@ -15,7 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
 #include "ability_record.h"
+#undef private
+#undef protected
 #include "app_utils.h"
 #include "uri_utils.h"
 #include "hilog_tag_wrapper.h"
@@ -272,6 +276,162 @@ HWTEST_F(AbilityRecordSecondTest, AbilityRecord_GetCurrentAccountId_001, TestSiz
     auto res = abilityRecord->GetCurrentAccountId();
     EXPECT_EQ(res, INVALID_USER_ID);
     TAG_LOGE(AAFwkTag::TEST, "AbilityRecord_GetCurrentAccountId_001 end.");
+}
+
+#ifdef SUPPORT_GRAPHICS
+/*
+ * Feature: AbilityRecord
+ * Function: ProcessForegroundAbility
+ * SubFunction: ProcessForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ProcessForegroundAbility
+ */
+HWTEST_F(AbilityRecordSecondTest, AaFwk_AbilityMS_ProcessForegroundAbility_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    bool isRecent = false;
+    AbilityRequest abilityRequest;
+    std::shared_ptr<StartOptions> startOptions = nullptr ;
+    std::shared_ptr<AbilityRecord> callerAbility;
+    uint32_t sceneFlag = 1;
+    abilityRecord->isReady_ = true;
+    abilityRecord->isRestartApp_ = true;
+    abilityRecord->isWindowStarted_ = true;
+    abilityRecord->currentState_ = AbilityState::FOREGROUND;
+    abilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility, sceneFlag);
+    EXPECT_EQ(abilityRecord->GetRestartAppFlag(), true);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ProcessForegroundAbility
+ * SubFunction: ProcessForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ProcessForegroundAbility
+ */
+HWTEST_F(AbilityRecordSecondTest, AaFwk_AbilityMS_ProcessForegroundAbility_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    bool isRecent = false;
+    AbilityRequest abilityRequest;
+    std::shared_ptr<StartOptions> startOptions = nullptr ;
+    std::shared_ptr<AbilityRecord> callerAbility;
+    uint32_t sceneFlag = 1;
+    abilityRecord->isReady_ = true;
+    abilityRecord->isRestartApp_ = true;
+    abilityRecord->isWindowStarted_ = false;
+    abilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility, sceneFlag);
+    EXPECT_EQ(abilityRecord->GetRestartAppFlag(), true);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetCompleteFirstFrameDrawing
+ * SubFunction: SetCompleteFirstFrameDrawing
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetCompleteFirstFrameDrawing
+ */
+HWTEST_F(AbilityRecordSecondTest, AaFwk_AbilityMS_SetCompleteFirstFrameDrawing_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    bool flag = true;
+    abilityRecord->SetCompleteFirstFrameDrawing(flag);
+    EXPECT_EQ(abilityRecord->isCompleteFirstFrameDrawing_, true);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: IsCompleteFirstFrameDrawing
+ * SubFunction: IsCompleteFirstFrameDrawing
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord IsCompleteFirstFrameDrawing
+ */
+HWTEST_F(AbilityRecordSecondTest, AaFwk_AbilityMS_IsCompleteFirstFrameDrawing_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->SetCompleteFirstFrameDrawing(true);
+    auto result = abilityRecord->IsCompleteFirstFrameDrawing();
+    EXPECT_EQ(result, true);
+}
+#endif
+
+/*
+ * Feature: AbilityRecord
+ * Function: BackgroundAbility
+ * SubFunction: BackgroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord BackgroundAbility
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_BackgroundAbility_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    Closure task = []() {};
+    abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
+    abilityRecord->launchDebugInfo_.debugApp = false;
+    abilityRecord->launchDebugInfo_.nativeDebug = false;
+    abilityRecord->BackgroundAbility(task);
+    abilityRecord->launchDebugInfo_.perfCmd.clear();
+    abilityRecord->isAttachDebug_ = false;
+    abilityRecord->isAssertDebug_ = false;
+    abilityRecord->BackgroundAbility(task);
+    abilityRecord->abilityInfo_.type == AppExecFwk::AbilityType::PAGE;
+    EXPECT_EQ(abilityRecord->isLaunching_, false);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: PrepareTerminateAbilityDone
+ * SubFunction: PrepareTerminateAbilityDone
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord PrepareTerminateAbilityDone
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_PrepareTerminateAbilityDone_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->isPrepareTerminateAbilityCalled_.store(true);
+    abilityRecord->PrepareTerminateAbilityDone(true);
+    EXPECT_EQ(abilityRecord->isPrepareTerminate_, true);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: TerminateAbility
+ * SubFunction: TerminateAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord TerminateAbility
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_TerminateAbility_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->clearMissionFlag_ = true;
+    abilityRecord->abilityInfo_.bundleName = "com.test.abc";
+    abilityRecord->abilityInfo_.name = "test ability";
+    abilityRecord->abilityInfo_.applicationInfo.appIndex = 1;
+    EXPECT_EQ(abilityRecord->TerminateAbility(), ERR_OK);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: AfterLoaded
+ * SubFunction: AfterLoaded
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord AfterLoaded
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_AfterLoaded_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.name = "com.ohos.sceneboard.MainAbility";
+    abilityRecord->abilityInfo_.bundleName = "com.ohos.sceneboard";
+    abilityRecord->AfterLoaded();
+    EXPECT_TRUE(abilityRecord->IsSceneBoard());
 }
 }  // namespace AAFwk
 }  // namespace OHOS
