@@ -7113,10 +7113,30 @@ int AbilityManagerService::KillProcess(const std::string &bundleName, bool clear
     CHECK_POINTER_AND_RETURN(bms, KILL_PROCESS_FAILED);
     int32_t userId = GetUserId();
     AppExecFwk::BundleInfo bundleInfo;
-    if (IN_PROCESS_CALL(bms->GetCloneBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, appIndex,
-        bundleInfo, userId)) != ERR_OK) {
+    if (IN_PROCESS_CALL(bms->GetCloneBundleInfoExt(bundleName,
+        static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
+        appIndex, userId, bundleInfo)) != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get bundle info when kill process failed");
         return GET_BUNDLE_INFO_FAILED;
+    }
+
+    int32_t collaboratorType = -1;
+    if (bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
+        collaboratorType = CollaboratorType::RESERVE_TYPE;
+    } else if (bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
+        collaboratorType = CollaboratorType::OTHERS_TYPE;
+    }
+    if (collaboratorType != -1) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Collaborator kill");
+        auto collaborator = GetCollaborator(collaboratorType);
+        if (collaborator == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Collaborator null");
+            return KILL_PROCESS_FAILED;
+        }
+        if (collaborator->NotifyKillProcesses(bundleName, userId) != ERR_OK) {
+            return KILL_PROCESS_FAILED;
+        }
+        return ERR_OK;
     }
 
     KeepAliveType type;
