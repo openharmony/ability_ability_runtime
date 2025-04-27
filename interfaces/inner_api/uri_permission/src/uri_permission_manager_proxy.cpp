@@ -378,11 +378,11 @@ int UriPermissionManagerProxy::Active(const std::vector<PolicyInfo> &policy, std
         TAG_LOGE(AAFwkTag::URIPERMMGR, "SendRequest fail, error:%{public}d", error);
         return INNER_ERR;
     }
-    auto res = reply.ReadUInt32Vector(&result);
-    if (res) {
-        return ERR_OK;
+    if (!reply.ReadUInt32Vector(&result)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "ReadUInt32Vector failed");
+        return INNER_ERR;
     }
-    return INNER_ERR;
+    return reply.ReadInt32();
 }
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 }  // namespace AAFwk

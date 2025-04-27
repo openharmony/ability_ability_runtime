@@ -86,6 +86,7 @@ public:
     static bool permissionReadWriteDesktop_;
     static bool permissionReadWriteDocuments_;
     static bool IsSystempAppCall_;
+    static bool permissionFileAccessPersist_;
 
     static TokenInfoMap tokenInfos;
 };

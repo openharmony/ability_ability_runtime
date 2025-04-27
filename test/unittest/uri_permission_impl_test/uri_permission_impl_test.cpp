@@ -641,6 +641,52 @@ HWTEST_F(UriPermissionImplTest, RevokeAllUriPermission_002, TestSize.Level1)
 
 /*
  * Feature: UriPermissionManagerStubImpl
+ * Function: Active
+ * SubFunction: NA
+ * FunctionPoints: Active Uri permission without FILE_ACCESS_PERSIST permission.
+*/
+HWTEST_F(UriPermissionImplTest, UPMS_Active_001, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    constexpr int32_t SANDBOX_MANAGER_PERMISSION_DENIED = 1;
+    PolicyInfo policyInfo;
+    policyInfo.path = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
+    policyInfo.mode = 1;
+    std::vector<PolicyInfo> policyInfoArray = { policyInfo };
+    // make param
+    std::vector<uint32_t> result;
+    // call Active
+    auto ret = upms->Active(policyInfoArray, result);
+    EXPECT_EQ(ret, SANDBOX_MANAGER_PERMISSION_DENIED);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: Active
+ * SubFunction: NA
+ * FunctionPoints: Active Uri permission with FILE_ACCESS_PERSIST permission.
+*/
+HWTEST_F(UriPermissionImplTest, UPMS_Active_002, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    // get policy data
+    PolicyInfo policyInfo;
+    policyInfo.path = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
+    policyInfo.mode = 1;
+    std::vector<PolicyInfo> policyInfoArray = { policyInfo };
+    // make param
+    std::vector<uint32_t> result;
+    // call Active
+    MyFlag::permissionFileAccessPersist_ = true;
+    auto ret = upms->Active(policyInfoArray, result);
+    MyFlag::permissionFileAccessPersist_ = false;
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
  * Function: GrantUriPermissionPrivileged
  * SubFunction: NA
  * FunctionPoints: do not have permission to call GrantUriPermissionPrivileged.
