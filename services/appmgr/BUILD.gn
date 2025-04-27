@@ -135,6 +135,7 @@ ohos_shared_library("libappms") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "i18n:i18n_sa_client",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
