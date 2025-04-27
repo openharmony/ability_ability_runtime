@@ -28,6 +28,7 @@ constexpr const char* PERMISSION_GRANT_URI_PERMISSION_PRIVILEGED = "ohos.permiss
 constexpr const char* PERMISSION_READ_WRITE_DOWNLOAD = "ohos.permission.READ_WRITE_DOWNLOAD_DIRECTORY";
 constexpr const char* PERMISSION_READ_WRITE_DESKTON = "ohos.permission.READ_WRITE_DESKTOP_DIRECTORY";
 constexpr const char* PERMISSION_READ_WRITE_DOCUMENTS = "ohos.permission.READ_WRITE_DOCUMENTS_DIRECTORY";
+constexpr const char* PERMISSION_FILE_ACCESS_PERSIST = "ohos.permission.FILE_ACCESS_PERSIST";
 } // namespace
 
 bool PermissionVerification::VerifyPermissionByTokenId(const int &tokenId, const std::string &permissionName) const
@@ -64,6 +65,9 @@ bool PermissionVerification::VerifyPermissionByTokenId(const int &tokenId, const
     }
     if (permissionName == PERMISSION_READ_WRITE_DOCUMENTS) {
         return MyFlag::permissionReadWriteDocuments_;
+    }
+    if (permissionName == PERMISSION_FILE_ACCESS_PERSIST) {
+        return MyFlag::permissionFileAccessPersist_;
     }
     return false;
 }
