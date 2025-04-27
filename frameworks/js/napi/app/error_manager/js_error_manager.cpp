@@ -170,13 +170,12 @@ static napi_value NotifyUnhandledRejectionHandler(napi_env env, napi_callback_in
 static void ClearGlobalObserverReference(napi_env env)
 {
     std::lock_guard<std::mutex> lock(globalErrorMtx);
-    TAG_LOGI(AAFwkTag::JSNAPI, "Clearing observer refs for env: %{public}p", env);
+    TAG_LOGI(AAFwkTag::JSNAPI, "Clearing observer refs for env");
     auto it = globalObserverList.begin();
     while (it != globalObserverList.end()) {
         if (it->env == env) {
             if (napi_delete_reference(env, it->ref) != napi_ok) {
-                TAG_LOGW(AAFwkTag::JSNAPI,
-                    "Failed to delete observer reference %{public}p in env %{public}p", it->ref, env);
+                TAG_LOGW(AAFwkTag::JSNAPI, "Failed to delete observer reference");
             }
             it = globalObserverList.erase(it);
         } else {
@@ -188,13 +187,12 @@ static void ClearGlobalObserverReference(napi_env env)
 static void ClearGlobalPromiseReference(napi_env env)
 {
     std::lock_guard<std::mutex> lock(globalPromiseMtx);
-    TAG_LOGI(AAFwkTag::JSNAPI, "Clearing promise refs for env: %{public}p", env);
+    TAG_LOGI(AAFwkTag::JSNAPI, "Clearing promise refs for env");
     auto it = globalPromiseList.begin();
     while (it != globalPromiseList.end()) {
         if (it->env == env) {
             if (napi_delete_reference(env, it->ref) != napi_ok) {
-                TAG_LOGW(AAFwkTag::JSNAPI,
-                    "Failed to delete promise reference %{public}p in env %{public}p", it->ref, env);
+                TAG_LOGW(AAFwkTag::JSNAPI, "Failed to delete promise reference");
             }
             it = globalPromiseList.erase(it);
         } else {
