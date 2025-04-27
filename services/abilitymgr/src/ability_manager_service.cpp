@@ -35,6 +35,7 @@
 #include "display_manager.h"
 #include "display_util.h"
 #include "distributed_client.h"
+#include "ipc_skeleton.h"
 #ifdef WITH_DLP
 #include "dlp_utils.h"
 #endif // WITH_DLP
@@ -116,6 +117,7 @@
 #include "utils/dms_util.h"
 #endif
 #include "hidden_start_observer_manager.h"
+#include "insight_intent_db_cache.h"
 
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
@@ -225,6 +227,7 @@ const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
 std::atomic<bool> g_isDmsAlive = false;
 constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
 constexpr const char* APPSPAWN_STARTED = "startup.service.ctl.appspawn.pid";
+constexpr const char* APP_LINKING_ONLY = "appLinkingOnly";
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
@@ -581,7 +584,10 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
         TAG_LOGE(AAFwkTag::ABILITYMGR, "window options not supported");
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
-    InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
+    //intent openlink do not RemoveInsightIntent
+    if (!want.HasParameter(AppExecFwk::INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG)) {
+        InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
+    }
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
@@ -11298,6 +11304,23 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
         return ret;
     }
 
+    const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    AbilityRuntime::ExtractInsightIntentGenericInfo infos = {};
+    DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfo(param.bundleName_,
+        param.moduleName_, param.insightIntentName_, infos);
+    if (infos.decoratorType == AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_LINK) {
+        int32_t resultCode = IntentOpenLinkInner(param, infos, -1);
+        if (resultCode == ERR_OK || resultCode == ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "Intent OpenLink success");
+            InsightIntentExecuteResult result;
+            DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->ExecuteIntentDone(
+                paramPtr->insightIntentId_, result.innerErr, result);
+            return ERR_OK;
+        }
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Intent OpenLink failed:%{public}d", resultCode);
+        return resultCode;
+    }
+
     Want want;
     ret = InsightIntentExecuteManager::GenerateWant(paramPtr, want);
     if (ret != ERR_OK) {
@@ -12968,6 +12991,44 @@ void AbilityManagerService::RemovePreStartSession(const std::string& sessionId)
 {
     std::lock_guard<ffrt::mutex> guard(preStartSessionMapLock_);
     preStartSessionMap_.erase(sessionId);
+}
+
+ErrCode AbilityManagerService::IntentOpenLinkInner(const InsightIntentExecuteParam& param,
+    AbilityRuntime::ExtractInsightIntentGenericInfo& linkInfo, const int32_t userId)
+{
+    auto CombinLinkInfo = [](const std::vector<AbilityRuntime::LinkIntentParamMapping>& paramMappings, std::string& uri,
+                              AAFwk::Want& want) {
+        for (auto& mapInfo : paramMappings) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR,
+                "paramMapping info paramName:%{public}s paramMappingName:%{public}s paramCategory:%{public}s",
+                mapInfo.paramName.c_str(), mapInfo.paramMappingName.c_str(), mapInfo.paramCategory.c_str());
+            std::string value = want.GetStringParam(mapInfo.paramName);
+            if (mapInfo.paramCategory == "link") {
+                uri += ("?" + mapInfo.paramMappingName + "=" + value);
+                TAG_LOGD(AAFwkTag::ABILITYMGR, "link uri=%{public}s", uri.c_str());
+            } else {
+                want.RemoveParam(mapInfo.paramName);
+                want.SetParam(mapInfo.paramMappingName, value);
+                TAG_LOGD(AAFwkTag::ABILITYMGR, "want setparam key:%{public}s value:%{public}s",
+                    mapInfo.paramMappingName.c_str(), value.c_str());
+            }
+        }
+    };
+
+    AAFwk::Want want;
+    want.SetParams(*param.insightIntentParam_);
+    std::string openLinkUri = param.uris_[0];
+    CombinLinkInfo(linkInfo.get<InsightIntentLinkInfo>().paramMapping, openLinkUri, want);
+
+    want.SetUri(openLinkUri);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "openLinkUri=%{public}s", openLinkUri.c_str());
+    if (!want.HasParameter(APP_LINKING_ONLY)) {
+        want.SetParam(APP_LINKING_ONLY, false);
+    }
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, param.insightIntentName_);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG, 1);
+
+    return OpenLink(want, nullptr, userId);
 }
 
 ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
