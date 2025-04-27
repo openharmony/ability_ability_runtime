@@ -56,6 +56,7 @@ public:
         bool jitEnabled = false;
         bool isMultiThread = false;
         bool isErrorInfoEnhance = false;
+        bool allowArkTsLargeHeap = false;
         int32_t uid = -1;
         // ArkTsCard start
         bool isUnique = false;
