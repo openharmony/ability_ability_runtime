@@ -23,6 +23,8 @@
 #include "hilog_tag_wrapper.h"
 #include "resourceManager.h"
 #include "sts_error_utils.h"
+#include "ani_common_util.h"
+#include "ability_runtime_error_util.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -267,34 +269,44 @@ ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unuse
     return {};
 }
 
-ani_double NativeOnSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
-    ani_string type, ani_object envCallback)
+ani_long GetNativeApplicationContextLong(ani_env *env, ani_object& aniObj)
 {
     ani_status status = ANI_ERROR;
-    TAG_LOGD(AAFwkTag::APPKIT, "NativeOnSync Call");
+    ani_long nativeContextLong = 0;
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
-        return ANI_ERROR;
+        return nativeContextLong;
     }
     ani_class applicationContextCls = nullptr;
     if ((status = env->FindClass("Lapplication/ApplicationContext/ApplicationContext;",
         &applicationContextCls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed status: %{public}d", status);
         AbilityRuntime::ThrowStsInvalidParamError(env, "FindClass failed");
-        return ANI_ERROR;
+        return nativeContextLong;
     }
     ani_field contextField;
     if ((status = env->Class_FindField(applicationContextCls, "nativeContext", &contextField)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", status);
         AbilityRuntime::ThrowStsInvalidParamError(env, "Class_FindField failed");
-        return ANI_ERROR;
+        return nativeContextLong;
     }
-    ani_long nativeContextLong;
     if ((status = env->Object_GetField_Long(aniObj, contextField, &nativeContextLong)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_GetField_Long failed status: %{public}d", status);
         AbilityRuntime::ThrowStsInvalidParamError(env, "Object_GetField_Long failed");
-        return ANI_ERROR;
+        return nativeContextLong;
     }
+    if (nativeContextLong == 0) {
+        AbilityRuntime::ThrowStsInvalidParamError(env, "nativeContext is null");
+    }
+
+    return nativeContextLong;
+}
+
+ani_double NativeOnSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_string type, ani_object envCallback)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "NativeOnSync Call");
+    ani_long nativeContextLong = GetNativeApplicationContextLong(env, aniObj);
     if (nativeContextLong == 0) {
         TAG_LOGE(AAFwkTag::APPKIT, "nativeContext is null");
         AbilityRuntime::ThrowStsInvalidParamError(env, "nativeContext is null");
@@ -310,6 +322,35 @@ ani_double NativeOnSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object
 
     return ani_double(callbackId);
 }
+
+void NativeOffSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_string type, ani_double callbackId, ani_object call)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "NativeOffSync Call");
+    ani_long nativeContextLong = GetNativeApplicationContextLong(env, aniObj);
+    if (nativeContextLong == 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "nativeContext is null");
+        AppExecFwk::AsyncCallback(env, call, CreateStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM), nullptr);
+        return;
+    }
+
+    if (etsEnviromentCallback_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "etsEnviromentCallback is null");
+        AppExecFwk::AsyncCallback(env, call, CreateStsError(env,
+            (ani_int)AbilityErrorCode::ERROR_CODE_INVALID_PARAM, "env_callback is nullptr"), nullptr);
+        return;
+    }
+
+    if (!etsEnviromentCallback_->UnRegister(callbackId)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed");
+        AppExecFwk::AsyncCallback(env, call, CreateStsError(env,
+            (ani_int)AbilityErrorCode::ERROR_CODE_INVALID_PARAM, "call UnRegister failed!"), nullptr);
+        return;
+    }
+
+    AppExecFwk::AsyncCallback(env, call, CreateStsError(env, AbilityErrorCode::ERROR_OK), nullptr);
+}
+
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -52,7 +52,9 @@
 #include "sts_runtime.h"
 #include "sts_error_utils.h"
 #include "ani_common_util.h"
+#include "ani_common_want.h"
 #include "ability_runtime_error_util.h"
+#include "ability_manager_client.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -231,27 +233,9 @@ static void killAllProcesses([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_o
         return;
     }
     ani_status status = ANI_ERROR;
-    ani_class applicationContextCls = nullptr;
-    if ((status = env->FindClass(STS_APPLICATION_CONTEXT_CLASS_NAME, &applicationContextCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed status: %{public}d", status);
-        AbilityRuntime::ThrowStsInvalidParamError(env, "FindClass failed");
-        return;
-    }
-    ani_field contextField;
-    if ((status = env->Class_FindField(applicationContextCls, "nativeContext", &contextField)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", status);
-        AbilityRuntime::ThrowStsInvalidParamError(env, "Class_FindField failed");
-        return;
-    }
-    ani_long nativeContextLong;
-    if ((status = env->Object_GetField_Long(aniObj, contextField, &nativeContextLong)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_GetField_Long failed status: %{public}d", status);
-        AbilityRuntime::ThrowStsInvalidParamError(env, "Object_GetField_Long failed");
-        return;
-    }
-
     ani_object aniObject = AbilityRuntime::CreateStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_OK);
     ErrCode innerErrCode = ERR_OK;
+    ani_long nativeContextLong = AbilityRuntime::ContextUtil::GetNativeApplicationContextLong(env, aniObj);
     if (nativeContextLong == 0) {
         TAG_LOGE(AAFwkTag::APPKIT, "nativeContextLong is nullptr");
         innerErrCode = AbilityRuntime::ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
@@ -263,33 +247,67 @@ static void killAllProcesses([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_o
     ((AbilityRuntime::ApplicationContext*)nativeContextLong)->KillProcessBySelf(clearPageStack);
 }
 
+static void PreloadUIExtensionAbility([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_object wantObj, ani_object call)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "PreloadUIExtensionAbility Call");
+    AAFwk::Want want;
+    if (!OHOS::AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse want failed");
+        AppExecFwk::AsyncCallback(env, call, AbilityRuntime::CreateStsInvalidParamError(env,
+            "Parse param want failed, want must be Want."), nullptr);
+        return;
+    }
+    ani_long nativeContextLong = AbilityRuntime::ContextUtil::GetNativeApplicationContextLong(env, aniObj);
+    auto context = ((AbilityRuntime::ApplicationContext*)nativeContextLong);
+    if (!context) {
+        AppExecFwk::AsyncCallback(env, call, AbilityRuntime::CreateStsErrorByNativeErr(env,
+            (int32_t)AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT), nullptr);
+        return;
+    }
+    auto hostBundleName = context->GetBundleName();
+    TAG_LOGD(AAFwkTag::APPKIT, "HostBundleName is %{public}s", hostBundleName.c_str());
+    auto innerErrCode = AAFwk::AbilityManagerClient::GetInstance()->PreloadUIExtensionAbility(want, hostBundleName);
+    if (innerErrCode == ERR_OK) {
+        AppExecFwk::AsyncCallback(env, call, AbilityRuntime::CreateStsError(env,
+            AbilityRuntime::AbilityErrorCode::ERROR_OK), nullptr);
+    } else {
+        TAG_LOGE(AAFwkTag::APPKIT, "OnPreloadUIExtensionAbility failed %{public}d", innerErrCode);
+        AppExecFwk::AsyncCallback(env, call, AbilityRuntime::CreateStsErrorByNativeErr(env, innerErrCode), nullptr);
+    }
+}
+
 static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
     ani_boolean value) {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    ani_class applicationContextCls = nullptr;
-    if (env->FindClass(STS_APPLICATION_CONTEXT_CLASS_NAME, &applicationContextCls) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed");
-        AbilityRuntime::ThrowStsInvalidParamError(env, "FindClass failed");
-        return;
-    }
-    ani_field contextField;
-    if (env->Class_FindField(applicationContextCls, "nativeContext", &contextField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed");
-        AbilityRuntime::ThrowStsInvalidParamError(env, "Class_FindField failed");
-        return;
-    }
-    ani_long nativeContextLong;
-    if (env->Object_GetField_Long(aniObj, contextField, &nativeContextLong) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_GetField_Long failed");
-        AbilityRuntime::ThrowStsInvalidParamError(env, "Object_GetField_Long failed");
-        return;
-    }
+    ani_long nativeContextLong = AbilityRuntime::ContextUtil::GetNativeApplicationContextLong(env, aniObj);
     int32_t errCode = ((AbilityRuntime::ApplicationContext*)nativeContextLong)->SetSupportedProcessCacheSelf(value);
     if (errCode == AAFwk::ERR_CAPABILITY_NOT_SUPPORT) {
         AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_CAPABILITY_NOT_SUPPORT);
     } else if (errCode != ERR_OK) {
         AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
     }
+}
+
+void BindApplicationContextFunc(ani_env* aniEnv, ani_class& contextClass)
+{
+    std::array applicationContextFunctions = {
+        ani_native_function {"setSupportedProcessCacheSync", "Z:V",
+            reinterpret_cast<void *>(SetSupportedProcessCacheSync)},
+        ani_native_function {"nativekillAllProcessesSync", "ZLutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(killAllProcesses)},
+        ani_native_function {"nativepreloadUIExtensionAbilitySync",
+            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(PreloadUIExtensionAbility)},
+        ani_native_function {"nativeOnSync",
+            "Lstd/core/String;L@ohos/app/ability/EnvironmentCallback/EnvironmentCallback;:D",
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeOnSync)},
+        ani_native_function {"nativeOffSync",
+            "Lstd/core/String;DLutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeOffSync)},
+    };
+    aniEnv->Class_BindNativeMethods(contextClass, applicationContextFunctions.data(),
+        applicationContextFunctions.size());
 }
 
 void OHOSApplication::InitAniApplicationContext()
@@ -301,17 +319,7 @@ void OHOSApplication::InitAniApplicationContext()
         TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed");
         return;
     }
-    std::array applicationContextFunctions = {
-        ani_native_function {"setSupportedProcessCacheSync", "Z:V",
-            reinterpret_cast<void *>(SetSupportedProcessCacheSync)},
-        ani_native_function {"nativeOnSync",
-            "Lstd/core/String;L@ohos/app/ability/EnvironmentCallback/EnvironmentCallback;:D",
-            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeOnSync)},
-        ani_native_function {"nativekillAllProcessesSync", "ZLutils/AbilityUtils/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void *>(killAllProcesses)},
-    };
-    aniEnv->Class_BindNativeMethods(applicationContextCls, applicationContextFunctions.data(),
-        applicationContextFunctions.size());
+    BindApplicationContextFunc(aniEnv, applicationContextCls);
 
     ani_method contextCtorMethod = nullptr;
     if (aniEnv->Class_FindMethod(applicationContextCls, "<ctor>", ":V", &contextCtorMethod) != ANI_OK) {
