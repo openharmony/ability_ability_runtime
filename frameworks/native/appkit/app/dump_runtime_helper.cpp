@@ -480,7 +480,6 @@ bool DumpRuntimeHelper::CheckOOMFreeSpace(uint64_t maxSpace)
     }
 
     unsigned long freeSize = st.f_bsize * st.f_bfree;
-    TAG_LOGI(AAFwkTag::APPKIT, "FreeSize=%{public}" PRIu, freeSize);
     if (freeSize <= maxSpace) {
         return false;
     }
