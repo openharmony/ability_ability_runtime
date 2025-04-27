@@ -1181,6 +1181,7 @@ napi_value JsAbilityContext::OnStartAbilityForResult(napi_env env, NapiCallbackI
     if (info.argc > ARGC_ONE && CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
         TAG_LOGD(AAFwkTag::CONTEXT, "start, options is used");
         AppExecFwk::UnwrapStartOptions(env, info.argv[INDEX_ONE], startOptions);
+        UnwrapCompletionHandlerInStartOptions(env, info.argv[INDEX_ONE], startOptions);
         unwrapArgc++;
     }
 
@@ -1267,6 +1268,7 @@ napi_value JsAbilityContext::OnStartAbilityForResultWithAccount(napi_env env, Na
     if (info.argc > ARGC_TWO && CheckTypeForNapiValue(env, info.argv[INDEX_TWO], napi_object)) {
         TAG_LOGD(AAFwkTag::CONTEXT, "start options is used");
         AppExecFwk::UnwrapStartOptions(env, info.argv[INDEX_TWO], startOptions);
+        UnwrapCompletionHandlerInStartOptions(env, info.argv[INDEX_TWO], startOptions);
         unwrapArgc++;
     }
     napi_value lastParam = info.argc > unwrapArgc ? info.argv[unwrapArgc] : nullptr;
