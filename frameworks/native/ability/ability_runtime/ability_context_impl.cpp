@@ -23,6 +23,7 @@
 #include "dialog_request_callback_impl.h"
 #include "dialog_ui_extension_callback.h"
 #include "hilog_tag_wrapper.h"
+#include "json_utils.h"
 #include "remote_object_wrapper.h"
 #include "request_constants.h"
 #include "session_info.h"
@@ -46,6 +47,7 @@ constexpr const char* DISPOSED_PROHIBIT_BACK = "APPGALLERY_APP_DISPOSED_PROHIBIT
 constexpr const char* IS_WINDOWMODE_FOLLOWHOST = "ohos.uec.params.isWindowModeFollowHost";
 constexpr const char* USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
 constexpr const int32_t ERR_NOT_SUPPORTED = -2;
+const std::string JSON_KEY_ERR_MSG = "errMsg";
 
 struct RequestResult {
     int32_t resultCode {0};
@@ -265,6 +267,12 @@ ErrCode AbilityContextImpl::StartAbilityForResult(const AAFwk::Want& want, const
     if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
         TAG_LOGE(AAFwkTag::CONTEXT, "ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
+        if (!startOptions.requestId_.empty()) {
+            nlohmann::json jsonObject = nlohmann::json {
+                { JSON_KEY_ERR_MSG, "startAbility failed" },
+            };
+            OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
+        }
     }
     return err;
 }
@@ -280,6 +288,12 @@ ErrCode AbilityContextImpl::StartAbilityForResultWithAccount(
     if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
         TAG_LOGE(AAFwkTag::CONTEXT, "ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
+        if (!startOptions.requestId_.empty()) {
+            nlohmann::json jsonObject = nlohmann::json {
+                { JSON_KEY_ERR_MSG, "startAbility failed" },
+            };
+            OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
+        }
     }
     return err;
 }
