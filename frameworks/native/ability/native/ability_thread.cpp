@@ -297,8 +297,7 @@ void AbilityThread::ScheduleAbilityRequestFailure(const std::string &requestId, 
     TAG_LOGD(AAFwkTag::ABILITY, "called");
 }
 
-void AbilityThread::ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+void AbilityThread::ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
 }

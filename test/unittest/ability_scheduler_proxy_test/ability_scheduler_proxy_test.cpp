@@ -517,8 +517,7 @@ HWTEST_F(AbilitySchedulerProxyTest, ScheduleAbilityRequestSuccess_001, TestSize.
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilitySchedulerMock::InvokeSendRequest));
     std::string requestId = "1234567890";
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
-    std::string message = "success";
-    abilitySchedulerProxy_->ScheduleAbilityRequestSuccess(requestId, element, message);
+    abilitySchedulerProxy_->ScheduleAbilityRequestSuccess(requestId, element);
     EXPECT_EQ(IAbilityScheduler::SCHEDULE_ABILITY_REQUEST_SUCCESS, mock_->code_);
 }
 }  // namespace AAFwk

@@ -1260,7 +1260,7 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         auto requestId = abilityRequest.want.GetStringParam(KEY_REQUEST_ID);
         if (!requestId.empty()) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "notify request success, requestId:%{public}s", requestId.c_str());
-            abilityRecord->NotifyAbilityRequestSuccess(requestId, abilityRequest.want.GetElement(), "success");
+            abilityRecord->NotifyAbilityRequestSuccess(requestId, abilityRequest.want.GetElement());
         }
         const_cast<AbilityRequest &>(abilityRequest).want.RemoveParam(KEY_REQUEST_ID);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s",

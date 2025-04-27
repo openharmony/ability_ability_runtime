@@ -384,7 +384,7 @@ private:
         {}
     };
     std::mutex onRequestResultMutex_;
-    std::vector<OnRequestResultElement> onRequestResults_;
+    std::vector<std::shared_ptr<OnRequestResultElement>> onRequestResults_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
