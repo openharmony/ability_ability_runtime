@@ -41,9 +41,9 @@ struct STSUncaughtExceptionInfo;
 namespace AbilityRuntime {
 
 struct STSNativeReference {
-    ani_class     aniCls = nullptr;
-    ani_object    aniObj = nullptr;
-    ani_ref      aniRef = nullptr;
+    ani_class aniCls = nullptr;
+    ani_object aniObj = nullptr;
+    ani_ref aniRef = nullptr;
 };
 
 class STSRuntime : public Runtime {

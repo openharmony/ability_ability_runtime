@@ -57,7 +57,7 @@ bool GetDoubleOrUndefined(ani_env *env, ani_object param, const char *name, ani_
     if (isUndefined) {
         TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s : undefined", name);
         return false;
-    } 
+    }
     if ((status = env->Object_CallMethodByName_Double(
         reinterpret_cast<ani_object>(obj), "doubleValue", nullptr, &value)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
@@ -419,7 +419,8 @@ ani_object createBoolean(ani_env *env, ani_boolean value)
     return personInfoObj;
 }
 
-bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::string &value)
+bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName,
+    const std::string &value)
 {
     ani_field field = nullptr;
     ani_string string = nullptr;

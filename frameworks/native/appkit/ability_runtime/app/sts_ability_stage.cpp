@@ -233,7 +233,6 @@ void STSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& co
     }
 
     ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, configuration);
-
     ani_method method = nullptr;
     ani_status status = env->Class_FindMethod(stsAbilityStageObj_->aniCls,
         "onConfigurationUpdate", "L@ohos/app/ability/Configuration/Configuration;:V", &method);
