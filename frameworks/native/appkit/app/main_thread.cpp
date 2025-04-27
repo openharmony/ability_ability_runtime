@@ -1846,7 +1846,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
         if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo, bundleInfo.targetVersion,
-		    appInfo.codeLanguage)) {
+            appInfo.codeLanguage)) {
             TAG_LOGE(AAFwkTag::APPKIT, "PrepareAbilityDelegator failed");
             return;
         }
