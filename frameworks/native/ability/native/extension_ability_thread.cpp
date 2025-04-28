@@ -31,6 +31,7 @@ namespace {
 #ifdef SUPPORT_GRAPHICS
 constexpr static char FORM_EXTENSION[] = "FormExtension";
 constexpr static char FORM_EDIT_EXTENSION[] = "FormEditExtensionAbility";
+constexpr static char LIVE_FORM_EXTENSION[] = "LiveFormExtensionAbility";
 constexpr static char UI_EXTENSION[] = "UIExtensionAbility";
 constexpr static char CUSTOM_EXTENSION[] = "ExtensionAbility";
 constexpr static char USER_AUTH_EXTENSION[] = "UserAuthExtensionAbility";
@@ -69,7 +70,8 @@ const std::map<AppExecFwk::ExtensionAbilityType, std::string> UI_EXTENSION_NAME_
 #endif  // SUPPORT_AUTO_FILL
     { AppExecFwk::ExtensionAbilityType::EMBEDDED_UI, EMBEDDED_UI_EXTENSION },
     { AppExecFwk::ExtensionAbilityType::PHOTO_EDITOR, PHOTO_EDITOR_EXTENSION },
-    { AppExecFwk::ExtensionAbilityType::FORM_EDIT, FORM_EDIT_EXTENSION }
+    { AppExecFwk::ExtensionAbilityType::FORM_EDIT, FORM_EDIT_EXTENSION },
+    { AppExecFwk::ExtensionAbilityType::LIVE_FORM, LIVE_FORM_EXTENSION }
 #endif //SUPPORT_GRAPHICS
 };
 
