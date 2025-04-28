@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "utils/window_options_utils.h"
 #include "hilog_tag_wrapper.h"
+#include "mock_app_utils.h"
 using namespace testing;
 using namespace testing::ext;
 using OHOS::AppExecFwk::ExtensionAbilityType;
@@ -150,6 +151,190 @@ HWTEST_F(WindowOptionsUtilsTest, WindowModeMap_004, TestSize.Level1)
     EXPECT_TRUE(result.first);
     EXPECT_EQ(result.second, AppExecFwk::SupportWindowMode::FLOATING);
     TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest WindowModeMap_004 end");
+}
+
+/*
+ * Feature: WindowOptionsUtils
+ * Function: SetWindowPositionAndSize
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetWindowPositionAndSize
+ */
+HWTEST_F(WindowOptionsUtilsTest, SetWindowPositionAndSize_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_003 start");
+    Want want;
+    sptr<IRemoteObject> callerToken;
+    StartOptions startOptions;
+    const int32_t length = 333;
+    startOptions.SetWindowLeft(length);
+    startOptions.windowLeftUsed_ = true;
+    AppUtils::isStartOptionsWithAnimation_ = true;
+    auto Window_ = std::make_shared<WindowOptionsUtils>();
+    ASSERT_NE(nullptr, Window_);
+    Window_->SetWindowPositionAndSize(want, callerToken, startOptions);
+    EXPECT_EQ(startOptions.GetWindowLeft(), length);
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_003 end");
+}
+
+/*
+ * Feature: WindowOptionsUtils
+ * Function: SetWindowPositionAndSize
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetWindowPositionAndSize
+ */
+HWTEST_F(WindowOptionsUtilsTest, SetWindowPositionAndSize_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_004 start");
+    Want want;
+    sptr<IRemoteObject> callerToken;
+    StartOptions startOptions;
+    const int32_t length = 333;
+    startOptions.SetWindowTop(length);
+    startOptions.windowTopUsed_ = true;
+    AppUtils::isStartOptionsWithAnimation_ = true;
+    auto Window_ = std::make_shared<WindowOptionsUtils>();
+    ASSERT_NE(nullptr, Window_);
+    Window_->SetWindowPositionAndSize(want, callerToken, startOptions);
+    EXPECT_EQ(startOptions.GetWindowTop(), length);
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_004 end");
+}
+
+/*
+ * Feature: WindowOptionsUtils
+ * Function: SetWindowPositionAndSize
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetWindowPositionAndSize
+ */
+HWTEST_F(WindowOptionsUtilsTest, SetWindowPositionAndSize_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_005 start");
+    Want want;
+    sptr<IRemoteObject> callerToken;
+    StartOptions startOptions;
+    const int32_t length = 333;
+    startOptions.SetWindowWidth(length);
+    startOptions.windowWidthUsed_ = true;
+    AppUtils::isStartOptionsWithAnimation_ = true;
+    auto Window_ = std::make_shared<WindowOptionsUtils>();
+    ASSERT_NE(nullptr, Window_);
+    Window_->SetWindowPositionAndSize(want, callerToken, startOptions);
+    EXPECT_EQ(startOptions.GetWindowWidth(), length);
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_005 end");
+}
+
+/*
+ * Feature: WindowOptionsUtils
+ * Function: SetWindowPositionAndSize
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetWindowPositionAndSize
+ */
+HWTEST_F(WindowOptionsUtilsTest, SetWindowPositionAndSize_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_006 start");
+    Want want;
+    sptr<IRemoteObject> callerToken;
+    StartOptions startOptions;
+    const int32_t length = 333;
+    startOptions.SetWindowHeight(length);
+    startOptions.windowHeightUsed_ = true;
+    AppUtils::isStartOptionsWithAnimation_ = true;
+    auto Window_ = std::make_shared<WindowOptionsUtils>();
+    ASSERT_NE(nullptr, Window_);
+    Window_->SetWindowPositionAndSize(want, callerToken, startOptions);
+    EXPECT_EQ(startOptions.GetWindowHeight(), length);
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_006 end");
+}
+
+/*
+ * Feature: WindowOptionsUtils
+ * Function: SetWindowPositionAndSize
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetWindowPositionAndSize
+ */
+HWTEST_F(WindowOptionsUtilsTest, SetWindowPositionAndSize_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_007 start");
+    Want want;
+    sptr<IRemoteObject> callerToken;
+    StartOptions startOptions;
+    const int32_t length = 333;
+    startOptions.SetMinWindowWidth(length);
+    startOptions.minWindowWidthUsed_ = true;
+    AppUtils::isStartOptionsWithAnimation_ = true;
+    auto Window_ = std::make_shared<WindowOptionsUtils>();
+    ASSERT_NE(nullptr, Window_);
+    Window_->SetWindowPositionAndSize(want, callerToken, startOptions);
+    EXPECT_EQ(startOptions.GetMinWindowWidth(), length);
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_007 end");
+}
+
+/*
+ * Feature: WindowOptionsUtils
+ * Function: SetWindowPositionAndSize
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetWindowPositionAndSize
+ */
+HWTEST_F(WindowOptionsUtilsTest, SetWindowPositionAndSize_008, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_008 start");
+    Want want;
+    sptr<IRemoteObject> callerToken;
+    StartOptions startOptions;
+    const int32_t length = 333;
+    startOptions.SetMinWindowHeight(length);
+    startOptions.minWindowHeightUsed_ = true;
+    AppUtils::isStartOptionsWithAnimation_ = true;
+    auto Window_ = std::make_shared<WindowOptionsUtils>();
+    ASSERT_NE(nullptr, Window_);
+    Window_->SetWindowPositionAndSize(want, callerToken, startOptions);
+    EXPECT_EQ(startOptions.GetMinWindowHeight(), length);
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_008 end");
+}
+
+/*
+ * Feature: WindowOptionsUtils
+ * Function: SetWindowPositionAndSize
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetWindowPositionAndSize
+ */
+HWTEST_F(WindowOptionsUtilsTest, SetWindowPositionAndSize_009, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_009 start");
+    Want want;
+    sptr<IRemoteObject> callerToken;
+    StartOptions startOptions;
+    const int32_t length = 333;
+    startOptions.SetMaxWindowWidth(length);
+    startOptions.maxWindowWidthUsed_ = true;
+    AppUtils::isStartOptionsWithAnimation_ = true;
+    auto Window_ = std::make_shared<WindowOptionsUtils>();
+    ASSERT_NE(nullptr, Window_);
+    Window_->SetWindowPositionAndSize(want, callerToken, startOptions);
+    EXPECT_EQ(startOptions.GetMaxWindowWidth(), length);
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_009 end");
+}
+
+/*
+ * Feature: WindowOptionsUtils
+ * Function: SetWindowPositionAndSize
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetWindowPositionAndSize
+ */
+HWTEST_F(WindowOptionsUtilsTest, SetWindowPositionAndSize_010, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_010 start");
+    Want want;
+    sptr<IRemoteObject> callerToken;
+    StartOptions startOptions;
+    const int32_t length = 333;
+    startOptions.SetMaxWindowHeight(length);
+    startOptions.maxWindowHeightUsed_ = true;
+    AppUtils::isStartOptionsWithAnimation_ = true;
+    auto Window_ = std::make_shared<WindowOptionsUtils>();
+    ASSERT_NE(nullptr, Window_);
+    Window_->SetWindowPositionAndSize(want, callerToken, startOptions);
+    EXPECT_EQ(startOptions.GetMaxWindowHeight(), length);
+    TAG_LOGI(AAFwkTag::TEST, "WindowOptionsUtilsTest SetWindowPositionAndSize_010 end");
 }
 } // namespace AAFwk
 } // namespace OHOS
