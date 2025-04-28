@@ -1052,7 +1052,8 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
 #if defined(SUPPORT_GRAPHICS) && defined(SUPPORT_APP_PREFERRED_LANGUAGE)
     UErrorCode status = U_ZERO_ERROR;
-    icu::Locale systemLocale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetEffectiveLanguage(), status);
+    icu::Locale systemLocale = icu::Locale::forLanguageTag(
+        config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE), status);
     resConfig->SetLocaleInfo(systemLocale);
 
     if (Global::I18n::PreferredLanguage::IsSetAppPreferredLanguage()) {
@@ -1806,6 +1807,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
     Configuration appConfig = config;
+    if (Global::I18n::PreferredLanguage::IsSetAppPreferredLanguage()) {
+        std::string preferredLanguage = Global::I18n::PreferredLanguage::GetAppPreferredLanguage();
+        appConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, preferredLanguage);
+    }
     ParseAppConfigurationParams(bundleInfo.applicationInfo.configuration, appConfig);
     std::string systemSizeScale = appConfig.GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     if (!systemSizeScale.empty() && systemSizeScale.compare(DEFAULT_APP_FONT_SIZE_SCALE) == 0) {

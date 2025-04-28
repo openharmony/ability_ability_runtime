@@ -47,6 +47,7 @@ ohos_unittest("multi_user_config_mgr_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "i18n:i18n_sa_client",
     "init:libbegetutil",
     "ipc:ipc_core",
     "os_account:libaccountkits",
