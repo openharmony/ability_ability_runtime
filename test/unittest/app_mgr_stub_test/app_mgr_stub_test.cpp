@@ -762,5 +762,44 @@ HWTEST_F(AppMgrStubTest, GetSupportedProcessCachePids_001, TestSize.Level1)
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
+
+/**
+ * @tc.name: UpdateConfigurationForBackgroundApp_001
+ * @tc.desc: UpdateConfigurationForBackgroundApp.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppMgrStubTest, UpdateConfigurationForBackgroundApp_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+
+    std::vector<BackgroundAppInfo> appInfos;
+    AppExecFwk::ConfigurationPolicy policy;
+    int32_t userId = -1;
+
+    BackgroundAppInfo info;
+    appInfos.push_back(info);
+    auto size = appInfos.size();
+    data.WriteUint32(size);
+
+    for (const auto &info: appInfos) {
+        data.WriteParcelable(&info);
+    }
+    data.WriteParcelable(&policy);
+    data.WriteInt32(userId);
+
+    EXPECT_CALL(*mockAppMgrService_, UpdateConfigurationForBackgroundApp(_, _, _)).Times(1);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_CONFIGURATION_POLICY), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
