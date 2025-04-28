@@ -25,6 +25,7 @@
 #include "form_runtime/form_extension_provider_client.h"
 #include "hilog_tag_wrapper.h"
 #include "sts_form_extension_context.h"
+#include "connection_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -612,6 +613,38 @@ bool STSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
     }
 
     return true;
+}
+
+void STSFormExtension::OnStop()
+{
+    TAG_LOGI(AAFwkTag::FORM_EXT, "OnStop begin");
+
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "env null");
+        return;
+    }
+    ani_status status = ANI_OK;
+    ani_method function;
+    if ((status = env->Class_FindMethod(
+        stsAbilityObj_->aniCls, "onStop", ":V", &function))) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod status : %{public}d", status);
+        return;
+    }
+
+    status = env->Object_CallMethod_Void(stsAbilityObj_->aniObj, function);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_New status : %{public}d", status);
+        return;
+    }
+
+    bool ret = ConnectionManager::GetInstance().DisconnectCaller(GetContext()->GetToken());
+    if (ret) {
+        ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
+        TAG_LOGI(AAFwkTag::FORM_EXT, "disconnected failed");
+    }
+
+    TAG_LOGI(AAFwkTag::FORM_EXT, "OnStop End");
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
