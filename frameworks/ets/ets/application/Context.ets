@@ -21,12 +21,21 @@ import { ApplicationInfo } from 'bundleManager.ApplicationInfo'
 import resmgr from '@ohos.resourceManager'
 
 export class Context extends BaseContext {
+    static {
+        loadLibrary("context_ani");
+    }
     area: contextConstant.AreaMode = contextConstant.AreaMode.EL1;
     filesDir: string = "";
     tempDir: string = "";
     applicationInfo: ApplicationInfo;
     eventHub: EventHub = new EventHub();
     resourceManager: resmgr.ResourceManager;
+    native constructor();
+    constructor(applicationInfo: ApplicationInfo, resourceManager: resmgr.ResourceManager) {
+        super();
+        this.applicationInfo = applicationInfo;
+        this.resourceManager = resourceManager;
+    }
 
     public native getApplicationContextSync(): ApplicationContext;
 
