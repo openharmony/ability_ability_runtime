@@ -189,7 +189,7 @@ bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object r
     ani_status status = ANI_ERROR;
     ani_class clsCall {};
 
-    if ((status = env->FindClass("Lapplication/UIAbilityContext/AsyncCallbackWrapper;", &clsCall)) != ANI_OK) {
+    if ((status = env->FindClass("Lutils/AbilityUtils/AsyncCallbackWrapper;", &clsCall)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
         return false;
     }
