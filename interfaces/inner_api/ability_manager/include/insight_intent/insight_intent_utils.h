@@ -30,9 +30,9 @@ class InsightIntentUtils {
 public:
     static uint32_t GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
         const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry);
-    static uint32_t ExtractInsightIntentGenericInfo2InsightIntentInfoForBack(
+    static uint32_t ConvertExtractInsightIntentGenericInfo(
         ExtractInsightIntentGenericInfo &genericInfo, InsightIntentInfoForBack &backInfo);
-    static uint32_t ExtractInsightIntentInfo2InsightIntentInfoForBack(
+    static uint32_t ConvertExtractInsightIntentInfo(
         ExtractInsightIntentInfo &intentInfo, InsightIntentInfoForBack &backInfo);
 };
 } // namespace AbilityRuntime

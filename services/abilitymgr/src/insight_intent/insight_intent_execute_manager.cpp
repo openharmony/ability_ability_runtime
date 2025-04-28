@@ -362,10 +362,5 @@ std::map<int32_t, int64_t> InsightIntentExecuteManager::GetAllIntentExemptionInf
     std::lock_guard<ffrt::mutex> guard(intentExemptionLock_);
     return intentExemptionDeadlineTime_;
 }
-
-int32_t InsightIntentExecuteManager::CheckPermissionForCaller()
-{
-    return CheckCallerPermission();
-}
 } // namespace AAFwk
 } // namespace OHOS

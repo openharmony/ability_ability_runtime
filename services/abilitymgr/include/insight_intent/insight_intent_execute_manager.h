@@ -99,7 +99,7 @@ public:
 
     bool CheckIntentIsExemption(int32_t uid);
 
-    int32_t CheckPermissionForCaller();
+    static int32_t CheckCallerPermission();
 private:
     mutable ffrt::mutex mutex_;
     mutable ffrt::mutex intentExemptionLock_;
@@ -111,8 +111,6 @@ private:
         uint64_t &intentId, const std::string &callerBundleName);
 
     static int32_t IsValidCall(const Want &want);
-
-    static int32_t CheckCallerPermission();
 };
 } // namespace AAFwk
 } // namespace OHOS
