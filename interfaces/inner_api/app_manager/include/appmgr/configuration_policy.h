@@ -13,27 +13,20 @@
  * limitations under the License.
  */
 
-#include "mock_permission_verification.h"
+#ifndef OHOS_ABILITY_RUNTIME_CONFIGURATION_POLICY_H
+#define OHOS_ABILITY_RUNTIME_CONFIGURATION_POLICY_H
+
+#include "parcel.h"
 
 namespace OHOS {
-namespace AAFwk {
-bool PermissionVerification::CheckSpecificSystemAbilityAccessPermission(const std::string &processName) const
-{
-    return !!(MyFlag::flag_);
-}
-
-bool PermissionVerification::VerifyRunningInfoPerm() const
-{
-    return MyFlag::perm;
-}
-
-bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
-{
-    return !!(MyFlag::flag_);
-}
-bool PermissionVerification::IsSACall() const
-{
-    return (MyFlag::flag_ & MyFlag::FLAG::IS_SA_CALL);
-}
-}  // namespace AAFwk
-}  // namespace OHOS
+namespace AppExecFwk {
+struct ConfigurationPolicy : public Parcelable {
+    bool ReadFromParcel(Parcel &parcel);
+    virtual bool Marshalling(Parcel &parcel) const override;
+    static ConfigurationPolicy *Unmarshalling(Parcel &parcel);
+    int8_t maxCountPerBatch = -1;
+    int16_t intervalTime = -1;
+};
+} // namespace AppExecFwk
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_POLICY_INTERFACE_H

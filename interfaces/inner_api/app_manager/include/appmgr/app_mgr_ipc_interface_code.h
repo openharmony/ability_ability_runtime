@@ -126,6 +126,7 @@ enum class AppMgrInterfaceCode {
     UPDATE_PROCESS_MEMORY_STATE = 100,
     GET_KILLED_PROCESS_INFO = 101,
     LAUNCH_ABILITY = 102,
+    UPDATE_CONFIGURATION_POLICY = 103,
 };
 } // AppExecFwk
 } // OHOS
