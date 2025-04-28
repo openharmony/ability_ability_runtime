@@ -549,11 +549,11 @@ void StsUIAbility::OnSceneRestored()
 void StsUIAbility::OnSceneWillDestroy()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
-
     if (stsWindowStageObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsWindowStageObj_");
         return;
     }
+    CallObjectMethod(false, "onWindowStageWillDestroy", nullptr, stsWindowStageObj_->aniRef);
 }
 
 void StsUIAbility::onSceneDestroyed()
@@ -690,7 +690,9 @@ bool StsUIAbility::OnBackPress()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
     UIAbility::OnBackPress();
-    return false;
+    bool ret = CallObjectMethod(true, "onBackPressed", nullptr);
+    TAG_LOGD(AAFwkTag::UIABILITY, "ret: %{public}d", ret);
+    return ret;
 }
 
 ani_object StsUIAbility::CreateAppWindowStage()
@@ -1236,7 +1238,7 @@ bool StsUIAbility::CallObjectMethod(bool withResult, const char *name, const cha
     }
     env->ResetError();
     if (withResult) {
-        ani_boolean res = 0;
+        ani_boolean res = false;
         va_list args;
         va_start(args, signature);
         if ((status = env->Object_CallMethod_Boolean(obj, method, &res, args)) != ANI_OK) {
