@@ -34,7 +34,7 @@ ani_object WrapAppStateData(ani_env *env, const AppExecFwk::AppStateData &appSta
         return nullptr;
     }
     if ((status = env->FindClass("Lapplication/AppStateData/AppStateData;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "find class failed status : %{public}d", status);
         return nullptr;
     }
     if (cls == nullptr) {
@@ -42,11 +42,11 @@ ani_object WrapAppStateData(ani_env *env, const AppExecFwk::AppStateData &appSta
         return nullptr;
     }
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "find ctor failed status : %{public}d", status);
         return nullptr;
     }
     if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_New AppStateData failed status : %{public}d", status);
         return nullptr;
     }
     if (object == nullptr) {
@@ -102,21 +102,21 @@ ani_object CreateAppStateDataArray(ani_env *env, std::vector<AppExecFwk::AppStat
     ani_status status = ANI_OK;
     status = env->FindClass("Lescompat/Array;", &arrayCls);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "FindClass failed status : %{public}d", status);
         return nullptr;
     }
 
     ani_method arrayCtor;
     status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "find ctor failed status : %{public}d", status);
         return nullptr;
     }
 
     ani_object arrayObj;
     status = env->Object_New(arrayCls, arrayCtor, &arrayObj, data.size());
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_New failed  status : %{public}d", status);
         return arrayObj;
     }
 
@@ -147,21 +147,21 @@ ani_object NewArrayClass(ani_env *env, const std::vector<std::string>& data)
     }
     status = env->FindClass("Lescompat/Array;", &arrayCls);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "find calss failed status : %{public}d", status);
         return nullptr;
     }
 
     ani_method arrayCtor;
     status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "find ctor failed status : %{public}d", status);
         return nullptr;
     }
 
     ani_object arrayObj;
     status = env->Object_New(arrayCls, arrayCtor, &arrayObj, data.size());
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_New array failed status : %{public}d", status);
         return arrayObj;
     }
 
@@ -170,12 +170,12 @@ ani_object NewArrayClass(ani_env *env, const std::vector<std::string>& data)
         ani_string ani_str;
         status = env->String_NewUTF8(item.c_str(), item.size(), &ani_str);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+            TAG_LOGE(AAFwkTag::APPMGR, "String_NewUTF8 failed status : %{public}d", status);
             break;
         }
         status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, ani_str);
         if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Void failed status : %{public}d", status);
             break;
         }
         index++;
@@ -190,13 +190,11 @@ bool SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::Ru
         return false;
     }
     ani_status status = ANI_OK;
-    status = env->Object_SetPropertyByName_Double(object, "pid", processInfo.pid_);
-    if (status != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Double(object, "pid", processInfo.pid_)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "pid failed status:%{public}d", status);
         return false;
     }
-    status = env->Object_SetPropertyByName_Double(object, "uid", processInfo.uid_);
-    if (status != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Double(object, "uid", processInfo.uid_)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "uid failed status:%{public}d", status);
         return false;
     }
@@ -214,8 +212,7 @@ bool SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::Ru
     ani_enum_item stateItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
         "L@ohos/app/ability/appManager/appManager/ProcessState;", processInfo.state_, stateItem);
-    status = env->Object_SetPropertyByName_Ref(object, "state", stateItem);
-    if (status != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Ref(object, "state", stateItem)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "state failed status:%{public}d", status);
         return false;
     }
@@ -223,8 +220,7 @@ bool SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::Ru
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
         "L@ohos/bundle/bundleManager/bundleManager/BundleType;",
         processInfo.bundleType, bundleTypeItem);
-    status = env->Object_SetPropertyByName_Ref(object, "bundleType", bundleTypeItem);
-    if (status != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Ref(object, "bundleType", bundleTypeItem)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "bundleType failed status:%{public}d", status);
         return false;
     }
@@ -248,7 +244,7 @@ ani_object WrapProcessInformation(ani_env *env, const AppExecFwk::RunningProcess
         return nullptr;
     }
     if ((status = env->FindClass("Lapplication/ProcessInformation/ProcessInformationInner;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "FindClass failed status : %{public}d", status);
         return nullptr;
     }
     if (cls == nullptr) {
@@ -256,11 +252,11 @@ ani_object WrapProcessInformation(ani_env *env, const AppExecFwk::RunningProcess
         return nullptr;
     }
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "find ctor failed status : %{public}d", status);
         return nullptr;
     }
     if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_New ProcessInformationInner failed status : %{public}d", status);
         return nullptr;
     }
     if (object == nullptr) {
@@ -286,21 +282,21 @@ ani_object CreateRunningProcessInfoArray(ani_env *env, std::vector<AppExecFwk::R
 
     status = env->FindClass("Lescompat/Array;", &arrayCls);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "FindClass failed status : %{public}d", status);
         return nullptr;
     }
 
     ani_method arrayCtor;
     status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "find ctor failed status : %{public}d", status);
         return nullptr;
     }
 
     ani_object arrayObj;
     status = env->Object_New(arrayCls, arrayCtor, &arrayObj, infos.size());
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_New array status : %{public}d", status);
         return arrayObj;
     }
     ani_size index = 0;
@@ -312,12 +308,77 @@ ani_object CreateRunningProcessInfoArray(ani_env *env, std::vector<AppExecFwk::R
         }
         status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, ani_info);
         if (status != ANI_OK) {
-            TAG_LOGW(AAFwkTag::APPMGR, "status : %{public}d", status);
+            TAG_LOGW(AAFwkTag::APPMGR, "Object_CallMethodByName_Void failed status : %{public}d", status);
             break;
         }
         index++;
     }
     return arrayObj;
+}
+
+ani_object CreateEmptyAniArray(ani_env *env)
+{
+    ani_class arrayCls = nullptr;
+    ani_status status = ANI_OK;
+
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null env");
+        return nullptr;
+    }
+
+    status = env->FindClass("Lescompat/Array;", &arrayCls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "FindClass failed status : %{public}d", status);
+        return nullptr;
+    }
+
+    ani_method arrayCtor;
+    status = env->Class_FindMethod(arrayCls, "<ctor>", ":V", &arrayCtor);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "find ctor failed status : %{public}d", status);
+        return nullptr;
+    }
+
+    ani_object arrayObj;
+    status = env->Object_New(arrayCls, arrayCtor, &arrayObj);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_New array failed status : %{public}d", status);
+        return arrayObj;
+    }
+    return arrayObj;
+}
+
+ani_object CreateEmptyMultiAppInfo(ani_env *env)
+{
+    ani_class cls {};
+    ani_status status = ANI_ERROR;
+    ani_method method {};
+    ani_object object = nullptr;
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null env");
+        return nullptr;
+    }
+    if ((status = env->FindClass("Lapplication/RunningMultiAppInfo/RunningMultiAppInfoInner;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "FindClass failed status : %{public}d", status);
+        return nullptr;
+    }
+    if (cls == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null cls");
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "find ctor failed status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_New failed status : %{public}d", status);
+        return nullptr;
+    }
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null object");
+        return nullptr;
+    }
+    return object;
 }
 
 ani_object CreateRunningMultiInstanceInfoArray(ani_env *env, std::vector<AppExecFwk::RunningMultiInstanceInfo> infos)
@@ -461,7 +522,7 @@ ani_object WrapRunningMultiAppInfo(ani_env *env, const AppExecFwk::RunningMultiA
         return nullptr;
     }
     if ((status = env->FindClass("Lapplication/RunningMultiAppInfo/RunningMultiAppInfoInner;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "FindClass failed status : %{public}d", status);
         return nullptr;
     }
     if (cls == nullptr) {
@@ -469,11 +530,11 @@ ani_object WrapRunningMultiAppInfo(ani_env *env, const AppExecFwk::RunningMultiA
         return nullptr;
     }
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "find ctor failed status : %{public}d", status);
         return nullptr;
     }
     if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_New failed status : %{public}d", status);
         return nullptr;
     }
     if (object == nullptr) {
@@ -608,7 +669,7 @@ bool SetRunningAppClone(ani_env *env, ani_object object, const AppExecFwk::Runni
     ani_object arrayObj;
     status = env->Object_New(arrayCls, arrayCtor, &arrayObj, runningAppClone.pids.size());
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "new array failed status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_New array failed status : %{public}d", status);
         return false;
     }
     ani_size index = 0;
