@@ -29,6 +29,7 @@ void InsightIntentDbCache::InitInsightIntentCache(const int32_t userId)
     }
     std::vector<ExtractInsightIntentInfo> totalInfos;
     totalInfos.clear();
+    intentGenericInfos_.clear();
     if (DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadInsightIntentInfos(userId, totalInfos) != ERR_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "Load All IntentData failed");
         return;
