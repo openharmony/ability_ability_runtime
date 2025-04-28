@@ -22,13 +22,18 @@ InsightIntentDbCache::InsightIntentDbCache()
 
 void InsightIntentDbCache::InitInsightIntentCache(const int32_t userId)
 {
+    std::lock_guard<std::mutex> lock(genericInfosMutex_);
+    if (userId_ == userId) {
+        TAG_LOGD(AAFwkTag::INTENT, "no need init, userId %{public}d.", userId_);
+        return;
+    }
     std::vector<ExtractInsightIntentInfo> totalInfos;
     totalInfos.clear();
+    intentGenericInfos_.clear();
     if (DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->LoadInsightIntentInfos(userId, totalInfos) != ERR_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "Load All IntentData failed");
         return;
     }
-    std::lock_guard<std::mutex> lock(genericInfosMutex_);
     for (size_t i = 0; i < totalInfos.size(); i++) {
         ExtractInsightIntentInfo info = totalInfos.at(i);
         std::string bundleName = info.genericInfo.bundleName;
