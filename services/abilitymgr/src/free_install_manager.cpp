@@ -262,36 +262,47 @@ int FreeInstallManager::NotifyDmsCallback(const Want &want, int resultCode)
 void FreeInstallManager::NotifyFreeInstallResult(int32_t recordId, const Want &want, int resultCode, bool isAsync)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<ffrt::mutex> lock(freeInstallListLock_);
-    if (freeInstallList_.empty()) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "null app callback");
+    FreeInstallInfo info;
+    bool found = false;
+    {
+        std::lock_guard<ffrt::mutex> lock(freeInstallListLock_);
+        if (freeInstallList_.empty()) {
+            TAG_LOGE(AAFwkTag::FREE_INSTALL, "null app callback");
+            return;
+        }
+
+        bool isFromRemote = want.GetBoolParam(FROM_REMOTE_KEY, false);
+        for (auto it = freeInstallList_.begin(); it != freeInstallList_.end();) {
+            FreeInstallInfo &freeInstallInfo = *it;
+            std::string bundleName = freeInstallInfo.want.GetElement().GetBundleName();
+            std::string abilityName = freeInstallInfo.want.GetElement().GetAbilityName();
+            std::string startTime = freeInstallInfo.want.GetStringParam(Want::PARAM_RESV_START_TIME);
+            std::string url = freeInstallInfo.want.GetUriString();
+            if (want.GetElement().GetBundleName().compare(bundleName) != 0 ||
+                want.GetElement().GetAbilityName().compare(abilityName) != 0 ||
+                want.GetStringParam(Want::PARAM_RESV_START_TIME).compare(startTime) != 0 ||
+                want.GetUriString().compare(url) != 0) {
+                it++;
+                continue;
+            }
+
+            if (!isAsync && freeInstallInfo.promise == nullptr) {
+                it++;
+                continue;
+            }
+            freeInstallInfo.isFreeInstallFinished = true;
+            freeInstallInfo.resultCode = resultCode;
+            found = true;
+            info = freeInstallInfo;
+            freeInstallList_.erase(it);
+            break;
+        }
+    }
+    if (found) {
+        HandleFreeInstallResult(recordId, info, resultCode, isAsync);
         return;
     }
-
-    bool isFromRemote = want.GetBoolParam(FROM_REMOTE_KEY, false);
-    for (auto it = freeInstallList_.begin(); it != freeInstallList_.end();) {
-        FreeInstallInfo &freeInstallInfo = *it;
-        std::string bundleName = freeInstallInfo.want.GetElement().GetBundleName();
-        std::string abilityName = freeInstallInfo.want.GetElement().GetAbilityName();
-        std::string startTime = freeInstallInfo.want.GetStringParam(Want::PARAM_RESV_START_TIME);
-        std::string url = freeInstallInfo.want.GetUriString();
-        if (want.GetElement().GetBundleName().compare(bundleName) != 0 ||
-            want.GetElement().GetAbilityName().compare(abilityName) != 0 ||
-            want.GetStringParam(Want::PARAM_RESV_START_TIME).compare(startTime) != 0 ||
-            want.GetUriString().compare(url) != 0) {
-            it++;
-            continue;
-        }
-
-        if (!isAsync && freeInstallInfo.promise == nullptr) {
-            it++;
-            continue;
-        }
-        freeInstallInfo.isFreeInstallFinished = true;
-        freeInstallInfo.resultCode = resultCode;
-        HandleFreeInstallResult(recordId, freeInstallInfo, resultCode, isAsync);
-        it = freeInstallList_.erase(it);
-    }
+    TAG_LOGE(AAFwkTag::FREE_INSTALL, "not found freeInstallInfo");
 }
 
 void FreeInstallManager::HandleOnFreeInstallSuccess(int32_t recordId, FreeInstallInfo &freeInstallInfo, bool isAsync)
