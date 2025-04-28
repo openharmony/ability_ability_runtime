@@ -176,14 +176,14 @@ private:
             return CreateJsUndefined(env);
         }
         auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
-        std::vector<InsightIntentInfoForBack> infos;
-        NapiAsyncTask::ExecuteCallback execute = [&infos, flag, innerErrorCode]() {
-            *innerErrorCode = AbilityManagerClient::GetInstance()->GetAllInsightIntentInfo(flag, infos);
+        auto infos = std::make_shared<std::vector<InsightIntentInfoForBack>>();
+        NapiAsyncTask::ExecuteCallback execute = [infos, flag, innerErrorCode]() {
+            *innerErrorCode = AbilityManagerClient::GetInstance()->GetAllInsightIntentInfo(flag, *infos);
         };
         NapiAsyncTask::CompleteCallback complete =
-            [innerErrorCode, &infos](napi_env env, NapiAsyncTask &task, int32_t status) {
+            [innerErrorCode, infos](napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (*innerErrorCode == 0) {
-                    task.ResolveWithNoError(env, CreateInsightIntentInfoForBackArray(env, infos));
+                    task.ResolveWithNoError(env, CreateInsightIntentInfoForBackArray(env, *infos));
                 } else {
                     task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*innerErrorCode)));
                 }
@@ -217,15 +217,15 @@ private:
             return CreateJsUndefined(env);
         }
         auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
-        std::vector<InsightIntentInfoForBack> infos;
-        NapiAsyncTask::ExecuteCallback execute = [&infos, flag, bundleName, innerErrorCode]() {
+        auto infos = std::make_shared<std::vector<InsightIntentInfoForBack>>();
+        NapiAsyncTask::ExecuteCallback execute = [infos, flag, bundleName, innerErrorCode]() {
             *innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByBundleName(
-                flag, bundleName, infos);
+                flag, bundleName, *infos);
         };
         NapiAsyncTask::CompleteCallback complete =
-            [innerErrorCode, &infos](napi_env env, NapiAsyncTask &task, int32_t status) {
+            [innerErrorCode, infos](napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (*innerErrorCode == 0) {
-                    task.ResolveWithNoError(env, CreateInsightIntentInfoForBackArray(env, infos));
+                    task.ResolveWithNoError(env, CreateInsightIntentInfoForBackArray(env, *infos));
                 } else {
                     task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*innerErrorCode)));
                 }
@@ -271,16 +271,16 @@ private:
             return CreateJsUndefined(env);
         }
         auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
-        InsightIntentInfoForBack intentInfo;
+        auto intentInfo = std::make_shared<InsightIntentInfoForBack>();
         NapiAsyncTask::ExecuteCallback execute =
-            [&intentInfo, flag, bundleName, moduleName, intentName, innerErrorCode]() {
+            [intentInfo, flag, bundleName, moduleName, intentName, innerErrorCode]() {
                 *innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByIntentName(
-                    flag, bundleName, moduleName, intentName, intentInfo);
+                    flag, bundleName, moduleName, intentName, *intentInfo);
             };
         NapiAsyncTask::CompleteCallback complete =
-            [innerErrorCode, &intentInfo](napi_env env, NapiAsyncTask &task, int32_t status) {
+            [innerErrorCode, intentInfo](napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (*innerErrorCode == 0) {
-                    task.ResolveWithNoError(env, CreateInsightIntentInfoForBack(env, intentInfo));
+                    task.ResolveWithNoError(env, CreateInsightIntentInfoForBack(env, *intentInfo));
                 } else {
                     task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*innerErrorCode)));
                 }

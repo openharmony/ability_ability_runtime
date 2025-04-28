@@ -25,6 +25,7 @@ using JsonType = AppExecFwk::JsonType;
 using ArrayType = AppExecFwk::ArrayType;
 namespace {
 int32_t g_parseResult = ERR_OK;
+std::mutex g_extraMutex;
 
 const std::map<AppExecFwk::ExecuteMode, std::string> EXECUTE_MODE_STRING_MAP = {
     {AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND, "UI_ABILITY_FOREGROUND"},
@@ -248,46 +249,53 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForBack &insig
         false,
         g_parseResult,
         ArrayType::STRING);
-    AppExecFwk::GetValueIfFindKey<LinkInfoForBack>(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_LINK_INFO,
-        insightIntentInfo.linkInfo,
-        JsonType::OBJECT,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<PageInfoForBack>(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_PAGE_INFO,
-        insightIntentInfo.pageInfo,
-        JsonType::OBJECT,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<EntryInfoForBack>(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_ENTRY_INFO,
-        insightIntentInfo.entryInfo,
-        JsonType::OBJECT,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<FunctionInfoForBack>(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_FUNCTION_INFO,
-        insightIntentInfo.functionInfo,
-        JsonType::OBJECT,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<FormInfoForBack>(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_FORM_INFO,
-        insightIntentInfo.formInfo,
-        JsonType::OBJECT,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+
+    if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_LINK) {
+        AppExecFwk::GetValueIfFindKey<LinkInfoForBack>(jsonObject,
+            jsonObjectEnd,
+            INSIGHT_INTENT_LINK_INFO,
+            insightIntentInfo.linkInfo,
+            JsonType::OBJECT,
+            false,
+            g_parseResult,
+            ArrayType::NOT_ARRAY);
+    } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_PAGE) {
+        AppExecFwk::GetValueIfFindKey<PageInfoForBack>(jsonObject,
+            jsonObjectEnd,
+            INSIGHT_INTENT_PAGE_INFO,
+            insightIntentInfo.pageInfo,
+            JsonType::OBJECT,
+            false,
+            g_parseResult,
+            ArrayType::NOT_ARRAY);
+    } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_ENTRY) {
+        AppExecFwk::GetValueIfFindKey<EntryInfoForBack>(jsonObject,
+            jsonObjectEnd,
+            INSIGHT_INTENT_ENTRY_INFO,
+            insightIntentInfo.entryInfo,
+            JsonType::OBJECT,
+            false,
+            g_parseResult,
+            ArrayType::NOT_ARRAY);
+    } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_FUNCTION) {
+        AppExecFwk::GetValueIfFindKey<FunctionInfoForBack>(jsonObject,
+            jsonObjectEnd,
+            INSIGHT_INTENT_FUNCTION_INFO,
+            insightIntentInfo.functionInfo,
+            JsonType::OBJECT,
+            false,
+            g_parseResult,
+            ArrayType::NOT_ARRAY);
+    } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_FORM) {
+        AppExecFwk::GetValueIfFindKey<FormInfoForBack>(jsonObject,
+            jsonObjectEnd,
+            INSIGHT_INTENT_FORM_INFO,
+            insightIntentInfo.formInfo,
+            JsonType::OBJECT,
+            false,
+            g_parseResult,
+            ArrayType::NOT_ARRAY);
+    }
 }
 
 void to_json(nlohmann::json& jsonObject, const InsightIntentInfoForBack &info)
@@ -337,7 +345,14 @@ bool InsightIntentInfoForBack::ReadFromParcel(Parcel &parcel)
         TAG_LOGE(AAFwkTag::INTENT, "failed to parse BundleInfo");
         return false;
     }
+    std::lock_guard<std::mutex> lock(g_extraMutex);
+    g_parseResult = ERR_OK;
     *this = jsonObject.get<InsightIntentInfoForBack>();
+    if (g_parseResult != ERR_OK) {
+        TAG_LOGE(AAFwkTag::INTENT, "parse result: %{public}d", g_parseResult);
+        g_parseResult = ERR_OK;
+        return false;
+    }
     return true;
 }
 
