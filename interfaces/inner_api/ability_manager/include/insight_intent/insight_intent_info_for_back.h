@@ -13,8 +13,8 @@
 * limitations under the License.
 */
 
-#ifndef OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_H
-#define OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_FOR_BACK_H
+#define OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_FOR_BACK_H
 
 #include <string>
 #include <vector>
@@ -71,4 +71,4 @@ struct InsightIntentInfoForBack : public Parcelable {
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_H
+#endif // OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_FOR_BACK_H
