@@ -51,7 +51,7 @@ void InsightIntentSysEventReceiver::SaveInsightIntentInfos(const std::string &bu
     // Get json profile firstly
     std::string profile;
     ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INSIGHT_INTENT_PROFILE, bundleName,
-        moduleName, profile, AppExecFwk::OsAccountManagerWrapper::GetCurrentActiveAccountId()));
+        moduleName, profile, userId));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "GetJsonProfile failed, code: %{public}d", ret);
         return;
