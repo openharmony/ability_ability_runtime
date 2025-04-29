@@ -1217,7 +1217,6 @@ public:
         const std::string &taskName = "");
 
     void UpdateUIExtensionBindInfo(const WantParams &wantParams);
-
 protected:
     sptr<Token> token_ = {};                               // used to interact with kit and wms
     std::unique_ptr<LifecycleDeal> lifecycleDeal_ = {};    // life manager used to schedule life
