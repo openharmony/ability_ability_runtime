@@ -65,7 +65,7 @@ struct RunningProcessInfo : public Parcelable {
     std::int32_t rssValue = 0;
     std::int32_t pssValue = 0;
     PreloadMode preloadMode_ = PreloadMode::PRELOAD_NONE;
-    AppProcessState state_;
+    AppProcessState state_ = AppProcessState::APP_STATE_CREATE;
     std::int64_t startTimeMillis_;
     std::vector<std::string> bundleNames;
     std::string processName_;
