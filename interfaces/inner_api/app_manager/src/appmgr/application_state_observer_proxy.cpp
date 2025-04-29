@@ -394,5 +394,26 @@ int32_t ApplicationStateObserverProxy::SendTransactCmd(uint32_t code, MessagePar
 
     return remote->SendRequest(code, data, reply, option);
 }
+
+void ApplicationStateObserverProxy::OnProcessBindingRelationChanged(const ProcessBindData &processBindData)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    if (!data.WriteParcelable(&processBindData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        return;
+    }
+    int32_t ret = SendTransactCmd(
+        static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_PROCESS_BINDINGRELATION_CHANGED),
+        data, reply, option);
+    if (ret != NO_ERROR && ret != ERR_INVALID_STUB) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is wrong, error code: %{public}d, bundleName:%{public}s.",
+            ret, processBindData.bundleName.c_str());
+    }
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -171,5 +171,15 @@ bool AbilityRunningRecord::IsHook() const
 {
     return want_ && want_->GetBoolParam(IS_HOOK, false);
 }
+
+void AbilityRunningRecord::SetUIExtensionBindAbilityId(const int32_t uiExtensionBindAbilityId)
+{
+    uiExtensionBindAbilityId_ = uiExtensionBindAbilityId;
+}
+
+int32_t AbilityRunningRecord::GetUIExtensionBindAbilityId() const
+{
+    return uiExtensionBindAbilityId_;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
