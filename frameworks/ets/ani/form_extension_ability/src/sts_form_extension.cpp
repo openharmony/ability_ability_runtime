@@ -645,6 +645,7 @@ void STSFormExtension::OnStop()
     if (ret) {
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
         TAG_LOGI(AAFwkTag::FORM_EXT, "disconnected failed");
+		return;
     }
 
     TAG_LOGI(AAFwkTag::FORM_EXT, "OnStop End");
