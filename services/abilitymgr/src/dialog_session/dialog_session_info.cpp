@@ -48,14 +48,19 @@ bool DialogAbilityInfo::ParseURI(const std::string &uri)
     bundleName = uriVec[index++];
     moduleName = uriVec[index++];
     abilityName = uriVec[index++];
-    bundleIconId = static_cast<int32_t>(std::stoi(uriVec[index++]));
-    bundleLabelId = static_cast<int32_t>(std::stoi(uriVec[index++]));
-    abilityIconId = static_cast<int32_t>(std::stoi(uriVec[index++]));
-    abilityLabelId = static_cast<int32_t>(std::stoi(uriVec[index++]));
-    visible = std::stoi(uriVec[index++]);
-    appIndex = static_cast<int32_t>(std::stoi(uriVec[index++]));
-    multiAppMode.multiAppModeType = static_cast<AppExecFwk::MultiAppModeType>(std::stoi(uriVec[index++]));
-    multiAppMode.maxCount = static_cast<int32_t>(std::stoi(uriVec[index++]));
+    try {
+        bundleIconId = static_cast<int32_t>(std::stoi(uriVec[index++]));
+        bundleLabelId = static_cast<int32_t>(std::stoi(uriVec[index++]));
+        abilityIconId = static_cast<int32_t>(std::stoi(uriVec[index++]));
+        abilityLabelId = static_cast<int32_t>(std::stoi(uriVec[index++]));
+        visible = std::stoi(uriVec[index++]);
+        appIndex = static_cast<int32_t>(std::stoi(uriVec[index++]));
+        multiAppMode.multiAppModeType = static_cast<AppExecFwk::MultiAppModeType>(std::stoi(uriVec[index++]));
+        multiAppMode.maxCount = static_cast<int32_t>(std::stoi(uriVec[index++]));
+    } catch (...) {
+        TAG_LOGW(AAFwkTag::DIALOG, "stoi(%{public}s) failed", uriVec[index++].c_str());
+        return false;
+    }
     return true;
 }
 

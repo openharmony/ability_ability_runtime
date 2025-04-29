@@ -1022,11 +1022,15 @@ bool AbilityManagerShellCommand::MatchOrderString(const std::regex &regexScript,
     }
 
     std::match_results<std::string::const_iterator> matchResults;
-    if (!std::regex_match(orderCmd, matchResults, regexScript)) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "order mismatch");
+    try {
+        if (!std::regex_match(orderCmd, matchResults, regexScript)) {
+            TAG_LOGE(AAFwkTag::AA_TOOL, "order mismatch");
+            return false;
+        }
+    } catch (...) {
+        TAG_LOGE(AAFwkTag::AA_TOOL, "regex failed");
         return false;
     }
-
     return true;
 }
 
@@ -2197,8 +2201,12 @@ ErrCode AbilityManagerShellCommand::StartUserTest(const std::map<std::string, st
 
     int64_t timeMs = 0;
     if (!want.GetStringParam("-w").empty()) {
-        auto time = std::stoi(want.GetStringParam("-w"));
-        timeMs = time > 0 ? time * TIME_RATE_MS : 0;
+        try {
+            auto time = std::stoi(want.GetStringParam("-w"));
+            timeMs = time > 0 ? time * TIME_RATE_MS : 0;
+        } catch (...) {
+            TAG_LOGE(AAFwkTag::AA_TOOL, "stoi(%{public}s) failed", want.GetStringParam("-w").c_str());
+        }
     }
     if (!observer->WaitForFinish(timeMs)) {
         resultReceiver_ = "Timeout: user test is not completed within the specified time.\n";
