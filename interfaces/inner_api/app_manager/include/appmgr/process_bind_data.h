@@ -71,7 +71,6 @@ struct ProcessBindData : public Parcelable {
   int32_t callerPid = -1;
   int32_t callerUid = -1;
   std::string callerBundleName;
-  std::vector<UIExtensionProcessBindInfo> bindInfos;
   // 0：unBind 1:Bind
   int32_t bindingRelation;
 };
