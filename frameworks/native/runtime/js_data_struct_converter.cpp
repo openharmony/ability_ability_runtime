@@ -82,6 +82,7 @@ napi_value CreateLastExitDetailInfo(napi_env env, const AAFwk::LastExitDetailInf
     napi_set_named_property(env, object, "exitMsg", CreateJsValue(env, lastExitDetailInfo.exitMsg));
     napi_set_named_property(env, object, "rss", CreateJsValue(env, lastExitDetailInfo.rss));
     napi_set_named_property(env, object, "pss", CreateJsValue(env, lastExitDetailInfo.pss));
+    napi_set_named_property(env, object, "processState", CreateJsValue(env, lastExitDetailInfo.processState));
     napi_set_named_property(env, object, "timestamp", CreateJsValue(env, lastExitDetailInfo.timestamp));
 
     return object;
