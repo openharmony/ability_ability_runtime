@@ -627,7 +627,7 @@ void STSFormExtension::OnStop()
 
     ani_ref nameRef;
     ani_status status = env->Object_GetFieldByName_Ref(
-		static_cast<ani_object>(stsAbilityObj_->aniRef), "onStop", &nameRef);
+        static_cast<ani_object>(stsAbilityObj_->aniRef), "onStop", &nameRef);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d, %{public}p, %{public}p",
             status, stsAbilityObj_->aniRef, stsAbilityObj_->aniObj);
