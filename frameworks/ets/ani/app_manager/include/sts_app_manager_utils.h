@@ -26,25 +26,27 @@ namespace OHOS {
 namespace AppManagerSts {
 ani_object NewArrayClass(ani_env *env, const std::vector<std::string>& data);
 ani_object WrapAppStateData(ani_env *env, const AppExecFwk::AppStateData &appStateData);
-void SetAppStateData(ani_env *env, ani_object object, const AppExecFwk::AppStateData &appStateData);
-void SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::RunningProcessInfo &processInfo);
+bool SetAppStateData(ani_env *env, ani_object object, const AppExecFwk::AppStateData &appStateData);
+bool SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::RunningProcessInfo &processInfo);
 ani_object WrapProcessInformation(ani_env *env, const AppExecFwk::RunningProcessInfo &processInfo);
 ani_object CreateRunningProcessInfoArray (ani_env *env, std::vector<AppExecFwk::RunningProcessInfo> infos);
 ani_object CreateAppStateDataArray (ani_env *env, std::vector<AppExecFwk::AppStateData> data);
 ani_object CreateRunningMultiInstanceInfoArray(ani_env *env,
     std::vector<AppExecFwk::RunningMultiInstanceInfo> infos);
 ani_object CreateRunningAppCloneArray(ani_env *env, std::vector<AppExecFwk::RunningAppClone> infos);
-void SetRunningMultiAppInfo(ani_env *env, ani_object object,
+bool SetRunningMultiAppInfo(ani_env *env, ani_object object,
     const AppExecFwk::RunningMultiAppInfo &runningMultiAppInfo);
 ani_object WrapRunningMultiAppInfo(ani_env *env, const AppExecFwk::RunningMultiAppInfo &runningMultiAppInfo);
 ani_object WrapRunningMultiInstanceInfo(ani_env *env, const AppExecFwk::RunningMultiInstanceInfo &instanceInfo);
-void SetRunningMultiInstanceInfo(ani_env *env, ani_object object,
+bool SetRunningMultiInstanceInfo(ani_env *env, ani_object object,
     const AppExecFwk::RunningMultiInstanceInfo &instanceInfo);
 ani_object WrapRunningAppClone(ani_env *env, const AppExecFwk::RunningAppClone &runningAppClone);
-void SetRunningAppClone(ani_env *env, ani_object object, const AppExecFwk::RunningAppClone &runningAppClone);
+bool SetRunningAppClone(ani_env *env, ani_object object, const AppExecFwk::RunningAppClone &runningAppClone);
 ani_object WrapProcessData(ani_env *env, const AppExecFwk::ProcessData &processData);
-void SetProcessData(ani_env* env, ani_object object, const AppExecFwk::ProcessData &processData);
+bool SetProcessData(ani_env* env, ani_object object, const AppExecFwk::ProcessData &processData);
 bool UnWrapArrayString(ani_env *env, ani_object arrayObj, std::vector<std::string> stringList);
+ani_object CreateEmptyAniArray(ani_env *env);
+ani_object CreateEmptyMultiAppInfo(ani_env *env);
 
 } // namespace AppManagerSts
 } // namespace OHOS
