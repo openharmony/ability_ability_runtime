@@ -51,6 +51,7 @@ public:
 
     sptr<IRemoteObject> OnConnect(const OHOS::AAFwk::Want &want) override;
 
+	void OnStop() override;
 private:
     void BindContext(std::shared_ptr<AbilityInfo> &abilityInfo, std::shared_ptr<AAFwk::Want> want,
         const std::string &moduleName, const std::string &srcPath);

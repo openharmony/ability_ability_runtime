@@ -624,17 +624,19 @@ void STSFormExtension::OnStop()
         TAG_LOGE(AAFwkTag::FORM_EXT, "env null");
         return;
     }
-    ani_status status = ANI_OK;
-    ani_method function;
-    if ((status = env->Class_FindMethod(
-        stsAbilityObj_->aniCls, "onStop", ":V", &function))) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod status : %{public}d", status);
+
+    ani_ref nameRef;
+    ani_status status = env->Object_GetFieldByName_Ref(static_cast<ani_object>(stsAbilityObj_->aniRef), "onStop", &nameRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d, %{public}p, %{public}p",
+            status, stsAbilityObj_->aniRef, stsAbilityObj_->aniObj);
         return;
     }
-
-    status = env->Object_CallMethod_Void(stsAbilityObj_->aniObj, function);
+    
+    ani_ref result;
+    status = env->FunctionalObject_Call(static_cast<ani_fn_object>(nameRef), 0, nullptr, &result);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_New status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::FORM_EXT, "FunctionalObject_Call status: %{public}d", status);
         return;
     }
 

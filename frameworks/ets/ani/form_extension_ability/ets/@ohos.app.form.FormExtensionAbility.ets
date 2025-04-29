@@ -54,9 +54,5 @@ export default class FormExtensionAbility {
     console.log(`FormExtensionAbility onRemoveForm, formId: ${formId}`);
   }
   
-  onStop: OnStopFn | undefined;
-
-  constructor(onStop ?: OnStopFn) {
-    console.log(`FormExtensionAbility onStop`);
-  }
+  onStop?: OnStopFn;
 }
