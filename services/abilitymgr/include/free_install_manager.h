@@ -49,6 +49,27 @@ struct FreeInstallInfo {
     std::shared_ptr<Want> originalWant = nullptr;
     std::shared_ptr<StartOptions> startOptions = nullptr;
     Want want;
+
+    FreeInstallInfo &operator=(const FreeInstallInfo &other)
+    {
+        isInstalled = other.isInstalled;
+        isPreStartMissionCalled = other.isPreStartMissionCalled;
+        isStartUIAbilityBySCBCalled = other.isStartUIAbilityBySCBCalled;
+        isFreeInstallFinished = other.isFreeInstallFinished;
+        isOpenAtomicServiceShortUrl = other.isOpenAtomicServiceShortUrl;
+        specifyTokenId = other.specifyTokenId;
+        userId = other.userId;
+        requestCode = other.requestCode;
+        resultCode = other.resultCode;
+        promise = other.promise;
+        identity = other.identity;
+        callerToken = other.callerToken;
+        dmsCallback = other.dmsCallback;
+        originalWant = other.originalWant;
+        startOptions = other.startOptions;
+        want = other.want;
+        return *this;
+    }
 };
 
 struct FreeInstallParams {
