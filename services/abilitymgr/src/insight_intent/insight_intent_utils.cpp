@@ -96,7 +96,7 @@ uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementN
     TAG_LOGE(AAFwkTag::INTENT, "get srcEntry failed");
     return AAFwk::ERR_INSIGHT_INTENT_START_INVALID_COMPONENT;
 }
-uint32_t InsightIntentUtils::ExtractInsightIntentGenericInfo2InsightIntentInfoForBack(
+uint32_t InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(
     ExtractInsightIntentGenericInfo &genericInfo, InsightIntentInfoForBack &backInfo)
 {
     backInfo.bundleName = genericInfo.bundleName;
@@ -135,10 +135,10 @@ uint32_t InsightIntentUtils::ExtractInsightIntentGenericInfo2InsightIntentInfoFo
     return ERR_OK;
 }
 
-uint32_t InsightIntentUtils::ExtractInsightIntentInfo2InsightIntentInfoForBack(
+uint32_t InsightIntentUtils::ConvertExtractInsightIntentInfo(
     ExtractInsightIntentInfo &intentInfo, InsightIntentInfoForBack &backInfo)
 {
-    ExtractInsightIntentGenericInfo2InsightIntentInfoForBack(intentInfo.genericInfo, backInfo);
+    ConvertExtractInsightIntentGenericInfo(intentInfo.genericInfo, backInfo);
     backInfo.domain = intentInfo.domain;
     backInfo.intentVersion = intentInfo.intentVersion;
     backInfo.displayDescription = intentInfo.displayDescription;
