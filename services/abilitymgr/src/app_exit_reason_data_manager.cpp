@@ -46,6 +46,7 @@ const std::string JSON_KEY_UID = "uid";
 const std::string JSON_KEY_PROCESS_NAME = "process_name";
 const std::string JSON_KEY_PSS_VALUE = "pss_value";
 const std::string JSON_KEY_RSS_VALUE = "rss_value";
+const std::string JSON_KEY_PROSESS_STATE = "process_state";
 } // namespace
 AppExitReasonDataManager::AppExitReasonDataManager() {}
 
@@ -344,6 +345,7 @@ DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValue(
         { JSON_KEY_PROCESS_NAME, processInfo.processName_ },
         { JSON_KEY_TIME_STAMP, nowMs.count() },
         { JSON_KEY_ABILITY_LIST, abilityList },
+        { JSON_KEY_PROSESS_STATE, processInfo.state_ },
     };
     DistributedKv::Value value(jsonObject.dump());
     return value;
@@ -376,6 +378,10 @@ void AppExitReasonDataManager::ConvertAppExitReasonInfoFromValue(const Distribut
     }
     if (jsonObject.contains(JSON_KEY_TIME_STAMP) && jsonObject[JSON_KEY_TIME_STAMP].is_number_integer()) {
         time_stamp = jsonObject.at(JSON_KEY_TIME_STAMP).get<int64_t>();
+    }
+    if (jsonObject.contains(JSON_KEY_PROSESS_STATE) && jsonObject[JSON_KEY_PROSESS_STATE].is_number_integer()) {
+        processInfo.state_ = static_cast<OHOS::AppExecFwk::AppProcessState>(
+            jsonObject.at(JSON_KEY_PROSESS_STATE).get<int32_t>());
     }
     if (jsonObject.contains(JSON_KEY_ABILITY_LIST) && jsonObject[JSON_KEY_ABILITY_LIST].is_array()) {
         abilityList.clear();

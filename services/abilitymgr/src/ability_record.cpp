@@ -3051,6 +3051,7 @@ void AbilityRecord::SetLastExitReason(const ExitReason &exitReason, const AppExe
     lastExitDetailInfo.exitSubReason = exitReason.subReason;
     lastExitDetailInfo.rss = processInfo.rssValue;
     lastExitDetailInfo.pss = processInfo.pssValue;
+    lastExitDetailInfo.processState = static_cast<int32_t>(processInfo.state_);
     lastExitDetailInfo.timestamp = timestamp;
     lastExitDetailInfo.processName = processInfo.processName_;
     lastExitDetailInfo.exitMsg = killMsg;
