@@ -1280,7 +1280,7 @@ void AppStateObserverManager::OnProcessBindingRelationChanged(
     auto task =
         [weak = weak_from_this(), appRecord, bindInfo, bindingRelation]() {
         auto self = weak.lock();
-        if (self == nullptr){
+        if (self == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
