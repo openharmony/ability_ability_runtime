@@ -6860,12 +6860,7 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
     request.abilityInfo = abilityInfo->abilityInfo;
     request.extensionProcessMode = abilityInfo->extensionProcessMode;
     request.customProcess = abilityInfo->customProcess;
-
-    if (request.abilityInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
-        request.collaboratorType = CollaboratorType::RESERVE_TYPE;
-    } else if (request.abilityInfo.applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
-        request.collaboratorType = CollaboratorType::OTHERS_TYPE;
-    }
+    request.collaboratorType = GetCollaboratorType(request.abilityInfo.applicationInfo.codePath);
 
     if (request.abilityInfo.type == AppExecFwk::AbilityType::SERVICE && request.abilityInfo.isStageBasedModel) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "stage mode, abilityInfo SERVICE type reset EXTENSION");
@@ -7120,23 +7115,9 @@ int AbilityManagerService::KillProcess(const std::string &bundleName, bool clear
         return GET_BUNDLE_INFO_FAILED;
     }
 
-    int32_t collaboratorType = -1;
-    if (bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
-        collaboratorType = CollaboratorType::RESERVE_TYPE;
-    } else if (bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
-        collaboratorType = CollaboratorType::OTHERS_TYPE;
-    }
-    if (collaboratorType != -1) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Collaborator kill");
-        auto collaborator = GetCollaborator(collaboratorType);
-        if (collaborator == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Collaborator null");
-            return KILL_PROCESS_FAILED;
-        }
-        if (collaborator->NotifyKillProcesses(bundleName, userId) != ERR_OK) {
-            return KILL_PROCESS_FAILED;
-        }
-        return ERR_OK;
+    int32_t collaboratorType = GetCollaboratorType(bundleInfo.applicationInfo.codePath);
+    if (CheckCollaboratorType(collaboratorType)) {
+        return KillProcessForCollaborator(collaboratorType, bundleName, userId);
     }
 
     KeepAliveType type;
@@ -7147,10 +7128,29 @@ int AbilityManagerService::KillProcess(const std::string &bundleName, bool clear
     }
 
     int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName, clearPageStack, appIndex);
-    if (ret != ERR_OK) {
+    return ret == ERR_OK ? ERR_OK : KILL_PROCESS_FAILED;
+}
+
+int32_t AbilityManagerService::KillProcessForCollaborator(int32_t collaboratorType,
+    const std::string &bundleName, int32_t userId)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Collaborator kill");
+    auto collaborator = GetCollaborator(collaboratorType);
+    if (collaborator == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Collaborator null");
         return KILL_PROCESS_FAILED;
     }
-
+    auto isSaCall = PermissionVerification::GetInstance()->IsSACall();
+    auto isShellCall = PermissionVerification::GetInstance()->IsShellCall();
+    auto isCallingPerm = PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_KILL_APP_PROCESSES);
+    if (!isCallingPerm && !isSaCall && !isShellCall) {
+        TAG_LOGE(AAFwkTag::APPMGR, "KillProcess permission verification fail");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (collaborator->NotifyKillProcesses(bundleName, userId) != ERR_OK) {
+        return KILL_PROCESS_FAILED;
+    }
     return ERR_OK;
 }
 
@@ -11220,6 +11220,16 @@ int32_t AbilityManagerService::UnregisterIAbilityManagerCollaborator(int32_t typ
         collaboratorMap_.erase(type);
     }
     return ERR_OK;
+}
+
+int32_t AbilityManagerService::GetCollaboratorType(const std::string &codePath) const
+{
+    if (codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
+        return CollaboratorType::RESERVE_TYPE;
+    } else if (codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
+        return CollaboratorType::OTHERS_TYPE;
+    }
+    return 0;
 }
 
 sptr<IAbilityManagerCollaborator> AbilityManagerService::GetCollaborator(int32_t type)
