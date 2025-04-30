@@ -29,6 +29,7 @@
 #include "ipc_skeleton.h"
 #include "js_ability_auto_startup_callback.h"
 #include "js_ability_auto_startup_manager_utils.h"
+#include "js_app_process_state.h"
 #include "js_context_utils.h"
 #include "js_data_struct_converter.h"
 #include "js_error_utils.h"
@@ -1888,33 +1889,6 @@ void JsApplicationContextUtils::BindNativeApplicationContextTwo(napi_env env, na
         JsApplicationContextUtils::SetSupportedProcessCacheSelf);
     BindNativeFunction(env, object, "setFontSizeScale", MD_NAME,
         JsApplicationContextUtils::SetFontSizeScale);
-}
-
-JsAppProcessState JsApplicationContextUtils::ConvertToJsAppProcessState(
-    const AppExecFwk::AppProcessState &appProcessState, const bool &isFocused)
-{
-    JsAppProcessState processState;
-    switch (appProcessState) {
-        case AppExecFwk::AppProcessState::APP_STATE_CREATE:
-        case AppExecFwk::AppProcessState::APP_STATE_READY:
-            processState = STATE_CREATE;
-            break;
-        case AppExecFwk::AppProcessState::APP_STATE_FOREGROUND:
-            processState = isFocused ? STATE_ACTIVE : STATE_FOREGROUND;
-            break;
-        case AppExecFwk::AppProcessState::APP_STATE_BACKGROUND:
-            processState = STATE_BACKGROUND;
-            break;
-        case AppExecFwk::AppProcessState::APP_STATE_TERMINATED:
-        case AppExecFwk::AppProcessState::APP_STATE_END:
-            processState = STATE_DESTROY;
-            break;
-        default:
-            TAG_LOGE(AAFwkTag::APPKIT, "process state invalid");
-            processState = STATE_DESTROY;
-            break;
-    }
-    return processState;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
