@@ -63,7 +63,7 @@ void InsightIntentEventMgr::UpdateInsightIntentEvent(const AppExecFwk::ElementNa
         if (!intentInfos.empty()) {
             TAG_LOGI(AAFwkTag::INTENT, "update bundleName: %{public}s to no insight intent", bundleName.c_str());
             DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->DeleteInsightIntentTotalInfo(
-                bundleName, userId);
+                bundleName, moduleName, userId);
             return;
         }
         return;
@@ -106,7 +106,7 @@ void InsightIntentEventMgr::DeleteInsightIntentEvent(const AppExecFwk::ElementNa
     }
 
     ret = DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->DeleteInsightIntentTotalInfo(
-        bundleName, userId);
+        bundleName, moduleName, userId);
     if (ret != ERR_OK) {
         TAG_LOGW(AAFwkTag::INTENT, "delete intent info failed, bundleName: %{public}s, "
             "moduleName: %{public}s, userId: %{public}d", bundleName.c_str(), moduleName.c_str(), userId);
