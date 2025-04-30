@@ -53,10 +53,19 @@ void InsightIntentEventMgr::UpdateInsightIntentEvent(const AppExecFwk::ElementNa
     // Get json profile firstly
     std::string profile;
     ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INSIGHT_INTENT_PROFILE, bundleName, moduleName,
-        profile, AppExecFwk::OsAccountManagerWrapper::GetCurrentActiveAccountId()));
+        profile, userId));
     if (ret != ERR_OK) {
-        TAG_LOGW(AAFwkTag::INTENT, "failed code: %{public}d, bundleName: %{public}s, "
+        TAG_LOGI(AAFwkTag::INTENT, "get json failed code: %{public}d, bundleName: %{public}s, "
             "moduleName: %{public}s, userId: %{public}d", ret, bundleName.c_str(), moduleName.c_str(), userId);
+        std::vector<ExtractInsightIntentInfo> intentInfos;
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
+            bundleName, userId, intentInfos);
+        if (!intentInfos.empty()) {
+            TAG_LOGI(AAFwkTag::INTENT, "update bundleName: %{public}s to no insight intent", bundleName.c_str());
+            DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->DeleteInsightIntentTotalInfo(
+                bundleName, userId);
+            return;
+        }
         return;
     }
 
