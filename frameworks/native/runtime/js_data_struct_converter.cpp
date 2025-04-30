@@ -18,6 +18,7 @@
 #include "common_func.h"
 #include "configuration_convertor.h"
 #include "hilog_tag_wrapper.h"
+#include "js_app_process_state.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 
@@ -82,7 +83,8 @@ napi_value CreateLastExitDetailInfo(napi_env env, const AAFwk::LastExitDetailInf
     napi_set_named_property(env, object, "exitMsg", CreateJsValue(env, lastExitDetailInfo.exitMsg));
     napi_set_named_property(env, object, "rss", CreateJsValue(env, lastExitDetailInfo.rss));
     napi_set_named_property(env, object, "pss", CreateJsValue(env, lastExitDetailInfo.pss));
-    napi_set_named_property(env, object, "processState", CreateJsValue(env, lastExitDetailInfo.processState));
+    napi_set_named_property(env, object, "processState", CreateJsValue(env,
+        ConvertToJsAppProcessState(static_cast<AppExecFwk::AppProcessState>(lastExitDetailInfo.processState), false)));
     napi_set_named_property(env, object, "timestamp", CreateJsValue(env, lastExitDetailInfo.timestamp));
 
     return object;

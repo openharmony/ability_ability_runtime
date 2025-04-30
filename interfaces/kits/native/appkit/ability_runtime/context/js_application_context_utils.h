@@ -29,15 +29,6 @@
 namespace OHOS {
 namespace AbilityRuntime {
 struct NapiCallbackInfo;
-namespace {
-enum JsAppProcessState {
-    STATE_CREATE,
-    STATE_FOREGROUND,
-    STATE_ACTIVE,
-    STATE_BACKGROUND,
-    STATE_DESTROY
-};
-}
 class JsApplicationContextUtils {
 public:
     explicit JsApplicationContextUtils(std::weak_ptr<ApplicationContext> &&applicationContext)
@@ -154,8 +145,6 @@ private:
     bool CheckCallerIsSystemApp();
     static void BindNativeApplicationContextOne(napi_env env, napi_value object);
     static void BindNativeApplicationContextTwo(napi_env env, napi_value object);
-    static JsAppProcessState ConvertToJsAppProcessState(
-        const AppExecFwk::AppProcessState &appProcessState, const bool &isFocused);
     std::shared_ptr<JsAbilityLifecycleCallback> callback_;
     std::shared_ptr<JsEnvironmentCallback> envCallback_;
     std::shared_ptr<JsApplicationStateChangeCallback> applicationStateCallback_;
