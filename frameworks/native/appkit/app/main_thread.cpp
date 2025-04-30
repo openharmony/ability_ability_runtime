@@ -1504,6 +1504,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     bool isSystemApp = bundleInfo.applicationInfo.isSystemApp;
     TAG_LOGD(AAFwkTag::APPKIT, "the application isSystemApp: %{public}d", isSystemApp);
 #ifdef CJ_FRONTEND
+    AbilityRuntime::CJRuntime::SetAppVersion(bundleInfo.applicationInfo.compileSdkVersion);
     if (isCJApp) {
         AbilityRuntime::CJRuntime::SetAppLibPath(appLibPaths);
         if (appInfo.asanEnabled) {
