@@ -96,6 +96,8 @@ enum class AAFwkLogTag : uint32_t {
 
     LOCAL_CALL = DEFAULT + 0x60, // 0xD001360
 
+    APP_SERVICE_EXT = DEFAULT + 0x70, // 0xD001370
+
     END = 256,               // N.B. never use it
 };
 
