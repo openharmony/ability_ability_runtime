@@ -25,6 +25,11 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+constexpr const char* BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
+constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.MainAbility";
+static const std::string EMPTY_NAME;
+}
 class AbilityRunningRecordTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -84,6 +89,23 @@ HWTEST_F(AbilityRunningRecordTest, GetName_001, TestSize.Level1)
 
 /*
  * Feature: AbilityRunningRecord
+ * Function: GetName
+ * SubFunction: NA
+ * FunctionPoints: AbilityRunningRecord GetName
+ * EnvConditions: NA
+ * CaseDescription: GetName
+ */
+HWTEST_F(AbilityRunningRecordTest, GetName_002, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "GetName_002 start.");
+    auto record = std::make_shared<AbilityRunningRecord>(nullptr, nullptr, 0);
+    ASSERT_NE(record, nullptr);
+    EXPECT_EQ(record->GetName(), EMPTY_NAME);
+    TAG_LOGD(AAFwkTag::TEST, "GetName_002 end.");
+}
+
+/*
+ * Feature: AbilityRunningRecord
  * Function: GetBundleName
  * SubFunction: NA
  * FunctionPoints: AbilityRunningRecord GetBundleName
@@ -106,6 +128,23 @@ HWTEST_F(AbilityRunningRecordTest, GetBundleName_001, TestSize.Level1)
 
 /*
  * Feature: AbilityRunningRecord
+ * Function: GetBundleName
+ * SubFunction: NA
+ * FunctionPoints: AbilityRunningRecord GetBundleName
+ * EnvConditions: NA
+ * CaseDescription: GetBundleName
+ */
+HWTEST_F(AbilityRunningRecordTest, GetBundleName_002, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "GetBundleName_002 start.");
+    auto record = std::make_shared<AbilityRunningRecord>(nullptr, nullptr, 0);
+    ASSERT_NE(record, nullptr);
+    EXPECT_EQ(record->GetBundleName(), EMPTY_NAME);
+    TAG_LOGD(AAFwkTag::TEST, "GetBundleName_002 end.");
+}
+
+/*
+ * Feature: AbilityRunningRecord
  * Function: GetModuleName
  * SubFunction: NA
  * FunctionPoints: AbilityRunningRecord GetModuleName
@@ -124,6 +163,23 @@ HWTEST_F(AbilityRunningRecordTest, GetModuleName_001, TestSize.Level1)
     auto name = record->GetModuleName();
     ASSERT_EQ(name, "test_module_name");
     TAG_LOGD(AAFwkTag::TEST, "GetModuleName_001 end.");
+}
+
+/*
+ * Feature: AbilityRunningRecord
+ * Function: GetModuleName
+ * SubFunction: NA
+ * FunctionPoints: AbilityRunningRecord GetModuleName
+ * EnvConditions: NA
+ * CaseDescription: GetModuleName
+ */
+HWTEST_F(AbilityRunningRecordTest, GetModuleName_002, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "GetModuleName_002 start.");
+    auto record = std::make_shared<AbilityRunningRecord>(nullptr, nullptr, 0);
+    ASSERT_NE(record, nullptr);
+    EXPECT_EQ(record->GetModuleName(), EMPTY_NAME);
+    TAG_LOGD(AAFwkTag::TEST, "GetModuleName_002 end.");
 }
 
 /*
@@ -364,6 +420,46 @@ HWTEST_F(AbilityRunningRecordTest, IsHook_001, TestSize.Level1)
     auto want = std::make_shared<AAFwk::Want>();
     record->SetWant(want);
     EXPECT_FALSE(record->IsHook());
+}
+
+/*
+ * Feature: AbilityRunningRecord
+ * Function: IsSceneBoard
+ * SubFunction: NA
+ * FunctionPoints: AbilityRunningRecord IsSceneBoard
+ * EnvConditions: NA
+ * CaseDescription: IsSceneBoard
+ */
+HWTEST_F(AbilityRunningRecordTest, IsSceneBoard_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "IsSceneBoard_001 start.");
+    auto record = std::make_shared<AbilityRunningRecord>(nullptr, nullptr, 1);
+    ASSERT_NE(record, nullptr);
+    EXPECT_FALSE(record->IsSceneBoard());
+    TAG_LOGD(AAFwkTag::TEST, "IsSceneBoard_001 end.");
+}
+
+/*
+ * Feature: AbilityRunningRecord
+ * Function: IsSceneBoard
+ * SubFunction: NA
+ * FunctionPoints: AbilityRunningRecord IsSceneBoard
+ * EnvConditions: NA
+ * CaseDescription: IsSceneBoard
+ */
+HWTEST_F(AbilityRunningRecordTest, IsSceneBoard_002, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "IsSceneBoard_002 start.");
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->name = SCENEBOARD_ABILITY_NAME;
+    abilityInfo->bundleName = BUNDLE_NAME_SCENEBOARD;
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, nullptr, 1);
+    ASSERT_NE(record, nullptr);
+    EXPECT_TRUE(record->IsSceneBoard());
+
+    abilityInfo->bundleName = "invalid_bundle_name";
+    EXPECT_FALSE(record->IsSceneBoard());
+    TAG_LOGD(AAFwkTag::TEST, "IsSceneBoard_002 end.");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
