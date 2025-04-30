@@ -141,12 +141,13 @@ int32_t InsightRdbStorageMgr::DeleteStorageInsightIntentByUserId(const int32_t u
     return ERR_OK;
 }
 
-int32_t InsightRdbStorageMgr::DeleteStorageInsightIntentData(const std::string &bundleName, const int32_t userId)
+int32_t InsightRdbStorageMgr::DeleteStorageInsightIntentData(const std::string &bundleName,
+    const std::string &moduleName, const int32_t userId)
 {
     bool result;
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
-        std::string key = std::to_string(userId).append("/").append(bundleName);
+        std::string key = std::to_string(userId).append("/").append(bundleName).append("/").append(moduleName);
         result = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->DeleteDataBeginWithKey(key);
     }
     if (!result) {
