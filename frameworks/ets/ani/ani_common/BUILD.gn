@@ -56,6 +56,8 @@ ohos_shared_library("ani_common") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/ability_manager:process_options",
+    "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -71,6 +73,7 @@ ohos_shared_library("ani_common") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "image_framework:image_ani",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
     "napi:ace_napi",
