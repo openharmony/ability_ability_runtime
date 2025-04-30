@@ -57,7 +57,7 @@ public:
     {
         sanitizerKind_ = kind;
     }
-    
+
     bool StartRuntime();
     void StopRuntime();
     void RegisterArkVMInRuntime(unsigned long long externalVM);
@@ -98,12 +98,14 @@ public:
     void InitCJSDKNS(const std::string& path);
     void InitNewCJAppNS(const std::string& path);
     void InitNewCJSDKNS(const std::string& path);
+    void InitCJCompatibilitySDKNS(const std::string& path);
     void InitCJSysNS(const std::string& path);
     void InitCJChipSDKNS(const std::string& path);
     void InitNewCJChipSDKNS(const std::string& path);
     void InitRuntimeNS();
     void InitCJNS(const std::string& path);
     static NSMode DetectAppNSMode();
+    static void SetAppVersion(std::string& version);
 
     static const char *cjAppNSName;
     static const char *cjSDKNSName;
@@ -113,6 +115,10 @@ public:
     static const char *cjNewSDKNSName;
     static const char *cjNewSysNSName;
     static const char *cjNDKNSName;
+    static const char *cjCompatibilitySDKNSName;
+    static std::string appVersion;
+    static const uint32_t majorVersion;
+    static const uint32_t minorVersion;
 
 private:
     bool LoadRuntimeApis();
