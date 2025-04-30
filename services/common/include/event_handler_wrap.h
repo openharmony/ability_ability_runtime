@@ -98,10 +98,10 @@ public:
     }
 private:
     bool isExtension_ = false;
-    uint32_t eventId_;
+    uint32_t eventId_ = 0;
     uint32_t timeout_ = 0;
     int runCount_ = 0;
-    int64_t param_;
+    int64_t param_ = 0;
     std::shared_ptr<EventDataBase> eventData_;
     TaskHandle eventTask_;
 };
