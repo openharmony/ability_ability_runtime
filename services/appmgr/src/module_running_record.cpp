@@ -16,6 +16,7 @@
 #include "module_running_record.h"
 #include "app_mgr_service_inner.h"
 #include "app_running_record.h"
+#include "app_utils.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -267,7 +268,8 @@ void ModuleRunningRecord::TerminateAbility(const std::shared_ptr<AppRunningRecor
     if (appLifeCycleDeal_) {
         if (!(appRecord->IsDebugApp() || appRecord->IsAttachDebug())) {
             SendEvent(AMSEventHandler::TERMINATE_ABILITY_TIMEOUT_MSG,
-                AMSEventHandler::TERMINATE_ABILITY_TIMEOUT, abilityRecord);
+                AMSEventHandler::TERMINATE_ABILITY_TIMEOUT * AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio(),
+                abilityRecord);
         }
         bool isCachedProcess = DelayedSingleton<CacheProcessManager>::GetInstance()->IsAppShouldCache(appRecord);
         appLifeCycleDeal_->ScheduleCleanAbility(token, isCachedProcess);
