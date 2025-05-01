@@ -67,5 +67,46 @@ void NativeChildCallback::OnError(int32_t errCode)
     ChildCallbackManager::GetInstance().RemoveRemoteObject(this);
 }
 
+int32_t NativeChildCallback::OnNativeChildExit(int32_t pid, int32_t signal)
+{
+    std::lock_guard lock(exitCallbackListMutex_);
+    for (const auto &exitCallback : exitCallbacks_) {
+        TAG_LOGI(AAFwkTag::PROCESSMGR,
+            "native child process exit, pid:%{public}d, signal:%{public}d", pid, signal);
+        exitCallback(pid, signal);
+    }
+    return NCP_NO_ERROR;
+}
+
+void NativeChildCallback::AddExitCallback(OH_Ability_OnNativeChildProcessExit callback)
+{
+    std::lock_guard lock(exitCallbackListMutex_);
+    for (const auto &cb : exitCallbacks_) {
+        if (cb == callback) {
+            TAG_LOGI(AAFwkTag::PROCESSMGR, "repeated add exit callback");
+            return;
+        }
+    }
+    exitCallbacks_.emplace_back(callback);
+}
+
+int32_t NativeChildCallback::RemoveExitCallback(OH_Ability_OnNativeChildProcessExit callback)
+{
+    std::lock_guard lock(exitCallbackListMutex_);
+    auto it = std::find(exitCallbacks_.begin(), exitCallbacks_.end(), callback);
+    if (it == exitCallbacks_.end()) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "native child exit callback not exist");
+        return NCP_ERR_CALLBACK_NOT_EXIST;
+    }
+    exitCallbacks_.erase(it);
+    return NCP_NO_ERROR;
+}
+
+bool NativeChildCallback::IsCallbacksEmpty()
+{
+    std::lock_guard lock(exitCallbackListMutex_);
+    return exitCallbacks_.empty();
+}
+
 } // namespace AbilityRuntime
 } // namespace OHOS
