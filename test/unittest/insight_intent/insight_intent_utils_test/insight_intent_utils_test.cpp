@@ -25,6 +25,8 @@
 #include "insight_intent_utils.h"
 #include "int_wrapper.h"
 #include "insight_intent_profile.h"
+#include "extract_insight_intent_profile.h"
+#include "insight_intent_info_for_back.h"
 #include "string_wrapper.h"
 #include "want.h"
 #include "mock_system_ability_manager.h"
@@ -89,6 +91,43 @@ const std::string TEST_JSON_STR_ARRAY = "{"
     "}"
     "]"
 "}";
+
+InsightIntentLinkInfo TEST_INSIGHT_INTENT_LINK_INFO = [] {
+    InsightIntentLinkInfo tmp;
+    tmp.uri = "uri_test";
+    tmp.parameters = R"({"oneOf":[{"requied":["palybackSpeed"]},{"requied": ["playbackProgress"]}],"properties":
+        {"playbackProgress":{"type":"number","description":"播放进度，单位秒"},"palybackSpeed":
+        {"description":"播放速率","enum":[0.5,0.75,1,1.25,1.5,2],"type":"number"}},"propertiesNames":
+        {"enum":["playbackProgress","palybackSpeed"]},"type":"object"})";
+    return tmp;
+}();
+
+ExtractInsightIntentGenericInfo TEST_INSIGHT_INTENT_GENERIC_INFO = [] {
+    ExtractInsightIntentGenericInfo tmp;
+    tmp.bundleName = "com.tdd.test";
+    tmp.moduleName = "entry";
+    tmp.intentName = "InsightIntentLink";
+    tmp.displayName = "displayName_test";
+    tmp.decoratorType = "decoratorType_test";
+    tmp.set<InsightIntentLinkInfo>();
+    tmp.data = TEST_INSIGHT_INTENT_LINK_INFO;
+    return tmp;
+}();
+
+ExtractInsightIntentInfo TEST_INSIGHT_INTENT_INFO = [] {
+    ExtractInsightIntentInfo tmp;
+    tmp.decoratorFile = "decoratorFile_test";
+    tmp.decoratorClass = "decoratorClass_test";
+    tmp.displayDescription = "displayDescription_test";
+    tmp.domain = "domain_test";
+    tmp.intentVersion = "intentVersion_test";
+    tmp.schema = "schema_test";
+    tmp.icon = "icon_test";
+    tmp.llmDescription = "llmDescription_test";
+    tmp.keywords = std::vector<std::string>{ "keywords_test1", "keywords_test2" };
+    tmp.genericInfo = TEST_INSIGHT_INTENT_GENERIC_INFO;
+    return tmp;
+}();
 
 constexpr int32_t BUNDLE_MGR_SERVICE_SYS_ABILITY_ID = 401;
 auto mockBundleMgr = sptr<MockBundleManagerService>::MakeSptr();
@@ -239,6 +278,61 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0400, TestSize.Level1)
     Mock::VerifyAndClear(mockBundleMgr);
     testing::Mock::AllowLeak(mockBundleMgr);
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest GetSrcEntry_0400 end.");
+}
+
+/**
+ * @tc.name: ConvertExtractInsightIntentGenericInfo_0100
+ * @tc.desc: basic function test of convert info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentGenericInfo_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0100 start");
+    AbilityRuntime::InsightIntentUtils utils;
+    InsightIntentInfoForBack insightIntentInfoForBack;
+    TEST_INSIGHT_INTENT_GENERIC_INFO.decoratorType = "@InsightIntentLink";
+    auto result = utils.ConvertExtractInsightIntentGenericInfo(TEST_INSIGHT_INTENT_GENERIC_INFO, insightIntentInfoForBack);
+    EXPECT_EQ(result, ERR_OK);
+    Mock::VerifyAndClear(mockBundleMgr);
+    testing::Mock::AllowLeak(mockBundleMgr);
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0100 end.");
+}
+
+/**
+ * @tc.name: ConvertExtractInsightIntentGenericInfo_0200
+ * @tc.desc: basic function test of convert info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentGenericInfo_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0200 start");
+    AbilityRuntime::InsightIntentUtils utils;
+    InsightIntentInfoForBack insightIntentInfoForBack;
+    TEST_INSIGHT_INTENT_GENERIC_INFO.decoratorType = "test";
+    auto result = utils.ConvertExtractInsightIntentGenericInfo(TEST_INSIGHT_INTENT_GENERIC_INFO, insightIntentInfoForBack);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    Mock::VerifyAndClear(mockBundleMgr);
+    testing::Mock::AllowLeak(mockBundleMgr);
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0200 end.");
+}
+
+/**
+ * @tc.name: ConvertExtractInsightIntentInfo_0100
+ * @tc.desc: basic function test of convert info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentInfo_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest ConvertExtractInsightIntentInfo_0100 start");
+    EXPECT_CALL(*mockBundleMgr, GetJsonProfile(testing::_, testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(TEST_JSON_STR_ARRAY), Return(ERR_OK)));
+    AbilityRuntime::InsightIntentUtils utils;
+    InsightIntentInfoForBack insightIntentInfoForBack;
+    auto result = utils.ConvertExtractInsightIntentInfo(TEST_INSIGHT_INTENT_INFO, insightIntentInfoForBack);
+    EXPECT_EQ(result, ERR_OK);
+    Mock::VerifyAndClear(mockBundleMgr);
+    testing::Mock::AllowLeak(mockBundleMgr);
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentInfo_0100 end.");
 }
 } // namespace AAFwk
 } // namespace OHOS
