@@ -193,5 +193,169 @@ HWTEST_F(MainElementUtilsTest, CheckMainElement_006, TestSize.Level1)
         processName, mainElement, isDataAbility, uriStr);
     EXPECT_FALSE(res);
 }
+
+/*
+ * Feature: MainElementUtils
+ * Function: CheckMainUIAbility
+ * SubFunction: NA
+ * FunctionPoints:MainElementUtils CheckMainUIAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckMainUIAbility
+ */
+HWTEST_F(MainElementUtilsTest, CheckMainUIAbility_001, TestSize.Level1)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<HapModuleInfo> hapModuleInfos;
+    HapModuleInfo moduleInfo;
+    moduleInfo.name = "entry";
+    moduleInfo.moduleName = "entry";
+    moduleInfo.moduleType = ModuleType::UNKNOWN;
+    moduleInfo.hapPath = "/data/app/el1/bundle/public/com.ohos.demoprocess/entry";
+    moduleInfo.compileMode = CompileMode::ES_MODULE;
+    moduleInfo.isStageBasedModel = true;
+    hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos = hapModuleInfos;
+    std::string mainElementName = "";
+    bool res = MainElementUtils::CheckMainUIAbility(bundleInfo, mainElementName);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: MainElementUtils
+ * Function: CheckMainUIAbility
+ * SubFunction: NA
+ * FunctionPoints:MainElementUtils CheckMainUIAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckMainUIAbility
+ */
+HWTEST_F(MainElementUtilsTest, CheckMainUIAbility_002, TestSize.Level1)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<HapModuleInfo> hapModuleInfos;
+    HapModuleInfo moduleInfo;
+    moduleInfo.name = "entry";
+    moduleInfo.moduleName = "entry";
+    moduleInfo.moduleType = ModuleType::ENTRY;
+    moduleInfo.hapPath = "/data/app/el1/bundle/public/com.ohos.demoprocess/entry";
+    moduleInfo.compileMode = CompileMode::ES_MODULE;
+    moduleInfo.isStageBasedModel = true;
+    moduleInfo.mainElementName = "";
+    hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos = hapModuleInfos;
+    std::string mainElementName = "";
+    bool res = MainElementUtils::CheckMainUIAbility(bundleInfo, mainElementName);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: MainElementUtils
+ * Function: CheckMainUIAbility
+ * SubFunction: NA
+ * FunctionPoints:MainElementUtils CheckMainUIAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckMainUIAbility
+ */
+HWTEST_F(MainElementUtilsTest, CheckMainUIAbility_003, TestSize.Level1)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<HapModuleInfo> hapModuleInfos;
+    HapModuleInfo moduleInfo;
+    moduleInfo.name = "entry";
+    moduleInfo.moduleName = "entry";
+    moduleInfo.moduleType = ModuleType::ENTRY;
+    moduleInfo.hapPath = "/data/app/el1/bundle/public/com.ohos.demoprocess/entry";
+    moduleInfo.compileMode = CompileMode::ES_MODULE;
+    moduleInfo.isStageBasedModel = true;
+    moduleInfo.mainElementName = "mainElementName";
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::UNKNOWN;
+    moduleInfo.abilityInfos.emplace_back(abilityInfo);
+    hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos = hapModuleInfos;
+    std::string mainElementName = "";
+    bool res = MainElementUtils::CheckMainUIAbility(bundleInfo, mainElementName);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: MainElementUtils
+ * Function: CheckMainUIAbility
+ * SubFunction: NA
+ * FunctionPoints:MainElementUtils CheckMainUIAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckMainUIAbility
+ */
+HWTEST_F(MainElementUtilsTest, CheckMainUIAbility_004, TestSize.Level1)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    HapModuleInfo moduleInfo;
+    moduleInfo.name = "entry";
+    moduleInfo.moduleName = "entry";
+    moduleInfo.moduleType = ModuleType::ENTRY;
+    moduleInfo.hapPath = "/data/app/el1/bundle/public/com.ohos.demoprocess/entry";
+    moduleInfo.compileMode = CompileMode::ES_MODULE;
+    moduleInfo.isStageBasedModel = true;
+    moduleInfo.mainElementName = "mainElementName";
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.name = "mainElementName";
+    moduleInfo.abilityInfos.emplace_back(abilityInfo);
+    bundleInfo.hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos.push_back(moduleInfo);
+    std::string mainElementName = "mainElementName";
+    bool res = MainElementUtils::CheckMainUIAbility(bundleInfo, mainElementName);
+    EXPECT_TRUE(res);
+}
+
+/*
+ * Feature: MainElementUtils
+ * Function: CheckStatusBarAbility
+ * SubFunction: NA
+ * FunctionPoints:MainElementUtils CheckStatusBarAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckStatusBarAbility
+ */
+HWTEST_F(MainElementUtilsTest, CheckStatusBarAbility_001, TestSize.Level1)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    ExtensionAbilityInfo extensionAbilityInfo;
+    extensionAbilityInfo.applicationInfo.accessTokenId = 0;
+    extensionAbilityInfo.bundleName = "bundleName";
+    extensionAbilityInfo.name = "nameTest";
+    extensionAbilityInfo.moduleName = "moduleName";
+    extensionAbilityInfo.type = AppExecFwk::ExtensionAbilityType::FORM;
+    bundleInfo.extensionInfos.emplace_back(extensionAbilityInfo);
+    bool res = MainElementUtils::CheckStatusBarAbility(bundleInfo);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: MainElementUtils
+ * Function: CheckStatusBarAbility
+ * SubFunction: NA
+ * FunctionPoints:MainElementUtils CheckStatusBarAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckStatusBarAbility
+ */
+HWTEST_F(MainElementUtilsTest, CheckStatusBarAbility_002, TestSize.Level1)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    ExtensionAbilityInfo extensionAbilityInfo;
+    extensionAbilityInfo.applicationInfo.accessTokenId = 0;
+    extensionAbilityInfo.bundleName = "bundleName";
+    extensionAbilityInfo.name = "nameTest";
+    extensionAbilityInfo.moduleName = "moduleName";
+    extensionAbilityInfo.type = AppExecFwk::ExtensionAbilityType::STATUS_BAR_VIEW;
+    HapModuleInfo moduleInfo;
+    moduleInfo.extensionInfos.emplace_back(extensionAbilityInfo);
+    moduleInfo.extensionInfos.emplace_back(extensionAbilityInfo);
+    moduleInfo.extensionInfos.emplace_back(extensionAbilityInfo);
+    bundleInfo.hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos.push_back(moduleInfo);
+    bool res = MainElementUtils::CheckStatusBarAbility(bundleInfo);
+    EXPECT_TRUE(res);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
