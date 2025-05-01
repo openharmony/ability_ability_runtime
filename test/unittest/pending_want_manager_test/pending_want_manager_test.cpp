@@ -1042,5 +1042,370 @@ HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4100, TestSize.Level1)
     pendingManager_->ClearPendingWantRecordTask("bundleName2", 1);
     EXPECT_EQ((int)pendingManager_->wantRecords_.size(), 0);
 }
+
+/*
+ * @tc.number    : PendingWantManagerTest_4200
+ * @tc.name      : PendingWantManager CheckPendingWantRecordByKey
+ * @tc.desc      : 1.CheckPendingWantRecordByKey
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4200, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    std::shared_ptr<PendingWantKey> pendingKey = nullptr;
+    std::shared_ptr<PendingWantKey> pendingKey1 = nullptr;
+
+    auto ret = pendingManager_->CheckPendingWantRecordByKey(pendingKey, pendingKey1);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_4300
+ * @tc.name      : PendingWantManager CheckPendingWantRecordByKey
+ * @tc.desc      : 1.CheckPendingWantRecordByKey
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4300, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+
+    std::shared_ptr<PendingWantKey> pendingKey = std::make_shared<PendingWantKey>();
+    pendingKey->appIndex_ = 1;
+
+    std::shared_ptr<PendingWantKey> pendingKey1 = std::make_shared<PendingWantKey>();
+    pendingKey1->appIndex_ = 2;
+
+    auto ret = pendingManager_->CheckPendingWantRecordByKey(pendingKey, pendingKey1);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_4400
+ * @tc.name      : PendingWantManager CheckPendingWantRecordByKey
+ * @tc.desc      : 1.CheckPendingWantRecordByKey
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4400, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+
+    std::shared_ptr<PendingWantKey> pendingKey = std::make_shared<PendingWantKey>();
+    pendingKey->appIndex_ = 1;
+    pendingKey->bundleName_ = "ByeBye";
+
+    std::shared_ptr<PendingWantKey> pendingKey1 = std::make_shared<PendingWantKey>();
+    pendingKey1->appIndex_ = 1;
+    pendingKey1->bundleName_ = "HelloWorld";
+
+    auto ret = pendingManager_->CheckPendingWantRecordByKey(pendingKey, pendingKey1);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_4500
+ * @tc.name      : PendingWantManager CheckPendingWantRecordByKey
+ * @tc.desc      : 1.CheckPendingWantRecordByKey
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4500, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+
+    std::shared_ptr<PendingWantKey> pendingKey = std::make_shared<PendingWantKey>();
+    pendingKey->appIndex_ = 1;
+    pendingKey->bundleName_ = "ByeBye";
+
+    std::shared_ptr<PendingWantKey> pendingKey1 = std::make_shared<PendingWantKey>();
+    pendingKey1->appIndex_ = 1;
+    pendingKey1->bundleName_ = "HelloWorld";
+
+    auto ret = pendingManager_->CheckPendingWantRecordByKey(pendingKey, pendingKey1);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_4600
+ * @tc.name      : PendingWantManager CheckPendingWantRecordByKey
+ * @tc.desc      : 1.CheckPendingWantRecordByKey
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4600, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+
+    std::shared_ptr<PendingWantKey> pendingKey = std::make_shared<PendingWantKey>();
+    pendingKey->appIndex_ = 1;
+    pendingKey->bundleName_ = "HelloWorld";
+    pendingKey->type_ = 1;
+
+    std::shared_ptr<PendingWantKey> pendingKey1 = std::make_shared<PendingWantKey>();
+    pendingKey1->appIndex_ = 1;
+    pendingKey1->bundleName_ = "HelloWorld";
+    pendingKey1->type_ = 2;
+
+    auto ret = pendingManager_->CheckPendingWantRecordByKey(pendingKey, pendingKey1);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_4700
+ * @tc.name      : PendingWantManager CheckPendingWantRecordByKey
+ * @tc.desc      : 1.CheckPendingWantRecordByKey
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4700, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+
+    std::shared_ptr<PendingWantKey> pendingKey = std::make_shared<PendingWantKey>();
+    pendingKey->appIndex_ = 1;
+    pendingKey->bundleName_ = "HelloWorld";
+    pendingKey->type_ = 1;
+    pendingKey->requestWho_ = "ByeBye";
+
+    std::shared_ptr<PendingWantKey> pendingKey1 = std::make_shared<PendingWantKey>();
+    pendingKey1->appIndex_ = 1;
+    pendingKey1->bundleName_ = "HelloWorld";
+    pendingKey1->type_ = 1;
+    pendingKey1->requestWho_ = "HelloWorld";
+
+    auto ret = pendingManager_->CheckPendingWantRecordByKey(pendingKey, pendingKey1);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_4800
+ * @tc.name      : PendingWantManager CheckPendingWantRecordByKey
+ * @tc.desc      : 1.CheckPendingWantRecordByKey
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4800, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+
+    std::shared_ptr<PendingWantKey> pendingKey = std::make_shared<PendingWantKey>();
+    pendingKey->appIndex_ = 1;
+    pendingKey->bundleName_ = "HelloWorld";
+    pendingKey->type_ = 1;
+    pendingKey->requestWho_ = "HelloWorld";
+    pendingKey->requestCode_ = 1;
+
+    std::shared_ptr<PendingWantKey> pendingKey1 = std::make_shared<PendingWantKey>();
+    pendingKey1->appIndex_ = 1;
+    pendingKey1->bundleName_ = "HelloWorld";
+    pendingKey1->type_ = 1;
+    pendingKey1->requestWho_ = "HelloWorld";
+    pendingKey1->requestCode_ = 2;
+
+    auto ret = pendingManager_->CheckPendingWantRecordByKey(pendingKey, pendingKey1);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_4900
+ * @tc.name      : PendingWantManager CheckPendingWantRecordByKey
+ * @tc.desc      : 1.CheckPendingWantRecordByKey
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4900, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+
+    std::shared_ptr<PendingWantKey> pendingKey = std::make_shared<PendingWantKey>();
+    pendingKey->appIndex_ = 1;
+    pendingKey->bundleName_ = "HelloWorld";
+    pendingKey->type_ = 1;
+    pendingKey->requestWho_ = "HelloWorld";
+    pendingKey->requestCode_ = 1;
+    pendingKey->requestResolvedType_ = "HelloWorld";
+    pendingKey->userId_ = 1;
+
+    std::shared_ptr<PendingWantKey> pendingKey1 = std::make_shared<PendingWantKey>();
+    pendingKey1->appIndex_ = 1;
+    pendingKey1->bundleName_ = "HelloWorld";
+    pendingKey1->type_ = 1;
+    pendingKey1->requestWho_ = "HelloWorld";
+    pendingKey1->requestCode_ = 1;
+    pendingKey1->requestResolvedType_ = "HelloWorld";
+    pendingKey1->userId_ = 1;
+    pendingKey1->requestWant_.SetParam("HelloWorld", true);
+
+    auto ret = pendingManager_->CheckPendingWantRecordByKey(pendingKey, pendingKey1);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_5000
+ * @tc.name      : PendingWantManager SendWantSender
+ * @tc.desc      : 1.SendWantSender
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_5000, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+
+    SenderInfo senderInfo;
+    auto ret = pendingManager_->SendWantSender(nullptr, senderInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_5100
+ * @tc.name      : PendingWantManager CancelWantSender
+ * @tc.desc      : 1.CancelWantSender
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_5100, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    auto pendingKey = std::make_shared<PendingWantKey>();
+    auto pendingRecord = sptr<PendingWantRecord>::MakeSptr();
+    pendingManager_->wantRecords_.clear();
+    pendingManager_->wantRecords_.emplace(pendingKey, pendingRecord);
+
+    pendingManager_->CancelWantSender(false, nullptr);
+    auto wantRcdSize = pendingManager_->wantRecords_.size();
+    EXPECT_EQ(wantRcdSize, 1);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_5200
+ * @tc.name      : PendingWantManager CancelWantSender
+ * @tc.desc      : 1.CancelWantSender
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_5200, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    auto pendingKey = std::make_shared<PendingWantKey>();
+    auto pendingRecord = sptr<PendingWantRecord>::MakeSptr();
+    pendingManager_->wantRecords_.clear();
+    pendingManager_->wantRecords_.emplace(pendingKey, pendingRecord);
+    sptr<IWantSender> sender = sptr<PendingWantRecord>::MakeSptr();
+
+    pendingManager_->CancelWantSender(true, sender);
+    auto wantRcdSize = pendingManager_->wantRecords_.size();
+    EXPECT_EQ(wantRcdSize, 1);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_5300
+ * @tc.name      : PendingWantManager PendingWantStartServiceExtension
+ * @tc.desc      : 1.PendingWantStartServiceExtension
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_5300, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    Want want;
+
+    auto ret = pendingManager_->PendingWantStartServiceExtension(want, nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_5400
+ * @tc.name      : PendingWantManager PendingWantPublishCommonEvent
+ * @tc.desc      : 1.PendingWantPublishCommonEvent
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_5400, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    Want want;
+    want.SetBundle("HelloWorld");
+    SenderInfo senderInfo;
+    senderInfo.requiredPermission = "HelloWorld";
+
+    auto ret = pendingManager_->PendingWantPublishCommonEvent(want, senderInfo, 1, 1);
+    EXPECT_EQ(ret, -1);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_5500
+ * @tc.name      : PendingWantManager PendingWantPublishCommonEvent
+ * @tc.desc      : 1.PendingWantPublishCommonEvent
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_5500, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    std::shared_ptr<WantSenderInfo> info = nullptr;
+
+    auto ret = pendingManager_->GetWantSenderInfo(nullptr, info);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_5600
+ * @tc.name      : PendingWantManager ClearPendingWantRecord
+ * @tc.desc      : 1.ClearPendingWantRecord
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_5600, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    pendingManager_->taskHandler_ = nullptr;
+
+    pendingManager_->ClearPendingWantRecord("HelloWorld", 1);
+    EXPECT_EQ(pendingManager_->taskHandler_,  nullptr);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_5700
+ * @tc.name      : PendingWantManager CheckPermission
+ * @tc.desc      : 1.CheckPermission
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_5700, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+
+    auto ret = pendingManager_->CheckPermission(nullptr);
+    EXPECT_EQ(ret,  false);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_5800
+ * @tc.name      : PendingWantManager CheckPermission
+ * @tc.desc      : 1.CheckPermission
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_5800, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    auto record = sptr<PendingWantRecord>::MakeSptr();
+    record->canceled_ = false;
+    record->key_ = std::make_shared<PendingWantKey>();
+    record->key_->type_ = static_cast<int32_t>(OperationType::START_ABILITY);
+
+    auto ret = pendingManager_->CheckPermission(record);
+    EXPECT_EQ(ret,  true);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_5900
+ * @tc.name      : PendingWantManager CheckPermission
+ * @tc.desc      : 1.CheckPermission
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_5900, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    auto record = sptr<PendingWantRecord>::MakeSptr();
+    record->canceled_ = true;
+
+    auto ret = pendingManager_->CheckPermission(record);
+    EXPECT_EQ(ret,  true);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_6000
+ * @tc.name      : PendingWantManager CheckCallerPermission
+ * @tc.desc      : 1.CheckCallerPermission
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_6000, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+
+    auto ret = pendingManager_->CheckCallerPermission();
+    EXPECT_EQ(ret,  true);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_6100
+ * @tc.name      : PendingWantManager GetAllRunningInstanceKeysByBundleName
+ * @tc.desc      : 1.GetAllRunningInstanceKeysByBundleName
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_6100, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    std::vector<std::string> appKeyVec = {"", ""};
+
+    auto ret = pendingManager_->GetAllRunningInstanceKeysByBundleName("HelloWorld", appKeyVec);
+    EXPECT_NE(ret,  OBJECT_NULL);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
