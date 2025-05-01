@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_INSIGHT_INTENT__SYS_EVENT_RECEIVER_H
-#define OHOS_ABILITY_RUNTIME_INSIGHT_INTENT__SYS_EVENT_RECEIVER_H
+#ifndef OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_SYS_EVENT_RECEIVER_H
+#define OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_SYS_EVENT_RECEIVER_H
 
 #include "common_event_data.h"
 #include "common_event_subscriber.h"
@@ -27,7 +27,7 @@ class InsightIntentSysEventReceiver : public EventFwk::CommonEventSubscriber,
     public std::enable_shared_from_this<InsightIntentSysEventReceiver> {
 public:
     InsightIntentSysEventReceiver(const EventFwk::CommonEventSubscribeInfo &subcribeInfo);
-    ~InsightIntentSysEventReceiver() =default;
+    ~InsightIntentSysEventReceiver() = default;
 
     void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
 private:
@@ -44,4 +44,4 @@ private:
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_INSIGHT_INTENT__SYS_EVENT_RECEIVER_H
+#endif // OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_SYS_EVENT_RECEIVER_H
