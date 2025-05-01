@@ -38,8 +38,8 @@ ohos_unittest("window_options_utils_test") {
     "${ability_runtime_services_path}/abilitymgr/src/start_options.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_window_option.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/window_options_utils.cpp",
-    "${ability_runtime_services_path}/common/src/app_utils.cpp",
     "${ability_runtime_services_path}/common/src/json_utils.cpp",
+    "mock/src/mock_app_utils.cpp",
     "window_options_utils_test.cpp",
   ]
 

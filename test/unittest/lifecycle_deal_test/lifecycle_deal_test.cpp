@@ -241,5 +241,196 @@ HWTEST_F(LifecycleDealTest, LifecycleDeal_oprator_008, TestSize.Level1)
     lifecycleDeal_->SetScheduler(abilityScheduler_);
     lifecycleDeal_->CommandAbilityWindow(want, sessionInfo, AAFwk::WIN_CMD_FOREGROUND);
 }
+
+/*
+ * Feature: LifecycleDeal
+ * Function: SaveAbilityState
+ * SubFunction: NA
+ * FunctionPoints: LifecycleDeal SaveAbilityState
+ * EnvConditions:NA
+ * CaseDescription: Verify SaveAbilityState operation and call mock once
+ * @tc.require: AR000I8B26
+ */
+HWTEST_F(LifecycleDealTest, SaveAbilityStateTest_001, TestSize.Level1)
+{
+    EXPECT_CALL(*abilityScheduler_, ScheduleSaveAbilityState()).Times(1);
+    lifecycleDeal_->SetScheduler(abilityScheduler_);
+    lifecycleDeal_->SaveAbilityState();
+}
+
+/*
+ * Feature: LifecycleDeal
+ * Function: RestoreAbilityState
+ * SubFunction: NA
+ * FunctionPoints: LifecycleDeal RestoreAbilityState
+ * EnvConditions:NA
+ * CaseDescription: Verify RestoreAbilityState operation and call mock once
+ * @tc.require: AR000I8B26
+ */
+HWTEST_F(LifecycleDealTest, RestoreAbilityState_001, TestSize.Level1)
+{
+    EXPECT_CALL(*abilityScheduler_, ScheduleRestoreAbilityState(::testing::_)).Times(1);
+    PacMap inState;
+    lifecycleDeal_->SetScheduler(abilityScheduler_);
+    lifecycleDeal_->RestoreAbilityState(inState);
+}
+
+/*
+ * Feature: LifecycleDeal
+ * Function: ForegroundNew
+ * SubFunction: NA
+ * FunctionPoints: LifecycleDeal ForegroundNew
+ * EnvConditions:NA
+ * CaseDescription: Verify ForegroundNew operation and call mock once
+ * @tc.require: AR000I8B26
+ */
+HWTEST_F(LifecycleDealTest, ForegroundNew_001, TestSize.Level1)
+{
+    EXPECT_CALL(*abilityScheduler_, ScheduleAbilityTransaction(::testing::_, ::testing::_, ::testing::_)).Times(1);
+    Want want;
+    LifeCycleStateInfo stateInfo;
+    sptr<SessionInfo> sessionInfo;
+    lifecycleDeal_->SetScheduler(abilityScheduler_);
+    lifecycleDeal_->ForegroundNew(want, stateInfo, sessionInfo);
+}
+
+/*
+ * Feature: LifecycleDeal
+ * Function: BackgroundNew
+ * SubFunction: NA
+ * FunctionPoints: LifecycleDeal BackgroundNew
+ * EnvConditions:NA
+ * CaseDescription: Verify BackgroundNew operation and call mock once
+ * @tc.require: AR000I8B26
+ */
+HWTEST_F(LifecycleDealTest, BackgroundNew_001, TestSize.Level1)
+{
+    EXPECT_CALL(*abilityScheduler_, ScheduleAbilityTransaction(::testing::_, ::testing::_, ::testing::_)).Times(1);
+    Want want;
+    LifeCycleStateInfo stateInfo;
+    sptr<SessionInfo> sessionInfo;
+    lifecycleDeal_->SetScheduler(abilityScheduler_);
+    lifecycleDeal_->BackgroundNew(want, stateInfo, sessionInfo);
+}
+
+/*
+ * Feature: LifecycleDeal
+ * Function: ContinueAbility
+ * SubFunction: NA
+ * FunctionPoints: LifecycleDeal ContinueAbility
+ * EnvConditions:NA
+ * CaseDescription: Verify ContinueAbility operation and call mock once
+ * @tc.require: AR000I8B26
+ */
+HWTEST_F(LifecycleDealTest, ContinueAbility_001, TestSize.Level1)
+{
+    EXPECT_CALL(*abilityScheduler_, ContinueAbility(::testing::_, ::testing::_)).Times(1);
+    std::string deviceId = "101";
+    uint32_t versionCode = 1;
+    lifecycleDeal_->SetScheduler(abilityScheduler_);
+    lifecycleDeal_->ContinueAbility(deviceId, versionCode);
+}
+
+/*
+ * Feature: LifecycleDeal
+ * Function: NotifyContinuationResult
+ * SubFunction: NA
+ * FunctionPoints: LifecycleDeal NotifyContinuationResult
+ * EnvConditions:NA
+ * CaseDescription: Verify NotifyContinuationResult operation and call mock once
+ * @tc.require: AR000I8B26
+ */
+HWTEST_F(LifecycleDealTest, NotifyContinuationResult_001, TestSize.Level1)
+{
+    EXPECT_CALL(*abilityScheduler_, NotifyContinuationResult(::testing::_)).Times(1);
+    int32_t result = 1;
+    lifecycleDeal_->SetScheduler(abilityScheduler_);
+    lifecycleDeal_->NotifyContinuationResult(result);
+}
+
+/*
+ * Feature: LifecycleDeal
+ * Function: ShareData
+ * SubFunction: NA
+ * FunctionPoints: LifecycleDeal ShareData
+ * EnvConditions:NA
+ * CaseDescription: Verify ShareData operation and call mock once
+ * @tc.require: AR000I8B26
+ */
+HWTEST_F(LifecycleDealTest, ShareData_001, TestSize.Level1)
+{
+    EXPECT_CALL(*abilityScheduler_, ScheduleShareData(::testing::_)).Times(1);
+    int32_t result = 1;
+    lifecycleDeal_->SetScheduler(abilityScheduler_);
+    lifecycleDeal_->ShareData(result);
+}
+
+/*
+ * Feature: LifecycleDeal
+ * Function: PrepareTerminateAbility
+ * SubFunction: NA
+ * FunctionPoints: LifecycleDeal PrepareTerminateAbility
+ * EnvConditions:NA
+ * CaseDescription: Verify PrepareTerminateAbility operation and call mock once
+ * @tc.require: AR000I8B26
+ */
+HWTEST_F(LifecycleDealTest, PrepareTerminateAbility_001, TestSize.Level1)
+{
+    bool result = lifecycleDeal_->PrepareTerminateAbility();
+    EXPECT_FALSE(result);
+}
+
+/*
+ * Feature: LifecycleDeal
+ * Function: PrepareTerminateAbility
+ * SubFunction: NA
+ * FunctionPoints: LifecycleDeal PrepareTerminateAbility
+ * EnvConditions:NA
+ * CaseDescription: Verify PrepareTerminateAbility operation and call mock once
+ * @tc.require: AR000I8B26
+ */
+HWTEST_F(LifecycleDealTest, PrepareTerminateAbility_002, TestSize.Level1)
+{
+    EXPECT_CALL(*abilityScheduler_, SchedulePrepareTerminateAbility()).Times(1);
+    lifecycleDeal_->SetScheduler(abilityScheduler_);
+    EXPECT_FALSE(lifecycleDeal_->PrepareTerminateAbility());
+}
+
+/*
+ * Feature: UpdateSessionToken
+ * Function: ShareData
+ * SubFunction: NA
+ * FunctionPoints: UpdateSessionToken ShareData
+ * EnvConditions:NA
+ * CaseDescription: Verify UpdateSessionToken operation and call mock once
+ * @tc.require: AR000I8B26
+ */
+HWTEST_F(LifecycleDealTest, UpdateSessionToken_001, TestSize.Level1)
+{
+    sptr<IRemoteObject> sessionToken = nullptr;
+    lifecycleDeal_->SetScheduler(abilityScheduler_);
+    EXPECT_EQ(abilityScheduler_->code_, 0);
+    lifecycleDeal_->UpdateSessionToken(sessionToken);
+    EXPECT_EQ(abilityScheduler_->code_, ABILITY_SCHEDULER_MOCK_VALUE);
+}
+
+/*
+ * Feature: ScheduleCollaborate
+ * Function: ShareData
+ * SubFunction: NA
+ * FunctionPoints: ScheduleCollaborate ShareData
+ * EnvConditions:NA
+ * CaseDescription: Verify ScheduleCollaborate operation and call mock once
+ * @tc.require: AR000I8B26
+ */
+HWTEST_F(LifecycleDealTest, ScheduleCollaborate_001, TestSize.Level1)
+{
+    sptr<IRemoteObject> sessionToken = nullptr;
+    Want want;
+    lifecycleDeal_->SetScheduler(abilityScheduler_);
+    EXPECT_EQ(abilityScheduler_->code_, 0);
+    lifecycleDeal_->ScheduleCollaborate(want);
+    EXPECT_EQ(abilityScheduler_->code_, ABILITY_SCHEDULER_MOCK_VALUE);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

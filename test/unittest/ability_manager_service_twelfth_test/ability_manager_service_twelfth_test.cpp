@@ -45,6 +45,9 @@ constexpr const char* START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
 constexpr int32_t ONE = 1;
 constexpr int32_t TWO = 2;
 constexpr int32_t FOUNDATION_UID = 5523;
+constexpr int32_t RESOURCE_SCHEDULE_UID = 1096;
+constexpr int32_t UPDATE_CONFIG_FLAG_COVER = 1;
+constexpr int32_t UPDATE_CONFIG_FLAG_APPEND = 2;
 
 namespace OHOS {
 namespace AAFwk {
@@ -621,50 +624,6 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, IsSceneBoardReady_002, TestSize.Level
 
 /*
  * Feature: AbilityManagerService
- * Name: CloseAssertDialog_001
- * Function: CloseAssertDialog
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CloseAssertDialog
- */
-HWTEST_F(AbilityManagerServiceTwelfthTest, CloseAssertDialog_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CloseAssertDialog_001 start");
-    std::string assertSessionId = "test_session_id_1";
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs, nullptr);
-    abilityMs->userController_ = std::make_shared<UserController>();
-    EXPECT_NE(abilityMs->userController_, nullptr);
-    abilityMs->CloseAssertDialog(assertSessionId);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CloseAssertDialog_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Name: CloseAssertDialog_002
- * Function: CloseAssertDialog
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CloseAssertDialog
- */
-HWTEST_F(AbilityManagerServiceTwelfthTest, CloseAssertDialog_002, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CloseAssertDialog_002 start");
-    std::string assertSessionId = "test_session_id_2";
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs, nullptr);
-    abilityMs->userController_ = std::make_shared<UserController>();
-    EXPECT_NE(abilityMs->userController_, nullptr);
-    auto taskHandler = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
-    auto eventHandler = std::make_shared<AbilityEventHandler>(taskHandler, abilityMs);
-    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler, eventHandler);
-    EXPECT_NE(abilityMs->subManagersHelper_, nullptr);
-    auto connectManager = std::make_shared<AbilityConnectManager>(0);
-    abilityMs->subManagersHelper_->connectManagers_.insert({0, connectManager});
-    abilityMs->CloseAssertDialog(assertSessionId);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CloseAssertDialog_002 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Name: PrepareTerminateAbilityBySCB_001
  * Function: PrepareTerminateAbilityBySCB
  * SubFunction: NA
@@ -700,6 +659,328 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, PrepareTerminateAbilityBySCB_002, Tes
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     EXPECT_FALSE(isTerminate);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest PrepareTerminateAbilityBySCB_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnStartSpecifiedAbilityTimeoutResponse
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnStartSpecifiedAbilityTimeoutResponse
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, OnStartSpecifiedAbilityTimeoutResponse_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest OnStartSpecifiedAbilityTimeoutResponse_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t requestId = 101;
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(abilityMs->subManagersHelper_, nullptr);
+    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(true));
+    abilityMs->OnStartSpecifiedAbilityTimeoutResponse(requestId);
+    auto manager = abilityMs->GetCurrentUIAbilityManager();
+    EXPECT_EQ(manager, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest OnStartSpecifiedAbilityTimeoutResponse_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnStartSpecifiedAbilityTimeoutResponse
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnStartSpecifiedAbilityTimeoutResponse
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, OnStartSpecifiedAbilityTimeoutResponse_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest OnStartSpecifiedAbilityTimeoutResponse_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t requestId = 101;
+    abilityMs->OnStartSpecifiedAbilityTimeoutResponse(requestId);
+    auto manager = abilityMs->GetCurrentUIAbilityManager();
+    EXPECT_EQ(manager, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest OnStartSpecifiedAbilityTimeoutResponse_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: UpdateAssociateConfigList
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService UpdateAssociateConfigList
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, UpdateAssociateConfigList_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest UpdateAssociateConfigList_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
+    std::map<std::string, std::list<std::string>> configs;
+    std::list<std::string> exportConfigs;
+    int32_t flag = 0;
+    int32_t result = abilityMs->UpdateAssociateConfigList(configs, exportConfigs, flag);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest UpdateAssociateConfigList_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: UpdateAssociateConfigList
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService UpdateAssociateConfigList
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, UpdateAssociateConfigList_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest UpdateAssociateConfigList_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    IPCSkeleton::SetCallingUid(RESOURCE_SCHEDULE_UID);
+    std::map<std::string, std::list<std::string>> configs1 = {
+        {"caller1", {"callee1/ability1", "callee2/ability2"}},
+        {"caller2", {"callee3/ability3"}}
+    };
+    std::list<std::string> exportConfigs1 = {"callee4/ability4", "callee5/ability5"};
+    int32_t flag1 = UPDATE_CONFIG_FLAG_COVER;
+    int32_t result1 = abilityMs->UpdateAssociateConfigList(configs1, exportConfigs1, flag1);
+    EXPECT_EQ(result1, ERR_OK);
+    EXPECT_TRUE(abilityMs->IsInWhiteList("caller1", "callee1", "ability1"));
+    EXPECT_TRUE(abilityMs->IsInWhiteList("caller2", "callee3", "ability3"));
+    EXPECT_TRUE(abilityMs->IsInWhiteList("caller1", "callee2", "ability2"));
+    EXPECT_TRUE(abilityMs->IsInWhiteList("caller2", "callee3", "ability3"));
+    EXPECT_TRUE(abilityMs->IsInWhiteList("callerX", "callee4", "ability4"));
+
+    std::map<std::string, std::list<std::string>> configs2 = {
+        {"caller1", {"callee6/ability6"}},
+        {"caller3", {"callee7/ability7"}}
+    };
+    std::list<std::string> exportConfigs2 = {"callee8/ability8"};
+    int32_t flag2 = UPDATE_CONFIG_FLAG_APPEND;
+    int32_t result2 = abilityMs->UpdateAssociateConfigList(configs2, exportConfigs2, flag2);
+    EXPECT_EQ(result2, ERR_OK);
+    EXPECT_TRUE(abilityMs->IsInWhiteList("caller1", "callee6", "ability6"));
+    EXPECT_TRUE(abilityMs->IsInWhiteList("caller3", "callee7", "ability7"));
+    EXPECT_TRUE(abilityMs->IsInWhiteList("callerX", "callee8", "ability8"));
+
+    std::map<std::string, std::list<std::string>> configs3;
+    std::list<std::string> exportConfigs3;
+    int32_t flag3 = UPDATE_CONFIG_FLAG_APPEND;
+    int32_t result3 = abilityMs->UpdateAssociateConfigList(configs3, exportConfigs3, flag3);
+    EXPECT_EQ(result3, ERR_OK);
+    EXPECT_TRUE(abilityMs->IsInWhiteList("caller1", "callee6", "ability6"));
+    EXPECT_TRUE(abilityMs->IsInWhiteList("caller3", "callee7", "ability7"));
+    EXPECT_TRUE(abilityMs->IsInWhiteList("callerX", "callee8", "ability8"));
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest UpdateAssociateConfigList_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: UpdateAssociateConfigList
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService UpdateAssociateConfigList
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, UpdateAssociateConfigList_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest UpdateAssociateConfigList_003 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    IPCSkeleton::SetCallingUid(RESOURCE_SCHEDULE_UID);
+    std::map<std::string, std::list<std::string>> configs = {
+        {"caller1", {"callee1/ability1"}}
+    };
+    std::list<std::string> exportConfigs = {"callee2/ability2"};
+    int32_t invalidFlag = 999;
+    int32_t result = abilityMs->UpdateAssociateConfigList(configs, exportConfigs, invalidFlag);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_FALSE(abilityMs->IsInWhiteList("caller1", "callee1", "ability1"));
+    EXPECT_FALSE(abilityMs->IsInWhiteList("callerX", "callee2", "ability2"));
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest UpdateAssociateConfigList_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: IsAppSelfCalled
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService IsAppSelfCalled
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, IsAppSelfCalled_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest IsAppSelfCalled_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    AbilityRequest abilityRequest{};
+    std::string deviceName = "device";
+    std::string abilityName = "ServiceAbility";
+    std::string appName = "hiservcie";
+    std::string bundleName = "com.ix.hiservcie";
+    std::string moduleName = "entry";
+    abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+    AppExecFwk::ApplicationInfo appInfo;
+    appInfo.accessTokenId = ONE;
+    abilityRequest.appInfo = appInfo;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    bool result = abilityMs->IsAppSelfCalled(abilityRecord);
+    EXPECT_TRUE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest IsAppSelfCalled_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: IsAppSelfCalled
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService IsAppSelfCalled
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, IsAppSelfCalled_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest IsAppSelfCalled_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
+    bool result = abilityMs->IsAppSelfCalled(abilityRecord);
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest IsAppSelfCalled_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckProcessIsBackground
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckProcessIsBackground
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, CheckProcessIsBackground_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CheckProcessIsBackground_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t pid = 1234;
+    AbilityState currentState = AbilityState::BACKGROUND;
+    abilityMs->windowVisibleList_.insert(pid);
+    bool result = abilityMs->CheckProcessIsBackground(pid, currentState);
+    ASSERT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CheckProcessIsBackground_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckProcessIsBackground
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckProcessIsBackground
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, CheckProcessIsBackground_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CheckProcessIsBackground_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t pid = 1234;
+    AbilityState currentState = AbilityState::BACKGROUND;
+    abilityMs->windowVisibleList_.clear();
+    bool result = abilityMs->CheckProcessIsBackground(pid, currentState);
+    ASSERT_TRUE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CheckProcessIsBackground_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckProcessIsBackground
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckProcessIsBackground
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, CheckProcessIsBackground_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CheckProcessIsBackground_003 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t pid = 1234;
+    AbilityState currentState = AbilityState::FOREGROUND;
+    abilityMs->windowVisibleList_.insert(pid);
+    bool result = abilityMs->CheckProcessIsBackground(pid, currentState);
+    ASSERT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CheckProcessIsBackground_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckProcessIsBackground
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckProcessIsBackground
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, CheckProcessIsBackground_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CheckProcessIsBackground_004 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t pid = 1234;
+    AbilityState currentState = AbilityState::FOREGROUND;
+    abilityMs->windowVisibleList_.erase(pid);
+    bool result = abilityMs->CheckProcessIsBackground(pid, currentState);
+    ASSERT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CheckProcessIsBackground_004 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CleanUIAbilityBySCB
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CleanUIAbilityBySCB
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, CleanUIAbilityBySCB_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CleanUIAbilityBySCB_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    sptr<SessionInfo> sessionInfo = nullptr;
+    uint32_t sceneFlag = 0;
+    bool isUserRequestedExit = false;
+    int32_t result = abilityMs->CleanUIAbilityBySCB(sessionInfo, isUserRequestedExit, sceneFlag);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CleanUIAbilityBySCB_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CleanUIAbilityBySCB
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CleanUIAbilityBySCB
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, CleanUIAbilityBySCB_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CleanUIAbilityBySCB_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    sptr<SessionInfo> sessionInfo = new SessionInfo();
+    sessionInfo->sessionToken = nullptr;
+    uint32_t sceneFlag = 0;
+    bool isUserRequestedExit = false;
+    int32_t result = abilityMs->CleanUIAbilityBySCB(sessionInfo, isUserRequestedExit, sceneFlag);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CleanUIAbilityBySCB_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CleanUIAbilityBySCB
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CleanUIAbilityBySCB
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, CleanUIAbilityBySCB_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CleanUIAbilityBySCB_003 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo = new SessionInfo();
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    uint32_t sceneFlag = 0;
+    bool isUserRequestedExit = false;
+    int32_t result = abilityMs->CleanUIAbilityBySCB(sessionInfo, isUserRequestedExit, sceneFlag);
+    ASSERT_EQ(result, ERR_WRONG_INTERFACE_CALL);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CleanUIAbilityBySCB_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CleanUIAbilityBySCB
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CleanUIAbilityBySCB
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, CleanUIAbilityBySCB_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CleanUIAbilityBySCB_004 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    sptr<SessionInfo> sessionInfo = new SessionInfo();
+    Rosen::SessionInfo info;
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->persistentId = 99999;
+    uint32_t sceneFlag = 1;
+    bool isUserRequestedExit = false;
+    auto uiAbilityManager = abilityMs->GetCurrentUIAbilityManager();
+    int32_t result = abilityMs->CleanUIAbilityBySCB(sessionInfo, isUserRequestedExit, sceneFlag);
+    ASSERT_EQ(result, ERR_WRONG_INTERFACE_CALL);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest CleanUIAbilityBySCB_004 end");
 }
 } // namespace AAFwk
 } // namespace OHOS
