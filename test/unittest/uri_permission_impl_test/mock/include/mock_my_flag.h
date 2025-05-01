@@ -87,6 +87,12 @@ public:
     static bool permissionReadWriteDocuments_;
     static bool IsSystempAppCall_;
     static bool permissionFileAccessPersist_;
+    static bool isSAOrSystemAppCall_;
+    static bool isUriTypeValid_;
+    static bool isSystemAppCall_;
+    static bool isDocsCloudUri_;
+    static std::string bundleName_;
+    static int32_t getTokenIdByBundleNameStatus_;
 
     static TokenInfoMap tokenInfos;
 };
