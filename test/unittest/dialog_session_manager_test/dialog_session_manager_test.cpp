@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "ability_config.h"
+#include "ability_record.h"
 #define private public
 #include "dialog_session_manager.h"
 #undef private
@@ -35,6 +36,7 @@ const std::string TEST_BUNDLE_NAME = "com.test.demo";
 const std::string TEST_DIALOG_SESSION_ID = "dialogSessionId";
 const std::string APP_LAUNCH_TRUSTLIST = "ohos.params.appLaunchTrustList";
 const std::string SHOW_DEFAULT_PICKER_FLAG = "ohos.ability.params.showDefaultPicker";
+constexpr const char* KEY_REQUEST_ID = "com.ohos.param.requestId";
 }
 
 class DialogSessionManagerTest : public testing::Test {
@@ -434,6 +436,230 @@ HWTEST_F(DialogSessionManagerTest, CreateImplicitSelectorModalDialog_0002, TestS
 
     EXPECT_NE(ret, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "CreateImplicitSelectorModalDialog_0002 end";
+}
+
+/**
+ * @tc.name: NotifyAbilityRequestFailure_0100
+ * @tc.desc: Test NotifyAbilityRequestFailure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, NotifyAbilityRequestFailure_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0100 start";
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    EXPECT_EQ(dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID), nullptr);
+
+    dialogSessionManager.NotifyAbilityRequestFailure(TEST_DIALOG_SESSION_ID, want);
+
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0100 end";
+}
+
+/**
+ * @tc.name: NotifyAbilityRequestFailure_0200
+ * @tc.desc: Test NotifyAbilityRequestFailure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, NotifyAbilityRequestFailure_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0200 start";
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    EXPECT_NE(dialogCallerInfo, nullptr);
+
+    dialogSessionManager.SetDialogSessionInfo(TEST_DIALOG_SESSION_ID, dilogSessionInfo, dialogCallerInfo);
+    auto callerInfo = dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID);
+    EXPECT_NE(dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID), nullptr);
+
+    auto requestId = callerInfo->targetWant.GetStringParam(KEY_REQUEST_ID);
+    EXPECT_EQ(requestId.empty(), true);
+
+    dialogSessionManager.NotifyAbilityRequestFailure(TEST_DIALOG_SESSION_ID, want);
+
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0200 end";
+}
+
+/**
+ * @tc.name: NotifyAbilityRequestFailure_0300
+ * @tc.desc: Test NotifyAbilityRequestFailure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, NotifyAbilityRequestFailure_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0300 start";
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    want.SetParam(KEY_REQUEST_ID, std::string("1234567890"));
+    sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    EXPECT_NE(dialogCallerInfo, nullptr);
+    dialogCallerInfo->targetWant = want;
+
+    dialogSessionManager.SetDialogSessionInfo(TEST_DIALOG_SESSION_ID, dilogSessionInfo, dialogCallerInfo);
+    auto callerInfo = dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID);
+    EXPECT_NE(dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID), nullptr);
+
+    auto requestId = callerInfo->targetWant.GetStringParam(KEY_REQUEST_ID);
+    EXPECT_EQ(requestId.empty(), false);
+    EXPECT_EQ(callerInfo->callerToken, nullptr);
+
+    dialogSessionManager.NotifyAbilityRequestFailure(TEST_DIALOG_SESSION_ID, want);
+
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0300 end";
+}
+
+/**
+ * @tc.name: NotifyAbilityRequestFailure_0400
+ * @tc.desc: Test NotifyAbilityRequestFailure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, NotifyAbilityRequestFailure_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0400 start";
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    want.SetParam(KEY_REQUEST_ID, std::string("1234567890"));
+    sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    EXPECT_NE(dialogCallerInfo, nullptr);
+    dialogCallerInfo->targetWant = want;
+
+    AbilityRequest abilityRequest;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    dialogCallerInfo->callerToken = MockToken(AbilityType::PAGE);
+    EXPECT_NE(dialogCallerInfo->callerToken, nullptr);
+    EXPECT_EQ(Token::GetAbilityRecordByToken(dialogCallerInfo->callerToken), nullptr);
+
+    dialogSessionManager.SetDialogSessionInfo(TEST_DIALOG_SESSION_ID, dilogSessionInfo, dialogCallerInfo);
+    auto callerInfo = dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID);
+    EXPECT_NE(dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID), nullptr);
+
+    auto requestId = callerInfo->targetWant.GetStringParam(KEY_REQUEST_ID);
+    EXPECT_EQ(requestId.empty(), false);
+    EXPECT_NE(callerInfo->callerToken, nullptr);
+    EXPECT_EQ(Token::GetAbilityRecordByToken(callerInfo->callerToken), nullptr);
+
+    dialogSessionManager.NotifyAbilityRequestFailure(TEST_DIALOG_SESSION_ID, want);
+
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0400 end";
+}
+
+/**
+ * @tc.name: NotifyAbilityRequestFailure_0500
+ * @tc.desc: Test NotifyAbilityRequestFailure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, NotifyAbilityRequestFailure_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0500 start";
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    want.SetParam(KEY_REQUEST_ID, std::string("1234567890"));
+    sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    EXPECT_NE(dialogCallerInfo, nullptr);
+    dialogCallerInfo->targetWant = want;
+
+    AbilityRequest abilityRequest;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    dialogCallerInfo->callerToken = new (std::nothrow) Token(abilityRecord);
+    EXPECT_NE(dialogCallerInfo->callerToken, nullptr);
+    EXPECT_NE(Token::GetAbilityRecordByToken(dialogCallerInfo->callerToken), nullptr);
+
+    dialogSessionManager.SetDialogSessionInfo(TEST_DIALOG_SESSION_ID, dilogSessionInfo, dialogCallerInfo);
+    auto callerInfo = dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID);
+    EXPECT_NE(dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID), nullptr);
+
+    auto requestId = callerInfo->targetWant.GetStringParam(KEY_REQUEST_ID);
+    EXPECT_EQ(requestId.empty(), false);
+    EXPECT_NE(callerInfo->callerToken, nullptr);
+    EXPECT_NE(Token::GetAbilityRecordByToken(callerInfo->callerToken), nullptr);
+
+    dialogSessionManager.NotifyAbilityRequestFailure(TEST_DIALOG_SESSION_ID, want);
+
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0500 end";
+}
+
+/**
+ * @tc.name: NotifyAbilityRequestFailure_0600
+ * @tc.desc: Test NotifyAbilityRequestFailure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, NotifyAbilityRequestFailure_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0600 start";
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    want.SetParam(KEY_REQUEST_ID, std::string("1234567890"));
+    sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    EXPECT_NE(dialogCallerInfo, nullptr);
+    dialogCallerInfo->targetWant = want;
+
+    AbilityRequest abilityRequest;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    dialogCallerInfo->callerToken = new (std::nothrow) Token(abilityRecord);
+    EXPECT_NE(dialogCallerInfo->callerToken, nullptr);
+    EXPECT_NE(Token::GetAbilityRecordByToken(dialogCallerInfo->callerToken), nullptr);
+    dialogCallerInfo->type = SelectorType::IMPLICIT_START_SELECTOR;
+
+    dialogSessionManager.SetDialogSessionInfo(TEST_DIALOG_SESSION_ID, dilogSessionInfo, dialogCallerInfo);
+    auto callerInfo = dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID);
+    EXPECT_NE(dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID), nullptr);
+
+    auto requestId = callerInfo->targetWant.GetStringParam(KEY_REQUEST_ID);
+    EXPECT_EQ(requestId.empty(), false);
+    EXPECT_NE(callerInfo->callerToken, nullptr);
+    EXPECT_NE(Token::GetAbilityRecordByToken(callerInfo->callerToken), nullptr);
+    EXPECT_EQ(callerInfo->type, SelectorType::IMPLICIT_START_SELECTOR);
+
+    dialogSessionManager.NotifyAbilityRequestFailure(TEST_DIALOG_SESSION_ID, want);
+
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0600 end";
+}
+
+/**
+ * @tc.name: NotifyAbilityRequestFailure_0700
+ * @tc.desc: Test NotifyAbilityRequestFailure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, NotifyAbilityRequestFailure_0700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0700 start";
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    want.SetParam(KEY_REQUEST_ID, std::string("1234567890"));
+    sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    EXPECT_NE(dialogCallerInfo, nullptr);
+    dialogCallerInfo->targetWant = want;
+
+    AbilityRequest abilityRequest;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    dialogCallerInfo->callerToken = new (std::nothrow) Token(abilityRecord);
+    EXPECT_NE(dialogCallerInfo->callerToken, nullptr);
+    EXPECT_NE(Token::GetAbilityRecordByToken(dialogCallerInfo->callerToken), nullptr);
+    dialogCallerInfo->type = SelectorType::APP_CLONE_SELECTOR;
+
+    dialogSessionManager.SetDialogSessionInfo(TEST_DIALOG_SESSION_ID, dilogSessionInfo, dialogCallerInfo);
+    auto callerInfo = dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID);
+    EXPECT_NE(dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID), nullptr);
+
+    auto requestId = callerInfo->targetWant.GetStringParam(KEY_REQUEST_ID);
+    EXPECT_EQ(requestId.empty(), false);
+    EXPECT_NE(callerInfo->callerToken, nullptr);
+    EXPECT_NE(Token::GetAbilityRecordByToken(callerInfo->callerToken), nullptr);
+    EXPECT_EQ(callerInfo->type, SelectorType::APP_CLONE_SELECTOR);
+
+    dialogSessionManager.NotifyAbilityRequestFailure(TEST_DIALOG_SESSION_ID, want);
+
+    GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0700 end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS
