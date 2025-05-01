@@ -40,7 +40,8 @@ public:
         const std::string &intentName, const int32_t userId, ExtractInsightIntentInfo &infos);
     int32_t SaveInsightIntentTotalInfo(const std::string &bundleName, const std::string &moduleName,
         const int32_t userId, ExtractInsightIntentProfileInfoVec profileInfos);
-    int32_t DeleteInsightIntentTotalInfo(const std::string &bundleName, const int32_t userId);
+    int32_t DeleteInsightIntentTotalInfo(const std::string &bundleName,
+        const std::string &moduleName, const int32_t userId);
     int32_t DeleteInsightIntentByUserId(const int32_t userId);
 private:
     int32_t userId_ = -1;
