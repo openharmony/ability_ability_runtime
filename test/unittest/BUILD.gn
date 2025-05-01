@@ -364,6 +364,7 @@ group("unittest") {
       "ability_keep_alive_service_test:unittest",
       "ability_manager_client_branch_second_test:unittest",
       "ability_manager_client_branch_test:unittest",
+      "ability_manager_client_branch_third_test:unittest",
       "ability_manager_collaborator_proxy_test:unittest",
       "ability_manager_event_subscriber_test:unittest",
       "ability_manager_proxy_fifth_test:unittest",
