@@ -20,6 +20,8 @@
 #include "mock_app_scheduler.h"
 #undef private
 
+#include "application_info.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -143,6 +145,50 @@ HWTEST_F(AppLifecycleDealTest, ChangeAppGcState_001, TestSize.Level1)
     appLifeCycle->SetApplicationClient(mockAppScheduler);
     int32_t result1 = appLifeCycle->ChangeAppGcState(0);
     EXPECT_EQ(ERR_OK, result1);
+}
+
+/**
+ * @tc.name: UpdateApplicationInfoInstalled_001
+ * @tc.desc: Test the normal state of UpdateApplicationInfoInstalled
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, UpdateApplicationInfoInstalled_001, TestSize.Level1)
+{
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    std::shared_ptr<ApplicationInfo> appInfo;
+    std::string moduleName;
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    EXPECT_CALL(*mockAppScheduler, ScheduleUpdateApplicationInfoInstalled(_, _)).Times(0);
+    appLifeCycle->UpdateApplicationInfoInstalled(*appInfo, moduleName);
+}
+
+/**
+ * @tc.name: AddAbilityStage_001
+ * @tc.desc: Test the normal state of AddAbilityStage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, AddAbilityStage_001, TestSize.Level1)
+{
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    HapModuleInfo abilityStage;
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    EXPECT_CALL(*mockAppScheduler, ScheduleAbilityStage(_)).Times(0);
+    appLifeCycle->AddAbilityStage(abilityStage);
+}
+
+/**
+ * @tc.name: AddAbilityStage_002
+ * @tc.desc: Test the normal state of AddAbilityStage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, AddAbilityStage_002, TestSize.Level1)
+{
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    HapModuleInfo abilityStage;
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    EXPECT_CALL(*mockAppScheduler, ScheduleAbilityStage(_)).Times(1);
+    appLifeCycle->AddAbilityStage(abilityStage);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
