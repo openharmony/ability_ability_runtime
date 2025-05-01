@@ -78,6 +78,7 @@
 #include "running_multi_info.h"
 #include "multi_user_config_mgr.h"
 #include "user_callback.h"
+#include "native_child_notify_interface.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -1248,6 +1249,10 @@ public:
     virtual int32_t StartNativeChildProcess(const pid_t hostPid,
         const std::string &libName, int32_t childProcessCount, const sptr<IRemoteObject> &callback);
 #endif // SUPPORT_CHILD_PROCESS
+
+    virtual int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback);
+
+    virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback);
 
     /**
      * To clear the process by ability token.

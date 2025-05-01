@@ -43,6 +43,7 @@
 #include "task_handler_wrap.h"
 #include "time_util.h"
 #include "ui_extension_utils.h"
+#include "app_native_spawn_manager.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -611,6 +612,11 @@ void AppRunningManager::RemoveAppRunningRecordById(const int32_t recordId)
     if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
         RemoveUIExtensionLauncherItem(appRecord->GetPid());
         AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(appRecord->GetPid());
+    }
+
+    // unregister child process exit notify when parent exit
+    if (appRecord != nullptr) {
+        AppNativeSpawnManager::GetInstance().RemoveNativeChildCallbackByPid(appRecord->GetPid());
     }
 }
 
@@ -1532,6 +1538,10 @@ std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(
         });
     if (it != appRunningRecordMap_.end()) {
         auto appRecord = it->second;
+        if (childRecord->IsNativeSpawnStarted() &&
+            AppNativeSpawnManager::GetInstance().GetNativeChildCallbackByPid(appRecord->GetPid()) != nullptr) {
+            AppNativeSpawnManager::GetInstance().AddChildRelation(childRecord->GetPid(), appRecord->GetPid());
+        }
         appRecord->RemoveChildProcessRecord(childRecord);
         TAG_LOGI(AAFwkTag::APPMGR, "RemoveChildProcessRecord pid:%{public}d, uid:%{public}d", childRecord->GetPid(),
             childRecord->GetUid());

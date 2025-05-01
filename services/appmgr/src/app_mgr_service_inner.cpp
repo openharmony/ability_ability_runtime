@@ -61,6 +61,7 @@
 #include "killing_process_manager.h"
 #include "last_exit_detail_info.h"
 #include "os_account_manager.h"
+#include "app_native_spawn_manager.h"
 #ifdef SUPPORT_SCREEN
 #include "locale_config.h"
 #endif
@@ -290,6 +291,10 @@ constexpr int32_t NWEB_PRELOAD_DELAY = 3000;
 
 constexpr const char* APP_INSTANCE_KEY_0 = "app_instance_0";
 
+//listen fd use
+constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
+constexpr const char* NATIVESPAWN_STARTED = "startup.service.ctl.nativespawn.pid";
+
 // Max child process number limitation for pc device.
 constexpr int32_t PC_MAX_CHILD_PROCESS_NUM = 50;
 constexpr int32_t USER100 = 100;
@@ -421,6 +426,7 @@ void AppMgrServiceInner::Init()
     otherTaskHandler_->SubmitTask([pThis = shared_from_this()]() {
         pThis->nwebPreloadSet_ = AAFwk::ResSchedUtil::GetInstance().GetNWebPreloadSet();
         }, NWEB_PRELOAD_DELAY);
+    AppNativeSpawnManager::GetInstance().InitNativeSpawnMsgPipe(appRunningManager_);
 }
 
 AppMgrServiceInner::~AppMgrServiceInner()
@@ -8726,6 +8732,18 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, args, options);
 }
 #endif // SUPPORT_CHILD_PROCESS
+
+int32_t AppMgrServiceInner::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    return AppNativeSpawnManager::GetInstance().RegisterNativeChildExitNotify(callback);
+}
+
+int32_t AppMgrServiceInner::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    return AppNativeSpawnManager::GetInstance().UnregisterNativeChildExitNotify(callback);
+}
 
 void AppMgrServiceInner::CacheLoadAbilityTask(const LoadAbilityTaskFunc&& func)
 {
