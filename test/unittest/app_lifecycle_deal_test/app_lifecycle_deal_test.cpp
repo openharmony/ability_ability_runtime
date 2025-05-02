@@ -21,6 +21,8 @@
 #undef private
 
 #include "application_info.h"
+#include "mock_ability_token.h"
+#include "hilog_tag_wrapper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -154,6 +156,7 @@ HWTEST_F(AppLifecycleDealTest, ChangeAppGcState_001, TestSize.Level1)
  */
 HWTEST_F(AppLifecycleDealTest, UpdateApplicationInfoInstalled_001, TestSize.Level1)
 {
+    TAG_LOGD(AAFwkTag::TEST, "UpdateApplicationInfoInstalled_001 start.");
     auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
     std::shared_ptr<ApplicationInfo> appInfo;
     std::string moduleName;
@@ -169,6 +172,7 @@ HWTEST_F(AppLifecycleDealTest, UpdateApplicationInfoInstalled_001, TestSize.Leve
  */
 HWTEST_F(AppLifecycleDealTest, AddAbilityStage_001, TestSize.Level1)
 {
+    TAG_LOGD(AAFwkTag::TEST, "AddAbilityStage_001 start.");
     auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
     HapModuleInfo abilityStage;
     sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
@@ -183,6 +187,7 @@ HWTEST_F(AppLifecycleDealTest, AddAbilityStage_001, TestSize.Level1)
  */
 HWTEST_F(AppLifecycleDealTest, AddAbilityStage_002, TestSize.Level1)
 {
+    TAG_LOGD(AAFwkTag::TEST, "AddAbilityStage_002 start.");
     auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
     HapModuleInfo abilityStage;
     sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
@@ -190,5 +195,247 @@ HWTEST_F(AppLifecycleDealTest, AddAbilityStage_002, TestSize.Level1)
     EXPECT_CALL(*mockAppScheduler, ScheduleAbilityStage(_)).Times(1);
     appLifeCycle->AddAbilityStage(abilityStage);
 }
-} // namespace AppExecFwk
-} // namespace OHOS
+
+/**
+ * @tc.name: UpdateApplicationInfoInstalled_002
+ * @tc.desc: Test the normal state of UpdateApplicationInfoInstalled
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, UpdateApplicationInfoInstalled_002, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "UpdateApplicationInfoInstalled_002 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    ApplicationInfo appInfo;
+    std::string moduleName;
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    EXPECT_CALL(*mockAppScheduler, ScheduleUpdateApplicationInfoInstalled(_, _)).Times(1);
+    appLifeCycle->UpdateApplicationInfoInstalled(appInfo, moduleName);
+}
+
+/**
+ * @tc.name: LaunchAbility_001
+ * @tc.desc: Test the normal state of LaunchAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, LaunchAbility_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "LaunchAbility_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->type = AbilityType::PAGE;
+    sptr<IRemoteObject> token = new MockAbilityToken();
+    int32_t abilityRecordId = 1;
+    auto ability = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    EXPECT_CALL(*mockAppScheduler, ScheduleLaunchAbility(_, _, _, _)).Times(1);
+    appLifeCycle->LaunchAbility(ability);
+}
+
+/**
+ * @tc.name: LaunchAbility_002
+ * @tc.desc: Test the normal state of LaunchAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, LaunchAbility_002, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "LaunchAbility_002 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->type = AbilityType::PAGE;
+    sptr<IRemoteObject> token = new MockAbilityToken();
+    int32_t abilityRecordId = 1;
+    auto ability = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    const std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    ability->SetWant(want);
+    EXPECT_CALL(*mockAppScheduler, ScheduleLaunchAbility(_, _, _, _)).Times(1);
+    appLifeCycle->LaunchAbility(ability);
+}
+
+/**
+ * @tc.name: LaunchAbility_003
+ * @tc.desc: Test the normal state of LaunchAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, LaunchAbility_003, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "LaunchAbility_003 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->type = AbilityType::DATA;
+    sptr<IRemoteObject> token = new MockAbilityToken();
+    int32_t abilityRecordId = 1;
+    auto ability = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    const std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    ability->SetWant(want);
+    EXPECT_CALL(*mockAppScheduler, ScheduleLaunchAbility(_, _, _, _)).Times(1);
+    appLifeCycle->LaunchAbility(ability);
+}
+
+/**
+ * @tc.name: ScheduleForegroundRunning_001
+ * @tc.desc: Test the normal state of ScheduleForegroundRunning
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, ScheduleForegroundRunning_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "ScheduleForegroundRunning_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    auto result = appLifeCycle->ScheduleForegroundRunning();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ScheduleHeapMemory_001
+ * @tc.desc: Test the normal state of ScheduleHeapMemory
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, ScheduleHeapMemory_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "ScheduleHeapMemory_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    int32_t pid = 1001;
+    OHOS::AppExecFwk::MallocInfo mallocInfo;
+    EXPECT_CALL(*mockAppScheduler, ScheduleHeapMemory(_, _)).Times(1);
+    appLifeCycle->ScheduleHeapMemory(pid, mallocInfo);
+}
+
+/**
+ * @tc.name: ScheduleJsHeapMemory_001
+ * @tc.desc: Test the normal state of ScheduleJsHeapMemory
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, ScheduleJsHeapMemory_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "ScheduleJsHeapMemory_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    OHOS::AppExecFwk::JsHeapDumpInfo info;
+    EXPECT_CALL(*mockAppScheduler, ScheduleJsHeapMemory(_)).Times(1);
+    appLifeCycle->ScheduleJsHeapMemory(info);
+}
+
+/**
+ * @tc.name: ScheduleClearPageStack_001
+ * @tc.desc: Test the normal state of ScheduleClearPageStack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, ScheduleClearPageStack_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "ScheduleClearPageStack_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    EXPECT_CALL(*mockAppScheduler, ScheduleClearPageStack()).Times(1);
+    appLifeCycle->ScheduleClearPageStack();
+}
+
+/**
+ * @tc.name: ScheduleAcceptWant_001
+ * @tc.desc: Test the normal state of ScheduleAcceptWant
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, ScheduleAcceptWant_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "ScheduleAcceptWant_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    AAFwk::Want* want = new AAFwk::Want();
+    std::string moduleName;
+    EXPECT_CALL(*mockAppScheduler, ScheduleAcceptWant(_, _)).Times(1);
+    appLifeCycle->ScheduleAcceptWant(*want, moduleName);
+}
+
+/**
+ * @tc.name: SchedulePrepareTerminate_001
+ * @tc.desc: Test the normal state of SchedulePrepareTerminate
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, SchedulePrepareTerminate_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "SchedulePrepareTerminate_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    std::string moduleName;
+    EXPECT_CALL(*mockAppScheduler, SchedulePrepareTerminate(_)).Times(1);
+    appLifeCycle->SchedulePrepareTerminate(moduleName);
+}
+
+/**
+ * @tc.name: ScheduleNewProcessRequest_001
+ * @tc.desc: Test the normal state of ScheduleNewProcessRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, ScheduleNewProcessRequest_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "ScheduleNewProcessRequest_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    AAFwk::Want* want = new AAFwk::Want();
+    std::string moduleName;
+    EXPECT_CALL(*mockAppScheduler, ScheduleNewProcessRequest(_, _)).Times(1);
+    appLifeCycle->ScheduleNewProcessRequest(*want, moduleName);
+}
+
+/**
+ * @tc.name: ScheduleCacheProcess_001
+ * @tc.desc: Test the normal state of ScheduleCacheProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, ScheduleCacheProcess_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "ScheduleCacheProcess_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    EXPECT_CALL(*mockAppScheduler, ScheduleCacheProcess()).Times(1);
+    appLifeCycle->ScheduleCacheProcess();
+}
+
+/**
+ * @tc.name: DumpFfrt_001
+ * @tc.desc: Test the normal state of DumpFfrt
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, DumpFfrt_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "DumpFfrt_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    std::string result;
+    EXPECT_CALL(*mockAppScheduler, ScheduleDumpFfrt(_)).Times(1);
+    appLifeCycle->DumpFfrt(result);
+}
+
+/**
+ * @tc.name: SetWatchdogBackgroundStatusRunning_001
+ * @tc.desc: Test the normal state of SetWatchdogBackgroundStatusRunning
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, SetWatchdogBackgroundStatusRunning_001, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "SetWatchdogBackgroundStatusRunning_001 start.");
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    bool status = true;
+    EXPECT_CALL(*mockAppScheduler, SetWatchdogBackgroundStatus(_)).Times(1);
+    appLifeCycle->SetWatchdogBackgroundStatusRunning(status);
+}
+}  // namespace AppExecFwk
+}  // namespace OHOS
