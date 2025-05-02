@@ -15,8 +15,12 @@
 
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
 #include "js_module_reader.h"
 #include "extractor.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -99,6 +103,32 @@ HWTEST_F(JsModuleReaderTest, GetPresetAppHapPathTest_0200, TestSize.Level2)
 JsModuleReader jsModuleReader("JsModuleReader", "/data/storage/el1/test.hsp");
 std::string hapPath = jsModuleReader.GetPresetAppHapPath("", "");
 EXPECT_TRUE(hapPath.empty());
+}
+
+/**
+ * @tc.name: GetFormAppHspPathTest_0100
+ * @tc.desc: GetFormAppHspPath Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsModuleReaderTest, GetFormAppHspPathTest_0100, TestSize.Level2)
+{
+    JsModuleReader jsModuleReader("JsModuleReader", "");
+    auto realHapPath = jsModuleReader.GetFormAppHspPath("inputPath");
+    EXPECT_EQ(realHapPath, "/data/bundles/JsModuleReader/inputPath.hsp");
+}
+
+/**
+ * @tc.name: GetPresetAppHapPath_0100
+ * @tc.desc: GetPresetAppHapPath Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsModuleReaderTest, GetPresetAppHapPath_0100, TestSize.Level2)
+{
+    JsModuleReader jsModuleReader("JsModuleReader", "");
+    std::string inputPath = "inputPath/inputPath2";
+    std::string bundleName = "bundleName";
+    auto realHapPath = jsModuleReader.GetPresetAppHapPath(inputPath, bundleName);
+    EXPECT_EQ(realHapPath, "inputPath/inputPath2");
 }
 }  // namespace AAFwk
 }  // namespace OHOS
