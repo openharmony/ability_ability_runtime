@@ -32,6 +32,12 @@ bool MyFlag::permissionReadWriteDesktop_ = false;
 bool MyFlag::permissionReadWriteDocuments_ = false;
 bool MyFlag::IsSystempAppCall_ = false;
 bool MyFlag::permissionFileAccessPersist_ = false;
+bool MyFlag::isSAOrSystemAppCall_ = false;
+bool MyFlag::isSystemAppCall_ = false;
+bool MyFlag::isUriTypeValid_ = false;
+bool MyFlag::isDocsCloudUri_ = false;
+int32_t MyFlag::getTokenIdByBundleNameStatus_ = 0;
+std::string MyFlag::bundleName_ = "";
 TokenInfoMap MyFlag::tokenInfos = {};
 } // namespace AAFwk
 } // namespace OHOS
