@@ -8124,8 +8124,12 @@ int AbilityManagerService::StartAbilityByCallWithErrMsg(const Want &want, const 
         ReportEventToRSS(abilityRequest.abilityInfo, callerToken);
         abilityRequest.want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
         auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
-        CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-        return uiAbilityManager->ResolveLocked(abilityRequest);
+        if (uiAbilityManager == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityManager null, userId is invalid:%{public}d", oriValidUserId);
+            errMsg = "uiAbilityManager null, userId is invalid";
+            return ERR_INVALID_VALUE;
+        }
+        return uiAbilityManager->ResolveLocked(abilityRequest, errMsg);
     }
 
     auto missionListMgr = GetMissionListManagerByUserId(oriValidUserId);
@@ -8148,7 +8152,8 @@ int AbilityManagerService::StartAbilityJust(AbilityRequest &abilityRequest, int3
         ReportEventToRSS(abilityRequest.abilityInfo, abilityRequest.callerToken);
         auto uiAbilityManager = GetUIAbilityManagerByUserId(validUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-        return uiAbilityManager->ResolveLocked(abilityRequest);
+        std::string errMsg;
+        return uiAbilityManager->ResolveLocked(abilityRequest, errMsg);
     }
 
     auto missionListMgr = GetMissionListManagerByUserId(validUserId);
