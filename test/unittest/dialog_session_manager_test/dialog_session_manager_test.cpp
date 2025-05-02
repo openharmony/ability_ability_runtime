@@ -149,6 +149,25 @@ HWTEST_F(DialogSessionManagerTest, SendDialogResultTest_0200, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SendDialogResultTest_0300
+ * @tc.desc: Test SendDialogResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, SendDialogResultTest_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SendDialogResultTest_0300 start";
+    AbilityRequest abilityRequest;
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    bool isAllowed = true;
+    abilityRequest.isQueryERMS = true;
+    dialogSessionManager.SetQueryERMSInfo(TEST_DIALOG_SESSION_ID, abilityRequest);
+    int32_t ret = dialogSessionManager.SendDialogResult(want, TEST_DIALOG_SESSION_ID, isAllowed);
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "SendDialogResultTest_0300 end";
+}
+
+/**
  * @tc.name: NotifySCBToRecoveryAfterInterceptionTest_0100
  * @tc.desc: Test NotifySCBToRecoveryAfterInterception
  * @tc.type: FUNC
@@ -660,6 +679,180 @@ HWTEST_F(DialogSessionManagerTest, NotifyAbilityRequestFailure_0700, TestSize.Le
     dialogSessionManager.NotifyAbilityRequestFailure(TEST_DIALOG_SESSION_ID, want);
 
     GTEST_LOG_(INFO) << "NotifyAbilityRequestFailure_0700 end";
+}
+
+/**
+ * @tc.name: SetQueryERMSInfo_001
+ * @tc.desc: test SetQueryERMSInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, SetQueryERMSInfo_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetQueryERMSInfo_001 start";
+    DialogSessionManager dialogSessionManager;
+    AbilityRequest abilityRequest;
+    abilityRequest.isQueryERMS = true;
+    dialogSessionManager.SetQueryERMSInfo(TEST_DIALOG_SESSION_ID, abilityRequest);
+    bool found = dialogSessionManager.queryERMSInfoMap_.find(TEST_DIALOG_SESSION_ID) !=
+        dialogSessionManager.queryERMSInfoMap_.end();
+    EXPECT_TRUE(found);
+    GTEST_LOG_(INFO) << "SetQueryERMSInfo_001 end";
+}
+
+/**
+ * @tc.name: NotifyQueryERMSFinished_001
+ * @tc.desc: test NotifyQueryERMSFinished function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, NotifyQueryERMSFinished_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyQueryERMSFinished_001 start";
+    DialogSessionManager dialogSessionManager;
+    AbilityRequest abilityRequest;
+    abilityRequest.isQueryERMS = true;
+    dialogSessionManager.SetQueryERMSInfo(TEST_DIALOG_SESSION_ID, abilityRequest);
+    bool result = dialogSessionManager.NotifyQueryERMSFinished(TEST_DIALOG_SESSION_ID, true);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "NotifyQueryERMSFinished_001 end";
+}
+
+/**
+ * @tc.name: NotifyQueryERMSFinished_002
+ * @tc.desc: test NotifyQueryERMSFinished function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, NotifyQueryERMSFinished_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyQueryERMSFinished_002 start";
+    DialogSessionManager dialogSessionManager;
+    AbilityRequest abilityRequest;
+    abilityRequest.isQueryERMS = true;
+    dialogSessionManager.SetQueryERMSInfo(TEST_DIALOG_SESSION_ID, abilityRequest);
+    bool result = dialogSessionManager.NotifyQueryERMSFinished("OTHERS", true);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "NotifyQueryERMSFinished_002 end";
+}
+
+/**
+ * @tc.name: ClearDialogContext_001
+ * @tc.desc: test ClearDialogContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, ClearDialogContext_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ClearDialogContext_001 start";
+    DialogSessionManager dialogSessionManager;
+    dialogSessionManager.dialogSessionInfoMap_[TEST_DIALOG_SESSION_ID] = nullptr;
+    dialogSessionManager.dialogCallerInfoMap_[TEST_DIALOG_SESSION_ID] = nullptr;
+    dialogSessionManager.startupSessionInfoMap_[TEST_DIALOG_SESSION_ID] = nullptr;
+    dialogSessionManager.ClearDialogContext(TEST_DIALOG_SESSION_ID);
+    bool found1 = dialogSessionManager.dialogSessionInfoMap_.find(TEST_DIALOG_SESSION_ID) ==
+        dialogSessionManager.dialogSessionInfoMap_.end();
+    bool found2 = dialogSessionManager.dialogCallerInfoMap_.find(TEST_DIALOG_SESSION_ID) ==
+        dialogSessionManager.dialogCallerInfoMap_.end();
+    bool found3 = dialogSessionManager.startupSessionInfoMap_.find(TEST_DIALOG_SESSION_ID) ==
+        dialogSessionManager.startupSessionInfoMap_.end();
+    EXPECT_TRUE(found1 && found2 && found3);
+    GTEST_LOG_(INFO) << "ClearDialogContext_001 end";
+}
+
+/**
+ * @tc.name: GenerateSelectorTargetAbilityInfos_001
+ * @tc.desc: test GenerateSelectorTargetAbilityInfos function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, GenerateSelectorTargetAbilityInfos_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GenerateSelectorTargetAbilityInfos_001 start";
+    DialogSessionManager dialogSessionManager;
+    std::vector<DialogAppInfo> dialogAppInfos;
+    std::vector<DialogAbilityInfo> targetAbilityInfos;
+    DialogAppInfo dialogAppInfo;
+    dialogAppInfos.push_back(dialogAppInfo);
+    dialogSessionManager.GenerateSelectorTargetAbilityInfos(dialogAppInfos, targetAbilityInfos);
+    bool insertSuccess = targetAbilityInfos.size() > 0;
+    EXPECT_TRUE(insertSuccess);
+    GTEST_LOG_(INFO) << "GenerateSelectorTargetAbilityInfos_001 end";
+}
+
+/**
+ * @tc.name: CreateJumpModalDialog_001
+ * @tc.desc: test CreateJumpModalDialog function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, CreateJumpModalDialog_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateJumpModalDialog_001 start";
+    DialogSessionManager dialogSessionManager;
+    AbilityRequest abilityRequest;
+    Want replaceWant;
+    int result = dialogSessionManager.CreateJumpModalDialog(abilityRequest, 0, replaceWant);
+    EXPECT_NE(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "CreateJumpModalDialog_001 end";
+}
+
+/**
+ * @tc.name: CreateModalDialogCommon_001
+ * @tc.desc: test CreateModalDialogCommon function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, CreateModalDialogCommon_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateModalDialogCommon_001 start";
+    DialogSessionManager dialogSessionManager;
+    Want replaceWant;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int result = dialogSessionManager.CreateModalDialogCommon(replaceWant, callerToken, TEST_DIALOG_SESSION_ID);
+    EXPECT_EQ(result, INNER_ERR);
+    GTEST_LOG_(INFO) << "CreateModalDialogCommon_001 end";
+}
+
+/**
+ * @tc.name: CreateModalDialogCommon_002
+ * @tc.desc: test CreateModalDialogCommon function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, CreateModalDialogCommon_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateModalDialogCommon_002 start";
+    DialogSessionManager dialogSessionManager;
+    Want replaceWant;
+    sptr<IRemoteObject> callerToken = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    int result = dialogSessionManager.CreateModalDialogCommon(replaceWant, callerToken, TEST_DIALOG_SESSION_ID);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "CreateModalDialogCommon_002 end";
+}
+
+/**
+ * @tc.name: HandleErmsResult_001
+ * @tc.desc: test HandleErmsResult function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, HandleErmsResult_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "HandleErmsResult_001 start";
+    DialogSessionManager dialogSessionManager;
+    AbilityRequest abilityRequest;
+    Want replaceWant;
+    int result = dialogSessionManager.HandleErmsResult(abilityRequest, 0, replaceWant);
+    EXPECT_NE(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "HandleErmsResult_001 end";
+}
+
+/**
+ * @tc.name: HandleErmsResultBySCB_001
+ * @tc.desc: test HandleErmsResultBySCB function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, HandleErmsResultBySCB_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "HandleErmsResultBySCB_001 start";
+    DialogSessionManager dialogSessionManager;
+    AbilityRequest abilityRequest;
+    Want replaceWant;
+    int result = dialogSessionManager.HandleErmsResultBySCB(abilityRequest, replaceWant);
+    EXPECT_NE(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "HandleErmsResultBySCB_001 end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS

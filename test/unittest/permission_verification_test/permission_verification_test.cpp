@@ -756,5 +756,104 @@ HWTEST_F(PermissionVerificationTest, CheckVerifyStartLocalDebug_0100, TestSize.L
     int result = AAFwk::PermissionVerification::GetInstance()->VerifyStartLocalDebug(0);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: IsSystemAppCallByTokenId_0100
+ * @tc.desc: IsSystemAppCallByTokenId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, IsSystemAppCallByTokenId_0100, TestSize.Level1)
+{
+    int result = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCallByTokenId(0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsSystemAppCallByTokenId_0200
+ * @tc.desc: IsSystemAppCallByTokenId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, IsSystemAppCallByTokenId_0200, TestSize.Level1)
+{
+    int result = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCallByTokenId(1);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: VerifyPrepareTerminatePermission_0100
+ * @tc.desc: VerifyPrepareTerminatePermission Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, VerifyPrepareTerminatePermission_0100, TestSize.Level1)
+{
+    int result = AAFwk::PermissionVerification::GetInstance()->VerifyPrepareTerminatePermission();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: VerifyPreloadApplicationPermission_0100
+ * @tc.desc: VerifyPreloadApplicationPermission Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, VerifyPreloadApplicationPermission_0100, TestSize.Level1)
+{
+    int result = AAFwk::PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: VerifyPreStartAtomicServicePermission_0100
+ * @tc.desc: VerifyPreStartAtomicServicePermission Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, VerifyPreStartAtomicServicePermission_0100, TestSize.Level1)
+{
+    int result = AAFwk::PermissionVerification::GetInstance()->VerifyPreStartAtomicServicePermission();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: VerifyBlockAllAppStartPermission_0100
+ * @tc.desc: VerifyBlockAllAppStartPermission Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, VerifyBlockAllAppStartPermission_0100, TestSize.Level1)
+{
+    int result = AAFwk::PermissionVerification::GetInstance()->VerifyBlockAllAppStartPermission();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: VerifySuperviseKiaServicePermission_0100
+ * @tc.desc: VerifySuperviseKiaServicePermission Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, VerifySuperviseKiaServicePermission_0100, TestSize.Level1)
+{
+    int result = AAFwk::PermissionVerification::GetInstance()->VerifySuperviseKiaServicePermission();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: VerifyStartSelfUIAbility_0100
+ * @tc.desc: VerifyStartSelfUIAbility Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, VerifyStartSelfUIAbility_0100, TestSize.Level1)
+{
+    int result = AAFwk::PermissionVerification::GetInstance()->VerifyStartSelfUIAbility(0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: VerifyFusionAccessPermission_0100
+ * @tc.desc: VerifyFusionAccessPermission Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PermissionVerificationTest, VerifyFusionAccessPermission_0100, TestSize.Level1)
+{
+    int result = AAFwk::PermissionVerification::GetInstance()->VerifyFusionAccessPermission();
+    EXPECT_FALSE(result);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

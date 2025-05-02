@@ -488,5 +488,35 @@ HWTEST_F(AbilityPermissionUtilTest, IsStartSelfUIAbility_0100, TestSize.Level2)
     ret = AbilityPermissionUtil::GetInstance().IsStartSelfUIAbility();
     EXPECT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: CheckStartRecentAbility_0100
+ * @tc.desc: CheckStartRecentAbility_0100 Test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, CheckStartRecentAbility_0100, TestSize.Level1)
+{
+    Want want;
+    AbilityRequest request;
+    want.SetParam(Want::PARAM_RESV_START_RECENT, true);
+    auto ret = AbilityPermissionUtil::GetInstance().CheckStartRecentAbility(want, request);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SetStartAbilityInfo_0200
+ * @tc.desc: CheckStartRecentAbility_0200 Test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, CheckStartRecentAbility_0200, TestSize.Level1)
+{
+    Want want;
+    AbilityRequest request;
+    want.SetParam(Want::PARAM_RESV_START_RECENT, false);
+    auto ret = AbilityPermissionUtil::GetInstance().CheckStartRecentAbility(want, request);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
