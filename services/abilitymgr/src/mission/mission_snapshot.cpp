@@ -50,10 +50,10 @@ MissionSnapshot *MissionSnapshot::Unmarshalling(Parcel &parcel)
 
 bool MissionSnapshot::Marshalling(Parcel &parcel) const
 {
+#ifdef SUPPORT_SCREEN
     if (!parcel.WriteParcelable(&topAbility)) {
         return false;
     }
-#ifdef SUPPORT_SCREEN
     if (!parcel.WriteParcelable(snapshot.get())) {
         return false;
     }
