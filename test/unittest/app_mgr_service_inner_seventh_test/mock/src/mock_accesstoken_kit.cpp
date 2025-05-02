@@ -12,34 +12,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "user_record_manager.h"
-#include <mutex>
-#include "hilog_tag_wrapper.h"
+
+#include "accesstoken_kit.h"
 #include "mock_my_status.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-namespace {
-    constexpr int32_t U0_USER_ID = 0;
-}
-UserRecordManager::~UserRecordManager() {}
- 
-UserRecordManager::UserRecordManager() {}
- 
-UserRecordManager &UserRecordManager::GetInstance()
+namespace Security {
+namespace AccessToken {
+
+ATokenTypeEnum AccessTokenKit::GetTokenTypeFlag(AccessTokenID tokenID)
 {
-    static UserRecordManager instance;
-    return instance;
-}
- 
-bool UserRecordManager::IsLogoutUser(int32_t userId)
-{
-    return AAFwk::MyStatus::GetInstance().isLogoutUser_;
+    return ATokenTypeEnum::TOKEN_INVALID;
 }
 
-void UserRecordManager::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
+int AccessTokenKit::GetNativeTokenInfo(AccessTokenID tokenID, NativeTokenInfo &nativeTokenInfoRes)
 {
+    return 0;
 }
-}  // namespace AppExecFwk
-}  // namespace OHOS
- 
+
+int AccessTokenKit::GetHapTokenInfo(AccessTokenID tokenID, HapTokenInfo &hapInfo)
+{
+    return 0;
+}
+
+int AccessTokenKit::ClearUserGrantedPermissionState(AccessTokenID tokenID)
+{
+    return AAFwk::MyStatus::GetInstance().clearUserGranted_;
+}
+
+} // namespace AccessToken
+} // namespace Security
+} // namespace OHOS

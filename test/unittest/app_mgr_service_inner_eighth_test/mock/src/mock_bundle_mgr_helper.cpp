@@ -161,7 +161,8 @@ bool BundleMgrHelper::QueryAbilityInfo(const Want& want, AbilityInfo& abilityInf
 
 bool BundleMgrHelper::QueryAbilityInfo(const Want& want, int32_t flags, int32_t userId, AbilityInfo& abilityInfo)
 {
-    return false;
+    abilityInfo = AAFwk::MyStatus::GetInstance().queryAbilityInfoValue_;
+    return AAFwk::MyStatus::GetInstance().queryAbilityInfo_;
 }
 
 bool BundleMgrHelper::GetBundleInfos(
@@ -194,6 +195,7 @@ bool BundleMgrHelper::QueryExtensionAbilityInfos(const Want& want, const int32_t
 ErrCode BundleMgrHelper::GetBundleInfoV9(const std::string& bundleName,
     int32_t flags, BundleInfo& bundleInfo, int32_t userId)
 {
+    bundleInfo = AAFwk::MyStatus::GetInstance().v9BundleInfo_;
     return AAFwk::MyStatus::GetInstance().getBundleInfoV9_;
 }
 

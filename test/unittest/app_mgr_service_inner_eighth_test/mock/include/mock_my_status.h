@@ -39,8 +39,10 @@ public:
     ErrCode getSandboxHapModuleInfo_ = ERR_OK;
     bool isLogoutUser_ = false;
     pid_t getCallingUid_ = 0;
+    pid_t getCallingTokenID_ = 0;
     ErrCode processUpdate_ = ERR_OK;
     bool verifyCallingPermission_ = false;
+    bool verifySuperviseKiaServicePermission_ = false;
     bool isSACall_ = false;
     bool isShellCall_ = false;
     std::shared_ptr<AppExecFwk::AppRunningRecord> getAppRunningRecordByPid_ = nullptr;
@@ -61,9 +63,28 @@ public:
     std::shared_ptr<AppExecFwk::AppRunningRecord> createAppRunning_ = nullptr;
     int32_t updateConfigurationByBundleName_ = 0;
     std::shared_ptr<AppExecFwk::AppRunningRecord> getAppRunningRecordByRenderPid_ = nullptr;
+    int32_t checkAppClone_ = 0;
     int32_t notifyLoadRepairPatch_ = 0;
     int32_t notifyHotReloadPage_ = 0;
     int32_t notifyUnLoadRepairPatch_ = 0;
+    int32_t isAppRunningByBundleName_ = 0;
+    std::shared_ptr<AppExecFwk::AppRunningRecord> getAppRunningByToken_ = nullptr;
+    std::shared_ptr<AppExecFwk::AppRunningRecord> getAppRunningProcessPid_ = nullptr;
+    int32_t getAppRunningProcessPidCall_ = 0;
+    bool isChildProcessReachLimit_ = false;
+    int dumpIpcAllStart_ = ERR_OK;
+    int dumpIpcAllStop_ = ERR_OK;
+    int dumpIpcAllStat_ = ERR_OK;
+    int dumpIpcStart_ = ERR_OK;
+    int dumpIpcStop_ = ERR_OK;
+    int dumpIpcStat_ = ERR_OK;
+    int dumpFfrt_ = ERR_OK;
+    int32_t getAllAppRunningRecordCount_ = 0;
+    pid_t handleUserRequestCleanPid_ = 0;
+    pid_t handleUserRequestCleanUid_ = 0;
+    bool handleUserRequestClean_ = false;
+    ErrCode checkIsKiaProcess_ = ERR_OK;
+    std::shared_ptr<AppExecFwk::AppRunningRecord> queryAppRecordPlus_ = nullptr;
     // mock accesstoken_kit
     int clearUserGranted_ = 0;
     // mock bundle
@@ -76,6 +97,9 @@ public:
     std::vector<AppExecFwk::BaseSharedBundleInfo> baseSharedBundleInfos_;
     bool queryDataGroupInfos_ = false;
     std::vector<AppExecFwk::DataGroupInfo> queryData_;
+    bool queryAbilityInfo_ = false;
+    AppExecFwk::AbilityInfo queryAbilityInfoValue_;
+    AppExecFwk::BundleInfo v9BundleInfo_;
     // permission verification
     bool judgeCallerIsAllowed_ = false;
     bool verifyRunningInfoPerm_ = false;
@@ -95,12 +119,24 @@ public:
     int getBrowserHostCall_ = 0;
     std::shared_ptr<AppExecFwk::RenderRecord> getRenderRecordByPid_ = nullptr;
     int setBrowserHostCall_ = 0;
+    std::list<std::shared_ptr<AppExecFwk::ApplicationInfo>> getAppInfoList_;
+    int32_t changeAppGcState_ = 0;
+    std::shared_ptr<AppExecFwk::AbilityRunningRecord> getAbilityRunningRecordByToken_ = nullptr;
+    std::shared_ptr<AppExecFwk::ChildProcessRecord> getChildProcessRecordByPid_ = nullptr;
+    int32_t getChildProcessRecordByPidCall_ = 0;
     // remote client
     std::shared_ptr<AppExecFwk::AppSpawnClient> getSpawnClient_;
     std::shared_ptr<AppExecFwk::AppSpawnClient> getNWebSpawnClient_;
     int getSpawnClientCall_ = 0;
     // app spawn client
     int32_t startProcess_ = ERR_OK;
+    // os account
+    ErrCode queryActiveOsAccountIds_ = ERR_OK;
+    ErrCode getOsAccountLocalIdFromUid_ = ERR_OK;
+    // exit resident
+    ErrCode handleMemorySizeInSufficent_ = ERR_OK;
+    ErrCode handleRequireBigMemoryOptimization_ = ERR_OK;
+    ErrCode handleNoRequireBigMemoryOptimization_ = ERR_OK;
 private:
     MyStatus() = default;
 };

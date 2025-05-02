@@ -12,34 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "user_record_manager.h"
-#include <mutex>
-#include "hilog_tag_wrapper.h"
+
+#include "parameters.h"
 #include "mock_my_status.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-namespace {
-    constexpr int32_t U0_USER_ID = 0;
-}
-UserRecordManager::~UserRecordManager() {}
- 
-UserRecordManager::UserRecordManager() {}
- 
-UserRecordManager &UserRecordManager::GetInstance()
-{
-    static UserRecordManager instance;
-    return instance;
-}
- 
-bool UserRecordManager::IsLogoutUser(int32_t userId)
-{
-    return AAFwk::MyStatus::GetInstance().isLogoutUser_;
-}
+namespace system {
 
-void UserRecordManager::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
+bool GetBoolParameter(const std::string& key, bool def)
 {
+    return OHOS::AAFwk::MyStatus::GetInstance().getBoolParameter_;
 }
-}  // namespace AppExecFwk
-}  // namespace OHOS
- 
+} // namespace system
+} // namespace OHOS
