@@ -244,5 +244,87 @@ HWTEST_F(RenderStateObserverManagerTest, OnObserverDied_0100, TestSize.Level1)
     EXPECT_EQ(res, ERR_OK);
     EXPECT_EQ(onRenderStateChangedResult, 0);
 }
+
+/**
+ * @tc.name: HandleUnregisterRenderStateObserver_0200
+ * @tc.desc: Test handle unregister.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderStateObserverManagerTest, HandleUnregisterRenderStateObserver_0200, TestSize.Level1)
+{
+    auto manager = std::make_shared<RenderStateObserverManager>();
+    manager->observerList_.clear();
+    sptr<IRenderStateObserver> observer = new MockRenderStateObserver();
+    manager->HandleUnregisterRenderStateObserver(observer);
+    EXPECT_EQ(manager->observerList_.size(), 0);
+}
+
+/**
+ * @tc.name: HandleUnregisterRenderStateObserver_0300
+ * @tc.desc: Test handle unregister.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderStateObserverManagerTest, HandleUnregisterRenderStateObserver_0300, TestSize.Level1)
+{
+    auto manager = std::make_shared<RenderStateObserverManager>();
+    manager->observerList_.clear();
+    manager->observerList_.push_back(nullptr);
+    sptr<IRenderStateObserver> observer = new MockRenderStateObserver();
+    manager->HandleUnregisterRenderStateObserver(observer);
+    EXPECT_EQ(manager->observerList_.size(), 1);
+}
+
+/**
+ * @tc.name: UnregisterRenderStateObserver_0300
+ * @tc.desc: Test unregister observer return OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderStateObserverManagerTest, UnregisterRenderStateObserver_0400, TestSize.Level1)
+{
+    auto manager = std::make_shared<RenderStateObserverManager>();
+    manager->Init();
+    sptr<IRenderStateObserver> observer = new MockRenderStateObserver();
+    int32_t res = manager->UnregisterRenderStateObserver(observer);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: UnregisterRenderStateObserver_0400
+ * @tc.desc: Test unregister handler_ nullptr return error.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderStateObserverManagerTest, UnregisterRenderStateObserver_0500, TestSize.Level1)
+{
+    auto manager = std::make_shared<RenderStateObserverManager>();
+    sptr<IRenderStateObserver> observer = new MockRenderStateObserver();
+    int32_t res = manager->UnregisterRenderStateObserver(observer);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: HandleOnRenderStateChanged_0200
+ * @tc.desc: Test HandleOnRenderStateChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderStateObserverManagerTest, HandleOnRenderStateChanged_0200, TestSize.Level1)
+{
+    auto manager = std::make_shared<RenderStateObserverManager>();
+    manager->Init();
+
+    sptr<MockRenderStateObserver> observer = new MockRenderStateObserver();
+    pid_t hostPid = 1234;
+    std::string renderParam = "test_render_param";
+    int32_t ipcFd = 1;
+    int32_t sharedFd = 1;
+    int32_t crashFd = 1;
+    std::shared_ptr<AppRunningRecord> host = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(
+        hostPid, renderParam, FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), host);
+
+    int32_t state = 1;
+    manager->observerList_.push_back(observer);
+    manager->HandleOnRenderStateChanged(renderRecord, state);
+    EXPECT_EQ(onRenderStateChangedResult, 1);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
