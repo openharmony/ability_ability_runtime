@@ -15,10 +15,14 @@
 
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
 #include "hilog_tag_wrapper.h"
 #include "js_runtime.h"
 #include "js_environment.h"
 #include "js_runtime_lite.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -190,6 +194,123 @@ HWTEST_F(JsRuntimeLiteTest, GetPkgContextInfoListMap_0200, TestSize.Level2)
     }
     ASSERT_EQ(pkgRetString, "");
     TAG_LOGI(AAFwkTag::TEST, "GetPkgContextInfoListMap_0200 end");
+}
+
+/**
+ * @tc.name: Init_0100
+ * @tc.desc: JsRuntimeLiteTest test for Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeLiteTest, Init_0100, TestSize.Level1)
+{
+    napi_env env = {};
+    Options options;
+    JsRuntimeLite::GetInstance().envMap_.clear();
+
+    auto ret = JsRuntimeLite::GetInstance().Init(options, env);
+    EXPECT_EQ(ret, napi_status::napi_generic_failure);
+}
+
+/**
+ * @tc.name: Init_0200
+ * @tc.desc: JsRuntimeLiteTest test for Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeLiteTest, Init_0200, TestSize.Level1)
+{
+    napi_env env = {};
+    Options options;
+    auto jsEnv = std::make_shared<JsEnv::JsEnvironment>();
+    jsEnv->vm_ = nullptr;
+    JsRuntimeLite::GetInstance().envMap_.emplace(env, jsEnv);
+
+    auto ret = JsRuntimeLite::GetInstance().Init(options, env);
+    EXPECT_EQ(ret, napi_status::napi_generic_failure);
+}
+
+/**
+ * @tc.name: AddEnv_0100
+ * @tc.desc: JsRuntimeLiteTest test for AddEnv.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeLiteTest, AddEnv_0100, TestSize.Level1)
+{
+    napi_env env = {};
+    auto jsEnv = std::make_shared<JsEnv::JsEnvironment>();
+    JsRuntimeLite::GetInstance().threadIds_.clear();
+    JsRuntimeLite::GetInstance().envMap_.clear();
+    JsRuntimeLite::GetInstance().envMap_.emplace(env, jsEnv);
+
+    auto ret = JsRuntimeLite::GetInstance().AddEnv(env, jsEnv);
+    EXPECT_EQ(ret, napi_status::napi_generic_failure);
+}
+
+/**
+ * @tc.name: GetEcmaVm_0100
+ * @tc.desc: JsRuntimeLiteTest test for GetEcmaVm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeLiteTest, GetEcmaVm_0100, TestSize.Level1)
+{
+    auto ret = JsRuntimeLite::GetInstance().GetEcmaVm(nullptr);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetJsEnv_0100
+ * @tc.desc: JsRuntimeLiteTest test for GetJsEnv.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeLiteTest, GetJsEnv_0100, TestSize.Level1)
+{
+    napi_env env = {};
+    JsRuntimeLite::GetInstance().envMap_.clear();
+    
+    auto ret = JsRuntimeLite::GetInstance().GetJsEnv(env);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: InitLoop_0100
+ * @tc.desc: JsRuntimeLiteTest test for InitLoop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeLiteTest, InitLoop_0100, TestSize.Level1)
+{
+    auto ret = JsRuntimeLite::GetInstance().InitLoop(nullptr);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: ParsePkgContextInfoJsonString_0100
+ * @tc.desc: JsRuntimeLiteTest test for ParsePkgContextInfoJsonString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeLiteTest, ParsePkgContextInfoJsonString_0100, TestSize.Level1)
+{
+    nlohmann::json itemObject;
+    itemObject["key"] = "value";
+    std::string key = "key";
+    std::vector<std::string> items = {};
+    JsRuntimeLite::GetInstance().ParsePkgContextInfoJsonString(itemObject, key, items);
+    auto rBeginIt = items.rbegin();
+    EXPECT_EQ(*rBeginIt, "value");
+}
+
+/**
+ * @tc.name: ParsePkgContextInfoJsonString_0200
+ * @tc.desc: JsRuntimeLiteTest test for ParsePkgContextInfoJsonString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeLiteTest, ParsePkgContextInfoJsonString_0200, TestSize.Level1)
+{
+    nlohmann::json itemObject;
+    itemObject["key"] = "value";
+    std::string key = "FakeKey";
+    std::vector<std::string> items = {};
+    JsRuntimeLite::GetInstance().ParsePkgContextInfoJsonString(itemObject, key, items);
+    auto rBeginIt = items.rbegin();
+    EXPECT_EQ(*rBeginIt, "");
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
