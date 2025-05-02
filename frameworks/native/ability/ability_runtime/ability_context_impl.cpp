@@ -269,7 +269,7 @@ ErrCode AbilityContextImpl::StartAbilityForResult(const AAFwk::Want& want, const
         OnAbilityResultInner(requestCode, err, want);
         if (!startOptions.requestId_.empty()) {
             nlohmann::json jsonObject = nlohmann::json {
-                { JSON_KEY_ERR_MSG, "startAbility failed" },
+                { JSON_KEY_ERR_MSG, "StartAbilityForResult failed" },
             };
             OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
         }
@@ -290,7 +290,7 @@ ErrCode AbilityContextImpl::StartAbilityForResultWithAccount(
         OnAbilityResultInner(requestCode, err, want);
         if (!startOptions.requestId_.empty()) {
             nlohmann::json jsonObject = nlohmann::json {
-                { JSON_KEY_ERR_MSG, "startAbility failed" },
+                { JSON_KEY_ERR_MSG, "StartAbilityForResultWithAccount failed" },
             };
             OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
         }
