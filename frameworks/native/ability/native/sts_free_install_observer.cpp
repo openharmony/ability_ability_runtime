@@ -36,6 +36,14 @@ void StsFreeInstallObserver::OnInstallFinished(
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     HandleOnInstallFinished(bundleName, abilityName, startTime, resultCode);
 }
+
+void StsFreeInstallObserver::OnInstallFinishedByUrl(const std::string &startTime, const std::string& url,
+    const int &resultCode)
+{
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
+    HandleOnInstallFinishedByUrl(startTime, url, resultCode);
+}
+
 void StsFreeInstallObserver::HandleOnInstallFinished(
     const std::string &bundleName, const std::string &abilityName, const std::string &startTime, const int &resultCode)
 {
@@ -62,6 +70,34 @@ void StsFreeInstallObserver::HandleOnInstallFinished(
         FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
     }
 }
+
+void StsFreeInstallObserver::HandleOnInstallFinishedByUrl(const std::string &startTime, const std::string& url,
+    const int &resultCode)
+{
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
+    std::vector<ani_object> callbacks;
+    {
+        std::unique_lock<std::mutex> lock(stsObserverObjectListLock_);
+        for (auto it = stsObserverObjectList_.begin(); it != stsObserverObjectList_.end();) {
+            if ((it->startTime != startTime) || (it->url != url)) {
+                it++;
+                continue;
+            }
+            if (it->callBack == nullptr) {
+                it++;
+                continue;
+            }
+            callbacks.emplace_back(it->callBack);
+            it = stsObserverObjectList_.erase(it);
+        }
+    }
+
+    for (auto callback : callbacks) {
+        CallCallback(callback, resultCode);
+        FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
+    }
+}
+
 void StsFreeInstallObserver::CallCallback(ani_object callback, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
@@ -107,6 +143,27 @@ void StsFreeInstallObserver::AddStsObserverObject(ani_env *env, const std::strin
     object.startTime = startTime;
     AddStsObserverCommon(env, object, callBack);
 }
+
+void StsFreeInstallObserver::AddStsObserverObject(ani_env *env, const std::string &startTime,
+    const std::string &url, ani_object callBack)
+{
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
+    {
+        std::unique_lock<std::mutex> lock(stsObserverObjectListLock_);
+        for (auto it = stsObserverObjectList_.begin(); it != stsObserverObjectList_.end(); ++it) {
+            if (it->startTime == startTime && it->url == url) {
+                TAG_LOGW(AAFwkTag::FREE_INSTALL, "add stsObject");
+                return;
+            }
+        }
+    }
+    StartAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
+    StsFreeInstallObserverObject object;
+    object.url = url;
+    object.startTime = startTime;
+    AddStsObserverCommon(env, object, callBack);
+}
+
 void StsFreeInstallObserver::AddStsObserverCommon(
     ani_env *env, StsFreeInstallObserverObject &object, ani_object callBack)
 {

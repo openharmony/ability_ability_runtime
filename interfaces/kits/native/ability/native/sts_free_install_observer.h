@@ -42,14 +42,16 @@ public:
 
     void OnInstallFinished(const std::string &bundleName, const std::string &abilityName, const std::string &startTime,
         const int &resultCode) override;
-    void OnInstallFinishedByUrl(const std::string &startTime, const std::string &url, const int &resultCode) override {}
+    void OnInstallFinishedByUrl(const std::string &startTime, const std::string& url, const int &resultCode) override;
     void AddStsObserverObject(ani_env *env, const std::string &bundleName, const std::string &abilityName,
         const std::string &startTime, ani_object callBack);
+    void AddStsObserverObject(ani_env *env, const std::string &startTime, const std::string &url, ani_object callBack);
 
 private:
     void CallCallback(ani_object callback, int32_t resultCode);
     void HandleOnInstallFinished(const std::string &bundleName, const std::string &abilityName,
         const std::string &startTime, const int &resultCode);
+    void HandleOnInstallFinishedByUrl(const std::string &startTime, const std::string& url, const int &resultCode);
     void AddStsObserverCommon(ani_env *env, StsFreeInstallObserverObject &object, ani_object callBack);
 
     ani_vm *etsVm_;
