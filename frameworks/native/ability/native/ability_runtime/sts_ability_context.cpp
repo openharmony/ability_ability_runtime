@@ -610,6 +610,8 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             ani_native_function { "nativeStartAbilityByCallSync",
                 "L@ohos/app/ability/Want/Want;:L@ohos/app/ability/UIAbility/Caller;",
                 reinterpret_cast<void*>(StsAbilityContext::StartAbilityByCall) },
+            ani_native_function { "nativeOpenLinkSync", nullptr,
+                reinterpret_cast<void*>(StsAbilityContext::NativeOpenLinkSync) },
         };
         status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
     });
