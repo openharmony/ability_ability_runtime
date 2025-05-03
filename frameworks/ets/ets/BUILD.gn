@@ -462,6 +462,7 @@ ohos_prebuilt_etc("service_extension_ability_abc_etc") {
   part_name = "ability_runtime"
   deps = [ ":service_extension_ability" ]
 }
+
 generate_static_abc("ability_runtime_app_state_data_abc") {
   base_url = "./"
   files = [ "./application/AppStateData.ets" ]
@@ -698,6 +699,8 @@ ohos_prebuilt_etc("ability_delegator_application_testRunner_abc_etc") {
   subsystem_name = "ability"
   part_name = "ability_runtime"
   deps = [ ":ability_delegator_application_testRunner_abc" ]
+}
+
 generate_static_abc("ability_runtime_OpenLink_Options_abc") {
   base_url = "./"
   files = [ "./@ohos.app.ability.OpenLinkOptions.ets" ]
