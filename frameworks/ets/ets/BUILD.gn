@@ -618,6 +618,22 @@ ohos_prebuilt_etc("ability_runtime_ability_callee_abc_etc") {
   deps = [ ":ability_runtime_ability_callee_abc" ]
 }
 
+generate_static_abc("ability_runtime_OpenLink_Options_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.OpenLinkOptions.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_runtime_OpenLink_Options_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_OpenLink_Options_abc_etc") {
+  source = "$target_out_dir/ability_runtime_OpenLink_Options_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_OpenLink_Options_abc" ]
+}
+
 group("ets_packages") {
   deps = [
     ":ability_ability_manager_abc_etc",
@@ -656,5 +672,6 @@ group("ets_packages") {
     ":ability_runtime_want_constant_abc_etc",
     ":service_extension_ability_abc_etc",
     ":ui_extension_ability_ani_etc",
+    ":ability_runtime_OpenLink_Options_abc_etc",
   ]
 }

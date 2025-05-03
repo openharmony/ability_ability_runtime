@@ -25,6 +25,7 @@
 #include "sts_runtime.h"
 #include "ohos_application.h"
 #include "sts_free_install_observer.h"
+#include "open_link_options.h"
 
 class STSNativeReference;
 
@@ -57,6 +58,8 @@ public:
     static void StartServiceExtensionAbilitySync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         [[maybe_unused]] ani_object wantObj, [[maybe_unused]] ani_object callbackobj);
     static ani_object StartAbilityByCall(ani_env *env, ani_object aniObj, ani_object wantObj);
+    static void NativeOpenLinkSync(ani_env *env, ani_object aniObj, ani_string aniLink,
+        ani_object myCallbackobj, ani_object optionsObj, ani_object callbackobj);
 
 private:
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
@@ -65,8 +68,14 @@ private:
     static void StartAbilityForResultInner(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object startOptionsObj, ani_object callback);
     static int32_t GenerateRequestCode();
-    void AddFreeInstallObserver(
-        ani_env *env, const AAFwk::Want &want, ani_object callback, const std::shared_ptr<AbilityContext> &context);
+    void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want, ani_object callback,
+        const std::shared_ptr<AbilityContext> &context, bool isOpenLink = false);
+    void UnWrapOpenLinkOptions(ani_env *env, ani_object optionsObj,
+        AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want);
+    void OpenLinkInner(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
+        ani_object optionsObj, ani_object callbackobj, bool haveOptionsParm, bool haveCallBackParm);
+    void CreateOpenLinkTask(ani_env *env, const ani_object callbackobj,
+        std::shared_ptr<AbilityContext> context, AAFwk::Want &want, int &requestCode);
 
     sptr<StsFreeInstallObserver> freeInstallObserver_ = nullptr;
     static std::mutex requestCodeMutex_;
