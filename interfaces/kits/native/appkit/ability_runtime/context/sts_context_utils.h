@@ -52,11 +52,6 @@ ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unuse
 
 ani_double NativeOnSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
     ani_string type, ani_object envCallback);
-    
-void NativeOffSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
-    ani_string type, ani_double callbackId, ani_object call);
-    
-ani_long GetNativeApplicationContextLong(ani_env *env, ani_object& aniObj);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

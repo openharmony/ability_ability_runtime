@@ -29,13 +29,11 @@ public:
     void OnConfigurationUpdated(const AppExecFwk::Configuration &config) override;
     void OnMemoryLevel(const int level) override;
     int32_t Register(ani_object aniCallback);
-    bool UnRegister(int32_t callbackId);
 
 private:
     ani_env *ani_env_ = nullptr;
     std::map<int32_t, ani_ref> enviromentAniCallbacks_;
     int32_t serialNumber_ = 0;
-    std::mutex Mutex_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
