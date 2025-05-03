@@ -17,10 +17,13 @@ import Context from 'application.Context'
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { BusinessError, AsyncCallback } from '@ohos.base'
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
+import Want from '@ohos.app.ability.Want';
 
 export default class ApplicationContext extends Context {
   public native nativekillAllProcessesSync(clearPageStack: boolean, callback: AsyncCallbackWrapper<void>): void;
   public native nativeOnSync(type: 'environment', callback: EnvironmentCallback): number;
+  public native nativeOffSync(type: 'environment', callbackId: number, callback: AsyncCallbackWrapper<void>): void;
+  public native nativepreloadUIExtensionAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
   public native setSupportedProcessCacheSync(isSupported: boolean): void;
 
   setSupportedProcessCache(isSupported: boolean): void {
@@ -31,6 +34,47 @@ export default class ApplicationContext extends Context {
 
   on(type: 'environment', callback: EnvironmentCallback): number {
     return this.nativeOnSync(type, callback);
+  }
+
+  off(type: 'environment', callbackId: number, callback: AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeOffSync(type, callbackId, myCall);
+    });
+  }
+
+  off(type: 'environment', callbackId: number): Promise<void> {
+    let p =
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
+          if (err.code == 0) {
+            resolve(undefined);
+          } else {
+            reject(err);
+          }
+        });
+        taskpool.execute((): void => {
+          this.nativeOffSync(type, callbackId, myCall);
+        });
+      });
+    return p;
+  }
+
+  preloadUIExtensionAbility(want: Want): Promise<void> {
+    let p =
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
+          if (err.code == 0) {
+            resolve(undefined);
+          } else {
+            reject(err);
+          }
+        });
+        taskpool.execute((): void => {
+          this.nativepreloadUIExtensionAbilitySync(want, myCall);
+        });
+      });
+    return p;
   }
 
   killAllProcesses(callback: AsyncCallback<void>): void {
