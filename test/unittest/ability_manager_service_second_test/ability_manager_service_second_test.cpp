@@ -26,11 +26,13 @@
 #undef protected
 
 #include "ability_manager_errors.h"
+#include "app_utils.h"
 #include "connection_observer_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "session/host/include/session.h"
 #include "scene_board_judgement.h"
 #include "mock_sa_call.h"
+#include "unlock_screen_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -392,8 +394,12 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_002, TestSize.Level1)
     AbilityStartSetting abilityStartSetting;
     sptr<IRemoteObject> callerToken = nullptr;
     int requestCode = 0;
-    EXPECT_EQ(abilityMs_->StartAbility(want, abilityStartSetting, callerToken, 0, requestCode),
-        CHECK_PERMISSION_FAILED);
+    auto ret = abilityMs_->StartAbility(want, abilityStartSetting, callerToken, 0, requestCode);
+    if (UnlockScreenManager::GetInstance().UnlockScreen()) {
+        EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
+    } else {
+        EXPECT_EQ(ret, ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE);
+    }
 }
 
 /*
@@ -409,8 +415,12 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_003, TestSize.Level1)
     AbilityStartSetting abilityStartSetting;
     sptr<IRemoteObject> callerToken = nullptr;
     int requestCode = 0;
-    EXPECT_EQ(abilityMs_->StartAbilityDetails(want, abilityStartSetting, callerToken, 0, requestCode),
-        CHECK_PERMISSION_FAILED);
+    auto ret = abilityMs_->StartAbilityDetails(want, abilityStartSetting, callerToken, 0, requestCode);
+    if (UnlockScreenManager::GetInstance().UnlockScreen()) {
+        EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
+    } else {
+        EXPECT_EQ(ret, ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE);
+    }
 }
 
 /*
@@ -691,7 +701,13 @@ HWTEST_F(AbilityManagerServiceSecondTest, ConnectLocalAbility_002, TestSize.Leve
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want;
     ExtensionAbilityType extensionType = ExtensionAbilityType::SERVICE;
-    EXPECT_EQ(abilityMs_->ConnectLocalAbility(want, 100, nullptr, nullptr, extensionType), ERR_INVALID_VALUE);
+    auto ret = abilityMs_->ConnectLocalAbility(want, 100, nullptr, nullptr, extensionType);
+    if (AppUtils::GetInstance().IsConnectSupportCrossUser()) {
+        EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    } else {
+        EXPECT_EQ(ret, ERR_CROSS_USER);
+    }
+    
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ConnectLocalAbility_002 end");
 }
 
