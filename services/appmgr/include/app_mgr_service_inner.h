@@ -1983,8 +1983,9 @@ private:
     void RemoveUIExtensionBindItem(std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token);
     void BindUIExtensionProcess(
         const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
-    void UnBindUIExtensionProcess(const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
-    bool WrapBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord, 
+    void UnBindUIExtensionProcess(
+        const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
+    bool WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord, 
         UIExtensionProcessBindInfo &bindInfo);
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
