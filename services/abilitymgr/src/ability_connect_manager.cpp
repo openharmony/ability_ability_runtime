@@ -3596,12 +3596,10 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetUIExtensionBySessionFro
 }
 
 void AbilityConnectManager::UpdateUIExtensionBindInfo(
-    const std::shared_ptr<AbilityRecord> &abilityRecord,
-    std::string callerBundleName, int32_t notifyProcessBind)
+    const std::shared_ptr<AbilityRecord> &abilityRecord, std::string callerBundleName, int32_t notifyProcessBind)
 {
     if (abilityRecord == nullptr ||
-        !UIExtensionUtils::IsUIExtension(
-            abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        !UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "record null or abilityType not match");
         return;
     }
