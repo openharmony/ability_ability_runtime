@@ -2476,6 +2476,33 @@ HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_RestartApp_0100, T
 }
 
 /**
+ * @tc.name: RestartSelfAtomicService_0100
+ * @tc.desc: RestartSelfAtomicService
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, RestartSelfAtomicService_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RestartSelfAtomicService_0100 start";
+    client_->RestartSelfAtomicService(nullptr);
+    EXPECT_NE(client_, nullptr);
+    GTEST_LOG_(INFO) << "RestartSelfAtomicService_0100 end";
+}
+
+/**
+ * @tc.name: RestartSelfAtomicService_0200
+ * @tc.desc: RestartSelfAtomicService
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, RestartSelfAtomicService_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RestartSelfAtomicService_0200 start";
+    sptr<IRemoteObject> callerToken = new AbilityManagerStubTestMock();
+    client_->RestartSelfAtomicService(callerToken);
+    EXPECT_NE(client_, nullptr);
+    GTEST_LOG_(INFO) << "RestartSelfAtomicService_0200 end";
+}
+
+/**
  * @tc.name: AbilityManagerClient_KillProcessWithPrepareTerminate_0100
  * @tc.desc: KillProcessWithPrepareTerminate
  * @tc.type: FUNC

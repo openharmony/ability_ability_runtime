@@ -2258,5 +2258,13 @@ ErrCode AbilityManagerClient::GetInsightIntentInfoByIntentName(
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
 }
+
+ErrCode AbilityManagerClient::RestartSelfAtomicService(sptr<IRemoteObject> callerToken)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RestartSelfAtomicService(callerToken);
+}
 } // namespace AAFwk
 } // namespace OHOS

@@ -1010,6 +1010,16 @@ enum NativeFreeInstallError {
      */
     ERR_WRITE_START_SELF_UI_ABILITY_RESULT = 29360215,
 
+    /*
+     * Result(29360216) for write caller token failed.
+     */
+     ERR_WRITE_CALLER_TOKEN_FAILED = 29360216,
+
+    /*
+     * Result(29360217) for caller is not atomic service.
+     */
+     ERR_CALLER_NOT_ATOMIC_SERVICE = 29360217,
+
     /**
      * Undefine error code.
      */
