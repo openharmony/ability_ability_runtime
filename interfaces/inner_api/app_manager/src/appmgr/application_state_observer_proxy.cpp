@@ -401,10 +401,11 @@ void ApplicationStateObserverProxy::OnProcessBindingRelationChanged(const Proces
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteParcelable(&processBindData)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "write processData failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "Write processData failed");
         return;
     }
     int32_t ret = SendTransactCmd(

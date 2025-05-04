@@ -3859,6 +3859,7 @@ void AbilityRecord::NotifyAbilityRequestSuccess(const std::string &requestId, co
 void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
 {
     if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityType not match");
         return;
     }
 
@@ -3866,30 +3867,27 @@ void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
     if (want_.HasParameter(UIEXTENSION_BIND_ABILITY_ID)) {
         want_.RemoveParam(UIEXTENSION_BIND_ABILITY_ID);
     }
-    want_.SetParam(UIEXTENSION_BIND_ABILITY_ID,
-                   wantParams.GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1));
+    want_.SetParam(UIEXTENSION_BIND_ABILITY_ID, wantParams.GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1));
 
     if (want_.HasParameter(UIEXTENSION_NOTIFY_BIND)) {
         want_.RemoveParam(UIEXTENSION_NOTIFY_BIND);
     }
-    want_.SetParam(UIEXTENSION_NOTIFY_BIND,
-                   wantParams.GetIntParam(UIEXTENSION_NOTIFY_BIND, -1));
+    want_.SetParam(UIEXTENSION_NOTIFY_BIND, wantParams.GetIntParam(UIEXTENSION_NOTIFY_BIND, -1));
+
     if (want_.HasParameter(UIEXTENSION_HOST_PID)) {
         want_.RemoveParam(UIEXTENSION_HOST_PID);
     }
-    want_.SetParam(UIEXTENSION_HOST_PID,
-                   wantParams.GetIntParam(UIEXTENSION_HOST_PID, -1));
+    want_.SetParam(UIEXTENSION_HOST_PID, wantParams.GetIntParam(UIEXTENSION_HOST_PID, -1));
 
     if (want_.HasParameter(UIEXTENSION_HOST_UID)) {
         want_.RemoveParam(UIEXTENSION_HOST_UID);
     }
-    want_.SetParam(UIEXTENSION_HOST_UID,
-                   wantParams.GetIntParam(UIEXTENSION_HOST_UID, -1));
+    want_.SetParam(UIEXTENSION_HOST_UID, wantParams.GetIntParam(UIEXTENSION_HOST_UID, -1));
+
     if (want_.HasParameter(UIEXTENSION_HOST_BUNDLENAME)) {
         want_.RemoveParam(UIEXTENSION_HOST_BUNDLENAME);
     }
-    want_.SetParam(UIEXTENSION_HOST_BUNDLENAME,
-                   wantParams.GetStringParam(UIEXTENSION_HOST_BUNDLENAME));
+    want_.SetParam(UIEXTENSION_HOST_BUNDLENAME, wantParams.GetStringParam(UIEXTENSION_HOST_BUNDLENAME));
 }
 }  // namespace AAFwk
 }  // namespace OHOS
