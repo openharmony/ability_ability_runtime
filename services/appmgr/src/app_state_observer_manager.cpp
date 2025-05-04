@@ -878,7 +878,7 @@ ProcessData AppStateObserverManager::WrapProcessData(const std::shared_ptr<AppRu
     processData.gpuPid = appRecord->GetGPUPid();
     processData.callerPid = appRecord->GetCallerPid();
     processData.callerUid = appRecord->GetCallerUid();
-    processData.killReason = appRecord->GetkillReason();
+    processData.killReason = appRecord->GetKillReason();
     return processData;
 }
 
