@@ -58,7 +58,7 @@ const std::string UIEXTENSION_HOST_PID = "ability.want.params.uiExtensionHostPid
 const std::string UIEXTENSION_HOST_UID = "ability.want.params.uiExtensionHostUid";
 const std::string UIEXTENSION_HOST_BUNDLENAME = "ability.want.params.uiExtensionHostBundleName";
 const std::string UIEXTENSION_BIND_ABILITY_ID = "ability.want.params.uiExtensionBindAbilityId";
-const std::string UIEXTENSION_NOTIFY_BIND = "ohos.uiextension.params.uiExtensioNotifyBind";
+const std::string UIEXTENSION_NOTIFY_BIND = "ohos.uiextension.params.notifyProcessBind";
 const std::string MAX_UINT64_VALUE = "18446744073709551615";
 const std::string IS_PRELOAD_UIEXTENSION_ABILITY = "ability.want.params.is_preload_uiextension_ability";
 const std::string SEPARATOR = ":";
@@ -885,6 +885,11 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
     abilityRecord->SetScheduler(scheduler);
     abilityRecord->RemoveSpecifiedWantParam(UIEXTENSION_ABILITY_ID);
     abilityRecord->RemoveSpecifiedWantParam(UIEXTENSION_ROOT_HOST_PID);
+    abilityRecord->RemoveSpecifiedWantParam(UIEXTENSION_HOST_PID);
+    abilityRecord->RemoveSpecifiedWantParam(UIEXTENSION_HOST_UID);
+    abilityRecord->RemoveSpecifiedWantParam(UIEXTENSION_HOST_BUNDLENAME);
+    abilityRecord->RemoveSpecifiedWantParam(UIEXTENSION_BIND_ABILITY_ID);
+    abilityRecord->RemoveSpecifiedWantParam(UIEXTENSION_NOTIFY_BIND);
     if (IsUIExtensionAbility(abilityRecord) && !abilityRecord->IsCreateByConnect()
         && !abilityRecord->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
         abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
