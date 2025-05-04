@@ -3859,7 +3859,7 @@ void AbilityRecord::NotifyAbilityRequestSuccess(const std::string &requestId, co
 void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
 {
     if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityType not match");
+        TAG_LOGE(AAFwkTag::UI_EXT, "abilityType not match");
         return;
     }
 
