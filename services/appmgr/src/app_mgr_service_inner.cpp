@@ -9452,7 +9452,7 @@ void AppMgrServiceInner::RemoveUIExtensionBindItem(
     }
 
     if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityType not match");    
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityType not match");
         return;
     }
 
@@ -9460,7 +9460,7 @@ void AppMgrServiceInner::RemoveUIExtensionBindItem(
     UIExtensionProcessBindInfo bindInfo;
     auto result = appRunningManager_->QueryUIExtensionBindItemById(uiExtensionBindAbilityId, bindInfo);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "bindInfo not exist");    
+        TAG_LOGE(AAFwkTag::APPMGR, "bindInfo not exist");
         return;
     }
     if (bindInfo.notifyProcessBind != 1) {
@@ -9513,7 +9513,7 @@ void AppMgrServiceInner::UnBindUIExtensionProcess(
     }
 }
 
-bool AppMgrServiceInner::WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord, 
+bool AppMgrServiceInner::WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord,
     UIExtensionProcessBindInfo &bindInfo)
 {
     auto notifyProcessBind = want->GetIntParam(UIEXTENSION_NOTIFY_BIND, -1);
