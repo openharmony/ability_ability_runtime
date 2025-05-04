@@ -9418,7 +9418,7 @@ void AppMgrServiceInner::AddUIExtensionBindItem(
     }
 
     UIExtensionProcessBindInfo bindInfo;
-    if(!WarpBindInfo(want, appRecord, bindInfo)) {
+    if (!WarpBindInfo(want, appRecord, bindInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "warp bindInfo fail");
         return;
     }
