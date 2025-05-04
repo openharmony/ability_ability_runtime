@@ -9418,10 +9418,11 @@ void AppMgrServiceInner::AddUIExtensionBindItem(
     }
 
     UIExtensionProcessBindInfo bindInfo;
-    if(!WarpBindInfo(want, appRecord, bindInfo)){
+    if(!WarpBindInfo(want, appRecord, bindInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "warp bindInfo fail");
         return;
     }
+    auto uiExtensionBindAbilityId = want->GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1);
     appRunningManager_->AddUIExtensionBindItem(uiExtensionBindAbilityId, bindInfo);
     BindUIExtensionProcess(appRecord, bindInfo);
     want->RemoveParam(UIEXTENSION_HOST_PID);
@@ -9450,8 +9451,7 @@ void AppMgrServiceInner::RemoveUIExtensionBindItem(
         return;
     }
 
-    if (!AAFwk::UIExtensionUtils::IsUIExtension(
-            abilityInfo->extensionAbilityType)) {
+    if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
         TAG_LOGE(AAFwkTag::APPMGR, "abilityType not match");    
         return;
     }
@@ -9513,7 +9513,7 @@ void AppMgrServiceInner::UnBindUIExtensionProcess(
     }
 }
 
-bool WrapBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord, 
+bool AppMgrServiceInner::WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord, 
     UIExtensionProcessBindInfo &bindInfo)
 {
     auto notifyProcessBind = want->GetIntParam(UIEXTENSION_NOTIFY_BIND, -1);
@@ -9524,8 +9524,8 @@ bool WrapBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunning
     pid_t providerPid = -1;
     pid_t providerUid = -1;
     if (appRecord->GetPriorityObject() != nullptr) {
-      providerPid = appRecord->GetPid();
-      providerUid = appRecord->GetUid();
+        providerPid = appRecord->GetPid();
+        providerUid = appRecord->GetUid();
     }
     TAG_LOGI(AAFwkTag::APPMGR,
         "uiExtensionBindAbilityId: %{public}d, providerUid: "
@@ -9539,8 +9539,8 @@ bool WrapBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunning
         callerBundleName.c_str());
     if (uiExtensionBindAbilityId == -1 || providerPid == -1 || providerUid == -1 || callerPid == -1 ||
         callerUid == -1 || callerBundleName.empty()) {
-      TAG_LOGE(AAFwkTag::APPMGR, "invalid want params");
-      return false;
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid want params");
+        return false;
     }
     bindInfo.pid = providerPid;
     bindInfo.uid = providerUid;
@@ -9548,12 +9548,10 @@ bool WrapBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunning
     bindInfo.callerUid = callerUid;
     bindInfo.callerBundleName = callerBundleName;
     bindInfo.notifyProcessBind = notifyProcessBind;
-    bindInfo.isKeepAlive = notifyProcessBind;
     bindInfo.isKeepAlive = appRecord->IsKeepAliveApp();
     bindInfo.extensionType = appRecord->GetExtensionType();
     bindInfo.processType = appRecord->GetProcessType();
     return true;
-}
 }
 } // namespace AppExecFwk
 }  // namespace OHOS
