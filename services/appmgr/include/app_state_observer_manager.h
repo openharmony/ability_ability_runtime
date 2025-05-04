@@ -118,8 +118,7 @@ private:
     AbilityForegroundObserverMap GetAbilityForegroundObserverMapCopy();
     ProcessData WrapProcessData(const std::shared_ptr<AppRunningRecord> &appRecord);
     ProcessData WrapRenderProcessData(const std::shared_ptr<RenderRecord> &renderRecord);
-    ProcessBindData WrapProcessBindData(const std::shared_ptr<AppRunningRecord> &appRecord,
-                                        const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
+    ProcessBindData WrapProcessBindData(const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
 #ifdef SUPPORT_CHILD_PROCESS
     int32_t WrapChildProcessData(ProcessData &processData, std::shared_ptr<ChildProcessRecord> childRecord);
 #endif // SUPPORT_CHILD_PROCESS
@@ -136,7 +135,7 @@ private:
     void AddObserverCount(int32_t uid);
     void DecreaseObserverCount(int32_t uid);
     void HandleOnProcessBindingRelationChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
-                                               const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
+        const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
 
 private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> handler_;
