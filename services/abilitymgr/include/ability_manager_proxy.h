@@ -1618,6 +1618,14 @@ public:
         const std::string &appId, const std::string &startTime, AtomicServiceStartupRule &rule) override;
 
     /**
+     * Restart atomic service.
+     *
+     * @param callerToken, The caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RestartSelfAtomicService(sptr<IRemoteObject> callerToken) override;
+
+     /**
      * PrepareTerminateAbilityDone, called when PrepareTerminateAbility call is done.
      *
      * @param token, the token of the ability to terminate.
