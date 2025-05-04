@@ -1957,20 +1957,6 @@ void AppRunningManager::RemoveTimeoutDeadAppRecord()
     }
 }
 
-UIExtensionProcessBindInfo AppRunningManager::WarpBindInfo(int32_t pid, int32_t uid, int32_t callerPid,
-                                                           int32_t callerUid, std::string callerBundleName,
-                                                           int32_t notifyProcessBind)
-{
-    UIExtensionProcessBindInfo uiExtensionProcessBindInfo;
-    uiExtensionProcessBindInfo.pid = pid;
-    uiExtensionProcessBindInfo.uid = uid;
-    uiExtensionProcessBindInfo.callerPid = callerPid;
-    uiExtensionProcessBindInfo.callerUid = callerUid;
-    uiExtensionProcessBindInfo.callerBundleName = callerBundleName;
-    uiExtensionProcessBindInfo.notifyProcessBind = notifyProcessBind;
-    return uiExtensionProcessBindInfo;
-}
-
 int32_t AppRunningManager::AddUIExtensionBindItem(
     int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,13 +23,10 @@ namespace OHOS {
 namespace AppExecFwk {
 bool ProcessBindData::Marshalling(Parcel &parcel) const
 {
-    return (parcel.WriteString(bundleName) && parcel.WriteInt32(pid) &&
-        parcel.WriteInt32(uid) && parcel.WriteBool(isKeepAlive) &&
-        parcel.WriteInt32(static_cast<int32_t>(processType)) &&
-        parcel.WriteInt32(static_cast<int32_t>(extensionType)) &&
-        parcel.WriteInt32(callerPid) && parcel.WriteInt32(callerUid) &&
-        parcel.WriteString(callerBundleName) &&
-        parcel.WriteInt32(bindingRelation));
+    return (parcel.WriteString(bundleName) && parcel.WriteInt32(pid) && parcel.WriteInt32(uid) &&
+            parcel.WriteBool(isKeepAlive) && parcel.WriteInt32(static_cast<int32_t>(processType)) &&
+            parcel.WriteInt32(static_cast<int32_t>(extensionType)) && parcel.WriteInt32(callerPid) &&
+            parcel.WriteInt32(callerUid) && parcel.WriteString(callerBundleName) && parcel.WriteInt32(bindingRelation));
 }
 
 bool ProcessBindData::ReadFromParcel(Parcel &parcel)
@@ -51,8 +48,7 @@ ProcessBindData *ProcessBindData::Unmarshalling(Parcel &parcel)
 {
     ProcessBindData *processBindData = new (std::nothrow) ProcessBindData();
     if (processBindData && !processBindData->ReadFromParcel(parcel)) {
-        TAG_LOGW(AAFwkTag::APPMGR,
-                 "processBindData failed, because ReadFromParcel failed");
+        TAG_LOGW(AAFwkTag::APPMGR, "processBindData failed, because ReadFromParcel failed");
         delete processBindData;
         processBindData = nullptr;
     }

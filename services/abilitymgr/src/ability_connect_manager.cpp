@@ -232,8 +232,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
             }
         };
         UpdateUIExtensionBindInfo(
-            targetService, hostBundleName,
-            abilityRequest.want.GetIntParam(UIEXTENSION_NOTIFY_BIND, -1));
+            targetService, hostBundleName, abilityRequest.want.GetIntParam(UIEXTENSION_NOTIFY_BIND, -1));
         LoadAbility(targetService, updateRecordCallback);
     } else if (targetService->IsAbilityState(AbilityState::ACTIVE) && !IsUIExtensionAbility(targetService)) {
         // It may have been started through connect
@@ -577,8 +576,7 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
         }
     };
     UpdateUIExtensionBindInfo(
-        targetService, hostBundleName,
-        abilityRequest.want.GetIntParam(UIEXTENSION_NOTIFY_BIND, -1));
+        targetService, hostBundleName, abilityRequest.want.GetIntParam(UIEXTENSION_NOTIFY_BIND, -1));
     LoadAbility(targetService, updateRecordCallback);
     return ERR_OK;
 }
@@ -3604,22 +3602,17 @@ void AbilityConnectManager::UpdateUIExtensionBindInfo(
     if (abilityRecord == nullptr ||
         !UIExtensionUtils::IsUIExtension(
             abilityRecord->GetAbilityInfo().extensionAbilityType)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "record null or type error");
+        TAG_LOGE(AAFwkTag::UI_EXT, "record null or abilityType not match");
         return;
     }
 
     WantParams wantParams;
     auto uiExtensionBindAbilityId = abilityRecord->GetUIExtensionAbilityId();
-    wantParams.SetParam(UIEXTENSION_BIND_ABILITY_ID,
-                        AAFwk::Integer::Box(uiExtensionBindAbilityId));
-    wantParams.SetParam(UIEXTENSION_NOTIFY_BIND,
-                        AAFwk::Integer::Box(notifyProcessBind));
-    wantParams.SetParam(UIEXTENSION_HOST_PID,
-                        AAFwk::Integer::Box(IPCSkeleton::GetCallingPid()));
-    wantParams.SetParam(UIEXTENSION_HOST_UID,
-                        AAFwk::Integer::Box(IPCSkeleton::GetCallingUid()));
-    wantParams.SetParam(UIEXTENSION_HOST_BUNDLENAME,
-                        String ::Box(callerBundleName));
+    wantParams.SetParam(UIEXTENSION_BIND_ABILITY_ID, AAFwk::Integer::Box(uiExtensionBindAbilityId));
+    wantParams.SetParam(UIEXTENSION_NOTIFY_BIND, AAFwk::Integer::Box(notifyProcessBind));
+    wantParams.SetParam(UIEXTENSION_HOST_PID, AAFwk::Integer::Box(IPCSkeleton::GetCallingPid()));
+    wantParams.SetParam(UIEXTENSION_HOST_UID, AAFwk::Integer::Box(IPCSkeleton::GetCallingUid()));
+    wantParams.SetParam(UIEXTENSION_HOST_BUNDLENAME, String ::Box(callerBundleName));
     abilityRecord->UpdateUIExtensionBindInfo(wantParams);
 }
 }  // namespace AAFwk

@@ -29,7 +29,7 @@ struct UIExtensionProcessBindInfo {
     int32_t pid = 0;
     int32_t uid = 0;
     bool isKeepAlive = false;
-    ProcessType processType = ProcessType::NORMAL;
+    ProcessType processType = ProcessType::EXTENSION;
     ExtensionAbilityType extensionType = ExtensionAbilityType::UNSPECIFIED;
     int32_t callerPid = -1;
     int32_t callerUid = -1;
@@ -66,7 +66,7 @@ struct ProcessBindData : public Parcelable {
     int32_t pid = 0;
     int32_t uid = 0;
     bool isKeepAlive = false;
-    ProcessType processType = ProcessType::NORMAL;
+    ProcessType processType = ProcessType::EXTENSION;
     ExtensionAbilityType extensionType = ExtensionAbilityType::UNSPECIFIED;
     int32_t callerPid = -1;
     int32_t callerUid = -1;
