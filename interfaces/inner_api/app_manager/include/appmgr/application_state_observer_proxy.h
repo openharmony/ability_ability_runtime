@@ -147,7 +147,7 @@ public:
      *
      * @param processBindData Process bind data.
      */
-     virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) override;
+    virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     static inline BrokerDelegator<ApplicationStateObserverProxy> delegator_;

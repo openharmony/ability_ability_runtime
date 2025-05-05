@@ -149,7 +149,7 @@ public:
      *
      * @param processBindData Process bind data.
      */
-     virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) override;
+    virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) override;
 private:
     int32_t HandleOnForegroundApplicationChanged(MessageParcel &data, MessageParcel &reply);
 

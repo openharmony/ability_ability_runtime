@@ -149,7 +149,7 @@ public:
      *
      * @param processBindData Process bind data.
      */
-     virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) {};
+    virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) {};
 
     enum class Message {
         TRANSACT_ON_FOREGROUND_APPLICATION_CHANGED = 0,
