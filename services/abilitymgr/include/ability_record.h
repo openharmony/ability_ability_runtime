@@ -1172,6 +1172,7 @@ public:
 
     void ScheduleCollaborate(const Want &want);
 
+    void UpdateUIExtensionBindInfo(const WantParams &wantParams);
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false);
 

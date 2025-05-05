@@ -663,7 +663,8 @@ private:
     void SetExtensionLoadParam(AbilityRuntime::LoadParam &loadParam, std::shared_ptr<AbilityRecord> abilityRecord);
     bool IsStrictMode(std::shared_ptr<AbilityRecord> abilityRecord);
     bool NeedExtensionControl(std::shared_ptr<AbilityRecord> abilityRecord);
-
+    void UpdateUIExtensionBindInfo(
+        const std::shared_ptr<AbilityRecord> &abilityRecord, std::string callerBundleName, int32_t notifyProcessBind);
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     const std::string TASK_ON_ABILITY_DIED = "OnAbilityDiedTask";
