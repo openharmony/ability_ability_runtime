@@ -183,6 +183,8 @@ private:
 
     int32_t HandleOnAppCacheStateChanged(MessageParcel &data, MessageParcel &reply);
 
+    int32_t HandleOnProcessBindingRelationChanged(MessageParcel &data, MessageParcel &reply);
+
     static std::mutex callbackMutex_;
 
     DISALLOW_COPY_AND_MOVE(ApplicationStateObserverStub);
