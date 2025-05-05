@@ -6382,10 +6382,17 @@ int32_t AbilityManagerProxy::RevokeDelegator(sptr<IRemoteObject> token)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
+    return reply.ReadInt32();
+}
 
 int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
     AbilityRuntime::GetInsightIntentFlag flag,
     std::vector<InsightIntentInfoForBack> &infos)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
     TAG_LOGI(AAFwkTag::INTENT, "GetAllInsightIntentInfo");
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::INTENT, "writeInterfaceToken failed");

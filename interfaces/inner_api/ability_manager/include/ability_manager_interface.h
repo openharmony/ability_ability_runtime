@@ -2124,6 +2124,9 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t RevokeDelegator(sptr<IRemoteObject> token)
+    {
+        return 0;
+    }
 
     /**
      * Get all insight intent infos.
