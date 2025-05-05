@@ -206,6 +206,11 @@ constexpr const char* HWASAN_FLAG_NAME = "hwasanEnabled";
 constexpr const char* UBSAN_FLAG_NAME = "ubsanEnabled";
 constexpr const char* UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbilityId";
 constexpr const char* UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
+constexpr const char* UIEXTENSION_HOST_PID = "ability.want.params.uiExtensionHostPid";
+constexpr const char* UIEXTENSION_HOST_UID = "ability.want.params.uiExtensionHostUid";
+constexpr const char* UIEXTENSION_HOST_BUNDLENAME = "ability.want.params.uiExtensionHostBundleName";
+constexpr const char* UIEXTENSION_BIND_ABILITY_ID = "ability.want.params.uiExtensionBindAbilityId";
+constexpr const char* UIEXTENSION_NOTIFY_BIND = "ohos.uiextension.params.notifyProcessBind";
 constexpr const char* MEMMGR_PROC_NAME = "memmgrservice";
 constexpr const char* ISOLATED_SANDBOX = "isolatedSandbox";
 constexpr const char* RENDER_PROCESS_NAME = ":render";
@@ -792,6 +797,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         StartAbility(loadParam->token, loadParam->preToken, abilityInfo, appRecord, hapModuleInfo, want,
             loadParam->abilityRecordId);
         if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+            AddUIExtensionBindItem(want, appRecord, loadParam->token);
             AddUIExtensionLauncherItem(want, appRecord, loadParam->token);
         }
     }
@@ -800,9 +806,12 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         appRecord != nullptr && want != nullptr) {
         auto abilityRunningRecord = appRecord->GetAbilityRunningRecordByToken(loadParam->token);
         auto uiExtensionAbilityId = want->GetIntParam(UIEXTENSION_ABILITY_ID, -1);
+        auto uiExtensionBindAbilityId = want->GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1);
         if (abilityRunningRecord != nullptr) {
             abilityRunningRecord->SetUIExtensionAbilityId(uiExtensionAbilityId);
+            abilityRunningRecord->SetUIExtensionBindAbilityId(uiExtensionBindAbilityId);
         }
+        want->RemoveParam(UIEXTENSION_BIND_ABILITY_ID);
     }
     AfterLoadAbility(appRecord, abilityInfo, loadParam);
 }
@@ -2817,6 +2826,7 @@ void AppMgrServiceInner::TerminateAbility(const sptr<IRemoteObject> &token, bool
         return;
     }
 
+    RemoveUIExtensionBindItem(appRecord, token);
     RemoveUIExtensionLauncherItem(appRecord, token);
 
     if (appRunningManager_) {
@@ -3994,6 +4004,9 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
     }
     OnAppStateChanged(appRecord, ApplicationState::APP_STATE_CREATE, false, false);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessCreated(appRecord, isPreload);
+    if (AAFwk::UIExtensionUtils::IsUIExtension(extensionAbilityType)) {
+        AddUIExtensionBindItem(want, appRecord, token);
+    }
     if (!appExistFlag) {
         OnAppStarted(appRecord);
     }
@@ -9193,6 +9206,157 @@ int32_t AppMgrServiceInner::GetKilledProcessInfo(int pid, int uid, KilledProcess
     info.bundleName = appRecord->GetBundleName();
     info.processName = appRecord->GetProcessName();
     return ERR_OK;
+}
+
+void AppMgrServiceInner::AddUIExtensionBindItem(
+    std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token)
+{
+    if (want == nullptr || appRecord == nullptr || token == nullptr || appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid input params");
+        return;
+    }
+
+    auto notifyProcessBind = want->GetIntParam(UIEXTENSION_NOTIFY_BIND, -1);
+    if (notifyProcessBind != 1) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no bind permission");
+        return;
+    }
+
+    UIExtensionProcessBindInfo bindInfo;
+    if (!WarpBindInfo(want, appRecord, bindInfo)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "warp bindInfo fail");
+        return;
+    }
+    auto uiExtensionBindAbilityId = want->GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1);
+    appRunningManager_->AddUIExtensionBindItem(uiExtensionBindAbilityId, bindInfo);
+    BindUIExtensionProcess(appRecord, bindInfo);
+    want->RemoveParam(UIEXTENSION_HOST_PID);
+    want->RemoveParam(UIEXTENSION_HOST_UID);
+    want->RemoveParam(UIEXTENSION_HOST_BUNDLENAME);
+    want->RemoveParam(UIEXTENSION_NOTIFY_BIND);
+}
+
+void AppMgrServiceInner::RemoveUIExtensionBindItem(
+    std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token)
+{
+    if (appRecord == nullptr || token == nullptr || appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid input params");
+        return;
+    }
+
+    auto abilityRunningRecord = appRecord->GetAbilityRunningRecordByToken(token);
+    if (abilityRunningRecord == nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "invalid ability");
+        return;
+    }
+
+    auto abilityInfo = abilityRunningRecord->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "invalid ability");
+        return;
+    }
+
+    if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityType not match");
+        return;
+    }
+
+    auto uiExtensionBindAbilityId = abilityRunningRecord->GetUIExtensionBindAbilityId();
+    UIExtensionProcessBindInfo bindInfo;
+    auto result = appRunningManager_->QueryUIExtensionBindItemById(uiExtensionBindAbilityId, bindInfo);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bindInfo not exist");
+        return;
+    }
+    if (bindInfo.notifyProcessBind != 1) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no unbind permission");
+        return;
+    }
+    UnBindUIExtensionProcess(appRecord, bindInfo);
+    appRunningManager_->RemoveUIExtensionBindItemById(uiExtensionBindAbilityId);
+}
+
+void AppMgrServiceInner::BindUIExtensionProcess(
+    const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo)
+{
+    std::lock_guard guard(uiExtensionBindReleationsLock_);
+    auto pid = bindInfo.pid;
+    auto callerPid = bindInfo.callerPid;
+    auto it = uiExtensionBindReleations_.find(pid);
+
+    if (it == uiExtensionBindReleations_.end() || it->second.find(callerPid) == it->second.end()) {
+        uiExtensionBindReleations_[pid][callerPid] = 1;
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessBindingRelationChanged(
+            appRecord, bindInfo, 1);
+    } else {
+        it->second[callerPid]++;
+    }
+}
+
+void AppMgrServiceInner::UnBindUIExtensionProcess(
+    const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo)
+{
+    std::lock_guard guard(uiExtensionBindReleationsLock_);
+    auto pid = bindInfo.pid;
+    auto callerPid = bindInfo.callerPid;
+    auto it = uiExtensionBindReleations_.find(pid);
+
+    if (it != uiExtensionBindReleations_.end()) {
+        auto &innerMap = it->second;
+        auto innerIt = innerMap.find(callerPid);
+        if (innerIt != innerMap.end()) {
+            innerIt->second--;
+            if (innerIt->second == 0) {
+                DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessBindingRelationChanged(
+                    appRecord, bindInfo, 0);
+                innerMap.erase(innerIt);
+            }
+        }
+        if (innerMap.empty()) {
+            uiExtensionBindReleations_.erase(it);
+        }
+    }
+}
+
+bool AppMgrServiceInner::WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord,
+    UIExtensionProcessBindInfo &bindInfo)
+{
+    auto notifyProcessBind = want->GetIntParam(UIEXTENSION_NOTIFY_BIND, -1);
+    auto uiExtensionBindAbilityId = want->GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1);
+    auto callerPid = want->GetIntParam(UIEXTENSION_HOST_PID, -1);
+    auto callerUid = want->GetIntParam(UIEXTENSION_HOST_UID, -1);
+    auto callerBundleName = want->GetStringParam(UIEXTENSION_HOST_BUNDLENAME);
+    pid_t providerPid = -1;
+    pid_t providerUid = -1;
+    if (appRecord->GetPriorityObject() != nullptr) {
+        providerPid = appRecord->GetPid();
+        providerUid = appRecord->GetUid();
+    }
+    TAG_LOGI(AAFwkTag::APPMGR,
+        "uiExtensionBindAbilityId: %{public}d, providerUid: "
+        "%{public}d,providerPid: %{public}d,callerUid: %{public}d, "
+        "callerPid: %{public}d,callerBundleName: %{public}s",
+        uiExtensionBindAbilityId,
+        providerUid,
+        providerPid,
+        callerUid,
+        callerPid,
+        callerBundleName.c_str());
+    if (uiExtensionBindAbilityId == -1 || providerPid == -1 || providerUid == -1 || callerPid == -1 ||
+        callerUid == -1 || callerBundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid want params");
+        return false;
+    }
+    bindInfo.pid = providerPid;
+    bindInfo.uid = providerUid;
+    bindInfo.callerPid = callerPid;
+    bindInfo.callerUid = callerUid;
+    bindInfo.callerBundleName = callerBundleName;
+    bindInfo.notifyProcessBind = notifyProcessBind;
+    bindInfo.isKeepAlive = appRecord->IsKeepAliveApp();
+    bindInfo.extensionType = appRecord->GetExtensionType();
+    bindInfo.processType = appRecord->GetProcessType();
+    return true;
 }
 } // namespace AppExecFwk
 }  // namespace OHOS
