@@ -8765,7 +8765,9 @@ void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& to
 
         appRecoveryHistory_[record->GetUid()] = now;
         curWant = (want == nullptr) ? record->GetWant() : *want;
-        curWant.SetParam(AAFwk::Want::PARAM_ABILITY_RECOVERY_RESTART, true);
+        if (curWant.GetBoolParam(AAFwk::Want::PARAM_ABILITY_RECOVERY_RESTART, true)) {
+            curWant.SetParam(AAFwk::Want::PARAM_ABILITY_RECOVERY_RESTART, true);
+        }
 
         ReportAppRecoverResult(record->GetUid(), appInfo, abilityInfo.name, "SUCCESS");
     }
