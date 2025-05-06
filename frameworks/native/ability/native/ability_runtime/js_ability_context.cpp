@@ -557,7 +557,7 @@ napi_value JsAbilityContext::OnStartAbility(napi_env env, NapiCallbackInfo& info
                 return;
             }
             nlohmann::json jsonObject = nlohmann::json {
-                { JSON_KEY_ERR_MSG, "startAbility failed" },
+                { JSON_KEY_ERR_MSG, "Failed to call startAbility" },
             };
             context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
         }
