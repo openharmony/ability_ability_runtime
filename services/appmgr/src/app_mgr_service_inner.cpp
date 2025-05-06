@@ -211,6 +211,7 @@ constexpr const char* UIEXTENSION_HOST_UID = "ability.want.params.uiExtensionHos
 constexpr const char* UIEXTENSION_HOST_BUNDLENAME = "ability.want.params.uiExtensionHostBundleName";
 constexpr const char* UIEXTENSION_BIND_ABILITY_ID = "ability.want.params.uiExtensionBindAbilityId";
 constexpr const char* UIEXTENSION_NOTIFY_BIND = "ohos.uiextension.params.notifyProcessBind";
+constexpr const char* CL_BUNDLE_NAME = "com.huawei.hmos.meetime";
 constexpr const char* MEMMGR_PROC_NAME = "memmgrservice";
 constexpr const char* ISOLATED_SANDBOX = "isolatedSandbox";
 constexpr const char* RENDER_PROCESS_NAME = ":render";
@@ -9343,7 +9344,7 @@ bool AppMgrServiceInner::WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::s
         callerPid,
         callerBundleName.c_str());
     if (uiExtensionBindAbilityId == -1 || providerPid == -1 || providerUid == -1 || callerPid == -1 ||
-        callerUid == -1 || callerBundleName.empty()) {
+        callerUid == -1 || callerBundleName != CL_BUNDLE_NAME) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid want params");
         return false;
     }
