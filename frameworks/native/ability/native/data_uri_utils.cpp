@@ -169,7 +169,14 @@ bool DataUriUtils::IsAttachedId(const Uri &dataUri)
  */
 bool DataUriUtils::IsNumber(const string &str)
 {
-    return std::regex_match(str, INTEGER_REGEX);
+    try {
+        if (std::regex_match(str, INTEGER_REGEX)) {
+            return true;
+        }
+        return false;
+    } catch (...) {
+        return false;
+    }
 }
 
 /**

@@ -32,6 +32,7 @@ group("appms_target") {
 }
 
 ohos_shared_library("libappms") {
+  use_exceptions = true
   sanitize = {
     cfi = true
     cfi_cross_dso = true
