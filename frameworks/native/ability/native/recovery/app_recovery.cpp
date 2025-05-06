@@ -278,7 +278,10 @@ bool AppRecovery::ScheduleRecoverApp(StateReason reason)
     // 1. check whether main handler is still avaliable
     // 2. do state saving in main thread or just restart app with no state?
     // 3. create an recovery thread for saving state, just block jsvm mult-thread checking mechaism
-
+    if (getpid() == gettid()) {
+        DoRecoverApp(reason);
+        return true;
+    }
     auto task = [reason]() {
         AppRecovery::GetInstance().DoRecoverApp(reason);
     };
