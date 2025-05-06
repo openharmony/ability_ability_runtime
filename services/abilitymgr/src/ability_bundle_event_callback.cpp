@@ -29,6 +29,7 @@ namespace {
 constexpr const char* KEY_TOKEN = "accessTokenId";
 constexpr const char* KEY_UID = "uid";
 constexpr const char* KEY_USER_ID = "userId";
+constexpr const char* KEY_APP_INDEX = "appIndex";
 constexpr const char* OLD_WEB_BUNDLE_NAME = "com.ohos.nweb";
 constexpr const char* NEW_WEB_BUNDLE_NAME = "com.ohos.arkwebcore";
 constexpr const char* ARKWEB_CORE_PACKAGE_NAME = "persist.arkwebcore.package_name";
@@ -54,6 +55,7 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
     int uid = want.GetIntParam(KEY_UID, 0);
     auto bundleType = want.GetIntParam(BUNDLE_TYPE, 0);
     int userId = want.GetIntParam(KEY_USER_ID, 0);
+    int appIndex = want.GetIntParam(KEY_APP_INDEX, 0);
     // verify data
     if (action.empty() || bundleName.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "OnReceiveEvent failed, empty action/bundleName");
@@ -78,7 +80,7 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
             return;
         }
         abilityAutoStartupService_->DeleteAutoStartupData(bundleName, tokenId);
-        AbilityRuntime::InsightIntentEventMgr::DeleteInsightIntentEvent(want.GetElement(), userId);
+        AbilityRuntime::InsightIntentEventMgr::DeleteInsightIntentEvent(want.GetElement(), userId, appIndex);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
         // install or uninstall module/bundle
         HandleUpdatedModuleInfo(bundleName, uid, moduleName, false);
