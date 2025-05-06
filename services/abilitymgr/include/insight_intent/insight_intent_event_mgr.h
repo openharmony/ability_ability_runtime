@@ -27,7 +27,7 @@ namespace AbilityRuntime {
 class InsightIntentEventMgr : public std::enable_shared_from_this<InsightIntentEventMgr> {
 public:
     static void UpdateInsightIntentEvent(const AppExecFwk::ElementName &elementName, int32_t userId);
-    static void DeleteInsightIntentEvent(const AppExecFwk::ElementName &elementName, int32_t userId);
+    static void DeleteInsightIntentEvent(const AppExecFwk::ElementName &elementName, int32_t userId, int32_t appIndex);
 
     void SubscribeSysEventReceiver();
 private:
