@@ -17,6 +17,8 @@ import formBindingData from '@ohos.app.form.formBindingData';
 import FormExtensionContext from './application/FormExtensionContext';
 import Want from '@ohos.app.ability.Want';
 
+type OnStopFn = () => void;
+
 export default class FormExtensionAbility {
   public context: FormExtensionContext = new FormExtensionContext();
 
@@ -51,4 +53,6 @@ export default class FormExtensionAbility {
   onRemoveForm(formId: string): void {
     console.log(`FormExtensionAbility onRemoveForm, formId: ${formId}`);
   }
+  
+  public onStop?: OnStopFn;
 }
