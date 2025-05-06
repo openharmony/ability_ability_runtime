@@ -89,7 +89,8 @@ void InsightIntentEventMgr::UpdateInsightIntentEvent(const AppExecFwk::ElementNa
         "moduleName: %{public}s, userId: %{public}d", bundleName.c_str(), moduleName.c_str(), userId);
 }
 
-void InsightIntentEventMgr::DeleteInsightIntentEvent(const AppExecFwk::ElementName &elementName, int32_t userId)
+void InsightIntentEventMgr::DeleteInsightIntentEvent(const AppExecFwk::ElementName &elementName, int32_t userId,
+    int32_t appIndex)
 {
     ErrCode ret;
     auto bundleName = elementName.GetBundleName();
@@ -100,8 +101,14 @@ void InsightIntentEventMgr::DeleteInsightIntentEvent(const AppExecFwk::ElementNa
         return;
     }
 
+    if (appIndex > 0) {
+        TAG_LOGI(AAFwkTag::INTENT, "this application is a simulation, not support to delete intent info, "
+            "bundleName: %{public}s, appIndex: %{public}d", bundleName.c_str(), appIndex);
+        return;
+    }
+
     if (userId < 0) {
-        TAG_LOGW(AAFwkTag::INTENT, "invalid userId: %{public}d", userId);
+        TAG_LOGI(AAFwkTag::INTENT, "invalid userId: %{public}d", userId);
         return;
     }
 
