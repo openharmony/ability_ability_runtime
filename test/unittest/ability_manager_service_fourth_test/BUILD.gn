@@ -95,6 +95,7 @@ ohos_unittest("ability_manager_service_fourth_test") {
     "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
