@@ -13,14 +13,9 @@
  * limitations under the License.
  */
 
-interface ShellCmdResult {
-    stdResult: string;
-    exitCode: int;
+export default interface TestRunner {
+    onPrepare(): void;
+  
+    onRun(): void;
   }
   
-  class ShellCmdResultImpl implements ShellCmdResult {
-    public stdResult: string = '';
-    public exitCode: int = 0;
-  }
-  
-  export default ShellCmdResult;
