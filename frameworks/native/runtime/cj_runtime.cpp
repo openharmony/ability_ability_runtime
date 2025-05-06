@@ -332,3 +332,13 @@ void CJRuntime::UnLoadCJAppLibrary()
 {
     TAG_LOGI(AAFwkTag::CJRUNTIME, "UnLoadCJAppLibrary not support yet");
 }
+
+void CJRuntime::SetAppVersion(std::string& version)
+{
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");
+        return;
+    }
+    return cjEnv->setAppVersion(version);
+}
