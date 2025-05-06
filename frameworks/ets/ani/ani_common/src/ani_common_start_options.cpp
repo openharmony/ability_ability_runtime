@@ -29,6 +29,14 @@ namespace AppExecFwk {
 bool UnwrapStartOptionsWithProcessOption(ani_env* env, ani_object param, AAFwk::StartOptions &startOptions)
 {
     UnwrapStartOptions(env, param, startOptions);
+    if (!UnwrapProcessOptions(env, param, startOptions.processOptions)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap processOptions failed");
+        return false;
+    }
+    if (!UnwrapStartWindowOption(env, param, startOptions.startWindowOption)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startWindowOption failed");
+        return false;
+    }
     return true;
 }
 
@@ -142,6 +150,89 @@ bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &sta
                 static_cast<AppExecFwk::SupportWindowMode>(supportWindowMode));
         }
     }
+    return true;
+}
+
+bool UnwrapProcessOptions(ani_env* env, ani_object param, std::shared_ptr<AAFwk::ProcessOptions> &processOptions)
+{
+    auto option = std::make_shared<AAFwk::ProcessOptions>();
+
+    ani_boolean isProcessModeUndefined = true;
+    ani_ref processModeRef = nullptr;
+    if (!GetPropertyRef(env, param, "processMode", processModeRef, isProcessModeUndefined)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap processMode failed");
+        return false;
+    }
+    int32_t processMode = 0;
+    if (!isProcessModeUndefined) {
+        AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(
+            env, reinterpret_cast<ani_enum_item>(processModeRef), processMode);
+        TAG_LOGD(AAFwkTag::JSNAPI, "processMode: %{public}d", processMode);
+        option->processMode = AAFwk::ProcessOptions::ConvertInt32ToProcessMode(processMode);
+    }
+
+    ani_boolean isStartupVisibilityUndefined = true;
+    ani_ref startupVisibilityRef = nullptr;
+    if (!GetPropertyRef(env, param, "startupVisibility", startupVisibilityRef, isStartupVisibilityUndefined)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startupVisibility failed");
+        return false;
+    }
+    int32_t startupVisibility = 0;
+    if (!isProcessModeUndefined && !isStartupVisibilityUndefined) {
+        AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(
+            env, reinterpret_cast<ani_enum_item>(startupVisibilityRef), startupVisibility);
+        TAG_LOGD(AAFwkTag::JSNAPI, "startupVisibility: %{public}d", startupVisibility);
+        option->startupVisibility = AAFwk::ProcessOptions::ConvertInt32ToStartupVisibility(startupVisibility);
+    }
+
+    processOptions = option;
+    return true;
+}
+
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
+bool UnwrapPixelMapFromAni(ani_env *env, ani_object param, std::shared_ptr<Media::PixelMap> &value)
+{
+    auto pixelMap = OHOS::Media::ImageAniUtils::GetPixelMapFromEnvSp(env, param);
+    if (!pixelMap) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap pixelMap failed");
+        return false;
+    }
+
+    value = pixelMap;
+    return true;
+}
+
+bool UnwrapPixelMapByPropertyName(
+    ani_env *env, ani_object param, const char *propertyName, std::shared_ptr<Media::PixelMap> &value)
+{
+    ani_object envValue = GetPropertyValueByName(env, param, propertyName);
+    if (envValue == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "UnwrapPixelMapByPropertyName failed");
+        return false;
+    }
+    return UnwrapPixelMapFromAni(env, envValue, value);
+}
+#endif
+
+bool UnwrapStartWindowOption(ani_env *env, ani_object param,
+    std::shared_ptr<AAFwk::StartWindowOption> &startWindowOption)
+{
+    auto option = std::make_shared<AAFwk::StartWindowOption>();
+
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
+
+    std::shared_ptr<Media::PixelMap> startWindowIcon = nullptr;
+    if (!UnwrapPixelMapByPropertyName(env, param, "startWindowIcon", startWindowIcon)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startWindowIcon failed");
+        return false;
+    }
+    option->startWindowIcon = startWindowIcon;
+
+    if (startWindowIcon != nullptr) {
+        option->hasStartWindow = true;
+    }
+#endif
+    startWindowOption = option;
     return true;
 }
 }  // namespace AppExecFwk

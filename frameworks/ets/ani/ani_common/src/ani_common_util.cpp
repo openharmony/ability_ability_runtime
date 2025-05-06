@@ -564,19 +564,19 @@ bool SetFieldRef(ani_env *env, ani_class cls, ani_object object, const std::stri
 bool AniStringToStdString(ani_env *env, ani_string aniString, std::string &stdString)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "env is nullptr");
         return false;
     }
     ani_size sz {};
     ani_status status = ANI_ERROR;
     if ((status = env->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "String_ToUTF8Size failed, status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "String_ToUTF8Size failed, status: %{public}d", status);
         return false;
     }
     stdString.resize(sz + 1);
     if ((status = env->String_GetUTF8SubString(aniString, 0, sz, stdString.data(), stdString.size(), &sz))
         != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "String_GetUTF8SubString failed status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "String_GetUTF8SubString failed status: %{public}d", status);
         return false;
     }
     return true;
@@ -586,12 +586,27 @@ bool GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_ref &ref
 {
     ani_status status = env->Object_GetPropertyByName_Ref(obj, name, &ref);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to get property '%{public}s', status: %{public}d", name, status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "Failed to get property '%{public}s', status: %{public}d", name, status);
         return false;
     }
     status = env->Reference_IsUndefined(ref, &isUndefined);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to check undefined for '%{public}s', status: %{public}d", name, status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "Failed to check undefined for '%{public}s', status: %{public}d", name, status);
+        return false;
+    }
+    return true;
+}
+
+bool GetFieldRef(ani_env *env, ani_object obj, const char *name, ani_ref &ref, ani_boolean &isUndefined)
+{
+    ani_status status = env->Object_GetFieldByName_Ref(obj, name, &ref);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Failed to get field '%{public}s', status: %{public}d", name, status);
+        return false;
+    }
+    status = env->Reference_IsUndefined(ref, &isUndefined);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Failed to check undefined for '%{public}s', status: %{public}d", name, status);
         return false;
     }
     return true;
@@ -603,13 +618,13 @@ bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object r
     ani_class clsCall {};
 
     if ((status = env->FindClass("Lutils/AbilityUtils/AsyncCallbackWrapper;", &clsCall)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
         return false;
     }
     ani_method method {};
     if ((status = env->Class_FindMethod(
         clsCall, "invoke", "L@ohos/base/BusinessError;Lstd/core/Object;:V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
         return false;
     }
     if (result == nullptr) {
@@ -618,10 +633,31 @@ bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object r
         result = reinterpret_cast<ani_object>(nullRef);
     }
     if ((status = env->Object_CallMethod_Void(call, method, error, result)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
         return false;
     }
     return true;
+}
+
+ani_object GetPropertyValueByName(ani_env *env, ani_object param, const char *propertyName)
+{
+    ani_boolean isUndefined = true;
+    ani_ref valueRef = nullptr;
+    if (!AppExecFwk::GetFieldRef(env, param, propertyName, valueRef, isUndefined)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetFieldRef failed");
+        return nullptr;
+    }
+
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "propertyName isUndefined: %{public}s ", propertyName);
+        return nullptr;
+    }
+
+    if (valueRef == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetPropertyValueRef is nullptr ");
+        return nullptr;
+    }
+    return reinterpret_cast<ani_object>(valueRef);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
