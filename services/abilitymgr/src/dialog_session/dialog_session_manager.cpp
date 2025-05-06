@@ -245,11 +245,11 @@ void DialogSessionManager::NotifyAbilityRequestFailure(const std::string &dialog
     auto abilityRecord = Token::GetAbilityRecordByToken(callerInfo->callerToken);
     CHECK_POINTER(abilityRecord);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "handling ability request failure, requestId=%{public}s", requestId.c_str());
-    std::string message = "user refuses to jump";
+    std::string message = "User refused redirection";
     if (callerInfo->type == SelectorType::IMPLICIT_START_SELECTOR) {
-        message = "user closed implicit start selector";
+        message = "User closed the implicit startup picker";
     } else if (callerInfo->type == SelectorType::APP_CLONE_SELECTOR) {
-        message = "user closed app-clone selector";
+        message = "User closed the app clone picker";
     }
     abilityRecord->NotifyAbilityRequestFailure(requestId, want.GetElement(), message);
 }

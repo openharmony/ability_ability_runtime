@@ -927,7 +927,7 @@ void UIAbilityImpl::ScheduleAbilityRequestSuccess(const std::string &requestId, 
         return;
     }
     nlohmann::json jsonObject = nlohmann::json {
-        { JSON_KEY_ERR_MSG, "success" },
+        { JSON_KEY_ERR_MSG, "Succeeded" },
     };
     ability_->OnAbilityRequestSuccess(requestId, element, jsonObject.dump());
 }
