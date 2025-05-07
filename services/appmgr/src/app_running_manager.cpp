@@ -1544,6 +1544,19 @@ std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(
 }
 #endif //SUPPORT_CHILD_PROCESS
 
+std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByChildRecordPid(const pid_t pid)
+{
+    std::lock_guard guard(runningRecordMapMutex_);
+    auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&pid](const auto &pair) {
+        auto childAppRecordMap = pair.second->GetChildAppRecordMap();
+        return childAppRecordMap.find(pid) != childAppRecordMap.end();
+    });
+    if (iter != appRunningRecordMap_.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
 int32_t AppRunningManager::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
