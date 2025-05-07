@@ -133,6 +133,7 @@ public:
     static napi_value SetFontSizeScale(napi_env env, napi_callback_info info);
     static napi_value CreateAreaModeContext(napi_env env, napi_callback_info info);
     static napi_value CreateDisplayContext(napi_env env, napi_callback_info info);
+    static napi_value GetIndex(napi_env env, napi_callback_info info);
 
 protected:
     std::weak_ptr<ApplicationContext> applicationContext_;
@@ -148,6 +149,7 @@ private:
     napi_value OnGetApplicationContext(napi_env env, NapiCallbackInfo& info);
     napi_value OnCreateAreaModeContext(napi_env env, NapiCallbackInfo &info);
     napi_value OnCreateDisplayContext(napi_env env, NapiCallbackInfo &info);
+    napi_value OnGetIndex(napi_env env, NapiCallbackInfo &info);
     napi_value CreateJsContext(napi_env env, const std::shared_ptr<Context> &context);
     bool CheckCallerIsSystemApp();
     static void BindNativeApplicationContextOne(napi_env env, napi_value object);
