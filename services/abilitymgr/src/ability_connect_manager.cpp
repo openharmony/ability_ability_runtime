@@ -33,6 +33,7 @@
 #include "res_sched_util.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
+#include "timeout_state_utils.h"
 #include "ui_extension_utils.h"
 #include "ui_service_extension_connection_constants.h"
 #include "uri_utils.h"
@@ -100,16 +101,6 @@ bool IsSpecialAbility(const AppExecFwk::AbilityInfo &abilityInfo)
         }
     }
     return false;
-}
-
-FreezeUtil::TimeoutState MsgId2StateOfConnectManager(uint32_t msgId)
-{
-    if (msgId == AbilityManagerService::LOAD_TIMEOUT_MSG) {
-        return FreezeUtil::TimeoutState::LOAD;
-    } else if (msgId == AbilityManagerService::CONNECT_TIMEOUT_MSG) {
-        return FreezeUtil::TimeoutState::CONNECT;
-    }
-    return FreezeUtil::TimeoutState::UNKNOWN;
 }
 }
 
@@ -3035,7 +3026,7 @@ void AbilityConnectManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord>
     if (!IsUIExtensionAbility(ability) && !ability->IsSceneBoard()) {
         info.needKillProcess = false;
     }
-    FreezeUtil::TimeoutState state = MsgId2StateOfConnectManager(msgId);
+    FreezeUtil::TimeoutState state = TimeoutStateUtils::MsgId2FreezeTimeOutState(msgId);
     FreezeUtil::LifecycleFlow flow;
     if (state != FreezeUtil::TimeoutState::UNKNOWN) {
         if (ability->GetToken() != nullptr) {

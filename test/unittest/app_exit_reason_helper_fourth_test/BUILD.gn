@@ -46,6 +46,7 @@ ohos_unittest("app_exit_reason_helper_fourth_test") {
     "${ability_runtime_services_path}/abilitymgr/src/start_window_option.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/sub_managers_helper.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/app_mgr_util.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/timeout_state_utils.cpp",
     "app_exit_reason_helper_fourth_test.cpp",
     "mock/src/bundle_mgr_helper.cpp",
     "mock/src/mock_app_scheduler.cpp",
