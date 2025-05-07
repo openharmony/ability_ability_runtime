@@ -3056,16 +3056,25 @@ void MainThread::HandleScheduleAcceptWant(const AAFwk::Want &want, const std::st
         TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
-
-    std::string specifiedFlag;
-    application_->ScheduleAcceptWant(want, moduleName, specifiedFlag);
-
-    if (!appMgr_ || !applicationImpl_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
-        return;
+    wptr<MainThread> weak = this;
+    auto callback = [weak, wantCopy = want] (std::string specifiedFlag) {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            return;
+        }
+        if (appThread->appMgr_ == nullptr || appThread->applicationImpl_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
+            return;
+        }
+        appThread->appMgr_->ScheduleAcceptWantDone(appThread->applicationImpl_->GetRecordId(),
+            wantCopy, specifiedFlag);
+    };
+    bool isAsync = false;
+    application_->ScheduleAcceptWant(want, moduleName, callback, isAsync);
+    if (!isAsync) {
+        TAG_LOGI(AAFwkTag::APPKIT, "sync call");
     }
-
-    appMgr_->ScheduleAcceptWantDone(applicationImpl_->GetRecordId(), want, specifiedFlag);
 }
 
 void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName)
@@ -3080,7 +3089,7 @@ void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &
         }
         appThread->HandleScheduleAcceptWant(want, moduleName);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:AcceptWant")) {
+    if (mainHandler_ == nullptr || !mainHandler_->PostTask(task, "MainThread:AcceptWant")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -3140,16 +3149,25 @@ void MainThread::HandleScheduleNewProcessRequest(const AAFwk::Want &want, const 
         TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
-
-    std::string specifiedProcessFlag;
-    application_->ScheduleNewProcessRequest(want, moduleName, specifiedProcessFlag);
-
-    if (!appMgr_ || !applicationImpl_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
-        return;
+    wptr<MainThread> weak = this;
+    auto callback = [weak, wantCopy = want] (std::string specifiedFlag) {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            return;
+        }
+        if (appThread->appMgr_ == nullptr || appThread->applicationImpl_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
+            return;
+        }
+        appThread->appMgr_->ScheduleNewProcessRequestDone(appThread->applicationImpl_->GetRecordId(),
+            wantCopy, specifiedFlag);
+    };
+    bool isAsync = false;
+    application_->ScheduleNewProcessRequest(want, moduleName, callback, isAsync);
+    if (!isAsync) {
+        TAG_LOGD(AAFwkTag::APPKIT, "sync call");
     }
-
-    appMgr_->ScheduleNewProcessRequestDone(applicationImpl_->GetRecordId(), want, specifiedProcessFlag);
 }
 
 void MainThread::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)

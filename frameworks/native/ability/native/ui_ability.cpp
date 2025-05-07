@@ -562,6 +562,13 @@ int32_t UIAbility::OnSaveState(int32_t reason, AAFwk::WantParams &wantParams)
     return ERR_OK;
 }
 
+int32_t UIAbility::OnSaveState(int32_t reason, AAFwk::WantParams &wantParams,
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo,
+    bool &isAsync, AppExecFwk::StateReason stateReason)
+{
+    return ERR_OK;
+}
+
 void UIAbility::OnCompleteContinuation(int result)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");

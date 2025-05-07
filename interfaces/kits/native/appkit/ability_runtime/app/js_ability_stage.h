@@ -52,9 +52,11 @@ public:
         AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
         bool &isAsync) const override;
 
-    std::string OnAcceptWant(const AAFwk::Want &want) override;
+    std::string OnAcceptWant(const AAFwk::Want &want,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsyn) override;
 
-    std::string OnNewProcessRequest(const AAFwk::Want &want) override;
+    std::string OnNewProcessRequest(const AAFwk::Want &want,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync) override;
 
     void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
 
@@ -85,7 +87,14 @@ private:
     bool CallOnPrepareTerminateAsync(napi_env env,
         AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
         bool &isAsync) const;
+    
+    bool CallAcceptOrRequestSync(napi_env env, const AAFwk::Want &want, std::string &methodName,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo) const;
 
+    bool CallAcceptOrRequestAsync(napi_env env, const AAFwk::Want &want, std::string &methodName,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo,
+        bool &isAsync) const;
+    
     int32_t RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo);
 
     static int32_t RunAutoStartupTaskInner(const std::function<void()> &callback, bool &isAsyncCallback);
