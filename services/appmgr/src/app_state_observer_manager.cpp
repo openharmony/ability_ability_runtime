@@ -1252,16 +1252,15 @@ void AppStateObserverManager::HandleOnAppCacheStateChanged(const std::shared_ptr
 }
 
 ProcessBindData AppStateObserverManager::WrapProcessBindData(
-    const std::shared_ptr<AppRunningRecord> &appRecord,
     const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation)
 {
     ProcessBindData processBindData;
-    processBindData.bundleName = appRecord->GetBundleName();
-    processBindData.pid = appRecord->GetPid();
-    processBindData.uid = appRecord->GetUid();
-    processBindData.isKeepAlive = appRecord->IsKeepAliveApp();
-    processBindData.extensionType = appRecord->GetExtensionType();
-    processBindData.processType = appRecord->GetProcessType();
+    processBindData.bundleName = bindInfo.bundleName;
+    processBindData.pid = bindInfo.pid;
+    processBindData.uid = bindInfo.uid;
+    processBindData.isKeepAlive = bindInfo.isKeepAlive;
+    processBindData.extensionType = bindInfo.extensionType;
+    processBindData.processType = bindInfo.processType;
     processBindData.callerPid = bindInfo.callerPid;
     processBindData.callerUid = bindInfo.callerUid;
     processBindData.callerBundleName = bindInfo.callerBundleName;
@@ -1278,8 +1277,7 @@ void AppStateObserverManager::OnProcessBindingRelationChanged(
         return;
     }
 
-    auto task =
-        [weak = weak_from_this(), appRecord, bindInfo, bindingRelation]() {
+    auto task = [weak = weak_from_this(), appRecord, bindInfo, bindingRelation]() {
         auto self = weak.lock();
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null self");
@@ -1301,16 +1299,22 @@ void AppStateObserverManager::HandleOnProcessBindingRelationChanged(
         return;
     }
 
-    ProcessBindData data =
-        WrapProcessBindData(appRecord, bindInfo, bindingRelation);
+    ProcessBindData data = WrapProcessBindData(bindInfo, bindingRelation);
+    TAG_LOGD(AAFwkTag::APPMGR,
+        "HandleOnProcessBindingRelationChanged, pid:%{public}d, uid:%{public}d, bundleName:%{public}s, "
+        "callerPid:%{public}d, callerUid:%{public}d, callerBundleName:%{public}s, bindingRelation:%{public}d",
+        data.pid,
+        data.uid,
+        data.bundleName.c_str(),
+        data.callerPid,
+        data.callerUid,
+        data.callerBundleName.c_str(),
+        data.bindingRelation);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
-    for (auto it = appStateObserverMapCopy.begin();
-         it != appStateObserverMapCopy.end(); ++it) {
+    for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
-        auto iter =
-            std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) &&
-            it->first != nullptr) {
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnProcessBindingRelationChanged(data);
         }
     }

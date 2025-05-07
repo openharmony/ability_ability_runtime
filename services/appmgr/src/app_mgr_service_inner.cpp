@@ -9404,48 +9404,26 @@ int32_t AppMgrServiceInner::LaunchAbility(sptr<IRemoteObject> token)
 }
 
 void AppMgrServiceInner::AddUIExtensionBindItem(
-    std::shared_ptr<AAFwk::Want> want,
-    std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token)
+    std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token)
 {
+    if (want == nullptr || appRecord == nullptr || token == nullptr || appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid input params");
+        return;
+    }
+
     auto notifyProcessBind = want->GetIntParam(UIEXTENSION_NOTIFY_BIND, -1);
     if (notifyProcessBind != 1) {
         TAG_LOGE(AAFwkTag::APPMGR, "no bind permission");
         return;
     }
-    if (want == nullptr || appRecord == nullptr || token == nullptr ||
-        appRunningManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "invalid input params");
-        return;
-    }
-    auto uiExtensionBindAbilityId =
-        want->GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1);
-    auto callerPid = want->GetIntParam(UIEXTENSION_HOST_PID, -1);
-    auto callerUid = want->GetIntParam(UIEXTENSION_HOST_UID, -1);
-    auto callerBundleName = want->GetStringParam(UIEXTENSION_HOST_BUNDLENAME);
-    pid_t providerPid = -1;
-    pid_t providerUid = -1;
-    if (appRecord->GetPriorityObject() != nullptr) {
-        providerPid = appRecord->GetPid();
-        providerUid = appRecord->GetUid();
-    }
-    if (uiExtensionBindAbilityId == -1 || providerPid == -1 ||
-        providerUid == -1 || callerPid == -1 || callerUid == -1 ||
-        callerBundleName.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "invalid want params");
-        return;
-    }
 
-    TAG_LOGI(AAFwkTag::APPMGR,
-             "uiExtensionBindAbilityId: %{public}d, providerUid: "
-             "%{public}d,providerPid: %{public}d,callerUid: %{public}d, "
-             "callerPid: %{public}d,callerBundleName: %{public}s",
-             uiExtensionBindAbilityId, providerUid, providerPid, callerUid,
-             callerPid, callerBundleName.c_str());
-    UIExtensionProcessBindInfo bindInfo = appRunningManager_->WarpBindInfo(
-        providerPid, providerUid, callerPid, callerUid, callerBundleName,
-        notifyProcessBind);
-    appRunningManager_->AddUIExtensionBindItem(uiExtensionBindAbilityId,
-                                               bindInfo);
+    UIExtensionProcessBindInfo bindInfo;
+    if (!WarpBindInfo(want, appRecord, bindInfo)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "warp bindInfo fail");
+        return;
+    }
+    auto uiExtensionBindAbilityId = want->GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1);
+    appRunningManager_->AddUIExtensionBindItem(uiExtensionBindAbilityId, bindInfo);
     BindUIExtensionProcess(appRecord, bindInfo);
     want->RemoveParam(UIEXTENSION_HOST_PID);
     want->RemoveParam(UIEXTENSION_HOST_UID);
@@ -9456,8 +9434,7 @@ void AppMgrServiceInner::AddUIExtensionBindItem(
 void AppMgrServiceInner::RemoveUIExtensionBindItem(
     std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token)
 {
-    if (appRecord == nullptr || token == nullptr ||
-        appRunningManager_ == nullptr) {
+    if (appRecord == nullptr || token == nullptr || appRunningManager_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid input params");
         return;
     }
@@ -9474,21 +9451,20 @@ void AppMgrServiceInner::RemoveUIExtensionBindItem(
         return;
     }
 
-    if (!AAFwk::UIExtensionUtils::IsUIExtension(
-            abilityInfo->extensionAbilityType)) {
+    if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityType not match");
         return;
     }
 
-    auto uiExtensionBindAbilityId =
-        abilityRunningRecord->GetUIExtensionBindAbilityId();
+    auto uiExtensionBindAbilityId = abilityRunningRecord->GetUIExtensionBindAbilityId();
     UIExtensionProcessBindInfo bindInfo;
-    auto result = appRunningManager_->QueryUIExtensionBindItemById(
-        uiExtensionBindAbilityId, bindInfo);
+    auto result = appRunningManager_->QueryUIExtensionBindItemById(uiExtensionBindAbilityId, bindInfo);
     if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bindInfo not exist");
         return;
     }
     if (bindInfo.notifyProcessBind != 1) {
-        TAG_LOGE(AAFwkTag::APPMGR, "no bind permission");
+        TAG_LOGE(AAFwkTag::APPMGR, "no unbind permission");
         return;
     }
     UnBindUIExtensionProcess(appRecord, bindInfo);
@@ -9496,27 +9472,24 @@ void AppMgrServiceInner::RemoveUIExtensionBindItem(
 }
 
 void AppMgrServiceInner::BindUIExtensionProcess(
-    const std::shared_ptr<AppRunningRecord> &appRecord,
-    const UIExtensionProcessBindInfo &bindInfo)
+    const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo)
 {
     std::lock_guard guard(uiExtensionBindReleationsLock_);
     auto pid = bindInfo.pid;
     auto callerPid = bindInfo.callerPid;
     auto it = uiExtensionBindReleations_.find(pid);
 
-    if (it == uiExtensionBindReleations_.end() ||
-        it->second.find(callerPid) == it->second.end()) {
+    if (it == uiExtensionBindReleations_.end() || it->second.find(callerPid) == it->second.end()) {
         uiExtensionBindReleations_[pid][callerPid] = 1;
-        DelayedSingleton<AppStateObserverManager>::GetInstance()
-            ->OnProcessBindingRelationChanged(appRecord, bindInfo, 1);
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessBindingRelationChanged(
+            appRecord, bindInfo, 1);
     } else {
         it->second[callerPid]++;
     }
 }
 
 void AppMgrServiceInner::UnBindUIExtensionProcess(
-    const std::shared_ptr<AppRunningRecord> &appRecord,
-    const UIExtensionProcessBindInfo &bindInfo)
+    const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo)
 {
     std::lock_guard guard(uiExtensionBindReleationsLock_);
     auto pid = bindInfo.pid;
@@ -9529,8 +9502,8 @@ void AppMgrServiceInner::UnBindUIExtensionProcess(
         if (innerIt != innerMap.end()) {
             innerIt->second--;
             if (innerIt->second == 0) {
-                DelayedSingleton<AppStateObserverManager>::GetInstance()
-                    ->OnProcessBindingRelationChanged(appRecord, bindInfo, 0);
+                DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessBindingRelationChanged(
+                    appRecord, bindInfo, 0);
                 innerMap.erase(innerIt);
             }
         }
@@ -9538,6 +9511,47 @@ void AppMgrServiceInner::UnBindUIExtensionProcess(
             uiExtensionBindReleations_.erase(it);
         }
     }
+}
+
+bool AppMgrServiceInner::WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord,
+    UIExtensionProcessBindInfo &bindInfo)
+{
+    auto notifyProcessBind = want->GetIntParam(UIEXTENSION_NOTIFY_BIND, -1);
+    auto uiExtensionBindAbilityId = want->GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1);
+    auto callerPid = want->GetIntParam(UIEXTENSION_HOST_PID, -1);
+    auto callerUid = want->GetIntParam(UIEXTENSION_HOST_UID, -1);
+    auto callerBundleName = want->GetStringParam(UIEXTENSION_HOST_BUNDLENAME);
+    pid_t providerPid = -1;
+    pid_t providerUid = -1;
+    if (appRecord->GetPriorityObject() != nullptr) {
+        providerPid = appRecord->GetPid();
+        providerUid = appRecord->GetUid();
+    }
+    TAG_LOGI(AAFwkTag::APPMGR,
+        "uiExtensionBindAbilityId: %{public}d, providerUid: "
+        "%{public}d,providerPid: %{public}d,callerUid: %{public}d, "
+        "callerPid: %{public}d,callerBundleName: %{public}s",
+        uiExtensionBindAbilityId,
+        providerUid,
+        providerPid,
+        callerUid,
+        callerPid,
+        callerBundleName.c_str());
+    if (uiExtensionBindAbilityId == -1 || providerPid == -1 || providerUid == -1 || callerPid == -1 ||
+        callerUid == -1 || callerBundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid want params");
+        return false;
+    }
+    bindInfo.pid = providerPid;
+    bindInfo.uid = providerUid;
+    bindInfo.callerPid = callerPid;
+    bindInfo.callerUid = callerUid;
+    bindInfo.callerBundleName = callerBundleName;
+    bindInfo.notifyProcessBind = notifyProcessBind;
+    bindInfo.isKeepAlive = appRecord->IsKeepAliveApp();
+    bindInfo.extensionType = appRecord->GetExtensionType();
+    bindInfo.processType = appRecord->GetProcessType();
+    return true;
 }
 } // namespace AppExecFwk
 }  // namespace OHOS

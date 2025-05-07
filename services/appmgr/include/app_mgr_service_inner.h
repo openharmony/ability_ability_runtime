@@ -1978,14 +1978,15 @@ private:
     void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(std::shared_ptr<ApplicationInfo> appInfo,
         const std::string &processName, const BundleInfo &bundleInfo);
-    void AddUIExtensionBindItem(std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AppRunningRecord> appRecord,
-                                sptr<IRemoteObject> token);
+    void AddUIExtensionBindItem(
+        std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token);
     void RemoveUIExtensionBindItem(std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token);
-    void BindUIExtensionProcess(const std::shared_ptr<AppRunningRecord> &appRecord,
-                                const UIExtensionProcessBindInfo &bindInfo);
-    void UnBindUIExtensionProcess(const std::shared_ptr<AppRunningRecord> &appRecord,
-                                  const UIExtensionProcessBindInfo &bindInfo);
-
+    void BindUIExtensionProcess(
+        const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
+    void UnBindUIExtensionProcess(
+        const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
+    bool WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord,
+        UIExtensionProcessBindInfo &bindInfo);
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
     std::atomic<int32_t> willKillPidsNum_ = 0;
