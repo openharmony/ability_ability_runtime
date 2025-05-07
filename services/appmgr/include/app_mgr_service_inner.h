@@ -203,10 +203,11 @@ public:
      *
      * @param pids, the pid list of processes are going to be killed.
      * @param reason, the reason to kill the processes.
-     * @return
+     * @param subProcess, kill SubProcess or not.
+     * @return ERR_OK, return back success, others fail.
      */
-    virtual void KillProcessesByPids(const std::vector<int32_t> &pids,
-        const std::string &reason = "KillProcessesByPids");
+    virtual int32_t KillProcessesByPids(const std::vector<int32_t> &pids,
+        const std::string &reason = "KillProcessesByPids", bool subProcess = false);
 
     /**
      * KillProcessesInBatch, kill processes in batch;
@@ -923,6 +924,11 @@ public:
     void NotifyAppStatus(const std::string &bundleName, int32_t appIndex, const std::string &eventData);
 
     int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation");
+
+    int32_t KillSubProcessBypidInner(const pid_t pid, const std::string &reason,
+        AAFwk::EventInfo &eventInfo);
+
+    int32_t KillSubProcessBypid(const pid_t pid, const std::string &reason);
 
     /**
      * @brief Get the running state of application by bundle name.
