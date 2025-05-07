@@ -177,6 +177,8 @@ const std::string JSON_KEY_APP_FONT_MAX_SCALE = "fontSizeMaxScale";
 const std::string JSON_KEY_APP_CONFIGURATION = "configuration";
 const std::string DEFAULT_APP_FONT_SIZE_SCALE = "nonFollowSystem";
 const std::string SYSTEM_DEFAULT_FONTSIZE_SCALE = "1.0";
+const char* PC_LIBRARY_PATH = "/system/lib64/liblayered_parameters_manager.z.so";
+const char* PC_FUNC_INFO = "DetermineResourceType";
 const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
 
@@ -1813,6 +1815,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         appConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, preferredLanguage);
     }
     ParseAppConfigurationParams(bundleInfo.applicationInfo.configuration, appConfig);
+    HandleConfigByPlugin(appConfig, bundleInfo);
     std::string systemSizeScale = appConfig.GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     if (!systemSizeScale.empty() && systemSizeScale.compare(DEFAULT_APP_FONT_SIZE_SCALE) == 0) {
         appConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, SYSTEM_DEFAULT_FONTSIZE_SCALE);
@@ -3851,6 +3854,30 @@ void MainThread::HandleCacheProcess()
         }
         runtime->ForceFullGC();
     }
+}
+
+void MainThread::HandleConfigByPlugin(Configuration &config, BundleInfo &bundleInfo)
+{
+    if (PC_LIBRARY_PATH == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "PC_LIBRARY_PATH == nullptr");
+        return;
+    }
+
+    void* handle = dlopen(PC_LIBRARY_PATH, RTLD_LAZY);
+    if (handle == nullptr) {
+        TAG_LOGW(AAFwkTag::APPKIT, "reason %{public}sn", dlerror());
+        return;
+    }
+
+    auto entry = reinterpret_cast<void* (*)(Configuration &, BundleInfo &)>(dlsym(handle, PC_FUNC_INFO));
+    if (entry == nullptr) {
+        dlclose(handle);
+        TAG_LOGE(AAFwkTag::APPKIT, "get func fail");
+        return;
+    }
+
+    entry(config, bundleInfo);
+    dlclose(handle);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
