@@ -85,13 +85,12 @@ std::shared_ptr<NativeRdb::RdbStore> InsightIntentRdbDataMgr::GetRdbStore()
         intentRdbConfig_.version,
         IntentRdbOpenCallback,
         errCode);
-    if (rdbStore_ == nullptr) {
+    if (errCode != NativeRdb::E_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "GetRdbStore failed, errCode:%{public}d", errCode);
-        return nullptr;
     }
     NativeRdb::RebuiltType rebuildType = NativeRdb::RebuiltType::NONE;
     int32_t rebuildCode = rdbStore_->GetRebuilt(rebuildType);
-    if (rebuildType == NativeRdb::RebuiltType::REBUILT || isNeedRebuildDb) {
+    if (errCode ==  NativeRdb::E_SQLITE_CORRUPT || rebuildType == NativeRdb::RebuiltType::REBUILT || isNeedRebuildDb) {
         TAG_LOGI(AAFwkTag::INTENT, "start %{public}s restore ret %{public}d, type:%{public}d",
             intentRdbConfig_.dbName.c_str(), rebuildCode, static_cast<int32_t>(rebuildType));
         int32_t restoreRet = rdbStore_->Restore(rdbFilePath);
