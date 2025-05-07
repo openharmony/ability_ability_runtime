@@ -22,10 +22,15 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
 constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
 constexpr const char* CLASSNAME_BOOLEAN = "Lstd/core/Boolean;";
 constexpr const char* CLASSNAME_INT = "Lstd/core/Int;";
 constexpr const char* CLASSNAME_LONG = "Lstd/core/Long;";
+constexpr const char* CLASSNAME_STRING = "Lstd/core/String;";
+constexpr const char* CLASSNAME_ARRAY = "Lescompat/Array;";
+constexpr const char* CLASSNAME_ASYNC_CALLBACK_WRAPPER = "Lutils/AbilityUtils/AsyncCallbackWrapper;";
+}
 
 bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value)
 {
@@ -142,7 +147,7 @@ bool SetFieldFixedArrayString(ani_env *env, ani_class cls, ani_object object, co
         return false;
     }
 
-    status = env->FindClass("Lstd/core/String;", &stringCls);
+    status = env->FindClass(CLASSNAME_STRING, &stringCls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return false;
@@ -246,7 +251,7 @@ bool SetFieldArrayString(ani_env *env, ani_class cls, ani_object object, const s
         return false;
     }
 
-    status = env->FindClass("Lescompat/Array;", &arrayCls);
+    status = env->FindClass(CLASSNAME_ARRAY, &arrayCls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return false;
@@ -617,7 +622,7 @@ bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object r
     ani_status status = ANI_ERROR;
     ani_class clsCall {};
 
-    if ((status = env->FindClass("Lutils/AbilityUtils/AsyncCallbackWrapper;", &clsCall)) != ANI_OK) {
+    if ((status = env->FindClass(CLASSNAME_ASYNC_CALLBACK_WRAPPER, &clsCall)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
         return false;
     }

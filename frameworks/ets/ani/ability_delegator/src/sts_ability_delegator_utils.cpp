@@ -21,6 +21,13 @@
 
 namespace OHOS {
 namespace AbilityDelegatorSts {
+namespace {
+constexpr const char* ABILITY_DELEGATOR_CLASS_NAME = "Lapplication/AbilityDelegator/AbilityDelegatorInner;";
+constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
+constexpr const char* ARGS_ABILITY_DELEGATOR_CLASS_NAME =
+    "Lapplication/abilityDelegatorArgs/AbilityDelegatorArgsInner;";
+}
+
 ani_object CreateStsAbilityDelegator(ani_env *aniEnv)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "CreateJsAbilityDelegator");
@@ -30,7 +37,7 @@ ani_object CreateStsAbilityDelegator(ani_env *aniEnv)
     }
     ani_class abilityDelegator = nullptr;
     ani_status status = ANI_ERROR;
-    status = aniEnv->FindClass("Lapplication/AbilityDelegator/AbilityDelegatorInner;", &abilityDelegator);
+    status = aniEnv->FindClass(ABILITY_DELEGATOR_CLASS_NAME, &abilityDelegator);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegatorInner failed status: %{public}d", status);
         return {};
@@ -117,7 +124,7 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
     ani_status status = ANI_ERROR;
     // get getter and setter methond of Record
     ani_class recordCls;
-    status = aniEnv->FindClass("Lescompat/Record;", &recordCls);
+    status = aniEnv->FindClass(RECORD_CLASS_NAME, &recordCls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status: %{public}d", status);
         return;
@@ -253,7 +260,7 @@ ani_object CreateStsAbilityDelegatorArguments(
     }
     ani_class arguments = nullptr;
     ani_status status = ANI_ERROR;
-    status = aniEnv->FindClass("Lapplication/abilityDelegatorArgs/AbilityDelegatorArgsInner;", &arguments);
+    status = aniEnv->FindClass(ARGS_ABILITY_DELEGATOR_CLASS_NAME, &arguments);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "find abilityDelegatorArgs failed status: %{public}d", status);
         return {};

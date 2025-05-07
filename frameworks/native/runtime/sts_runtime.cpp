@@ -84,6 +84,8 @@ constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
 constexpr char ENTRY_PATH_MAP_FILE[] = "/system/framework/entrypath.json";
 constexpr char ENTRY_PATH_MAP_KEY[] = "entryPath";
 constexpr char DEFAULT_ENTRY_ABILITY_CLASS[] = "entry/src/main/ets/entryability/EntryAbility/EntryAbility";
+constexpr const char* STRING_CLASS_NAME = "Lstd/core/String;";
+constexpr const char* ABC_RUNTIME_LINKER_CLASS_NAME = "Lstd/core/AbcRuntimeLinker;";
 
 class EntryPathManager {
 public:
@@ -504,7 +506,7 @@ void STSRuntime::PreloadModule(const std::string& moduleName, const std::string&
         return;
     }
     ani_class stringCls = nullptr;
-    if (aniEnv->FindClass("Lstd/core/String;", &stringCls) != ANI_OK) {
+    if (aniEnv->FindClass(STRING_CLASS_NAME, &stringCls) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "FindClass Lstd/core/String Failed");
         return;
     }
@@ -529,7 +531,7 @@ void STSRuntime::PreloadModule(const std::string& moduleName, const std::string&
         return;
     }
     ani_class cls = nullptr;
-    if (aniEnv->FindClass("Lstd/core/AbcRuntimeLinker;", &cls) != ANI_OK) {
+    if (aniEnv->FindClass(ABC_RUNTIME_LINKER_CLASS_NAME, &cls) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "FindClass AbcRuntimeLinker failed");
         return;
     }
@@ -588,7 +590,7 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
     }
 
     ani_class stringCls = nullptr;
-    if (aniEnv->FindClass("Lstd/core/String;", &stringCls) != ANI_OK) {
+    if (aniEnv->FindClass(STRING_CLASS_NAME, &stringCls) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "FindClass Lstd/core/String Failed");
         return std::make_unique<STSNativeReference>();
     }
@@ -616,7 +618,7 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
     }
 
     ani_class cls = nullptr;
-    if (aniEnv->FindClass("Lstd/core/AbcRuntimeLinker;", &cls) != ANI_OK) {
+    if (aniEnv->FindClass(ABC_RUNTIME_LINKER_CLASS_NAME, &cls) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "FindClass AbcRuntimeLinker failed");
         return std::make_unique<STSNativeReference>();
     }

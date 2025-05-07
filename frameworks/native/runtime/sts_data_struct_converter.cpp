@@ -23,6 +23,13 @@ namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 
+namespace {
+constexpr const char* LAUNCH_PARAM_IMPL_CLASS_NAME = "L@ohos/app/ability/AbilityConstant/LaunchParamImpl;";
+constexpr const char* LAUNCH_REASON_ENUM_NAME = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchReason;";
+constexpr const char* LAST_EXIT_REASON_ENUM_NAME =
+    "L@ohos/app/ability/AbilityConstant/AbilityConstant/LastExitReason;";
+}
+
 ani_string GetAniString(ani_env *env, const std::string &str)
 {
     ani_string aniStr = nullptr;
@@ -42,7 +49,7 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
     ani_status status = ANI_ERROR;
     ani_object object = nullptr;
     ani_class cls = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/AbilityConstant/LaunchParamImpl;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(LAUNCH_PARAM_IMPL_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         return nullptr;
     }
@@ -71,13 +78,12 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
 
     ani_enum_item launchReasonItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
-        "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchReason;", launchParam.launchReason, launchReasonItem);
+        LAUNCH_REASON_ENUM_NAME, launchParam.launchReason, launchReasonItem);
     env->Object_SetPropertyByName_Ref(object, "launchReason", launchReasonItem);
 
     ani_enum_item lastExitReasonItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
-        "L@ohos/app/ability/AbilityConstant/AbilityConstant/LastExitReason;",
-        launchParam.lastExitReason, lastExitReasonItem);
+        LAST_EXIT_REASON_ENUM_NAME, launchParam.lastExitReason, lastExitReasonItem);
     env->Object_SetPropertyByName_Ref(object, "lastExitReason", lastExitReasonItem);
 
     return object;

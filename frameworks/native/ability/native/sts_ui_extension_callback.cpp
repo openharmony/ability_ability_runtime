@@ -29,6 +29,10 @@ namespace AbilityRuntime {
 constexpr const char* ERROR_MSG_INNER = "Inner error.";
 #endif // SUPPORT_SCREEN
 
+namespace {
+constexpr const char* ABILITY_START_CLASS_NAME = "Lapplication/AbilityStartCallback/AbilityStartCallback;";
+}
+
 StsUIExtensionCallback::StsUIExtensionCallback() : JsUIExtensionCallback(nullptr)
 {
 }
@@ -57,7 +61,7 @@ void StsUIExtensionCallback::OnError(int32_t number)
     }
     ani_status status = ANI_ERROR;
     ani_class clsCall = nullptr;
-    if ((status = aniEnv->FindClass("Lapplication/AbilityStartCallback/AbilityStartCallback;", &clsCall)) != ANI_OK) {
+    if ((status = aniEnv->FindClass(ABILITY_START_CLASS_NAME, &clsCall)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "find AbilityStartCallback class failed, status : %{public}d", status);
         return;
     }

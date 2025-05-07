@@ -33,6 +33,10 @@ namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime;
 namespace {
+constexpr const char* WANT_CLASS_NAME = "L@ohos/app/ability/Want/Want;";
+constexpr const char* RECORD_SERIALIZE_TOOL_CLASS_NAME = "L@ohos/app/ability/Want/RecordSerializeTool;";
+constexpr const char* ABILITY_RESULT_INNER_CLASS_NAME = "Lability/abilityResult/AbilityResultInner;";
+
 bool InnerWrapWantParams(ani_env* env, ani_class wantCls, ani_object wantObject, const AAFwk::WantParams& wantParams)
 {
     ani_ref wantParamRef = WrapWantParams(env, wantParams);
@@ -61,7 +65,7 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     ani_status status = ANI_ERROR;
     ani_method method = nullptr;
     ani_object object = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/Want/Want;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(WANT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
     }
     if (cls == nullptr) {
@@ -97,7 +101,7 @@ ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams)
 {
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/Want/RecordSerializeTool;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(RECORD_SERIALIZE_TOOL_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "FindClass RecordSerializeTool failed, status : %{public}d", status);
     }
     if (cls == nullptr) {
@@ -275,7 +279,7 @@ bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams
 {
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/Want/RecordSerializeTool;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(RECORD_SERIALIZE_TOOL_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "FindClass RecordSerializeTool failed, status : %{public}d", status);
     }
     if (cls == nullptr) {
@@ -316,7 +320,7 @@ bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams
 
 bool GetAbilityResultClass(ani_env *env, ani_class &cls)
 {
-    ani_status status = env->FindClass("Lability/abilityResult/AbilityResultInner;", &cls);
+    ani_status status = env->FindClass(ABILITY_RESULT_INNER_CLASS_NAME, &cls);
     if (status != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
         return false;

@@ -24,7 +24,10 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-const char *INVOKE_METHOD_NAME = "invoke";
+namespace {
+constexpr const char* UI_CONTEXT_CLASS_NAME = "Lapplication/UIExtensionContext/UIExtensionContext;";
+}
+
 static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj,
     [[maybe_unused]] ani_object callback)
 {
@@ -34,7 +37,7 @@ static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] an
     ani_field contextField = nullptr;
     ani_status status = ANI_ERROR;
     ErrCode ret = ERR_INVALID_VALUE;
-    if ((status = env->FindClass("Lapplication/UIExtensionContext/UIExtensionContext;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(UI_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return;
     }
@@ -59,7 +62,7 @@ static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env, [[maybe_u
     ani_field contextField = nullptr;
     ani_status status = ANI_ERROR;
     ErrCode ret = ERR_INVALID_VALUE;
-    if ((status = env->FindClass("Lapplication/UIExtensionContext/UIExtensionContext;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(UI_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return;
     }
@@ -116,7 +119,7 @@ UIExtensionContext* StsUIExtensionContext::GetAbilityContext(ani_env *env, ani_o
         TAG_LOGE(AAFwkTag::UI_EXT, "null env");
         return nullptr;
     }
-    if ((status = env->FindClass("Lapplication/UIExtensionContext/UIExtensionContext;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(UI_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "GetAbilityContext find class status: %{public}d", status);
         return nullptr;
     }
@@ -253,7 +256,7 @@ ani_object CreateStsUIExtensionContext(ani_env *env, std::shared_ptr<UIExtension
     ani_method method = nullptr;
     ani_field field = nullptr;
     ani_object contextObj = nullptr;
-    if ((env->FindClass("Lapplication/UIExtensionContext/UIExtensionContext;", &cls)) != ANI_OK) {
+    if ((env->FindClass(UI_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return nullptr;
     }

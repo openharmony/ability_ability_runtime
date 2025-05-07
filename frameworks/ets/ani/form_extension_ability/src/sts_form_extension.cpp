@@ -29,6 +29,11 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+constexpr const char* FORM_BINDING_DATA_CLASS_NAME =
+    "L@ohos/app/form/formBindingData/formBindingData/FormBindingDataInner;";
+constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
+}
 
 STSFormExtension *STSFormExtension::Create(const std::unique_ptr<Runtime> &runtime)
 {
@@ -332,7 +337,7 @@ bool STSFormExtension::ExtractFormData(ani_env *env, ani_ref nativeResult, AppEx
     ani_status status = ANI_OK;
 
     ani_class cls{};
-    status = env->FindClass("L@ohos/app/form/formBindingData/formBindingData/FormBindingDataInner;", &cls);
+    status = env->FindClass(FORM_BINDING_DATA_CLASS_NAME, &cls);
     if (status != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "FindClass status: %{public}d", status);
         return false;
@@ -561,7 +566,7 @@ bool STSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
     ani_status status = ANI_OK;
 
     ani_class recordCls;
-    status = env->FindClass("Lescompat/Record;", &recordCls);
+    status = env->FindClass(RECORD_CLASS_NAME, &recordCls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "FindClass failed status: %{public}d", status);
         return false;
