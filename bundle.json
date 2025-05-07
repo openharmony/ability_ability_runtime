@@ -274,7 +274,8 @@
               "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/runtime/include/",
               "header_files": [
                 "js_runtime.h",
-                "runtime.h"
+                "runtime.h",
+                "sts_runtime.h"
               ]
             },
             "name": "//foundation/ability/ability_runtime/interfaces/inner_api/runtime:runtime"
@@ -330,6 +331,15 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/frameworks/js/napi/inner/napi_ability_common:napi_ability_common"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/ets/ani/ani_wantagent_common",
+              "header_files": [
+                "ani_common_want_agent.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/ets/ani/ani_wantagent_common:ani_wantagent_common"
           },
           {
             "header": {

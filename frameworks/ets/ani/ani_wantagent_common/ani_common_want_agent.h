@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_RESULT_H
-#define OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_RESULT_H
+#ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_WANT_AGENT_H
+#define OHOS_ABILITY_RUNTIME_ANI_COMMON_WANT_AGENT_H
 
 #include "ani.h"
-#include "want.h"
+#include "want_agent.h"
 
 namespace OHOS {
 namespace AppExecFwk {
+using namespace OHOS::AbilityRuntime::WantAgent;
 
-ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want &want);
+ani_object WrapWantAgent(ani_env *env, WantAgent *wantAgent);
+void UnwrapWantAgent(ani_env *env, ani_object agent, void** result);
 
 } // namespace AppExecFwk
 } // namespace OHOS
-
-#endif // OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_RESULT_H
+#endif  // OHOS_ABILITY_RUNTIME_ANI_COMMON_WANT_AGENT_H

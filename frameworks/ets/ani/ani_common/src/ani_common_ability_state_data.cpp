@@ -15,7 +15,6 @@
 
 #include "ani_common_ability_state_data.h"
 
-#include "ani_common_util.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
