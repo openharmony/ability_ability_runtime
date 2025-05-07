@@ -26,6 +26,13 @@ constexpr double FONT_SIZE_MIN_SCALE = 0.0;
 constexpr double FONT_SIZE_MAX_SCALE = 3.2;
 constexpr double FONT_WEIGHT_MIN_SCALE = 0.0;
 constexpr double FONT_WEIGHT_MAX_SCALE = 1.25;
+constexpr const char* COLOR_MODE_ENUM_NAME =
+    "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;";
+constexpr const char* DIRECTION_ENUM_NAME =
+    "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/Direction;";
+constexpr const char* DENSITY_ENUM_NAME =
+    "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ScreenDensity;";
+constexpr const char* CONFIGURATION_IMPL_CLASS_NAME = "L@ohos/app/ability/Configuration/ConfigurationImpl;";
 }
 
 void SetBasicConfiguration(
@@ -36,7 +43,7 @@ void SetBasicConfiguration(
 
     ani_enum_item colorModeItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
-        "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;",
+        COLOR_MODE_ENUM_NAME,
         ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE)), colorModeItem);
     env->Object_SetPropertyByName_Ref(object, "colorMode", colorModeItem);
 
@@ -46,15 +53,14 @@ void SetBasicConfiguration(
     std::string direction = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
     ani_enum_item directionItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
-        "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/Direction;", ConvertDirection(direction),
+        DIRECTION_ENUM_NAME, ConvertDirection(direction),
         directionItem);
     env->Object_SetPropertyByName_Ref(object, "direction", directionItem);
 
     std::string density = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI);
     ani_enum_item densityItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
-        "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ScreenDensity;", ConvertDensity(density),
-        densityItem);
+        DENSITY_ENUM_NAME, ConvertDensity(density), densityItem);
     env->Object_SetPropertyByName_Ref(object, "screenDensity", densityItem);
 }
 
@@ -93,7 +99,7 @@ ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &conf
         TAG_LOGE(AAFwkTag::JSNAPI, "null env");
         return nullptr;
     }
-    if ((status = env->FindClass("L@ohos/app/ability/Configuration/ConfigurationImpl;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(CONFIGURATION_IMPL_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return nullptr;
     }

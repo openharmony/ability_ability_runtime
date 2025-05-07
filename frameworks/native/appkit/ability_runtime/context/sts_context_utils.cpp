@@ -30,7 +30,10 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace ContextUtil {
 namespace {
-    std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_ = nullptr;
+std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_ = nullptr;
+constexpr const char* AREA_MODE_ENUM_NAME = "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;";
+constexpr const char* RESOURCE_MANAGER_INNER_CLASS_NAME =
+    "L@ohos/resourceManager/resourceManager/ResourceManagerInner;";
 }
 
 static std::weak_ptr<Context> context_;
@@ -98,8 +101,7 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
     }
     auto area = context->GetArea();
     ani_enum_item areaModeItem {};
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(
-        aniEnv, "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;", area, areaModeItem);
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(aniEnv, AREA_MODE_ENUM_NAME, area, areaModeItem);
 
     if (aniEnv->Object_SetField_Ref(contextObj, areaField, (ani_ref)areaModeItem) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Int failed");
@@ -226,8 +228,7 @@ ani_object CreateModuleResourceManagerSync([[maybe_unused]]ani_env *env, [[maybe
 
     auto resourceManager = context->CreateModuleResourceManager(bundleName_, moduleName_);
     ani_class resourceManagerCls = nullptr;
-    if ((status = env->FindClass("L@ohos/resourceManager/resourceManager/ResourceManagerInner;",
-        &resourceManagerCls)) != ANI_OK) {
+    if ((status = env->FindClass(RESOURCE_MANAGER_INNER_CLASS_NAME, &resourceManagerCls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed status: %{public}d", status);
         return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "findClass fail");
     }
