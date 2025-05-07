@@ -147,6 +147,15 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
+     * StartAbilityWithWait, send want and abilityStartWithWaitObserver to abms.
+     *
+     * @param want Ability want.
+     * @param observer ability foreground notify observer for aa tool.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> observer);
+
+    /**
      * StartAbility with want, send want to ability manager service.
      *
      * @param want Ability want.

@@ -21,6 +21,8 @@
 #include "ability_connect_manager.h"
 #include "ability_manager_radar.h"
 #include "ability_start_by_call_helper.h"
+#include "ability_start_with_wait_observer_utils.h"
+#include "ability_start_with_wait_observer_manager.h"
 #include "accesstoken_kit.h"
 #include "ability_manager_xcollie.h"
 #include "app_utils.h"
@@ -1273,6 +1275,10 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     if (isUIAbilityOnly && abilityInfo.type != AbilityType::PAGE) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ability type no UIAbility");
         return ERR_INVALID_VALUE;
+    }
+    if (abilityInfo.type != AbilityType::PAGE) {
+        AbilityStartWithWaitObserverManager::GetInstance().NotifyAATerminateWait(
+            const_cast<Want &>(want), TerminateReason::TERMINATE_FOR_NON_UI_ABILITY);
     }
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId is : %{public}d, singleton is : %{public}d",
@@ -13541,6 +13547,30 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
             InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(info, intentInfoBack);
             infos.emplace_back(intentInfoBack);
         }
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityManagerService::StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> &observer)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerService::StartAbilityWithWait called");
+    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    if (!isShellCall) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not shell call");
+        return ERR_PERMISSION_DENIED;
+    }
+    // 1.regist observer
+    int32_t result = AbilityStartWithWaitObserverManager::GetInstance().RegisterObserver(want, observer);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "register ability start with wait observer fail, result:%{public}d", result);
+        return result;
+    }
+    // 2.start ability
+    result = StartAbility(want, DEFAULT_INVAL_VALUE, DEFAULT_INVAL_VALUE);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "start ability wait fail, result:%{public}d", result);
+        return result;
     }
     return ERR_OK;
 }

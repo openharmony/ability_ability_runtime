@@ -21,6 +21,7 @@
 #include <list>
 #include <vector>
 
+#include "aa_tools/ability_start_with_wait_observer_interface.h"
 #include "ability_connect_callback_interface.h"
 #include "ability_manager_ipc_interface_code.h"
 #include "ability_running_info.h"
@@ -2159,6 +2160,11 @@ public:
         const std::string &moduleName,
         const std::string &intentName,
         InsightIntentInfoForBack &info)
+    {
+        return 0;
+    }
+
+    virtual int32_t StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> &observer)
     {
         return 0;
     }
