@@ -1958,6 +1958,15 @@ private:
     void GetKernelPermissions(uint32_t accessTokenId, JITPermissionsMap &permissionsMap);
     void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
 
+    void AddUIExtensionBindItem(
+        std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token);
+    void RemoveUIExtensionBindItem(std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token);
+    void BindUIExtensionProcess(
+        const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
+    void UnBindUIExtensionProcess(
+        const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
+    bool WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord,
+        UIExtensionProcessBindInfo &bindInfo);
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
     std::atomic<int32_t> willKillPidsNum_ = 0;
@@ -2014,6 +2023,9 @@ private:
     std::unordered_set<std::string> nwebPreloadSet_ {};
 
     std::mutex childProcessRecordMapMutex_;
+
+    std::mutex uiExtensionBindReleationsLock_;
+    std::map<int32_t, std::unordered_map<pid_t, int32_t>> uiExtensionBindReleations_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

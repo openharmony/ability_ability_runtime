@@ -165,5 +165,15 @@ bool AbilityRunningRecord::IsSceneBoard() const
     }
     return info_->name == SCENEBOARD_ABILITY_NAME && info_->bundleName == BUNDLE_NAME_SCENEBOARD;
 }
+
+void AbilityRunningRecord::SetUIExtensionBindAbilityId(const int32_t uiExtensionBindAbilityId)
+{
+    uiExtensionBindAbilityId_ = uiExtensionBindAbilityId;
+}
+
+int32_t AbilityRunningRecord::GetUIExtensionBindAbilityId() const
+{
+    return uiExtensionBindAbilityId_;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

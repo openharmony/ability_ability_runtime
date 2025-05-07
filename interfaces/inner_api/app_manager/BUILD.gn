@@ -119,6 +119,7 @@ ohos_shared_library("app_manager") {
     "src/appmgr/start_specified_ability_response_proxy.cpp",
     "src/appmgr/start_specified_ability_response_stub.cpp",
     "src/appmgr/system_memory_attr.cpp",
+    "src/appmgr/process_bind_data.cpp",
   ]
 
   public_configs = [
