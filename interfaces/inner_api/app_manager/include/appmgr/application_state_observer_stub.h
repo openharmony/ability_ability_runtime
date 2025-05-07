@@ -144,6 +144,12 @@ public:
      */
     virtual void OnAppCacheStateChanged(const AppStateData &appStateData) override;
 
+    /**
+     * Will be called when bindingRelation change.
+     *
+     * @param processBindData Process bind data.
+     */
+    virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) override;
 private:
     int32_t HandleOnForegroundApplicationChanged(MessageParcel &data, MessageParcel &reply);
 
@@ -176,6 +182,8 @@ private:
     int32_t HandleOnPageHide(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleOnAppCacheStateChanged(MessageParcel &data, MessageParcel &reply);
+
+    int32_t HandleOnProcessBindingRelationChanged(MessageParcel &data, MessageParcel &reply);
 
     static std::mutex callbackMutex_;
 
