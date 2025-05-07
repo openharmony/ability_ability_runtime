@@ -24,6 +24,10 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+constexpr const char* FORM_EXTENSION_CONTEXT_CLASS_NAME = "Lapplication/FormExtensionContext/FormExtensionContext;";
+}
+
 ani_object STSFormExtensionContext::SetFormExtensionContext(
     ani_env *env, const std::shared_ptr<FormExtensionContext> &context)
 {
@@ -39,7 +43,7 @@ ani_object STSFormExtensionContext::SetFormExtensionContext(
     ani_method method = nullptr;
     ani_field field = nullptr;
 
-    if ((status = env->FindClass("Lapplication/FormExtensionContext/FormExtensionContext;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(FORM_EXTENSION_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
     }
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
@@ -70,7 +74,7 @@ ani_ref STSFormExtensionContext::CreateStsExtensionContext(ani_env *env,
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
 
-    status = env->FindClass("Lapplication/FormExtensionContext/FormExtensionContext;", &cls);
+    status = env->FindClass(FORM_EXTENSION_CONTEXT_CLASS_NAME, &cls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
         return nullptr;

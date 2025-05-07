@@ -75,6 +75,7 @@ enum CollaborateResult {
 #endif
 constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;
+constexpr const char* UI_ABILITY_CONTEXT_CLASS_NAME = "Lapplication/UIAbilityContext/UIAbilityContext;";
 
 
 void PromiseCallback(ani_env* env, ani_object aniObj)
@@ -279,7 +280,7 @@ void StsUIAbility::CreateAniContext(
         }
         shellContextRef_ = std::make_shared<STSNativeReference>();
         ani_class cls {};
-        if ((status = env->FindClass("Lapplication/UIAbilityContext/UIAbilityContext;", &cls)) != ANI_OK) {
+        if ((status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
             return;
         }

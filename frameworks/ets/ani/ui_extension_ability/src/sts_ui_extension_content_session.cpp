@@ -34,6 +34,11 @@
 #include "sts_error_utils.h"
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+constexpr const char* UI_SESSION_CLASS_NAME =
+    "L@ohos/app/ability/UIExtensionContentSession/UIExtensionContentSession;";
+}
+
 StsUIExtensionContentSession* GetStsContentSession(ani_env* env, ani_object obj)
 {
     if (env == nullptr) {
@@ -43,7 +48,7 @@ StsUIExtensionContentSession* GetStsContentSession(ani_env* env, ani_object obj)
     }
     ani_class cls;
     ani_status status = ANI_ERROR;
-    status = env->FindClass("L@ohos/app/ability/UIExtensionContentSession/UIExtensionContentSession;", &cls);
+    status = env->FindClass(UI_SESSION_CLASS_NAME, &cls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         ThrowStsInvalidParamError(env, "findClass fail");
@@ -167,7 +172,7 @@ ani_object StsUIExtensionContentSession::CreateStsUIExtensionContentSession(ani_
     ani_method method = nullptr;
     ani_class cls;
     ani_status status = ANI_ERROR;
-    status = env->FindClass("L@ohos/app/ability/UIExtensionContentSession/UIExtensionContentSession;", &cls);
+    status = env->FindClass(UI_SESSION_CLASS_NAME, &cls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return nullptr;

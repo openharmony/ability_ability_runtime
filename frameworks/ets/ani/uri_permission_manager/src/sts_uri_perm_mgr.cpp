@@ -34,6 +34,9 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
+constexpr const char* WRAPPER_CLASS_NAME = "Lutils/AbilityUtils/AsyncCallbackWrapper;";
+constexpr const char* ERROR_CLASS_NAME = "Lescompat/Error;";
+constexpr const char* BUSINESS_ERROR_CLASS_NAME = "L@ohos/base/BusinessError;";
 }
 const char *INVOKE_METHOD_NAME = "invoke";
 const int32_t ERR_OK = 0;
@@ -189,7 +192,7 @@ bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object r
     ani_status status = ANI_ERROR;
     ani_class clsCall {};
 
-    if ((status = env->FindClass("Lutils/AbilityUtils/AsyncCallbackWrapper;", &clsCall)) != ANI_OK) {
+    if ((status = env->FindClass(WRAPPER_CLASS_NAME, &clsCall)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
         return false;
     }
@@ -224,7 +227,7 @@ ani_object WrapError(ani_env *env, const std::string &msg)
     ani_string aniMsg = GetAniString(env, msg);
     ani_ref undefRef;
     env->GetUndefined(&undefRef);
-    if ((status = env->FindClass("Lescompat/Error;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(ERROR_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "statys: %{public}d", status);
         return nullptr;
     }
@@ -261,7 +264,7 @@ ani_object WrapBusinessError(ani_env *env, int32_t code)
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return nullptr;
     }
-    if ((status = env->FindClass("L@ohos/base/BusinessError;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(BUSINESS_ERROR_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         return nullptr;
     }

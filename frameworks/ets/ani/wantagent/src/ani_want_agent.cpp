@@ -30,6 +30,9 @@ namespace {
 constexpr int32_t ERR_NOT_OK = -1;
 constexpr int32_t BUSINESS_ERROR_CODE_OK = 0;
 constexpr int32_t PARAMETER_ERROR = -1;
+constexpr const char* COMPLETE_DATA_IMPL_CLASS_NAME = "L@ohos/app/ability/wantAgent/wantAgent/CompleteDataImpl;";
+constexpr const char* WANT_CLASS_NAME = "L@ohos/app/ability/Want/Want;";
+constexpr const char* LONG_CLASS_NAME = "Lstd/core/Long;";
 } // namespace
 
 TriggerCompleteCallBack::TriggerCompleteCallBack()
@@ -73,7 +76,7 @@ void OnSendFinishedCallback(TriggerReceiveDataWorker *dataWorker)
     ani_class cls {};
     ani_method method = nullptr;
     ani_object object = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/wantAgent/wantAgent/CompleteDataImpl;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(COMPLETE_DATA_IMPL_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "status : %{public}d", status);
         return;
     }
@@ -354,7 +357,7 @@ void EtsWantAgent::OnGetWant(ani_env *env, ani_object agent, ani_object call)
         ani_class cls = nullptr;
         ani_method method = nullptr;
         ani_object object = nullptr;
-        env->FindClass("L@ohos/app/ability/Want/Want;", &cls);
+        env->FindClass(WANT_CLASS_NAME, &cls);
         env->Class_FindMethod(cls, "<ctor>", ":V", &method);
         env->Object_New(cls, method, &object);
         wantAniObj = object;
@@ -630,7 +633,7 @@ void EtsWantAgent::UnwrapWantAgent(ani_env *env, ani_object agent, void** result
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
     ani_method method {};
-    if ((status = env->FindClass("Lstd/core/Long;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(LONG_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "status : %{public}d", status);
     }
     if ((status = env->Class_FindMethod(cls, "unboxed", nullptr, &method)) != ANI_OK) {

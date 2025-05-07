@@ -20,6 +20,11 @@
 #include "sts_service_extension_context.h"
 #include "ani_common_start_options.h"
 
+namespace {
+constexpr const char* SERVICE_EXTENSION_CONTEXT_CLASS_NAME =
+    "Lapplication/ServiceExtensionContext/ServiceExtensionContext;";
+}
+
 const char *INVOKE_METHOD_NAME = "invoke";
 static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj,
     [[maybe_unused]] ani_object callback)
@@ -96,7 +101,7 @@ OHOS::AbilityRuntime::ServiceExtensionContext* StsServiceExtensionContext::GetAb
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
         return nullptr;
     }
-    if ((status = env->FindClass("Lapplication/ServiceExtensionContext/ServiceExtensionContext;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(SERVICE_EXTENSION_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "terminateSelfSync find class status : %{public}d", status);
         return nullptr;
     }
@@ -256,7 +261,7 @@ ani_object CreateStsServiceExtensionContext(ani_env *env,
     ani_method method = nullptr;
     ani_field field = nullptr;
     ani_object contextObj = nullptr;
-    if ((env->FindClass("Lapplication/ServiceExtensionContext/ServiceExtensionContext;", &cls)) != ANI_OK) {
+    if ((env->FindClass(SERVICE_EXTENSION_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "find class status : %{public}d", status);
         return nullptr;
     }
