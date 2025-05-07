@@ -31,10 +31,6 @@ ohos_shared_library("ani_common") {
   include_dirs = [
     "./include",
     "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_services_path}/common/include",
   ]
 
   public_configs = [ ":ani_common_public_config" ]
@@ -54,29 +50,20 @@ ohos_shared_library("ani_common") {
   }
 
   deps = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
     "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
-    "${ability_runtime_native_path}/appkit:app_context",
   ]
 
   external_deps = [
     "ability_base:base",
-    "ability_base:session_info",
     "ability_base:want",
-    "access_token:libtokenid_sdk",
-    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "image_framework:image_ani",
-    "ipc:ipc_core",
     "json:nlohmann_json_static",
-    "napi:ace_napi",
     "runtime_core:ani",
   ]
 
