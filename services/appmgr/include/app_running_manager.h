@@ -375,8 +375,6 @@ public:
 
     void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
     std::shared_ptr<AppRunningRecord> QueryAppRecordPlus(int32_t pid, int32_t uid);
-    UIExtensionProcessBindInfo WarpBindInfo(int32_t pid, int32_t uid, int32_t callerPid, int32_t callerUid,
-                                            std::string callerBundleName, int32_t notifyProcessBind);
     int32_t AddUIExtensionBindItem(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
     int32_t QueryUIExtensionBindItemById(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
     int32_t RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId);
