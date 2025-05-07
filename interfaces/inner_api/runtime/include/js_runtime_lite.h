@@ -29,6 +29,7 @@
 using Options = OHOS::AbilityRuntime::Runtime::Options;
 namespace OHOS {
 namespace AbilityRuntime {
+void StartDebuggerModule(bool isDebugApp, bool isNativeStart);
 class JsRuntimeLite {
 public:
     JsRuntimeLite(const JsRuntimeLite&) = delete;
@@ -42,13 +43,13 @@ public:
     napi_status CreateJsEnv(const Options& options, std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
     napi_status RemoveJsEnv(napi_env env);
     napi_status Init(const Options& options, napi_env env);
+    std::shared_ptr<JsEnv::JsEnvironment> GetJsEnv(napi_env env);
     
 private:
     JsRuntimeLite();
     ~JsRuntimeLite();
     napi_status AddEnv(napi_env env, std::shared_ptr<JsEnv::JsEnvironment> jsEnv);
     panda::ecmascript::EcmaVM* GetEcmaVm(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv) const;
-    std::shared_ptr<JsEnv::JsEnvironment> GetJsEnv(napi_env env);
     void LoadAotFile(const Options& options, const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
     void InitConsoleModule(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
     void InitTimerModule(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
