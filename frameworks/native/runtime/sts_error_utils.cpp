@@ -26,6 +26,7 @@ constexpr const char* ERR_MSG_INVALID_NUM_PARAMS = "Parameter error. The number 
 constexpr const char* NOT_SYSTEM_APP = "The application is not system-app, can not use system-api.";
 
 constexpr const char* BUSINESS_ERROR_CLASS = "L@ohos/base/BusinessError;";
+constexpr const char* ERROR_CLASS_NAME = "Lescompat/Error;";
 } // namespace
 
 void ThrowStsError(ani_env *env, ani_object err)
@@ -139,7 +140,7 @@ ani_object WrapStsError(ani_env *env, const std::string &msg)
         return nullptr;
     }
 
-    if ((status = env->FindClass("Lescompat/Error;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(ERROR_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "FindClass failed %{public}d", status);
         return nullptr;
     }
@@ -166,7 +167,7 @@ ani_object CreateStsError(ani_env *env, ani_int code, const std::string &msg)
         TAG_LOGE(AAFwkTag::ABILITY, "null env");
         return nullptr;
     }
-    if ((status = env->FindClass("L@ohos/base/BusinessError;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(BUSINESS_ERROR_CLASS, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "FindClass failed %{public}d", status);
         return nullptr;
     }

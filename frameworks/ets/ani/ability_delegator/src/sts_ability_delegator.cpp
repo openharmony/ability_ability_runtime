@@ -35,6 +35,14 @@ constexpr int COMMON_FAILED = 16000100;
 #else
 constexpr int COMMON_FAILED = -1;
 #endif
+
+namespace {
+constexpr const char* AREA_MODE_ENUM_NAME = "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;";
+constexpr const char* CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
+constexpr const char* SHELL_CMD_RESULT_CLASS_NAME = "Lapplication/shellCmdResult/ShellCmdResultImpl;";
+constexpr const char* ABILITY_MONITOR_INNER_CLASS_NAME = "Lapplication/AbilityMonitor/AbilityMonitorInner;";
+}
+
 ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
     std::shared_ptr<AbilityRuntime::Context> context)
 {
@@ -59,8 +67,8 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
         return {};
     }
     ani_enum_item areaModeItem {};
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(
-        aniEnv, "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;", context->GetArea(), areaModeItem);
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(aniEnv,
+        AREA_MODE_ENUM_NAME, context->GetArea(), areaModeItem);
     if (aniEnv->Object_SetField_Ref(contextObj, areaField, (ani_ref)areaModeItem) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Int failed");
         return {};
@@ -103,7 +111,7 @@ ani_object GetAppContext(ani_env* env, [[maybe_unused]]ani_object object, ani_cl
     }
     ani_class cls;
     ani_object nullobj = nullptr;
-    if (ANI_OK != env->FindClass("Lapplication/Context/Context;", &cls)) {
+    if (ANI_OK != env->FindClass(CONTEXT_CLASS_NAME, &cls)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass Context Failed");
         return nullobj;
     }
@@ -132,7 +140,7 @@ ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmd
     }
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
-    status = env->FindClass("Lapplication/shellCmdResult/ShellCmdResultImpl;", &cls);
+    status = env->FindClass(SHELL_CMD_RESULT_CLASS_NAME, &cls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegator failed status: %{public}d", status);
         return {};
@@ -306,7 +314,7 @@ void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, an
         return;
     }
     ani_class monitorCls;
-    ani_status status = env->FindClass("Lapplication/AbilityMonitor/AbilityMonitorInner;", &monitorCls);
+    ani_status status = env->FindClass(ABILITY_MONITOR_INNER_CLASS_NAME, &monitorCls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status: %{public}d", status);
         return;

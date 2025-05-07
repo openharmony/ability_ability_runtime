@@ -55,6 +55,7 @@ const std::string APP_LINKING_ONLY = "appLinkingOnly";
 namespace {
     static std::once_flag g_bindNativeMethodsFlag;
 
+constexpr const char* UI_ABILITY_CONTEXT_CLASS_NAME = "Lapplication/UIAbilityContext/UIAbilityContext;";
 constexpr int32_t CALLER_TIME_OUT = 10; // 10s
 struct StartAbilityByCallData {
     sptr<IRemoteObject> remoteCallee;
@@ -110,7 +111,7 @@ std::shared_ptr<AbilityContext> StsAbilityContext::GetAbilityContext(ani_env *en
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return nullptr;
     }
-    if ((status = env->FindClass("Lapplication/UIAbilityContext/UIAbilityContext;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
         return nullptr;
     }
@@ -137,7 +138,7 @@ ani_object StsAbilityContext::SetAbilityContext(ani_env *env, const std::shared_
         TAG_LOGE(AAFwkTag::UIABILITY, "null context");
         return nullptr;
     }
-    if ((status = env->FindClass("Lapplication/UIAbilityContext/UIAbilityContext;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
         return nullptr;
     }
@@ -575,7 +576,7 @@ void StsAbilityContext::NativeOpenLinkSync(ani_env *env, ani_object aniObj, ani_
 
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
-    ani_status status = env->FindClass("Lapplication/UIAbilityContext/UIAbilityContext;", &cls);
+    ani_status status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls);
     if (status != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
         return false;
