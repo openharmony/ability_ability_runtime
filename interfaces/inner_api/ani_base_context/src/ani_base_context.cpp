@@ -19,17 +19,8 @@ namespace OHOS {
 namespace AbilityRuntime {
 ani_status IsStageContext(ani_env* env, ani_object object, ani_boolean& stageMode)
 {
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "env is nullptr");
-        return ANI_ERROR;
-    }
-
-    ani_status status = env->Object_GetFieldByName_Boolean(object, "stageMode", &stageMode);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "GetField failed, status : %{public}d", status);
-        return ANI_ERROR;
-    }
-
+    // arkTS 1.2 only supported stage mode
+    stageMode = true;
     return ANI_OK;
 }
 
