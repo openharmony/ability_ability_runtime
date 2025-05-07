@@ -876,7 +876,8 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityVirtualFunc_0200, TestSize.Level1)
     ret = ability->OnRestoreData(data);
     EXPECT_EQ(ret, false);
     int32_t reason = 0;
-    EXPECT_EQ(ability->OnSaveState(reason, data), 0);
+    bool isAsync = false;
+    EXPECT_EQ(ability->OnSaveState(reason, data, nullptr, isAsync, StateReason::LIFECYCLE), 0);
     int result = 0;
     ability->OnCompleteContinuation(result);
     ability->OnRemoteTerminated();

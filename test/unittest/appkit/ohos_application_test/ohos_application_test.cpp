@@ -748,13 +748,14 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_ScheduleAcceptWant_
 {
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_ScheduleAcceptWant_0100 start.";
     Want want;
-    std::string flag = "";
+    bool isAsync = false;
     std::string moduleName = "entry";
     EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
     std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage = std::make_shared<AbilityRuntime::AbilityStage>();
     ohosApplication_->abilityStages_.emplace(moduleName, abilityStage);
     EXPECT_FALSE(ohosApplication_->abilityStages_.empty());
-    ohosApplication_->ScheduleAcceptWant(want, moduleName, flag);
+    auto callback = [](std::string) {};
+    ohosApplication_->ScheduleAcceptWant(want, moduleName, callback, isAsync);
     EXPECT_TRUE(abilityStage != nullptr);
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_ScheduleAcceptWant_0100 end.";
 }
