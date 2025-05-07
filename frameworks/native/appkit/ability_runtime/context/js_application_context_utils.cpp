@@ -1108,6 +1108,34 @@ napi_value JsApplicationContextUtils::OnCreateDisplayContext(napi_env env, NapiC
 #endif
 }
 
+
+napi_value JsApplicationContextUtils::GetIndex(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnGetIndex, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnGetIndex(napi_env env, NapiCallbackInfo &info)
+{
+    if (info.argc != ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "The number of parameters is incorrect.");
+        ThrowInvalidNumParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is already released");
+        return CreateJsUndefined(env);
+    }
+
+    uint64_t index = applicationContext->GetIndex();
+    napi_value result = nullptr;
+    napi_create_int64(env, index, &result);
+    return result;
+}
+
 napi_value JsApplicationContextUtils::CreateJsContext(napi_env env, const std::shared_ptr<Context> &context)
 {
     napi_value value = CreateJsBaseContext(env, context, true);
@@ -1836,6 +1864,8 @@ void JsApplicationContextUtils::BindNativeApplicationContextOne(napi_env env, na
     BindNativeFunction(env, object, "createAreaModeContext", MD_NAME, JsApplicationContextUtils::CreateAreaModeContext);
     BindNativeFunction(env, object, "createDisplayContext", MD_NAME,
         JsApplicationContextUtils::CreateDisplayContext);
+    BindNativeFunction(env, object, "getIndex", MD_NAME,
+        JsApplicationContextUtils::GetIndex);
 }
 
 void JsApplicationContextUtils::BindNativeApplicationContextTwo(napi_env env, napi_value object)
