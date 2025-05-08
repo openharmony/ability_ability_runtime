@@ -1543,6 +1543,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.uid = bundleInfo.applicationInfo.uid;
         options.apiTargetVersion = appInfo.apiTargetVersion;
         options.pkgContextInfoJsonStringMap = pkgContextInfoJsonStringMap;
+        options.allowArkTsLargeHeap = appInfo.allowArkTsLargeHeap;
 #ifdef CJ_FRONTEND
         options.lang = isCJApp ? AbilityRuntime::Runtime::Language::CJ : AbilityRuntime::Runtime::Language::JS;
 #endif
