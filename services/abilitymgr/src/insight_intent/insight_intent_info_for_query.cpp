@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "insight_intent_info_for_back.h"
+#include "insight_intent_info_for_query.h"
 
 #include "string_wrapper.h"
 #include "hilog_tag_wrapper.h"
@@ -41,9 +41,9 @@ const std::map<std::string, AppExecFwk::ExecuteMode> STRING_EXECUTE_MODE_MAP = {
 };
 }
 
-void from_json(const nlohmann::json &jsonObject, LinkInfoForBack &linkInfo)
+void from_json(const nlohmann::json &jsonObject, LinkInfoForQuery &linkInfo)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "LinkInfoForBack from json");
+    TAG_LOGD(AAFwkTag::INTENT, "LinkInfoForQuery from json");
     const auto &jsonObjectEnd = jsonObject.end();
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
@@ -53,17 +53,17 @@ void from_json(const nlohmann::json &jsonObject, LinkInfoForBack &linkInfo)
         g_parseResult);
 }
 
-void to_json(nlohmann::json& jsonObject, const LinkInfoForBack &info)
+void to_json(nlohmann::json& jsonObject, const LinkInfoForQuery &info)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "LinkInfoForBack to json");
+    TAG_LOGD(AAFwkTag::INTENT, "LinkInfoForQuery to json");
     jsonObject = nlohmann::json {
         {INSIGHT_INTENTS_URI, info.uri}
     };
 }
 
-void from_json(const nlohmann::json &jsonObject, PageInfoForBack &pageInfo)
+void from_json(const nlohmann::json &jsonObject, PageInfoForQuery &pageInfo)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "PageInfoForBack from json");
+    TAG_LOGD(AAFwkTag::INTENT, "PageInfoForQuery from json");
     const auto &jsonObjectEnd = jsonObject.end();
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
@@ -91,9 +91,9 @@ void from_json(const nlohmann::json &jsonObject, PageInfoForBack &pageInfo)
         g_parseResult);
 }
 
-void to_json(nlohmann::json& jsonObject, const PageInfoForBack &info)
+void to_json(nlohmann::json& jsonObject, const PageInfoForQuery &info)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "PageInfoForBack to json");
+    TAG_LOGD(AAFwkTag::INTENT, "PageInfoForQuery to json");
     jsonObject = nlohmann::json {
         {INSIGHT_INTENT_UI_ABILITY, info.uiAbility},
         {INSIGHT_INTENT_PAGE_ROUTER_NAME, info.pageRouterName},
@@ -102,9 +102,9 @@ void to_json(nlohmann::json& jsonObject, const PageInfoForBack &info)
     };
 }
 
-void from_json(const nlohmann::json &jsonObject, EntryInfoForBack &entryInfo)
+void from_json(const nlohmann::json &jsonObject, EntryInfoForQuery &entryInfo)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "EntryInfoForBack from json");
+    TAG_LOGD(AAFwkTag::INTENT, "EntryInfoForQuery from json");
     const auto &jsonObjectEnd = jsonObject.end();
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
@@ -125,9 +125,9 @@ void from_json(const nlohmann::json &jsonObject, EntryInfoForBack &entryInfo)
     }
 }
 
-void to_json(nlohmann::json& jsonObject, const EntryInfoForBack &info)
+void to_json(nlohmann::json& jsonObject, const EntryInfoForQuery &info)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "EntryInfoForBack to json");
+    TAG_LOGD(AAFwkTag::INTENT, "EntryInfoForQuery to json");
     std::vector<std::string> modeStrings;
     for (const auto &mode : info.executeMode) {
         auto it = EXECUTE_MODE_STRING_MAP.find(mode);
@@ -143,31 +143,31 @@ void to_json(nlohmann::json& jsonObject, const EntryInfoForBack &info)
     };
 }
 
-void from_json(const nlohmann::json &jsonObject, FunctionInfoForBack &functionInfo)
+void from_json(const nlohmann::json &jsonObject, FunctionInfoForQuery &functionInfo)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "FunctionInfoForBack from json");
+    TAG_LOGD(AAFwkTag::INTENT, "FunctionInfoForQuery from json");
 }
 
-void to_json(nlohmann::json& jsonObject, const FunctionInfoForBack &info)
+void to_json(nlohmann::json& jsonObject, const FunctionInfoForQuery &info)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "FunctionInfoForBack to json");
+    TAG_LOGD(AAFwkTag::INTENT, "FunctionInfoForQuery to json");
     jsonObject = nlohmann::json {};
 }
 
-void from_json(const nlohmann::json &jsonObject, FormInfoForBack &formInfo)
+void from_json(const nlohmann::json &jsonObject, FormInfoForQuery &formInfo)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "FormInfoForBack from json");
+    TAG_LOGD(AAFwkTag::INTENT, "FormInfoForQuery from json");
 }
 
-void to_json(nlohmann::json& jsonObject, const FormInfoForBack &info)
+void to_json(nlohmann::json& jsonObject, const FormInfoForQuery &info)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "FormInfoForBack to json");
+    TAG_LOGD(AAFwkTag::INTENT, "FormInfoForQuery to json");
     jsonObject = nlohmann::json {};
 }
 
-void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForBack &insightIntentInfo)
+void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insightIntentInfo)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "InsightIntentInfoForBack from json");
+    TAG_LOGD(AAFwkTag::INTENT, "InsightIntentInfoForQuery from json");
     const auto &jsonObjectEnd = jsonObject.end();
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
@@ -251,7 +251,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForBack &insig
         ArrayType::STRING);
 
     if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_LINK) {
-        AppExecFwk::GetValueIfFindKey<LinkInfoForBack>(jsonObject,
+        AppExecFwk::GetValueIfFindKey<LinkInfoForQuery>(jsonObject,
             jsonObjectEnd,
             INSIGHT_INTENT_LINK_INFO,
             insightIntentInfo.linkInfo,
@@ -260,7 +260,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForBack &insig
             g_parseResult,
             ArrayType::NOT_ARRAY);
     } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_PAGE) {
-        AppExecFwk::GetValueIfFindKey<PageInfoForBack>(jsonObject,
+        AppExecFwk::GetValueIfFindKey<PageInfoForQuery>(jsonObject,
             jsonObjectEnd,
             INSIGHT_INTENT_PAGE_INFO,
             insightIntentInfo.pageInfo,
@@ -269,7 +269,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForBack &insig
             g_parseResult,
             ArrayType::NOT_ARRAY);
     } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_ENTRY) {
-        AppExecFwk::GetValueIfFindKey<EntryInfoForBack>(jsonObject,
+        AppExecFwk::GetValueIfFindKey<EntryInfoForQuery>(jsonObject,
             jsonObjectEnd,
             INSIGHT_INTENT_ENTRY_INFO,
             insightIntentInfo.entryInfo,
@@ -278,7 +278,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForBack &insig
             g_parseResult,
             ArrayType::NOT_ARRAY);
     } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_FUNCTION) {
-        AppExecFwk::GetValueIfFindKey<FunctionInfoForBack>(jsonObject,
+        AppExecFwk::GetValueIfFindKey<FunctionInfoForQuery>(jsonObject,
             jsonObjectEnd,
             INSIGHT_INTENT_FUNCTION_INFO,
             insightIntentInfo.functionInfo,
@@ -287,7 +287,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForBack &insig
             g_parseResult,
             ArrayType::NOT_ARRAY);
     } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_FORM) {
-        AppExecFwk::GetValueIfFindKey<FormInfoForBack>(jsonObject,
+        AppExecFwk::GetValueIfFindKey<FormInfoForQuery>(jsonObject,
             jsonObjectEnd,
             INSIGHT_INTENT_FORM_INFO,
             insightIntentInfo.formInfo,
@@ -298,9 +298,9 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForBack &insig
     }
 }
 
-void to_json(nlohmann::json& jsonObject, const InsightIntentInfoForBack &info)
+void to_json(nlohmann::json& jsonObject, const InsightIntentInfoForQuery &info)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "EntryInfoForBack to json");
+    TAG_LOGD(AAFwkTag::INTENT, "InsightIntentInfoForQuery to json");
     jsonObject = nlohmann::json {
         {INSIGHT_INTENT_BUNDLE_NAME, info.bundleName},
         {INSIGHT_INTENT_MODULE_NAME, info.moduleName},
@@ -323,7 +323,7 @@ void to_json(nlohmann::json& jsonObject, const InsightIntentInfoForBack &info)
     };
 }
 
-bool InsightIntentInfoForBack::ReadFromParcel(Parcel &parcel)
+bool InsightIntentInfoForQuery::ReadFromParcel(Parcel &parcel)
 {
     MessageParcel *messageParcel = reinterpret_cast<MessageParcel *>(&parcel);
     if (!messageParcel) {
@@ -347,7 +347,7 @@ bool InsightIntentInfoForBack::ReadFromParcel(Parcel &parcel)
     }
     std::lock_guard<std::mutex> lock(g_extraMutex);
     g_parseResult = ERR_OK;
-    *this = jsonObject.get<InsightIntentInfoForBack>();
+    *this = jsonObject.get<InsightIntentInfoForQuery>();
     if (g_parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "parse result: %{public}d", g_parseResult);
         g_parseResult = ERR_OK;
@@ -356,7 +356,7 @@ bool InsightIntentInfoForBack::ReadFromParcel(Parcel &parcel)
     return true;
 }
 
-bool InsightIntentInfoForBack::Marshalling(Parcel &parcel) const
+bool InsightIntentInfoForQuery::Marshalling(Parcel &parcel) const
 {
     MessageParcel *messageParcel = reinterpret_cast<MessageParcel *>(&parcel);
     if (!messageParcel) {
@@ -376,9 +376,9 @@ bool InsightIntentInfoForBack::Marshalling(Parcel &parcel) const
     return true;
 }
 
-InsightIntentInfoForBack *InsightIntentInfoForBack::Unmarshalling(Parcel &parcel)
+InsightIntentInfoForQuery *InsightIntentInfoForQuery::Unmarshalling(Parcel &parcel)
 {
-    InsightIntentInfoForBack *info = new (std::nothrow) InsightIntentInfoForBack();
+    InsightIntentInfoForQuery *info = new (std::nothrow) InsightIntentInfoForQuery();
     if (info == nullptr) {
         return nullptr;
     }

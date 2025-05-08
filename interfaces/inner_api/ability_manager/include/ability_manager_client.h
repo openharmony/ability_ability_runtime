@@ -1758,7 +1758,7 @@ public:
      */
     ErrCode GetAllInsightIntentInfo(
         AbilityRuntime::GetInsightIntentFlag flag,
-        std::vector<InsightIntentInfoForBack> &infos);
+        std::vector<InsightIntentInfoForQuery> &infos);
 
     /**
      * Get specified bundleName insight intent infos.
@@ -1770,7 +1770,7 @@ public:
     ErrCode GetInsightIntentInfoByBundleName(
         AbilityRuntime::GetInsightIntentFlag flag,
         const std::string &bundleName,
-        std::vector<InsightIntentInfoForBack> &infos);
+        std::vector<InsightIntentInfoForQuery> &infos);
 
     /**
      * Get specified intentName insight intent infos.
@@ -1786,7 +1786,7 @@ public:
         const std::string &bundleName,
         const std::string &moduleName,
         const std::string &intentName,
-        InsightIntentInfoForBack &info);
+        InsightIntentInfoForQuery &info);
                                     
 private:
     AbilityManagerClient();

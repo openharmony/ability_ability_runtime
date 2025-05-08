@@ -4509,7 +4509,7 @@ int32_t AbilityManagerStub::GetAllInsightIntentInfoInner(MessageParcel &data, Me
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "GetAllInsightIntentInfoInner");
     auto flag = static_cast<AbilityRuntime::GetInsightIntentFlag>(data.ReadUint32());
-    std::vector<InsightIntentInfoForBack> infos;
+    std::vector<InsightIntentInfoForQuery> infos;
     int32_t result = GetAllInsightIntentInfo(flag, infos);
     if (!reply.WriteInt32(infos.size())) {
         return INNER_ERR;
@@ -4530,7 +4530,7 @@ int32_t AbilityManagerStub::GetInsightIntentInfoByBundleNameInner(MessageParcel 
 {
     auto flag = static_cast<AbilityRuntime::GetInsightIntentFlag>(data.ReadUint32());
     auto bundleName = std::string(data.ReadString());
-    std::vector<InsightIntentInfoForBack> infos;
+    std::vector<InsightIntentInfoForQuery> infos;
     int32_t result = GetInsightIntentInfoByBundleName(flag, bundleName, infos);
     if (!reply.WriteInt32(infos.size())) {
         return INNER_ERR;
@@ -4553,7 +4553,7 @@ int32_t AbilityManagerStub::GetInsightIntentInfoByIntentNameInner(MessageParcel 
     auto bundleName = std::string(data.ReadString());
     auto modlueName = std::string(data.ReadString());
     auto intentName = std::string(data.ReadString());
-    InsightIntentInfoForBack info;
+    InsightIntentInfoForQuery info;
     int32_t result = GetInsightIntentInfoByIntentName(flag, bundleName, modlueName, intentName, info);
     if (!reply.WriteParcelable(&info)) {
         return INNER_ERR;

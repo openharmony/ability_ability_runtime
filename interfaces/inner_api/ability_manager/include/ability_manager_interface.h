@@ -39,7 +39,7 @@
 #include "iacquire_share_data_callback_interface.h"
 #include "insight_intent/insight_intent_execute_param.h"
 #include "insight_intent/insight_intent_execute_result.h"
-#include "insight_intent/insight_intent_info_for_back.h"
+#include "insight_intent/insight_intent_info_for_query.h"
 #include "iprepare_terminate_callback_interface.h"
 #include "keep_alive_info.h"
 #include "mission_info.h"
@@ -90,7 +90,7 @@ using UIExtensionSessionInfo = AbilityRuntime::UIExtensionSessionInfo;
 using IAbilityFirstFrameStateObserver = AppExecFwk::IAbilityFirstFrameStateObserver;
 #endif
 using AtomicServiceStartupRule = AbilityRuntime::AtomicServiceStartupRule;
-using InsightIntentInfoForBack = AbilityRuntime::InsightIntentInfoForBack;
+using InsightIntentInfoForQuery = AbilityRuntime::InsightIntentInfoForQuery;
 
 constexpr const char* ABILITY_MANAGER_SERVICE_NAME = "AbilityManagerService";
 const int DEFAULT_INVAL_VALUE = -1;
@@ -2136,7 +2136,7 @@ public:
      */
     virtual int32_t GetAllInsightIntentInfo(
         AbilityRuntime::GetInsightIntentFlag flag,
-        std::vector<InsightIntentInfoForBack> &infos)
+        std::vector<InsightIntentInfoForQuery> &infos)
     {
         return 0;
     }
@@ -2151,7 +2151,7 @@ public:
     virtual int32_t GetInsightIntentInfoByBundleName(
         AbilityRuntime::GetInsightIntentFlag flag,
         const std::string &bundleName,
-        std::vector<InsightIntentInfoForBack> &infos)
+        std::vector<InsightIntentInfoForQuery> &infos)
     {
         return 0;
     }
@@ -2170,7 +2170,7 @@ public:
         const std::string &bundleName,
         const std::string &moduleName,
         const std::string &intentName,
-        InsightIntentInfoForBack &info)
+        InsightIntentInfoForQuery &info)
     {
         return 0;
     }
