@@ -259,19 +259,13 @@ std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath, co
 
 void JsModuleReader::GetHapPathList(const std::string &bundleName, std::vector<std::string> &hapList)
 {
-    auto systemAbilityManagerClient = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManagerClient) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null systemAbilityManagerClient");
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null bundleMgrHelper");
         return;
     }
-    auto remoteObject = systemAbilityManagerClient->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (!remoteObject) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null remoteObject");
-        return;
-    }
-    auto bundleMgrProxy = iface_cast<IBundleMgr>(remoteObject);
     AppExecFwk::BundleInfo bundleInfo;
-    auto getInfoResult = bundleMgrProxy->GetBundleInfoForSelf(static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::
+    auto getInfoResult = bundleMgrHelper->GetBundleInfoForSelf(static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::
         GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
     if (getInfoResult != 0 || bundleInfo.hapModuleInfos.empty()) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "GetBundleInfoForSelf failed");
