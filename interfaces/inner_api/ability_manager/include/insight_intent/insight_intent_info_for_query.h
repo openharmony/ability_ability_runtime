@@ -13,8 +13,8 @@
 * limitations under the License.
 */
 
-#ifndef OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_FOR_BACK_H
-#define OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_FOR_BACK_H
+#ifndef OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_FOR_QUERY_H
+#define OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_FOR_QUERY_H
 
 #include <string>
 #include <vector>
@@ -25,27 +25,27 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-struct LinkInfoForBack {
+struct LinkInfoForQuery {
     std::string uri;
 };
 
-struct PageInfoForBack {
+struct PageInfoForQuery {
     std::string uiAbility;
     std::string pageRouterName;
     std::string navigationId;
     std::string navDestination;
 };
 
-struct EntryInfoForBack {
+struct EntryInfoForQuery {
     std::string abilityName;
     std::vector<AppExecFwk::ExecuteMode> executeMode;
 };
 
-struct FunctionInfoForBack {};
+struct FunctionInfoForQuery {};
 
-struct FormInfoForBack {};
+struct FormInfoForQuery {};
 
-struct InsightIntentInfoForBack : public Parcelable {
+struct InsightIntentInfoForQuery : public Parcelable {
     std::string bundleName;
     std::string moduleName;
     std::string intentName;
@@ -59,16 +59,16 @@ struct InsightIntentInfoForBack : public Parcelable {
     std::string intentType;
     std::string parameters;
     std::vector<std::string> keywords;
-    LinkInfoForBack linkInfo;
-    PageInfoForBack pageInfo;
-    EntryInfoForBack entryInfo;
-    FunctionInfoForBack functionInfo;
-    FormInfoForBack formInfo;
+    LinkInfoForQuery linkInfo;
+    PageInfoForQuery pageInfo;
+    EntryInfoForQuery entryInfo;
+    FunctionInfoForQuery functionInfo;
+    FormInfoForQuery formInfo;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
-    static InsightIntentInfoForBack *Unmarshalling(Parcel &parcel);
+    static InsightIntentInfoForQuery *Unmarshalling(Parcel &parcel);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_FOR_BACK_H
+#endif // OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_INFO_FOR_QUERY_H

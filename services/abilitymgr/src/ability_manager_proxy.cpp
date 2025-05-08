@@ -6387,7 +6387,7 @@ int32_t AbilityManagerProxy::RevokeDelegator(sptr<IRemoteObject> token)
 
 int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
     AbilityRuntime::GetInsightIntentFlag flag,
-    std::vector<InsightIntentInfoForBack> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -6413,7 +6413,7 @@ int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
     int32_t infoSize = reply.ReadInt32();
     infos.clear();
     for (int32_t i = 0; i < infoSize; i++) {
-        std::unique_ptr<InsightIntentInfoForBack> info(reply.ReadParcelable<InsightIntentInfoForBack>());
+        std::unique_ptr<InsightIntentInfoForQuery> info(reply.ReadParcelable<InsightIntentInfoForQuery>());
         if (info == nullptr) {
             return false;
         }
@@ -6425,7 +6425,7 @@ int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
 int32_t AbilityManagerProxy::GetInsightIntentInfoByBundleName(
     AbilityRuntime::GetInsightIntentFlag flag,
     const std::string &bundleName,
-    std::vector<InsightIntentInfoForBack> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -6455,7 +6455,7 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByBundleName(
     int32_t infoSize = reply.ReadInt32();
     infos.clear();
     for (int32_t i = 0; i < infoSize; i++) {
-        std::unique_ptr<InsightIntentInfoForBack> info(reply.ReadParcelable<InsightIntentInfoForBack>());
+        std::unique_ptr<InsightIntentInfoForQuery> info(reply.ReadParcelable<InsightIntentInfoForQuery>());
         if (info == nullptr) {
             return false;
         }
@@ -6469,7 +6469,7 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByIntentName(
     const std::string &bundleName,
     const std::string &moduleName,
     const std::string &intentName,
-    InsightIntentInfoForBack &info)
+    InsightIntentInfoForQuery &info)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -6506,7 +6506,7 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByIntentName(
         TAG_LOGE(AAFwkTag::INTENT, "request error:%{public}d", error);
         return error;
     }
-    std::unique_ptr<InsightIntentInfoForBack> intentInfo(reply.ReadParcelable<InsightIntentInfoForBack>());
+    std::unique_ptr<InsightIntentInfoForQuery> intentInfo(reply.ReadParcelable<InsightIntentInfoForQuery>());
     if (intentInfo == nullptr) {
         return false;
     }

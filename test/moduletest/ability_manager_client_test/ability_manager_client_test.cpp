@@ -515,7 +515,7 @@ HWTEST_F(AbilityManagerClientTest, GetAllInsightIntentInfo_0100, TestSize.Level1
     TAG_LOGI(AAFwkTag::TEST, "GetAllInsightIntentInfo_0100 start");
     sptr<IAbilityConnection> connect = sptr<MockIAbilityConnection>::MakeSptr();
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
-    std::vector<InsightIntentInfoForBack> infos;
+    std::vector<InsightIntentInfoForQuery> infos;
     auto result = AbilityManagerClient::GetInstance()->GetAllInsightIntentInfo(flag, infos);
     EXPECT_NE(result, ERR_OK);
 
@@ -533,7 +533,7 @@ HWTEST_F(AbilityManagerClientTest, GetInsightIntentInfoByBundleName_0100, TestSi
     sptr<IAbilityConnection> connect = sptr<MockIAbilityConnection>::MakeSptr();
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
     std::string bundleName = "com.example.bundleName";
-    std::vector<InsightIntentInfoForBack> infos;
+    std::vector<InsightIntentInfoForQuery> infos;
     auto result = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
     EXPECT_NE(result, ERR_OK);
 
@@ -553,7 +553,7 @@ HWTEST_F(AbilityManagerClientTest, GetInsightIntentInfoByIntentName_0100, TestSi
     std::string bundleName = "com.example.bundleName";
     std::string moduleName = "entry";
     std::string intentName = "test";
-    InsightIntentInfoForBack info;
+    InsightIntentInfoForQuery info;
     auto result = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByIntentName(
         flag, bundleName, moduleName, intentName, info);
     EXPECT_NE(result, ERR_OK);

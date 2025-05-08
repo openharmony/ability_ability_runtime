@@ -2800,7 +2800,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetAllInsightIntentInfo_00
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
-    std::vector<InsightIntentInfoForBack> infos;
+    std::vector<InsightIntentInfoForQuery> infos;
     auto res = proxy_->GetAllInsightIntentInfo(flag, infos);
     EXPECT_EQ(res, NO_ERROR);
 }
@@ -2820,7 +2820,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetInsightIntentInfoByBund
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
     std::string bundleName = "com.example.bundleName";
-    std::vector<InsightIntentInfoForBack> infos;
+    std::vector<InsightIntentInfoForQuery> infos;
     auto res = proxy_->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
     EXPECT_EQ(res, NO_ERROR);
 }
@@ -2842,7 +2842,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetInsightIntentInfoByInte
     std::string bundleName = "com.example.bundleName";
     std::string moduleName = "entry";
     std::string intentName = "test";
-    InsightIntentInfoForBack info;
+    InsightIntentInfoForQuery info;
     auto res = proxy_->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
     EXPECT_EQ(res, NO_ERROR);
 }

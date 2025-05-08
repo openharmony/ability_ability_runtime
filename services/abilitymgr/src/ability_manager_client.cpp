@@ -2202,7 +2202,7 @@ ErrCode AbilityManagerClient::RevokeDelegator(sptr<IRemoteObject> token)
 
 ErrCode AbilityManagerClient::GetAllInsightIntentInfo(
     AbilityRuntime::GetInsightIntentFlag flag,
-    std::vector<InsightIntentInfoForBack> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos)
 {
     TAG_LOGD(AAFwkTag::INTENT, "call GetAllInsightIntentInfo");
     auto abms = GetAbilityManager();
@@ -2213,7 +2213,7 @@ ErrCode AbilityManagerClient::GetAllInsightIntentInfo(
 ErrCode AbilityManagerClient::GetInsightIntentInfoByBundleName(
     AbilityRuntime::GetInsightIntentFlag flag,
     const std::string &bundleName,
-    std::vector<InsightIntentInfoForBack> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos)
 {
     TAG_LOGD(AAFwkTag::INTENT, "call GetInsightIntentInfoByBundleName");
     auto abms = GetAbilityManager();
@@ -2226,7 +2226,7 @@ ErrCode AbilityManagerClient::GetInsightIntentInfoByIntentName(
     const std::string &bundleName,
     const std::string &moduleName,
     const std::string &intentName,
-    InsightIntentInfoForBack &info)
+    InsightIntentInfoForQuery &info)
 {
     TAG_LOGD(AAFwkTag::INTENT, "call GetInsightIntentInfoByIntentName");
     auto abms = GetAbilityManager();

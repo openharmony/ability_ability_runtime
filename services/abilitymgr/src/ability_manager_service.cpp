@@ -13855,7 +13855,7 @@ int32_t AbilityManagerService::CheckStartPlugin(const Want& want, sptr<IRemoteOb
 
 int32_t AbilityManagerService::GetAllInsightIntentInfo(
     AbilityRuntime::GetInsightIntentFlag flag,
-    std::vector<InsightIntentInfoForBack> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos)
 {
     TAG_LOGI(AAFwkTag::INTENT, "GetAllInsightIntentInfo");
     int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckCallerPermission();
@@ -13872,9 +13872,9 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
             return ERR_OK;
         }
         for (auto &info : intentInfos) {
-            InsightIntentInfoForBack intentInfoBack;
-            InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoBack);
-            infos.emplace_back(intentInfoBack);
+            InsightIntentInfoForQuery intentInfoQuery;
+            InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery);
+            infos.emplace_back(intentInfoQuery);
         }
     } else {
         std::vector<ExtractInsightIntentGenericInfo> genericInfos;
@@ -13883,9 +13883,9 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
             return ERR_OK;
         }
         for (auto &info : genericInfos) {
-            InsightIntentInfoForBack intentInfoBack;
-            InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(info, intentInfoBack);
-            infos.emplace_back(intentInfoBack);
+            InsightIntentInfoForQuery intentInfoQuery;
+            InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(info, intentInfoQuery);
+            infos.emplace_back(intentInfoQuery);
         }
     }
     return ERR_OK;
@@ -13894,7 +13894,7 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
 int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
     AbilityRuntime::GetInsightIntentFlag flag,
     const std::string &bundleName,
-    std::vector<InsightIntentInfoForBack> &infos)
+    std::vector<InsightIntentInfoForQuery> &infos)
 {
     TAG_LOGI(AAFwkTag::INTENT, "GetInsightIntentInfoByBundleName");
     int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckCallerPermission();
@@ -13912,9 +13912,9 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
             return ERR_OK;
         }
         for (auto &info : intentInfos) {
-            InsightIntentInfoForBack intentInfoBack;
-            InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoBack);
-            infos.emplace_back(intentInfoBack);
+            InsightIntentInfoForQuery intentInfoQuery;
+            InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery);
+            infos.emplace_back(intentInfoQuery);
         }
     } else {
         std::vector<ExtractInsightIntentGenericInfo> genericInfos;
@@ -13924,9 +13924,9 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
             return ERR_OK;
         }
         for (auto &info : genericInfos) {
-            InsightIntentInfoForBack intentInfoBack;
-            InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(info, intentInfoBack);
-            infos.emplace_back(intentInfoBack);
+            InsightIntentInfoForQuery intentInfoQuery;
+            InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(info, intentInfoQuery);
+            infos.emplace_back(intentInfoQuery);
         }
     }
     return ERR_OK;
@@ -13937,7 +13937,7 @@ int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
     const std::string &bundleName,
     const std::string &moduleName,
     const std::string &intentName,
-    InsightIntentInfoForBack &info)
+    InsightIntentInfoForQuery &info)
 {
     TAG_LOGI(AAFwkTag::INTENT, "GetInsightIntentInfoByIntentName");
     int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckCallerPermission();

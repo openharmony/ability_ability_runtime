@@ -87,7 +87,7 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_execute_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_execute_param.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_execute_result.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_info_for_back.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_info_for_query.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/intent_exemption_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/keep_alive/keep_alive_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/last_exit_detail_info.cpp",

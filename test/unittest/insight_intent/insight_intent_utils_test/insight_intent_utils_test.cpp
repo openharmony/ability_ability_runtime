@@ -26,7 +26,7 @@
 #include "int_wrapper.h"
 #include "insight_intent_profile.h"
 #include "extract_insight_intent_profile.h"
-#include "insight_intent_info_for_back.h"
+#include "insight_intent_info_for_query.h"
 #include "string_wrapper.h"
 #include "want.h"
 #include "mock_system_ability_manager.h"
@@ -289,9 +289,9 @@ HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentGenericInfo_0100, Te
 {
     TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0100 start");
     AbilityRuntime::InsightIntentUtils utils;
-    InsightIntentInfoForBack insightIntentInfoForBack;
+    InsightIntentInfoForQuery insightIntentInfoForQuery;
     TEST_INSIGHT_INTENT_GENERIC_INFO.decoratorType = "@InsightIntentLink";
-    auto result = utils.ConvertExtractInsightIntentGenericInfo(TEST_INSIGHT_INTENT_GENERIC_INFO, insightIntentInfoForBack);
+    auto result = utils.ConvertExtractInsightIntentGenericInfo(TEST_INSIGHT_INTENT_GENERIC_INFO, insightIntentInfoForQuery);
     EXPECT_EQ(result, ERR_OK);
     Mock::VerifyAndClear(mockBundleMgr);
     testing::Mock::AllowLeak(mockBundleMgr);
@@ -307,9 +307,9 @@ HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentGenericInfo_0200, Te
 {
     TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0200 start");
     AbilityRuntime::InsightIntentUtils utils;
-    InsightIntentInfoForBack insightIntentInfoForBack;
+    InsightIntentInfoForQuery insightIntentInfoForQuery;
     TEST_INSIGHT_INTENT_GENERIC_INFO.decoratorType = "test";
-    auto result = utils.ConvertExtractInsightIntentGenericInfo(TEST_INSIGHT_INTENT_GENERIC_INFO, insightIntentInfoForBack);
+    auto result = utils.ConvertExtractInsightIntentGenericInfo(TEST_INSIGHT_INTENT_GENERIC_INFO, insightIntentInfoForQuery);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     Mock::VerifyAndClear(mockBundleMgr);
     testing::Mock::AllowLeak(mockBundleMgr);
@@ -327,8 +327,8 @@ HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentInfo_0100, TestSize.
     EXPECT_CALL(*mockBundleMgr, GetJsonProfile(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<3>(TEST_JSON_STR_ARRAY), Return(ERR_OK)));
     AbilityRuntime::InsightIntentUtils utils;
-    InsightIntentInfoForBack insightIntentInfoForBack;
-    auto result = utils.ConvertExtractInsightIntentInfo(TEST_INSIGHT_INTENT_INFO, insightIntentInfoForBack);
+    InsightIntentInfoForQuery insightIntentInfoForQuery;
+    auto result = utils.ConvertExtractInsightIntentInfo(TEST_INSIGHT_INTENT_INFO, insightIntentInfoForQuery);
     EXPECT_EQ(result, ERR_OK);
     Mock::VerifyAndClear(mockBundleMgr);
     testing::Mock::AllowLeak(mockBundleMgr);
