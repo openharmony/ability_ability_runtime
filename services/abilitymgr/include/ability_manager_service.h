@@ -75,6 +75,8 @@
 namespace OHOS {
 namespace AbilityRuntime {
 class IStatusBarDelegate;
+struct ExtractInsightIntentGenericInfo;
+struct LinkIntentParamMapping;
 }
 namespace Rosen {
 class FocusChangeInfo;
@@ -2661,6 +2663,14 @@ private:
     bool ShouldBlockAllAppStart();
 
     std::string InsightIntentGetcallerBundleName();
+
+    ErrCode IntentOpenLinkInner(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
+        AbilityRuntime::ExtractInsightIntentGenericInfo &linkInfo, const int32_t userId);
+ 
+    AbilityRuntime::ExtractInsightIntentGenericInfo GetInsightIntentGenericInfo(const InsightIntentExecuteParam &param);
+ 
+    void CombinLinkInfo(
+        const std::vector<AbilityRuntime::LinkIntentParamMapping> &paramMappings, std::string &uri, AAFwk::Want &want);
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;

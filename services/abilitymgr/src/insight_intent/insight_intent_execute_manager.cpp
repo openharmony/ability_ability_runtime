@@ -50,7 +50,8 @@ InsightIntentExecuteManager::InsightIntentExecuteManager() = default;
 InsightIntentExecuteManager::~InsightIntentExecuteManager() = default;
 
 int32_t InsightIntentExecuteManager::CheckAndUpdateParam(uint64_t key, const sptr<IRemoteObject> &callerToken,
-    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, std::string callerBundleName)
+    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, std::string callerBundleName,
+    const bool openLinkExecuteFlag)
 {
     int32_t result = CheckCallerPermission();
     if (result != ERR_OK) {
@@ -64,8 +65,8 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateParam(uint64_t key, const spt
         TAG_LOGE(AAFwkTag::INTENT, "null param");
         return ERR_INVALID_VALUE;
     }
-    if (param->bundleName_.empty() || param->moduleName_.empty() || param->abilityName_.empty() ||
-        param->insightIntentName_.empty()) {
+    if (param->bundleName_.empty() || param->moduleName_.empty() ||
+        (!openLinkExecuteFlag && param->abilityName_.empty()) || param->insightIntentName_.empty()) {
         TAG_LOGE(AAFwkTag::INTENT, "invalid param");
         return ERR_INVALID_VALUE;
     }
