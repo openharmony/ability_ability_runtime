@@ -113,8 +113,6 @@ std::unique_ptr<STSNativeReference> CreateEtsInsightIntentContext(ani_env *env,
     const std::shared_ptr<EtsInsightIntentContext>& context)
 {
     TAG_LOGD(AAFwkTag::INTENT, "CreateEtsInsightIntentContext called");
-    auto workContext = new (std::nothrow) std::weak_ptr<EtsInsightIntentContext>(context);
-    ani_long nativeContextLong = (ani_long)workContext;
     ani_class cls {};
     ani_status status = ANI_ERROR;
     ani_object contextObj = nullptr;
@@ -151,12 +149,20 @@ std::unique_ptr<STSNativeReference> CreateEtsInsightIntentContext(ani_env *env,
         TAG_LOGE(AAFwkTag::INTENT, "status: %{public}d", status);
         return std::make_unique<STSNativeReference>();
     }
+    auto workContext = new (std::nothrow) std::weak_ptr<EtsInsightIntentContext>(context);
+    if (workContext == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null workContext");
+        return std::make_unique<STSNativeReference>();
+    }
+    ani_long nativeContextLong = (ani_long)workContext;
     if ((status = env->Object_SetField_Long(contextObj, field, nativeContextLong)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "status: %{public}d", status);
+        delete workContext;
         return std::make_unique<STSNativeReference>();
     }
     if ((status = env->GlobalReference_Create(contextObj, &contextObjtRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "status: %{public}d", status);
+        delete workContext;
         return std::make_unique<STSNativeReference>();
     }
     auto nativeReference = std::make_unique<STSNativeReference>();
