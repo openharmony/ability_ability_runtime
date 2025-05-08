@@ -108,7 +108,7 @@ HWTEST_F(StartupManagerTest, BuildAutoAppStartupTaskManager_0100, Function | Med
         std::make_shared<StartupTaskManager>(startupTaskManagerId, autoStartupTasks);
     EXPECT_TRUE(startupTaskManager != nullptr);
     startupManager->appStartupTasks_.emplace(name, nullptr);
-    int32_t ret = startupManager->BuildAutoAppStartupTaskManager(startupTaskManager);
+    int32_t ret = startupManager->BuildAutoAppStartupTaskManager(startupTaskManager, "");
     EXPECT_EQ(ret, ERR_STARTUP_INTERNAL_ERROR);
     startupManager->appStartupTasks_.clear();
     startupManager->appStartupTasks_.emplace(name, startupTask);
@@ -116,7 +116,7 @@ HWTEST_F(StartupManagerTest, BuildAutoAppStartupTaskManager_0100, Function | Med
     dependencies.emplace_back(name1);
     startupTask1->SetDependencies(dependencies);
     startupManager->appStartupTasks_.emplace(name1, startupTask1);
-    ret = startupManager->BuildAutoAppStartupTaskManager(startupTaskManager);
+    ret = startupManager->BuildAutoAppStartupTaskManager(startupTaskManager, "");
     EXPECT_EQ(ret, ERR_OK);
     GTEST_LOG_(INFO) << "StartupManagerTest BuildAutoAppStartupTaskManager_0100 end";
 }
