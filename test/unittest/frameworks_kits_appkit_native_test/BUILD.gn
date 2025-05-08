@@ -954,9 +954,12 @@ ohos_unittest("dump_runtime_helper_test") {
     "faultloggerd:libfaultloggerd",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
     "napi:ace_napi",
+    "ffrt:libffrt",
+    "storage_service:storage_manager_acl",
   ]
 }
 
@@ -1047,9 +1050,12 @@ ohos_unittest("dump_runtime_helper_second_test") {
     "faultloggerd:libfaultloggerd",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
     "napi:ace_napi",
+    "ffrt:libffrt",
+    "storage_service:storage_manager_acl",
   ]
 }
 

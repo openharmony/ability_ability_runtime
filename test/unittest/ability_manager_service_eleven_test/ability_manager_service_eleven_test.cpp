@@ -31,6 +31,7 @@
 #include "mock_my_flag.h"
 #include "mock_permission_verification.h"
 #include "mock_scene_board_judgement.h"
+#include "mock_ability_connect_callback.h"
 #include "session/host/include/session.h"
 #include "ui_ability_lifecycle_manager.h"
 
@@ -702,6 +703,290 @@ HWTEST_F(AbilityManagerServiceElevenTest, AttachAbilityThread_0012, TestSize.Lev
     }
 
     GTEST_LOG_(INFO) << "AttachAbilityThread_0012 end";
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: ReleaseCall_001
+ * Function: ReleaseCall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ReleaseCall
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, ReleaseCall_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest ReleaseCall_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    AppExecFwk::ElementName validElement("device", "com.example.demo", "MainAbility");
+    int32_t retCode = abilityMs->ReleaseCall(nullptr, validElement);
+    EXPECT_EQ(retCode, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest ReleaseCall_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: ReleaseCall_002
+ * Function: ReleaseCall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ReleaseCall
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, ReleaseCall_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest ReleaseCall_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    abilityMs->subManagersHelper_->missionListManagers_.clear();
+    std::shared_ptr<UIAbilityLifecycleManager> uiAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
+    abilityMs->subManagersHelper_->uiAbilityManagers_.emplace(0, uiAbilityManager);
+
+    sptr<IAbilityConnection> connect = new AbilityConnectCallback();
+    AppExecFwk::ElementName emptyElement;
+    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(true));
+    int32_t retCode = abilityMs->ReleaseCall(connect, emptyElement);
+    EXPECT_EQ(retCode, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest ReleaseCall_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: ReleaseCall_003
+ * Function: ReleaseCall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ReleaseCall
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, ReleaseCall_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest ReleaseCall_003 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    abilityMs->subManagersHelper_->missionListManagers_.clear();
+    std::shared_ptr<MockMissionListManagerInterface> missionListManager =
+        std::make_shared<MockMissionListManagerInterface>();
+    abilityMs->subManagersHelper_->missionListManagers_.emplace(0, missionListManager);
+
+    sptr<IAbilityConnection> connect = new AbilityConnectCallback();
+    AppExecFwk::ElementName emptyElement;
+    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(false));
+    int32_t retCode = abilityMs->ReleaseCall(connect, emptyElement);
+    EXPECT_EQ(retCode, ERR_NO_INIT);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest ReleaseCall_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckStartCallHasFloatingWindowForUIExtension_001
+ * Function: CheckStartCallHasFloatingWindowForUIExtension
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckStartCallHasFloatingWindowForUIExtension
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, CheckStartCallHasFloatingWindowForUIExtension_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest CheckStartCallHasFloatingWindowForUIExtension_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+
+    sptr<IRemoteObject> token = nullptr;
+    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(false));
+    int result = abilityMs->CheckStartCallHasFloatingWindowForUIExtension(token);
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest CheckStartCallHasFloatingWindowForUIExtension_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckStartCallHasFloatingWindowForUIExtension_002
+ * Function: CheckStartCallHasFloatingWindowForUIExtension
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckStartCallHasFloatingWindowForUIExtension
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, CheckStartCallHasFloatingWindowForUIExtension_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest CheckStartCallHasFloatingWindowForUIExtension_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+
+    sptr<IRemoteObject> token = nullptr;
+    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(true));
+    int result = abilityMs->CheckStartCallHasFloatingWindowForUIExtension(token);
+    EXPECT_TRUE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest CheckStartCallHasFloatingWindowForUIExtension_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckStartCallHasFloatingWindowForUIExtension_003
+ * Function: CheckStartCallHasFloatingWindowForUIExtension
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckStartCallHasFloatingWindowForUIExtension
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, CheckStartCallHasFloatingWindowForUIExtension_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest CheckStartCallHasFloatingWindowForUIExtension_003 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(true));
+    int result = abilityMs->CheckStartCallHasFloatingWindowForUIExtension(token);
+    EXPECT_TRUE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest CheckStartCallHasFloatingWindowForUIExtension_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckUIExtensionCallerIsUIAbility_001
+ * Function: CheckUIExtensionCallerIsUIAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckUIExtensionCallerIsUIAbility
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, CheckUIExtensionCallerIsUIAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest CheckUIExtensionCallerIsUIAbility_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.demo";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AbilityType::PAGE;
+    abilityRequest.callerToken = nullptr;
+    int result = abilityMs->CheckUIExtensionCallerIsUIAbility(abilityRequest);
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest CheckUIExtensionCallerIsUIAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: SetBackgroundCall_001
+ * Function: SetBackgroundCall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetBackgroundCall
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, SetBackgroundCall_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest SetBackgroundCall_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    RunningProcessInfo info;
+    AbilityRequest abilityRequest;
+    bool isBackgroundCall = false;
+
+    abilityMs->backgroundJudgeFlag_ = true;
+    int result = abilityMs->SetBackgroundCall(info, abilityRequest, isBackgroundCall);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest SetBackgroundCall_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: SetBackgroundCall_002
+ * Function: SetBackgroundCall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetBackgroundCall
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, SetBackgroundCall_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest SetBackgroundCall_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    RunningProcessInfo info;
+    AbilityRequest abilityRequest;
+    bool isBackgroundCall = false;
+
+    abilityMs->backgroundJudgeFlag_ = false;
+    int result = abilityMs->SetBackgroundCall(info, abilityRequest, isBackgroundCall);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest SetBackgroundCall_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: SetResidentProcessEnabled_001
+ * Function: SetResidentProcessEnabled
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetResidentProcessEnabled
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, SetResidentProcessEnabled_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest SetResidentProcessEnabled_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    std::string bundleName = "";
+    bool enable = false;
+    int result = abilityMs->SetResidentProcessEnabled(bundleName, enable);
+    EXPECT_EQ(result, INNER_ERR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest SetResidentProcessEnabled_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: VerificationToken_001
+ * Function: VerificationToken
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService VerificationToken
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, VerificationToken_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest VerificationToken_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(abilityMs->subManagersHelper_, nullptr);
+    abilityMs->subManagersHelper_->currentDataAbilityManager_ = nullptr;
+    EXPECT_FALSE(abilityMs->VerificationToken(token));
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest VerificationToken_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: VerificationToken_002
+ * Function: VerificationToken
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService VerificationToken
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, VerificationToken_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest VerificationToken_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(abilityMs->subManagersHelper_, nullptr);
+    abilityMs->subManagersHelper_->currentConnectManager_ = nullptr;
+    EXPECT_FALSE(abilityMs->VerificationToken(token));
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest VerificationToken_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: VerificationToken_003
+ * Function: VerificationToken
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService VerificationToken
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, VerificationToken_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest VerificationToken_003 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(abilityMs->subManagersHelper_, nullptr);
+    abilityMs->subManagersHelper_->currentMissionListManager_ = nullptr;
+    EXPECT_FALSE(abilityMs->VerificationToken(token));
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest VerificationToken_003 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

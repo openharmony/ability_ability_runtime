@@ -22,6 +22,8 @@
 #include <gmock/gmock.h>
 #include "ability_scheduler_interface.h"
 
+constexpr int32_t ABILITY_SCHEDULER_MOCK_VALUE = 1;
+
 namespace OHOS {
 namespace AAFwk {
 class AbilitySchedulerMock : public IRemoteStub<IAbilityScheduler> {
@@ -164,9 +166,23 @@ public:
         return 0;
     }
 
-    virtual void UpdateSessionToken(sptr<IRemoteObject> sessionToken) override {}
+    virtual void UpdateSessionToken(sptr<IRemoteObject> sessionToken) override
+    {
+        code_ = ABILITY_SCHEDULER_MOCK_VALUE;
+    }
 
-    virtual void ScheduleCollaborate(const Want &want) override {}
+    virtual void ScheduleCollaborate(const Want &want) override
+    {
+        code_ = ABILITY_SCHEDULER_MOCK_VALUE;
+    }
+
+    virtual void ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override
+    {}
+
+    virtual void ScheduleAbilityRequestSuccess(const std::string &requestId,
+        const AppExecFwk::ElementName &element) override
+    {}
 
     int code_ = 0;
 };

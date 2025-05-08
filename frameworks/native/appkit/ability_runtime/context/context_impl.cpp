@@ -255,7 +255,7 @@ int32_t ContextImpl::GetGroupDirWithCheck(const std::string &groupId, bool check
         TAG_LOGE(AAFwkTag::APPKIT, "groupDir currently not supports el1 level");
         return ERR_INVALID_VALUE;
     }
-    int errCode = GetBundleManager();
+    int32_t errCode = GetBundleManager();
     if (errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed, errCode: %{public}d", errCode);
         return errCode;
@@ -266,7 +266,12 @@ int32_t ContextImpl::GetGroupDirWithCheck(const std::string &groupId, bool check
         TAG_LOGE(AAFwkTag::APPKIT, "getGroupDir failed or groupDirGet empty");
         return ERR_INVALID_VALUE;
     }
-    std::string uuid = groupDirGet.substr(groupDirGet.rfind('/'));
+    auto pos = groupDirGet.rfind('/');
+    if (pos == std::string::npos) {
+        TAG_LOGE(AAFwkTag::APPKIT, "getGroupDir failed to rfind.");
+        return ERR_INVALID_VALUE;
+    }
+    std::string uuid = groupDirGet.substr(pos);
     groupDir = CONTEXT_DATA_STORAGE + currArea_ + CONTEXT_FILE_SEPARATOR + CONTEXT_GROUP + uuid;
     CreateDirIfNotExistWithCheck(groupDir, MODE, true);
     return ERR_OK;
@@ -291,7 +296,12 @@ std::string ContextImpl::GetTempDir()
 std::string ContextImpl::GetResourceDir()
 {
     std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfoPtr = GetHapModuleInfo();
-    if (hapModuleInfoPtr == nullptr || hapModuleInfoPtr->moduleName.empty()) {
+    if (hapModuleInfoPtr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfo null");
+        return "";
+    }
+    if (hapModuleInfoPtr->moduleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfo moduleName is empty");
         return "";
     }
     std::string dir = std::string(LOCAL_CODE_PATH) + CONTEXT_FILE_SEPARATOR +
@@ -299,6 +309,7 @@ std::string ContextImpl::GetResourceDir()
     if (OHOS::FileExists(dir)) {
         return dir;
     }
+    TAG_LOGE(AAFwkTag::APPKIT, "dir:%{public}s not exist", dir.c_str());
     return "";
 }
 
@@ -1030,9 +1041,15 @@ void ContextImpl::GetOverlayPath(std::shared_ptr<Global::Resource::ResourceManag
     } else {
         std::vector<std::string> overlayPaths;
         for (auto it : overlayModuleInfos) {
-            if (std::regex_search(it.hapPath, std::regex(GetBundleNameWithContext(inputContext)))) {
+            bool isMatched = false;
+            try {
+                isMatched = std::regex_search(it.hapPath, std::regex(GetBundleNameWithContext(inputContext)));
+            } catch (...) {
+                TAG_LOGE(AAFwkTag::APPKIT, "hapPath: %{private}s", it.hapPath.c_str());
+            }
+            if (isMatched) {
                 it.hapPath = std::regex_replace(it.hapPath, std::regex(std::string(ABS_CODE_PATH) +
-        std::string(FILE_SEPARATOR) + GetBundleNameWithContext(inputContext)), LOCAL_CODE_PATH);
+                    std::string(FILE_SEPARATOR) + GetBundleNameWithContext(inputContext)), LOCAL_CODE_PATH);
             } else {
                 it.hapPath = std::regex_replace(it.hapPath, std::regex(ABS_CODE_PATH), LOCAL_BUNDLES);
             }

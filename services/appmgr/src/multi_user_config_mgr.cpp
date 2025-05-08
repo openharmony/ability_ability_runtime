@@ -16,6 +16,7 @@
 #include "multi_user_config_mgr.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "i18n_service_ability_client.h"
 #include "os_account_manager.h"
 
 namespace OHOS {
@@ -77,6 +78,8 @@ void MultiUserConfigurationMgr::SetOrUpdateConfigByUserId(
             return;
         }
         Configuration userConfig = *globalConfiguration_;
+        std::string language = OHOS::Global::I18n::I18nServiceAbilityClient::GetLanguageFromUserId(userId);
+        userConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
         userConfig.CompareDifferent(changeKeyV, config);
         if (!changeKeyV.empty()) {
             userConfig.Merge(changeKeyV, config);

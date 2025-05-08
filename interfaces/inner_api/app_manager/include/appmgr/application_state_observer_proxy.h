@@ -142,6 +142,12 @@ public:
      */
     virtual void OnAppCacheStateChanged(const AppStateData &appStateData) override;
 
+    /**
+     * Will be called when bindingRelation change.
+     *
+     * @param processBindData Process bind data.
+     */
+    virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     static inline BrokerDelegator<ApplicationStateObserverProxy> delegator_;

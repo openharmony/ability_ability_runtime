@@ -43,6 +43,7 @@ ohos_fuzztest("ExtensionRecordManageraFuzzTest") {
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/application_state_observer_stub.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/page_state_data.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/process_data.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/process_bind_data.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/extension_record/extension_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/extension_record/extension_record_factory.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/extension_record/extension_record_manager.cpp",

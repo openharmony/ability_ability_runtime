@@ -38,6 +38,7 @@
 #include "refbase.h"
 #include "running_process_info.h"
 #include "simple_process_info.h"
+#include "process_bind_data.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -384,6 +385,9 @@ public:
 
     void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
     std::shared_ptr<AppRunningRecord> QueryAppRecordPlus(int32_t pid, int32_t uid);
+    int32_t AddUIExtensionBindItem(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
+    int32_t QueryUIExtensionBindItemById(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
+    int32_t RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId);
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     int32_t AssignRunningProcessInfoByAppRecord(
@@ -404,6 +408,9 @@ private:
 
     std::mutex updateConfigurationDelayedLock_;
     std::map<const int32_t, bool> updateConfigurationDelayedMap_;
+
+    std::mutex uiExtensionBindMapLock_;
+    std::map<int32_t, UIExtensionProcessBindInfo> uiExtensionBindMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

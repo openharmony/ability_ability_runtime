@@ -806,6 +806,18 @@ void UIAbility::HandleCollaboration(const AAFwk::Want &want)
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 }
 
+void UIAbility::OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+}
+
+void UIAbility::OnAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+}
+
 std::string UIAbility::GetContentInfo()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

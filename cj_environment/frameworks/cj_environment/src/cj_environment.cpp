@@ -16,7 +16,7 @@
 #include "cj_environment.h"
 
 #include <string>
-#include <filesystem>
+#include <sstream>
 #include <mutex>
 #include "cj_hilog.h"
 #include "cj_invoker.h"
@@ -236,6 +236,10 @@ const char *CJEnvironment::cjNewAppNSName = "moduleNs_default";
 const char *CJEnvironment::cjNewSDKNSName = "cj_rom_sdk";
 const char *CJEnvironment::cjNewSysNSName = "default";
 const char *CJEnvironment::cjNDKNSName = "ndk";
+const char *CJEnvironment::cjCompatibilitySDKNSName = "cj_compatibility_sdk";
+std::string CJEnvironment::appVersion = "5.1.0.0";
+const uint32_t CJEnvironment::majorVersion = 5;
+const uint32_t CJEnvironment::minorVersion = 1;
 
 #ifdef WITH_EVENT_HANDLER
 static std::shared_ptr<AppExecFwk::EventHandler>GetGHandler()
@@ -525,11 +529,15 @@ void CJEnvironment::InitNewCJAppNS(const std::string& path)
         Dl_namespace chip_sdk;
         dlns_get(CJEnvironment::cjSDKNSName, &sdk);
         dlns_get(CJEnvironment::cjChipSDKNSName, &chip_sdk);
+        dlns_inherit(&ns, &sdk, "allow_all_shared_libs");
         dlns_inherit(&ns, &chip_sdk, "libssl_openssl.z.so");
     } else {
+        Dl_namespace compatibility_sdk;
+        dlns_get(CJEnvironment::cjCompatibilitySDKNSName, &compatibility_sdk);
         dlns_get(CJEnvironment::cjNewSDKNSName, &sdk);
+        dlns_inherit(&ns, &sdk, "allow_all_shared_libs");
+        dlns_inherit(&ns, &compatibility_sdk, "allow_all_shared_libs");
     }
-    dlns_inherit(&ns, &sdk, "allow_all_shared_libs");
 #endif
 }
 
@@ -549,6 +557,15 @@ void CJEnvironment::InitNewCJSDKNS(const std::string& path)
     LOGI("InitCJSDKNS: %{public}s", path.c_str());
     Dl_namespace ns;
     DynamicInitNewNamespace(&ns, path.c_str(), cjNewSDKNSName);
+#endif
+}
+
+void CJEnvironment::InitCJCompatibilitySDKNS(const std::string& path)
+{
+#ifdef __OHOS__
+    LOGI("InitCJCompatibilitySDKNS: %{public}s", path.c_str());
+    Dl_namespace ns;
+    DynamicInitNewNamespace(&ns, path.c_str(), cjCompatibilitySDKNSName);
 #endif
 }
 
@@ -745,13 +762,27 @@ bool CJEnvironment::StartDebugger()
     return true;
 }
 
+std::vector<uint32_t> SplitVersion(std::string& version, char separator)
+{
+    std::vector<uint32_t> result;
+    std::stringstream ss(version);
+    std::string item;
+
+    while (std::getline(ss, item, separator)) {
+        result.push_back(std::stoul(item));
+    }
+    return result;
+}
+
 CJEnvironment::NSMode CJEnvironment::DetectAppNSMode()
 {
-    std::filesystem::path runtimePath(CJ_RT_PATH + "/libcangjie-runtime.so");
-    if (std::filesystem::exists(runtimePath)) {
-        return NSMode::APP;
-    } else {
+    LOGI("App compileSDKVersion is %{public}s", CJEnvironment::appVersion.c_str());
+    std::vector<uint32_t> tokens = SplitVersion(CJEnvironment::appVersion, '.');
+    if (tokens[0] > CJEnvironment::majorVersion ||
+        (tokens[0] == CJEnvironment::majorVersion && tokens[1] >= CJEnvironment::minorVersion)) {
         return NSMode::SINK;
+    } else {
+        return NSMode::APP;
     }
 }
 
@@ -763,6 +794,7 @@ void CJEnvironment::InitRuntimeNS()
         InitCJSDKNS(CJ_RT_PATH + ":" + CJ_LIB_PATH);
     } else {
         InitNewCJSDKNS(CJ_SDK_PATH);
+        InitCJCompatibilitySDKNS(CJ_RT_PATH + ":" + CJ_LIB_PATH);
     }
 #endif
 }
@@ -774,6 +806,11 @@ void CJEnvironment::InitCJNS(const std::string& appPath)
 #endif
     StartRuntime();
     StartUIScheduler();
+}
+
+void CJEnvironment::SetAppVersion(std::string& version)
+{
+    CJEnvironment::appVersion = version;
 }
 
 CJEnvMethods* CJEnvironment::CreateEnvMethods()
@@ -820,6 +857,9 @@ CJEnvMethods* CJEnvironment::CreateEnvMethods()
         },
         .registerStackInfoCallbacks = [](UpdateStackInfoFuncType uFunc) {
             CJEnvironment::GetInstance()->RegisterStackInfoCallbacks(uFunc);
+        },
+        .setAppVersion = [](std::string& version) {
+            CJEnvironment::SetAppVersion(version);
         },
         .dumpHeapSnapshot = [](int fd) {
             CJEnvironment::GetInstance()->DumpHeapSnapshot(fd);

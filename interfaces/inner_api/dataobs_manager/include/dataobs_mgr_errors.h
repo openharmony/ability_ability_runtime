@@ -52,6 +52,7 @@ enum Status : int32_t {
     INVALID_PARAM,
     GET_TOKENINFO_ERR,
     DATAOBS_INVALID_USERID,
+    DATAOBS_NOT_SYSTEM_APP,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

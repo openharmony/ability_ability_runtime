@@ -20,8 +20,10 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ipc_capacity_wrap.h"
+#include "record_cost_time_util.h"
 
 namespace OHOS {
+using AAFwk::RecordCostTimeUtil;
 namespace EcologicalRuleMgrService {
 
 using namespace std::chrono;
@@ -116,24 +118,20 @@ int32_t AbilityEcologicalRuleMgrServiceClient::EvaluateResolveInfos(const AAFwk:
     const vector<AppExecFwk::ExtensionAbilityInfo> &extInfos)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    int64_t start = GetCurrentTimeMicro();
+    RecordCostTimeUtil("EvaluateResolveInfos");
     TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "want: %{private}s, callerInfo: %{public}s, type: %{public}d",
         want.ToString().c_str(), callerInfo.ToString().c_str(), type);
     if (!CheckConnectService()) {
         return AAFwk::ERR_CONNECT_ERMS_FAILED;
     }
-    int32_t res = ecologicalRuleMgrServiceProxy_->EvaluateResolveInfos(want, callerInfo, type, abilityInfos);
-    int64_t cost = GetCurrentTimeMicro() - start;
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE,
-        "[ERMS-DFX] cost %{public}" PRId64 " ms", cost);
-    return res;
+    return ecologicalRuleMgrServiceProxy_->EvaluateResolveInfos(want, callerInfo, type, abilityInfos);
 }
 
 int32_t AbilityEcologicalRuleMgrServiceClient::QueryStartExperience(const OHOS::AAFwk::Want &want,
     const AbilityCallerInfo &callerInfo, AbilityExperienceRule &rule)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    int64_t start = GetCurrentTimeMicro();
+    RecordCostTimeUtil("QueryStartExperience");
     TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "callerInfo: %{public}s, want: %{private}s", callerInfo.ToString().c_str(),
         want.ToString().c_str());
 
@@ -147,9 +145,6 @@ int32_t AbilityEcologicalRuleMgrServiceClient::QueryStartExperience(const OHOS::
             "queryStart finish: resultCode = %{public}d, sceneCode = %{public}s, replaceWant = %{private}s",
             rule.resultCode, rule.sceneCode.c_str(), (*(rule.replaceWant)).ToString().c_str());
     }
-    int64_t cost = GetCurrentTimeMicro() - start;
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE,
-        "[ERMS-DFX] cost %{public}" PRId64 " ms", cost);
     return res;
 }
 

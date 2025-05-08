@@ -840,7 +840,7 @@ public:
      * @param token Ability identify.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t LaunchAbility(const sptr<IRemoteObject> &token) override;
+    int32_t LaunchAbility(sptr<IRemoteObject> token) override;
 private:
     /**
      * Init, Initialize application services.

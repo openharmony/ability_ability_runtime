@@ -19,7 +19,6 @@
 #include <unistd.h>
 #include <filesystem>
 #include <regex>
-#include <fcntl.h>
 
 #include "cj_envsetup.h"
 #include "hilog_tag_wrapper.h"
@@ -333,6 +332,16 @@ bool CJRuntime::StartDebugger()
 void CJRuntime::UnLoadCJAppLibrary()
 {
     TAG_LOGI(AAFwkTag::CJRUNTIME, "UnLoadCJAppLibrary not support yet");
+}
+
+void CJRuntime::SetAppVersion(std::string& version)
+{
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");
+        return;
+    }
+    return cjEnv->setAppVersion(version);
 }
 
 void CJRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary)

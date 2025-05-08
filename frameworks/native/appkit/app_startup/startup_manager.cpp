@@ -80,6 +80,7 @@ int32_t StartupManager::PreloadAppHintStartup(const AppExecFwk::BundleInfo& bund
         TAG_LOGD(AAFwkTag::STARTUP, "entry module no app startup config");
         return ERR_OK;
     }
+    bundleName_ = bundleInfo.name;
     moduleStartupConfigInfos_.emplace_back(entryInfo.name, entryInfo.appStartup, entryInfo.hapPath,
         entryInfo.moduleType, entryInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE);
 
@@ -915,7 +916,8 @@ bool StartupManager::AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigI
 
     std::string name = preloadStartupTaskJson.at(NAME).get<std::string>();
     std::string ohmUrl = preloadStartupTaskJson.at(OHMURL).get<std::string>();
-    auto task = std::make_shared<PreloadSoStartupTask>(name, ohmUrl);
+    std::string path = bundleName_ + "/" + info.name_;
+    auto task = std::make_shared<PreloadSoStartupTask>(name, ohmUrl, path);
     if (task == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "task is null");
         return false;

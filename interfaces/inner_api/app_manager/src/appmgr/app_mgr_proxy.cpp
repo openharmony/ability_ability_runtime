@@ -2276,7 +2276,7 @@ int32_t AppMgrProxy::GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &i
     return ERR_OK;
 }
 
-int32_t AppMgrProxy::LaunchAbility(const sptr<IRemoteObject> &token)
+int32_t AppMgrProxy::LaunchAbility(sptr<IRemoteObject> token)
 {
     MessageParcel data;
     MessageParcel reply;

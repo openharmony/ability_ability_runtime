@@ -1176,6 +1176,11 @@ public:
         return isPluginAbility_;
     }
 
+    void NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
+
+    void NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element);
+
     void ScheduleCollaborate(const Want &want);
 
     bool IsHook () const
@@ -1198,9 +1203,20 @@ public:
         hookOff_ = hookOff;
     }
 
+    inline void SetLaunchWant(std::shared_ptr<Want> launchWant)
+    {
+        launchWant_ = launchWant;
+    }
+
+    inline std::shared_ptr<Want> GetLaunchWant() const
+    {
+        return launchWant_;
+    }
+
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false,
         const std::string &taskName = "");
 
+    void UpdateUIExtensionBindInfo(const WantParams &wantParams);
 protected:
 
     sptr<Token> token_ = {};                               // used to interact with kit and wms
@@ -1432,6 +1448,7 @@ private:
     bool isPrepareTerminate_ = false;
 
     std::string killReason_ = "";
+    std::shared_ptr<Want> launchWant_ = nullptr;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

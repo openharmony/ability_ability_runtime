@@ -429,7 +429,7 @@ public:
         const InsightIntentExecuteResult &result));
     MOCK_METHOD5(StartAbilityWithSpecifyTokenId, int(const Want& want, const sptr<IRemoteObject>& callerToken,
         uint32_t specifyTokenId, int32_t userId, int requestCode));
-    MOCK_METHOD1(RevokeDelegator, int32_t(const sptr<IRemoteObject> &token));
+    MOCK_METHOD1(RevokeDelegator, int32_t(sptr<IRemoteObject> token));
 };
 }  // namespace AAFwk
 }  // namespace OHOS

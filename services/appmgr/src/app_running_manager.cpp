@@ -24,6 +24,7 @@
 #include "common_event_support.h"
 #include "exit_resident_process_manager.h"
 #include "freeze_util.h"
+#include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "killing_process_manager.h"
@@ -127,7 +128,8 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
             (pair.second->GetCustomProcessFlag() == customProcessFlag) &&
             (pair.second->GetSignCode() == signCode) && (pair.second->GetProcessName() == processName) &&
             (pair.second->GetJointUserId() == jointUserId) && !(pair.second->IsTerminating()) &&
-            !(pair.second->IsKilling()) && !(pair.second->GetRestartAppFlag());
+            !(pair.second->IsKilling()) && !(pair.second->GetRestartAppFlag()) &&
+            (pair.second->GetKillReason() != AbilityRuntime::GlobalConstant::LOW_MEMORY_KILL);
     };
     auto appRunningMap = GetAppRunningRecordMap();
     if (!jointUserId.empty()) {
@@ -140,7 +142,9 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
             (specifiedProcessFlag.empty() || appRecord->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
             (appRecord->GetCustomProcessFlag() == customProcessFlag) &&
             !(appRecord->IsTerminating()) && !(appRecord->IsKilling()) && !(appRecord->GetRestartAppFlag()) &&
-            !(appRecord->IsUserRequestCleaning()) && !(appRecord->IsCaching() && appRecord->GetProcessCacheBlocked())) {
+            !(appRecord->IsUserRequestCleaning()) &&
+            !(appRecord->IsCaching() && appRecord->GetProcessCacheBlocked()) &&
+            appRecord->GetKillReason() != AbilityRuntime::GlobalConstant::LOW_MEMORY_KILL) {
             auto appInfoList = appRecord->GetAppInfoList();
             TAG_LOGD(AAFwkTag::APPMGR,
                 "appInfoList: %{public}zu, processName: %{public}s, specifiedProcessFlag: %{public}s, \
@@ -995,7 +999,7 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, cons
         if (appRecord->GetDelayConfiguration() == nullptr) {
             appRecord->ResetDelayConfiguration();
         }
-        if (appRecord && !isCollaboratorReserveType(appRecord)) {
+        if (appRecord) {
             TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s]", appRecord->GetName().c_str());
             std::lock_guard guard(updateConfigurationDelayedLock_);
             if (appRecord->NeedUpdateConfigurationBackground() ||
@@ -1025,7 +1029,7 @@ int32_t AppRunningManager::UpdateConfigurationByBundleName(const Configuration &
             TAG_LOGD(AAFwkTag::APPMGR, "app not ready, appName is %{public}s", appRecord->GetBundleName().c_str());
             continue;
         }
-        if (appRecord && !isCollaboratorReserveType(appRecord) && appRecord->GetBundleName() == name &&
+        if (appRecord && appRecord->GetBundleName() == name &&
             appRecord->GetAppIndex() == appIndex) {
             TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s], index:%{public}d",
                 appRecord->GetName().c_str(), appIndex);
@@ -1033,16 +1037,6 @@ int32_t AppRunningManager::UpdateConfigurationByBundleName(const Configuration &
         }
     }
     return result;
-}
-
-bool AppRunningManager::isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord)
-{
-    std::string bundleName = appRecord->GetApplicationInfo()->name;
-    bool isReserveType = bundleName == AAFwk::AppUtils::GetInstance().GetBrokerDelegateBundleName();
-    if (isReserveType) {
-        TAG_LOGI(AAFwkTag::APPMGR, "isReserveType app [%{public}s]", appRecord->GetName().c_str());
-    }
-    return isReserveType;
 }
 
 int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
@@ -1973,6 +1967,36 @@ void AppRunningManager::RemoveTimeoutDeadAppRecord()
             }
             }, DEAD_APP_RECORD_CLEAR_TIME);
     }
+}
+
+int32_t AppRunningManager::AddUIExtensionBindItem(
+    int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo)
+{
+    std::lock_guard guard(uiExtensionBindMapLock_);
+    uiExtensionBindMap_.emplace(uiExtensionBindAbilityId, bindInfo);
+    return ERR_OK;
+}
+
+int32_t AppRunningManager::RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId)
+{
+    std::lock_guard guard(uiExtensionBindMapLock_);
+    auto it = uiExtensionBindMap_.find(uiExtensionBindAbilityId);
+    if (it != uiExtensionBindMap_.end()) {
+        uiExtensionBindMap_.erase(it);
+    }
+    return ERR_OK;
+}
+
+int32_t AppRunningManager::QueryUIExtensionBindItemById(
+    int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo)
+{
+    std::lock_guard guard(uiExtensionBindMapLock_);
+    auto it = uiExtensionBindMap_.find(uiExtensionBindAbilityId);
+    if (it != uiExtensionBindMap_.end()) {
+        bindInfo = it->second;
+        return ERR_OK;
+    }
+    return ERR_INVALID_VALUE;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

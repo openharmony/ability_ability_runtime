@@ -203,6 +203,8 @@ bool PendingWantManager::CheckPendingWantRecordByKey(
 
 int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo)
 {
+    SenderInfo info = senderInfo;
+
     if (target == nullptr) {
         if (senderInfo.finishedReceiver != nullptr) {
             Want want;
@@ -226,12 +228,12 @@ int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target, const Sende
     if (!CheckPermission(record)) {
         if (senderInfo.finishedReceiver != nullptr) {
             Want want;
+            record->BuildSendWant(info, want);
             WantParams wantParams = {};
             senderInfo.finishedReceiver->PerformReceive(want, senderInfo.code, "", wantParams, false, false, 0);
         }
         return ERR_INVALID_VALUE;
     }
-    SenderInfo info = senderInfo;
     return record->SenderInner(info);
 }
 
@@ -389,6 +391,7 @@ int32_t PendingWantManager::PendingRecordIdCreate()
 sptr<PendingWantRecord> PendingWantManager::GetPendingWantRecordByCode(int32_t code)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::WANTAGENT, "resuest code:%{public}d", code);
 
     std::lock_guard<ffrt::mutex> locker(mutex_);
     auto iter = std::find_if(wantRecords_.begin(), wantRecords_.end(), [&code](const auto &pair) {
@@ -613,7 +616,12 @@ void PendingWantManager::ClearPendingWantRecord(const std::string &bundleName, i
 {
     CHECK_POINTER(taskHandler_);
     TAG_LOGI(AAFwkTag::WANTAGENT, "begin");
-    auto task = [bundleName, uid, self = shared_from_this()]() { self->ClearPendingWantRecordTask(bundleName, uid); };
+    auto task = [bundleName, uid, thisWeakPtr = weak_from_this()]() {
+        auto wantManager = thisWeakPtr.lock();
+        if (wantManager) {
+            wantManager->ClearPendingWantRecordTask(bundleName, uid);
+        }
+    };
     taskHandler_->SubmitTask(task);
 }
 
@@ -722,6 +730,9 @@ void PendingWantManager::Dump(std::vector<std::string> &info)
     std::lock_guard<ffrt::mutex> locker(mutex_);
     for (const auto &item : wantRecords_) {
         const auto &pendingKey = item.first;
+        if (!pendingKey) {
+            continue;
+        }
         dumpInfo = "        PendWantRecord ID #" + std::to_string(pendingKey->GetCode()) +
             "  type #" + std::to_string(pendingKey->GetType());
         info.push_back(dumpInfo);
@@ -756,7 +767,7 @@ void PendingWantManager::DumpByRecordId(std::vector<std::string> &info, const st
     std::lock_guard<ffrt::mutex> locker(mutex_);
     for (const auto &item : wantRecords_) {
         const auto &pendingKey = item.first;
-        if (args == std::to_string(pendingKey->GetCode())) {
+        if (pendingKey && (args == std::to_string(pendingKey->GetCode()))) {
             dumpInfo = "        PendWantRecord ID #" + std::to_string(pendingKey->GetCode()) +
                 "  type #" + std::to_string(pendingKey->GetType());
                 info.push_back(dumpInfo);

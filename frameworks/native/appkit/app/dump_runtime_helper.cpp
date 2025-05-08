@@ -22,6 +22,13 @@
 #include "js_runtime_utils.h"
 #include "singleton.h"
 #include "dfx_jsnapi.h"
+#include <sys/statvfs.h>
+#include <sys/stat.h>
+#include <sys/xattr.h>
+#include "parameters.h"
+#include "ffrt.h"
+#include "directory_ex.h"
+#include "storage_acl.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -29,12 +36,53 @@ const char *MODULE_NAME = "hiviewdfx.jsLeakWatcher";
 const char *CHECK = "check";
 const char *REQUIRE_NAPI = "requireNapi";
 
+static bool g_betaVersion = OHOS::system::GetParameter("const.logsystem.versiontype", "unknown") == "beta";
+static bool g_developMode = (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "enable") ||
+                            (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "true");
+static int g_oomDumpProcessQuota = 0;
+static uint64_t g_lastOOMDumpTime = 0;
+static constexpr const char* const EVENT_XATTR_NAME = "user.appevent";
+static constexpr const char* const OOM_QUOTA_XATTR_NAME = "user.oomdump.quota";
+static constexpr const char* const PROPERTY2C = "user.oomdumptelemetry.quota";
+static constexpr const char* const HIAPPEVENT_PATH = "/data/storage/el2/base/cache/hiappevent";
+static constexpr const char* const OOM_QUOTA_PATH = "/data/storage/el2/base/cache/rawheap";
+static constexpr uint64_t OOM_DUMP_INTERVAL = 7 * 24 * 60 * 60;
+static constexpr uint64_t OOM_DUMP_SPACE_LIMIT = 30ull * 1024 * 1024 * 1024;
+static constexpr uint32_t EVENT_RESOURCE_OVERLIMIT_MASK = 6;
+static constexpr uint64_t BIT_MASK = 1;
+static constexpr uint32_t BUF_SIZE_256 = 256;
+static constexpr int DECIMAL_BASE = 10;
+static constexpr int KB_PER_MB = 1024;
+
+enum {
+    INDEX_DELIVERY_TS = 0,
+    INDEX_COMPRESSED_TS_0,
+    INDEX_COMPRESSED_TS_1,
+    INDEX_COMPRESSED_TS_2,
+    INDEX_COMPRESSED_TS_3,
+    INDEX_COMPRESSED_TS_4,
+    INDEX_APP_QUOTA,
+    INDEX_HAS_SENT,
+    INDEX_ROM_RSV_SIZE,
+    PROPERTY2C_SIZE
+};
+
 DumpRuntimeHelper::DumpRuntimeHelper(const std::shared_ptr<OHOSApplication> &application)
     : application_(application)
 {}
 
+bool DumpRuntimeHelper::Check2DOOMDumpOpt()
+{
+    char* env = getenv("DFX_RESOURCE_OVERLIMIT_OPTIONS");
+    if (env == nullptr) {
+        return false;
+    }
+    return strstr(env, "oomdump:enable") != nullptr;
+}
+
 void DumpRuntimeHelper::SetAppFreezeFilterCallback()
 {
+    CreateDirDelay(OOM_QUOTA_PATH);
     if (application_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null application");
         return;
@@ -44,16 +92,111 @@ void DumpRuntimeHelper::SetAppFreezeFilterCallback()
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
-    auto appfreezeFilterCallback = [] (const int32_t pid) -> bool {
+    auto appfreezeFilterCallback = [this] (const int32_t pid, const bool needDecreaseQuota) -> bool {
         auto client = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
         if (client == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null client");
             return false;
         }
-        return client->SetAppFreezeFilter(pid);
+        if (g_betaVersion || g_developMode || !needDecreaseQuota) {
+            TAG_LOGI(AAFwkTag::APPKIT, "no need to check quota, just dump."
+                " beta: %{public}d, develop: %{public}d, hidumper: %{public}d",
+                g_betaVersion, g_developMode, !needDecreaseQuota);
+            client->SetAppFreezeFilter(pid);
+            return true;
+        }
+        bool ret2D = Check2DQuota(needDecreaseQuota);
+        bool ret2C = Check2CQuota();
+        if (!ret2D && !ret2C) {
+            TAG_LOGI(AAFwkTag::APPKIT, "check 2C 2D quota both failed, no dump.");
+            return false;
+        }
+        TAG_LOGI(AAFwkTag::APPKIT, "check success, will dump. 2C: %{public}d, 2D: %{public}d", ret2C, ret2D);
+        client->SetAppFreezeFilter(pid);
+        return true;
     };
     auto vm = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetEcmaVm();
     panda::DFXJSNApi::SetAppFreezeFilterCallback(vm, appfreezeFilterCallback);
+}
+
+bool DumpRuntimeHelper::Check2CQuota()
+{
+    std::vector<int64_t> quota2C;
+    if (!GetQuota(OOM_QUOTA_PATH, PROPERTY2C, quota2C, PROPERTY2C_SIZE)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "failed to GetQuota, PROPERTY2C: %{public}s", PROPERTY2C);
+        return false;
+    }
+
+    int compressQuota = GetCompressQuota(quota2C);
+    int appQuota = static_cast<int>(quota2C[INDEX_APP_QUOTA]);
+    int leftQuota = MIN(compressQuota, appQuota) - static_cast<int>(quota2C[INDEX_HAS_SENT]);
+    if (leftQuota <= 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid quota, compress: %{public}d, app: %{public}d, sent: %{public}" PRId64,
+            compressQuota, appQuota, quota2C[INDEX_HAS_SENT]);
+        return false;
+    }
+
+    uint64_t now = GetCurrentTimestamp();
+    if (quota2C[INDEX_DELIVERY_TS] < 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid quota2C[%{public}d]: %{public}" PRId64,
+            INDEX_DELIVERY_TS, quota2C[INDEX_DELIVERY_TS]);
+        return false;
+    }
+    uint64_t deliveryTs = static_cast<uint64_t>(quota2C[INDEX_DELIVERY_TS]);
+    if (now < deliveryTs || now - deliveryTs > OOM_DUMP_INTERVAL) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid deliveryTs: %{public}" PRIu64, deliveryTs);
+        return false;
+    }
+
+    uint64_t spaceQuota = static_cast<uint64_t>(quota2C[INDEX_ROM_RSV_SIZE]) * KB_PER_MB;
+    if (!CheckOOMFreeSpace(spaceQuota)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "rom free space is less than spaceQuota: %{public}" PRIu64, spaceQuota);
+        return false;
+    }
+
+    TAG_LOGE(AAFwkTag::APPKIT, "success check 2C Quota");
+    return true;
+}
+
+bool DumpRuntimeHelper::Check2DQuota(bool needDecreaseQuota)
+{
+    if (OHOS::system::GetParameter("hiview.oomdump.switch", "unknown") == "disable") {
+        TAG_LOGE(AAFwkTag::APPKIT, "oom dump is disabled");
+        return false;
+    }
+    if (!Check2DOOMDumpOpt()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Check2DOOMDumpOpt failed");
+        return false;
+    }
+    uint64_t time = 0ull;
+    int quota = 0;
+    int value = OHOS::system::GetIntParameter("persist.hiview.oomdump.process.maxcount", 0);
+    if (value < 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid persist.hiview.oomdump.process.maxcount: %{public}d", value);
+        return false;
+    }
+    uint32_t oomDumpProcessMaxQuota = static_cast<uint32_t>(value);
+    if (!Get2DQuota(OOM_QUOTA_PATH, OOM_QUOTA_XATTR_NAME, time, quota)) {
+        TAG_LOGI(AAFwkTag::APPKIT, "failed to Get2DQuota, need to Init2DOOMDumpQuota");
+        if (!Init2DOOMDumpQuota(OOM_QUOTA_PATH, oomDumpProcessMaxQuota)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "failed Init2DOOMDumpQuota");
+            return false;
+        }
+    }
+    value = OHOS::system::GetIntParameter("persist.hiview.oomdump.maxcount", 0);
+    if (value < 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid persist.hiview.oomdump.maxcount: %{public}d", value);
+        return false;
+    }
+    uint32_t oomDumpMaxQuota = static_cast<uint32_t>(value);
+    if (!Check2DOOMDumpQuota(oomDumpMaxQuota, oomDumpProcessMaxQuota)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Check2DOOMDumpQuota failed");
+        return false;
+    }
+    Set2DQuota(OOM_QUOTA_PATH, GetCurrentTimestamp(), g_oomDumpProcessQuota - 1);
+
+    TAG_LOGI(AAFwkTag::APPKIT, "succeed to Check2DQuota");
+    return true;
 }
 
 void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
@@ -191,5 +334,294 @@ void DumpRuntimeHelper::WriteCheckList(const std::string &checkList)
     close(fd);
 }
 
+void DumpRuntimeHelper::CreateDirDelay(const std::string &path)
+{
+    ffrt::submit([=] {
+        if (!CreateDir(path)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "failed to create %{public}s", path.c_str());
+            return;
+        }
+        constexpr mode_t defaultLogDirMode = 0770;
+        if (!OHOS::ChangeModeDirectory(path.c_str(), defaultLogDirMode)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "failed to changeMode %{public}s", path.c_str());
+            return;
+        }
+        if (OHOS::StorageDaemon::AclSetAccess(path, "g:1201:rwx") != 0) {
+            TAG_LOGE(AAFwkTag::APPKIT, "failed to AclSetAccess, path: %{public}s", path.c_str());
+            return;
+        }
+        TAG_LOGI(AAFwkTag::APPKIT, "success to AclSetAccess, path: %{public}s", path.c_str());
+        }, {}, {}, {ffrt::task_attr().name("ffrt_dfr_CreateDir")});
+}
+
+bool DumpRuntimeHelper::Init2DOOMDumpQuota(const std::string &path, uint32_t oomDumpProcessMaxQuota)
+{
+    uint64_t currentTime = GetCurrentTimestamp();
+    if (!Set2DQuota(path, currentTime, oomDumpProcessMaxQuota)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Set2DQuota failed, current: %{public}" PRIu64 ", quota: %{public}d",
+            currentTime, oomDumpProcessMaxQuota);
+        return false;
+    }
+    TAG_LOGI(AAFwkTag::APPKIT, "Init dumpTime: %{public}" PRIu64 ", quota: %{public}d.",
+        currentTime, oomDumpProcessMaxQuota);
+    return true;
+}
+
+bool DumpRuntimeHelper::CreateDir(const std::string &path)
+{
+    if (IsFileExists(path)) {
+        TAG_LOGI(AAFwkTag::APPKIT, "File existed. dir: %{public}s", path.c_str());
+        return true;
+    }
+    if (!ForceCreateDirectory(path)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create dir: %{public}s", path.c_str());
+        return false;
+    }
+    TAG_LOGI(AAFwkTag::APPKIT, "success to CreateDir. dir: %{public}s", path.c_str());
+    return true;
+}
+
+bool DumpRuntimeHelper::Check2DOOMDumpQuota(uint32_t oomDumpMaxQuota, uint32_t oomDumpProcessMaxQuota)
+{
+    if (!CheckAppListenedEvents(HIAPPEVENT_PATH)) {
+        TAG_LOGI(AAFwkTag::APPKIT, "Not subscribe oom event.");
+        return false;
+    }
+    if (oomDumpMaxQuota <= 0) {
+        TAG_LOGI(AAFwkTag::APPKIT, "The whole machine quota has been exhausted, quota=%{public}u", oomDumpMaxQuota);
+        return false;
+    }
+    if (!CheckOOMFreeSpace(OOM_DUMP_SPACE_LIMIT)) {
+        TAG_LOGI(AAFwkTag::APPKIT, "Device space is not enough.");
+        return false;
+    }
+    if (!Get2DQuota(OOM_QUOTA_PATH, OOM_QUOTA_XATTR_NAME, g_lastOOMDumpTime, g_oomDumpProcessQuota)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Check2DOOMDumpQuota failed to get quota.");
+        return false;
+    }
+    uint64_t currentTime = GetCurrentTimestamp();
+    if (currentTime - g_lastOOMDumpTime <= OOM_DUMP_INTERVAL) {
+        if (g_oomDumpProcessQuota <= 0) {
+            TAG_LOGI(AAFwkTag::APPKIT, "Weekly quota has been exhausted, quota=%{public}d", g_oomDumpProcessQuota);
+            return false;
+        }
+    } else {
+        TAG_LOGI(AAFwkTag::APPKIT, "Over one week, reset process quota=%{public}u", oomDumpProcessMaxQuota);
+        g_oomDumpProcessQuota = static_cast<int>(oomDumpProcessMaxQuota);
+        if (!Set2DQuota(OOM_QUOTA_PATH, currentTime, oomDumpProcessMaxQuota)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Failed to reset quota.");
+            return false;
+        }
+    }
+    TAG_LOGI(AAFwkTag::APPKIT, "Last oom time=%{public}" PRIu64 ", currentTime=%{public}" PRIu64 ", quota=%{public}d",
+        g_lastOOMDumpTime, currentTime, g_oomDumpProcessQuota);
+    return true;
+}
+
+bool DumpRuntimeHelper::GetQuota(const std::string &path, const std::string &property,
+                                 std::vector<int64_t> &output, size_t size)
+{
+    std::string value;
+    if (!GetDirXattr(path, property, value)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get xattr. path: %{public}s, preperty: %{public}s",
+            path.c_str(), property.c_str());
+        return false;
+    }
+    size_t commaCount = static_cast<size_t>(std::count(value.begin(), value.end(), ','));
+    if (commaCount != size - 1) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Invalid number of commas: %{public}zu", commaCount);
+        return false;
+    }
+
+    std::vector<int64_t> rtn;
+    std::stringstream ss(value);
+    std::string segment;
+    while (std::getline(ss, segment, ',')) {
+        if (segment.empty()) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid segment: empty value found, index: %{public}zu", rtn.size());
+            return false;
+        }
+        long long tmp;
+        if (!SafeStoll(segment, tmp)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "failed to SafeStoll, segment: %{public}s", segment.c_str());
+            return false;
+        }
+        rtn.push_back(static_cast<int64_t>(tmp));
+    }
+
+    if (rtn.size() != size) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Invalid number of entries: %{public}zu", rtn.size());
+        return false;
+    }
+
+    output = rtn;
+    return true;
+}
+
+bool DumpRuntimeHelper::Get2DQuota(const std::string &path, const std::string &property,
+                                   uint64_t &timestamp, int &quota)
+{
+    std::string value;
+    if (!GetDirXattr(path, property, value)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get xattr. path: %{public}s, preperty: %{public}s",
+            path.c_str(), property.c_str());
+        return false;
+    }
+    std::istringstream ss(value);
+    char delimiter;
+    if (!(ss >> timestamp >> delimiter >> quota) || delimiter != ',') {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to decode value: %{public}s", value.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool DumpRuntimeHelper::Set2DQuota(const std::string &path, uint64_t timestamp, int newQuota)
+{
+    std::ostringstream value;
+    value << timestamp << "," << newQuota;
+    if (newQuota < 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Invalid quota.");
+        return false;
+    }
+    TAG_LOGI(AAFwkTag::APPKIT, "Set quota=%{public}d", newQuota);
+    return SetDirXattr(path, OOM_QUOTA_XATTR_NAME, value.str());
+}
+
+uint64_t DumpRuntimeHelper::GetCurrentTimestamp()
+{
+    return static_cast<uint64_t>(time(nullptr));
+}
+
+bool DumpRuntimeHelper::CheckOOMFreeSpace(uint64_t maxSpace)
+{
+    struct statvfs st;
+    if (statvfs("/data/storage/el2/base/", &st) != 0) {
+        return false;
+    }
+
+    unsigned long freeSize = st.f_bsize * st.f_bfree;
+    if (freeSize <= maxSpace) {
+        return false;
+    }
+    return true;
+}
+
+uint64_t DumpRuntimeHelper::GetMaskFromDirXattr(const std::string &path)
+{
+    std::string value;
+    if (!GetDirXattr(path, EVENT_XATTR_NAME, value)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get subscirbe xattr.");
+        return 0;
+    }
+    return static_cast<uint64_t>(std::strtoull(value.c_str(), nullptr, 0));
+}
+
+bool DumpRuntimeHelper::CheckAppListenedEvents(const std::string &path)
+{
+    uint64_t eventsMask = GetMaskFromDirXattr(path);
+    if (eventsMask == 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get events mask for path:%{public}s", path.c_str());
+        return false;
+    }
+    if (!(eventsMask & (BIT_MASK << EVENT_RESOURCE_OVERLIMIT_MASK))) {
+        TAG_LOGI(AAFwkTag::APPKIT, "Unlistened event for path:%{public}s", path.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool DumpRuntimeHelper::IsFileExists(const std::string &file)
+{
+    return access(file.c_str(), F_OK) == 0;
+}
+
+bool DumpRuntimeHelper::ForceCreateDirectory(const std::string &path)
+{
+    std::string::size_type index = 0;
+    do {
+        std::string subPath;
+        index = path.find('/', index + 1); // (index + 1) means the next char traversed
+        if (index == std::string::npos) {
+            subPath = path;
+        } else {
+            subPath = path.substr(0, index);
+        }
+
+        if (!IsFileExists(subPath) && mkdir(subPath.c_str(), S_IRWXU) != 0) {
+            return false;
+        }
+    } while (index != std::string::npos);
+    return IsFileExists(path);
+}
+
+bool DumpRuntimeHelper::SetDirXattr(const std::string &path, const std::string &name, const std::string &value)
+{
+    return setxattr(path.c_str(), name.c_str(), value.c_str(), strlen(value.c_str()), 0) == 0;
+}
+
+bool DumpRuntimeHelper::GetDirXattr(const std::string &path, const std::string &name, std::string &value)
+{
+    char buf[BUF_SIZE_256] = {0};
+    if (getxattr(path.c_str(), name.c_str(), buf, sizeof(buf) - 1) == -1) {
+        TAG_LOGE(AAFwkTag::APPKIT, "failed getxattr, path: %{public}s, name: %{public}s, err: %{public}d:%{public}s",
+            path.c_str(), name.c_str(), errno, strerror(errno));
+        return false;
+    }
+    value = buf;
+    return true;
+}
+
+bool DumpRuntimeHelper::SafeStoll(const std::string &str, long long &value)
+{
+    value = 0;
+    size_t start = 0;
+    bool isNegative = false;
+
+    if (str.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "str is empty");
+        return false;
+    }
+
+    if (str[0] == '-') {
+        isNegative = true;
+        start = 1;
+    } else if (str[0] == '+') {
+        start = 1;
+    }
+
+    for (size_t i = start; i < str.size(); ++i) {
+        if (!isdigit(str[i])) {
+            TAG_LOGE(AAFwkTag::APPKIT, "digit check failed. str: %{public}s, index: %{public}zu", str.c_str(), i);
+            return false;
+        }
+        if (value > (LLONG_MAX - (str[i] - '0')) / DECIMAL_BASE) {
+            TAG_LOGE(AAFwkTag::APPKIT, "out of range, str: %{public}s", str.c_str());
+            return false;
+        }
+        value = value * DECIMAL_BASE + (str[i] - '0');
+    }
+
+    if (isNegative) {
+        value = -value;
+    }
+
+    TAG_LOGD(AAFwkTag::APPKIT, "success, str: %{public}s, result: %{public}lld", str.c_str(), value);
+    return true;
+}
+
+int DumpRuntimeHelper::GetCompressQuota(const std::vector<int64_t> &quotas)
+{
+    int ret = 0;
+    uint64_t now = static_cast<uint64_t>(time(nullptr));
+    for (int i = INDEX_COMPRESSED_TS_0; i <= INDEX_COMPRESSED_TS_4; i++) {
+        uint64_t compressTs = static_cast<uint64_t>(quotas[i]);
+        if (now > compressTs && now - compressTs > OOM_DUMP_INTERVAL) {
+            ret++;
+        }
+    }
+
+    return ret;
+}
 } // namespace AppExecFwk
 } // namespace OHOS

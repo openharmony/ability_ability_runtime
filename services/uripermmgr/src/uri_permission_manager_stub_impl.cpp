@@ -52,6 +52,7 @@ const int MAX_URI_COUNT = 200000;
 #ifndef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
 constexpr int32_t CAPABILITY_NOT_SUPPORT = 801;
 #endif // ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
+constexpr int32_t SANDBOX_MANAGER_PERMISSION_DENIED = 1;
 }
 
 ErrCode UriPermissionManagerStubImpl::VerifyUriPermission(const Uri& uri, uint32_t flag, uint32_t tokenId,
@@ -335,7 +336,8 @@ int32_t UriPermissionManagerStubImpl::GrantBatchUriPermissionImpl(const std::vec
         TAG_LOGE(AAFwkTag::URIPERMMGR, "null ConnectManager");
         return INNER_ERR;
     }
-    auto resVec = storageManager_->CreateShareFile(uriVec, targetTokenId, flag);
+    std::vector<int32_t> resVec;
+    storageManager_->CreateShareFile(uriVec, targetTokenId, flag, resVec);
     if (resVec.size() == 0) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "CreateShareFile failed, storageManager resVec empty");
         return INNER_ERR;
@@ -1015,6 +1017,14 @@ ErrCode UriPermissionManagerStubImpl::Active(const UriPermissionRawData& policyR
     int32_t& funcResult)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto tokenId = IPCSkeleton::GetCallingTokenID();
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "active %{private}d permission", tokenId);
+    auto permissionName = PermissionConstants::PERMISSION_FILE_ACCESS_PERSIST;
+    if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenId, permissionName)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "No permission to call");
+        funcResult = SANDBOX_MANAGER_PERMISSION_DENIED;
+        return ERR_OK;
+    }
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     std::vector<PolicyInfo> policy;
     auto result = RawDataToPolicyInfo(policyRawData, policy);
@@ -1029,8 +1039,6 @@ ErrCode UriPermissionManagerStubImpl::Active(const UriPermissionRawData& policyR
     }
     uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()).count());
-    auto tokenId = IPCSkeleton::GetCallingTokenID();
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "active %{private}d permission", tokenId);
     auto ret = SandboxManagerKit::StartAccessingPolicy(policy, res, false, tokenId, timeNow);
     TAG_LOGI(AAFwkTag::URIPERMMGR, "active permission end");
     if (ret != ERR_OK) {

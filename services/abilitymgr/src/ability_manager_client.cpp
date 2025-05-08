@@ -1771,7 +1771,8 @@ ErrCode AbilityManagerClient::KillProcessWithPrepareTerminate(const std::vector<
 
 ErrCode AbilityManagerClient::KillProcessWithReason(int32_t pid, const ExitReason &reason)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call, pid:%{public}d", pid);
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "kill pid:%{public}d, reason:%{public}d, subReason:%{public}d, exitMsg:%{public}s",
+        pid, reason.reason, reason.subReason, reason.exitMsg.c_str());
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->KillProcessWithReason(pid, reason);
@@ -2191,7 +2192,7 @@ ErrCode AbilityManagerClient::QueryPreLoadUIExtensionRecord(const AppExecFwk::El
         element, moduleName, hostBundleName, recordNum, userId);
 }
 
-ErrCode AbilityManagerClient::RevokeDelegator(const sptr<IRemoteObject> &token)
+ErrCode AbilityManagerClient::RevokeDelegator(sptr<IRemoteObject> token)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call RevokeDelegator");
     auto abms = GetAbilityManager();
