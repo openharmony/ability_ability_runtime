@@ -479,6 +479,8 @@ private:
     void HandleRestartResidentTask(const AbilityRequest &abilityRequest);
     void HandleActiveAbility(std::shared_ptr<AbilityRecord> &targetService,
         std::shared_ptr<ConnectionRecord> &connectRecord);
+    void HandleConnectedAbility(std::shared_ptr<AbilityRecord> &targetService,
+        std::list<std::shared_ptr<ConnectionRecord>> &connectRecordList);
     void HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo);
     void TerminateOrCacheAbility(std::shared_ptr<AbilityRecord> abilityRecord);
 
