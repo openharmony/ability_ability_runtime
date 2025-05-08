@@ -504,7 +504,7 @@ bool AppUtils::IsSystemReasonMessage(const std::string &reasonMessage)
     return systemReasonMessagesSet.find(reasonMessage) != systemReasonMessagesSet.end();
 }
 
-bool AppUtild::IsSupportAppServiceExtension()
+bool AppUtils::IsSupportAppServiceExtension()
 {
     if (!isSupportAppServiceExtension_.isLoaded) {
         isSupportAppServiceExtension_.value = system::GetBoolParameter(SUPPORT_APP_SERVICE_EXTENSION, false);

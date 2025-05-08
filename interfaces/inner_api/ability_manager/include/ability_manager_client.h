@@ -565,6 +565,20 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
+     * ConnectAppServiceExtensionAbility, connect session with appService ability.
+     *
+     * @param want, Special want for appService type's ability.
+     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param callerToken, caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ConnectAppServiceExtesnionAbility(
+        const Want &want,
+        sptr<IAbilityConnection> connect,
+        sptr<IRemoteObject> callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
      * Connect data share extension ability.
      *
      * @param want, special want for the data share extension ability.

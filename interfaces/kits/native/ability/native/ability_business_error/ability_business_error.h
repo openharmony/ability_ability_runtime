@@ -186,6 +186,9 @@ enum class AbilityErrorCode {
     // extension can not start the ability due to extension control.
     ERROR_CODE_EXTENSION_START_ABILITY_CONTROLLED = 16000083,
 
+    // the target not in app identifier allow list.
+    ERROR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST = 16000200,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 

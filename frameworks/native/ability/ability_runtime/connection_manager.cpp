@@ -54,8 +54,14 @@ ErrCode ConnectionManager::ConnectUIServiceExtensionAbility(const sptr<IRemoteOb
     return ConnectAbilityInner(connectCaller, want, AAFwk::DEFAULT_INVAL_VALUE, connectCallback, true);
 }
 
-ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connectCaller,
-    const AAFwk::Want& want, int accountId, const sptr<AbilityConnectCallback>& connectCallback, bool isUIService)
+ErrCode ConnectionManager::ConnectAppServiceExtensionAbility(const sptr<IRemoteObject>& connectCaller,
+    const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback)
+{
+    return ConnectAbilityInner(connectCaller, want, AAFwk::DEFAULT_INVAL_VALUE, connectCallback, false, true);
+}
+
+ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connectCaller, const AAFwk::Want& want,
+    int accountId, const sptr<AbilityConnectCallback>& connectCallback, bool isUIService, bool isAppService)
 {
     if (connectCaller == nullptr || connectCallback == nullptr) {
         TAG_LOGE(AAFwkTag::CONNECTION, "null connectCaller or connectCallback");
@@ -96,10 +102,10 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connec
         } else {
             TAG_LOGE(AAFwkTag::CONNECTION, "abilityConnection disconnected");
             abilityConnections_.erase(connectionIter);
-            return CreateConnection(connectCaller, want, accountId, connectCallback, isUIService);
+            return CreateConnection(connectCaller, want, accountId, connectCallback, isUIService, isAppService);
         }
     } else {
-        return CreateConnection(connectCaller, want, accountId, connectCallback, isUIService);
+        return CreateConnection(connectCaller, want, accountId, connectCallback, isUIService, isAppService);
     }
 }
 
@@ -138,8 +144,8 @@ bool ConnectionManager::MatchConnection(
     }
 }
 
-ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCaller,
-    const AAFwk::Want& want, int accountId, const sptr<AbilityConnectCallback>& connectCallback, bool isUIService)
+ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCaller, const AAFwk::Want& want,
+    int accountId, const sptr<AbilityConnectCallback>& connectCallback, bool isUIService, bool isAppService)
 {
     TAG_LOGD(AAFwkTag::CONNECTION, "called");
     sptr<AbilityConnection> abilityConnection = new AbilityConnection();
@@ -152,6 +158,9 @@ ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCa
     ErrCode ret = ERR_OK;
     if (isUIService) {
         ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectUIServiceExtesnionAbility(
+            want, abilityConnection, connectCaller, accountId);
+    } else if (isAppService) {
+        ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAppServiceExtensionAbility(
             want, abilityConnection, connectCaller, accountId);
     } else {
         ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
