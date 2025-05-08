@@ -15,37 +15,25 @@
 
 #include "record_cost_time_util.h"
 
-#include <ctime>
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
 namespace {
 constexpr int64_t MAX_MILLISECONDS = 500;
-// NANOSECONDS mean 10^9 nano second
-constexpr int64_t NANOSECONDS = 1000000000;
-// MILLISECONDS mean 10^6 milli second
-constexpr int64_t MILLISECONDS = 1000000;
 }
 
-int64_t RecordCostTimeUtil::SystemTimeMillisecond()
-{
-    struct timespec t;
-    clock_gettime(CLOCK_MONOTONIC, &t);
-    return (int64_t)((t.tv_sec) * NANOSECONDS + t.tv_nsec) / MILLISECONDS;
-}
-
-RecordCostTimeUtil::RecordCostTimeUtil(const std::string &name) : funcName_(name)
-{
-    timeStart_ = SystemTimeMillisecond();
-}
+RecordCostTimeUtil::RecordCostTimeUtil(const std::string &name)
+    : funcName_(name), timeStart_(std::chrono::steady_clock::now())
+{}
 
 RecordCostTimeUtil::~RecordCostTimeUtil()
 {
-    int64_t costTime = SystemTimeMillisecond() - timeStart_;
-    if (costTime > MAX_MILLISECONDS) {
+    auto costTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - timeStart_);
+    if (costTime > std::chrono::milliseconds(MAX_MILLISECONDS)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "a_cost_time:%{public}s, name:%{public}s",
-            std::to_string(costTime).c_str(), funcName_.c_str());
+            std::to_string(costTime.count()).c_str(), funcName_.c_str());
     }
 }
 }  // namespace AAFwk
