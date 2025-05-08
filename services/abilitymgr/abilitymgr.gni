@@ -167,6 +167,7 @@ abilityms_files = [
   "src/utils/uri_utils.cpp",
   "src/utils/want_utils.cpp",
   "src/utils/window_options_utils.cpp",
+  "src/utils/timeout_state_utils.cpp",
 ]
 
 if (ability_runtime_graphics) {

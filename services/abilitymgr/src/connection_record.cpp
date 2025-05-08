@@ -18,6 +18,7 @@
 #include "ability_manager_service.h"
 #include "ability_util.h"
 #include "connection_state_manager.h"
+#include "freeze_util.h"
 #include "ui_service_extension_connection_constants.h"
 
 namespace OHOS {
@@ -305,6 +306,9 @@ void ConnectionRecord::CancelConnectTimeoutTask()
     TAG_LOGI(AAFwkTag::ABILITYMGR, "CancelConnectTimeoutTask taskName:%{public}s", taskName.c_str());
     handler->RemoveEvent(AbilityManagerService::CONNECT_TIMEOUT_MSG, taskName);
     handler->RemoveEvent(AbilityManagerService::CONNECT_HALF_TIMEOUT_MSG, taskName);
+    auto targetToken = GetTargetToken();
+    CHECK_POINTER(targetToken);
+    AbilityRuntime::FreezeUtil::GetInstance().DeleteLifecycleEvent(targetToken);
 }
 
 void ConnectionRecord::DisconnectTimeout()

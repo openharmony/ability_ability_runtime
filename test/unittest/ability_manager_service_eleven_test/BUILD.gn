@@ -45,6 +45,7 @@ ohos_unittest("ability_manager_service_eleven_test") {
     "${ability_runtime_services_path}/abilitymgr/src/ability_connect_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/process_options.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/timeout_state_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/window_options_utils.cpp",
     "ability_manager_service_eleven_test.cpp",
     "mock/src/mock_my_flag.cpp",

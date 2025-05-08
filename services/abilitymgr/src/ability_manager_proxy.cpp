@@ -1484,6 +1484,8 @@ int AbilityManagerProxy::ScheduleConnectAbilityDone(
     error = SendRequest(AbilityManagerInterfaceCode::CONNECT_ABILITY_DONE, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
+        AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
+            std::string("AbilityManagerProxy::ScheduleConnectAbilityDone; ipc error ") + std::to_string(error));
         return error;
     }
     return reply.ReadInt32();
