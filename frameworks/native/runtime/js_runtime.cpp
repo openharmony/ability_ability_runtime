@@ -688,6 +688,7 @@ bool JsRuntime::Initialize(const Options& options)
         auto vm = GetEcmaVm();
         CHECK_POINTER_AND_RETURN(vm, false);
 
+        panda::JSNApi::SetLargeHeap(options.allowArkTsLargeHeap);
         if (preloaded_) {
             PostPreload(options);
         }
@@ -695,7 +696,6 @@ bool JsRuntime::Initialize(const Options& options)
         napi_value globalObj = nullptr;
         napi_get_global(env, &globalObj);
         CHECK_POINTER_AND_RETURN(globalObj, false);
-
         if (!preloaded_) {
             InitSyscapModule(env);
 
@@ -790,6 +790,7 @@ bool JsRuntime::CreateJsEnv(const Options& options)
     std::string memConfigProperty = OHOS::system::GetParameter("persist.ark.mem_config_property", "");
     size_t gcThreadNum = OHOS::system::GetUintParameter<size_t>("persist.ark.gcthreads", 7);
     size_t longPauseTime = OHOS::system::GetUintParameter<size_t>("persist.ark.longpausetime", 40);
+    pandaOption.SetLargeHeap(options.allowArkTsLargeHeap);
     pandaOption.SetArkProperties(arkProperties);
     pandaOption.SetArkBundleName(bundleName);
     pandaOption.SetMemConfigProperty(memConfigProperty);
