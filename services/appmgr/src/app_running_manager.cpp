@@ -989,7 +989,7 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, cons
         if (appRecord->GetDelayConfiguration() == nullptr) {
             appRecord->ResetDelayConfiguration();
         }
-        if (appRecord && !isCollaboratorReserveType(appRecord)) {
+        if (appRecord) {
             TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s]", appRecord->GetName().c_str());
             std::lock_guard guard(updateConfigurationDelayedLock_);
             if (appRecord->NeedUpdateConfigurationBackground() ||
@@ -1019,7 +1019,7 @@ int32_t AppRunningManager::UpdateConfigurationByBundleName(const Configuration &
             TAG_LOGD(AAFwkTag::APPMGR, "app not ready, appName is %{public}s", appRecord->GetBundleName().c_str());
             continue;
         }
-        if (appRecord && !isCollaboratorReserveType(appRecord) && appRecord->GetBundleName() == name &&
+        if (appRecord && appRecord->GetBundleName() == name &&
             appRecord->GetAppIndex() == appIndex) {
             TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s], index:%{public}d",
                 appRecord->GetName().c_str(), appIndex);
@@ -1027,16 +1027,6 @@ int32_t AppRunningManager::UpdateConfigurationByBundleName(const Configuration &
         }
     }
     return result;
-}
-
-bool AppRunningManager::isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord)
-{
-    std::string bundleName = appRecord->GetApplicationInfo()->name;
-    bool isReserveType = bundleName == AAFwk::AppUtils::GetInstance().GetBrokerDelegateBundleName();
-    if (isReserveType) {
-        TAG_LOGI(AAFwkTag::APPMGR, "isReserveType app [%{public}s]", appRecord->GetName().c_str());
-    }
-    return isReserveType;
 }
 
 int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
