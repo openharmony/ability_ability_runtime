@@ -35,6 +35,7 @@
 #include "display_manager.h"
 #include "display_util.h"
 #include "distributed_client.h"
+#include "ipc_skeleton.h"
 #ifdef WITH_DLP
 #include "dlp_utils.h"
 #endif // WITH_DLP
@@ -118,6 +119,7 @@
 #include "utils/dms_util.h"
 #endif
 #include "hidden_start_observer_manager.h"
+#include "insight_intent_db_cache.h"
 
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
@@ -229,6 +231,7 @@ const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
 std::atomic<bool> g_isDmsAlive = false;
 constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
 constexpr const char* APPSPAWN_STARTED = "startup.service.ctl.appspawn.pid";
+constexpr const char* APP_LINKING_ONLY = "appLinkingOnly";
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
@@ -621,7 +624,10 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "start ability with caller");
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
-    InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
+    //intent openlink do not RemoveInsightIntent
+    if (!want.HasParameter(AppExecFwk::INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG)) {
+        InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
+    }
     auto checkFileShareRet = UriUtils::GetInstance().CheckNonImplicitShareFileUri(want, GetValidUserId(userId), 0);
     if (checkFileShareRet != ERR_OK) {
         return checkFileShareRet;
@@ -11633,12 +11639,20 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
     if (callerBundlename.empty()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "callerBundlename is null");
     }
+    AbilityRuntime::ExtractInsightIntentGenericInfo infos = GetInsightIntentGenericInfo(param);
+    bool openLinkExecuteFlag = infos.decoratorType == AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_LINK;
+ 
     auto paramPtr = std::make_shared<InsightIntentExecuteParam>(param);
     int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateParam(key, callerToken,
-        paramPtr, callerBundlename);
+        paramPtr, callerBundlename, openLinkExecuteFlag);
     if (ret != ERR_OK) {
         return ret;
     }
+ 
+    if (openLinkExecuteFlag) {
+        return IntentOpenLinkInner(paramPtr, infos, -1);
+    }
+
     Want want;
     ret = InsightIntentExecuteManager::GenerateWant(paramPtr, want);
     if (ret != ERR_OK) {
@@ -13327,6 +13341,101 @@ void AbilityManagerService::RemovePreStartSession(const std::string& sessionId)
 {
     std::lock_guard<ffrt::mutex> guard(preStartSessionMapLock_);
     preStartSessionMap_.erase(sessionId);
+}
+
+AbilityRuntime::ExtractInsightIntentGenericInfo AbilityManagerService::GetInsightIntentGenericInfo(
+    const InsightIntentExecuteParam &param)
+{
+    AbilityRuntime::ExtractInsightIntentGenericInfo infos;
+    DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfo(
+        param.bundleName_, param.moduleName_, param.insightIntentName_, infos);
+    TAG_LOGD(AAFwkTag::INTENT,
+        "getLinkInfo:bundleName:%{public}s,moduleName:%{public}s,"
+        "intentName:%{public}s,decoratorType:%{public}s",
+        param.bundleName_.c_str(), param.moduleName_.c_str(), param.insightIntentName_.c_str(),
+        infos.decoratorType.c_str());
+    return infos;
+}
+
+void AbilityManagerService::CombinLinkInfo(
+    const std::vector<AbilityRuntime::LinkIntentParamMapping> &paramMappings, std::string &uri, AAFwk::Want &want)
+{
+    bool linkQuestionChatFlag = true;
+    if (uri.find('?') != std::string::npos) {
+        linkQuestionChatFlag = false;
+    }
+    for (auto &mapInfo : paramMappings) {
+        TAG_LOGD(AAFwkTag::INTENT,
+            "paramMapping info paramName:%{public}s paramMappingName:%{public}s paramCategory:%{public}s",
+            mapInfo.paramName.c_str(),
+            mapInfo.paramMappingName.c_str(),
+            mapInfo.paramCategory.c_str());
+        if (!want.HasParameter(mapInfo.paramName)) {
+            continue;
+        }
+        std::string value = want.GetStringParam(mapInfo.paramName);
+        if (mapInfo.paramCategory == "link") {
+            if (linkQuestionChatFlag) {
+                uri += ("?" + mapInfo.paramMappingName + "=" + value);
+                linkQuestionChatFlag = false;
+            } else {
+                uri += ("&" + mapInfo.paramMappingName + "=" + value);
+            }
+            TAG_LOGD(AAFwkTag::INTENT, "link uri=%{public}s", uri.c_str());
+        } else {
+            want.RemoveParam(mapInfo.paramName);
+            want.SetParam(mapInfo.paramMappingName, value);
+            TAG_LOGD(AAFwkTag::INTENT,
+                "want setparam key:%{public}s value:%{public}s",
+                mapInfo.paramMappingName.c_str(),
+                value.c_str());
+        }
+    }
+}
+
+ErrCode AbilityManagerService::IntentOpenLinkInner(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
+    AbilityRuntime::ExtractInsightIntentGenericInfo &linkInfo, const int32_t userId)
+{
+    if (param->uris_.empty()) {
+        TAG_LOGE(AAFwkTag::INTENT, "Intent OpenLink failed uris is empty");
+        return INNER_ERR;
+    }
+    std::string linkUri = linkInfo.get<AbilityRuntime::InsightIntentLinkInfo>().uri;
+    if (linkUri != param->uris_[0].substr(0, linkUri.size())) {
+        TAG_LOGE(AAFwkTag::INTENT,
+            "Intent OpenLink failed uris is mismatch,linkUri:%{public}s, param uris:%{public}s",
+            linkUri.c_str(), param->uris_[0].c_str());
+        return INNER_ERR;
+    }
+
+    AAFwk::Want want;
+    want.SetParams(*param->insightIntentParam_);
+    std::string openLinkUri = param->uris_[0];
+    CombinLinkInfo(linkInfo.get<AbilityRuntime::InsightIntentLinkInfo>().paramMapping, openLinkUri, want);
+
+    want.SetUri(openLinkUri);
+    want.SetElementName("", param->bundleName_, "", param->moduleName_);
+    TAG_LOGD(AAFwkTag::INTENT, "openLinkUri=%{public}s", openLinkUri.c_str());
+    if (!want.HasParameter(APP_LINKING_ONLY)) {
+        want.SetParam(APP_LINKING_ONLY, false);
+    }
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, param->insightIntentName_);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG, 1);
+
+    auto resultCode = OpenLink(want, nullptr, userId);
+    if (resultCode == ERR_OK || resultCode == ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
+        TAG_LOGD(AAFwkTag::INTENT, "Intent OpenLink success");
+        InsightIntentExecuteResult result;
+        DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->ExecuteIntentDone(
+            param->insightIntentId_, result.innerErr, result);
+        return ERR_OK;
+    }
+    //mapping error code 16000019->16000050
+    if (resultCode == ERR_IMPLICIT_START_ABILITY_FAIL) {
+        resultCode = INNER_ERR;
+    }
+    TAG_LOGD(AAFwkTag::INTENT, "Intent OpenLink failed:%{public}d", resultCode);
+    return resultCode;
 }
 
 ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
