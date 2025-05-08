@@ -29,6 +29,8 @@ napi_value CreatePageInfoForBack(napi_env env, const PageInfoForBack &info);
 napi_value CreateEntryInfoForBack(napi_env env, const EntryInfoForBack &info);
 napi_value CreateFunctionInfoForBack(napi_env env, const FunctionInfoForBack &info);
 napi_value CreateFormInfoForBack(napi_env env, const FormInfoForBack &info);
+napi_value CreateInsightIntentInfoParamWithJson(napi_env env, const nlohmann::json &jsonObject);
+napi_value CreateInsightIntentInfoParam(napi_env env, const std::string &paramStr);
 napi_value CreateInsightIntentInfoForBack(napi_env env, const InsightIntentInfoForBack &info);
 napi_value CreateInsightIntentInfoForBackArray(napi_env env, const std::vector<InsightIntentInfoForBack> &infos);
 } // namespace AbilityRuntime
