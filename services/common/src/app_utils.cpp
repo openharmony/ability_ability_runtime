@@ -71,6 +71,7 @@ constexpr const char* MAX_CHILD_PROCESS = "const.max_native_child_process";
 constexpr const char* SUPPORT_MULTI_INSTANCE = "const.abilityms.support_multi_instance";
 constexpr const char* MIGRATE_CLIENT_BUNDLE_NAME = "const.sys.abilityms.migrate_client_bundle_name";
 constexpr const char* CONNECT_SUPPORT_CROSS_USER = "const.abilityms.connect_support_cross_user";
+constexpr const char* SUPPORT_APP_SERVICE_EXTENSION = "const.abilityms.support_app_service";
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
@@ -501,6 +502,16 @@ bool AppUtils::IsSystemReasonMessage(const std::string &reasonMessage)
         "ReasonMessage_SystemShare",
     };
     return systemReasonMessagesSet.find(reasonMessage) != systemReasonMessagesSet.end();
+}
+
+bool AppUtild::IsSupportAppServiceExtension()
+{
+    if (!isSupportAppServiceExtension_.isLoaded) {
+        isSupportAppServiceExtension_.value = system::GetBoolParameter(SUPPORT_APP_SERVICE_EXTENSION, false);
+        isSupportAppServiceExtension_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isSupportAppServiceExtension_.value);
+    return isSupportAppServiceExtension_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
