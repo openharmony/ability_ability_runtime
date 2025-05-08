@@ -1833,7 +1833,7 @@ int32_t AppMgrService::GetKilledProcessInfo(int pid, int uid, KilledProcessInfo 
     return appMgrServiceInner_->GetKilledProcessInfo(pid, uid, info);
 }
 
-int32_t AppMgrService::LaunchAbility(const sptr<IRemoteObject> &token)
+int32_t AppMgrService::LaunchAbility(sptr<IRemoteObject> token)
 {
     if (!IsReady()) {
         return AAFwk::ERR_APP_MGR_SERVICE_NOT_READY;

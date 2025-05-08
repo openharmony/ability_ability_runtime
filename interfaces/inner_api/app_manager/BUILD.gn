@@ -120,6 +120,7 @@ ohos_shared_library("app_manager") {
     "src/appmgr/start_specified_ability_response_proxy.cpp",
     "src/appmgr/start_specified_ability_response_stub.cpp",
     "src/appmgr/system_memory_attr.cpp",
+    "src/appmgr/process_bind_data.cpp",
   ]
 
   public_configs = [
@@ -173,6 +174,12 @@ ohos_shared_library("app_manager") {
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }
 
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_soc_perf)) {
+    external_deps += [ "soc_perf:socperf_client" ]
+    defines += [ "SOC_PERF_ENABLE" ]
+  }
+  
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"

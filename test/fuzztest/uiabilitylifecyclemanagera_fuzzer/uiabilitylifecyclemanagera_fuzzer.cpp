@@ -141,7 +141,8 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     std::shared_ptr<AbilityRecord> abilityRecord3;
     AbilityRequest abilityRequest3;
     uIAbilityLifecycleManager->OnAbilityDied(abilityRecord3);
-    uIAbilityLifecycleManager->ResolveLocked(abilityRequest3);
+    std::string errMsg;
+    uIAbilityLifecycleManager->ResolveLocked(abilityRequest3, errMsg);
     sptr<SessionInfo> sessionInfo3;
     uIAbilityLifecycleManager->CallUIAbilityBySCB(sessionInfo3, boolParam);
     DoSomethingInterestingWithMyAPI1(data, size);

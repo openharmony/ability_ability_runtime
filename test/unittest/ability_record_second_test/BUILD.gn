@@ -29,9 +29,11 @@ ohos_unittest("ability_record_second_test") {
     "mock/include",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit/include",
+    "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/ability_scheduler_mock",
   ]
 
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/lifecycle_deal.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/uri_utils.cpp",
     "ability_record_second_test.cpp",
     "mock/src/mock_scene_board_judgement.cpp",

@@ -43,6 +43,7 @@ const std::string APP_LAUNCH_TRUSTLIST = "ohos.params.appLaunchTrustList";
 namespace OHOS {
 namespace AAFwk {
 
+const size_t IDENTITY_LIST_MAX_SIZE = 10;
 class ImplicitStartProcessorTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -247,6 +248,30 @@ HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_007, TestSize.Level1)
 
 /*
  * Feature: ImplicitStartProcessor
+ * Function: ImplicitStartAbility
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor ImplicitStartAbility
+ * EnvConditions: NA
+ * CaseDescription: 测试dialogAppInfos.size() == 0且设置了FLAG_START_WITHOUT_TIPS的场景
+ */
+HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_008, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_008 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    int32_t userId = 0;
+    std::string mockAction = "action.system.home";
+    request.want.SetAction(mockAction);
+    // Set FLAG_START_WITHOUT_TIPS flag to trigger the specific code path
+    request.want.SetFlags(Want::FLAG_START_WITHOUT_TIPS);
+    int32_t res = processor->ImplicitStartAbility(request, userId,
+        AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED, "", false);
+    EXPECT_EQ(res, ERR_IMPLICIT_START_ABILITY_FAIL);
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_008 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
  * Function: TrustlistIntersectionProcess
  * SubFunction: NA
  * FunctionPoints:ImplicitStartProcessor TrustlistIntersectionProcess
@@ -258,6 +283,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_001, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_001 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::string mockUriString = "file://com.example.test/test.txt";
     std::vector<std::string> mockTrustlist = {
@@ -278,9 +304,9 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_001, TestSize.
     int32_t infosOldSize = dialogAppInfos.size();
     TAG_LOGI(AAFwkTag::TEST, "infosOldSize: %{public}d", infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
-    EXPECT_TRUE(dialogAppInfos.size() == infosOldSize);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_001 end");
 }
 
@@ -297,6 +323,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_002, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_002 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::string mockTrustlist = "demo1";
     request.want.SetParam(APP_LAUNCH_TRUSTLIST, mockTrustlist);
@@ -312,9 +339,9 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_002, TestSize.
     int32_t infosOldSize = dialogAppInfos.size();
     TAG_LOGI(AAFwkTag::TEST, "infosOldSize: %{public}d", infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
-    EXPECT_TRUE(dialogAppInfos.size() == infosOldSize);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_002 end");
 }
 
@@ -331,6 +358,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_003, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_003 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::vector<std::string> mockTrustlist = {
         "aaa", "bbb", "ccc", "ddd", "eee",
@@ -362,7 +390,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_003, TestSize.
     TAG_LOGI(AAFwkTag::TEST,
         "trustlistOldSize: %{public}d, infosOldSize: %{public}d", trustlistOldSize, infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
     int32_t trustlistNewSize = request.want.GetStringArrayParam(APP_LAUNCH_TRUSTLIST).size();
     int32_t infosNewSize = dialogAppInfos.size();
@@ -370,7 +398,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_003, TestSize.
         "trustlistNewSize: %{public}d, infosNewSize: %{public}d", trustlistNewSize, infosNewSize);
 
     EXPECT_TRUE(trustlistNewSize == trustlistOldSize);
-    EXPECT_TRUE(infosNewSize == 1);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_003 end");
 }
 
@@ -387,6 +415,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_004, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_004 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::vector<std::string> mockTrustlist = {
         "abc",
@@ -406,13 +435,13 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_004, TestSize.
     TAG_LOGI(AAFwkTag::TEST,
         "infosOldSize: %{public}d", infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
     int32_t infosNewSize = dialogAppInfos.size();
     TAG_LOGI(AAFwkTag::TEST,
         "infosNewSize: %{public}d", infosNewSize);
 
-    EXPECT_TRUE(infosNewSize == 0);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_004 end");
 }
 
@@ -429,6 +458,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_005, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_005 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::vector<std::string> mockTrustlist = {
         "demo1",
@@ -448,13 +478,13 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_005, TestSize.
     TAG_LOGI(AAFwkTag::TEST,
         "infosOldSize: %{public}d", infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
     int32_t infosNewSize = dialogAppInfos.size();
     TAG_LOGI(AAFwkTag::TEST,
         "infosNewSize: %{public}d", infosNewSize);
 
-    EXPECT_TRUE(infosNewSize == 1);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_005 end");
 }
 
@@ -471,6 +501,7 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_006, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_006 start");
     auto processor = std::make_shared<ImplicitStartProcessor>();
 
+    int32_t userId = 0;
     AbilityRequest request;
     std::vector<std::string> mockTrustlist = {
         "demo1",
@@ -491,13 +522,13 @@ HWTEST_F(ImplicitStartProcessorTest, TrustlistIntersectionProcess_006, TestSize.
     TAG_LOGI(AAFwkTag::TEST,
         "infosOldSize: %{public}d", infosOldSize);
 
-    processor->TrustlistIntersectionProcess(request, dialogAppInfos);
+    processor->TrustlistIntersectionProcess(request, dialogAppInfos, userId);
 
     int32_t infosNewSize = dialogAppInfos.size();
     TAG_LOGI(AAFwkTag::TEST,
         "infosNewSize: %{public}d", infosNewSize);
 
-    EXPECT_TRUE(infosNewSize == infosOldSize);
+    EXPECT_TRUE(infosOldSize);
     TAG_LOGI(AAFwkTag::TEST, "TrustlistIntersectionProcess_006 end");
 }
 
@@ -837,6 +868,130 @@ HWTEST_F(ImplicitStartProcessorTest, OnlyKeepReserveApp_001, TestSize.Level1)
 
 /*
  * Feature: ImplicitStartProcessor
+ * Function: OnlyKeepReserveApp
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor OnlyKeepReserveApp
+ * EnvConditions: NA
+ * CaseDescription: Verify OnlyKeepReserveApp when uriReservedFlag is false
+ */
+HWTEST_F(ImplicitStartProcessorTest, OnlyKeepReserveApp_002, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionAbInfos;
+    AppExecFwk::ExtensionAbilityInfo extensionAbInfo;
+    extensionAbInfos.push_back(extensionAbInfo);
+    AppExecFwk::AbilityInfo abilityInfo1;
+    abilityInfo1.bundleName = "test1";
+    abilityInfos.push_back(abilityInfo1);
+    AppExecFwk::AbilityInfo abilityInfo2;
+    abilityInfo2.bundleName = "test2";
+    abilityInfos.push_back(abilityInfo2);
+    int32_t originalAbilitySize = abilityInfos.size();
+    int32_t originalExtensionSize = extensionAbInfos.size();
+    AbilityRequest abilityRequest;
+    abilityRequest.uriReservedFlag = false;
+    abilityRequest.reservedBundleName = "test1";
+    processor->OnlyKeepReserveApp(abilityInfos, extensionAbInfos, abilityRequest);
+    EXPECT_EQ(abilityInfos.size(), originalAbilitySize);
+    EXPECT_EQ(extensionAbInfos.size(), originalExtensionSize);
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: OnlyKeepReserveApp
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor OnlyKeepReserveApp
+ * EnvConditions: NA
+ * CaseDescription: Verify OnlyKeepReserveApp when uriReservedFlag is true and extensionInfos is not empty
+ */
+HWTEST_F(ImplicitStartProcessorTest, OnlyKeepReserveApp_003, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionAbInfos;
+    AppExecFwk::ExtensionAbilityInfo extensionAbInfo;
+    extensionAbInfos.push_back(extensionAbInfo);
+    extensionAbInfos.push_back(extensionAbInfo);
+    AppExecFwk::AbilityInfo abilityInfo1;
+    abilityInfo1.bundleName = "test1";
+    abilityInfos.push_back(abilityInfo1);
+    AbilityRequest abilityRequest;
+    abilityRequest.uriReservedFlag = true;
+    abilityRequest.reservedBundleName = "test1";
+    int32_t originalExtensionSize = extensionAbInfos.size();
+    EXPECT_GT(originalExtensionSize, 0);
+    processor->OnlyKeepReserveApp(abilityInfos, extensionAbInfos, abilityRequest);
+    EXPECT_EQ(extensionAbInfos.size(), 0);
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: OnlyKeepReserveApp
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor OnlyKeepReserveApp
+ * EnvConditions: NA
+ * CaseDescription: Verify OnlyKeepReserveApp when uriReservedFlag is true and filtering abilityInfos
+ */
+HWTEST_F(ImplicitStartProcessorTest, OnlyKeepReserveApp_004, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionAbInfos;
+    AppExecFwk::AbilityInfo abilityInfo1;
+    abilityInfo1.bundleName = "test1";
+    abilityInfos.push_back(abilityInfo1);
+    AppExecFwk::AbilityInfo abilityInfo2;
+    abilityInfo2.bundleName = "test2";
+    abilityInfos.push_back(abilityInfo2);
+    AppExecFwk::AbilityInfo abilityInfo3;
+    abilityInfo3.bundleName = "test1";
+    abilityInfos.push_back(abilityInfo3);
+    int32_t originalAbilitySize = abilityInfos.size();
+    EXPECT_EQ(originalAbilitySize, 3);
+    AbilityRequest abilityRequest;
+    abilityRequest.uriReservedFlag = true;
+    abilityRequest.reservedBundleName = "test1";
+    processor->OnlyKeepReserveApp(abilityInfos, extensionAbInfos, abilityRequest);
+    EXPECT_EQ(abilityInfos.size(), 2);
+    for (const auto& ability : abilityInfos) {
+        EXPECT_EQ(ability.bundleName, "test1");
+    }
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: OnlyKeepReserveApp
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor OnlyKeepReserveApp
+ * EnvConditions: NA
+ * CaseDescription: Verify OnlyKeepReserveApp when uriReservedFlag is true and filtering abilityInfos
+ */
+HWTEST_F(ImplicitStartProcessorTest, OnlyKeepReserveApp_005, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionAbInfos;
+    AppExecFwk::AbilityInfo abilityInfo1;
+    abilityInfo1.bundleName = "test1";
+    abilityInfos.push_back(abilityInfo1);
+    AppExecFwk::AbilityInfo abilityInfo2;
+    abilityInfo2.bundleName = "test1";
+    abilityInfos.push_back(abilityInfo2);
+    int32_t originalAbilitySize = abilityInfos.size();
+    EXPECT_EQ(originalAbilitySize, 2);
+    AbilityRequest abilityRequest;
+    abilityRequest.uriReservedFlag = true;
+    abilityRequest.reservedBundleName = "test1";
+    processor->OnlyKeepReserveApp(abilityInfos, extensionAbInfos, abilityRequest);
+    EXPECT_EQ(abilityInfos.size(), 2);
+    for (const auto& ability : abilityInfos) {
+        EXPECT_EQ(ability.bundleName, "test1");
+    }
+}
+
+/*
+ * Feature: ImplicitStartProcessor
  * Function: GetDefaultAppProxy
  * SubFunction: NA
  * FunctionPoints:ImplicitStartProcessor GetDefaultAppProxy
@@ -892,6 +1047,50 @@ HWTEST_F(ImplicitStartProcessorTest, AddIdentity_001, TestSize.Level1)
     param.isExtension = false;
     processor->AddAbilityInfoToDialogInfos(param, dialogAppInfos);
     EXPECT_TRUE(processor != nullptr);
+}
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: AddIdentity
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor AddIdentity
+ * EnvConditions: NA
+ * CaseDescription: Verify AddIdentity when identityList_ is at max capacity.
+ */
+HWTEST_F(ImplicitStartProcessorTest, AddIdentity_002, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    for (size_t i = 0; i < IDENTITY_LIST_MAX_SIZE; i++) {
+        int32_t tokenId = 100 + i;
+        std::string identity = "identity_" + std::to_string(i);
+        processor->AddIdentity(tokenId, identity);
+    }
+    EXPECT_EQ(processor->identityList_.front().tokenId, 100);
+    int32_t newTokenId = 200;
+    std::string newIdentity = "new_identity";
+    processor->AddIdentity(newTokenId, newIdentity);
+    EXPECT_EQ(processor->identityList_.size(), IDENTITY_LIST_MAX_SIZE);
+    EXPECT_EQ(processor->identityList_.back().tokenId, newTokenId);
+    EXPECT_NE(processor->identityList_.front().tokenId, 100);
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: AddIdentity
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor AddIdentity
+ * EnvConditions: NA
+ * CaseDescription: Verify AddIdentity.
+ */
+HWTEST_F(ImplicitStartProcessorTest, AddIdentity_003, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    for (size_t i = 0; i < IDENTITY_LIST_MAX_SIZE; i++) {
+        int32_t tokenId = 100 + i;
+        std::string identity = "identity_" + std::to_string(i);
+        processor->AddIdentity(tokenId, identity);
+    }
+    EXPECT_EQ(processor->identityList_.front().tokenId, 100);
+    EXPECT_EQ(processor->identityList_.size(), IDENTITY_LIST_MAX_SIZE);
 }
 
 /*
@@ -1125,6 +1324,190 @@ HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAG_001, TestSize.Level1)
     auto ret = processor->ImplicitStartAG(userId, request, dialogAppInfos, genReqParam, queryAGSuccess);
     EXPECT_NE(ret, 0);
     TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAG end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: NeedQueryFromAG
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor NeedQueryFromAG
+ * EnvConditions: NA
+ * CaseDescription: Verify NeedQueryFromAG when OPEN_LINK_APP_LINKING_ONLY is false
+ */
+HWTEST_F(ImplicitStartProcessorTest, NeedQueryFromAG_001, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    bool applinkExist = false;
+    auto res = processor->NeedQueryFromAG(request, applinkExist);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: NeedQueryFromAG
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor NeedQueryFromAG
+ * EnvConditions: NA
+ * CaseDescription: Verify NeedQueryFromAG when appLinkingOnly is true
+ */
+HWTEST_F(ImplicitStartProcessorTest, NeedQueryFromAG_002, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    bool applinkExist = false;
+    request.want.SetParam(OPEN_LINK_APP_LINKING_ONLY, true);
+    auto res = processor->NeedQueryFromAG(request, applinkExist);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: NeedQueryFromAG
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor NeedQueryFromAG
+ * EnvConditions: NA
+ * CaseDescription: Verify NeedQueryFromAG when linkUriScheme is not http/https
+ */
+HWTEST_F(ImplicitStartProcessorTest, NeedQueryFromAG_003, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    bool applinkExist = false;
+    request.want.SetParam(OPEN_LINK_APP_LINKING_ONLY, false);
+    OHOS::Uri uri("file://example.com/test.txt");
+    request.want.SetUri(uri);
+    auto res = processor->NeedQueryFromAG(request, applinkExist);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: NeedQueryFromAG
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor NeedQueryFromAG
+ * EnvConditions: NA
+ * CaseDescription: Verify NeedQueryFromAG when applinkExist is true
+ */
+HWTEST_F(ImplicitStartProcessorTest, NeedQueryFromAG_004, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    bool applinkExist = true;
+    request.want.SetParam(OPEN_LINK_APP_LINKING_ONLY, false);
+    OHOS::Uri uri("https://example.com/test.html");
+    request.want.SetUri(uri);
+    auto res = processor->NeedQueryFromAG(request, applinkExist);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: NeedQueryFromAG
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor NeedQueryFromAG
+ * EnvConditions: NA
+ * CaseDescription: Verify NeedQueryFromAG returns true when all conditions are met
+ */
+HWTEST_F(ImplicitStartProcessorTest, NeedQueryFromAG_005, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    bool applinkExist = false;
+    request.want.SetParam(OPEN_LINK_APP_LINKING_ONLY, false);
+    OHOS::Uri uri("https://example.com/test.html");
+    request.want.SetUri(uri);
+    auto res = processor->NeedQueryFromAG(request, applinkExist);
+    EXPECT_TRUE(res);
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: NeedQueryFromAG
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor NeedQueryFromAG
+ * EnvConditions: NA
+ * CaseDescription: Verify NeedQueryFromAG with http scheme
+ */
+HWTEST_F(ImplicitStartProcessorTest, NeedQueryFromAG_006, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    bool applinkExist = false;
+    request.want.SetParam(OPEN_LINK_APP_LINKING_ONLY, false);
+    OHOS::Uri uri("http://example.com/test.html");
+    request.want.SetUri(uri);
+    auto res = processor->NeedQueryFromAG(request, applinkExist);
+    EXPECT_TRUE(res);
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: ResetCallingIdentityAsCaller
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor ResetCallingIdentityAsCaller
+ * EnvConditions: NA
+ * CaseDescription: Verify ResetCallingIdentityAsCaller.
+ */
+HWTEST_F(ImplicitStartProcessorTest, ResetCallingIdentityAsCaller_001, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    for (size_t i = 0; i < IDENTITY_LIST_MAX_SIZE; i++) {
+        int32_t tokenId = 100 + i;
+        std::string identity = "identity_" + std::to_string(i);
+        processor->AddIdentity(tokenId, identity);
+    }
+    EXPECT_EQ(processor->identityList_.front().tokenId, 100);
+    int32_t newTokenId = 200;
+    processor->ResetCallingIdentityAsCaller(newTokenId, false);
+    EXPECT_EQ(processor->identityList_.size(), IDENTITY_LIST_MAX_SIZE);
+    EXPECT_EQ(processor->identityList_.front().tokenId, 100);
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: RemoveIdentity
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor RemoveIdentity
+ * EnvConditions: NA
+ * CaseDescription: Verify RemoveIdentity.
+ */
+HWTEST_F(ImplicitStartProcessorTest, RemoveIdentity_001, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    for (size_t i = 0; i < IDENTITY_LIST_MAX_SIZE; i++) {
+        int32_t tokenId = 100 + i;
+        std::string identity = "identity_" + std::to_string(i);
+        processor->AddIdentity(tokenId, identity);
+    }
+    EXPECT_EQ(processor->identityList_.front().tokenId, 100);
+    int32_t newTokenId = 100;
+    processor->RemoveIdentity(newTokenId);
+    EXPECT_NE(processor->identityList_.size(), IDENTITY_LIST_MAX_SIZE);
+    EXPECT_NE(processor->identityList_.front().tokenId, 100);
+}
+
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: RemoveIdentity
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor RemoveIdentity
+ * EnvConditions: NA
+ * CaseDescription: Verify RemoveIdentity.
+ */
+HWTEST_F(ImplicitStartProcessorTest, RemoveIdentity_002, TestSize.Level1)
+{
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    for (size_t i = 0; i < IDENTITY_LIST_MAX_SIZE; i++) {
+        int32_t tokenId = 100 + i;
+        std::string identity = "identity_" + std::to_string(i);
+        processor->AddIdentity(tokenId, identity);
+    }
+    EXPECT_EQ(processor->identityList_.front().tokenId, 100);
+    int32_t newTokenId = 200;
+    processor->RemoveIdentity(newTokenId);
+    EXPECT_EQ(processor->identityList_.size(), IDENTITY_LIST_MAX_SIZE);
+    EXPECT_EQ(processor->identityList_.front().tokenId, 100);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

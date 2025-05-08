@@ -75,6 +75,18 @@ HWTEST_F(ExitResidentProcessManagerTest, RecordExitResidentBundleName_001, TestS
 }
 
 /**
+ * @tc.name: RecordExitResidentBundleName_002
+ * @tc.desc: Verify that the RecordExitResidentBundleName interface calls normally
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExitResidentProcessManagerTest, RecordExitResidentBundleName_002, TestSize.Level1)
+{
+    auto exitResidentProcessManager = std::make_shared<ExitResidentProcessManager>();
+    exitResidentProcessManager->currentMemorySizeState_ = MemoryState::LOW_MEMORY;
+    EXPECT_EQ(exitResidentProcessManager->RecordExitResidentBundleName("", 0), true);
+}
+
+/**
  * @tc.name: RecordExitResidentBundleDependedOnWeb_001
  * @tc.desc: Verify that the RecordExitResidentBundleDependedOnWeb interface calls normally
  * @tc.type: FUNC
@@ -155,6 +167,67 @@ HWTEST_F(ExitResidentProcessManagerTest, IsKilledForUpgradeWeb_001, TestSize.Lev
     auto exitResidentProcessManager = std::make_shared<ExitResidentProcessManager>();
     // exitResidentProcessManager->exitResidentBundlesDependedOnWeb_;
     EXPECT_EQ(exitResidentProcessManager->IsKilledForUpgradeWeb(bundleName), false);
+}
+
+/**
+ * @tc.name: IsMemorySizeSufficient_001
+ * @tc.desc: Verify that the IsMemorySizeSufficient interface calls normally
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExitResidentProcessManagerTest, IsMemorySizeSufficient_001, TestSize.Level1)
+{
+    auto exitResidentProcessManager = std::make_shared<ExitResidentProcessManager>();
+    exitResidentProcessManager->currentBigMemoryState_ = MemoryState::MEMORY_RECOVERY;
+    EXPECT_EQ(exitResidentProcessManager->IsMemorySizeSufficient(), true);
+}
+
+/**
+ * @tc.name: RecordExitResidentBundleNameOnRequireBigMemory_001
+ * @tc.desc: Verify that the RecordExitResidentBundleNameOnRequireBigMemory interface calls normally
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExitResidentProcessManagerTest, RecordExitResidentBundleNameOnRequireBigMemory_001, TestSize.Level1)
+{
+    auto exitResidentProcessManager = std::make_shared<ExitResidentProcessManager>();
+    exitResidentProcessManager->currentBigMemoryState_ = MemoryState::NO_REQUIRE_BIG_MEMORY;
+    EXPECT_EQ(exitResidentProcessManager->RecordExitResidentBundleNameOnRequireBigMemory("", 0), false);
+
+    auto exitResidentProcessManager2 = std::make_shared<ExitResidentProcessManager>();
+    exitResidentProcessManager2->currentBigMemoryState_ = MemoryState::MEMORY_RECOVERY;
+    EXPECT_EQ(exitResidentProcessManager2->RecordExitResidentBundleNameOnRequireBigMemory("", 0), true);
+}
+
+/**
+ * @tc.name: HandleRequireBigMemoryOptimization_001
+ * @tc.desc: Verify that the HandleRequireBigMemoryOptimization interface calls normally
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExitResidentProcessManagerTest, HandleRequireBigMemoryOptimization_001, TestSize.Level1)
+{
+    auto exitResidentProcessManager = std::make_shared<ExitResidentProcessManager>();
+    exitResidentProcessManager->currentBigMemoryState_ = MemoryState::NO_REQUIRE_BIG_MEMORY;
+    EXPECT_EQ(exitResidentProcessManager->HandleRequireBigMemoryOptimization(), ERR_OK);
+
+    auto exitResidentProcessManager2 = std::make_shared<ExitResidentProcessManager>();
+    exitResidentProcessManager2->currentBigMemoryState_ = MemoryState::MEMORY_RECOVERY;
+    EXPECT_NE(exitResidentProcessManager2->HandleRequireBigMemoryOptimization(), ERR_OK);
+}
+
+/**
+ * @tc.name: HandleNoRequireBigMemoryOptimization_001
+ * @tc.desc: Verify that the HandleNoRequireBigMemoryOptimization interface calls normally
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExitResidentProcessManagerTest, HandleNoRequireBigMemoryOptimization_001, TestSize.Level1)
+{
+    auto exitResidentProcessManager = std::make_shared<ExitResidentProcessManager>();
+    std::vector<ExitResidentProcessInfo> vecInfo;
+    exitResidentProcessManager->currentBigMemoryState_ = MemoryState::LOW_MEMORY;
+    EXPECT_EQ(exitResidentProcessManager->HandleNoRequireBigMemoryOptimization(vecInfo), ERR_OK);
+
+    auto exitResidentProcessManager2 = std::make_shared<ExitResidentProcessManager>();
+    exitResidentProcessManager2->currentBigMemoryState_ = MemoryState::NO_REQUIRE_BIG_MEMORY;
+    EXPECT_NE(exitResidentProcessManager2->HandleNoRequireBigMemoryOptimization(vecInfo), ERR_OK);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

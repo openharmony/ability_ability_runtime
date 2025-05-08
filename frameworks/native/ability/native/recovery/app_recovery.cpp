@@ -42,6 +42,7 @@
 #include "string_ex.h"
 #include "string_wrapper.h"
 #include "want_params.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -120,6 +121,18 @@ bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
         return false;
     }
 
+    token_ = token;
+    mainWant_.SetElementName(abilityInfo->bundleName, abilityInfo->name);
+    auto handler = mainHandler_.lock();
+    if (handler != nullptr) {
+        auto task = []() {
+            AppRecovery::GetInstance().DeleteInValidMissionFiles();
+        };
+        if (!handler->PostTask(task, "AppRecovery:AddAbility", DELAY_TIME)) {
+            TAG_LOGE(AAFwkTag::RECOVERY, "DeleteInValidMissionFiles failed");
+        }
+    }
+ 
     if (isEnable_ && !abilityRecoverys_.empty() && !abilityInfo->recoverable) {
         TAG_LOGE(AAFwkTag::RECOVERY, "recoverable is false");
         return false;
@@ -130,15 +143,6 @@ bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
     abilityRecovery->EnableAbilityRecovery(useAppSettedValue_.load(), restartFlag_, saveOccasion_, saveMode_);
     ability->EnableAbilityRecovery(abilityRecovery, useAppSettedValue_.load());
     abilityRecoverys_.push_back(abilityRecovery);
-    auto handler = mainHandler_.lock();
-    if (handler != nullptr) {
-        auto task = []() {
-            AppRecovery::GetInstance().DeleteInValidMissionFiles();
-        };
-        if (!handler->PostTask(task, "AppRecovery:AddAbility", DELAY_TIME)) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "DeleteInValidMissionFiles failed");
-        }
-    }
     return true;
 }
 
@@ -248,13 +252,17 @@ void AppRecovery::SetRestartWant(std::shared_ptr<AAFwk::Want> want)
 
 bool AppRecovery::ScheduleRecoverApp(StateReason reason)
 {
-    if (!isEnable_) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "not enabled");
-        return false;
-    }
-
+    TAG_LOGI(AAFwkTag::RECOVERY, "scheduleRecoverApp  begin");
     if (!ShouldRecoverApp(reason)) {
         TAG_LOGE(AAFwkTag::RECOVERY, "not recover app");
+        return false;
+    }
+    
+    if (!isEnable_) {
+        if (OHOS::system::GetParameter("const.dfx.sub_health_recovery.enable", "") == "true") {
+            DoRecoverMainApp(reason);
+            return false;
+        }
         return false;
     }
 
@@ -278,12 +286,15 @@ bool AppRecovery::ScheduleRecoverApp(StateReason reason)
     // 1. check whether main handler is still avaliable
     // 2. do state saving in main thread or just restart app with no state?
     // 3. create an recovery thread for saving state, just block jsvm mult-thread checking mechaism
-
+    if (getpid() == gettid()) {
+        DoRecoverApp(reason);
+        return true;
+    }
     auto task = [reason]() {
         AppRecovery::GetInstance().DoRecoverApp(reason);
     };
     if (!handler->PostTask(task, "AppRecovery:RecoverApp")) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "schedule save app state failed");
+        TAG_LOGE(AAFwkTag::RECOVERY, "schedule recover restart app failed");
     }
 
     return true;
@@ -291,12 +302,10 @@ bool AppRecovery::ScheduleRecoverApp(StateReason reason)
 
 bool AppRecovery::TryRecoverApp(StateReason reason)
 {
-    if (!isEnable_) {
-        return false;
+    if (isEnable_) {
+        ScheduleSaveAppState(reason);
+        PersistAppState();
     }
-
-    ScheduleSaveAppState(reason);
-    PersistAppState();
     return ScheduleRecoverApp(reason);
 }
 
@@ -327,6 +336,23 @@ void AppRecovery::DoRecoverApp(StateReason reason)
     }
 }
 
+void AppRecovery::DoRecoverMainApp(StateReason reason)
+{
+    TAG_LOGD(AAFwkTag::RECOVERY, "DoReciverMainApp begin");
+    AAFwk::Want *want = &mainWant_;
+    want->SetParam(AAFwk::Want::PARAM_ABILITY_RECOVERY_RESTART, false);
+    auto token = token_.promote();
+    if (token == nullptr) {
+        return;
+    }
+    auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "null abilityMgr");
+        return;
+    }
+    abilityMgr->ScheduleRecoverAbility(token, reason, want);
+}
+ 
 void AppRecovery::DoSaveAppState(StateReason reason, uintptr_t ability)
 {
     TAG_LOGD(AAFwkTag::RECOVERY, "begin");

@@ -16,7 +16,11 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+#define private public
+#define protected public
 #include "ability_connect_manager.h"
+#undef private
+#undef protected
 #include "extension_record_factory.h"
 #include "ability_util.h"
 #include "hilog_tag_wrapper.h"
@@ -27,6 +31,14 @@ using namespace OHOS::AppExecFwk;
 namespace {
 const std::string VASSISTANT_BUNDLE_NAME = "com.huawei.hmos.vassistant";
 const std::string VASSISTANT_B2 = "com.huawei.hmos.vassistant.test";
+constexpr size_t LOAD_TIMEOUT = 0;
+constexpr size_t ACTIVE_TIMEOUT = 1;
+constexpr size_t INACTIVE_TIMEOUT = 2;
+constexpr size_t FOREGROUND_TIMEOUT = 5;
+constexpr size_t BACKGROUND_TIMEOUT = 6;
+constexpr size_t TERMINATE_TIMEOUT = 4;
+constexpr size_t CONNECT_TIMEOUT = 10;
+constexpr size_t INVALID_TIMEOUT = 11;
 }
 
 namespace OHOS {
@@ -224,5 +236,217 @@ HWTEST_F(AbilityConnectManagerSecondTest, UpdateKeepAliveEnableState_001, TestSi
     TAG_LOGI(AAFwkTag::TEST, "RUpdateKeepAliveEnableState_001 end");
 }
 
+/*
+ * Feature: AbilityConnectManager
+ * Function: HandleCommandTimeoutTask
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, HandleCommandTimeoutTask_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleCommandTimeoutTask_001 start");
+
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(100);
+    EXPECT_NE(connectManager, nullptr);
+
+    ASSERT_NE(serviceRecord_, nullptr);
+    serviceRecord_->SetAbilityState(AbilityState::INACTIVE);
+
+    std::string serviceKey = serviceRecord_->GetURI();
+    connectManager->AddToServiceMap(serviceKey, serviceRecord_);
+
+    connectManager->HandleCommandTimeoutTask(serviceRecord_);
+    auto serviceMap = connectManager->GetServiceMap();
+    EXPECT_TRUE(serviceMap.find(serviceKey) == serviceMap.end());
+
+    TAG_LOGI(AAFwkTag::TEST, "HandleCommandTimeoutTask_001 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: HandleInactiveTimeout
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, HandleInactiveTimeout_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleInactiveTimeout_001 start");
+
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(100);
+    EXPECT_NE(connectManager, nullptr);
+
+    ASSERT_NE(serviceRecord_, nullptr);
+    serviceRecord_->SetAbilityState(AbilityState::INACTIVE);
+
+    std::string serviceKey = serviceRecord_->GetURI();
+    connectManager->AddToServiceMap(serviceKey, serviceRecord_);
+
+    connectManager->HandleInactiveTimeout(serviceRecord_);
+    auto serviceMap = connectManager->GetServiceMap();
+    EXPECT_TRUE(serviceMap.find(serviceKey) == serviceMap.end());
+
+    TAG_LOGI(AAFwkTag::TEST, "HandleInactiveTimeout_001 end");
+}
+/*
+ * Feature: AbilityConnectManager
+ * Function: GetTimeoutMsgContent
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, GetTimeoutMsgContent_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetTimeoutMsgContent_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+    int typeId = 0;
+    std::string msgStr;
+    std::string expected = "load timeout";
+    uint32_t msgId = LOAD_TIMEOUT;
+    connectManager->GetTimeoutMsgContent(msgId, msgStr, typeId);
+    ASSERT_EQ(msgStr, expected);
+
+    msgStr = "";
+    expected = "active timeout";
+    msgId = ACTIVE_TIMEOUT;
+    connectManager->GetTimeoutMsgContent(msgId, msgStr, typeId);
+    ASSERT_EQ(msgStr, expected);
+
+    msgStr = "";
+    expected = "inactive timeout";
+    msgId = INACTIVE_TIMEOUT;
+    connectManager->GetTimeoutMsgContent(msgId, msgStr, typeId);
+    ASSERT_EQ(msgStr, expected);
+    TAG_LOGI(AAFwkTag::TEST, "GetTimeoutMsgContent_001 end");
+}
+ 
+/*
+ * Feature: AbilityConnectManager
+ * Function: GetTimeoutMsgContent
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, GetTimeoutMsgContent_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetTimeoutMsgContent_002 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+    int typeId = 0;
+    std::string msgStr;
+    std::string expected = "background timeout";
+    uint32_t msgId = BACKGROUND_TIMEOUT;
+    connectManager->GetTimeoutMsgContent(msgId, msgStr, typeId);
+    ASSERT_EQ(msgStr, expected);
+    
+    msgStr = "";
+    expected = "terminate timeout";
+    msgId = TERMINATE_TIMEOUT;
+    connectManager->GetTimeoutMsgContent(msgId, msgStr, typeId);
+    ASSERT_EQ(msgStr, expected);
+    
+    msgStr = "";
+    expected = "connect timeout";
+    msgId = CONNECT_TIMEOUT;
+    connectManager->GetTimeoutMsgContent(msgId, msgStr, typeId);
+    ASSERT_EQ(msgStr, expected);
+    TAG_LOGI(AAFwkTag::TEST, "GetTimeoutMsgContent_002 end");
+}
+ 
+/*
+ * Feature: AbilityConnectManager
+ * Function: GetTimeoutMsgContent
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, GetTimeoutMsgContent_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetTimeoutMsgContent_003 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetTimeoutMsgContent_002 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    int typeId = 0;
+    std::string msgStr;
+    std::string expected = "foreground timeout";
+    uint32_t msgId = FOREGROUND_TIMEOUT;
+    connectManager->GetTimeoutMsgContent(msgId, msgStr, typeId);
+    ASSERT_EQ(msgStr, expected);
+
+    msgId = INVALID_TIMEOUT;
+    bool result = connectManager->GetTimeoutMsgContent(msgId, msgStr, typeId);
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "GetTimeoutMsgContent_003 end");
+}
+ 
+/*
+ * Feature: AbilityConnectManager
+ * Function: GenerateBundleName
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, GenerateBundleName_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GenerateBundleName_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::UNSPECIFIED;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SHARE;
+    connectManager->GenerateBundleName(abilityRequest);
+    ASSERT_EQ(abilityRequest.abilityInfo.bundleName, "com.example.unittest");
+    TAG_LOGI(AAFwkTag::TEST, "GenerateBundleName_001 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: HandleRestartResidentTask
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, HandleRestartResidentTask_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleRestartResidentTask_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityRequest req;
+    req.want.SetElementName("com.example.bundle", "com.example.module", "MainAbility");
+    AbilityRequest taskReq;
+    taskReq.want.SetElementName("com.example.bundle", "com.example.module", "MainAbility");
+    connectManager->restartResidentTaskList_.push_back(taskReq);
+    ASSERT_EQ(connectManager->restartResidentTaskList_.size(), 1);
+
+    connectManager->HandleRestartResidentTask(req);
+    ASSERT_EQ(connectManager->restartResidentTaskList_.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "HandleRestartResidentTask_001 end");
+}
+ 
+/*
+ * Feature: AbilityConnectManager
+ * Function: HandleRestartResidentTask
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, HandleRestartResidentTask_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleRestartResidentTask_002 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityRequest req;
+    req.want.SetElementName("com.example.bundle", "com.example.module", "MainAbility");
+    AbilityRequest task;
+    task.want.SetElementName("com.other.bundle", "com.other.module", "OtherAbility");
+    connectManager->restartResidentTaskList_.push_back(task);
+    ASSERT_EQ(connectManager->restartResidentTaskList_.size(), 1);
+
+    connectManager->HandleRestartResidentTask(req);
+    ASSERT_EQ(connectManager->restartResidentTaskList_.size(), 1);
+    TAG_LOGI(AAFwkTag::TEST, "HandleRestartResidentTask_002 end");
+}
+ 
+/*
+ * Feature: AbilityConnectManager
+ * Function: HandleRestartResidentTask
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, HandleRestartResidentTask_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleRestartResidentTask_003 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityRequest req;
+    req.want.SetElementName("com.example.bundle", "com.example.module", "MainAbility");
+    ASSERT_TRUE(connectManager->restartResidentTaskList_.empty());
+    
+    connectManager->HandleRestartResidentTask(req);
+    ASSERT_TRUE(connectManager->restartResidentTaskList_.empty());
+    TAG_LOGI(AAFwkTag::TEST, "HandleRestartResidentTask_003 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

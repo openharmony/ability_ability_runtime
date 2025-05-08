@@ -21,7 +21,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-std::mutex HiddenStartObserverStub::callbackMutex_;
 int HiddenStartObserverStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {

@@ -123,6 +123,10 @@ int32_t AutoFillExtensionCallback::ReloadInModal(const AAFwk::WantParams &wantPa
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     std::lock_guard<std::mutex> lock(closeMutex_);
+    if (autoFillWindowType_ != AutoFill::AutoFillWindowType::POPUP_WINDOW) {
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "not popup window, not reload any more");
+        return AutoFill::AUTO_FILL_PREVIOUS_REQUEST_NOT_FINISHED;
+    }
     auto uiContent = GetUIContent();
     if (uiContent == nullptr) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null uiContent");

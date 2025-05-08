@@ -32,6 +32,7 @@
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "image_source.h"
+#include "json_utils.h"
 #include "keep_alive_process_manager.h"
 #include "last_exit_detail_info.h"
 #include "multi_instance_utils.h"
@@ -87,6 +88,11 @@ const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity"
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
 const std::string UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbilityId";
 const std::string UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
+const std::string UIEXTENSION_HOST_PID = "ability.want.params.uiExtensionHostPid";
+const std::string UIEXTENSION_HOST_UID = "ability.want.params.uiExtensionHostUid";
+const std::string UIEXTENSION_HOST_BUNDLENAME = "ability.want.params.uiExtensionHostBundleName";
+const std::string UIEXTENSION_BIND_ABILITY_ID = "ability.want.params.uiExtensionBindAbilityId";
+const std::string UIEXTENSION_NOTIFY_BIND = "ohos.uiextension.params.notifyProcessBind";
 constexpr const char* PARAM_SEND_RESULT_CALLER_BUNDLENAME = "ohos.anco.param.sendResultCallderBundleName";
 constexpr const char* PARAM_SEND_RESULT_CALLER_TOKENID = "ohos.anco.param.sendResultCallerTokenId";
 constexpr const char* PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME = "ohos.anco.param.isNeedUpdateName";
@@ -112,6 +118,7 @@ const int MAX_URI_COUNT = 500;
 const int RESTART_SCENEBOARD_DELAY = 500;
 constexpr int32_t DMS_UID = 5522;
 constexpr int32_t SCHEDULER_DIED_TIMEOUT = 60000;
+const std::string JSON_KEY_ERR_MSG = "errMsg";
 
 auto g_addLifecycleEventTask = [](sptr<Token> token, std::string &methodName) {
     CHECK_POINTER_LOG(token, "token is nullptr");
@@ -1037,7 +1044,7 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
         TAG_LOGW(AAFwkTag::ABILITYMGR, "getcolormode failed");
     }
 
-    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager(false));
     resourceMgr->UpdateResConfig(*resConfig);
 
     std::string loadPath;
@@ -3831,6 +3838,56 @@ void AbilityRecord::ScheduleCollaborate(const Want &want)
     std::lock_guard guard(collaborateWantLock_);
     CHECK_POINTER(lifecycleDeal_);
     lifecycleDeal_->ScheduleCollaborate(want);
+}
+
+void AbilityRecord::NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    CHECK_POINTER(lifecycleDeal_);
+    nlohmann::json jsonObject = nlohmann::json {
+        { JSON_KEY_ERR_MSG, message },
+    };
+    lifecycleDeal_->NotifyAbilityRequestFailure(requestId, element, jsonObject.dump());
+}
+
+void AbilityRecord::NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)
+{
+    CHECK_POINTER(lifecycleDeal_);
+    lifecycleDeal_->NotifyAbilityRequestSuccess(requestId, element);
+}
+
+void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
+{
+    if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "abilityType not match");
+        return;
+    }
+
+    std::lock_guard guard(wantLock_);
+    if (want_.HasParameter(UIEXTENSION_BIND_ABILITY_ID)) {
+        want_.RemoveParam(UIEXTENSION_BIND_ABILITY_ID);
+    }
+    want_.SetParam(UIEXTENSION_BIND_ABILITY_ID, wantParams.GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1));
+
+    if (want_.HasParameter(UIEXTENSION_NOTIFY_BIND)) {
+        want_.RemoveParam(UIEXTENSION_NOTIFY_BIND);
+    }
+    want_.SetParam(UIEXTENSION_NOTIFY_BIND, wantParams.GetIntParam(UIEXTENSION_NOTIFY_BIND, -1));
+
+    if (want_.HasParameter(UIEXTENSION_HOST_PID)) {
+        want_.RemoveParam(UIEXTENSION_HOST_PID);
+    }
+    want_.SetParam(UIEXTENSION_HOST_PID, wantParams.GetIntParam(UIEXTENSION_HOST_PID, -1));
+
+    if (want_.HasParameter(UIEXTENSION_HOST_UID)) {
+        want_.RemoveParam(UIEXTENSION_HOST_UID);
+    }
+    want_.SetParam(UIEXTENSION_HOST_UID, wantParams.GetIntParam(UIEXTENSION_HOST_UID, -1));
+
+    if (want_.HasParameter(UIEXTENSION_HOST_BUNDLENAME)) {
+        want_.RemoveParam(UIEXTENSION_HOST_BUNDLENAME);
+    }
+    want_.SetParam(UIEXTENSION_HOST_BUNDLENAME, wantParams.GetStringParam(UIEXTENSION_HOST_BUNDLENAME));
 }
 }  // namespace AAFwk
 }  // namespace OHOS

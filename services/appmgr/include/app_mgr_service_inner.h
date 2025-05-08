@@ -203,9 +203,11 @@ public:
      * kill the processes by pid list given.
      *
      * @param pids, the pid list of processes are going to be killed.
+     * @param reason, the reason to kill the processes.
      * @return
      */
-    virtual void KillProcessesByPids(std::vector<int32_t> &pids);
+    virtual void KillProcessesByPids(const std::vector<int32_t> &pids,
+        const std::string &reason = "KillProcessesByPids");
 
     /**
      * KillProcessesInBatch, kill processes in batch;
@@ -1482,7 +1484,7 @@ public:
         return taskHandler_;
     }
 
-    int32_t LaunchAbility(const sptr<IRemoteObject> &token);
+    int32_t LaunchAbility(sptr<IRemoteObject> token);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -1986,7 +1988,15 @@ private:
     void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(std::shared_ptr<ApplicationInfo> appInfo,
         const std::string &processName, const BundleInfo &bundleInfo);
-
+    void AddUIExtensionBindItem(
+        std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token);
+    void RemoveUIExtensionBindItem(std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token);
+    void BindUIExtensionProcess(
+        const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
+    void UnBindUIExtensionProcess(
+        const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
+    bool WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord,
+        UIExtensionProcessBindInfo &bindInfo);
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
     std::atomic<int32_t> willKillPidsNum_ = 0;
@@ -2045,6 +2055,9 @@ private:
 
     std::mutex screenOffSubscriberMutex_;
     std::mutex childProcessRecordMapMutex_;
+
+    std::mutex uiExtensionBindReleationsLock_;
+    std::map<int32_t, std::unordered_map<pid_t, int32_t>> uiExtensionBindReleations_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

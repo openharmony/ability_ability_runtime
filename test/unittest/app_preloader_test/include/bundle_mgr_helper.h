@@ -18,9 +18,20 @@
 
 #include "bundle_mgr_interface.h"
 #include "want.h"
+#include "app_mgr_service_dump_error_code.h"
 
 namespace OHOS {
 namespace AppExecFwk {
+    enum UidCheckCode {
+        UID_CHECK_INVALID_NUM = -2,
+        UID_CHECK_FALSE = -3,
+        UID_CHECK_PRELOAD_SERVICE = -5,
+        UID_CHECK_PRELOAD_PAGE = -6,
+        UID_CHECK_PRELOAD_CONDITIONS = -7,
+        UID_CHECK_BUNDLE_INFO = -9,
+        UID_CHECK_BUNDLE_INFO_FAILED = -10,
+    };
+
 using Want = OHOS::AAFwk::Want;
 
 class BundleMgrHelper : public std::enable_shared_from_this<BundleMgrHelper> {
@@ -30,26 +41,65 @@ public:
 
     ErrCode GetLaunchWantForBundle(const std::string &bundleName, Want &want, int32_t userId)
     {
+        if (userId == UID_CHECK_INVALID_NUM) {
+            return ERR_INVALID_NUM_ARGS_ERROR;
+        }
+            
         return ERR_OK;
     }
 
     bool QueryAbilityInfo(const Want &want, int32_t flags, int32_t userId, AbilityInfo &abilityInfo)
     {
-        abilityInfo.type = AppExecFwk::AbilityType::PAGE;
-        abilityInfo.isStageBasedModel = true;
-        abilityInfo.name = "MainAbility";
-        abilityInfo.applicationName = "com.acts.preloadtest";
-        abilityInfo.applicationInfo.name = abilityInfo.applicationName;
+        switch (userId) {
+            case UID_CHECK_FALSE:
+                return false;
+                break;
+            case UID_CHECK_PRELOAD_SERVICE:
+                abilityInfo.type = AppExecFwk::AbilityType::SERVICE;
+                abilityInfo.isStageBasedModel = true;
+                abilityInfo.name = "MainAbility";
+                abilityInfo.applicationName = "com.acts.preloadtest";
+                abilityInfo.applicationInfo.name = abilityInfo.applicationName;
+                break;
+            case UID_CHECK_PRELOAD_PAGE:
+                abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+                abilityInfo.isStageBasedModel = true;
+                abilityInfo.name = "";
+                abilityInfo.applicationName = "com.acts.preloadtest";
+                abilityInfo.applicationInfo.name = abilityInfo.applicationName;
+                break;
+            case UID_CHECK_PRELOAD_CONDITIONS:
+                abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+                abilityInfo.isStageBasedModel = true;
+                abilityInfo.name = "MainAbility";
+                abilityInfo.applicationName = "com.acts.preloadtest";
+                abilityInfo.applicationInfo.name = "com.acts.preloadtest2";
+                break;
+            default:
+                abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+                abilityInfo.isStageBasedModel = true;
+                abilityInfo.name = "MainAbility";
+                abilityInfo.applicationName = "com.acts.preloadtest";
+                abilityInfo.applicationInfo.name = abilityInfo.applicationName;
+        }
+  
         return true;
     }
 
     bool GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId)
     {
+        if (userId == UID_CHECK_BUNDLE_INFO) {
+            return false;
+        }
+        
         return true;
     }
 
     bool GetHapModuleInfo(const AbilityInfo &abilityInfo, int32_t userId, HapModuleInfo &hapModuleInfo)
     {
+        if (userId == UID_CHECK_BUNDLE_INFO_FAILED) {
+            return false;
+        }
         return true;
     }
 };

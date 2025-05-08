@@ -71,5 +71,20 @@ HWTEST_F(RestartAppManagerTest, IsRestartAppFrequent_002, TestSize.Level1)
     auto res = instance.IsRestartAppFrequent(key, time);
     EXPECT_EQ(res, false);
 }
+
+/**
+ * @tc.number: AddRestartAppHistory_001
+ * @tc.name: AddRestartAppHistory
+ * @tc.desc: Test whether AddRestartAppHistory is called normally.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RestartAppManagerTest, AddRestartAppHistory_001, TestSize.Level1)
+{
+    RestartAppManager &instance = RestartAppManager::GetInstance();
+    RestartAppKeyType key("", 123);
+    time_t time = 1;
+    instance.AddRestartAppHistory(key, time);
+    EXPECT_EQ(instance.restartAppHistory_[key], time);
+}
 } // namespace AAFwk
 } // namespace OHOS

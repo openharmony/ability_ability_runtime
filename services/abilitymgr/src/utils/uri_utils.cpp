@@ -197,8 +197,8 @@ std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string>
     if (!want.GetUriString().empty()) {
         if (checkResults[startIndex]) {
             permissionedUris.emplace_back(want.GetUri());
-        } else if (want.GetUri().GetScheme() == "file") {
-            // erase uri param
+        } else if (want.GetUri().GetScheme() == "file" || want.GetUri().GetScheme().empty()) {
+            // erase Unprivileged file uri and uri that scheme is empty.
             want.SetUri("");
             TAG_LOGI(AAFwkTag::ABILITYMGR, "erase uri param.");
         }
@@ -207,11 +207,10 @@ std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string>
     // process param stream
     std::vector<std::string> paramStreamUris;
     for (size_t index = startIndex; index < checkResults.size(); index++) {
+        // only reserve privileged file uri
         auto uri = Uri(uriVec[index]);
         if (checkResults[index]) {
             permissionedUris.emplace_back(uri);
-            paramStreamUris.emplace_back(uriVec[index]);
-        } else if (uri.GetScheme() != "file") {
             paramStreamUris.emplace_back(uriVec[index]);
         }
     }
@@ -417,8 +416,9 @@ void UriUtils::GrantUriPermission(Want &want, std::string targetBundleName, int3
     }
 
     auto callerPkg = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-    if (callerPkg == AppUtils::GetInstance().GetBrokerDelegateBundleName() &&
-        GrantShellUriPermission(uriVec, flag, targetBundleName, appIndex)) {
+    bool isBrokerCall = (callerPkg == AppUtils::GetInstance().GetBrokerDelegateBundleName() ||
+        IPCSkeleton::GetCallingUid() == AppUtils::GetInstance().GetCollaboratorBrokerUID());
+    if (isBrokerCall && GrantShellUriPermission(uriVec, flag, targetBundleName, appIndex)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "permission to shell");
         return;
     }

@@ -86,6 +86,9 @@ public:
     bool PrepareTerminateAbility();
     void UpdateSessionToken(sptr<IRemoteObject> sessionToken);
     void ScheduleCollaborate(const Want &want);
+    void NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
+    void NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element);
 
 private:
     sptr<IAbilityScheduler> GetScheduler();

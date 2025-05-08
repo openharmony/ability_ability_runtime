@@ -665,6 +665,8 @@ private:
 
     int32_t OnAttachLocalDebug(bool isDebugFromLocal);
 
+    void HandleConfigByPlugin(Configuration &config, BundleInfo &bundleInfo);
+
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
     void HandleNWebPreload();
 #endif

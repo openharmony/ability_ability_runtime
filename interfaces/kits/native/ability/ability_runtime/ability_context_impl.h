@@ -20,6 +20,7 @@
 
 #include <uv.h>
 #include <vector>
+#include <unordered_map>
 
 #include "context_impl.h"
 #include "configuration.h"
@@ -332,6 +333,37 @@ public:
     }
 #endif
 
+    /**
+     * @brief Add CompletioHandler.
+     *
+     * @param requestId, the requestId.
+     * @param onRequestSucc, the callback ot be called upon request success.
+     * @param onRequestFail, the callback ot be called upon request failure.
+     * @return ERR_OK on success, otherwise failure.
+     */
+    ErrCode AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
+        OnRequestResult onRequestFail) override;
+
+    /**
+     * @brief Callback on request success.
+     *
+     * @param requestId, the requestId.
+     * @param element, the want element of startAbility.
+     * @param message, the message returned to the callback.
+     */
+    void OnRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override;
+
+    /**
+     * @brief Callback on request failure.
+     *
+     * @param requestId, the requestId.
+     * @param element, the want element of startAbility.
+     * @param message, the message returned to the callback.
+     */
+    void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override;
+
 private:
     sptr<IRemoteObject> token_ = nullptr;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_ = nullptr;
@@ -359,6 +391,19 @@ private:
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);
     sptr<IRemoteObject> GetSessionToken();
     void SetWindowRectangleParams(AAFwk::Want &want);
+
+    struct OnRequestResultElement {
+        std::string requestId_;
+        OnRequestResult onRequestSuccess_;
+        OnRequestResult onRequestFailure_;
+
+        OnRequestResultElement(const std::string &requestId, OnRequestResult onRequestSucc,
+            OnRequestResult onRequestFail) : requestId_(requestId), onRequestSuccess_(onRequestSucc),
+            onRequestFailure_(onRequestFail)
+        {}
+    };
+    std::mutex onRequestResultMutex_;
+    std::vector<std::shared_ptr<OnRequestResultElement>> onRequestResults_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

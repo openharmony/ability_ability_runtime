@@ -23,6 +23,7 @@
 #include "dialog_request_callback_impl.h"
 #include "dialog_ui_extension_callback.h"
 #include "hilog_tag_wrapper.h"
+#include "json_utils.h"
 #include "remote_object_wrapper.h"
 #include "request_constants.h"
 #include "session_info.h"
@@ -46,6 +47,7 @@ constexpr const char* DISPOSED_PROHIBIT_BACK = "APPGALLERY_APP_DISPOSED_PROHIBIT
 constexpr const char* IS_WINDOWMODE_FOLLOWHOST = "ohos.uec.params.isWindowModeFollowHost";
 constexpr const char* USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
 constexpr const int32_t ERR_NOT_SUPPORTED = -2;
+const std::string JSON_KEY_ERR_MSG = "errMsg";
 
 struct RequestResult {
     int32_t resultCode {0};
@@ -265,6 +267,12 @@ ErrCode AbilityContextImpl::StartAbilityForResult(const AAFwk::Want& want, const
     if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
         TAG_LOGE(AAFwkTag::CONTEXT, "ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
+        if (!startOptions.requestId_.empty()) {
+            nlohmann::json jsonObject = nlohmann::json {
+                { JSON_KEY_ERR_MSG, "Failed to call startAbilityForResult" },
+            };
+            OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
+        }
     }
     return err;
 }
@@ -280,6 +288,12 @@ ErrCode AbilityContextImpl::StartAbilityForResultWithAccount(
     if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
         TAG_LOGE(AAFwkTag::CONTEXT, "ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
+        if (!startOptions.requestId_.empty()) {
+            nlohmann::json jsonObject = nlohmann::json {
+                { JSON_KEY_ERR_MSG, "Failed to call startAbilityForResultWithAccount" },
+            };
+            OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
+        }
     }
     return err;
 }
@@ -1276,6 +1290,72 @@ ErrCode AbilityContextImpl::RevokeDelegator()
     abilityCallback->NotifyWindowDestroy();
     SetHookOff(true);
     return ERR_OK;
+}
+
+ErrCode AbilityContextImpl::AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
+    OnRequestResult onRequestFail)
+{
+    if (onRequestSucc == nullptr || onRequestFail == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "either func is null");
+        return ERR_INVALID_VALUE;
+    }
+    std::lock_guard lock(onRequestResultMutex_);
+    for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+        if ((*iter)->requestId_ == requestId) {
+            TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s already exists", requestId.c_str());
+            return ERR_OK;
+        }
+    }
+    onRequestResults_.emplace_back(std::make_shared<OnRequestResultElement>(requestId, onRequestSucc, onRequestFail));
+    return ERR_OK;
+}
+
+void AbilityContextImpl::OnRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    std::shared_ptr<OnRequestResultElement> result = nullptr;
+    {
+        std::lock_guard lock(onRequestResultMutex_);
+        for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+            if ((*iter)->requestId_ == requestId) {
+                result = *iter;
+                onRequestResults_.erase(iter);
+                break;
+            }
+        }
+    }
+
+    if (result != nullptr) {
+        TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s, call onRequestSuccess", requestId.c_str());
+        result->onRequestSuccess_(element, message);
+        return;
+    }
+
+    TAG_LOGE(AAFwkTag::CONTEXT, "requestId=%{public}s not exist", requestId.c_str());
+}
+
+void AbilityContextImpl::OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    std::shared_ptr<OnRequestResultElement> result = nullptr;
+    {
+        std::lock_guard lock(onRequestResultMutex_);
+        for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+            if ((*iter)->requestId_ == requestId) {
+                result = *iter;
+                onRequestResults_.erase(iter);
+                break;
+            }
+        }
+    }
+
+    if (result != nullptr) {
+        TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s, call onRequestFailure", requestId.c_str());
+        result->onRequestFailure_(element, message);
+        return;
+    }
+
+    TAG_LOGE(AAFwkTag::CONTEXT, "requestId=%{public}s not exist", requestId.c_str());
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

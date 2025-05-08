@@ -72,17 +72,17 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetFreeSizeOfVolume(std::string volumeUuid, int64_t &freeSize) override
+    virtual int32_t GetFreeSizeOfVolume(const std::string &volumeUuid, int64_t &freeSize) override
     {
         return E_OK;
     }
 
-    virtual int32_t GetTotalSizeOfVolume(std::string volumeUuid, int64_t &totalSize) override
+    virtual int32_t GetTotalSizeOfVolume(const std::string &volumeUuid, int64_t &totalSize) override
     {
         return E_OK;
     }
 
-    virtual int32_t GetBundleStats(std::string pkgName, BundleStats &bundleStats,
+    virtual int32_t GetBundleStats(const std::string &pkgName, BundleStats &bundleStats,
         int32_t index, uint32_t statFlag) override
     {
         return E_OK;
@@ -118,28 +118,28 @@ public:
         return E_OK;
     }
 
-    virtual int32_t NotifyVolumeCreated(VolumeCore vc) override
+    virtual int32_t NotifyVolumeCreated(const VolumeCore& vc) override
     {
         return E_OK;
     }
 
-    virtual int32_t NotifyVolumeMounted(std::string volumeId, int fsType, std::string fsUuid,
-        std::string path, std::string description) override
+    virtual int32_t NotifyVolumeMounted(const std::string &volumeId, int fsType, const std::string &fsUuid,
+        const std::string &path, const std::string &description) override
     {
         return E_OK;
     }
 
-    virtual int32_t NotifyVolumeStateChanged(std::string volumeId, VolumeState state) override
+    virtual int32_t NotifyVolumeStateChanged(const std::string &volumeId, uint32_t state) override
     {
         return E_OK;
     }
 
-    virtual int32_t Mount(std::string volumeId) override
+    virtual int32_t Mount(const std::string &volumeId) override
     {
         return E_OK;
     }
 
-    virtual int32_t Unmount(std::string volumeId) override
+    virtual int32_t Unmount(const std::string &volumeId) override
     {
         return E_OK;
     }
@@ -149,17 +149,17 @@ public:
         return E_OK;
     }
 
-    virtual int32_t NotifyDiskCreated(Disk disk) override
+    virtual int32_t NotifyDiskCreated(const Disk& disk) override
     {
         return E_OK;
     }
 
-    virtual int32_t NotifyDiskDestroyed(std::string diskId) override
+    virtual int32_t NotifyDiskDestroyed(const std::string &diskId) override
     {
         return E_OK;
     }
 
-    virtual int32_t Partition(std::string diskId, int32_t type) override
+    virtual int32_t Partition(const std::string &diskId, int32_t type) override
     {
         return E_OK;
     }
@@ -169,27 +169,27 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetVolumeByUuid(std::string fsUuid, VolumeExternal &vc) override
+    virtual int32_t GetVolumeByUuid(const std::string &fsUuid, VolumeExternal &vc) override
     {
         return E_OK;
     }
 
-    virtual int32_t GetVolumeById(std::string volumeId, VolumeExternal &vc) override
+    virtual int32_t GetVolumeById(const std::string &volumeId, VolumeExternal &vc) override
     {
         return E_OK;
     }
 
-    virtual int32_t SetVolumeDescription(std::string fsUuid, std::string description) override
+    virtual int32_t SetVolumeDescription(const std::string &fsUuid, const std::string &description) override
     {
         return E_OK;
     }
 
-    virtual int32_t Format(std::string volumeId, std::string fsType) override
+    virtual int32_t Format(const std::string &volumeId, const std::string &fsType) override
     {
         return E_OK;
     }
 
-    virtual int32_t GetDiskById(std::string diskId, Disk &disk) override
+    virtual int32_t GetDiskById(const std::string &diskId, Disk &disk) override
     {
         return E_OK;
     }
@@ -221,7 +221,7 @@ public:
                                                  const std::vector<uint8_t> &newSecret,
                                                  uint64_t secureUid,
                                                  uint32_t userId,
-                                                 std::vector<std::vector<uint8_t>> &plainText) override
+                                                 const std::vector<std::vector<uint8_t>> &plainText) override
     {
         return E_OK;
     }
@@ -261,7 +261,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t DeleteAppkey(const std::string keyId) override
+    virtual int32_t DeleteAppkey(const std::string &keyId) override
     {
         return E_OK;
     }
@@ -312,19 +312,19 @@ public:
         return E_OK;
     }
 
-    virtual std::vector<int32_t> CreateShareFile(const std::vector<std::string> &uriList,
-        uint32_t tokenId, uint32_t flag) override
+    virtual int32_t CreateShareFile(const std::vector<std::string> &uriList,
+        uint32_t tokenId, uint32_t flag, std::vector<int32_t> &funcResult) override
     {
         int size = uriList.size();
         if (size <= 0) {
-            return { -1 };
+            return -1;
         }
         if (isZero) {
-            std::vector<int32_t> retVec(size, ERR_OK);
-            return retVec;
+            funcResult.assign(size, ERR_OK);
+            return ERR_OK;
         }
-        std::vector<int32_t> retVec(size, -1);
-        return retVec;
+        funcResult.assign(size, -1);
+        return E_OK;
     }
 
     virtual int32_t DeleteShareFile(uint32_t tokenId, const std::vector<std::string> &sharePathList) override
@@ -332,7 +332,8 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetUserStorageStatsByType(int32_t userId, StorageStats &storageStats, std::string type) override
+    virtual int32_t GetUserStorageStatsByType(int32_t userId, StorageStats &storageStats,
+        const std::string &type) override
     {
         return E_OK;
     }
@@ -371,6 +372,12 @@ public:
 
     virtual int32_t IsFileOccupied(const std::string &path, const std::vector<std::string> &inputList,
         std::vector<std::string> &outputList, bool &isOccupy) override
+    {
+        return E_OK;
+    }
+
+    int32_t SetBundleQuota(const std::string &bundleName, int32_t uid,
+        const std::string &bundleDataDirPath, int32_t limitSizeMb) override
     {
         return E_OK;
     }

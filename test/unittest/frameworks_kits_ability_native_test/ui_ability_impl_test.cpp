@@ -2362,5 +2362,81 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_AfterDidBackground_0100, TestSize.Lev
     impl->AfterDidBackground();
     GTEST_LOG_(INFO) << "AbilityRuntime_AfterDidBackground_0100 end";
 }
+
+/**
+ * @tc.number: AbilityRuntime_ScheduleAbilityRequestFailure_0100
+ * @tc.name: ScheduleAbilityRequestFailure
+ * @tc.desc: Verify ScheduleAbilityRequestFailure succeeded.
+ */
+HWTEST_F(UIAbilityImplTest, AbilityRuntime_ScheduleAbilityRequestFailure_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestFailure_0100 start";
+    auto abilityImpl = std::make_shared<UIAbilityImpl>();
+    ASSERT_NE(abilityImpl, nullptr);
+    std::shared_ptr<MockUIAbility> pMocKUIAbility = std::make_shared<MockUIAbility>();
+    ASSERT_NE(pMocKUIAbility, nullptr);
+    abilityImpl->ability_ = pMocKUIAbility;
+    EXPECT_NE(abilityImpl->ability_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    abilityImpl->ScheduleAbilityRequestFailure(requestId, element, message);
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestFailure_0100 end";
+}
+
+/**
+ * @tc.number: AbilityRuntime_ScheduleAbilityRequestFailure_0200
+ * @tc.name: ScheduleAbilityRequestFailure
+ * @tc.desc: Verify ScheduleAbilityRequestFailure succeeded.
+ */
+HWTEST_F(UIAbilityImplTest, AbilityRuntime_ScheduleAbilityRequestFailure_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestFailure_0200 start";
+    auto abilityImpl = std::make_shared<UIAbilityImpl>();
+    ASSERT_NE(abilityImpl, nullptr);
+    EXPECT_EQ(abilityImpl->ability_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    abilityImpl->ScheduleAbilityRequestFailure(requestId, element, message);
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestFailure_0200 end";
+}
+
+/**
+ * @tc.number: AbilityRuntime_ScheduleAbilityRequestSuccess_0100
+ * @tc.name: ScheduleAbilityRequestSuccess
+ * @tc.desc: Verify ScheduleAbilityRequestSuccess succeeded.
+ */
+HWTEST_F(UIAbilityImplTest, AbilityRuntime_ScheduleAbilityRequestSuccess_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0100 start";
+    auto abilityImpl = std::make_shared<UIAbilityImpl>();
+    ASSERT_NE(abilityImpl, nullptr);
+    std::shared_ptr<MockUIAbility> pMocKUIAbility = std::make_shared<MockUIAbility>();
+    ASSERT_NE(pMocKUIAbility, nullptr);
+    abilityImpl->ability_ = pMocKUIAbility;
+    EXPECT_NE(abilityImpl->ability_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    abilityImpl->ScheduleAbilityRequestSuccess(requestId, element);
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0100 end";
+}
+
+/**
+ * @tc.number: AbilityRuntime_ScheduleAbilityRequestSuccess_0200
+ * @tc.name: ScheduleAbilityRequestSuccess
+ * @tc.desc: Verify ScheduleAbilityRequestSuccess succeeded.
+ */
+HWTEST_F(UIAbilityImplTest, AbilityRuntime_ScheduleAbilityRequestSuccess_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0200 start";
+    auto abilityImpl = std::make_shared<UIAbilityImpl>();
+    ASSERT_NE(abilityImpl, nullptr);
+    EXPECT_EQ(abilityImpl->ability_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    abilityImpl->ScheduleAbilityRequestSuccess(requestId, element);
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0200 end";
+}
 } // namespace AppExecFwk
 } // namespace OHOS

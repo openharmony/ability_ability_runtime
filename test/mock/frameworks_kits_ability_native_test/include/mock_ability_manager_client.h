@@ -153,6 +153,13 @@ public:
     virtual void UpdateSessionToken(sptr<IRemoteObject> sessionToken) {}
 
     virtual void ScheduleCollaborate(const Want &want) {}
+
+    virtual void ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message)
+    {}
+
+    virtual void ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)
+    {}
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

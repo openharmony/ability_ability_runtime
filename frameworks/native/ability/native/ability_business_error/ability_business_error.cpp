@@ -102,8 +102,9 @@ constexpr const char* ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT = "Creating a ne
 constexpr const char* ERROR_MSG_UI_ABILITY_IS_STARTING = "The UIAbility is being started.";
 constexpr const char* ERROR_MSG_EXTENSION_START_ABILITY_CONTROLLED =
     "The extension can not start the ability due to extension control.";
-constexpr const char* ERROR_MSG_NOT_HOOK = "The context does not belong to HookAbility; multiple calls are invoked.";
-constexpr const char* ERROR_MSG_FROM_WINDOW = "Failed to cancel the hook of the window module.";
+constexpr const char* ERROR_MSG_NOT_HOOK = "Only allow DelegatorAbility to call the method once.";
+constexpr const char* ERROR_MSG_FROM_WINDOW =
+    "The interaction process between Ability and Window encountered an error.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;

@@ -252,6 +252,7 @@ HWTEST_F(AbilitySchedulerStubTest, AbilitySchedulerStub_0010, TestSize.Level2)
     auto res = stub_->OnRemoteRequest(IAbilityScheduler::REQUEST_CALL_REMOTE, data, reply, option);
     EXPECT_EQ(res, NO_ERROR);
 }
+
 /**
  * @tc.name: AbilitySchedulerStub_011
  * @tc.desc: test DumpAbilityInfo
@@ -267,6 +268,48 @@ HWTEST_F(AbilitySchedulerStubTest, AbilitySchedulerStub_011, TestSize.Level1)
     int32_t result = 0;
     data.WriteInt32(result);
     auto res = stub_->OnRemoteRequest(IAbilityScheduler::DUMP_ABILITY_RUNNER_INNER, data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: ScheduleAbilityRequestFailureInner_001
+ * @tc.desc: test ScheduleAbilityRequestFailureInner
+ * @tc.type: FUNC
+ * @tc.require: SR000GH1GO
+ */
+HWTEST_F(AbilitySchedulerStubTest, ScheduleAbilityRequestFailureInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+    std::string requestId = "1234567890";
+    data.WriteString(requestId);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    data.WriteParcelable(&element);
+    std::string message = "failure";
+    data.WriteString(message);
+    auto res = stub_->OnRemoteRequest(IAbilityScheduler::SCHEDULE_ABILITY_REQUEST_FAILURE, data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: ScheduleAbilityRequestSuccessInner_001
+ * @tc.desc: test ScheduleAbilityRequestSuccessInner
+ * @tc.type: FUNC
+ * @tc.require: SR000GH1GO
+ */
+HWTEST_F(AbilitySchedulerStubTest, ScheduleAbilityRequestSuccessInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+    std::string requestId = "1234567890";
+    data.WriteString(requestId);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    data.WriteParcelable(&element);
+    auto res = stub_->OnRemoteRequest(IAbilityScheduler::SCHEDULE_ABILITY_REQUEST_SUCCESS, data, reply, option);
     EXPECT_EQ(res, NO_ERROR);
 }
 }  // namespace AAFwk

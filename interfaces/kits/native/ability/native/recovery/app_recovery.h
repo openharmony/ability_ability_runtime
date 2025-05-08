@@ -65,6 +65,7 @@ private:
     bool ShouldRecoverApp(StateReason reason);
 
     void DoRecoverApp(StateReason reason);
+    void DoRecoverMainApp(StateReason reason);
     void DoSaveAppState(StateReason reason, uintptr_t ability = 0);
     void DeleteInValidMissionFileById(std::string path, int32_t missionId);
     bool GetMissionIds(std::string path, std::vector<int32_t> &missionIds);
@@ -73,6 +74,8 @@ private:
     uint16_t restartFlag_;
     uint16_t saveOccasion_;
     uint16_t saveMode_;
+    wptr<IRemoteObject> token_;
+    AAFwk::Want mainWant_;
     std::weak_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::weak_ptr<AppExecFwk::ApplicationInfo> applicationInfo_;
     std::weak_ptr<AbilityRuntime::UIAbility> ability_;

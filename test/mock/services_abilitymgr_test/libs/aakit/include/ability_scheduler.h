@@ -117,6 +117,14 @@ public:
     virtual void UpdateSessionToken(sptr<IRemoteObject> sessionToken) override {}
 
     virtual void ScheduleCollaborate(const Want &want) override {}
+
+    virtual void ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override
+    {}
+
+    virtual void ScheduleAbilityRequestSuccess(const std::string &requestId,
+        const AppExecFwk::ElementName &element) override
+    {}
 private:
     AbilityResult result_;
 };
