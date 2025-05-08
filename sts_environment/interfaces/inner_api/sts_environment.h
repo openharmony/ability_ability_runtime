@@ -33,7 +33,7 @@ struct STSRuntimeAPI;
 using TaskFuncType = void (*)();
 namespace StsEnv {
 class StsEnvironmentImpl;
-class STSEnvironment final {
+class STSEnvironment final : public std::enable_shared_from_this<STSEnvironment> {
 public:
     explicit STSEnvironment(std::unique_ptr<StsEnvironmentImpl> impl);
 
@@ -71,7 +71,6 @@ public:
     void* LoadSTSLibrary(const char* dlName);
     void UnLoadSTSLibrary(void* handle);
 
-    bool StartDebugger();
     bool PostTask(TaskFuncType task);
     void PostTask(const std::function<void()>& task, const std::string& name = "", int64_t delayTime = 0);
     void PostSyncTask(const std::function<void()>& task, const std::string& name);
@@ -84,6 +83,8 @@ public:
     void ReInitStsEnvImpl(std::unique_ptr<StsEnvironmentImpl> impl);
     ani_env* GetAniEnv();
     void HandleUncaughtError();
+    int32_t ParseHdcRegisterOption(std::string& option);
+    bool debugMode_ = false;
 
     static const char* stsAppNSName;
     static const char* stsSDKNSName;

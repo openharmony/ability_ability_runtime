@@ -45,6 +45,7 @@ const char STS_ANI_GET_CREATEDVMS[] = "ANI_GetCreatedVMs";
 const char STS_LIB_PATH[] = "libets_interop_js_napi.z.so";
 const char BOOT_PATH[] = "/system/framework/bootpath.json";
 const char BACKTRACE[] = "=====================Backtrace========================";
+static const std::string DEBUGGER = "@Debugger";
 
 
 using GetDefaultVMInitArgsSTSRuntimeType = ets_int (*)(EtsVMInitArgs* vmArgs);
@@ -333,11 +334,6 @@ void STSEnvironment::UnLoadSTSLibrary(void* handle)
     DynamicFreeLibrary(handle);
 }
 
-bool STSEnvironment::StartDebugger()
-{
-    return true;
-}
-
 STSEnvironment::STSEnvironment(std::unique_ptr<StsEnvironmentImpl> impl) : impl_(std::move(impl))
 {}
 
@@ -500,6 +496,26 @@ std::string STSEnvironment::GetErrorProperty(ani_error aniError, const char* pro
     }
     propertyValue.resize(sz);
     return propertyValue;
+}
+
+int32_t STSEnvironment::ParseHdcRegisterOption(std::string& option)
+{
+    TAG_LOGD(AAFwkTag::JSENV, "Start");
+    std::size_t pos = option.find_first_of(":");
+    if (pos == std::string::npos) {
+        return -1;
+    }
+    std::string idStr = option.substr(pos + 1);
+    pos = idStr.find(DEBUGGER);
+    if (pos == std::string::npos) {
+        return -1;
+    }
+    idStr = idStr.substr(0, pos);
+    pos = idStr.find("@");
+    if (pos != std::string::npos) {
+        idStr = idStr.substr(pos + 1);
+    }
+    return std::atoi(idStr.c_str());
 }
 } // namespace StsEnv
 } // namespace OHOS

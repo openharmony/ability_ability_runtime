@@ -125,6 +125,7 @@ ohos_shared_library("runtime") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "runtime_core:libarkruntime",
     "samgr:samgr_proxy",
     "zlib:shared_libz",
   ]
