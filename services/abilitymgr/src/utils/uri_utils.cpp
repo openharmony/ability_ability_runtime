@@ -197,8 +197,8 @@ std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string>
     if (!want.GetUriString().empty()) {
         if (checkResults[startIndex]) {
             permissionedUris.emplace_back(want.GetUri());
-        } else if (want.GetUri().GetScheme() == "file" || want.GetUri().GetScheme().empty()) {
-            // erase Unprivileged file uri and uri that scheme is empty.
+        } else if (want.GetUri().GetScheme() == "file") {
+            // erase uri param
             want.SetUri("");
             TAG_LOGI(AAFwkTag::ABILITYMGR, "erase uri param.");
         }
@@ -207,10 +207,11 @@ std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string>
     // process param stream
     std::vector<std::string> paramStreamUris;
     for (size_t index = startIndex; index < checkResults.size(); index++) {
-        // only reserve privileged file uri
         auto uri = Uri(uriVec[index]);
         if (checkResults[index]) {
             permissionedUris.emplace_back(uri);
+            paramStreamUris.emplace_back(uriVec[index]);
+        } else if (uri.GetScheme() != "file") {
             paramStreamUris.emplace_back(uriVec[index]);
         }
     }
