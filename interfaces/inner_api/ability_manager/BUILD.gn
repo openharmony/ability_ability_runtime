@@ -25,6 +25,7 @@ config("ability_manager_public_config") {
   ]
   include_dirs = [
     "include/",
+    "include/aa_tools",
     "include/insight_intent",
     "include/status_bar_delegate",
     "include/ui_extension",
@@ -106,6 +107,9 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_services_path}/abilitymgr/src/user_callback_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/window_config.cpp",
+    "src/aa_tools/abililty_start_with_wait_data.cpp",
+    "src/aa_tools/ability_start_with_wait_observer_proxy.cpp",
+    "src/aa_tools/ability_start_with_wait_observer_stub.cpp",
     "src/hidden_start_observer_proxy.cpp",
     "src/hidden_start_observer_stub.cpp",
     "src/status_bar_delegate/status_bar_delegate_proxy.cpp",

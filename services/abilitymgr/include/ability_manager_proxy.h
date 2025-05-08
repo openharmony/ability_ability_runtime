@@ -1712,6 +1712,8 @@ public:
         const std::string &intentName,
         InsightIntentInfoForBack &info) override;
 
+    int32_t StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> &observer) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
