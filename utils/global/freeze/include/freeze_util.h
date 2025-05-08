@@ -29,7 +29,8 @@ public:
         UNKNOWN = 0,
         LOAD,
         FOREGROUND,
-        BACKGROUND
+        BACKGROUND,
+        CONNECT
     };
 
     struct LifecycleFlow {

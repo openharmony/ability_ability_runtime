@@ -529,6 +529,7 @@ ohos_shared_library("extensionkit_native") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
     "${ability_runtime_napi_path}/inner/napi_common",
+    "${ability_runtime_path}/utils/global/freeze/include",
   ]
 
   sources = [
@@ -555,6 +556,7 @@ ohos_shared_library("extensionkit_native") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/utils/global/freeze:freeze_util",
   ]
 
   external_deps = [
@@ -1006,6 +1008,7 @@ ohos_shared_library("service_extension") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
+    "${ability_runtime_path}/utils/global/freeze/include",
   ]
 
   sources = [
@@ -1028,6 +1031,7 @@ ohos_shared_library("service_extension") {
     "${ability_runtime_native_path}/ability/native:insight_intent_executor",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
+    "${ability_runtime_path}/utils/global/freeze:freeze_util",
   ]
 
   external_deps = [

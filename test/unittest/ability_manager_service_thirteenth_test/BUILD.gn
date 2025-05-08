@@ -193,6 +193,7 @@ ohos_unittest("ability_manager_service_thirteenth_test") {
     "${ability_runtime_services_path}/abilitymgr/src/utils/multi_instance_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/timeout_state_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/update_caller_info_util.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/uri_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/want_utils.cpp",

@@ -37,6 +37,7 @@ ohos_fuzztest("UiAbilityLifeCycleManagerAFuzzTest") {
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/status_bar_delegate_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/timeout_state_utils.cpp",
     "uiabilitylifecyclemanagera_fuzzer.cpp",
   ]
 
