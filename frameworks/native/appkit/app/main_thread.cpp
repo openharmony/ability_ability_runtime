@@ -163,6 +163,8 @@ constexpr char EVENT_KEY_PROCESS_RSS_MEMINFO[] = "PROCESS_RSS_MEMINFO";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
 constexpr char KILL_REASON[] = "Kill Reason:Js Error";
+const char* PC_LIBRARY_PATH = "/system/lib64/liblayered_parameters_manager.z.so";
+const char* PC_FUNC_INFO = "DetermineResourceType";
 
 const int32_t JSCRASH_TYPE = 3;
 const std::string JSVM_TYPE = "ARK";
@@ -1765,6 +1767,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
     Configuration appConfig = config;
     ParseAppConfigurationParams(bundleInfo.applicationInfo.configuration, appConfig);
+    HandleConfigByPlugin(appConfig, bundleInfo);
     if (Global::I18n::PreferredLanguage::IsSetAppPreferredLanguage()) {
         std::string preferredLanguage = Global::I18n::PreferredLanguage::GetAppPreferredLanguage();
         appConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, preferredLanguage);
@@ -3760,6 +3763,30 @@ void MainThread::HandleCacheProcess()
         }
         runtime->ForceFullGC();
     }
+}
+
+void MainThread::HandleConfigByPlugin(Configuration &config, BundleInfo &bundleInfo)
+{
+    if (PC_LIBRARY_PATH == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "PC_LIBRARY_PATH == nullptr");
+        return;
+    }
+
+    void* handle = dlopen(PC_LIBRARY_PATH, RTLD_LAZY);
+    if (handle == nullptr) {
+        TAG_LOGW(AAFwkTag::APPKIT, "reason %{public}sn", dlerror());
+        return;
+    }
+
+    auto entry = reinterpret_cast<void* (*)(Configuration &, BundleInfo &)>(dlsym(handle, PC_FUNC_INFO));
+    if (entry == nullptr) {
+        dlclose(handle);
+        TAG_LOGE(AAFwkTag::APPKIT, "get func fail");
+        return;
+    }
+
+    entry(config, bundleInfo);
+    dlclose(handle);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
