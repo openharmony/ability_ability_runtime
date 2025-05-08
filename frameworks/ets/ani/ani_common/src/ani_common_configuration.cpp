@@ -15,9 +15,9 @@
 
 #include "ani_common_configuration.h"
 
+#include "ani_enum_convert.h"
 #include "configuration_convertor.h"
 #include "hilog_tag_wrapper.h"
-#include "ani_enum_convert.h"
 
 namespace OHOS {
 namespace AppExecFwk {

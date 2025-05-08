@@ -17,7 +17,6 @@
 
 #include "ani_common_want.h"
 #include "hilog_tag_wrapper.h"
-#include "want.h"
 
 namespace OHOS {
 namespace AppExecFwk {

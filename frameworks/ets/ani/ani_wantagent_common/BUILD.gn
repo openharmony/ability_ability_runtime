@@ -14,46 +14,35 @@
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-ohos_shared_library("aniwantagent") {
-  branch_protector_ret = "pac_ret"
+config("ani_wantagent_common_public_config") {
+  include_dirs = [ "./" ]
+}
+
+ohos_shared_library("ani_wantagent_common") {
   sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
 
-  include_dirs = [
-    "./include",
-    "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
-  ]
+  public_configs = [ ":ani_wantagent_common_public_config" ]
 
-  sources = [ "src/ani_want_agent.cpp" ]
+  sources = [ "ani_common_want_agent.cpp" ]
 
   deps = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
-    "${ability_runtime_innerkits_path}/error_utils:ability_runtime_error_util",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits",
-    "${ability_runtime_native_path}/ability/native:abilitykit_native",
-    "${ability_runtime_native_path}/appkit:app_context",
-    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
-    "${ability_runtime_path}/frameworks/ets/ani/ani_wantagent_common:ani_wantagent_common",
   ]
 
   external_deps = [
-    "ability_base:want",
-    "access_token:libtokenid_sdk",
-    "c_utils:utils",
     "hilog:libhilog",
     "runtime_core:ani",
   ]
-
-  cflags_cc = []
-  if (os_dlp_part_enabled) {
-    cflags_cc += [ "-DWITH_DLP" ]
-  }
 
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
