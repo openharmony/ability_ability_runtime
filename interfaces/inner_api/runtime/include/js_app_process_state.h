@@ -27,33 +27,8 @@ enum JsAppProcessState {
     STATE_BACKGROUND,
     STATE_DESTROY
 };
-namespace {
-inline JsAppProcessState ConvertToJsAppProcessState(AppExecFwk::AppProcessState appProcessState, bool isFocused)
-{
-    JsAppProcessState processState;
-    switch (appProcessState) {
-        case AppExecFwk::AppProcessState::APP_STATE_CREATE:
-        case AppExecFwk::AppProcessState::APP_STATE_READY:
-            processState = STATE_CREATE;
-            break;
-        case AppExecFwk::AppProcessState::APP_STATE_FOREGROUND:
-            processState = isFocused ? STATE_ACTIVE : STATE_FOREGROUND;
-            break;
-        case AppExecFwk::AppProcessState::APP_STATE_BACKGROUND:
-            processState = STATE_BACKGROUND;
-            break;
-        case AppExecFwk::AppProcessState::APP_STATE_TERMINATED:
-        case AppExecFwk::AppProcessState::APP_STATE_END:
-            processState = STATE_DESTROY;
-            break;
-        default:
-            TAG_LOGE(AAFwkTag::APPMGR, "invalid state");
-            processState = STATE_DESTROY;
-            break;
-    }
-    return processState;
-}
-}
+
+JsAppProcessState ConvertToJsAppProcessState(AppExecFwk::AppProcessState appProcessState, bool isFocused);
 } // namespace AbilityRuntime
 } // namespace OHOS
 

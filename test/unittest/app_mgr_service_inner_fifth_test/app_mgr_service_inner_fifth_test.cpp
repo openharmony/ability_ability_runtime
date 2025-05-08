@@ -78,7 +78,7 @@ public:
     {
         dealed = true;
     }
-    void OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+    void OnCacheExitInfo(uint32_t accessTokenId, const RunningProcessInfo &exitInfo,
         const std::string &bundleName, const std::vector<std::string> &abilityNames,
         const std::vector<std::string> &uiExtensionNames) override
     {

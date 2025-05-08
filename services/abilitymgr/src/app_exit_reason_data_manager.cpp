@@ -299,12 +299,6 @@ int32_t AppExitReasonDataManager::RecordSignalReason(int32_t pid, int32_t uid, i
     AAFwk::ExitReason exitReason = {};
     exitReason.reason = AAFwk::REASON_NORMAL;
     exitReason.subReason = signal;
-    AppExecFwk::RunningProcessInfo processInfo = {};
-    processInfo.pid_ = cacheInfo.exitInfo.pid;
-    processInfo.uid_ = cacheInfo.exitInfo.uid;
-    processInfo.rssValue = cacheInfo.exitInfo.rss;
-    processInfo.pssValue = cacheInfo.exitInfo.pss;
-    processInfo.processName_ = cacheInfo.exitInfo.processName;
 
     for (const auto &item : allEntries) {
         if (item.key.ToString() == std::to_string(accessTokenId)) {
@@ -314,7 +308,7 @@ int32_t AppExitReasonDataManager::RecordSignalReason(int32_t pid, int32_t uid, i
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "key: %{public}s", std::to_string(accessTokenId).c_str());
     ret = SetAppExitReason(cacheInfo.bundleName, accessTokenId, cacheInfo.abilityNames, exitReason,
-        processInfo, false);
+        cacheInfo.exitInfo, false);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAppExitReason failed, ret: %{public}d", ret);
         return AAFwk::ERR_RECORD_SIGNAL_REASON_FAILED;
