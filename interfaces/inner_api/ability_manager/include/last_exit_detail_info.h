@@ -33,11 +33,6 @@ struct LastExitDetailInfo : public Parcelable {
     std::string processName;
     std::string exitMsg;
 
-    LastExitDetailInfo() = default;
-    ~LastExitDetailInfo() = default;
-    LastExitDetailInfo(const LastExitDetailInfo &other);
-    LastExitDetailInfo &operator=(const LastExitDetailInfo &other);
-
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     static LastExitDetailInfo *Unmarshalling(Parcel &parcel);

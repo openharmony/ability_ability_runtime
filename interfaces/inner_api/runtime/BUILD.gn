@@ -60,6 +60,7 @@ ohos_shared_library("runtime") {
   sources = [
     "${ability_runtime_native_path}/appkit/ability_bundle_manager_helper/bundle_mgr_helper.cpp",
     "${ability_runtime_native_path}/runtime/hdc_register.cpp",
+    "${ability_runtime_native_path}/runtime/js_app_process_state.cpp",
     "${ability_runtime_native_path}/runtime/js_data_struct_converter.cpp",
     "${ability_runtime_native_path}/runtime/js_error_utils.cpp",
     "${ability_runtime_native_path}/runtime/js_module_reader.cpp",
