@@ -906,6 +906,21 @@ HWTEST_F(AbilityManagerServiceThirdTest, IsCrossUserCall_003, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
+ * Function: IsCrossUserCall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService IsCrossUserCall
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, IsCrossUserCall_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest IsCrossUserCall_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    int32_t userId = 1;
+    EXPECT_EQ(abilityMs_->IsCrossUserCall(userId), false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest IsCrossUserCall_004 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: IsValidMissionIds
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService IsValidMissionIds
