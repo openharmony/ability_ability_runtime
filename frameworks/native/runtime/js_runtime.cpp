@@ -82,7 +82,6 @@ constexpr int32_t DEFAULT_INTER_VAL = 500;
 constexpr int32_t API8 = 8;
 const std::string SANDBOX_ARK_CACHE_PATH = "/data/storage/ark-cache/";
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
-const std::string DEBUGGER = "@Debugger";
 
 constexpr char MERGE_ABC_PATH[] = "/ets/modules.abc";
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
@@ -161,8 +160,8 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "localDebug %{public}d", dOption.isDebugFromLocal);
-    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "developer Mode false");
+    if (!ShouldSkipDebugMode(dOption)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "not start debug");
         return;
     }
     CHECK_POINTER(jsEnv_);
@@ -207,10 +206,16 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             TAG_LOGE(AAFwkTag::JSRUNTIME, "not support release app");
             return;
         }
+        auto callback = [weak, isDebugApp, isStartWithDebug](int32_t tid, const DebuggerPostTask& task) {
+            panda::JSNApi::DebugOption debugOption = {ARK_DEBUGGER_LIB_PATH, isDebugApp ? isStartWithDebug : false};
+            if (weak != nullptr) {
+                panda::JSNApi::StoreDebugInfo(tid, weak->GetVM(), debugOption, task, isDebugApp);
+            }
+        };
         if (option.find(DEBUGGER) == std::string::npos) {
             // if has old connect server, stop it
             ConnectServerManager::Get().StopConnectServer(false);
-            ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
+            ConnectServerManager::Get().SendInstanceMessageAll(callback);
             ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
         } else {
             if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
@@ -227,6 +232,19 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
     }
 
     DebuggerConnectionHandler(isDebugApp, isStartWithDebug);
+}
+
+bool JsRuntime::ShouldSkipDebugMode(const DebugOption dOption)
+{
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "developer Mode false");
+        return false;
+    }
+    if (!(dOption.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "developer register in sts");
+        return false;
+    }
+    return true;
 }
 
 void JsRuntime::DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug)

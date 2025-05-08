@@ -28,11 +28,6 @@
 
 using namespace OHOS::AbilityRuntime;
 
-
-namespace {
-const std::string DEBUGGER = "@Debugger";
-} // namespace
-
 #define LIB_NAME "libcj_environment.z.so"
 #define GET_ENV_INS_NAME "OHOS_GetCJEnvInstance"
 

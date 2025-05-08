@@ -53,6 +53,7 @@ ohos_shared_library("connect_server_manager") {
   external_deps = [
     "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
+    "runtime_core:libarkruntime",
   ]
 
   configs = [
