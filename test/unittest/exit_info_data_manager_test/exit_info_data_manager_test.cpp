@@ -138,8 +138,8 @@ HWTEST_F(ExitInfoDataManagerTest, GetExitInfo_002, TestSize.Level1)
     TAG_LOGD(AAFwkTag::TEST, "GetExitInfo_002 called. start");
     uint32_t accessTokenId = 666;
     AbilityRuntime::ExitCacheInfo cacheInfo;
-    cacheInfo.exitInfo.pid = 111;
-    cacheInfo.exitInfo.uid = 222;
+    cacheInfo.exitInfo.pid_ = 111;
+    cacheInfo.exitInfo.uid_ = 222;
     auto ret = AbilityRuntime::ExitInfoDataManager::GetInstance().AddExitInfo(accessTokenId, cacheInfo);
     EXPECT_EQ(ret, true);
     AbilityRuntime::ExitCacheInfo cacheInfo2;

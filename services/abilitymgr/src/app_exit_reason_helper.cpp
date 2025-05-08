@@ -165,12 +165,8 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(int32_t pid, int32_t uid, c
         return ret;
     }
 
-    AppExecFwk::RunningProcessInfo processInfo;
-    processInfo.pid_ = pid;
-    processInfo.uid_ = uid;
-    processInfo.processName_ = appInfo.processName;
     return RecordProcessExitReason(pid, appInfo.bundleName, uid, appInfo.accessTokenId, exitReason,
-        processInfo, false, true);
+        appInfo.processInfo, false, true);
 }
 
 int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const std::string bundleName,
