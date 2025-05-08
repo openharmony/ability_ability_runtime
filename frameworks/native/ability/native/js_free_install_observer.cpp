@@ -15,6 +15,7 @@
 
 #include "js_free_install_observer.h"
 
+#include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "js_error_utils.h"
@@ -125,7 +126,8 @@ void JsFreeInstallObserver::HandleOnInstallFinished(const std::string &bundleNam
                 it++;
                 continue;
             }
-            if (it->isAbilityResult && resultCode == ERR_OK) {
+            if (it->isAbilityResult && (resultCode == ERR_OK ||
+                resultCode == AAFwk::ATOMIC_SERVICE_MINIMIZED)) {
                 it++;
                 continue;
             }
@@ -165,7 +167,8 @@ void JsFreeInstallObserver::HandleOnInstallFinishedByUrl(const std::string &star
                 it++;
                 continue;
             }
-            if (it->isAbilityResult && resultCode == ERR_OK) {
+            if (it->isAbilityResult && (resultCode == ERR_OK ||
+                resultCode == AAFwk::ATOMIC_SERVICE_MINIMIZED)) {
                 it++;
                 continue;
             }
@@ -196,7 +199,7 @@ void JsFreeInstallObserver::CallCallback(napi_ref callback, int32_t resultCode)
         return;
     }
     napi_value value;
-    if (resultCode == ERR_OK) {
+    if (resultCode == ERR_OK || resultCode == AAFwk::ATOMIC_SERVICE_MINIMIZED) {
         value = CreateJsUndefined(env_);
     } else {
         value = CreateJsError(env_, GetJsErrorCodeByNativeError(resultCode));
@@ -229,7 +232,7 @@ void JsFreeInstallObserver::CallPromise(napi_deferred deferred, int32_t resultCo
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "null deferred");
         return;
     }
-    if (resultCode == ERR_OK) {
+    if (resultCode == ERR_OK || resultCode == AAFwk::ATOMIC_SERVICE_MINIMIZED) {
         napi_value value = CreateJsUndefined(env_);
         napi_resolve_deferred(env_, deferred, value);
     } else {
