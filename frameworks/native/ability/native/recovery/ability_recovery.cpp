@@ -171,8 +171,8 @@ bool AbilityRecovery::SerializeDataToFile(int32_t savedStateId, WantParams& para
         return false;
     }
 
-    ssize_t nwrite = fwrite(reinterpret_cast<uint8_t*>(buf), 1, sz, fileF);
-    if (nwrite <= 0) {
+    size_t nwrite = fwrite(reinterpret_cast<uint8_t*>(buf), 1, sz, fileF);
+    if (nwrite != ERR_OK) {
         TAG_LOGE(AAFwkTag::RECOVERY, "persist parcel data failed %{public}d", errno);
     }
     TAG_LOGD(AAFwkTag::RECOVERY, "file size: %{public}zu", sz);
