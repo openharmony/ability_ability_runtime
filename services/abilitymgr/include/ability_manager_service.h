@@ -35,6 +35,7 @@
 #include "ability_manager_event_subscriber.h"
 #include "ability_manager_stub.h"
 #include "ability_keep_alive_service.h"
+#include "ability_start_with_wait_observer_utils.h"
 #include "ams_configuration_parameter.h"
 #include "app_debug_listener_interface.h"
 #include "app_exit_reason_helper.h"
@@ -2051,6 +2052,8 @@ public:
         const std::string &moduleName,
         const std::string &intentName,
         InsightIntentInfoForBack &info) override;
+
+    virtual int32_t StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> &observer) override;
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;

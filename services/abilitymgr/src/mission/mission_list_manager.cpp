@@ -19,6 +19,8 @@
 
 #include "ability_manager_errors.h"
 #include "ability_manager_service.h"
+#include "ability_start_with_wait_observer_manager.h"
+#include "ability_start_with_wait_observer_utils.h"
 #include "ability_util.h"
 #include "app_exit_reason_data_manager.h"
 #include "appfreeze_manager.h"
@@ -634,6 +636,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
             TAG_LOGE(AAFwkTag::ABILITYMGR, "targetRecord null");
             return;
         }
+        AbilityStartWithWaitObserverManager::GetInstance().SetColdStartForShellCall(targetRecord);
         targetMission = std::make_shared<Mission>(info.missionInfo.id, targetRecord,
             info.missionName, info.startMethod);
         targetRecord->UpdateRecoveryInfo(info.hasRecoverInfo);
@@ -1305,17 +1308,16 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s", element.c_str());
 
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
+    AbilityStartWithWaitObserverManager::GetInstance().NotifyAATerminateWait(abilityRecord);
 
 #if BINDER_IPC_32BIT
     TAG_LOGI(AAFwkTag::ABILITYMGR, "bundle:%{public}s,ability:%{public}s,time:%{public}lld",
         abilityRecord->GetAbilityInfo().bundleName.c_str(),
-        abilityRecord->GetAbilityInfo().name.c_str(),
-        AbilityUtil::UTCTimeSeconds());
+        abilityRecord->GetAbilityInfo().name.c_str(), AbilityUtil::UTCTimeSeconds());
 #else
     TAG_LOGI(AAFwkTag::ABILITYMGR, "bundle:%{public}s,ability:%{public}s,time:%{public}ld",
         abilityRecord->GetAbilityInfo().bundleName.c_str(),
-        abilityRecord->GetAbilityInfo().name.c_str(),
-        AbilityUtil::UTCTimeSeconds());
+        abilityRecord->GetAbilityInfo().name.c_str(), AbilityUtil::UTCTimeSeconds());
 #endif
 
     auto mission = GetMissionById(abilityRecord->GetMissionId());
@@ -2410,6 +2412,8 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord null");
         return;
     }
+    AbilityStartWithWaitObserverManager::GetInstance().NotifyAATerminateWait(
+        abilityRecord, TerminateReason::TERMINATE_FOR_UI_ABILITY_FOREGROUND_FAILED);
     if (state == AbilityState::FOREGROUND_WINDOW_FREEZED) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "window freezed");
         abilityRecord->SetPendingState(AbilityState::INITIAL);
@@ -3006,6 +3010,7 @@ void MissionListManager::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &ab
     abilityRecord->SetCompleteFirstFrameDrawing(true);
     AppExecFwk::AbilityFirstFrameStateObserverManager::GetInstance().
         HandleOnFirstFrameState(abilityRecord);
+    AbilityStartWithWaitObserverManager::GetInstance().NotifyAATerminateWait(abilityRecord);
     auto handler = AbilityManagerService::GetPubInstance()->GetTaskHandler();
     if (handler == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "GetTaskHandler fail");

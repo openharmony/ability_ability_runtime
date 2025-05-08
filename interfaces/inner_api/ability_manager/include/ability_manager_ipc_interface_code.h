@@ -619,6 +619,9 @@ enum class AbilityManagerInterfaceCode {
 
     // get all insight intent info by intent name
     GET_INSIGHT_INTENT_INFO_BY_INTENT_NAME = 6141,
+
+    // start ability with wait
+    START_ABILITY_WITH_WAIT = 6142,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
