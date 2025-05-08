@@ -10033,7 +10033,7 @@ int32_t AbilityManagerService::CheckCallAppServiceExtensionPermission(const Abil
         return CHECK_PERMISSION_FAILED;
     }
     if (!VerifySameAppOrAppIdentifierAlloListPermission(abilityRequest)) {
-        return ERROR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST;
+        return ERR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST;
     }
     int result = AAFwk::PermissionVerification::GetInstance()->
         CheckCallAppServiceExtensionPermission(abilityRequest.appInfo.accessTokenId);

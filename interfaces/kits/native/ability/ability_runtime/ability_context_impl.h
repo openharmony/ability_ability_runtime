@@ -90,7 +90,9 @@ public:
         int requestCode, RuntimeTask &&task) override;
     ErrCode StartUIServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId = -1) override;
     ErrCode StartServiceExtensionAbility(const Want &want, int32_t accountId = -1) override;
+    ErrCode StartAppServiceExtensionAbility(const Want &want, int32_t accountId = -1) override;
     ErrCode StopServiceExtensionAbility(const Want& want, int32_t accountId = -1) override;
+    ErrCode StopAppServiceExtensionAbility(const Want& want, int32_t accountId = -1) override;
     ErrCode TerminateAbilityWithResult(const AAFwk::Want &want, int resultCode) override;
     ErrCode BackToCallerAbilityWithResult(const AAFwk::Want &want, int resultCode, int64_t requestCode) override;
     void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData) override;
@@ -99,6 +101,8 @@ public:
     ErrCode ConnectAbilityWithAccount(const AAFwk::Want &want, int accountId,
                         const sptr<AbilityConnectCallback> &connectCallback) override;
     ErrCode ConnectUIServiceExtensionAbility(const AAFwk::Want& want,
+        const sptr<AbilityConnectCallback>& connectCallback) override;
+    ErrCode ConnectAppServiceExtensionAbility(const AAFwk::Want& want,
         const sptr<AbilityConnectCallback>& connectCallback) override;
     void DisconnectAbility(const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback,
         int32_t accountId = -1) override;

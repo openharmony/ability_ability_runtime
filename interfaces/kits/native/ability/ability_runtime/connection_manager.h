@@ -146,6 +146,17 @@ public:
         const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback);
 
     /**
+     * @brief connect appService ability connection.
+     * 
+     * @param connectCaller The connection caller.
+     * @param connectReceiver The connection receiver.
+     * @param connectCallback The connection callback.
+     * @return Returns the result of connecting appService ability connection.
+     */
+    ErrCode ConnectAppServiceExtensionAbility(const sptr<IRemoteObject>& connectCaller,
+        const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback);
+    
+    /**
      * @brief disconnect ability connection.
      *
      * @param connectCaller The connection caller.
@@ -206,9 +217,9 @@ private:
     std::map<ConnectionInfo, std::vector<sptr<AbilityConnectCallback>>> abilityConnections_;
     ErrCode ConnectAbilityInner(const sptr<IRemoteObject> &connectCaller,
         const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback,
-        bool isUIService = false);
-    ErrCode CreateConnection(const sptr<IRemoteObject> &connectCaller,
-        const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback, bool isUIService);
+        bool isUIService = false, bool isAppService = false);
+    ErrCode CreateConnection(const sptr<IRemoteObject> &connectCaller, const AAFwk::Want &want, int accountId,
+        const sptr<AbilityConnectCallback> &connectCallback, bool isUIService, bool isAppService);
     bool IsConnectingTimeout(const ConnectionInfo& info);
 };
 } // namespace AbilityRuntime
