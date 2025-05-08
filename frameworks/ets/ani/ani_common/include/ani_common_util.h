@@ -16,7 +16,9 @@
 #ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_UTIL_H
 #define OHOS_ABILITY_RUNTIME_ANI_COMMON_UTIL_H
 
-#include "sts_runtime.h"
+#include <string>
+
+#include "ani.h"
 namespace OHOS {
 namespace AppExecFwk {
 

@@ -16,8 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_NAPI_COMMON_CONFIGURATION_H
 #define OHOS_ABILITY_RUNTIME_NAPI_COMMON_CONFIGURATION_H
 
-#include "configuration.h"
 #include "ani_common_util.h"
+#include "configuration.h"
 
 namespace OHOS {
 namespace AppExecFwk {
