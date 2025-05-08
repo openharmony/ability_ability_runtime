@@ -20,6 +20,7 @@
 #include "freeze_util.h"
 #include "js_embeddable_ui_ability_context.h"
 #include "ui_ability.h"
+#include "recovery_param.h"
 
 class NativeReference;
 
@@ -36,6 +37,12 @@ using Configuration = AppExecFwk::Configuration;
 using InsightIntentExecuteResult = AppExecFwk::InsightIntentExecuteResult;
 using InsightIntentExecuteParam = AppExecFwk::InsightIntentExecuteParam;
 using InsightIntentExecutorAsyncCallback = AppExecFwk::InsightIntentExecutorAsyncCallback;
+
+struct CallOnSaveStateInfo {
+    AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo;
+    AppExecFwk::WantParams wantParams;
+    AppExecFwk::StateReason reason;
+};
 
 class JsUIAbility : public UIAbility {
 public:
@@ -138,7 +145,9 @@ public:
      * @param wantParams Indicates the user data to be saved.
      * @return result code defined in abilityConstants
      */
-    int32_t OnSaveState(int32_t reason, WantParams &wantParams) override;
+    int32_t OnSaveState(int32_t reason, WantParams &wantParams,
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo,
+        bool &isAsync, AppExecFwk::StateReason stateReason) override;
 
     /**
      * @brief Called when startAbilityForResult(ohos.aafwk.content.Want,int) is called to start an ability and the
@@ -378,6 +387,7 @@ private:
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo);
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo);
+    int32_t CallSaveStatePromise(napi_value result, CallOnSaveStateInfo info);
     std::unique_ptr<NativeReference> CreateAppWindowStage();
     std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     sptr<IRemoteObject> SetNewRuleFlagToCallee(napi_env env, napi_value remoteJsObj);
