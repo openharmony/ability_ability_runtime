@@ -27,6 +27,7 @@ bool UIExtensionHostInfo::ReadFromParcel(Parcel &parcel)
     }
 
     elementName_ = *abilityInfo;
+    sessionName = parcel.ReadString();
     return true;
 }
 
@@ -50,6 +51,11 @@ bool UIExtensionHostInfo::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteParcelable(&elementName_)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write elementName failed");
+        return false;
+    }
+
+    if (!parcel.WriteString(sessionName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write sessionName failed");
         return false;
     }
 
