@@ -114,6 +114,36 @@ HWTEST_F(UserControllerTest, StartUserTest_0200, TestSize.Level0)
 }
 
 /**
+ * @tc.name: StartNoHeadUser_0100
+ * @tc.desc: StartNoHeadUser Test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UserControllerTest, StartNoHeadUser_0100, TestSize.Level0)
+{
+    UserController userController;
+    sptr<TestUserCallback> callback = new TestUserCallback();
+    int32_t userId = 666;
+    auto ret = userController.StartNoHeadUser(userId, callback);
+    EXPECT_EQ(ret, INVALID_USERID_VALUE);
+}
+
+/**
+ * @tc.name: StartNoHeadUser_0200
+ * @tc.desc: StartNoHeadUser Test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UserControllerTest, StartNoHeadUser_0200, TestSize.Level0)
+{
+    UserController userController;
+    sptr<TestUserCallback> callback = new TestUserCallback();
+    int32_t userId = 100;
+    auto ret = userController.StartNoHeadUser(userId, callback);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
  * @tc.name: StopUserTest_0100
  * @tc.desc: StopUser Test
  * @tc.type: FUNC
