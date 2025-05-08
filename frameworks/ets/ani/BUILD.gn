@@ -25,5 +25,6 @@ group("ani_packages") {
     "${ability_runtime_path}/frameworks/ets/ani/uri_permission_manager:uri_permission_manager_abc_etc",
     "${ability_runtime_path}/frameworks/ets/ani/uri_permission_manager:uri_permission_manager_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/wantagent:aniwantagent",
+    "${ability_runtime_path}/frameworks/ets/ani/application:application_ani",
   ]
 }

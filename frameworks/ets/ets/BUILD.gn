@@ -444,6 +444,25 @@ ohos_prebuilt_etc("ability_ability_manager_abc_etc") {
   deps = [ ":ability_ability_manager_abc" ]
 }
 
+generate_static_abc("ability_ability_application_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.application.ets" ]
+
+  dst_file = "$target_out_dir/ability_ability_application.abc"
+  out_puts = [ "$target_out_dir/ability_ability_application.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_ability_application.abc"
+}
+
+ohos_prebuilt_etc("ability_ability_application_abc_etc") {
+  source = "$target_out_dir/ability_ability_application.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_ability_application_abc" ]
+}
+
 generate_static_abc("service_extension_ability") {
   base_url = "./"
   files = [
@@ -719,6 +738,7 @@ ohos_prebuilt_etc("ability_runtime_OpenLink_Options_abc_etc") {
 
 group("ets_packages") {
   deps = [
+    ":ability_ability_application_abc_etc",
     ":ability_ability_manager_abc_etc",
     ":ability_delegator_abc_etc",
     ":ability_delegator_ability_monitor_abc_etc",
