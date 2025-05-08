@@ -550,17 +550,6 @@ napi_value JsAbilityContext::OnStartAbility(napi_env env, NapiCallbackInfo& info
             return;
         }
         task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
-        if (unwrapArgc > ARGC_ONE && !startOptions.requestId_.empty()) {
-            auto context = weak.lock();
-            if (!context) {
-                TAG_LOGW(AAFwkTag::CONTEXT, "null context");
-                return;
-            }
-            nlohmann::json jsonObject = nlohmann::json {
-                { JSON_KEY_ERR_MSG, "Failed to call startAbility" },
-            };
-            context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
-        }
     };
 
     napi_value lastParam = (info.argc > unwrapArgc) ? info.argv[unwrapArgc] : nullptr;
@@ -936,32 +925,9 @@ napi_value JsAbilityContext::OnOpenLinkInner(napi_env env, const AAFwk::Want& wa
     return result;
 }
 
-napi_value JsAbilityContext::OnStartAbilityAsCaller(napi_env env, NapiCallbackInfo& info)
+napi_value JsAbilityContext::OnStartAbilityAsCallerInner(napi_env env, NapiCallbackInfo& info,
+    const AAFwk::Want &want, size_t unwrapArgc, const AAFwk::StartOptions &startOptions)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-
-    if (info.argc == ARGC_ZERO) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "not enough params");
-        ThrowTooFewParametersError(env);
-        return CreateJsUndefined(env);
-    }
-
-    AAFwk::Want want;
-    bool unWrapWantFlag = OHOS::AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want);
-    if (!unWrapWantFlag) {
-        ThrowInvalidParamError(env, "Parameter error: Parse want failed! Want must be a Want.");
-        return CreateJsUndefined(env);
-    }
-    InheritWindowMode(want);
-    decltype(info.argc) unwrapArgc = ARGC_ONE;
-    TAG_LOGI(AAFwkTag::CONTEXT, "ability:%{public}s",
-        want.GetElement().GetAbilityName().c_str());
-    AAFwk::StartOptions startOptions;
-    if (info.argc > ARGC_ONE && CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
-        TAG_LOGD(AAFwkTag::CONTEXT, "start, options is used");
-        AppExecFwk::UnwrapStartOptions(env, info.argv[INDEX_ONE], startOptions);
-        unwrapArgc++;
-    }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, startOptions, unwrapArgc, innerErrCode]() {
         auto context = weak.lock();
@@ -989,6 +955,36 @@ napi_value JsAbilityContext::OnStartAbilityAsCaller(napi_env env, NapiCallbackIn
     NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityAsCaller",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
+}
+
+napi_value JsAbilityContext::OnStartAbilityAsCaller(napi_env env, NapiCallbackInfo& info)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "not enough params");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    AAFwk::Want want;
+    bool unWrapWantFlag = OHOS::AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want);
+    if (!unWrapWantFlag) {
+        ThrowInvalidParamError(env, "Parameter error: Parse want failed! Want must be a Want.");
+        return CreateJsUndefined(env);
+    }
+    InheritWindowMode(want);
+    decltype(info.argc) unwrapArgc = ARGC_ONE;
+    TAG_LOGI(AAFwkTag::CONTEXT, "ability:%{public}s",
+        want.GetElement().GetAbilityName().c_str());
+    AAFwk::StartOptions startOptions;
+    if (info.argc > ARGC_ONE && CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "start, options is used");
+        AppExecFwk::UnwrapStartOptions(env, info.argv[INDEX_ONE], startOptions);
+        UnwrapCompletionHandlerInStartOptions(env, info.argv[INDEX_ONE], startOptions);
+        unwrapArgc++;
+    }
+    return OnStartAbilityAsCallerInner(env, info, want, unwrapArgc, startOptions);
 }
 
 napi_value JsAbilityContext::OnStartRecentAbility(napi_env env, NapiCallbackInfo& info)
@@ -1019,6 +1015,7 @@ napi_value JsAbilityContext::OnStartAbilityWithAccount(napi_env env, NapiCallbac
     if (info.argc > ARGC_TWO && CheckTypeForNapiValue(env, info.argv[INDEX_TWO], napi_object)) {
         TAG_LOGD(AAFwkTag::CONTEXT, "start options is used");
         AppExecFwk::UnwrapStartOptions(env, info.argv[INDEX_TWO], startOptions);
+        UnwrapCompletionHandlerInStartOptions(env, info.argv[INDEX_TWO], startOptions);
         unwrapArgc++;
     }
 
