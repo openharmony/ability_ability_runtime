@@ -498,6 +498,9 @@
             "UIAbilityContext",
             "nfctech",
             "tagSession"
+        ],
+        "AppServiceExtension": [
+            "window"
         ]
     }
 }
