@@ -3015,42 +3015,525 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_001, TestSize.Level2)
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     pid_t hostPid = 0;
-    std::string renderParam = "test_renderParam";
+    std::string renderParam = "";
     pid_t renderPid = 0;
-    int ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(0), FdGuard(0), FdGuard(0), renderPid);
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0),
+        renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(0), FdGuard(0), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(0), FdGuard(1), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(0), FdGuard(1), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(1), FdGuard(0), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(1), FdGuard(0), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(1), FdGuard(1), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(1), FdGuard(1), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(0), FdGuard(1), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(0), FdGuard(1), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(1), FdGuard(0), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(1), FdGuard(0), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(1), FdGuard(1), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(1), FdGuard(1), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_001 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_003
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_003, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_003 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_004
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_004, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_004 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_005
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_005, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_005 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_005 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_006
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_006, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_006 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_006 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_007
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_007, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_007 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_007 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_008
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_008, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_008 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_008 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_009
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_009, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_009 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_009 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_010
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_010, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_010 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_010 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_011
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_011, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_011 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_011 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_012
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_012, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_012 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_012 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_013
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_013, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_013 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_013 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_014
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_014, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_014 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_014 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_015
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_015, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_015 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_015 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_016
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_016, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_016 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_016 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_017
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_017, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_017 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 0;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_017 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_018
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_018, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_018 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_018 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_019
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_019, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_019 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_019 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_020
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_020, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_020 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_020 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_021
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_021, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_021 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_021 end");
 }
 
 /**
@@ -3065,45 +3548,316 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_002, TestSize.Level2)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    pid_t hostPid1 = 1;
-    std::string renderParam = "test_renderParam";
+    pid_t hostPid = 1;
+    std::string renderParam = "";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(0);
     pid_t renderPid = 0;
-    int ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(0), FdGuard(0), FdGuard(0), renderPid);
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(0), FdGuard(0), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(0), FdGuard(1), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(0), FdGuard(1), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(1), FdGuard(0), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(1), FdGuard(0), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(1), FdGuard(1), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(1), FdGuard(1), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(0), FdGuard(0), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(0), FdGuard(1), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(0), FdGuard(1), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(1), FdGuard(0), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(1), FdGuard(0), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(1), FdGuard(1), FdGuard(0), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(1), FdGuard(1), FdGuard(1), renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_002 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_022
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_022, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_022 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_022 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_032
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_032, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_032 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_032 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_023
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_023, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_023 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_023 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_024
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_024, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_024 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_024 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_025
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_025, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_025 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_025 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_026
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_026, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_026 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_026 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_027
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_027, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_027 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(0);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_027 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_028
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_028, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_028 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_028 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_029
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_029, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_029 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(0);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_029 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_030
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_030, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_030 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(0);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_030 end");
+}
+
+/**
+ * @tc.name: StartRenderProcess_031
+ * @tc.desc: start render process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_031, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_031 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t hostPid = 1;
+    std::string renderParam = "test_renderParam";
+    FdGuard ipcFd(1);
+    FdGuard sharedFd(1);
+    FdGuard crashFd(1);
+    pid_t renderPid = 0;
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd), std::move(sharedFd),
+        std::move(crashFd), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ipcFd.Release();
+    sharedFd.Release();
+    crashFd.Release();
+    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_031 end");
 }
 
 /**
