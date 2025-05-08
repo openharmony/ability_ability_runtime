@@ -202,6 +202,12 @@ ErrCode AbilityContextImpl::StartAbility(const AAFwk::Want& want, const AAFwk::S
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, token_, requestCode);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "ret=%{public}d", err);
+        if (!startOptions.requestId_.empty()) {
+            std::string errMsg = want.GetBoolParam(Want::PARAM_RESV_START_RECENT, false) ?
+                "Failed to call startRecentAbility" : "Failed to call startAbility";
+            nlohmann::json jsonObject = nlohmann::json { { JSON_KEY_ERR_MSG, errMsg } };
+            OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
+        }
     }
     return err;
 }
@@ -215,6 +221,12 @@ ErrCode AbilityContextImpl::StartAbilityAsCaller(const AAFwk::Want &want, const 
         startOptions, token_, nullptr, requestCode);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "ret=%{public}d", err);
+        if (!startOptions.requestId_.empty()) {
+            nlohmann::json jsonObject = nlohmann::json {
+                { JSON_KEY_ERR_MSG, "Failed to call startAbilityAsCaller" },
+            };
+            OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
+        }
     }
     return err;
 }
@@ -229,6 +241,12 @@ ErrCode AbilityContextImpl::StartAbilityWithAccount(
         want, startOptions, token_, requestCode, accountId);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "ret=%{public}d", err);
+        if (!startOptions.requestId_.empty()) {
+            nlohmann::json jsonObject = nlohmann::json {
+                { JSON_KEY_ERR_MSG, "Failed to call startAbilityWithAccount" },
+            };
+            OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
+        }
     }
     return err;
 }
