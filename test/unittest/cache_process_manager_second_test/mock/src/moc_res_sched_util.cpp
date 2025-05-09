@@ -40,11 +40,6 @@ int64_t ResSchedUtil::convertType(int64_t resSchedType)
     return -1;
 }
 
-void ResSchedUtil::ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart,
-    int32_t warmStartType)
-{
-}
-
 void ResSchedUtil::ReportAbilityAssociatedStartInfoToRSS(
     const AbilityInfo &abilityInfo, int64_t resSchedType, int32_t callerUid, int32_t callerPid)
 {
