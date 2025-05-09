@@ -98,6 +98,7 @@ public:
     std::string GetCacheDir() override;
     std::string GetTempDir() override;
     std::string GetResourceDir(const std::string &moduleName = "") override;
+    bool IsModuleExist(const std::string &moduleName);
     void GetAllTempDir(std::vector<std::string> &tempPaths);
     std::string GetFilesDir() override;
     bool IsUpdatingConfigurations() override;
