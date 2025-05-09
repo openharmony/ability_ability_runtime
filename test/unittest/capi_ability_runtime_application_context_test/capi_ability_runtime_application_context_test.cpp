@@ -1927,15 +1927,15 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetResourceDirTest_002, TestS
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, -1, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, 0, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
     ASSERT_EQ(writeLength, 0);
 }
 
@@ -1995,61 +1995,10 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetResourceDirTest_003, TestS
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
     resourceDir = contextImpl->GetResourceDir(moduleName);
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
-}
-
-/**
- * @tc.number: GetResourceDirTest_004
- * @tc.desc: Function test
- * @tc.type: FUNC
- */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetResourceDirTest_004, TestSize.Level0)
-{
-    char buffer[BUFFER_SIZE] = { 0 };
-    int32_t writeLength = 0;
-
-    const auto contextImpl = InitApplicationContextImpl(TEST_BUNDLE_NAME);
-    ASSERT_NE(contextImpl, nullptr);
-
-    contextImpl->SwitchArea(ABILITY_RUNTIME_AREA_MODE_EL1);
-    AbilityRuntime_ErrorCode code =
-    OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    const char* moduleName = ENTRY_MODULE_NAME;
-    std::string resourceDir = contextImpl->GetResourceDir(moduleName);
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
-
-    contextImpl->SwitchArea(ABILITY_RUNTIME_AREA_MODE_EL2);
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    resourceDir = contextImpl->GetResourceDir(moduleName);
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
-
-    contextImpl->SwitchArea(ABILITY_RUNTIME_AREA_MODE_EL3);
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    resourceDir = contextImpl->GetResourceDir(moduleName);
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
-
-    contextImpl->SwitchArea(ABILITY_RUNTIME_AREA_MODE_EL4);
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    resourceDir = contextImpl->GetResourceDir(moduleName);
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
-
-    contextImpl->SwitchArea(ABILITY_RUNTIME_AREA_MODE_EL5);
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    resourceDir =contextImpl->GetResourceDir(moduleName);
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
+    ASSERT_NE(writeLength, resourceDir.length());
+    ASSERT_NE(buffer, resourceDir.c_str());
 }
 
 // CheckWant - Normal

@@ -86,6 +86,8 @@ public:
 
     std::string GetResourceDir(const std::string &moduleName = "") override;
 
+    bool IsModuleExist(const std::string &moduleName);
+
     /**
      * @brief Get all temporary directories.
      *

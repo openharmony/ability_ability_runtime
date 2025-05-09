@@ -287,6 +287,20 @@ std::string ContextImpl::GetTempDir()
     return dir;
 }
 
+bool ContextImpl::IsModuleExist(const std::string &moduleName) {
+    if (applicationInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo");
+        return false;
+    }
+    for (const auto &module : applicationInfo_->moduleInfos) {
+        if (module.moduleName == moduleName) {
+            return true;
+        }
+    }
+    TAG_LOGE(AAFwkTag::APPKIT, "not find moduleName");
+    return false;
+}
+
 std::string ContextImpl::GetResourceDir(const std::string &moduleName)
 {
     auto constructAndCheckDir = [](const std::string &moduleName) -> std::string {

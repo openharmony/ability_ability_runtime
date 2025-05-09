@@ -295,11 +295,11 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(cons
         TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
-    const std::string resourceDir = appContext->GetResourceDir(moduleName);
-    if (resourceDir.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "resourceDir is empty");
-        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    if (!appContext->IsModuleExist(moduleName)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "moduleName is not exist");
+        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
+    const std::string resourceDir = appContext->GetResourceDir(moduleName);
     return WriteStringToBuffer(resourceDir, buffer, bufferSize, writeLength);
 }
 
