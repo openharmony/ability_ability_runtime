@@ -268,11 +268,6 @@ public:
         return 0;
     }
 
-    int32_t DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
-    {
-        return 0;
-    }
-
 private:
     Semaphore sem_;
     std::string data_;

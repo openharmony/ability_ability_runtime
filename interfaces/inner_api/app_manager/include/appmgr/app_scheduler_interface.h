@@ -26,7 +26,6 @@
 #include "want.h"
 #include "app_malloc_info.h"
 #include "app_jsheap_mem_info.h"
-#include "app_cjheap_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -104,16 +103,6 @@ public:
      * @return
      */
     virtual void ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info) = 0;
-
-    /**
-     * ScheduleCjHeapMemory, call ScheduleCjHeapMemory() through proxy project,
-     * triggerGC and dump the application's cjheap memory info.
-     *
-     * @param info, pid, needGc, needSnapshot
-     *
-     * @return
-     */
-    virtual void ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info) = 0;
 
     /**
      * ScheduleLaunchApplication, call ScheduleLaunchApplication() through proxy project,
@@ -363,7 +352,6 @@ public:
         SCHEDULE_CLEAR_PAGE_STACK,
         SCHEDULE_PREPARE_TERMINATE,
         WATCHDOG_BACKGROUND_STATUS_TRANSACTION,
-        SCHEDULE_CJHEAP_MEMORY_APPLICATION_TRANSACTION,
     };
 };
 }  // namespace AppExecFwk

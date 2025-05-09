@@ -412,6 +412,9 @@ bool CJEnvironment::LoadRuntimeApis()
 
 void CJEnvironment::RegisterArkVMInRuntime(unsigned long long externalVM)
 {
+    if (lazyApis_ == nullptr) {
+        return;
+    }
     if (lazyApis_->RegisterArkVMInRuntime == nullptr) {
         return;
     }
@@ -420,6 +423,9 @@ void CJEnvironment::RegisterArkVMInRuntime(unsigned long long externalVM)
 
 void CJEnvironment::RegisterStackInfoCallbacks(UpdateStackInfoFuncType uFunc)
 {
+    if (lazyApis_ == nullptr) {
+        return;
+    }
     if (lazyApis_->RegisterStackInfoCallbacks == nullptr) {
         return;
     }
@@ -428,11 +434,20 @@ void CJEnvironment::RegisterStackInfoCallbacks(UpdateStackInfoFuncType uFunc)
 
 void CJEnvironment::RegisterCJUncaughtExceptionHandler(const CJUncaughtExceptionInfo& handle)
 {
+    if (lazyApis_ == nullptr) {
+        return;
+    }
+    if (lazyApis_->RegisterCJUncaughtExceptionHandler == nullptr) {
+        return;
+    }
     lazyApis_->RegisterCJUncaughtExceptionHandler(handle);
 }
 
 void CJEnvironment::DumpHeapSnapshot(int fd)
 {
+    if (lazyApis_ == nullptr) {
+        return;
+    }
     if (lazyApis_->DumpHeapSnapshot == nullptr) {
         return;
     }
@@ -441,6 +456,9 @@ void CJEnvironment::DumpHeapSnapshot(int fd)
 
 void CJEnvironment::ForceFullGC()
 {
+    if (lazyApis_ == nullptr) {
+        return;
+    }
     if (lazyApis_->ForceFullGC == nullptr) {
         return;
     }
@@ -816,12 +834,19 @@ void CJEnvironment::SetAppVersion(std::string& version)
 CJEnvMethods* CJEnvironment::CreateEnvMethods()
 {
     static CJEnvMethods gCJEnvMethods {
-        .initCJAppNS = [](const std::string& path) { // to keep compatibility with older version
+        .initCJAppNS = [](const std::string& path) {
+            // to keep compatibility with older version
             CJEnvironment::SetAppPath(path);
         },
-        .initCJSDKNS = [](const std::string& path) {}, // @deprecated
-        .initCJSysNS = [](const std::string& path) {}, // @deprecated
-        .initCJChipSDKNS = [](const std::string& path) {}, // @deprecated
+        .initCJSDKNS = [](const std::string& path) {
+            // @deprecated
+        },
+        .initCJSysNS = [](const std::string& path) {
+            // @deprecated
+        },
+        .initCJChipSDKNS = [](const std::string& path) {
+            // @deprecated
+        },
         .startRuntime = [] {
             return CJEnvironment::GetInstance()->StartRuntime();
         },

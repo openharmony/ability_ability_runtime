@@ -566,16 +566,6 @@ AppMgrResultCode AppMgrClient::DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo
     return AppMgrResultCode(service->DumpJsHeapMemory(info));
 }
 
-AppMgrResultCode AppMgrClient::DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
-{
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "DumpCjHeapMemory: service is nullptr");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-    }
-    return AppMgrResultCode(service->DumpCjHeapMemory(info));
-}
-
 AppMgrResultCode AppMgrClient::GetConfiguration(Configuration& config)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());

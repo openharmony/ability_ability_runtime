@@ -264,11 +264,6 @@ public:
         return 0;
     }
 
-    int32_t DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
-    {
-        return 0;
-    }
-
     int32_t GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
         RunningMultiAppInfo &info) override;
 

@@ -611,13 +611,6 @@ void AppRunningRecord::ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &in
     }
 }
 
-void AppRunningRecord::ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
-{
-    if (appLifeCycleDeal_) {
-        appLifeCycleDeal_->ScheduleCjHeapMemory(info);
-    }
-}
-
 void AppRunningRecord::LowMemoryWarning()
 {
     if (appLifeCycleDeal_) {

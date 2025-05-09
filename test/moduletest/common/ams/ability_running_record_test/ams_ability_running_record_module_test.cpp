@@ -192,9 +192,6 @@ public:
     void ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info) override
     {}
 
-    void ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info) override
-    {}
-
     int32_t ScheduleDumpIpcStart(std::string& result) override
     {
         return 0;
