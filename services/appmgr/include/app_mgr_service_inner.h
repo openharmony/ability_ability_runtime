@@ -1366,6 +1366,16 @@ public:
 
     int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
 
+    /**
+      * @brief Get supported process cache.
+      * @param pid Process pid.
+      * @param isSupport Supported process cache.
+      * @return Returns ERR_OK on success, others on failure.
+      */
+    int32_t IsProcessCacheSupported(int32_t pid, bool &isSupported);
+
+    int32_t SetProcessCacheEnable(int32_t pid, bool enable);
+
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
 
     /**
