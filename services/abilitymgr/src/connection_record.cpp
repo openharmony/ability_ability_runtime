@@ -188,6 +188,37 @@ void ConnectionRecord::CompleteConnect()
     TAG_LOGI(AAFwkTag::CONNECTION, "connectState:%{public}d", state_);
 }
 
+void ConnectionRecord::CompleteConnectAndOnlyCallConnectDone()
+{
+    if (GetConnectState() != ConnectionState::CONNECTED) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Connect state is %{public}d, not connected state", GetConnectState());
+        return;
+    }
+    CHECK_POINTER(targetService_);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "CompleteConnect,%{public}s", targetService_->GetAbilityInfo().name.c_str());
+    const AppExecFwk::AbilityInfo &abilityInfo = targetService_->GetAbilityInfo();
+    AppExecFwk::ElementName element(targetService_->GetWant().GetDeviceId(), abilityInfo.bundleName,
+        abilityInfo.name, abilityInfo.moduleName);
+    auto remoteObject = targetService_->GetConnRemoteObject();
+    auto callback = GetAbilityConnectCallback();
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    if (remoteObject == nullptr) {
+        TAG_LOGW(AAFwkTag::CONNECTION, "Complete null remoteObject: %{public}s", element.GetURI().c_str());
+        return;
+    }
+
+    if (callback && handler) {
+        handler->SubmitTask([callback, element, remoteObject] {
+            TAG_LOGD(AAFwkTag::CONNECTION, "CallOnAbilityConnectDone");
+            auto ret = ConnectionRecord::CallOnAbilityConnectDone(callback, element, remoteObject, ERR_OK);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::CONNECTION, "CallOnAbilityConnectDone failed");
+            }
+        });
+    }
+    TAG_LOGI(AAFwkTag::CONNECTION, "Complete connectState:%{public}d", state_);
+}
+
 int32_t ConnectionRecord::CallOnAbilityConnectDone(sptr<IAbilityConnection> callback,
     const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
