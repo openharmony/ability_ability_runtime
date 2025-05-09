@@ -215,6 +215,7 @@ constexpr char PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED[] = "const.product.ent
 
 constexpr int32_t RESOURCE_SCHEDULE_UID = 1096;
 constexpr int32_t HIVIEW_UID = 1201;
+constexpr int32_t MEMMGR_UID = 1111;
 constexpr int32_t UPDATE_CONFIG_FLAG_COVER = 1;
 constexpr int32_t UPDATE_CONFIG_FLAG_APPEND = 2;
 constexpr int32_t START_AUTO_START_APP_DELAY_TIME = 200;
@@ -2651,7 +2652,7 @@ int32_t AbilityManagerService::RecordProcessExitReason(const int32_t pid, const 
 
 int32_t AbilityManagerService::RecordProcessExitReason(int32_t pid, int32_t uid, const ExitReason &exitReason)
 {
-    if (IPCSkeleton::GetCallingUid() != HIVIEW_UID) {
+    if (IPCSkeleton::GetCallingUid() != HIVIEW_UID && IPCSkeleton::GetCallingUid() != MEMMGR_UID) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not expected caller");
         return ERR_NO_PERMISSION_CALLER;
     }
