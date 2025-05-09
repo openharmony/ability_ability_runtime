@@ -338,6 +338,10 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleSetSupportedProcessCacheSelf(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE):
             return HandleSetSupportedProcessCache(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::IS_PROCESS_CACHE_SUPPORTED):
+            return HandleIsProcessCacheSupported(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::SET_PROCESS_CACHE_ENABLE):
+            return HandleSetProcessCacheEnable(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_RUNNING_PROCESSES_BY_BUNDLE_TYPE):
             return HandleGetRunningProcessesByBundleType(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_APP_ASSERT_PAUSE_STATE_SELF):
@@ -1650,6 +1654,36 @@ int32_t AppMgrStub::HandleSetSupportedProcessCache(MessageParcel &data, MessageP
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleIsProcessCacheSupported(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleIsProcessCacheSupported called");
+    int32_t pid = data.ReadInt32();
+    bool isSupported = false;
+    auto ret = IsProcessCacheSupported(pid, isSupported);
+    if (!reply.WriteBool(isSupported)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write isSupported error.");
+        return AAFwk::ERR_WRITE_BOOL_FAILED;
+    }
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleSetProcessCacheEnable(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleSetProcessCacheEnable called");
+    int32_t pid = data.ReadInt32();
+    bool enable = data.ReadBool();
+    auto ret = SetProcessCacheEnable(pid, enable);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }

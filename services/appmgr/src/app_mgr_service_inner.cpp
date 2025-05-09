@@ -8744,6 +8744,53 @@ int32_t AppMgrServiceInner::SetSupportedProcessCacheSelf(bool isSupport)
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::IsProcessCacheSupported(int32_t pid, bool &isSupported)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "get supported process cache, pid:%{public}d", pid);
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
+        return AAFwk::ERR_NULL_APP_RUNNING_MANAGER;
+    }
+
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord, pid:%{public}d", pid);
+        return AAFwk::ERR_NO_APP_RECORD;
+    }
+
+    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCache()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "process cache feature disabled");
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    isSupported = (appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT);
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::SetProcessCacheEnable(int32_t pid, bool enable)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "set enable process cache, pid:%{public}d, enable:%{public}d", pid, enable);
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
+        return AAFwk::ERR_NULL_APP_RUNNING_MANAGER;
+    }
+
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord, pid:%{public}d", pid);
+        return AAFwk::ERR_NO_APP_RECORD;
+    }
+
+    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCache()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "process cache feature disabled");
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+    }
+
+    appRecord->SetEnableProcessCache(enable);
+    return ERR_OK;
+}
+
 int32_t AppMgrServiceInner::SetSupportedProcessCache(int32_t pid, bool isSupport)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "called");
