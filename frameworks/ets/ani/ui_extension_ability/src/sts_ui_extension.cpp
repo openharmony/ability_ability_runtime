@@ -19,6 +19,7 @@
 #include "ability_info.h"
 #include "ability_manager_client.h"
 #include "ability_start_setting.h"
+#include "array_wrapper.h"
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "context.h"
@@ -33,6 +34,7 @@
 #include "want_params_wrapper.h"
 #include "sts_data_struct_converter.h"
 #include "sts_ui_extension_context.h"
+#include "string_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -372,6 +374,34 @@ void StsUIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::
     OnCommandWindowDone(sessionInfo, winCmd);
 }
 
+bool StsUIExtension::ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
+    const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo)
+{
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        return false;
+    }
+    if (sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null sessionInfo");
+        return false;
+    }
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = context->GetAbilityInfo();
+    if (abilityInfo != nullptr) {
+        executorInfo.hapPath = abilityInfo->hapPath;
+        executorInfo.windowMode = abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE;
+    }
+    executorInfo.token = context->GetToken();
+    executorInfo.pageLoader = contentSessions_[sessionInfo->uiExtensionComponentId];
+    executorInfo.executeParam = std::make_shared<InsightIntentExecuteParam>();
+    InsightIntentExecuteParam::GenerateFromWant(want, *executorInfo.executeParam);
+    executorInfo.executeParam->executeMode_ = UI_EXTENSION_ABILITY;
+    executorInfo.srcEntry = want.GetStringParam(INSIGHT_INTENT_SRC_ENTRY);
+    TAG_LOGD(AAFwkTag::UI_EXT, "executorInfo, insightIntentId: %{public}" PRIu64,
+        executorInfo.executeParam->insightIntentId_);
+    return true;
+}
+
 bool StsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     const sptr<AAFwk::SessionInfo> &sessionInfo, bool needForeground)
 {
@@ -389,33 +419,42 @@ bool StsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     }
 
     auto uiExtension = std::static_pointer_cast<StsUIExtension>(shared_from_this());
-    executorCallback->Push([uiExtension, sessionInfo, needForeground](AppExecFwk::InsightIntentExecuteResult result) {
+    executorCallback->Push(
+        [uiExtension, sessionInfo, needForeground, want](AppExecFwk::InsightIntentExecuteResult result) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "Execute post insightintent");
         if (uiExtension == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "UI extension is nullptr");
+            TAG_LOGE(AAFwkTag::UI_EXT, "null uiExtension");
             return;
         }
 
+        InsightIntentExecuteParam executeParam;
+        InsightIntentExecuteParam::GenerateFromWant(want, executeParam);
+        if (result.uris.size() > 0) {
+            uiExtension->ExecuteInsightIntentDone(executeParam.insightIntentId_, result);
+        }
         uiExtension->PostInsightIntentExecuted(sessionInfo, result, needForeground);
     });
 
-    auto context = GetContext();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "context null");
+    InsightIntentExecutorInfo executorInfo;
+    if (!ForegroundWindowInitInsightIntentExecutorInfo(want, sessionInfo, executorInfo)) {
         return false;
     }
-    InsightIntentExecutorInfo executorInfo;
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = context->GetAbilityInfo();
-    if (abilityInfo != nullptr) {
-        executorInfo.hapPath = abilityInfo->hapPath;
-        executorInfo.windowMode = abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE;
+
+    int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+        stsRuntime_, executorInfo, std::move(executorCallback));
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
     }
-    executorInfo.token = context->GetToken();
-    executorInfo.pageLoader = contentSessions_[sessionInfo->uiExtensionComponentId];
-    executorInfo.executeParam = std::make_shared<InsightIntentExecuteParam>();
-    InsightIntentExecuteParam::GenerateFromWant(want, *executorInfo.executeParam);
-    executorInfo.executeParam->executeMode_ = UI_EXTENSION_ABILITY;
-    executorInfo.srcEntry = want.GetStringParam(INSIGHT_INTENT_SRC_ENTRY);
     return true;
+}
+
+void StsUIExtension::ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "intentId %{public}" PRIu64"", intentId);
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token_, intentId, result);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "notify execute done failed");
+    }
 }
 
 void StsUIExtension::PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &sessionInfo,
@@ -483,13 +522,26 @@ void StsUIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &
                 resultParams.SetParam("result", pWantParams);
             }
         }
+        auto size = result.uris.size();
+        sptr<IArray> uriArray = new (std::nothrow) Array(size, g_IID_IString);
+        if (uriArray == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "new uriArray failed");
+            return;
+        }
+        for (std::size_t i = 0; i < size; i++) {
+            uriArray->Set(i, String::Box(result.uris[i]));
+        }
+        resultParams.SetParam("uris", uriArray);
+        resultParams.SetParam("flags", Integer::Box(result.flags));
         sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(resultParams);
         if (pWantParams != nullptr) {
             params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT, pWantParams);
         }
 
         Rosen::WMError ret = res->second->TransferExtensionData(params);
-        if (ret != Rosen::WMError::WM_OK) {
+        if (ret == Rosen::WMError::WM_OK) {
+            TAG_LOGD(AAFwkTag::UI_EXT, "TransferExtensionData success");
+        } else {
             TAG_LOGE(AAFwkTag::UI_EXT, "TransferExtensionData failed, ret=%{public}d", ret);
         }
 
@@ -510,6 +562,8 @@ void StsUIExtension::OnForeground(const Want &want, sptr<AAFwk::SessionInfo> ses
         TAG_LOGE(AAFwkTag::UI_EXT, "sessionInfo nullptr");
         return;
     }
+    Extension::OnForeground(want, sessionInfo);
+
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
         bool finish = ForegroundWindowWithInsightIntent(want, sessionInfo, true);
         if (finish) {
@@ -524,6 +578,7 @@ void StsUIExtension::OnBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CallObjectMethod(false, "onBackground", nullptr);
+    Extension::OnBackground();
 }
 
 bool StsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)
@@ -561,6 +616,11 @@ bool StsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAF
         if ((status = env->GlobalReference_Create(sessonObj, &contentSession_)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         }
+        std::shared_ptr<STSNativeReferenceWrapper> etsNativeRef = std::make_shared<STSNativeReferenceWrapper>();
+        etsNativeRef->ref_ = std::make_shared<STSNativeReference>();
+        etsNativeRef->ref_->aniObj = sessonObj;
+        etsNativeRef->ref_->aniRef = contentSession_;
+        contentSessions_.insert_or_assign(compId, etsNativeRef);
         int32_t screenMode = want.GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
         if (screenMode == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
             screenMode_ = AAFwk::EMBEDDED_FULL_SCREEN_MODE;

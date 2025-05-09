@@ -23,6 +23,7 @@ config("insight_intent_context_public_config") {
 
 ohos_shared_library("insightintentcontext") {
   sources = [
+    "ets_insight_intent_context.cpp",
     "insight_intent_context.cpp",
     "js_insight_intent_context.cpp",
   ]
@@ -38,6 +39,7 @@ ohos_shared_library("insightintentcontext") {
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
   ]
 
   external_deps = [
@@ -49,6 +51,7 @@ ohos_shared_library("insightintentcontext") {
     "ipc:ipc_core",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "runtime_core:ani",
   ]
 
   subsystem_name = "ability"
