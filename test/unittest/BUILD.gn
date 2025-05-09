@@ -487,6 +487,7 @@ group("unittest") {
       "app_spawn_client_second_test:unittest",
       "app_spawn_client_test:unittest",
       "app_state_observer_manager_test:unittest",
+      "app_state_observer_manager_test_second:unittest",
       "app_utils_test:unittest",
       "appkit:unittest",
       "application_context_second_test:unittest",
