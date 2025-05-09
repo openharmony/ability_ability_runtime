@@ -17,7 +17,7 @@
 
 #include "ability_business_error.h"
 #include "hilog_tag_wrapper.h"
-
+#include "ets_insight_intent_executor.h"
 namespace OHOS {
 namespace AbilityRuntime {
 InsightIntentExecutorMgr::InsightIntentExecutorMgr()
@@ -70,9 +70,18 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
     AddInsightIntentExecutor(executeParam->insightIntentId_, intentExecutor);
 
     bool isAsync = false;
-    auto ret = intentExecutor->HandleExecuteIntent(static_cast<InsightIntentExecuteMode>(executeParam->executeMode_),
-        executeParam->insightIntentName_, *executeParam->insightIntentParam_, executeInfo.pageLoader,
-        std::move(callback), isAsync);
+    bool ret = false;
+    if (runtime.GetLanguage() == AbilityRuntime::Runtime::Language::STS) {
+        ret = std::static_pointer_cast<EtsInsightIntentExecutor>(intentExecutor)->HandleExecuteEtsIntent(
+            static_cast<InsightIntentExecuteMode>(executeParam->executeMode_),
+            executeParam->insightIntentName_, *executeParam->insightIntentParam_,
+            std::static_pointer_cast<STSNativeReferenceWrapper>(executeInfo.pageLoader)->ref_,
+            std::move(callback), isAsync);
+    } else {
+        ret = intentExecutor->HandleExecuteIntent(static_cast<InsightIntentExecuteMode>(executeParam->executeMode_),
+            executeParam->insightIntentName_, *executeParam->insightIntentParam_, executeInfo.pageLoader,
+            std::move(callback), isAsync);
+    }
     if (!ret) {
         TAG_LOGE(AAFwkTag::INTENT, "Handle Execute intent failed");
         // callback has removed, if execute insight intent failed, call in sub function.
