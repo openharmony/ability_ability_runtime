@@ -65,19 +65,30 @@ public:
 
     int32_t LoadAppStartupTaskConfig(bool &needRunAutoStartupTask);
 
-    const std::vector<StartupTaskInfo> &GetStartupTaskInfos() const;
+    const std::vector<StartupTaskInfo> GetStartupTaskInfos(const std::string &name);
 
     const std::string &GetPendingConfigEntry() const;
+
+    void ClearAppStartupTask();
 
     int32_t RegisterAppStartupTask(
         const std::string &name, const std::shared_ptr<AppStartupTask> &startupTask);
 
-    int32_t BuildAutoAppStartupTaskManager(std::shared_ptr<StartupTaskManager> &startupTaskManager);
+    int32_t BuildAutoAppStartupTaskManager(std::shared_ptr<StartupTaskManager> &startupTaskManager,
+        const std::string &moduleName);
 
     int32_t BuildAppStartupTaskManager(const std::vector<std::string> &inputDependencies,
         std::shared_ptr<StartupTaskManager> &startupTaskManager);
 
     int32_t OnStartupTaskManagerComplete(uint32_t id);
+
+    int32_t RunLoadModuleStartupConfigTask(
+        bool &needRunAutoStartupTask, const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo);
+
+    void SetModuleConfig(const std::shared_ptr<StartupConfig> &config, const std::string &moduleName,
+        bool isDefaultConfig);
+
+    const std::shared_ptr<StartupConfig>& GetModuleConfig(const std::string &moduleName);
 
     void SetDefaultConfig(const std::shared_ptr<StartupConfig> &config);
 
@@ -102,6 +113,8 @@ private:
     std::vector<ModuleStartupConfigInfo> moduleStartupConfigInfos_;
     std::mutex appStartupConfigInitializationMutex_;
     std::atomic<bool> isAppStartupConfigInited_ = false;
+    std::atomic<bool> isAppStartupTaskRegistered_ = false;
+    std::set<std::string> isModuleStartupConfigInited_;
 
     std::mutex startupTaskManagerMutex_;
     uint32_t startupTaskManagerId = 0;
@@ -118,6 +131,7 @@ private:
     bool autoPreloadSoStopped_ = false;
 
     std::shared_ptr<StartupConfig> defaultConfig_;
+    std::map<std::string, std::shared_ptr<StartupConfig>> moduleConfigs_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> preloadHandler_;
 

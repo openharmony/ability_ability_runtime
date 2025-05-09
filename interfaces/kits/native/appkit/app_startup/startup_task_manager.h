@@ -21,6 +21,7 @@
 #include <string>
 
 #include "event_handler.h"
+#include "js_runtime.h"
 #include "startup_config.h"
 #include "startup_task.h"
 #include "startup_task_dispatcher.h"
@@ -48,6 +49,8 @@ public:
     void TimeoutStop();
 
     void OnTimeout();
+
+    void UpdateStartupTaskContextRef(std::shared_ptr<NativeReference> &contextJsRef);
 
 private:
     uint32_t startupTaskManagerId_ = 0;
