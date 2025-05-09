@@ -1897,7 +1897,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, JudgeMultiUserConcurrency_0001, TestSiz
     bool ret = abilityMs->JudgeMultiUserConcurrency(userId);
     EXPECT_EQ(ret, true);
 
-    userId = 1;
+    userId = 10;
     ret = abilityMs->JudgeMultiUserConcurrency(userId);
     EXPECT_EQ(ret, false);
 }
