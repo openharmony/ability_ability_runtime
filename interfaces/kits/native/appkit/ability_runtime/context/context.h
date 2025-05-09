@@ -42,11 +42,7 @@ class ApplicationContext;
 
 class Context : public Bindable, public std::enable_shared_from_this<Context> {
 public:
-    Context()
-    {
-        index_ = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()
-            .time_since_epoch()).count();
-    };
+    Context() = default;
     ~Context() override = default;
 
     /**
@@ -336,7 +332,7 @@ public:
 
     using SelfType = Context;
     static const size_t CONTEXT_TYPE_ID;
-    uint64_t GetIndex();
+
 protected:
     virtual bool IsContext(size_t contextTypeId)
     {
@@ -345,7 +341,6 @@ protected:
 
     static std::shared_ptr<ApplicationContext> applicationContext_;
     static std::mutex contextMutex_;
-    uint64_t index_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
