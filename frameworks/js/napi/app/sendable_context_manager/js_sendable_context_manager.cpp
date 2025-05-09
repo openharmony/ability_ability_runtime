@@ -347,10 +347,6 @@ public:
         GET_NAPI_INFO_AND_CALL(env, info, JsSendableContextManager, OnConvertToUIAbilityContext);
     }
 
-    static napi_value SetEventHubMultithreadingEnabled(napi_env env, napi_callback_info info)
-    {
-        GET_NAPI_INFO_AND_CALL(env, info, JsSendableContextManager, OnSetEventHubMultithreadingEnabled);
-    }
 private:
     napi_value OnConvertFromContext(napi_env env, NapiCallbackInfo &info)
     {
@@ -503,11 +499,6 @@ private:
 
         return object;
     }
-    
-    napi_value OnSetEventHubMultithreadingEnabled(napi_env env, NapiCallbackInfo &info)
-    {
-        return nullptr;
-    }
 };
 
 napi_value CreateJsSendableContextManager(napi_env env, napi_value exportObj)
@@ -532,8 +523,6 @@ napi_value CreateJsSendableContextManager(napi_env env, napi_value exportObj)
         DECLARE_NAPI_FUNCTION("convertToApplicationContext", JsSendableContextManager::ConvertToApplicationContext),
         DECLARE_NAPI_FUNCTION("convertToAbilityStageContext", JsSendableContextManager::ConvertToAbilityStageContext),
         DECLARE_NAPI_FUNCTION("convertToUIAbilityContext", JsSendableContextManager::ConvertToUIAbilityContext),
-        DECLARE_NAPI_FUNCTION("setEventHubMultithreadingEnabled",
-            JsSendableContextManager::SetEventHubMultithreadingEnabled),
     };
 
     status = napi_define_properties(env, exportObj, sizeof(properties) / sizeof(properties[0]), properties);

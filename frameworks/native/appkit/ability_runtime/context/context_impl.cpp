@@ -1647,10 +1647,5 @@ bool ContextImpl::GetDisplayConfig(uint64_t displayId, float &density, std::stri
     return getDisplayConfigCallback_(displayId, density, directionStr);
 }
 #endif
-
-uint64_t Context::GetIndex()
-{
-    return index_;
-}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

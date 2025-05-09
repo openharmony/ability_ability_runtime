@@ -11,28 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-
-es2abc_gen_abc("gen_sendable_context_manager_abc") {
-  src_js = rebase_path("sendable_context_manager.js")
-  dst_file = rebase_path(target_out_dir + "/sendable_context_manager.abc")
-  in_puts = [ "sendable_context_manager.js" ]
-  out_puts = [ target_out_dir + "/sendable_context_manager.abc" ]
-  extra_args = [ "--module" ]
-}
-
-gen_js_obj("sendable_context_manager_js") {
-  input = "sendable_context_manager.js"
-  output = target_out_dir + "/sendable_context_manager.o"
-}
-
-gen_js_obj("sendable_context_manager_abc") {
-  input = get_label_info(":gen_sendable_context_manager_abc", "target_out_dir") + "/sendable_context_manager.abc"
-  output = target_out_dir + "/sendable_context_manager_abc.o"
-  dep = ":gen_sendable_context_manager_abc"
-}
 
 ohos_shared_library("sendablecontextmanager_napi") {
   sanitize = {
@@ -66,8 +46,6 @@ ohos_shared_library("sendablecontextmanager_napi") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    ":sendable_context_manager_abc",
-    ":sendable_context_manager_js",
   ]
 
   external_deps = [
