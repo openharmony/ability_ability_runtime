@@ -654,6 +654,10 @@ int32_t JsAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &cal
     if (result != ERR_OK) {
         return result;
     }
+    if (startupTaskManager == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null startupTaskManager");
+        return ERR_INVALID_VALUE;
+    }
     startupTaskManager->UpdateStartupTaskContextRef(shellContextRef_);
     result = startupTaskManager->Prepare();
     if (result != ERR_OK) {
