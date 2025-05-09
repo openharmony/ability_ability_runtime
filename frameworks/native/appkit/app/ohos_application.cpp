@@ -884,8 +884,7 @@ void OHOSApplication::CleanEmptyAbilityStage()
     }
 }
 
-void OHOSApplication::PreloadAppStartup(const BundleInfo &bundleInfo,
-    const HapModuleInfo &entryHapModuleInfo, const std::string &preloadModuleName)
+void OHOSApplication::PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName)
 {
     if (!IsMainProcess(bundleInfo.applicationInfo.name, bundleInfo.applicationInfo.process)) {
         TAG_LOGD(AAFwkTag::STARTUP, "not main process");
@@ -898,7 +897,17 @@ void OHOSApplication::PreloadAppStartup(const BundleInfo &bundleInfo,
         TAG_LOGE(AAFwkTag::STARTUP, "failed to get startupManager");
         return;
     }
-    startupManager->PreloadAppHintStartup(bundleInfo, entryHapModuleInfo, preloadModuleName);
+
+    AppExecFwk::HapModuleInfo preloadHapModuleInfo;
+    if (!bundleInfo.hapModuleInfos.empty()) {
+        for (const auto& hapModuleInfo : bundleInfo.hapModuleInfos) {
+            if (hapModuleInfo.name == preloadModuleName) {
+                preloadHapModuleInfo = hapModuleInfo;
+                break;
+            }
+        }
+    }
+    startupManager->PreloadAppHintStartup(bundleInfo, preloadHapModuleInfo, preloadModuleName);
 }
 
 bool OHOSApplication::IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level)

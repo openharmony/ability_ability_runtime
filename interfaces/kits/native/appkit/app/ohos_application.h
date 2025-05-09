@@ -232,8 +232,7 @@ public:
     bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
 #endif
 
-    void PreloadAppStartup(const BundleInfo &bundleInfo, const HapModuleInfo &entryHapModuleInfo,
-        const std::string &preloadModuleName);
+    void PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName);
 
 private:
     void UpdateAppContextResMgr(const Configuration &config);
