@@ -28,7 +28,6 @@
 #include "child_process_request.h"
 #endif // SUPPORT_CHILD_PROCESS
 #include "app_jsheap_mem_info.h"
-#include "app_cjheap_mem_info.h"
 #include "app_mgr_interface.h"
 #include "fault_data.h"
 #include "iapp_state_callback.h"
@@ -157,11 +156,6 @@ public:
     virtual void AddAbilityStageDone(const int32_t recordId) {}
 
     virtual int DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo& info)
-    {
-        return 0;
-    }
-
-    virtual int DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo& info)
     {
         return 0;
     }

@@ -59,7 +59,6 @@ private:
     int32_t HandleScheduleUpdateApplicationInfoInstalled(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleHeapMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleJsHeapMemory(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleScheduleCjHeapMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyAppFault(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleChangeAppGcState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAttachAppDebug(MessageParcel &data, MessageParcel &reply);

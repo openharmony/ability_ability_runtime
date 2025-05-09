@@ -22,7 +22,6 @@
 
 #include "ability_record_mgr.h"
 #include "app_jsheap_mem_info.h"
-#include "app_cjheap_mem_info.h"
 #include "app_malloc_info.h"
 #include "app_mgr_interface.h"
 #include "app_scheduler_host.h"
@@ -190,14 +189,6 @@ public:
      * @param info, pid, tid, needGc, needSnapshot.
      */
     void ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info) override;
-
-    /**
-     *
-     * @brief triggerGC and dump the application's cjheap memory info.
-     *
-     * @param info, pid, needGc, needSnapshot.
-     */
-    void ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info) override;
 
     /**
      *
@@ -389,8 +380,6 @@ private:
     void HandleScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName);
 
     void HandleJsHeapMemory(const OHOS::AppExecFwk::JsHeapDumpInfo &info);
-
-    void HandleCjHeapMemory(const OHOS::AppExecFwk::CjHeapDumpInfo &info);
 
     void HandleSchedulePrepareTerminate(const std::string &moduleName);
 

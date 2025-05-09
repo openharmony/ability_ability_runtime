@@ -48,7 +48,6 @@
 #include "app_spawn_client.h"
 #include "app_malloc_info.h"
 #include "app_jsheap_mem_info.h"
-#include "app_cjheap_mem_info.h"
 #include "simple_process_info.h"
 
 namespace OHOS {
@@ -431,15 +430,6 @@ public:
      * @return
      */
     void ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info);
-
-    /**
-     * ScheduleCjHeapMemory, triggerGC and dump the application's cjheap memory info.
-     *
-     * @param info, pid, needGc, needSnapshot
-     *
-     * @return
-     */
-    void ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info);
 
     /**
      * GetAbilityRunningRecordByToken, Obtaining the ability record through token.

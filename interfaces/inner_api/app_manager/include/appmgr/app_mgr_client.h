@@ -40,7 +40,6 @@
 #include "system_memory_attr.h"
 #include "want.h"
 #include "app_jsheap_mem_info.h"
-#include "app_cjheap_mem_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -339,15 +338,6 @@ public:
      * @return ERR_OK ,return back success, others fail.
      */
     virtual AppMgrResultCode DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info);
-
-    /**
-     * DumpCjHeapMemory, call DumpCjHeapMemory() through proxy project.
-     * triggerGC and dump the application's cjheap memory info.
-     *
-     * @param info, pid needGc needSnapshot
-     * @return ERR_OK ,return back success, others fail.
-     */
-    virtual AppMgrResultCode DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info);
 
     /**
      * GetConfiguration
