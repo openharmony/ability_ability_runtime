@@ -105,7 +105,6 @@
             "sandbox_manager",
             "screenlock_mgr",
             "selinux_adapter",
-            "soc_perf",
             "storage_service",
             "toolchain",
             "webview",
