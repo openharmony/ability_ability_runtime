@@ -564,6 +564,7 @@ group("unittest") {
       "insight_intent_profile_test:unittest",
       "js_ability_context_test:unittest",
       "js_app_service_extension_test:unittest",
+      "js_runtime_common_test:unittest",
       "js_service_extension_test:unittest",
       "js_ui_ability_test:unittest",
       "js_ui_extension_content_session_test:unittest",

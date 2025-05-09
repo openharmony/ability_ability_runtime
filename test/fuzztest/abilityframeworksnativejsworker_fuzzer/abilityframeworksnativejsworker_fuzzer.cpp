@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 
 #include "ability_record.h"
 #include "securec.h"
+#include "js_runtime_common.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -88,7 +89,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     AbilityRuntime::GetContainerId();
     bool isDebugApp = *data % ENABLE;
     bool isNativeStart = *data % ENABLE;
-    AbilityRuntime::StartDebuggerInWorkerModule(isDebugApp, isNativeStart);
+    AbilityRuntime::JsRuntimeCommon::GetInstance().StartDebuggerModule(isDebugApp, isNativeStart);
     NativeEngine *nativeEngine = nullptr;
     AbilityRuntime::InitWorkerFunc(nativeEngine);
     AbilityRuntime::OffWorkerFunc(nativeEngine);
