@@ -8226,14 +8226,10 @@ int AbilityManagerService::StartUser(int userId, sptr<IUserCallback> callback, b
         return CHECK_PERMISSION_FAILED;
     }
 
-    if (ShouldBlockAllAppStart()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "low-mem mode");
-        auto connectManager = GetConnectManagerByUserId(userId);
-        if (connectManager == nullptr || connectManager->GetSceneBoardTokenId() == 0) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "low-mem mode, disallow cold start");
-            callback->OnStartUserDone(userId, ERR_ALL_APP_START_BLOCKED);
-            return ERR_ALL_APP_START_BLOCKED;
-        }
+    if (ShouldBlockAllAppStart() && callback != nullptr) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "low-mem mode, disallow");
+        callback->OnStartUserDone(userId, ERR_ALL_APP_START_BLOCKED);
+        return ERR_ALL_APP_START_BLOCKED;
     }
 
     if (userController_) {
