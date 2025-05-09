@@ -90,7 +90,6 @@ public:
     static napi_value CreateModuleResourceManager(napi_env env, napi_callback_info info);
     static napi_value CreateAreaModeContext(napi_env env, napi_callback_info info);
     static napi_value CreateDisplayContext(napi_env env, napi_callback_info info);
-    static napi_value GetIndex(napi_env env, napi_callback_info info);
 
     napi_value OnGetCacheDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetTempDir(napi_env env, NapiCallbackInfo& info);
@@ -134,7 +133,6 @@ private:
     napi_value OnCreateDisplayContext(napi_env env, NapiCallbackInfo &info);
     napi_value CreateJsContext(napi_env env, const std::shared_ptr<Context> &context);
     bool CheckCallerIsSystemApp();
-    napi_value OnGetIndex(napi_env env, NapiCallbackInfo &info);
 };
 
 void JsBaseContext::Finalizer(napi_env env, void* data, void* hint)
@@ -758,36 +756,6 @@ napi_value JsBaseContext::OnCreateDisplayContext(napi_env env, NapiCallbackInfo 
 #endif
 }
 
-napi_value JsBaseContext::GetIndex(napi_env env, napi_callback_info info)
-{
-    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetIndex, BASE_CONTEXT_NAME);
-}
-
-napi_value JsBaseContext::OnGetIndex(napi_env env, NapiCallbackInfo &info)
-{
-    if (info.argc != 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "not enough params");
-        ThrowTooFewParametersError(env);
-        return CreateJsUndefined(env);
-    }
-
-    auto context = context_.lock();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "context is already released");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
-        return CreateJsUndefined(env);
-    }
-    uint64_t index = context->GetIndex();
-    napi_value result = nullptr;
-    napi_status status = napi_create_int64(env, index, &result);
-    if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::APPKIT, "create js object faild.");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
-        return CreateJsUndefined(env);
-    }
-    return result;
-}
-
 napi_value JsBaseContext::CreateJsContext(napi_env env, const std::shared_ptr<Context> &context)
 {
     napi_value value = CreateJsBaseContext(env, context, true);
@@ -984,7 +952,6 @@ void BindPropertyAndFunction(napi_env env, napi_value object, const char* module
     BindNativeFunction(env, object, "getGroupDir", moduleName, JsBaseContext::GetGroupDir);
     BindNativeFunction(env, object, "createAreaModeContext", moduleName, JsBaseContext::CreateAreaModeContext);
     BindNativeFunction(env, object, "createDisplayContext", moduleName, JsBaseContext::CreateDisplayContext);
-    BindNativeFunction(env, object, "getIndex", moduleName, JsBaseContext::GetIndex);
 }
 napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, bool keepContext)
 {

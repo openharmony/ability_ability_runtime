@@ -12,8 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-let emitter = requireNapi('events.emitter');
-
 class BusinessError extends Error {
   constructor(code) {
     let msg = '';
@@ -30,65 +28,6 @@ class BusinessError extends Error {
 class EventHub {
   constructor() {
     this.eventMap = {};
-    this.contextIndex_ = -1;
-    this.onMultiThreadingEnabled = false;
-    this.emitMultiThreadingEnabled = false;
-  }
-
-  onEmitterFunction(eventData = {'data':{}}) {
-    let eventName = eventData.data[`arg${0}`];
-    let arrays = Object.keys(eventData.data);
-    let result = {};
-    for (let index = 1; index < arrays.length; index++) {
-      result[`arg${index - 1}`] = eventData.data[`arg${index}`];
-    }
-    let args = this.dataToArgs(result);
-    this.emitInner(eventName, args);
-  }
-
-  getEmitterEventName(event) {
-    return 'ohos.event.' + this.contextIndex_ + '.' + event;
-  }
-
-  argsToData(args = []) {
-    let eventData = {};
-    let data = args.reduce((acc, value, index)=>{
-      acc[`arg${index}`] = value;
-      return acc;
-    }, {});
-    eventData.data = data;
-    return eventData;
-  }
-
-  dataToArgs(data = {}) {
-    if (!data) {
-      return [];
-    }
-    let args = [];
-    let oLen = Object.keys(data).length;
-    for (let index = 0; index < oLen; index++) {
-      args[index] = data[`arg${index}`];
-    }
-    return args;
-  }
-
-  setEventHubOnMultiThreadingEnabled(enable) {
-    this.emitMultiThreadingEnabled = enable;
-  }
-
-  setEventHubEmitMultiThreadingEnabled(enable) {
-    if (this.onMultiThreadingEnabled === enable) {
-      return;
-    }
-    this.onMultiThreadingEnabled = enable;
-    let keys = Object.keys(this.eventMap);
-    for (let i = 0; i < keys.length; i++) {
-      if (this.onMultiThreadingEnabled === true) {
-        emitter.on(this.getEmitterEventName(keys[i]), (eventData)=>this.onEmitterFunction(eventData));
-      } else {
-        emitter.off(this.getEmitterEventName(keys[i]));
-      }
-    }
   }
 
   on(event, callback) {
@@ -101,11 +40,6 @@ class EventHub {
     }
     if (this.eventMap[event].indexOf(callback) === -1) {
       this.eventMap[event].push(callback);
-    }
-    if (this.onMultiThreadingEnabled === true) {
-      if (emitter.getListenerCount(this.getEmitterEventName(event)) === 0) {
-        emitter.on(this.getEmitterEventName(event), (eventData)=>this.onEmitterFunction(eventData));
-      }
     }
   }
 
@@ -128,24 +62,9 @@ class EventHub {
         delete this.eventMap[event];
       }
     }
-    let array = this.eventMap[event];
-    if (array === null || array === undefined) {
-        emitter.off(this.getEmitterEventName(event));
-    }
   }
 
   emit(event, ...args) {
-    if (this.emitMultiThreadingEnabled === true) {
-      let eventNameArrays = [event];
-      let newArgsArrays = eventNameArrays.concat(args);
-      let eventData = this.argsToData(newArgsArrays);
-      emitter.emit(this.getEmitterEventName(event), eventData);
-    } else {
-      this.emitInner(event, args);
-    }
-  }
-
-  emitInner(event, ...args) {
     if (typeof (event) !== 'string') {
       throw new BusinessError(ERROR_CODE_INVALID_PARAM);
       return;
@@ -163,9 +82,7 @@ class EventHub {
 class ApplicationContext {
   constructor(obj) {
     this.__context_impl__ = obj;
-    let eventHub = new EventHub();
-    eventHub.contextIndex_ = obj.getIndex();
-    this.__context_impl__.eventHub = eventHub;
+    this.__context_impl__.eventHub = new EventHub();
   }
 
   registerAbilityLifecycleCallback(abilityLifecycleCallback) {
