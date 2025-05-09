@@ -46,6 +46,7 @@ struct IntentRdbConfig {
 class IntentRdbOpenCallback : public NativeRdb::RdbOpenCallback {
 public:
     IntentRdbOpenCallback(const IntentRdbConfig &intentRdbConfig);
+    virtual ~IntentRdbOpenCallback() = default;
     int32_t OnCreate(NativeRdb::RdbStore &rdbStore) override;
     int32_t OnUpgrade(NativeRdb::RdbStore &rdbStore, int currentVersion, int targetVersion) override;
     int32_t OnDowngrade(NativeRdb::RdbStore &rdbStore, int currentVersion, int targetVersion) override;
