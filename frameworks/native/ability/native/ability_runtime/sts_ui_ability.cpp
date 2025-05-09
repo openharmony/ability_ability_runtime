@@ -1051,7 +1051,9 @@ bool StsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
     executeInfo.windowMode = windowMode_;
     executeInfo.token = context->GetToken();
     if (stsWindowStageObj_ != nullptr) {
-        // TODO
+        std::shared_ptr<STSNativeReferenceWrapper> etsNativeRef = std::make_shared<STSNativeReferenceWrapper>();
+        etsNativeRef->ref_ = stsWindowStageObj_;
+        executeInfo.pageLoader = etsNativeRef;
     }
     executeInfo.executeParam = executeParam;
     return true;

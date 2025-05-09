@@ -11,15 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-config("ani_common_public_config") {
-  visibility = [ ":*" ]
-  include_dirs = [ "include" ]
-}
-
-ohos_shared_library("ani_common") {
+ohos_shared_library("insight_intent_driver_ani_kit") {
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
@@ -30,20 +26,19 @@ ohos_shared_library("ani_common") {
 
   include_dirs = [
     "./include",
-    "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
+    "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
+    "${ability_runtime_path}/interfaces/inner_api/runtime/include",
   ]
 
-  public_configs = [ ":ani_common_public_config" ]
+  configs = []
+
+  public_configs = []
 
   sources = [
-    "src/ani_common_ability_result.cpp",
-    "src/ani_common_ability_state_data.cpp",
-    "src/ani_common_configuration.cpp",
-    "src/ani_common_execute_param.cpp",
-    "src/ani_common_execute_result.cpp",
-    "src/ani_common_start_options.cpp",
-    "src/ani_common_util.cpp",
-    "src/ani_common_want.cpp",
+    "./src/ets_insight_intent_driver.cpp",
   ]
 
   cflags = []
@@ -53,20 +48,19 @@ ohos_shared_library("ani_common") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
-    "${ability_runtime_innerkits_path}/ability_manager:process_options",
-    "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
-    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
   ]
 
   external_deps = [
-    "ability_base:base",
     "ability_base:want",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
-    "image_framework:image_ani",
     "json:nlohmann_json_static",
+    "napi:ace_napi",
     "runtime_core:ani",
   ]
 
