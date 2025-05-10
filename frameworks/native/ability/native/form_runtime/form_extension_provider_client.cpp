@@ -308,6 +308,42 @@ void FormExtensionProviderClient::NotifyFormExtensionCastTempForm(const int64_t 
     HandleResultCode(errorCode, want, callerToken);
 }
 
+int FormExtensionProviderClient::NotifyConfigurationUpdate(const AppExecFwk::Configuration &configuration,
+    const Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGI(AAFwkTag::FORM_EXT, "NotifyConfigurationUpdate called");
+    std::pair<int, int> errorCode = CheckParam(want, callerToken);
+    if (errorCode.first != ERR_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "CheckParam failed: %{public}d", errorCode.first);
+        return errorCode.second;
+    }
+
+    std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    std::function<void()> notifyFormExtensionConfigurationUpdateFunc =
+        [client = sptr<FormExtensionProviderClient>(this), configuration, want, callerToken]() {
+            client->NotifyExtensionConfigurationUpdate(configuration, want, callerToken);
+        };
+    mainHandler->PostSyncTask(notifyFormExtensionConfigurationUpdateFunc,
+        "FormExtensionProviderClient::NotifyExtensionConfigurationUpdate");
+    return ERR_OK;
+}
+
+void FormExtensionProviderClient::NotifyExtensionConfigurationUpdate(const AppExecFwk::Configuration &configuration,
+    const Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGI(AAFwkTag::FORM_EXT, "NotifyExtensionConfigurationUpdate called");
+    int errorCode = ERR_OK;
+    std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
+    if (ownerFormExtension == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
+        errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
+    } else {
+        ownerFormExtension->OnConfigurationUpdated(configuration);
+    }
+
+    HandleResultCode(errorCode, want, callerToken);
+}
+
 int FormExtensionProviderClient::FireFormEvent(const int64_t formId, const std::string &message,
     const Want &want, const sptr<IRemoteObject> &callerToken)
 {
