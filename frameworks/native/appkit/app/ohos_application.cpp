@@ -902,12 +902,11 @@ void OHOSApplication::PreloadAppStartup(const BundleInfo &bundleInfo, const std:
     if (!bundleInfo.hapModuleInfos.empty()) {
         for (const auto& hapModuleInfo : bundleInfo.hapModuleInfos) {
             if (hapModuleInfo.name == preloadModuleName) {
-                preloadHapModuleInfo = hapModuleInfo;
+                startupManager->PreloadAppHintStartup(bundleInfo, hapModuleInfo, preloadModuleName);
                 break;
             }
         }
     }
-    startupManager->PreloadAppHintStartup(bundleInfo, preloadHapModuleInfo, preloadModuleName);
 }
 
 bool OHOSApplication::IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level)
