@@ -1490,7 +1490,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByChildP
     return nullptr;
 }
 
-bool AppRunningManager::IsChildProcessReachLimit(uint32_t accessTokenId)
+bool AppRunningManager::IsChildProcessReachLimit(uint32_t accessTokenId, bool multiProcessFeature)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called.");
     int32_t childCount = 0;
@@ -1503,7 +1503,9 @@ bool AppRunningManager::IsChildProcessReachLimit(uint32_t accessTokenId)
         }
         childCount += appRecord->GetChildProcessCount();
     }
-    return childCount >= AAFwk::AppUtils::GetInstance().MaxChildProcess();
+    auto maxCount = multiProcessFeature ? AAFwk::AppUtils::GetInstance().MaxMultiProcessFeatureChildProcess() :
+        AAFwk::AppUtils::GetInstance().MaxChildProcess();
+    return childCount >= maxCount;
 }
 
 std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote)
