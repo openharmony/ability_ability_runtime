@@ -568,6 +568,10 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId, Abili
             eventInfo.bundleName = abilityInfos.front().bundleName;
             eventInfo.callerBundleName = request.want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
             eventInfo.uri = request.want.GetUriString();
+            auto pos = eventInfo.uri.find("?");
+            if (pos != std::string::npos) {
+                eventInfo.uri = eventInfo.uri.substr(0, pos);
+            }
             SendAbilityEvent(EventName::START_ABILITY_BY_APP_LINKING, HiSysEventType::BEHAVIOR, eventInfo);
         }
     }
