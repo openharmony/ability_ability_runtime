@@ -1748,7 +1748,15 @@ napi_value JsApplicationContextUtils::CreateJsApplicationContext(napi_env env)
     if (resourceManager != nullptr) {
         napi_set_named_property(env, object, "resourceManager", CreateJsResourceManager(env, resourceManager, context));
     }
-
+    napi_value applicationContextValue = nullptr;
+    Context *contextPtr = context.get();
+    int64_t applicationContextAddress = reinterpret_cast<int64_t>(contextPtr);
+    auto status = napi_create_int64(env, applicationContextAddress, &applicationContextValue);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::APPKIT, "get context index fial");
+        return nullptr;
+    }
+    napi_set_named_property(env, object, "index", applicationContextValue);
     BindNativeApplicationContextOne(env, object);
     BindNativeApplicationContextTwo(env, object);
     return object;
