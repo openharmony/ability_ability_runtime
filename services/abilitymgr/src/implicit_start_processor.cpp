@@ -347,7 +347,8 @@ static void ProcessLinkType(std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
     if (!appLinkingExist && !defaultAppExist) {
         return;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "open applink first");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "appLinkingExist: %{public}d, defaultAppExist: %{public}d",
+        appLinkingExist, defaultAppExist);
     for (auto it = abilityInfos.begin(); it != abilityInfos.end();) {
         if (it->linkType == AppExecFwk::LinkType::APP_LINK) {
             it++;
