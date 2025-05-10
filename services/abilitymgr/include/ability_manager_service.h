@@ -2117,7 +2117,8 @@ protected:
      * @param abilityRequest, abilityRequest.
      * @return Returns whether the caller is allowed to start AppServiceExtension.
      */
-    int32_t CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest);
+    int32_t CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest,
+        bool isVerifyAppIdentifierAllowList);
 
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
@@ -2540,7 +2541,7 @@ private:
     int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex, int32_t userId);
 
     int32_t CheckDebugAssertPermission();
-    bool VerifySameAppOrAppIdentifierAlloListPermission(const AbilityRequest &abilityRequest);
+    bool VerifySameAppOrAppIdentifierAllowListPermission(const AbilityRequest &abilityRequest);
     std::shared_ptr<AbilityDebugDeal> ConnectInitAbilityDebugDeal();
 
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,
