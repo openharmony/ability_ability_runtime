@@ -22,6 +22,7 @@
 #include "napi_remote_object.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
+#include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -84,6 +85,58 @@ napi_value CreateFormInfoForBack(napi_env env, const FormInfoForBack &info)
     return objValue;
 }
 
+napi_value CreateInsightIntentInfoParamWithJson(napi_env env, const nlohmann::json &jsonObject)
+{
+    if (jsonObject.is_object()) {
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        for (const auto &it: jsonObject.items()) {
+            if (it.value().is_object() || it.value().is_array()) {
+                napi_set_named_property(
+                    env, objValue, it.key().c_str(), CreateInsightIntentInfoParamWithJson(env, it.value()));
+            } else if (it.value().is_string()) {
+                napi_set_named_property(
+                    env, objValue, it.key().c_str(), CreateJsValue(env, it.value().get<std::string>()));
+            } else if (it.value().is_boolean()) {
+                napi_set_named_property(
+                    env, objValue, it.key().c_str(), CreateJsValue(env, it.value().get<bool>()));
+            } else if (it.value().is_number()) {
+                napi_set_named_property(
+                    env, objValue, it.key().c_str(), CreateJsValue(env, it.value().get<double>()));
+            }
+        }
+        return objValue;
+    } else if (jsonObject.is_array()) {
+        napi_value arrayValue = nullptr;
+        napi_create_array_with_length(env, jsonObject.size(), &arrayValue);
+        uint32_t index = 0;
+        for (const auto &it: jsonObject) {
+            if (it.is_object() || it.is_array()) {
+                napi_set_element(env, arrayValue, index++, CreateInsightIntentInfoParamWithJson(env, it));
+            } else if (it.is_string()) {
+                napi_set_element(env, arrayValue, index++, CreateJsValue(env, it.get<std::string>()));
+            } else if (it.is_boolean()) {
+                napi_set_element(env, arrayValue, index++, CreateJsValue(env, it.get<bool>()));
+            } else if (it.is_number()) {
+                napi_set_element(env, arrayValue, index++, CreateJsValue(env, it.get<double>()));
+            }
+        }
+        return arrayValue;
+    }
+    TAG_LOGE(AAFwkTag::INTENT, "Creat js param fail");
+    return nullptr;
+}
+
+napi_value CreateInsightIntentInfoParam(napi_env env, const std::string &paramStr)
+{
+    nlohmann::json jsonObject = nlohmann::json::parse(paramStr, nullptr, false);
+    if (jsonObject.is_discarded()) {
+        TAG_LOGE(AAFwkTag::INTENT, "Parse param str fail");
+        return nullptr;
+    }
+    return CreateInsightIntentInfoParamWithJson(env, jsonObject);
+}
+
 napi_value CreateInsightIntentInfoForBack(napi_env env, const InsightIntentInfoForBack &info)
 {
     napi_value objValue = nullptr;
@@ -99,7 +152,7 @@ napi_value CreateInsightIntentInfoForBack(napi_env env, const InsightIntentInfoF
     napi_set_named_property(env, objValue, "icon", CreateJsValue(env, info.icon));
     napi_set_named_property(env, objValue, "llmDescription", CreateJsValue(env, info.llmDescription));
     napi_set_named_property(env, objValue, "intentType", CreateJsValue(env, info.intentType));
-    napi_set_named_property(env, objValue, "parameters", CreateJsValue(env, info.parameters));
+    napi_set_named_property(env, objValue, "parameters", CreateInsightIntentInfoParam(env, info.parameters));
     napi_set_named_property(env, objValue, "keywords", CreateNativeArray(env, info.keywords));
     if (info.intentType == INSIGHT_INTENTS_TYPE_LINK) {
         napi_set_named_property(env, objValue, "subIntentInfo", CreateLinkInfoForBack(env, info.linkInfo));
