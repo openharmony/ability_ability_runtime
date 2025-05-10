@@ -247,11 +247,6 @@ void StartupManager::SetModuleConfig(const std::shared_ptr<StartupConfig> &confi
     }
 }
 
-const std::shared_ptr<StartupConfig>& StartupManager::GetModuleConfig(const std::string &moduleName)
-{
-    return moduleConfigs_[moduleName];
-}
-
 void StartupManager::SetDefaultConfig(const std::shared_ptr<StartupConfig> &config)
 {
     defaultConfig_ = config;

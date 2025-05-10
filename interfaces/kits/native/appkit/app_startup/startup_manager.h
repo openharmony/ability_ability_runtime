@@ -88,8 +88,6 @@ public:
     void SetModuleConfig(const std::shared_ptr<StartupConfig> &config, const std::string &moduleName,
         bool isDefaultConfig);
 
-    const std::shared_ptr<StartupConfig>& GetModuleConfig(const std::string &moduleName);
-
     void SetDefaultConfig(const std::shared_ptr<StartupConfig> &config);
 
     const std::shared_ptr<StartupConfig>& GetDefaultConfig() const;
