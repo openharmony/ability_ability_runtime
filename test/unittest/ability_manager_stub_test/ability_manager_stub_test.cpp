@@ -3704,5 +3704,70 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_TerminateMissionInner_001, T
     auto res = stub_->TerminateMissionInner(data, reply);
     EXPECT_EQ(res, NO_ERROR);
 }
+
+/**
+ * @tc.name: GetAllInsightIntentInfo_0100
+ * @tc.desc: GetAllInsightIntentInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, GetAllInsightIntentInfo_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
+    data.WriteUint32(static_cast<uint32_t>(flag));
+    auto ret = stub_->GetAllInsightIntentInfoInner(data, reply);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: GetInsightIntentInfoByBundleName_0100
+ * @tc.desc: GetInsightIntentInfoByBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, GetInsightIntentInfoByBundleName_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
+    std::string bundleName = "com.example.bundleName";
+    data.WriteUint32(static_cast<uint32_t>(flag));
+    data.WriteString(bundleName);
+    auto ret = stub_->GetInsightIntentInfoByBundleNameInner(data, reply);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: GetInsightIntentInfoByIntentName_0100
+ * @tc.desc: GetInsightIntentInfoByIntentName
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, GetInsightIntentInfoByIntentName_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
+    std::string bundleName = "com.example.bundleName";
+    std::string moduleName = "entry";
+    std::string intentName = "test";
+    data.WriteUint32(static_cast<uint32_t>(flag));
+    data.WriteString(bundleName);
+    data.WriteString(moduleName);
+    data.WriteString(intentName);
+    auto ret = stub_->GetInsightIntentInfoByIntentNameInner(data, reply);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
 } // namespace AAFwk
 } // namespace OHOS

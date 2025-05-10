@@ -99,6 +99,8 @@ public:
     void SetIntentExemptionInfo(int32_t uid);
 
     bool CheckIntentIsExemption(int32_t uid);
+
+    static int32_t CheckCallerPermission();
 private:
     mutable ffrt::mutex mutex_;
     mutable ffrt::mutex intentExemptionLock_;
@@ -111,7 +113,6 @@ private:
 
     static int32_t IsValidCall(const Want &want);
 
-    static int32_t CheckCallerPermission();
     void SendIntentReport(EventInfo &eventInfo, int32_t errCode);
 };
 } // namespace AAFwk

@@ -613,6 +613,15 @@ enum class AbilityManagerInterfaceCode {
 
     // revoke delegator
     REVOKE_DELEGATOR = 6139,
+
+    // get all insight intent info
+    GET_ALL_INSIGHT_INTENT_INFO = 6140,
+
+    // get all insight intent info by bundle name
+    GET_INSIGHT_INTENT_INFO_BY_BUNDLE_NAME = 6141,
+
+    // get all insight intent info by intent name
+    GET_INSIGHT_INTENT_INFO_BY_INTENT_NAME = 6142,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
