@@ -28,14 +28,10 @@ struct LastExitDetailInfo : public Parcelable {
     int32_t exitSubReason = -1;
     int32_t rss = 0;
     int32_t pss = 0;
+    int32_t processState = 0;
     int64_t timestamp = 0;
-    std::string processName = "";
-    std::string exitMsg = "";
-
-    LastExitDetailInfo() = default;
-    ~LastExitDetailInfo() = default;
-    LastExitDetailInfo(const LastExitDetailInfo &other);
-    LastExitDetailInfo &operator=(const LastExitDetailInfo &other);
+    std::string processName;
+    std::string exitMsg;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

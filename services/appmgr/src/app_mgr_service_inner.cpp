@@ -4235,12 +4235,10 @@ void AppMgrServiceInner::CacheExitInfo(const std::shared_ptr<AppRunningRecord> &
         TAG_LOGI(AAFwkTag::APPMGR, "exit info exist");
         return;
     }
-    AAFwk::LastExitDetailInfo exitInfo = {};
-    exitInfo.pid = appRecord->GetPid();
-    exitInfo.uid = appRecord->GetUid();
-    exitInfo.rss = appRecord->GetRssValue();
-    exitInfo.pss = appRecord->GetPssValue();
-    exitInfo.processName = appRecord->GetProcessName();
+    RunningProcessInfo exitInfo;
+    if (appRunningManager_) {
+        appRunningManager_->AssignRunningProcessInfoByAppRecord(appRecord, exitInfo);
+    }
     std::vector<std::string> abilityNames;
     std::vector<std::string> uiExtensionNames;
     std::string bundleName = "";
@@ -9183,8 +9181,6 @@ int32_t AppMgrServiceInner::GetKilledProcessInfo(int pid, int uid, KilledProcess
         TAG_LOGI(AAFwkTag::APPMGR, "appRecord not found");
         return AAFwk::ERR_NO_APP_RECORD;
     }
-    info.pid = pid;
-    info.uid = uid;
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo) {
         info.accessTokenId = appInfo->accessTokenId;
@@ -9192,7 +9188,7 @@ int32_t AppMgrServiceInner::GetKilledProcessInfo(int pid, int uid, KilledProcess
         TAG_LOGW(AAFwkTag::APPMGR, "appInfo null");
     }
     info.bundleName = appRecord->GetBundleName();
-    info.processName = appRecord->GetProcessName();
+    appRunningManager_->AssignRunningProcessInfoByAppRecord(appRecord, info.processInfo);
     return ERR_OK;
 }
 
