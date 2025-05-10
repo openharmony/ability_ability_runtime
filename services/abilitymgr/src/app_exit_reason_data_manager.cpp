@@ -46,6 +46,7 @@ const std::string JSON_KEY_UID = "uid";
 const std::string JSON_KEY_PROCESS_NAME = "process_name";
 const std::string JSON_KEY_PSS_VALUE = "pss_value";
 const std::string JSON_KEY_RSS_VALUE = "rss_value";
+const std::string JSON_KEY_PROSESS_STATE = "process_state";
 } // namespace
 AppExitReasonDataManager::AppExitReasonDataManager() {}
 
@@ -298,12 +299,6 @@ int32_t AppExitReasonDataManager::RecordSignalReason(int32_t pid, int32_t uid, i
     AAFwk::ExitReason exitReason = {};
     exitReason.reason = AAFwk::REASON_NORMAL;
     exitReason.subReason = signal;
-    AppExecFwk::RunningProcessInfo processInfo = {};
-    processInfo.pid_ = cacheInfo.exitInfo.pid;
-    processInfo.uid_ = cacheInfo.exitInfo.uid;
-    processInfo.rssValue = cacheInfo.exitInfo.rss;
-    processInfo.pssValue = cacheInfo.exitInfo.pss;
-    processInfo.processName_ = cacheInfo.exitInfo.processName;
 
     for (const auto &item : allEntries) {
         if (item.key.ToString() == std::to_string(accessTokenId)) {
@@ -313,7 +308,7 @@ int32_t AppExitReasonDataManager::RecordSignalReason(int32_t pid, int32_t uid, i
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "key: %{public}s", std::to_string(accessTokenId).c_str());
     ret = SetAppExitReason(cacheInfo.bundleName, accessTokenId, cacheInfo.abilityNames, exitReason,
-        processInfo, false);
+        cacheInfo.exitInfo, false);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAppExitReason failed, ret: %{public}d", ret);
         return AAFwk::ERR_RECORD_SIGNAL_REASON_FAILED;
@@ -344,6 +339,7 @@ DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValue(
         { JSON_KEY_PROCESS_NAME, processInfo.processName_ },
         { JSON_KEY_TIME_STAMP, nowMs.count() },
         { JSON_KEY_ABILITY_LIST, abilityList },
+        { JSON_KEY_PROSESS_STATE, processInfo.state_ },
     };
     DistributedKv::Value value(jsonObject.dump());
     return value;
@@ -376,6 +372,10 @@ void AppExitReasonDataManager::ConvertAppExitReasonInfoFromValue(const Distribut
     }
     if (jsonObject.contains(JSON_KEY_TIME_STAMP) && jsonObject[JSON_KEY_TIME_STAMP].is_number_integer()) {
         time_stamp = jsonObject.at(JSON_KEY_TIME_STAMP).get<int64_t>();
+    }
+    if (jsonObject.contains(JSON_KEY_PROSESS_STATE) && jsonObject[JSON_KEY_PROSESS_STATE].is_number_integer()) {
+        processInfo.state_ = static_cast<OHOS::AppExecFwk::AppProcessState>(
+            jsonObject.at(JSON_KEY_PROSESS_STATE).get<int32_t>());
     }
     if (jsonObject.contains(JSON_KEY_ABILITY_LIST) && jsonObject[JSON_KEY_ABILITY_LIST].is_array()) {
         abilityList.clear();
