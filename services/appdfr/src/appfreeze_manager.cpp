@@ -33,7 +33,7 @@
 #include "parameter.h"
 #include "parameters.h"
 #include "singleton.h"
-
+#include "res_sched_util.h"
 #include "app_mgr_client.h"
 #include "hilog_tag_wrapper.h"
 #include "time_util.h"
@@ -70,6 +70,13 @@ static bool g_betaVersion = OHOS::system::GetParameter("const.logsystem.versiont
 static bool g_developMode = (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "enable") ||
                             (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "true");
 }
+static constexpr const char *const TWELVE_BIG_CPU_CUR_FREQ = "/sys/devices/system/cpu/cpufreq/policy2/scaling_cur_freq";
+static constexpr const char *const TWELVE_BIG_CPU_MAX_FREQ = "/sys/devices/system/cpu/cpufreq/policy2/scaling_max_freq";
+static constexpr const char *const TWELVE_MID_CPU_CUR_FREQ = "/sys/devices/system/cpu/cpufreq/policy1/scaling_cur_freq";
+static constexpr const char *const TWELVE_MID_CPU_MAX_FREQ = "/sys/devices/system/cpu/cpufreq/policy1/scaling_max_freq";
+const static std::set<std::string> HALF_EVENT_CONFIGS = {"UI_BLOCK_3S", "THREAD_BLOCK_3S", "BUSSNESS_THREAD_BLOCK_3S",
+                                                         "LIFECYCLE_HALF_TIMEOUT"};
+static constexpr int PERF_TIME = 60000;
 std::shared_ptr<AppfreezeManager> AppfreezeManager::instance_ = nullptr;
 ffrt::mutex AppfreezeManager::singletonMutex_;
 ffrt::mutex AppfreezeManager::freezeMutex_;
@@ -333,6 +340,7 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetAppRunningUniqueIdByPid(appInfo.pid,
         appRunningUniqueId);
     int ret = 0;
+    this->PerfStart(faultData.errorObject.name);
     int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
     if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) {
         ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, faultData.errorObject.name,
@@ -743,6 +751,43 @@ bool AppfreezeManager::IsValidFreezeFilter(int32_t pid, const std::string& bundl
     TAG_LOGI(AAFwkTag::APPDFR, "SetAppFreezeFilter: %{public}d, bundleName=%{public}s, "
         "pid:%{public}d", ret, bundleName.c_str(), pid);
     return ret;
+}
+void AppfreezeManager::PerfStart(std::string eventName)
+{
+    if (OHOS::system::GetParameter("const.dfx.sub_health_recovery.enable", "") != "true") {
+        TAG_LOGI(AAFwkTag::APPDFR, "sub_health_recovery is not enable");
+        return;
+    }
+    auto it = HALF_EVENT_CONFIGS.find(eventName);
+    if (it == HALF_EVENT_CONFIGS.end()) {
+        return;
+    }
+    auto curTime = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
+    if (curTime - perfTime < PERF_TIME) {
+        TAG_LOGE(AAFwkTag::APPDFR, "perf time is less than 60s");
+        return;
+    }
+    std::string bigCpuCurFreq = this->GetFirstLine(TWELVE_BIG_CPU_CUR_FREQ);
+    std::string bigCpuMaxFreq = this->GetFirstLine(TWELVE_BIG_CPU_MAX_FREQ);
+    std::string midCpuCurFreq = this->GetFirstLine(TWELVE_MID_CPU_CUR_FREQ);
+    std::string midCpuMaxFreq = this->GetFirstLine(TWELVE_MID_CPU_MAX_FREQ);
+    if (bigCpuCurFreq == bigCpuMaxFreq || midCpuCurFreq == midCpuMaxFreq) {
+        perfTime = curTime;
+        TAG_LOGI(AAFwkTag::APPDFR, "perf start");
+        AAFwk::ResSchedUtil::GetInstance().ReportSubHealtyPerfInfoToRSS();
+        TAG_LOGI(AAFwkTag::APPDFR, "perf end");
+    }
+}
+std::string AppfreezeManager::GetFirstLine(const std::string &path)
+{
+    std::ifstream inFile(path.c_str());
+    if (!inFile) {
+        return "";
+    }
+    std::string firstLine;
+    getline(inFile, firstLine);
+    inFile.close();
+    return firstLine;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

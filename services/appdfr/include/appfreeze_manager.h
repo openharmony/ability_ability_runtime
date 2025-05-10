@@ -140,6 +140,9 @@ private:
     static std::map<int, std::string> catchStackMap_;
     static ffrt::mutex freezeFilterMutex_;
     std::map<std::string, AppFreezeInfo> appfreezeFilterMap_;
+    int64_t perfTime = 0;
+    void PerfStart(std::string eventName);
+    std::string GetFirstLine(const std::string &path);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
