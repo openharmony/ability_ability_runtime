@@ -217,9 +217,10 @@ private:
     std::map<ConnectionInfo, std::vector<sptr<AbilityConnectCallback>>> abilityConnections_;
     ErrCode ConnectAbilityInner(const sptr<IRemoteObject> &connectCaller,
         const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback,
-        bool isUIService = false, bool isAppService = false);
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::SERVICE);
     ErrCode CreateConnection(const sptr<IRemoteObject> &connectCaller, const AAFwk::Want &want, int accountId,
-        const sptr<AbilityConnectCallback> &connectCallback, bool isUIService, bool isAppService);
+        const sptr<AbilityConnectCallback> &connectCallback,
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::SERVICE);
     bool IsConnectingTimeout(const ConnectionInfo& info);
 };
 } // namespace AbilityRuntime

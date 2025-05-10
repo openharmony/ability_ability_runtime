@@ -534,7 +534,8 @@ public:
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode ConnectAbility(const Want &want, sptr<IAbilityConnection> connect, int32_t userId);
+    ErrCode ConnectAbility(const Want &want, sptr<IAbilityConnection> connect, int32_t userId,
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::SERVICE);
 
     /**
      * ConnectAbility, connect session with service ability.
@@ -542,13 +543,15 @@ public:
      * @param want, Special want for service type's ability.
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @param callerToken, caller ability token.
+     * 
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ConnectAbility(
         const Want &want,
         sptr<IAbilityConnection> connect,
         sptr<IRemoteObject> callerToken,
-        int32_t userId = DEFAULT_INVAL_VALUE);
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::SERVICE);
 
     /**
      * ConnectUIServiceExtensionAbility, connect session with uiService ability.

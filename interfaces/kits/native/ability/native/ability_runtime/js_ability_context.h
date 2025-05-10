@@ -153,6 +153,12 @@ private:
     napi_value OnStartAppServiceExtensionAbility(napi_env env, NapiCallbackInfo& info);
     napi_value OnStopAppServiceExtensionAbility(napi_env env, NapiCallbackInfo& info);
     napi_value OnConnectAppServiceExtensionAbility(napi_env env, NapiCallbackInfo& info);
+    napi_value JsAbilityContext::StartExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
+        AppExecFwk::ExtensionAbilityType extensionType);
+    napi_value JsAbilityContext::StopExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
+        AppExecFwk::ExtensionAbilityType extensionType);
+    napi_value JsAbilityContext::ConnectExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
+        AppExecFwk::ExtensionAbilityType extensionType);
     
     static bool UnWrapWant(napi_env env, napi_value argv, AAFwk::Want& want);
     static napi_value WrapWant(napi_env env, const AAFwk::Want& want);
