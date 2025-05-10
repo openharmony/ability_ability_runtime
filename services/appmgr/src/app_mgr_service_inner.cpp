@@ -265,6 +265,7 @@ constexpr const char* KILL_PROCESS_REASON_PREFIX = "Kill Reason:";
 constexpr const char* PRELOAD_APPLIATION_TASK = "PreloadApplicactionTask";
 constexpr const char* KEY_WATERMARK_BUSINESS_NAME = "com.ohos.param.watermarkBusinessName";
 constexpr const char* KEY_IS_WATERMARK_ENABLED = "com.ohos.param.isWatermarkEnabled";
+constexpr const char* KILL_SUB_PROCESS_REASON_PREFIX = "Kill SubProcess Reason:";
 
 constexpr const char* PROC_SELF_TASK_PATH = "/proc/self/task/";
 
@@ -3155,19 +3156,111 @@ int32_t AppMgrServiceInner::KillProcessesInBatch(const std::vector<int32_t> &pid
     return ERR_OK;
 }
 
-void AppMgrServiceInner::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason)
+int32_t AppMgrServiceInner::KillSubProcessBypidInner(const pid_t pid, const std::string &reason,
+    AAFwk::EventInfo &eventInfo)
 {
-    for (const auto& pid: pids) {
-        auto appRecord = GetAppRunningRecordByPid(pid);
-        if (appRecord == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
-            continue;
-        }
-        auto result = KillProcessByPid(pid, reason);
-        if (result < 0) {
-            TAG_LOGW(AAFwkTag::APPMGR, "fail, pid:%{public}d", pid);
+    int32_t ret = -1;
+    if (!ProcessUtil::ProcessExist(pid) || pid <= 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid pid: %{public}d", pid);
+        return AAFwk::ERR_KILL_PROCESS_NOT_EXIST;
+    }
+    if (CheckIsThreadInFoundation(pid)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "don't kill pid %{public}d", pid);
+        return AAFwk::ERR_KILL_FOUNDATION_UID;
+    }
+    ret = kill(pid, SIGNAL_KILL);
+    if (ret < 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Kill pid %{public}d err: %{public}d", pid, ret);
+    }
+
+    std::string killReason = KILL_SUB_PROCESS_REASON_PREFIX + reason;
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
+    int result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PID, std::to_string(eventInfo.pid),
+        EVENT_KEY_PROCESS_NAME, eventInfo.processName, EVENT_KEY_MESSAGE, killReason);
+    TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
+        "%{public}d, processName=%{public}s, msg=%{public}s, ret=%{public}d",
+        result, pid, eventInfo.processName.c_str(), killReason.c_str(), ret);
+    return ret;
+}
+
+int32_t AppMgrServiceInner::KillSubProcessBypid(const pid_t pid, const std::string &reason)
+{
+    int32_t ret = ERR_OK;
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return ERR_INVALID_VALUE;
+    }
+    // get render record
+    auto appRecord = appRunningManager_->GetAppRunningRecordByRenderPid(pid);
+    if (appRecord) {
+        auto renderRecord = appRecord->GetRenderRecordByPid(pid);
+        if (renderRecord) {
+            AAFwk::EventInfo renderEventInfo;
+            renderEventInfo.pid = renderRecord->GetPid();
+            renderEventInfo.processName = renderRecord->GetProcessName();
+            return KillSubProcessBypidInner(pid, reason, renderEventInfo);
         }
     }
+    // get child process
+#ifdef SUPPORT_CHILD_PROCESS
+    appRecord = appRunningManager_->GetAppRunningRecordByChildProcessPid(pid);
+    if (appRecord) {
+        auto childRecordMap = appRecord->GetChildProcessRecordMap();
+        auto iter = childRecordMap.find(pid);
+        if (iter != childRecordMap.end()) {
+            auto childProcessRecord = iter->second;
+            if (childProcessRecord) {
+                AAFwk::EventInfo childEventInfo;
+                childEventInfo.pid = childProcessRecord->GetPid();
+                childEventInfo.processName = childProcessRecord->GetProcessName();
+                return KillSubProcessBypidInner(pid, reason, childEventInfo);
+            }
+        }
+    }
+#endif
+    // get child record process
+    appRecord = appRunningManager_->GetAppRunningRecordByChildRecordPid(pid);
+    if (appRecord) {
+        auto childAppRecordMap = appRecord->GetChildAppRecordMap();
+        auto it = childAppRecordMap.find(pid);
+        if (it != childAppRecordMap.end()) {
+            auto weakChildAppRecord = it->second;
+            auto childAppRecord = weakChildAppRecord.lock();
+            if (childAppRecord) {
+                AAFwk::EventInfo childRecordEventInfo;
+                childRecordEventInfo.pid = childAppRecord->GetPid();
+                childRecordEventInfo.processName = childAppRecord->GetProcessName();
+                return KillSubProcessBypidInner(pid, reason, childRecordEventInfo);
+            }
+        }
+    }
+
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason,
+    bool subProcess)
+{
+    int32_t ret = ERR_OK;
+    for (const auto& pid: pids) {
+        auto appRecord = GetAppRunningRecordByPid(pid);
+        if (appRecord != nullptr) {
+            if (KillProcessByPid(pid, reason) < 0) {
+                TAG_LOGW(AAFwkTag::APPMGR, "fail, pid:%{public}d", pid);
+            }
+            continue;
+        }
+        if (subProcess == false) {
+            continue;
+        }
+        ret = KillSubProcessBypid(pid, reason);
+        if (ret < 0) {
+            TAG_LOGW(AAFwkTag::APPMGR, "KillSubProcessBypid fail, pid:%{public}d, ret:%{public}d", pid, ret);
+            return ret;
+        }
+    }
+    return ret;
 }
 
 void AppMgrServiceInner::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken)

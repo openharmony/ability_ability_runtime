@@ -290,7 +290,8 @@ void AmsMgrProxy::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnM
     TAG_LOGD(AAFwkTag::APPMGR, "ending");
 }
 
-void AmsMgrProxy::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason)
+int32_t AmsMgrProxy::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason,
+    bool subProcess)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -299,28 +300,34 @@ void AmsMgrProxy::KillProcessesByPids(const std::vector<int32_t> &pids, const st
 
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
-        return;
+        return ERR_INVALID_DATA;
     }
     if (!data.WriteUint32(pids.size())) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write size failed");
-        return;
+        return ERR_FLATTEN_OBJECT;
     }
     for (const auto &pid: pids) {
         if (!data.WriteInt32(pid)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Write pid failed");
-            return;
+            return ERR_FLATTEN_OBJECT;
         }
     }
     if (!data.WriteString(reason)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write reason failed");
-        return;
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(subProcess)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write subProcess failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_BY_PIDS), data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
+        return ret;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "end");
+    return reply.ReadInt32();
 }
 
 void AmsMgrProxy::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken)
