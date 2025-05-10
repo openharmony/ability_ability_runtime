@@ -1715,6 +1715,10 @@ private:
 #ifdef SUPPORT_CHILD_PROCESS
     int32_t StartChildProcessPreCheck(pid_t callingPid, int32_t childProcessType);
 
+    bool AllowNativeChildProcess(int32_t childProcessType, const std::string appIdentifier);
+
+    bool AllowChildProcessInMultiProcessFeatureApp(std::shared_ptr<AppRunningRecord> appRecord);
+
     int32_t StartChildProcessImpl(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args,
         const ChildProcessOptions &options);
