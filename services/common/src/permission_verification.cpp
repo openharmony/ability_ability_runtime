@@ -597,15 +597,5 @@ bool PermissionVerification::VerifyFusionAccessPermission() const
     TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
     return false;
 }
-
-int PermissionVerification::CheckCallAppServiceExtensionPermission(int32_t accessTokenId) const
-{
-    if (VerifyPermissionByTokenId(accessTokenId, PermissionConstants::PERMISSION_SUPPORT_APP_SERVICE_EXTENSION)) {
-        TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
-        return ERR_OK;
-    }
-    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
-    return CHECK_PERMISSION_FAILED;
-}
 }  // namespace AAFwk
 }  // namespace OHOS

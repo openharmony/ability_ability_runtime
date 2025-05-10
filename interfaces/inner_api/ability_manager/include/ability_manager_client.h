@@ -534,8 +534,7 @@ public:
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode ConnectAbility(const Want &want, sptr<IAbilityConnection> connect, int32_t userId,
-        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::SERVICE);
+    ErrCode ConnectAbility(const Want &want, sptr<IAbilityConnection> connect, int32_t userId);
 
     /**
      * ConnectAbility, connect session with service ability.
@@ -543,10 +542,23 @@ public:
      * @param want, Special want for service type's ability.
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @param callerToken, caller ability token.
-     * 
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ConnectAbility(
+        const Want &want,
+        sptr<IAbilityConnection> connect,
+        sptr<IRemoteObject> callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+    
+    /**
+     * ConnectAbilityWithExtensionType, connect session with specified extentionType ability.
+     *
+     * @param want, Special want for appService type's ability.
+     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param callerToken, caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ConnectAbilityWithExtensionType(
         const Want &want,
         sptr<IAbilityConnection> connect,
         sptr<IRemoteObject> callerToken,
@@ -562,20 +574,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ConnectUIServiceExtesnionAbility(
-        const Want &want,
-        sptr<IAbilityConnection> connect,
-        sptr<IRemoteObject> callerToken,
-        int32_t userId = DEFAULT_INVAL_VALUE);
-
-    /**
-     * ConnectAppServiceExtensionAbility, connect session with appService ability.
-     *
-     * @param want, Special want for appService type's ability.
-     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
-     * @param callerToken, caller ability token.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode ConnectAppServiceExtesnionAbility(
         const Want &want,
         sptr<IAbilityConnection> connect,
         sptr<IRemoteObject> callerToken,

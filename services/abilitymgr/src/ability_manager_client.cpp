@@ -532,27 +532,38 @@ ErrCode AbilityManagerClient::MinimizeUIAbilityBySCB(sptr<SessionInfo> sessionIn
     return abms->MinimizeUIAbilityBySCB(sessionInfo, fromUser, sceneFlag);
 }
 
-ErrCode AbilityManagerClient::ConnectAbility(const Want &want, sptr<IAbilityConnection> connect, int32_t userId,
-    AppExecFwk::ExtensionAbilityType extensionType)
+ErrCode AbilityManagerClient::ConnectAbility(const Want &want, sptr<IAbilityConnection> connect, int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "name:%{public}s %{public}s, userId:%{public}d",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
-    return abms->ConnectAbilityCommon(want, connect, nullptr, extensionType, userId);
+    return abms->ConnectAbilityCommon(want, connect, nullptr, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
 }
 
 ErrCode AbilityManagerClient::ConnectAbility(
+    const Want &want, sptr<IAbilityConnection> connect, sptr<IRemoteObject> callerToken, int32_t userId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "name:%{public}s %{public}s, userId:%{public}d",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
+    return abms->ConnectAbilityCommon(want, connect, callerToken, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
+}
+
+ErrCode AbilityManagerClient::ConnectAbilityWithExtensionType(
     const Want &want, sptr<IAbilityConnection> connect, sptr<IRemoteObject> callerToken, int32_t userId,
     AppExecFwk::ExtensionAbilityType extensionType)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "name:%{public}s %{public}s, userId:%{public}d",
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "name:%{public}s %{public}s, userId:%{public}d",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
-    return abms->ConnectAbilityCommon(want, connect, callerToken, extensionType, userId);
+    return abms->ConnectAbilityCommon(want, connect, callerToken,
+        extensionType, userId);
 }
 
 ErrCode AbilityManagerClient::ConnectUIServiceExtesnionAbility(
@@ -565,18 +576,6 @@ ErrCode AbilityManagerClient::ConnectUIServiceExtesnionAbility(
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
     return abms->ConnectAbilityCommon(want, connect, callerToken,
         AppExecFwk::ExtensionAbilityType::UI_SERVICE, userId);
-}
-
-ErrCode AbilityManagerClient::ConnectAppServiceExtensionAbility(
-    const Want &want, sptr<IAbilityConnection> connect, sptr<IRemoteObject> callerToken, int32_t userId)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "name:%{public}s %{public}s, userId:%{public}d",
-        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
-    return abms->ConnectAbilityCommon(want, connect, callerToken,
-        AppExecFwk::ExtensionAbilityType::APP_SERVICE, userId);
 }
 
 ErrCode AbilityManagerClient::ConnectDataShareExtensionAbility(const Want &want,

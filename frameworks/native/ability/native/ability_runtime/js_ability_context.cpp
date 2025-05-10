@@ -1362,7 +1362,7 @@ napi_value JsAbilityContext::StartExtensionAbilityCommon(napi_env env, NapiCallb
     }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
-        [weak = context_, want, innerErrCode]() {
+        [weak = context_, want, innerErrCode, extensionType]() {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::CONTEXT, "null context");
@@ -1374,7 +1374,8 @@ napi_value JsAbilityContext::StartExtensionAbilityCommon(napi_env env, NapiCallb
             } else if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
                 *innerErrCode = context->StartAppServiceExtensionAbility(want);
             } else {
-                TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d", static_cast<int32_t>(extensionType));
+                TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d",
+                    static_cast<int32_t>(extensionType));
             }
     };
 
@@ -1391,15 +1392,7 @@ napi_value JsAbilityContext::StartExtensionAbilityCommon(napi_env env, NapiCallb
 
     napi_value lastParam = (info.argc > ARGC_ONE) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
-    std::string taskName = "JsAbilityContext::OnStartExtensionAbility";
-    if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-        taskName = "JsAbilityContext::OnStartExtensionAbility";
-    } else if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
-        taskName = "JsAbilityContext::OnStartAppServiceExtensionAbility";
-    } else {
-        TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d", static_cast<int32_t>(extensionType));
-    }
-    NapiAsyncTask::ScheduleHighQos(taskName,
+    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::StartExtensionAbilityCommon",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
@@ -1453,8 +1446,7 @@ napi_value JsAbilityContext::OnStartExtensionAbilityWithAccount(napi_env env, Na
 napi_value JsAbilityContext::OnStopExtensionAbility(napi_env env, NapiCallbackInfo& info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return StopExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
-        AppExecFwk::ExtensionAbilityType::SERVICE);
+    return StopExtensionAbilityCommon(env, info, AppExecFwk::ExtensionAbilityType::SERVICE);
 }
 
 napi_value JsAbilityContext::StopExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
@@ -1474,7 +1466,7 @@ napi_value JsAbilityContext::StopExtensionAbilityCommon(napi_env env, NapiCallba
     }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
-        [weak = context_, want, innerErrCode]() {
+        [weak = context_, want, innerErrCode, extensionType]() {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::CONTEXT, "null context");
@@ -1486,7 +1478,8 @@ napi_value JsAbilityContext::StopExtensionAbilityCommon(napi_env env, NapiCallba
             } else if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
                 *innerErrCode = context->StopAppServiceExtensionAbility(want);
             } else {
-                TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d", static_cast<int32_t>(extensionType));
+                TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d",
+                    static_cast<int32_t>(extensionType));
             }
     };
     NapiAsyncTask::CompleteCallback complete =
@@ -1502,15 +1495,7 @@ napi_value JsAbilityContext::StopExtensionAbilityCommon(napi_env env, NapiCallba
 
     napi_value lastParam = (info.argc > ARGC_ONE) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
-    std::string taskName = "JsAbilityContext::OnStopExtensionAbility";
-    if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-        taskName = "JsAbilityContext::OnStopExtensionAbility";
-    } else if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
-        taskName = "JsAbilityContext::OnStopAppServiceExtensionAbility";
-    } else {
-        TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d", static_cast<int32_t>(extensionType));
-    }
-    NapiAsyncTask::Schedule(taskName,
+    NapiAsyncTask::Schedule("JsAbilityContext::StopExtensionAbilityCommon",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
@@ -1669,8 +1654,7 @@ napi_value JsAbilityContext::OnBackToCallerAbilityWithResult(napi_env env, NapiC
 napi_value JsAbilityContext::OnConnectAbility(napi_env env, NapiCallbackInfo& info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return ConnectExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
-        AppExecFwk::ExtensionAbilityType::SERVICE);
+    return ConnectExtensionAbilityCommon(env, info, AppExecFwk::ExtensionAbilityType::SERVICE);
 }
 
 napi_value JsAbilityContext::ConnectExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
@@ -1696,7 +1680,7 @@ napi_value JsAbilityContext::ConnectExtensionAbilityCommon(napi_env env, NapiCal
     int64_t connectId = InsertConnection(connection, want);
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
-        [weak = context_, want, connection, connectId, innerErrCode]() {
+        [weak = context_, want, connection, connectId, innerErrCode, extensionType]() {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGE(AAFwkTag::CONTEXT, "null context");
@@ -1706,11 +1690,12 @@ napi_value JsAbilityContext::ConnectExtensionAbilityCommon(napi_env env, NapiCal
             TAG_LOGD(AAFwkTag::CONTEXT, "connectAbility: %{public}d, extensionType: type: %{public}d",
                 static_cast<int32_t>(connectId), static_cast<int32_t>(extensionType));
             if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-                *innerErrCode = context->ConnectAbility(want);
+                *innerErrCode = context->ConnectAbility(want, connection);
             } else if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
-                *innerErrCode = context->ConnectAppServiceExtensionAbility(want);
+                *innerErrCode = context->ConnectAppServiceExtensionAbility(want, connection);
             } else {
-                TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d", static_cast<int32_t>(extensionType));
+                TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d",
+                    static_cast<int32_t>(extensionType));
             }
     };
     NapiAsyncTask::CompleteCallback complete =
@@ -1728,15 +1713,7 @@ napi_value JsAbilityContext::ConnectExtensionAbilityCommon(napi_env env, NapiCal
             }
         };
     napi_value result = nullptr;
-    std::string taskName = "JsAbilityContext::OnConnectAbility";
-    if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-        taskName = "JsAbilityContext::OnConnectAbility";
-    } else if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
-        taskName = "JsAbilityContext::OnConnectAppServiceExtensionAbility";
-    } else {
-        TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d", static_cast<int32_t>(extensionType));
-    }
-    NapiAsyncTask::ScheduleHighQos(taskName,
+    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::ConnectExtensionAbilityCommon",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return CreateJsValue(env, connectId);
 }
@@ -3030,15 +3007,13 @@ napi_value JsAbilityContext::OnStartAppServiceExtensionAbility(napi_env env, Nap
 napi_value JsAbilityContext::OnStopAppServiceExtensionAbility(napi_env env, NapiCallbackInfo& info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return StopExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
-        AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+    return StopExtensionAbilityCommon(env, info, AppExecFwk::ExtensionAbilityType::APP_SERVICE);
 }
 
 napi_value JsAbilityContext::OnConnectAppServiceExtensionAbility(napi_env env, NapiCallbackInfo& info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return ConnectExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
-        AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+    return ConnectExtensionAbilityCommon(env, info, AppExecFwk::ExtensionAbilityType::APP_SERVICE);
 }
 
 int32_t JsAbilityContext::GenerateRequestCode()
