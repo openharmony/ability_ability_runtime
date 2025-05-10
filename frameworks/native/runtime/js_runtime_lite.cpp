@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,13 +22,13 @@
 #include "iservice_registry.h"
 #include "js_environment.h"
 #include "js_module_reader.h"
+#include "js_runtime_common.h"
 #include "js_worker.h"
 #include "ohos_js_env_logger.h"
 #include "ohos_js_environment_impl.h"
 #include "parameters.h"
 #include "system_ability_definition.h"
 #include "native_engine/native_create_env.h"
-#include "connect_server_manager.h"
 
 using Extractor = OHOS::AbilityBase::Extractor;
 using ExtractorUtil = OHOS::AbilityBase::ExtractorUtil;
@@ -37,7 +37,6 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
-constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_inspector.z.so";
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
 const std::string PACKAGE_NAME = "packageName";
 const std::string BUNDLE_NAME = "bundleName";
@@ -46,9 +45,6 @@ const std::string VERSION = "version";
 const std::string ENTRY_PATH = "entryPath";
 const std::string IS_SO = "isSO";
 const std::string DEPENDENCY_ALIAS = "dependencyAlias";
-bool g_debugMode = false;
-bool g_debugApp = false;
-bool g_nativeStart = false;
 int32_t PrintVmLog(int32_t, int32_t, const char*, const char*, const char* message)
 {
     TAG_LOGI(AAFwkTag::JSRUNTIME, "ArkLog: %{public}s", message);
@@ -75,31 +71,6 @@ JsRuntimeLite& JsRuntimeLite::GetInstance()
     return jsRuntimeLite;
 }
 
-napi_status StartDebugMode(NativeEngine* nativeEngine)
-{
-    if (nativeEngine == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null nativeEngine");
-        return napi_status::napi_invalid_arg;
-    }
-    auto instanceId = panda::DFXJSNApi::GetCurrentThreadId();
-    TAG_LOGI(AAFwkTag::JSRUNTIME, "Create instanceId is %{public}d", instanceId);
-    std::string instanceName = "childThread_" + std::to_string(instanceId);
-    bool isAddInstance = ConnectServerManager::Get().AddInstance(instanceId, instanceId, instanceName);
-    if (g_nativeStart) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "native: true, set isAddInstance: false");
-        isAddInstance = false;
-    }
-    auto postTask = [nativeEngine](std::function<void()>&& callback) {
-        nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
-    };
-    panda::JSNApi::DebugOption debugOption = {ARK_DEBUGGER_LIB_PATH, isAddInstance};
-    auto vm = const_cast<EcmaVM*>(nativeEngine->GetEcmaVm());
-    ConnectServerManager::Get().StoreDebuggerInfo(
-        instanceId, reinterpret_cast<void*>(vm), debugOption, postTask, g_debugApp);
-    panda::JSNApi::NotifyDebugMode(instanceId, vm, debugOption, instanceId, postTask, g_debugApp);
-    return napi_status::napi_ok;
-}
-
 napi_status CreateNapiEnv(napi_env *env)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "Called");
@@ -123,38 +94,15 @@ napi_status CreateNapiEnv(napi_env *env)
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
         return napi_status::napi_generic_failure;
     }
-    if (g_debugMode) {
+    if (JsRuntimeCommon::GetInstance().IsDebugMode()) {
         auto nativeEngine = jsEnv->GetNativeEngine();
-        napi_status errCode = StartDebugMode(nativeEngine);
+        const std::string threadName = "childThread";
+        napi_status errCode = JsRuntimeCommon::GetInstance().StartDebugMode(nativeEngine, threadName);
         if (errCode != napi_status::napi_ok) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "start debug mode failed");
         }
     }
     return JsRuntimeLite::GetInstance().Init(*options, *env);
-}
-
-napi_status StopDebugMode(napi_env *env)
-{
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
-        return napi_status::napi_invalid_arg;
-    }
-    auto instanceId = panda::DFXJSNApi::GetCurrentThreadId();
-    TAG_LOGI(AAFwkTag::JSRUNTIME, "destroy instanceId is %{public}d", instanceId);
-    ConnectServerManager::Get().RemoveInstance(instanceId);
-    auto jsEnv = JsRuntimeLite::GetInstance().GetJsEnv(*env);
-    if (jsEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
-        return napi_status::napi_generic_failure;
-    }
-    auto nativeEngine = jsEnv->GetNativeEngine();
-    if (nativeEngine == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null nativeEngine");
-        return napi_status::napi_generic_failure;
-    }
-    auto vm = const_cast<EcmaVM*>(nativeEngine->GetEcmaVm());
-    panda::JSNApi::StopDebugger(vm);
-    return napi_status::napi_ok;
 }
 
 napi_status DestroyNapiEnv(napi_env *env)
@@ -164,8 +112,18 @@ napi_status DestroyNapiEnv(napi_env *env)
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
         return napi_status::napi_invalid_arg;
     }
-    if (g_debugMode) {
-        napi_status errCode = StopDebugMode(env);
+    if (JsRuntimeCommon::GetInstance().IsDebugMode()) {
+        auto jsEnv = JsRuntimeLite::GetInstance().GetJsEnv(*env);
+        if (jsEnv == nullptr) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
+            return napi_status::napi_generic_failure;
+        }
+        auto nativeEngine = jsEnv->GetNativeEngine();
+        if (nativeEngine == nullptr) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null nativeEngine");
+            return napi_status::napi_generic_failure;
+        }
+        napi_status errCode = JsRuntimeCommon::GetInstance().StopDebugMode(nativeEngine);
         if (errCode != napi_status::napi_ok) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "stop debug mode failed");
         }
@@ -175,13 +133,6 @@ napi_status DestroyNapiEnv(napi_env *env)
         *env = nullptr;
     }
     return errCode;
-}
-
-void StartDebuggerModule(bool isDebugApp, bool isNativeStart)
-{
-    g_debugMode = true;
-    g_debugApp = isDebugApp;
-    g_nativeStart = isNativeStart;
 }
 
 void JsRuntimeLite::InitJsRuntimeLite(const Options& options)
