@@ -19,6 +19,7 @@
 #include "sts_context_utils.h"
 #include "application_context.h"
 #include "context_impl.h"
+#include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
