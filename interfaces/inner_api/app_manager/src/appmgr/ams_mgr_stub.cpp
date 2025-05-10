@@ -331,8 +331,9 @@ ErrCode AmsMgrStub::HandleKillProcessesByPids(MessageParcel &data, MessageParcel
         pids.emplace_back(data.ReadInt32());
     }
     std::string reason = data.ReadString();
-
-    KillProcessesByPids(pids, reason);
+    bool subProcess = data.ReadBool();
+    int32_t ret = KillProcessesByPids(pids, reason, subProcess);
+    reply.WriteInt32(ret);
     return NO_ERROR;
 }
 
