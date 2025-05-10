@@ -38,7 +38,11 @@ using namespace OHOS::AppExecFwk;
 namespace {
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
+constexpr int32_t INDEX_TWO = 2;
+constexpr int32_t INDEX_THREE = 3;
 constexpr size_t ARGC_ONE = 1;
+constexpr size_t ARGC_TWO = 2;
+constexpr size_t ARGC_FOUR = 4;
 }
 class JsInsightIntentExecuteCallbackClient : public InsightIntentExecuteCallbackInterface,
     public std::enable_shared_from_this<JsInsightIntentExecuteCallbackClient> {
@@ -91,6 +95,21 @@ public:
         GET_NAPI_INFO_AND_CALL(env, info, JsInsightIntentDriver, OnExecute);
     }
 
+    static napi_value GetAllInsightIntentInfo(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsInsightIntentDriver, OnGetAllInsightIntentInfo);
+    }
+
+    static napi_value GetInsightIntentInfoByBundleName(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsInsightIntentDriver, OnGetInsightIntentInfoByBundleName);
+    }
+
+    static napi_value GetInsightIntentInfoByIntentName(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsInsightIntentDriver, OnGetInsightIntentInfoByIntentName);
+    }
+
 private:
     napi_value OnExecute(napi_env env, NapiCallbackInfo& info)
     {
@@ -139,7 +158,167 @@ private:
         }
         return result;
     }
+    
+    napi_value OnGetAllInsightIntentInfo(napi_env env, NapiCallbackInfo& info)
+    {
+        TAG_LOGI(AAFwkTag::INTENT, "OnGetAllInsightIntentInfo");
+        if (info.argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        GetInsightIntentFlag flag;
+        if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], flag) ||
+            (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
+            ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
+            return CreateJsUndefined(env);
+        }
+        auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+        auto infos = std::make_shared<std::vector<InsightIntentInfoForQuery>>();
+        NapiAsyncTask::ExecuteCallback execute = [infos, flag, innerErrorCode]() {
+            *innerErrorCode = AbilityManagerClient::GetInstance()->GetAllInsightIntentInfo(flag, *infos);
+        };
+        NapiAsyncTask::CompleteCallback complete =
+            [innerErrorCode, infos](napi_env env, NapiAsyncTask &task, int32_t status) {
+                if (*innerErrorCode == 0) {
+                    task.ResolveWithNoError(env, CreateInsightIntentInfoForQueryArray(env, *infos));
+                } else {
+                    task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*innerErrorCode)));
+                }
+            };
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("JsInsightIntentDriver::OnGetAllInsightIntentInfo",
+            env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+        return result;
+    }
+
+    napi_value OnGetInsightIntentInfoByBundleName(napi_env env, NapiCallbackInfo& info)
+    {
+        TAG_LOGI(AAFwkTag::INTENT, "OnGetInsightIntentInfoByBundleName");
+        if (info.argc < ARGC_TWO) {
+            TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        std::string bundleName;
+        if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], bundleName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse bundleName failed");
+            ThrowInvalidParamError(env, "Parse param bundleName failed, bundleName must be string.");
+            return CreateJsUndefined(env);
+        }
+        GetInsightIntentFlag flag;
+        if (!ConvertFromJsValue(env, info.argv[INDEX_ONE], flag) ||
+            (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
+            ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
+            return CreateJsUndefined(env);
+        }
+        auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+        auto infos = std::make_shared<std::vector<InsightIntentInfoForQuery>>();
+        NapiAsyncTask::ExecuteCallback execute = [infos, flag, bundleName, innerErrorCode]() {
+            *innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByBundleName(
+                flag, bundleName, *infos);
+        };
+        NapiAsyncTask::CompleteCallback complete =
+            [innerErrorCode, infos](napi_env env, NapiAsyncTask &task, int32_t status) {
+                if (*innerErrorCode == 0) {
+                    task.ResolveWithNoError(env, CreateInsightIntentInfoForQueryArray(env, *infos));
+                } else {
+                    task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*innerErrorCode)));
+                }
+            };
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("JsInsightIntentDriver::OnGetInsightIntentInfoByBundleName",
+            env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+        return result;
+    }
+
+    napi_value OnGetInsightIntentInfoByIntentName(napi_env env, NapiCallbackInfo& info)
+    {
+        TAG_LOGI(AAFwkTag::INTENT, "OnGetInsightIntentInfoByIntentName");
+        if (info.argc < ARGC_FOUR) {
+            TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        std::string bundleName;
+        if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], bundleName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse bundleName failed");
+            ThrowInvalidParamError(env, "Parse param bundleName failed, bundleName must be string.");
+            return CreateJsUndefined(env);
+        }
+        std::string moduleName;
+        if (!ConvertFromJsValue(env, info.argv[INDEX_ONE], moduleName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse intentName failed");
+            ThrowInvalidParamError(env, "Parse param moduleName failed, moduleName must be string.");
+            return CreateJsUndefined(env);
+        }
+        std::string intentName;
+        if (!ConvertFromJsValue(env, info.argv[INDEX_TWO], intentName)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse intentName failed");
+            ThrowInvalidParamError(env, "Parse param intentName failed, intentName must be string.");
+            return CreateJsUndefined(env);
+        }
+        GetInsightIntentFlag flag;
+        if (!ConvertFromJsValue(env, info.argv[INDEX_THREE], flag) ||
+            (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT)) {
+            TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
+            ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
+            return CreateJsUndefined(env);
+        }
+        auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+        auto intentInfo = std::make_shared<InsightIntentInfoForQuery>();
+        NapiAsyncTask::ExecuteCallback execute =
+            [intentInfo, flag, bundleName, moduleName, intentName, innerErrorCode]() {
+                *innerErrorCode = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByIntentName(
+                    flag, bundleName, moduleName, intentName, *intentInfo);
+            };
+        NapiAsyncTask::CompleteCallback complete =
+            [innerErrorCode, intentInfo](napi_env env, NapiAsyncTask &task, int32_t status) {
+                if (*innerErrorCode == 0) {
+                    task.ResolveWithNoError(env, CreateInsightIntentInfoForQuery(env, *intentInfo));
+                } else {
+                    task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*innerErrorCode)));
+                }
+            };
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("JsInsightIntentDriver::OnGetInsightIntentInfoByIntentName",
+            env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+        return result;
+    }
 };
+
+static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* name, int32_t value)
+{
+    napi_status status;
+    napi_value itemName;
+    napi_value itemValue;
+
+    NAPI_CALL_BASE(env, status = napi_create_string_utf8(env, name, NAPI_AUTO_LENGTH, &itemName), status);
+    NAPI_CALL_BASE(env, status = napi_create_int32(env, value, &itemValue), status);
+
+    NAPI_CALL_BASE(env, status = napi_set_property(env, napiObject, itemName, itemValue), status);
+    NAPI_CALL_BASE(env, status = napi_set_property(env, napiObject, itemValue, itemName), status);
+
+    return napi_ok;
+}
+
+static napi_value InitGetInsightIntentFlagObject(napi_env env)
+{
+    napi_value napiObject;
+    NAPI_CALL(env, napi_create_object(env, &napiObject));
+
+    NAPI_CALL(env, SetEnumItem(
+        env, napiObject, "GET_FULL_INSIGHT_INTENT", GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT));
+    NAPI_CALL(env, SetEnumItem(
+        env, napiObject, "GET_SUMMARY_INSIGHT_INTENT", GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT));
+
+    return napiObject;
+}
 
 napi_value JsInsightIntentDriverInit(napi_env env, napi_value exportObj)
 {
@@ -154,6 +333,20 @@ napi_value JsInsightIntentDriverInit(napi_env env, napi_value exportObj)
 
     const char *moduleName = "JsInsightIntentDriver";
     BindNativeFunction(env, exportObj, "execute", moduleName, JsInsightIntentDriver::Execute);
+    BindNativeFunction(env, exportObj,
+        "getAllInsightIntentInfo", moduleName, JsInsightIntentDriver::GetAllInsightIntentInfo);
+    BindNativeFunction(env, exportObj,
+        "getInsightIntentInfoByBundleName", moduleName, JsInsightIntentDriver::GetInsightIntentInfoByBundleName);
+    BindNativeFunction(env, exportObj,
+        "getInsightIntentInfoByIntentName", moduleName, JsInsightIntentDriver::GetInsightIntentInfoByIntentName);
+
+    napi_value getInsightIntentFlag = InitGetInsightIntentFlagObject(env);
+    NAPI_ASSERT(env, getInsightIntentFlag != nullptr, "failed to create getInsightIntent flag object");
+    napi_property_descriptor exportObjs[] = {
+        DECLARE_NAPI_PROPERTY("GetInsightIntentFlag", getInsightIntentFlag),
+    };
+    napi_status status = napi_define_properties(env, exportObj, sizeof(exportObjs) / sizeof(exportObjs[0]), exportObjs);
+    NAPI_ASSERT(env, status == napi_ok, "failed to define properties for exportObj");
     return CreateJsUndefined(env);
 }
 } // namespace AbilityRuntime

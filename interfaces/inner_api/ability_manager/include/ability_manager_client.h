@@ -1750,6 +1750,44 @@ public:
      */
     ErrCode RevokeDelegator(sptr<IRemoteObject> token);
 
+    /**
+     * Get all insight intent infos.
+     * @param flag, the get type.
+     * @param infos, the insight intent infos.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetAllInsightIntentInfo(
+        AbilityRuntime::GetInsightIntentFlag flag,
+        std::vector<InsightIntentInfoForQuery> &infos);
+
+    /**
+     * Get specified bundleName insight intent infos.
+     * @param flag, the get type.
+     * @param infos, the insight intent infos.
+     * @param bundleName, The get insightIntent bundleName.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetInsightIntentInfoByBundleName(
+        AbilityRuntime::GetInsightIntentFlag flag,
+        const std::string &bundleName,
+        std::vector<InsightIntentInfoForQuery> &infos);
+
+    /**
+     * Get specified intentName insight intent infos.
+     * @param flag, the get type.
+     * @param infos, the insight intent infos.
+     * @param bundleName, The get insightIntent bundleName.
+     * @param moduleName, The get insightIntent moduleName.
+     * @param intentName, The get intent name.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetInsightIntentInfoByIntentName(
+        AbilityRuntime::GetInsightIntentFlag flag,
+        const std::string &bundleName,
+        const std::string &moduleName,
+        const std::string &intentName,
+        InsightIntentInfoForQuery &info);
+                                    
 private:
     AbilityManagerClient();
     DISALLOW_COPY_AND_MOVE(AbilityManagerClient);

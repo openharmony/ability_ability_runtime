@@ -45,6 +45,8 @@
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "insight_intent_execute_manager.h"
+#include "insight_intent_db_cache.h"
+#include "insight_intent_utils.h"
 #include "interceptor/ability_jump_interceptor.h"
 #include "interceptor/block_all_app_start_interceptor.h"
 #include "interceptor/control_interceptor.h"
@@ -13843,6 +13845,113 @@ int32_t AbilityManagerService::CheckStartPlugin(const Want& want, sptr<IRemoteOb
     if (abilityRecord->IsPluginAbility()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not host ability");
         return RESOLVE_ABILITY_ERR;
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityManagerService::GetAllInsightIntentInfo(
+    AbilityRuntime::GetInsightIntentFlag flag,
+    std::vector<InsightIntentInfoForQuery> &infos)
+{
+    TAG_LOGI(AAFwkTag::INTENT, "GetAllInsightIntentInfo");
+    int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckCallerPermission();
+    if (ret != ERR_OK) {
+        TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
+        return ret;
+    }
+    if (flag == AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
+        std::vector<ExtractInsightIntentInfo> intentInfos;
+        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(userId, intentInfos);
+        if (intentInfos.empty()) {
+            TAG_LOGD(AAFwkTag::INTENT, "extractInsightIntentInfos empty");
+            return ERR_OK;
+        }
+        for (auto &info : intentInfos) {
+            InsightIntentInfoForQuery intentInfoQuery;
+            InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery);
+            infos.emplace_back(intentInfoQuery);
+        }
+    } else {
+        std::vector<ExtractInsightIntentGenericInfo> genericInfos;
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentGenericInfo(genericInfos);
+        if (genericInfos.empty()) {
+            return ERR_OK;
+        }
+        for (auto &info : genericInfos) {
+            InsightIntentInfoForQuery intentInfoQuery;
+            InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(info, intentInfoQuery);
+            infos.emplace_back(intentInfoQuery);
+        }
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
+    AbilityRuntime::GetInsightIntentFlag flag,
+    const std::string &bundleName,
+    std::vector<InsightIntentInfoForQuery> &infos)
+{
+    TAG_LOGI(AAFwkTag::INTENT, "GetInsightIntentInfoByBundleName");
+    int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckCallerPermission();
+    if (ret != ERR_OK) {
+        TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
+        return ret;
+    }
+    if (flag == AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
+        std::vector<ExtractInsightIntentInfo> intentInfos;
+        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
+            bundleName, userId, intentInfos);
+        if (intentInfos.empty()) {
+            TAG_LOGD(AAFwkTag::INTENT, "extractInsightIntentInfos empty");
+            return ERR_OK;
+        }
+        for (auto &info : intentInfos) {
+            InsightIntentInfoForQuery intentInfoQuery;
+            InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery);
+            infos.emplace_back(intentInfoQuery);
+        }
+    } else {
+        std::vector<ExtractInsightIntentGenericInfo> genericInfos;
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfoByName(
+            bundleName, genericInfos);
+        if (genericInfos.empty()) {
+            return ERR_OK;
+        }
+        for (auto &info : genericInfos) {
+            InsightIntentInfoForQuery intentInfoQuery;
+            InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(info, intentInfoQuery);
+            infos.emplace_back(intentInfoQuery);
+        }
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
+    AbilityRuntime::GetInsightIntentFlag flag,
+    const std::string &bundleName,
+    const std::string &moduleName,
+    const std::string &intentName,
+    InsightIntentInfoForQuery &info)
+{
+    TAG_LOGI(AAFwkTag::INTENT, "GetInsightIntentInfoByIntentName");
+    int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckCallerPermission();
+    if (ret != ERR_OK) {
+        TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
+        return ret;
+    }
+    if (flag == AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
+        ExtractInsightIntentInfo intentInfo;
+        const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
+            bundleName, moduleName, intentName, userId, intentInfo);
+        InsightIntentUtils::ConvertExtractInsightIntentInfo(intentInfo, info);
+    } else {
+        ExtractInsightIntentGenericInfo genericInfo;
+        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfo(
+            bundleName, moduleName, intentName, genericInfo);
+        InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(genericInfo, info);
     }
     return ERR_OK;
 }
