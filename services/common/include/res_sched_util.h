@@ -63,6 +63,7 @@ public:
         int64_t timeDuration = 0, int64_t abilityRecordId = -1);
     std::unordered_set<std::string> GetNWebPreloadSet() const;
     void ReportAbilityIntentExemptionInfoToRSS(int32_t callerUid, int32_t callerPid);
+    void ReportSubHealtyPerfInfoToRSS();
 private:
     ResSchedUtil() = default;
     ~ResSchedUtil() = default;

@@ -28,6 +28,7 @@
 namespace OHOS {
 namespace AAFwk {
 using AssociatedStartType = ResourceSchedule::ResType::AssociatedStartType;
+static constexpr int PERF_NUM = 10202;
 ResSchedUtil &ResSchedUtil::GetInstance()
 {
     static ResSchedUtil instance;
@@ -47,6 +48,16 @@ int64_t ResSchedUtil::convertType(int64_t resSchedType)
 #endif
     TAG_LOGE(AAFwkTag::DEFAULT, "sched invalid");
     return -1;
+}
+
+void ResSchedUtil::ReportSubHealtyPerfInfoToRSS()
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    uint32_t resType = ResourceSchedule::ResType::RES_TYPE_ANCO_CUST;
+    std::unordered_map<std::string, std::string> eventParams{{"name", "soc_perf"}};
+    TAG_LOGI(AAFwkTag::DEFAULT, "soc_perf start");
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, PERF_NUM, eventParams);
+#endif
 }
 
 void ResSchedUtil::ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart,
