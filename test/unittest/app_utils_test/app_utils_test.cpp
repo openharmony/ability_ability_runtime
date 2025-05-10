@@ -15,7 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#define private public
 #include "app_utils.h"
+#undef private
 #include "hilog_tag_wrapper.h"
 #include "parameters.h"
 
@@ -330,6 +332,24 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1500, TestSize.Level2)
     } else if (deviceType == "2in1") {
         EXPECT_TRUE(isSupportMultiInstance == true);
     }
+}
+
+/**
+ * @tc.number: AppUtilsTest_1600
+ * @tc.desc: Test AllowChildProcessInMultiProcessFeatureApp works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_1600, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1600 start.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    bool allow = appUtils.AllowChildProcessInMultiProcessFeatureApp();
+    EXPECT_FALSE(allow);
+
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = true;
+    allow = appUtils.AllowChildProcessInMultiProcessFeatureApp();
+    EXPECT_TRUE(allow);
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1600 end.");
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

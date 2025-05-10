@@ -42,6 +42,10 @@ constexpr const char* LIMIT_MAXIMUM_OF_RENDER_PROCESS = "persist.sys.abilityms.l
 constexpr const char* GRANT_PERSIST_URI_PERMISSION = "persist.sys.abilityms.grant_persist_uri_permission";
 constexpr const char* START_OPTIONS_WITH_ANIMATION = "persist.sys.abilityms.start_options_with_animation";
 constexpr const char* MULTI_PROCESS_MODEL = "persist.sys.abilityms.multi_process_model";
+constexpr const char* ALLOW_CHILD_PROCESS_IN_MULTI_PROCESS_FEATURE_APP =
+    "const.sys.abilityms.allow_child_process_in_multi_process_feature_app";
+constexpr const char* MAX_MULTI_PROCESS_FEATURE_CHILD_PROCESS =
+    "const.sys.abilityms.max_multi_process_feature_child_process";
 constexpr const char* START_OPTIONS_WITH_PROCESS_OPTION = "persist.sys.abilityms.start_options_with_process_option";
 constexpr const char* MOVE_UI_ABILITY_TO_BACKGROUND_API_ENABLE =
     "persist.sys.abilityms.move_ui_ability_to_background_api_enable";
@@ -214,6 +218,18 @@ bool AppUtils::IsMultiProcessModel()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isMultiProcessModel_.value);
     return isMultiProcessModel_.value;
+}
+
+bool AppUtils::AllowChildProcessInMultiProcessFeatureApp()
+{
+    if (!allowChildProcessInMultiProcessFeatureApp_.isLoaded) {
+        allowChildProcessInMultiProcessFeatureApp_.value =
+            system::GetBoolParameter(ALLOW_CHILD_PROCESS_IN_MULTI_PROCESS_FEATURE_APP, false);
+            allowChildProcessInMultiProcessFeatureApp_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "AllowChildProcessInMultiProcessFeatureApp:%{public}d",
+        allowChildProcessInMultiProcessFeatureApp_.value);
+    return allowChildProcessInMultiProcessFeatureApp_.value;
 }
 
 bool AppUtils::IsStartOptionsWithProcessOptions()
@@ -537,6 +553,18 @@ int32_t AppUtils::MaxChildProcess()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "MaxChildProcess: %{public}d", maxChildProcess_.value);
     return maxChildProcess_.value;
+}
+
+int32_t AppUtils::MaxMultiProcessFeatureChildProcess()
+{
+    if (!maxMultiProcessFeatureChildProcess_.isLoaded) {
+        maxMultiProcessFeatureChildProcess_.value =
+            system::GetIntParameter<int32_t>(MAX_MULTI_PROCESS_FEATURE_CHILD_PROCESS, DEFAULT_MAX_CHILD_PROCESS);
+            maxMultiProcessFeatureChildProcess_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "maxMultiProcessFeatureChildProcess: %{public}d",
+        maxMultiProcessFeatureChildProcess_.value);
+    return maxMultiProcessFeatureChildProcess_.value;
 }
 
 bool AppUtils::IsSupportMultiInstance()

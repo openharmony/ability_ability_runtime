@@ -240,7 +240,7 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_IsChildProcessReachLimit_0100,
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
 
-    appRunningManager->IsChildProcessReachLimit(1);
+    appRunningManager->IsChildProcessReachLimit(1, false);
     auto record = appRunningManager->GetAppRunningRecordByChildProcessPid(123);
     EXPECT_EQ(record, nullptr);
 }

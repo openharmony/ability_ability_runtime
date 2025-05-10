@@ -1061,6 +1061,9 @@ public:
         return isDebugFromLocal_;
     }
 
+    std::optional<bool> IsSupportMultiProcessDeviceFeature() const;
+    void SetSupportMultiProcessDeviceFeature(bool support);
+
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1234,6 +1237,8 @@ private:
     int32_t pssValue_ = 0;
     bool reasonExist_ = false;
     bool isDebugFromLocal_ = false;
+    std::optional<bool> supportMultiProcessDeviceFeature_ = std::nullopt;
+    mutable ffrt::mutex supportMultiProcessDeviceFeatureLock_;
 };
 
 }  // namespace AppExecFwk
