@@ -140,6 +140,13 @@ public:
     bool IsMultiProcessModel();
 
     /**
+     * Allow starting child process in pc-type app
+     *
+     * @return allow or not allow
+     */
+    bool AllowChildProcessInMultiProcessFeatureApp();
+
+    /**
      * IsStartOptionsWithProcessOptions, check whether the start options have process options.
      *
      * @return Whether the start options have process options.
@@ -264,6 +271,13 @@ public:
     int32_t MaxChildProcess();
 
     /**
+     * MaxMultiProcessFeatureChildProcess, get max child process of multi process feature app.
+     *
+     * @return Max child process count.
+     */
+    int32_t MaxMultiProcessFeatureChildProcess();
+
+    /**
      * GetMigrateClientBundleName, get migrate client bundle name.
      *
      * @return Migrate client bundle name.
@@ -361,6 +375,7 @@ private:
     volatile DeviceConfiguration<bool> isGrantPersistUriPermission_ = {false, false};
     volatile DeviceConfiguration<bool> isStartOptionsWithAnimation_ = {false, false};
     volatile DeviceConfiguration<bool> isMultiProcessModel_ = {false, false};
+    volatile DeviceConfiguration<bool> allowChildProcessInMultiProcessFeatureApp_ = {false, false};
     volatile DeviceConfiguration<bool> isStartOptionsWithProcessOptions_ = {false, false};
     volatile DeviceConfiguration<bool> enableMoveUIAbilityToBackgroundApi_ = {false, true};
     volatile DeviceConfiguration<bool> isLaunchEmbededUIAbility_ = {false, false};
@@ -386,6 +401,7 @@ private:
     volatile DeviceConfiguration<int32_t> collaboratorBrokerUid_ = {false, DEFAULT_INVALID_VALUE};
     volatile DeviceConfiguration<int32_t> collaboratorBrokerReserveUid_ = {false, DEFAULT_INVALID_VALUE};
     volatile DeviceConfiguration<int32_t> maxChildProcess_ = {false, DEFAULT_MAX_CHILD_PROCESS};
+    volatile DeviceConfiguration<int32_t> maxMultiProcessFeatureChildProcess_ = {false, DEFAULT_MAX_CHILD_PROCESS};
     DeviceConfiguration<std::string> migrateClientBundleName_ = {true, "com.huwei.hmos.migratecilent"};
     std::mutex cacheAbilityListMutex_;
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>

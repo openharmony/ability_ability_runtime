@@ -298,6 +298,7 @@ constexpr int32_t PC_MAX_CHILD_PROCESS_NUM = 50;
 constexpr int32_t USER100 = 100;
 constexpr const char* LIFE_CYCLE_STATE_START_FOREGROUND = "start foreground";
 constexpr const char* LIFE_CYCLE_STATE_START_BACKGROUND = "start background";
+const std::string MULTI_PROCESS = "multi_process";
 
 int32_t GetUserIdByUid(int32_t uid)
 {
@@ -5851,6 +5852,7 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
     int32_t childNumLimit = appRecord->HasGPU() ? PHONE_MAX_RENDER_PROCESS_NUM + 1 : PHONE_MAX_RENDER_PROCESS_NUM;
     // The phone device allows a maximum of 40 render processes to be created.
     if (AAFwk::AppUtils::GetInstance().IsLimitMaximumOfRenderProcess() &&
+        !AllowChildProcessInMultiProcessFeatureApp(appRecord) &&
         renderRecordMap.size() >= static_cast<uint32_t>(childNumLimit)) {
         TAG_LOGE(AAFwkTag::APPMGR, "maximum render process limitation, hostPid:%{public}d", hostPid);
         return ERR_REACHING_MAXIMUM_RENDER_PROCESS_LIMITATION;
@@ -7891,29 +7893,70 @@ int32_t AppMgrServiceInner::StartChildProcessPreCheck(pid_t callingPid, int32_t 
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called.");
     CHECK_POINTER_AND_RETURN_VALUE(appRunningManager_, ERR_NO_INIT);
-    auto childRecord = appRunningManager_->GetAppRunningRecordByChildProcessPid(callingPid);
-    if (childRecord) {
+    auto childHostRecord = appRunningManager_->GetAppRunningRecordByChildProcessPid(callingPid);
+    if (childHostRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "already in child process.");
         return AAFwk::ERR_ALREADY_IN_CHILD_PROCESS;
     }
     auto hostRecord = GetAppRunningRecordByPid(callingPid);
     CHECK_POINTER_AND_RETURN_VALUE(hostRecord, ERR_NULL_OBJECT);
-    auto &appUtils = AAFwk::AppUtils::GetInstance();
-    if (!appUtils.IsMultiProcessModel()) {
-        bool checkAllowList = childProcessType == CHILD_PROCESS_TYPE_NATIVE_ARGS ||
-            childProcessType == CHILD_PROCESS_TYPE_NATIVE;
-        if (!checkAllowList || !appUtils.IsAllowNativeChildProcess(hostRecord->GetAppIdentifier())) {
-            TAG_LOGE(AAFwkTag::APPMGR, "not support child process.");
-            return AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS;
-        }
+    if (!AAFwk::AppUtils::GetInstance().IsMultiProcessModel() &&
+        !AllowNativeChildProcess(childProcessType, hostRecord->GetAppIdentifier()) &&
+        !AllowChildProcessInMultiProcessFeatureApp(hostRecord)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not support child process.");
+        return AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS;
     }
     auto applicationInfo = hostRecord->GetApplicationInfo();
     CHECK_POINTER_AND_RETURN_VALUE(applicationInfo, ERR_NULL_OBJECT);
-    if (appRunningManager_->IsChildProcessReachLimit(applicationInfo->accessTokenId)) {
+    bool useMultiFeatureMaxCount = false;
+    if (!AAFwk::AppUtils::GetInstance().IsMultiProcessModel() &&
+        AllowChildProcessInMultiProcessFeatureApp(hostRecord)) {
+        useMultiFeatureMaxCount = true;
+    }
+    if (appRunningManager_->IsChildProcessReachLimit(applicationInfo->accessTokenId, useMultiFeatureMaxCount)) {
         TAG_LOGE(AAFwkTag::APPMGR, "child process count reach limit.");
         return AAFwk::ERR_CHILD_PROCESS_REACH_LIMIT;
     }
     return ERR_OK;
+}
+
+bool AppMgrServiceInner::AllowNativeChildProcess(int32_t childProcessType, const std::string appIdentifier)
+{
+    bool checkAllowList = childProcessType == CHILD_PROCESS_TYPE_NATIVE_ARGS ||
+        childProcessType == CHILD_PROCESS_TYPE_NATIVE;
+    return checkAllowList && AAFwk::AppUtils::GetInstance().IsAllowNativeChildProcess(appIdentifier);
+}
+
+bool AppMgrServiceInner::AllowChildProcessInMultiProcessFeatureApp(std::shared_ptr<AppRunningRecord> appRecord)
+{
+    if (!AAFwk::AppUtils::GetInstance().AllowChildProcessInMultiProcessFeatureApp()) {
+        return false;
+    }
+    CHECK_POINTER_AND_RETURN_VALUE(appRecord, false);
+    auto support = appRecord->IsSupportMultiProcessDeviceFeature();
+    if (support.has_value()) {
+        return support.value();
+    }
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN_VALUE(bundleMgrHelper, false);
+    BundleInfo bundleInfo;
+    auto ret = IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfoV9(appRecord->GetBundleName(),
+        static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo, appRecord->GetUserId()));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "getBundleInfo fail");
+        return false;
+    }
+    for (const auto &info : bundleInfo.hapModuleInfos) {
+        if (info.moduleType != AppExecFwk::ModuleType::ENTRY) {
+            continue;
+        }
+        auto &deviceFeatures = info.deviceFeatures;
+        auto supportMultiProcess =
+            std::find(deviceFeatures.begin(), deviceFeatures.end(), MULTI_PROCESS) != deviceFeatures.end();
+        appRecord->SetSupportMultiProcessDeviceFeature(supportMultiProcess);
+        return supportMultiProcess;
+    }
+    return false;
 }
 
 int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
@@ -8867,7 +8910,8 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     }
 
     if (!AAFwk::AppUtils::GetInstance().IsSupportNativeChildProcess() &&
-        !AAFwk::AppUtils::GetInstance().IsAllowNativeChildProcess(appRecord->GetAppIdentifier())) {
+        !AllowNativeChildProcess(CHILD_PROCESS_TYPE_NATIVE, appRecord->GetAppIdentifier()) &&
+        !AllowChildProcessInMultiProcessFeatureApp(appRecord)) {
         TAG_LOGE(AAFwkTag::APPMGR, "unSupport native child process");
         return AAFwk::ERR_NOT_SUPPORT_NATIVE_CHILD_PROCESS;
     }

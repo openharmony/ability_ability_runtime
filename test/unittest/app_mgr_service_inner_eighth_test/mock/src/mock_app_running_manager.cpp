@@ -361,7 +361,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByChildP
     return AAFwk::MyStatus::GetInstance().getAppRunningProcessPid_;
 }
 
-bool AppRunningManager::IsChildProcessReachLimit(uint32_t accessTokenId)
+bool AppRunningManager::IsChildProcessReachLimit(uint32_t accessTokenId, bool multiProcessFeature)
 {
     return AAFwk::MyStatus::GetInstance().isChildProcessReachLimit_;
 }
