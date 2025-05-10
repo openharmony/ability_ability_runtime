@@ -594,5 +594,23 @@ HWTEST_F(AbilityRecoveryUnitTest, TestLoadSavedState_001, TestSize.Level1)
     abilityRecovery_->missionId_ = 10;
     EXPECT_TRUE(!abilityRecovery_->LoadSavedState(StateReason::DEVELOPER_REQUEST));
 }
+
+/**
+ * @tc.name: SaveStateCallback_001
+ * @tc.desc: Test SaveStateCallback when enableFlag is false.
+ * @tc.type: FUNC
+ * @tc.require: I5UL6H
+ */
+HWTEST_F(AbilityRecoveryUnitTest, SaveStateCallback_001, TestSize.Level1)
+{
+    AppExecFwk::OnSaveStateResult result;
+    result.status = AppExecFwk::OnSaveResult::CONTINUATION_REJECT;
+    abilityRecovery_->ability_ = mockAbility_;
+    abilityRecovery_->SaveStateCallback(result);
+    EXPECT_NE(abilityRecovery_->ability_.lock(), nullptr);
+    result.status = AppExecFwk::OnSaveResult::ALL_AGREE;
+    abilityRecovery_->SaveStateCallback(result);
+    EXPECT_NE(abilityRecovery_->ability_.lock(), nullptr);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
