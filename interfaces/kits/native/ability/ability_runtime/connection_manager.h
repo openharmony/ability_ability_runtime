@@ -23,6 +23,7 @@
 #include "ability_connection.h"
 #include "element_name.h"
 #include "errors.h"
+#include "extension_ability_info.h"
 #include "operation.h"
 #include "want.h"
 
@@ -147,7 +148,7 @@ public:
 
     /**
      * @brief connect appService ability connection.
-     * 
+     *
      * @param connectCaller The connection caller.
      * @param connectReceiver The connection receiver.
      * @param connectCallback The connection callback.

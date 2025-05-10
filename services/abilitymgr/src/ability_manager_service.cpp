@@ -4655,10 +4655,10 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
 
     if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
         auto targetService = connectManager->GetServiceRecordByAbilityRequest(abilityRequest);
-        if (targetService == nullptr || targetService->IsAbilityState(AbilityState::INACTIVE)) {
-            result = CheckCallAppServiceExtensionPermission(abilityRequest, true);
-        } else {
+        if (targetService != nullptr && targetService->IsAbilityState(AbilityState::ACTIVE)) {
             result = CheckCallAppServiceExtensionPermission(abilityRequest, false);
+        } else {
+            result = CheckCallAppServiceExtensionPermission(abilityRequest, true);
         }
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "CheckCallAppServiceExtensionPermission result: %{public}d", result);
     } else {
@@ -10031,19 +10031,17 @@ AAFwk::PermissionVerification::VerificationInfo AbilityManagerService::CreateVer
 int32_t AbilityManagerService::CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest,
     bool isVerifyAppIdentifierAllowList)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "APP_SERVICE begin");
     if (!AppUtils::GetInstance().IsSupportAppServiceExtension()) {
-        return CHECK_PERMISSION_FAILED;
+        return ERR_CAPABILITY_NOT_SUPPORT;
     }
     if (isVerifyAppIdentifierAllowList && !VerifySameAppOrAppIdentifierAllowListPermission(abilityRequest)) {
         return ERR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST;
     }
-    int result = AAFwk::PermissionVerification::GetInstance()->
-        CheckCallAppServiceExtensionPermission(abilityRequest.appInfo.accessTokenId);
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "without start appServiceExtension permission");
+    if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(abilityRequest.appInfo.accessTokenId,
+        PermissionConstants::PERMISSION_SUPPORT_APP_SERVICE_EXTENSION)) {
+        return CHECK_PERMISSION_FAILED;
     }
-    return result;
+    return ERR_OK;
 }
 
 int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequest &abilityRequest)
@@ -11882,19 +11880,19 @@ bool AbilityManagerService::VerifySameAppOrAppIdentifierAllowListPermission(cons
     int32_t userId = GetUserId();
     std::string callerAppIdentifier = abilityRequest.want.GetStringParam(Want::PARAM_RESV_CALLER_APP_IDENTIFIER);
     if (callerAppIdentifier.empty()) {
-        AppExecFwk::BundleInfo callerBundleInfo;
+        AppExecFwk::SignatureInfo signatureInfo;
         auto abilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
         if (abilityRecord == nullptr) {
             return false;
         }
         std::string callerBundleName = abilityRecord->GetApplicationInfo().bundleName;
-        if (!IN_PROCESS_CALL(bms->GetSignatureInfoByBundleName(callerBundleName,
-            callerAppIdentifier))) {
+        if (IN_PROCESS_CALL(bms->GetSignatureInfoByBundleName(callerBundleName,
+            signatureInfo)) != ERR_OK) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR,
-                    "bms GetSignatureInfoByBundleName error, bundleName: %{public}s", callerBundleName);
+                    "bms GetSignatureInfoByBundleName error, bundleName: %{public}s", callerBundleName.c_str());
                 return false;
             };
-        callerAppIdentifier = callerBundleInfo.signatureInfo.appIdentifier;
+        callerAppIdentifier = signatureInfo.appIdentifier;
     }
     if (!IN_PROCESS_CALL(bms->GetBundleInfo(targetBundleName, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO,
         targetBundleInfo, userId))) {
@@ -11903,10 +11901,12 @@ bool AbilityManagerService::VerifySameAppOrAppIdentifierAllowListPermission(cons
     }
     for (const AppExecFwk::ExtensionAbilityInfo& info: targetBundleInfo.extensionInfos) {
         if (info.type == AppExecFwk::ExtensionAbilityType::APP_SERVICE &&
-            info.name == abilityRequest.want.abilityName &&
-            std::find(info.appIdentifierAllowList.begin(), info.appIdentifierAllowList.end(),
-            callerAppIdentifier) != info.appIdentifierAllowList.end()) {
-            return true;
+            info.name == abilityRequest.abilityInfo.name) {
+            if (std::find(info.appIdentifierAllowList.begin(), info.appIdentifierAllowList.end(),
+                callerAppIdentifier) != info.appIdentifierAllowList.end()) {
+                return true;
+            }
+            return false;
         }
     }
     return false;

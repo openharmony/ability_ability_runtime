@@ -164,13 +164,9 @@ public:
 
     virtual ErrCode StartServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId = -1) = 0;
 
-    virtual ErrCode StartAppServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId = -1) = 0;
-
     virtual ErrCode StartUIServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId = -1) = 0;
 
     virtual ErrCode StopServiceExtensionAbility(const AAFwk::Want& want, int32_t accountId = -1) = 0;
-
-    virtual ErrCode StopAppServiceExtensionAbility(const AAFwk::Want& want, int32_t accountId = -1) = 0;
 
     virtual ErrCode TerminateAbilityWithResult(const AAFwk::Want &want, int resultCode) = 0;
 
@@ -220,6 +216,8 @@ public:
     virtual ErrCode ConnectUIServiceExtensionAbility(const AAFwk::Want& want,
         const sptr<AbilityConnectCallback>& connectCallback) = 0;
 
+    virtual ErrCode StartAppServiceExtensionAbility(const AAFwk::Want &want) = 0;
+    virtual ErrCode StopAppServiceExtensionAbility(const AAFwk::Want& want) = 0;
     /**
     * @brief Connects the current ability to an appService ability using the AbilityInfo.AbilityType.SERVICE template.
     *

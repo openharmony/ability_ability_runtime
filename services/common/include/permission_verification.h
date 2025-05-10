@@ -91,8 +91,6 @@ struct VerificationInfo {
 
     int CheckStartByCallPermission(const VerificationInfo &verificationInfo) const;
 
-    int CheckCallAppServiceExtensionPermission(int32_t accessTokenId) const;
-
     bool JudgeCallerIsAllowedToUseSystemAPI() const;
 
     bool IsSystemAppCall() const;

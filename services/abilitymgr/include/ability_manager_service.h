@@ -2113,7 +2113,7 @@ protected:
     
     /**
      * Check if Caller is allowed to start AppServiceExtension(Stage).
-     * 
+     *
      * @param abilityRequest, abilityRequest.
      * @return Returns whether the caller is allowed to start AppServiceExtension.
      */

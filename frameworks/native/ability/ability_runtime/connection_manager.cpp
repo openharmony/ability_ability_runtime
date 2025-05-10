@@ -148,6 +148,7 @@ bool ConnectionManager::MatchConnection(
 
 ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCaller, const AAFwk::Want& want,
     int accountId, const sptr<AbilityConnectCallback>& connectCallback, AppExecFwk::ExtensionAbilityType extensionType)
+{
     TAG_LOGD(AAFwkTag::CONNECTION, "called");
     sptr<AbilityConnection> abilityConnection = new AbilityConnection();
     if (abilityConnection == nullptr) {
@@ -157,7 +158,7 @@ ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCa
     abilityConnection->AddConnectCallback(connectCallback);
     abilityConnection->SetConnectionState(CONNECTION_STATE_CONNECTING);
     ErrCode ret = ERR_OK;
-    ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
+    ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbilityWithExtensionType(
         want, abilityConnection, connectCaller, accountId, extensionType);
     std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     if (ret == ERR_OK) {

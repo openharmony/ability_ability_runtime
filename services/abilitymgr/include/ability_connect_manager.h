@@ -363,7 +363,7 @@ public:
 
     /**
      * GetServiceRecordByAbilityRequest.
-     * 
+     *
      * @param abilityRequest, the request of the service ability to start.
      * @return Returns AbilityRecord shared_ptr.
      */
