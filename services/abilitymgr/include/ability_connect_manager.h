@@ -361,6 +361,14 @@ public:
      */
     void HandleExtensionDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
 
+    /**
+     * GetServiceRecordByAbilityRequest.
+     *
+     * @param abilityRequest, the request of the service ability to start.
+     * @return Returns AbilityRecord shared_ptr.
+     */
+    std::shared_ptr<AbilityRecord> GetServiceRecordByAbilityRequest(const AbilityRequest &abilityRequest);
+
 private:
     /**
      * StartAbilityLocked with request.

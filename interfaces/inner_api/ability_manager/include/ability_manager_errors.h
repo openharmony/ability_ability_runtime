@@ -739,6 +739,11 @@ enum {
     ERR_NULL_SESSION_INFO = 2097317,
 
     /**
+     * Result (2097331) for target not in app identifier allow list.
+     */
+    ERR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST = 2097331,
+
+    /**
      * Native error(3000000) for target bundle not exist.
      */
     ERR_CODE_NOT_EXIST = 3000000,
