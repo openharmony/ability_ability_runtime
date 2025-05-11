@@ -229,5 +229,18 @@ bool AppUtils::IsCacheExtensionAbilityByList(const std::string& bundleName, cons
     return true;
 }
 
+void AppUtils::LoadResidentWhiteList()
+{
+}
+
+const std::vector<std::string>& AppUtils::GetResidentWhiteList()
+{
+    return {};
+}
+
+bool AppUtils::InResidentWhiteList(const std::string &bundleName)
+{
+    return true;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

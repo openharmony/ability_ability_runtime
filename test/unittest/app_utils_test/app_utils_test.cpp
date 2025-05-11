@@ -351,5 +351,35 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1600, TestSize.Level2)
     EXPECT_TRUE(allow);
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1600 end.");
 }
+
+/**
+ * @tc.number: AppUtilsTest_1700
+ * @tc.desc: Test IsAllowNativeChildProcess works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_1700, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1700 called.");
+    auto allow = AAFwk::AppUtils::GetInstance().InResidentWhiteList("com.test.demo");
+    EXPECT_FALSE(allow);
+}
+
+/**
+ * @tc.number: AppUtilsTest_1800
+ * @tc.desc: Test IsAllowNativeChildProcess works
+ * @tc.type: FUNC
+ */
+ HWTEST_F(AppUtilsTest, AppUtilsTest_1800, TestSize.Level2)
+ {
+     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1800 called.");
+     auto residentWhiteList = AAFwk::AppUtils::GetInstance().GetResidentWhiteList();
+     bool isExist = false;
+     for (const auto &item: residentWhiteList) {
+        if (item == "com.test.demo") {
+            isExist = true;
+        }
+    }
+    EXPECT_FALSE(isExist);
+ }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

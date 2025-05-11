@@ -301,6 +301,10 @@ public:
      */
     bool IsSystemReasonMessage(const std::string &reasonMessage);
 
+    bool InResidentWhiteList(const std::string &bundleName);
+
+    const std::vector<std::string> &GetResidentWhiteList();
+
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.
@@ -343,6 +347,8 @@ private:
      *
      */
     void LoadRequireBigMemoryApp();
+
+    void LoadResidentWhiteList();
 
     /**
      * AppUtils, private constructor.
@@ -389,6 +395,8 @@ private:
     DeviceConfiguration<std::string> migrateClientBundleName_ = {true, "com.huwei.hmos.migratecilent"};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         cacheAbilityList_ = {false, {}};
+    DeviceConfiguration<std::vector<std::string>> residentWhiteList_ = {false, {}};
+    std::mutex residentWhiteListMutex_;
     DISALLOW_COPY_AND_MOVE(AppUtils);
 };
 }  // namespace AAFwk
