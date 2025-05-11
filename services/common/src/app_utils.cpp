@@ -83,6 +83,8 @@ constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_
 constexpr const char* CACHE_ABILITY_BY_LIST_ENABLE = "persist.sys.abilityms.cache_ability_enable";
 constexpr const char* CACHE_ABILITY_LIST_PATH = "etc/ability/abilityms_cache_ability.json";
 constexpr const char* CACHE_PROCESS_NAME = "cache_list";
+constexpr const char* RESIDENT_WHITE_LIST_PATH = "etc/ability_runtime/resident_process.json";
+constexpr const char* NORMAL_RESIDENT_APPS = "normal_resident_apps";
 }
 
 AppUtils::~AppUtils() {}
@@ -676,5 +678,55 @@ bool AppUtils::IsCacheExtensionAbilityByList(const std::string& bundleName, cons
     return false;
 }
 
+void AppUtils::LoadResidentWhiteList()
+{
+    nlohmann::json object;
+    if (!JsonUtils::GetInstance().LoadConfiguration(RESIDENT_WHITE_LIST_PATH, object)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "load cache_ability file failed");
+        return;
+    }
+    if (!object.contains(NORMAL_RESIDENT_APPS) ||
+        !object.at(NORMAL_RESIDENT_APPS).is_array()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "cache_ability file invalid");
+        return;
+    }
+
+    for (auto &item : object.at(NORMAL_RESIDENT_APPS).items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.is_string()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load cache_ability bundleName failed");
+            return;
+        }
+        residentWhiteList_.value.emplace_back(jsonObject.get<std::string>());
+    }
+}
+
+const std::vector<std::string>& AppUtils::GetResidentWhiteList()
+{
+    std::lock_guard lock(residentWhiteListMutex_);
+    if (!residentWhiteList_.isLoaded) {
+        LoadResidentWhiteList();
+        residentWhiteList_.isLoaded = true;
+    }
+    return residentWhiteList_.value;
+}
+
+bool AppUtils::InResidentWhiteList(const std::string &bundleName)
+{
+    std::lock_guard lock(residentWhiteListMutex_);
+    if (!residentWhiteList_.isLoaded) {
+        LoadResidentWhiteList();
+        residentWhiteList_.isLoaded = true;
+    }
+    if (residentWhiteList_.value.empty()) {
+        return true;
+    }
+    for (const auto &item: residentWhiteList_.value) {
+        if (bundleName == item) {
+            return true;
+        }
+    }
+    return false;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

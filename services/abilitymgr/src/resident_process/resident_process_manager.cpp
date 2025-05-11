@@ -18,6 +18,7 @@
 #include "ability_manager_service.h"
 #include "ability_resident_process_rdb.h"
 #include "ability_util.h"
+#include "app_utils.h"
 #include "ffrt.h"
 #include "keep_alive_utils.h"
 #include "main_element_utils.h"
@@ -83,7 +84,7 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
 void ResidentProcessManager::StartResidentProcessWithMainElementPerBundle(const AppExecFwk::BundleInfo &bundleInfo,
     size_t index, std::set<uint32_t> &needEraseIndexSet, int32_t userId)
 {
-    if (userId != 0 && !AmsConfigurationParameter::GetInstance().InResidentWhiteList(bundleInfo.name)) {
+    if (userId != 0 && !AppUtils::GetInstance().InResidentWhiteList(bundleInfo.name)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "not in resident allow list");
         needEraseIndexSet.insert(index);
         return;
@@ -314,7 +315,7 @@ bool ResidentProcessManager::GetResidentBundleInfosForUser(std::vector<AppExecFw
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     CHECK_POINTER_AND_RETURN(bundleMgrHelper, false);
 
-    const auto &residentWhiteList = AmsConfigurationParameter::GetInstance().GetResidentWhiteList();
+    const auto &residentWhiteList = AppUtils::GetInstance().GetResidentWhiteList();
     if (userId == 0 || residentWhiteList.empty()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "userId: %{public}d", userId);
         return IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfos(OHOS::AppExecFwk::GET_BUNDLE_DEFAULT,
