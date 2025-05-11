@@ -2110,6 +2110,15 @@ protected:
     void OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
         const std::string &bundleName, const std::vector<std::string> &abilityNames,
         const std::vector<std::string> &uiExtensionNames) override;
+    
+    /**
+     * Check if Caller is allowed to start AppServiceExtension(Stage).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start AppServiceExtension.
+     */
+    int32_t CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest,
+        bool isVerifyAppIdentifierAllowList);
 
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
@@ -2529,6 +2538,7 @@ private:
     int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex, int32_t userId);
 
     int32_t CheckDebugAssertPermission();
+    bool VerifySameAppOrAppIdentifierAllowListPermission(const AbilityRequest &abilityRequest);
     std::shared_ptr<AbilityDebugDeal> ConnectInitAbilityDebugDeal();
 
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,

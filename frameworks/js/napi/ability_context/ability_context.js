@@ -240,6 +240,22 @@ class AbilityContext extends Context {
   setColorMode(colorMode) {
     this.__context_impl__.setColorMode(colorMode);
   };
+
+  startAppServiceExtensionAbility(want) {
+    return this.__context_impl__.startAppServiceExtensionAbility(want);
+  }
+
+  stopAppServiceExtensionAbility(want) {
+    return this.__context_impl__.stopAppServiceExtensionAbility(want);
+  }
+
+  connectAppServiceExtensionAbility(want, options) {
+    return this.__context_impl__.connectAppServiceExtensionAbility(want, options);
+  }
+
+  disconnectAppServiceExtensionAbility(connection, callback) {
+    return this.__context_impl__.disconnectAppServiceExtensionAbility(connection, callback);
+  }
 }
 
 export default AbilityContext;
