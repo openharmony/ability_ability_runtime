@@ -2196,7 +2196,7 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& app
             TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
             return;
         }
-    
+
         AbilityInfo abilityInfo;
         abilityInfo.bundleName = appInfo.bundleName;
         abilityInfo.package = moduleName;
@@ -3881,7 +3881,6 @@ void MainThread::HandleConfigByPlugin(Configuration &config, BundleInfo &bundleI
     }
 
     entry(config, bundleInfo);
-    dlclose(handle);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
