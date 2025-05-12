@@ -141,6 +141,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit/app_startup/startup_utils.cpp",
     "${ability_runtime_native_path}/appkit/dfr/appfreeze_inner.cpp",
     "${ability_runtime_native_path}/appkit/dfr/appfreeze_state.cpp",
+    "${ability_runtime_native_path}/appkit/dfr/dump_process_helper.cpp",
     "${ability_runtime_native_path}/appkit/dfr/watchdog.cpp",
   ]
   cflags = []

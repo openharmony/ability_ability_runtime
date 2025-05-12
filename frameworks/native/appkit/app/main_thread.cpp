@@ -50,6 +50,7 @@
 #include "display_util.h"
 #include "dump_ffrt_helper.h"
 #include "dump_ipc_helper.h"
+#include "dump_process_helper.h"
 #include "dump_runtime_helper.h"
 #include "exit_reason.h"
 #include "extension_ability_info.h"
@@ -158,6 +159,7 @@ constexpr char EVENT_KEY_CANGJIE[] = "CANGJIE";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
 constexpr char EVENT_KEY_PNAME[] = "PNAME";
 constexpr char EVENT_KEY_APP_RUNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
+constexpr char EVENT_KEY_PROCESS_RSS_MEMINFO[] = "PROCESS_RSS_MEMINFO";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
 constexpr char KILL_REASON[] = "Kill Reason:Js Error";
@@ -1306,7 +1308,8 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
                 EVENT_KEY_HAPPEN_TIME, timet,
                 EVENT_KEY_REASON, errName,
                 EVENT_KEY_JSVM, JSVM_TYPE,
-                EVENT_KEY_SUMMARY, errSummary);
+                EVENT_KEY_SUMMARY, errSummary,
+                EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
             ErrorObject appExecErrorObj = {
                 .name = errName,
                 .message = errMsg,
@@ -1323,8 +1326,7 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
             // if app's callback has been registered, let app decide whether exit or not.
             TAG_LOGE(AAFwkTag::APPKIT,
                 "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n%{public}s\n"
-                "message: %{public}s\n"
-                "stack: %{public}s",
+                "message: %{public}s\nstack: %{public}s",
                 bundleName.c_str(), errName.c_str(), summary.c_str(), errMsg.c_str(), errStack.c_str());
             AAFwk::ExitReason exitReason = { REASON_CJ_ERROR, errName };
             AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
@@ -1667,7 +1669,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     EVENT_KEY_JSVM, JSVM_TYPE,
                     EVENT_KEY_SUMMARY, summary,
                     EVENT_KEY_PNAME, processName,
-                    EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId);
+                    EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId,
+                    EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
                 ErrorObject appExecErrorObj = {
                     .name = errorObj.name,
                     .message = errorObj.message,
