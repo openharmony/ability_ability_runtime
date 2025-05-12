@@ -35,9 +35,13 @@ public:
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
     void SetAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo> &info);
 
+    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const override;
+    std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) override;
+    std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;
+
     Options GetOptions() override;
     void SetOptions(const Options &options) override;
-    std::string GetBundleName() override;
+    std::string GetBundleName() const override;
     std::string GetBundleCodePath() override;
     std::string GetBundleCodeDir() override;
     std::string GetCacheDir() override;
@@ -51,13 +55,20 @@ public:
     void SwitchArea(int mode) override;
     int GetArea() override;
     std::string GetBaseDir() override;
-    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const;
     void SetResourceManager(const std::shared_ptr<Global::Resource::ResourceManager> &resMgr);
     void SetAbilityStageContext(const std::shared_ptr<AbilityStageContext> &stageContext);
     bool IsTerminating();
     void SetTerminating(const bool &state);
     int32_t TerminateSelf();
     void SetSimulator(Simulator *simulator);
+    using SelfType = AbilityContext;
+    static const size_t CONTEXT_TYPE_ID;
+
+protected:
+    bool IsContext(size_t contextTypeId) override
+    {
+        return contextTypeId == CONTEXT_TYPE_ID || Context::IsContext(contextTypeId);
+    }
 
 private:
     static const int EL_DEFAULT = 1;
