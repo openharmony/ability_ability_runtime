@@ -72,8 +72,22 @@ void SetCreateCompleteCallback(ani_env *env, std::shared_ptr<std::shared_ptr<Con
     auto context = *contextPtr;
     if (!context) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed to create context");
+        ani_class cls = nullptr;
+        ani_status status = env->FindClass("Lapplication/Context/Context;", &cls);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPKIT, "find Context failed status: %{public}d", status);
+        }
+        ani_method method = nullptr;
+        status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod ctor failed status: %{public}d", status);
+        }
+        ani_object objValue = nullptr;
+        if (env->Object_New(cls, method, &objValue) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Object_New failed status: %{public}d", status);
+        }
         AppExecFwk::AsyncCallback(env, callback, CreateStsError(env,
-            AbilityErrorCode::ERROR_CODE_INVALID_PARAM), nullptr);
+            AbilityErrorCode::ERROR_CODE_INVALID_PARAM), objValue);
         return;
     }
     ani_class cls {};
