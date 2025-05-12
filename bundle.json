@@ -194,6 +194,13 @@
           },
           {
             "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/ability/native/form_runtime",
+              "header_files": []
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:cj_form_extension"
+          },
+          {
+            "header": {
               "header_base": "//foundation/ability/ability_runtime/frameworks/cj/ffi/context",
               "header_files": []
             },
