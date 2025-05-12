@@ -2645,8 +2645,10 @@ int32_t AbilityManagerService::RecordAppExitReason(const ExitReason &exitReason)
 
 int32_t AbilityManagerService::RecordProcessExitReason(const int32_t pid, const ExitReason &exitReason)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "recordProcessExitReason pid:%{public}d, reason:%{public}d, exitMsg:%{public}s",
-        pid, exitReason.reason, exitReason.exitMsg.c_str());
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "recordProcessExitReason pid:%{public}d, reason:%{public}d, exitMsg:%{public}s, callerPid:%{public}d",
+        pid, exitReason.reason, exitReason.exitMsg.c_str(), callerPid);
 
     if (!AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
         !AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
@@ -2665,8 +2667,10 @@ int32_t AbilityManagerService::RecordProcessExitReason(int32_t pid, int32_t uid,
         return ERR_NO_PERMISSION_CALLER;
     }
 
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "[EXIT_REASON_TAG] pid:%{public}d, reason:%{public}d, exitMsg:%{public}s",
-        pid, exitReason.reason, exitReason.exitMsg.c_str());
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "[EXIT_REASON_TAG] pid:%{public}d, reason:%{public}d, exitMsg:%{public}s, callerPid:%{public}d",
+        pid, exitReason.reason, exitReason.exitMsg.c_str(), callerPid);
 
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_APP_EXIT_REASON_HELPER);
     return appExitReasonHelper_->RecordProcessExitReason(pid, uid, exitReason);
