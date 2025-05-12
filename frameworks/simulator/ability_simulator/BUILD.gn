@@ -62,6 +62,7 @@ ohos_shared_library("ability_simulator_inner") {
       "src/bundle_parser/module_info.cpp",
       "src/bundle_parser/module_profile.cpp",
       "src/common_func.cpp",
+      "src/context_impl.cpp",
       "src/js_ability_context.cpp",
       "src/js_ability_stage_context.cpp",
       "src/js_application_context_utils.cpp",
