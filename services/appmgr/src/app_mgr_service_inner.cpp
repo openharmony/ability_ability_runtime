@@ -5565,6 +5565,11 @@ void AppMgrServiceInner::InitGlobalConfiguration()
     auto language = OHOS::Global::I18n::LocaleConfig::GetEffectiveLanguage();
     TAG_LOGI(AAFwkTag::APPMGR, "current global language: %{public}s", language.c_str());
     globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
+
+    auto locale = OHOS::Global::I18n::LocaleConfig::GetEffectiveLocale();
+    TAG_LOGI(AAFwkTag::APPMGR, "current global locale: %{public}s", locale.c_str());
+    globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE, locale);
+
     std::string sysHour = OHOS::Global::I18n::LocaleConfig::GetSystemHour();
     TAG_LOGI(AAFwkTag::APPMGR, "current 24 hour clock: %{public}s", sysHour.c_str());
     globalConfiguration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_HOUR, sysHour);

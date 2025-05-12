@@ -32,6 +32,8 @@ public:
     ~ResourceConfigHelper() = default;
     std::string GetLanguage();
     void SetLanguage(std::string language);
+    std::string GetLocale();
+    void SetLocale(const std::string& locale);
     std::string GetColormode();
     void SetColormode(std::string colormode);
     std::string GetHasPointerDevice();
@@ -50,6 +52,7 @@ public:
 
 private:
     std::string language_;
+    std::string locale_;
     std::string colormode_;
     std::string hasPointerDevice_;
     std::string mcc_;
