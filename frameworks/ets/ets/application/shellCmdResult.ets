@@ -15,12 +15,12 @@
 
 interface ShellCmdResult {
     stdResult: string;
-    exitCode: int;
+    exitCode: number;
   }
-  
+
   class ShellCmdResultImpl implements ShellCmdResult {
     public stdResult: string = '';
-    public exitCode: int = 0;
+    public exitCode: number = 0;
   }
-  
+
   export default ShellCmdResult;
