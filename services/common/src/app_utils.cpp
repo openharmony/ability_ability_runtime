@@ -533,10 +533,12 @@ bool AppUtils::IsPrepareTerminateEnabled()
 
     bool AppUtils::IsCacheExtensionAbilityByList(const std::string& bundleName, const std::string& abilityName)
     {
-        /* only load once, mutex lock already in caller function */
         if (!cacheAbilityList_.isLoaded) {
-            LoadCacheAbilityList();
-            cacheAbilityList_.isLoaded = true;
+            std::lock_guard lock(cacheAbilityListMutex_);
+            if (!cacheAbilityList_.isLoaded) {
+                LoadCacheAbilityList();
+                cacheAbilityList_.isLoaded = true;
+            }
         }
 
         if (cacheAbilityList_.value.empty() || !IsCacheAbilityEnabled()) {
