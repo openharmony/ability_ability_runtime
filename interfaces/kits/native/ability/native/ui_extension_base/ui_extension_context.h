@@ -158,6 +158,7 @@ public:
     std::shared_ptr<AppExecFwk::Configuration> GetAbilityConfiguration() const;
     void SetAbilityConfiguration(const AppExecFwk::Configuration &config);
     void SetAbilityColorMode(int32_t colorMode);
+    void NotifyComponentTerminate();
 #ifdef SUPPORT_SCREEN
     void SetWindow(sptr<Rosen::Window> window);
 

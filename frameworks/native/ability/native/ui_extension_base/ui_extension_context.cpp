@@ -21,6 +21,7 @@
 #include "hitrace_meter.h"
 #include "configuration_convertor.h"
 #include "configuration.h"
+#include "string_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -384,6 +385,33 @@ void UIExtensionContext::SetAbilityColorMode(int32_t colorMode)
         return;
     }
     abilityConfigUpdateCallback_(config);
+}
+
+void UIExtensionContext::NotifyComponentTerminate()
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "NotifyComponentTerminate called");
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = GetAbilityInfo();
+    if (!info) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null info");
+        return;
+    }
+    if (screenMode_ != AAFwk::EMBEDDED_FULL_SCREEN_MODE ||
+        info->applicationInfo.bundleType != AppExecFwk::BundleType::ATOMIC_SERVICE ) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "not fullscreen or atomic service, screenMode_:%{public}d, bundleType:%{public}d",
+            screenMode_, static_cast<uint32_t>(info->applicationInfo.bundleType));
+        return;
+    }
+    if (!window_) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null window_");
+        return;
+    }
+    AAFwk::WantParams params;
+    params.SetParam(
+        AAFwk::EMBEDDED_FULL_SCREEN_TERMINATE_KEY, AAFwk::String::Box(AAFwk::EMBEDDED_FULL_SCREEN_TERMINATE_VALUE));
+    auto ret = window_->TransferExtensionData(params);
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "transfer extension data failed, ret:%{public}d", ret);
+    }
 }
 
 int32_t UIExtensionContext::curRequestCode_ = 0;
