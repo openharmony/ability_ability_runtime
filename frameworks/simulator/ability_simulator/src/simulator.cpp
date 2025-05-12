@@ -41,6 +41,8 @@
 #include "JsMockUtil.h"
 #include "launch_param.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
+#include "res_config.h"
+#include "resource_manager_helper.h"
 #include "resource_manager.h"
 #include "window_scene.h"
 #include "sys_timer.h"
@@ -183,6 +185,12 @@ void DebuggerTask::OnPostTask(std::function<void()> &&task)
 
 SimulatorImpl::~SimulatorImpl()
 {
+    if (context_ != nullptr) {
+        context_->Unbind();
+    }
+    if (stageContext_ != nullptr) {
+        stageContext_->Unbind();
+    }
     if (nativeEngine_) {
         uv_close(reinterpret_cast<uv_handle_t*>(&debuggerTask_.onPostTaskSignal), nullptr);
         uv_loop_t* uvLoop = nullptr;
@@ -283,6 +291,9 @@ bool SimulatorImpl::ParseBundleAndModuleInfo()
     nlohmann::json appInfoJson;
     to_json(appInfoJson, *appInfo_);
     std::cout << "appinfo : " << appInfoJson.dump() << std::endl;
+
+    AppExecFwk::BundleContainer::GetInstance().LoadDependencyHspInfo(appInfo_->bundleName, options_.dependencyHspInfos);
+    AppExecFwk::BundleContainer::GetInstance().SetBundleCodeDir(options_.previewPath);
 
     options_.bundleName = appInfo_->bundleName;
     options_.compatibleVersion = appInfo_->apiCompatibleVersion;
@@ -474,6 +485,22 @@ void SimulatorImpl::InitJsAbilityStageContext(napi_value obj)
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "null obj");
         return;
     }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(stageContext_);
+    auto status = napi_wrap(nativeEngine_, contextObj, workContext,
+        [](napi_env, void *data, void*) {
+            TAG_LOGD(AAFwkTag::ABILITY_SIM, "finalizer for weak_ptr ui ability context");
+            delete static_cast<std::weak_ptr<AbilityStageContext> *>(data);
+        },
+        nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "wrap ability context failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
+
+    JsRuntime jsRuntime;
+    stageContext_->Bind(jsRuntime, jsStageContext_.get());
     napi_set_named_property(nativeEngine_, obj, "context", contextObj);
 }
 
@@ -576,9 +603,17 @@ void SimulatorImpl::InitResourceMgr()
     }
 
     if (!resourceMgr_->AddResource(options_.resourcePath.c_str())) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Add resource failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Add app resource failed");
     }
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "Add resource success");
+    ResourceManagerHelper::GetInstance().Init(options_);
+    ResourceManagerHelper::GetInstance().AddSystemResource(resourceMgr_);
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (resConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null resConfig");
+        return;
+    }
+    ResourceManagerHelper::GetInstance().GetResConfig(*resConfig);
+    resourceMgr_->UpdateResConfig(*resConfig);
 }
 
 void SimulatorImpl::InitJsAbilityContext(napi_env env, napi_value obj)
@@ -608,6 +643,22 @@ void SimulatorImpl::InitJsAbilityContext(napi_env env, napi_value obj)
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "null obj");
         return;
     }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(context_);
+    auto status = napi_wrap(nativeEngine_, contextObj, workContext,
+        [](napi_env, void *data, void*) {
+            TAG_LOGD(AAFwkTag::ABILITY_SIM, "finalizer for weak_ptr ui ability context");
+            delete static_cast<std::weak_ptr<AbilityContext> *>(data);
+        },
+        nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "wrap ability context failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
+
+    JsRuntime jsRuntime;
+    context_->Bind(jsRuntime, systemModule.get());
     napi_set_named_property(env, obj, "context", contextObj);
     jsContexts_.emplace(currentId_, systemModule);
 }
