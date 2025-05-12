@@ -267,6 +267,12 @@ void CompletePromiseVoidCallbackWork(napi_env env, napi_status status, void *dat
 std::vector<uint8_t> ConvertU8Vector(napi_env env, napi_value jsValue);
 
 std::vector<std::string> ConvertStringVector(napi_env env, napi_value jsValue);
+
+napi_value WrapLocaleToJS(napi_env env, const std::string &locale);
+
+bool UnwrapLocaleByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, std::string &value);
+
+bool UnwrapLocaleFromJS(napi_env env, napi_value jsValue, std::string &value);
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_NAPI_COMMON_UTIL_H
