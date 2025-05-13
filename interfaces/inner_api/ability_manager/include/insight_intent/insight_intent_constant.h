@@ -70,6 +70,15 @@ namespace OHOS::AbilityRuntime {
         GET_FULL_INSIGHT_INTENT = 1,
         GET_SUMMARY_INSIGHT_INTENT
     };
+
+    enum class InsightIntentType : uint8_t {
+        DECOR_NONE = 0,
+        DECOR_LINK = 1,
+        DECOR_PAGE = 2,
+        DECOR_FUNC = 3,
+        DECOR_FORM = 4,
+        DECOR_ENTRY = 5,
+    };
 } // namespace OHOS::AbilityRuntime
 
 #endif // OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_CONSTANT_H
