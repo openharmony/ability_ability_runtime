@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,12 +32,12 @@ using namespace OHOS::AppExecFwk;
 
 extern "C" __attribute__((visibility("default"))) FormExtension* OHOS_ABILITY_CJFormExtension()
 {
-    return new (std::nothrow) CJFormExtension();
+    return new CJFormExtension();
 }
 
 CJFormExtension* CJFormExtension::Create(const std::unique_ptr<Runtime>& runtime)
 {
-    TAG_LOGI(AAFwkTag::FORM_EXT, "call");
+    TAG_LOGD(AAFwkTag::FORM_EXT, "call");
     return new CJFormExtension();
 }
 
@@ -45,10 +45,11 @@ CJFormExtension::CJFormExtension() {}
 CJFormExtension::~CJFormExtension()
 {
     TAG_LOGD(AAFwkTag::FORM_EXT, "destructor");
-    // auto context = GetContext();
-    // if (context) {
-    //     context->Unbind();
-    // }
+    auto context = GetContext();
+    if (context) {
+        context->Unbind();
+    }
+    cjObj_.Destroy();
 }
 
 void CJFormExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
@@ -58,149 +59,116 @@ void CJFormExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
 {
     TAG_LOGD(AAFwkTag::FORM_EXT, "call");
     FormExtension::Init(record, application, handler, token);
-    int32_t ret = cjObj_.Init(abilityInfo_->name);
+    // init and bindContext
+    int32_t ret = cjObj_.Init(abilityInfo_->name, this);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "cjFormExtension Init failed");
-        return;
     }
 }
 
 OHOS::AppExecFwk::FormProviderInfo CJFormExtension::OnCreate(const OHOS::AAFwk::Want& want)
 {
-    TAG_LOGI(AAFwkTag::FORM_EXT, "call");
+    TAG_LOGD(AAFwkTag::FORM_EXT, "call");
 
-    cjObj_.OnAddForm(want);
+    CFormBindingData nativeResult = cjObj_.OnAddForm(want);
     OHOS::AppExecFwk::FormProviderInfo formProviderInfo;
-    // if (!CheckTypeForNapiValue(env, nativeResult, napi_object)) {
-    //     TAG_LOGE(AAFwkTag::FORM_EXT, "null nativeResult");
-    //     return formProviderInfo;
-    // }
 
-    // napi_value nativeDataValue = nullptr;
-    // napi_get_named_property(env, nativeResult, "data", &nativeDataValue);
-    // if (nativeDataValue == nullptr) {
-    //     TAG_LOGE(AAFwkTag::FORM_EXT, "null nativeResult");
-    //     return formProviderInfo;
-    // }
-    // std::string formDataStr;
-    // if (!ConvertFromJsValue(env, nativeDataValue, formDataStr)) {
-    //     TAG_LOGE(AAFwkTag::FORM_EXT, "Convert formDataStr failed");
-    //     return formProviderInfo;
-    // }
-    // AppExecFwk::FormProviderData formData = AppExecFwk::FormProviderData(formDataStr);
-    // formProviderInfo.SetFormData(formData);
-
-    // napi_value nativeProxies = nullptr;
-    // napi_get_named_property(env, nativeResult, "proxies", &nativeProxies);
-    // std::vector<FormDataProxy> formDataProxies;
-    // if (nativeProxies != nullptr && !ConvertFromDataProxies(env, nativeProxies, formDataProxies)) {
-    //     TAG_LOGW(AAFwkTag::FORM_EXT, "Convert formDataProxies failed");
-    //     return formProviderInfo;
-    // }
-    // formProviderInfo.SetFormDataProxies(formDataProxies);
-    TAG_LOGI(AAFwkTag::FORM_EXT, "ok");
+    if (nativeResult.data == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null nativeResult");
+        cjObj_.FreeCFormBindingData(nativeResult);
+        return formProviderInfo;
+    }
+    std::string formDataStr = std::string(nativeResult.data);
+    AppExecFwk::FormProviderData formData = AppExecFwk::FormProviderData(formDataStr);
+    formProviderInfo.SetFormData(formData);
+    std::vector<FormDataProxy> formDataProxies;
+    if (!ConvertFromDataProxies(nativeResult.cArrProxyData, formDataProxies)) {
+        TAG_LOGW(AAFwkTag::FORM_EXT, "Convert formDataProxies failed");
+        cjObj_.FreeCFormBindingData(nativeResult);
+        return formProviderInfo;
+    }
+    formProviderInfo.SetFormDataProxies(formDataProxies);
+    cjObj_.FreeCFormBindingData(nativeResult);
+    TAG_LOGD(AAFwkTag::FORM_EXT, "ok");
     return formProviderInfo;
 }
 
 void CJFormExtension::OnDestroy(const int64_t formId)
 {
-    TAG_LOGI(AAFwkTag::FORM_EXT, "formId: %{public}" PRId64, formId);
+    TAG_LOGD(AAFwkTag::FORM_EXT, "formId: %{public}" PRId64, formId);
     FormExtension::OnDestroy(formId);
-
-    // 
-    return;
+    cjObj_.OnRemoveForm(std::to_string(formId).c_str());
 }
 
 void CJFormExtension::OnStop()
 {
-    TAG_LOGI(AAFwkTag::FORM_EXT, "call");
+    TAG_LOGD(AAFwkTag::FORM_EXT, "call");
     cjObj_.OnStop();
     bool ret = ConnectionManager::GetInstance().DisconnectCaller(GetContext()->GetToken());
     if (ret) {
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
-        TAG_LOGI(AAFwkTag::FORM_EXT, "disconnected failed");
+        TAG_LOGD(AAFwkTag::FORM_EXT, "disconnected failed");
     }
-    return;
 }
 
 void CJFormExtension::OnEvent(const int64_t formId, const std::string& message)
 {
-    TAG_LOGI(AAFwkTag::FORM_EXT, "formId: %{public}" PRId64, formId);
+    TAG_LOGD(AAFwkTag::FORM_EXT, "formId: %{public}" PRId64, formId);
     FormExtension::OnEvent(formId, message);
-
-    return;
+    cjObj_.OnFormEvent(std::to_string(formId).c_str(), message.c_str());
 }
 
 void CJFormExtension::OnUpdate(const int64_t formId, const AAFwk::WantParams &wantParams)
 {
-    TAG_LOGI(AAFwkTag::FORM_EXT, "formId: %{public}" PRId64, formId);
+    TAG_LOGD(AAFwkTag::FORM_EXT, "formId: %{public}" PRId64, formId);
     FormExtension::OnUpdate(formId, wantParams);
-
-    return;
+    auto params = OHOS::AAFwk::WantParamWrapper(wantParams).ToString();
+    cjObj_.OnUpdateForm(std::to_string(formId).c_str(), params.c_str());
 }
 
 void CJFormExtension::OnCastToNormal(const int64_t formId)
 {
-    TAG_LOGI(AAFwkTag::FORM_EXT, "formId: %{public}" PRId64, formId);
+    TAG_LOGD(AAFwkTag::FORM_EXT, "formId: %{public}" PRId64, formId);
     FormExtension::OnCastToNormal(formId);
-
-    return;
+    cjObj_.OnCastToNormalForm(std::to_string(formId).c_str());
 }
 
 void CJFormExtension::OnVisibilityChange(const std::map<int64_t, int32_t>& formEventsMap)
 {
-    TAG_LOGI(AAFwkTag::FORM_EXT, "call");
+    TAG_LOGD(AAFwkTag::FORM_EXT, "call");
     FormExtension::OnVisibilityChange(formEventsMap);
-    return;
+    cjObj_.OnChangeFormVisibility(formEventsMap);
 }
 
 sptr<IRemoteObject> CJFormExtension::OnConnect(const OHOS::AAFwk::Want& want)
 {
     TAG_LOGD(AAFwkTag::FORM_EXT, "call");
     Extension::OnConnect(want);
-    // if (providerRemoteObject_ == nullptr) {
-    //     TAG_LOGD(AAFwkTag::FORM_EXT, "null providerRemoteObject");
-    //     sptr<FormExtensionProviderClient> providerClient = new (std::nothrow) FormExtensionProviderClient();
-    //     if (providerClient == nullptr) {
-    //         TAG_LOGE(AAFwkTag::FORM_EXT, "providerClient null");
-    //         return nullptr;
-    //     }
-    //     std::shared_ptr<CJFormExtension> formExtension = std::static_pointer_cast<CJFormExtension>(shared_from_this());
-    //     providerClient->SetOwner(formExtension);
-    //     providerRemoteObject_ = providerClient->AsObject();
-    // }
-    // return providerRemoteObject_;
-    return nullptr;
+    if (providerRemoteObject_ == nullptr) {
+        TAG_LOGD(AAFwkTag::FORM_EXT, "null providerRemoteObject");
+        sptr<FormExtensionProviderClient> providerClient = new FormExtensionProviderClient();
+        std::shared_ptr<CJFormExtension> formExtension = std::static_pointer_cast<CJFormExtension>(shared_from_this());
+        providerClient->SetOwner(formExtension);
+        providerRemoteObject_ = providerClient->AsObject();
+    }
+    return providerRemoteObject_;
 }
 
 
 void CJFormExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {
     FormExtension::OnConfigurationUpdated(configuration);
-    TAG_LOGI(AAFwkTag::FORM_EXT, "call");
+    TAG_LOGD(AAFwkTag::FORM_EXT, "call");
 
-    // HandleScope handleScope(cjRuntime_);
-    // napi_env env = cjRuntime_.GetNapiEnv();
-
-    // // Notify extension context
-    // auto fullConfig = GetContext()->GetConfiguration();
-    // if (!fullConfig) {
-    //     TAG_LOGE(AAFwkTag::FORM_EXT, "null fullConfig");
-    //     return;
-    // }
-    // JsExtensionContext::ConfigurationUpdated(env, shellContextRef_, fullConfig);
-
-    // napi_value napiConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, *fullConfig);
-    // CallObjectMethod("onConfigurationUpdate", "onConfigurationUpdated", &napiConfiguration, 1);
-    return;
+    auto fullConfig = GetContext()->GetConfiguration();
+    cjObj_.OnConfigurationUpdate(fullConfig);
 }
 
 FormState CJFormExtension::OnAcquireFormState(const Want &want)
 {
-    TAG_LOGI(AAFwkTag::FORM_EXT, "call");
-    auto state = static_cast<int32_t>(FormState::DEFAULT);
-    
-    TAG_LOGI(AAFwkTag::FORM_EXT, "state: %{public}d", state);
+    TAG_LOGD(AAFwkTag::FORM_EXT, "call");
+    auto state = cjObj_.OnAcquireFormState(want);
+    TAG_LOGD(AAFwkTag::FORM_EXT, "state: %{public}d", state);
     if (state <= static_cast<int32_t>(AppExecFwk::FormState::UNKNOWN) ||
         state > static_cast<int32_t>(AppExecFwk::FormState::READY)) {
         return AppExecFwk::FormState::UNKNOWN;
@@ -221,6 +189,35 @@ bool CJFormExtension::OnAcquireData(int64_t formId, AAFwk::WantParams &wantParam
     return true;
 }
 
+bool CJFormExtension::ConvertFromDataProxies(CArrProxyData cArrProxyData,
+    std::vector<FormDataProxy> &formDataProxies)
+{
+    uint32_t len = cArrProxyData.size;
+    if (cArrProxyData.head == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null head");
+        return false;
+    }
+    for (uint32_t i = 0; i < len; i++) {
+        FormDataProxy formDataProxy("", "");
+        CProxyData element = cArrProxyData.head[i];
+        if (!ConvertFormDataProxy(element, formDataProxy)) {
+            TAG_LOGE(AAFwkTag::FORM_EXT, "GetElement [%{public}u] error", i);
+            continue;
+        }
+        formDataProxies.push_back(formDataProxy);
+    }
+    return true;
+}
+
+bool CJFormExtension::ConvertFormDataProxy(CProxyData cProxyData, FormDataProxy &formDataProxy)
+{
+    if (cProxyData.key == nullptr || cProxyData.subscribeId == nullptr) {
+        return false;
+    }
+    formDataProxy.key = std::string(cProxyData.key);
+    formDataProxy.subscribeId = std::string(cProxyData.subscribeId);
+    return true;
+}
 
 } // namespace AbilityRuntime
 } // namespace OHOS
