@@ -2684,7 +2684,7 @@ int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityReq
             return result;
         }
     } else if (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
-        result = CheckCallAppServiceExtensionPermission(abilityRequest, true);
+        result = CheckCallAppServiceExtensionPermission(abilityRequest, true, false);
         if (result != ERR_OK) {
             return result;
         }
@@ -4658,11 +4658,10 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
     if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
         auto targetService = connectManager->GetServiceRecordByAbilityRequest(abilityRequest);
         if (targetService != nullptr && targetService->IsAbilityState(AbilityState::ACTIVE)) {
-            result = CheckCallAppServiceExtensionPermission(abilityRequest, false);
+            result = CheckCallAppServiceExtensionPermission(abilityRequest, false, true);
         } else {
-            result = CheckCallAppServiceExtensionPermission(abilityRequest, true);
+            result = CheckCallAppServiceExtensionPermission(abilityRequest, true, true);
         }
-        result == ERR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST? ERR_TARGET_NOT_STARTED: result;
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "CheckCallAppServiceExtensionPermission result: %{public}d", result);
     } else {
         result = CheckCallServicePermission(abilityRequest);
@@ -10039,12 +10038,15 @@ AAFwk::PermissionVerification::VerificationInfo AbilityManagerService::CreateVer
 }
 
 int32_t AbilityManagerService::CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest,
-    bool isVerifyAppIdentifierAllowList)
+    bool isVerifyAppIdentifierAllowList, bool isFromConnect)
 {
     if (!AppUtils::GetInstance().IsSupportAppServiceExtension()) {
         return ERR_CAPABILITY_NOT_SUPPORT;
     }
     if (isVerifyAppIdentifierAllowList && !VerifySameAppOrAppIdentifierAllowListPermission(abilityRequest)) {
+        if (isFromConnect) {
+            return ERR_TARGET_NOT_STARTED;
+        }
         return ERR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST;
     }
     if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(abilityRequest.appInfo.accessTokenId,
