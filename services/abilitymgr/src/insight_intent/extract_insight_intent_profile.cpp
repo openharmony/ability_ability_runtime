@@ -47,9 +47,9 @@ const std::string INSIGHT_INTENT_PARAMETERS = "parameters";
 const std::string INSIGHT_INTENT_URI = "uri";
 const std::string INSIGHT_INTENT_PARAM_MAPPING = "paramMappings";
 const std::string INSIGHT_INTENT_UI_ABILITY = "uiAbility";
-const std::string INSIGHT_INTENT_PAGE_ROUTE_NAME = "pageRouteName";
+const std::string INSIGHT_INTENT_PAGE_ROUTE_NAME = "pagePath";
 const std::string INSIGHT_INTENT_NAVIGATION_ID = "navigationId";
-const std::string INSIGHT_INTENT_NAV_DESTINATION = "navDestination";
+const std::string INSIGHT_INTENT_NAV_DESTINATION = "navDestinationName";
 const std::string INSIGHT_INTENT_ABILITY_NAME = "abilityName";
 const std::string INSIGHT_INTENT_FUNCTION_NAME = "functionName";
 const std::string INSIGHT_INTENT_FUNCTION_PARAMS = "functionParams";
@@ -303,12 +303,6 @@ void to_json(nlohmann::json& jsonObject, const ExtractInsightIntentProfileInfo& 
 {
     TAG_LOGI(AAFwkTag::INTENT, "call to ExtractInsightIntentProfileInfo");
 
-    auto parameters = nlohmann::json::parse(info.parameters, nullptr, false);
-    if (parameters.is_discarded()) {
-        TAG_LOGE(AAFwkTag::INTENT, "discarded parameters");
-        return;
-    }
-
     jsonObject = nlohmann::json {
         {INSIGHT_INTENT_DECORETOR_FILE, info.decoratorFile},
         {INSIGHT_INTENT_DECORETOR_CLASS, info.decoratorClass},
@@ -324,7 +318,6 @@ void to_json(nlohmann::json& jsonObject, const ExtractInsightIntentProfileInfo& 
         {INSIGHT_INTENT_ICON, info.icon},
         {INSIGHT_INTENT_LLM_DESCRIPTION, info.llmDescription},
         {INSIGHT_INTENT_KEYWORDS, info.keywords},
-        {INSIGHT_INTENT_PARAMETERS, parameters},
         {INSIGHT_INTENT_URI, info.uri},
         {INSIGHT_INTENT_PARAM_MAPPING, info.paramMapping},
         {INSIGHT_INTENT_UI_ABILITY, info.uiAbility},
@@ -336,6 +329,16 @@ void to_json(nlohmann::json& jsonObject, const ExtractInsightIntentProfileInfo& 
         {INSIGHT_INTENT_FUNCTION_NAME, info.functionName},
         {INSIGHT_INTENT_FUNCTION_PARAMS, info.functionParams}
     };
+
+    if (!info.parameters.empty()) {
+        auto parameters = nlohmann::json::parse(info.parameters, nullptr, false);
+        if (parameters.is_discarded()) {
+            TAG_LOGE(AAFwkTag::INTENT, "discarded parameters");
+            return;
+        }
+
+        jsonObject[INSIGHT_INTENT_PARAMETERS] = parameters;
+    }
 }
 
 bool CheckProfileSubIntentInfo(const ExtractInsightIntentProfileInfo &insightIntent)
@@ -362,8 +365,8 @@ bool CheckProfileSubIntentInfo(const ExtractInsightIntentProfileInfo &insightInt
             }
             break;
         case DecoratorType::DECORATOR_ENTRY:
-            if (insightIntent.abilityName.empty() || insightIntent.executeMode.empty()) {
-                TAG_LOGE(AAFwkTag::INTENT, "empty abilityName or executeMode, intentName: %{public}s",
+            if (insightIntent.abilityName.empty()) {
+                TAG_LOGE(AAFwkTag::INTENT, "empty abilityName, intentName: %{public}s",
                          insightIntent.intentName.c_str());
                 return false;
             }
@@ -438,7 +441,7 @@ bool TransformToPageInfo(const ExtractInsightIntentProfileInfo &insightIntent, I
     TAG_LOGD(AAFwkTag::INTENT, "navDestination: %{public}s", info.navDestination.c_str());
     // todo: schema模块将insightIntent.parameters解析成info.params
     info.parameters = insightIntent.parameters;
-    TAG_LOGD(AAFwkTag::INTENT, "link parameters: %{public}s", info.parameters.c_str());
+    TAG_LOGD(AAFwkTag::INTENT, "page parameters: %{public}s", info.parameters.c_str());
     return true;
 }
 
@@ -460,7 +463,7 @@ bool TransformToEntryInfo(const ExtractInsightIntentProfileInfo &insightIntent, 
 
     // todo: schema模块将insightIntent.parameters解析成info.params
     info.parameters = insightIntent.parameters;
-    TAG_LOGD(AAFwkTag::INTENT, "link parameters: %{public}s", info.parameters.c_str());
+    TAG_LOGD(AAFwkTag::INTENT, "entry parameters: %{public}s", info.parameters.c_str());
     return true;
 }
 
@@ -474,14 +477,14 @@ bool TransformToFunctionInfo(const ExtractInsightIntentProfileInfo &insightInten
     }
     // todo: schema模块将insightIntent.parameters解析成info.params
     info.parameters = insightIntent.parameters;
-    TAG_LOGD(AAFwkTag::INTENT, "link parameters: %{public}s", info.parameters.c_str());
+    TAG_LOGD(AAFwkTag::INTENT, "function parameters: %{public}s", info.parameters.c_str());
     return true;
 }
 
 bool TransformToFormInfo(const ExtractInsightIntentProfileInfo &insightIntent, InsightIntentFormInfo &info)
 {
     info.parameters = insightIntent.parameters;
-    TAG_LOGD(AAFwkTag::INTENT, "link parameters: %{public}s", info.parameters.c_str());
+    TAG_LOGD(AAFwkTag::INTENT, "form parameters: %{public}s", info.parameters.c_str());
     return true;
 }
 
