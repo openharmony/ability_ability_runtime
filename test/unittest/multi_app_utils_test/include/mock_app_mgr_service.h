@@ -244,7 +244,7 @@ public:
         return false;
     }
 
-    virtual int32_t ChangeAppGcState(pid_t pid, int32_t state)
+    virtual int32_t ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid = 0)
     {
         return 0;
     }

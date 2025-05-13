@@ -865,7 +865,7 @@ std::shared_ptr<AppRunningRecord> AppRunningRecord::GetParentAppRecord()
     return parentAppRecord_.lock();
 }
 
-int32_t AppRunningRecord::ChangeAppGcState(int32_t state)
+int32_t AppRunningRecord::ChangeAppGcState(int32_t state, uint64_t tid)
 {
     return AAFwk::MyStatus::GetInstance().changeAppGcState_;
 }
