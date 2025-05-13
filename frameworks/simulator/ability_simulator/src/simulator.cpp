@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,6 @@
 #include "resource_manager.h"
 #include "window_scene.h"
 #include "sys_timer.h"
-#include "source_map.h"
 
 
 namespace OHOS {
@@ -57,7 +56,6 @@ constexpr size_t DEFAULT_LONG_PAUSE_TIME = 40;
 
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules.abc";
-constexpr char SOURCE_MAPS_PATH[] = "/ets/sourceMaps.map";
 const std::string PACKAGE_NAME = "packageName";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string MODULE_NAME = "moduleName";
@@ -129,7 +127,6 @@ private:
     void ReportJsError(napi_value obj);
     std::string GetNativeStrFromJsTaggedObj(napi_value obj, const char* key);
     void CreateStageContext();
-    std::string ReadSourceMap();
 
     panda::ecmascript::EcmaVM *CreateJSVM();
     Options options_;
@@ -153,7 +150,6 @@ private:
     std::shared_ptr<AppExecFwk::ApplicationInfo> appInfo_;
     std::shared_ptr<AppExecFwk::HapModuleInfo> moduleInfo_;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_;
-    std::shared_ptr<JsEnv::SourceMap> sourceMapPtr_;
     CallbackTypePostTask postTask_ = nullptr;
     void GetPkgContextInfoListMap(const std::map<std::string, std::string> &contextInfoMap,
         std::map<std::string, std::vector<std::vector<std::string>>> &pkgContextInfoMap,
@@ -212,10 +208,6 @@ bool SimulatorImpl::Initialize(const Options &options)
     }
 
     options_ = options;
-    sourceMapPtr_ = std::make_shared<JsEnv::SourceMap>();
-    auto content = ReadSourceMap();
-    sourceMapPtr_->SplitSourceMap(content);
-
     postTask_ = options.postTask;
     if (!OnInit()) {
         return false;
@@ -698,29 +690,6 @@ panda::ecmascript::EcmaVM *SimulatorImpl::CreateJSVM()
     return panda::JSNApi::CreateJSVM(pandaOption);
 }
 
-std::string SimulatorImpl::ReadSourceMap()
-{
-    std::string normalizedPath = options_.modulePath;
-    std::replace(normalizedPath.begin(), normalizedPath.end(), '\\', '/');
-    auto sourceMapPath = std::regex_replace(normalizedPath, std::regex(MERGE_ABC_PATH), SOURCE_MAPS_PATH);
-
-    std::replace(sourceMapPath.begin(), sourceMapPath.end(), '/', '\\');
-    std::ifstream stream(sourceMapPath, std::ios::ate | std::ios::binary);
-    if (!stream.is_open()) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "open:%{public}s failed", sourceMapPath.c_str());
-        return "";
-    }
-
-    size_t len = stream.tellg();
-    std::unique_ptr<uint8_t[]> buffer = std::make_unique<uint8_t[]>(len);
-    stream.seekg(0);
-    stream.read(reinterpret_cast<char*>(buffer.get()), len);
-    stream.close();
-    std::string content;
-    content.assign(reinterpret_cast<char*>(buffer.get()), len);
-    return content;
-}
-
 bool SimulatorImpl::OnInit()
 {
     if (!ParseBundleAndModuleInfo()) {
@@ -1014,29 +983,20 @@ void SimulatorImpl::ReportJsError(napi_value obj)
     std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");
     std::string errorStack = GetNativeStrFromJsTaggedObj(obj, "stack");
     std::string topStack = GetNativeStrFromJsTaggedObj(obj, "topstack");
-    std::string summary = "name:" + errorName + "\n";
-    summary += "message:" + errorMsg + "\n";
+    std::string summary = "Simulator error name:" + errorName + "\n";
+    summary += "Simulator error message:" + errorMsg + "\n";
     bool hasProperty = false;
     napi_has_named_property(nativeEngine_, obj, "code", &hasProperty);
     if (hasProperty) {
         std::string errorCode = GetNativeStrFromJsTaggedObj(obj, "code");
-        summary += "code:" + errorCode + "\n";
+        summary += "Simulator error code:" + errorCode + "\n";
     }
     if (errorStack.empty()) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "errorStack empty");
         return;
     }
-    auto newErrorStack = sourceMapPtr_->TranslateBySourceMap(errorStack);
-    summary += "Stacktrace:\n" + newErrorStack;
-
-    std::stringstream summaryBody(summary);
-    std::string line;
-    std::string formattedSummary;
-    while (std::getline(summaryBody, line)) {
-        formattedSummary += "[Simulator Log]" + line + "\n";
-    }
-
-    TAG_LOGW(AAFwkTag::ABILITY_SIM, "summary:\n%{public}s", formattedSummary.c_str());
+    summary += "Stacktrace:\n" + errorStack;
+    TAG_LOGE(AAFwkTag::ABILITY_SIM, "summary:\n%{public}s", summary.c_str());
 }
 
 void SimulatorImpl::CreateStageContext()
