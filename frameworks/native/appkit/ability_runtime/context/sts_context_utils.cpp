@@ -25,6 +25,8 @@
 #include "sts_error_utils.h"
 #include "ani_common_util.h"
 #include "ability_runtime_error_util.h"
+#include "tokenid_kit.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -32,10 +34,7 @@ namespace ContextUtil {
 namespace {
 std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_ = nullptr;
 constexpr const char* AREA_MODE_ENUM_NAME = "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;";
-constexpr const char* RESOURCE_MANAGER_INNER_CLASS_NAME =
-    "L@ohos/resourceManager/resourceManager/ResourceManagerInner;";
 }
-
 static std::weak_ptr<Context> context_;
 void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     void* applicationCtxRef)
@@ -206,57 +205,44 @@ void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object context
     BindContextDir(aniEnv, contextClass, contextObj, context);
 }
 
+bool CheckCallerIsSystemApp()
+{
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        return false;
+    }
+    return true;
+}
+
 ani_object CreateModuleResourceManagerSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
     ani_string bundleName, ani_string moduleName)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
-        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "env is null");
+        return {};
     }
     std::string bundleName_ = "";
     AppExecFwk::AniStringToStdString(env, bundleName, bundleName_);
     std::string moduleName_ = "";
     AppExecFwk::AniStringToStdString(env, moduleName, moduleName_);
-    ani_status status = ANI_ERROR;
-
     auto context = context_.lock();
     if (!context) {
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
         ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return {};
     }
-
+    if (!CheckCallerIsSystemApp()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not system-app");
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return {};
+    }
     auto resourceManager = context->CreateModuleResourceManager(bundleName_, moduleName_);
-    ani_class resourceManagerCls = nullptr;
-    if ((status = env->FindClass(RESOURCE_MANAGER_INNER_CLASS_NAME, &resourceManagerCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed status: %{public}d", status);
-        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "findClass fail");
+    if (resourceManager == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager");
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return {};
     }
-
-    ani_method CtorMethod = nullptr;
-    if ((status = env->Class_FindMethod(resourceManagerCls, "<ctor>", ":V", &CtorMethod)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod ctor failed status: %{public}d", status);
-        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "Class_FindMethod ctor failed");
-    }
-
-    ani_object Object = nullptr;
-    if ((status = env->Object_New(resourceManagerCls, CtorMethod, &Object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_New failed status: %{public}d", status);
-        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "Object_New failed");
-    }
-
-    ani_field Field;
-    if ((status = env->Class_FindField(resourceManagerCls, "nativeResMgr", &Field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", status);
-        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "Class_FindField failed");
-    }
-
-    if ((status = env->Object_SetField_Long(Object, Field, (ani_long)resourceManager.get())) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Long failed status: %{public}d", status);
-        return OHOS::AbilityRuntime::CreateStsInvalidParamError(env, "Object_SetField_Long failed");
-    }
-
-    return Object;
+    return Global::Resource::ResMgrAddon::CreateResMgr(env, "", resourceManager, context);
 }
 
 ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj)
