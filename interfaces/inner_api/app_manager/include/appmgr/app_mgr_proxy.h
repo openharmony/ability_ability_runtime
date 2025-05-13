@@ -537,7 +537,7 @@ public:
      * @param pid pid
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t ChangeAppGcState(pid_t pid, int32_t state) override;
+    virtual int32_t ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid = 0) override;
 
     /**
      * Register appRunning status listener.
