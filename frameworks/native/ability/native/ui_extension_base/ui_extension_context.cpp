@@ -407,7 +407,7 @@ void UIExtensionContext::NotifyComponentTerminate()
     }
     AAFwk::WantParams params;
     params.SetParam(
-        AAFwk::EMBEDDED_FULL_SCREEN_TERMINATE_KEY, AAFwk::String::Box(AAFwk::EMBEDDED_FULL_SCREEN_TERMINATE_VALUE));
+        AAFwk::EMBEDDED_ATOMIC_SERVICE_TERMINATE_KEY, AAFwk::String::Box(AAFwk::EMBEDDED_FULL_SCREEN_TERMINATE_VALUE));
     auto ret = window_->TransferExtensionData(params);
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "transfer extension data failed, ret:%{public}d", ret);
