@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,14 +26,12 @@ ohos_shared_library("ability_simulator_inner") {
       defines = [
         "WINDOWS_PLATFORM",
         "NOGDI",
-        "OFFSET_PREVIEW=0",
       ]
     }
 
     cflags = [ "-std=c++17" ]
 
     include_dirs = [
-      "${ability_runtime_path}/js_environment/interfaces/inner_api",
       "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_business_error",
       "${ability_runtime_native_path}/runtime",
       "${ability_runtime_innerkits_path}/ability_manager/include",
@@ -50,7 +48,6 @@ ohos_shared_library("ability_simulator_inner") {
     sources = [
       "${ability_runtime_native_path}/ability/native/ability_business_error/ability_business_error.cpp",
       "${ability_runtime_native_path}/runtime/js_module_searcher.cpp",
-      "${ability_runtime_path}/js_environment/frameworks/js_environment/src/source_map.cpp",
       "src/ability_context.cpp",
       "src/ability_stage_context.cpp",
       "src/bundle_parser/ability_info.cpp",
