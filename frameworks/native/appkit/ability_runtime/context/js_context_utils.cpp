@@ -985,7 +985,15 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
             TAG_LOGE(AAFwkTag::APPKIT, "null jsResourceManager");
         }
     }
-
+    napi_value contextValue = nullptr;
+    Context *contextPtr = context.get();
+    int64_t contextAddress = reinterpret_cast<int64_t>(contextPtr);
+    auto status = napi_create_int64(env, contextAddress, &contextValue);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::APPKIT, "get context index fial");
+        return nullptr;
+    }
+    napi_set_named_property(env, object, "index", contextValue);
     const char *moduleName = "JsBaseContext";
     BindPropertyAndFunction(env, object, moduleName);
     return object;
