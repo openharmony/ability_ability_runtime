@@ -995,8 +995,6 @@ void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abi
         } else {
             processName = abilityInfo->process;
         }
-        // extension's process is bundleName:extensionType, generated at installation time
-        MakeIsolateSandBoxProcessName(abilityInfo, hapModuleInfo, processName);
         if (appIndex != 0) {
             processName += ":" + std::to_string(appIndex);
         }
@@ -9280,30 +9278,6 @@ bool AppMgrServiceInner::IsProcessContainsOnlyUIAbility(const pid_t pid)
         }
     }
     return true;
-}
-
-void AppMgrServiceInner::MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
-    const HapModuleInfo &hapModuleInfo, std::string &processName) const
-{
-    if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo nullptr");
-        return;
-    }
-    auto type = abilityInfo->type;
-    auto extensionType = abilityInfo->extensionAbilityType;
-    if (type != AppExecFwk::AbilityType::EXTENSION ||
-        extensionType == AppExecFwk::ExtensionAbilityType::DATASHARE ||
-        extensionType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-        return;
-    }
-    for (const auto& extensionInfo: hapModuleInfo.extensionInfos) {
-        if (extensionInfo.name == abilityInfo->name) {
-            if (extensionInfo.needCreateSandbox) {
-                processName = (processName + ":" + abilityInfo->name);
-            }
-            return;
-        }
-    }
 }
 
 bool AppMgrServiceInner::IsProcessAttached(sptr<IRemoteObject> token) const
