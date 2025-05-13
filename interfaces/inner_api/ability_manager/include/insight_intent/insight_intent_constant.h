@@ -22,7 +22,7 @@ namespace OHOS::AbilityRuntime {
     constexpr char INSIGHT_INTENTS_TYPE_LINK[] = "@InsightIntentLink";
     constexpr char INSIGHT_INTENTS_TYPE_PAGE[] = "@InsightIntentPage";
     constexpr char INSIGHT_INTENTS_TYPE_ENTRY[] = "@InsightIntentEntry";
-    constexpr char INSIGHT_INTENTS_TYPE_FUNCTION[] = "@InsightIntentFunction";
+    constexpr char INSIGHT_INTENTS_TYPE_FUNCTION[] = "@InsightIntentFunctionMethod";
     constexpr char INSIGHT_INTENTS_TYPE_FORM[] = "@InsightIntentForm";
 
     constexpr char INSIGHT_INTENTS_URI[] = "uri";

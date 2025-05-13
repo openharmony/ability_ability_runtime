@@ -239,7 +239,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insi
         jsonObjectEnd,
         INSIGHT_INTENT_PARAMETERS,
         insightIntentInfo.parameters,
-        true,
+        false,
         g_parseResult);
     AppExecFwk::GetValueIfFindKey<std::vector<std::string>>(jsonObject,
         jsonObjectEnd,
@@ -336,6 +336,7 @@ bool InsightIntentInfoForQuery::ReadFromParcel(Parcel &parcel)
         return false;
     }
     const char *data = reinterpret_cast<const char *>(messageParcel->ReadRawData(length));
+    TAG_LOGD(AAFwkTag::INTENT, "ReadFromParcel data: %{public}s", data);
     if (!data) {
         TAG_LOGE(AAFwkTag::INTENT, "Fail read raw length = %{public}d", length);
         return false;
@@ -365,6 +366,7 @@ bool InsightIntentInfoForQuery::Marshalling(Parcel &parcel) const
     }
     nlohmann::json jsonObject = *this;
     std::string str = jsonObject.dump();
+    TAG_LOGD(AAFwkTag::INTENT, "Marshalling str: %{public}s", str.c_str());
     if (!messageParcel->WriteUint32(str.size() + 1)) {
         TAG_LOGE(AAFwkTag::INTENT, "Write intent info size failed");
         return false;
