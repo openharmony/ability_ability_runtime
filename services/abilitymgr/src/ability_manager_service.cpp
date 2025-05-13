@@ -3183,9 +3183,6 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
     
-    if (!isStartAsCaller) {
-        UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, callerToken);
-    }
     result = isDlp ? IN_PROCESS_CALL(
         CheckOptExtensionAbility(want, abilityRequest, validUserId, extensionType, isImplicit, isStartAsCaller)) :
         CheckOptExtensionAbility(want, abilityRequest, validUserId, extensionType, isImplicit, isStartAsCaller);
@@ -3205,6 +3202,10 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
         eventInfo.errCode = result;
         EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
+    }
+
+    if (!isStartAsCaller) {
+        UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, callerToken);
     }
 
     auto connectManager = GetConnectManagerByUserId(validUserId);
@@ -4661,6 +4662,7 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
         } else {
             result = CheckCallAppServiceExtensionPermission(abilityRequest, true);
         }
+        result == ERR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST? ERR_TARGET_NOT_STARTED: result;
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "CheckCallAppServiceExtensionPermission result: %{public}d", result);
     } else {
         result = CheckCallServicePermission(abilityRequest);

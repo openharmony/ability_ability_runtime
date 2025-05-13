@@ -744,6 +744,11 @@ enum {
     ERR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST = 2097331,
 
     /**
+     * Result (2097332) for target has not been started yet.
+     */
+    ERR_TARGET_NOT_STARTED = 2097332,
+
+    /**
      * Native error(3000000) for target bundle not exist.
      */
     ERR_CODE_NOT_EXIST = 3000000,
