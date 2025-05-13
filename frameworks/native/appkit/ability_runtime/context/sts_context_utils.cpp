@@ -32,7 +32,6 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace ContextUtil {
 namespace {
-std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_ = nullptr;
 constexpr const char* AREA_MODE_ENUM_NAME = "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;";
 }
 static std::weak_ptr<Context> context_;
@@ -254,88 +253,6 @@ ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unuse
     }
     ThrowStsInvalidParamError(env, "appContextObj null");
     return {};
-}
-
-ani_long GetNativeApplicationContextLong(ani_env *env, ani_object& aniObj)
-{
-    ani_status status = ANI_ERROR;
-    ani_long nativeContextLong = 0;
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
-        return nativeContextLong;
-    }
-    ani_class applicationContextCls = nullptr;
-    if ((status = env->FindClass("Lapplication/ApplicationContext/ApplicationContext;",
-        &applicationContextCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed status: %{public}d", status);
-        AbilityRuntime::ThrowStsInvalidParamError(env, "FindClass failed");
-        return nativeContextLong;
-    }
-    ani_field contextField;
-    if ((status = env->Class_FindField(applicationContextCls, "nativeContext", &contextField)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", status);
-        AbilityRuntime::ThrowStsInvalidParamError(env, "Class_FindField failed");
-        return nativeContextLong;
-    }
-    if ((status = env->Object_GetField_Long(aniObj, contextField, &nativeContextLong)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_GetField_Long failed status: %{public}d", status);
-        AbilityRuntime::ThrowStsInvalidParamError(env, "Object_GetField_Long failed");
-        return nativeContextLong;
-    }
-    if (nativeContextLong == 0) {
-        AbilityRuntime::ThrowStsInvalidParamError(env, "nativeContext is null");
-    }
-
-    return nativeContextLong;
-}
-
-ani_double NativeOnSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
-    ani_string type, ani_object envCallback)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "NativeOnSync Call");
-    ani_long nativeContextLong = GetNativeApplicationContextLong(env, aniObj);
-    if (nativeContextLong == 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "nativeContext is null");
-        AbilityRuntime::ThrowStsInvalidParamError(env, "nativeContext is null");
-        return ANI_ERROR;
-    }
-    if (etsEnviromentCallback_ != nullptr) {
-        return ani_double(etsEnviromentCallback_->Register(envCallback));
-    }
-
-    etsEnviromentCallback_ = std::make_shared<EtsEnviromentCallback>(env);
-    int32_t callbackId = etsEnviromentCallback_->Register(envCallback);
-    ((AbilityRuntime::ApplicationContext*)nativeContextLong)->RegisterEnvironmentCallback(etsEnviromentCallback_);
-
-    return ani_double(callbackId);
-}
-
-void NativeOffSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
-    ani_string type, ani_double callbackId, ani_object call)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "NativeOffSync Call");
-    ani_long nativeContextLong = GetNativeApplicationContextLong(env, aniObj);
-    if (nativeContextLong == 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "nativeContext is null");
-        AppExecFwk::AsyncCallback(env, call, CreateStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM), nullptr);
-        return;
-    }
-
-    if (etsEnviromentCallback_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "etsEnviromentCallback is null");
-        AppExecFwk::AsyncCallback(env, call, CreateStsError(env,
-            (ani_int)AbilityErrorCode::ERROR_CODE_INVALID_PARAM, "env_callback is nullptr"), nullptr);
-        return;
-    }
-
-    if (!etsEnviromentCallback_->UnRegister(callbackId)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed");
-        AppExecFwk::AsyncCallback(env, call, CreateStsError(env,
-            (ani_int)AbilityErrorCode::ERROR_CODE_INVALID_PARAM, "call UnRegister failed!"), nullptr);
-        return;
-    }
-
-    AppExecFwk::AsyncCallback(env, call, CreateStsError(env, AbilityErrorCode::ERROR_OK), nullptr);
 }
 
 }
