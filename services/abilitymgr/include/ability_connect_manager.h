@@ -458,6 +458,17 @@ private:
     std::shared_ptr<AbilityRecord> GetServiceRecordByElementName(const std::string &element);
 
     /**
+     * GetAbilityConnectedRecordFromRecordList.
+     *
+     * @param targetService, the ptr of the connected ability.
+     * @param connectRecordList, connect record list.
+     * @return Returns ConnectionRecord shared_ptr.
+     */
+    std::shared_ptr<ConnectionRecord> GetAbilityConnectedRecordFromRecordList(
+        const std::shared_ptr<AbilityRecord> &targetService,
+        std::list<std::shared_ptr<ConnectionRecord>> &connectRecordList);
+
+    /**
      * dispatch service ability life cycle .
      *
      * @param abilityRecord.
@@ -481,16 +492,6 @@ private:
         std::shared_ptr<ConnectionRecord> &connectRecord);
     void HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo);
     void TerminateOrCacheAbility(std::shared_ptr<AbilityRecord> abilityRecord);
-
-    /**
-     * IsAbilityConnected.
-     *
-     * @param abilityRecord, the ptr of the connected ability.
-     * @param connectRecordList, connect record list.
-     * @return true: ability is connected, false: ability is not connected
-     */
-    bool IsAbilityConnected(const std::shared_ptr<AbilityRecord> &abilityRecord,
-        const std::list<std::shared_ptr<ConnectionRecord>> &connectRecordList);
 
     /**
      * RemoveConnectionRecordFromMap.

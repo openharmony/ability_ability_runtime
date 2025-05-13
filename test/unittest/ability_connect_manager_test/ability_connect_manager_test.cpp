@@ -2003,13 +2003,13 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_TerminateDone_001, TestSize.
 
 /*
  * Feature: AbilityConnectManager
- * Function: IsAbilityConnected
- * SubFunction: IsAbilityConnected
+ * Function: GetAbilityConnectedRecordFromRecordList
+ * SubFunction: GetAbilityConnectedRecordFromRecordList
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Verify AbilityConnectManager IsAbilityConnected
+ * CaseDescription: Verify AbilityConnectManager GetAbilityConnectedRecordFromRecordList
  */
-HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_IsAbilityConnected_001, TestSize.Level1)
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_GetAbilityConnectedRecordFromRecordList_001, TestSize.Level1)
 {
     std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
     std::shared_ptr<AbilityRecord> abilityRecord = serviceRecord_;
@@ -2018,11 +2018,11 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_IsAbilityConnected_001, Test
     std::shared_ptr<ConnectionRecord> connection =
         std::make_shared<ConnectionRecord>(abilityRecord->GetToken(), abilityRecord, callback, nullptr);
     connectRecordList.push_back(connection);
-    bool res1 = connectManager->IsAbilityConnected(nullptr, connectRecordList);
-    EXPECT_FALSE(res1);
+    auto res1 = connectManager->GetAbilityConnectedRecordFromRecordList(nullptr, connectRecordList);
+    EXPECT_EQ(res1, nullptr);
     connectRecordList.push_back(nullptr);
-    bool res2 = connectManager->IsAbilityConnected(abilityRecord, connectRecordList);
-    EXPECT_TRUE(res2);
+    auto res2 = connectManager->GetAbilityConnectedRecordFromRecordList(abilityRecord, connectRecordList);
+    EXPECT_EQ(res2, connection);
 }
 
 /*
