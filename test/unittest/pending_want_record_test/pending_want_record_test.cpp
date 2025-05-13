@@ -744,5 +744,51 @@ HWTEST_F(PendingWantRecordTest, PendingWantRecordTest_2500, TestSize.Level1)
     EXPECT_EQ(params.GetStringParam(
         std::string("ohos.extra.param.key.appInstance")), std::string("app_instance_3"));
 }
+
+/*
+ * @tc.number    : PendingWantRecordTest_0100
+ * @tc.name      : ExecuteOperation
+ * @tc.desc      : check Starts a service extension
+ */
+HWTEST_F(PendingWantRecordTest, ExecuteOperation_0100, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "ExecuteOperation_0100 start.");
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    key->SetType(static_cast<int32_t>(OperationType::START_SERVICE_EXTENSION));
+    SenderInfo info;
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    auto params = pendingWantRecord->ExecuteOperation(pendingManager_, info, want);
+    EXPECT_NE(params, NO_ERROR);
+}
+
+/*
+ * @tc.number    : ExecuteOperation_0200
+ * @tc.name      : ExecuteOperation
+ * @tc.desc      : check Unknown operation
+ */
+HWTEST_F(PendingWantRecordTest, ExecuteOperation_0200, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "ExecuteOperation_0200 start.");
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, 0, 0);
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    key->SetType(static_cast<int32_t>(OperationType::UNKNOWN_TYPE));
+    SenderInfo info;
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    auto params = pendingWantRecord->ExecuteOperation(pendingManager_, info, want);
+    EXPECT_EQ(params, NO_ERROR);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
