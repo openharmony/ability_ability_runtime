@@ -141,6 +141,13 @@ CConfiguration CreateCConfiguration(const OHOS::AppExecFwk::Configuration &confi
     return cfg;
 }
 
+void FreeCConfiguration(CConfiguration configuration)
+{
+    free(configuration.language);
+    free(configuration.mcc);
+    free(configuration.mnc);
+}
+
 extern "C" {
 CJ_EXPORT CConfiguration OHOS_ConvertConfiguration(void* param)
 {

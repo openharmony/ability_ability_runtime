@@ -19,7 +19,7 @@
 #include "configuration.h"
 #include "form_extension.h"
 #include "cj_form_extension_object.h"
-#include "form_extension_context.h"
+#include "cj_form_extension_context.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -63,9 +63,19 @@ public:
 
     void OnStop() override;
 
+    void SetCjContext(sptr<CJFormExtensionContext> cjContext)
+    {
+        cjContext_ = cjContext;
+    }
+
 private:
+    bool ConvertFromDataProxies(CArrProxyData cArrProxyData, std::vector<FormDataProxy> &formDataProxies);
+
+    bool ConvertFormDataProxy(CProxyData cProxyData, FormDataProxy &formDataProxy);
+
     CJFormExtensionObject cjObj_;
     sptr<IRemoteObject> providerRemoteObject_ = nullptr;
+    sptr<CJFormExtensionContext> cjContext_ = nullptr;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -977,16 +977,20 @@ ohos_shared_library("cj_form_extension") {
 
     sources = [
       "${ability_runtime_native_path}/ability/native/form_runtime/cj_form_extension.cpp",
+      "${ability_runtime_native_path}/ability/native/form_runtime/cj_form_extension_context.cpp",
       "${ability_runtime_native_path}/ability/native/form_runtime/cj_form_extension_object.cpp",
     ]
 
     deps = [
       ":abilitykit_native",
+      ":cj_extensionkit_native",
       ":extensionkit_native",
       ":form_extension",
       "${ability_runtime_innerkits_path}/runtime:runtime",
       "${ability_runtime_native_path}/ability:ability_context_native",
       "${ability_runtime_native_path}/appkit:app_context",
+      "${ability_runtime_native_path}/ability:cj_ability_context_native",
+      "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
     ]
 
     external_deps = [
@@ -1000,6 +1004,8 @@ ohos_shared_library("cj_form_extension") {
       "ipc:ipc_core",
       "ipc:ipc_napi",
       "napi:ace_napi",
+      "napi:cj_bind_ffi",
+      "napi:cj_bind_native",
     ]
 
     if (form_fwk_enable) {

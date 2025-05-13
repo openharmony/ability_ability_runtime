@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,7 @@ FormExtension* CreateCJFormExtension()
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "open cj_form_extension library %{public}s failed, reason: %{public}sn",
             CJ_FORM_EXT_LIB_NAME, dlerror());
-        return new (std::nothrow) FormExtension();
+        return new FormExtension();
     }
 
     auto entry = reinterpret_cast<CreateFunc>(dlsym(handle, CJ_FORM_EXT_CREATE_FUNC));
@@ -56,7 +56,7 @@ FormExtension* CreateCJFormExtension()
         dlclose(handle);
         TAG_LOGE(AAFwkTag::FORM_EXT, "get cj_form_extension symbol %{public}s in %{public}s failed",
             CJ_FORM_EXT_CREATE_FUNC, CJ_FORM_EXT_LIB_NAME);
-        return new (std::nothrow) FormExtension();
+        return new FormExtension();
     }
 
     auto instance = entry();
@@ -64,7 +64,7 @@ FormExtension* CreateCJFormExtension()
         dlclose(handle);
         TAG_LOGE(AAFwkTag::FORM_EXT, "get cj_form_extension instance in %{public}s failed",
             CJ_FORM_EXT_LIB_NAME);
-        return new (std::nothrow) FormExtension();
+        return new FormExtension();
     }
 
     return instance;
