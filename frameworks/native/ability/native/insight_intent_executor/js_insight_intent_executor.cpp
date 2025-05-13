@@ -107,9 +107,7 @@ bool JsInsightIntentExecutor::ExecuteIntentCheckError()
 }
 
 bool JsInsightIntentExecutor::HandleExecuteIntent(
-    InsightIntentExecuteMode mode,
-    const std::string& name,
-    const AAFwk::WantParams& param,
+    std::shared_ptr<InsightIntentExecuteParam> executeParam,
     const std::shared_ptr<NativeReference>& pageLoader,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback,
     bool& isAsync)
@@ -122,36 +120,43 @@ bool JsInsightIntentExecutor::HandleExecuteIntent(
         TAG_LOGE(AAFwkTag::INTENT, "null callback");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
+    if (executeParam == nullptr || executeParam->insightIntentParam_ == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid execute param");
+        STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
+    }
     callback_ = std::move(callback);
     bool successful = false;
+    InsightIntentExecuteMode mode = static_cast<InsightIntentExecuteMode>(executeParam->executeMode_);
+    auto name = executeParam->insightIntentName_;
+    auto param = executeParam->insightIntentParam_;
     switch (mode) {
         case InsightIntentExecuteMode::UIABILITY_FOREGROUND:
             if (!JsInsightIntentExecutor::CheckParametersUIAbilityForeground(pageLoader)) {
                 TAG_LOGE(AAFwkTag::INTENT, "CheckParametersUIAbilityForeground error");
                 return ExecuteIntentCheckError();
             }
-            successful = ExecuteInsightIntentUIAbilityForeground(name, param, pageLoader);
+            successful = ExecuteInsightIntentUIAbilityForeground(name, *param, pageLoader);
             break;
         case InsightIntentExecuteMode::UIABILITY_BACKGROUND:
             if (!JsInsightIntentExecutor::CheckParametersUIAbilityBackground()) {
                 TAG_LOGE(AAFwkTag::INTENT, "CheckParametersUIAbilityBackground error");
                 return ExecuteIntentCheckError();
             }
-            successful = ExecuteInsightIntentUIAbilityBackground(name, param);
+            successful = ExecuteInsightIntentUIAbilityBackground(name, *param);
             break;
         case InsightIntentExecuteMode::UIEXTENSION_ABILITY:
             if (!JsInsightIntentExecutor::CheckParametersUIExtension(pageLoader)) {
                 TAG_LOGE(AAFwkTag::INTENT, "CheckParametersUIExtension error");
                 return ExecuteIntentCheckError();
             }
-            successful = ExecuteInsightIntentUIExtension(name, param, pageLoader);
+            successful = ExecuteInsightIntentUIExtension(name, *param, pageLoader);
             break;
         case InsightIntentExecuteMode::SERVICE_EXTENSION_ABILITY:
             if (!JsInsightIntentExecutor::CheckParametersServiceExtension()) {
                 TAG_LOGE(AAFwkTag::INTENT, "CheckParametersServiceExtension error");
                 return ExecuteIntentCheckError();
             }
-            successful = ExecuteInsightIntentServiceExtension(name, param);
+            successful = ExecuteInsightIntentServiceExtension(name, *param);
             break;
         default:
             TAG_LOGE(AAFwkTag::INTENT, "InsightIntentExecuteMode not supported yet");
