@@ -1099,7 +1099,7 @@ private:
     void RemoveEvent(uint32_t msg);
 
     void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record, bool isExtensionDebug = false);
-    uint32_t GetAddStageTimeout() const;
+    int32_t GetAddStageTimeout() const;
     void SetModuleLoaded(const std::string &moduleName) const;
 
 private:
