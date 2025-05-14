@@ -160,7 +160,7 @@ public:
     void SetAbilityColorMode(int32_t colorMode);
 
     /**
-     * @brief Send destroy request to the host component when Atomic Service need to be closed.
+     * @brief Send destroy request to the host component.
      */
     void RequestComponentTerminate();
 
