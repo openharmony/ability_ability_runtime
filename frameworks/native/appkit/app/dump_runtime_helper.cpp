@@ -210,7 +210,8 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
-    if (info.needLeakobj) {
+    if (info.needLeakobj &&
+        runtime->GetLanguage() == OHOS::AbilityRuntime::Runtime::Language::JS) {
         std::string checkList = "";
         GetCheckList(runtime, checkList);
         WriteCheckList(checkList);
