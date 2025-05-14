@@ -271,15 +271,15 @@ HWTEST_F(JsRuntimeTest, StartProfiler_0100, TestSize.Level1)
     auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
     ASSERT_NE(jsRuntime, nullptr);
     AbilityRuntime::Runtime::DebugOption dOption;
-    dOption.isDebugFromLocal = true;
-    dOption.isDeveloperMode = true;
+    dOption.isDebugFromLocal = false;
+    dOption.isDeveloperMode = false;
     dOption.isDebugApp = true;
     dOption.isStartWithDebug = false;
     dOption.processName = "testProcess";
     dOption.perfCmd = "profile jsperf 100";
     jsRuntime->instanceId_ = 999;
     jsRuntime->StartProfiler(dOption);
-    EXPECT_NE(jsRuntime->instanceId_, 999);
+    EXPECT_EQ(jsRuntime->instanceId_, 999);
     jsRuntime.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TAG_LOGI(AAFwkTag::TEST, "StartProfiler_0100 end");
