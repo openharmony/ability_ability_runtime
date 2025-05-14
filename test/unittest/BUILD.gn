@@ -347,6 +347,7 @@ group("unittest") {
       "ability_connect_callback_proxy_test:unittest",
       "ability_connect_callback_stub_test:unittest",
       "ability_connect_manager_first_test:unittest",
+      "ability_connect_manager_fourth_test:unittest",
       "ability_connect_manager_second_test:unittest",
       "ability_connect_manager_test:unittest",
       "ability_connection_test:unittest",
