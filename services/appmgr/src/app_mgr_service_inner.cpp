@@ -167,6 +167,7 @@ constexpr const int32_t API10 = 10;
 constexpr const int32_t API15 = 15;
 constexpr const int32_t API_VERSION_MOD = 100;
 constexpr const int32_t U0_USER_ID = 0;
+constexpr const int32_t U1_USER_ID = 1;
 constexpr const char* CLASS_NAME = "ohos.app.MainThread";
 constexpr const char* FUNC_NAME = "main";
 constexpr const char* RENDER_PARAM = "invalidparam";
@@ -2018,7 +2019,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationData(const std::string &bundleName
     int32_t newUserId = userId;
     if (userId == DEFAULT_INVAL_VALUE) {
         newUserId = GetUserIdByUid(callerUid);
-        if (newUserId == U0_USER_ID) {
+        if (newUserId == U0_USER_ID || newUserId == U1_USER_ID) {
             newUserId = currentUserId_;
         }
     }
