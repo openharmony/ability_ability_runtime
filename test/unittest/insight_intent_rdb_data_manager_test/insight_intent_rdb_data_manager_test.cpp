@@ -69,11 +69,7 @@ void InsightIntentRdbDataManagerTest::TearDown()
  */
 HWTEST_F(InsightIntentRdbDataManagerTest, InsightIntentRdbDataManager_0100, Function | SmallTest | Level1)
 {
-    IntentRdbConfig intentRdbConfig;
-    auto res = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->InitIntentTable(intentRdbConfig);
-    EXPECT_TRUE(res);
-
-    res = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->InsertData(KEY_ONE, VALUE_ONE);
+    auto res = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->InsertData(KEY_ONE, VALUE_ONE);
     EXPECT_TRUE(res);
 
     std::string value;
