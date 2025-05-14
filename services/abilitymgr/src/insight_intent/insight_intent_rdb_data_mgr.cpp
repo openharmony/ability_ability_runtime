@@ -121,6 +121,7 @@ bool InsightIntentRdbDataMgr::IsIntentRdbLoaded()
         TAG_LOGE(AAFwkTag::INTENT, "Create rdb table failed, ret:%{public}d", ret);
         return false;
     }
+    HmfsUtils::AddDeleteDfx(intentRdbConfig_.dbPath);
     return true;
 }
 
