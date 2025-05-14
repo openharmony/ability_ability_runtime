@@ -147,7 +147,6 @@
         "DistributedExtensionAbility": [
             "ability.featureAbility",
             "ability.particleAbility",
-            "abilityAccessCtrl",
             "accessibility.config",
             "account.appAccount",
             "account.distributedAccount",
