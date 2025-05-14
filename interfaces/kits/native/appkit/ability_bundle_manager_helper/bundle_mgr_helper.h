@@ -56,6 +56,7 @@ public:
         const std::string &bundleName, std::vector<BaseSharedBundleInfo> &baseSharedBundleInfos,
         GetDependentBundleInfoFlag flag = GetDependentBundleInfoFlag::GET_APP_CROSS_HSP_BUNDLE_INFO);
     ErrCode GetBundleInfoForSelf(int32_t flags, BundleInfo &bundleInfo);
+    ErrCode GetBundleInfoForSelfWithOutCache(int32_t flags, BundleInfo &bundleInfo);
     ErrCode GetDependentBundleInfo(const std::string &sharedBundleName, BundleInfo &sharedBundleInfo,
         GetDependentBundleInfoFlag flag = GetDependentBundleInfoFlag::GET_APP_CROSS_HSP_BUNDLE_INFO);
     bool GetGroupDir(const std::string &dataGroupId, std::string &dir);
