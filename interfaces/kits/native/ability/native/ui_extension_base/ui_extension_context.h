@@ -158,7 +158,12 @@ public:
     std::shared_ptr<AppExecFwk::Configuration> GetAbilityConfiguration() const;
     void SetAbilityConfiguration(const AppExecFwk::Configuration &config);
     void SetAbilityColorMode(int32_t colorMode);
-    void NotifyComponentTerminate();
+
+    /**
+     * @brief Send destroy request to the host component when Atomic Service need to be closed.
+     */
+    void RequestComponentTerminate();
+
 #ifdef SUPPORT_SCREEN
     void SetWindow(sptr<Rosen::Window> window);
 
