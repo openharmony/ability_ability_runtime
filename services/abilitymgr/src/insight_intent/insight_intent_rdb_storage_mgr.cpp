@@ -20,11 +20,6 @@ namespace OHOS {
 namespace AbilityRuntime {
 InsightRdbStorageMgr::InsightRdbStorageMgr()
 {
-    TAG_LOGD(AAFwkTag::INTENT, "InsightRdbStorageMgr is created");
-    IntentRdbConfig intentRdbConfig;
-    if (!DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->InitIntentTable(intentRdbConfig)) {
-        TAG_LOGE(AAFwkTag::INTENT, "insight intent info rdb storage mgr init rdb table fail");
-    }
 }
 
 InsightRdbStorageMgr::~InsightRdbStorageMgr()
