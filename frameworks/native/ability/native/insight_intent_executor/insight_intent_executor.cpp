@@ -21,7 +21,7 @@
 #include "runtime.h"
 
 namespace OHOS::AbilityRuntime {
-std::shared_ptr<InsightIntentExecutor> InsightIntentExecutor::Create(Runtime& runtime)
+std::shared_ptr<InsightIntentExecutor> InsightIntentExecutor::Create(Runtime& runtime, InsightIntentType type)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
     switch (runtime.GetLanguage()) {
