@@ -61,6 +61,8 @@ const char INIT_CJLIBRARY_SYMBOL_NAME[] = "InitCJLibrary";
 const char REGISTER_EVENTHANDLER_CALLBACKS_NAME[] = "RegisterEventHandlerCallbacks";
 const char REGISTER_ARKVM_SYMBOL_NAME[] = "RegisterArkVMInRuntime";
 const char REGISTER_STACKINFO_CALLBACKS_NAME[] = "RegisterStackInfoCallbacks";
+const char DUMP_HEAP_SNAPSHOT_NAME[] = "CJ_MRT_DumpHeapSnapshot";
+const char FORCE_FULL_GC_NAME[] = "CJ_MRT_ForceFullGC";
 
 using InitCJRuntimeType = int(*)(const struct RuntimeParam*);;
 using InitUISchedulerType = void*(*)();
@@ -70,6 +72,8 @@ using InitCJLibraryType = int(*)(const char*);
 using RegisterEventHandlerType = void(*)(PostTaskType, HasHigherPriorityType);
 using RegisterArkVMType = void(*)(unsigned long long);
 using RegisterStackInfoType = void(*)(UpdateStackInfoFuncType);
+using DumpHeapSnapshotType = void(*)(int);
+using ForceFullGCType = void(*)();
 
 #ifdef __OHOS__
 const char REGISTER_UNCAUGHT_EXCEPTION_NAME[] = "RegisterUncaughtExceptionHandler";
@@ -184,6 +188,32 @@ bool LoadSymbolRegisterCJUncaughtExceptionHandler(void* handle, CJRuntimeAPI& ap
     return true;
 }
 #endif
+
+bool LoadSymbolDumpHeapSnapshot(void* handle, CJRuntimeAPI& apis)
+{
+    auto symbol = DynamicFindSymbol(handle, DUMP_HEAP_SNAPSHOT_NAME);
+    if (symbol == nullptr) {
+        LOGE("runtime api not found: %{public}s", DUMP_HEAP_SNAPSHOT_NAME);
+        // return true for compatible.
+        apis.DumpHeapSnapshot = nullptr;
+        return true;
+    }
+    apis.DumpHeapSnapshot = reinterpret_cast<DumpHeapSnapshotType>(symbol);
+    return true;
+}
+
+bool LoadSymbolForceFullGC(void* handle, CJRuntimeAPI& apis)
+{
+    auto symbol = DynamicFindSymbol(handle, FORCE_FULL_GC_NAME);
+    if (symbol == nullptr) {
+        LOGE("runtime api not found: %{public}s", FORCE_FULL_GC_NAME);
+        // return true for compatible.
+        apis.ForceFullGC = nullptr;
+        return true;
+    }
+    apis.ForceFullGC = reinterpret_cast<ForceFullGCType>(symbol);
+    return true;
+}
 
 bool PostTaskWrapper(void* func)
 {
@@ -362,7 +392,9 @@ bool CJEnvironment::LoadRuntimeApis()
         !LoadSymbolInitCJLibrary(dso, *lazyApis_) ||
         !LoadSymbolRegisterEventHandlerCallbacks(dso, *lazyApis_) ||
         !LoadSymbolRegisterStackInfoCallbacks(dso, *lazyApis_) ||
-        !LoadSymbolRegisterArkVM(dso, *lazyApis_)) {
+        !LoadSymbolRegisterArkVM(dso, *lazyApis_) ||
+        !LoadSymbolDumpHeapSnapshot(dso, *lazyApis_) ||
+        !LoadSymbolForceFullGC(dso, *lazyApis_)) {
         LOGE("load symbol failed");
         DynamicFreeLibrary(dso);
         return false;
@@ -380,6 +412,9 @@ bool CJEnvironment::LoadRuntimeApis()
 
 void CJEnvironment::RegisterArkVMInRuntime(unsigned long long externalVM)
 {
+    if (lazyApis_ == nullptr) {
+        return;
+    }
     if (lazyApis_->RegisterArkVMInRuntime == nullptr) {
         return;
     }
@@ -388,6 +423,9 @@ void CJEnvironment::RegisterArkVMInRuntime(unsigned long long externalVM)
 
 void CJEnvironment::RegisterStackInfoCallbacks(UpdateStackInfoFuncType uFunc)
 {
+    if (lazyApis_ == nullptr) {
+        return;
+    }
     if (lazyApis_->RegisterStackInfoCallbacks == nullptr) {
         return;
     }
@@ -396,7 +434,35 @@ void CJEnvironment::RegisterStackInfoCallbacks(UpdateStackInfoFuncType uFunc)
 
 void CJEnvironment::RegisterCJUncaughtExceptionHandler(const CJUncaughtExceptionInfo& handle)
 {
+    if (lazyApis_ == nullptr) {
+        return;
+    }
+    if (lazyApis_->RegisterCJUncaughtExceptionHandler == nullptr) {
+        return;
+    }
     lazyApis_->RegisterCJUncaughtExceptionHandler(handle);
+}
+
+void CJEnvironment::DumpHeapSnapshot(int fd)
+{
+    if (lazyApis_ == nullptr) {
+        return;
+    }
+    if (lazyApis_->DumpHeapSnapshot == nullptr) {
+        return;
+    }
+    lazyApis_->DumpHeapSnapshot(fd);
+}
+
+void CJEnvironment::ForceFullGC()
+{
+    if (lazyApis_ == nullptr) {
+        return;
+    }
+    if (lazyApis_->ForceFullGC == nullptr) {
+        return;
+    }
+    lazyApis_->ForceFullGC();
 }
 
 bool CJEnvironment::PostTask(TaskFuncType task)
@@ -819,6 +885,12 @@ CJEnvMethods* CJEnvironment::CreateEnvMethods()
         },
         .setAppVersion = [](std::string& version) {
             CJEnvironment::SetAppVersion(version);
+        },
+        .dumpHeapSnapshot = [](int fd) {
+            CJEnvironment::GetInstance()->DumpHeapSnapshot(fd);
+        },
+        .forceFullGC = []() {
+            CJEnvironment::GetInstance()->ForceFullGC();
         }
     };
     return &gCJEnvMethods;

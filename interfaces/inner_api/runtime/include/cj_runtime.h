@@ -67,8 +67,8 @@ public:
     void UnLoadCJAppLibrary();
     void DestroyHeapProfiler() override {};
     void ForceFullGC() override {};
-    void ForceFullGC(uint32_t tid) override {};
-    void DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary = false) override {};
+    void ForceFullGC(uint32_t tid) override;
+    void DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary = false) override;
     void DumpCpuProfile() override {};
     void AllowCrossThreadExecution() override {};
     void GetHeapPrepare() override {};
