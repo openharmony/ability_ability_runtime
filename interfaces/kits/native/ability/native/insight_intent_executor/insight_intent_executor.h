@@ -37,7 +37,7 @@ using InsightIntentExecutorAsyncCallback =
     AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::InsightIntentExecuteResult>;
 class InsightIntentExecutor {
 public:
-    static std::shared_ptr<InsightIntentExecutor> Create(Runtime& runtime);
+    static std::shared_ptr<InsightIntentExecutor> Create(Runtime& runtime, InsightIntentType type);
 protected:
     InsightIntentExecutor() = default;
 public:
@@ -61,9 +61,7 @@ public:
      *
      */
     virtual bool HandleExecuteIntent(
-        InsightIntentExecuteMode mode,
-        const std::string& name,
-        const AAFwk::WantParams& params,
+        std::shared_ptr<InsightIntentExecuteParam> executeParam,
         const std::shared_ptr<NativeReference>& pageLoader,
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback,
         bool& isAsync) = 0;
