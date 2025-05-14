@@ -38,7 +38,6 @@ private:
     void HandleUserSwitched(const EventFwk::CommonEventData &data);
     void HandleUserRemove(const EventFwk::CommonEventData &data);
 
-    std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
     int32_t lastUserId_ = 0;
     std::mutex userIdMutex_;
 };
