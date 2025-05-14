@@ -1270,6 +1270,13 @@ void UIAbility::ExecuteInsightIntentMoveToForeground(const AAFwk::Want &want,
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 }
 
+void UIAbility::ExecuteInsightIntentPage(const AAFwk::Want &want,
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+    std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "execute insight intent page");
+}
+
 void UIAbility::ExecuteInsightIntentBackground(const AAFwk::Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
