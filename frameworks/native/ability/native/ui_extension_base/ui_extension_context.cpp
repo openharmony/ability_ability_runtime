@@ -22,7 +22,6 @@
 #include "hitrace_meter.h"
 #include "configuration_convertor.h"
 #include "configuration.h"
-#include "string_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
