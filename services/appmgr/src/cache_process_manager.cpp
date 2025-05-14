@@ -298,6 +298,9 @@ void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<Ap
     if (appRecord->GetSupportProcessCacheState() != SupportProcessCacheState::SUPPORT) {
         return;
     }
+    if (!appRecord->GetEnableProcessCache()) {
+        return;
+    }
     if (!appRecord->GetPriorityObject()) {
         return;
     }
@@ -389,6 +392,9 @@ bool CacheProcessManager::IsAppShouldCache(const std::shared_ptr<AppRunningRecor
         return true;
     }
     if (!IsAppSupportProcessCache(appRecord)) {
+        return false;
+    }
+    if (!appRecord->GetEnableProcessCache()) {
         return false;
     }
     return true;

@@ -1805,7 +1805,8 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return false;
     }
-    if (appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT) {
+    if ((appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT) &&
+        (appRecord->GetEnableProcessCache())) {
         TAG_LOGI(AAFwkTag::APPMGR, "support porcess cache should not force clean");
         return false;
     }

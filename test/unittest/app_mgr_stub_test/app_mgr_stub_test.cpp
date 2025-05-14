@@ -762,5 +762,53 @@ HWTEST_F(AppMgrStubTest, GetSupportedProcessCachePids_001, TestSize.Level1)
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
+
+/**
+ * @tc.name: HandleIsProcessCacheSupported_0100
+ * @tc.desc: Test HandleIsProcessCacheSupported.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleIsProcessCacheSupported_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t pid = 1;
+    bool isSupport = false;
+    data.WriteInt32(pid);
+    data.WriteBool(isSupport);
+
+    EXPECT_CALL(*mockAppMgrService_, IsProcessCacheSupported(_, _)).Times(1);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::IS_PROCESS_CACHE_SUPPORTED), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleSetProcessCacheEnable_0100
+ * @tc.desc: Test HandleSetProcessCacheEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleSetProcessCacheEnable_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t pid = 1;
+    bool enable = false;
+    data.WriteInt32(pid);
+    data.WriteBool(enable);
+
+    EXPECT_CALL(*mockAppMgrService_, SetProcessCacheEnable(_, _)).Times(1);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::SET_PROCESS_CACHE_ENABLE), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

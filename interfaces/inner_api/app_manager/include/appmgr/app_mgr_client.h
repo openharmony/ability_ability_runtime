@@ -873,6 +873,10 @@ public:
 
     int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
 
+    int32_t IsProcessCacheSupported(int32_t pid, bool &isSupported);
+
+    int32_t SetProcessCacheEnable(int32_t pid, bool enable);
+
     /**
      * set browser channel for caller
      */
