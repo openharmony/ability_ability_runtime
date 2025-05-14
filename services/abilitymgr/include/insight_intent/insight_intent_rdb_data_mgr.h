@@ -64,8 +64,6 @@ private:
 class InsightIntentRdbDataMgr : public std::enable_shared_from_this<InsightIntentRdbDataMgr> {
     DECLARE_DELAYED_SINGLETON(InsightIntentRdbDataMgr)
 public:
-    bool InitIntentTable(const IntentRdbConfig &intentRdbConfig);
-
     bool InsertData(const std::string &key, const std::string &value);
 
     bool UpdateData(const std::string &key, const std::string &value);
