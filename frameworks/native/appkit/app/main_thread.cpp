@@ -3349,7 +3349,7 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
     }
 
     BundleInfo bundleInfo;
-    if (bundleMgrHelper->GetBundleInfoForSelf(
+    if (bundleMgrHelper->GetBundleInfoForSelfWithOutCache(
         (static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) +
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
