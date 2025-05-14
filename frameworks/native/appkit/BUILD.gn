@@ -413,6 +413,7 @@ ohos_shared_library("app_context_utils") {
     "ability_runtime/context/js_context_utils.cpp",
     "ability_runtime/context/js_resource_manager_utils.cpp",
     "ability_runtime/context/sts_context_utils.cpp",
+    "ability_runtime/context/ets_application_context_utils.cpp",
   ]
   cflags = []
   if (target_cpu == "arm") {
