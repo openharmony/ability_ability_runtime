@@ -392,7 +392,7 @@ void UIExtensionContext::NotifyComponentTerminate()
     TAG_LOGD(AAFwkTag::CONTEXT, "NotifyComponentTerminate called");
     std::shared_ptr<AppExecFwk::AbilityInfo> info = GetAbilityInfo();
     if (!info) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null info");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null info");
         return;
     }
     if (screenMode_ != AAFwk::EMBEDDED_FULL_SCREEN_MODE ||
