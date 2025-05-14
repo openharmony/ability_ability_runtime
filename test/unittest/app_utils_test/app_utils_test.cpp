@@ -351,5 +351,21 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1600, TestSize.Level2)
     EXPECT_TRUE(allow);
     TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1600 end.");
 }
+
+/**
+ * @tc.number: AppUtilsTest_1700
+ * @tc.desc: Test MaxMultiProcessFeatureChildProcess works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_1700, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1700 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+
+    appUtils.maxMultiProcessFeatureChildProcess_.isLoaded = true;
+    appUtils.maxMultiProcessFeatureChildProcess_.value = 512;
+    auto maxProcess = appUtils.MaxMultiProcessFeatureChildProcess();
+    EXPECT_TRUE(maxProcess == 512);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
