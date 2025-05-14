@@ -101,6 +101,26 @@ HWTEST_F(ChildProcessManagerTest, StartChildProcessBySelfFork_0200, TestSize.Lev
 }
 
 /**
+ * @tc.number: StartChildProcessBySelfFork_0300
+ * @tc.desc: Test StartChildProcessBySelfFork works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, StartChildProcessBySelfFork_0300, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "StartChildProcessBySelfFork_0300 called.");
+
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isMultiProcessModel_.isLoaded = true;
+    appUtils.isMultiProcessModel_.value = false;
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.isLoaded = true;
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = true;
+    
+    pid_t pid;
+    auto ret = ChildProcessManager::GetInstance().StartChildProcessBySelfFork("./ets/process/DemoProcess.ts", pid);
+    EXPECT_EQ(ret, ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED);
+}
+
+/**
  * @tc.number: StartChildProcessByAppSpawnFork_0100
  * @tc.desc: Test StartChildProcessByAppSpawnFork works.
  * @tc.type: FUNC
@@ -382,6 +402,119 @@ HWTEST_F(ChildProcessManagerTest, LoadNativeLibWithArgs_0100, TestSize.Level2)
     TAG_LOGD(AAFwkTag::TEST, "LoadNativeLibWithArgs_0100 called.");
     auto ret = ChildProcessManager::GetInstance().LoadNativeLibWithArgs("entry", "libentry.so", "Main", nullptr);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number: AllowChildProcessOnDevice_0100
+ * @tc.desc: Test AllowChildProcessOnDevice works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, AllowChildProcessOnDevice_0100, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "AllowChildProcessOnDevice_0100 called.");
+
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isMultiProcessModel_.isLoaded = true;
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.isLoaded = true;
+
+    appUtils.isMultiProcessModel_.value = true;
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = false;
+    auto allow = ChildProcessManager::GetInstance().AllowChildProcessOnDevice();
+    EXPECT_TRUE(allow);
+
+    appUtils.isMultiProcessModel_.value = false;
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = true;
+    allow = ChildProcessManager::GetInstance().AllowChildProcessOnDevice();
+    EXPECT_TRUE(allow);
+
+    appUtils.isMultiProcessModel_.value = false;
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = false;
+    allow = ChildProcessManager::GetInstance().AllowChildProcessOnDevice();
+    EXPECT_FALSE(allow);
+}
+
+/**
+ * @tc.number: IsMultiProcessFeatureApp_0100
+ * @tc.desc: Test IsMultiProcessFeatureApp works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, IsMultiProcessFeatureApp_0100, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "IsMultiProcessFeatureApp_0100 called.");
+
+    AppExecFwk::BundleInfo bundleInfo;
+    bool ret = ChildProcessManager::GetInstance().IsMultiProcessFeatureApp(bundleInfo);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number: IsMultiProcessFeatureApp_0200
+ * @tc.desc: Test IsMultiProcessFeatureApp works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, IsMultiProcessFeatureApp_0200, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "IsMultiProcessFeatureApp_0200 called.");
+
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<AppExecFwk::HapModuleInfo> hapModuleInfos;
+    AppExecFwk::HapModuleInfo moduleInfo;
+    moduleInfo.name = "feature";
+    moduleInfo.moduleName = "feature";
+    moduleInfo.moduleType = AppExecFwk::ModuleType::FEATURE;
+
+    hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos = hapModuleInfos;
+    bool ret = ChildProcessManager::GetInstance().IsMultiProcessFeatureApp(bundleInfo);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number: IsMultiProcessFeatureApp_0300
+ * @tc.desc: Test IsMultiProcessFeatureApp works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, IsMultiProcessFeatureApp_0300, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "IsMultiProcessFeatureApp_0300 called.");
+
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<AppExecFwk::HapModuleInfo> hapModuleInfos;
+    AppExecFwk::HapModuleInfo moduleInfo;
+    moduleInfo.name = "entry";
+    moduleInfo.moduleName = "entry";
+    moduleInfo.moduleType = AppExecFwk::ModuleType::ENTRY;
+
+    hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos = hapModuleInfos;
+    bool ret = ChildProcessManager::GetInstance().IsMultiProcessFeatureApp(bundleInfo);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number: IsMultiProcessFeatureApp_0400
+ * @tc.desc: Test IsMultiProcessFeatureApp works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, IsMultiProcessFeatureApp_0400, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "IsMultiProcessFeatureApp_0400 called.");
+
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<AppExecFwk::HapModuleInfo> hapModuleInfos;
+    AppExecFwk::HapModuleInfo moduleInfo;
+    moduleInfo.name = "entry";
+    moduleInfo.moduleName = "entry";
+    moduleInfo.moduleType = AppExecFwk::ModuleType::ENTRY;
+
+    std::vector<std::string> deviceFeatures;
+    deviceFeatures.push_back("multi_process");
+    moduleInfo.deviceFeatures = deviceFeatures;
+
+    hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos = hapModuleInfos;
+    bool ret = ChildProcessManager::GetInstance().IsMultiProcessFeatureApp(bundleInfo);
+    EXPECT_TRUE(ret);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
