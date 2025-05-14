@@ -189,6 +189,9 @@ enum class AbilityErrorCode {
     // the target not in app identifier allow list.
     ERROR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST = 16000200,
 
+    // the target has not been started yet.
+    ERROR_CODE_TARGET_NOT_STARTED = 16000201,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 

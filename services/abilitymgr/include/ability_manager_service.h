@@ -2115,10 +2115,12 @@ protected:
      * Check if Caller is allowed to start AppServiceExtension(Stage).
      *
      * @param abilityRequest, abilityRequest.
+     * @param isVerifyAppIdentifierAllowList, isVerifyAppIdentifierAllowList
+     * @param isFromConnect, isFromConnect
      * @return Returns whether the caller is allowed to start AppServiceExtension.
      */
     int32_t CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest,
-        bool isVerifyAppIdentifierAllowList);
+        bool isVerifyAppIdentifierAllowList, bool isFromConnect);
 
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
