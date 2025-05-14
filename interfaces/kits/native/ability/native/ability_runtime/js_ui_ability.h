@@ -243,7 +243,7 @@ public:
      * You can override this function to implement your own processing logic.
      */
     void OnBackground() override;
-    
+
     /**
      * @brief Called before this ability enters the <b>STATE_FOREGROUND</b> state.
      * The ability in the <b>STATE_FOREGROUND</b> state is invisible.
@@ -320,6 +320,17 @@ public:
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
 
     /**
+     * @brief Execute insight intent when an ability start with page insight intent.
+     *
+     * @param want Want.
+     * @param executeParam insight intent execute param.
+     * @param callback insight intent async callback.
+     */
+    void ExecuteInsightIntentPage(const AAFwk::Want &want,
+        const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+        std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
+
+    /**
      * @brief Execute insight intent when an ability didn't started, schedule it to background.
      *
      * @param want Want.
@@ -368,7 +379,8 @@ private:
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         InsightIntentExecutorInfo& executeInfo);
     int32_t OnCollaborate(WantParams &wantParams);
-    
+    void SetInsightIntentParam(const Want &want, bool coldStart);
+
     std::shared_ptr<NativeReference> jsWindowStageObj_;
     int32_t windowMode_ = 0;
 #endif
