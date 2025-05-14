@@ -364,7 +364,7 @@ void UriPermissionManagerClient::UpmsDeathRecipient::OnRemoteDied([[maybe_unused
 
 int32_t UriPermissionManagerClient::ClearPermissionTokenByMap(const uint32_t tokenId)
 {
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "clear call");
     auto uriPermMgr = GetUriPermMgr();
     if (uriPermMgr) {
         int32_t funcResult = -1;
