@@ -47,20 +47,12 @@
 #include "display_manager.h"
 #include "window.h"
 #endif
-#include "ani.h"
-#include "sts_context_utils.h"
-#include "sts_runtime.h"
-#include "sts_error_utils.h"
-#include "ani_common_util.h"
-#include "ani_common_want.h"
-#include "ability_runtime_error_util.h"
-#include "ability_manager_client.h"
+#include "ets_application_context_utils.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
     constexpr const char* PERSIST_DARKMODE_KEY = "persist.ace.darkmode";
-    constexpr const char* STS_APPLICATION_CONTEXT_CLASS_NAME = "Lapplication/ApplicationContext/ApplicationContext;";
     constexpr const char* STS_CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
 }
 REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
@@ -192,6 +184,7 @@ void OHOSApplication::SetApplicationContext(
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return;
     }
+    AbilityRuntime::SetApplicationContextToEts(abilityRuntimeContext);
     abilityRuntimeContext_ = abilityRuntimeContext;
     auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
     std::weak_ptr<OHOSApplication> applicationWptr = application;
@@ -224,133 +217,11 @@ void OHOSApplication::SetApplicationContext(
 #endif
 }
 
-static void killAllProcesses([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
-    ani_boolean clearPageStack, ani_object call)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "killAllProcesses Call");
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
-        return;
-    }
-    ani_status status = ANI_ERROR;
-    ani_object aniObject = AbilityRuntime::CreateStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_OK);
-    ErrCode innerErrCode = ERR_OK;
-    ani_long nativeContextLong = AbilityRuntime::ContextUtil::GetNativeApplicationContextLong(env, aniObj);
-    if (nativeContextLong == 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "nativeContextLong is nullptr");
-        innerErrCode = AbilityRuntime::ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
-        aniObject = AbilityRuntime::CreateStsError(env, innerErrCode, "applicationContext is already released.");
-        AppExecFwk::AsyncCallback(env, call, aniObject, nullptr);
-        return;
-    }
-    AppExecFwk::AsyncCallback(env, call, aniObject, nullptr);
-    ((AbilityRuntime::ApplicationContext*)nativeContextLong)->KillProcessBySelf(clearPageStack);
-}
-
-static void PreloadUIExtensionAbility([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
-    ani_object wantObj, ani_object call)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "PreloadUIExtensionAbility Call");
-    AAFwk::Want want;
-    if (!OHOS::AppExecFwk::UnwrapWant(env, wantObj, want)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Parse want failed");
-        AppExecFwk::AsyncCallback(env, call, AbilityRuntime::CreateStsInvalidParamError(env,
-            "Parse param want failed, want must be Want."), nullptr);
-        return;
-    }
-    ani_long nativeContextLong = AbilityRuntime::ContextUtil::GetNativeApplicationContextLong(env, aniObj);
-    auto context = ((AbilityRuntime::ApplicationContext*)nativeContextLong);
-    if (!context) {
-        AppExecFwk::AsyncCallback(env, call, AbilityRuntime::CreateStsErrorByNativeErr(env,
-            (int32_t)AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT), nullptr);
-        return;
-    }
-    auto hostBundleName = context->GetBundleName();
-    TAG_LOGD(AAFwkTag::APPKIT, "HostBundleName is %{public}s", hostBundleName.c_str());
-    auto innerErrCode = AAFwk::AbilityManagerClient::GetInstance()->PreloadUIExtensionAbility(want, hostBundleName);
-    if (innerErrCode == ERR_OK) {
-        AppExecFwk::AsyncCallback(env, call, AbilityRuntime::CreateStsError(env,
-            AbilityRuntime::AbilityErrorCode::ERROR_OK), nullptr);
-    } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "OnPreloadUIExtensionAbility failed %{public}d", innerErrCode);
-        AppExecFwk::AsyncCallback(env, call, AbilityRuntime::CreateStsErrorByNativeErr(env, innerErrCode), nullptr);
-    }
-}
-
-static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
-    ani_boolean value) {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    ani_long nativeContextLong = AbilityRuntime::ContextUtil::GetNativeApplicationContextLong(env, aniObj);
-    int32_t errCode = ((AbilityRuntime::ApplicationContext*)nativeContextLong)->SetSupportedProcessCacheSelf(value);
-    if (errCode == AAFwk::ERR_CAPABILITY_NOT_SUPPORT) {
-        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_CAPABILITY_NOT_SUPPORT);
-    } else if (errCode != ERR_OK) {
-        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
-    }
-}
-
-void BindApplicationContextFunc(ani_env* aniEnv, ani_class& contextClass)
-{
-    std::array applicationContextFunctions = {
-        ani_native_function {"setSupportedProcessCacheSync", "Z:V",
-            reinterpret_cast<void *>(SetSupportedProcessCacheSync)},
-        ani_native_function {"nativekillAllProcessesSync", "ZLutils/AbilityUtils/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void *>(killAllProcesses)},
-        ani_native_function {"nativepreloadUIExtensionAbilitySync",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void *>(PreloadUIExtensionAbility)},
-        ani_native_function {"nativeOnSync",
-            "Lstd/core/String;L@ohos/app/ability/EnvironmentCallback/EnvironmentCallback;:D",
-            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeOnSync)},
-        ani_native_function {"nativeOffSync",
-            "Lstd/core/String;DLutils/AbilityUtils/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeOffSync)},
-    };
-    aniEnv->Class_BindNativeMethods(contextClass, applicationContextFunctions.data(),
-        applicationContextFunctions.size());
-}
-
 void OHOSApplication::InitAniApplicationContext()
 {
     auto& runtime = GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
     auto aniEnv = static_cast<AbilityRuntime::STSRuntime &>(*runtime).GetAniEnv();
-    ani_class applicationContextCls = nullptr;
-    if (aniEnv->FindClass(STS_APPLICATION_CONTEXT_CLASS_NAME, &applicationContextCls) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed");
-        return;
-    }
-    BindApplicationContextFunc(aniEnv, applicationContextCls);
-
-    ani_method contextCtorMethod = nullptr;
-    if (aniEnv->Class_FindMethod(applicationContextCls, "<ctor>", ":V", &contextCtorMethod) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod ctor failed");
-        return;
-    }
-    ani_object applicationContextObject = nullptr;
-    if (aniEnv->Object_New(applicationContextCls, contextCtorMethod, &applicationContextObject) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_New failed");
-        return;
-    }
-    ani_field contextField;
-    if (aniEnv->Class_FindField(applicationContextCls, "nativeContext", &contextField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed");
-        return;
-    }
-    if (aniEnv->Object_SetField_Long(applicationContextObject, contextField,
-        (ani_long)abilityRuntimeContext_.get()) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Long failed");
-        return;
-    }
-    ani_ref applicationContextObjectRef = nullptr;
-    if (aniEnv->GlobalReference_Create(applicationContextObject, &applicationContextObjectRef) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Create failed");
-        return;
-    }
-    auto stsReference = std::make_shared<AbilityRuntime::STSNativeReference>();
-    stsReference->aniObj = applicationContextObject;
-    AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().AddStsGlobalObject(aniEnv, stsReference);
-    applicationContextObjRef_ = reinterpret_cast<void*>(applicationContextObjectRef);
-    abilityRuntimeContext_->SetApplicationCtxObjRef(applicationContextObjRef_);
+    AbilityRuntime::CreateEtsApplicationContext(aniEnv, applicationContextObjRef_);
 }
 
 void OHOSApplication::InitAniContext()
