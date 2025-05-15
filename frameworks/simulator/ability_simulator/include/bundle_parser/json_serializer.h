@@ -18,6 +18,7 @@
 
 #include "ability_info.h"
 #include "application_info.h"
+#include "bundle_info.h"
 #include "extension_ability_info.h"
 #include "hap_module_info.h"
 #include "module_info.h"
@@ -73,6 +74,15 @@ void from_json(const nlohmann::json &jsonObject, RouterItem &routerItem);
 void to_json(nlohmann::json &jsonObject, const RouterItem &routerItem);
 void from_json(const nlohmann::json &jsonObject, AppEnvironment &appEnvironment);
 void to_json(nlohmann::json &jsonObject, const AppEnvironment &appEnvironment);
+void to_json(nlohmann::json &jsonObject, const BundleInfo &bundleInfo);
+void from_json(const nlohmann::json &jsonObject, BundleInfo &bundleInfo);
+void to_json(nlohmann::json &jsonObject, const OverlayBundleInfo &overlayBundleInfo);
+void from_json(const nlohmann::json &jsonObject, OverlayBundleInfo &overlayBundleInfo);
+void to_json(nlohmann::json &jsonObject, const RequestPermissionUsedScene &usedScene);
+void from_json(const nlohmann::json &jsonObject, RequestPermissionUsedScene &usedScene);
+void to_json(nlohmann::json &jsonObject, const RequestPermission &requestPermission);
+void from_json(const nlohmann::json &jsonObject, RequestPermission &requestPermission);
+void to_json(nlohmann::json &jsonObject, const SignatureInfo &signatureInfo);
 } // namespace AppExecFwk
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_SIMULATOR_JSON_SERIALIZER_H
