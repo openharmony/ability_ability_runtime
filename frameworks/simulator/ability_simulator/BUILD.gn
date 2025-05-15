@@ -22,14 +22,17 @@ config("ability_simulator_public_config") {
 
 ohos_shared_library("ability_simulator_inner") {
   if (is_mingw || is_mac) {
-    defines = [ "__IDE_PREVIEW__" ]
+    defines = []
     if (is_mingw) {
       defines += [
         "WINDOWS_PLATFORM",
         "NOGDI",
-        "OFFSET_PREVIEW=0",
       ]
     }
+    defines += [
+      "OFFSET_PREVIEW=0",
+      "__IDE_PREVIEW__"
+    ]
 
     cflags = [ "-std=c++17" ]
 

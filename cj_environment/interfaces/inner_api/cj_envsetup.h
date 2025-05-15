@@ -57,6 +57,8 @@ struct CJEnvMethods {
     void (*registerArkVMInRuntime)(unsigned long long arkVM) = nullptr;
     void (*registerStackInfoCallbacks)(UpdateStackInfoFuncType uFunc) = nullptr;
     void (*setAppVersion)(std::string& version) = nullptr;
+    void (*dumpHeapSnapshot) (int fd) = nullptr;
+    void (*forceFullGC) () = nullptr;
 };
 
 class CJEnv {

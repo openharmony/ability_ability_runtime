@@ -24,6 +24,7 @@
 #include "ability_util.h"
 #include "bundle_mgr_helper.h"
 #include "insight_intent_db_cache.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -33,7 +34,6 @@ const int32_t MAIN_USER_ID = 100;
 InsightIntentSysEventReceiver::InsightIntentSysEventReceiver(const EventFwk::CommonEventSubscribeInfo &subscribeInfo)
     : EventFwk::CommonEventSubscriber(subscribeInfo)
 {
-    taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(INSIGHT_INTENT_SYS_EVENT_RECERVER);
 }
 
 void InsightIntentSysEventReceiver::SaveInsightIntentInfos(const std::string &bundleName, const std::string &moduleName,
@@ -130,9 +130,8 @@ void InsightIntentSysEventReceiver::DeleteInsightIntentInfoByUserId(int32_t user
 
 void InsightIntentSysEventReceiver::HandleBundleScanFinished()
 {
-    CHECK_POINTER(taskHandler_);
     auto task = [self = shared_from_this()]() { self->LoadInsightIntentInfos(); };
-    taskHandler_->SubmitTask(task);
+    ffrt::submit(task);
 }
 
 void InsightIntentSysEventReceiver::HandleUserSwitched(const EventFwk::CommonEventData &data)
@@ -151,9 +150,8 @@ void InsightIntentSysEventReceiver::HandleUserSwitched(const EventFwk::CommonEve
     TAG_LOGI(AAFwkTag::INTENT, "userId: %{public}d switch to  current userId: %{public}d", lastUserId_, userId);
     lastUserId_ = userId;
 
-    CHECK_POINTER(taskHandler_);
     auto task = [self = shared_from_this(), userId]() { self->LoadInsightIntentInfos(userId); };
-    taskHandler_->SubmitTask(task);
+    ffrt::submit(task);
 }
 
 void InsightIntentSysEventReceiver::HandleUserRemove(const EventFwk::CommonEventData &data)
@@ -169,9 +167,8 @@ void InsightIntentSysEventReceiver::HandleUserRemove(const EventFwk::CommonEvent
         return;
     }
 
-    CHECK_POINTER(taskHandler_);
     auto task = [self = shared_from_this(), userId]() { self->DeleteInsightIntentInfoByUserId(userId); };
-    taskHandler_->SubmitTask(task);
+    ffrt::submit(task);
 }
 
 void InsightIntentSysEventReceiver::OnReceiveEvent(const EventFwk::CommonEventData &data)

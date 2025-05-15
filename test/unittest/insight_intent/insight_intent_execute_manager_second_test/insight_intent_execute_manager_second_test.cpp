@@ -24,6 +24,9 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+constexpr uint64_t NON_EXIST_ID = 12345;
+};
 namespace OHOS {
 namespace AAFwk {
 class InsightIntentExecuteManagerSecondTest : public testing::Test {
@@ -338,6 +341,258 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, GetCallerBundleName_0300, TestSi
     auto ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GetCallerBundleName(
         intentId, callerBundleName);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: AddWantUirsAndFlagsFromParam_001
+ * @tc.desc: basic function test of display id.
+ * @tc.type: FUNC
+ * @tc.require: issueI8ZRAG
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, AddWantUirsAndFlagsFromParam_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Want want;
+    std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> paramPtr = nullptr;
+    auto ret = InsightIntentExecuteManager::AddWantUirsAndFlagsFromParam(paramPtr, want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+  
+/**
+ * @tc.name: AddWantUirsAndFlagsFromParam_002
+ * @tc.desc: basic function test of display id.
+ * @tc.type: FUNC
+ * @tc.require: issueI8ZRAG
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, AddWantUirsAndFlagsFromParam_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Want want;
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = std::make_shared<WantParams>();
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    paramPtr->uris_.emplace_back("testUri1");
+    paramPtr->uris_.emplace_back("testUri2");
+    auto ret = InsightIntentExecuteManager::AddWantUirsAndFlagsFromParam(paramPtr, want);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+ 
+/**
+ * @tc.name: RemoteDied_0100
+ * @tc.desc: RemoteDied_0100
+ * @tc.type: FUNC
+ * @tc.require: issueI8ZRAG
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, RemoteDied_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    EXPECT_NE(manager, nullptr);
+    uint64_t nonExistentIntentId = NON_EXIST_ID;
+    int32_t result = manager->RemoteDied(nonExistentIntentId);
+
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+ 
+/**
+ * @tc.name: RemoteDied_0200
+ * @tc.desc: RemoteDied_0200
+ * @tc.type: FUNC
+ * @tc.require: issueI8ZRAG
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, RemoteDied_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    EXPECT_NE(manager, nullptr);
+    uint64_t key = 1;
+    sptr<IRemoteObject> callToken = new AppExecFwk::MockAbilityToken();
+    EXPECT_NE(callToken, nullptr);
+    std::string bundleName = "test.bundleName";
+    std::string callerBundleName = "test.callerBundleName";
+    uint64_t intentId = 1;
+    manager->AddRecord(key, callToken, bundleName, intentId, callerBundleName);
+
+    int32_t result = manager->RemoteDied(intentId);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: GetBundleName_0100
+ * @tc.desc: GetBundleName_0100
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, GetBundleName_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    EXPECT_NE(manager, nullptr);
+    uint64_t nonExistentIntentId = NON_EXIST_ID;
+    std::string bundleName;
+
+    int32_t result = manager->GetBundleName(nonExistentIntentId, bundleName);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: GetBundleName_0200
+ * @tc.desc: GetBundleName_0200
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, GetBundleName_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    EXPECT_NE(manager, nullptr);
+    uint64_t key = 1;
+    sptr<IRemoteObject> callToken = new AppExecFwk::MockAbilityToken();
+    EXPECT_NE(callToken, nullptr);
+    std::string bundleName = "test.bundleName";
+    std::string callerBundleName = "test.callerBundleName";
+    uint64_t intentId = 1;
+    manager->AddRecord(key, callToken, bundleName, intentId, callerBundleName);
+
+    std::string retBundleName;
+    int32_t result = manager->GetBundleName(intentId, retBundleName);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: GenerateWant_0300
+ * @tc.desc: GenerateWant_0300
+ * @tc.type: FUNC
+ * @tc.require: issueI8ZRAG
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, GenerateWant_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Want want;
+    auto ret = InsightIntentExecuteManager::GenerateWant(nullptr, want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: GenerateWant_0400
+ * @tc.desc: GenerateWant_0400
+ * @tc.type: FUNC
+ * @tc.require: issueI8ZRAG
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, GenerateWant_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "";
+    param.insightIntentParam_ = nullptr;
+    param.displayId_ = 2;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    Want want;
+    std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
+    EXPECT_TRUE(startTime.empty());
+
+    InsightIntentExecuteManager::GenerateWant(paramPtr, want);
+    startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
+    EXPECT_FALSE(startTime.empty());
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: GenerateWant_0500
+ * @tc.desc: GenerateWant_0500
+ * @tc.type: FUNC
+ * @tc.require: issueI8ZRAG
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, GenerateWant_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "test.IntentName";
+    param.insightIntentParam_ = nullptr;
+    param.displayId_ = 2;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    Want want;
+
+    int32_t result = InsightIntentExecuteManager::GenerateWant(paramPtr, want);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: CheckIntentIsExemption_0100
+ * @tc.desc: CheckIntentIsExemption_0100
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckIntentIsExemption_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    EXPECT_NE(manager, nullptr);
+    int32_t uid = NON_EXIST_ID;
+
+    bool result = manager->CheckIntentIsExemption(uid);
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: CheckIntentIsExemption_0200
+ * @tc.desc: CheckIntentIsExemption_0200
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, CheckIntentIsExemption_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    EXPECT_NE(manager, nullptr);
+    int32_t uid = 1;
+    manager->SetIntentExemptionInfo(uid);
+
+    bool result = manager->CheckIntentIsExemption(uid);
+    EXPECT_TRUE(result);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: GetAllIntentExemptionInfo_0100
+ * @tc.desc: GetAllIntentExemptionInfo_0100
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, GetAllIntentExemptionInfo_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    std::shared_ptr<InsightIntentExecuteManager> manager = std::make_shared<InsightIntentExecuteManager>();
+    EXPECT_NE(manager, nullptr);
+    int32_t uid1 = 1;
+    int32_t uid2 = 2;
+    manager->SetIntentExemptionInfo(uid1);
+    manager->SetIntentExemptionInfo(uid2);
+
+    auto result = manager->GetAllIntentExemptionInfo();
+    EXPECT_EQ(result.size(), 2);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
 } // namespace AAFwk

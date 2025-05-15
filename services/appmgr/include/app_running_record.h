@@ -1143,7 +1143,7 @@ private:
     bool isErrorInfoEnhance_ = false;
     bool isNativeStart_ = false;
     bool isMultiThread_ = false;
-    bool enableProcessCache_ = false;
+    bool enableProcessCache_ = true;
     bool processCacheBlocked = false; // temporarily block process cache feature
     bool hasGPU_ = false;
     bool isStrictMode_ = false;

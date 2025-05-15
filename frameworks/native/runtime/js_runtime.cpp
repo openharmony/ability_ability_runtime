@@ -1087,6 +1087,67 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModule(
     return std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(resultRef));
 }
 
+napi_value JsRuntime::GetExportObjectFromOhmUrl(const std::string &srcEntrance, const std::string &key)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "Get %{private}s export %{private}s", srcEntrance.c_str(), key.c_str());
+    auto vm = GetEcmaVm();
+    CHECK_POINTER_AND_RETURN(vm, nullptr);
+    auto ohmUrl = panda::JSNApi::IsOhmUrl(srcEntrance);
+    if (!ohmUrl) {
+        TAG_LOGW(AAFwkTag::JSRUNTIME, "srcEntrance %{private}s not ohmurl", srcEntrance.c_str());
+        return nullptr;
+    }
+
+    panda::Local<panda::ObjectRef> exportObj = panda::JSNApi::GetExportObjectFromOhmUrl(vm, srcEntrance, key);
+    if (exportObj->IsNull()) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Get %{private}s export %{private}s failed", srcEntrance.c_str(), key.c_str());
+        return nullptr;
+    }
+
+    auto env = GetNapiEnv();
+    CHECK_POINTER_AND_RETURN(env, nullptr);
+    return ArkNativeEngine::ArkValueToNapiValue(env, exportObj);
+}
+
+bool JsRuntime::ExecuteSecureWithOhmUrl(const std::string &moduleName, const std::string &hapPath,
+    const std::string &srcEntrance)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "moduleName %{public}s, hapPath %{private}s, execute %{private}s",
+        moduleName.c_str(), hapPath.c_str(), srcEntrance.c_str());
+    auto vm = GetEcmaVm();
+    CHECK_POINTER_AND_RETURN(vm, false);
+    auto ohmUrl = panda::JSNApi::IsOhmUrl(srcEntrance);
+    if (!ohmUrl) {
+        TAG_LOGW(AAFwkTag::JSRUNTIME, "srcEntrance %{private}s not ohmurl", srcEntrance.c_str());
+        return false;
+    }
+
+    bool newCreate = false;
+    std::string loadPath = ExtractorUtil::GetLoadFilePath(hapPath);
+    std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate, true);
+    if (extractor == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "get hapPath %{private}s extractor failed", hapPath.c_str());
+        return false;
+    }
+
+    std::string srcFileName = BUNDLE_INSTALL_PATH + moduleName + MERGE_ABC_PATH;
+    auto safeData = extractor->GetSafeData(srcFileName);
+    if (safeData == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null safeData srcFileName %{private}s", srcFileName.c_str());
+        return false;
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+    auto ret = panda::JSNApi::ExecuteSecureWithOhmUrl(vm, safeData->GetDataPtr(), safeData->GetDataLen(), srcFileName,
+        srcEntrance);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    TAG_LOGI(AAFwkTag::JSRUNTIME, "srcEntrance %{public}s timing %{public}lld", srcEntrance.c_str(), duration_ms);
+    return ret;
+}
+
 bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath, bool useCommonChunk,
     const std::string& srcEntrance)
 {

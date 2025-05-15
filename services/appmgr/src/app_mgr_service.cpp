@@ -1632,6 +1632,36 @@ int32_t AppMgrService::SetSupportedProcessCache(int32_t pid, bool isSupport)
     return appMgrServiceInner_->SetSupportedProcessCache(pid, isSupport);
 }
 
+int32_t AppMgrService::IsProcessCacheSupported(int32_t pid, bool &isSupported)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "get supported process cache");
+    if (appMgrServiceInner_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return AAFwk::ERR_NULL_APP_MGR_SERVICE_INNER;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(
+        FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not foundation");
+        return AAFwk::ERR_NO_PERMISSION_CALLER;
+    }
+    return appMgrServiceInner_->IsProcessCacheSupported(pid, isSupported);
+}
+
+int32_t AppMgrService::SetProcessCacheEnable(int32_t pid, bool enable)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "set enable process cache");
+    if (appMgrServiceInner_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return AAFwk::ERR_NULL_APP_MGR_SERVICE_INNER;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(
+        FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not foundation");
+        return AAFwk::ERR_NO_PERMISSION_CALLER;
+    }
+    return appMgrServiceInner_->SetProcessCacheEnable(pid, enable);
+}
+
 void AppMgrService::SetAppAssertionPauseState(bool flag)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
