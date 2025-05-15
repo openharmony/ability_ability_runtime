@@ -22,8 +22,9 @@ config("ability_simulator_public_config") {
 
 ohos_shared_library("ability_simulator_inner") {
   if (is_mingw || is_mac) {
+    defines = [ "__IDE_PREVIEW__" ]
     if (is_mingw) {
-      defines = [
+      defines += [
         "WINDOWS_PLATFORM",
         "NOGDI",
         "OFFSET_PREVIEW=0",
@@ -71,7 +72,6 @@ ohos_shared_library("ability_simulator_inner") {
       "src/js_resource_manager_utils.cpp",
       "src/js_runtime_utils.cpp",
       "src/js_timer.cpp",
-      "src/resource_manager_addon.cpp",
       "src/simulator.cpp",
     ]
 
@@ -92,6 +92,7 @@ ohos_shared_library("ability_simulator_inner") {
       "jsoncpp:jsoncpp_static",
       "napi:ace_napi",
       "previewer:ide_extension",
+      "resource_management:resmgr_napi_core_preview",
     ]
 
     if (ability_runtime_graphics) {
