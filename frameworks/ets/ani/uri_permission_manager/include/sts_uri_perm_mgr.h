@@ -19,7 +19,7 @@
 #include "sts_runtime.h"
 
 namespace OHOS {
-namespace AbilityRuntime {    
+namespace AbilityRuntime {
 static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_double appCloneIndex, ani_object callback);
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,

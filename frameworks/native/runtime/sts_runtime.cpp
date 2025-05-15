@@ -86,6 +86,8 @@ constexpr char ENTRY_PATH_MAP_KEY[] = "entryPath";
 constexpr char DEFAULT_ENTRY_ABILITY_CLASS[] = "entry/src/main/ets/entryability/EntryAbility/EntryAbility";
 constexpr const char* STRING_CLASS_NAME = "Lstd/core/String;";
 constexpr const char* ABC_RUNTIME_LINKER_CLASS_NAME = "Lstd/core/AbcRuntimeLinker;";
+const int NUMBER_ZERO = 0;
+const int NUMBER_TWO = 2;
 
 class EntryPathManager {
 public:
@@ -164,10 +166,10 @@ private:
 
     static bool StartsWithDotSlash(const std::string &str)
     {
-        if (str.length() < 2) {
+        if (str.length() < NUMBER_TWO) {
             return false;
         }
-        std::string prefix = str.substr(0, 2);
+        std::string prefix = str.substr(NUMBER_ZERO, NUMBER_TWO);
         return prefix == "./";
     }
 
@@ -560,7 +562,7 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadModule(const std::string& mo
         moduleName_ = path;
     }
     TAG_LOGD(AAFwkTag::STSRUNTIME, "moduleName_(%{public}s, path %{public}s",
-        moduleName_.c_str(),path.c_str());
+        moduleName_.c_str(), path.c_str());
 
     std::string fileName;
     if (!hapPath.empty()) {
@@ -577,8 +579,8 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadModule(const std::string& mo
     return stsNativeReference;
 }
 
-std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string& moduleName, const std::string& path, const std::string& hapPath,
-    const std::string& srcEntrance)
+std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string& moduleName,
+    const std::string& path, const std::string& hapPath, const std::string& srcEntrance)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "Load sts module(%{public}s, %{public}s, %{public}s, %{public}s)",
         moduleName.c_str(), path.c_str(), hapPath.c_str(), srcEntrance.c_str());
@@ -676,8 +678,8 @@ std::unique_ptr<STSNativeReference> STSRuntime::LoadStsModule(const std::string&
     return stsNativeReference;
 }
 
-bool STSRuntime::RunScript(ani_env* aniEnv, const std::string& moduleName, const std::string& abcPath, const std::string& hapPath,
-    const std::string& srcEntrance)
+bool STSRuntime::RunScript(ani_env* aniEnv, const std::string& moduleName, const std::string& abcPath,
+    const std::string& hapPath, const std::string& srcEntrance)
 {
     bool newCreate = false;
     std::string loadPath = ExtractorUtil::GetLoadFilePath(hapPath);

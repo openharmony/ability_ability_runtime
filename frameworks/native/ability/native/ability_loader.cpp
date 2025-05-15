@@ -63,7 +63,8 @@ AbilityRuntime::Extension *AbilityLoader::GetExtensionByName(const std::string &
     return nullptr;
 }
 
-AbilityRuntime::UIAbility *AbilityLoader::GetUIAbilityByName(const std::string &abilityName, const std::string &language)
+AbilityRuntime::UIAbility *AbilityLoader::GetUIAbilityByName(const std::string &abilityName,
+    const std::string &language)
 {
     auto it = uiAbilities_.find(abilityName);
     if (it != uiAbilities_.end()) {

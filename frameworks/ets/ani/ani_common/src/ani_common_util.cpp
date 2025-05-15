@@ -424,7 +424,8 @@ ani_object createLong(ani_env *env, ani_long value)
     return personInfoObj;
 }
 
-bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::string &value)
+bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName,
+    const std::string &value)
 {
     ani_field field = nullptr;
     ani_string string = nullptr;

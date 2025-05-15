@@ -37,13 +37,15 @@ ani_object createDouble(ani_env *env, ani_double value);
 ani_object createBoolean(ani_env *env, ani_boolean value);
 ani_object createInt(ani_env *env, ani_int value);
 ani_object createLong(ani_env *env, ani_long value);
-bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::string &value);
+bool SetFieldString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName,
+    const std::string &value);
 bool SetFieldBoolean(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, bool value);
 bool SetFieldInt(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, int value);
 bool SetOptionalFieldInt(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, int value);
 
 bool SetStringProperty(ani_env *env, ani_object param, const char *name, const std::string &value);
-bool SetFieldArrayString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, const std::vector<std::string> &values);
+bool SetFieldArrayString(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName,
+    const std::vector<std::string> &values);
 bool SetFieldRef(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName, ani_ref value);
 bool AniStringToStdString(ani_env *env, ani_string aniString, std::string &stdString);
 
