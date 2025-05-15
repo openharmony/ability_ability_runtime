@@ -93,6 +93,95 @@ Global::Resource::Direction ConvertDirection(const std::string &direction)
     return resolution;
 }
 
+Global::Resource::DeviceType ConvertDeviceType(const std::string &deviceType)
+{
+    static const std::unordered_map<std::string, Global::Resource::DeviceType> deviceTypes = {
+        {"default", Global::Resource::DeviceType::DEVICE_PHONE},
+        {"phone", Global::Resource::DeviceType::DEVICE_PHONE},
+        {"tablet", Global::Resource::DeviceType::DEVICE_TABLET},
+        {"car", Global::Resource::DeviceType::DEVICE_CAR},
+        {"tv", Global::Resource::DeviceType::DEVICE_TV},
+        {"watch", Global::Resource::DeviceType::DEVICE_WEARABLE},
+        {"2in1", Global::Resource::DeviceType::DEVICE_TWOINONE},
+        {"wearable", Global::Resource::DeviceType::DEVICE_WEARABLE}
+    };
+
+    if (deviceTypes.find(deviceType) != deviceTypes.end()) {
+        return deviceTypes.at(deviceType);
+    }
+
+    return Global::Resource::DeviceType::DEVICE_PHONE;
+}
+
+Global::Resource::DeviceType ConvertDeviceType(DeviceType type)
+{
+    switch (type) {
+        case DeviceType::PHONE:
+            return Global::Resource::DeviceType::DEVICE_PHONE;
+        case DeviceType::TV:
+            return Global::Resource::DeviceType::DEVICE_TV;
+        case DeviceType::WATCH:
+            return Global::Resource::DeviceType::DEVICE_WEARABLE;
+        case DeviceType::CAR:
+            return Global::Resource::DeviceType::DEVICE_CAR;
+        case DeviceType::TABLET:
+            return Global::Resource::DeviceType::DEVICE_TABLET;
+        case DeviceType::TWO_IN_ONE:
+            return Global::Resource::DeviceType::DEVICE_TWOINONE;
+        case DeviceType::WEARABLE:
+            return Global::Resource::DeviceType::DEVICE_WEARABLE;
+        default:
+            return Global::Resource::DeviceType::DEVICE_NOT_SET;
+    }
+}
+
+Global::Resource::Direction ConvertDirection(DeviceOrientation orientation)
+{
+    switch (orientation) {
+        case DeviceOrientation::PORTRAIT:
+            return Global::Resource::Direction::DIRECTION_VERTICAL;
+        case DeviceOrientation::LANDSCAPE:
+            return Global::Resource::Direction::DIRECTION_HORIZONTAL;
+        default:
+            return Global::Resource::Direction::DIRECTION_NOT_SET;
+    }
+}
+
+Global::Resource::ScreenDensity ConvertDensity(double density)
+{
+    static const std::vector<std::pair<double, Global::Resource::ScreenDensity>> resolutions = {
+        { 0.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_NOT_SET },
+        { 120.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_SDPI },
+        { 160.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_MDPI },
+        { 240.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_LDPI },
+        { 320.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_XLDPI },
+        { 480.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_XXLDPI },
+        { 640.0, Global::Resource::ScreenDensity::SCREEN_DENSITY_XXXLDPI },
+    };
+    double deviceDpi = density * DPI_BASE;
+    auto resolution = Global::Resource::ScreenDensity::SCREEN_DENSITY_NOT_SET;
+    constexpr double epsilon = 0.001f;
+    for (const auto& [dpi, value] : resolutions) {
+        resolution = value;
+        if ((deviceDpi - dpi) < epsilon) {
+            break;
+        }
+    }
+    return resolution;
+}
+
+Global::Resource::ColorMode ConvertColorMode(ColorMode colorMode)
+{
+    switch (colorMode) {
+        case ColorMode::DARK:
+            return Global::Resource::ColorMode::DARK;
+        case ColorMode::LIGHT:
+            return Global::Resource::ColorMode::LIGHT;
+        default:
+            return Global::Resource::ColorMode::COLOR_MODE_NOT_SET;
+    }
+}
+
 napi_value CreateJsConfiguration(napi_env env, const AppExecFwk::Configuration &configuration)
 {
     napi_value object = nullptr;

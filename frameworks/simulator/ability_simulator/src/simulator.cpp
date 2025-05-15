@@ -274,7 +274,7 @@ napi_value SimulatorImpl::LoadScript(const std::string &srcPath)
 
 bool SimulatorImpl::ParseBundleAndModuleInfo()
 {
-    AppExecFwk::BundleContainer::GetInstance().LoadBundleInfos(options_.moduleJsonBuffer);
+    AppExecFwk::BundleContainer::GetInstance().LoadBundleInfos(options_.moduleJsonBuffer, options_.resourcePath);
     appInfo_ = AppExecFwk::BundleContainer::GetInstance().GetApplicationInfo();
     if (appInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "appinfo parse failed");
