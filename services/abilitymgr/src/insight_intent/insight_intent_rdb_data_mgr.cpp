@@ -36,32 +36,6 @@ InsightIntentRdbDataMgr::InsightIntentRdbDataMgr()
 InsightIntentRdbDataMgr::~InsightIntentRdbDataMgr()
 {}
 
-bool InsightIntentRdbDataMgr::InitIntentTable(const IntentRdbConfig &intentRdbConfig)
-{
-    TAG_LOGI(AAFwkTag::INTENT, "Init");
-    std::lock_guard<std::mutex> lock(rdbStoreMutex_);
-    if (intentRdbConfig.tableName.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "empty IntentRdbConfig");
-        return false;
-    }
-
-    auto rdbStore = GetRdbStore();
-    if (rdbStore == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "RdbStore is null");
-        return false;
-    }
-    std::string createTableSql = "CREATE TABLE IF NOT EXISTS " + intentRdbConfig.tableName
-        + " (INTENT_KEY TEXT NOT NULL PRIMARY KEY, INTENT_VALUE TEXT NOT NULL);";
-    int32_t ret = NativeRdb::E_OK;
-    ret = rdbStore->ExecuteSql(createTableSql);
-    if (ret != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "Create rdb table failed, ret:%{public}d", ret);
-        return false;
-    }
-    HmfsUtils::AddDeleteDfx(intentRdbConfig_.dbPath);
-    return true;
-}
-
 std::shared_ptr<NativeRdb::RdbStore> InsightIntentRdbDataMgr::GetRdbStore()
 {
     NativeRdb::RdbStoreConfig rdbStoreConfig(intentRdbConfig_.dbPath + intentRdbConfig_.dbName);
