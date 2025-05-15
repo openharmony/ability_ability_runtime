@@ -25,7 +25,8 @@ export default class UIExtensionContentSession {
   native loadContent(path: string, storage?: LocalStorage): void;
   native setWindowBackgroundColor(color: string): void;
   native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
-  native setReceiveDataCallbackASync(): void;
+  native nativeSetReceiveDataCallback(callback: (data: Record<string, Object>) => void): void;
+  native nativeSetReceiveDataForResultCallback(callback: (data: Record<string, Object>) => Record<string, Object>): void;
   native terminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
   native terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
 
@@ -33,14 +34,13 @@ export default class UIExtensionContentSession {
     this.nativeSendData(data);
   }
 
-   setReceiveDataCallback(callback: (data: Record<string, Object>) => void): void {
-     let p1 = taskpool.execute(():undefined => {this.setReceiveDataCallbackASync(); return undefined});
-         p1.then((e: NullishType)=>{
-            let result = e as Record<string, Object>;
-              callback(result);
-         }, (err:Object): void => {
-         });
-   }
+  setReceiveDataCallback(callback: (data: Record<string, Object>) => void): void {
+    this.nativeSetReceiveDataCallback(callback);
+  }
+
+  setReceiveDataForResultCallback(callback: (data: Record<string, Object>) => Record<string, Object>): void {
+    this.nativeSetReceiveDataForResultCallback(callback);
+  }
 
   terminateSelf(callback:AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
