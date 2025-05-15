@@ -76,7 +76,7 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
     }
     int32_t resultCode = RecordProcessExtensionExitReason(pid, bundleName, exitReason, processInfo, false);
     if (resultCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "record reason failed, code: %{public}d", resultCode);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not record extension reason: %{public}d", resultCode);
     }
     CHECK_POINTER_AND_RETURN(subManagersHelper_, ERR_NULL_OBJECT);
     std::vector<std::string> abilityList;
@@ -87,7 +87,7 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
     ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyAppMgrRecordExitReason(IPCSkeleton::GetCallingPid(),
         exitReason.reason, exitReason.exitMsg);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed,code: %{public}d", ret);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "notify ret: %{public}d", ret);
     }
     if (abilityList.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityLists empty");
@@ -127,7 +127,7 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const Ex
     int32_t resultCode = RecordProcessExtensionExitReason(pid, bundleName, exitReason, processInfo,
         fromKillWithReason);
     if (resultCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "record Reason failed, code: %{public}d", resultCode);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not record extension reason: %{public}d", resultCode);
     }
 
     return RecordProcessExitReason(pid, bundleName, application.uid, application.accessTokenId, exitReason,
@@ -203,7 +203,7 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const st
     auto ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyAppMgrRecordExitReason(pid, exitReason.reason,
         exitReason.exitMsg);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed:%{public}d", ret);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "notify ret:%{public}d", ret);
     }
 
     if (abilityLists.empty()) {

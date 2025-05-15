@@ -464,6 +464,16 @@ public:
         return 0;
     }
 
+    virtual int32_t IsProcessCacheSupported(int32_t pid, bool &isSupported)
+    {
+        return 0;
+    }
+
+    virtual int32_t SetProcessCacheEnable(int32_t pid, bool enable)
+    {
+        return 0;
+    }
+
     virtual void SetAppAssertionPauseState(bool flag) {}
 
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) {}

@@ -16,6 +16,9 @@
 #include "permission_verification.h"
 #include "insight_intent_utils.h"
 
+namespace {
+constexpr uint64_t ERRIGHT_INVALID_COMPONRNT = 2097269;
+};
 namespace OHOS {
 namespace AAFwk {
 using namespace AppExecFwk;
@@ -35,6 +38,9 @@ uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementN
     const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry)
 {
     if (executeMode == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND) {
+        if (intentName.empty()) {
+            return ERRIGHT_INVALID_COMPONRNT;
+        }
         srcEntry = "test.srcEntry";
         return ERR_OK;
     }

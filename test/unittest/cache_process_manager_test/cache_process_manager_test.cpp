@@ -371,6 +371,11 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_IsAppShouldCache_0100, Tes
     cacheProcMgr->cachedAppRecordQueue_.push_back(appRecord);
     EXPECT_EQ(cacheProcMgr->IsAppShouldCache(appRecord), true);
 
+    // App not enable
+    cacheProcMgr->cachedAppRecordQueue_.clear();
+    appRecord->SetEnableProcessCache(false);
+    EXPECT_EQ(cacheProcMgr->IsAppShouldCache(appRecord), false);
+
     // App not support cache
     cacheProcMgr->cachedAppRecordQueue_.clear();
     appRecord->procCacheSupportState_ = SupportProcessCacheState::NOT_SUPPORT;

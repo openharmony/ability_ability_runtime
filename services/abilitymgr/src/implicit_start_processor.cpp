@@ -98,7 +98,8 @@ bool ImplicitStartProcessor::IsImplicitStartAction(const Want &want)
         return false;
     }
 
-    if (want.GetAction() != BLACK_ACTION_SELECT_DATA) {
+    if (want.GetAction() != BLACK_ACTION_SELECT_DATA &&
+        !want.HasParameter(AppExecFwk::INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG)) {//intent openlink do not Implicit compare
         TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start, action:%{public}s", want.GetAction().data());
         return true;
     }

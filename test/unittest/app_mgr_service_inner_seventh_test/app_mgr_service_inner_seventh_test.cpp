@@ -2810,5 +2810,95 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, SetRenderStartMsg_002, TestSize.Level1)
     EXPECT_EQ(startMsg.gids.size(), 1);
     TAG_LOGI(AAFwkTag::TEST, "SetRenderStartMsg_002 end");
 }
+
+/**
+* @tc.name: AllowNativeChildProcess_001
+* @tc.desc: test AllowNativeChildProcess
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, AllowNativeChildProcess_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AllowNativeChildProcess_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    auto ret = appMgrServiceInner->AllowNativeChildProcess(CHILD_PROCESS_TYPE_JS, "");
+    EXPECT_FALSE(ret);
+    ret = appMgrServiceInner->AllowNativeChildProcess(CHILD_PROCESS_TYPE_NATIVE, "");
+    EXPECT_FALSE(ret);
+    ret = appMgrServiceInner->AllowNativeChildProcess(CHILD_PROCESS_TYPE_NATIVE_ARGS, "");
+    EXPECT_FALSE(ret);
+
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.allowStartNativeProcessApps_.isLoaded = true;
+    std::vector<std::string> appIds;
+    appIds.push_back("testAppId");
+    appUtils.allowStartNativeProcessApps_.value = appIds;
+    ret = appMgrServiceInner->AllowNativeChildProcess(CHILD_PROCESS_TYPE_NATIVE_ARGS, "testAppId");
+    EXPECT_TRUE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AllowNativeChildProcess_001 end");
+}
+
+/**
+* @tc.name: AllowChildProcessInMultiProcessFeatureApp_001
+* @tc.desc: test AllowChildProcessInMultiProcessFeatureApp
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, AllowChildProcessInMultiProcessFeatureApp_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AllowChildProcessInMultiProcessFeatureApp_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, 1, "com.example.child");
+    EXPECT_NE(appRecord, nullptr);
+
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.isLoaded = true;
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = false;
+    auto ret = appMgrServiceInner->AllowChildProcessInMultiProcessFeatureApp(appRecord);
+    EXPECT_FALSE(ret);
+    ret = appMgrServiceInner->AllowChildProcessInMultiProcessFeatureApp(nullptr);
+    EXPECT_FALSE(ret);
+
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.isLoaded = true;
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = true;
+    appRecord->SetSupportMultiProcessDeviceFeature(false);
+    ret = appMgrServiceInner->AllowChildProcessInMultiProcessFeatureApp(appRecord);
+    EXPECT_FALSE(ret);
+    appRecord->SetSupportMultiProcessDeviceFeature(true);
+    ret = appMgrServiceInner->AllowChildProcessInMultiProcessFeatureApp(appRecord);
+    EXPECT_TRUE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AllowChildProcessInMultiProcessFeatureApp_001 end");
+}
+
+/**
+* @tc.name: AllowChildProcessInMultiProcessFeatureApp_002
+* @tc.desc: test AllowChildProcessInMultiProcessFeatureApp
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, AllowChildProcessInMultiProcessFeatureApp_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AllowChildProcessInMultiProcessFeatureApp_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, 1, "com.example.child");
+    EXPECT_NE(appRecord, nullptr);
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.isLoaded = true;
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = true;
+
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+    AAFwk::MyStatus::GetInstance().getBundleInfoV9_ = 1;
+    auto ret = appMgrServiceInner->AllowChildProcessInMultiProcessFeatureApp(appRecord);
+    EXPECT_FALSE(ret);
+
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+    AAFwk::MyStatus::GetInstance().getBundleInfoV9_ = ERR_OK;
+    ret = appMgrServiceInner->AllowChildProcessInMultiProcessFeatureApp(appRecord);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AllowChildProcessInMultiProcessFeatureApp_002 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -19,6 +19,7 @@
 
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "insight_intent_constant.h"
 #include "int_wrapper.h"
 #include "string_wrapper.h"
 
@@ -41,6 +42,14 @@ bool InsightIntentExecuteParam::ReadFromParcel(Parcel &parcel)
     displayId_ = parcel.ReadInt32();
     parcel.ReadStringVector(&uris_);
     flags_ = parcel.ReadInt32();
+    decoratorType_ = parcel.ReadInt8();
+    srcEntrance_ = Str16ToStr8(parcel.ReadString16());
+    className_ = Str16ToStr8(parcel.ReadString16());
+    methodName_ = Str16ToStr8(parcel.ReadString16());
+    parcel.ReadStringVector(&methodParams_);
+    pagePath_ = Str16ToStr8(parcel.ReadString16());
+    navigationId_ = Str16ToStr8(parcel.ReadString16());
+    navDestinationName_ = Str16ToStr8(parcel.ReadString16());
     return true;
 }
 
@@ -70,6 +79,14 @@ bool InsightIntentExecuteParam::Marshalling(Parcel &parcel) const
     parcel.WriteInt32(displayId_);
     parcel.WriteStringVector(uris_);
     parcel.WriteInt32(flags_);
+    parcel.WriteInt8(decoratorType_);
+    parcel.WriteString16(Str8ToStr16(srcEntrance_));
+    parcel.WriteString16(Str8ToStr16(className_));
+    parcel.WriteString16(Str8ToStr16(methodName_));
+    parcel.WriteStringVector(methodParams_);
+    parcel.WriteString16(Str8ToStr16(pagePath_));
+    parcel.WriteString16(Str8ToStr16(navigationId_));
+    parcel.WriteString16(Str8ToStr16(navDestinationName_));
     return true;
 }
 
@@ -78,6 +95,21 @@ bool InsightIntentExecuteParam::IsInsightIntentExecute(const AAFwk::Want &want)
     if (want.HasParameter(INSIGHT_INTENT_EXECUTE_PARAM_NAME)) {
         return true;
     }
+    return false;
+}
+
+bool InsightIntentExecuteParam::IsInsightIntentPage(const AAFwk::Want &want)
+{
+    if (!want.HasParameter(INSIGHT_INTENT_EXECUTE_PARAM_NAME)) {
+        return false;
+    }
+
+    const WantParams &wantParams = want.GetParams();
+    auto type = wantParams.GetIntParam(INSIGHT_INTENT_DECORATOR_TYPE, -1);
+    if (type == static_cast<int>(AbilityRuntime::InsightIntentType::DECOR_PAGE)) {
+        return true;
+    }
+
     return false;
 }
 
@@ -110,7 +142,14 @@ bool InsightIntentExecuteParam::GenerateFromWant(const AAFwk::Want &want,
     executeParam.insightIntentParam_ = std::make_shared<WantParams>(insightIntentParam);
     executeParam.uris_ = want.GetStringArrayParam(INSIGHT_INTENT_EXECUTE_PARAM_URI);
     executeParam.flags_ = wantParams.GetIntParam(INSIGHT_INTENT_EXECUTE_PARAM_FLAGS, 0);
-
+    executeParam.decoratorType_ = wantParams.GetIntParam(INSIGHT_INTENT_DECORATOR_TYPE, 0);
+    executeParam.srcEntrance_ = wantParams.GetStringParam(INSIGHT_INTENT_SRC_ENTRANCE);
+    executeParam.className_ = wantParams.GetStringParam(INSIGHT_INTENT_FUNC_PARAM_CLASSNAME);
+    executeParam.methodName_ = wantParams.GetStringParam(INSIGHT_INTENT_FUNC_PARAM_METHODNAME);
+    executeParam.methodParams_ = want.GetStringArrayParam(INSIGHT_INTENT_FUNC_PARAM_METHODPARAMS);
+    executeParam.pagePath_ = wantParams.GetStringParam(INSIGHT_INTENT_PAGE_PARAM_PAGEPATH);
+    executeParam.navigationId_ = wantParams.GetStringParam(INSIGHT_INTENT_PAGE_PARAM_NAVIGATIONID);
+    executeParam.navDestinationName_ = wantParams.GetStringParam(INSIGHT_INTENT_PAGE_PARAM_NAVDESTINATIONNAME);
     return true;
 }
 

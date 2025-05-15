@@ -28,12 +28,22 @@
 #include "mock_lifecycle_observer.h"
 #include "ohos_application.h"
 #include "runtime.h"
+#include "ability_context_impl.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 using namespace testing::ext;
 using namespace OHOS;
 using OHOS::Parcel;
+
+class MockAbilityContextImpl : public AbilityRuntime::AbilityContextImpl {
+public:
+    ErrCode CreateModalUIExtensionWithApp(const Want &want) override
+    {
+        GTEST_LOG_(INFO) << "CreateModalUIExtensionWithApp";
+        return ERR_OK;
+    }
+};
 
 class UIAbilityBaseTest : public testing::Test {
 public:
@@ -1549,6 +1559,219 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_OnDidBackground_0100, TestSize.Level1)
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     ability->OnDidBackground();
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_ShouldRecoverState_0100
+ * @tc.desc: UIAbility ShouldRecoverState test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_ShouldRecoverState_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(ability, nullptr);
+    AAFwk::Want want;
+    want.SetParam(Want::PARAM_ABILITY_RECOVERY_RESTART, true);
+    ability->EnableAbilityRecovery(nullptr, false);
+
+    bool result = ability->ShouldRecoverState(want);
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_ShouldDefaultRecoverState_0200
+ * @tc.desc: UIAbility ShouldDefaultRecoverState test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_ShouldDefaultRecoverState_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(uiAbility, nullptr);
+
+    auto startSetting = std::make_shared<AppExecFwk::AbilityStartSetting>();
+    startSetting->AddProperty(AppExecFwk::AbilityStartSetting::IS_START_BY_SCB_KEY, "false");
+    AAFwk::Want want;
+    want.SetParam(Want::PARAM_ABILITY_RECOVERY_RESTART, true);
+
+    bool result = uiAbility->ShouldDefaultRecoverState(want);
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_GetWant_0100
+ * @tc.desc: UIAbility GetWant test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_GetWant_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(uiAbility, nullptr);
+    AAFwk::Want want;
+    want.SetParam(Want::PARAM_ABILITY_RECOVERY_RESTART, true);
+    uiAbility->SetWant(want);
+
+    auto result = uiAbility->GetWant();
+    EXPECT_NE(result, nullptr);
+    bool ret = result->GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, true);
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_OnContinueAsyncCB_0100
+ * @tc.desc: UIAbility OnContinueAsyncCB test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_OnContinueAsyncCB_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(uiAbility, nullptr);
+    napi_ref jsWantParams = nullptr;
+    int32_t status = 0;
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    int32_t result = uiAbility->OnContinueAsyncCB(jsWantParams, status, abilityInfo);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_CreateModalUIExtension_0100
+ * @tc.desc: CreateModalUIExtension test
+ * @tc.desc: Verify function OnDidBackground.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_CreateModalUIExtension_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(uiAbility, nullptr);
+    uiAbility->handler_ = nullptr;
+    AAFwk::Want want;
+    want.SetParam("ohos.uec.params.useGlobalUIContent", false);
+    auto abilityContext = std::shared_ptr<MockAbilityContextImpl>();
+    uiAbility->abilityContext_ = abilityContext;
+
+    int result = uiAbility->CreateModalUIExtension(want);
+    EXPECT_NE(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_SetIdentityToken_0100
+ * @tc.desc: SetIdentityToken test
+ * @tc.desc: Verify function SetIdentityToken.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_SetIdentityToken_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(uiAbility, nullptr);
+    std::string emptyToken = "";
+    EXPECT_EQ(uiAbility->GetIdentityToken(), emptyToken);
+    std::string token = "TestIdentityToken";
+
+    uiAbility->SetIdentityToken(token);
+    std::string token2 = uiAbility->GetIdentityToken();
+    EXPECT_EQ(token2, token);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_CheckRecoveryEnabled_0100
+ * @tc.desc: CheckRecoveryEnabled test
+ * @tc.desc: Verify function CheckRecoveryEnabled.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_CheckRecoveryEnabled_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(uiAbility, nullptr);
+    uiAbility->EnableAbilityRecovery(nullptr, true);
+
+    bool result = uiAbility->CheckRecoveryEnabled();
+    EXPECT_TRUE(result);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_CheckRecoveryEnabled_0200
+ * @tc.desc: CheckRecoveryEnabled test
+ * @tc.desc: Verify function CheckRecoveryEnabled.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_CheckRecoveryEnabled_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(uiAbility, nullptr);
+    uiAbility->EnableAbilityRecovery(nullptr, false);
+    uiAbility->abilityContext_ = nullptr;
+
+    bool result = uiAbility->CheckRecoveryEnabled();
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_IsStartByScb_0100
+ * @tc.desc: IsStartByScb test
+ * @tc.desc: Verify function IsStartByScb.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_IsStartByScb_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(uiAbility, nullptr);
+    uiAbility->SetStartAbilitySetting(nullptr);
+
+    bool result = uiAbility->IsStartByScb();
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_IsStartByScb_0200
+ * @tc.desc: IsStartByScb test
+ * @tc.desc: Verify function IsStartByScb.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_IsStartByScb_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(uiAbility, nullptr);
+    auto startSetting = std::make_shared<AppExecFwk::AbilityStartSetting>();
+    startSetting->AddProperty(AppExecFwk::AbilityStartSetting::IS_START_BY_SCB_KEY, "true");
+
+    bool result = uiAbility->IsStartByScb();
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UIAbility_IsStartByScb_0300
+ * @tc.desc: IsStartByScb test
+ * @tc.desc: Verify function IsStartByScb.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_IsStartByScb_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
+    ASSERT_NE(uiAbility, nullptr);
+    auto startSetting = std::make_shared<AppExecFwk::AbilityStartSetting>();
+    startSetting->AddProperty(AppExecFwk::AbilityStartSetting::IS_START_BY_SCB_KEY, "false");
+
+    bool result = uiAbility->IsStartByScb();
+    EXPECT_FALSE(result);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 } // namespace AppExecFwk
