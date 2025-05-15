@@ -1029,8 +1029,9 @@ bool AppMgrClient::SetAppFreezeFilter(int32_t pid)
     return service->SetAppFreezeFilter(pid);
 }
 
-int32_t AppMgrClient::ChangeAppGcState(pid_t pid, int32_t state)
+int32_t AppMgrClient::ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid)
 {
+    TAG_LOGD(AAFwkTag::APPMGR, "tid is %{private}llu", tid);
     if (mgrHolder_ == nullptr) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
@@ -1038,7 +1039,7 @@ int32_t AppMgrClient::ChangeAppGcState(pid_t pid, int32_t state)
     if (service == nullptr) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    return service->ChangeAppGcState(pid, state);
+    return service->ChangeAppGcState(pid, state, tid);
 }
 
 int32_t AppMgrClient::RegisterAppDebugListener(const sptr<IAppDebugListener> &listener)
