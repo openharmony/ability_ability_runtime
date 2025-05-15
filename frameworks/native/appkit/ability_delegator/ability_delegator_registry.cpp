@@ -17,7 +17,8 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-std::map<AbilityRuntime::Runtime::Language, std::shared_ptr<IAbilityDelegator>> AbilityDelegatorRegistry::abilityDelegator_ {};
+std::map<AbilityRuntime::Runtime::Language,
+    std::shared_ptr<IAbilityDelegator>> AbilityDelegatorRegistry::abilityDelegator_ {};
 std::shared_ptr<AbilityDelegatorArgs> AbilityDelegatorRegistry::abilityDelegatorArgs_ {};
 
 std::shared_ptr<AbilityDelegator> AbilityDelegatorRegistry::GetAbilityDelegator(
@@ -28,7 +29,7 @@ std::shared_ptr<AbilityDelegator> AbilityDelegatorRegistry::GetAbilityDelegator(
         auto p = reinterpret_cast<AbilityDelegator*>(it->second.get());
         return std::shared_ptr<AbilityDelegator>(it->second, p);
     }
-    return nullptr; 
+    return nullptr;
 }
 
 #ifdef CJ_FRONTEND
@@ -39,8 +40,7 @@ std::shared_ptr<CJAbilityDelegatorImpl> AbilityDelegatorRegistry::GetCJAbilityDe
         auto p = reinterpret_cast<CJAbilityDelegatorImpl*>(it->second.get());
         return std::shared_ptr<CJAbilityDelegatorImpl>(it->second, p);
     }
-    return nullptr; 
-    
+    return nullptr;
 }
 #endif
 
