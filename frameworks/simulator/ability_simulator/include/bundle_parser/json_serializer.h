@@ -53,6 +53,26 @@ void from_json(const nlohmann::json &jsonObject, ModuleInfo &moduleInfo);
 void to_json(nlohmann::json &jsonObject, const ModuleInfo &moduleInfo);
 void from_json(const nlohmann::json &jsonObject, ExtensionAbilityInfo &extensionInfo);
 void to_json(nlohmann::json &jsonObject, const ExtensionAbilityInfo &extensionInfo);
+void from_json(const nlohmann::json &jsonObject, HnpPackage &hnpPackage);
+void to_json(nlohmann::json &jsonObject, const HnpPackage &hnpPackage);
+void from_json(const nlohmann::json &jsonObject, MultiAppModeData &multiAppMode);
+void to_json(nlohmann::json &jsonObject, const MultiAppModeData &multiAppMode);
+void from_json(const nlohmann::json &jsonObject, ApplicationEnvironment &applicationEnvironment);
+void to_json(nlohmann::json &jsonObject, const ApplicationEnvironment &applicationEnvironment);
+void from_json(const nlohmann::json &jsonObject, HqfInfo &hqfInfo);
+void to_json(nlohmann::json &jsonObject, const HqfInfo &hqfInfo);
+void from_json(const nlohmann::json &jsonObject, AppqfInfo &appqfInfo);
+void to_json(nlohmann::json &jsonObject, const AppqfInfo &appqfInfo);
+void from_json(const nlohmann::json &jsonObject, AppQuickFix &appQuickFix);
+void to_json(nlohmann::json &jsonObject, const AppQuickFix &appQuickFix);
+void from_json(const nlohmann::json &jsonObject, StartWindowResource &startWindowResource);
+void to_json(nlohmann::json &jsonObject, const StartWindowResource &startWindowResource);
+void from_json(const nlohmann::json &jsonObject, OverlayModuleInfo &overlayModuleInfo);
+void to_json(nlohmann::json &jsonObject, const OverlayModuleInfo &overlayModuleInfo);
+void from_json(const nlohmann::json &jsonObject, RouterItem &routerItem);
+void to_json(nlohmann::json &jsonObject, const RouterItem &routerItem);
+void from_json(const nlohmann::json &jsonObject, AppEnvironment &appEnvironment);
+void to_json(nlohmann::json &jsonObject, const AppEnvironment &appEnvironment);
 } // namespace AppExecFwk
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_SIMULATOR_JSON_SERIALIZER_H
