@@ -28,6 +28,7 @@ const std::string PATH_SEPARATOR = "/";
 constexpr const char* CURRENT_DEVICE_ID = "PHONE-001";
 constexpr int DEFAULT_USERID = 0;
 constexpr int UNSPECIFIED_USERID = -2;
+constexpr int ALL_USERID = -3;
 constexpr int PERMISSION_GRANTED = 0;
 constexpr const char* MODULE_NAME_SEPARATOR = ",";
 enum class AppType {
