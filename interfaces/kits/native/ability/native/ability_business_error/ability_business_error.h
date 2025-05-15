@@ -192,6 +192,12 @@ enum class AbilityErrorCode {
     // The interaction process between Ability and the Window encountered an error.
     ERROR_CODE_FROM_WINDOW = 16000085,
 
+    // the target not in app identifier allow list.
+    ERROR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST = 16000200,
+
+    // the target has not been started yet.
+    ERROR_CODE_TARGET_NOT_STARTED = 16000201,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 
