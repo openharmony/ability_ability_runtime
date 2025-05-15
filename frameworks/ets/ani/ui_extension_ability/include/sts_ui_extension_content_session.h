@@ -29,7 +29,8 @@ namespace AbilityRuntime {
 [[maybe_unused]] static void NativeSetWindowBackgroundColor(ani_env* env, ani_object obj, ani_string color);
 [[maybe_unused]] static int NativeTerminateSelfWithResult(ani_env* env, ani_object obj,
     [[maybe_unused]] ani_object abilityResult, [[maybe_unused]] ani_object callback);
-[[maybe_unused]] static ani_object NativeSetReceiveDataCallback(ani_env* env, ani_object obj);
+[[maybe_unused]] static void NativeSetReceiveDataCallback(ani_env* env, ani_object clsObj, ani_object funcObj);
+[[maybe_unused]] static void NativeSetReceiveDataForResultCallback(ani_env* env, ani_object clsObj, ani_object funcObj);
 
 using RuntimeTask = std::function<void(int, const AAFwk::Want&, bool)>;
 
@@ -85,16 +86,23 @@ public:
     int32_t TerminateSelfWithResult();
     void SetWindowBackgroundColor(ani_env* env, ani_string color);
     ani_object GetUIExtensionHostWindowProxy(ani_env* env, ani_object object);
-    ani_object SetReceiveDataCallback(ani_env* env, ani_object object);
+    void SetReceiveDataCallback(ani_env* env, ani_object functionObj);
+    static void CallReceiveDataCallback(ani_vm* vm, ani_ref callbackRef, const AAFwk::WantParams& wantParams);
+    void SetReceiveDataForResultCallback(ani_env* env, ani_object object);
+    static void CallReceiveDataCallbackForResult(ani_vm* vm, ani_ref callbackRef,
+        const AAFwk::WantParams& wantParams, AAFwk::WantParams& retWantParams);
 
 private:
+    bool SetReceiveDataCallbackUnRegist(ani_env* env, ani_object functionObj);
+    bool SetReceiveDataForResultCallbackUnRegist(ani_env* env, ani_object funcObj);
+
     sptr<AAFwk::SessionInfo> sessionInfo_;
     sptr<Rosen::Window> uiWindow_;
     std::weak_ptr<AbilityRuntime::Context> context_;
-    std::shared_ptr<CallbackWrapper> receiveDataCallback_;
-    bool isRegistered = false;
-    std::shared_ptr<CallbackWrapper> receiveDataForResultCallback_;
-    bool isSyncRegistered = false;
+    ani_ref receiveDataCallback_ = nullptr;
+    bool isRegistered_ = false;
+    ani_ref receiveDataForResultCallback_ = nullptr;
+    bool isSyncRegistered_ = false;
     std::shared_ptr<StsUISessionAbilityResultListener> listener_;
     bool isFirstTriggerBindModal_ = true;
 };
