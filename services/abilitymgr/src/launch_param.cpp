@@ -39,6 +39,7 @@ bool LaunchParam::ReadFromParcel(Parcel &parcel)
     std::unique_ptr<LastExitDetailInfo> detailInfo(parcel.ReadParcelable<LastExitDetailInfo>());
     if (detailInfo == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "detailInfo null");
+        return false;
     }
     lastExitDetailInfo = *detailInfo;
 
