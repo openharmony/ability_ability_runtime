@@ -2132,7 +2132,7 @@ protected:
      * @return Returns whether the caller is allowed to start AppServiceExtension.
      */
     int32_t CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest,
-        bool isVerifyAppIdentifierAllowList, bool isFromConnect);
+        std::shared_ptr<AbilityRecord> targetService, bool isFromConnect);
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr, bool flag = true);
