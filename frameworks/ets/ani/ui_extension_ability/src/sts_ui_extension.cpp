@@ -124,7 +124,6 @@ void StsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     stsObj_ = stsRuntime_.LoadModule(
         moduleName, srcPath, abilityInfo_->hapPath, abilityInfo_->compileMode == AppExecFwk::CompileMode::ES_MODULE,
         false, abilityInfo_->srcEntrance);
-
     if (stsObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "stsObj_ null");
         return;

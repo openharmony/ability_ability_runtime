@@ -96,7 +96,7 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
     auto configuration = context->GetConfiguration();
     if (configuration != nullptr) {
         ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, *configuration);
-        if(configObj != nullptr) {
+        if (configObj != nullptr) {
             TAG_LOGE(AAFwkTag::ABILITY, "configObj bind");
             ani_ref configObjRef = nullptr;
             if (env->GlobalReference_Create(configObj, &configObjRef) != ANI_OK) {
@@ -142,7 +142,8 @@ ani_object STSAbilityStageContext::CreateHapModuleInfo(ani_env* env, const std::
     return obj;
 }
 
-void STSAbilityStageContext::ConfigurationUpdated(ani_env* env, const std::shared_ptr<AppExecFwk::Configuration> &config)
+void STSAbilityStageContext::ConfigurationUpdated(ani_env* env,
+    const std::shared_ptr<AppExecFwk::Configuration> &config)
 {
     if (!config) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "null config");
