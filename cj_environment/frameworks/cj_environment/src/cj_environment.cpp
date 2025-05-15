@@ -18,6 +18,7 @@
 #include <string>
 #include <sstream>
 #include <mutex>
+#include <charconv>
 #include "cj_hilog.h"
 #include "cj_invoker.h"
 #ifdef __OHOS__
@@ -45,7 +46,7 @@ const std::string SANDBOX_LIB_PATH = "/data/storage/el1/bundle/libs/" APP_LIB_NA
 const std::string CJ_RT_PATH = SANDBOX_LIB_PATH + "/runtime";
 const std::string CJ_LIB_PATH = SANDBOX_LIB_PATH + "/ohos";
 const std::string CJ_SYSLIB_PATH = "/system/lib64:/system/lib64/platformsdk";
-const std::string CJ_CHIPSDK_PATH = "/system/lib64/chipset-pub-sdk";
+const std::string CJ_CHIPSDK_PATH = "/system/lib64/chipset-pub-sdk:/system/lib64/chipset-sdk";
 const std::string CJ_SDK_PATH = "/system/lib64/platformsdk/cjsdk";
 } // namespace
 
@@ -785,9 +786,15 @@ std::vector<uint32_t> SplitVersion(std::string& version, char separator)
     std::vector<uint32_t> result;
     std::stringstream ss(version);
     std::string item;
-
+    uint32_t num;
     while (std::getline(ss, item, separator)) {
-        result.push_back(std::stoul(item));
+        auto res = std::from_chars(item.data(), item.data() + item.size(), num);
+        if (res.ec == std::errc()) {
+            result.push_back(num);
+        } else {
+            LOGE("Incorrect version");
+            return result;
+        }
     }
     return result;
 }
@@ -796,6 +803,9 @@ CJEnvironment::NSMode CJEnvironment::DetectAppNSMode()
 {
     LOGI("App compileSDKVersion is %{public}s", CJEnvironment::appVersion.c_str());
     std::vector<uint32_t> tokens = SplitVersion(CJEnvironment::appVersion, '.');
+    if (tokens.size() <= 1) {
+        return NSMode::SINK;
+    }
     if (tokens[0] > CJEnvironment::majorVersion ||
         (tokens[0] == CJEnvironment::majorVersion && tokens[1] >= CJEnvironment::minorVersion)) {
         return NSMode::SINK;
