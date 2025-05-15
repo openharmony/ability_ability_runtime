@@ -27,6 +27,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 const size_t UIExtensionContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("UIExtensionContext"));
 int UIExtensionContext::ILLEGAL_REQUEST_CODE(-1);
+constexpr const char* REQUEST_COMPONENT_TERMINATE_KEY = "ohos.param.key.requestComponentTerminate";
 
 ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want) const
 {
