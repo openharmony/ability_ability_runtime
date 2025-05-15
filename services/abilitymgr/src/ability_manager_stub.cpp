@@ -837,6 +837,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentieth(uint32_t code, MessageParc
     if (interfaceCode == AbilityManagerInterfaceCode::REVOKE_DELEGATOR) {
         return RevokeDelegatorInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::START_ABILITY_WITH_WAIT) {
+        return StartAbilityWithWaitInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4502,6 +4505,27 @@ int32_t AbilityManagerStub::RevokeDelegatorInner(MessageParcel &data, MessagePar
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
         return INNER_ERR;
     }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::StartAbilityWithWaitInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerStub::StartAbilityWithWaitInner called");
+    std::unique_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null want");
+        return ERR_NULL_OBJECT;
+    }
+
+    auto callback = iface_cast<IAbilityStartWithWaitObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callback");
+        return ERR_NULL_OBJECT;
+    }
+
+    int32_t result = StartAbilityWithWait(*want, callback);
+    reply.WriteInt32(result);
     return NO_ERROR;
 }
 
