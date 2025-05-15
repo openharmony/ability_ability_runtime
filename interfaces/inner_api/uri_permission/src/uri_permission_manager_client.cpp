@@ -26,7 +26,7 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
-const int MAX_URI_COUNT = 500;
+const int MAX_URI_COUNT = 200000;
 } // namespace
 UriPermissionManagerClient& UriPermissionManagerClient::GetInstance()
 {
@@ -48,7 +48,7 @@ int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int 
 int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
     const std::string targetBundleName, int32_t appIndex, uint32_t initiatorTokenId)
 {
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu", targetBundleName.c_str(),
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu", targetBundleName.c_str(),
         uriVec.size());
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
@@ -64,7 +64,7 @@ int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVe
 int32_t UriPermissionManagerClient::GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
     const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType)
 {
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu",
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu",
         targetBundleName.c_str(), uriVec.size());
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
@@ -112,7 +112,7 @@ std::vector<bool> UriPermissionManagerClient::CheckUriAuthorization(const std::v
     uint32_t flag, uint32_t tokenId)
 {
     uint32_t size = uriVec.size();
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "flag:%{public}u, tokenId:%{public}u", flag, tokenId);
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "flag:%{public}u, tokenId:%{public}u", flag, tokenId);
     std::vector<bool> errorRes(size, false);
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
