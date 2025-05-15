@@ -396,7 +396,7 @@ void UIExtensionContext::RequestComponentTerminate()
         return;
     }
     AAFwk::WantParams params;
-    params.SetParam(AAFwk::REQUEST_COMPONENT_TERMINATE_KEY, AAFwk::Boolean::Box(true));
+    params.SetParam(REQUEST_COMPONENT_TERMINATE_KEY, AAFwk::Boolean::Box(true));
     auto ret = window_->TransferExtensionData(params);
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "transfer extension data failed, ret:%{public}d", ret);
