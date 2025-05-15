@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,13 +42,13 @@ public:
     napi_status CreateJsEnv(const Options& options, std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
     napi_status RemoveJsEnv(napi_env env);
     napi_status Init(const Options& options, napi_env env);
+    std::shared_ptr<JsEnv::JsEnvironment> GetJsEnv(napi_env env);
     
 private:
     JsRuntimeLite();
     ~JsRuntimeLite();
     napi_status AddEnv(napi_env env, std::shared_ptr<JsEnv::JsEnvironment> jsEnv);
     panda::ecmascript::EcmaVM* GetEcmaVm(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv) const;
-    std::shared_ptr<JsEnv::JsEnvironment> GetJsEnv(napi_env env);
     void LoadAotFile(const Options& options, const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
     void InitConsoleModule(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
     void InitTimerModule(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
