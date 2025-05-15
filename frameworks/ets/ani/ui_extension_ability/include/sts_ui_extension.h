@@ -181,18 +181,11 @@ public:
     void ResetEnv(ani_env* env);
 
 private:
-    // virtual void BindContext(napi_env env, napi_value obj, std::shared_ptr<AAFwk::Want> want);
     virtual void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want,
         const std::shared_ptr<OHOSApplication> &application);
     ani_object CreateSTSContext(ani_env *env, std::shared_ptr<UIExtensionContext> context,
         int32_t screenMode, const std::shared_ptr<OHOSApplication> &application);
-    // napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
-    //     bool withResult = false);
     bool CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
-    // bool CheckPromise(napi_value result);
-    // bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
-
-    // napi_value CallOnConnect(const AAFwk::Want &want);
     ani_status CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
     ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& param);
     std::shared_ptr<STSNativeReference> LoadModule(ani_env *env);

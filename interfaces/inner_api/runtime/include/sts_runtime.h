@@ -40,8 +40,7 @@ struct STSUncaughtExceptionInfo;
 
 namespace AbilityRuntime {
 
-struct STSNativeReference
-{
+struct STSNativeReference {
     ani_class     aniCls = nullptr;
     ani_object    aniObj = nullptr;
     ani_ref      aniRef = nullptr;
@@ -106,8 +105,8 @@ public:
     ani_env* GetAniEnv();
     std::unique_ptr<STSNativeReference> LoadModule(const std::string& moduleName, const std::string& modulePath,
         const std::string& hapPath, bool esmodule, bool useCommonChunk, const std::string& srcEntrance);
-    std::unique_ptr<STSNativeReference> LoadStsModule(const std::string& moduleName, const std::string& path, const std::string& hapPath,
-        const std::string& srcEntrance);
+    std::unique_ptr<STSNativeReference> LoadStsModule(const std::string& moduleName, const std::string& path,
+        const std::string& hapPath, const std::string& srcEntrance);
     bool RunScript(ani_env* aniEnv, const std::string& moduleName, const std::string& abcPath,
         const std::string& hapPath, const std::string& srcEntrance);
     void HandleUncaughtError();

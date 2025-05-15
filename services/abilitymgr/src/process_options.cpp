@@ -19,6 +19,11 @@
 
 namespace OHOS {
 namespace AAFwk {
+const int NUMBER_ZERO = 0;
+const int NUMBER_ONE = 1;
+const int NUMBER_TWO = 2;
+const int NUMBER_THREE = 3;
+
 bool ProcessOptions::ReadFromParcel(Parcel &parcel)
 {
     processMode = static_cast<ProcessMode>(parcel.ReadInt32());
@@ -78,23 +83,18 @@ ProcessMode ProcessOptions::ConvertInt32ToProcessMode(int32_t value)
     return static_cast<ProcessMode>(value);
 }
 
-//   enum ProcessMode {
-//     NEW_PROCESS_ATTACH_TO_PARENT = 1,
-//     NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM = 2,
-//     ATTACH_TO_STATUS_BAR_ITEM = 3
-//   }
 ProcessMode ProcessOptions::ConvertStsToProcessMode(int32_t index)
 {
-    if (index < 0 || index > 2) {
+    if (index < NUMBER_ZERO || index > NUMBER_TWO) {
         return ProcessMode::UNSPECIFIED;
     }
-    return static_cast<ProcessMode>(index + 1);
+    return static_cast<ProcessMode>(index + NUMBER_ONE);
 }
 int32_t ProcessOptions::ConvertProcessModeToSts(const ProcessMode mode)
 {
     int32_t value = static_cast<int32_t>(mode);
-    if (value >= 1 && value <= 3) {
-        return value - 1;
+    if (value >= NUMBER_ONE && value <= NUMBER_THREE) {
+        return value - NUMBER_ONE;
     }
     return static_cast<int32_t>(ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT);
 }
@@ -107,13 +107,10 @@ StartupVisibility ProcessOptions::ConvertInt32ToStartupVisibility(int32_t value)
     }
     return static_cast<StartupVisibility>(value);
 }
-// enum StartupVisibility {
-//     STARTUP_HIDE = 0,
-//     STARTUP_SHOW = 1
-//   }StartupVisibility
+
 StartupVisibility ConvertStsToStartupVisibility(int32_t index)
 {
-    if (index < 0 || index > 1) {
+    if (index < NUMBER_ZERO || index > NUMBER_ONE) {
         return StartupVisibility::UNSPECIFIED;
     }
     return static_cast<StartupVisibility>(index);
@@ -121,12 +118,11 @@ StartupVisibility ConvertStsToStartupVisibility(int32_t index)
 int32_t ConvertStartupVisibilityToSts(const StartupVisibility value)
 {
     if (value == StartupVisibility::STARTUP_HIDE) {
-        return 0;
+        return NUMBER_ZERO;
     } else if (value == StartupVisibility::STARTUP_SHOW) {
-        return 1;
+        return NUMBER_ONE;
     }
-
-    return 0;
+    return NUMBER_ZERO;
 }
 
 bool ProcessOptions::IsNewProcessMode(ProcessMode value)

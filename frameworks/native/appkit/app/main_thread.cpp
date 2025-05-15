@@ -1337,16 +1337,10 @@ JsEnv::UncaughtExceptionInfo MainThread::CreateJsExceptionInfo(const std::string
         auto napiEnv = (static_cast<AbilityRuntime::JsRuntime&>(
                             *appThread->application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0)))
                            .GetNapiEnv();
-        // if (NapiErrorManager::GetInstance()->NotifyUncaughtException(
-        //         napiEnv, summary, appExecErrorObj.name, appExecErrorObj.message, appExecErrorObj.stack)) {
-        //     return;
-        // }
         if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
             ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
             return;
         }
-        // if app's callback has been registered, let app decide whether exit or
-        // not.
         TAG_LOGE(AAFwkTag::APPKIT,
             "\n%{public}s is about to exit due to RuntimeError\nError "
             "type:%{public}s\n%{public}s",
@@ -1677,7 +1671,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         }
         // need vm support
         if (appLaunchData.IsNeedPreloadModule()) {
-            for(auto &runtime : application_->GetRuntime()) {
+            for (auto &runtime : application_->GetRuntime()) {
                 PreloadModule(entryHapModuleInfo, runtime);
             }
         }
@@ -1690,7 +1684,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             processName = processInfo_->GetProcessName();
             TAG_LOGD(AAFwkTag::APPKIT, "pid is %{public}d, processName is %{public}s", pid, processName.c_str());
         }
-        for(auto &runtime : application_->GetRuntime()) {
+        for (auto &runtime : application_->GetRuntime()) {
             runtime->SetStopPreloadSoCallback([uid = bundleInfo.applicationInfo.uid, currentPid = pid,
                 bundleName = appInfo.bundleName]()-> void {
                     TAG_LOGD(AAFwkTag::APPKIT, "runtime callback and report load abc completed info to rss.");
@@ -1706,7 +1700,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         debugOption.isDebugFromLocal = appLaunchData.GetDebugFromLocal();
         debugOption.perfCmd = perfCmd;
         debugOption.isDeveloperMode = isDeveloperMode_;
-        for(auto &runtime : application_->GetRuntime()) {
+        for (auto &runtime : application_->GetRuntime()) {
             runtime->SetDebugOption(debugOption);
         }
         if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
@@ -1850,7 +1844,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
         if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo, bundleInfo.targetVersion,
-		    appInfo.codeLanguage)) {
+            appInfo.codeLanguage)) {
             TAG_LOGE(AAFwkTag::APPKIT, "PrepareAbilityDelegator failed");
             return;
         }
@@ -3925,7 +3919,6 @@ void MainThread::AddRuntimeLang(ApplicationInfo& appInfo, AbilityRuntime::Runtim
     if (appInfo.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2) {
         options.langs.emplace(AbilityRuntime::Runtime::Language::STS, true);
     } else if (appInfo.codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID) {
-        //options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true);
         options.langs.emplace(AbilityRuntime::Runtime::Language::STS, true);
     } else {
         options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true);
