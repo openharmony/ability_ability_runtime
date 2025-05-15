@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "bundle_info.h"
 #include "startup_task.h"
 
 namespace OHOS {
@@ -32,8 +33,18 @@ public:
 
     void SetIsExcludeFromAutoStart(bool excludeFromAutoStart);
 
+    void SetModuleName(const std::string &moduleName);
+
+    const std::string& GetModuleName() const;
+
+    void SetModuleType(AppExecFwk::ModuleType moduleType);
+
+    AppExecFwk::ModuleType GetModuleType() const;
+
 protected:
     bool isExcludeFromAutoStart_ = false;
+    std::string moduleName_;
+    AppExecFwk::ModuleType moduleType_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
