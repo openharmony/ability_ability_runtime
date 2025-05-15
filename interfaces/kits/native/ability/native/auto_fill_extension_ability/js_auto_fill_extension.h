@@ -136,7 +136,7 @@ private:
     void RegisterTransferComponentDataListener(const sptr<Rosen::Window> &uiWindow);
 
     JsRuntime& jsRuntime_;
-    std::unique_ptr<NativeReference> jsObj_;
+    std::shared_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_ = nullptr;
     std::map<sptr<IRemoteObject>, sptr<Rosen::Window>> uiWindowMap_;
     std::set<sptr<IRemoteObject>> foregroundWindows_;
