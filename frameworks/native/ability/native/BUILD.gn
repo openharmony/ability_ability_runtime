@@ -69,6 +69,36 @@ config("ability_config") {
   }
 }
 
+config("app_service_extension_public_config") {
+  visibility = [ ":*" ]
+  visibility += [
+    "${ability_runtime_napi_path}/inner/*",
+    "${ability_runtime_test_path}/fuzztest/*",
+  ]
+  include_dirs = [
+    "${ability_runtime_napi_path}/inner/napi_ability_common",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/distributed",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/kits",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/remote_register_service",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/distributed_ability_runtime",
+    "${ability_runtime_path}/interfaces/kits/native/appkit",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/app",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/recovery/",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+    "${ability_runtime_innerkits_path}/ability_manager/include/continuation",
+    "${ability_runtime_services_path}/common/include",
+  ]
+  if (ability_runtime_graphics) {
+    defines = [
+      "SUPPORT_GRAPHICS",
+    ]
+  }
+}
+
 config("ability_public_config") {
   visibility = [ ":*" ]
   visibility += [
@@ -1524,6 +1554,7 @@ group("extension_blocklist_config") {
 
 group("extension_module") {
   deps = [
+    ":app_service_extension_module",
     ":embedded_ui_extension_module",
     ":service_extension_module",
     ":ui_extension_module",
@@ -2524,6 +2555,126 @@ ohos_shared_library("photo_editor_extension_module") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "napi:ace_napi",
+  ]
+
+  if (ability_runtime_graphics) {
+    external_deps += [ "window_manager:libwm" ]
+  }
+
+  relative_install_dir = "extensionability/"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("app_service_extension") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  defines = [ "AMS_LOG_TAG = \"Ability\"" ]
+  defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
+  ]
+
+  sources = [
+    "${ability_runtime_native_path}/ability/native/app_service_extension.cpp",
+    "${ability_runtime_native_path}/ability/native/js_app_service_extension.cpp",
+    "${ability_runtime_native_path}/ability/native/js_app_service_extension_context.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/app_service_extension_context.cpp",
+  ]
+
+  deps = [
+    ":abilitykit_native",
+    ":extensionkit_native",
+    ":service_extension",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/appkit:app_context",
+  ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:want",
+    "ability_base:zuri",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  if (ability_runtime_graphics) {
+    external_deps += [
+      "window_manager:libdm",
+      "window_manager:libwm",
+      "window_manager:libwsutils",
+    ]
+  }
+
+  innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("app_service_extension_module") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
+    "${ability_runtime_path}/interfaces/inner_api/runtime/include",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
+  ]
+
+  sources = [ "${ability_runtime_native_path}/ability/native/app_service_extension_module_loader.cpp" ]
+
+  configs = [ ":ability_config" ]
+  public_configs = [ ":app_service_extension_public_config" ]
+
+  deps = [
+    ":app_service_extension",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+  ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "json:nlohmann_json_static",
     "napi:ace_napi",
   ]
 
