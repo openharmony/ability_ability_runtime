@@ -31,7 +31,7 @@ ohos_shared_library("ability_simulator_inner") {
     }
     defines += [
       "OFFSET_PREVIEW=0",
-      "__IDE_PREVIEW__"
+      "__IDE_PREVIEW__",
     ]
 
     cflags = [ "-std=c++17" ]
