@@ -1303,7 +1303,8 @@ int32_t AppMgrStub::HandleChangeAppGcState(MessageParcel &data, MessageParcel &r
     HITRACE_METER(HITRACE_TAG_APP);
     int32_t pid = data.ReadInt32();
     int32_t state = data.ReadInt32();
-    int32_t ret = ChangeAppGcState(pid, state);
+    uint64_t tid = data.ReadUint64();
+    int32_t ret = ChangeAppGcState(pid, state, tid);
     reply.WriteInt32(ret);
     return NO_ERROR;
 }

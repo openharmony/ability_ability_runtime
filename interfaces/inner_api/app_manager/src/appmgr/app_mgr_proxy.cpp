@@ -1454,7 +1454,7 @@ int32_t AppMgrProxy::GetRunningProcessInformation(
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::ChangeAppGcState(pid_t pid, int32_t state)
+int32_t AppMgrProxy::ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
@@ -1470,6 +1470,10 @@ int32_t AppMgrProxy::ChangeAppGcState(pid_t pid, int32_t state)
     }
     if (!data.WriteInt32(state)) {
         TAG_LOGE(AAFwkTag::APPMGR, "State write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint64(tid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "tid write failed.");
         return ERR_FLATTEN_OBJECT;
     }
 
