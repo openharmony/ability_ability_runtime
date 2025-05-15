@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace AAFwk {
 constexpr int32_t U0_USER_ID = 0;
+constexpr int32_t U1_USER_ID = 1;
 constexpr int32_t INVALID_USER_ID = -1;
 
 SubManagersHelper::SubManagersHelper(
@@ -43,6 +44,11 @@ SubManagersHelper::~SubManagersHelper()
 
 void SubManagersHelper::InitSubManagers(int userId, bool switchUser)
 {
+    if (userId == U1_USER_ID) {
+        InitConnectManager(userId, false);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Init U1");
+        return;
+    }
     InitConnectManager(userId, switchUser);
     InitDataAbilityManager(userId, switchUser);
     InitPendWantManager(userId, switchUser);
