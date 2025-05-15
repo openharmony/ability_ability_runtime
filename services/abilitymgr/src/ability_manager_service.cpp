@@ -12467,7 +12467,7 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
     }
 
     result = SignRestartAppFlag(userId, callerUid, processInfo.instanceKey, processInfo.appMode, isAppRecovery);
-    if (result != ERR_OK) {
+    if (!isAppRecovery && result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "signRestartAppFlag error");
         return result;
     }
@@ -12521,7 +12521,7 @@ int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, int32_t uid, c
         return ERR_INVALID_VALUE;
     }
     auto ret = IN_PROCESS_CALL(appMgr->SignRestartAppFlag(uid, instanceKey));
-    if (ret != ERR_OK) {
+    if (!isAppRecovery && ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr signRestartAppFlag error");
         return ret;
     }
