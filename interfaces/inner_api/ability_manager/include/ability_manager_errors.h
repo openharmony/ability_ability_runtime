@@ -787,6 +787,17 @@ enum {
      * Native error(2097331) for kill app while starting.
      */
     ERR_KILL_APP_WHILE_STARTING = 2097331,
+    
+    /**
+     * Result (2097332) for target not in app identifier allow list.
+     */
+    ERR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST = 2097332,
+
+    /**
+     * Result (2097333) for target has not been started yet.
+     */
+    ERR_TARGET_NOT_STARTED = 2097333,
+    
     /**
      * Native error(3000000) for target bundle not exist.
      */

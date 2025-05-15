@@ -364,6 +364,11 @@ public:
     void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message) override;
 
+    ErrCode StartAppServiceExtensionAbility(const Want &want) override;
+    ErrCode StopAppServiceExtensionAbility(const Want& want) override;
+    ErrCode ConnectAppServiceExtensionAbility(const AAFwk::Want& want,
+        const sptr<AbilityConnectCallback>& connectCallback) override;
+
 private:
     sptr<IRemoteObject> token_ = nullptr;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_ = nullptr;
