@@ -73,23 +73,25 @@ StartupManager::StartupManager()
 StartupManager::~StartupManager() = default;
 
 int32_t StartupManager::PreloadAppHintStartup(const AppExecFwk::BundleInfo& bundleInfo,
-    const AppExecFwk::HapModuleInfo& entryInfo, const std::string &preloadModuleName)
+    const AppExecFwk::HapModuleInfo& preloadHapModuleInfo, const std::string &preloadModuleName)
 {
     moduleStartupConfigInfos_.clear();
-    if (entryInfo.appStartup.empty()) {
-        TAG_LOGD(AAFwkTag::STARTUP, "entry module no app startup config");
+    if (preloadHapModuleInfo.appStartup.empty()) {
+        TAG_LOGD(AAFwkTag::STARTUP, "module no app startup config");
         return ERR_OK;
     }
     bundleName_ = bundleInfo.name;
-    moduleStartupConfigInfos_.emplace_back(entryInfo.name, entryInfo.appStartup, entryInfo.hapPath,
-        entryInfo.moduleType, entryInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE);
+    moduleStartupConfigInfos_.emplace_back(preloadHapModuleInfo.name, preloadHapModuleInfo.appStartup,
+        preloadHapModuleInfo.hapPath, preloadHapModuleInfo.moduleType,
+        preloadHapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE);
+    isModuleStartupConfigInited_.emplace(preloadHapModuleInfo.name);
 
     for (const auto& module : bundleInfo.hapModuleInfos) {
         if (module.appStartup.empty()) {
             continue;
         }
         if (module.moduleType != AppExecFwk::ModuleType::SHARED) {
-            // ENTRY has been added and FEATURE is not supported.
+            // ENTRY or FEATURE has been added.
             continue;
         }
         moduleStartupConfigInfos_.emplace_back(module.name, module.appStartup, module.hapPath, module.moduleType,
@@ -101,9 +103,8 @@ int32_t StartupManager::PreloadAppHintStartup(const AppExecFwk::BundleInfo& bund
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
-    if (entryInfo.name != preloadModuleName) {
-        // not entry module, no need to load app startup config and preload so now.
-        TAG_LOGD(AAFwkTag::STARTUP, "not entry module: %{public}s", preloadModuleName.c_str());
+    if (preloadHapModuleInfo.name != preloadModuleName) {
+        TAG_LOGD(AAFwkTag::STARTUP, "preload module name: %{public}s", preloadModuleName.c_str());
         return ERR_OK;
     }
     TAG_LOGD(AAFwkTag::STARTUP, "appStartup modules: %{public}zu", moduleStartupConfigInfos_.size());
@@ -118,7 +119,8 @@ int32_t StartupManager::PreloadAppHintStartup(const AppExecFwk::BundleInfo& bund
     return ERR_OK;
 }
 
-int32_t StartupManager::BuildAutoAppStartupTaskManager(std::shared_ptr<StartupTaskManager> &startupTaskManager)
+int32_t StartupManager::BuildAutoAppStartupTaskManager(std::shared_ptr<StartupTaskManager> &startupTaskManager,
+    const std::string &moduleName)
 {
     std::map<std::string, std::shared_ptr<StartupTask>> autoStartupTasks;
     std::set<std::string> dependenciesSet;
@@ -126,6 +128,10 @@ int32_t StartupManager::BuildAutoAppStartupTaskManager(std::shared_ptr<StartupTa
         if (iter.second == nullptr) {
             TAG_LOGE(AAFwkTag::STARTUP, "startup task null");
             return ERR_STARTUP_INTERNAL_ERROR;
+        }
+        if (iter.second->GetModuleName() != moduleName &&
+            iter.second->GetModuleType() != AppExecFwk::ModuleType::SHARED) {
+            continue;
         }
         if (iter.second->GetIsExcludeFromAutoStart()) {
             continue;
@@ -148,7 +154,7 @@ int32_t StartupManager::BuildAutoAppStartupTaskManager(std::shared_ptr<StartupTa
     TAG_LOGD(AAFwkTag::STARTUP, "autoStartupTasksManager build, id: %{public}u, tasks num: %{public}zu",
         startupTaskManagerId, autoStartupTasks.size());
     startupTaskManager = std::make_shared<StartupTaskManager>(startupTaskManagerId, autoStartupTasks);
-    startupTaskManager->SetConfig(defaultConfig_);
+    startupTaskManager->SetConfig(moduleConfigs_[moduleName]);
     startupTaskManagerMap_.emplace(startupTaskManagerId, startupTaskManager);
     startupTaskManagerId++;
     return ERR_OK;
@@ -189,6 +195,10 @@ int32_t StartupManager::BuildAppStartupTaskManager(const std::vector<std::string
             TAG_LOGE(AAFwkTag::STARTUP, "%{public}s startup task null", iter.c_str());
             return ERR_STARTUP_INTERNAL_ERROR;
         }
+        if (findResult->second->GetModuleType() == AppExecFwk::ModuleType::FEATURE) {
+            TAG_LOGE(AAFwkTag::STARTUP, "manual task of feature type is not supported");
+            return ERR_STARTUP_DEPENDENCY_NOT_FOUND;
+        }
         currentStartupTasks.emplace(iter, findResult->second);
         auto dependencies = findResult->second->GetDependencies();
         for (auto &dep : dependencies) {
@@ -228,6 +238,15 @@ int32_t StartupManager::OnStartupTaskManagerComplete(uint32_t id)
     TAG_LOGD(AAFwkTag::STARTUP, "erase StartupTaskManager id: %{public}u", id);
     startupTaskManagerMap_.erase(result);
     return ERR_OK;
+}
+
+void StartupManager::SetModuleConfig(const std::shared_ptr<StartupConfig> &config, const std::string &moduleName,
+    bool isDefaultConfig = false)
+{
+    moduleConfigs_[moduleName] = config;
+    if (isDefaultConfig) {
+        defaultConfig_ = config;
+    }
 }
 
 void StartupManager::SetDefaultConfig(const std::shared_ptr<StartupConfig> &config)
@@ -332,9 +351,19 @@ bool StartupManager::HasAppStartupConfig() const
     return !moduleStartupConfigInfos_.empty();
 }
 
-const std::vector<StartupTaskInfo> &StartupManager::GetStartupTaskInfos() const
+const std::vector<StartupTaskInfo> StartupManager::GetStartupTaskInfos(const std::string &name)
 {
-    return pendingStartupTaskInfos_;
+    if (!isAppStartupTaskRegistered_) {
+        isAppStartupTaskRegistered_ = true;
+        return pendingStartupTaskInfos_;
+    }
+    std::vector<StartupTaskInfo> pendingStartupTaskInfos;
+    for (const auto &iter : pendingStartupTaskInfos_) {
+        if (iter.moduleName == name) {
+            pendingStartupTaskInfos.emplace_back(iter);
+        }
+    }
+    return pendingStartupTaskInfos;
 }
 
 const std::string &StartupManager::GetPendingConfigEntry() const
@@ -393,6 +422,11 @@ int32_t StartupManager::RegisterPreloadSoStartupTask(
     return ERR_OK;
 }
 
+void StartupManager::ClearAppStartupTask()
+{
+    appStartupTasks_.clear();
+}
+
 int32_t StartupManager::RegisterAppStartupTask(
     const std::string &name, const std::shared_ptr<AppStartupTask> &startupTask)
 {
@@ -401,7 +435,6 @@ int32_t StartupManager::RegisterAppStartupTask(
         TAG_LOGE(AAFwkTag::STARTUP, "exist preload so startup task %{public}s", name.c_str());
         return ERR_STARTUP_INVALID_VALUE;
     }
-
     auto result = appStartupTasks_.emplace(name, startupTask);
     if (!result.second) {
         TAG_LOGE(AAFwkTag::STARTUP, "exist app startup task %{public}s", name.c_str());
@@ -546,6 +579,48 @@ int32_t StartupManager::AddLoadAppStartupConfigTask(
     task->SetWaitOnMainThread(true);
     // no dependencies
     preloadAppHintTasks.emplace(task->GetName(), task);
+    return ERR_OK;
+}
+
+int32_t StartupManager::RunLoadModuleStartupConfigTask(
+    bool &needRunAutoStartupTask, const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo)
+{
+    if (isModuleStartupConfigInited_.count(hapModuleInfo->name) != 0) {
+        TAG_LOGD(AAFwkTag::STARTUP, "module startup config already loaded");
+        return ERR_OK;
+    }
+    ModuleStartupConfigInfo configInfo(hapModuleInfo->name, hapModuleInfo->appStartup, hapModuleInfo->hapPath,
+        hapModuleInfo->moduleType, hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
+    if (hapModuleInfo->appStartup.empty()) {
+        TAG_LOGD(AAFwkTag::STARTUP, "module startup config is empty");
+        return ERR_OK;
+    }
+    TAG_LOGD(AAFwkTag::STARTUP, "load module %{public}s, type: %{public}d", hapModuleInfo->name.c_str(),
+        hapModuleInfo->moduleType);
+    std::string configStr;
+    int32_t result = GetStartupConfigString(configInfo, configStr);
+    if (result != ERR_OK) {
+        return result;
+    }
+    std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSoStartupTasks;
+    std::vector<StartupTaskInfo> pendingStartupTaskInfos;
+    std::string pendingConfigEntry;
+    bool success = AnalyzeStartupConfig(configInfo, configStr,
+        preloadSoStartupTasks_, pendingStartupTaskInfos_, pendingConfigEntry);
+    if (!success) {
+        TAG_LOGE(AAFwkTag::STARTUP, "failed to parse app startup module %{public}s, type: %{public}d",
+            configInfo.name_.c_str(), configInfo.moduleType_);
+        return ERR_STARTUP_CONFIG_PARSE_ERROR;
+    }
+    std::lock_guard guard(appStartupConfigInitializationMutex_);
+    preloadSoStartupTasks_.insert(preloadSoStartupTasks.begin(), preloadSoStartupTasks.end());
+    pendingStartupTaskInfos_.insert(pendingStartupTaskInfos_.end(), pendingStartupTaskInfos.begin(),
+        pendingStartupTaskInfos.end());
+    pendingConfigEntry_ = pendingConfigEntry;
+    isModuleStartupConfigInited_.emplace(hapModuleInfo->name);
+    if (!needRunAutoStartupTask && pendingConfigEntry.size() > 0) {
+        needRunAutoStartupTask = true;
+    }
     return ERR_OK;
 }
 
@@ -814,7 +889,7 @@ bool StartupManager::AnalyzeStartupConfig(const ModuleStartupConfigInfo& info, c
         return false;
     }
 
-    if (info.moduleType_ == AppExecFwk::ModuleType::ENTRY) {
+    if (info.moduleType_ == AppExecFwk::ModuleType::ENTRY || info.moduleType_ == AppExecFwk::ModuleType::FEATURE) {
         if (!(startupConfigJson.contains(CONFIG_ENTRY) && startupConfigJson[CONFIG_ENTRY].is_string())) {
             TAG_LOGE(AAFwkTag::STARTUP, "no config entry.");
             return false;
@@ -958,7 +1033,7 @@ void StartupManager::SetOptionalParameters(const nlohmann::json& module, AppExec
         startupTaskInfo.ohmUrl = module.at(OHMURL).get<std::string>();
     }
 
-    if (moduleType != AppExecFwk::ModuleType::ENTRY) {
+    if (moduleType != AppExecFwk::ModuleType::ENTRY && moduleType != AppExecFwk::ModuleType::FEATURE) {
         startupTaskInfo.excludeFromAutoStart = true;
         return;
     }
@@ -982,7 +1057,7 @@ void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExec
         task->SetDependencies(dependencies);
     }
 
-    if (moduleType != AppExecFwk::ModuleType::ENTRY) {
+    if (moduleType != AppExecFwk::ModuleType::ENTRY && moduleType != AppExecFwk::ModuleType::FEATURE) {
         task->SetIsExcludeFromAutoStart(true);
         return;
     }
