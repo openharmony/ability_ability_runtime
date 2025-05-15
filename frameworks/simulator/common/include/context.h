@@ -20,18 +20,25 @@
 #include <mutex>
 
 #include "application_info.h"
+#include "bindable.h"
 #include "configuration.h"
 #include "hap_module_info.h"
 #include "options.h"
 
 namespace OHOS {
+namespace Global {
+namespace Resource {
+class ResourceManager;
+enum DeviceType : int32_t;
+}
+}
 namespace AbilityRuntime {
-class Context {
+class Context : public Bindable, public std::enable_shared_from_this<Context> {
 public:
     Context() = default;
     ~Context() = default;
 
-    virtual std::string GetBundleName() = 0;
+    virtual std::string GetBundleName() const = 0;
 
     virtual std::string GetBundleCodePath() = 0;
 
@@ -68,6 +75,43 @@ public:
     virtual std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo() const = 0;
 
     virtual std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo() const = 0;
+
+    virtual std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const = 0;
+
+    virtual std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) = 0;
+
+    virtual std::shared_ptr<Context> CreateModuleContext(
+        const std::string &bundleName, const std::string &moduleName) = 0;
+
+    /**
+     * @brief Getting derived class
+     *
+     * @tparam T template
+     * @param context the context object
+     * @return std::shared_ptr<T> derived class
+     */
+    template<class T>
+    static std::shared_ptr<T> ConvertTo(const std::shared_ptr<Context> &context)
+    {
+        if constexpr (!std::is_same_v<T, typename T::SelfType>) {
+            return nullptr;
+        }
+
+        if (context && context->IsContext(T::CONTEXT_TYPE_ID)) {
+            return std::static_pointer_cast<T>(context);
+        }
+
+        return nullptr;
+    }
+
+    using SelfType = Context;
+    static const size_t CONTEXT_TYPE_ID;
+
+protected:
+    virtual bool IsContext(size_t contextTypeId)
+    {
+        return contextTypeId == CONTEXT_TYPE_ID;
+    }
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
