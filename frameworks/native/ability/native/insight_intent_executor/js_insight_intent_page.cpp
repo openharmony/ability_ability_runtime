@@ -188,6 +188,12 @@ void JsInsightIntentPage::SetInsightIntentParam(JsRuntime& runtime, const std::s
     AAFwk::WantParamWrapper wrapper(newWant.GetParams());
     std::string parametersString = wrapper.ToString();
     TAG_LOGD(AAFwkTag::INTENT, "param string %{private}s", parametersString.c_str());
+
+    Rosen::WMError wmRet = windowSptr->SetIntentParam(parametersString,
+        ExecuteOhmUrlOperator(runtime, executeParam->moduleName_, hapPath, executeParam->pagePath_), coldStart);
+    if (wmRet != Rosen::WMError::WM_OK) {
+        TAG_LOGE(AAFwkTag::INTENT, "Set intent param failed %{public}d", wmRet);
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
