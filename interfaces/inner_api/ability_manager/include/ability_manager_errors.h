@@ -782,6 +782,11 @@ enum {
     ERR_INVALID_CONTEXT = 2097323,
     INTENT_NOT_EXIST = 2097329,
     INTENT_STATE_NOT_EXECUTING = 2097330,
+
+    /**
+     * Native error(2097331) for kill app while starting.
+     */
+    ERR_KILL_APP_WHILE_STRATING = 2097331,
     /**
      * Native error(3000000) for target bundle not exist.
      */
