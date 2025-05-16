@@ -1031,7 +1031,7 @@ bool AppMgrClient::SetAppFreezeFilter(int32_t pid)
 
 int32_t AppMgrClient::ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "tid is %{private}llu", tid);
+    TAG_LOGD(AAFwkTag::APPMGR, "tid is %{private}" PRIu64, tid);
     if (mgrHolder_ == nullptr) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
