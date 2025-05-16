@@ -25,9 +25,10 @@ bool KilledProcessInfo::ReadFromParcel(Parcel &parcel)
     accessTokenId = parcel.ReadUint32();
     bundleName = parcel.ReadString();
     std::unique_ptr<RunningProcessInfo> tmpInfo(parcel.ReadParcelable<RunningProcessInfo>());
-    if (tmpInfo != nullptr) {
-        processInfo = *tmpInfo;
+    if (tmpInfo == nullptr) {
+        return false;
     }
+    processInfo = *tmpInfo;
     return true;
 }
 
