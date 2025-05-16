@@ -81,6 +81,8 @@ private:
 #ifdef SUPPORT_CHILD_PROCESS
     int32_t HandleGetAllChildrenProcesses(MessageParcel &data, MessageParcel &reply);
 #endif  // SUPPORT_CHILD_PROCESS
+    int32_t HandleRegisterNativeChildExitNotify(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleUnregisterNativeChildExitNotify(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAddAbilityStageDone(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyMemoryLevel(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyProcMemoryLevel(MessageParcel &data, MessageParcel &reply);

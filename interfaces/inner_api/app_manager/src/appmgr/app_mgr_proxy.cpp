@@ -2057,6 +2057,50 @@ int32_t AppMgrProxy::StartNativeChildProcess(const std::string &libName, int32_t
 }
 #endif // SUPPORT_CHILD_PROCESS
 
+int AppMgrProxy::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
+{
+    if (!notify) {
+        TAG_LOGE(AAFwkTag::APPMGR, "notify null");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "RegisterNativeChildExitNotify start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(notify->AsObject())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "notify write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::REGISTER_NATIVE_CHILD_EXIT_NOTIFY, data, reply, option);
+    return reply.ReadInt32();
+}
+
+int AppMgrProxy::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
+{
+    if (!notify) {
+        TAG_LOGE(AAFwkTag::APPMGR, "notify null");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "UnregisterNativeChildExitNotify start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(notify->AsObject())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "notify write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::UNREGISTER_NATIVE_CHILD_EXIT_NOTIFY, data, reply, option);
+    return reply.ReadInt32();
+}
+
 int32_t AppMgrProxy::CheckCallingIsUserTestMode(const pid_t pid, bool &isUserTest)
 {
     MessageParcel data;
