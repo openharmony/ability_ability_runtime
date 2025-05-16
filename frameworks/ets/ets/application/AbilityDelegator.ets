@@ -176,7 +176,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
     p.then((e: NullishType) => {
       let ability = e as UIAbility;
       let resultCode: Int = 0;
-      let error: BusinessError = { code: resultCode.intValue(), data: undefined };
+      let error: BusinessError = { code: resultCode.toInt(), data: undefined };
       callback(error, ability);
       console.log("getCurrentTopAbility callback2_06");
     }).catch((err: BusinessError): void => {
