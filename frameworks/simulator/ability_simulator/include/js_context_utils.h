@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+napi_value AttachBaseContext(napi_env env, void *value, void *hint);
 napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, bool keepContext = false);
 } // namespace AbilityRuntime
 } // namespace OHOS

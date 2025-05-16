@@ -16,15 +16,38 @@
 #include "js_context_utils.h"
 
 #include <iostream>
+
+#include "ability_runtime_error_util.h"
+#include "context_impl.h"
 #include "hilog_tag_wrapper.h"
 #include "js_application_context_utils.h"
 #include "js_data_converter.h"
+#include "js_error_utils.h"
+#include "js_resource_manager_utils.h"
 #include "js_runtime_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr char BASE_CONTEXT_NAME[] = "__base_context_ptr__";
+
+void *DetachNewBaseContext(napi_env, void *nativeObject, void *)
+{
+    auto *origContext = static_cast<std::weak_ptr<Context> *>(nativeObject);
+    if (origContext == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "origContext is null");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "New detached base context");
+    auto *detachNewContext = new (std::nothrow) std::weak_ptr<Context>(*origContext);
+    return detachNewContext;
+}
+
+void DetachFinalizeBaseContext(void *detachedObject, void *)
+{
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "Finalizer detached base context");
+    delete static_cast<std::weak_ptr<Context> *>(detachedObject);
+}
 
 class JsBaseContext {
 public:
@@ -64,6 +87,11 @@ public:
 
 protected:
     std::weak_ptr<Context> context_;
+
+private:
+    napi_value CreateJsModuleContext(napi_env env, const std::shared_ptr<Context> &moduleContext);
+    napi_value OnCreateModuleContext(napi_env env, NapiCallbackInfo &info);
+    bool CheckCallerIsSystemApp();
 };
 
 void JsBaseContext::Finalizer(napi_env env, void *data, void *hint)
@@ -127,7 +155,79 @@ napi_value JsBaseContext::OnSwitchArea(napi_env env, NapiCallbackInfo &info)
 
 napi_value JsBaseContext::CreateModuleContext(napi_env env, napi_callback_info info)
 {
-    return nullptr;
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnCreateModuleContext, BASE_CONTEXT_NAME);
+}
+napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo &info)
+{
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "null context");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    std::shared_ptr<Context> moduleContext = nullptr;
+    std::string moduleName;
+    if (!ConvertFromJsValue(env, info.argv[1], moduleName)) {
+        TAG_LOGD(AAFwkTag::ABILITY_SIM, "Parse inner module name");
+        if (!ConvertFromJsValue(env, info.argv[0], moduleName)) {
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "Parse moduleName failed");
+            ThrowInvalidParamError(env, "Parse param moduleName failed, moduleName must be string.");
+            return CreateJsUndefined(env);
+        }
+        moduleContext = context->CreateModuleContext(moduleName);
+    } else {
+        std::string bundleName;
+        if (!ConvertFromJsValue(env, info.argv[0], bundleName)) {
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "Parse bundleName failed");
+            ThrowInvalidParamError(env, "Parse param bundleName failed, bundleName must be string.");
+            return CreateJsUndefined(env);
+        }
+        if (!CheckCallerIsSystemApp()) {
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "not system-app");
+            AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
+            return CreateJsUndefined(env);
+        }
+        TAG_LOGD(AAFwkTag::ABILITY_SIM, "Parse outer module name");
+        moduleContext = context->CreateModuleContext(bundleName, moduleName);
+    }
+    if (!moduleContext) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null moduleContext");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    return CreateJsModuleContext(env, moduleContext);
+}
+
+napi_value JsBaseContext::CreateJsModuleContext(napi_env env, const std::shared_ptr<Context> &moduleContext)
+{
+    napi_value value = CreateJsBaseContext(env, moduleContext, true);
+
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
+    if (systemModule == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "null systemModule");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    napi_value object = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, object, napi_object)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "get object failed");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    auto workContext = new (std::nothrow) std::weak_ptr<Context>(moduleContext);
+    napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachBaseContext, workContext, nullptr);
+    auto res = napi_wrap(env, object, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::ABILITY_SIM, "Finalizer for weak_ptr module context is called");
+            delete static_cast<std::weak_ptr<Context> *>(data);
+        },
+        nullptr, nullptr);
+    if (res != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "napi_wrap failed:%{public}d", res);
+        delete workContext;
+        return CreateJsUndefined(env);
+    }
+    return object;
 }
 
 napi_value JsBaseContext::CreateModuleResourceManager(napi_env env, napi_callback_info info)
@@ -306,6 +406,11 @@ napi_value JsBaseContext::OnGetApplicationContext(napi_env env, NapiCallbackInfo
     auto contextObj =  systemModule->GetNapiValue();
     return contextObj;
 }
+
+bool JsBaseContext::CheckCallerIsSystemApp()
+{
+    return true;
+}
 } // namespace
 
 napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, bool keepContext)
@@ -324,6 +429,16 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
     auto hapModuleInfo = context->GetHapModuleInfo();
     if (hapModuleInfo != nullptr) {
         napi_set_named_property(env, object, "currentHapModuleInfo", CreateJsHapModuleInfo(env, *hapModuleInfo));
+    }
+
+    auto resourceManager = context->GetResourceManager();
+    if (resourceManager != nullptr) {
+        auto jsResourceManager = CreateJsResourceManager(env, resourceManager, context);
+        if (jsResourceManager != nullptr) {
+            napi_set_named_property(env, object, "resourceManager", jsResourceManager);
+        } else {
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "null jsResourceManager");
+        }
     }
 
     auto jsContext = std::make_unique<JsBaseContext>(context);
@@ -349,6 +464,48 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
         JsBaseContext::CreateModuleResourceManager);
 
     return object;
+}
+
+napi_value AttachBaseContext(napi_env env, void *value, void *hint)
+{
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
+    if (value == nullptr || env == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "invalid parameter");
+        return nullptr;
+    }
+    auto ptr = reinterpret_cast<std::weak_ptr<Context> *>(value)->lock();
+    if (ptr == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "null ptr");
+        return nullptr;
+    }
+    napi_value object = CreateJsBaseContext(env, ptr, true);
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &object, 1);
+    if (systemModule == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "null systemModule");
+        return nullptr;
+    }
+
+    napi_value contextObj = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "get object failed");
+        return nullptr;
+    }
+    auto workContext = new (std::nothrow) std::weak_ptr<Context>(ptr);
+    napi_coerce_to_native_binding_object(
+        env, contextObj, DetachNewBaseContext, AttachBaseContext, workContext, nullptr);
+    napi_add_detached_finalizer(env, contextObj, DetachFinalizeBaseContext, nullptr);
+    auto res = napi_wrap(env, contextObj, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::ABILITY_SIM, "Finalizer for weak_ptr base context is called");
+            delete static_cast<std::weak_ptr<Context> *>(data);
+        },
+        nullptr, nullptr);
+    if (res != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "napi_wrap failed:%{public}d", res);
+        delete workContext;
+        return nullptr;
+    }
+    return contextObj;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
