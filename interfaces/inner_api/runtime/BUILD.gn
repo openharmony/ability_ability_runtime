@@ -111,6 +111,7 @@ ohos_shared_library("runtime") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "i18n:intl_register",
     "init:syscap_ts",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
