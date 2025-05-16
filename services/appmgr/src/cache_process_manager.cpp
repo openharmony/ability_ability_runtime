@@ -308,7 +308,8 @@ void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<Ap
         return;
     }
     bool forceKillProcess =
-        AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPid());
+        AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(
+            appRecord->GetPid(), appRecord->GetBundleName());
     if (forceKillProcess) {
         appRecord->SetProcessCacheBlocked(true);
         return;
