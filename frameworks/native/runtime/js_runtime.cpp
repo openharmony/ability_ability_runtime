@@ -57,6 +57,7 @@
 #include "ohos_js_environment_impl.h"
 #include "parameters.h"
 #include "extractor.h"
+#include "replace_intl_module.h"
 #include "system_ability_definition.h"
 #include "source_map.h"
 #include "source_map_operator.h"
@@ -768,6 +769,7 @@ bool JsRuntime::Initialize(const Options& options)
             InitTimerModule();
         }
 
+        OHOS::Global::I18n::ReplaceIntlModule(GetNapiEnv());
         InitWorkerModule(options);
         SetModuleLoadChecker(options.moduleCheckerDelegate);
         SetRequestAotCallback();
