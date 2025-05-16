@@ -166,6 +166,11 @@ ohos_unittest("context_impl_test") {
     "context_impl_test.cpp",
   ]
 
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
   configs = [ ":module_private_config" ]
 
   deps = [

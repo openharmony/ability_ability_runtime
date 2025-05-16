@@ -106,7 +106,7 @@ public:
     {
         return "MockAbilityContext for tdd";
     }
-    virtual std::string GetResourceDir()
+    virtual std::string GetResourceDir(const std::string &moduleName = "")
     {
         return "MockAbilityContext for tdd";
     }
