@@ -33,6 +33,7 @@ public:
 private:
     int32_t HandleOnNativeChildStarted(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnError(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnNativeChildExit(MessageParcel &data, MessageParcel &reply);
 };
 
 } // OHOS
