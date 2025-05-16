@@ -244,7 +244,7 @@ void AppScheduler::OnStartProcessFailed(sptr<IRemoteObject> token)
     callback->OnStartProcessFailed(token);
 }
 
-void AppScheduler::OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+void AppScheduler::OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
     const std::string &bundleName, const std::vector<std::string> &abilityNames,
     const std::vector<std::string> &uiExtensionNames)
 {

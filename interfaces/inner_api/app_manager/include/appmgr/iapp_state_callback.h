@@ -22,7 +22,7 @@
 #include "app_mgr_constants.h"
 #include "app_process_data.h"
 #include "bundle_info.h"
-#include "last_exit_detail_info.h"
+#include "running_process_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -89,7 +89,7 @@ public:
      */
     virtual void NotifyAppPreCache(int32_t pid, int32_t userId) {}
 
-    virtual void OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+    virtual void OnCacheExitInfo(uint32_t accessTokenId, const RunningProcessInfo &exitInfo,
         const std::string &bundleName, const std::vector<std::string> &abilityNames,
         const std::vector<std::string> &uiExtensionNames) {}
 
