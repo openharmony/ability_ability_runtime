@@ -6682,7 +6682,7 @@ int AppMgrServiceInner::GetExceptionTimerId(const FaultData &faultData, const st
             bool isOccurException = true;
             innerService->ParseInfoToAppfreeze(faultData, pid, callerUid, bundleName, appRecord->GetProcessName(),
                 isOccurException);
-            if (faultData.errorObject.name != AppFreezeType::THREAD_BLOCK_3S ||
+            if (faultData.errorObject.name != AppFreezeType::THREAD_BLOCK_3S &&
                 faultData.errorObject.name != AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
                 TAG_LOGI(AAFwkTag::APPMGR, "Ffrt Exception faultData: %{public}s,pid: %{public}d "
                     "will exit because"" %{public}s", bundleName.c_str(), pid,
