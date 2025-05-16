@@ -28,7 +28,6 @@
 #include "string_wrapper.h"
 #ifdef SUPPORT_SCREEN
 #include "window.h"
-#include "ui_content.h"
 #endif // SUPPORT_SCREEN
 
 namespace OHOS {
