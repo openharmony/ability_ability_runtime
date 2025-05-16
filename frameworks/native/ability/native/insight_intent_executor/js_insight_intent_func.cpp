@@ -39,8 +39,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 std::shared_ptr<JsInsightIntentFunc> JsInsightIntentFunc::Create(JsRuntime& runtime)
 {
-    std::shared_ptr<JsInsightIntentFunc> ptr(new (std::nothrow) JsInsightIntentFunc(runtime));
-    return ptr;
+    return std::make_shared<JsInsightIntentFunc>(runtime);
 }
 
 JsInsightIntentFunc::JsInsightIntentFunc(JsRuntime& runtime) : runtime_(runtime)
