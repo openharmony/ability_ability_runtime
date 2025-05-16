@@ -3640,6 +3640,24 @@ void AbilityConnectManager::UpdateUIExtensionBindInfo(
         return;
     }
 
+    if (callerBundleName == AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "scb not allow bind process");
+        return;
+    }
+
+    auto sessionInfo = abilityRecord->GetSessionInfo();
+    if (sessionInfo == nullptr) {
+        if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "sa preload not allow bind process");
+            return;
+        }
+    } else {
+        if (sessionInfo->uiExtensionUsage == AAFwk::UIExtensionUsage::MODAL) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "modal not allow bind process");
+            return;
+        }
+    }
+
     WantParams wantParams;
     auto uiExtensionBindAbilityId = abilityRecord->GetUIExtensionAbilityId();
     wantParams.SetParam(UIEXTENSION_BIND_ABILITY_ID, AAFwk::Integer::Box(uiExtensionBindAbilityId));
