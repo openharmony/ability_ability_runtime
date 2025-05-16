@@ -26,6 +26,7 @@ namespace AAFwk {
 using namespace OHOS::AppExecFwk;
 namespace {
 const int64_t USER_SWITCH_TIMEOUT = 3 * 1000; // 3s
+constexpr int32_t U1_USER_ID = 1;
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 }
 
@@ -84,6 +85,10 @@ void UserController::ClearAbilityUserItems(int32_t userId)
 
 int UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, bool isAppRecovery)
 {
+    if (userId == U1_USER_ID) {
+        return StartNoHeadUser(userId, callback);
+    }
+
     if (userId < 0 || userId == USER_ID_NO_HEAD) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUserId invalid:%{public}d", userId);
         callback->OnStartUserDone(userId, INVALID_USERID_VALUE);
@@ -125,11 +130,7 @@ int UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, bool
     }
 
     SetCurrentUserId(userId);
-    // notify wms switching now
-
-    bool needStart = false;
     if (state == STATE_BOOTING) {
-        needStart = true;
         // send user start msg.
         SendSystemUserStart(userId);
     }
@@ -137,13 +138,26 @@ int UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, bool
     SendSystemUserCurrent(oldUserId, userId);
     SendReportUserSwitch(oldUserId, userId, userItem);
     SendUserSwitchTimeout(oldUserId, userId, userItem);
+    return MoveUserToForeground(oldUserId, userId, callback, isAppRecovery);
+}
 
-    if (needStart) {
-        BroadcastUserStarted(userId);
+int32_t UserController::StartNoHeadUser(int32_t userId, sptr<IUserCallback> callback) const
+{
+    if (!IsExistOsAccount(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "U1 not exist");
+        callback->OnStartUserDone(userId, INVALID_USERID_VALUE);
+        return INVALID_USERID_VALUE;
     }
 
-    UserBootDone(userItem);
-    return MoveUserToForeground(oldUserId, userId, callback, isAppRecovery);
+    auto abilityManagerService = DelayedSingleton<AbilityManagerService>::GetInstance();
+    if (!abilityManagerService) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityManagerService is nullptr");
+        callback->OnLogoutUserDone(userId, GET_ABILITY_SERVICE_FAILED);
+        return GET_ABILITY_SERVICE_FAILED;
+    }
+    abilityManagerService->UserStarted(userId);
+    callback->OnStartUserDone(userId, ERR_OK);
+    return ERR_OK;
 }
 
 int32_t UserController::StopUser(int32_t userId)
@@ -270,7 +284,7 @@ bool UserController::IsCurrentUser(int32_t userId)
     return false;
 }
 
-bool UserController::IsExistOsAccount(int32_t userId)
+bool UserController::IsExistOsAccount(int32_t userId) const
 {
     bool isExist = false;
     auto errCode = DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->IsOsAccountExists(userId, isExist);
@@ -336,11 +350,6 @@ void UserController::UserBootDone(std::shared_ptr<UserItem> &item)
         return;
     }
     manager->UserStarted(userId);
-}
-
-void UserController::BroadcastUserStarted(int32_t userId)
-{
-    // broadcast event user start.
 }
 
 void UserController::BroadcastUserBackground(int32_t userId)

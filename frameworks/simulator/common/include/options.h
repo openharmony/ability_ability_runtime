@@ -34,6 +34,8 @@ enum class DeviceType {
     WATCH,
     CAR,
     TABLET,
+    TWO_IN_ONE,
+    WEARABLE,
     UNKNOWN,
 };
 
@@ -62,6 +64,12 @@ struct DeviceResourceInfo {
     std::vector<int64_t> resourcehandlers;
     std::string packagePath;
     int32_t themeId { -1 };
+};
+
+struct DependencyHspInfo {
+    std::string moduleName;
+    std::string resourcePath;               // resources.index path
+    std::vector<uint8_t> moduleJsonBuffer;  // module.json buffer
 };
 
 using SendCurrentRouterCallback = bool (*)(const std::string currentRouterPath);
@@ -104,6 +112,7 @@ struct Options {
     CallbackTypePostTask postTask;
     std::map<std::string, std::string> pkgContextInfoJsonStringMap;
     std::map<std::string, std::string> packageNameList;
+    std::vector<DependencyHspInfo> dependencyHspInfos;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

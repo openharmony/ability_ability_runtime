@@ -123,8 +123,8 @@ public:
         return E_OK;
     }
 
-    virtual int32_t NotifyVolumeMounted(const std::string &volumeId, int fsType, const std::string &fsUuid,
-        const std::string &path, const std::string &description) override
+    virtual int32_t NotifyVolumeMounted(const std::string &volumeId, const std::string &fsTypeStr,
+        const std::string &fsUuid, const std::string &path, const std::string &description) override
     {
         return E_OK;
     }

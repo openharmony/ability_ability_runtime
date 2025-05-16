@@ -2118,14 +2118,14 @@ std::shared_ptr<AppRunningRecord> AppRunningRecord::GetParentAppRecord()
     return parentAppRecord_.lock();
 }
 
-int32_t AppRunningRecord::ChangeAppGcState(int32_t state)
+int32_t AppRunningRecord::ChangeAppGcState(int32_t state, uint64_t tid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (appLifeCycleDeal_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
         return ERR_INVALID_VALUE;
     }
-    return appLifeCycleDeal_->ChangeAppGcState(state);
+    return appLifeCycleDeal_->ChangeAppGcState(state, tid);
 }
 
 void AppRunningRecord::SetAttachDebug(bool isAttachDebug, bool isDebugFromLocal)

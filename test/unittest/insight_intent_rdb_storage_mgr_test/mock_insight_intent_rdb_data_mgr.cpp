@@ -62,10 +62,6 @@ InsightIntentRdbDataMgr::InsightIntentRdbDataMgr()
 InsightIntentRdbDataMgr::~InsightIntentRdbDataMgr()
 {}
 
-bool InsightIntentRdbDataMgr::InitIntentTable(const IntentRdbConfig &intentRdbConfig)
-{
-    return true;
-}
 bool InsightIntentRdbDataMgr::QueryData(const std::string &key, std::string &value)
 {
     if (g_mockQueryDataRet) {

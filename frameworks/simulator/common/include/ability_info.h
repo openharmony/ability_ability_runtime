@@ -17,6 +17,7 @@
 #define FOUNDATION_ABILITY_RUNTIME_SIMULATOR_COMMON_ABILITY_INFO_H
 
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "application_info.h"
@@ -77,6 +78,21 @@ enum class SupportWindowMode {
     FULLSCREEN = 0,
     SPLIT,
     FLOATING,
+};
+
+enum class LinkType : uint8_t {
+    DEEP_LINK = 0,
+    APP_LINK,
+    DEFAULT_APP,
+};
+
+struct StartWindowResource {
+    uint32_t startWindowAppIconId = 0;
+    uint32_t startWindowIllustrationId = 0;
+    uint32_t startWindowBrandingImageId = 0;
+    uint32_t startWindowBackgroundColorId = 0;
+    uint32_t startWindowBackgroundImageId = 0;
+    std::string startWindowBackgroundImageFit = "Cover";
 };
 
 // configuration information about an ability
@@ -142,24 +158,35 @@ struct AbilityInfo {
     int32_t priority = 0;
 
     // configuration fields on startup page
+    std::string startWindow;
     std::string startWindowIcon;
     int32_t startWindowIconId;
     std::string startWindowBackground;
     int32_t startWindowBackgroundId;
+    std::string preferMultiWindowOrientation = "default";
     // whether to display in the missions list
     bool excludeFromMissions = false;
     bool unclearableMission = false;
+    bool excludeFromDock = false;
     // whether to support recover UI interface
     bool recoverable = false;
+    bool isolationProcess = false;
+    LinkType linkType = LinkType::DEEP_LINK;
+    uint32_t orientationId = 0;
+    uint32_t startWindowId = 0;
+    int32_t appIndex = 0;
 
     // support windows mode
     std::vector<SupportWindowMode> windowModes;
+    std::vector<std::string> continueType;
+    std::unordered_set<std::string> continueBundleNames;
     double maxWindowRatio = 0;
     double minWindowRatio = 0;
     uint32_t maxWindowWidth = 0;
     uint32_t minWindowWidth = 0;
     uint32_t maxWindowHeight = 0;
     uint32_t minWindowHeight = 0;
+    StartWindowResource startWindowResource;
     // for NAPI, save self query cache
     int32_t uid = -1;
     CompileMode compileMode = CompileMode::JS_BUNDLE;

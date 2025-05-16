@@ -20,6 +20,7 @@
 #include <set>
 #include <sstream>
 #include "bundle_constants.h"
+#include "bundle_info.h"
 #include "common_profile.h"
 #include "hilog_tag_wrapper.h"
 #include "string_ex.h"
@@ -1721,6 +1722,34 @@ void SetInstallationFree(InnerModuleInfo &innerModuleInfo, BundleType bundleType
     }
 }
 
+bool ToBundleInfo(const ApplicationInfo &applicationInfo, const InnerModuleInfo &innerModuleInfo,
+    const TransformParam &transformParam, BundleInfo &bundleInfo)
+{
+    bundleInfo.name = applicationInfo.bundleName;
+
+    bundleInfo.versionCode = static_cast<uint32_t>(applicationInfo.versionCode);
+    bundleInfo.versionName = applicationInfo.versionName;
+    bundleInfo.minCompatibleVersionCode = static_cast<uint32_t>(applicationInfo.minCompatibleVersionCode);
+
+    bundleInfo.compatibleVersion = static_cast<uint32_t>(applicationInfo.apiCompatibleVersion);
+    bundleInfo.targetVersion = static_cast<uint32_t>(applicationInfo.apiTargetVersion);
+
+    bundleInfo.isKeepAlive = applicationInfo.keepAlive;
+    bundleInfo.singleton = applicationInfo.singleton;
+    bundleInfo.isPreInstallApp = transformParam.isPreInstallApp;
+
+    bundleInfo.vendor = applicationInfo.vendor;
+    bundleInfo.releaseType = applicationInfo.apiReleaseType;
+    bundleInfo.isNativeApp = false;
+
+    if (innerModuleInfo.isEntry) {
+        bundleInfo.mainEntry = innerModuleInfo.moduleName;
+        bundleInfo.entryModuleName = innerModuleInfo.moduleName;
+    }
+
+    return true;
+}
+
 bool ParseExtensionInfo(const Profile::ModuleJson &moduleJson, InnerBundleInfo &innerBundleInfo,
     const TransformParam &transformParam, InnerModuleInfo &innerModuleInfo)
 {
@@ -1762,6 +1791,10 @@ bool ToInnerBundleInfo(const Profile::ModuleJson &moduleJson, InnerBundleInfo &i
     InnerModuleInfo innerModuleInfo;
     ToInnerModuleInfo(moduleJson, transformParam, innerModuleInfo);
     SetInstallationFree(innerModuleInfo, applicationInfo.bundleType);
+
+    BundleInfo bundleInfo;
+    ToBundleInfo(applicationInfo, innerModuleInfo, transformParam, bundleInfo);
+
     for (const Profile::Ability &ability : moduleJson.module.abilities) {
         AbilityInfo abilityInfo;
         ToAbilityInfo(moduleJson, ability, transformParam, abilityInfo);
@@ -1790,8 +1823,74 @@ bool ToInnerBundleInfo(const Profile::ModuleJson &moduleJson, InnerBundleInfo &i
     }
     innerBundleInfo.SetCurrentModulePackage(moduleJson.module.name);
     innerBundleInfo.SetBaseApplicationInfo(applicationInfo);
+    innerBundleInfo.SetBaseBundleInfo(bundleInfo);
     innerBundleInfo.InsertInnerModuleInfo(moduleJson.module.name, innerModuleInfo);
     innerBundleInfo.SetTargetPriority(moduleJson.app.targetPriority);
+    return true;
+}
+
+bool ParserAtomicModuleConfig(const nlohmann::json &jsonObject, InnerBundleInfo &innerBundleInfo)
+{
+    nlohmann::json moduleJson = jsonObject.at(Profile::MODULE);
+    std::vector<std::string> preloads;
+    std::string moduleName = moduleJson.at(Profile::MODULE_NAME);
+    if (moduleJson.contains(Profile::ATOMIC_SERVICE)) {
+        nlohmann::json moduleAtomicObj = moduleJson.at(Profile::ATOMIC_SERVICE);
+        if (moduleAtomicObj.contains(Profile::MODULE_ATOMIC_SERVICE_PRELOADS)) {
+            nlohmann::json preloadObj = moduleAtomicObj.at(Profile::MODULE_ATOMIC_SERVICE_PRELOADS);
+            if (preloadObj.empty()) {
+                TAG_LOGE(AAFwkTag::ABILITY_SIM, "reloadObj is empty");
+                return true;
+            }
+            if (preloadObj.size() > Constants::MAX_JSON_ARRAY_LENGTH) {
+                TAG_LOGE(AAFwkTag::ABILITY_SIM, "preloads config in module.json is oversize");
+                return false;
+            }
+            for (const auto &preload : preloadObj) {
+                if (preload.contains(Profile::PRELOADS_MODULE_NAME)) {
+                    std::string preloadName = preload.at(Profile::PRELOADS_MODULE_NAME);
+                    preloads.emplace_back(preloadName);
+                } else {
+                    TAG_LOGE(AAFwkTag::ABILITY_SIM, "preloads must have moduleName");
+                    return false;
+                }
+            }
+        }
+    }
+    innerBundleInfo.SetInnerModuleAtomicPreload(moduleName, preloads);
+    return true;
+}
+
+bool ParserAtomicConfig(const nlohmann::json &jsonObject, InnerBundleInfo &innerBundleInfo)
+{
+    if (!jsonObject.contains(Profile::MODULE) || !jsonObject.contains(Profile::APP)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "ParserAtomicConfig failed due to bad module.json");
+        return false;
+    }
+    nlohmann::json appJson = jsonObject.at(Profile::APP);
+    nlohmann::json moduleJson = jsonObject.at(Profile::MODULE);
+    if (!moduleJson.is_object() || !appJson.is_object()) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "module.json file lacks of invalid module or app properties");
+        return false;
+    }
+    BundleType bundleType = BundleType::APP;
+    if (appJson.contains(Profile::BUNDLE_TYPE)) {
+        if (appJson.at(Profile::BUNDLE_TYPE) == Profile::BUNDLE_TYPE_ATOMIC_SERVICE) {
+            bundleType = BundleType::ATOMIC_SERVICE;
+        } else if (appJson.at(Profile::BUNDLE_TYPE) == Profile::BUNDLE_TYPE_SHARED) {
+            bundleType = BundleType::SHARED;
+        } else if (appJson.at(Profile::BUNDLE_TYPE) == Profile::BUNDLE_TYPE_APP_SERVICE_FWK) {
+            bundleType = BundleType::APP_SERVICE_FWK;
+        } else if (appJson.at(Profile::BUNDLE_TYPE) == Profile::BUNDLE_TYPE_PLUGIN) {
+            bundleType = BundleType::APP_PLUGIN;
+        }
+    }
+
+    innerBundleInfo.SetApplicationBundleType(bundleType);
+    if (!ParserAtomicModuleConfig(jsonObject, innerBundleInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "parse module atomicService failed");
+        return false;
+    }
     return true;
 }
 } // namespace
@@ -1817,6 +1916,11 @@ ErrCode ModuleProfile::TransformTo(const std::vector<uint8_t> &buf, InnerBundleI
     }
 
     if (!ToInnerBundleInfo(moduleJson, innerBundleInfo)) {
+        return ERR_APPEXECFWK_PARSE_PROFILE_PROP_CHECK_ERROR;
+    }
+
+    if (!ParserAtomicConfig(jsonObject, innerBundleInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Parser atomicService config failed");
         return ERR_APPEXECFWK_PARSE_PROFILE_PROP_CHECK_ERROR;
     }
 

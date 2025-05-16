@@ -176,11 +176,21 @@ constexpr const char *APP_TARGET_BUNDLE_NAME = "targetBundleName";
 constexpr const char *APP_TARGET_PRIORITY = "targetPriority";
 constexpr const char *MODULE_TARGET_MODULE_NAME = "targetModuleName";
 constexpr const char *MODULE_TARGET_PRIORITY = "targetPriority";
-constexpr const char *BUNDLE_TYPE_APP = "app";
-constexpr const char *BUNDLE_TYPE_ATOMIC_SERVICE = "atomicService";
 constexpr const char *COMPILE_SDK_VERSION = "compileSdkVersion";
 constexpr const char *COMPILE_SDK_TYPE = "compileSdkType";
 constexpr const char *COMPILE_SDK_TYPE_OPEN_HARMONY = "OpenHarmony";
+
+// module atomicService
+constexpr const char *MODULE_ATOMIC_SERVICE_PRELOADS = "preloads";
+// module atomicService preloads
+constexpr const char *PRELOADS_MODULE_NAME = "moduleName";
+
+// bundleType
+constexpr const char *BUNDLE_TYPE_APP = "app";
+constexpr const char *BUNDLE_TYPE_ATOMIC_SERVICE = "atomicService";
+constexpr const char *BUNDLE_TYPE_SHARED = "shared";
+constexpr const char *BUNDLE_TYPE_APP_SERVICE_FWK = "appService";
+constexpr const char *BUNDLE_TYPE_PLUGIN = "appPlugin";
 } // namespace Profile
 } // namespace AppExecFwk
 } // namespace OHOS

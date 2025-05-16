@@ -106,10 +106,9 @@ public:
 
 private:
     bool IsCurrentUser(int32_t userId);
-    bool IsExistOsAccount(int32_t userId);
+    bool IsExistOsAccount(int32_t userId) const;
     std::shared_ptr<UserItem> GetOrCreateUserItem(int32_t userId);
     void SetCurrentUserId(int32_t userId);
-    void BroadcastUserStarted(int32_t userId);
     int MoveUserToForeground(int32_t oldUserId, int32_t newUserId, sptr<IUserCallback> callback,
         bool isAppRecovery = false);
     void UserBootDone(std::shared_ptr<UserItem> &item);
@@ -137,6 +136,7 @@ private:
     void HandleContinueUserSwitch(int32_t oldUserId, int32_t newUserId,
         std::shared_ptr<UserItem> &usrItem);
     void HandleUserSwitchDone(int32_t userId);
+    int32_t StartNoHeadUser(int32_t userId, sptr<IUserCallback> callback) const;
 
 private:
     int32_t currentUserId_ = USER_ID_NO_HEAD;
