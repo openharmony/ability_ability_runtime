@@ -77,7 +77,19 @@ public:
     std::shared_ptr<AppRunningRecord> CheckAppRunningRecordIsExist(const std::string &appName,
         const std::string &processName, const int uid, const BundleInfo &bundleInfo,
         const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr, const std::string &instanceKey = "",
-        const std::string &customProcessFlag = "");
+        const std::string &customProcessFlag = "", const std::string &sandBoxProcessFlag = "");
+
+    /**
+     * CheckAppProcessNameIsConsistent, Check whether the application process or the sandbox process name is consistent.
+     *
+     * @param appRecord, the ptr of AppRunningRecord.
+     * @param processName, the application process name.
+     * @param sandBoxProcessName, the application sandBox process name
+     *
+     * @return true if process name is consistent.
+     */
+    static bool CheckAppProcessNameIsConsistent(const std::shared_ptr<AppRunningRecord> &appRecord,
+        const std::string &processName, const std::string &sandBoxProcessName);
 
 #ifdef APP_NO_RESPONSE_DIALOG
     /**

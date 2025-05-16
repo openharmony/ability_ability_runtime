@@ -307,6 +307,35 @@ HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_CheckAppRunningRecordIsE
 }
 
 /**
+ * @tc.name: AppRunningManager_CheckAppProcessNameIsConsistent_0100
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_CheckAppProcessNameIsConsistent_0100, TestSize.Level1)
+{
+    BundleInfo bundleInfo;
+    std::shared_ptr<AppRunningRecord> appRunningRecord =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    std::string processName = "processName";
+    std::string sandBoxProcessName {};
+
+    bool ret = AppRunningManager::CheckAppProcessNameIsConsistent(nullptr, processName, sandBoxProcessName);
+    EXPECT_FALSE(ret);
+
+    EXPECT_NE(appRunningRecord, nullptr);
+    ret = AppRunningManager::CheckAppProcessNameIsConsistent(appRunningRecord, processName, sandBoxProcessName);
+    EXPECT_FALSE(ret);
+
+    ret = AppRunningManager::CheckAppProcessNameIsConsistent(appRunningRecord, PROCESS_NAME, sandBoxProcessName);
+    EXPECT_TRUE(ret);
+
+    sandBoxProcessName = "sandBoxProcessName";
+    appRunningRecord->SetSandBoxProcessName(sandBoxProcessName);
+    ret = AppRunningManager::CheckAppProcessNameIsConsistent(appRunningRecord, processName, sandBoxProcessName);
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: AppRunningManager_GetProcessInfosByUserId_0100
  * @tc.desc: NA
  * @tc.type: FUNC

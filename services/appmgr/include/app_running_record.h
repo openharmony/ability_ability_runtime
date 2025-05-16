@@ -152,6 +152,20 @@ public:
     const std::string &GetProcessName() const;
 
     /**
+     * @brief Obtains the name of sandbox process.
+     *
+     * @return Returns the name of sandbox process.
+     */
+    const std::string &GetSandBoxProcessName() const;
+
+    /**
+     * @brief Setting the name of sandbox process.
+     *
+     * @param processName, the name of sandbox process.
+     */
+    void SetSandBoxProcessName(const std::string &processName);
+
+    /**
      * @brief Obtains the the flag of specified process.
      *
      * @return Returns the the flag of specified process.
@@ -1182,6 +1196,7 @@ private:
 
     std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;  // the application's info of this process
     std::string processName_;  // the name of this process
+    std::string sandboxProcessName_; // the name of sandbox process
     std::string specifiedProcessFlag_; // the flag of specified Process
     std::string customProcessFlag_; // the flag of custom process
     std::unordered_set<sptr<IRemoteObject>, RemoteObjHash> foregroundingAbilityTokens_;
