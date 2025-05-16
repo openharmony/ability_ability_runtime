@@ -1800,9 +1800,10 @@ private:
     bool SendCreateAtomicServiceProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
         const BundleType &bundleType, const std::string &moduleName = "", const std::string &abilityName = "");
 
-    void SendProcessExitEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void SendProcessExitEvent(std::shared_ptr<AppRunningRecord> appRecord);
 
-    void SendProcessExitEventTask(const std::shared_ptr<AppRunningRecord> &appRecord, time_t exitTime, int32_t count);
+    void SendProcessExitEventTask(pid_t pid, const std::string &processName, int32_t extensionType,
+        int32_t exitReason, time_t exitTime, int32_t count);
 
     void SetRunningSharedBundleList(const std::string &bundleName,
         const std::vector<BaseSharedBundleInfo> baseSharedBundleInfoList);

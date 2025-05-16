@@ -1849,27 +1849,18 @@ int32_t AppMgrServiceInner::UpdateProcessMemoryState(const std::vector<ProcessMe
     return ERR_OK;
 }
 
-void AppMgrServiceInner::SendProcessExitEventTask(
-    const std::shared_ptr<AppRunningRecord> &appRecord, time_t exitTime, int32_t count)
+void AppMgrServiceInner::SendProcessExitEventTask(pid_t pid, const std::string &processName, int32_t extensionType,
+    int32_t exitReason, time_t exitTime, int32_t count)
 {
-    if (appRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
-        return;
-    }
-    if (appRecord->GetPriorityObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "priority object null");
-        return;
-    }
-    auto pid = appRecord->GetPid();
     auto exitResult = !ProcessUtil::ProcessExist(pid);
     constexpr int32_t EXIT_SUCESS = 0;
     constexpr int32_t EXIT_FAILED = -1;
     AAFwk::EventInfo eventInfo;
     eventInfo.time = exitTime;
     eventInfo.pid = pid;
-    eventInfo.processName = appRecord->GetProcessName();
-    eventInfo.extensionType = static_cast<int32_t>(appRecord->GetExtensionType());
-    eventInfo.exitReason = appRecord->GetExitReason();
+    eventInfo.processName = processName;
+    eventInfo.extensionType = extensionType;
+    eventInfo.exitReason = exitReason;
 
     if (exitResult) {
         eventInfo.exitResult = EXIT_SUCESS;
@@ -1883,22 +1874,36 @@ void AppMgrServiceInner::SendProcessExitEventTask(
         return;
     }
 
-    auto sendEventTask = [innerServiceWeak = weak_from_this(), appRecord, exitTime, count] () {
+    auto sendEventTask = [innerServiceWeak = weak_from_this(), pid, processName, extensionType, exitReason, exitTime,
+        count] () {
         auto innerService = innerServiceWeak.lock();
         CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
-        innerService->SendProcessExitEventTask(appRecord, exitTime, count);
+        innerService->SendProcessExitEventTask(pid, processName, extensionType, exitReason, exitTime, count);
     };
     CHECK_POINTER_AND_RETURN_LOG(taskHandler_, "Task handler is nullptr.");
     taskHandler_->SubmitTaskJust(sendEventTask, PROCESS_EXIT_EVENT_TASK, KILL_PROCESS_DELAYTIME_MICRO_SECONDS);
 }
 
-void AppMgrServiceInner::SendProcessExitEvent(const std::shared_ptr<AppRunningRecord> &appRecord)
+void AppMgrServiceInner::SendProcessExitEvent(std::shared_ptr<AppRunningRecord> appRecord)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+        return;
+    }
+    if (appRecord->GetPriorityObject() == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "priority object null");
+        return;
+    }
     time_t currentTime;
     time(&currentTime);
     constexpr int32_t RETRY_COUNT = 5;
-    SendProcessExitEventTask(appRecord, currentTime, RETRY_COUNT);
+
+    auto pid = appRecord->GetPid();
+    auto processName = appRecord->GetProcessName();
+    auto extensionType = static_cast<int32_t>(appRecord->GetExtensionType());
+    auto exitReason = appRecord->GetExitReason();
+    SendProcessExitEventTask(pid, processName, extensionType, exitReason, currentTime, RETRY_COUNT);
     return;
 }
 
