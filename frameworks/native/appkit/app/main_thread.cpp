@@ -3597,7 +3597,7 @@ int32_t MainThread::ChangeAppGcState(int32_t state, uint64_t tid)
     }
     auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
     if (tid > 0) {
-        TAG_LOGD(AAFwkTag::APPKIT, "tid is %{private}llu", tid);
+        TAG_LOGD(AAFwkTag::APPKIT, "tid is %{private}" PRIu64, tid);
         nativeEngine.NotifyForceExpandState(tid, state);
         return NO_ERROR;
     }
