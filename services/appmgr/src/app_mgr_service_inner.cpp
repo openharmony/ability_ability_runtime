@@ -167,6 +167,7 @@ constexpr const int32_t API10 = 10;
 constexpr const int32_t API15 = 15;
 constexpr const int32_t API_VERSION_MOD = 100;
 constexpr const int32_t U0_USER_ID = 0;
+constexpr const int32_t U1_USER_ID = 1;
 constexpr const char* CLASS_NAME = "ohos.app.MainThread";
 constexpr const char* FUNC_NAME = "main";
 constexpr const char* RENDER_PARAM = "invalidparam";
@@ -2018,7 +2019,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationData(const std::string &bundleName
     int32_t newUserId = userId;
     if (userId == DEFAULT_INVAL_VALUE) {
         newUserId = GetUserIdByUid(callerUid);
-        if (newUserId == U0_USER_ID) {
+        if (newUserId == U0_USER_ID || newUserId == U1_USER_ID) {
             newUserId = currentUserId_;
         }
     }
@@ -7323,7 +7324,7 @@ int32_t AppMgrServiceInner::GetRunningProcessInformation(
     return ERR_OK;
 }
 
-int32_t AppMgrServiceInner::ChangeAppGcState(pid_t pid, int32_t state)
+int32_t AppMgrServiceInner::ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid)
 {
     auto callerUid = IPCSkeleton::GetCallingUid();
     TAG_LOGD(AAFwkTag::APPMGR, "called, pid:%{public}d, state:%{public}d, uid:%{public}d.", pid, state, callerUid);
@@ -7336,7 +7337,7 @@ int32_t AppMgrServiceInner::ChangeAppGcState(pid_t pid, int32_t state)
         TAG_LOGE(AAFwkTag::APPMGR, "no appRecord");
         return ERR_INVALID_VALUE;
     }
-    return appRecord->ChangeAppGcState(state);
+    return appRecord->ChangeAppGcState(state, tid);
 }
 
 int32_t AppMgrServiceInner::RegisterAppDebugListener(const sptr<IAppDebugListener> &listener)

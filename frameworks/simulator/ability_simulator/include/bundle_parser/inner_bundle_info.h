@@ -16,13 +16,14 @@
 #ifndef OHOS_ABILITY_RUNTIME_SIMULATOR_INNER_BUNDLE_INFO_H
 #define OHOS_ABILITY_RUNTIME_SIMULATOR_INNER_BUNDLE_INFO_H
 
-#include "nocopyable.h"
 #include "ability_info.h"
 #include "bundle_constants.h"
+#include "bundle_info.h"
 #include "common_profile.h"
 #include "extension_ability_info.h"
 #include "hap_module_info.h"
 #include "json_util.h"
+#include "nocopyable.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -231,9 +232,21 @@ public:
         isNewVersion_ = isNewVersion;
     }
 
+    void SetBaseBundleInfo(const BundleInfo &bundleInfo);
+    void SetApplicationBundleType(BundleType type);
+    bool SetInnerModuleAtomicPreload(const std::string &moduleName, const std::vector<std::string> &preloads);
+    ErrCode GetBundleInfoV9(int32_t flags, BundleInfo &bundleInfo, int32_t userId = Constants::UNSPECIFIED_USERID,
+        int32_t appIndex = 0) const;
+    ErrCode GetApplicationInfoV9(int32_t flags, int32_t userId, ApplicationInfo &appInfo, int32_t appIndex = 0) const;
+    ErrCode GetAppServiceHspInfo(BundleInfo &bundleInfo) const;
+    bool GetSharedBundleInfo(int32_t flags, BundleInfo &bundleInfo) const;
+
 private:
     void RemoveDuplicateName(std::vector<std::string> &name) const;
     IsolationMode GetIsolationMode(const std::string &isolationMode) const;
+    void ProcessBundleFlags(int32_t flags, int32_t userId, BundleInfo &bundleInfo, int32_t appIndex = 0) const;
+    void ProcessBundleWithHapModuleInfoFlag(
+        int32_t flags, BundleInfo &bundleInfo, int32_t userId, int32_t appIndex = 0) const;
 
     // using for get
     Constants::AppType appType_ = Constants::AppType::THIRD_PARTY_APP;
@@ -251,6 +264,8 @@ private:
     bool isNewVersion_ = false;
     std::map<std::string, ExtensionAbilityInfo> baseExtensionInfos_;
     std::vector<Metadata> provisionMetadatas_;
+    std::shared_ptr<BundleInfo> baseBundleInfo_ = nullptr;
+    int32_t overlayType_ = NON_OVERLAY_TYPE;
 };
 
 void from_json(const nlohmann::json &jsonObject, InnerModuleInfo &info);

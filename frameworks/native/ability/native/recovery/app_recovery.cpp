@@ -261,7 +261,7 @@ bool AppRecovery::ScheduleRecoverApp(StateReason reason)
     if (!isEnable_) {
         if (OHOS::system::GetParameter("const.dfx.sub_health_recovery.enable", "") == "true") {
             DoRecoverMainApp(reason);
-            return false;
+            return true;
         }
         return false;
     }

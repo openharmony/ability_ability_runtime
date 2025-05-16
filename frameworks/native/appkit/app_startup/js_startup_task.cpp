@@ -171,6 +171,11 @@ void JsStartupTask::OnAsyncTaskCompleted(const std::shared_ptr<StartupTaskResult
     startupTaskResultCallback_->Call(result);
 }
 
+void JsStartupTask::UpdateContextRef(std::shared_ptr<NativeReference> &contextJsRef)
+{
+    contextJsRef_ = contextJsRef;
+}
+
 int32_t JsStartupTask::RunTaskOnDependencyCompleted(const std::string &dependencyName,
     const std::shared_ptr<StartupTaskResult> &result)
 {

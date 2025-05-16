@@ -77,7 +77,8 @@ private:
 
     std::unique_ptr<NativeReference> LoadJsSrcEntry(const std::string &srcEntry);
 
-    bool LoadJsStartupConfig(const std::string &srcEntry);
+    bool LoadJsStartupConfig(const std::string &srcEntry, const std::string &moduleName,
+        AppExecFwk::ModuleType moduleType);
 
     bool CallOnPrepareTerminate(napi_env env,
         AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo) const;
@@ -88,7 +89,8 @@ private:
 
     int32_t RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo);
 
-    static int32_t RunAutoStartupTaskInner(const std::function<void()> &callback, bool &isAsyncCallback);
+    int32_t RunAutoStartupTaskInner(const std::function<void()> &callback, bool &isAsyncCallback,
+        const std::string &moduleName);
     
     void SetJsAbilityStage(const std::shared_ptr<Context> &context);
 

@@ -65,7 +65,6 @@ private:
     std::weak_ptr<AbilityContext> context_;
 };
 napi_value CreateJsAbilityContext(napi_env env, const std::shared_ptr<AbilityContext> &context);
-napi_value CreateJsErrorByNativeErr(napi_env env, int32_t err, const std::string &permission = "");
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_SIMULATOR_JS_ABILITY_CONTEXT_H

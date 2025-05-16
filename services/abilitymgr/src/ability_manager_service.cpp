@@ -233,6 +233,7 @@ const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
 };
 std::atomic<bool> g_isDmsAlive = false;
 constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
+constexpr int32_t U1_USER_ID = 1;
 constexpr const char* APPSPAWN_STARTED = "startup.service.ctl.appspawn.pid";
 constexpr const char* APP_LINKING_ONLY = "appLinkingOnly";
 
@@ -1301,7 +1302,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ability type no UIAbility");
         return ERR_INVALID_VALUE;
     }
-    validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
+    validUserId = abilityInfo.applicationInfo.uid / BASE_USER_RANGE;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
@@ -2243,7 +2244,7 @@ int32_t AbilityManagerService::RequestDialogServiceInner(const Want &want, const
 
     auto abilityInfo = abilityRequest.abilityInfo;
     threadLocalInfo.SetStartAbilityInfo(abilityInfo);
-    validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
+    validUserId = abilityInfo.applicationInfo.uid / BASE_USER_RANGE;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
@@ -2592,7 +2593,7 @@ void AbilityManagerService::AppUpgradeCompleted(int32_t uid)
     auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER(bms);
     auto userId = uid / BASE_USER_RANGE;
-    if (userId != U0_USER_ID && userId != GetUserId()) {
+    if (userId != U0_USER_ID && userId != U1_USER_ID && userId != GetUserId()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "not current user");
         return;
     }
@@ -3278,7 +3279,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
         return CHECK_PERMISSION_FAILED;
     }
     auto abilityInfo = abilityRequest.abilityInfo;
-    validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
+    validUserId = abilityInfo.applicationInfo.uid / BASE_USER_RANGE;
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
@@ -3709,7 +3710,7 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
-    validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
+    validUserId = abilityInfo.applicationInfo.uid / BASE_USER_RANGE;
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
@@ -3777,7 +3778,7 @@ void AbilityManagerService::StopSwitchUserDialogInner(const Want &want, const in
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
-    auto stopUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : lastUserId;
+    auto stopUserId = abilityInfo.applicationInfo.uid / BASE_USER_RANGE;
     result = CheckOptExtensionAbility(want, abilityRequest, stopUserId, AppExecFwk::ExtensionAbilityType::SERVICE);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "check extensionAbility type error");
@@ -4779,7 +4780,7 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
             return TARGET_ABILITY_NOT_SERVICE;
         }
     }
-    int32_t validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : userId;
+    int32_t validUserId = abilityInfo.applicationInfo.uid / BASE_USER_RANGE;
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "validUserId : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
@@ -4887,9 +4888,14 @@ int AbilityManagerService::DisconnectLocalAbility(const sptr<IAbilityConnection>
     if (connectManager->DisconnectAbilityLocked(connect) == ERR_OK) {
         return ERR_OK;
     }
-
+    connectManager = GetConnectManagerByUserId(U1_USER_ID);
+    CHECK_POINTER_AND_RETURN(connectManager, ERR_NO_INIT);
+    if (connectManager->DisconnectAbilityLocked(connect) == ERR_OK) {
+        return ERR_OK;
+    }
+    
     auto userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-    if (userId == U0_USER_ID) {
+    if (userId == U0_USER_ID || userId == U1_USER_ID) {
         auto connectManagers = GetConnectManagers();
         for (auto& item : connectManagers) {
             if (item.second && item.second->DisconnectAbilityLocked(connect) == ERR_OK) {
@@ -7025,7 +7031,7 @@ int AbilityManagerService::StopServiceAbility(const Want &want, int32_t userId, 
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
-    validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
+    validUserId = abilityInfo.applicationInfo.uid / BASE_USER_RANGE;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "validUserId : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
@@ -8230,11 +8236,13 @@ int AbilityManagerService::JudgeAbilityVisibleControl(const AppExecFwk::AbilityI
 int AbilityManagerService::StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "startUser in service:%{public}d", userId);
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "startUser callback is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
     if (IPCSkeleton::GetCallingUid() != ACCOUNT_MGR_SERVICE_UID) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startUser permission verification failed, not account process");
-        if (callback != nullptr) {
-            callback->OnStartUserDone(userId, CHECK_PERMISSION_FAILED);
-        }
+        callback->OnStartUserDone(userId, CHECK_PERMISSION_FAILED);
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -8841,7 +8849,7 @@ void AbilityManagerService::StartSwitchUserDialogInner(const Want &want, int32_t
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
-    auto startUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : lastUserId;
+    auto startUserId = abilityInfo.applicationInfo.uid / BASE_USER_RANGE;
     result = CheckOptExtensionAbility(want, abilityRequest, startUserId, AppExecFwk::ExtensionAbilityType::SERVICE);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "check extensionAbility type error");
@@ -8993,7 +9001,7 @@ void AbilityManagerService::PauseOldMissionListManager(int32_t userId)
 void AbilityManagerService::PauseOldConnectManager(int32_t userId)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s, PauseOldConnectManager:%{public}d-----begin", __func__, userId);
-    if (userId == U0_USER_ID) {
+    if (userId == U0_USER_ID || userId == U1_USER_ID) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s, u0 not stop, id:%{public}d-----null", __func__, userId);
         return;
     }
@@ -9022,7 +9030,7 @@ int32_t AbilityManagerService::GetValidUserId(const int32_t userId)
         validUserId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "validUserId = %{public}d, CallingUid = %{public}d.", validUserId,
             IPCSkeleton::GetCallingUid());
-        if (validUserId == U0_USER_ID) {
+        if (validUserId == U0_USER_ID || validUserId == U1_USER_ID) {
             validUserId = GetUserId();
         }
     }
@@ -9299,8 +9307,8 @@ int AbilityManagerService::DelegatorMoveMissionToFront(int32_t missionId)
 bool AbilityManagerService::JudgeMultiUserConcurrency(const int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (userId == U0_USER_ID) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s, userId is 0.", __func__);
+    if (userId == U0_USER_ID || userId == U1_USER_ID) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s, userId is 0 or 1.", __func__);
         return true;
     }
 
@@ -12459,7 +12467,7 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
     }
 
     result = SignRestartAppFlag(userId, callerUid, processInfo.instanceKey, processInfo.appMode, isAppRecovery);
-    if (result != ERR_OK) {
+    if (!isAppRecovery && result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "signRestartAppFlag error");
         return result;
     }
@@ -12513,7 +12521,7 @@ int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, int32_t uid, c
         return ERR_INVALID_VALUE;
     }
     auto ret = IN_PROCESS_CALL(appMgr->SignRestartAppFlag(uid, instanceKey));
-    if (ret != ERR_OK) {
+    if (!isAppRecovery && ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr signRestartAppFlag error");
         return ret;
     }
@@ -13248,7 +13256,7 @@ int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> ses
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
-    validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
+    validUserId = abilityInfo.applicationInfo.uid / BASE_USER_RANGE;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
@@ -14067,6 +14075,11 @@ int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
         InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(genericInfo, info);
     }
     return ERR_OK;
+}
+
+bool AbilityManagerService::IsCrossUserCall(int32_t userId) const
+{
+    return userId != INVALID_USER_ID && userId != U0_USER_ID && userId != U1_USER_ID && userId != GetUserId();
 }
 }  // namespace AAFwk
 }  // namespace OHOS

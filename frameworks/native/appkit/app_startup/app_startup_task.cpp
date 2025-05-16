@@ -32,5 +32,25 @@ void AppStartupTask::SetIsExcludeFromAutoStart(bool excludeFromAutoStart)
 {
     isExcludeFromAutoStart_ = excludeFromAutoStart;
 }
+
+void AppStartupTask::SetModuleName(const std::string &moduleName)
+{
+    moduleName_ = moduleName;
+}
+
+const std::string& AppStartupTask::GetModuleName() const
+{
+    return moduleName_;
+}
+
+void AppStartupTask::SetModuleType(AppExecFwk::ModuleType moduleType)
+{
+    moduleType_ = moduleType;
+}
+
+AppExecFwk::ModuleType AppStartupTask::GetModuleType() const
+{
+    return moduleType_;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

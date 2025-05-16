@@ -433,7 +433,8 @@ int32_t AppSchedulerHost::HandleNotifyAppFault(MessageParcel &data, MessageParce
 int32_t AppSchedulerHost::HandleScheduleChangeAppGcState(MessageParcel &data, MessageParcel &reply)
 {
     int32_t state = data.ReadInt32();
-    int32_t result = ScheduleChangeAppGcState(state);
+    uint64_t tid = data.ReadUint64();
+    int32_t result = ScheduleChangeAppGcState(state, tid);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "reply write failed.");
         return ERR_INVALID_VALUE;
