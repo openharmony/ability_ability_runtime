@@ -22,12 +22,15 @@
 #include "hitrace_meter.h"
 #include "configuration_convertor.h"
 #include "configuration.h"
+#include "ui_content.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 const size_t UIExtensionContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("UIExtensionContext"));
 int UIExtensionContext::ILLEGAL_REQUEST_CODE(-1);
 constexpr const char* REQUEST_COMPONENT_TERMINATE_KEY = "ohos.param.key.requestComponentTerminate";
+constexpr const char* UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
+constexpr const char* FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
 
 ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want) const
 {
@@ -386,6 +389,60 @@ void UIExtensionContext::SetAbilityColorMode(int32_t colorMode)
         return;
     }
     abilityConfigUpdateCallback_(config);
+}
+
+bool UIExtensionContext::IsTerminating()
+{
+    return isTerminating_;
+}
+
+void UIExtensionContext::SetTerminating(bool state)
+{
+    isTerminating_ = state;
+}
+
+ErrCode UIExtensionContext::StartAbilityByType(const std::string &type,
+    AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartAbilityByType begin.");
+    if (uiExtensionCallbacks == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null uiExtensionCallbacks");
+        return ERR_INVALID_VALUE;
+    }
+    auto uiContent = GetUIContent();
+    if (uiContent == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null uiContent");
+        return ERR_INVALID_VALUE;
+    }
+    wantParam.SetParam(UIEXTENSION_TARGET_TYPE_KEY, AAFwk::String::Box(type));
+    AAFwk::Want want;
+    want.SetParams(wantParam);
+    if (wantParam.HasParam(FLAG_AUTH_READ_URI_PERMISSION)) {
+        int32_t flag = wantParam.GetIntParam(FLAG_AUTH_READ_URI_PERMISSION, 0);
+        want.SetFlags(flag);
+        wantParam.Remove(FLAG_AUTH_READ_URI_PERMISSION);
+    }
+
+    OHOS::Ace::ModalUIExtensionCallbacks callback;
+    OHOS::Ace::ModalUIExtensionConfig config;
+    callback.onError = [uiExtensionCallbacks](int32_t arg, const std::string &str1, const std::string &str2) {
+        uiExtensionCallbacks->OnError(arg);
+    };
+    callback.onRelease = [uiExtensionCallbacks](int32_t arg) {
+        uiExtensionCallbacks->OnRelease(arg);
+    };
+    callback.onResult = [uiExtensionCallbacks](int32_t arg1, const OHOS::AAFwk::Want arg2) {
+        uiExtensionCallbacks->OnResult(arg1, arg2);
+    };
+
+    int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
+    if (sessionId == 0) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "createModalUIExtension fail");
+        return ERR_INVALID_VALUE;
+    }
+    uiExtensionCallbacks->SetUIContent(uiContent);
+    uiExtensionCallbacks->SetSessionId(sessionId);
+    return ERR_OK;
 }
 
 void UIExtensionContext::RequestComponentTerminate()
