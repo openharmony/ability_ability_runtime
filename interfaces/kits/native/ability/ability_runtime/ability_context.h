@@ -173,6 +173,8 @@ public:
 
     virtual ErrCode RestoreWindowStage(napi_env env, napi_value contentStorage) = 0;
 
+    virtual ErrCode RestoreWindowStage(NativeReference* contentStorage) = 0;
+
     virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData) = 0;
 
     virtual ErrCode RequestModalUIExtension(const AAFwk::Want& want) = 0;
