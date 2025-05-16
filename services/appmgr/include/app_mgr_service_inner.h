@@ -1537,7 +1537,8 @@ private:
      */
     void MakeProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo, int32_t appIndex,
-        const std::string &specifiedProcessFlag, std::string &processName, bool isCallerSetProcess) const;
+        const std::string &specifiedProcessFlag, std::string &processName, bool isCallerSetProcess,
+        std::string &sandBoxProcessName) const;
 
     /**
      * Build a process's name based on the info given
@@ -1962,6 +1963,8 @@ private:
     void CheckCleanAbilityByUserRequest(const std::shared_ptr<AppRunningRecord> &appRecord,
         const std::shared_ptr<AbilityRunningRecord> &abilityRecord, const AbilityState state);
     int32_t GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids);
+    bool MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
+        const HapModuleInfo &hapModuleInfo, const std::string &processName, std::string &sandBoxProcessName) const;
     int32_t DealWithUserConfiguration(const Configuration &config, const int32_t userId, int32_t &notifyUserId);
     bool CheckIsDebugApp(const std::string &bundleName);
     int32_t MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia, std::string &watermarkBusinessName,

@@ -169,6 +169,16 @@ const std::string &AppRunningRecord::GetProcessName() const
     return processName_;
 }
 
+const std::string &AppRunningRecord::GetSandBoxProcessName() const
+{
+    return sandboxProcessName_;
+}
+
+void AppRunningRecord::SetSandBoxProcessName(const std::string &processName)
+{
+    sandboxProcessName_ = processName;
+}
+
 void AppRunningRecord::SetSpecifiedProcessFlag(const std::string &flag)
 {
     specifiedProcessFlag_ = flag;

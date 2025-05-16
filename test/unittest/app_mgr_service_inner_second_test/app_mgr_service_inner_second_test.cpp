@@ -817,21 +817,22 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeProcessN
     int32_t appIndex = 0;
     std::string specifiedProcessFlag = "akeProcessName";
     std::string processName = "akeProcessName";
+    std::string sandBoxProcessName {};
     appMgrServiceInner->MakeProcessName(abilityInfo_, applicationInfo_, hapModuleInfo,
-                                        appIndex, specifiedProcessFlag, processName, false);
+                                        appIndex, specifiedProcessFlag, processName, false, sandBoxProcessName);
     abilityInfo_->process = "akeProcessName";
     appMgrServiceInner->MakeProcessName(abilityInfo_, applicationInfo_, hapModuleInfo,
-                                        appIndex, specifiedProcessFlag, processName, false);
+                                        appIndex, specifiedProcessFlag, processName, false, sandBoxProcessName);
     abilityInfo_->process = "";
     appIndex = 1;
     appMgrServiceInner->MakeProcessName(abilityInfo_, applicationInfo_, hapModuleInfo,
-                                        appIndex, specifiedProcessFlag, processName, false);
+                                        appIndex, specifiedProcessFlag, processName, false, sandBoxProcessName);
     abilityInfo_ = nullptr;
     appMgrServiceInner->MakeProcessName(abilityInfo_, applicationInfo_, hapModuleInfo,
-                                        appIndex, specifiedProcessFlag, processName, false);
+                                        appIndex, specifiedProcessFlag, processName, false, sandBoxProcessName);
     applicationInfo_ = nullptr;
     appMgrServiceInner->MakeProcessName(abilityInfo_, applicationInfo_, hapModuleInfo,
-                                        appIndex, specifiedProcessFlag, processName, false);
+                                        appIndex, specifiedProcessFlag, processName, false, sandBoxProcessName);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_MakeProcessName_0100 end");
 }
 
