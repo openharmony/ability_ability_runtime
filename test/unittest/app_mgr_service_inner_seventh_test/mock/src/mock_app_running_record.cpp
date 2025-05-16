@@ -1238,7 +1238,7 @@ void AppRunningRecord::UnSetPolicy()
 {
 }
 
-uint32_t AppRunningRecord::GetAddStageTimeout() const
+int32_t AppRunningRecord::GetAddStageTimeout() const
 {
     return 0;
 }
