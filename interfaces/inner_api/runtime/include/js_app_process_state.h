@@ -13,26 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_KILLED_PROCESS_INFO_H
-#define OHOS_ABILITY_RUNTIME_KILLED_PROCESS_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_APP_PROCESS_STATE_H
+#define OHOS_ABILITY_RUNTIME_JS_APP_PROCESS_STATE_H
 
-#include <string>
-
-#include "parcel.h"
 #include "running_process_info.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-struct KilledProcessInfo : public Parcelable {
-    uint32_t accessTokenId = 0;
-    std::string bundleName;
-    RunningProcessInfo processInfo;
-
-    bool ReadFromParcel(Parcel &parcel);
-    virtual bool Marshalling(Parcel &parcel) const override;
-    static KilledProcessInfo *Unmarshalling(Parcel &parcel);
+namespace AbilityRuntime {
+enum JsAppProcessState {
+    STATE_CREATE,
+    STATE_FOREGROUND,
+    STATE_ACTIVE,
+    STATE_BACKGROUND,
+    STATE_DESTROY
 };
-}  // namespace AppExecFwk
-}  // namespace OHOS
 
-#endif  // OHOS_ABILITY_RUNTIME_KILLED_PROCESS_INFO_H
+JsAppProcessState ConvertToJsAppProcessState(AppExecFwk::AppProcessState appProcessState, bool isFocused);
+} // namespace AbilityRuntime
+} // namespace OHOS
+
+#endif // OHOS_ABILITY_RUNTIME_JS_APP_PROCESS_STATE_H

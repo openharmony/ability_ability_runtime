@@ -21,13 +21,13 @@
 #include <string>
 #include <vector>
 
-#include "last_exit_detail_info.h"
+#include "running_process_info.h"
 #include "singleton.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 struct ExitCacheInfo {
-    AAFwk::LastExitDetailInfo exitInfo = {};
+    AppExecFwk::RunningProcessInfo exitInfo = {};
     std::string bundleName = "";
     std::vector<std::string> abilityNames;
     std::vector<std::string> uiExtensionNames;

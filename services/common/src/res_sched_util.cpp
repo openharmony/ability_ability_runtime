@@ -27,8 +27,10 @@
 
 namespace OHOS {
 namespace AAFwk {
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 using AssociatedStartType = ResourceSchedule::ResType::AssociatedStartType;
 static constexpr int PERF_NUM = 10202;
+#endif
 ResSchedUtil &ResSchedUtil::GetInstance()
 {
     static ResSchedUtil instance;
@@ -244,6 +246,7 @@ void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int3
 
 std::unordered_set<std::string> ResSchedUtil::GetNWebPreloadSet() const
 {
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_GET_NWEB_PRELOAD_SET;
     nlohmann::json payload;
     nlohmann::json reply;
@@ -254,6 +257,9 @@ std::unordered_set<std::string> ResSchedUtil::GetNWebPreloadSet() const
     }
     auto jsonObj = reply["NWebPreloadSet"];
     return { jsonObj.begin(), jsonObj.end() };
+#else
+    return {};
+#endif
 }
 } // namespace AAFwk
 } // namespace OHOS

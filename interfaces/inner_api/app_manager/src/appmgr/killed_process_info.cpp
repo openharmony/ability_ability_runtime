@@ -22,11 +22,13 @@ namespace OHOS {
 namespace AppExecFwk {
 bool KilledProcessInfo::ReadFromParcel(Parcel &parcel)
 {
-    pid = parcel.ReadInt32();
-    uid = parcel.ReadInt32();
     accessTokenId = parcel.ReadUint32();
-    processName = parcel.ReadString();
     bundleName = parcel.ReadString();
+    std::unique_ptr<RunningProcessInfo> tmpInfo(parcel.ReadParcelable<RunningProcessInfo>());
+    if (tmpInfo == nullptr) {
+        return false;
+    }
+    processInfo = *tmpInfo;
     return true;
 }
 
@@ -43,11 +45,9 @@ KilledProcessInfo *KilledProcessInfo::Unmarshalling(Parcel &parcel)
 
 bool KilledProcessInfo::Marshalling(Parcel &parcel) const
 {
-    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, pid);
-    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, uid);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Uint32, parcel, accessTokenId);
-    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String, parcel, processName);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String, parcel, bundleName);
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Parcelable, parcel, &processInfo);
     return true;
 }
 }  // namespace AppExecFwk
