@@ -29,8 +29,9 @@ namespace AbilityRuntime {
 using State = JsInsightIntentUtils::State;
 
 class JsInsightIntentPage final : public InsightIntentExecutor,
-                                public std::enable_shared_from_this<JsInsightIntentPage> {
+                                  public std::enable_shared_from_this<JsInsightIntentPage> {
 public:
+    explicit JsInsightIntentPage(JsRuntime& runtime);
     JsInsightIntentPage(const JsInsightIntentPage&) = delete;
     JsInsightIntentPage(const JsInsightIntentPage&&) = delete;
     JsInsightIntentPage& operator=(const JsInsightIntentPage&) = delete;
@@ -78,7 +79,6 @@ public:
         const AAFwk::Want &want, wptr<Rosen::Window> window, bool coldStart);
 
 private:
-    explicit JsInsightIntentPage(JsRuntime& runtime);
     bool LoadJsCode(const InsightIntentExecutorInfo& insightIntentInfo, JsRuntime& runtime);
 
     void ReplyFailedInner(InsightIntentInnerErr innerErr = InsightIntentInnerErr::INSIGHT_INTENT_EXECUTE_REPLY_FAILED);
@@ -86,9 +86,6 @@ private:
     void ReplySucceededInner(std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> resultCpp);
 
     bool ExecuteInsightIntent(const std::string& name, const AAFwk::WantParams& param);
-
-    // TODO just for mock test
-    static void SetIntentParam(const std::string &intentParams, ExecuteOhmUrlCallback callback);
 
     JsRuntime& runtime_;
     State state_ = State::CREATED;

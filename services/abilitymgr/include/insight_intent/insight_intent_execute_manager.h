@@ -20,6 +20,7 @@
 #include "ability_connect_callback_stub.h"
 #include "cpp/mutex.h"
 #include "event_report.h"
+#include "extract_insight_intent_profile.h"
 #include "insight_intent_execute_param.h"
 #include "insight_intent_execute_result.h"
 #include "iremote_object.h"
@@ -90,12 +91,11 @@ public:
 
     int32_t GetCallerBundleName(uint64_t intentId, std::string &callerBundleName) const;
 
-    static int32_t GenerateWant(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, Want &want);
+    static int32_t GenerateWant(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
+        const AbilityRuntime::ExtractInsightIntentGenericInfo &decoratorInfo,
+        Want &want);
 
     std::map<int32_t, int64_t> GetAllIntentExemptionInfo() const;
-
-    static int32_t AddWantUirsAndFlagsFromParam(
-        const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, Want &want);
 
     void SetIntentExemptionInfo(int32_t uid);
 
@@ -113,6 +113,16 @@ private:
         uint64_t &intentId, const std::string &callerBundleName);
 
     static int32_t IsValidCall(const Want &want);
+
+    static int32_t AddWantUirsAndFlagsFromParam(
+        const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, Want &want);
+    static int32_t CheckAndUpdateDecoratorParams(
+        const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
+        const AbilityRuntime::ExtractInsightIntentGenericInfo &decoratorInfo,
+        Want &want);
+    static int32_t UpdateFuncDecoratorParams(AbilityRuntime::ExtractInsightIntentInfo &info, Want &want);
+    static int32_t UpdatePageDecoratorParams(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
+        AbilityRuntime::ExtractInsightIntentInfo &info, Want &want);
 
     void SendIntentReport(EventInfo &eventInfo, int32_t errCode);
 };

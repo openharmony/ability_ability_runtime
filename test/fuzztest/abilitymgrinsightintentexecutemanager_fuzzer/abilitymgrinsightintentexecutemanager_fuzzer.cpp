@@ -100,7 +100,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     Minfos->GetBundleName(intentId, jsonStr);
     std::string callerBundleName = "com.example.fuzzTest";
     Minfos->AddRecord(key, callerToken, jsonStr, intentId, callerBundleName);
-    Minfos->GenerateWant(paramPtr, want);
+    AbilityRuntime::ExtractInsightIntentGenericInfo decoratorInfo;
+    Minfos->GenerateWant(paramPtr, decoratorInfo, want);
     Minfos->IsValidCall(want);
     Minfos->CheckCallerPermission();
     return true;

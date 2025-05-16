@@ -43,8 +43,7 @@ constexpr char INSIGHT_INTENT_DOT_HAP_PATH[] = "ohos.insightIntent.hapPath";
 
 std::shared_ptr<JsInsightIntentPage> JsInsightIntentPage::Create(JsRuntime& runtime)
 {
-    std::shared_ptr<JsInsightIntentPage> ptr(new (std::nothrow) JsInsightIntentPage(runtime));
-    return ptr;
+    return std::make_shared<JsInsightIntentPage>(runtime);
 }
 
 JsInsightIntentPage::JsInsightIntentPage(JsRuntime& runtime) : runtime_(runtime)
