@@ -11365,7 +11365,7 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
     if (ProcessLowMemoryKill(pid, reason)) {
         // if app is already starting, return
         TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}d is starting", pid);
-        return ERR_OK;
+        return ERR_KILL_APP_WHILE_STRATING;
     }
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
     auto ret = appExitReasonHelper_->RecordProcessExitReason(pid, reason, true);
