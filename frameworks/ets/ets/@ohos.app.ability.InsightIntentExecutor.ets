@@ -86,7 +86,7 @@ export default class InsightIntentExecutor {
 
   onExecuteInUIAbilityForegroundMode(name: string, param: Record<string, Object>, pageLoader: window.WindowStage):
     insightIntent.ExecuteResult {
-    let ret: insightIntent.ExecuteResult;
+    let ret: insightIntent.ExecuteResult = {};
     return ret;
   }
 
@@ -101,7 +101,7 @@ export default class InsightIntentExecutor {
 
   onExecuteInUIAbilityBackgroundMode(name: string, param: Record<string, Object>):
     insightIntent.ExecuteResult {
-    let ret: insightIntent.ExecuteResult;
+    let ret: insightIntent.ExecuteResult = {};
     return ret;
   }
 
@@ -116,7 +116,7 @@ export default class InsightIntentExecutor {
 
   onExecuteInUIExtensionAbility(name: string, param: Record<string, Object>, pageLoader: UIExtensionContentSession):
     insightIntent.ExecuteResult {
-    let ret: insightIntent.ExecuteResult;
+    let ret: insightIntent.ExecuteResult = {};
     return ret;
   }
 
@@ -132,7 +132,7 @@ export default class InsightIntentExecutor {
 
   onExecuteInServiceExtensionAbility(name: string, param: Record<string, Object>):
     insightIntent.ExecuteResult {
-    let ret: insightIntent.ExecuteResult;
+    let ret: insightIntent.ExecuteResult = {};
     return ret;
   }
 
