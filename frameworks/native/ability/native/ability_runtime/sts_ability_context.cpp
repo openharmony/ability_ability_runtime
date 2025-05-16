@@ -35,6 +35,7 @@
 #include "ani_common_start_options.h"
 #include "ani_common_configuration.h"
 #include "ani_common_ability_result.h"
+#include "ani_enum_convert.h"
 #include "open_link_options.h"
 #include "start_options.h"
 #include "sts_ui_extension_callback.h"
@@ -574,6 +575,114 @@ void StsAbilityContext::NativeOpenLinkSync(ani_env *env, ani_object aniObj, ani_
         !isOptionsUndefined, !isCallbackUndefined);
 }
 
+void StsAbilityContext::NativeRestoreWindowStage(ani_env *env, ani_object aniObj, ani_object localStorage)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "NativeRestoreWindowStage");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_boolean isLocalStorageUndefined = true;
+    if ((status = env->Reference_IsUndefined(localStorage, &isLocalStorageUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        return;
+    }
+    if (isLocalStorageUndefined) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null localStorage");
+        ThrowStsTooFewParametersError(env);
+        return;
+    }
+    ani_ref global = nullptr;
+    if ((status = env->GlobalReference_Create(localStorage, &global)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
+        return;
+    }
+    STSNativeReferenceWrapper* etsNativeRef = nullptr;
+    etsNativeRef = new STSNativeReferenceWrapper();
+    etsNativeRef->ref_ = std::make_shared<STSNativeReference>();
+    etsNativeRef->ref_->aniRef = global;
+    auto errcode = context->RestoreWindowStage(etsNativeRef);
+    if (errcode != 0) {
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return;
+    }
+}
+
+bool StsAbilityContext::NativeIsTerminating(ani_env *env, ani_object aniObj)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "NativeIsTerminating");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return false;
+    }
+    auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return false;
+    }
+    return context->IsTerminating();
+}
+
+void StsAbilityContext::NativeMoveAbilityToBackground(ani_env *env, ani_object aniObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "NativeMoveAbilityToBackground");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        AppExecFwk::AsyncCallback(env, callback,
+            OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)), nullptr);
+        return;
+    }
+    ErrCode ret = ERR_OK;
+    ani_object errorObject = nullptr;
+    ret = context->MoveUIAbilityToBackground();
+    errorObject = CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret));
+    AppExecFwk::AsyncCallback(env, callback, errorObject, nullptr);
+}
+
+void StsAbilityContext::NativeRequestModalUIExtension(ani_env *env, ani_object aniObj,
+    ani_string pickerWantObj, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "NativeRequestModalUIExtension");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    ani_object errorObject = nullptr;
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, pickerWantObj, want)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "parse want failed");
+        ThrowStsInvalidParamError(env, "Parse param want failed, want must be Want.");
+        return;
+    }
+    auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        errorObject = CreateStsErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
+        return;
+    }
+
+    ErrCode ret = ERR_OK;
+    ret = AAFwk::AbilityManagerClient::GetInstance()->RequestModalUIExtension(want);
+    errorObject = CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret));
+    AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
+}
+
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
     ani_status status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls);
@@ -613,6 +722,14 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void*>(StsAbilityContext::StartAbilityByCall) },
             ani_native_function { "nativeOpenLinkSync", nullptr,
                 reinterpret_cast<void*>(StsAbilityContext::NativeOpenLinkSync) },
+            ani_native_function { "nativeRestoreWindowStage", nullptr,
+                reinterpret_cast<void*>(StsAbilityContext::NativeRestoreWindowStage) },
+            ani_native_function { "nativeIsTerminating", nullptr,
+                reinterpret_cast<void*>(StsAbilityContext::NativeIsTerminating) },
+            ani_native_function { "nativeMoveAbilityToBackground", nullptr,
+                reinterpret_cast<void*>(StsAbilityContext::NativeMoveAbilityToBackground) },
+            ani_native_function { "nativeRequestModalUIExtension", nullptr,
+                reinterpret_cast<void*>(StsAbilityContext::NativeRequestModalUIExtension) },
         };
         status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
     });

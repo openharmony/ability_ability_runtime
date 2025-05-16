@@ -721,7 +721,28 @@ void StsUIAbility::RestorePageStack(const Want &want)
     if (IsRestorePageStack(want)) {
         std::string pageStack;
         GetPageStackFromWant(want, pageStack);
-        if (abilityContext_->GetContentStorage()) {
+        auto window = scene_->GetMainWindow();
+        if (window == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null window");
+        }
+        auto wrapper = static_cast<STSNativeReferenceWrapper*>(abilityContext_->GetContentStorage().release());
+        if (wrapper != nullptr) {
+            auto env = stsRuntime_.GetAniEnv();
+            if (!env) {
+                TAG_LOGE(AAFwkTag::UIABILITY, "env not found Ability.sts");
+                return;
+            }
+            if (wrapper->ref_ == nullptr) {
+                TAG_LOGE(AAFwkTag::UIABILITY, "null STSNativeReference");
+                return;
+            }
+            if (wrapper->ref_->aniRef == nullptr) {
+                TAG_LOGE(AAFwkTag::UIABILITY, "null aniRef");
+                return;
+            }
+            TAG_LOGD(AAFwkTag::UIABILITY, "NapiSetUIContent");
+            window->NapiSetUIContent(pageStack, env, reinterpret_cast<ani_object>(wrapper->ref_->aniRef),
+                Rosen::BackupAndRestoreType::CONTINUATION);
         } else {
             TAG_LOGE(AAFwkTag::UIABILITY, "null content storage");
         }
