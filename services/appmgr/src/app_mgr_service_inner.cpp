@@ -9578,8 +9578,8 @@ void AppMgrServiceInner::AddUIExtensionBindItem(
     }
 
     UIExtensionProcessBindInfo bindInfo;
-    if (!WarpBindInfo(want, appRecord, bindInfo)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "warp bindInfo fail");
+    if (!WrapBindInfo(want, appRecord, bindInfo)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "wrap bindInfo fail");
         return;
     }
     auto uiExtensionBindAbilityId = want->GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1);
@@ -9673,7 +9673,7 @@ void AppMgrServiceInner::UnBindUIExtensionProcess(
     }
 }
 
-bool AppMgrServiceInner::WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord,
+bool AppMgrServiceInner::WrapBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord,
     UIExtensionProcessBindInfo &bindInfo)
 {
     auto notifyProcessBind = want->GetIntParam(UIEXTENSION_NOTIFY_BIND, -1);
