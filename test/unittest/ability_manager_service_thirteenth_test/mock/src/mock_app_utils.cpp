@@ -242,5 +242,11 @@ bool AppUtils::InResidentWhiteList(const std::string &bundleName)
 {
     return true;
 }
+
+bool AppUtils::IsSupportAppServiceExtension()
+{
+    return true;
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS
