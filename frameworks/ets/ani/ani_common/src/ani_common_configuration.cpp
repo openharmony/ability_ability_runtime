@@ -42,7 +42,7 @@ void SetBasicConfiguration(
     env->Object_SetPropertyByName_Ref(object, "language", GetAniString(env, str));
 
     ani_enum_item colorModeItem {};
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(env,
         COLOR_MODE_ENUM_NAME,
         ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE)), colorModeItem);
     env->Object_SetPropertyByName_Ref(object, "colorMode", colorModeItem);
@@ -52,14 +52,14 @@ void SetBasicConfiguration(
 
     std::string direction = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
     ani_enum_item directionItem {};
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(env,
         DIRECTION_ENUM_NAME, ConvertDirection(direction),
         directionItem);
     env->Object_SetPropertyByName_Ref(object, "direction", directionItem);
 
     std::string density = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI);
     ani_enum_item densityItem {};
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(env,
         DENSITY_ENUM_NAME, ConvertDensity(density), densityItem);
     env->Object_SetPropertyByName_Ref(object, "screenDensity", densityItem);
 }
