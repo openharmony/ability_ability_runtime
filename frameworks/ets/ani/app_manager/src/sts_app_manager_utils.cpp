@@ -210,14 +210,14 @@ bool SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::Ru
         return false;
     }
     ani_enum_item stateItem {};
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(env,
         "L@ohos/app/ability/appManager/appManager/ProcessState;", processInfo.state_, stateItem);
     if ((status = env->Object_SetPropertyByName_Ref(object, "state", stateItem)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "state failed status:%{public}d", status);
         return false;
     }
     ani_enum_item bundleTypeItem {};
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(env,
         "L@ohos/bundle/bundleManager/bundleManager/BundleType;",
         processInfo.bundleType, bundleTypeItem);
     if ((status = env->Object_SetPropertyByName_Ref(object, "bundleType", bundleTypeItem)) != ANI_OK) {
@@ -489,7 +489,7 @@ bool SetRunningMultiAppInfo(ani_env *env, ani_object object,
         return false;
     }
     ani_enum_item modeItem {};
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(env,
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(env,
         "Lapplication/MultiAppMode/MultiAppMode;", runningMultiAppInfo.mode, modeItem);
     status = env->Object_SetPropertyByName_Ref(object, "mode", modeItem);
     if (status != ANI_OK) {

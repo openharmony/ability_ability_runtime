@@ -18,6 +18,8 @@ import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { BusinessError, AsyncCallback } from '@ohos.base'
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import Want from '@ohos.app.ability.Want';
+import { ProcessInformation } from 'application.ProcessInformation';
+import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 
 export default class ApplicationContext extends Context {
   public native nativekillAllProcessesSync(clearPageStack: boolean, callback: AsyncCallbackWrapper<void>): void;
@@ -25,6 +27,11 @@ export default class ApplicationContext extends Context {
   public native nativeOffSync(type: 'environment', callbackId: number, callback: AsyncCallbackWrapper<void>): void;
   public native nativepreloadUIExtensionAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
   public native setSupportedProcessCacheSync(isSupported: boolean): void;
+  public native nativegetRunningProcessInformation(callback: AsyncCallbackWrapper<Array<ProcessInformation>>): void;
+  public native nativeclearUpApplicationData(callback: AsyncCallbackWrapper<void>): void;
+  public native nativesetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
+  public native nativesetFont(font: string): void; 
+  public native nativerestartApp(want: Want): void;
 
   setSupportedProcessCache(isSupported: boolean): void {
     taskpool.execute((): void => {
@@ -116,5 +123,68 @@ export default class ApplicationContext extends Context {
         });
       });
     return p;
+  }
+
+  getRunningProcessInformation(callback: AsyncCallback<Array<ProcessInformation>>): void {
+    let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>(callback);
+    taskpool.execute((): void => {
+      this.nativegetRunningProcessInformation(myCall);
+    });
+  }
+
+  getRunningProcessInformation(): Promise<Array<ProcessInformation>> {
+    let p = new Promise<Array<ProcessInformation>>((resolve: (data: Array<ProcessInformation>) => void,
+      reject: (err: BusinessError<void>) => void): void => {
+      let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError<void>,
+        data: Array<ProcessInformation>) => {
+        if (err.code == 0) {
+          resolve(data);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativegetRunningProcessInformation(myCall);
+      });
+    });
+    return p;
+  }
+
+  clearUpApplicationData(callback: AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeclearUpApplicationData(myCall);
+    });
+  }
+
+  clearUpApplicationData(): Promise<void> {
+    let p =
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
+          if (err.code == 0) {
+            resolve(undefined);
+          } else {
+            reject(err);
+          }
+        });
+        taskpool.execute((): void => {
+          this.nativeclearUpApplicationData(myCall);
+        });
+      });
+    return p;
+  }
+
+  setColorMode(colorMode: ConfigurationConstant.ColorMode): void {
+    this.nativesetColorMode(colorMode);
+  }
+
+  setFont(font: string): void {
+    this.nativesetFont(font);
+  }
+
+  restartApp(want: Want): void {
+    taskpool.execute((): void => {
+      this.nativerestartApp(want);
+    });
   }
 }

@@ -80,7 +80,7 @@ void EtsEnviromentCallback::OnMemoryLevel(const int level)
         ani_fn_object onMemoryLevelFunc = reinterpret_cast<ani_fn_object>(onMemoryLevelRef);
 
         ani_enum_item memoryLevel {};
-        OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(ani_env_,
+        OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(ani_env_,
             "L@ohos/app/ability/AbilityConstant/AbilityConstant/MemoryLevel;",
             (AppExecFwk::MemoryLevel)level, memoryLevel);
 
