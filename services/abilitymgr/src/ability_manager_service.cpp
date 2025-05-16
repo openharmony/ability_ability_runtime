@@ -3442,7 +3442,7 @@ int AbilityManagerService::CheckUIExtensionUsage(AppExecFwk::UIExtensionUsage ui
         return ERR_INVALID_VALUE;
     }
 
-    if (AAFwk::UIExtensionUtils::IsOnlyForModal(extensionType) && 
+    if (AAFwk::UIExtensionUtils::IsOnlyForModal(extensionType) &&
         uiExtensionUsage != UIExtensionUsage::MODAL) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "secureModal extension type error:%u.", extensionType);
         return ERR_INVALID_VALUE;
@@ -4893,7 +4893,7 @@ int AbilityManagerService::DisconnectLocalAbility(const sptr<IAbilityConnection>
     if (connectManager->DisconnectAbilityLocked(connect) == ERR_OK) {
         return ERR_OK;
     }
-    
+
     auto userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
     if (userId == U0_USER_ID || userId == U1_USER_ID) {
         auto connectManagers = GetConnectManagers();
@@ -11651,20 +11651,20 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
     }
     AbilityRuntime::ExtractInsightIntentGenericInfo infos = GetInsightIntentGenericInfo(param);
     bool openLinkExecuteFlag = infos.decoratorType == AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_LINK;
- 
+
     auto paramPtr = std::make_shared<InsightIntentExecuteParam>(param);
     int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateParam(key, callerToken,
         paramPtr, callerBundlename, openLinkExecuteFlag);
     if (ret != ERR_OK) {
         return ret;
     }
- 
+
     if (openLinkExecuteFlag) {
         return IntentOpenLinkInner(paramPtr, infos, -1);
     }
 
     Want want;
-    ret = InsightIntentExecuteManager::GenerateWant(paramPtr, want);
+    ret = InsightIntentExecuteManager::GenerateWant(paramPtr, infos, want);
     if (ret != ERR_OK) {
         return ret;
     }
@@ -13872,7 +13872,7 @@ int32_t AbilityManagerService::KillProcessForPermissionUpdate(uint32_t accessTok
         uiAbilityManager->SetKillForPermissionUpdateFlag(accessTokenId);
     }
 
-    int32_t ret = 
+    int32_t ret =
         DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByAccessTokenId(accessTokenId);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "KillProcessesByAccessTokenId error");

@@ -35,12 +35,11 @@
 
 #define TMP_NAPI_ANONYMOUS_FUNC "_"
 
-namespace OHOS{
+namespace OHOS {
 namespace AbilityRuntime {
 std::shared_ptr<JsInsightIntentEntry> JsInsightIntentEntry::Create(JsRuntime& runtime)
 {
-    std::shared_ptr<JsInsightIntentEntry> ptr(new (std::nothrow) JsInsightIntentEntry(runtime));
-    return ptr;
+    return std::make_shared<JsInsightIntentEntry>(runtime);
 }
 
 JsInsightIntentEntry::JsInsightIntentEntry(JsRuntime& runtime) : runtime_(runtime)
@@ -62,10 +61,12 @@ bool JsInsightIntentEntry::Init(const InsightIntentExecutorInfo& insightIntentIn
     InsightIntentExecutor::Init(insightIntentInfo);
 
     HandleScope handleScope(runtime_);
-    jsObj_ = JsInsightIntentEntry::LoadJsCode(insightIntentInfo, runtime_);
     if (jsObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "load js failed");
-        STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
+        jsObj_ = JsInsightIntentEntry::LoadJsCode(insightIntentInfo, runtime_);
+        if (jsObj_ == nullptr) {
+            TAG_LOGE(AAFwkTag::INTENT, "load js failed");
+            STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
+        }
     }
 
     auto env = runtime_.GetNapiEnv();
@@ -145,19 +146,39 @@ std::unique_ptr<NativeReference> JsInsightIntentEntry::LoadJsCode(
     }
 
     std::string moduleName(executeParam->moduleName_);
-    std::string srcPath(executeParam->moduleName_ + "/" + info.srcEntry);
-    auto pos = srcPath.rfind('.');
-    if (pos == std::string::npos) {
-        TAG_LOGE(AAFwkTag::INTENT, "srcEntry invalid");
-        return nullptr;
-    }
-    srcPath.erase(pos);
-    srcPath.append(".abc");
+    std::string hapPath(info.hapPath);
+    std::string srcEntrance(executeParam->srcEntrance_);
+    TAG_LOGD(AAFwkTag::INTENT, "moduleName %{public}s, hapPath %{private}s, srcEntrance %{private}s",
+        moduleName.c_str(), hapPath.c_str(), srcEntrance.c_str());
 
-    // info.srcEntry is a ohmurl type, it has export default
-    std::unique_ptr<NativeReference> jsCode(runtime.LoadModule(moduleName, srcPath, info.hapPath, info.esmodule,
-        false, info.srcEntry));
-    return jsCode;
+    auto ret = runtime.ExecuteSecureWithOhmUrl(moduleName, hapPath, srcEntrance);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::INTENT, "execute failed");
+        return std::unique_ptr<NativeReference>();
+    }
+
+    auto exportObj = runtime.GetExportObjectFromOhmUrl(srcEntrance, "default");
+    if (exportObj == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "get default object failed");
+        return std::unique_ptr<NativeReference>();
+    }
+
+    napi_value instanceValue = nullptr;
+    auto* env = runtime.GetNapiEnv();
+    auto status = napi_new_instance(env, exportObj, 0, nullptr, &instanceValue);
+    if (status != napi_ok || instanceValue == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "new instance failed %{public}d", status);
+        return std::unique_ptr<NativeReference>();
+    }
+
+    napi_ref resultRef = nullptr;
+    status = napi_create_reference(env, instanceValue, 1, &resultRef);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::INTENT, "create instance failed %{public}d", status);
+        return std::unique_ptr<NativeReference>();
+    }
+
+    return std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(resultRef));
 }
 
 bool JsInsightIntentEntry::CallJsFunctionWithResultInner(

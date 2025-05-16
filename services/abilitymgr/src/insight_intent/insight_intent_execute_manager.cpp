@@ -17,8 +17,10 @@
 
 #include "ability_config.h"
 #include "ability_manager_errors.h"
+#include "extract_insight_intent_profile.h"
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_execute_callback_interface.h"
+#include "insight_intent_db_cache.h"
 #include "insight_intent_utils.h"
 #include "permission_verification.h"
 #include "want_params_wrapper.h"
@@ -33,6 +35,10 @@ constexpr char EXECUTE_INSIGHT_INTENT_PERMISSION[] = "ohos.permission.EXECUTE_IN
 constexpr int32_t OPERATION_DURATION = 10000;
 }
 using namespace AppExecFwk;
+using InsightIntentType = AbilityRuntime::InsightIntentType;
+using ExtractInsightIntentInfo = AbilityRuntime::ExtractInsightIntentInfo;
+using InsightIntentPageInfo = AbilityRuntime::InsightIntentPageInfo;
+using InsightIntentFunctionInfo = AbilityRuntime::InsightIntentFunctionInfo;
 
 void InsightIntentExecuteRecipient::OnRemoteDied(const wptr<OHOS::IRemoteObject> &remote)
 {
@@ -261,8 +267,110 @@ int32_t InsightIntentExecuteManager::AddWantUirsAndFlagsFromParam(
     return ERR_OK;
 }
 
+int32_t InsightIntentExecuteManager::UpdateFuncDecoratorParams(ExtractInsightIntentInfo &info, Want &want)
+{
+    std::string srcEntrance = info.decoratorFile;
+    want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
+
+    std::string className = info.decoratorClass;
+    std::string methodName = info.genericInfo.get<InsightIntentFunctionInfo>().functionName;
+    std::vector<std::string> methodParams = info.genericInfo.get<InsightIntentFunctionInfo>().functionParams;
+    if (className.empty() || methodName.empty()) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid func param");
+        return ERR_INVALID_VALUE;
+    }
+    want.SetParam(INSIGHT_INTENT_FUNC_PARAM_CLASSNAME, className);
+    want.SetParam(INSIGHT_INTENT_FUNC_PARAM_METHODNAME, methodName);
+    want.SetParam(INSIGHT_INTENT_FUNC_PARAM_METHODPARAMS, methodParams);
+    return ERR_OK;
+}
+
+int32_t InsightIntentExecuteManager::UpdatePageDecoratorParams(
+    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
+    ExtractInsightIntentInfo &info,
+    Want &want)
+{
+    std::string srcEntrance = info.decoratorFile;
+    want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
+
+    std::string pagePath = info.genericInfo.get<InsightIntentPageInfo>().pageRouteName;
+    std::string navigationId = info.genericInfo.get<InsightIntentPageInfo>().navigationId;
+    std::string navDestinationName = info.genericInfo.get<InsightIntentPageInfo>().navDestination;
+    std::string uiAbilityName = info.genericInfo.get<InsightIntentPageInfo>().uiAbility;
+    if (pagePath.empty()) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid func param");
+        return ERR_INVALID_VALUE;
+    }
+    if (uiAbilityName.empty()) {
+        param->abilityName_ = "";
+    } else {
+        if (uiAbilityName != param->abilityName_) {
+            TAG_LOGE(AAFwkTag::INTENT, "invalid uiability name, %{public}s, %{public}s",
+                uiAbilityName.c_str(), param->abilityName_.c_str());
+            return ERR_INVALID_VALUE;
+        }
+    }
+    want.SetParam(INSIGHT_INTENT_PAGE_PARAM_PAGEPATH, pagePath);
+    want.SetParam(INSIGHT_INTENT_PAGE_PARAM_NAVIGATIONID, navigationId);
+    want.SetParam(INSIGHT_INTENT_PAGE_PARAM_NAVDESTINATIONNAME, navDestinationName);
+    return ERR_OK;
+}
+
+int32_t InsightIntentExecuteManager::CheckAndUpdateDecoratorParams(
+    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
+    const AbilityRuntime::ExtractInsightIntentGenericInfo &decoratorInfo,
+    Want &want)
+{
+    // ExtractInsightIntentGenericInfo don't satisfy for now
+    ExtractInsightIntentInfo info;
+    const int32_t userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
+    DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
+        param->bundleName_, param->moduleName_, param->insightIntentName_, userId, info);
+
+    InsightIntentType type = InsightIntentType::DECOR_NONE;
+    std::string decoratorType = info.genericInfo.decoratorType;
+    TAG_LOGD(AAFwkTag::INTENT, "intentName %{public}s, decoratorType %{public}s", param->insightIntentName_.c_str(),
+        decoratorType.c_str());
+    static const std::unordered_map<std::string, InsightIntentType> mapping = {
+        {AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_LINK, InsightIntentType::DECOR_LINK},
+        {AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_PAGE, InsightIntentType::DECOR_PAGE},
+        {AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY, InsightIntentType::DECOR_ENTRY},
+        {AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_FUNCTION, InsightIntentType::DECOR_FUNC},
+        {AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_FORM, InsightIntentType::DECOR_FORM}
+    };
+    auto it = mapping.find(decoratorType);
+    if (it != mapping.end()) {
+        type = it->second;
+    }
+
+    want.SetParam(INSIGHT_INTENT_DECORATOR_TYPE, static_cast<int>(type));
+    TAG_LOGD(AAFwkTag::INTENT, "intentName %{public}s, type %{public}d", param->insightIntentName_.c_str(),
+        static_cast<int8_t>(type));
+    switch (type) {
+        case InsightIntentType::DECOR_FUNC: {
+            return UpdateFuncDecoratorParams(info, want);
+        }
+        case InsightIntentType::DECOR_PAGE: {
+            return UpdatePageDecoratorParams(param, info, want);
+        }
+        case InsightIntentType::DECOR_ENTRY: {
+            std::string srcEntrance = info.decoratorFile;
+            want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
+            return ERR_OK;
+        }
+        case InsightIntentType::DECOR_NONE:
+        case InsightIntentType::DECOR_LINK:
+        case InsightIntentType::DECOR_FORM:
+        default:
+            break;
+    }
+    return ERR_OK;
+}
+
 int32_t InsightIntentExecuteManager::GenerateWant(
-    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, Want &want)
+    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
+    const AbilityRuntime::ExtractInsightIntentGenericInfo &decoratorInfo,
+    Want &want)
 {
     if (param == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "null param");
@@ -291,7 +399,8 @@ int32_t InsightIntentExecuteManager::GenerateWant(
             std::chrono::system_clock::now().time_since_epoch()).count());
         want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
         want.AddFlags(Want::FLAG_INSTALL_ON_DEMAND);
-    } else {
+    } else if (decoratorInfo.decoratorType == "") {
+        // decoratorType is empty indicate no decorator
         TAG_LOGE(AAFwkTag::INTENT, "insight intent srcEntry invalid");
         return ERR_INVALID_VALUE;
     }
@@ -304,7 +413,18 @@ int32_t InsightIntentExecuteManager::GenerateWant(
         TAG_LOGD(AAFwkTag::INTENT, "Generate want with displayId: %{public}d", param->displayId_);
     }
 
-    return AddWantUirsAndFlagsFromParam(param, want);
+    ret = AddWantUirsAndFlagsFromParam(param, want);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
+    ret = CheckAndUpdateDecoratorParams(param, decoratorInfo, want);
+    if (ret != ERR_OK) {
+        // log has print in sub method
+        return ret;
+    }
+
+    return ERR_OK;
 }
 
 int32_t InsightIntentExecuteManager::IsValidCall(const Want &want)
