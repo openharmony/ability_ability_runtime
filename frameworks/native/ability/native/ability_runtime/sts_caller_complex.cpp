@@ -197,7 +197,6 @@ namespace AbilityRuntime {
 ani_object CreateEtsCaller(ani_env *env, ReleaseCallFunc releaseCallFunc,
     sptr<IRemoteObject> callee, std::shared_ptr<CallerCallBack> callback)
 {
-    ani_long nativeCaller = (ani_long)(new EtsCallerComplex(releaseCallFunc, callback));
     ani_class cls {};
     ani_status status = ANI_ERROR;
     ani_object callerObj = nullptr;
@@ -218,13 +217,21 @@ ani_object CreateEtsCaller(ani_env *env, ReleaseCallFunc releaseCallFunc,
         TAG_LOGE(AAFwkTag::ABILITY, "status : %{public}d", status);
         return nullptr;
     }
+    auto etsCaller = new (std::nothrow) EtsCallerComplex(releaseCallFunc, callback);
+    if (etsCaller == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "etsCaller is null");
+        return nullptr;
+    }
+    ani_long nativeCaller = (ani_long)(etsCaller);
     if ((status = env->Object_SetFieldByName_Long(callerObj, "nativeCaller", nativeCaller)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "status : %{public}d", status);
+        delete etsCaller;
         return nullptr;
     }
     auto remoteObj = AniCreateRemoteObj(env, callee);
     if ((status = env->Object_SetFieldByName_Ref(callerObj, "callee", remoteObj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "status : %{public}d", status);
+        delete etsCaller;
         return nullptr;
     }
     return callerObj;
