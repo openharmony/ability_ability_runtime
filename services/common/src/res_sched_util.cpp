@@ -204,7 +204,7 @@ void ResSchedUtil::GetAllFrozenPidsFromRSS(std::unordered_set<int32_t> &frozenPi
 #endif
 }
 
-bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid)
+bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid, const std::string& bundleName)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_SHOULD_FORCE_KILL_PROCESS;
