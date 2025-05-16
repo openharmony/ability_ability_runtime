@@ -16,6 +16,7 @@
 #include "ui_extension_context.h"
 
 #include "ability_manager_client.h"
+#include "bool_wrapper.h"
 #include "connection_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -26,6 +27,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 const size_t UIExtensionContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("UIExtensionContext"));
 int UIExtensionContext::ILLEGAL_REQUEST_CODE(-1);
+constexpr const char* REQUEST_COMPONENT_TERMINATE_KEY = "ohos.param.key.requestComponentTerminate";
 
 ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want) const
 {
@@ -384,6 +386,21 @@ void UIExtensionContext::SetAbilityColorMode(int32_t colorMode)
         return;
     }
     abilityConfigUpdateCallback_(config);
+}
+
+void UIExtensionContext::RequestComponentTerminate()
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "RequestComponentTerminate called");
+    if (!window_) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null window_");
+        return;
+    }
+    AAFwk::WantParams params;
+    params.SetParam(REQUEST_COMPONENT_TERMINATE_KEY, AAFwk::Boolean::Box(true));
+    auto ret = window_->TransferExtensionData(params);
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "transfer extension data failed, ret:%{public}d", ret);
+    }
 }
 
 int32_t UIExtensionContext::curRequestCode_ = 0;
