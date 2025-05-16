@@ -24,6 +24,8 @@
 #include "start_options.h"
 #include "ui_holder_extension_context.h"
 #include "want.h"
+#include "js_ui_extension_callback.h"
+#include "string_wrapper.h"
 #ifdef SUPPORT_SCREEN
 #include "window.h"
 #endif // SUPPORT_SCREEN
@@ -183,6 +185,15 @@ public:
 
     void RemoveResultCallbackTask(int requestCode);
 
+    /**
+     * @brief Start a new ability using type;
+     * @return errCode ERR_OK on success, others on failure.
+    */
+    ErrCode StartAbilityByType(const std::string &type,
+        AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks);
+    bool IsTerminating();
+    void SetTerminating(bool state);
+
     int32_t GetScreenMode() const;
     void SetScreenMode(int32_t screenMode);
     using SelfType = UIExtensionContext;
@@ -207,6 +218,7 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr_ = nullptr;
     AbilityConfigUpdateCallback abilityConfigUpdateCallback_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> abilityConfiguration_ = nullptr;
+    bool isTerminating_ = false;
     /**
      * @brief Get Current Ability Type
      *
