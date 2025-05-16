@@ -392,7 +392,7 @@ bool CacheProcessManager::IsAppShouldCache(const std::shared_ptr<AppRunningRecor
     }
     if (!CheckSupportState(appRecord)) {
         TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s defines not support.",
-                appRecord->GetBundleName().c_str());
+            appRecord->GetBundleName().c_str());
         return false;
     }
     if (IsCachedProcess(appRecord) && !appRecord->GetProcessCacheBlocked()) {
