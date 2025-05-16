@@ -57,6 +57,7 @@ private:
     bool IsAppContainsSrvExt(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool IsAppSupportProcessCacheInnerFirst(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool IsProcessSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord);
+    bool CheckSupportState(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool warmStartProcesEnable_ = false;
     bool shouldCheckApi = true;
     // whether the feature should check setSupportedProcessCache value or not
