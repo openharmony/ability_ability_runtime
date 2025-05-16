@@ -21,7 +21,7 @@
 #include "napi_common_execute_result.h"
 #include "napi_common_util.h"
 
-namespace OHOS{
+namespace OHOS {
 namespace AbilityRuntime {
 bool JsInsightIntentUtils::CallJsFunctionWithResult(
     napi_env env,

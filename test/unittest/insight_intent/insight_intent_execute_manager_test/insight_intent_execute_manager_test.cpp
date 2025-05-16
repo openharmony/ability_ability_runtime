@@ -62,8 +62,9 @@ HWTEST_F(InsightIntentExecuteManagerTest, GenerateWant_0100, TestSize.Level1)
     param.insightIntentParam_ = nullptr;
     // other member has default value.
     auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentGenericInfo decoratorInfo;
     Want want;
-    auto ret = InsightIntentExecuteManager::GenerateWant(paramPtr, want);
+    auto ret = InsightIntentExecuteManager::GenerateWant(paramPtr, decoratorInfo, want);
     EXPECT_EQ(ret, ERR_OK);
     // get display id of want, expect don't contain
     auto displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, -100);
@@ -89,8 +90,9 @@ HWTEST_F(InsightIntentExecuteManagerTest, GenerateWant_0200, TestSize.Level1)
     param.displayId_ = 2;
     // other member has default value.
     auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentGenericInfo decoratorInfo;
     Want want;
-    auto ret = InsightIntentExecuteManager::GenerateWant(paramPtr, want);
+    auto ret = InsightIntentExecuteManager::GenerateWant(paramPtr, decoratorInfo, want);
     EXPECT_EQ(ret, ERR_OK);
     // get display id of want
     auto displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, -100);

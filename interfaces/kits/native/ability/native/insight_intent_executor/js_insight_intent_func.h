@@ -27,8 +27,9 @@ namespace AbilityRuntime {
 using State = JsInsightIntentUtils::State;
 
 class JsInsightIntentFunc final : public InsightIntentExecutor,
-                                public std::enable_shared_from_this<JsInsightIntentFunc> {
+                                  public std::enable_shared_from_this<JsInsightIntentFunc> {
 public:
+    explicit JsInsightIntentFunc(JsRuntime& runtime);
     JsInsightIntentFunc(const JsInsightIntentFunc&) = delete;
     JsInsightIntentFunc(const JsInsightIntentFunc&&) = delete;
     JsInsightIntentFunc& operator=(const JsInsightIntentFunc&) = delete;
@@ -64,8 +65,6 @@ public:
         bool& isAsync) override;
 
 private:
-    explicit JsInsightIntentFunc(JsRuntime& runtime);
-
     bool LoadJsCode(const InsightIntentExecutorInfo& insightIntentInfo, JsRuntime& runtime);
 
     void ReplyFailedInner(InsightIntentInnerErr innerErr = InsightIntentInnerErr::INSIGHT_INTENT_EXECUTE_REPLY_FAILED);
