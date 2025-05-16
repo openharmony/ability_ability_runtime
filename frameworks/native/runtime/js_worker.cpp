@@ -31,6 +31,7 @@
 #include "core/common/container_scope.h"
 #include "declarative_module_preloader.h"
 #endif
+#include "replace_intl_module.h"
 
 #include "extractor.h"
 #include "file_mapper.h"
@@ -89,6 +90,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
         return;
     }
 
+    OHOS::Global::I18n::ReplaceIntlModule(reinterpret_cast<napi_env>(nativeEngine));
     OHOS::JsSysModule::Console::InitConsoleModule(reinterpret_cast<napi_env>(nativeEngine));
     InitSyscapModule(reinterpret_cast<napi_env>(nativeEngine));
 #ifdef SUPPORT_SCREEN
