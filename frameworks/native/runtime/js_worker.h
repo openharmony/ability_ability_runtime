@@ -23,7 +23,6 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-void StartDebuggerInWorkerModule(bool isDebugApp, bool isNativeStart);
 void InitWorkerFunc(NativeEngine* nativeEngine);
 void OffWorkerFunc(NativeEngine* nativeEngine);
 void ReleaseWorkerSafeMemFunc(void* mapper);
