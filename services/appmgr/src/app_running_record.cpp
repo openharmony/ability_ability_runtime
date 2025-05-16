@@ -403,7 +403,7 @@ bool AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bund
             AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG)) {
             TAG_LOGI(
                 AAFwkTag::APPMGR, "ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG not exist");
-            auto timeout = GetAddStageTimeout();
+            auto timeout = GetAddStageTimeout() * AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
             SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
             SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, timeout);
         }
@@ -2624,7 +2624,7 @@ void AppRunningRecord::UnSetPolicy()
 #endif // SUPPORT_UPMS
 }
 
-uint32_t AppRunningRecord::GetAddStageTimeout() const
+int32_t AppRunningRecord::GetAddStageTimeout() const
 {
     if (IsEmptyKeepAliveApp()) {
         return AMSEventHandler::ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT;
