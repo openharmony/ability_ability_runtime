@@ -77,7 +77,7 @@ void ResSchedUtil::GetAllFrozenPidsFromRSS(std::unordered_set<int32_t> &frozenPi
 {
 }
 
-bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid)
+bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid, const std::string& bundleName)
 {
     return AAFwk::MyStatus::GetInstance().isShouldKillProcess_;
 }
