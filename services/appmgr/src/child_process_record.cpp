@@ -52,6 +52,11 @@ ChildProcessRecord::~ChildProcessRecord()
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
 
+bool ChildProcessRecord::IsNativeSpawnStarted() const
+{
+    return childProcessType_ == CHILD_PROCESS_TYPE_NATIVE_ARGS;
+}
+
 std::shared_ptr<ChildProcessRecord> ChildProcessRecord::CreateChildProcessRecord(pid_t hostPid,
     const ChildProcessRequest &request, const std::shared_ptr<AppRunningRecord> hostRecord)
 {
