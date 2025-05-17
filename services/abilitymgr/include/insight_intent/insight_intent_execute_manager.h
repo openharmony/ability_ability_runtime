@@ -76,7 +76,7 @@ DECLARE_DELAYED_SINGLETON(InsightIntentExecuteManager)
 public:
     int32_t CheckAndUpdateParam(uint64_t key, const sptr<IRemoteObject> &callerToken,
         const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, std::string callerBundleName = "",
-        const bool openLinkExecuteFlag = false);
+        const bool ignoreAbilityName = false);
 
     int32_t CheckAndUpdateWant(Want &want, AppExecFwk::ExecuteMode executeMode, std::string callerBundleName = "");
 
@@ -122,6 +122,8 @@ private:
         Want &want);
     static int32_t UpdateFuncDecoratorParams(AbilityRuntime::ExtractInsightIntentInfo &info, Want &want);
     static int32_t UpdatePageDecoratorParams(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
+        AbilityRuntime::ExtractInsightIntentInfo &info, Want &want);
+    static int32_t UpdateEntryDecoratorParams(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
         AbilityRuntime::ExtractInsightIntentInfo &info, Want &want);
 
     void SendIntentReport(EventInfo &eventInfo, int32_t errCode);

@@ -16,6 +16,7 @@
 #include "insight_intent_execute_manager.h"
 
 #include "ability_config.h"
+#include "ability_util.h"
 #include "ability_manager_errors.h"
 #include "extract_insight_intent_profile.h"
 #include "hilog_tag_wrapper.h"
@@ -39,6 +40,7 @@ using InsightIntentType = AbilityRuntime::InsightIntentType;
 using ExtractInsightIntentInfo = AbilityRuntime::ExtractInsightIntentInfo;
 using InsightIntentPageInfo = AbilityRuntime::InsightIntentPageInfo;
 using InsightIntentFunctionInfo = AbilityRuntime::InsightIntentFunctionInfo;
+using InsightIntentEntryInfo = AbilityRuntime::InsightIntentEntryInfo;
 
 void InsightIntentExecuteRecipient::OnRemoteDied(const wptr<OHOS::IRemoteObject> &remote)
 {
@@ -57,7 +59,7 @@ InsightIntentExecuteManager::~InsightIntentExecuteManager() = default;
 
 int32_t InsightIntentExecuteManager::CheckAndUpdateParam(uint64_t key, const sptr<IRemoteObject> &callerToken,
     const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, std::string callerBundleName,
-    const bool openLinkExecuteFlag)
+    const bool ignoreAbilityName)
 {
     int32_t result = CheckCallerPermission();
     if (result != ERR_OK) {
@@ -72,7 +74,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateParam(uint64_t key, const spt
         return ERR_INVALID_VALUE;
     }
     if (param->bundleName_.empty() || param->moduleName_.empty() ||
-        (!openLinkExecuteFlag && param->abilityName_.empty()) || param->insightIntentName_.empty()) {
+        (!ignoreAbilityName && param->abilityName_.empty()) || param->insightIntentName_.empty()) {
         TAG_LOGE(AAFwkTag::INTENT, "invalid param");
         return ERR_INVALID_VALUE;
     }
@@ -301,18 +303,59 @@ int32_t InsightIntentExecuteManager::UpdatePageDecoratorParams(
         TAG_LOGE(AAFwkTag::INTENT, "invalid func param");
         return ERR_INVALID_VALUE;
     }
+    if (uiAbilityName != param->abilityName_) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid uiAbility name, %{public}s, %{public}s",
+            uiAbilityName.c_str(), param->abilityName_.c_str());
+        return ERR_INVALID_VALUE;
+    }
     if (uiAbilityName.empty()) {
-        param->abilityName_ = "";
-    } else {
-        if (uiAbilityName != param->abilityName_) {
-            TAG_LOGE(AAFwkTag::INTENT, "invalid uiability name, %{public}s, %{public}s",
-                uiAbilityName.c_str(), param->abilityName_.c_str());
+        auto bms = AbilityUtil::GetBundleManagerHelper();
+        if (bms == nullptr) {
+            TAG_LOGE(AAFwkTag::INTENT, "get bms failed");
             return ERR_INVALID_VALUE;
         }
+        const int32_t userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
+        std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+        if (IN_PROCESS_CALL(bms->GetLauncherAbilityInfoSync(param->bundleName_, userId, abilityInfos)) != ERR_OK) {
+            TAG_LOGE(AAFwkTag::INTENT, "get launcher ability info failed");
+            return ERR_INVALID_VALUE;
+        }
+        for (auto &info: abilityInfos) {
+            TAG_LOGD(AAFwkTag::INTENT, "moduleName %{public}s", param->moduleName_.c_str());
+            if (info.moduleName == param->moduleName_) {
+                TAG_LOGI(AAFwkTag::INTENT, "ability matched %{public}s", info.name.c_str());
+                param->abilityName_ = info.name;
+                break;
+            }
+        }
     }
+    if (param->abilityName_.empty()) {
+        TAG_LOGE(AAFwkTag::INTENT, "ability name empty");
+        return ERR_INVALID_VALUE;
+    }
+    want.SetElementName("", param->bundleName_, param->abilityName_, param->moduleName_);
     want.SetParam(INSIGHT_INTENT_PAGE_PARAM_PAGEPATH, pagePath);
     want.SetParam(INSIGHT_INTENT_PAGE_PARAM_NAVIGATIONID, navigationId);
     want.SetParam(INSIGHT_INTENT_PAGE_PARAM_NAVDESTINATIONNAME, navDestinationName);
+    return ERR_OK;
+}
+
+int32_t InsightIntentExecuteManager::UpdateEntryDecoratorParams(
+    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
+    ExtractInsightIntentInfo &info,
+    Want &want)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "update entry params");
+    std::string srcEntrance = info.decoratorFile;
+    want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
+    auto executeMode = param->executeMode_;
+    std::vector<ExecuteMode> supportModes = info.genericInfo.get<InsightIntentEntryInfo>().executeMode;
+    TAG_LOGD(AAFwkTag::INTENT, "support mode size %{public}zu", supportModes.size());
+    bool found = std::find(supportModes.begin(), supportModes.end(), executeMode) != supportModes.end();
+    if (!found) {
+        TAG_LOGE(AAFwkTag::INTENT, "execute mode %{public}d mismatch", executeMode);
+        return ERR_INVALID_VALUE;
+    }
     return ERR_OK;
 }
 
@@ -354,9 +397,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateDecoratorParams(
             return UpdatePageDecoratorParams(param, info, want);
         }
         case InsightIntentType::DECOR_ENTRY: {
-            std::string srcEntrance = info.decoratorFile;
-            want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
-            return ERR_OK;
+            return UpdateEntryDecoratorParams(param, info, want);
         }
         case InsightIntentType::DECOR_NONE:
         case InsightIntentType::DECOR_LINK:
@@ -392,7 +433,7 @@ int32_t InsightIntentExecuteManager::GenerateWant(
         static_cast<AppExecFwk::ExecuteMode>(param->executeMode_), srcEntry);
     if (!srcEntry.empty()) {
         want.SetParam(INSIGHT_INTENT_SRC_ENTRY, srcEntry);
-    } else if (ret == ERR_INSIGHT_INTENT_GET_PROFILE_FAILED &&
+    } else if (decoratorInfo.decoratorType == "" && ret == ERR_INSIGHT_INTENT_GET_PROFILE_FAILED &&
         param->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND) {
         TAG_LOGI(AAFwkTag::INTENT, "insight intent srcEntry invalid, try free install ondemand");
         std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
