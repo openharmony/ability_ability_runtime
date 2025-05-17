@@ -123,7 +123,8 @@ public:
     // for collaborator (along with normal)
     ErrCode GetCloneBundleInfoExt(const std::string &bundleName, uint32_t flags, int32_t appIndex,
         int32_t userId, BundleInfo &bundleInfo);
-
+    ErrCode GetLauncherAbilityInfoSync(const std::string &bundleName, int32_t userId,
+        std::vector<AbilityInfo> &abilityInfo);
 private:
     sptr<IBundleMgr> Connect();
     sptr<IBundleMgr> Connect(bool checkBmsReady);

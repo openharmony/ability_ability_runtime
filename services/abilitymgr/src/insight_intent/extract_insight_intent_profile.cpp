@@ -81,7 +81,9 @@ DecoratorType StringToEnum(const std::string& input)
 
 const std::map<std::string, ExecuteMode> executeModeMap = {
     {"foreground", ExecuteMode::UI_ABILITY_FOREGROUND},
-    {"background", ExecuteMode::UI_ABILITY_BACKGROUND}
+    {"background", ExecuteMode::UI_ABILITY_BACKGROUND},
+    {"uiextension", ExecuteMode::UI_EXTENSION_ABILITY},
+    {"serviceextension", ExecuteMode::SERVICE_EXTENSION_ABILITY}
 };
 } // namespace
 
