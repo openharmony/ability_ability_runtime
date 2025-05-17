@@ -42,5 +42,10 @@ void StartupConfig::ListenerOnCompleted(const std::shared_ptr<StartupTaskResult>
         listener_->OnCompleted(result);
     }
 }
+
+const std::string &StartupConfig::GetCustomization() const
+{
+    return customization_;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

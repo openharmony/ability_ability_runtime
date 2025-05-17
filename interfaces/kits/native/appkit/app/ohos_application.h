@@ -26,6 +26,7 @@
 #include "context.h"
 #include "ability_stage_context.h"
 #include "application_configuration_manager.h"
+#include "app_launch_data.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -230,7 +231,8 @@ public:
     bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
 #endif
 
-    void PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName);
+    void PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName,
+        std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
 
 private:
     void UpdateAppContextResMgr(const Configuration &config);
