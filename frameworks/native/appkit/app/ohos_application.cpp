@@ -433,7 +433,8 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         abilityStage->Init(stageContext, weak);
         auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, abilityRecord, callback);
         if (autoStartupCallback != nullptr) {
-            abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
+            abilityStage->RunAutoStartupTask(autoStartupCallback, abilityRecord->GetWant(), isAsyncCallback,
+                stageContext);
             if (isAsyncCallback) {
                 TAG_LOGI(AAFwkTag::APPKIT, "wait startup");
                 return nullptr;
@@ -640,7 +641,7 @@ bool OHOSApplication::AddAbilityStage(
     abilityStage->Init(stageContext, weak);
     auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, hapModuleInfo, callback);
     if (autoStartupCallback != nullptr) {
-        abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
+        abilityStage->RunAutoStartupTask(autoStartupCallback, nullptr, isAsyncCallback, stageContext);
         if (isAsyncCallback) {
             TAG_LOGI(AAFwkTag::APPKIT, "wait startup");
             return false;
@@ -869,7 +870,8 @@ void OHOSApplication::CleanEmptyAbilityStage()
     }
 }
 
-void OHOSApplication::PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName)
+void OHOSApplication::PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName,
+    std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData)
 {
     if (!IsMainProcess(bundleInfo.applicationInfo.name, bundleInfo.applicationInfo.process)) {
         TAG_LOGD(AAFwkTag::STARTUP, "not main process");
@@ -883,11 +885,10 @@ void OHOSApplication::PreloadAppStartup(const BundleInfo &bundleInfo, const std:
         return;
     }
 
-    AppExecFwk::HapModuleInfo preloadHapModuleInfo;
     if (!bundleInfo.hapModuleInfos.empty()) {
         for (const auto& hapModuleInfo : bundleInfo.hapModuleInfos) {
             if (hapModuleInfo.name == preloadModuleName) {
-                startupManager->PreloadAppHintStartup(bundleInfo, hapModuleInfo, preloadModuleName);
+                startupManager->PreloadAppHintStartup(bundleInfo, hapModuleInfo, preloadModuleName, startupTaskData);
                 break;
             }
         }

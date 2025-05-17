@@ -97,6 +97,7 @@ HWTEST_F(AppLaunchDataTest, Marshalling_0100, TestSize.Level1)
     launchData_->appIndex_ = appIndex;
     launchData_->userTestRecord_ = nullptr;
     launchData_->debugApp_ = false;
+    launchData_->startupTaskData_ = std::make_shared<StartupTaskData>();
     
     EXPECT_TRUE(launchData_->Marshalling(parcel));
 
@@ -110,6 +111,7 @@ HWTEST_F(AppLaunchDataTest, Marshalling_0100, TestSize.Level1)
     EXPECT_EQ(parcel.ReadInt32(), appIndex);
     EXPECT_FALSE(parcel.ReadBool());
     EXPECT_FALSE(parcel.ReadBool());
+    EXPECT_TRUE(launchData_->ReadStartupTaskDataFromParcel(parcel));
 }
 
 /**

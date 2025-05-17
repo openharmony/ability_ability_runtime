@@ -635,6 +635,7 @@ public:
     std::shared_ptr<UserTestRecord> GetUserTestInfo();
 
     void SetProcessAndExtensionType(const std::shared_ptr<AbilityInfo> &abilityInfo, uint32_t extensionProcessMode = 0);
+    void SetStartupTaskData(const AAFwk::Want &want);
     void SetSpecifiedAbilityFlagAndWant(int requestId, const AAFwk::Want &want, const std::string &moduleName);
     void SetScheduleNewProcessRequestState(int32_t requestId, const AAFwk::Want &want, const std::string &moduleName);
     /**
@@ -1239,6 +1240,8 @@ private:
     bool isDebugFromLocal_ = false;
     std::optional<bool> supportMultiProcessDeviceFeature_ = std::nullopt;
     mutable ffrt::mutex supportMultiProcessDeviceFeatureLock_;
+    std::shared_ptr<StartupTaskData> startupTaskData_ = nullptr;
+    ffrt::mutex startupTaskDataLock_;
 };
 
 }  // namespace AppExecFwk

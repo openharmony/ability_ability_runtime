@@ -135,6 +135,15 @@ bool AppLaunchData::MarshallingExtend(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write isDebugFromLocal");
         return false;
     }
+    bool hasStartupTaskData = startupTaskData_ ? true : false;
+    if (!parcel.WriteBool(hasStartupTaskData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write the hasStartupTaskData");
+        return false;
+    }
+    if (hasStartupTaskData && !parcel.WriteParcelable(startupTaskData_.get())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write startupTaskData");
+        return false;
+    }
     return true;
 }
 
@@ -146,7 +155,6 @@ bool AppLaunchData::ReadFromParcel(Parcel &parcel)
         return false;
     }
     applicationInfo_ = *applicationInfoRead;
-
     std::unique_ptr<Profile> profileRead(parcel.ReadParcelable<Profile>());
     if (!profileRead) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed, profileRead is nullptr");
@@ -160,7 +168,6 @@ bool AppLaunchData::ReadFromParcel(Parcel &parcel)
         return false;
     }
     processInfo_ = *processInfoRead;
-
     recordId_ = parcel.ReadInt32();
     uId_ = parcel.ReadInt32();
     appIndex_ = parcel.ReadInt32();
@@ -186,6 +193,9 @@ bool AppLaunchData::ReadFromParcel(Parcel &parcel)
     isAllowedNWebPreload_ = parcel.ReadBool();
     preloadModuleName_ = parcel.ReadString();
     isDebugFromLocal_ = parcel.ReadBool();
+    if (!ReadStartupTaskDataFromParcel(parcel)) {
+        return false;
+    }
     return true;
 }
 
@@ -198,6 +208,20 @@ AppLaunchData *AppLaunchData::Unmarshalling(Parcel &parcel)
         appLaunchData = nullptr;
     }
     return appLaunchData;
+}
+
+bool AppLaunchData::ReadStartupTaskDataFromParcel(Parcel &parcel)
+{
+    bool hasStartupTaskData = parcel.ReadBool();
+    if (!hasStartupTaskData) {
+        return true;
+    }
+    startupTaskData_ = std::shared_ptr<StartupTaskData>(parcel.ReadParcelable<StartupTaskData>());
+    if (!startupTaskData_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed, startupTaskData_ is nullptr");
+        return false;
+    }
+    return true;
 }
 
 bool UserTestRecord::Marshalling(Parcel &parcel) const
@@ -305,6 +329,42 @@ void AppLaunchData::SetDebugFromLocal(bool isDebugFromLocal)
 bool AppLaunchData::GetDebugFromLocal() const
 {
     return isDebugFromLocal_;
+}
+
+bool StartupTaskData::Marshalling(Parcel &parcel) const
+{
+    if (!parcel.WriteString(action)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write action");
+        return false;
+    }
+    if (!parcel.WriteString(insightIntentName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write insightIntentName");
+        return false;
+    }
+    if (!parcel.WriteString(uri)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write uri");
+        return false;
+    }
+    return true;
+}
+
+StartupTaskData *StartupTaskData::Unmarshalling(Parcel &parcel)
+{
+    StartupTaskData *data = new (std::nothrow) StartupTaskData();
+    if (data && !data->ReadFromParcel(parcel)) {
+        TAG_LOGW(AAFwkTag::APPMGR, "ReadFromParcel failed");
+        delete data;
+        data = nullptr;
+    }
+    return data;
+}
+
+bool StartupTaskData::ReadFromParcel(Parcel &parcel)
+{
+    action = parcel.ReadString();
+    insightIntentName = parcel.ReadString();
+    uri = parcel.ReadString();
+    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

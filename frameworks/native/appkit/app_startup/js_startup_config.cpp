@@ -17,6 +17,8 @@
 
 #include "hilog_tag_wrapper.h"
 #include "js_runtime_utils.h"
+#include "napi_common_util.h"
+#include "napi_common_want.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -26,7 +28,8 @@ JsStartupConfig::JsStartupConfig(napi_env env) : StartupConfig(), env_(env)
 
 JsStartupConfig::~JsStartupConfig() = default;
 
-int32_t JsStartupConfig::Init(std::unique_ptr<NativeReference> &configEntryJsRef)
+int32_t JsStartupConfig::Init(std::unique_ptr<NativeReference> &configEntryJsRef,
+    std::shared_ptr<AAFwk::Want> want)
 {
     if (configEntryJsRef == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "null configEntry");
@@ -60,6 +63,7 @@ int32_t JsStartupConfig::Init(std::unique_ptr<NativeReference> &configEntryJsRef
 
     InitAwaitTimeout(env_, config);
     InitListener(env_, config);
+    InitCustomization(env_, configEntry, want);
     return ERR_OK;
 }
 
@@ -143,6 +147,39 @@ void JsStartupConfig::InitListener(napi_env env, napi_value config)
             napi_call_function(env, listener, onCompleted, 1, argv, nullptr);
         };
     listener_ = std::make_shared<StartupListener>(onCompletedCallback);
+}
+
+void JsStartupConfig::InitCustomization(napi_env env, napi_value configEntry, std::shared_ptr<AAFwk::Want> want)
+{
+    TAG_LOGD(AAFwkTag::STARTUP, "InitCustomization");
+    if (!want) {
+        TAG_LOGD(AAFwkTag::STARTUP, "want is null");
+        return;
+    }
+
+    napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, *want);
+    napi_value method = nullptr;
+    napi_get_named_property(env, configEntry, "onRequestCustomMatchRule", &method);
+    if (method == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null method onRequestCustomMatchRule");
+        return;
+    }
+
+    bool isCallable = false;
+    napi_is_callable(env, method, &isCallable);
+    if (!isCallable) {
+        TAG_LOGE(AAFwkTag::STARTUP, "onRequestCustomMatchRule not callable");
+        return;
+    }
+
+    constexpr size_t argc = 1;
+    napi_value argv[] = { napiWant };
+    napi_value callResult = nullptr;
+    napi_status status = napi_call_function(env, configEntry, method, argc, argv, &callResult);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "call js func onRequestCustomMatchRule failed: %{public}d", status);
+    }
+    customization_ = AppExecFwk::UnwrapStringFromJS(env, callResult);
 }
 
 napi_value JsStartupConfig::BuildResult(napi_env env, const std::shared_ptr<StartupTaskResult> &result)
