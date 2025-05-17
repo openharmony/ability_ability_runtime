@@ -7894,6 +7894,7 @@ int32_t AppMgrServiceInner::NotifyPageShow(const sptr<IRemoteObject> &token, con
         return ERR_PERMISSION_DENIED;
     }
 
+    const_cast<PageStateData &>(pageStateData).uid = IPCSkeleton::GetCallingUid();
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnPageShow(pageStateData);
     return ERR_OK;
 }
