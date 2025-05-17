@@ -16,6 +16,7 @@
 #include "native_child_process.h"
 #include <map>
 #include <mutex>
+#include "app_mgr_client.h"
 #include "hilog_tag_wrapper.h"
 #include "native_child_callback.h"
 #include "child_process_args_manager.h"
@@ -27,11 +28,11 @@ using namespace OHOS;
 using namespace OHOS::AbilityRuntime;
 
 namespace {
-
-std::mutex g_mutexCallBackObj;
 constexpr size_t MAX_KEY_SIZE = 20;
 constexpr size_t MAX_FD_SIZE = 16;
-
+std::mutex g_callbackStubMutex;
+std::mutex g_callbackSerialMutex;
+sptr<OHOS::AbilityRuntime::NativeChildCallback> g_callbackStub = nullptr;
 } // Anonymous namespace
 
 int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNativeChildProcessStarted onProcessStarted)
@@ -124,4 +125,81 @@ NativeChildProcess_Args* OH_Ability_GetCurrentChildProcessArgs()
         TAG_LOGE(AAFwkTag::PROCESSMGR, "GetChildProcessArgs null");
     }
     return result;
+}
+
+sptr<OHOS::AbilityRuntime::NativeChildCallback> GetGlobalNativeChildCallbackStub()
+{
+    std::lock_guard<std::mutex> lock(g_callbackStubMutex);
+    return g_callbackStub;
+}
+
+void SetGlobalNativeChildCallbackStub(sptr<OHOS::AbilityRuntime::NativeChildCallback> local)
+{
+    std::lock_guard<std::mutex> lock(g_callbackStubMutex);
+    g_callbackStub = local;
+}
+
+Ability_NativeChildProcess_ErrCode OH_Ability_RegisterNativeChildProcessExitCallback(
+    OH_Ability_OnNativeChildProcessExit onProcessExit)
+{
+    if (onProcessExit == nullptr) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null callback func pointer");
+        return NCP_ERR_INVALID_PARAM;
+    }
+
+    std::lock_guard<std::mutex> lock(g_callbackSerialMutex);
+    auto localCallbackStub = GetGlobalNativeChildCallbackStub();
+    if (localCallbackStub != nullptr) {
+        localCallbackStub->AddExitCallback(onProcessExit);
+        return NCP_NO_ERROR;
+    }
+
+    localCallbackStub = sptr<NativeChildCallback>::MakeSptr(nullptr);
+    if (!localCallbackStub) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null callbackStub");
+        return NCP_ERR_INTERNAL;
+    }
+    SetGlobalNativeChildCallbackStub(localCallbackStub);
+    localCallbackStub->AddExitCallback(onProcessExit);
+    auto ret = DelayedSingleton<OHOS::AppExecFwk::AppMgrClient>::GetInstance()->RegisterNativeChildExitNotify(
+        localCallbackStub);
+    if (ret != NCP_NO_ERROR) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "register native child exit notify failed, %{public}d", ret);
+        SetGlobalNativeChildCallbackStub(nullptr);
+        return NCP_ERR_INTERNAL;
+    }
+
+    return NCP_NO_ERROR;
+}
+
+Ability_NativeChildProcess_ErrCode OH_Ability_UnregisterNativeChildProcessExitCallback(
+    OH_Ability_OnNativeChildProcessExit onProcessExit)
+{
+    if (onProcessExit == nullptr) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null callback func pointer");
+        return NCP_ERR_INVALID_PARAM;
+    }
+
+    std::lock_guard<std::mutex> lock(g_callbackSerialMutex);
+    sptr<OHOS::AbilityRuntime::NativeChildCallback> localCallbackStub = GetGlobalNativeChildCallbackStub();
+    if (localCallbackStub == nullptr) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null callbackStub");
+        return NCP_ERR_CALLBACK_NOT_EXIST;
+    }
+
+    auto ret = localCallbackStub->RemoveExitCallback(onProcessExit);
+    if (ret ==  NCP_ERR_CALLBACK_NOT_EXIST) {
+        return static_cast<Ability_NativeChildProcess_ErrCode>(ret);
+    }
+    if (localCallbackStub->IsCallbacksEmpty()) {
+        auto ret = DelayedSingleton<OHOS::AppExecFwk::AppMgrClient>::GetInstance()->UnregisterNativeChildExitNotify(
+            localCallbackStub);
+        if (ret != NCP_NO_ERROR) {
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "unregister native child exit notify failed, %{public}d", ret);
+            return NCP_ERR_INTERNAL;
+        }
+        SetGlobalNativeChildCallbackStub(nullptr);
+    }
+
+    return NCP_NO_ERROR;
 }

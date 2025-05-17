@@ -26,6 +26,7 @@
 #include "ipc_types.h"
 #include "mock_app_mgr_service.h"
 #include "render_state_observer_stub.h"
+#include "native_child_notify_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -50,6 +51,16 @@ public:
     virtual ~RenderStateObserverMock() = default;
     void OnRenderStateChanged(const RenderStateData &renderStateData) override
     {}
+};
+
+class NativeChildCallbackMock : public NativeChildNotifyStub {
+public:
+    NativeChildCallbackMock() = default;
+    virtual ~NativeChildCallbackMock() = default;
+
+    void OnNativeChildStarted(const sptr<IRemoteObject> &nativeChild) {}
+    void OnError(int32_t errCode) {}
+    int32_t OnNativeChildExit(int32_t pid, int32_t signal) { return 0; }
 };
 
 class AppMgrStubTest : public testing::Test {
@@ -477,6 +488,38 @@ HWTEST_F(AppMgrStubTest, HandleUnregisterAppForegroundStateObserver_0100, TestSi
     int32_t pid = 1;
     reply.WriteInt32(pid);
     auto res = mockAppMgrService_->HandleUnregisterAppForegroundStateObserver(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleRegisterNativeChildExitNotify_0100
+ * @tc.desc: Test when callback is not nullptr the return of writeInt32 is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleRegisterNativeChildExitNotify_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> object = new (std::nothrow) NativeChildCallbackMock();
+    data.WriteRemoteObject(object);
+    reply.WriteInt32(0);
+    auto res = mockAppMgrService_->HandleRegisterNativeChildExitNotify(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleUnregisterNativeChildExitNotify_0100
+ * @tc.desc: Test when callback is not nullptr the return of writeInt32 is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleUnregisterNativeChildExitNotify_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> object = new (std::nothrow) NativeChildCallbackMock();
+    data.WriteRemoteObject(object);
+    reply.WriteInt32(0);
+    auto res = mockAppMgrService_->HandleUnregisterNativeChildExitNotify(data, reply);
     EXPECT_EQ(res, NO_ERROR);
 }
 

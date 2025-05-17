@@ -111,6 +111,11 @@ typedef enum Ability_NativeChildProcess_ErrCode {
      * An invalid IPC object pointer may be returned.
      */
     NCP_ERR_CONNECTION_FAILED = 16010008,
+
+    /**
+     * @error The callback does not exist; it may not have been registered or has already been unregistered.
+     */
+    NCP_ERR_CALLBACK_NOT_EXIST = 16010009,
 } Ability_NativeChildProcess_ErrCode;
 
 
@@ -287,6 +292,45 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(
  * @since 17
  */
 NativeChildProcess_Args* OH_Ability_GetCurrentChildProcessArgs();
+
+/**
+ * @brief Define a callback function to handle the exit of a native child process.
+ *
+ * @param pid The pid of the exited native child process.
+ * @param signal The signal of the exited native child process.
+ * @since 20
+ */
+typedef void (*OH_Ability_OnNativeChildProcessExit)(int32_t pid, int32_t signal);
+
+/**
+ * @brief Register a native child process exit callback.
+ * Registering the same callback repeatedly will only keep one.
+ *
+ * @param onProcessExit Pointer to the callback function to handle the exit of a native child process.
+ * For details, see {@link OH_Ability_OnNativeChildProcessExit}.
+ * @return Returns {@link NCP_NO_ERROR} if the call is successful.
+ *         Returns {@link NCP_ERR_INVALID_PARAM} if the param is invalid.
+ *         Returns {@link NCP_ERR_INTERNAL} if internal error occurs.
+ *         For details, see {@link Ability_NativeChildProcess_ErrCode}.
+ * @since 20
+ */
+Ability_NativeChildProcess_ErrCode OH_Ability_RegisterNativeChildProcessExitCallback(
+    OH_Ability_OnNativeChildProcessExit onProcessExit);
+
+/**
+ * @brief Unregister a native child process exit callback.
+ *
+ * @param onProcessExit Pointer to the callback function to handle the exit of a native child process.
+ * For details, see {@link OH_Ability_OnNativeChildProcessExit}.
+ * @return Returns {@link NCP_NO_ERROR} if the call is successful.
+ *         Returns {@link NCP_ERR_INVALID_PARAM} if the param is invalid.
+ *         Returns {@link NCP_ERR_INTERNAL} if internal error occurs.
+ *         Returns {@link NCP_ERR_CALLBACK_NOT_EXIST} if the callback is not exist.
+ *         For details, see {@link Ability_NativeChildProcess_ErrCode}.
+ * @since 20
+ */
+Ability_NativeChildProcess_ErrCode OH_Ability_UnregisterNativeChildProcessExitCallback(
+    OH_Ability_OnNativeChildProcessExit onProcessExit);
 
 #ifdef __cplusplus
 } // extern "C"
