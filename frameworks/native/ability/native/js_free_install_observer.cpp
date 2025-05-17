@@ -126,8 +126,7 @@ void JsFreeInstallObserver::HandleOnInstallFinished(const std::string &bundleNam
                 it++;
                 continue;
             }
-            if (it->isAbilityResult && (resultCode == ERR_OK ||
-                resultCode == AAFwk::ATOMIC_SERVICE_MINIMIZED)) {
+            if (it->isAbilityResult && resultCode == ERR_OK) {
                 it++;
                 continue;
             }
