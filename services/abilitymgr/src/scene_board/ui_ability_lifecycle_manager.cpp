@@ -593,8 +593,8 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
         AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(DMS_PROCESS_NAME)) {
         return StartWithPersistentIdByDistributed(abilityRequest, persistentId);
     }
-    if (StartSpecifiedProcessRequest(abilityRequest)) {
-        return ERR_OK;
+    if (IsStartSpecifiedProcessRequest(abilityRequest)) {
+        return StartSpecifiedProcessRequest(abilityRequest);
     }
     const auto &abilityInfo = abilityRequest.abilityInfo;
     auto requestId = GetRequestId();
@@ -648,8 +648,8 @@ int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const Ab
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    if (StartSpecifiedProcessRequest(abilityRequest)) {
-        return ERR_OK;
+    if (IsStartSpecifiedProcessRequest(abilityRequest)) {
+        return StartSpecifiedProcessRequest(abilityRequest);
     }
     const auto &abilityInfo = abilityRequest.abilityInfo;
     auto isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
@@ -2221,13 +2221,21 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessTimeoutResponse(int32_t r
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessTimeoutResponse %{public}d", requestId);
     std::lock_guard guard(sessionLock_);
+    auto request = GetSpecifiedRequest(requestId);
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    if (request != nullptr  && sceneSessionManager != nullptr) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "removing instance key");
+        Rosen::WMError ret = sceneSessionManager->RemoveInstanceKey(request->abilityRequest.want.GetBundle(),
+            request->abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY));
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "remove instance key ret:%{public}d", ret);
+    }
     auto nextRequest = PopAndGetNextSpecified(requestId);
     if (nextRequest) {
         StartSpecifiedRequest(*nextRequest);
     }
 }
 
-bool UIAbilityLifecycleManager::StartSpecifiedProcessRequest(const AbilityRequest &abilityRequest)
+bool UIAbilityLifecycleManager::IsStartSpecifiedProcessRequest(const AbilityRequest &abilityRequest)
 {
     const auto &abilityInfo = abilityRequest.abilityInfo;
     if (!abilityInfo.isolationProcess) {
@@ -2250,12 +2258,30 @@ bool UIAbilityLifecycleManager::StartSpecifiedProcessRequest(const AbilityReques
     if (isPlugin) {
         return false;
     }
+    return true;
+}
+
+int32_t UIAbilityLifecycleManager::StartSpecifiedProcessRequest(const AbilityRequest &abilityRequest)
+{
+    auto isCreating = abilityRequest.want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
+    const auto &abilityInfo = abilityRequest.abilityInfo;
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    if (abilityInfo.applicationInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE &&
+        isCreating && sceneSessionManager != nullptr) {
+        std::string instanceKey;
+        Rosen::WMError ret = sceneSessionManager->CreateNewInstanceKey(abilityRequest.want.GetBundle(), instanceKey);
+        if (ret != Rosen::WMError::WM_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "create new isntance error:%{public}d", ret);
+            return ERR_CREATE_INSTANCE_KEY_FAILED;
+        }
+        const_cast<AbilityRequest &>(abilityRequest).want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    }
     auto requestId = GetRequestId();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess, requestId:%{public}d", requestId);
     auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
     specifiedRequest->specifiedProcessState = SpecifiedProcessState::STATE_PROCESS;
     AddSpecifiedRequest(specifiedRequest);
-    return true;
+    return ERR_OK;
 }
 
 void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want)
@@ -2272,9 +2298,10 @@ void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want)
     abilityRequest.isFromIcon = true;
     std::lock_guard guard(sessionLock_);
     // support specified process mode
-    if (StartSpecifiedProcessRequest(abilityRequest)) {
+    if (!IsStartSpecifiedProcessRequest(abilityRequest)) {
         return;
     }
+    StartSpecifiedProcessRequest(abilityRequest);
     AddSpecifiedRequest(std::make_shared<SpecifiedRequest>(GetRequestId(), abilityRequest));
 }
 
