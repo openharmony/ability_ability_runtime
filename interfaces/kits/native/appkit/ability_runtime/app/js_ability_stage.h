@@ -60,8 +60,8 @@ public:
 
     void OnMemoryLevel(int32_t level) override;
 
-    int32_t RunAutoStartupTask(const std::function<void()> &callback, bool &isAsyncCallback,
-        const std::shared_ptr<Context> &stageContext) override;
+    int32_t RunAutoStartupTask(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
+        bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext) override;
 
 private:
     napi_value CallObjectMethod(const char* name, napi_value const * argv = nullptr, size_t argc = 0) const;
@@ -77,8 +77,8 @@ private:
 
     std::unique_ptr<NativeReference> LoadJsSrcEntry(const std::string &srcEntry);
 
-    bool LoadJsStartupConfig(const std::string &srcEntry, const std::string &moduleName,
-        AppExecFwk::ModuleType moduleType);
+    bool LoadJsStartupConfig(const std::string &srcEntry, std::shared_ptr<AAFwk::Want> want,
+        const std::string &moduleName, AppExecFwk::ModuleType moduleType);
 
     bool CallOnPrepareTerminate(napi_env env,
         AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo) const;
@@ -87,10 +87,11 @@ private:
         AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
         bool &isAsync) const;
 
-    int32_t RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo);
+    int32_t RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo,
+        std::shared_ptr<AAFwk::Want> want);
 
-    int32_t RunAutoStartupTaskInner(const std::function<void()> &callback, bool &isAsyncCallback,
-        const std::string &moduleName);
+    int32_t RunAutoStartupTaskInner(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
+        bool &isAsyncCallback, const std::string &moduleName);
     
     void SetJsAbilityStage(const std::shared_ptr<Context> &context);
 

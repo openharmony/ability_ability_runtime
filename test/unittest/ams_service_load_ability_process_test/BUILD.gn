@@ -24,6 +24,7 @@ ohos_unittest("AmsServiceLoadAbilityProcessTest") {
     "${ability_runtime_services_path}/appmgr/test/unittest/mocks",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_test_path}/mock/common/include",
+    "${ability_runtime_innerkits_path}/ability_manager/include/insight_intent",
   ]
 
   sources = [

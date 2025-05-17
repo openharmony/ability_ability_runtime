@@ -528,6 +528,9 @@ void AppRunningRecord::SetProcessAndExtensionType(
 {
 }
 
+void AppRunningRecord::SetStartupTaskData(const AAFwk::Want &want)
+{}
+
 void AppRunningRecord::SetSpecifiedAbilityFlagAndWant(
     int requestId, const AAFwk::Want &want, const std::string &moduleName)
 {

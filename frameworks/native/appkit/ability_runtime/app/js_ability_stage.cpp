@@ -474,8 +474,8 @@ void JsAbilityStage::OnMemoryLevel(int32_t level)
     TAG_LOGD(AAFwkTag::APPKIT, "end");
 }
 
-int32_t JsAbilityStage::RunAutoStartupTask(const std::function<void()> &callback, bool &isAsyncCallback,
-    const std::shared_ptr<Context> &stageContext)
+int32_t JsAbilityStage::RunAutoStartupTask(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
+    bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     isAsyncCallback = false;
@@ -501,14 +501,15 @@ int32_t JsAbilityStage::RunAutoStartupTask(const std::function<void()> &callback
     if (!shellContextRef_) {
         SetJsAbilityStage(stageContext);
     }
-    int32_t result = RegisterAppStartupTask(hapModuleInfo);
+    int32_t result = RegisterAppStartupTask(hapModuleInfo, want);
     if (result != ERR_OK) {
         return result;
     }
-    return RunAutoStartupTaskInner(callback, isAsyncCallback, hapModuleInfo->name);
+    return RunAutoStartupTaskInner(callback, want, isAsyncCallback, hapModuleInfo->name);
 }
 
-int32_t JsAbilityStage::RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo)
+int32_t JsAbilityStage::RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo,
+    std::shared_ptr<AAFwk::Want> want)
 {
     std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
     if (startupManager == nullptr) {
@@ -530,7 +531,7 @@ int32_t JsAbilityStage::RegisterAppStartupTask(const std::shared_ptr<AppExecFwk:
     jsRuntime_.UpdateModuleNameAndAssetPath(hapModuleInfo->moduleName);
 
     const std::string &configEntry = startupManager->GetPendingConfigEntry();
-    if (!LoadJsStartupConfig(configEntry, hapModuleInfo->moduleName, hapModuleInfo->moduleType)) {
+    if (!LoadJsStartupConfig(configEntry, want, hapModuleInfo->moduleName, hapModuleInfo->moduleType)) {
         TAG_LOGE(AAFwkTag::APPKIT, "load js appStartup config failed.");
         return ERR_INVALID_VALUE;
     }
@@ -550,13 +551,14 @@ int32_t JsAbilityStage::RegisterAppStartupTask(const std::shared_ptr<AppExecFwk:
         jsStartupTask->SetWaitOnMainThread(item.waitOnMainThread);
         jsStartupTask->SetModuleName(hapModuleInfo->moduleName);
         jsStartupTask->SetModuleType(hapModuleInfo->moduleType);
+        jsStartupTask->SetMatchRules(std::move(item.matchRules));
         startupManager->RegisterAppStartupTask(item.name, jsStartupTask);
     }
     return ERR_OK;
 }
 
-int32_t JsAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &callback, bool &isAsyncCallback,
-    const std::string &moduleName)
+int32_t JsAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &callback,
+    std::shared_ptr<AAFwk::Want> want, bool &isAsyncCallback, const std::string &moduleName)
 {
     std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
     if (startupManager == nullptr) {
@@ -564,7 +566,7 @@ int32_t JsAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &cal
         return ERR_INVALID_VALUE;
     }
     std::shared_ptr<StartupTaskManager> startupTaskManager = nullptr;
-    int32_t result = startupManager->BuildAutoAppStartupTaskManager(startupTaskManager, moduleName);
+    int32_t result = startupManager->BuildAutoAppStartupTaskManager(want, startupTaskManager, moduleName);
     if (result != ERR_OK) {
         return result;
     }
@@ -647,8 +649,8 @@ std::unique_ptr<NativeReference> JsAbilityStage::LoadJsSrcEntry(const std::strin
     return jsCode;
 }
 
-bool JsAbilityStage::LoadJsStartupConfig(const std::string &srcEntry, const std::string &moduleName,
-    AppExecFwk::ModuleType moduleType)
+bool JsAbilityStage::LoadJsStartupConfig(const std::string &srcEntry, std::shared_ptr<AAFwk::Want> want,
+    const std::string &moduleName, AppExecFwk::ModuleType moduleType)
 {
     std::unique_ptr<NativeReference> startupConfigEntry = LoadJsSrcEntry(srcEntry);
     if (startupConfigEntry == nullptr) {
@@ -661,7 +663,7 @@ bool JsAbilityStage::LoadJsStartupConfig(const std::string &srcEntry, const std:
         TAG_LOGE(AAFwkTag::APPKIT, "null startupConfig");
         return false;
     }
-    if (startupConfig->Init(startupConfigEntry) != ERR_OK) {
+    if (startupConfig->Init(startupConfigEntry, want) != ERR_OK) {
         return false;
     }
     std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
