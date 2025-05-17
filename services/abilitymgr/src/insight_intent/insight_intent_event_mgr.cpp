@@ -28,6 +28,20 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+void InsightIntentEventMgr::DeleteInsightIntent(const std::string &bundleName, const std::string &moduleName,
+    int32_t userId)
+{
+    std::vector<ExtractInsightIntentInfo> intentInfos;
+    DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
+        bundleName, userId, intentInfos);
+    if (!intentInfos.empty()) {
+        TAG_LOGI(AAFwkTag::INTENT, "update bundleName: %{public}s to no insight intent", bundleName.c_str());
+        DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->DeleteInsightIntentTotalInfo(
+            bundleName, moduleName, userId);
+    }
+
+    return;
+}
 
 void InsightIntentEventMgr::UpdateInsightIntentEvent(const AppExecFwk::ElementName &elementName, int32_t userId)
 {
@@ -52,27 +66,20 @@ void InsightIntentEventMgr::UpdateInsightIntentEvent(const AppExecFwk::ElementNa
 
     // Get json profile firstly
     std::string profile;
-    ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INSIGHT_INTENT_PROFILE, bundleName, moduleName,
+    ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INTENT_PROFILE, bundleName, moduleName,
         profile, userId));
     if (ret != ERR_OK) {
         TAG_LOGI(AAFwkTag::INTENT, "get json failed code: %{public}d, bundleName: %{public}s, "
             "moduleName: %{public}s, userId: %{public}d", ret, bundleName.c_str(), moduleName.c_str(), userId);
-        std::vector<ExtractInsightIntentInfo> intentInfos;
-        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
-            bundleName, userId, intentInfos);
-        if (!intentInfos.empty()) {
-            TAG_LOGI(AAFwkTag::INTENT, "update bundleName: %{public}s to no insight intent", bundleName.c_str());
-            DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->DeleteInsightIntentTotalInfo(
-                bundleName, moduleName, userId);
-            return;
-        }
+        DeleteInsightIntent(bundleName, moduleName, userId);
         return;
     }
 
     // Transform json string
     AbilityRuntime::ExtractInsightIntentProfileInfoVec infos = {};
-    if (!AbilityRuntime::ExtractInsightIntentProfile::TransformTo(profile, infos)) {
-        TAG_LOGE(AAFwkTag::INTENT, "transform profile failed, profile:%{public}s", profile.c_str());
+    if (!AbilityRuntime::ExtractInsightIntentProfile::TransformTo(profile, infos) || infos.insightIntents.size() == 0) {
+        TAG_LOGW(AAFwkTag::INTENT, "transform profile failed, profile:%{public}s", profile.c_str());
+        DeleteInsightIntent(bundleName, moduleName, userId);
         return;
     }
 
