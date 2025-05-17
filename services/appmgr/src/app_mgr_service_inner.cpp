@@ -3257,8 +3257,10 @@ int32_t AppMgrServiceInner::KillProcessesByPids(const std::vector<int32_t> &pids
     for (const auto& pid: pids) {
         auto appRecord = GetAppRunningRecordByPid(pid);
         if (appRecord != nullptr) {
-            if (KillProcessByPid(pid, reason) < 0) {
+            ret = KillProcessByPid(pid, reason);
+            if (ret != ERR_OK) {
                 TAG_LOGW(AAFwkTag::APPMGR, "fail, pid:%{public}d", pid);
+                return ret;
             }
             continue;
         }
@@ -3266,7 +3268,7 @@ int32_t AppMgrServiceInner::KillProcessesByPids(const std::vector<int32_t> &pids
             continue;
         }
         ret = KillSubProcessBypid(pid, reason);
-        if (ret < 0) {
+        if (ret != ERR_OK) {
             TAG_LOGW(AAFwkTag::APPMGR, "KillSubProcessBypid fail, pid:%{public}d, ret:%{public}d", pid, ret);
             return ret;
         }
