@@ -140,9 +140,9 @@ int32_t StartupManager::BuildAutoAppStartupTaskManager(std::shared_ptr<AAFwk::Wa
         auto moduleMatcher = std::make_shared<ModuleStartStartupTaskMatcher>(moduleName);
         taskMatcher.SetModuleMatcher(moduleMatcher);
         if (startupConfig) {
-            TAG_LOGI(AAFwkTag::STARTUP, "customization: %{public}s", defaultConfig_->GetCustomization().c_str());
+            TAG_LOGI(AAFwkTag::STARTUP, "customization: %{public}s", startupConfig->GetCustomization().c_str());
             auto customizationMatcher =
-                std::make_shared<CustomizationStartupTaskMatcher>(defaultConfig_->GetCustomization());
+                std::make_shared<CustomizationStartupTaskMatcher>(startupConfig->GetCustomization());
             taskMatcher.SetCustomizationMatcher(customizationMatcher);
         }
         filteredByFeature = FilterMatchedStartupTask(taskMatcher, appStartupTasks_, autoStartupTasks, dependenciesSet);
