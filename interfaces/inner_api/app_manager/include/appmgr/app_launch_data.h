@@ -41,6 +41,16 @@ struct UserTestRecord : public Parcelable {
     static UserTestRecord *Unmarshalling(Parcel &parcel);
 };
 
+struct StartupTaskData : public Parcelable {
+    std::string action;
+    std::string insightIntentName;
+    std::string uri;
+
+    bool ReadFromParcel(Parcel &parcel);
+    virtual bool Marshalling(Parcel &parcel) const override;
+    static StartupTaskData *Unmarshalling(Parcel &parcel);
+};
+
 class AppLaunchData : public Parcelable {
 public:
     /**
@@ -232,6 +242,16 @@ public:
         instanceKey_ = instanceKey;
     }
 
+    void SetStartupTaskData(std::shared_ptr<StartupTaskData> startupTaskData)
+    {
+        startupTaskData_ = startupTaskData;
+    }
+
+    std::shared_ptr<StartupTaskData> GetStartupTaskData() const
+    {
+        return startupTaskData_;
+    }
+
     /**
      * @brief read this Sequenceable object from a Parcel.
      *
@@ -260,6 +280,9 @@ public:
      * @param inParcel Indicates the Parcel object into which the Sequenceable object has been marshaled.
      */
     static AppLaunchData *Unmarshalling(Parcel &parcel);
+    
+    bool ReadStartupTaskDataFromParcel(Parcel &parcel);
+
     /**
      * @brief Setting is aa start with native.
      *
@@ -332,6 +355,7 @@ private:
     std::string instanceKey_;
     std::string preloadModuleName_;
     bool isDebugFromLocal_;
+    std::shared_ptr<StartupTaskData> startupTaskData_ = nullptr;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

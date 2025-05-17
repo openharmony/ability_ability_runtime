@@ -1526,7 +1526,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 #endif
 
-    application_->PreloadAppStartup(bundleInfo, appLaunchData.GetPreloadModuleName());
+    application_->PreloadAppStartup(bundleInfo, appLaunchData.GetPreloadModuleName(),
+        appLaunchData.GetStartupTaskData());
 
     if (isStageBased) {
         // Create runtime

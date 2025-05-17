@@ -23,6 +23,13 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+struct StartupTaskMatchRules {
+    std::vector<std::string> uris;
+    std::vector<std::string> insightIntents;
+    std::vector<std::string> actions;
+    std::vector<std::string> customization;
+};
+
 class AppStartupTask : public StartupTask {
 public:
     explicit AppStartupTask(const std::string& name);
@@ -32,6 +39,16 @@ public:
     bool GetIsExcludeFromAutoStart() const;
 
     void SetIsExcludeFromAutoStart(bool excludeFromAutoStart);
+
+    void SetMatchRules(StartupTaskMatchRules matchRules);
+
+    const std::vector<std::string> &GetUriMatchRules() const;
+
+    const std::vector<std::string> &GetInsightIntentMatchRules() const;
+
+    const std::vector<std::string> &GetActionMatchRules() const;
+
+    const std::vector<std::string> &GetCustomizationMatchRules() const;
 
     void SetModuleName(const std::string &moduleName);
 
@@ -45,6 +62,7 @@ protected:
     bool isExcludeFromAutoStart_ = false;
     std::string moduleName_;
     AppExecFwk::ModuleType moduleType_;
+    StartupTaskMatchRules matchRules_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

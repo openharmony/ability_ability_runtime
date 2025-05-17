@@ -22,6 +22,7 @@ ohos_unittest("AmsServiceStartupTest") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include",
+    "${ability_runtime_innerkits_path}/ability_manager/include/insight_intent",
   ]
 
   sources = [
