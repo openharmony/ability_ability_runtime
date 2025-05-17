@@ -27,7 +27,7 @@ namespace {
 int32_t g_extraParseResult = ERR_OK;
 std::mutex g_extraMutex;
 
-const std::string INSIGHT_INTENTS = "insightIntents";
+const std::string INSIGHT_INTENTS = "extractInsightIntents";
 const std::string INSIGHT_INTENT_NAME = "intentName";
 const std::string INSIGHT_INTENT_DOMAIN = "domain";
 const std::string INSIGHT_INTENT_VERSION = "intentVersion";

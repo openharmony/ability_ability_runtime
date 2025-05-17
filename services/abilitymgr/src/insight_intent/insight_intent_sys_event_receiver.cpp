@@ -50,7 +50,7 @@ void InsightIntentSysEventReceiver::SaveInsightIntentInfos(const std::string &bu
 
     // Get json profile firstly
     std::string profile;
-    ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INSIGHT_INTENT_PROFILE, bundleName,
+    ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INTENT_PROFILE, bundleName,
         moduleName, profile, userId));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "GetJsonProfile failed, code: %{public}d", ret);
@@ -59,7 +59,7 @@ void InsightIntentSysEventReceiver::SaveInsightIntentInfos(const std::string &bu
 
     // Transform json string
     AbilityRuntime::ExtractInsightIntentProfileInfoVec infos = {};
-    if (!AbilityRuntime::ExtractInsightIntentProfile::TransformTo(profile, infos)) {
+    if (!AbilityRuntime::ExtractInsightIntentProfile::TransformTo(profile, infos) || infos.insightIntents.size() == 0) {
         TAG_LOGE(AAFwkTag::INTENT, "transform profile failed, profile:%{public}s", profile.c_str());
         return;
     }
