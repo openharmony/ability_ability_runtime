@@ -293,5 +293,54 @@ HWTEST_F(AppMgrServiceThirdTest, LaunchAbility_001, TestSize.Level1)
     res = appMgrService->LaunchAbility(nullptr);
     EXPECT_EQ(res, AAFwk::ERR_NULL_APP_RUNNING_MANAGER);
 }
+
+/*
+ * Feature: AppMgrService
+ * Function: UpdateConfigurationForBackgroundApp
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService UpdateConfigurationForBackgroundApp
+ * EnvConditions: NA
+ * CaseDescription: Verify UpdateConfigurationForBackgroundApp
+ */
+HWTEST_F(AppMgrServiceThirdTest, UpdateConfigurationForBackgroundApp_001, TestSize.Level2)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrService->SetInnerService(appMgrServiceInner);
+    std::vector<BackgroundAppInfo> appInfos;
+    AppExecFwk::ConfigurationPolicy policy;
+    int32_t userId = -1;
+    appMgrService->SetInnerService(nullptr);
+    AAFwk::MyFlag::flag_ = 0;
+    int32_t res = appMgrService->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
+    EXPECT_EQ(res, 22);
+    AAFwk::MyFlag::flag_ = 1;
+    res = appMgrService->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
+    EXPECT_EQ(res, 38);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: UpdateConfigurationForBackgroundApp
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService UpdateConfigurationForBackgroundApp
+ * EnvConditions: NA
+ * CaseDescription: Verify UpdateConfigurationForBackgroundApp
+ */
+HWTEST_F(AppMgrServiceThirdTest, UpdateConfigurationForBackgroundApp_002, TestSize.Level2)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrService->SetInnerService(appMgrServiceInner);
+    std::vector<BackgroundAppInfo> appInfos;
+    AppExecFwk::ConfigurationPolicy policy;
+    int32_t userId = -1;
+    AAFwk::MyFlag::flag_ = 1;
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+    int32_t res = appMgrService->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
+    EXPECT_EQ(res, 1);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

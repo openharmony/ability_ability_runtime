@@ -44,12 +44,14 @@
 #include "app_scheduler_interface.h"
 #include "app_spawn_client.h"
 #include "appexecfwk_errors.h"
+#include "background_app_info.h"
 #include "bundle_info.h"
 #include "bundle_mgr_helper.h"
 #ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_info.h"
 #include "child_process_request.h"
 #endif // SUPPORT_CHILD_PROCESS
+#include "configuration_policy.h"
 #include "cpp/mutex.h"
 #include "event_report.h"
 #include "exit_resident_process_manager.h"
@@ -762,6 +764,16 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
+
+    /**
+     * UpdateConfigurationForBackgroundApp
+     * @param appInfos Background application information.
+     * @param policy Update policy.
+     * @param userId configuration for the user
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &appInfos,
+        const AppExecFwk::ConfigurationPolicy &policy, const int32_t userId);
 
     int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name, int32_t appIndex);
 

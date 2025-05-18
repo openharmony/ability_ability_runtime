@@ -29,8 +29,10 @@
 #include "app_running_record.h"
 #include "app_state_data.h"
 #include "application_info.h"
+#include "background_app_info.h"
 #include "bundle_info.h"
 #include "configuration.h"
+#include "configuration_policy.h"
 #include "iremote_object.h"
 #include "kill_process_config.h"
 #include "record_query_result.h"
@@ -42,6 +44,11 @@
 namespace OHOS {
 namespace Rosen {
 class WindowVisibilityInfo;
+enum ConfigMode : uint32_t {
+    COLOR_MODE = 0,
+    FONT_SCALE = 1,
+    FONT_WEIGHT_SCALE = 2,
+};
 }
 namespace AppExecFwk {
 
@@ -200,6 +207,16 @@ public:
     * @return Returns ERR_OK on success, others on failure.
     */
     int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
+
+    /**
+     * UpdateConfigurationForBackgroundApp
+     * @param appInfos Background application information.
+     * @param policy Update policy.
+     * @param userId configuration for the user
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &appInfos,
+        const AppExecFwk::ConfigurationPolicy &policy, const int32_t userId = -1);
 
     /**
      *  Update config by sa.
@@ -390,7 +407,8 @@ private:
         const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner);
     void AddRecordToDeadList(std::shared_ptr<AppRunningRecord> appRecord);
     void RemoveTimeoutDeadAppRecord();
-
+    void ExecuteConfigurationTask(const BackgroundAppInfo& info, const int32_t userId);
+    bool UpdateConfiguration(std::shared_ptr<AppRunningRecord> &appRecord, Rosen::ConfigMode configMode);
 private:
     std::mutex runningRecordMapMutex_;
     std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> appRunningRecordMap_;
@@ -402,6 +420,7 @@ private:
     std::mutex updateConfigurationDelayedLock_;
     std::map<const int32_t, bool> updateConfigurationDelayedMap_;
 
+    std::vector<BackgroundAppInfo> appInfos_;
     std::mutex uiExtensionBindMapLock_;
     std::map<int32_t, UIExtensionProcessBindInfo> uiExtensionBindMap_;
 };
