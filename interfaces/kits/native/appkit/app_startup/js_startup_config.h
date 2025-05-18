@@ -21,6 +21,7 @@
 #include "js_runtime.h"
 #include "startup_config.h"
 #include "startup_utils.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -30,7 +31,7 @@ public:
 
     ~JsStartupConfig() override;
 
-    int32_t Init(std::unique_ptr<NativeReference> &configEntryJsRef);
+    int32_t Init(std::unique_ptr<NativeReference> &configEntryJsRef, std::shared_ptr<AAFwk::Want> want);
 
     int32_t Init(napi_value config);
 
@@ -43,6 +44,7 @@ private:
 
     void InitAwaitTimeout(napi_env env, napi_value config);
     void InitListener(napi_env env, napi_value config);
+    void InitCustomization(napi_env env, napi_value configEntry, std::shared_ptr<AAFwk::Want> want);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

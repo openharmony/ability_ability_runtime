@@ -117,7 +117,7 @@ public:
     
     virtual void OnStartProcessFailed(sptr<IRemoteObject> token) {}
 
-    virtual void OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+    virtual void OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
         const std::string &bundleName, const std::vector<std::string> &abilityNames,
         const std::vector<std::string> &uiExtensionNames) {}
 };
@@ -236,9 +236,11 @@ public:
      *
      * @param pids, the pid list of processes are going to be killed.
      * @param reason, the reason to kill the processes.
+     * @param subProcess, kill SubProcess or not.
+     * @return ERR_OK, return back success, others fail.
      */
-    void KillProcessesByPids(const std::vector<int32_t> &pids,
-        const std::string &reason = "KillProcessesByPids");
+    int32_t KillProcessesByPids(const std::vector<int32_t> &pids,
+        const std::string &reason = "KillProcessesByPids", bool subProcess = false);
 
     /**
      * Set child and parent relationship
@@ -665,7 +667,7 @@ protected:
      * @param abilityNames abilityNames in app.
      * @param uiExtensionNames uiExtensionNames in app.
      */
-    virtual void OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+    virtual void OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
         const std::string &bundleName, const std::vector<std::string> &abilityNames,
         const std::vector<std::string> &uiExtensionNames) override;
 

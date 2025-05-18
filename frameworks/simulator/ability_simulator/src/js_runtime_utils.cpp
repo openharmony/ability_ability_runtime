@@ -16,7 +16,6 @@
 #include "js_runtime_utils.h"
 
 #include "hilog_tag_wrapper.h"
-#include "js_runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -314,42 +313,46 @@ std::unique_ptr<NapiAsyncTask> CreateAsyncTaskWithLastParam(napi_env env, napi_v
         std::unique_ptr<NapiAsyncTask::CompleteCallback>(), result);
 }
 
-std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(napi_env env,
-    const std::string &moduleName, napi_value const *argv, size_t argc)
+bool NapiAsyncTask::SendNapiEvent(napi_env env, napi_event_priority eventPriority)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "LoadSystemModule(%{public}s)", moduleName.c_str());
+    if (napi_send_event(
+        env,
+        [env, this]() {
+            napi_status status = napi_ok;
+            Complete(env, status, this);
+        },
+        eventPriority) != napi_ok) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "SendNapiEvent failed");
+        return false;
+    }
+    return true;
+}
+
+void NapiAsyncTask::ScheduleHighQos(const std::string &name, napi_env env, std::unique_ptr<NapiAsyncTask> &&task)
+{
+    if (task && task->StartHighQos(name, env)) {
+        task.release();
+    }
+}
+
+bool NapiAsyncTask::StartHighQos(const std::string &name, napi_env env)
+{
+    if (work_) {
+        napi_delete_async_work(env, work_);
+        work_ = nullptr;
+    }
     if (env == nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITY_SIM, "invalid env");
-        return std::unique_ptr<NativeReference>();
+        return false;
     }
-
-    napi_value globalObj = nullptr;
-    napi_get_global(env, &globalObj);
-    std::unique_ptr<NativeReference> methodRequireNapiRef_;
-    napi_value ref = nullptr;
-    napi_get_named_property(env, globalObj, "requireNapi", &ref);
-    napi_ref methodRequireNapiRef = nullptr;
-    napi_create_reference(env, ref, 1, &methodRequireNapiRef);
-    methodRequireNapiRef_.reset(reinterpret_cast<NativeReference *>(methodRequireNapiRef));
-    if (!methodRequireNapiRef_) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create reference failed");
-        return nullptr;
+    if (execute_ == nullptr) {
+        return SendNapiEvent(env, napi_eprio_immediate);
     }
-    napi_value className = nullptr;
-    napi_create_string_utf8(env, moduleName.c_str(), moduleName.length(), &className);
-    napi_value classValue = nullptr;
-    napi_call_function(env,
-        globalObj, methodRequireNapiRef_->GetNapiValue(), 1, &className, &classValue);
-    napi_value instanceValue = nullptr;
-    napi_new_instance(env, classValue, argc, argv, &instanceValue);
-    if (instanceValue == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create object instance failed");
-        return std::unique_ptr<NativeReference>();
-    }
-
-    napi_ref result = nullptr;
-    napi_create_reference(env, instanceValue, 1, &result);
-    return std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference *>(result));
+    NativeEngine* engine = reinterpret_cast<NativeEngine*>(env);
+    work_ = reinterpret_cast<napi_async_work>(engine->CreateAsyncWork(name,
+        reinterpret_cast<NativeAsyncExecuteCallback>(Execute),
+        reinterpret_cast<NativeAsyncCompleteCallback>(Complete), this));
+    napi_queue_async_work_with_qos(env, work_, napi_qos_user_initiated);
+    return true;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

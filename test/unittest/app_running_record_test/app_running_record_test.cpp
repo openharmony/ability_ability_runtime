@@ -30,6 +30,7 @@
 #undef private
 #undef protected
 #include "hilog_tag_wrapper.h"
+#include "insight_intent_execute_param.h"
 #include "mock_ability_token.h"
 
 using namespace testing;
@@ -363,6 +364,50 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetDebugFromLocal_0100, TestSize
     appRecord->SetDebugFromLocal(isDebugFromLocal);
     bool resultTwo = appRecord->GetDebugFromLocal();
     EXPECT_EQ(isDebugFromLocal, resultTwo);
+}
+
+/**
+ * @tc.name: AppRunningRecord_IsSupportMultiProcessDeviceFeature_0100
+ * @tc.desc: Test IsSupportMultiProcessDeviceFeature works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_IsSupportMultiProcessDeviceFeature_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_IsSupportMultiProcessDeviceFeature_0100 called.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    EXPECT_NE(appRecord, nullptr);
+    
+    appRecord->SetSupportMultiProcessDeviceFeature(true);
+    auto support = appRecord->IsSupportMultiProcessDeviceFeature();
+    EXPECT_TRUE(support.value());
+
+    appRecord->SetSupportMultiProcessDeviceFeature(false);
+    support = appRecord->IsSupportMultiProcessDeviceFeature();
+    EXPECT_FALSE(support.value());
+}
+
+/**
+ * @tc.name: AppRunningRecord_SetStartupTaskData_0100
+ * @tc.desc: Test SetStartupTaskData works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetStartupTaskData_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_SetStartupTaskData_0100 start.");
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    EXPECT_NE(appRecord, nullptr);
+    
+    AAFwk::Want want;
+    appRecord->SetStartupTaskData(want);
+    EXPECT_EQ(appRecord->startupTaskData_->insightIntentName, "");
+
+    std::string param("intentName1");
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, param);
+    appRecord->SetStartupTaskData(want);
+    EXPECT_EQ(appRecord->startupTaskData_->insightIntentName, "intentName1");
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_SetStartupTaskData_0100 end.");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

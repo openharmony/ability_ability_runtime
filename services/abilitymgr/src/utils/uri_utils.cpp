@@ -416,8 +416,9 @@ void UriUtils::GrantUriPermission(Want &want, std::string targetBundleName, int3
     }
 
     auto callerPkg = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-    if (callerPkg == AppUtils::GetInstance().GetBrokerDelegateBundleName() &&
-        GrantShellUriPermission(uriVec, flag, targetBundleName, appIndex)) {
+    bool isBrokerCall = (callerPkg == AppUtils::GetInstance().GetBrokerDelegateBundleName() ||
+        IPCSkeleton::GetCallingUid() == AppUtils::GetInstance().GetCollaboratorBrokerUID());
+    if (isBrokerCall && GrantShellUriPermission(uriVec, flag, targetBundleName, appIndex)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "permission to shell");
         return;
     }

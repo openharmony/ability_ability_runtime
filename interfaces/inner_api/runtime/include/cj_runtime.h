@@ -35,6 +35,7 @@ public:
     static std::unique_ptr<CJRuntime> Create(const Options& options);
     static void SetAppLibPath(const AppLibPathMap& appLibPaths);
     static bool IsCJAbility(const std::string& info);
+    static void SetAppVersion(std::string& version);
     static void SetSanitizerVersion(SanitizerKind kind);
     static void SetPackageName(std::string srcEntryName);
     ~CJRuntime() override = default;
@@ -66,8 +67,8 @@ public:
     void UnLoadCJAppLibrary();
     void DestroyHeapProfiler() override {};
     void ForceFullGC() override {};
-    void ForceFullGC(uint32_t tid) override {};
-    void DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary = false) override {};
+    void ForceFullGC(uint32_t tid) override;
+    void DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary = false) override;
     void DumpCpuProfile() override {};
     void AllowCrossThreadExecution() override {};
     void GetHeapPrepare() override {};

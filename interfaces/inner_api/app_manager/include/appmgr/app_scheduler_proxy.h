@@ -244,7 +244,7 @@ public:
      *
      * @return Is the status change completed.
      */
-    virtual int32_t ScheduleChangeAppGcState(int32_t state) override;
+    virtual int32_t ScheduleChangeAppGcState(int32_t state, uint64_t tid = 0) override;
 
     /**
      * @brief Attach app debug.

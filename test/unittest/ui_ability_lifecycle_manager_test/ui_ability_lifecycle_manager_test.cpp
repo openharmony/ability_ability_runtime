@@ -1897,7 +1897,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, NotifySCBPendingActivation_001, TestSize
     auto token = abilityRecord->GetToken();
     EXPECT_NE(token, nullptr);
     abilityRequest.callerToken = token->AsObject();
-    uiAbilityLifecycleManager->NotifySCBPendingActivation(sessionInfo, abilityRequest);
+    std::string errMsg;
+    uiAbilityLifecycleManager->NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
 }
 
@@ -1911,7 +1912,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ResolveLocked_001, TestSize.Level1)
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     AbilityRequest abilityRequest;
-    EXPECT_EQ(uiAbilityLifecycleManager->ResolveLocked(abilityRequest), RESOLVE_CALL_ABILITY_INNER_ERR);
+    std::string errMsg;
+    EXPECT_EQ(uiAbilityLifecycleManager->ResolveLocked(abilityRequest, errMsg), RESOLVE_CALL_ABILITY_INNER_ERR);
 }
 
 /**
@@ -1925,7 +1927,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ResolveLocked_002, TestSize.Level1)
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     AbilityRequest abilityRequest;
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
-    EXPECT_EQ(uiAbilityLifecycleManager->ResolveLocked(abilityRequest), RESOLVE_CALL_ABILITY_INNER_ERR);
+    std::string errMsg;
+    EXPECT_EQ(uiAbilityLifecycleManager->ResolveLocked(abilityRequest, errMsg), RESOLVE_CALL_ABILITY_INNER_ERR);
 }
 
 /**
@@ -1952,7 +1955,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallAbilityLocked_001, TestSize.Level1)
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
     abilityRecord->isReady_ = true;
 
-    uiAbilityLifecycleManager->CallAbilityLocked(abilityRequest);
+    std::string errMsg;
+    uiAbilityLifecycleManager->CallAbilityLocked(abilityRequest, errMsg);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
 }
 
@@ -1970,7 +1974,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallAbilityLocked_002, TestSize.Level1)
     Want want;
     want.SetParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, true);
     abilityRequest.want = want;
-    uiAbilityLifecycleManager->CallAbilityLocked(abilityRequest);
+    std::string errMsg;
+    uiAbilityLifecycleManager->CallAbilityLocked(abilityRequest, errMsg);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
 }
 

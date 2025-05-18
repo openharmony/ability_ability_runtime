@@ -479,5 +479,78 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartUIServiceEx
     AAFwk::AbilityManagerClient::GetInstance()->proxy_ = nullptr;
     GTEST_LOG_(INFO) << "service_extension_context_StartUIServiceExtensionAbility_002 end";
 }
+
+/**
+ * @tc.number: service_extension_context_ReleaseCall_002
+ * @tc.name: ReleaseCall
+ * @tc.desc: Start ui service extension ability success
+ */
+HWTEST_F(ServiceExtensionContextTest, service_extension_context_ReleaseCall_002, TestSize.Level1)
+{
+    ServiceExtensionContext serviceExtensionContextTest;
+    serviceExtensionContextTest.localCallContainer_ = std::make_shared<LocalCallContainer>();
+
+    auto result = serviceExtensionContextTest.ReleaseCall(nullptr);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: service_extension_context_GetAbilityInfoType_002
+ * @tc.name: GetAbilityInfoType
+ * @tc.desc: Start ui service extension ability success
+ */
+HWTEST_F(ServiceExtensionContextTest, service_extension_context_GetAbilityInfoType_002, TestSize.Level1)
+{
+    ServiceExtensionContext serviceExtensionContextTest;
+    serviceExtensionContextTest.abilityInfo_ = std::make_shared<OHOS::AppExecFwk::AbilityInfo>();
+    serviceExtensionContextTest.abilityInfo_->type = AppExecFwk::AbilityType::SERVICE;
+
+    auto result = serviceExtensionContextTest.GetAbilityInfoType();
+    EXPECT_EQ(result, AppExecFwk::AbilityType::SERVICE);
+}
+
+/**
+ * @tc.number: service_extension_context_AddFreeInstallObserver_002
+ * @tc.name: AddFreeInstallObserver
+ * @tc.desc: Start ui service extension ability success
+ */
+HWTEST_F(ServiceExtensionContextTest, service_extension_context_AddFreeInstallObserver_002, TestSize.Level1)
+{
+    ServiceExtensionContext serviceExtensionContextTest;
+    MessageParcel data;
+    sptr<AbilityRuntime::IFreeInstallObserver> observer =
+        iface_cast<AbilityRuntime::IFreeInstallObserver>(data.ReadRemoteObject());
+
+    auto result = serviceExtensionContextTest.AddFreeInstallObserver(nullptr);
+    EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.number: service_extension_context_PreStartMission_001
+ * @tc.name: PreStartMission
+ * @tc.desc: Start ui service extension ability success
+ */
+HWTEST_F(ServiceExtensionContextTest, service_extension_context_PreStartMission_001, TestSize.Level1)
+{
+    ServiceExtensionContext serviceExtensionContextTest;
+
+    auto result = serviceExtensionContextTest.PreStartMission("", "", "", "");
+    EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.number: service_extension_context_OpenAtomicService_001
+ * @tc.name: OpenAtomicService
+ * @tc.desc: Start ui service extension ability success
+ */
+HWTEST_F(ServiceExtensionContextTest, service_extension_context_OpenAtomicService_001, TestSize.Level1)
+{
+    ServiceExtensionContext serviceExtensionContextTest;
+    AAFwk::Want want;
+    AAFwk::StartOptions options;
+
+    auto result = serviceExtensionContextTest.OpenAtomicService(want, options);
+    EXPECT_NE(result, ERR_OK);
+}
 }
 }

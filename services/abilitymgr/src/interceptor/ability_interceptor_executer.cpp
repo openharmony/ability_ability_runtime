@@ -14,6 +14,7 @@
  */
 
 #include "interceptor/ability_interceptor_executer.h"
+#include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 
 namespace OHOS {
@@ -49,6 +50,7 @@ ErrCode AbilityInterceptorExecuter::DoProcess(AbilityInterceptorParam param)
         }
         result = (*item).second->DoProcess(param);
         if (result != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "DoProcess err: %{public}s_%{public}d", (*item).first.c_str(), result);
             break;
         } else {
             item++;

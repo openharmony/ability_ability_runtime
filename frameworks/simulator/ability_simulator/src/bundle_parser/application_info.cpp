@@ -47,6 +47,7 @@ const std::string APPLICATION_KEEP_ALIVE = "keepAlive";
 const std::string APPLICATION_REMOVABLE = "removable";
 const std::string APPLICATION_SINGLETON = "singleton";
 const std::string APPLICATION_USER_DATA_CLEARABLE = "userDataClearable";
+const std::string ALLOW_APP_RUN_WHEN_DEVICE_FIRST_LOCKED = "allowAppRunWhenDeviceFirstLocked";
 const std::string APPLICATION_IS_SYSTEM_APP = "isSystemApp";
 const std::string APPLICATION_IS_LAUNCHER_APP = "isLauncherApp";
 const std::string APPLICATION_IS_FREEINSTALL_APP = "isFreeInstallApp";
@@ -64,6 +65,7 @@ const std::string APPLICATION_API_RELEASETYPE = "apiReleaseType";
 const std::string APPLICATION_DEBUG = "debug";
 const std::string APPLICATION_DEVICE_ID = "deviceId";
 const std::string APPLICATION_DISTRIBUTED_NOTIFICATION_ENABLED = "distributedNotificationEnabled";
+const std::string APPLICATION_INSTALLED_FOR_ALL_USER = "installedForAllUser";
 const std::string APPLICATION_ENTITY_TYPE = "entityType";
 const std::string APPLICATION_PROCESS = "process";
 const std::string APPLICATION_SUPPORTED_MODES = "supportedModes";
@@ -97,6 +99,7 @@ const std::string APPLICATION_LABEL_RESOURCE = "labelResource";
 const std::string APPLICATION_DESCRIPTION_RESOURCE = "descriptionResource";
 const std::string APPLICATION_MULTI_PROJECTS = "multiProjects";
 const std::string APPLICATION_CROWDTEST_DEADLINE = "crowdtestDeadline";
+const std::string APPLICATION_APP_QUICK_FIX = "appQuickFix";
 const std::string RESOURCE_ID = "id";
 const std::string APPLICATION_NEED_APP_DETAIL = "needAppDetail";
 const std::string APPLICATION_APP_DETAIL_ABILITY_LIBRARY_PATH = "appDetailAbilityLibraryPath";
@@ -109,6 +112,46 @@ const std::string APPLICATION_APP_TYPE = "bundleType";
 const std::string APPLICATION_COMPILE_SDK_VERSION = "compileSdkVersion";
 const std::string APPLICATION_COMPILE_SDK_TYPE = "compileSdkType";
 const std::string APPLICATION_RESOURCES_APPLY = "resourcesApply";
+const std::string APPLICATION_MAX_CHILD_PROCESS = "maxChildProcess";
+const std::string APPLICATION_APP_INDEX = "appIndex";
+const std::string APPLICATION_ALLOW_ENABLE_NOTIFICATION = "allowEnableNotification";
+const std::string APPLICATION_GWP_ASAN_ENABLED = "GWPAsanEnabled";
+const std::string APPLICATION_APPLICATION_FLAGS = "applicationFlags";
+const std::string APPLICATION_ALLOW_MULTI_PROCESS = "allowMultiProcess";
+const std::string APPLICATION_ASSET_ACCESS_GROUPS = "assetAccessGroups";
+const std::string APPLICATION_HAS_PLUGIN = "hasPlugin";
+const std::string APPLICATION_ORGANIZATION = "organization";
+const std::string APPLICATION_INSTALL_SOURCE = "installSource";
+const std::string APPLICATION_HWASAN_ENABLED = "hwasanEnabled";
+const std::string APPLICATION_CONFIGURATION = "configuration";
+const std::string APPLICATION_CLOUD_FILE_SYNC_ENABLED = "cloudFileSyncEnabled";
+const std::string APPLICATION_UBSAN_ENABLED = "ubsanEnabled";
+const std::string APPLICATION_HNP_PACKAGES = "hnpPackages";
+const std::string APPLICATION_HNP_PACKAGES_PACKAGE = "package";
+const std::string APPLICATION_HNP_PACKAGES_TYPE = "type";
+const std::string APPLICATION_TSAN_ENABLED = "tsanEnabled";
+const std::string APPLICATION_APP_ENVIRONMENTS = "appEnvironments";
+const std::string APPLICATION_RESERVED_FLAG = "applicationReservedFlag";
+const std::string APPLICATION_MULTI_APP_MODE = "multiAppMode";
+const std::string APPLICATION_MULTI_APP_MODE_TYPE = "multiAppModeType";
+const std::string APPLICATION_MULTI_APP_MODE_MAX_ADDITIONAL_NUMBER = "maxCount";
+const std::string APP_ENVIRONMENTS_NAME = "name";
+const std::string APP_ENVIRONMENTS_VALUE = "value";
+const std::string APP_QUICK_FIX_VERSION_CODE = "versionCode";
+const std::string APP_QUICK_FIX_VERSION_NAME = "versionName";
+const std::string APP_QUICK_FIX_DEPLOYED_APP_QF_INFO = "deployedAppqfInfo";
+const std::string APP_QUICK_FIX_DEPLOYING_APP_QF_INFO = "deployingAppqfInfo";
+const std::string APP_QF_INFO_VERSION_CODE = "versionCode";
+const std::string APP_QF_INFO_VERSION_NAME = "versionName";
+const std::string APP_QF_INFO_CPU_ABI = "cpuAbi";
+const std::string APP_QF_INFO_NATIVE_LIBRARY_PATH = "nativeLibraryPath";
+const std::string APP_QF_INFO_HQF_INFOS = "hqfInfos";
+const std::string APP_QF_INFO_TYPE = "type";
+const std::string HQF_INFO_HAP_SHA256 = "hapSha256";
+const std::string HQF_INFO_HQF_FILE_PATH = "hqfFilePath";
+const std::string HQF_INFO_TYPE = "type";
+const std::string HQF_INFO_CPU_ABI = "cpuAbi";
+const std::string HQF_INFO_NATIVE_LIBRARY_PATH = "nativeLibraryPath";
 }
 void to_json(nlohmann::json &jsonObject, const Resource &resource)
 {
@@ -152,6 +195,304 @@ void from_json(const nlohmann::json &jsonObject, Resource &resource)
     }
 }
 
+
+void to_json(nlohmann::json &jsonObject, const HnpPackage &hnpPackage)
+{
+    jsonObject = nlohmann::json {
+        {APPLICATION_HNP_PACKAGES_PACKAGE, hnpPackage.package},
+        {APPLICATION_HNP_PACKAGES_TYPE, hnpPackage.type},
+    };
+}
+
+void from_json(const nlohmann::json &jsonObject, HnpPackage &hnpPackage)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    int32_t parseResult = ERR_OK;
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_HNP_PACKAGES_PACKAGE,
+        hnpPackage.package,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_HNP_PACKAGES_TYPE,
+        hnpPackage.type,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    if (parseResult != ERR_OK) {
+        TAG_LOGD(AAFwkTag::ABILITY_SIM, "read Resource error %{public}d", parseResult);
+    }
+}
+
+void to_json(nlohmann::json &jsonObject, const MultiAppModeData &multiAppMode)
+{
+    jsonObject = nlohmann::json {
+        {APPLICATION_MULTI_APP_MODE_TYPE, multiAppMode.multiAppModeType},
+        {APPLICATION_MULTI_APP_MODE_MAX_ADDITIONAL_NUMBER, multiAppMode.maxCount},
+    };
+}
+
+void from_json(const nlohmann::json &jsonObject, MultiAppModeData &multiAppMode)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    int32_t parseResult = ERR_OK;
+    GetValueIfFindKey<MultiAppModeType>(jsonObject, jsonObjectEnd, APPLICATION_MULTI_APP_MODE_TYPE,
+        multiAppMode.multiAppModeType, JsonType::NUMBER, false, parseResult, ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject, jsonObjectEnd, APPLICATION_MULTI_APP_MODE_MAX_ADDITIONAL_NUMBER,
+        multiAppMode.maxCount, JsonType::NUMBER, false, parseResult, ArrayType::NOT_ARRAY);
+    if (parseResult != ERR_OK) {
+        TAG_LOGD(AAFwkTag::ABILITY_SIM, "from_json error : %{public}d", parseResult);
+    }
+}
+
+void to_json(nlohmann::json &jsonObject, const ApplicationEnvironment &applicationEnvironment)
+{
+    jsonObject = nlohmann::json {
+        {APP_ENVIRONMENTS_NAME, applicationEnvironment.name},
+        {APP_ENVIRONMENTS_VALUE, applicationEnvironment.value}
+    };
+}
+
+void from_json(const nlohmann::json &jsonObject, ApplicationEnvironment &applicationEnvironment)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    int32_t parseResult = ERR_OK;
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APP_ENVIRONMENTS_NAME,
+        applicationEnvironment.name,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APP_ENVIRONMENTS_VALUE,
+        applicationEnvironment.value,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    if (parseResult != ERR_OK) {
+        TAG_LOGD(AAFwkTag::ABILITY_SIM, "read database error : %{public}d", parseResult);
+    }
+}
+
+void to_json(nlohmann::json &jsonObject, const HqfInfo &hqfInfo)
+{
+    jsonObject = nlohmann::json {
+        {Constants::MODULE_NAME, hqfInfo.moduleName},
+        {HQF_INFO_HAP_SHA256, hqfInfo.hapSha256},
+        {HQF_INFO_HQF_FILE_PATH, hqfInfo.hqfFilePath},
+        {HQF_INFO_TYPE, hqfInfo.type},
+        {HQF_INFO_CPU_ABI, hqfInfo.cpuAbi},
+        {HQF_INFO_NATIVE_LIBRARY_PATH, hqfInfo.nativeLibraryPath}
+    };
+}
+
+void from_json(const nlohmann::json &jsonObject, HqfInfo &hqfInfo)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    int32_t parseResult = ERR_OK;
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        Constants::MODULE_NAME,
+        hqfInfo.moduleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HQF_INFO_HAP_SHA256,
+        hqfInfo.hapSha256,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HQF_INFO_HQF_FILE_PATH,
+        hqfInfo.hqfFilePath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<QuickFixType>(jsonObject,
+        jsonObjectEnd,
+        HQF_INFO_TYPE,
+        hqfInfo.type,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HQF_INFO_CPU_ABI,
+        hqfInfo.cpuAbi,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HQF_INFO_NATIVE_LIBRARY_PATH,
+        hqfInfo.nativeLibraryPath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    if (parseResult != ERR_OK) {
+        TAG_LOGD(AAFwkTag::ABILITY_SIM, "read module hqfInfo from jsonObject error, error code : %{public}d",
+            parseResult);
+    }
+}
+
+void to_json(nlohmann::json &jsonObject, const AppqfInfo &appqfInfo)
+{
+    jsonObject = nlohmann::json {
+        {APP_QF_INFO_VERSION_CODE, appqfInfo.versionCode},
+        {APP_QF_INFO_VERSION_NAME, appqfInfo.versionName},
+        {APP_QF_INFO_CPU_ABI, appqfInfo.cpuAbi},
+        {APP_QF_INFO_NATIVE_LIBRARY_PATH, appqfInfo.nativeLibraryPath},
+        {APP_QF_INFO_TYPE, appqfInfo.type},
+        {APP_QF_INFO_HQF_INFOS, appqfInfo.hqfInfos}
+    };
+}
+
+void from_json(const nlohmann::json &jsonObject, AppqfInfo &appqfInfo)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    int32_t parseResult = ERR_OK;
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        APP_QF_INFO_VERSION_CODE,
+        appqfInfo.versionCode,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APP_QF_INFO_VERSION_NAME,
+        appqfInfo.versionName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APP_QF_INFO_CPU_ABI,
+        appqfInfo.cpuAbi,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APP_QF_INFO_NATIVE_LIBRARY_PATH,
+        appqfInfo.nativeLibraryPath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+
+    GetValueIfFindKey<QuickFixType>(jsonObject,
+        jsonObjectEnd,
+        APP_QF_INFO_TYPE,
+        appqfInfo.type,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+
+    GetValueIfFindKey<std::vector<HqfInfo>>(jsonObject,
+        jsonObjectEnd,
+        APP_QF_INFO_HQF_INFOS,
+        appqfInfo.hqfInfos,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    if (parseResult != ERR_OK) {
+        TAG_LOGD(AAFwkTag::ABILITY_SIM, "read module appqfInfo from jsonObject error, error code : %{public}d",
+            parseResult);
+    }
+}
+
+void to_json(nlohmann::json &jsonObject, const AppQuickFix &appQuickFix)
+{
+    jsonObject = nlohmann::json {
+        {Constants::BUNDLE_NAME, appQuickFix.bundleName},
+        {APP_QUICK_FIX_VERSION_CODE, appQuickFix.versionCode},
+        {APP_QUICK_FIX_VERSION_NAME, appQuickFix.versionName},
+        {APP_QUICK_FIX_DEPLOYED_APP_QF_INFO, appQuickFix.deployedAppqfInfo},
+        {APP_QUICK_FIX_DEPLOYING_APP_QF_INFO, appQuickFix.deployingAppqfInfo}
+    };
+}
+
+void from_json(const nlohmann::json &jsonObject, AppQuickFix &appQuickFix)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    int32_t parseResult = ERR_OK;
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        Constants::BUNDLE_NAME,
+        appQuickFix.bundleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        APP_QUICK_FIX_VERSION_CODE,
+        appQuickFix.versionCode,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APP_QUICK_FIX_VERSION_NAME,
+        appQuickFix.versionName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+
+    GetValueIfFindKey<AppqfInfo>(jsonObject,
+        jsonObjectEnd,
+        APP_QUICK_FIX_DEPLOYED_APP_QF_INFO,
+        appQuickFix.deployedAppqfInfo,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+
+    GetValueIfFindKey<AppqfInfo>(jsonObject,
+        jsonObjectEnd,
+        APP_QUICK_FIX_DEPLOYING_APP_QF_INFO,
+        appQuickFix.deployingAppqfInfo,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    if (parseResult != ERR_OK) {
+        TAG_LOGD(AAFwkTag::ABILITY_SIM, "read module appQuickFix from jsonObject error, error code : %{public}d",
+            parseResult);
+    }
+}
+
 void to_json(nlohmann::json &jsonObject, const ApplicationInfo &applicationInfo)
 {
     jsonObject = nlohmann::json {
@@ -172,6 +513,7 @@ void to_json(nlohmann::json &jsonObject, const ApplicationInfo &applicationInfo)
         {APPLICATION_REMOVABLE, applicationInfo.removable},
         {APPLICATION_SINGLETON, applicationInfo.singleton},
         {APPLICATION_USER_DATA_CLEARABLE, applicationInfo.userDataClearable},
+        {ALLOW_APP_RUN_WHEN_DEVICE_FIRST_LOCKED, applicationInfo.allowAppRunWhenDeviceFirstLocked},
         {APPLICATION_ACCESSIBLE, applicationInfo.accessible},
         {APPLICATION_IS_SYSTEM_APP, applicationInfo.isSystemApp},
         {APPLICATION_IS_LAUNCHER_APP, applicationInfo.isLauncherApp},
@@ -190,6 +532,8 @@ void to_json(nlohmann::json &jsonObject, const ApplicationInfo &applicationInfo)
         {APPLICATION_DEBUG, applicationInfo.debug},
         {APPLICATION_DEVICE_ID, applicationInfo.deviceId},
         {APPLICATION_DISTRIBUTED_NOTIFICATION_ENABLED, applicationInfo.distributedNotificationEnabled},
+        {APPLICATION_INSTALLED_FOR_ALL_USER, applicationInfo.installedForAllUser},
+        {APPLICATION_ALLOW_ENABLE_NOTIFICATION, applicationInfo.allowEnableNotification},
         {APPLICATION_ENTITY_TYPE, applicationInfo.entityType},
         {APPLICATION_PROCESS, applicationInfo.process},
         {APPLICATION_SUPPORTED_MODES, applicationInfo.supportedModes},
@@ -233,6 +577,23 @@ void to_json(nlohmann::json &jsonObject, const ApplicationInfo &applicationInfo)
         {APPLICATION_COMPILE_SDK_VERSION, applicationInfo.compileSdkVersion},
         {APPLICATION_COMPILE_SDK_TYPE, applicationInfo.compileSdkType},
         {APPLICATION_RESOURCES_APPLY, applicationInfo.resourcesApply},
+        {APPLICATION_GWP_ASAN_ENABLED, applicationInfo.gwpAsanEnabled},
+        {APPLICATION_HWASAN_ENABLED, applicationInfo.hwasanEnabled},
+        {APPLICATION_RESERVED_FLAG, applicationInfo.applicationReservedFlag},
+        {APPLICATION_TSAN_ENABLED, applicationInfo.tsanEnabled},
+        {APPLICATION_APP_ENVIRONMENTS, applicationInfo.appEnvironments},
+        {APPLICATION_ORGANIZATION, applicationInfo.organization},
+        {APPLICATION_MULTI_APP_MODE, applicationInfo.multiAppMode},
+        {APPLICATION_MAX_CHILD_PROCESS, applicationInfo.maxChildProcess},
+        {APPLICATION_APP_INDEX, applicationInfo.appIndex},
+        {APPLICATION_INSTALL_SOURCE, applicationInfo.installSource},
+        {APPLICATION_CONFIGURATION, applicationInfo.configuration},
+        {APPLICATION_CLOUD_FILE_SYNC_ENABLED, applicationInfo.cloudFileSyncEnabled},
+        {APPLICATION_APPLICATION_FLAGS, applicationInfo.applicationFlags},
+        {APPLICATION_UBSAN_ENABLED, applicationInfo.ubsanEnabled},
+        {APPLICATION_ALLOW_MULTI_PROCESS, applicationInfo.allowMultiProcess},
+        {APPLICATION_ASSET_ACCESS_GROUPS, applicationInfo.assetAccessGroups},
+        {APPLICATION_HAS_PLUGIN, applicationInfo.hasPlugin}
     };
 }
 
@@ -378,6 +739,14 @@ void from_json(const nlohmann::json &jsonObject, ApplicationInfo &applicationInf
         ArrayType::NOT_ARRAY);
     GetValueIfFindKey<bool>(jsonObject,
         jsonObjectEnd,
+        ALLOW_APP_RUN_WHEN_DEVICE_FIRST_LOCKED,
+        applicationInfo.allowAppRunWhenDeviceFirstLocked,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
         APPLICATION_ACCESSIBLE,
         applicationInfo.accessible,
         JsonType::BOOLEAN,
@@ -516,6 +885,22 @@ void from_json(const nlohmann::json &jsonObject, ApplicationInfo &applicationInf
         jsonObjectEnd,
         APPLICATION_DISTRIBUTED_NOTIFICATION_ENABLED,
         applicationInfo.distributedNotificationEnabled,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_INSTALLED_FOR_ALL_USER,
+        applicationInfo.installedForAllUser,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_ALLOW_ENABLE_NOTIFICATION,
+        applicationInfo.allowEnableNotification,
         JsonType::BOOLEAN,
         false,
         parseResult,
@@ -776,6 +1161,14 @@ void from_json(const nlohmann::json &jsonObject, ApplicationInfo &applicationInf
         false,
         parseResult,
         ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<AppQuickFix>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_APP_QUICK_FIX,
+        applicationInfo.appQuickFix,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     GetValueIfFindKey<bool>(jsonObject,
         jsonObjectEnd,
         APPLICATION_NEED_APP_DETAIL,
@@ -864,6 +1257,142 @@ void from_json(const nlohmann::json &jsonObject, ApplicationInfo &applicationInf
         false,
         parseResult,
         ArrayType::NUMBER);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_GWP_ASAN_ENABLED,
+        applicationInfo.gwpAsanEnabled,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_RESERVED_FLAG,
+        applicationInfo.applicationReservedFlag,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_TSAN_ENABLED,
+        applicationInfo.tsanEnabled,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_ORGANIZATION,
+        applicationInfo.organization,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<ApplicationEnvironment>>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_APP_ENVIRONMENTS,
+        applicationInfo.appEnvironments,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<MultiAppModeData>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_MULTI_APP_MODE,
+        applicationInfo.multiAppMode,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_APP_INDEX,
+        applicationInfo.appIndex,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_MAX_CHILD_PROCESS,
+        applicationInfo.maxChildProcess,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_INSTALL_SOURCE,
+        applicationInfo.installSource,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_HWASAN_ENABLED,
+        applicationInfo.hwasanEnabled,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_CONFIGURATION,
+        applicationInfo.configuration,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_CLOUD_FILE_SYNC_ENABLED,
+        applicationInfo.cloudFileSyncEnabled,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_APPLICATION_FLAGS,
+        applicationInfo.applicationFlags,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_UBSAN_ENABLED,
+        applicationInfo.ubsanEnabled,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_ALLOW_MULTI_PROCESS,
+        applicationInfo.allowMultiProcess,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_ASSET_ACCESS_GROUPS,
+        applicationInfo.assetAccessGroups,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        APPLICATION_HAS_PLUGIN,
+        applicationInfo.hasPlugin,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "from_json error:%{public}d", parseResult);
     }

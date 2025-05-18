@@ -1526,5 +1526,364 @@ HWTEST_F(JsRuntimeTest, StartProfiler_0100, TestSize.Level1)
     EXPECT_EQ(jsRuntime->jsEnv_, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "StartProfiler_0100 end");
 }
+
+/**
+ * @tc.name: LoadScript_0200
+ * @tc.desc: LoadScript
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, LoadScript_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LoadScript_0200 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    jsRuntime->jsEnv_->engine_ = nullptr;
+
+    auto ret = jsRuntime->LoadScript("MyPath", nullptr, false);
+    EXPECT_EQ(ret, false);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "LoadScript_0200 end");
+}
+
+/**
+ * @tc.name: LoadScript_0300
+ * @tc.desc: LoadScript
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, LoadScript_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LoadScript_0300 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = nullptr;
+
+    auto ret = jsRuntime->LoadScript("MyPath", nullptr, 0, false, "");
+    EXPECT_EQ(ret, false);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "LoadScript_0300 end");
+}
+
+/**
+ * @tc.name: LoadScript_0400
+ * @tc.desc: LoadScript
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, LoadScript_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LoadScript_0400 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    jsRuntime->isOhmUrl_ = true;
+    jsRuntime->moduleName_ = "moduleName";
+
+    auto ret = jsRuntime->LoadScript("MyPath", nullptr, 0, false, "");
+    EXPECT_EQ(ret, false);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "LoadScript_0400 end");
+}
+
+/**
+ * @tc.name: LoadScript_0500
+ * @tc.desc: LoadScript
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, LoadScript_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LoadScript_0500 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    jsRuntime->isOhmUrl_ = false;
+    jsRuntime->moduleName_ = "moduleName";
+
+    auto ret = jsRuntime->LoadScript("MyPath", nullptr, 0, false, "");
+    EXPECT_EQ(ret, false);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "LoadScript_0500 end");
+}
+
+/**
+ * @tc.name: LoadSystemModuleByEngine_0200
+ * @tc.desc: LoadSystemModuleByEngine
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, LoadSystemModuleByEngine_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "LoadSystemModuleByEngine_0200 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    napi_env env = {};
+    jsRuntime->jsEnv_->engine_ = reinterpret_cast<NativeEngine*>(env);
+
+    auto ret = jsRuntime->LoadSystemModuleByEngine(env, "", nullptr, 0);
+    EXPECT_EQ(ret, nullptr);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "LoadSystemModuleByEngine_0200 end");
+}
+
+/**
+ * @tc.name: Deinitialize_0200
+ * @tc.desc: Deinitialize
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, Deinitialize_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Deinitialize_0200 start");
+
+    auto jsRuntime = std::make_unique<AbilityRuntime::JsRuntime>();
+    std::string moduleName = "PreloadSystemModuleTest";
+    napi_value object = nullptr;
+    std::unique_ptr<NativeReference> nativeRef = jsRuntime->LoadSystemModule(moduleName, &object, 0);
+    jsRuntime->modules_.emplace("moduleName", nativeRef.get());
+    jsRuntime->jsEnv_ = nullptr;
+
+    jsRuntime->Deinitialize();
+    EXPECT_EQ(jsRuntime->modules_.size(), 0);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "Deinitialize_0200 end");
+}
+
+/**
+ * @tc.name: RunScript_0200
+ * @tc.desc: RunScript
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RunScript_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RunScript_0200 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    panda::RuntimeOption pandaOption;
+    jsRuntime->jsEnv_->vm_ = panda::JSNApi::CreateJSVM(pandaOption);
+
+    auto ret = jsRuntime->RunScript("", "", false);
+    EXPECT_EQ(ret, false);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "RunScript_0200 end");
+}
+
+/**
+ * @tc.name: RunScript_0300
+ * @tc.desc: RunScript
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RunScript_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RunScript_0300 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    panda::RuntimeOption pandaOption;
+    jsRuntime->jsEnv_->vm_ = panda::JSNApi::CreateJSVM(pandaOption);
+
+    auto ret = jsRuntime->RunScript("MockPath", "", true);
+    EXPECT_EQ(ret, false);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "RunScript_0300 end");
+}
+
+/**
+ * @tc.name: RunSandboxScript_0300
+ * @tc.desc: RunSandboxScript
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RunSandboxScript_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RunSandboxScript_0300 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    std::string bundleName(PATH_MAX, 'a');
+    const std::string& codePath = bundleName;
+    const std::string& modulePath = "";
+    std::string fileName = "";
+    jsRuntime->codePath_ = codePath;
+
+    auto ret = jsRuntime->RunSandboxScript(modulePath, fileName);
+    EXPECT_EQ(ret, false);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "RunSandboxScript_0300 end");
+}
+
+/**
+ * @tc.name: RunSandboxScript_0300
+ * @tc.desc: RunSandboxScript
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RunSandboxScript_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RunSandboxScript_0400 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    std::string bundleName(PATH_MAX, 'a');
+    const std::string& codePath = bundleName;
+    const std::string& modulePath = "";
+    std::string fileName = "HelloWorld";
+    jsRuntime->codePath_ = codePath;
+
+    auto ret = jsRuntime->RunSandboxScript(modulePath, fileName);
+    EXPECT_EQ(ret, false);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "RunSandboxScript_0400 end");
+}
+
+/**
+ * @tc.name: RemoveTask_0300
+ * @tc.desc: RemoveTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RemoveTask_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RemoveTask_0300 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    std::string taskName = "removeTask003";
+    bool taskExecuted = false;
+    auto task = [taskName, &taskExecuted]() {
+        TAG_LOGI(AAFwkTag::TEST, "%{public}s called.", taskName.c_str());
+        taskExecuted = true;
+    };
+    int64_t delayTime = 20;
+    jsRuntime->PostTask(task, taskName, delayTime);
+    jsRuntime->RemoveTask(taskName);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    EXPECT_EQ(taskExecuted, false);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "RemoveTask_0300 end");
+}
+
+/**
+ * @tc.name: SuspendVM_0200
+ * @tc.desc: SuspendVM
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, SuspendVM_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SuspendVM_0200 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    napi_env env = {};
+    jsRuntime->jsEnv_->engine_ = reinterpret_cast<NativeEngine*>(env);
+    auto ret = jsRuntime->SuspendVM(3);
+    EXPECT_EQ(ret, false);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "SuspendVM_0200 end");
+}
+
+/**
+ * @tc.name: PopPreloadObj_0100
+ * @tc.desc: PopPreloadObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, PopPreloadObj_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PopPreloadObj_0100 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    napi_ref ref = nullptr;
+    napi_value value = {};
+    napi_env env_ = {};
+    napi_create_reference(env_, value, 1, &ref);
+    auto navRef = std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference *>(ref));
+    std::map<std::string, std::unique_ptr<NativeReference>> preloadObjMap;
+    preloadObjMap.emplace("PreloadObj", nullptr);
+    preloadObjMap.emplace("PreloadObj1", std::move(navRef));
+    jsRuntime->preloadList_ = std::move(preloadObjMap);
+
+    std::unique_ptr<NativeReference> obj = nullptr;
+    auto ret = jsRuntime->PopPreloadObj("PreloadObj", obj);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(obj, nullptr);
+    EXPECT_EQ(jsRuntime->preloadList_.size(), 1);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "PopPreloadObj_0100 end");
+}
+
+/**
+ * @tc.name: UpdateModuleNameAndAssetPath_0400
+ * @tc.desc: UpdateModuleNameAndAssetPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, UpdateModuleNameAndAssetPath_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UpdateModuleNameAndAssetPath_0400 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    jsRuntime->isBundle_ = false;
+    panda::RuntimeOption pandaOption;
+    jsRuntime->jsEnv_->vm_ = panda::JSNApi::CreateJSVM(pandaOption);
+    jsRuntime->moduleName_ = "";
+
+    jsRuntime->UpdateModuleNameAndAssetPath("moduleName");
+    EXPECT_EQ(jsRuntime->moduleName_, "moduleName");
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "UpdateModuleNameAndAssetPath_0400 end");
+}
+
+/**
+ * @tc.name: ExecuteSecureWithOhmUrl_0100
+ * @tc.desc: basic function test of ExecuteSecureWithOhmUrl and GetExportObjectFromOhmUrl.
+ * @tc.type: FUNC
+ * @tc.require: issueIC77WI
+ */
+HWTEST_F(JsRuntimeTest, ExecuteSecureWithOhmUrl_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ExecuteSecureWithOhmUrl_0100 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    jsRuntime->isBundle_ = false;
+    panda::RuntimeOption pandaOption;
+    jsRuntime->jsEnv_->vm_ = panda::JSNApi::CreateJSVM(pandaOption);
+    jsRuntime->moduleName_ = "";
+
+    std::string moduleName = "moduleName";
+    std::string hapPath = "hapPath";
+    std::string srcEntrance = "srcEntrance";
+    auto ret = jsRuntime->ExecuteSecureWithOhmUrl(moduleName, hapPath, srcEntrance);
+    EXPECT_EQ(ret, false);
+
+    std::string key = "key";
+    auto retVal = jsRuntime->GetExportObjectFromOhmUrl(srcEntrance, key);
+    EXPECT_EQ(retVal, nullptr);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "ExecuteSecureWithOhmUrl_0100 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

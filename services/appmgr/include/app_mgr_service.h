@@ -634,7 +634,7 @@ public:
      *
      * @return Is the status change completed.
      */
-    virtual int32_t ChangeAppGcState(pid_t pid, int32_t state) override;
+    virtual int32_t ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid = 0) override;
 
     /**
      * Register appRunning status listener.
@@ -777,6 +777,10 @@ public:
 
     int32_t SetSupportedProcessCache(int32_t pid, bool isSupport) override;
 
+    int32_t IsProcessCacheSupported(int32_t pid, bool &isSupported) override;
+
+    int32_t SetProcessCacheEnable(int32_t pid, bool enable) override;
+
     /**
      * set browser channel for caller
      */
@@ -801,6 +805,20 @@ public:
     int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback) override;
 #endif // SUPPORT_CHILD_PROCESS
+
+    /**
+     * Register callback to notify native child exit.
+     * @param notify, callback to notify
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify) override;
+
+    /**
+     * Unregister callback to notify native child exit.
+     * @param notify, callback to notify
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> notify) override;
 
     /**
      * Notify that the process depends on web by itself.

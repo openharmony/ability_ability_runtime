@@ -60,12 +60,14 @@ ohos_shared_library("runtime") {
   sources = [
     "${ability_runtime_native_path}/appkit/ability_bundle_manager_helper/bundle_mgr_helper.cpp",
     "${ability_runtime_native_path}/runtime/hdc_register.cpp",
+    "${ability_runtime_native_path}/runtime/js_app_process_state.cpp",
     "${ability_runtime_native_path}/runtime/js_data_struct_converter.cpp",
     "${ability_runtime_native_path}/runtime/js_error_utils.cpp",
     "${ability_runtime_native_path}/runtime/js_module_reader.cpp",
     "${ability_runtime_native_path}/runtime/js_module_searcher.cpp",
     "${ability_runtime_native_path}/runtime/js_quickfix_callback.cpp",
     "${ability_runtime_native_path}/runtime/js_runtime.cpp",
+    "${ability_runtime_native_path}/runtime/js_runtime_common.cpp",
     "${ability_runtime_native_path}/runtime/js_runtime_lite.cpp",
     "${ability_runtime_native_path}/runtime/js_runtime_utils.cpp",
     "${ability_runtime_native_path}/runtime/js_worker.cpp",
@@ -83,6 +85,7 @@ ohos_shared_library("runtime") {
   ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/connect_server_manager:connect_server_manager",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
@@ -111,6 +114,7 @@ ohos_shared_library("runtime") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "i18n:intl_register",
     "init:syscap_ts",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
@@ -119,6 +123,7 @@ ohos_shared_library("runtime") {
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
     "zlib:shared_libz",
+    "faultloggerd:libfaultloggerd",
   ]
 
   public_external_deps = [

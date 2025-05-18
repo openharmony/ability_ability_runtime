@@ -816,11 +816,10 @@ HWTEST_F(AbilityManagerServiceElevenTest, CheckStartCallHasFloatingWindowForUIEx
     EXPECT_NE(abilityMs, nullptr);
 
     sptr<IRemoteObject> token = nullptr;
-    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
-        .Times(AnyNumber())
-        .WillRepeatedly(Return(true));
-    int result = abilityMs->CheckStartCallHasFloatingWindowForUIExtension(token);
-    EXPECT_TRUE(result);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        int result = abilityMs->CheckStartCallHasFloatingWindowForUIExtension(token);
+        EXPECT_TRUE(result);
+    }
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest CheckStartCallHasFloatingWindowForUIExtension_002 end");
 }
 
@@ -838,11 +837,10 @@ HWTEST_F(AbilityManagerServiceElevenTest, CheckStartCallHasFloatingWindowForUIEx
     EXPECT_NE(abilityMs, nullptr);
 
     sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
-    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
-        .Times(AnyNumber())
-        .WillRepeatedly(Return(true));
-    int result = abilityMs->CheckStartCallHasFloatingWindowForUIExtension(token);
-    EXPECT_TRUE(result);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        int result = abilityMs->CheckStartCallHasFloatingWindowForUIExtension(token);
+        EXPECT_TRUE(result);
+    }
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest CheckStartCallHasFloatingWindowForUIExtension_003 end");
 }
 

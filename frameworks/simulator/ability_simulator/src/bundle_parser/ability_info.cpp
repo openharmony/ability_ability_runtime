@@ -75,12 +75,16 @@ const std::string JSON_KEY_ICON_ID = "iconId";
 const std::string JSON_KEY_FORM_ENABLED = "formEnabled";
 const std::string JSON_KEY_SRC_PATH = "srcPath";
 const std::string JSON_KEY_SRC_LANGUAGE = "srcLanguage";
+const std::string JSON_KEY_START_WINDOW = "startWindow";
+const std::string JSON_KEY_START_WINDOW_ID = "startWindowId";
+const std::string JSON_KEY_START_WINDOW_RESOURCE = "startWindowResource";
 const std::string JSON_KEY_START_WINDOW_ICON = "startWindowIcon";
 const std::string JSON_KEY_START_WINDOW_ICON_ID = "startWindowIconId";
 const std::string JSON_KEY_START_WINDOW_BACKGROUND = "startWindowBackground";
 const std::string JSON_KEY_START_WINDOW_BACKGROUND_ID = "startWindowBackgroundId";
 const std::string JSON_KEY_COMPILE_MODE = "compileMode";
 const std::string META_DATA = "metadata";
+const std::string META_DATA_VALUEID = "valueId";
 const std::string META_DATA_NAME = "name";
 const std::string META_DATA_VALUE = "value";
 const std::string META_DATA_RESOURCE = "resource";
@@ -99,9 +103,22 @@ const std::string JOSN_KEY_MIN_WINDOW_HEIGHT = "minWindowHeight";
 const std::string JOSN_KEY_UID = "uid";
 const std::string JOSN_KEY_EXCLUDE_FROM_MISSIONS = "excludeFromMissions";
 const std::string JOSN_KEY_UNCLEARABLE_MISSION = "unclearableMission";
+const std::string JSON_KEY_EXCLUDE_FROM_DOCK_MISSION = "excludeFromDock";
+const std::string JSON_KEY_PREFER_MULTI_WINDOW_ORIENTATION_MISSION = "preferMultiWindowOrientation";
 const std::string JSON_KEY_RECOVERABLE = "recoverable";
 const std::string JSON_KEY_SUPPORT_EXT_NAMES = "supportExtNames";
 const std::string JSON_KEY_SUPPORT_MIME_TYPES = "supportMimeTypes";
+const std::string JSON_KEY_ISOLATION_PROCESS = "isolationProcess";
+const std::string JSON_KEY_ORIENTATION_ID = "orientationId";
+const std::string JSON_KEY_CONTINUE_BUNDLE_NAME = "continueBundleName";
+const std::string JSON_KEY_CONTINUE_TYPE = "continueType";
+const std::string JSON_KEY_APP_INDEX = "appIndex";
+const std::string START_WINDOW_APP_ICON_ID = "startWindowAppIconId";
+const std::string START_WINDOW_ILLUSTRATION_ID = "startWindowIllustrationId";
+const std::string START_WINDOW_BRANDING_IMAGE_ID = "startWindowBrandingImageId";
+const std::string START_WINDOW_BACKGROUND_COLOR_ID = "startWindowBackgroundColorId";
+const std::string START_WINDOW_BACKGROUND_IMAGE_ID = "startWindowBackgroundImageId";
+const std::string START_WINDOW_BACKGROUND_IMAGE_FIT = "startWindowBackgroundImageFit";
 } // namespace
 void to_json(nlohmann::json &jsonObject, const CustomizeData &customizeData)
 {
@@ -122,9 +139,22 @@ void to_json(nlohmann::json &jsonObject, const MetaData &metaData)
 void to_json(nlohmann::json &jsonObject, const Metadata &metadata)
 {
     jsonObject = nlohmann::json {
+        {META_DATA_VALUEID, metadata.valueId},
         {META_DATA_NAME, metadata.name},
         {META_DATA_VALUE, metadata.value},
         {META_DATA_RESOURCE, metadata.resource}
+    };
+}
+
+void to_json(nlohmann::json &jsonObject, const StartWindowResource &startWindowResource)
+{
+    jsonObject = nlohmann::json {
+        {START_WINDOW_APP_ICON_ID, startWindowResource.startWindowAppIconId},
+        {START_WINDOW_ILLUSTRATION_ID, startWindowResource.startWindowIllustrationId},
+        {START_WINDOW_BRANDING_IMAGE_ID, startWindowResource.startWindowBrandingImageId},
+        {START_WINDOW_BACKGROUND_COLOR_ID, startWindowResource.startWindowBackgroundColorId},
+        {START_WINDOW_BACKGROUND_IMAGE_ID, startWindowResource.startWindowBackgroundImageId},
+        {START_WINDOW_BACKGROUND_IMAGE_FIT, startWindowResource.startWindowBackgroundImageFit}
     };
 }
 
@@ -182,6 +212,7 @@ void to_json(nlohmann::json &jsonObject, const AbilityInfo &abilityInfo)
         {IS_STAGE_BASED_MODEL, abilityInfo.isStageBasedModel},
         {CONTINUABLE, abilityInfo.continuable},
         {PRIORITY, abilityInfo.priority},
+        {JSON_KEY_START_WINDOW, abilityInfo.startWindow},
         {JSON_KEY_START_WINDOW_ICON, abilityInfo.startWindowIcon},
         {JSON_KEY_START_WINDOW_ICON_ID, abilityInfo.startWindowIconId},
         {JSON_KEY_START_WINDOW_BACKGROUND, abilityInfo.startWindowBackground},
@@ -199,6 +230,12 @@ void to_json(nlohmann::json &jsonObject, const AbilityInfo &abilityInfo)
         {JSON_KEY_RECOVERABLE, abilityInfo.recoverable},
         {JSON_KEY_SUPPORT_EXT_NAMES, abilityInfo.supportExtNames},
         {JSON_KEY_SUPPORT_MIME_TYPES, abilityInfo.supportMimeTypes},
+        {JSON_KEY_ISOLATION_PROCESS, abilityInfo.isolationProcess},
+        {JSON_KEY_CONTINUE_TYPE, abilityInfo.continueType},
+        {JSON_KEY_CONTINUE_BUNDLE_NAME, abilityInfo.continueBundleNames},
+        {JSON_KEY_APP_INDEX, abilityInfo.appIndex},
+        {JSON_KEY_ORIENTATION_ID, abilityInfo.orientationId},
+        {JSON_KEY_START_WINDOW_RESOURCE, abilityInfo.startWindowResource}
     };
     if (abilityInfo.maxWindowRatio == 0) {
         // maxWindowRatio in json string will be 0 instead of 0.0
@@ -262,6 +299,14 @@ void from_json(const nlohmann::json &jsonObject, Metadata &metadata)
 {
     const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        META_DATA_VALUEID,
+        metadata.valueId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     GetValueIfFindKey<std::string>(jsonObject,
         jsonObjectEnd,
         META_DATA_NAME,
@@ -289,6 +334,63 @@ void from_json(const nlohmann::json &jsonObject, Metadata &metadata)
     if (parseResult != ERR_OK) {
         TAG_LOGD(
             AAFwkTag::ABILITY_SIM, "read Ability Metadata error:%{public}d", parseResult);
+    }
+}
+
+void from_json(const nlohmann::json &jsonObject, StartWindowResource &startWindowResource)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    int32_t parseResult = ERR_OK;
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        START_WINDOW_APP_ICON_ID,
+        startWindowResource.startWindowAppIconId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        START_WINDOW_ILLUSTRATION_ID,
+        startWindowResource.startWindowIllustrationId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        START_WINDOW_BRANDING_IMAGE_ID,
+        startWindowResource.startWindowBrandingImageId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        START_WINDOW_BACKGROUND_COLOR_ID,
+        startWindowResource.startWindowBackgroundColorId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        START_WINDOW_BACKGROUND_IMAGE_ID,
+        startWindowResource.startWindowBackgroundImageId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        START_WINDOW_BACKGROUND_IMAGE_FIT,
+        startWindowResource.startWindowBackgroundImageFit,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    if (parseResult != ERR_OK) {
+        TAG_LOGD(AAFwkTag::ABILITY_SIM, "read Resource error:%{public}d", parseResult);
     }
 }
 
@@ -849,6 +951,70 @@ void from_json(const nlohmann::json &jsonObject, AbilityInfo &abilityInfo)
         false,
         parseResult,
         ArrayType::STRING);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        JSON_KEY_ISOLATION_PROCESS,
+        abilityInfo.isolationProcess,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        JSON_KEY_CONTINUE_TYPE,
+        abilityInfo.continueType,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<std::unordered_set<std::string>>(jsonObject,
+        jsonObjectEnd,
+        JSON_KEY_CONTINUE_BUNDLE_NAME,
+        abilityInfo.continueBundleNames,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        JSON_KEY_APP_INDEX,
+        abilityInfo.appIndex,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        JSON_KEY_ORIENTATION_ID,
+        abilityInfo.orientationId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        JSON_KEY_START_WINDOW,
+        abilityInfo.startWindow,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        JSON_KEY_START_WINDOW_ID,
+        abilityInfo.startWindowId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<StartWindowResource>(jsonObject,
+        jsonObjectEnd,
+        JSON_KEY_START_WINDOW_RESOURCE,
+        abilityInfo.startWindowResource,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "AbilityInfo from_json error:%{public}d", parseResult);
     }

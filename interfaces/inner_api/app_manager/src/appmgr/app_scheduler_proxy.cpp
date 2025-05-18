@@ -636,7 +636,7 @@ int32_t AppSchedulerProxy::ScheduleNotifyAppFault(const FaultData &faultData)
     return reply.ReadInt32();
 }
 
-int32_t AppSchedulerProxy::ScheduleChangeAppGcState(int32_t state)
+int32_t AppSchedulerProxy::ScheduleChangeAppGcState(int32_t state, uint64_t tid)
 {
     MessageParcel data;
 
@@ -646,6 +646,7 @@ int32_t AppSchedulerProxy::ScheduleChangeAppGcState(int32_t state)
     }
 
     data.WriteInt32(state);
+    data.WriteUint64(tid);
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     auto ret = SendTransactCmd(static_cast<uint32_t>(IAppScheduler::Message::APP_GC_STATE_CHANGE),

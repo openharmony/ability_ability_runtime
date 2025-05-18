@@ -49,6 +49,7 @@ namespace AbilityRuntime {
 namespace {
     bool g_jitEnabled = false;
     AbilityRuntime::Runtime::DebugOption g_debugOption;
+    const std::string MULTI_PROCESS = "multi_process";
 }
 bool ChildProcessManager::signalRegistered_ = false;
 
@@ -71,7 +72,7 @@ ChildProcessManager::~ChildProcessManager()
 ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessBySelfFork(const std::string &srcEntry, pid_t &pid)
 {
     TAG_LOGI(AAFwkTag::PROCESSMGR, "called");
-    ChildProcessManagerErrorCode errorCode = PreCheck();
+    ChildProcessManagerErrorCode errorCode = PreCheckSelfFork();
     if (errorCode != ChildProcessManagerErrorCode::ERR_OK) {
         return errorCode;
     }
@@ -80,6 +81,11 @@ ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessBySelfFork(co
     if (!GetBundleInfo(bundleInfo)) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "GetBundleInfo failed");
         return ChildProcessManagerErrorCode::ERR_GET_BUNDLE_INFO_FAILED;
+    }
+
+    if (!AAFwk::AppUtils::GetInstance().IsMultiProcessModel() && !IsMultiProcessFeatureApp(bundleInfo)) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "Device features not support multi process.");
+        return ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED;
     }
 
     RegisterSignal();
@@ -97,6 +103,18 @@ ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessBySelfFork(co
         HandleChildProcessBySelfFork(srcEntry, bundleInfo);
     }
     return ChildProcessManagerErrorCode::ERR_OK;
+}
+
+bool ChildProcessManager::IsMultiProcessFeatureApp(const AppExecFwk::BundleInfo &bundleInfo)
+{
+    for (const auto &info : bundleInfo.hapModuleInfos) {
+        if (info.moduleType != AppExecFwk::ModuleType::ENTRY) {
+            continue;
+        }
+        auto &deviceFeatures = info.deviceFeatures;
+        return std::find(deviceFeatures.begin(), deviceFeatures.end(), MULTI_PROCESS) != deviceFeatures.end();
+    }
+    return false;
 }
 
 ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessByAppSpawnFork(
@@ -187,9 +205,15 @@ void ChildProcessManager::HandleSigChild(int32_t signo)
     }
 }
 
-ChildProcessManagerErrorCode ChildProcessManager::PreCheck()
+bool ChildProcessManager::AllowChildProcessOnDevice()
 {
-    if (!AAFwk::AppUtils::GetInstance().IsMultiProcessModel()) {
+    return AAFwk::AppUtils::GetInstance().IsMultiProcessModel() ||
+        AAFwk::AppUtils::GetInstance().AllowChildProcessInMultiProcessFeatureApp();
+}
+
+ChildProcessManagerErrorCode ChildProcessManager::PreCheckSelfFork()
+{
+    if (!AllowChildProcessOnDevice()) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Multi process model disabled");
         return ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED;
     }
@@ -202,7 +226,7 @@ ChildProcessManagerErrorCode ChildProcessManager::PreCheck()
 
 ChildProcessManagerErrorCode ChildProcessManager::PreCheck(int32_t childProcessType)
 {
-    if (!AAFwk::AppUtils::GetInstance().IsMultiProcessModel() &&
+    if (!AllowChildProcessOnDevice() &&
         childProcessType != AppExecFwk::CHILD_PROCESS_TYPE_NATIVE_ARGS &&
         childProcessType != AppExecFwk::CHILD_PROCESS_TYPE_NATIVE) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Not support child process.");

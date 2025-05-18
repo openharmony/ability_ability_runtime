@@ -63,6 +63,7 @@ public:
     {
         return {};
     }
+    MOCK_METHOD(void, OnProcessReused, (const ProcessData &processData), (override));
 };
 class AppForegroundStateObserver : public AppForegroundStateObserverStub {
 public:
@@ -1481,6 +1482,38 @@ HWTEST_F(AppSpawnSocketTest, OnObserverDied_0300, TestSize.Level1)
     EXPECT_EQ(0, appForegroundStateObserverSetSize);
 }
 
+/**
+ * @tc.name: OnObserverDied_0400
+ * @tc.desc: Test when observer is not nullptr and type is APP_FOREGROUND_STATE_OBSERVER.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSpawnSocketTest, OnObserverDied_0400, TestSize.Level1)
+{
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) AppForegroundStateObserver();
+    wptr<IRemoteObject> remote(remoteObject);
+    ObserverType type = ObserverType::APP_FOREGROUND_STATE_OBSERVER;
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnObserverDied(remote, type);
+    auto appForegroundStateObserverSetSize =
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->appForegroundStateObserverMap_.size();
+    EXPECT_EQ(0, appForegroundStateObserverSetSize);
+}
+
+/**
+ * @tc.name: OnObserverDied_0500
+ * @tc.desc: Test when observer is not nullptr and type is undefined.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSpawnSocketTest, OnObserverDied_0500, TestSize.Level1)
+{
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) AppForegroundStateObserver();
+    wptr<IRemoteObject> remote(remoteObject);
+    ObserverType type = ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER;
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnObserverDied(remote, static_cast<ObserverType>(100));
+    auto appForegroundStateObserverSetSize =
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->appForegroundStateObserverMap_.size();
+    EXPECT_EQ(0, appForegroundStateObserverSetSize);
+}
+
 /*
  * Feature: AppStateObserverManager
  * Function: OnAppCacheStateChanged
@@ -1583,37 +1616,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppCacheStateChanged_004, TestSize.Level2)
     manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, bundleNameList});
     manager->HandleOnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_CREATE);
 }
-/*
- * Feature: AppStateObserverManager
- * Function: OnProcessReused
- * SubFunction: NA
- * FunctionPoints: AppStateObserverManager OnProcessReused
- * EnvConditions: NA
- * CaseDescription: Verify OnProcessReused
- */
-HWTEST_F(AppSpawnSocketTest, OnProcessReused_001, TestSize.Level2)
-{
-    auto manager = std::make_shared<AppStateObserverManager>();
-    ASSERT_NE(manager, nullptr);
-    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
-    manager->OnProcessReused(appRecord);
-}
-/*
- * Feature: AppStateObserverManager
- * Function: OnProcessReused
- * SubFunction: NA
- * FunctionPoints: AppStateObserverManager OnProcessReused
- * EnvConditions: NA
- * CaseDescription: Verify OnProcessReused
- */
-HWTEST_F(AppSpawnSocketTest, OnProcessReused_002, TestSize.Level2)
-{
-    auto manager = std::make_shared<AppStateObserverManager>();
-    ASSERT_NE(manager, nullptr);
-    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
-    manager->Init();
-    manager->OnProcessReused(appRecord);
-}
+
 /*
  * Feature: AppStateObserverManager
  * Function: AddObserverCount
@@ -1629,9 +1632,10 @@ HWTEST_F(AppSpawnSocketTest, AddObserverCount_001, TestSize.Level2)
     int32_t uid = 1000;
     
     manager->AddObserverCount(uid);
-    ASSERT_EQ(manager->observerCountMap_[uid], 1);
-    ASSERT_EQ(manager->observerAmount_, 1);
+    EXPECT_EQ(manager->observerCountMap_[uid], 1);
+    EXPECT_EQ(manager->observerAmount_, 1);
 }
+
 /*
  * Feature: AppStateObserverManager
  * Function: DecreaseObserverCount
@@ -1647,13 +1651,14 @@ HWTEST_F(AppSpawnSocketTest, DecreaseObserverCount_001, TestSize.Level2)
     int32_t uid = 1000;
     
     manager->AddObserverCount(uid);
-    ASSERT_EQ(manager->observerCountMap_[uid], 1);
-    ASSERT_EQ(manager->observerAmount_, 1);
+    EXPECT_EQ(manager->observerCountMap_[uid], 1);
+    EXPECT_EQ(manager->observerAmount_, 1);
     
     manager->DecreaseObserverCount(uid);
-    ASSERT_TRUE(manager->observerCountMap_.empty());
-    ASSERT_EQ(manager->observerAmount_, 0);
+    EXPECT_TRUE(manager->observerCountMap_.empty());
+    EXPECT_EQ(manager->observerAmount_, 0);
 }
+
 /*
  * Feature: AppStateObserverManager
  * Function: WrapAppStateData
@@ -1674,6 +1679,90 @@ HWTEST_F(AppSpawnSocketTest, WrapAppStateData_001, TestSize.Level2)
     EXPECT_EQ(data.uid, 1001);
     EXPECT_EQ(data.bundleName, "com.test.app");
     EXPECT_EQ(data.state, static_cast<int32_t>(ApplicationState::APP_STATE_FOREGROUND));
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnProcessResued
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnProcessResued
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnProcessResued
+ */
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessResued_001, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto* mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer = mockObserver;
+    manager->appStateObserverMap_[observer] = AppStateObserverInfo{0, {"com.example"}};
+    EXPECT_CALL(*mockObserver, OnProcessReused(_)).Times(0);
+    manager->HandleOnProcessResued(nullptr);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnProcessResued
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnProcessResued
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnProcessResued
+ */
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessResued_002, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    std::vector<std::string> bundleNames{"com.ohos.unittest"};
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, bundleNames});
+    EXPECT_CALL(*mockObserver, OnProcessReused(_)).Times(1);
+    manager->HandleOnProcessResued(appRecord);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnProcessResued
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnProcessResued
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnProcessResued
+ */
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessResued_003, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    std::vector<std::string> bundleNames;
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, bundleNames});
+    EXPECT_CALL(*mockObserver, OnProcessReused(_)).Times(1);
+    manager->HandleOnProcessResued(appRecord);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnProcessResued
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnProcessResued
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnProcessResued
+ */
+HWTEST_F(AppSpawnSocketTest, HandleOnProcessResued_004, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    std::vector<std::string> bundleNames{"com.ohos.other"};
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, bundleNames});
+    EXPECT_CALL(*mockObserver, OnProcessReused(_)).Times(0);
+    manager->HandleOnProcessResued(appRecord);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

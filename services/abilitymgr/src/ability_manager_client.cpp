@@ -1686,7 +1686,7 @@ ErrCode AbilityManagerClient::RecordProcessExitReason(const int32_t pid, const E
 
 ErrCode AbilityManagerClient::RecordProcessExitReason(int32_t pid, int32_t uid, const ExitReason &exitReason)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "[EXIT_REASON_TAG] pid:%{public}d, reason:%{public}d, exitMsg: %{public}s",
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "[EXIT_REASON_TAG] pid:%{public}d, reason:%{public}d, exitMsg: %{public}s",
         pid, exitReason.reason, exitReason.exitMsg.c_str());
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
@@ -2198,6 +2198,40 @@ ErrCode AbilityManagerClient::RevokeDelegator(sptr<IRemoteObject> token)
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->RevokeDelegator(token);
+}
+
+ErrCode AbilityManagerClient::GetAllInsightIntentInfo(
+    AbilityRuntime::GetInsightIntentFlag flag,
+    std::vector<InsightIntentInfoForQuery> &infos)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "call GetAllInsightIntentInfo");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetAllInsightIntentInfo(flag, infos);
+}
+
+ErrCode AbilityManagerClient::GetInsightIntentInfoByBundleName(
+    AbilityRuntime::GetInsightIntentFlag flag,
+    const std::string &bundleName,
+    std::vector<InsightIntentInfoForQuery> &infos)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "call GetInsightIntentInfoByBundleName");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
+}
+
+ErrCode AbilityManagerClient::GetInsightIntentInfoByIntentName(
+    AbilityRuntime::GetInsightIntentFlag flag,
+    const std::string &bundleName,
+    const std::string &moduleName,
+    const std::string &intentName,
+    InsightIntentInfoForQuery &info)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "call GetInsightIntentInfoByIntentName");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
 }
 } // namespace AAFwk
 } // namespace OHOS

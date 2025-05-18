@@ -635,6 +635,7 @@ public:
     std::shared_ptr<UserTestRecord> GetUserTestInfo();
 
     void SetProcessAndExtensionType(const std::shared_ptr<AbilityInfo> &abilityInfo, uint32_t extensionProcessMode = 0);
+    void SetStartupTaskData(const AAFwk::Want &want);
     void SetSpecifiedAbilityFlagAndWant(int requestId, const AAFwk::Want &want, const std::string &moduleName);
     void SetScheduleNewProcessRequestState(int32_t requestId, const AAFwk::Want &want, const std::string &moduleName);
     /**
@@ -804,7 +805,7 @@ public:
      *
      * @return Is the status change completed.
      */
-    int32_t ChangeAppGcState(int32_t state);
+    int32_t ChangeAppGcState(int32_t state, uint64_t tid = 0);
 
     void SetAttachDebug(bool isAttachDebug, bool isDebugFromLocal);
     bool IsAttachDebug() const;
@@ -1061,6 +1062,9 @@ public:
         return isDebugFromLocal_;
     }
 
+    std::optional<bool> IsSupportMultiProcessDeviceFeature() const;
+    void SetSupportMultiProcessDeviceFeature(bool support);
+
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1096,7 +1100,7 @@ private:
     void RemoveEvent(uint32_t msg);
 
     void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record, bool isExtensionDebug = false);
-    uint32_t GetAddStageTimeout() const;
+    int32_t GetAddStageTimeout() const;
     void SetModuleLoaded(const std::string &moduleName) const;
 
 private:
@@ -1140,7 +1144,7 @@ private:
     bool isErrorInfoEnhance_ = false;
     bool isNativeStart_ = false;
     bool isMultiThread_ = false;
-    bool enableProcessCache_ = false;
+    bool enableProcessCache_ = true;
     bool processCacheBlocked = false; // temporarily block process cache feature
     bool hasGPU_ = false;
     bool isStrictMode_ = false;
@@ -1234,6 +1238,10 @@ private:
     int32_t pssValue_ = 0;
     bool reasonExist_ = false;
     bool isDebugFromLocal_ = false;
+    std::optional<bool> supportMultiProcessDeviceFeature_ = std::nullopt;
+    mutable ffrt::mutex supportMultiProcessDeviceFeatureLock_;
+    std::shared_ptr<StartupTaskData> startupTaskData_ = nullptr;
+    ffrt::mutex startupTaskDataLock_;
 };
 
 }  // namespace AppExecFwk

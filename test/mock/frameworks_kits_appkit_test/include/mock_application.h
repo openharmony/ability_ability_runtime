@@ -32,7 +32,7 @@ public:
     virtual void OnBackground();
     virtual void OnStart();
     virtual void OnTerminate();
-    virtual int32_t ScheduleChangeAppGcState(int32_t state);
+    virtual int32_t ScheduleChangeAppGcState(int32_t state, uint64_t tid = 0);
 
 private:
     int level_ = 0;

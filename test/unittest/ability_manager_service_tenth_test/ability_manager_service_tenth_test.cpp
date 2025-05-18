@@ -594,5 +594,113 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartHighestPriorityAbility_001, TestSi
     EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartHighestPriorityAbility_001 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Name: DelegatorDoAbilityBackground_001
+ * Function: DelegatorDoAbilityBackground
+ * SubFunction: NA
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, DelegatorDoAbilityBackground_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DelegatorDoAbilityBackground_001 start");
+    std::shared_ptr<AbilityManagerService> abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> token = nullptr;
+    int result = abilityMs_->DelegatorDoAbilityForeground(token);
+    ASSERT_EQ(result, CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DelegatorDoAbilityBackground_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: DelegatorDoAbilityBackground_002
+ * Function: DelegatorDoAbilityBackground
+ * SubFunction: NA
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, DelegatorDoAbilityBackground_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DelegatorDoAbilityBackground_002 start");
+    std::shared_ptr<AbilityManagerService> abilityMs_ = std::make_shared<AbilityManagerService>();
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->SetPid(IPCSkeleton::GetCallingPid());
+    sptr<IRemoteObject> token = new Token(abilityRecord);
+    int result = abilityMs_->DelegatorDoAbilityBackground(token);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DelegatorDoAbilityBackground_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: DelegatorDoAbilityBackground_003
+ * Function: DelegatorDoAbilityBackground
+ * SubFunction: NA
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, DelegatorDoAbilityBackground_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DelegatorDoAbilityBackground_003 start");
+    std::shared_ptr<AbilityManagerService> abilityMs_ = std::make_shared<AbilityManagerService>();
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->SetPid(IPCSkeleton::GetCallingPid() + 1);
+    sptr<IRemoteObject> token = new Token(abilityRecord);
+    int result = abilityMs_->DelegatorDoAbilityBackground(token);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DelegatorDoAbilityBackground_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: DoAbilityForeground_001
+ * Function: DoAbilityForeground
+ * SubFunction: NA
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, DoAbilityForeground_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DoAbilityForeground_001 start");
+    std::shared_ptr<AbilityManagerService> abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> token = nullptr;
+    uint32_t flag = 0;
+    int result = abilityMs_->DoAbilityForeground(token, flag);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DoAbilityForeground_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: DoAbilityForeground_002
+ * Function: DoAbilityForeground
+ * SubFunction: NA
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, DoAbilityForeground_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DoAbilityForeground_002 start");
+    std::shared_ptr<AbilityManagerService> abilityMs_ = std::make_shared<AbilityManagerService>();
+    std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
+    sptr<IRemoteObject> token = new Token(abilityRecord);
+    uint32_t flag = 0;
+    int result = abilityMs_->DoAbilityForeground(token, flag);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DoAbilityForeground_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: DoAbilityForeground_003
+ * Function: DoAbilityForeground
+ * SubFunction: NA
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, DoAbilityForeground_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DoAbilityForeground_003 start");
+    std::shared_ptr<AbilityManagerService> abilityMs_ = std::make_shared<AbilityManagerService>();
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    sptr<IRemoteObject> token = new Token(abilityRecord);
+    abilityMs_->SetAbilityController(nullptr, true);
+    uint32_t flag = 0;
+    int result = abilityMs_->DoAbilityForeground(token, flag);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DoAbilityForeground_003 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

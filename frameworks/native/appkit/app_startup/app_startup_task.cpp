@@ -32,5 +32,50 @@ void AppStartupTask::SetIsExcludeFromAutoStart(bool excludeFromAutoStart)
 {
     isExcludeFromAutoStart_ = excludeFromAutoStart;
 }
+
+void AppStartupTask::SetModuleName(const std::string &moduleName)
+{
+    moduleName_ = moduleName;
+}
+
+const std::string& AppStartupTask::GetModuleName() const
+{
+    return moduleName_;
+}
+
+void AppStartupTask::SetModuleType(AppExecFwk::ModuleType moduleType)
+{
+    moduleType_ = moduleType;
+}
+
+AppExecFwk::ModuleType AppStartupTask::GetModuleType() const
+{
+    return moduleType_;
+}
+
+void AppStartupTask::SetMatchRules(StartupTaskMatchRules matchRules)
+{
+    matchRules_ = std::move(matchRules);
+}
+
+const std::vector<std::string> &AppStartupTask::GetUriMatchRules() const
+{
+    return matchRules_.uris;
+}
+
+const std::vector<std::string> &AppStartupTask::GetInsightIntentMatchRules() const
+{
+    return matchRules_.insightIntents;
+}
+
+const std::vector<std::string> &AppStartupTask::GetActionMatchRules() const
+{
+    return matchRules_.actions;
+}
+
+const std::vector<std::string> &AppStartupTask::GetCustomizationMatchRules() const
+{
+    return matchRules_.customization;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

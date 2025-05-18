@@ -160,11 +160,16 @@ void AppScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawn
     appMgrClient_->KillProcessesByUserId(userId, isNeedSendAppSpawnMsg, callback);
 }
 
-void AppScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason)
+int32_t AppScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason, bool subProcess)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
-    CHECK_POINTER(appMgrClient_);
-    appMgrClient_->KillProcessesByPids(pids, reason);
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    int32_t ret = appMgrClient_->KillProcessesByPids(pids, reason, subProcess);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to KillProcessesByPids");
+        return ret;
+    }
+    return ERR_OK;
 }
 
 void AppScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken)
@@ -239,7 +244,7 @@ void AppScheduler::OnStartProcessFailed(sptr<IRemoteObject> token)
     callback->OnStartProcessFailed(token);
 }
 
-void AppScheduler::OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+void AppScheduler::OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
     const std::string &bundleName, const std::vector<std::string> &abilityNames,
     const std::vector<std::string> &uiExtensionNames)
 {

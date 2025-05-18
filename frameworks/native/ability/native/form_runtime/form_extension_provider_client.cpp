@@ -56,6 +56,10 @@ int FormExtensionProviderClient::AcquireProviderFormInfo(const AppExecFwk::FormJ
     }
 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    if (mainHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GetMainEventRunner failed.");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
     std::function<void()> acquireProviderInfoFunc = [client = sptr<FormExtensionProviderClient>(this),
         formJsInfo, want, callerToken]() {
         client->AcquireFormExtensionProviderInfo(formJsInfo, want, callerToken);
@@ -128,6 +132,10 @@ int FormExtensionProviderClient::NotifyFormDelete(const int64_t formId, const Wa
     }
 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    if (mainHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GetMainEventRunner failed.");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
     std::function<void()> notifyFormExtensionDeleteFunc = [client = sptr<FormExtensionProviderClient>(this),
         formId, want, callerToken]() {
         client->NotifyFormExtensionDelete(formId, want, callerToken);
@@ -170,6 +178,10 @@ int FormExtensionProviderClient::NotifyFormsDelete(const std::vector<int64_t> &f
     }
 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    if (mainHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GetMainEventRunner failed.");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
     std::function<void()> notifyFormExtensionsDeleteFunc = [client = sptr<FormExtensionProviderClient>(this),
         formIds, want, callerToken]() {
         client->NotifyFormExtensionsDelete(formIds, want, callerToken);
@@ -207,6 +219,10 @@ int FormExtensionProviderClient::NotifyFormUpdate(const int64_t formId, const Wa
     }
 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    if (mainHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GetMainEventRunner failed.");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
     std::function<void()> notifyFormExtensionUpdateFunc = [client = sptr<FormExtensionProviderClient>(this),
         formId, want, callerToken]() {
         client->NotifyFormExtensionUpdate(formId, want, callerToken);
@@ -244,6 +260,10 @@ int FormExtensionProviderClient::EventNotify(const std::vector<int64_t> &formIds
     }
 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    if (mainHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GetMainEventRunner failed.");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
     std::function<void()> eventNotifyExtensionFunc = [client = sptr<FormExtensionProviderClient>(this),
         formIds, formVisibleType, want, callerToken]() {
         client->EventNotifyExtension(formIds, formVisibleType, want, callerToken);
@@ -283,6 +303,10 @@ int FormExtensionProviderClient::NotifyFormCastTempForm(const int64_t formId, co
     }
 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    if (mainHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GetMainEventRunner failed.");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
     std::function<void()> notifyFormExtensionCastTempFormFunc = [client = sptr<FormExtensionProviderClient>(this),
         formId, want, callerToken]() {
         client->NotifyFormExtensionCastTempForm(formId, want, callerToken);
@@ -308,6 +332,46 @@ void FormExtensionProviderClient::NotifyFormExtensionCastTempForm(const int64_t 
     HandleResultCode(errorCode, want, callerToken);
 }
 
+int FormExtensionProviderClient::NotifyConfigurationUpdate(const AppExecFwk::Configuration &configuration,
+    const Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGI(AAFwkTag::FORM_EXT, "called");
+    std::pair<int, int> errorCode = CheckParam(want, callerToken);
+    if (errorCode.first != ERR_OK) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "CheckParam failed: %{public}d", errorCode.first);
+        return errorCode.second;
+    }
+
+    std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    if (mainHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GetMainEventRunner failed.");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    std::function<void()> notifyFormExtensionConfigurationUpdateFunc =
+        [client = sptr<FormExtensionProviderClient>(this), configuration, want, callerToken]() {
+            client->NotifyExtensionConfigurationUpdate(configuration, want, callerToken);
+        };
+    mainHandler->PostSyncTask(notifyFormExtensionConfigurationUpdateFunc,
+        "FormExtensionProviderClient::NotifyExtensionConfigurationUpdate");
+    return ERR_OK;
+}
+
+void FormExtensionProviderClient::NotifyExtensionConfigurationUpdate(const AppExecFwk::Configuration &configuration,
+    const Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGI(AAFwkTag::FORM_EXT, "called");
+    int errorCode = ERR_OK;
+    std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
+    if (ownerFormExtension == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
+        errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
+    } else {
+        ownerFormExtension->OnConfigurationUpdated(configuration);
+    }
+
+    HandleResultCode(errorCode, want, callerToken);
+}
+
 int FormExtensionProviderClient::FireFormEvent(const int64_t formId, const std::string &message,
     const Want &want, const sptr<IRemoteObject> &callerToken)
 {
@@ -319,6 +383,10 @@ int FormExtensionProviderClient::FireFormEvent(const int64_t formId, const std::
     }
 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    if (mainHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GetMainEventRunner failed: %{public}" PRId64, formId);
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
     std::function<void()> fireFormExtensionEventFunc = [client = sptr<FormExtensionProviderClient>(this),
         formId, message, want, callerToken]() {
         client->FireFormExtensionEvent(formId, message, want, callerToken);
@@ -356,6 +424,10 @@ int FormExtensionProviderClient::AcquireState(const Want &wantArg, const std::st
     }
 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    if (mainHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GetMainEventRunner failed.");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
     std::function<void()> notifyFormExtensionAcquireStateFunc = [client = sptr<FormExtensionProviderClient>(this),
         wantArg, provider, want, callerToken]() {
         client->NotifyFormExtensionAcquireState(wantArg, provider, want, callerToken);
@@ -460,6 +532,11 @@ int32_t FormExtensionProviderClient::AcquireShareFormData(int64_t formId, const 
     }
 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    if (mainHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GetMainEventRunner failed.");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+
     auto formCall = iface_cast<IFormSupply>(formSupplyCallback);
     if (formCall == nullptr) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "null formCall");
@@ -501,6 +578,10 @@ int32_t FormExtensionProviderClient::AcquireFormData(int64_t formId, const sptr<
     }
 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    if (mainHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GetMainEventRunner failed.");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
     auto formCall = iface_cast<IFormSupply>(formSupplyCallback);
     if (formCall == nullptr) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "null formCall");

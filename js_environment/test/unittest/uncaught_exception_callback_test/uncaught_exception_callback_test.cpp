@@ -309,7 +309,7 @@ void Backtrace(std::ostringstream &stack)
             break;
         }
         const char *file = info.dli_fname ? info.dli_fname : "";
-        uint64_t offset = info.dli_fbase ? pcs[i] - panda::ecmascript::ToUintPtr(info.dli_fbase) : 0;
+        uint64_t offset = info.dli_fbase ? pcs[i] - reinterpret_cast<uintptr_t>(info.dli_fbase) : 0;
         char buf[LOG_BUF_LEN] = {0};
         char frameFormatWithMapName[] = "#%02zu pc %016" PRIx64 " %s";
         if (snprintf_s(buf, sizeof(buf), sizeof(buf) - 1, frameFormatWithMapName, i, offset, file) < 0) {

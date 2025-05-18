@@ -17,12 +17,22 @@
 #define OHOS_ABILITY_RUNTIME_JS_INSIGHT_INTENT_DRIVER_UTILS_H
 
 #include "insight_intent_execute_result.h"
+#include "insight_intent_info_for_query.h"
 #include "native_engine/native_engine.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 napi_value CreateJsExecuteResult(napi_env env, const AppExecFwk::InsightIntentExecuteResult &result);
 napi_value CreateJsWantParams(napi_env env, const AAFwk::WantParams &wantParams);
+napi_value CreateLinkInfoForQuery(napi_env env, const LinkInfoForQuery &info);
+napi_value CreatePageInfoForQuery(napi_env env, const PageInfoForQuery &info);
+napi_value CreateEntryInfoForQuery(napi_env env, const EntryInfoForQuery &info);
+napi_value CreateFunctionInfoForQuery(napi_env env, const FunctionInfoForQuery &info);
+napi_value CreateFormInfoForQuery(napi_env env, const FormInfoForQuery &info);
+napi_value CreateInsightIntentInfoParamWithJson(napi_env env, const nlohmann::json &jsonObject);
+napi_value CreateInsightIntentInfoParam(napi_env env, const std::string &paramStr);
+napi_value CreateInsightIntentInfoForQuery(napi_env env, const InsightIntentInfoForQuery &info);
+napi_value CreateInsightIntentInfoForQueryArray(napi_env env, const std::vector<InsightIntentInfoForQuery> &infos);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_JS_INSIGHT_INTENT_DRIVER_UTILS_H

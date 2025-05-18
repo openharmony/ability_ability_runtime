@@ -191,7 +191,7 @@ public:
      *
      * @param abilityRequest target ability request.
      */
-    int ResolveLocked(const AbilityRequest &abilityRequest);
+    int ResolveLocked(const AbilityRequest &abilityRequest, std::string &errMsg);
 
     /**
      * Call UIAbility by SCB.
@@ -438,9 +438,10 @@ private:
         std::shared_ptr<AbilityRecord> callerAbilityRecord);
 
     // byCall
-    int CallAbilityLocked(const AbilityRequest &abilityRequest);
+    int CallAbilityLocked(const AbilityRequest &abilityRequest, std::string &errMsg);
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
-    int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
+    int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo,
+        const AbilityRequest &abilityRequest, std::string &errMsg);
     bool IsHookModule(const AbilityRequest &abilityRequest) const;
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
     std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);

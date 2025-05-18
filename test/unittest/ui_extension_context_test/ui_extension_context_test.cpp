@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,8 @@
 
 using namespace testing::ext;
 using namespace OHOS::Rosen;
+using testing::Return;
+using testing::_;
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -669,6 +671,34 @@ HWTEST_F(UIExtensionContextTest, GetResourceManager_0100, TestSize.Level1)
     context->resourceManager_ = resourceMgr;
     auto ref = context->GetResourceManager();
     EXPECT_NE(ref, nullptr);
+}
+
+/**
+ * @tc.number: RequestComponentTerminate_0100
+ * @tc.name: RequestComponentTerminate
+ * @tc.desc: RequestComponentTerminate with all conditions required, transfer data ok.
+ */
+HWTEST_F(UIExtensionContextTest, RequestComponentTerminate_0100, TestSize.Level1)
+{
+    auto context = std::make_shared<UIExtensionContext>();
+    sptr<MockWindow> window = sptr<MockWindow>::MakeSptr();
+    EXPECT_CALL(*window, TransferExtensionData(_)).Times(1).WillOnce(Return(Rosen::WMError::WM_OK));
+    context->SetWindow(window);
+    context->RequestComponentTerminate();
+}
+
+/**
+ * @tc.number: RequestComponentTerminate_0200
+ * @tc.name: RequestComponentTerminate
+ * @tc.desc: RequestComponentTerminate with all conditions required, transfer data not ok.
+ */
+HWTEST_F(UIExtensionContextTest, RequestComponentTerminate_0200, TestSize.Level1)
+{
+    auto context = std::make_shared<UIExtensionContext>();
+    sptr<MockWindow> window = sptr<MockWindow>::MakeSptr();
+    EXPECT_CALL(*window, TransferExtensionData(_)).Times(1).WillOnce(Return(Rosen::WMError::WM_DO_NOTHING));
+    context->SetWindow(window);
+    context->RequestComponentTerminate();
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

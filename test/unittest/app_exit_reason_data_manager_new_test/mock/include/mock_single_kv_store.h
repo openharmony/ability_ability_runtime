@@ -33,7 +33,7 @@ public:
 
     DistributedKv::Status Get(const DistributedKv::Key &key, DistributedKv::Value &value) override
     {
-        return DistributedKv::Status::SUCCESS;
+        return Get_;
     };
 
     MOCK_CONST_METHOD2(GetEntries,
@@ -206,6 +206,7 @@ public:
     DistributedKv::Status GetEntries_ = DistributedKv::Status::SUCCESS;
     DistributedKv::Status Delete_ = DistributedKv::Status::SUCCESS;
     DistributedKv::Status Put_ = DistributedKv::Status::SUCCESS;
+    DistributedKv::Status Get_ = DistributedKv::Status::SUCCESS;
 };
 }
 #endif

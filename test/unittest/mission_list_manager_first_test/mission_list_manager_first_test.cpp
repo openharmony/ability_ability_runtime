@@ -25,6 +25,7 @@
 #include "mission_info_mgr.h"
 #include "mission_list_manager.h"
 #include "startup_util.h"
+#include "task_handler_wrap.h"
 #undef private
 #undef protected
 
@@ -958,6 +959,209 @@ HWTEST_F(MissionListManagerFirstTest, MissionListManager_RemoveMissionLocked_001
     EXPECT_NE(missionListManager, nullptr);
     missionListManager.reset();
     GTEST_LOG_(INFO) << "MissionListManager_RemoveMissionLocked_001 end";
+}
+
+/*
+ * @tc.name: MissionListManager_FindEarliestMission_001
+ * @tc.desc: Test FindEarliestMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionListManagerFirstTest, MissionListManager_FindEarliestMission_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MissionListManager_FindEarliestMission_001 start";
+    int userId = 0;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+    missionListManager->currentMissionLists_.clear();
+    missionListManager->defaultStandardList_ = nullptr;
+    missionListManager->defaultSingleList_ = nullptr;
+
+    auto ret = missionListManager->FindEarliestMission();
+    EXPECT_EQ(ret, nullptr);
+    missionListManager.reset();
+    GTEST_LOG_(INFO) << "MissionListManager_FindEarliestMission_001 end";
+}
+
+/*
+ * @tc.name: MissionListManager_MinimizeAbility_001
+ * @tc.desc: Test MinimizeAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionListManagerFirstTest, MissionListManager_MinimizeAbility_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MissionListManager_MinimizeAbility_001 start";
+    int userId = 0;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+
+    auto ret = missionListManager->MinimizeAbility(nullptr, false);
+    EXPECT_EQ(ret, INNER_ERR);
+    missionListManager.reset();
+    GTEST_LOG_(INFO) << "MissionListManager_MinimizeAbility_001 end";
+}
+
+/*
+ * @tc.name: MissionListManager_MoveMissionListToTop_001
+ * @tc.desc: Test MoveMissionListToTop
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionListManagerFirstTest, MissionListManager_MoveMissionListToTop_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MissionListManager_MoveMissionListToTop_001 start";
+    int userId = 0;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+
+    auto missionList1 = std::make_shared<MissionList>();
+    auto missionList2 = std::make_shared<MissionList>();
+    auto missionList3 = std::make_shared<MissionList>();
+    auto missionList4 = std::make_shared<MissionList>();
+    missionListManager->currentMissionLists_.emplace_back(missionList1);
+    missionListManager->currentMissionLists_.emplace_back(missionList2);
+    missionListManager->currentMissionLists_.emplace_back(missionList3);
+    missionListManager->currentMissionLists_.emplace_back(missionList4);
+
+    missionListManager->MoveMissionListToTop(missionList4);
+    EXPECT_EQ(missionListManager->currentMissionLists_.front(), missionList4);
+    missionListManager.reset();
+    GTEST_LOG_(INFO) << "MissionListManager_MoveMissionListToTop_001 end";
+}
+
+/*
+ * @tc.name: MissionListManager_MinimizeAbilityLocked_001
+ * @tc.desc: Test MinimizeAbilityLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionListManagerFirstTest, MissionListManager_MinimizeAbilityLocked_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MissionListManager_MinimizeAbilityLocked_001 start";
+    int userId = 0;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->pendingState_.store(AbilityState::ACTIVE);
+
+    auto ret = missionListManager->MinimizeAbilityLocked(abilityRecord, false);
+    EXPECT_EQ(ret, ERR_OK);
+    missionListManager.reset();
+    GTEST_LOG_(INFO) << "MissionListManager_MinimizeAbilityLocked_001 end";
+}
+
+/*
+ * @tc.name: MissionListManager_BackToCallerAbilityWithResult_001
+ * @tc.desc: Test BackToCallerAbilityWithResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionListManagerFirstTest, MissionListManager_BackToCallerAbilityWithResult_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MissionListManager_BackToCallerAbilityWithResult_001 start";
+    int userId = 0;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->currentState_ = AbilityState::BACKGROUNDING;
+
+    auto ret = missionListManager->BackToCallerAbilityWithResult(
+        nullptr,
+        0,
+        nullptr,
+        0
+    );
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    missionListManager.reset();
+    GTEST_LOG_(INFO) << "MissionListManager_BackToCallerAbilityWithResult_001 end";
+}
+
+/*
+ * @tc.name: MissionListManager_MoveAbilityToBackgroundLocked_001
+ * @tc.desc: Test MoveAbilityToBackgroundLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionListManagerFirstTest, MissionListManager_MoveAbilityToBackgroundLocked_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MissionListManager_MoveAbilityToBackgroundLocked_001 start";
+    int userId = 0;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->currentState_ = AbilityState::BACKGROUNDING;
+
+    auto ret = missionListManager->MoveAbilityToBackgroundLocked(nullptr, nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    missionListManager.reset();
+    GTEST_LOG_(INFO) << "MissionListManager_MoveAbilityToBackgroundLocked_001 end";
+}
+
+/*
+ * @tc.name: MissionListManager_RemoveMissionList_001
+ * @tc.desc: Test RemoveMissionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionListManagerFirstTest, MissionListManager_RemoveMissionList_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MissionListManager_RemoveMissionList_001 start";
+    int userId = 0;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+    auto missionList1 = std::make_shared<MissionList>();
+    auto missionList2 = std::make_shared<MissionList>();
+    auto missionList3 = std::make_shared<MissionList>();
+
+    missionListManager->currentMissionLists_.clear();
+    missionListManager->currentMissionLists_.emplace_back(missionList1);
+    missionListManager->currentMissionLists_.emplace_back(missionList2);
+    missionListManager->currentMissionLists_.emplace_back(missionList3);
+
+    missionListManager->RemoveMissionList(missionList3);
+    EXPECT_EQ(missionListManager->currentMissionLists_.size(), 2);
+    missionListManager.reset();
+    GTEST_LOG_(INFO) << "MissionListManager_RemoveMissionList_001 end";
+}
+
+/*
+ * @tc.name: MissionListManager_ClearMission_001
+ * @tc.desc: Test ClearMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionListManagerFirstTest, MissionListManager_ClearMission_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MissionListManager_ClearMission_001 start";
+    int userId = 0;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+    auto missionList1 = std::make_shared<MissionList>();
+
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    std::shared_ptr<Mission> mission1 = std::make_shared<Mission>(1, abilityRecord, "");
+    std::shared_ptr<Mission> mission2 = std::make_shared<Mission>(2, abilityRecord, "");
+    std::shared_ptr<Mission> mission3 = std::make_shared<Mission>(3, abilityRecord, "");
+    mission1->abilityRecord_ = abilityRecord;
+    mission1->abilityRecord_->abilityInfo_.excludeFromMissions = false;
+    mission1->unclearable_ = true;
+    missionList1->missions_.clear();
+    missionList1->missions_.emplace_back(mission1);
+    missionList1->missions_.emplace_back(mission2);
+    missionList1->missions_.emplace_back(mission3);
+    missionList1->type_ = MissionListType::CURRENT;
+    std::shared_ptr<AbilityRecord> ability = InitAbilityRecord();
+
+    auto missionList2 = std::make_shared<MissionList>();
+    
+    auto missionList3 = std::make_shared<MissionList>();
+
+    missionListManager->currentMissionLists_.clear();
+    missionListManager->currentMissionLists_.emplace_back(missionList1);
+    missionListManager->currentMissionLists_.emplace_back(missionList2);
+    missionListManager->currentMissionLists_.emplace_back(missionList3);
+
+    auto ret = missionListManager->ClearMission(1);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    missionListManager.reset();
+    GTEST_LOG_(INFO) << "MissionListManager_ClearMission_001 end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS

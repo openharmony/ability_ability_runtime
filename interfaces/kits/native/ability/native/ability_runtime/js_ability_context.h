@@ -103,6 +103,8 @@ private:
     napi_value OnOpenLink(napi_env env, NapiCallbackInfo& info);
     napi_value OnOpenLinkInner(napi_env env, const AAFwk::Want& want,
         int requestCode, const std::string& startTime, const std::string& url);
+    napi_value OnStartAbilityAsCallerInner(napi_env env, NapiCallbackInfo& info,
+        const AAFwk::Want &want, size_t unwrapArgc, const AAFwk::StartOptions &startOptions);
     napi_value OnStartAbilityAsCaller(napi_env env, NapiCallbackInfo& info);
     napi_value OnStartRecentAbility(napi_env env, NapiCallbackInfo& info);
     napi_value OnStartAbilityWithAccount(napi_env env, NapiCallbackInfo& info);

@@ -409,7 +409,7 @@ public:
      * You can override this function to implement your own processing logic.
      */
     virtual void OnBackground();
-    
+
     /**
      * @brief Called before this ability enters the <b>STATE_FOREGROUND</b> state.
      * The ability in the <b>STATE_FOREGROUND</b> state is invisible.
@@ -564,6 +564,17 @@ public:
      * @param callback insight intent async callback.
      */
     virtual void ExecuteInsightIntentMoveToForeground(const AAFwk::Want &want,
+        const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+        std::unique_ptr<InsightIntentExecutorAsyncCallback> callback);
+
+    /**
+     * @brief Execute insight intent when an ability start with page insight intent.
+     *
+     * @param want Want.
+     * @param executeParam insight intent execute param.
+     * @param callback insight intent async callback.
+     */
+    virtual void ExecuteInsightIntentPage(const AAFwk::Want &want,
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback);
 

@@ -36,6 +36,7 @@
 #include "insight_intent_execute_param.h"
 #include "js_ability_context.h"
 #include "js_data_struct_converter.h"
+#include "js_insight_intent_page.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "js_utils.h"
@@ -952,6 +953,7 @@ void JsUIAbility::DoOnForeground(const Want &want)
             windowMode_ = windowMode;
             TAG_LOGD(AAFwkTag::UIABILITY, "set window mode: %{public}d", windowMode);
         }
+        SetInsightIntentParam(want, false);
     }
 
     auto window = scene_->GetMainWindow();
@@ -965,7 +967,7 @@ void JsUIAbility::DoOnForeground(const Want &want)
     }
 
     OnWillForeground();
-    
+
     TAG_LOGD(AAFwkTag::UIABILITY, "move scene to foreground, sceneFlag_: %{public}d", UIAbility::sceneFlag_);
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, METHOD_NAME);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "scene_->GoForeground");
@@ -1015,6 +1017,7 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
         return;
     }
 
+    SetInsightIntentParam(want, true);
     AbilityContinuationOrRecover(want);
     auto window = scene_->GetMainWindow();
     if (window) {
@@ -1042,6 +1045,7 @@ void JsUIAbility::RequestFocus(const Want &want)
         window->SetWindowMode(static_cast<Rosen::WindowMode>(windowMode));
         TAG_LOGD(AAFwkTag::UIABILITY, "set window mode: %{public}d", windowMode);
     }
+    SetInsightIntentParam(want, false);
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, METHOD_NAME);
     scene_->GoForeground(UIAbility::sceneFlag_);
     TAG_LOGI(AAFwkTag::UIABILITY, "end");
@@ -1159,6 +1163,52 @@ void JsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
     if (!ret) {
         // callback has removed, release in insight intent executor.
         TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+    }
+}
+
+void JsUIAbility::ExecuteInsightIntentPage(const Want &want,
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+    std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "execute intent page");
+    if (abilityInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid ability info");
+        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        return;
+    }
+
+    InsightIntentExecutorInfo executeInfo;
+    executeInfo.hapPath = abilityInfo_->hapPath;
+    executeInfo.executeParam = executeParam;
+    auto ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+        jsRuntime_, executeInfo, std::move(callback));
+    if (!ret) {
+        // callback has removed, release in insight intent executor.
+        TAG_LOGE(AAFwkTag::INTENT, "execute insightIntent failed");
+    }
+}
+
+void JsUIAbility::SetInsightIntentParam(const Want &want, bool coldStart)
+{
+    if (scene_ == nullptr) {
+        TAG_LOGW(AAFwkTag::INTENT, "scene invalid");
+        return;
+    }
+
+    auto window = scene_->GetMainWindow();
+    if (window == nullptr) {
+        TAG_LOGW(AAFwkTag::INTENT, "window invalid");
+        return;
+    }
+
+    if (abilityInfo_ == nullptr) {
+        TAG_LOGW(AAFwkTag::INTENT, "abilityInfo invalid");
+        return;
+    }
+
+    if (AppExecFwk::InsightIntentExecuteParam::IsInsightIntentPage(want)) {
+        JsInsightIntentPage::SetInsightIntentParam(jsRuntime_, abilityInfo_->hapPath, want, window, coldStart);
     }
 }
 

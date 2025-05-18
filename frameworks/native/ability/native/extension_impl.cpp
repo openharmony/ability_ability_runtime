@@ -18,6 +18,7 @@
 #include "ability_manager_client.h"
 #include "ability_local_record.h"
 #include "ability_transaction_callback_info.h"
+#include "freeze_util.h"
 #include "hitrace_meter.h"
 #include "ipc_object_proxy.h"
 #include "extension_context.h"
@@ -272,6 +273,7 @@ sptr<IRemoteObject> ExtensionImpl::ConnectExtension(const Want &want, bool &isAs
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::EXT, "call");
+    FreezeUtil::GetInstance().AddLifecycleEvent(token_, "ExtensionImpl::ConnectExtension");
     if (extension_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null extension_");
         isAsyncCallback = false;
@@ -312,10 +314,16 @@ sptr<IRemoteObject> ExtensionImpl::ConnectExtension(const Want &want, bool &isAs
 
 void ExtensionImpl::ConnectExtensionCallback(sptr<IRemoteObject> &service)
 {
+    FreezeUtil::GetInstance().AddLifecycleEvent(token_, "ExtensionImpl::ConnectExtensionCallback");
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->ScheduleConnectAbilityDone(token_, service);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::EXT, "err: %{public}d", err);
+        FreezeUtil::GetInstance().AddLifecycleEvent(token_,
+            "ExtensionImpl::ConnectExtensionCallback fail, err is " + std::to_string(err));
+        return;
     }
+    FreezeUtil::GetInstance().DeleteLifecycleEvent(token_);
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
 }
 
 /**

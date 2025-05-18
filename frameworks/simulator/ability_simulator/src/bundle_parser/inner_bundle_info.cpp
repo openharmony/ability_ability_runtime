@@ -119,6 +119,8 @@ const std::string NATIVE_LIBRARY_PATH_SYMBOL = "!/";
 const std::string STR_PHONE = "phone";
 const std::string STR_DEFAULT = "default";
 
+const std::string OVERLAY_TYPE = "overlayType";
+
 inline CompileMode ConvertCompileMode(const std::string &compileMode)
 {
     if (compileMode == Profile::COMPILE_MODE_ES_MODULE) {
@@ -135,6 +137,7 @@ InnerBundleInfo::InnerBundleInfo()
     if (baseApplicationInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "null baseApplicationInfo_");
     }
+    baseBundleInfo_ = std::make_shared<BundleInfo>();
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "instance created");
 }
 
@@ -161,6 +164,11 @@ InnerBundleInfo &InnerBundleInfo::operator=(const InnerBundleInfo &info)
         *(this->baseApplicationInfo_) = *(info.baseApplicationInfo_);
     }
     this->provisionMetadatas_ = info.provisionMetadatas_;
+    this->baseBundleInfo_ = std::make_shared<BundleInfo>();
+    if (info.baseBundleInfo_ != nullptr) {
+        *(this->baseBundleInfo_) = *(info.baseBundleInfo_);
+    }
+    this->overlayType_ = info.overlayType_;
     return *this;
 }
 
@@ -254,6 +262,7 @@ void InnerBundleInfo::ToJson(nlohmann::json &jsonObject) const
     jsonObject[BUNDLE_STATUS] = bundleStatus_;
     jsonObject[ALLOWED_ACLS] = allowedAcls_;
     jsonObject[BASE_APPLICATION_INFO] = *baseApplicationInfo_;
+    jsonObject[BASE_BUNDLE_INFO] = *baseBundleInfo_;
     jsonObject[BASE_ABILITY_INFO] = baseAbilityInfos_;
     jsonObject[INNER_MODULE_INFO] = innerModuleInfos_;
     jsonObject[USER_ID] = userId_;
@@ -262,6 +271,7 @@ void InnerBundleInfo::ToJson(nlohmann::json &jsonObject) const
     jsonObject[BUNDLE_BASE_EXTENSION_INFOS] = baseExtensionInfos_;
     jsonObject[APP_INDEX] = appIndex_;
     jsonObject[BUNDLE_IS_SANDBOX_APP] = isSandboxApp_;
+    jsonObject[OVERLAY_TYPE] = overlayType_;
 }
 
 void from_json(const nlohmann::json &jsonObject, InnerModuleInfo &info)
@@ -811,6 +821,14 @@ int32_t InnerBundleInfo::FromJson(const nlohmann::json &jsonObject)
         true,
         parseResult,
         ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<BundleInfo>(jsonObject,
+        jsonObjectEnd,
+        BASE_BUNDLE_INFO,
+        *baseBundleInfo_,
+        JsonType::OBJECT,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     GetValueIfFindKey<ApplicationInfo>(jsonObject,
         jsonObjectEnd,
         BASE_APPLICATION_INFO,
@@ -880,6 +898,14 @@ int32_t InnerBundleInfo::FromJson(const nlohmann::json &jsonObject)
         BUNDLE_IS_SANDBOX_APP,
         isSandboxApp_,
         JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        OVERLAY_TYPE,
+        overlayType_,
+        JsonType::NUMBER,
         false,
         parseResult,
         ArrayType::NOT_ARRAY);
@@ -1086,5 +1112,165 @@ IsolationMode InnerBundleInfo::GetIsolationMode(const std::string &isolationMode
         return IsolationMode::NONISOLATION_FIRST;
     }
 }
-}  // namespace AppExecFwk
+
+void InnerBundleInfo::SetBaseBundleInfo(const BundleInfo &bundleInfo)
+{
+    *baseBundleInfo_ = bundleInfo;
+}
+void InnerBundleInfo::SetApplicationBundleType(BundleType type)
+{
+    baseApplicationInfo_->bundleType = type;
+}
+bool InnerBundleInfo::SetInnerModuleAtomicPreload(
+    const std::string &moduleName, const std::vector<std::string> &preloads)
+{
+    if (innerModuleInfos_.find(moduleName) == innerModuleInfos_.end()) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "innerBundleInfo does not contain the module");
+        return false;
+    }
+    innerModuleInfos_.at(moduleName).preloads = preloads;
+    return true;
+}
+
+ErrCode InnerBundleInfo::GetApplicationInfoV9(
+    int32_t flags, int32_t userId, ApplicationInfo &appInfo, int32_t appIndex) const
+{
+    appInfo = *baseApplicationInfo_;
+    for (const auto &info : innerModuleInfos_) {
+        bool deCompress = info.second.hapPath.empty();
+        ModuleInfo moduleInfo;
+        moduleInfo.moduleName = info.second.moduleName;
+        if (deCompress) {
+            moduleInfo.moduleSourceDir = info.second.modulePath;
+            appInfo.moduleSourceDirs.emplace_back(info.second.modulePath);
+        }
+        moduleInfo.preloads = info.second.preloads;
+        appInfo.moduleInfos.emplace_back(moduleInfo);
+        if (deCompress && info.second.isEntry) {
+            appInfo.entryDir = info.second.modulePath;
+        }
+        if ((static_cast<uint32_t>(flags) &
+                static_cast<uint32_t>(GetApplicationFlag::GET_APPLICATION_INFO_WITH_METADATA)) ==
+            static_cast<uint32_t>(GetApplicationFlag::GET_APPLICATION_INFO_WITH_METADATA)) {
+            bool isModuleJson = info.second.isModuleJson;
+            if (!isModuleJson && info.second.metaData.customizeData.size() > 0) {
+                appInfo.metaData[info.second.moduleName] = info.second.metaData.customizeData;
+            }
+            if (isModuleJson && info.second.metadata.size() > 0) {
+                appInfo.metadata[info.second.moduleName] = info.second.metadata;
+            }
+        }
+    }
+    if (!appInfo.permissions.empty()) {
+        RemoveDuplicateName(appInfo.permissions);
+    }
+    return ERR_OK;
+}
+
+void InnerBundleInfo::ProcessBundleWithHapModuleInfoFlag(
+    int32_t flags, BundleInfo &bundleInfo, int32_t userId, int32_t appIndex) const
+{
+    if ((static_cast<uint32_t>(flags) & static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE)) !=
+        static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE)) {
+        bundleInfo.hapModuleInfos.clear();
+        return;
+    }
+    for (const auto &info : innerModuleInfos_) {
+        auto hapmoduleinfo = FindHapModuleInfo(info.second.modulePackage, userId);
+        if (hapmoduleinfo) {
+            HapModuleInfo hapModuleInfo = *hapmoduleinfo;
+            auto it = innerModuleInfos_.find(info.second.modulePackage);
+            if (it == innerModuleInfos_.end()) {
+                TAG_LOGE(AAFwkTag::ABILITY_SIM, "not find module %{public}s", info.second.modulePackage.c_str());
+            } else {
+                hapModuleInfo.hashValue = it->second.hashValue;
+            }
+            if (hapModuleInfo.hapPath.empty()) {
+                hapModuleInfo.moduleSourceDir = info.second.modulePath;
+            }
+            if ((static_cast<uint32_t>(flags) &
+                    static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)) !=
+                static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)) {
+                hapModuleInfo.metadata.clear();
+            }
+            bundleInfo.hapModuleInfos.emplace_back(hapModuleInfo);
+        }
+    }
+}
+
+void InnerBundleInfo::ProcessBundleFlags(int32_t flags, int32_t userId, BundleInfo &bundleInfo, int32_t appIndex) const
+{
+    if ((static_cast<uint32_t>(flags) & static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)) ==
+        static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)) {
+        if ((static_cast<uint32_t>(flags) & static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)) ==
+            static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)) {
+            GetApplicationInfoV9(static_cast<int32_t>(GetApplicationFlag::GET_APPLICATION_INFO_WITH_METADATA), userId,
+                bundleInfo.applicationInfo, appIndex);
+        } else {
+            GetApplicationInfoV9(static_cast<int32_t>(GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT), userId,
+                bundleInfo.applicationInfo, appIndex);
+        }
+    }
+    bundleInfo.applicationInfo.appIndex = appIndex;
+    ProcessBundleWithHapModuleInfoFlag(flags, bundleInfo, userId, appIndex);
+    if ((static_cast<uint32_t>(flags) &
+            static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO)) ==
+        static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO)) {
+        bundleInfo.signatureInfo.appId = baseBundleInfo_->appId;
+        bundleInfo.signatureInfo.fingerprint = baseApplicationInfo_->fingerprint;
+        bundleInfo.signatureInfo.certificate = baseBundleInfo_->signatureInfo.certificate;
+    }
+}
+
+ErrCode InnerBundleInfo::GetBundleInfoV9(int32_t flags, BundleInfo &bundleInfo, int32_t userId, int32_t appIndex) const
+{
+    bundleInfo = *baseBundleInfo_;
+    bundleInfo.overlayType = overlayType_;
+    bundleInfo.isNewVersion = isNewVersion_;
+    for (const auto &info : innerModuleInfos_) {
+        bundleInfo.hapModuleNames.emplace_back(info.second.modulePackage);
+        bundleInfo.moduleNames.emplace_back(info.second.moduleName);
+        bundleInfo.moduleDirs.emplace_back(info.second.modulePath);
+        bundleInfo.modulePublicDirs.emplace_back(info.second.moduleDataDir);
+        bundleInfo.moduleResPaths.emplace_back(info.second.moduleResPath);
+    }
+    ProcessBundleFlags(flags, userId, bundleInfo, appIndex);
+    return ERR_OK;
+}
+
+ErrCode InnerBundleInfo::GetAppServiceHspInfo(BundleInfo &bundleInfo) const
+{
+    if (baseApplicationInfo_->bundleType != BundleType::APP_SERVICE_FWK) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "%{public}s is not app service", GetBundleName().c_str());
+        return ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST;
+    }
+    bundleInfo = *baseBundleInfo_;
+    bundleInfo.applicationInfo = *baseApplicationInfo_;
+    for (const auto &info : innerModuleInfos_) {
+        if (info.second.distro.moduleType == Profile::MODULE_TYPE_SHARED) {
+            auto hapmoduleinfo = FindHapModuleInfo(info.second.modulePackage, Constants::ALL_USERID);
+            if (hapmoduleinfo) {
+                HapModuleInfo hapModuleInfo = *hapmoduleinfo;
+                hapModuleInfo.moduleSourceDir =
+                    hapModuleInfo.hapPath.empty() ? info.second.modulePath : hapModuleInfo.moduleSourceDir;
+                bundleInfo.hapModuleInfos.emplace_back(hapModuleInfo);
+            }
+        }
+    }
+    if (bundleInfo.hapModuleInfos.empty()) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "bundleName:%{public}s no hsp module info",
+            baseApplicationInfo_->bundleName.c_str());
+        return ERR_BUNDLE_MANAGER_MODULE_NOT_EXIST;
+    }
+    return ERR_OK;
+}
+
+bool InnerBundleInfo::GetSharedBundleInfo(int32_t flags, BundleInfo &bundleInfo) const
+{
+    bundleInfo = *baseBundleInfo_;
+    ProcessBundleWithHapModuleInfoFlag(flags, bundleInfo, Constants::ALL_USERID);
+    bundleInfo.applicationInfo = *baseApplicationInfo_;
+    return true;
+}
+} // namespace AppExecFwk
 }  // namespace OHOS

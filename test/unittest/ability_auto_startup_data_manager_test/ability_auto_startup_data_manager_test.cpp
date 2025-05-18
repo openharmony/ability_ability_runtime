@@ -616,5 +616,197 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_accessTokenId_100, TestSize.
     EXPECT_FALSE(result);
     GTEST_LOG_(INFO) << "IsEqual_accessTokenId_100 end";
 }
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: UpdateAutoStartupData_
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager UpdateAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateAutoStartupData_500 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    abilityAutoStartupDataManager.kvStorePtr_ = kvStorePtr;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.userId = 100;
+    bool isAutoStartup = true;
+    bool isEdmForce = false;
+    kvStorePtr->Put_ = DistributedKv::Status::INVALID_FORMAT;
+
+    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
+    EXPECT_EQ(result, ERR_INVALID_OPERATION);
+    kvStorePtr->Put_ = DistributedKv::Status::SUCCESS;
+    GTEST_LOG_(INFO) << "UpdateAutoStartupData_500 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: DeleteAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager DeleteAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DeleteAutoStartupData_500 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    abilityAutoStartupDataManager.kvStorePtr_ = kvStorePtr;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.userId = 100;
+    kvStorePtr->Delete_ = DistributedKv::Status::INVALID_FORMAT;
+
+    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info);
+    EXPECT_EQ(result, ERR_INVALID_OPERATION);
+    kvStorePtr->Delete_ = DistributedKv::Status::SUCCESS;
+    GTEST_LOG_(INFO) << "DeleteAutoStartupData_500 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: DeleteAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager DeleteAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_bundleName_400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DeleteAutoStartupData_bundleName_400 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    abilityAutoStartupDataManager.kvStorePtr_ = kvStorePtr;
+    EXPECT_EQ(true, abilityAutoStartupDataManager.CheckKvStore());
+    kvStorePtr->GetEntries_ = DistributedKv::Status::INVALID_FORMAT;
+    std::string bundleName = "com.example.testbundle";
+    int32_t accessTokenId = 0;
+
+    auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(bundleName, accessTokenId);
+    EXPECT_EQ(result, ERR_INVALID_OPERATION);
+    kvStorePtr->GetEntries_ = DistributedKv::Status::SUCCESS;
+    GTEST_LOG_(INFO) << "DeleteAutoStartupData_bundleName_400 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: QueryAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager QueryAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "QueryAutoStartupData_500 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    abilityAutoStartupDataManager.kvStorePtr_ = kvStorePtr;
+    EXPECT_EQ(true, abilityAutoStartupDataManager.CheckKvStore());
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.userId = 100;
+    kvStorePtr->GetEntries_ = DistributedKv::Status::INVALID_FORMAT;
+
+    auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info);
+    EXPECT_EQ(result.code, ERR_INVALID_OPERATION);
+    kvStorePtr->GetEntries_ = DistributedKv::Status::SUCCESS;
+    GTEST_LOG_(INFO) << "QueryAutoStartupData_500 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: GetCurrentAppAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager GetCurrentAppAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, GetCurrentAppAutoStartupData_300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetCurrentAppAutoStartupData_300 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    abilityAutoStartupDataManager.kvStorePtr_ = kvStorePtr;
+    EXPECT_TRUE(abilityAutoStartupDataManager.CheckKvStore());
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    std::vector<AutoStartupInfo> infoList;
+    std::string accessTokenId = "0";
+    kvStorePtr->GetEntries_ = DistributedKv::Status::INVALID_FORMAT;
+
+    auto result = abilityAutoStartupDataManager.GetCurrentAppAutoStartupData(info.bundleName, infoList, accessTokenId);
+    EXPECT_EQ(result, ERR_INVALID_OPERATION);
+    kvStorePtr->GetEntries_ = DistributedKv::Status::SUCCESS;
+    GTEST_LOG_(INFO) << "GetCurrentAppAutoStartupData_300 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: GetCurrentAppAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager GetCurrentAppAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, RestoreKvStore_100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RestoreKvStore_100 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    DistributedKv::Status status = DistributedKv::Status::DATA_CORRUPTED;
+
+    auto result = abilityAutoStartupDataManager.RestoreKvStore(status);
+    EXPECT_NE(result, status);
+    GTEST_LOG_(INFO) << "RestoreKvStore_100 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: GetCurrentAppAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager GetCurrentAppAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, RestoreKvStore_200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RestoreKvStore_200 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    DistributedKv::Status status = DistributedKv::Status::SUCCESS;
+
+    auto result = abilityAutoStartupDataManager.RestoreKvStore(status);
+    EXPECT_EQ(result, status);
+    GTEST_LOG_(INFO) << "RestoreKvStore_200 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: InsertAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager InsertAutoStartupData
+ */
+
+HWTEST_F(AbilityAutoStartupDataManagerTest, InsertAutoStartupData_500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "InsertAutoStartupData_500 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    abilityAutoStartupDataManager.kvStorePtr_ = kvStorePtr;
+    EXPECT_EQ(true, abilityAutoStartupDataManager.CheckKvStore());
+
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.userId = 100;
+    struct AutoStartupStatus AutoStartupStatus;
+    AutoStartupStatus.isAutoStartup = false;
+    AutoStartupStatus.isEdmForce = false;
+    kvStorePtr->Put_ = DistributedKv::Status::INVALID_FORMAT;
+
+    auto result = abilityAutoStartupDataManager.InsertAutoStartupData(
+        info, AutoStartupStatus.isAutoStartup, AutoStartupStatus.isEdmForce);
+    EXPECT_EQ(result, ERR_INVALID_OPERATION);
+    kvStorePtr->Put_ = DistributedKv::Status::SUCCESS;
+    GTEST_LOG_(INFO) << "InsertAutoStartupData_500 end";
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

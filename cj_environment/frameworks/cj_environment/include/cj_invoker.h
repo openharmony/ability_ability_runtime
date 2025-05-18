@@ -39,6 +39,8 @@ struct CJRuntimeAPI {
     void (*RegisterCJUncaughtExceptionHandler)(const CJUncaughtExceptionInfo& handle);
     void (*RegisterArkVMInRuntime)(unsigned long long);
     void (*RegisterStackInfoCallbacks)(UpdateStackInfoFuncType);
+    void (*DumpHeapSnapshot)(int fd);
+    void (*ForceFullGC)();
 };
 }
 

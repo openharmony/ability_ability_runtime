@@ -52,7 +52,6 @@ ohos_shared_library("app_manager") {
   ]
 
   sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/last_exit_detail_info.cpp",
     "${ability_runtime_services_path}/appdfr/src/appfreeze_manager.cpp",
     "src/appmgr/ability_controller_proxy.cpp",
     "src/appmgr/ability_controller_stub.cpp",
@@ -121,6 +120,7 @@ ohos_shared_library("app_manager") {
     "src/appmgr/start_specified_ability_response_proxy.cpp",
     "src/appmgr/start_specified_ability_response_stub.cpp",
     "src/appmgr/system_memory_attr.cpp",
+    "src/appmgr/process_bind_data.cpp",
   ]
 
   public_configs = [
@@ -137,6 +137,7 @@ ohos_shared_library("app_manager") {
   deps = [
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
+    "${ability_runtime_services_path}/common:res_sched_util",
   ]
 
   external_deps = [

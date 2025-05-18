@@ -19,6 +19,7 @@
 #include <string>
 
 #include "ability_info.h"
+#include "application_info.h"
 #include "extension_ability_info.h"
 
 namespace OHOS {
@@ -54,6 +55,12 @@ enum class AOTCompileStatus {
     COMPILE_FAILED = 2,
 };
 
+enum OverlayState : int8_t {
+    OVERLAY_DISABLED = 0,
+    OVERLAY_ENABLE,
+    OVERLAY_INVALID,
+};
+
 struct Dependency {
     std::string bundleName;
     std::string moduleName;
@@ -72,6 +79,31 @@ struct PreloadItem {
 
     PreloadItem() = default;
     explicit PreloadItem(std::string name) : moduleName(name) {}
+};
+
+struct RouterItem {
+    std::string name;
+    std::string pageSourceFile;
+    std::string buildFunction;
+    std::string customData;
+    std::string ohmurl;
+    std::string bundleName;
+    std::string moduleName;
+    std::map<std::string, std::string> data;
+};
+
+struct AppEnvironment {
+    std::string name;
+    std::string value;
+};
+
+struct OverlayModuleInfo {
+    int32_t priority = 0;
+    int32_t state = OVERLAY_INVALID; // 0 is for disable and 1 is for enable
+    std::string bundleName;
+    std::string moduleName;
+    std::string targetModuleName;
+    std::string hapPath;
 };
 
 // configuration information about an module
@@ -95,6 +127,9 @@ struct HapModuleInfo {
     std::string nativeLibraryPath;
     std::string cpuAbi;
     bool compressNativeLibs = true;
+
+    // quick fix hqf info
+    HqfInfo hqfInfo;
     std::vector<std::string> nativeLibraryFileNames;
 
     std::vector<std::string> reqCapabilities;
@@ -106,6 +141,7 @@ struct HapModuleInfo {
     std::string bundleName;
     std::string mainElementName;
     std::string pages;
+    std::string systemTheme;
     std::string process;
     std::string resourcePath;
     std::string srcEntrance;
@@ -125,9 +161,20 @@ struct HapModuleInfo {
     std::string moduleSourceDir;
     AtomicServiceModuleType atomicServiceModuleType = AtomicServiceModuleType::NORMAL;
     std::vector<PreloadItem> preloads;
+    std::vector<RouterItem> routerArray;
+    std::vector<AppEnvironment> appEnvironments;
     std::string buildHash;
+    std::string routerMap;
+    std::string packageName;
+    std::string abilitySrcEntryDelegator;
+    std::string abilityStageSrcEntryDelegator;
+    std::string appStartup;
+    std::string fileContextMenu;
     IsolationMode isolationMode = IsolationMode::NONISOLATION_FIRST;
     AOTCompileStatus aotCompileStatus = AOTCompileStatus::NOT_COMPILED;
+
+    // overlay module info
+    std::vector<OverlayModuleInfo> overlayModuleInfos;
 };
 } // namespace AppExecFwk
 } // namespace OHOS

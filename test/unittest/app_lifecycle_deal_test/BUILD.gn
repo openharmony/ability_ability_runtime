@@ -25,6 +25,7 @@ ohos_unittest("app_lifecycle_deal_test") {
   ]
 
   include_dirs = [
+    "mock/include",
     "${ability_runtime_test_path}/mock/common/include",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
@@ -33,7 +34,10 @@ ohos_unittest("app_lifecycle_deal_test") {
     "${ability_runtime_services_path}/appmgr/test/unittest/mocks",
   ]
 
-  sources = [ "app_lifecycle_deal_test.cpp" ]
+  sources = [
+    "app_lifecycle_deal_test.cpp",
+    "mock/src/bundle_mgr_helper.cpp",
+  ]
 
   deps = [
     "${ability_runtime_services_path}/abilitymgr:abilityms",
@@ -51,6 +55,7 @@ ohos_unittest("app_lifecycle_deal_test") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",

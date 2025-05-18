@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include "ability_window_configuration.h"
 #include "app_running_record.h"
+#include "app_utils.h"
 #include "render_record.h"
 #include "app_mgr_service_inner.h"
 #include "error_msg_util.h"
@@ -23,6 +26,7 @@
 #include "freeze_util.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
+#include "insight_intent_execute_param.h"
 #include "ui_extension_utils.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
@@ -35,6 +39,7 @@
 #include "uri_permission_manager_client.h"
 #endif // SUPPORT_UPMS
 namespace OHOS {
+using AAFwk::AppUtils;
 namespace AppExecFwk {
 namespace {
 constexpr int64_t NANOSECONDS = 1000000000;  // NANOSECONDS mean 10^9 nano second
@@ -343,6 +348,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetNWebPreload(isAllowedNWebPreload_);
     launchData.SetPreloadModuleName(preloadModuleName_);
     launchData.SetDebugFromLocal(isDebugFromLocal_);
+    launchData.SetStartupTaskData(startupTaskData_);
 
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     AddAppLifecycleEvent("AppRunningRecord::LaunchApplication");
@@ -373,7 +379,7 @@ void AppRunningRecord::AddAbilityStage()
     }
     HapModuleInfo abilityStage;
     if (GetTheModuleInfoNeedToUpdated(mainBundleName_, abilityStage)) {
-        auto timeout = GetAddStageTimeout();
+        auto timeout = GetAddStageTimeout() * AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
         SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
         SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, timeout);
         TAG_LOGI(AAFwkTag::APPMGR, "Current module : [%{public}s] | bundle : [%{public}s]",
@@ -399,7 +405,7 @@ bool AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bund
             AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG)) {
             TAG_LOGI(
                 AAFwkTag::APPMGR, "ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG not exist");
-            auto timeout = GetAddStageTimeout();
+            auto timeout = GetAddStageTimeout() * AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
             SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
             SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, timeout);
         }
@@ -423,7 +429,7 @@ void AppRunningRecord::AddAbilityStageBySpecifiedProcess(const std::string &bund
 
     HapModuleInfo hapModuleInfo;
     if (GetTheModuleInfoNeedToUpdated(bundleName, hapModuleInfo)) {
-        auto timeout = GetAddStageTimeout();
+        auto timeout = GetAddStageTimeout() * AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
         SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
         SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, timeout);
         if (appLifeCycleDeal_ == nullptr) {
@@ -492,7 +498,7 @@ void AppRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
 
 void AppRunningRecord::ScheduleTerminate()
 {
-    auto timeout = AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT;
+    auto timeout = AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT * AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
     SendEvent(AMSEventHandler::TERMINATE_APPLICATION_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
     SendEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG, timeout);
     if (appLifeCycleDeal_ == nullptr) {
@@ -1159,7 +1165,8 @@ std::shared_ptr<PriorityObject> AppRunningRecord::GetPriorityObject()
 
 void AppRunningRecord::SendEventForSpecifiedAbility()
 {
-    auto timeOUt = AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT;
+    auto timeOUt = AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT *
+        AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
     SendEvent(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG, timeOUt / HALF_TIMEOUT);
     SendEvent(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG, timeOUt);
 }
@@ -1481,6 +1488,21 @@ void AppRunningRecord::SetProcessAndExtensionType(
     return;
 }
 
+void AppRunningRecord::SetStartupTaskData(const AAFwk::Want &want)
+{
+    std::lock_guard<ffrt::mutex> lock(startupTaskDataLock_);
+    startupTaskData_ = std::make_shared<StartupTaskData>();
+    startupTaskData_->uri = want.GetUriString();
+    startupTaskData_->action = want.GetAction();
+    const AppExecFwk::WantParams &wantParams = want.GetParams();
+    if (wantParams.HasParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME)) {
+        startupTaskData_->insightIntentName = wantParams.GetStringParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME);
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "uri: %{public}s, action: %{public}s, intentName: %{public}s",
+        startupTaskData_->uri.c_str(), startupTaskData_->action.c_str(),
+        startupTaskData_->insightIntentName.c_str());
+}
+
 void AppRunningRecord::SetSpecifiedAbilityFlagAndWant(
     int requestId, const AAFwk::Want &want, const std::string &moduleName)
 {
@@ -1562,7 +1584,8 @@ void AppRunningRecord::SchedulePrepareTerminate(const std::string &moduleName)
 
 void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)
 {
-    auto timeOUt = AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT;
+    auto timeOUt = AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT *
+        AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
     SendEvent(AMSEventHandler::START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG, timeOUt / HALF_TIMEOUT);
     SendEvent(AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG, timeOUt);
     if (appLifeCycleDeal_ == nullptr) {
@@ -1582,7 +1605,8 @@ void AppRunningRecord::ScheduleAcceptWantDone()
 
 void AppRunningRecord::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)
 {
-    auto timeOUt = AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT;
+    auto timeOUt = AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT *
+        AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
     SendEvent(AMSEventHandler::START_SPECIFIED_PROCESS_HALF_TIMEOUT_MSG, timeOUt / HALF_TIMEOUT);
     SendEvent(AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG, timeOUt);
     if (appLifeCycleDeal_ == nullptr) {
@@ -2111,14 +2135,14 @@ std::shared_ptr<AppRunningRecord> AppRunningRecord::GetParentAppRecord()
     return parentAppRecord_.lock();
 }
 
-int32_t AppRunningRecord::ChangeAppGcState(int32_t state)
+int32_t AppRunningRecord::ChangeAppGcState(int32_t state, uint64_t tid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (appLifeCycleDeal_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
         return ERR_INVALID_VALUE;
     }
-    return appLifeCycleDeal_->ChangeAppGcState(state);
+    return appLifeCycleDeal_->ChangeAppGcState(state, tid);
 }
 
 void AppRunningRecord::SetAttachDebug(bool isAttachDebug, bool isDebugFromLocal)
@@ -2617,7 +2641,7 @@ void AppRunningRecord::UnSetPolicy()
 #endif // SUPPORT_UPMS
 }
 
-uint32_t AppRunningRecord::GetAddStageTimeout() const
+int32_t AppRunningRecord::GetAddStageTimeout() const
 {
     if (IsEmptyKeepAliveApp()) {
         return AMSEventHandler::ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT;
@@ -2628,6 +2652,18 @@ uint32_t AppRunningRecord::GetAddStageTimeout() const
 void AppRunningRecord::SetDebugFromLocal(bool isDebugFromLocal)
 {
     isDebugFromLocal_ = isDebugFromLocal;
+}
+
+std::optional<bool> AppRunningRecord::IsSupportMultiProcessDeviceFeature() const
+{
+    std::lock_guard<ffrt::mutex> supportLock(supportMultiProcessDeviceFeatureLock_);
+    return supportMultiProcessDeviceFeature_;
+}
+
+void AppRunningRecord::SetSupportMultiProcessDeviceFeature(bool support)
+{
+    std::lock_guard<ffrt::mutex> supportLock(supportMultiProcessDeviceFeatureLock_);
+    supportMultiProcessDeviceFeature_ = support;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

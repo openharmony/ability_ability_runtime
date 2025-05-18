@@ -207,7 +207,7 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const std::vector<std::
         return ERR_OK;
     }
     if (uriVec.size() == 0 || uriVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "out of range: %{public}u", uriVec.size());
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "out of range: %{public}zu", uriVec.size());
         funcResult = ERR_URI_LIST_OUT_OF_RANGE;
         return ERR_OK;
     }
@@ -415,7 +415,7 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermissionPrivileged(const std::ve
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (uriVec.size() == 0 || uriVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "out of range: %{public}u", uriVec.size());
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "out of range: %{public}zu", uriVec.size());
         funcResult = ERR_URI_LIST_OUT_OF_RANGE;
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
@@ -985,7 +985,7 @@ ErrCode UriPermissionManagerStubImpl::RawDataToStringVec(const UriPermissionRawD
         return ERR_DEAD_OBJECT;
     }
     if (rawData.size == 0 || rawData.size > MAX_IPC_RAW_DATA_SIZE) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "size invalid: %{public}zu", rawData.size);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "size invalid: %{public}u", rawData.size);
         return ERR_DEAD_OBJECT;
     }
     std::stringstream ss;

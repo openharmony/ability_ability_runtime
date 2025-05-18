@@ -225,6 +225,10 @@ void SourceMap::ExtractStackInfo(const std::string& stackStr, std::vector<std::s
 
 void SourceMap::ExtractSourceMapData(const std::string& allmappings, std::shared_ptr<SourceMapData>& curMapData)
 {
+    if (!curMapData) {
+        TAG_LOGE(AAFwkTag::JSENV, "curMapData is null");
+        return;
+    }
     curMapData->mappings_ = HandleMappings(allmappings);
     // the first bit: the column after transferring.
     // the second bit: the source file.
