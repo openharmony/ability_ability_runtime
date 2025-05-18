@@ -96,5 +96,60 @@ uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementN
     TAG_LOGE(AAFwkTag::INTENT, "get srcEntry failed");
     return AAFwk::ERR_INSIGHT_INTENT_START_INVALID_COMPONENT;
 }
+uint32_t InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(
+    ExtractInsightIntentGenericInfo &genericInfo, InsightIntentInfoForQuery &queryInfo)
+{
+    queryInfo.bundleName = genericInfo.bundleName;
+    queryInfo.moduleName = genericInfo.moduleName;
+    queryInfo.intentName = genericInfo.intentName;
+    queryInfo.displayName = genericInfo.displayName;
+    queryInfo.intentType = genericInfo.decoratorType;
+    if (genericInfo.decoratorType == INSIGHT_INTENTS_DECORATOR_TYPE_LINK) {
+        auto linkInfo = genericInfo.get<InsightIntentLinkInfo>();
+        queryInfo.linkInfo.uri = linkInfo.uri;
+        queryInfo.parameters = linkInfo.parameters;
+    } else if (genericInfo.decoratorType == INSIGHT_INTENTS_DECORATOR_TYPE_PAGE) {
+        auto pageInfo = genericInfo.get<InsightIntentPageInfo>();
+        queryInfo.pageInfo.uiAbility = pageInfo.uiAbility;
+        queryInfo.pageInfo.pageRouterName = pageInfo.pageRouteName;
+        queryInfo.pageInfo.navigationId = pageInfo.navigationId;
+        queryInfo.pageInfo.navDestination = pageInfo.navDestination;
+        queryInfo.parameters = pageInfo.parameters;
+    } else if (genericInfo.decoratorType == INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY) {
+        auto entryInfo = genericInfo.get<InsightIntentEntryInfo>();
+        queryInfo.entryInfo.abilityName = entryInfo.abilityName;
+        for (auto mode : entryInfo.executeMode) {
+            queryInfo.entryInfo.executeMode.emplace_back(mode);
+        }
+        queryInfo.parameters = entryInfo.parameters;
+    } else if (genericInfo.decoratorType == INSIGHT_INTENTS_DECORATOR_TYPE_FUNCTION) {
+        auto functionInfo = genericInfo.get<InsightIntentFunctionInfo>();
+        queryInfo.parameters = functionInfo.parameters;
+    } else if (genericInfo.decoratorType == INSIGHT_INTENTS_DECORATOR_TYPE_FORM) {
+        auto formInfo = genericInfo.get<InsightIntentFormInfo>();
+        queryInfo.parameters = formInfo.parameters;
+    } else {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid decoratorType:%{public}s", genericInfo.decoratorType.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+uint32_t InsightIntentUtils::ConvertExtractInsightIntentInfo(
+    ExtractInsightIntentInfo &intentInfo, InsightIntentInfoForQuery &queryInfo)
+{
+    ConvertExtractInsightIntentGenericInfo(intentInfo.genericInfo, queryInfo);
+    queryInfo.domain = intentInfo.domain;
+    queryInfo.intentVersion = intentInfo.intentVersion;
+    queryInfo.displayDescription = intentInfo.displayDescription;
+    queryInfo.schema = intentInfo.schema;
+    queryInfo.icon = intentInfo.icon;
+    queryInfo.llmDescription = intentInfo.llmDescription;
+
+    for (auto &keyword : intentInfo.keywords) {
+        queryInfo.keywords.emplace_back(keyword);
+    }
+    return ERR_OK;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

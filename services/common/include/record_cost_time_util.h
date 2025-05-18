@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_RECORD_COST_TIME_UTIL_H
 #define OHOS_ABILITY_RUNTIME_RECORD_COST_TIME_UTIL_H
 
+#include <chrono>
 #include <string>
 
 namespace OHOS {
@@ -26,10 +27,8 @@ public:
     virtual ~RecordCostTimeUtil();
 
 private:
-    int64_t SystemTimeMillisecond();
-
     std::string funcName_;
-    int64_t timeStart_ = 0;
+    std::chrono::steady_clock::time_point timeStart_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

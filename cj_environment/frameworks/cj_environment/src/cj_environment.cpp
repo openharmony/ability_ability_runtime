@@ -16,8 +16,9 @@
 #include "cj_environment.h"
 
 #include <string>
-#include <filesystem>
+#include <sstream>
 #include <mutex>
+#include <charconv>
 #include "cj_hilog.h"
 #include "cj_invoker.h"
 #ifdef __OHOS__
@@ -45,7 +46,7 @@ const std::string SANDBOX_LIB_PATH = "/data/storage/el1/bundle/libs/" APP_LIB_NA
 const std::string CJ_RT_PATH = SANDBOX_LIB_PATH + "/runtime";
 const std::string CJ_LIB_PATH = SANDBOX_LIB_PATH + "/ohos";
 const std::string CJ_SYSLIB_PATH = "/system/lib64:/system/lib64/platformsdk";
-const std::string CJ_CHIPSDK_PATH = "/system/lib64/chipset-pub-sdk";
+const std::string CJ_CHIPSDK_PATH = "/system/lib64/chipset-pub-sdk:/system/lib64/chipset-sdk";
 const std::string CJ_SDK_PATH = "/system/lib64/platformsdk/cjsdk";
 } // namespace
 
@@ -61,6 +62,8 @@ const char INIT_CJLIBRARY_SYMBOL_NAME[] = "InitCJLibrary";
 const char REGISTER_EVENTHANDLER_CALLBACKS_NAME[] = "RegisterEventHandlerCallbacks";
 const char REGISTER_ARKVM_SYMBOL_NAME[] = "RegisterArkVMInRuntime";
 const char REGISTER_STACKINFO_CALLBACKS_NAME[] = "RegisterStackInfoCallbacks";
+const char DUMP_HEAP_SNAPSHOT_NAME[] = "CJ_MRT_DumpHeapSnapshot";
+const char FORCE_FULL_GC_NAME[] = "CJ_MRT_ForceFullGC";
 
 using InitCJRuntimeType = int(*)(const struct RuntimeParam*);;
 using InitUISchedulerType = void*(*)();
@@ -70,6 +73,8 @@ using InitCJLibraryType = int(*)(const char*);
 using RegisterEventHandlerType = void(*)(PostTaskType, HasHigherPriorityType);
 using RegisterArkVMType = void(*)(unsigned long long);
 using RegisterStackInfoType = void(*)(UpdateStackInfoFuncType);
+using DumpHeapSnapshotType = void(*)(int);
+using ForceFullGCType = void(*)();
 
 #ifdef __OHOS__
 const char REGISTER_UNCAUGHT_EXCEPTION_NAME[] = "RegisterUncaughtExceptionHandler";
@@ -185,6 +190,32 @@ bool LoadSymbolRegisterCJUncaughtExceptionHandler(void* handle, CJRuntimeAPI& ap
 }
 #endif
 
+bool LoadSymbolDumpHeapSnapshot(void* handle, CJRuntimeAPI& apis)
+{
+    auto symbol = DynamicFindSymbol(handle, DUMP_HEAP_SNAPSHOT_NAME);
+    if (symbol == nullptr) {
+        LOGE("runtime api not found: %{public}s", DUMP_HEAP_SNAPSHOT_NAME);
+        // return true for compatible.
+        apis.DumpHeapSnapshot = nullptr;
+        return true;
+    }
+    apis.DumpHeapSnapshot = reinterpret_cast<DumpHeapSnapshotType>(symbol);
+    return true;
+}
+
+bool LoadSymbolForceFullGC(void* handle, CJRuntimeAPI& apis)
+{
+    auto symbol = DynamicFindSymbol(handle, FORCE_FULL_GC_NAME);
+    if (symbol == nullptr) {
+        LOGE("runtime api not found: %{public}s", FORCE_FULL_GC_NAME);
+        // return true for compatible.
+        apis.ForceFullGC = nullptr;
+        return true;
+    }
+    apis.ForceFullGC = reinterpret_cast<ForceFullGCType>(symbol);
+    return true;
+}
+
 bool PostTaskWrapper(void* func)
 {
     return CJEnvironment::GetInstance()->PostTask(reinterpret_cast<TaskFuncType>(func));
@@ -206,6 +237,10 @@ const char *CJEnvironment::cjNewAppNSName = "moduleNs_default";
 const char *CJEnvironment::cjNewSDKNSName = "cj_rom_sdk";
 const char *CJEnvironment::cjNewSysNSName = "default";
 const char *CJEnvironment::cjNDKNSName = "ndk";
+const char *CJEnvironment::cjCompatibilitySDKNSName = "cj_compatibility_sdk";
+std::string CJEnvironment::appVersion = "5.1.0.0";
+const uint32_t CJEnvironment::majorVersion = 5;
+const uint32_t CJEnvironment::minorVersion = 1;
 
 #ifdef WITH_EVENT_HANDLER
 static std::shared_ptr<AppExecFwk::EventHandler>GetGHandler()
@@ -358,7 +393,9 @@ bool CJEnvironment::LoadRuntimeApis()
         !LoadSymbolInitCJLibrary(dso, *lazyApis_) ||
         !LoadSymbolRegisterEventHandlerCallbacks(dso, *lazyApis_) ||
         !LoadSymbolRegisterStackInfoCallbacks(dso, *lazyApis_) ||
-        !LoadSymbolRegisterArkVM(dso, *lazyApis_)) {
+        !LoadSymbolRegisterArkVM(dso, *lazyApis_) ||
+        !LoadSymbolDumpHeapSnapshot(dso, *lazyApis_) ||
+        !LoadSymbolForceFullGC(dso, *lazyApis_)) {
         LOGE("load symbol failed");
         DynamicFreeLibrary(dso);
         return false;
@@ -376,6 +413,9 @@ bool CJEnvironment::LoadRuntimeApis()
 
 void CJEnvironment::RegisterArkVMInRuntime(unsigned long long externalVM)
 {
+    if (lazyApis_ == nullptr) {
+        return;
+    }
     if (lazyApis_->RegisterArkVMInRuntime == nullptr) {
         return;
     }
@@ -384,6 +424,9 @@ void CJEnvironment::RegisterArkVMInRuntime(unsigned long long externalVM)
 
 void CJEnvironment::RegisterStackInfoCallbacks(UpdateStackInfoFuncType uFunc)
 {
+    if (lazyApis_ == nullptr) {
+        return;
+    }
     if (lazyApis_->RegisterStackInfoCallbacks == nullptr) {
         return;
     }
@@ -392,7 +435,35 @@ void CJEnvironment::RegisterStackInfoCallbacks(UpdateStackInfoFuncType uFunc)
 
 void CJEnvironment::RegisterCJUncaughtExceptionHandler(const CJUncaughtExceptionInfo& handle)
 {
+    if (lazyApis_ == nullptr) {
+        return;
+    }
+    if (lazyApis_->RegisterCJUncaughtExceptionHandler == nullptr) {
+        return;
+    }
     lazyApis_->RegisterCJUncaughtExceptionHandler(handle);
+}
+
+void CJEnvironment::DumpHeapSnapshot(int fd)
+{
+    if (lazyApis_ == nullptr) {
+        return;
+    }
+    if (lazyApis_->DumpHeapSnapshot == nullptr) {
+        return;
+    }
+    lazyApis_->DumpHeapSnapshot(fd);
+}
+
+void CJEnvironment::ForceFullGC()
+{
+    if (lazyApis_ == nullptr) {
+        return;
+    }
+    if (lazyApis_->ForceFullGC == nullptr) {
+        return;
+    }
+    lazyApis_->ForceFullGC();
 }
 
 bool CJEnvironment::PostTask(TaskFuncType task)
@@ -477,11 +548,15 @@ void CJEnvironment::InitNewCJAppNS(const std::string& path)
         Dl_namespace chip_sdk;
         dlns_get(CJEnvironment::cjSDKNSName, &sdk);
         dlns_get(CJEnvironment::cjChipSDKNSName, &chip_sdk);
+        dlns_inherit(&ns, &sdk, "allow_all_shared_libs");
         dlns_inherit(&ns, &chip_sdk, "libssl_openssl.z.so");
     } else {
+        Dl_namespace compatibility_sdk;
+        dlns_get(CJEnvironment::cjCompatibilitySDKNSName, &compatibility_sdk);
         dlns_get(CJEnvironment::cjNewSDKNSName, &sdk);
+        dlns_inherit(&ns, &sdk, "allow_all_shared_libs");
+        dlns_inherit(&ns, &compatibility_sdk, "allow_all_shared_libs");
     }
-    dlns_inherit(&ns, &sdk, "allow_all_shared_libs");
 #endif
 }
 
@@ -501,6 +576,15 @@ void CJEnvironment::InitNewCJSDKNS(const std::string& path)
     LOGI("InitCJSDKNS: %{public}s", path.c_str());
     Dl_namespace ns;
     DynamicInitNewNamespace(&ns, path.c_str(), cjNewSDKNSName);
+#endif
+}
+
+void CJEnvironment::InitCJCompatibilitySDKNS(const std::string& path)
+{
+#ifdef __OHOS__
+    LOGI("InitCJCompatibilitySDKNS: %{public}s", path.c_str());
+    Dl_namespace ns;
+    DynamicInitNewNamespace(&ns, path.c_str(), cjCompatibilitySDKNSName);
 #endif
 }
 
@@ -697,13 +781,36 @@ bool CJEnvironment::StartDebugger()
     return true;
 }
 
+std::vector<uint32_t> SplitVersion(std::string& version, char separator)
+{
+    std::vector<uint32_t> result;
+    std::stringstream ss(version);
+    std::string item;
+    uint32_t num;
+    while (std::getline(ss, item, separator)) {
+        auto res = std::from_chars(item.data(), item.data() + item.size(), num);
+        if (res.ec == std::errc()) {
+            result.push_back(num);
+        } else {
+            LOGE("Incorrect version");
+            return result;
+        }
+    }
+    return result;
+}
+
 CJEnvironment::NSMode CJEnvironment::DetectAppNSMode()
 {
-    std::filesystem::path runtimePath(CJ_RT_PATH + "/libcangjie-runtime.so");
-    if (std::filesystem::exists(runtimePath)) {
-        return NSMode::APP;
-    } else {
+    LOGI("App compileSDKVersion is %{public}s", CJEnvironment::appVersion.c_str());
+    std::vector<uint32_t> tokens = SplitVersion(CJEnvironment::appVersion, '.');
+    if (tokens.size() <= 1) {
         return NSMode::SINK;
+    }
+    if (tokens[0] > CJEnvironment::majorVersion ||
+        (tokens[0] == CJEnvironment::majorVersion && tokens[1] >= CJEnvironment::minorVersion)) {
+        return NSMode::SINK;
+    } else {
+        return NSMode::APP;
     }
 }
 
@@ -715,6 +822,7 @@ void CJEnvironment::InitRuntimeNS()
         InitCJSDKNS(CJ_RT_PATH + ":" + CJ_LIB_PATH);
     } else {
         InitNewCJSDKNS(CJ_SDK_PATH);
+        InitCJCompatibilitySDKNS(CJ_RT_PATH + ":" + CJ_LIB_PATH);
     }
 #endif
 }
@@ -726,6 +834,11 @@ void CJEnvironment::InitCJNS(const std::string& appPath)
 #endif
     StartRuntime();
     StartUIScheduler();
+}
+
+void CJEnvironment::SetAppVersion(std::string& version)
+{
+    CJEnvironment::appVersion = version;
 }
 
 CJEnvMethods* CJEnvironment::CreateEnvMethods()
@@ -779,6 +892,15 @@ CJEnvMethods* CJEnvironment::CreateEnvMethods()
         },
         .registerStackInfoCallbacks = [](UpdateStackInfoFuncType uFunc) {
             CJEnvironment::GetInstance()->RegisterStackInfoCallbacks(uFunc);
+        },
+        .setAppVersion = [](std::string& version) {
+            CJEnvironment::SetAppVersion(version);
+        },
+        .dumpHeapSnapshot = [](int fd) {
+            CJEnvironment::GetInstance()->DumpHeapSnapshot(fd);
+        },
+        .forceFullGC = []() {
+            CJEnvironment::GetInstance()->ForceFullGC();
         }
     };
     return &gCJEnvMethods;

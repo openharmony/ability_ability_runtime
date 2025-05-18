@@ -71,6 +71,7 @@ struct ProcessData : public Parcelable {
     bool isPreloadModule = false;
     int32_t callerPid = -1;
     int32_t callerUid = -1;
+    std::string killReason;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

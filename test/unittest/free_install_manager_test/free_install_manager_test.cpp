@@ -30,6 +30,8 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 const int BUNDLE_MGR_SERVICE_SYS_ABILITY_ID = 401;
+const int VALID_RECORD_ID = 1;
+const int INVALID_RECORD_ID = -1;
 }
 class FreeInstallTest : public testing::Test {
 public:
@@ -509,5 +511,97 @@ HWTEST_F(FreeInstallTest, FreeInstall_StartAbilityByConvertedWant_001, TestSize.
     EXPECT_TRUE(freeInstallManager_ != nullptr);
 }
 
+/**
+ * @tc.number: IsTopAbility_001
+ * @tc.name: IsTopAbility
+ * @tc.desc: Test IsTopAbility.
+ */
+HWTEST_F(FreeInstallTest, FreeInstall_IsTopAbility_001, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    EXPECT_NE(freeInstallManager_, nullptr);
+    sptr<IRemoteObject> callerToken = nullptr;
+    bool result = freeInstallManager_->IsTopAbility(callerToken);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number: FreeInstall_StartRemoteFreeInstall_001
+ * @tc.name: StartRemoteFreeInstall
+ * @tc.desc: Test StartRemoteFreeInstall.
+ */
+HWTEST_F(FreeInstallTest, FreeInstall_StartRemoteFreeInstall_001, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    Want want;
+    want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.demo";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AbilityType::PAGE;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->missionId_ = -1;
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int result = freeInstallManager_->StartRemoteFreeInstall(want, 0, 0, callerToken);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: FreeInstall_AddFreeInstallObserver_002
+ * @tc.name: AddFreeInstallObserver
+ * @tc.desc: Test StartRemoteFreeInstall.
+ */
+HWTEST_F(FreeInstallTest, FreeInstall_AddFreeInstallObserver_002, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.demo";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AbilityType::PAGE;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->missionId_ = -1;
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int result = freeInstallManager_->AddFreeInstallObserver(callerToken, nullptr);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: FreeInstall_GetRecordIdByToken_001
+ * @tc.name: GetRecordIdByToken
+ * @tc.desc: Test StartRemoteFreeInstall.
+ */
+HWTEST_F(FreeInstallTest, FreeInstall_GetRecordIdByToken_001, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    EXPECT_NE(freeInstallManager_, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.demo";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AbilityType::PAGE;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->recordId_ = VALID_RECORD_ID;
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t result = freeInstallManager_->GetRecordIdByToken(callerToken);
+    EXPECT_EQ(result, VALID_RECORD_ID);
+}
+
+/**
+ * @tc.number: FreeInstall_GetRecordIdByToken_002
+ * @tc.name: GetRecordIdByToken
+ * @tc.desc: Test StartRemoteFreeInstall.
+ */
+HWTEST_F(FreeInstallTest, FreeInstall_GetRecordIdByToken_002, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    EXPECT_NE(freeInstallManager_, nullptr);
+    sptr<IRemoteObject> callerToken = nullptr;
+    int32_t result = freeInstallManager_->GetRecordIdByToken(callerToken);
+    EXPECT_EQ(result, INVALID_RECORD_ID);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

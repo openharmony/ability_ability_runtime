@@ -22,6 +22,7 @@
 #include "mock_parameters.h"
 #include "mock_permission_verification.h"
 #include "mock_single_kv_store.h"
+#include "ability_manager_errors.h"
 
 namespace {
 constexpr int32_t BASE_USER_RANGE = 200000;
@@ -217,6 +218,167 @@ HWTEST_F(AbilityAutoStartupServiceSecondTest, InnerApplicationAutoStartupByEDM_0
     EXPECT_EQ(result, 0);
 
     GTEST_LOG_(INFO) << "InnerApplicationAutoStartupByEDM_004 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: CheckPermissionForSystemTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService CheckPermissionForSystem
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, CheckPermissionForSystem_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckPermissionForSystem_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    MyFlag::flag_ = 0;
+    system::SetBoolParameter("", false);
+    int32_t result = abilityAutoStartupService->CheckPermissionForSystem();
+    ASSERT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+    GTEST_LOG_(INFO) << "CheckPermissionForSystem_001 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: CheckPermissionForSystemTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService CheckPermissionForSystem
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, CheckPermissionForSystem_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckPermissionForSystem_002 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    MyFlag::flag_ = 0;
+    system::SetBoolParameter("", true);
+    int32_t result = abilityAutoStartupService->CheckPermissionForSystem();
+    ASSERT_EQ(result, ERR_NOT_SYSTEM_APP);
+    GTEST_LOG_(INFO) << "CheckPermissionForSystem_002 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: CheckPermissionForSystemTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService CheckPermissionForSystem
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, CheckPermissionForSystem_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckPermissionForSystem_003 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    MyFlag::flag_ = 1;
+    system::SetBoolParameter("", true);
+    int32_t result = abilityAutoStartupService->CheckPermissionForSystem();
+    ASSERT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "CheckPermissionForSystem_003 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: SetApplicationAutoStartupTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService SetApplicationAutoStartup
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, SetApplicationAutoStartup_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetApplicationAutoStartup_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    AutoStartupInfo info;
+    info.bundleName = "com.example.test";
+    info.moduleName = "testModule";
+    info.abilityName = "testAbility";
+    info.accessTokenId = "12345";
+    info.userId = 100;
+    int32_t result = abilityAutoStartupService->SetApplicationAutoStartup(info);
+    ASSERT_EQ(result, INNER_ERR);
+    GTEST_LOG_(INFO) << "SetApplicationAutoStartup_001 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: SetApplicationAutoStartupTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService SetApplicationAutoStartup
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, SetApplicationAutoStartup_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetApplicationAutoStartup_002 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    MyFlag::flag_ = 0;
+    system::SetBoolParameter("", true);
+    AutoStartupInfo info;
+    info.bundleName = "com.example.test";
+    info.moduleName = "testModule";
+    info.abilityName = "testAbility";
+    info.accessTokenId = "12345";
+    info.userId = 100;
+    bool isVisible = true;
+    abilityAutoStartupService->GetAbilityData(info, isVisible, info.abilityName,
+        info.accessTokenId, info.userId);
+    int32_t result = abilityAutoStartupService->SetApplicationAutoStartup(info);
+    ASSERT_EQ(result, ERR_NOT_SYSTEM_APP);
+    GTEST_LOG_(INFO) << "SetApplicationAutoStartup_002 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: CancelApplicationAutoStartupTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService CancelApplicationAutoStartup
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, CancelApplicationAutoStartup_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CancelApplicationAutoStartup_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    MyFlag::flag_ = 0;
+    system::SetBoolParameter("", true);
+    AutoStartupInfo info;
+    info.bundleName = "com.example.test";
+    info.moduleName = "testModule";
+    info.abilityName = "testAbility";
+    info.accessTokenId = "12345";
+    info.userId = 100;
+    bool isVisible = true;
+    abilityAutoStartupService->GetAbilityData(info, isVisible, info.abilityName,
+        info.accessTokenId, info.userId);
+    int32_t result = abilityAutoStartupService->CancelApplicationAutoStartup(info);
+    ASSERT_EQ(result, ERR_NOT_SYSTEM_APP);
+    GTEST_LOG_(INFO) << "CancelApplicationAutoStartup_001 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: CheckPermissionForSelfTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService CheckPermissionForSelf
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, CheckPermissionForSelf_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckPermissionForSelf_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    system::SetBoolParameter("", false);
+    std::string bundleName = "";
+    int32_t result = abilityAutoStartupService->CheckPermissionForSelf(bundleName);
+    ASSERT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+    GTEST_LOG_(INFO) << "CheckPermissionForSelf_001 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: CheckPermissionForSelfTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService CheckPermissionForSelf
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, CheckPermissionForSelf_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckPermissionForSelf_002 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    system::SetBoolParameter("const.product.appboot.setting.enabled", true);
+    std::string bundleName = "com.example.test";
+    int32_t result = abilityAutoStartupService->CheckPermissionForSelf(bundleName);
+    ASSERT_EQ(result, ERR_NOT_SELF_APPLICATION);
+    GTEST_LOG_(INFO) << "CheckPermissionForSelf_002 end";
 }
 } // namespace AAFwk
 } // namespace OHOS

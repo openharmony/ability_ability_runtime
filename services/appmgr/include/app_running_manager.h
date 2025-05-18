@@ -39,6 +39,7 @@
 #include "refbase.h"
 #include "running_process_info.h"
 #include "simple_process_info.h"
+#include "process_bind_data.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -339,7 +340,7 @@ public:
 #ifdef SUPPORT_CHILD_PROCESS
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByChildProcessPid(const pid_t pid);
     std::shared_ptr<ChildProcessRecord> OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
-    bool IsChildProcessReachLimit(uint32_t accessTokenId);
+    bool IsChildProcessReachLimit(uint32_t accessTokenId, bool multiProcessFeature);
 #endif //SUPPORT_CHILD_PROCESS
 
     /**
@@ -391,10 +392,16 @@ public:
 
     void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
     std::shared_ptr<AppRunningRecord> QueryAppRecordPlus(int32_t pid, int32_t uid);
-private:
-    std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
+    int32_t AddUIExtensionBindItem(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
+    int32_t QueryUIExtensionBindItemById(int32_t uiExtensionBindAbilityId, UIExtensionProcessBindInfo &bindInfo);
+    int32_t RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId);
+
+    std::shared_ptr<AppRunningRecord> GetAppRunningRecordByChildRecordPid(const pid_t pid);
+    
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
+private:
+    std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
     void NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
         const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner);
@@ -414,6 +421,8 @@ private:
     std::map<const int32_t, bool> updateConfigurationDelayedMap_;
 
     std::vector<BackgroundAppInfo> appInfos_;
+    std::mutex uiExtensionBindMapLock_;
+    std::map<int32_t, UIExtensionProcessBindInfo> uiExtensionBindMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

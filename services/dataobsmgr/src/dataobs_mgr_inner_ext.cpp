@@ -188,6 +188,11 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
 
     for (const auto &entry : entrys_) {
         if (entry.isDescendants) {
+            if (entry.userId != userId && entry.userId != 0 && userId != 0) {
+                TAG_LOGW(AAFwkTag::DBOBSMGR, "Not allow across user notify, uri:%{public}s, from %{public}d to"
+                    "%{public}d", CommonUtils::Anonymous(uri.ToString()).c_str(), userId, entry.userId);
+                continue;
+            }
             obsRes.try_emplace(entry.observer, std::list<Uri>()).first->second.push_back(uri);
         }
     }

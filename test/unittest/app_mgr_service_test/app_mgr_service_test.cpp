@@ -515,6 +515,40 @@ HWTEST_F(AppMgrServiceTest, UnregisterApplicationStateObserver_001, TestSize.Lev
 
 /*
  * Feature: AppMgrService
+ * Function: RegisterNativeChildExitNotify
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService RegisterNativeChildExitNotify
+ * EnvConditions: NA
+ * CaseDescription: Verify RegisterNativeChildExitNotify
+ */
+HWTEST_F(AppMgrServiceTest, RegisterNativeChildExitNotify_001, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    sptr<INativeChildNotify> notify = nullptr;
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->RegisterNativeChildExitNotify(notify);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: UnregisterNativeChildExitNotify
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService UnregisterNativeChildExitNotify
+ * EnvConditions: NA
+ * CaseDescription: Verify UnregisterNativeChildExitNotify
+ */
+HWTEST_F(AppMgrServiceTest, UnregisterNativeChildExitNotify_001, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    sptr<INativeChildNotify> notify = nullptr;
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->UnregisterNativeChildExitNotify(notify);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
  * Function: GetForegroundApplications
  * SubFunction: NA
  * FunctionPoints: AppMgrService GetForegroundApplications
@@ -2178,6 +2212,44 @@ HWTEST_F(AppMgrServiceTest, LaunchAbility_0200, TestSize.Level1)
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
     int32_t res = appMgrService->LaunchAbility(nullptr);
     EXPECT_EQ(res, AAFwk::ERR_NO_ALLOW_OUTSIDE_CALL);
+}
+
+/**
+ * @tc.name: IsProcessCacheSupported_0100
+ * @tc.desc: IsProcessCacheSupported.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, IsProcessCacheSupported_0100, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+    appMgrService->appMgrServiceInner_ = std::make_shared<AppMgrServiceInner>();
+    int32_t pid = 1;
+    bool isSupport = false;
+    auto ret = appMgrService->IsProcessCacheSupported(pid, isSupport);
+    EXPECT_EQ(ret, AAFwk::ERR_NO_PERMISSION_CALLER);
+}
+
+/**
+ * @tc.name: SetProcessCacheEnable_0100
+ * @tc.desc: SetProcessCacheEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, SetProcessCacheEnable_0100, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+    appMgrService->appMgrServiceInner_ = std::make_shared<AppMgrServiceInner>();
+    int32_t pid = 1;
+    bool enable = false;
+    auto ret = appMgrService->SetProcessCacheEnable(pid, enable);
+    EXPECT_EQ(ret, AAFwk::ERR_NO_PERMISSION_CALLER);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

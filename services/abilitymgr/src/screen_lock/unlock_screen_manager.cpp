@@ -19,6 +19,17 @@
 #include "in_process_call_wrapper.h"
 #include "parameters.h"
 #include "permission_verification.h"
+#ifdef SUPPORT_POWER
+#include "power_mgr_client.h"
+#endif
+
+#ifdef SUPPORT_GRAPHICS
+#include "unlock_screen_callback.h"
+#ifdef SUPPORT_SCREEN
+#include "screenlock_manager.h"
+#include "screenlock_common.h"
+#endif
+#endif
 
 namespace OHOS {
 namespace AbilityRuntime {

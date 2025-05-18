@@ -38,6 +38,7 @@ ohos_unittest("AmsServiceAppSpawnClientTest") {
     "${ability_runtime_services_path}/appmgr/src/app_mgr_service.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_mgr_service_event_handler.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_mgr_service_inner.cpp",
+    "${ability_runtime_services_path}/appmgr/src/app_native_spawn_manager.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_preloader.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_running_record.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_running_status_module.cpp",
@@ -93,6 +94,7 @@ ohos_unittest("AmsServiceAppSpawnClientTest") {
     "memory_utils:libmeminfo",
     "os_account:os_account_innerkits",
     "resource_schedule_service:ressched_client",
+    "json:nlohmann_json_static",
   ]
 
   if (ability_runtime_child_process) {

@@ -27,7 +27,10 @@
 
 namespace OHOS {
 namespace AAFwk {
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 using AssociatedStartType = ResourceSchedule::ResType::AssociatedStartType;
+static constexpr int PERF_NUM = 10202;
+#endif
 ResSchedUtil &ResSchedUtil::GetInstance()
 {
     static ResSchedUtil instance;
@@ -47,6 +50,16 @@ int64_t ResSchedUtil::convertType(int64_t resSchedType)
 #endif
     TAG_LOGE(AAFwkTag::DEFAULT, "sched invalid");
     return -1;
+}
+
+void ResSchedUtil::ReportSubHealtyPerfInfoToRSS()
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    uint32_t resType = ResourceSchedule::ResType::RES_TYPE_ANCO_CUST;
+    std::unordered_map<std::string, std::string> eventParams{{"name", "soc_perf"}};
+    TAG_LOGI(AAFwkTag::DEFAULT, "soc_perf start");
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, PERF_NUM, eventParams);
+#endif
 }
 
 void ResSchedUtil::ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart,
@@ -191,7 +204,7 @@ void ResSchedUtil::GetAllFrozenPidsFromRSS(std::unordered_set<int32_t> &frozenPi
 #endif
 }
 
-bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid)
+bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid, const std::string& bundleName)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_SHOULD_FORCE_KILL_PROCESS;
@@ -233,6 +246,7 @@ void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int3
 
 std::unordered_set<std::string> ResSchedUtil::GetNWebPreloadSet() const
 {
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_GET_NWEB_PRELOAD_SET;
     nlohmann::json payload;
     nlohmann::json reply;
@@ -243,6 +257,9 @@ std::unordered_set<std::string> ResSchedUtil::GetNWebPreloadSet() const
     }
     auto jsonObj = reply["NWebPreloadSet"];
     return { jsonObj.begin(), jsonObj.end() };
+#else
+    return {};
+#endif
 }
 } // namespace AAFwk
 } // namespace OHOS

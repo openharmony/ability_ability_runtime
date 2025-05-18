@@ -15,19 +15,38 @@
 
 #include "insight_intent_executor.h"
 #include "hilog_tag_wrapper.h"
+#include "js_insight_intent_entry.h"
 #include "js_insight_intent_executor.h"
-
+#include "js_insight_intent_func.h"
+#include "js_insight_intent_page.h"
 #include "js_runtime.h"
 #include "runtime.h"
 
 namespace OHOS::AbilityRuntime {
-std::shared_ptr<InsightIntentExecutor> InsightIntentExecutor::Create(Runtime& runtime)
+std::shared_ptr<InsightIntentExecutor> InsightIntentExecutor::Create(Runtime& runtime, InsightIntentType type)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
     switch (runtime.GetLanguage()) {
-        case Runtime::Language::JS:
-            return static_cast<std::shared_ptr<InsightIntentExecutor>>(JsInsightIntentExecutor::Create(
-                static_cast<JsRuntime&>(runtime)));
+        case Runtime::Language::JS: {
+            switch (type) {
+                case InsightIntentType::DECOR_NONE:
+                    return static_cast<std::shared_ptr<InsightIntentExecutor>>(JsInsightIntentExecutor::Create(
+                        static_cast<JsRuntime&>(runtime)));
+                case InsightIntentType::DECOR_ENTRY:
+                    return static_cast<std::shared_ptr<InsightIntentExecutor>>(JsInsightIntentEntry::Create(
+                        static_cast<JsRuntime&>(runtime)));
+                case InsightIntentType::DECOR_FUNC:
+                    return static_cast<std::shared_ptr<InsightIntentExecutor>>(JsInsightIntentFunc::Create(
+                        static_cast<JsRuntime&>(runtime)));
+                case InsightIntentType::DECOR_PAGE:
+                    return static_cast<std::shared_ptr<InsightIntentExecutor>>(JsInsightIntentPage::Create(
+                        static_cast<JsRuntime&>(runtime)));
+                case InsightIntentType::DECOR_LINK:
+                case InsightIntentType::DECOR_FORM:
+                default:
+                    return nullptr;
+                }
+            }
         default:
             return nullptr;
     }

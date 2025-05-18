@@ -50,6 +50,7 @@
 #include "want.h"
 #include "app_jsheap_mem_info.h"
 #include "running_multi_info.h"
+#include "native_child_notify_interface.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -651,7 +652,7 @@ public:
      *
      * @return Is the status change completed.
      */
-    virtual int32_t ChangeAppGcState(pid_t pid, int32_t state) = 0;
+    virtual int32_t ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid = 0) = 0;
 
     /**
      * Register appRunning status listener.
@@ -851,6 +852,10 @@ public:
 
     virtual int32_t SetSupportedProcessCache(int32_t pid, bool isSupport) = 0;
 
+    virtual int32_t IsProcessCacheSupported(int32_t pid, bool &isSupported) = 0;
+
+    virtual int32_t SetProcessCacheEnable(int32_t pid, bool enable) = 0;
+
     /**
      * Set application assertion pause state.
      *
@@ -885,6 +890,26 @@ public:
     virtual int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback) = 0;
 #endif // SUPPORT_CHILD_PROCESS
+
+     /**
+     * Register native child exit callback to notify.
+     * @param notify, Callback used to notify caller the info of native child exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
+    {
+        return 0;
+    }
+
+    /**
+     * Unregister native child exit callback to notify.
+     * @param notify, Callback used to notify caller the info of native child exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
+    {
+        return 0;
+    }
 
     /**
      * Notify that the process depends on web by itself.

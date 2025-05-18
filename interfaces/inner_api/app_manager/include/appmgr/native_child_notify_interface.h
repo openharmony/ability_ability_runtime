@@ -39,9 +39,24 @@ public:
      */
     virtual void OnError(int32_t errCode) = 0;
 
-protected:
-    static constexpr uint32_t IPC_ID_ON_NATIVE_CHILD_STARTED = 0;
-    static constexpr uint32_t IPC_ID_ON_ERROR = 1;
+    /**
+     * Notify native child process exit.
+     *
+     * @param pid child process pid
+     * @param signal child process exit signal
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t OnNativeChildExit(int32_t pid, int32_t signal) = 0;
+
+    enum {
+        // ipc id for OnNativeChildStarted
+        IPC_ID_ON_NATIVE_CHILD_STARTED = 0,
+
+        // ipc id for OnError
+        IPC_ID_ON_ERROR = 1,
+
+        IPC_ID_ON_NATIVE_CHILD_EXIT = 2
+    };
 };
 
 } // OHOS

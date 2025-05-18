@@ -34,6 +34,7 @@ namespace {
     const bool NO_DEBUG_START = false;
     const unsigned int SIZE_ONE = 1;
     const unsigned int SIZE_TWO = 2;
+    const unsigned int SIZE_THREE = 3;
 }
 class AppDebugManagerTest : public testing::Test {
 public:
@@ -233,6 +234,116 @@ HWTEST_F(AppDebugManagerTest, RemoveAppDebugInfo_0100, TestSize.Level1)
     EXPECT_EQ(manager_->debugInfos_.size(), SIZE_ONE);
 
     EXPECT_CALL(*listener_, OnAppDebugStoped(_)).Times(1);
+    manager_->RemoveAppDebugInfo(debugInfo);
+    EXPECT_TRUE(manager_->debugInfos_.empty());
+}
+HWTEST_F(AppDebugManagerTest, RegisterAppDebugListener_0200, TestSize.Level1)
+{
+    sptr<MockAppDebugListenerStub> listener = new MockAppDebugListenerStub();
+    AppDebugInfo appDebugInfo;
+    manager_->debugInfos_.push_back(appDebugInfo);
+
+    EXPECT_CALL(*listener, OnAppDebugStarted(_)).Times(1);
+    manager_->listeners_.insert(nullptr);
+    auto result = manager_->RegisterAppDebugListener(listener);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(manager_->listeners_.size(), SIZE_THREE);
+
+    listener = nullptr;
+    result = manager_->RegisterAppDebugListener(listener);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(manager_->listeners_.size(), SIZE_THREE);
+}
+
+/**
+ * @tc.name: UnregisterAppDebugListener_0200
+ * @tc.desc: Unregister listener for app debug listener, check nullptr listener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppDebugManagerTest, UnregisterAppDebugListener_0200, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    sptr<MockAppDebugListenerStub> listener = nullptr;
+    auto result = manager_->UnregisterAppDebugListener(listener);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(manager_->listeners_.size(), SIZE_ONE);
+
+    EXPECT_NE(listener_, nullptr);
+    manager_->listeners_.insert(nullptr);
+    result = manager_->UnregisterAppDebugListener(listener_);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(manager_->listeners_.size(), SIZE_ONE);
+}
+
+/**
+ * @tc.name: StartDebug_0200
+ * @tc.desc: Start debug by AppDebugInfo, notify AppDebugListener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppDebugManagerTest, StartDebug_0200, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_TRUE(manager_->debugInfos_.empty());
+    std::vector<AppDebugInfo> debugInfos;
+    AppDebugInfo info;
+    debugInfos.push_back(info);
+
+    EXPECT_NE(listener_, nullptr);
+    EXPECT_CALL(*listener_, OnAppDebugStarted(_)).Times(1);
+    manager_->listeners_.insert(nullptr);
+    manager_->StartDebug(debugInfos);
+    EXPECT_FALSE(manager_->debugInfos_.empty());
+}
+
+/**
+ * @tc.name: StopDebug_0200
+ * @tc.desc: Start debug by AppDebugInfo, notify AppDebugListener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppDebugManagerTest, StopDebug_0200, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_TRUE(manager_->debugInfos_.empty());
+    std::vector<AppDebugInfo> debugInfos;
+    AppDebugInfo info;
+    info.bundleName = DEBUG_START_NAME;
+    info.isDebugStart = IS_DEBUG_START;
+    info.pid = 10;
+    info.uid = 12345;
+    debugInfos.push_back(info);
+    manager_->debugInfos_ = debugInfos;
+
+    EXPECT_NE(listener_, nullptr);
+    EXPECT_CALL(*listener_, OnAppDebugStoped(_)).Times(1);
+    manager_->listeners_.insert(nullptr);
+    manager_->StopDebug(debugInfos);
+    EXPECT_TRUE(manager_->debugInfos_.empty());
+}
+
+/**
+ * @tc.name: RemoveAppDebugInfo_0200
+ * @tc.desc: Remove app debug info with bundleName, pid, uid and isDebugStart flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppDebugManagerTest, RemoveAppDebugInfo_0200, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_TRUE(manager_->debugInfos_.empty());
+
+    std::vector<AppDebugInfo> debugInfos;
+    int pid = 10;
+    int uid = 12345;
+    AppDebugInfo debugInfo;
+    debugInfo.bundleName = DEBUG_START_NAME;
+    debugInfo.pid = pid;
+    debugInfo.uid = uid;
+    debugInfo.isDebugStart = IS_DEBUG_START;
+
+    manager_->debugInfos_.push_back(debugInfo);
+    EXPECT_EQ(manager_->debugInfos_.size(), SIZE_ONE);
+
+    EXPECT_CALL(*listener_, OnAppDebugStoped(_)).Times(1);
+    manager_->listeners_.insert(nullptr);
     manager_->RemoveAppDebugInfo(debugInfo);
     EXPECT_TRUE(manager_->debugInfos_.empty());
 }

@@ -17,8 +17,12 @@
 #include "gmock/gmock.h"
 #include <memory>
 #include <string>
+#define private public
+#define protected public
 #include "app_exit_reason_data_manager.h"
 #include "mock_single_kv_store.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,6 +33,9 @@ namespace {
 const std::string MODULE_NAME = "module_name";
 const std::string ABILITY_NAME = "ability_name";
 const std::string BUNDLE_NAME = "bundle_name";
+const std::string JSON_KEY_REASON = "reason";
+const std::string JSON_KEY_SUB_KILL_REASON = "sub_kill_reason";
+const std::string JSON_KEY_EXIT_MSG = "exit_msg";
 constexpr uint32_t ACCESS_TOKEN_ID = 123;
 const int SESSION_ID = 111;
 } // namespace
@@ -115,8 +122,8 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_SetAppExitReason
 
     DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = tempKv;
     tempStoreId.storeId = "app_exit_reason_infos";
-    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(BUNDLE_NAME, ACCESS_TOKEN_ID,
-        abilityList, exitReason, processInfo, false);
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+        BUNDLE_NAME, ACCESS_TOKEN_ID, abilityList, exitReason, processInfo, false);
     EXPECT_EQ(result, ERR_OK);
 }
 
@@ -346,6 +353,179 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_RecordSignalReas
     result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->RecordSignalReason(
         pid, uid, signal, bundleName);
     EXPECT_EQ(result, AAFwk::ERR_GET_EXIT_INFO_FAILED);
+}
+
+/* *
+ * @tc.name: AppExitReasonDataManager_SetAppExitReason_002
+ * @tc.desc: SetAppExitReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_SetAppExitReason_002, TestSize.Level1)
+{
+    std::vector<std::string> abilityList;
+    abilityList.push_back(ABILITY_NAME);
+    AAFwk::ExitReason exitReason = {AAFwk::REASON_JS_ERROR, "Js Error."};
+    AppExecFwk::RunningProcessInfo processInfo;
+
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    kvStorePtr->Put_ = DistributedKv::Status::ERROR;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
+
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+        BUNDLE_NAME, ACCESS_TOKEN_ID, abilityList, exitReason, processInfo, false);
+    EXPECT_EQ(result, ERR_INVALID_OPERATION);
+}
+
+/* *
+ * @tc.name: AppExitReasonDataManager_ConvertReasonFromValue_002
+ * @tc.desc: ConvertReasonFromValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertReasonFromValue_002, TestSize.Level1)
+{
+    bool withKillMsg = false;
+    nlohmann::json jsonObject = nlohmann::json{{ JSON_KEY_REASON, AAFwk::Reason::REASON_NORMAL }};
+    AAFwk::ExitReason exitReason;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->ConvertReasonFromValue(jsonObject, exitReason,
+        withKillMsg);
+    EXPECT_EQ(exitReason.reason, AAFwk::Reason::REASON_NORMAL);
+}
+
+/* *
+ * @tc.name: AppExitReasonDataManager_ConvertReasonFromValue_003
+ * @tc.desc: ConvertReasonFromValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertReasonFromValue_003, TestSize.Level1)
+{
+    bool withKillMsg = false;
+    nlohmann::json jsonObject = nlohmann::json{{ JSON_KEY_SUB_KILL_REASON, 0 }};
+    AAFwk::ExitReason exitReason;
+    exitReason.subReason = -1;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->ConvertReasonFromValue(jsonObject, exitReason,
+        withKillMsg);
+    EXPECT_EQ(exitReason.subReason, 0);
+}
+
+/* *
+ * @tc.name: AppExitReasonDataManager_ConvertReasonFromValue_004
+ * @tc.desc: ConvertReasonFromValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertReasonFromValue_004, TestSize.Level1)
+{
+    bool withKillMsg = false;
+    nlohmann::json jsonObject = nlohmann::json{{ JSON_KEY_EXIT_MSG, "exitMsg" }};
+    AAFwk::ExitReason exitReason;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->ConvertReasonFromValue(jsonObject, exitReason,
+        withKillMsg);
+    EXPECT_EQ(exitReason.exitMsg, "exitMsg");
+}
+
+/* *
+ * @tc.name: AppExitReasonDataManager_AddAbilityRecoverInfo_002
+ * @tc.desc: AddAbilityRecoverInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_AddAbilityRecoverInfo_002, TestSize.Level1)
+{
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    kvStorePtr->Get_ = DistributedKv::Status::ERROR;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->AddAbilityRecoverInfo(
+        ACCESS_TOKEN_ID, MODULE_NAME, ABILITY_NAME, SESSION_ID);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/* *
+ * @tc.name: AppExitReasonDataManager_AddAbilityRecoverInfo_003
+ * @tc.desc: AddAbilityRecoverInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_AddAbilityRecoverInfo_003, TestSize.Level1)
+{
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    kvStorePtr->Get_ = DistributedKv::Status::KEY_NOT_FOUND;
+    kvStorePtr->Put_ = DistributedKv::Status::ERROR;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->AddAbilityRecoverInfo(
+        ACCESS_TOKEN_ID, MODULE_NAME, ABILITY_NAME, SESSION_ID);
+    EXPECT_EQ(result, ERR_INVALID_OPERATION);
+}
+
+/* *
+ * @tc.name: AppExitReasonDataManager_GetAbilityRecoverInfo_001
+ * @tc.desc: GetAbilityRecoverInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_GetAbilityRecoverInfo_001, TestSize.Level1)
+{
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    kvStorePtr->Get_ = DistributedKv::Status::ERROR;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
+    bool hasRecoverInfo = false;
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAbilityRecoverInfo(
+        ACCESS_TOKEN_ID, MODULE_NAME, ABILITY_NAME, hasRecoverInfo);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/* *
+ * @tc.name: AppExitReasonDataManager_GetAbilityRecoverInfo_002
+ * @tc.desc: GetAbilityRecoverInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_GetAbilityRecoverInfo_002, TestSize.Level1)
+{
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
+    bool hasRecoverInfo = false;
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAbilityRecoverInfo(
+        ACCESS_TOKEN_ID, MODULE_NAME, ABILITY_NAME, hasRecoverInfo);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/* *
+ * @tc.name: AppExitReasonDataManager_SetUIExtensionAbilityExitReason_002
+ * @tc.desc: SetUIExtensionAbilityExitReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_SetUIExtensionAbilityExitReason_002, TestSize.Level1)
+{
+    std::vector<std::string> extensionList;
+    extensionList.push_back("testSetUIExtensionAbilityExitReason");
+    AppExecFwk::RunningProcessInfo processInfo;
+    AAFwk::ExitReason exitReason = {AAFwk::REASON_JS_ERROR, "Js Error."};
+
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    kvStorePtr->Put_ = DistributedKv::Status::ERROR;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
+
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetUIExtensionAbilityExitReason(
+        BUNDLE_NAME, extensionList, exitReason, processInfo, false);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/* *
+ * @tc.name: AppExitReasonDataManager_ConvertAppExitReason_001
+ * @tc.desc: SetUIExtensionAbilityExitReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertAppExitReason_001, TestSize.Level1)
+{
+    std::string extensionListName = "testExtensionListName";
+    bool withKillMsg = true;
+    nlohmann::json jsonObject = nlohmann::json{{ JSON_KEY_REASON, AAFwk::Reason::REASON_NORMAL }};
+    AAFwk::ExitReason exitReason;
+    exitReason.exitMsg = "exitMsg";
+    AppExecFwk::RunningProcessInfo processInfo;
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()
+        ->ConvertAppExitReasonInfoToValueOfExtensionName(extensionListName, exitReason, processInfo, withKillMsg);
+    std::string jsonString = result.ToString();
+    jsonObject = nlohmann::json::parse(jsonString);
+    ASSERT_TRUE(jsonObject.contains(JSON_KEY_EXIT_MSG));
+    ASSERT_TRUE(jsonObject[JSON_KEY_EXIT_MSG].is_string());
+    auto exitMsg = jsonObject.at(JSON_KEY_EXIT_MSG).get<std::string>();
+    EXPECT_EQ(exitMsg, exitReason.exitMsg);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

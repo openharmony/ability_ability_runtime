@@ -19,11 +19,31 @@
 
 namespace OHOS {
 namespace AAFwk {
+static constexpr uint32_t MESSAGE_MAX_COUNT = 50;
 DataAbilityObserverProxy::DataAbilityObserverProxy(const sptr<IRemoteObject> &remote)
     : IRemoteProxy<IDataAbilityObserver>(remote)
 {}
 DataAbilityObserverProxy::~DataAbilityObserverProxy()
 {}
+
+/**
+ * @brief Set the message option.
+ *
+ * @param option Indicates the option of message.
+ */
+void DataAbilityObserverProxy::SetMessageOption(MessageOption &option)
+{
+    std::lock_guard<std::mutex> lock(countMutex_);
+    // Send a wakeup IPC every 50 times. Otherwise, send a non-wakeup IPC.
+    if (messageCount_ >= MESSAGE_MAX_COUNT) {
+        option = MessageOption(MessageOption::TF_ASYNC);
+        messageCount_ = 0;
+    } else {
+        option = MessageOption(MessageOption::TF_ASYNC | MessageOption::TF_ASYNC_WAKEUP_LATER);
+        messageCount_++;
+    }
+}
+
 /**
  * @brief Called back to notify that the data being observed has changed.
  *
@@ -33,7 +53,8 @@ void DataAbilityObserverProxy::OnChange()
 {
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC | MessageOption::TF_ASYNC_WAKEUP_LATER);
+    MessageOption option;
+    SetMessageOption(option);
 
     if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "write token false");
@@ -55,7 +76,8 @@ void DataAbilityObserverProxy::OnChangeExt(const ChangeInfo &changeInfo)
 {
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC | MessageOption::TF_ASYNC_WAKEUP_LATER);
+    MessageOption option;
+    SetMessageOption(option);
 
     if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "write token false");
@@ -82,7 +104,8 @@ void DataAbilityObserverProxy::OnChangePreferences(const std::string &key)
 {
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC | MessageOption::TF_ASYNC_WAKEUP_LATER);
+    MessageOption option;
+    SetMessageOption(option);
 
     if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "write token false");

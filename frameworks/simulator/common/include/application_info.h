@@ -44,10 +44,18 @@ enum class GetApplicationFlag {
     GET_APPLICATION_INFO_WITH_DISABLE = 0x00000004,
 };
 
+enum class GetDependentBundleInfoFlag {
+    GET_APP_CROSS_HSP_BUNDLE_INFO = 0x00000000,
+    GET_APP_SERVICE_HSP_BUNDLE_INFO = 0x00000001,
+    GET_ALL_DEPENDENT_BUNDLE_INFO = 0x00000002,
+};
+
 enum class BundleType {
     APP = 0,
     ATOMIC_SERVICE = 1,
     SHARED = 2,
+    APP_SERVICE_FWK = 3,
+    APP_PLUGIN = 4,
 };
 
 enum class CompatiblePolicy {
@@ -55,10 +63,50 @@ enum class CompatiblePolicy {
     BACKWARD_COMPATIBILITY = 1,
 };
 
+enum class ApplicationReservedFlag {
+    ENCRYPTED_APPLICATION = 0x00000001,
+    ENCRYPTED_KEY_EXISTED = 0x00000002,
+};
+
+enum class MultiAppModeType : uint8_t {
+    UNSPECIFIED = 0,
+    MULTI_INSTANCE = 1,
+    APP_CLONE = 2,
+};
+
+enum class ApplicationInfoFlag {
+    FLAG_INSTALLED = 0x00000001,
+    /**
+     * Indicates the installation source of pre-installed applications
+     * App upgrades will not change installation source
+     * FLAG_BOOT_INSTALLED App installed during first boot
+     * FLAG_OTA_INSTALLED App installed during OTA
+     * FLAG_RECOVER_INSTALLED App recover
+     */
+    FLAG_BOOT_INSTALLED = 0x00000002,
+    FLAG_OTA_INSTALLED = 0x00000004,
+    FLAG_RECOVER_INSTALLED = 0x00000008,
+    FLAG_OTHER_INSTALLED = 0x00000010,
+    FLAG_PREINSTALLED_APP = 0x00000020,
+    FLAG_PREINSTALLED_APP_UPDATE = 0x00000040,
+};
+
+enum class QuickFixType : int8_t {
+    UNKNOWN = 0,
+    PATCH = 1,
+    HOT_RELOAD = 2
+};
+
 struct Metadata {
+    uint32_t valueId = 0;
     std::string name;
     std::string value;
     std::string resource;
+};
+
+struct HnpPackage {
+    std::string package;
+    std::string type;
 };
 
 struct CustomizeData {
@@ -80,6 +128,43 @@ struct Resource {
 
     /** the resource id in hap */
     int32_t id = 0;
+};
+
+struct MultiAppModeData {
+    MultiAppModeType multiAppModeType = MultiAppModeType::UNSPECIFIED;
+    int32_t maxCount = 0;
+};
+
+struct ApplicationEnvironment {
+    std::string name;
+    std::string value;
+};
+
+struct HqfInfo {
+    QuickFixType type = QuickFixType::UNKNOWN; // quick fix type
+    std::string moduleName;
+    std::string hapSha256;
+    std::string hqfFilePath;
+    std::string cpuAbi;
+    std::string nativeLibraryPath;
+};
+
+struct AppqfInfo {
+    QuickFixType type = QuickFixType::UNKNOWN; // quick fix type
+    uint32_t versionCode = 0; // quick fix version code
+    std::string versionName; // quick fix version name
+    std::string cpuAbi; // quick fix abi
+    std::string nativeLibraryPath; // quick fix so path
+    std::vector<HqfInfo> hqfInfos;
+};
+
+struct AppQuickFix {
+    uint32_t versionCode = 0; // original bundle version code
+    std::string bundleName; // original bundle name
+    std::string versionName; // original bundle version name
+
+    AppqfInfo deployedAppqfInfo; // deployed quick fix patch
+    AppqfInfo deployingAppqfInfo; // deploying quick fix patch
 };
 
 // configuration information about an application
@@ -111,12 +196,19 @@ struct ApplicationInfo {
     bool removable = true;
     bool singleton = false;
     bool userDataClearable = true;
+    bool allowAppRunWhenDeviceFirstLocked = false;
     bool accessible = false;
     bool runningResourcesApply = false;
     bool associatedWakeUp = false;
     bool hideDesktopIcon = false;
     bool formVisibleNotify = false;
+    bool installedForAllUser = false;
+    bool allowEnableNotification = false;
+    bool allowMultiProcess = false;
+    bool gwpAsanEnabled = false;
+    bool hasPlugin = false;
     std::vector<std::string> allowCommonEvent;
+    std::vector<std::string> assetAccessGroups;
     std::vector<int32_t> resourcesApply;
 
     bool isSystemApp = false;
@@ -147,9 +239,14 @@ struct ApplicationInfo {
 
     // user related fields, assign when calling the get interface
     uint32_t accessTokenId = 0;
+    uint32_t applicationReservedFlag = 0;
     uint64_t accessTokenIdEx = 0;
     bool enabled = false;
+    int32_t appIndex = 0;
     int32_t uid = -1;
+    int32_t maxChildProcess = 0;
+    int32_t applicationFlags = static_cast<uint32_t>(ApplicationInfoFlag::FLAG_INSTALLED);
+    MultiAppModeData multiAppMode;
 
     // native so
     std::string nativeLibraryPath;
@@ -166,7 +263,12 @@ struct ApplicationInfo {
     // Installation-free
     std::vector<std::string> targetBundleList;
 
+    std::vector<ApplicationEnvironment> appEnvironments;
+    std::map<std::string, std::vector<HnpPackage>> hnpPackages;
     std::string fingerprint;
+
+    // quick fix info
+    AppQuickFix appQuickFix;
 
     // unused
     std::string icon;
@@ -177,6 +279,10 @@ struct ApplicationInfo {
 
     // switch
     bool multiProjects = false;
+    bool tsanEnabled = false;
+    bool hwasanEnabled = false;
+    bool ubsanEnabled = false;
+    bool cloudFileSyncEnabled = false;
 
     // app detail ability
     bool needAppDetail = false;
@@ -185,13 +291,15 @@ struct ApplicationInfo {
     // overlay installation
     std::string targetBundleName;
     int32_t targetPriority;
-    int32_t overlayState;
-
+    int32_t overlayState = 0;
     bool split = true;
     BundleType bundleType = BundleType::APP;
 
     std::string compileSdkVersion;
     std::string compileSdkType = DEFAULT_COMPILE_SDK_TYPE;
+    std::string organization;
+    std::string installSource;
+    std::string configuration;
 };
 } // namespace AppExecFwk
 } // namespace OHOS

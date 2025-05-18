@@ -728,6 +728,11 @@ void UIAbilityImpl::HandleExecuteInsightIntentForeground(const AAFwk::Want &want
         return;
     }
 
+    if (AppExecFwk::InsightIntentExecuteParam::IsInsightIntentPage(want)) {
+        ExecuteInsightIntentPage(want, executeParam, std::move(intentCb));
+        return;
+    }
+
     if (lifecycleState_ == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
         ExecuteInsightIntentRepeateForeground(want, executeParam, std::move(intentCb));
     } else {
@@ -785,6 +790,31 @@ void UIAbilityImpl::ExecuteInsightIntentMoveToForeground(const Want &want,
 
     // private function, no need check ability_ validity.
     ability_->ExecuteInsightIntentMoveToForeground(want, executeParam, std::move(callback));
+}
+
+void UIAbilityImpl::ExecuteInsightIntentPage(const Want &want,
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+    std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
+{
+    // cause intent page no need execute onExecute callback, it just need set some params
+    TAG_LOGI(AAFwkTag::INTENT, "execute page intent");
+    auto asyncCallback =
+        [weak = weak_from_this(), intentId = executeParam->insightIntentId_, want](InsightIntentExecuteResult result) {
+            TAG_LOGD(AAFwkTag::INTENT, "execute insightIntent finished, intentId %{public}" PRIu64"", intentId);
+            auto abilityImpl = weak.lock();
+            if (abilityImpl == nullptr) {
+                TAG_LOGE(AAFwkTag::INTENT, "null ability impl");
+                return;
+            }
+            bool bflag = true;
+            abilityImpl->HandleForegroundNewState(want, bflag);
+            abilityImpl->ExecuteInsightIntentDone(intentId, result);
+            abilityImpl->AbilityTransactionCallback(AAFwk::ABILITY_STATE_FOREGROUND_NEW);
+        };
+    callback->Push(asyncCallback);
+
+    // private function, no need check ability_ validity.
+    ability_->ExecuteInsightIntentPage(want, executeParam, std::move(callback));
 }
 
 void UIAbilityImpl::PostForegroundInsightIntent()
@@ -927,7 +957,7 @@ void UIAbilityImpl::ScheduleAbilityRequestSuccess(const std::string &requestId, 
         return;
     }
     nlohmann::json jsonObject = nlohmann::json {
-        { JSON_KEY_ERR_MSG, "success" },
+        { JSON_KEY_ERR_MSG, "Succeeded" },
     };
     ability_->OnAbilityRequestSuccess(requestId, element, jsonObject.dump());
 }

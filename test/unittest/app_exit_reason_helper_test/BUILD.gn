@@ -36,6 +36,7 @@ ohos_unittest("app_exit_reason_helper_test") {
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_window_option.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/sub_managers_helper.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/timeout_state_utils.cpp",
     "app_exit_reason_helper_test.cpp",
   ]
 
@@ -68,6 +69,7 @@ ohos_unittest("app_exit_reason_helper_test") {
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm",
     "window_manager:libwsutils",
     "window_manager:session_manager_lite",
   ]

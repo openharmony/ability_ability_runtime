@@ -20,6 +20,7 @@
 #include "app_state_data.h"
 #include "page_state_data.h"
 #include "process_data.h"
+#include "process_bind_data.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
 
@@ -143,6 +144,13 @@ public:
      */
     virtual void OnAppCacheStateChanged(const AppStateData &appStateData) {};
 
+    /**
+     * Will be called when bindingRelation change.
+     *
+     * @param processBindData Process bind data.
+     */
+    virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) {};
+
     enum class Message {
         TRANSACT_ON_FOREGROUND_APPLICATION_CHANGED = 0,
         TRANSACT_ON_ABILITY_STATE_CHANGED,
@@ -160,6 +168,7 @@ public:
         TRANSACT_ON_APP_CACHE_STATE_CHANGED,
         TRANSACT_ON_WINDOW_SHOW,
         TRANSACT_ON_WINDOW_HIDDEN,
+        TRANSACT_ON_PROCESS_BINDINGRELATION_CHANGED,
     };
 };
 }  // namespace AppExecFwk

@@ -107,7 +107,7 @@ void AppStateCallbackHost::OnStartProcessFailed(sptr<IRemoteObject> token)
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
 
-void AppStateCallbackHost::OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+void AppStateCallbackHost::OnCacheExitInfo(uint32_t accessTokenId, const RunningProcessInfo &exitInfo,
     const std::string &bundleName, const std::vector<std::string> &abilityNames,
     const std::vector<std::string> &uiExtensionNames)
 {
@@ -241,7 +241,7 @@ int32_t AppStateCallbackHost::HandleNotifyAppPreCache(MessageParcel &data, Messa
 int32_t AppStateCallbackHost::HandleOnCacheExitInfo(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t accessTokenId = data.ReadUint32();
-    std::unique_ptr<AAFwk::LastExitDetailInfo> exitInfo(data.ReadParcelable<AAFwk::LastExitDetailInfo>());
+    std::unique_ptr<RunningProcessInfo> exitInfo(data.ReadParcelable<RunningProcessInfo>());
     if (exitInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "To read exitInfo failed");
         return ERR_DEAD_OBJECT;

@@ -41,6 +41,8 @@ public:
 
     void OnAsyncTaskCompleted(const std::shared_ptr<StartupTaskResult> &result);
 
+    void UpdateContextRef(std::shared_ptr<NativeReference> &contextJsRef);
+
 private:
     JsRuntime &jsRuntime_;
     std::unique_ptr<NativeReference> startupJsRef_;

@@ -88,6 +88,11 @@ const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity"
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
 const std::string UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbilityId";
 const std::string UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
+const std::string UIEXTENSION_HOST_PID = "ability.want.params.uiExtensionHostPid";
+const std::string UIEXTENSION_HOST_UID = "ability.want.params.uiExtensionHostUid";
+const std::string UIEXTENSION_HOST_BUNDLENAME = "ability.want.params.uiExtensionHostBundleName";
+const std::string UIEXTENSION_BIND_ABILITY_ID = "ability.want.params.uiExtensionBindAbilityId";
+const std::string UIEXTENSION_NOTIFY_BIND = "ohos.uiextension.params.notifyProcessBind";
 constexpr const char* PARAM_SEND_RESULT_CALLER_BUNDLENAME = "ohos.anco.param.sendResultCallderBundleName";
 constexpr const char* PARAM_SEND_RESULT_CALLER_TOKENID = "ohos.anco.param.sendResultCallerTokenId";
 constexpr const char* PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME = "ohos.anco.param.isNeedUpdateName";
@@ -3046,6 +3051,7 @@ void AbilityRecord::SetLastExitReason(const ExitReason &exitReason, const AppExe
     lastExitDetailInfo.exitSubReason = exitReason.subReason;
     lastExitDetailInfo.rss = processInfo.rssValue;
     lastExitDetailInfo.pss = processInfo.pssValue;
+    lastExitDetailInfo.processState = static_cast<int32_t>(processInfo.state_);
     lastExitDetailInfo.timestamp = timestamp;
     lastExitDetailInfo.processName = processInfo.processName_;
     lastExitDetailInfo.exitMsg = killMsg;
@@ -3849,6 +3855,40 @@ void AbilityRecord::NotifyAbilityRequestSuccess(const std::string &requestId, co
 {
     CHECK_POINTER(lifecycleDeal_);
     lifecycleDeal_->NotifyAbilityRequestSuccess(requestId, element);
+}
+
+void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
+{
+    if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "abilityType not match");
+        return;
+    }
+
+    std::lock_guard guard(wantLock_);
+    if (want_.HasParameter(UIEXTENSION_BIND_ABILITY_ID)) {
+        want_.RemoveParam(UIEXTENSION_BIND_ABILITY_ID);
+    }
+    want_.SetParam(UIEXTENSION_BIND_ABILITY_ID, wantParams.GetIntParam(UIEXTENSION_BIND_ABILITY_ID, -1));
+
+    if (want_.HasParameter(UIEXTENSION_NOTIFY_BIND)) {
+        want_.RemoveParam(UIEXTENSION_NOTIFY_BIND);
+    }
+    want_.SetParam(UIEXTENSION_NOTIFY_BIND, wantParams.GetIntParam(UIEXTENSION_NOTIFY_BIND, -1));
+
+    if (want_.HasParameter(UIEXTENSION_HOST_PID)) {
+        want_.RemoveParam(UIEXTENSION_HOST_PID);
+    }
+    want_.SetParam(UIEXTENSION_HOST_PID, wantParams.GetIntParam(UIEXTENSION_HOST_PID, -1));
+
+    if (want_.HasParameter(UIEXTENSION_HOST_UID)) {
+        want_.RemoveParam(UIEXTENSION_HOST_UID);
+    }
+    want_.SetParam(UIEXTENSION_HOST_UID, wantParams.GetIntParam(UIEXTENSION_HOST_UID, -1));
+
+    if (want_.HasParameter(UIEXTENSION_HOST_BUNDLENAME)) {
+        want_.RemoveParam(UIEXTENSION_HOST_BUNDLENAME);
+    }
+    want_.SetParam(UIEXTENSION_HOST_BUNDLENAME, wantParams.GetStringParam(UIEXTENSION_HOST_BUNDLENAME));
 }
 }  // namespace AAFwk
 }  // namespace OHOS

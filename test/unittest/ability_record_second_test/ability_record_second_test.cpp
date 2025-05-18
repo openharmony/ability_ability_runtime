@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "ability_record.h"
+#include "lifecycle_deal.h"
 #undef private
 #undef protected
 #include "app_utils.h"
@@ -26,7 +27,7 @@
 #include "connection_record.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_scene_board_judgement.h"
-
+#include "ability_scheduler_mock.h"
 #include "ability_util.h"
 
 using namespace testing::ext;
@@ -40,6 +41,10 @@ const std::string TEST_PERF_CMD = "perfCmd";
 const std::string TEST_MULTI_THREAD = "multiThread";
 const std::string TEST_ERROR_INFO_ENHANCE = "errorInfoEnhance";
 const std::string TEST_PARAMS_STREAM = "ability.params.stream";
+const std::string UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbilityId";
+const std::string UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
+const std::string DEBUG_APP = "debugApp";
+constexpr int32_t DMS_UID = 5522;
 constexpr int32_t INVALID_USER_ID = 100;
 }
 
@@ -278,87 +283,6 @@ HWTEST_F(AbilityRecordSecondTest, AbilityRecord_GetCurrentAccountId_001, TestSiz
     TAG_LOGE(AAFwkTag::TEST, "AbilityRecord_GetCurrentAccountId_001 end.");
 }
 
-#ifdef SUPPORT_GRAPHICS
-/*
- * Feature: AbilityRecord
- * Function: ProcessForegroundAbility
- * SubFunction: ProcessForegroundAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ProcessForegroundAbility
- */
-HWTEST_F(AbilityRecordSecondTest, AaFwk_AbilityMS_ProcessForegroundAbility_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    bool isRecent = false;
-    AbilityRequest abilityRequest;
-    std::shared_ptr<StartOptions> startOptions = nullptr ;
-    std::shared_ptr<AbilityRecord> callerAbility;
-    uint32_t sceneFlag = 1;
-    abilityRecord->isReady_ = true;
-    abilityRecord->isRestartApp_ = true;
-    abilityRecord->isWindowStarted_ = true;
-    abilityRecord->currentState_ = AbilityState::FOREGROUND;
-    abilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility, sceneFlag);
-    EXPECT_EQ(abilityRecord->GetRestartAppFlag(), true);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: ProcessForegroundAbility
- * SubFunction: ProcessForegroundAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ProcessForegroundAbility
- */
-HWTEST_F(AbilityRecordSecondTest, AaFwk_AbilityMS_ProcessForegroundAbility_002, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    bool isRecent = false;
-    AbilityRequest abilityRequest;
-    std::shared_ptr<StartOptions> startOptions = nullptr ;
-    std::shared_ptr<AbilityRecord> callerAbility;
-    uint32_t sceneFlag = 1;
-    abilityRecord->isReady_ = true;
-    abilityRecord->isRestartApp_ = true;
-    abilityRecord->isWindowStarted_ = false;
-    abilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility, sceneFlag);
-    EXPECT_EQ(abilityRecord->GetRestartAppFlag(), true);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: SetCompleteFirstFrameDrawing
- * SubFunction: SetCompleteFirstFrameDrawing
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord SetCompleteFirstFrameDrawing
- */
-HWTEST_F(AbilityRecordSecondTest, AaFwk_AbilityMS_SetCompleteFirstFrameDrawing_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    bool flag = true;
-    abilityRecord->SetCompleteFirstFrameDrawing(flag);
-    EXPECT_EQ(abilityRecord->isCompleteFirstFrameDrawing_, true);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: IsCompleteFirstFrameDrawing
- * SubFunction: IsCompleteFirstFrameDrawing
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord IsCompleteFirstFrameDrawing
- */
-HWTEST_F(AbilityRecordSecondTest, AaFwk_AbilityMS_IsCompleteFirstFrameDrawing_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    abilityRecord->SetCompleteFirstFrameDrawing(true);
-    auto result = abilityRecord->IsCompleteFirstFrameDrawing();
-    EXPECT_EQ(result, true);
-}
-#endif
-
 /*
  * Feature: AbilityRecord
  * Function: BackgroundAbility
@@ -419,19 +343,821 @@ HWTEST_F(AbilityRecordSecondTest, AbilityRecord_TerminateAbility_001, TestSize.L
 
 /*
  * Feature: AbilityRecord
- * Function: AfterLoaded
- * SubFunction: AfterLoaded
+ * Function: Terminate
+ * SubFunction: Terminate
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord AfterLoaded
+ * CaseDescription: Verify AbilityRecord Terminate
  */
-HWTEST_F(AbilityRecordSecondTest, AbilityRecord_AfterLoaded_001, TestSize.Level1)
+HWTEST_F(AbilityRecordSecondTest, AaFwk_AbilityMS_Terminate, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    abilityRecord->abilityInfo_.name = "com.ohos.sceneboard.MainAbility";
+    abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
+    abilityRecord->launchDebugInfo_.debugApp = false;
+    abilityRecord->launchDebugInfo_.nativeDebug = false;
+    abilityRecord->launchDebugInfo_.perfCmd.clear();
+    abilityRecord->isAttachDebug_ = false;
+    abilityRecord->isAssertDebug_ = false;
+    abilityRecord->isReady_ = false;
+    abilityRecord->Terminate([]() {});
+    EXPECT_EQ(abilityRecord->lifeCycleStateInfo_.state, AbilityLifeCycleState::ABILITY_STATE_INITIAL);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: DisconnectAbility
+ * SubFunction: DisconnectAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord DisconnectAbility
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_DisconnectAbility_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI_SERVICE;
+    abilityRecord->connRecordList_.clear();
+    abilityRecord->isConnected = true;
+    abilityRecord->DisconnectAbility();
+    EXPECT_FALSE(abilityRecord->isConnected);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: DisconnectAbilityWithWant
+ * SubFunction: DisconnectAbilityWithWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord DisconnectAbilityWithWant
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_DisconnectAbilityWithWant_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.name = "test";
+    abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI_SERVICE;
+    abilityRecord->connRecordList_.clear();
+    abilityRecord->isConnected = true;
+
+    Want want;
+    abilityRecord->DisconnectAbilityWithWant(want);
+    EXPECT_FALSE(abilityRecord->isConnected);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: RemoveSpecifiedWantParam
+ * SubFunction: RemoveSpecifiedWantParam
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify SystemAbilityCallerRecord RemoveSpecifiedWantParam
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_RemoveSpecifiedWantParam_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->want_.SetParam(TEST_NATIVE_DEBUG, true);
+    abilityRecord->RemoveSpecifiedWantParam(TEST_NATIVE_DEBUG);
+    EXPECT_FALSE(abilityRecord->want_.HasParameter(TEST_NATIVE_DEBUG));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: Dump
+ * SubFunction: Dump
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify Dump
+ */
+HWTEST_F(AbilityRecordSecondTest, AaFwk_AbilityMS_Dump, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    std::vector<std::string> info;
+    abilityRecord->isLauncherRoot_ = true;
+    abilityRecord->Dump(info);
+    EXPECT_TRUE(info.size() ==  12);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: DumpUIExtensionRootHostInfo
+ * SubFunction: DumpUIExtensionRootHostInfo
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DumpUIExtensionRootHostInfo
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_DumpUIExtensionRootHostInfo_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    std::vector<std::string> info;
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    abilityRecord->token_ = nullptr;
+    abilityRecord->DumpUIExtensionRootHostInfo(info);
+    EXPECT_TRUE(info.size() ==  0);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: DumpAbilityState
+ * SubFunction: DumpAbilityState
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord DumpAbilityState
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_DumpAbilityState_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    std::vector<std::string> info;
+    bool isClient = false;
+    std::vector<std::string> params;
+    abilityRecord->missionAffinity_ = "missionAffinity";
+    abilityRecord->DumpAbilityState(info, isClient, params);
+    EXPECT_FALSE(abilityRecord->GetMissionAffinity().empty());
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: DumpService
+ * SubFunction: DumpService
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord DumpService
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_DumpService_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    std::vector<std::string> info;
+    std::vector<std::string> params;
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::HMS_ACCOUNT;
+    abilityRecord->scheduler_ = nullptr;
+    abilityRecord->isReady_ = false;
+    abilityRecord->isLauncherRoot_ = false;
+    abilityRecord->token_ = nullptr;
+    abilityRecord->connRecordList_.clear();
+    abilityRecord->DumpService(info, params, false);
+    EXPECT_TRUE(info.size() == 8);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: DumpService
+ * SubFunction: DumpService
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord DumpService
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_DumpService_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    std::vector<std::string> info;
+    std::vector<std::string> params;
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI_SERVICE;
+    abilityRecord->scheduler_ = nullptr;
+    abilityRecord->isReady_ = false;
+    abilityRecord->isLauncherRoot_ = false;
+    abilityRecord->token_ = nullptr;
+    abilityRecord->connRecordList_.clear();
+    abilityRecord->DumpService(info, params, false);
+    EXPECT_TRUE(info.size() == 9);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: DumpUIExtensionPid
+ * SubFunction: DumpUIExtensionPid
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord DumpUIExtensionPid
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_DumpUIExtensionPid_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    std::vector<std::string> info;
+    abilityRecord->DumpUIExtensionPid(info, true);
+    EXPECT_TRUE(info.size() == 1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: OnSchedulerDied
+ * SubFunction: OnSchedulerDied
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord OnSchedulerDied
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_OnSchedulerDied_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.bundleName = "test";
+    abilityRecord->abilityInfo_.name = "test";
+    abilityRecord->scheduler_ = sptr<AbilitySchedulerMock>::MakeSptr();
+    EXPECT_NE(abilityRecord->scheduler_, nullptr);
+    abilityRecord->isWindowAttached_ = true;
+    abilityRecord->OnProcessDied();
+    EXPECT_TRUE(abilityRecord->isWindowAttached_);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: OnSchedulerDied
+ * SubFunction: OnSchedulerDied
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord OnSchedulerDied
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_OnSchedulerDied_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.bundleName = "test";
+    abilityRecord->abilityInfo_.name = "test";
+    abilityRecord->scheduler_ = nullptr;
+    abilityRecord->isWindowAttached_ = true;
+    abilityRecord->OnProcessDied();
+    EXPECT_FALSE(abilityRecord->isWindowAttached_);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: IsNeverStarted
+ * SubFunction: IsNeverStarted
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord IsNeverStarted
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_IsNeverStarted_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSPICKER_MEDIACONTROL;
+    abilityRecord->startId_ = 0;
+    EXPECT_TRUE(abilityRecord->IsNeverStarted());
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->isLaunching_ = false;
+    abilityRecord->launchDebugInfo_.isNativeDebugSet = true;
+    abilityRecord->launchDebugInfo_.isPerfCmdSet = true;
+    Want want;
+    abilityRecord->SetWant(want);
+    EXPECT_TRUE(abilityRecord->want_.HasParameter("nativeDebug"));
+    EXPECT_TRUE(abilityRecord->want_.HasParameter("perfCmd"));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->isLaunching_ = false;
+    abilityRecord->want_.SetParam("multiThread", false);
+    abilityRecord->want_.SetParam("errorInfoEnhance", false);
+    Want want;
+    abilityRecord->SetWant(want);
+    EXPECT_TRUE(abilityRecord->want_.GetBoolParam("multiThread", true));
+    EXPECT_TRUE(abilityRecord->want_.GetBoolParam("errorInfoEnhance", true));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWant
+ * SubFunction: SetWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWant
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWant_003, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->isLaunching_ = false;
+    Want want;
+    want.SetParam("ohos.ability.params.UIServiceHostProxy", true);
+    abilityRecord->SetWant(want);
+    EXPECT_FALSE(abilityRecord->want_.HasParameter("ohos.ability.params.UIServiceHostProxy"));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWindowMode
+ * SubFunction: SetWindowMode
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWindowMode
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWindowMode_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->SetWindowMode(true);
+    EXPECT_TRUE(abilityRecord->want_.GetBoolParam(Want::PARAM_RESV_WINDOW_MODE, true));
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetLastExitReason
+ * SubFunction: SetLastExitReason
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetLastExitReason
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetLastExitReason_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    ExitReason exitReason;
+    exitReason.exitMsg = "exitMsg";
+    AppExecFwk::RunningProcessInfo processInfo;
+    int64_t timestamp = 1745579756980;
+    bool withKillMsg = true;
+    abilityRecord->SetLastExitReason(exitReason, processInfo, timestamp, withKillMsg);
+    EXPECT_TRUE(abilityRecord->lifeCycleStateInfo_.launchParam.lastExitDetailInfo.exitMsg == "exitMsg");
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetKeepAlive
+ * SubFunction: GetKeepAlive
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetKeepAlive
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_GetKeepAlive_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     abilityRecord->abilityInfo_.bundleName = "com.ohos.sceneboard";
-    abilityRecord->AfterLoaded();
-    EXPECT_TRUE(abilityRecord->IsSceneBoard());
+    abilityRecord->abilityInfo_.name = "com.ohos.sceneboard.MainAbility";
+    abilityRecord->keepAliveBundle_ = false;
+    EXPECT_TRUE(abilityRecord->GetKeepAlive());
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: UpdateSessionInfo
+ * SubFunction: UpdateSessionInfo
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord UpdateSessionInfo
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_UpdateSessionInfo_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->sessionInfo_ = sptr<SessionInfo>::MakeSptr();
+    sptr<IRemoteObject> sessionToken = sptr<Token>::MakeSptr(abilityRecord);
+    abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
+    abilityRecord->UpdateSessionInfo(sessionToken);
+    EXPECT_NE(abilityRecord->sessionInfo_->sessionToken, nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetWantAppIndex
+ * SubFunction: SetWantAppIndex
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetWantAppIndex
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetWantAppIndex_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    int32_t appIndex = 1;
+    abilityRecord->SetWantAppIndex(appIndex);
+    EXPECT_EQ(abilityRecord->want_.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0), appIndex);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: DumpClientInfo
+ * SubFunction: DumpClientInfo
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord DumpClientInfo
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_DumpClientInfo_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->scheduler_ = sptr<AbilitySchedulerMock>::MakeSptr();
+    abilityRecord->isReady_ = true;
+    std::vector<std::string> info;
+    std::vector<std::string> params;
+    bool isClient = false;
+    bool dumpConfig = true;
+    abilityRecord->DumpClientInfo(info, params, isClient, dumpConfig);
+    EXPECT_EQ(info.size(), 0);
+    EXPECT_EQ(params.size(), 0);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: DumpAbilityInfoDone
+ * SubFunction: DumpAbilityInfoDone
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord DumpAbilityInfoDone
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_DumpAbilityInfoDone_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    std::vector<std::string> infos;
+    infos.push_back("test");
+    abilityRecord->isDumpTimeout_ = false;
+    abilityRecord->DumpAbilityInfoDone(infos);
+    EXPECT_EQ(abilityRecord->dumpInfos_.size(), 1);
+}
+
+#ifdef SUPPORT_UPMS
+/*
+ * Feature: AbilityRecord
+ * Function: GrantUriPermission
+ * SubFunction: GrantUriPermission
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GrantUriPermission
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_GrantUriPermission_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->specifyTokenId_ = 10;
+    abilityRecord->appIndex_ = 1001;
+    std::shared_ptr<CallerRecord> caller = std::make_shared<CallerRecord>();
+    caller->caller_ = abilityRecord;
+    abilityRecord->callerList_.push_back(caller);
+    Want want;
+    std::string targetBundleName = "targetBundleName";
+    bool isSandboxApp = false;
+    uint32_t tokenId = 1234;
+    abilityRecord->GrantUriPermission(want, targetBundleName, isSandboxApp, tokenId);
+    EXPECT_EQ(abilityRecord->specifyTokenId_, 0);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GrantUriPermission
+ * SubFunction: GrantUriPermission
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GrantUriPermission
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_GrantUriPermission_003, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->specifyTokenId_ = 1;
+    abilityRecord->GrantUriPermission();
+    EXPECT_EQ(abilityRecord->specifyTokenId_, 0);
+}
+#endif // SUPPORT_UPMS
+
+/*
+ * Feature: AbilityRecord
+ * Function: RemoveAbilityWindowStateMap
+ * SubFunction: RemoveAbilityWindowStateMap
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord RemoveAbilityWindowStateMap
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_RemoveAbilityWindowStateMap_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    uint64_t uiExtensionComponentId = 1;
+    abilityRecord->abilityWindowStateMap_.clear();
+    abilityRecord->abilityWindowStateMap_[uiExtensionComponentId] = AbilityWindowState::BACKGROUND;
+    abilityRecord->RemoveAbilityWindowStateMap(uiExtensionComponentId);
+    auto itr = abilityRecord->abilityWindowStateMap_.find(uiExtensionComponentId);
+    EXPECT_TRUE(itr == abilityRecord->abilityWindowStateMap_.end());
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: IsAbilityWindowReady
+ * SubFunction: IsAbilityWindowReady
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord IsAbilityWindowReady
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_IsAbilityWindowReady_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    uint64_t uiExtensionComponentId = 1;
+    abilityRecord->abilityWindowStateMap_.clear();
+    abilityRecord->abilityWindowStateMap_[uiExtensionComponentId] = AbilityWindowState::BACKGROUNDING;
+    EXPECT_FALSE(abilityRecord->IsAbilityWindowReady());
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: IsAbilityWindowReady
+ * SubFunction: IsAbilityWindowReady
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord IsAbilityWindowReady
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_IsAbilityWindowReady_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityWindowStateMap_.clear();
+    EXPECT_TRUE(abilityRecord->IsAbilityWindowReady());
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetAbilityWindowState
+ * SubFunction: SetAbilityWindowState
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetAbilityWindowState
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetAbilityWindowState_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityWindowStateMap_.clear();
+    WindowCommand winCmd = WindowCommand::WIN_CMD_FOREGROUND;
+    bool isFinished = true;
+    abilityRecord->SetAbilityWindowState(nullptr, winCmd, isFinished);
+    EXPECT_TRUE(abilityRecord->abilityWindowStateMap_.empty());
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetAbilityWindowState
+ * SubFunction: SetAbilityWindowState
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetAbilityWindowState
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetAbilityWindowState_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityWindowStateMap_.clear();
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    sessionInfo->uiExtensionComponentId = 1;
+    WindowCommand winCmd = WindowCommand::WIN_CMD_FOREGROUND;
+    bool isFinished = true;
+    abilityRecord->SetAbilityWindowState(sessionInfo, winCmd, isFinished);
+    auto itr = abilityRecord->abilityWindowStateMap_.find(sessionInfo->uiExtensionComponentId);
+    EXPECT_TRUE(itr != abilityRecord->abilityWindowStateMap_.end());
+    EXPECT_EQ(itr->second, AbilityWindowState::FOREGROUND);
+}
+
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetAbilityWindowState
+ * SubFunction: SetAbilityWindowState
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetAbilityWindowState
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetAbilityWindowState_003, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityWindowStateMap_.clear();
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    sessionInfo->uiExtensionComponentId = 1;
+    WindowCommand winCmd = WindowCommand::WIN_CMD_BACKGROUND;
+    bool isFinished = true;
+    abilityRecord->SetAbilityWindowState(sessionInfo, winCmd, isFinished);
+    auto itr = abilityRecord->abilityWindowStateMap_.find(sessionInfo->uiExtensionComponentId);
+    EXPECT_TRUE(itr != abilityRecord->abilityWindowStateMap_.end());
+    EXPECT_EQ(itr->second, AbilityWindowState::BACKGROUND);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: DumpUIExtensionRootHostInfo
+ * SubFunction: DumpUIExtensionRootHostInfo
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify DumpUIExtensionRootHostInfo
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_DumpUIExtensionRootHostInfo_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    std::vector<std::string> info;
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    abilityRecord->token_ = sptr<Token>::MakeSptr(abilityRecord);
+    abilityRecord->DumpUIExtensionRootHostInfo(info);
+    EXPECT_TRUE(info.size() ==  0);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetAbilityWindowState
+ * SubFunction: SetAbilityWindowState
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetAbilityWindowState
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetAbilityWindowState_004, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityWindowStateMap_.clear();
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    sessionInfo->uiExtensionComponentId = 1;
+    abilityRecord->abilityWindowStateMap_[sessionInfo->uiExtensionComponentId] = AbilityWindowState::TERMINATE;
+    WindowCommand winCmd = WindowCommand::WIN_CMD_DESTROY;
+    bool isFinished = true;
+    abilityRecord->SetAbilityWindowState(sessionInfo, winCmd, isFinished);
+    auto itr = abilityRecord->abilityWindowStateMap_.find(sessionInfo->uiExtensionComponentId);
+    EXPECT_TRUE(itr == abilityRecord->abilityWindowStateMap_.end());
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetAbilityWindowState
+ * SubFunction: SetAbilityWindowState
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetAbilityWindowState
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetAbilityWindowState_005, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityWindowStateMap_.clear();
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    sessionInfo->uiExtensionComponentId = 1;
+    WindowCommand winCmd = WindowCommand::WIN_CMD_FOREGROUND;
+    bool isFinished = false;
+    abilityRecord->SetAbilityWindowState(sessionInfo, winCmd, isFinished);
+    auto itr = abilityRecord->abilityWindowStateMap_.find(sessionInfo->uiExtensionComponentId);
+    EXPECT_TRUE(itr != abilityRecord->abilityWindowStateMap_.end());
+    EXPECT_EQ(itr->second, AbilityWindowState::FOREGROUNDING);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetAbilityWindowState
+ * SubFunction: SetAbilityWindowState
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetAbilityWindowState
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetAbilityWindowState_006, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityWindowStateMap_.clear();
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    sessionInfo->uiExtensionComponentId = 1;
+    WindowCommand winCmd = WindowCommand::WIN_CMD_BACKGROUND;
+    bool isFinished = false;
+    abilityRecord->SetAbilityWindowState(sessionInfo, winCmd, isFinished);
+    auto itr = abilityRecord->abilityWindowStateMap_.find(sessionInfo->uiExtensionComponentId);
+    EXPECT_TRUE(itr != abilityRecord->abilityWindowStateMap_.end());
+    EXPECT_EQ(itr->second, AbilityWindowState::BACKGROUNDING);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetAbilityWindowState
+ * SubFunction: SetAbilityWindowState
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetAbilityWindowState
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetAbilityWindowState_007, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityWindowStateMap_.clear();
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    sessionInfo->uiExtensionComponentId = 1;
+    WindowCommand winCmd = WindowCommand::WIN_CMD_DESTROY;
+    bool isFinished = false;
+    abilityRecord->SetAbilityWindowState(sessionInfo, winCmd, isFinished);
+    auto itr = abilityRecord->abilityWindowStateMap_.find(sessionInfo->uiExtensionComponentId);
+    EXPECT_TRUE(itr != abilityRecord->abilityWindowStateMap_.end());
+    EXPECT_EQ(itr->second, AbilityWindowState::TERMINATING);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: CreateModalUIExtension
+ * SubFunction: CreateModalUIExtension
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord CreateModalUIExtension
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_CreateModalUIExtension_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    Want want;
+    abilityRecord->scheduler_ = sptr<AbilitySchedulerMock>::MakeSptr();
+    EXPECT_NE(abilityRecord->CreateModalUIExtension(want), INNER_ERR);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetURI
+ * SubFunction: GetURI
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetURI
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_GetURI_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->uri_ = "test";
+    EXPECT_EQ(abilityRecord->GetURI(), "test");
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: UpdateUIExtensionInfo
+ * SubFunction: UpdateUIExtensionInfo
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord UpdateUIExtensionInfo
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_UpdateUIExtensionInfo_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSPICKER_MEDIACONTROL;
+
+    int param = 100;
+
+    abilityRecord->want_.SetParam(UIEXTENSION_ABILITY_ID, param);
+    EXPECT_TRUE(abilityRecord->want_.HasParameter(UIEXTENSION_ABILITY_ID));
+
+    abilityRecord->want_.SetParam(UIEXTENSION_ROOT_HOST_PID, param);
+    EXPECT_TRUE(abilityRecord->want_.HasParameter(UIEXTENSION_ROOT_HOST_PID));
+
+    WantParams wantParams;
+    abilityRecord->UpdateUIExtensionInfo(wantParams);
+    EXPECT_NE(abilityRecord->want_.GetIntParam(UIEXTENSION_ABILITY_ID, 0), param);
+    EXPECT_NE(abilityRecord->want_.GetIntParam(UIEXTENSION_ROOT_HOST_PID, 0), param);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: UpdateDmsCallerInfo
+ * SubFunction: UpdateDmsCallerInfo
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord UpdateDmsCallerInfo
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_UpdateDmsCallerInfo_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    Want want;
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, DMS_UID);
+    abilityRecord->UpdateDmsCallerInfo(want);
+    EXPECT_EQ(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0), -1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetDebugUIExtension
+ * SubFunction: SetDebugUIExtension
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetDebugUIExtension
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetDebugUIExtension_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+
+    Want want;
+    abilityRecord->want_ = want;
+    abilityRecord->launchDebugInfo_.isDebugAppSet = false;
+    abilityRecord->launchDebugInfo_.debugApp = false;
+
+    abilityRecord->SetDebugUIExtension();
+    EXPECT_FALSE(abilityRecord->want_.HasParameter(DEBUG_APP));
+    EXPECT_FALSE(abilityRecord->launchDebugInfo_.isDebugAppSet);
+    EXPECT_FALSE(abilityRecord->launchDebugInfo_.debugApp);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: SetDebugUIExtension
+ * SubFunction: SetDebugUIExtension
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord SetDebugUIExtension
+ */
+HWTEST_F(AbilityRecordSecondTest, AbilityRecord_SetDebugUIExtension_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSPICKER_MEDIACONTROL;
+
+    Want want;
+    abilityRecord->want_ = want;
+    abilityRecord->launchDebugInfo_.isDebugAppSet = false;
+    abilityRecord->launchDebugInfo_.debugApp = false;
+
+    abilityRecord->SetDebugUIExtension();
+    EXPECT_TRUE(abilityRecord->want_.HasParameter(DEBUG_APP));
+    EXPECT_TRUE(abilityRecord->launchDebugInfo_.isDebugAppSet);
+    EXPECT_TRUE(abilityRecord->launchDebugInfo_.debugApp);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

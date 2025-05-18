@@ -189,5 +189,102 @@ HWTEST_F(JsRuntimeTest, DebuggerConnectionManager_0200, TestSize.Level1)
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TAG_LOGI(AAFwkTag::TEST, "DebuggerConnectionManager_0200 end");
 }
+
+/**
+ * @tc.name: SetDebugOption_0100
+ * @tc.desc: JsRuntime test for SetDebugOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, SetDebugOption_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetDebugOption_0100 start");
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    EXPECT_NE(jsRuntime, nullptr);
+    AbilityRuntime::Runtime::DebugOption dOption;
+    dOption.perfCmd = "profile test";
+    dOption.processName = "testProcess";
+    EXPECT_NE(jsRuntime->debugOption_.perfCmd, "profile test");
+    EXPECT_NE(jsRuntime->debugOption_.processName, "testProcess");
+    jsRuntime->SetDebugOption(dOption);
+    EXPECT_EQ(jsRuntime->debugOption_.perfCmd, "profile test");
+    EXPECT_EQ(jsRuntime->debugOption_.processName, "testProcess");
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "SetDebugOption_0100 end");
+}
+
+/**
+ * @tc.name: StartLocalDebugMode_0100
+ * @tc.desc: JsRuntime test for StartLocalDebugMode with isDebugFromLocal=true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, StartLocalDebugMode_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartLocalDebugMode_0100 start");
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    EXPECT_NE(jsRuntime, nullptr);
+    jsRuntime->debugOption_.isDebugFromLocal=false;
+    jsRuntime->StartLocalDebugMode(true);
+    EXPECT_EQ(jsRuntime->debugOption_.isDebugFromLocal, true);
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "StartLocalDebugMode_0100 end");
+}
+
+/**
+ * @tc.name: SetStopPreloadSoCallback_0100
+ * @tc.desc: JsRuntime test for SetStopPreloadSoCallback to verify GetEcmaVm is called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, SetStopPreloadSoCallback_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetStopPreloadSoCallback_0100 start");
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    int mark = 0;
+    auto callback = [&mark]() {
+        mark = 1;
+        TAG_LOGI(AAFwkTag::TEST, "Callback function called");
+    };
+    jsRuntime->SetStopPreloadSoCallback(callback);
+    jsRuntime.reset();
+    EXPECT_EQ(mark, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "SetStopPreloadSoCallback_0100 end");
+}
+
+/**
+ * @tc.name: StartProfiler_0100
+ * @tc.desc: JsRuntime test for StartProfiler.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, StartProfiler_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartProfiler_0100 start");
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    ASSERT_NE(jsRuntime, nullptr);
+    AbilityRuntime::Runtime::DebugOption dOption;
+    dOption.isDebugFromLocal = false;
+    dOption.isDeveloperMode = false;
+    dOption.isDebugApp = true;
+    dOption.isStartWithDebug = false;
+    dOption.processName = "testProcess";
+    dOption.perfCmd = "profile jsperf 100";
+    jsRuntime->instanceId_ = 999;
+    jsRuntime->StartProfiler(dOption);
+    EXPECT_EQ(jsRuntime->instanceId_, 999);
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "StartProfiler_0100 end");
+}
+
+
 }  // namespace AbilityRuntime
 }  // namespace OHOS

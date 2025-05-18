@@ -41,6 +41,7 @@ void BundleMgrHelper::SetBmsReady(bool bmsReady)
 
 ErrCode BundleMgrHelper::GetNameForUid(const int32_t uid, std::string& name)
 {
+    name = AAFwk::MyStatus::GetInstance().getNameForUid_;
     return ERR_OK;
 }
 
@@ -109,7 +110,7 @@ std::string BundleMgrHelper::GetAppIdByBundleName(const std::string& bundleName,
 
 bool BundleMgrHelper::GetHapModuleInfo(const AbilityInfo& abilityInfo, HapModuleInfo& hapModuleInfo)
 {
-    return false;
+    return AAFwk::MyStatus::GetInstance().getHapModuleInfo_;
 }
 
 std::string BundleMgrHelper::GetAbilityLabel(const std::string& bundleName, const std::string& abilityName)
@@ -127,7 +128,8 @@ ErrCode BundleMgrHelper::GetBaseSharedBundleInfos(const std::string& bundleName,
     std::vector<BaseSharedBundleInfo>& baseSharedBundleInfos,
     GetDependentBundleInfoFlag flag)
 {
-    return ERR_OK;
+    baseSharedBundleInfos = AAFwk::MyStatus::GetInstance().baseSharedBundleInfos_;
+    return AAFwk::MyStatus::GetInstance().getBaseSharedBundleInfos_;
 }
 
 ErrCode BundleMgrHelper::GetBundleInfoForSelf(int32_t flags, BundleInfo& bundleInfo)
@@ -148,7 +150,8 @@ bool BundleMgrHelper::GetGroupDir(const std::string& dataGroupId, std::string& d
 
 sptr<IOverlayManager> BundleMgrHelper::GetOverlayManagerProxy()
 {
-    return nullptr;
+    AAFwk::MyStatus::GetInstance().getOverlayCall_++;
+    return AAFwk::MyStatus::GetInstance().getOverlay_;
 }
 
 bool BundleMgrHelper::QueryAbilityInfo(const Want& want, AbilityInfo& abilityInfo)
@@ -191,13 +194,14 @@ bool BundleMgrHelper::QueryExtensionAbilityInfos(const Want& want, const int32_t
 ErrCode BundleMgrHelper::GetBundleInfoV9(const std::string& bundleName,
     int32_t flags, BundleInfo& bundleInfo, int32_t userId)
 {
-    return ERR_OK;
+    return AAFwk::MyStatus::GetInstance().getBundleInfoV9_;
 }
 
 bool BundleMgrHelper::GetApplicationInfo(
     const std::string& appName, const ApplicationFlag flag, const int32_t userId, ApplicationInfo& appInfo)
 {
-    return false;
+    appInfo = AAFwk::MyStatus::GetInstance().applicationInfo_;
+    return AAFwk::MyStatus::GetInstance().getApplicationInfo_;
 }
 
 bool BundleMgrHelper::GetApplicationInfo(const std::string& appName,
@@ -257,13 +261,14 @@ bool BundleMgrHelper::ImplicitQueryInfos(const Want& want, int32_t flags, int32_
 
 bool BundleMgrHelper::CleanBundleDataFiles(const std::string& bundleName, int32_t userId, int32_t appCloneIndex)
 {
-    return false;
+    return AAFwk::MyStatus::GetInstance().cleanBundleDataFiles_;
 }
 
 bool BundleMgrHelper::QueryDataGroupInfos(const std::string& bundleName,
     int32_t userId, std::vector<DataGroupInfo>& infos)
 {
-    return false;
+    infos = AAFwk::MyStatus::GetInstance().queryData_;
+    return AAFwk::MyStatus::GetInstance().queryDataGroupInfos_;
 }
 
 bool BundleMgrHelper::RegisterBundleEventCallback(const sptr<IBundleEventCallback>& bundleEventCallback)
@@ -279,7 +284,7 @@ bool BundleMgrHelper::GetBundleInfos(
 
 bool BundleMgrHelper::GetHapModuleInfo(const AbilityInfo& abilityInfo, int32_t userId, HapModuleInfo& hapModuleInfo)
 {
-    return false;
+    return AAFwk::MyStatus::GetInstance().getHapModuleInfo_;
 }
 
 bool BundleMgrHelper::QueryAppGalleryBundleName(std::string& bundleName)
@@ -317,7 +322,7 @@ ErrCode BundleMgrHelper::QueryCloneAbilityInfo(
 ErrCode BundleMgrHelper::GetCloneBundleInfo(
     const std::string& bundleName, int32_t flags, int32_t appCloneIndex, BundleInfo& bundleInfo, int32_t userId)
 {
-    return ERR_OK;
+    return AAFwk::MyStatus::GetInstance().getCloneBundleInfo_;
 }
 
 ErrCode BundleMgrHelper::QueryCloneExtensionAbilityInfoWithAppIndex(const ElementName& element,

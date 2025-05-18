@@ -58,11 +58,12 @@ public:
         const int32_t pid = -1, const int32_t callerPid = -1);
     std::string GetThawReasonByAbilityType(const AbilityInfo &abilityInfo);
     void GetAllFrozenPidsFromRSS(std::unordered_set<int32_t> &frozenPids);
-    bool CheckShouldForceKillProcess(int32_t pid);
+    bool CheckShouldForceKillProcess(int32_t pid, const std::string& bundleName);
     void ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid,
         int64_t timeDuration = 0, int64_t abilityRecordId = -1);
     std::unordered_set<std::string> GetNWebPreloadSet() const;
     void ReportAbilityIntentExemptionInfoToRSS(int32_t callerUid, int32_t callerPid);
+    void ReportSubHealtyPerfInfoToRSS();
 private:
     ResSchedUtil() = default;
     ~ResSchedUtil() = default;

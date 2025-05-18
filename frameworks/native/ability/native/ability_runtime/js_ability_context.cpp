@@ -550,15 +550,15 @@ napi_value JsAbilityContext::OnStartAbility(napi_env env, NapiCallbackInfo& info
             return;
         }
         task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
-        if (unwrapArgc > ARGC_ONE && !startOptions.requestId_.empty()) {
-            auto context = weak.lock();
-            if (!context) {
-                TAG_LOGW(AAFwkTag::CONTEXT, "null context");
-                return;
-            }
-            nlohmann::json jsonObject = nlohmann::json {
-                { JSON_KEY_ERR_MSG, "startAbility failed" },
-            };
+        auto context = weak.lock();
+        if (context == nullptr) {
+            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
+            return;
+        }
+        if (!startOptions.requestId_.empty()) {
+            std::string errMsg = want.GetBoolParam(Want::PARAM_RESV_START_RECENT, false) ?
+                "Failed to call startRecentAbility" : "Failed to call startAbility";
+            nlohmann::json jsonObject = nlohmann::json { { JSON_KEY_ERR_MSG, errMsg } };
             context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
         }
     };
@@ -936,6 +936,51 @@ napi_value JsAbilityContext::OnOpenLinkInner(napi_env env, const AAFwk::Want& wa
     return result;
 }
 
+napi_value JsAbilityContext::OnStartAbilityAsCallerInner(napi_env env, NapiCallbackInfo& info,
+    const AAFwk::Want &want, size_t unwrapArgc, const AAFwk::StartOptions &startOptions)
+{
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, startOptions, unwrapArgc, innerErrCode]() {
+        auto context = weak.lock();
+        if (!context) {
+            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
+            *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            return;
+        }
+        *innerErrCode = (unwrapArgc == ARGC_ONE) ?
+            context->StartAbilityAsCaller(want, -1) : context->StartAbilityAsCaller(want, startOptions, -1);
+    };
+    NapiAsyncTask::CompleteCallback complete =
+        [weak = context_, innerErrCode, want, startOptions](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (*innerErrCode == ERR_OK) {
+                task.Resolve(env, CreateJsUndefined(env));
+                return;
+            }
+            if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+            } else {
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+            }
+            auto context = weak.lock();
+            if (context == nullptr) {
+                TAG_LOGW(AAFwkTag::CONTEXT, "null context");
+                return;
+            }
+            if (!startOptions.requestId_.empty()) {
+                nlohmann::json jsonObject = nlohmann::json {
+                    { JSON_KEY_ERR_MSG, "Failed to call startAbilityAsCaller" }
+                };
+                context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
+            }
+        };
+
+    napi_value lastParam = (info.argc > unwrapArgc) ? info.argv[unwrapArgc] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityAsCaller",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 napi_value JsAbilityContext::OnStartAbilityAsCaller(napi_env env, NapiCallbackInfo& info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -960,35 +1005,10 @@ napi_value JsAbilityContext::OnStartAbilityAsCaller(napi_env env, NapiCallbackIn
     if (info.argc > ARGC_ONE && CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
         TAG_LOGD(AAFwkTag::CONTEXT, "start, options is used");
         AppExecFwk::UnwrapStartOptions(env, info.argv[INDEX_ONE], startOptions);
+        UnwrapCompletionHandlerInStartOptions(env, info.argv[INDEX_ONE], startOptions);
         unwrapArgc++;
     }
-    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, startOptions, unwrapArgc, innerErrCode]() {
-        auto context = weak.lock();
-        if (!context) {
-            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
-            *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
-            return;
-        }
-        *innerErrCode = (unwrapArgc == ARGC_ONE) ?
-            context->StartAbilityAsCaller(want, -1) : context->StartAbilityAsCaller(want, startOptions, -1);
-    };
-    NapiAsyncTask::CompleteCallback complete =
-        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (*innerErrCode == ERR_OK) {
-                task.Resolve(env, CreateJsUndefined(env));
-            } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
-            } else {
-                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
-            }
-        };
-
-    napi_value lastParam = (info.argc > unwrapArgc) ? info.argv[unwrapArgc] : nullptr;
-    napi_value result = nullptr;
-    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityAsCaller",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-    return result;
+    return OnStartAbilityAsCallerInner(env, info, want, unwrapArgc, startOptions);
 }
 
 napi_value JsAbilityContext::OnStartRecentAbility(napi_env env, NapiCallbackInfo& info)
@@ -1019,6 +1039,7 @@ napi_value JsAbilityContext::OnStartAbilityWithAccount(napi_env env, NapiCallbac
     if (info.argc > ARGC_TWO && CheckTypeForNapiValue(env, info.argv[INDEX_TWO], napi_object)) {
         TAG_LOGD(AAFwkTag::CONTEXT, "start options is used");
         AppExecFwk::UnwrapStartOptions(env, info.argv[INDEX_TWO], startOptions);
+        UnwrapCompletionHandlerInStartOptions(env, info.argv[INDEX_TWO], startOptions);
         unwrapArgc++;
     }
 
@@ -1051,12 +1072,23 @@ napi_value JsAbilityContext::OnStartAbilityWithAccount(napi_env env, NapiCallbac
         }
     };
 
-    NapiAsyncTask::CompleteCallback complete = [innerErrCode](
+    NapiAsyncTask::CompleteCallback complete = [weak = context_, innerErrCode, want, startOptions](
         napi_env env, NapiAsyncTask& task, int32_t status) {
             if (*innerErrCode == 0) {
                 task.Resolve(env, CreateJsUndefined(env));
-            } else {
-                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+                return;
+            }
+            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+            auto context = weak.lock();
+            if (context == nullptr) {
+                TAG_LOGW(AAFwkTag::CONTEXT, "null context");
+                return;
+            }
+            if (!startOptions.requestId_.empty()) {
+                nlohmann::json jsonObject = nlohmann::json {
+                    { JSON_KEY_ERR_MSG, "Failed to call startAbilityWithAccount" }
+                };
+                context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
             }
     };
     napi_value lastParam = (info.argc > unwrapArgc) ? info.argv[unwrapArgc] : nullptr;

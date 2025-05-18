@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +39,8 @@
 #include "system_ability_definition.h"
 #include "uri.h"
 #include "mock_ability_connect_callback.h"
+#include "insight_intent_db_cache.h"
+#include "insight_intent_execute_param.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -902,6 +905,21 @@ HWTEST_F(AbilityManagerServiceThirdTest, IsCrossUserCall_003, TestSize.Level1)
     int32_t userId = 10;
     EXPECT_EQ(abilityMs_->IsCrossUserCall(userId), true);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest IsCrossUserCall_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: IsCrossUserCall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService IsCrossUserCall
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, IsCrossUserCall_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest IsCrossUserCall_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    int32_t userId = 1;
+    EXPECT_EQ(abilityMs_->IsCrossUserCall(userId), false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest IsCrossUserCall_004 end");
 }
 
 /*
@@ -2642,6 +2660,24 @@ HWTEST_F(AbilityManagerServiceThirdTest, AbilityManagerServiceTest_OpenLink_001,
     Want want;
     sptr<IRemoteObject> callerToken = nullptr;
     int res = abilityMs->OpenLink(want, callerToken, 0, -1);
+    EXPECT_NE(res, ERR_OK);
+}
+
+/*
+* Feature: AbilityManagerService
+* Function: IntentOpenLinkInner
+* FunctionPoints: AbilityManagerService IntentOpenLinkInner
+*/
+HWTEST_F(AbilityManagerServiceThirdTest, AbilityManagerServiceTest_IntentOpenLinkInner_001, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    AppExecFwk::InsightIntentExecuteParam param{};
+    param.insightIntentParam_ = std::make_shared<WantParams>();
+    param.uris_.push_back("");
+    AbilityRuntime::ExtractInsightIntentGenericInfo info{};
+    auto paramPtr = std::make_shared<InsightIntentExecuteParam>(param);
+    int res = abilityMs->IntentOpenLinkInner(paramPtr, info, -1);
     EXPECT_NE(res, ERR_OK);
 }
 
