@@ -1093,13 +1093,13 @@ int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector
     const AppExecFwk::ConfigurationPolicy& policy, const int32_t userId)
 {
     int32_t maxCountPerBatch = policy.maxCountPerBatch;
-    if (maxCountPerBatch < 1 ) {
+    if (maxCountPerBatch < 1) {
         TAG_LOGE(AAFwkTag::APPMGR, "maxCountPerBatch invalid");
         return ERR_INVALID_VALUE;
     }
 
     int32_t intervalTime = policy.intervalTime;
-    if (intervalTime < 0 ) {
+    if (intervalTime < 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "intervalTime invalid");
         return ERR_INVALID_VALUE;
     }
@@ -1112,7 +1112,7 @@ int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector
 
     appInfos_ = appInfos;
     int32_t taskCount = 0;
-    int32_t batchCount= 0;
+    int32_t batchCount = 0;
     for (auto info : appInfos) {
         auto policyTask = [weak = weak_from_this(), info, userId] {
             auto appRuningMgr = weak.lock();
@@ -1122,7 +1122,6 @@ int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector
             }
             appRuningMgr->ExecuteConfigurationTask(info, userId);
         };
-        //taskHandler_->SubmitTask(policyTask, info.bandleName.c_str() + std::to_string(info.appIndex), policy.intervalTime * batchCount);
         AAFwk::TaskHandlerWrap::GetFfrtHandler()->SubmitTask(policyTask,
             info.bandleName.c_str() + std::to_string(info.appIndex), policy.intervalTime * batchCount);
         if (++taskCount >= policy.maxCountPerBatch) {
