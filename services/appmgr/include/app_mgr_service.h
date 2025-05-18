@@ -427,6 +427,24 @@ public:
     virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) override;
 
     /**
+     * Internally, an asynchronous task will be initiated and tasks in the task list will be scheduled according to
+     * the policy.
+     * If during the execution of a task, a caller triggers UpdateConfiguration or UpdateConfigurationForBackgroundApp,
+     * the asynchronous task will be terminated.
+     * If the task has not been executed and the app is switched to the foreground, the task will be updated 
+     * when brought to the foreground. The task will not be updated while in the background.
+     * Supported scope: colormode
+     * Only SA can call this method.
+     * 
+     * @param appInfos Background application information.
+     * @param policy Update policy.
+     * @param userId configuration for the user
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &appInfos,
+        const AppExecFwk::ConfigurationPolicy &policy, const int32_t userId = -1) override;
+
+    /**
      *  Update config by bundle name.
      *
      * @param config Application environment change parameters.

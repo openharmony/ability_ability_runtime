@@ -103,6 +103,7 @@ private:
     int32_t HandleGetRenderProcessTerminationStatus(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetConfiguration(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateConfiguration(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleUpdateConfigurationForBackgroundApp(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateConfigurationByBundleName(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterConfigurationObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUnregisterConfigurationObserver(MessageParcel &data, MessageParcel &reply);

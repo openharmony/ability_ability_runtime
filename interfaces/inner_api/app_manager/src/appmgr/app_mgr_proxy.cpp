@@ -28,6 +28,7 @@ namespace OHOS {
 namespace AppExecFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr int32_t MAX_PROCESS_STATE_COUNT = 1000;
+constexpr int32_t MAX_BACKGROUND_APP_COUNT = 1000;
 AppMgrProxy::AppMgrProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<IAppMgr>(impl)
 {}
 
@@ -945,6 +946,47 @@ int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config, const int3
     int32_t ret = SendRequest(AppMgrInterfaceCode::UPDATE_CONFIGURATION, data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo>& appInfos,
+    const AppExecFwk::ConfigurationPolicy& policy, const int32_t userId)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfigurationForBackgroundApp");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return IPC_PROXY_ERR;
+    }
+    auto size = appInfos.size();
+    if (size == 0 || size > MAX_BACKGROUND_APP_COUNT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppInfos size invalid");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteUint32(size)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (const auto &info: appInfos) {
+        if (!data.WriteParcelable(&info)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Write appInfos failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    if (!data.WriteParcelable(&policy)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel policy failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel userId failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t ret = SendRequest(AppMgrInterfaceCode::UPDATE_CONFIGURATION_POLICY, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
         return ret;
     }
     return reply.ReadInt32();

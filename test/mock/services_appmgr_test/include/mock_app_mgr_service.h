@@ -74,6 +74,8 @@ public:
     MOCK_METHOD2(GetAbilityRecordsByProcessID, int(const int pid, std::vector<sptr<IRemoteObject>>& tokens));
     MOCK_METHOD1(GetConfiguration, int32_t(Configuration& config));
     MOCK_METHOD2(UpdateConfiguration, int32_t(const Configuration& config, const int32_t userId));
+    MOCK_METHOD3(UpdateConfigurationForBackgroundApp, int32_t(const std::vector<BackgroundAppInfo> &appInfos,
+        const AppExecFwk::ConfigurationPolicy &policy, const int32_t userId));
     MOCK_METHOD3(UpdateConfigurationByBundleName, int32_t(const Configuration& config, const std::string &name,
         int32_t appIndex));
     MOCK_METHOD1(RegisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver>& observer));

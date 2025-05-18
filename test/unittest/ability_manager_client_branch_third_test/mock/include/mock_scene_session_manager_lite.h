@@ -118,6 +118,9 @@ public:
     MOCK_METHOD(WMError, GetRootMainWindowId, (int32_t persistentId, int32_t& hostWindowId), (override));
     MOCK_METHOD(WMError, GetAccessibilityWindowInfo,
         (std::vector<sptr<AccessibilityWindowInfo>>& infos), (override));
+    WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) override {
+        return WSError::WS_OK;
+    }
 };
 } // namespace OHOS::Rosen
 #endif // MOCK_SCENE_SESSION_MANAGER_LITE_H

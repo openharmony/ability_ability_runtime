@@ -5482,6 +5482,23 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
     return result;
 }
 
+int32_t AppMgrServiceInner::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo>& appInfos,
+    const AppExecFwk::ConfigurationPolicy& policy, const int32_t userId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return ERR_NO_INIT;
+    }
+    CHECK_CALLER_IS_SYSTEM_APP;
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyUpdateConfigurationPerm();
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "permission verification failed");
+        return ret;
+    }
+    return appRunningManager_->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
+}
+
 int32_t AppMgrServiceInner::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
     int32_t appIndex)
 {

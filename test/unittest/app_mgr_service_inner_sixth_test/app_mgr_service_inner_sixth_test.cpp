@@ -537,5 +537,30 @@ HWTEST_F(AppMgrServiceInnerSixthTest, IsAppRunningByBundleNameAndUserId_006, Tes
 
     GTEST_LOG_(INFO) << "IsAppRunningByBundleNameAndUserId_006 end";
 }
+
+/**
+ * @tc.name: UpdateConfigurationForBackgroundApp_001
+ * @tc.desc: update configuration policy.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppMgrServiceInnerSixthTest, UpdateConfigurationForBackgroundApp_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UpdateConfiguration_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    std::vector<BackgroundAppInfo> appInfos;
+    AppExecFwk::ConfigurationPolicy policy;
+    int32_t userId = -1;
+    auto ret = appMgrServiceInner->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
+    EXPECT_NE(ret, 0);
+
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    ret = appMgrServiceInner->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "UpdateConfiguration_001 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS
