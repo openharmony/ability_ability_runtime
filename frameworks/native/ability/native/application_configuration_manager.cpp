@@ -20,6 +20,7 @@
 #include <vector>
 #include "application_configuration_manager.h"
 #include "configuration_utils.h"
+#include "unicode/locid.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -126,6 +127,48 @@ std::vector<std::shared_ptr<Global::Resource::ResourceManager>> ApplicationConfi
             return pair.second;
         });
     return values;
+}
+
+std::string ApplicationConfigurationManager::GetUpdatedLocale(const std::string& systemLocale,
+    const std::string& systemLanguage)
+{
+    if (systemLocale.empty() || systemLanguage.empty()) {
+        return "";
+    }
+
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag(systemLocale.c_str(), status);
+    if (U_FAILURE(status)) {
+        return "";
+    }
+
+    icu::Locale language = icu::Locale::forLanguageTag(systemLanguage.c_str(), status);
+    if (U_FAILURE(status)) {
+        return "";
+    }
+
+    std::string extendParamTag;
+    size_t pos = systemLocale.find("-u-");
+    if (pos != std::string::npos) {
+        extendParamTag = systemLocale.substr(pos);
+    }
+
+    std::string languageTag = language.getLanguage();
+    std::string scriptTag = language.getScript();
+    std::string regionTag = locale.getCountry();
+
+    std::string effectiveLocale = languageTag;
+    std::string splitor = "-";
+    if (!scriptTag.empty()) {
+        effectiveLocale += splitor + scriptTag;
+    }
+    if (!regionTag.empty()) {
+        effectiveLocale += splitor + regionTag;
+    }
+    if (!extendParamTag.empty()) {
+        effectiveLocale += extendParamTag;
+    }
+    return effectiveLocale;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

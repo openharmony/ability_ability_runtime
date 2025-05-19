@@ -1815,11 +1815,14 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
     Configuration appConfig = config;
+    ParseAppConfigurationParams(bundleInfo.applicationInfo.configuration, appConfig);
     if (Global::I18n::PreferredLanguage::IsSetAppPreferredLanguage()) {
         std::string preferredLanguage = Global::I18n::PreferredLanguage::GetAppPreferredLanguage();
         appConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, preferredLanguage);
+        std::string locale = appConfig.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE);
+        appConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE,
+            AbilityRuntime::ApplicationConfigurationManager::GetUpdatedLocale(locale, preferredLanguage));
     }
-    ParseAppConfigurationParams(bundleInfo.applicationInfo.configuration, appConfig);
     HandleConfigByPlugin(appConfig, bundleInfo);
     std::string systemSizeScale = appConfig.GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     if (!systemSizeScale.empty() && systemSizeScale.compare(DEFAULT_APP_FONT_SIZE_SCALE) == 0) {
