@@ -269,8 +269,15 @@ int32_t InsightIntentExecuteManager::AddWantUirsAndFlagsFromParam(
     return ERR_OK;
 }
 
-int32_t InsightIntentExecuteManager::UpdateFuncDecoratorParams(ExtractInsightIntentInfo &info, Want &want)
+int32_t InsightIntentExecuteManager::UpdateFuncDecoratorParams(
+    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
+    ExtractInsightIntentInfo &info, Want &want)
 {
+    if (param->executeMode_ != AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid execute mode %{public}d", param->executeMode_);
+        return ERR_INVALID_VALUE;
+    }
+
     std::string srcEntrance = info.decoratorFile;
     want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
 
@@ -289,9 +296,13 @@ int32_t InsightIntentExecuteManager::UpdateFuncDecoratorParams(ExtractInsightInt
 
 int32_t InsightIntentExecuteManager::UpdatePageDecoratorParams(
     const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
-    ExtractInsightIntentInfo &info,
-    Want &want)
+    ExtractInsightIntentInfo &info, Want &want)
 {
+    if (param->executeMode_ != AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid execute mode %{public}d", param->executeMode_);
+        return ERR_INVALID_VALUE;
+    }
+
     std::string srcEntrance = info.decoratorFile;
     want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
 
@@ -299,13 +310,9 @@ int32_t InsightIntentExecuteManager::UpdatePageDecoratorParams(
     std::string navigationId = info.genericInfo.get<InsightIntentPageInfo>().navigationId;
     std::string navDestinationName = info.genericInfo.get<InsightIntentPageInfo>().navDestination;
     std::string uiAbilityName = info.genericInfo.get<InsightIntentPageInfo>().uiAbility;
-    if (pagePath.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "invalid func param");
-        return ERR_INVALID_VALUE;
-    }
-    if (uiAbilityName != param->abilityName_) {
-        TAG_LOGE(AAFwkTag::INTENT, "invalid uiAbility name, %{public}s, %{public}s",
-            uiAbilityName.c_str(), param->abilityName_.c_str());
+    if (pagePath.empty() || uiAbilityName != param->abilityName_) {
+        TAG_LOGE(AAFwkTag::INTENT, "invalid page param, pagePath %{public}s, uiability %{public}s, %{public}s",
+            pagePath.c_str(), uiAbilityName.c_str(), param->abilityName_.c_str());
         return ERR_INVALID_VALUE;
     }
     if (uiAbilityName.empty()) {
@@ -342,8 +349,7 @@ int32_t InsightIntentExecuteManager::UpdatePageDecoratorParams(
 
 int32_t InsightIntentExecuteManager::UpdateEntryDecoratorParams(
     const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
-    ExtractInsightIntentInfo &info,
-    Want &want)
+    ExtractInsightIntentInfo &info, Want &want)
 {
     TAG_LOGD(AAFwkTag::INTENT, "update entry params");
     std::string srcEntrance = info.decoratorFile;
@@ -391,7 +397,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateDecoratorParams(
         static_cast<int8_t>(type));
     switch (type) {
         case InsightIntentType::DECOR_FUNC: {
-            return UpdateFuncDecoratorParams(info, want);
+            return UpdateFuncDecoratorParams(param, info, want);
         }
         case InsightIntentType::DECOR_PAGE: {
             return UpdatePageDecoratorParams(param, info, want);
