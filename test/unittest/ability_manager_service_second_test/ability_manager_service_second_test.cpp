@@ -60,6 +60,24 @@ public:
     Want want_{};
 };
 
+class MockIRemoteMissionListener : public IRemoteMissionListener {
+    public:
+        virtual ~MockIRemoteMissionListener() {}
+        void NotifyMissionsChanged(const std::string& deviceId) override
+        {}
+
+        void NotifySnapshot(const std::string& deviceId, int32_t missionId) override
+        {}
+
+        void NotifyNetDisconnect(const std::string& deviceId, int32_t state) override
+        {}
+
+        sptr<IRemoteObject> AsObject() override
+        {
+            return nullptr;
+        }
+    };
+
 AbilityRequest AbilityManagerServiceSecondTest::GenerateAbilityRequest(const std::string& deviceName,
     const std::string& abilityName, const std::string& appName, const std::string& bundleName,
     const std::string& moduleName)
@@ -913,7 +931,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, RegisterMissionListener_001, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest RegisterMissionListener_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::string deviceId = "test";
-    EXPECT_EQ(abilityMs_->RegisterMissionListener(deviceId, nullptr), REGISTER_REMOTE_MISSION_LISTENER_FAIL);
+    EXPECT_EQ(abilityMs_->RegisterMissionListener(deviceId, nullptr), ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest RegisterMissionListener_001 end");
 }
 
@@ -937,6 +955,23 @@ HWTEST_F(AbilityManagerServiceSecondTest, RegisterMissionListener_002, TestSize.
 
 /*
  * Feature: AbilityManagerService
+ * Function: RegisterMissionListener
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterMissionListener
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, RegisterMissionListener_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest RegisterMissionListener_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    std::string deviceId = "test";
+    sptr<MockIRemoteMissionListener> listener = new (std::nothrow) MockIRemoteMissionListener();
+    EXPECT_NE(listener, nullptr);
+    EXPECT_EQ(abilityMs_->RegisterMissionListener(deviceId, listener), CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest RegisterMissionListener_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: UnRegisterMissionListener
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService UnRegisterMissionListener
@@ -946,7 +981,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, UnRegisterMissionListener_001, TestSiz
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UnRegisterMissionListener_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::string deviceId = "test";
-    EXPECT_EQ(abilityMs_->UnRegisterMissionListener(deviceId, nullptr), REGISTER_REMOTE_MISSION_LISTENER_FAIL);
+    EXPECT_EQ(abilityMs_->UnRegisterMissionListener(deviceId, nullptr), ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UnRegisterMissionListener_001 end");
 }
 
@@ -965,6 +1000,23 @@ HWTEST_F(AbilityManagerServiceSecondTest, UnRegisterMissionListener_002, TestSiz
     abilityMs_->subManagersHelper_->currentMissionListManager_ = nullptr;
     EXPECT_EQ(abilityMs_->UnRegisterMissionListener(nullptr), ERR_NO_INIT);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UnRegisterMissionListener_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: UnRegisterMissionListener
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService UnRegisterMissionListener
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, UnRegisterMissionListener_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UnRegisterMissionListener_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    std::string deviceId = "test";
+    sptr<MockIRemoteMissionListener> listener = new (std::nothrow) MockIRemoteMissionListener();
+    EXPECT_NE(listener, nullptr);
+    EXPECT_EQ(abilityMs_->UnRegisterMissionListener(deviceId, listener), CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UnRegisterMissionListener_003 end");
 }
 
 /*
