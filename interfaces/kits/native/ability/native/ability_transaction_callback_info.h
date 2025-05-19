@@ -19,11 +19,20 @@
 #include <memory>
 #include <stack>
 
+#include "want_params.h"
+#include "recovery_param.h"
+
 namespace OHOS {
 namespace AppExecFwk {
 struct OnPrepareTerminationResult {
     int32_t prepareTermination;
     bool isExist;
+};
+
+struct OnSaveStateResult {
+    int32_t status;
+    AAFwk::WantParams wantParams;
+    StateReason reason;
 };
 
 template<typename T = void>
