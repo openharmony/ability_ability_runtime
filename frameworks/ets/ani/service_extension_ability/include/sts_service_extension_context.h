@@ -44,6 +44,9 @@ void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_objec
 void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo);
 
+void UpdateContextConfiguration(ani_env *env, std::unique_ptr<OHOS::AbilityRuntime::STSNativeReference>& stsObj,
+    ani_object aniConfiguration);
+
 class StsServiceExtensionContext final {
 public:
     static StsServiceExtensionContext &GetInstance()

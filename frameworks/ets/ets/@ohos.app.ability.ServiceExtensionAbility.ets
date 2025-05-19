@@ -16,6 +16,7 @@
 import rpc from '@ohos.rpc';
 import Want from '@ohos.app.ability.Want';
 import ServiceExtensionContext from 'application.ServiceExtensionContext';
+import { Configuration } from '@ohos.app.ability.Configuration'
 
 class MyService extends rpc.RemoteObject {
     constructor(descriptor: string) {
@@ -92,5 +93,8 @@ export default class ServiceExtensionAbility {
     console.log("onDisconnectAsync");
     this.isOnDisconnectAsync = false;
     return new Promise<void>((resolve: (a: undefined)=>void, reject: (err: Error)=>void): void => {});
+  }
+  onConfigurationUpdate(newConfig: Configuration): void {
+    console.log("onConfigurationUpdate");
   }
 }
