@@ -29,6 +29,7 @@
 #include "ipc_skeleton.h"
 #include "js_ability_auto_startup_callback.h"
 #include "js_ability_auto_startup_manager_utils.h"
+#include "js_app_process_state.h"
 #include "js_context_utils.h"
 #include "js_data_struct_converter.h"
 #include "js_error_utils.h"
@@ -1747,7 +1748,15 @@ napi_value JsApplicationContextUtils::CreateJsApplicationContext(napi_env env)
     if (resourceManager != nullptr) {
         napi_set_named_property(env, object, "resourceManager", CreateJsResourceManager(env, resourceManager, context));
     }
-
+    napi_value applicationContextValue = nullptr;
+    Context *contextPtr = context.get();
+    int64_t applicationContextAddress = reinterpret_cast<int64_t>(contextPtr);
+    auto status = napi_create_int64(env, applicationContextAddress, &applicationContextValue);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::APPKIT, "get context index fial");
+        return nullptr;
+    }
+    napi_set_named_property(env, object, "index", applicationContextValue);
     BindNativeApplicationContextOne(env, object);
     BindNativeApplicationContextTwo(env, object);
     return object;
@@ -1858,33 +1867,6 @@ void JsApplicationContextUtils::BindNativeApplicationContextTwo(napi_env env, na
         JsApplicationContextUtils::SetSupportedProcessCacheSelf);
     BindNativeFunction(env, object, "setFontSizeScale", MD_NAME,
         JsApplicationContextUtils::SetFontSizeScale);
-}
-
-JsAppProcessState JsApplicationContextUtils::ConvertToJsAppProcessState(
-    const AppExecFwk::AppProcessState &appProcessState, const bool &isFocused)
-{
-    JsAppProcessState processState;
-    switch (appProcessState) {
-        case AppExecFwk::AppProcessState::APP_STATE_CREATE:
-        case AppExecFwk::AppProcessState::APP_STATE_READY:
-            processState = STATE_CREATE;
-            break;
-        case AppExecFwk::AppProcessState::APP_STATE_FOREGROUND:
-            processState = isFocused ? STATE_ACTIVE : STATE_FOREGROUND;
-            break;
-        case AppExecFwk::AppProcessState::APP_STATE_BACKGROUND:
-            processState = STATE_BACKGROUND;
-            break;
-        case AppExecFwk::AppProcessState::APP_STATE_TERMINATED:
-        case AppExecFwk::AppProcessState::APP_STATE_END:
-            processState = STATE_DESTROY;
-            break;
-        default:
-            TAG_LOGE(AAFwkTag::APPKIT, "process state invalid");
-            processState = STATE_DESTROY;
-            break;
-    }
-    return processState;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

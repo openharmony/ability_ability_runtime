@@ -50,6 +50,7 @@
 #include "display_util.h"
 #include "dump_ffrt_helper.h"
 #include "dump_ipc_helper.h"
+#include "dump_process_helper.h"
 #include "dump_runtime_helper.h"
 #include "exit_reason.h"
 #include "extension_ability_info.h"
@@ -158,6 +159,7 @@ constexpr char EVENT_KEY_CANGJIE[] = "CANGJIE";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
 constexpr char EVENT_KEY_PNAME[] = "PNAME";
 constexpr char EVENT_KEY_APP_RUNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
+constexpr char EVENT_KEY_PROCESS_RSS_MEMINFO[] = "PROCESS_RSS_MEMINFO";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
 constexpr char KILL_REASON[] = "Kill Reason:Js Error";
@@ -1306,7 +1308,8 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
                 EVENT_KEY_HAPPEN_TIME, timet,
                 EVENT_KEY_REASON, errName,
                 EVENT_KEY_JSVM, JSVM_TYPE,
-                EVENT_KEY_SUMMARY, errSummary);
+                EVENT_KEY_SUMMARY, errSummary,
+                EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
             ErrorObject appExecErrorObj = {
                 .name = errName,
                 .message = errMsg,
@@ -1323,8 +1326,7 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
             // if app's callback has been registered, let app decide whether exit or not.
             TAG_LOGE(AAFwkTag::APPKIT,
                 "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n%{public}s\n"
-                "message: %{public}s\n"
-                "stack: %{public}s",
+                "message: %{public}s\nstack: %{public}s",
                 bundleName.c_str(), errName.c_str(), summary.c_str(), errMsg.c_str(), errStack.c_str());
             AAFwk::ExitReason exitReason = { REASON_CJ_ERROR, errName };
             AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
@@ -1524,7 +1526,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 #endif
 
-    application_->PreloadAppStartup(bundleInfo, entryHapModuleInfo, appLaunchData.GetPreloadModuleName());
+    application_->PreloadAppStartup(bundleInfo, appLaunchData.GetPreloadModuleName(),
+        appLaunchData.GetStartupTaskData());
 
     if (isStageBased) {
         // Create runtime
@@ -1667,7 +1670,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     EVENT_KEY_JSVM, JSVM_TYPE,
                     EVENT_KEY_SUMMARY, summary,
                     EVENT_KEY_PNAME, processName,
-                    EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId);
+                    EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId,
+                    EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
                 ErrorObject appExecErrorObj = {
                     .name = errorObj.name,
                     .message = errorObj.message,
@@ -1811,11 +1815,14 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
     Configuration appConfig = config;
+    ParseAppConfigurationParams(bundleInfo.applicationInfo.configuration, appConfig);
     if (Global::I18n::PreferredLanguage::IsSetAppPreferredLanguage()) {
         std::string preferredLanguage = Global::I18n::PreferredLanguage::GetAppPreferredLanguage();
         appConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, preferredLanguage);
+        std::string locale = appConfig.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE);
+        appConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE,
+            AbilityRuntime::ApplicationConfigurationManager::GetUpdatedLocale(locale, preferredLanguage));
     }
-    ParseAppConfigurationParams(bundleInfo.applicationInfo.configuration, appConfig);
     HandleConfigByPlugin(appConfig, bundleInfo);
     std::string systemSizeScale = appConfig.GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     if (!systemSizeScale.empty() && systemSizeScale.compare(DEFAULT_APP_FONT_SIZE_SCALE) == 0) {
@@ -2193,7 +2200,7 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& app
             TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
             return;
         }
-    
+
         AbilityInfo abilityInfo;
         abilityInfo.bundleName = appInfo.bundleName;
         abilityInfo.package = moduleName;
@@ -3346,7 +3353,7 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
     }
 
     BundleInfo bundleInfo;
-    if (bundleMgrHelper->GetBundleInfoForSelf(
+    if (bundleMgrHelper->GetBundleInfoForSelfWithOutCache(
         (static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) +
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
@@ -3546,7 +3553,7 @@ std::vector<std::string> MainThread::GetRemoveOverlayPaths(const std::vector<Ove
     return removePaths;
 }
 
-int32_t MainThread::ScheduleChangeAppGcState(int32_t state)
+int32_t MainThread::ScheduleChangeAppGcState(int32_t state, uint64_t tid)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called, state is %{public}d", state);
     if (mainHandler_ == nullptr) {
@@ -3554,8 +3561,13 @@ int32_t MainThread::ScheduleChangeAppGcState(int32_t state)
         return ERR_INVALID_VALUE;
     }
 
+    if (tid > 0) {
+        ChangeAppGcState(state, tid);
+        return NO_ERROR;
+    }
+
     wptr<MainThread> weak = this;
-    auto task = [weak, state] {
+    auto task = [weak, state, tid] {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
@@ -3572,7 +3584,7 @@ int32_t MainThread::ScheduleChangeAppGcState(int32_t state)
     return NO_ERROR;
 }
 
-int32_t MainThread::ChangeAppGcState(int32_t state)
+int32_t MainThread::ChangeAppGcState(int32_t state, uint64_t tid)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (application_ == nullptr) {
@@ -3588,6 +3600,11 @@ int32_t MainThread::ChangeAppGcState(int32_t state)
         return NO_ERROR;
     }
     auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
+    if (tid > 0) {
+        TAG_LOGD(AAFwkTag::APPKIT, "tid is %{private}" PRIu64, tid);
+        nativeEngine.NotifyForceExpandState(tid, state);
+        return NO_ERROR;
+    }
     nativeEngine.NotifyForceExpandState(state);
     return NO_ERROR;
 }
@@ -3878,7 +3895,6 @@ void MainThread::HandleConfigByPlugin(Configuration &config, BundleInfo &bundleI
     }
 
     entry(config, bundleInfo);
-    dlclose(handle);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -624,7 +624,7 @@ public:
      * @param pid pid
      * @return Is the status change completed..
      */
-    int32_t ChangeAppGcState(pid_t pid, int32_t state);
+    int32_t ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid = 0);
 
      /**
      * @brief Register app debug listener.
@@ -731,6 +731,20 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer);
+
+    /**
+     * Register native child exit notify.
+     * @param notify, callback to notify.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterNativeChildExitNotify(sptr<INativeChildNotify> notify);
+
+    /**
+     * Unregister native child exit notify.
+     * @param notify, callback to notify.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UnregisterNativeChildExitNotify(sptr<INativeChildNotify> notify);
 
     /**
      * @brief Notify AbilityManagerService the page show.
@@ -872,6 +886,10 @@ public:
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
 
     int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
+
+    int32_t IsProcessCacheSupported(int32_t pid, bool &isSupported);
+
+    int32_t SetProcessCacheEnable(int32_t pid, bool enable);
 
     /**
      * set browser channel for caller

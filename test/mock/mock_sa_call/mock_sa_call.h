@@ -117,6 +117,7 @@ public:
         uint64_t tokenId;
         const char* perms[] = {
             perms[0] = "ohos.permission.SET_PROCESS_CACHE_STATE",
+            perms[1] = "ohos.permission.GET_RUNNING_INFO",
         };
 
         NativeTokenInfoParams infoInstance = {

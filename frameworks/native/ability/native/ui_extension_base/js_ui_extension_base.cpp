@@ -309,6 +309,10 @@ void JsUIExtensionBase::OnStop()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    if (context_) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "set terminating true");
+        context_->SetTerminating(true);
+    }
     HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onDestroy");
     ApplicationConfigurationManager::GetInstance().DeleteIgnoreContext(context_);
@@ -330,6 +334,10 @@ void JsUIExtensionBase::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *cal
     }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    if (context_) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "set terminating true");
+        context_->SetTerminating(true);
+    }
     HandleScope handleScope(jsRuntime_);
     napi_value result = CallObjectMethod("onDestroy", nullptr, 0, true);
     if (!CheckPromise(result)) {

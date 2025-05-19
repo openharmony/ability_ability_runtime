@@ -1029,8 +1029,9 @@ bool AppMgrClient::SetAppFreezeFilter(int32_t pid)
     return service->SetAppFreezeFilter(pid);
 }
 
-int32_t AppMgrClient::ChangeAppGcState(pid_t pid, int32_t state)
+int32_t AppMgrClient::ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid)
 {
+    TAG_LOGD(AAFwkTag::APPMGR, "tid is %{private}" PRIu64, tid);
     if (mgrHolder_ == nullptr) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
@@ -1038,7 +1039,7 @@ int32_t AppMgrClient::ChangeAppGcState(pid_t pid, int32_t state)
     if (service == nullptr) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    return service->ChangeAppGcState(pid, state);
+    return service->ChangeAppGcState(pid, state, tid);
 }
 
 int32_t AppMgrClient::RegisterAppDebugListener(const sptr<IAppDebugListener> &listener)
@@ -1172,6 +1173,24 @@ int32_t AppMgrClient::UnregisterApplicationStateObserver(const sptr<IApplication
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
     return service->UnregisterApplicationStateObserver(observer);
+}
+
+int32_t AppMgrClient::RegisterNativeChildExitNotify(sptr<INativeChildNotify> notify)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->RegisterNativeChildExitNotify(notify);
+}
+
+int32_t AppMgrClient::UnregisterNativeChildExitNotify(sptr<INativeChildNotify> notify)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->UnregisterNativeChildExitNotify(notify);
 }
 
 int32_t AppMgrClient::NotifyPageShow(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)
@@ -1374,6 +1393,36 @@ int32_t AppMgrClient::SetSupportedProcessCache(int32_t pid, bool isSupport)
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
     return service->SetSupportedProcessCache(pid, isSupport);
+}
+
+int32_t AppMgrClient::IsProcessCacheSupported(int32_t pid, bool &isSupported)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "IsProcessCacheSupported called");
+    if (mgrHolder_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "mgrHolder_ is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->IsProcessCacheSupported(pid, isSupported);
+}
+
+int32_t AppMgrClient::SetProcessCacheEnable(int32_t pid, bool enable)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "SetProcessCacheEnable called");
+    if (mgrHolder_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "mgrHolder_ is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->SetProcessCacheEnable(pid, enable);
 }
 
 void AppMgrClient::SaveBrowserChannel(sptr<IRemoteObject> browser)

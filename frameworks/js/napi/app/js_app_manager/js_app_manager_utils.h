@@ -37,13 +37,6 @@ using OHOS::AppExecFwk::RunningMultiInstanceInfo;
 #ifdef SUPPORT_GRAPHICS
 using OHOS::AppExecFwk::AbilityFirstFrameStateData;
 #endif
-enum JsAppProcessState {
-    STATE_CREATE,
-    STATE_FOREGROUND,
-    STATE_ACTIVE,
-    STATE_BACKGROUND,
-    STATE_DESTROY
-};
 struct PreloadApplicationParam {
     std::string bundleName;
     int32_t userId;
@@ -68,8 +61,6 @@ napi_value KeepAliveAppTypeInit(napi_env env);
 napi_value KeepAliveSetterInit(napi_env env);
 bool ConvertPreloadApplicationParam(napi_env env, size_t argc, napi_value *argv, PreloadApplicationParam &param,
     std::string &errorMsg);
-JsAppProcessState ConvertToJsAppProcessState(
-    const AppExecFwk::AppProcessState &appProcessState, const bool &isFocused);
 napi_value CreateJsRunningMultiAppInfo(napi_env env, const RunningMultiAppInfo &info);
 napi_value CreateJsRunningAppCloneArray(napi_env env, const std::vector<RunningAppClone>& data);
 napi_value CreateJsRunningAppClone(napi_env env, const RunningAppClone &info);

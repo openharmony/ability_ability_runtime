@@ -28,10 +28,27 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+void InsightIntentEventMgr::DeleteInsightIntent(const std::string &bundleName, const std::string &moduleName,
+    int32_t userId)
+{
+    std::vector<ExtractInsightIntentInfo> intentInfos;
+    DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
+        bundleName, userId, intentInfos);
+    if (!intentInfos.empty()) {
+        TAG_LOGI(AAFwkTag::INTENT, "update bundleName: %{public}s to no insight intent", bundleName.c_str());
+        DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->DeleteInsightIntentTotalInfo(
+            bundleName, moduleName, userId);
+    }
+
+    return;
+}
 
 void InsightIntentEventMgr::UpdateInsightIntentEvent(const AppExecFwk::ElementName &elementName, int32_t userId)
 {
     ErrCode ret;
+    std::vector<std::string> moduleNameVec;
+    std::string profile;
+    AbilityRuntime::ExtractInsightIntentProfileInfoVec infos = {};
     auto bundleName = elementName.GetBundleName();
     auto moduleName = elementName.GetModuleName();
     if (bundleName.empty() || moduleName.empty()) {
@@ -50,43 +67,38 @@ void InsightIntentEventMgr::UpdateInsightIntentEvent(const AppExecFwk::ElementNa
         return;
     }
 
-    // Get json profile firstly
-    std::string profile;
-    ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INSIGHT_INTENT_PROFILE, bundleName, moduleName,
-        profile, userId));
-    if (ret != ERR_OK) {
-        TAG_LOGI(AAFwkTag::INTENT, "get json failed code: %{public}d, bundleName: %{public}s, "
-            "moduleName: %{public}s, userId: %{public}d", ret, bundleName.c_str(), moduleName.c_str(), userId);
-        std::vector<ExtractInsightIntentInfo> intentInfos;
-        DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
-            bundleName, userId, intentInfos);
-        if (!intentInfos.empty()) {
-            TAG_LOGI(AAFwkTag::INTENT, "update bundleName: %{public}s to no insight intent", bundleName.c_str());
-            DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->DeleteInsightIntentTotalInfo(
-                bundleName, moduleName, userId);
-            return;
+    OHOS::SplitStr(moduleName, ",", moduleNameVec);
+    for (std::string moduleNameLocal : moduleNameVec) {
+        // Get json profile firstly
+        ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INTENT_PROFILE, bundleName, moduleNameLocal,
+            profile, userId));
+        if (ret != ERR_OK) {
+            TAG_LOGI(AAFwkTag::INTENT, "get json failed code: %{public}d, bundleName: %{public}s, "
+                "moduleName: %{public}s, userId: %{public}d", ret, bundleName.c_str(), moduleNameLocal.c_str(), userId);
+            DeleteInsightIntent(bundleName, moduleNameLocal, userId);
+            continue;
         }
-        return;
-    }
 
-    // Transform json string
-    AbilityRuntime::ExtractInsightIntentProfileInfoVec infos = {};
-    if (!AbilityRuntime::ExtractInsightIntentProfile::TransformTo(profile, infos)) {
-        TAG_LOGE(AAFwkTag::INTENT, "transform profile failed, profile:%{public}s", profile.c_str());
-        return;
-    }
+        // Transform json string
+        if (!AbilityRuntime::ExtractInsightIntentProfile::TransformTo(profile, infos) ||
+            infos.insightIntents.size() == 0) {
+            TAG_LOGW(AAFwkTag::INTENT, "transform profile failed, profile:%{public}s", profile.c_str());
+            DeleteInsightIntent(bundleName, moduleNameLocal, userId);
+            continue;
+        }
 
-    // save database
-    ret = DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, userId, infos);
-    if (ret != ERR_OK) {
-        TAG_LOGW(AAFwkTag::INTENT, "update intent info failed, bundleName: %{public}s, "
-            "moduleName: %{public}s, userId: %{public}d", bundleName.c_str(), moduleName.c_str(), userId);
-        return;
-    }
+        // save database
+        ret = DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(
+            bundleName, moduleNameLocal, userId, infos);
+        if (ret != ERR_OK) {
+            TAG_LOGW(AAFwkTag::INTENT, "update intent info failed, bundleName: %{public}s, "
+                "moduleName: %{public}s, userId: %{public}d", bundleName.c_str(), moduleNameLocal.c_str(), userId);
+            continue;
+        }
 
-    TAG_LOGI(AAFwkTag::INTENT, "update intent info success, bundleName: %{public}s, "
-        "moduleName: %{public}s, userId: %{public}d", bundleName.c_str(), moduleName.c_str(), userId);
+        TAG_LOGI(AAFwkTag::INTENT, "update intent info success, bundleName: %{public}s, "
+            "moduleName: %{public}s, userId: %{public}d", bundleName.c_str(), moduleNameLocal.c_str(), userId);
+    }
 }
 
 void InsightIntentEventMgr::DeleteInsightIntentEvent(const AppExecFwk::ElementName &elementName, int32_t userId,

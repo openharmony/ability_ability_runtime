@@ -36,5 +36,5 @@ public:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif //OHOS_ABILITY_RUNTIME_TIMEOUE_STATE_UTILS_H
+#endif //OHOS_ABILITY_RUNTIME_TIMEOUT_STATE_UTILS_H
  

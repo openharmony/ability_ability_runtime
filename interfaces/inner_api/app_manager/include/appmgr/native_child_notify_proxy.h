@@ -29,6 +29,7 @@ public:
 
     void OnNativeChildStarted(const sptr<IRemoteObject> &nativeChild) override;
     void OnError(int32_t errCode) override;
+    int32_t OnNativeChildExit(int32_t pid, int32_t signal) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

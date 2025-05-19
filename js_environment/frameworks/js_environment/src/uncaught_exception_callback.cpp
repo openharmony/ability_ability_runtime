@@ -14,6 +14,7 @@
  */
 #include "uncaught_exception_callback.h"
 
+#include <charconv>
 #include <string>
 #include <sstream>
 
@@ -133,7 +134,11 @@ std::string NapiUncaughtExceptionCallback::GetFuncNameAndBuildId(std::string nat
             return nativeStack;
         }
         pc = tempStr.substr(pcPos += FLAG_PC_POS, FLAG_SPLIT_POS);
-        uint64_t value = std::stoull(pc, nullptr, FLAG_SPLIT_POS);
+        uint64_t value;
+        auto res = std::from_chars(pc.data(), pc.data() + pc.size(), value, FLAG_SPLIT_POS);
+        if (res.ec != std::errc()) {
+            return nativeStack;
+        }
         std::string funcName;
         uint64_t funcOffset;
         HiviewDFX::DfxSymbols::GetFuncNameAndOffsetByPc(value, elfFile, funcName, funcOffset);

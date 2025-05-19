@@ -343,6 +343,11 @@ void JsUIExtension::OnStop()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     UIExtension::OnStop();
     TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    auto context = GetContext();
+    if (context) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "set terminating true");
+        context->SetTerminating(true);
+    }
     AbilityRuntime::ApplicationConfigurationManager::GetInstance().DeleteIgnoreContext(GetContext());
     TAG_LOGI(AAFwkTag::UIABILITY, "GetIgnoreContext size %{public}zu",
         AbilityRuntime::ApplicationConfigurationManager::GetInstance().GetIgnoreContext().size());
@@ -363,6 +368,11 @@ void JsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbac
     }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    auto context = GetContext();
+    if (context) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "set terminating true");
+        context->SetTerminating(true);
+    }
     UIExtension::OnStop();
     HandleScope handleScope(jsRuntime_);
     napi_value result = CallObjectMethod("onDestroy", nullptr, 0, true);

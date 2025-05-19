@@ -40,6 +40,7 @@ namespace OHOS {
 namespace AppExecFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr int32_t MAX_PROCESS_STATE_COUNT = 1000;
+constexpr int32_t MAX_BACKGROUND_APP_COUNT = 1000;
 
 AppMgrStub::AppMgrStub() {}
 
@@ -278,6 +279,10 @@ int32_t AppMgrStub::OnRemoteRequestInnerFifth(uint32_t code, MessageParcel &data
         case static_cast<uint32_t>(AppMgrInterfaceCode::START_CHILD_PROCESS):
             return HandleStartChildProcess(data, reply);
     #endif // SUPPORT_CHILD_PROCESS
+        case static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_NATIVE_CHILD_EXIT_NOTIFY):
+            return HandleRegisterNativeChildExitNotify(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_NATIVE_CHILD_EXIT_NOTIFY):
+            return HandleUnregisterNativeChildExitNotify(data, reply);
     }
     return INVALID_FD;
 }
@@ -338,6 +343,10 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleSetSupportedProcessCacheSelf(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE):
             return HandleSetSupportedProcessCache(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::IS_PROCESS_CACHE_SUPPORTED):
+            return HandleIsProcessCacheSupported(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::SET_PROCESS_CACHE_ENABLE):
+            return HandleSetProcessCacheEnable(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_RUNNING_PROCESSES_BY_BUNDLE_TYPE):
             return HandleGetRunningProcessesByBundleType(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_APP_ASSERT_PAUSE_STATE_SELF):
@@ -386,6 +395,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleGetKilledProcessInfo(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::LAUNCH_ABILITY):
             return HandleLaunchAbility(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_CONFIGURATION_POLICY):
+            return HandleUpdateConfigurationForBackgroundApp(data, reply);
     }
     return INVALID_FD;
 }
@@ -1014,6 +1025,42 @@ int32_t AppMgrStub::HandleUpdateConfiguration(MessageParcel &data, MessageParcel
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleUpdateConfigurationForBackgroundApp(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::vector<BackgroundAppInfo> appInfos;
+    uint32_t size = data.ReadUint32();
+    if (size <= 0 || size > MAX_BACKGROUND_APP_COUNT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid size");
+        return ERR_INVALID_VALUE;
+    }
+    appInfos.resize(size);
+    if (appInfos.capacity() < size) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Resource allocation error");
+        return ERR_NO_MEMORY;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        std::unique_ptr<BackgroundAppInfo> tmpInfo(data.ReadParcelable<BackgroundAppInfo>());
+        if (tmpInfo == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "tmpInfo null");
+            return ERR_INVALID_VALUE;
+        }
+        appInfos.push_back(*tmpInfo);
+    }
+    std::unique_ptr<AppExecFwk::ConfigurationPolicy> policy(data.ReadParcelable<AppExecFwk::ConfigurationPolicy>());
+    if (policy == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "policy null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t userId = data.ReadInt32();
+    int32_t result = UpdateConfigurationForBackgroundApp(appInfos, *policy, userId);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 int32_t AppMgrStub::HandleUpdateConfigurationByBundleName(MessageParcel &data, MessageParcel &reply)
 {
     std::unique_ptr<Configuration> config(data.ReadParcelable<Configuration>());
@@ -1299,7 +1346,8 @@ int32_t AppMgrStub::HandleChangeAppGcState(MessageParcel &data, MessageParcel &r
     HITRACE_METER(HITRACE_TAG_APP);
     int32_t pid = data.ReadInt32();
     int32_t state = data.ReadInt32();
-    int32_t ret = ChangeAppGcState(pid, state);
+    uint64_t tid = data.ReadUint64();
+    int32_t ret = ChangeAppGcState(pid, state, tid);
     reply.WriteInt32(ret);
     return NO_ERROR;
 }
@@ -1502,6 +1550,38 @@ int32_t AppMgrStub::HandleExitChildProcessSafely(MessageParcel &data, MessagePar
 }
 #endif // SUPPORT_CHILD_PROCESS
 
+int32_t AppMgrStub::HandleRegisterNativeChildExitNotify(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    auto callback = iface_cast<AppExecFwk::INativeChildNotify>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = RegisterNativeChildExitNotify(callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUnregisterNativeChildExitNotify(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    auto callback = iface_cast<AppExecFwk::INativeChildNotify>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = UnregisterNativeChildExitNotify(callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 int32_t AppMgrStub::HandleIsFinalAppProcess(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -1650,6 +1730,36 @@ int32_t AppMgrStub::HandleSetSupportedProcessCache(MessageParcel &data, MessageP
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleIsProcessCacheSupported(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleIsProcessCacheSupported called");
+    int32_t pid = data.ReadInt32();
+    bool isSupported = false;
+    auto ret = IsProcessCacheSupported(pid, isSupported);
+    if (!reply.WriteBool(isSupported)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write isSupported error.");
+        return AAFwk::ERR_WRITE_BOOL_FAILED;
+    }
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleSetProcessCacheEnable(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleSetProcessCacheEnable called");
+    int32_t pid = data.ReadInt32();
+    bool enable = data.ReadBool();
+    auto ret = SetProcessCacheEnable(pid, enable);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }

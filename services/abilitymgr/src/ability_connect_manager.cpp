@@ -657,9 +657,11 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     ConnectListType connectRecordList;
     GetConnectRecordListFromMap(connect, connectRecordList);
     bool isCallbackConnected = !connectRecordList.empty();
+    auto connectedRecord = GetAbilityConnectedRecordFromRecordList(targetService, connectRecordList);
     // 3. If this service ability and callback has been connected, There is no need to connect repeatedly
-    if (isLoadedAbility && (isCallbackConnected) && IsAbilityConnected(targetService, connectRecordList)) {
+    if (isLoadedAbility && (isCallbackConnected) && (connectedRecord != nullptr)) {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "service/callback connected");
+        connectedRecord->CompleteConnectAndOnlyCallConnectDone();
         return ERR_OK;
     }
 
@@ -740,6 +742,26 @@ void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &
     } else {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "connecting");
     }
+}
+
+std::shared_ptr<ConnectionRecord> AbilityConnectManager::GetAbilityConnectedRecordFromRecordList(
+    const std::shared_ptr<AbilityRecord> &targetService,
+    std::list<std::shared_ptr<ConnectionRecord>> &connectRecordList)
+{
+    auto isMatch = [targetService](auto connectRecord) -> bool {
+        if (targetService == nullptr || connectRecord == nullptr) {
+            return false;
+        }
+        if (targetService != connectRecord->GetAbilityRecord()) {
+            return false;
+        }
+        return true;
+    };
+    auto connectRecord = std::find_if(connectRecordList.begin(), connectRecordList.end(), isMatch);
+    if (connectRecord != connectRecordList.end()) {
+        return *connectRecord;
+    }
+    return nullptr;
 }
 
 int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection> &connect)
@@ -2050,21 +2072,6 @@ void AbilityConnectManager::TerminateDone(const std::shared_ptr<AbilityRecord> &
         RemoveUIExtensionAbilityRecord(abilityRecord);
     }
     RemoveServiceAbility(abilityRecord);
-}
-
-bool AbilityConnectManager::IsAbilityConnected(const std::shared_ptr<AbilityRecord> &abilityRecord,
-    const std::list<std::shared_ptr<ConnectionRecord>> &connectRecordList)
-{
-    auto isMatch = [abilityRecord](auto connectRecord) -> bool {
-        if (abilityRecord == nullptr || connectRecord == nullptr) {
-            return false;
-        }
-        if (abilityRecord != connectRecord->GetAbilityRecord()) {
-            return false;
-        }
-        return true;
-    };
-    return std::any_of(connectRecordList.begin(), connectRecordList.end(), isMatch);
 }
 
 void AbilityConnectManager::RemoveConnectionRecordFromMap(std::shared_ptr<ConnectionRecord> connection)
@@ -3631,6 +3638,24 @@ void AbilityConnectManager::UpdateUIExtensionBindInfo(
         !UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "record null or abilityType not match");
         return;
+    }
+
+    if (callerBundleName == AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "scb not allow bind process");
+        return;
+    }
+
+    auto sessionInfo = abilityRecord->GetSessionInfo();
+    if (sessionInfo == nullptr) {
+        if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "sa preload not allow bind process");
+            return;
+        }
+    } else {
+        if (sessionInfo->uiExtensionUsage == AAFwk::UIExtensionUsage::MODAL) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "modal not allow bind process");
+            return;
+        }
     }
 
     WantParams wantParams;

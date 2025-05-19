@@ -962,6 +962,36 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterApplicationStateObserver_001, 
 }
 
 /**
+ * @tc.name: AppMgrClient_RegisterNativeChildExitNotify_001
+ * @tc.desc: RegisterNativeChildExitNotify.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterNativeChildExitNotify_001, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    sptr<INativeChildNotify> notify = nullptr;
+    auto result = appMgrClient->RegisterNativeChildExitNotify(notify);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AppMgrClient_UnregisterNativeChildExitNotify_001
+ * @tc.desc: UnregisterNativeChildExitNotify.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterNativeChildExitNotify_001, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    sptr<INativeChildNotify> notify = nullptr;
+    auto result = appMgrClient->UnregisterNativeChildExitNotify(notify);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: AppMgrClient_NotifyPageShow_001
  * @tc.desc: NotifyPageShow.
  * @tc.type: FUNC
@@ -1474,6 +1504,72 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessDependedOnWeb_001, TestSize.L
     EXPECT_NE(appMgrClient, nullptr);
     appMgrClient->KillProcessDependedOnWeb();
     EXPECT_NE(appMgrClient->GetRemoteObject(), nullptr);
+}
+
+/**
+ * @tc.name: AppMgrClient_IsProcessCacheSupported_001
+ * @tc.desc: IsProcessCacheSupported.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_IsProcessCacheSupported_001, TestSize.Level2)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    ASSERT_NE(appMgrClient, nullptr);
+    int32_t pid = 1;
+    bool isSupport = false;
+    appMgrClient->mgrHolder_ = nullptr;
+    auto ret = appMgrClient->IsProcessCacheSupported(pid, isSupport);
+    EXPECT_EQ(ret, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: AppMgrClient_IsProcessCacheSupported_002
+ * @tc.desc: IsProcessCacheSupported.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_IsProcessCacheSupported_002, TestSize.Level2)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    ASSERT_NE(appMgrClient, nullptr);
+    auto ret = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(ret, AppMgrResultCode::RESULT_OK);
+    int32_t pid = 1;
+    bool isSupport = false;
+    auto result = appMgrClient->IsProcessCacheSupported(pid, isSupport);
+    EXPECT_NE(result, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: AppMgrClient_SetProcessCacheEnable_001
+ * @tc.desc: SetProcessCacheEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_SetProcessCacheEnable_001, TestSize.Level2)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    ASSERT_NE(appMgrClient, nullptr);
+    int32_t pid = 1;
+    bool enable = false;
+    appMgrClient->mgrHolder_ = nullptr;
+    auto ret = appMgrClient->SetProcessCacheEnable(pid, enable);
+    EXPECT_EQ(ret, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: AppMgrClient_SetProcessCacheEnable_002
+ * @tc.desc: SetProcessCacheEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_SetProcessCacheEnable_002, TestSize.Level2)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    ASSERT_NE(appMgrClient, nullptr);
+    auto ret = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(ret, AppMgrResultCode::RESULT_OK);
+    int32_t pid = 1;
+    bool enable = false;
+    auto result = appMgrClient->SetProcessCacheEnable(pid, enable);
+    EXPECT_NE(result, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

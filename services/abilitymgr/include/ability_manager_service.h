@@ -2113,7 +2113,7 @@ protected:
 
     void OnStartProcessFailed(sptr<IRemoteObject> token) override;
 
-    void OnCacheExitInfo(uint32_t accessTokenId, const AAFwk::LastExitDetailInfo &exitInfo,
+    void OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
         const std::string &bundleName, const std::vector<std::string> &abilityNames,
         const std::vector<std::string> &uiExtensionNames) override;
 
@@ -2456,10 +2456,7 @@ private:
 
     void InitStartupFlag();
 
-    inline bool IsCrossUserCall(int32_t userId)
-    {
-        return (userId != INVALID_USER_ID && userId != U0_USER_ID && userId != GetUserId());
-    }
+    bool IsCrossUserCall(int32_t userId) const;
 
     int32_t RequestDialogServiceInner(const Want &want, const sptr<IRemoteObject> &callerToken,
         int requestCode, int32_t userId);

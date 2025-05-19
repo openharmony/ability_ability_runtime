@@ -74,9 +74,7 @@ public:
      *
      */
     bool HandleExecuteIntent(
-        InsightIntentExecuteMode mode,
-        const std::string& name,
-        const AAFwk::WantParams& param,
+        std::shared_ptr<InsightIntentExecuteParam> executeParam,
         const std::shared_ptr<NativeReference>& pageLoader,
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback,
         bool& isAsync) override;

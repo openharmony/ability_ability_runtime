@@ -56,6 +56,7 @@ public:
         const std::string &bundleName, std::vector<BaseSharedBundleInfo> &baseSharedBundleInfos,
         GetDependentBundleInfoFlag flag = GetDependentBundleInfoFlag::GET_APP_CROSS_HSP_BUNDLE_INFO);
     ErrCode GetBundleInfoForSelf(int32_t flags, BundleInfo &bundleInfo);
+    ErrCode GetBundleInfoForSelfWithOutCache(int32_t flags, BundleInfo &bundleInfo);
     ErrCode GetDependentBundleInfo(const std::string &sharedBundleName, BundleInfo &sharedBundleInfo,
         GetDependentBundleInfoFlag flag = GetDependentBundleInfoFlag::GET_APP_CROSS_HSP_BUNDLE_INFO);
     bool GetGroupDir(const std::string &dataGroupId, std::string &dir);
@@ -122,7 +123,8 @@ public:
     // for collaborator (along with normal)
     ErrCode GetCloneBundleInfoExt(const std::string &bundleName, uint32_t flags, int32_t appIndex,
         int32_t userId, BundleInfo &bundleInfo);
-
+    ErrCode GetLauncherAbilityInfoSync(const std::string &bundleName, int32_t userId,
+        std::vector<AbilityInfo> &abilityInfo);
 private:
     sptr<IBundleMgr> Connect();
     sptr<IBundleMgr> Connect(bool checkBmsReady);

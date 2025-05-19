@@ -89,5 +89,28 @@ void NativeChildNotifyProxy::OnError(int32_t errCode)
     SendRequest(INativeChildNotify::IPC_ID_ON_ERROR, data, reply, option);
 }
 
+int32_t NativeChildNotifyProxy::OnNativeChildExit(int32_t pid, int32_t signal)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "NativeChildNotifyProxy OnNativeChildExit");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_NULL_OBJECT;
+    }
+
+    if (!data.WriteInt32(pid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "NativeChildNotifyProxy write native child pid failed.");
+        return ERR_NULL_OBJECT;
+    }
+
+    if (!data.WriteInt32(signal)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "NativeChildNotifyProxy write native child signal failed.");
+        return ERR_NULL_OBJECT;
+    }
+
+    return SendRequest(INativeChildNotify::IPC_ID_ON_NATIVE_CHILD_EXIT, data, reply, option);
+}
+
 } // OHOS
 } // AppExecFwk

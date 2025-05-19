@@ -16,11 +16,14 @@
 #ifndef OHOS_ABILITY_RUNTIME_SIMULATOR_BUNDLE_CONTAINER_H
 #define OHOS_ABILITY_RUNTIME_SIMULATOR_BUNDLE_CONTAINER_H
 
+#include <map>
 #include <vector>
 
 #include "application_info.h"
 #include "bundle_constants.h"
+#include "bundle_info.h"
 #include "inner_bundle_info.h"
+#include "options.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -30,12 +33,26 @@ public:
     ~BundleContainer() = default;
 
     static BundleContainer &GetInstance();
-    void LoadBundleInfos(const std::vector<uint8_t> &buffer);
+    void LoadBundleInfos(const std::vector<uint8_t> &buffer, const std::string &resourcePath);
+    void LoadDependencyHspInfo(
+        const std::string &bundleName, const std::vector<AbilityRuntime::DependencyHspInfo> &dependencyHspInfos);
     std::shared_ptr<ApplicationInfo> GetApplicationInfo() const;
     std::shared_ptr<HapModuleInfo> GetHapModuleInfo(const std::string &modulePackage) const;
     std::shared_ptr<AbilityInfo> GetAbilityInfo(const std::string &moduleName, const std::string &abilityName) const;
+    void GetBundleInfo(const std::string &bundleName, const std::string &moduleName, BundleInfo &bundleInfo);
+    ErrCode GetDependentBundleInfo(const std::string &bundleName, const std::string &moduleName,
+        BundleInfo &sharedBundleInfo, GetDependentBundleInfoFlag flag);
+    void SetBundleCodeDir(const std::string &bundleCodeDir);
+    std::string GetBundleCodeDir() const;
+
 private:
     std::shared_ptr<InnerBundleInfo> bundleInfo_ = nullptr;
+    std::string resourcePath_;
+    std::map<std::string, std::shared_ptr<InnerBundleInfo>> bundleInfos_;
+    std::map<std::string, std::string> resourcePaths_;
+    std::string bundleCodeDir_;
+    std::shared_ptr<InnerBundleInfo> GetInnerBundleInfo(const std::string &bundleName, const std::string &moduleName);
+    void UpdateResourcePath(const std::string &bundleName, const std::string &moduleName, BundleInfo &bundleInfo);
 };
 } // namespace AppExecFwk
 } // namespace OHOS

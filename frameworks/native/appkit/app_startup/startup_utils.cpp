@@ -38,5 +38,20 @@ std::string StartupUtils::GetErrorMessage(int32_t errCode)
     }
     return iter->second;
 }
+
+bool StartupUtils::ParseJsonStringArray(const nlohmann::json &json, const std::string key,
+    std::vector<std::string> &arr)
+{
+    if (!json.contains(key) || !json[key].is_array()) {
+        return false;
+    }
+
+    for (const auto &item : json.at(key)) {
+        if (item.is_string()) {
+            arr.push_back(item.get<std::string>());
+        }
+    }
+    return true;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

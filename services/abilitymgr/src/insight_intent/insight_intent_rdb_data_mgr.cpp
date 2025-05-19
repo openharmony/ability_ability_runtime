@@ -36,32 +36,6 @@ InsightIntentRdbDataMgr::InsightIntentRdbDataMgr()
 InsightIntentRdbDataMgr::~InsightIntentRdbDataMgr()
 {}
 
-bool InsightIntentRdbDataMgr::InitIntentTable(const IntentRdbConfig &intentRdbConfig)
-{
-    TAG_LOGI(AAFwkTag::INTENT, "Init");
-    std::lock_guard<std::mutex> lock(rdbStoreMutex_);
-    if (intentRdbConfig.tableName.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "empty IntentRdbConfig");
-        return false;
-    }
-
-    auto rdbStore = GetRdbStore();
-    if (rdbStore == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "RdbStore is null");
-        return false;
-    }
-    std::string createTableSql = "CREATE TABLE IF NOT EXISTS " + intentRdbConfig.tableName
-        + " (INTENT_KEY TEXT NOT NULL PRIMARY KEY, INTENT_VALUE TEXT NOT NULL);";
-    int32_t ret = NativeRdb::E_OK;
-    ret = rdbStore->ExecuteSql(createTableSql);
-    if (ret != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "Create rdb table failed, ret:%{public}d", ret);
-        return false;
-    }
-    HmfsUtils::AddDeleteDfx(intentRdbConfig_.dbPath);
-    return true;
-}
-
 std::shared_ptr<NativeRdb::RdbStore> InsightIntentRdbDataMgr::GetRdbStore()
 {
     NativeRdb::RdbStoreConfig rdbStoreConfig(intentRdbConfig_.dbPath + intentRdbConfig_.dbName);
@@ -85,8 +59,9 @@ std::shared_ptr<NativeRdb::RdbStore> InsightIntentRdbDataMgr::GetRdbStore()
         intentRdbConfig_.version,
         IntentRdbOpenCallback,
         errCode);
-    if (errCode != NativeRdb::E_OK) {
+    if (rdbStore_ == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "GetRdbStore failed, errCode:%{public}d", errCode);
+        return rdbStore_;
     }
     NativeRdb::RebuiltType rebuildType = NativeRdb::RebuiltType::NONE;
     int32_t rebuildCode = rdbStore_->GetRebuilt(rebuildType);
@@ -120,6 +95,7 @@ bool InsightIntentRdbDataMgr::IsIntentRdbLoaded()
         TAG_LOGE(AAFwkTag::INTENT, "Create rdb table failed, ret:%{public}d", ret);
         return false;
     }
+    HmfsUtils::AddDeleteDfx(intentRdbConfig_.dbPath);
     return true;
 }
 
@@ -154,7 +130,7 @@ bool InsightIntentRdbDataMgr::InsertData(const std::string &key, const std::stri
     valuesBucket.PutString(INTENT_VALUE, value);
     auto ret = InsertWithRetry(rdbStore_, rowId, valuesBucket);
     if (ret != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "Insert data error");
+        TAG_LOGE(AAFwkTag::INTENT, "Insert data error ret:%{public}d", ret);
         return false;
     }
     BackupRdb();
@@ -177,8 +153,17 @@ bool InsightIntentRdbDataMgr::UpdateData(const std::string &key, const std::stri
     valuesBucket.PutString(INTENT_KEY, key);
     valuesBucket.PutString(INTENT_VALUE, value);
     auto ret = rdbStore_->Update(rowId, valuesBucket, absRdbPredicates);
+    if (ret ==  NativeRdb::E_SQLITE_CORRUPT) {
+        std::string rdbFilePath = intentRdbConfig_.dbPath + std::string("/") + std::string(INTENT_BACK_UP_RDB_NAME);
+        int32_t restoreRet = rdbStore_->Restore(rdbFilePath);
+        if (restoreRet != NativeRdb::E_OK) {
+            TAG_LOGE(AAFwkTag::INTENT, "rdb restore failed ret:%{public}d", restoreRet);
+            return false;
+        }
+        ret = rdbStore_->Update(rowId, valuesBucket, absRdbPredicates);
+    }
     if (ret != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "Update data error");
+        TAG_LOGE(AAFwkTag::INTENT, "Update data error ret:%{public}d", ret);
         return false;
     }
     BackupRdb();
@@ -198,8 +183,17 @@ bool InsightIntentRdbDataMgr::DeleteDataBeginWithKey(const std::string &key)
     NativeRdb::AbsRdbPredicates absRdbPredicates(intentRdbConfig_.tableName);
     absRdbPredicates.BeginsWith(INTENT_KEY, key);
     auto ret = rdbStore_->Delete(rowId, absRdbPredicates);
+    if (ret ==  NativeRdb::E_SQLITE_CORRUPT) {
+        std::string rdbFilePath = intentRdbConfig_.dbPath + std::string("/") + std::string(INTENT_BACK_UP_RDB_NAME);
+        int32_t restoreRet = rdbStore_->Restore(rdbFilePath);
+        if (restoreRet != NativeRdb::E_OK) {
+            TAG_LOGE(AAFwkTag::INTENT, "rdb restore failed ret:%{public}d", restoreRet);
+            return false;
+        }
+        ret = rdbStore_->Delete(rowId, absRdbPredicates);
+    }
     if (ret != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "Delete data error");
+        TAG_LOGE(AAFwkTag::INTENT, "Delete data error ret:%{public}d", ret);
         return false;
     }
     BackupRdb();
@@ -219,8 +213,17 @@ bool InsightIntentRdbDataMgr::DeleteData(const std::string &key)
     NativeRdb::AbsRdbPredicates absRdbPredicates(intentRdbConfig_.tableName);
     absRdbPredicates.EqualTo(INTENT_KEY, key);
     auto ret = rdbStore_->Delete(rowId, absRdbPredicates);
+    if (ret ==  NativeRdb::E_SQLITE_CORRUPT) {
+        std::string rdbFilePath = intentRdbConfig_.dbPath + std::string("/") + std::string(INTENT_BACK_UP_RDB_NAME);
+        int32_t restoreRet = rdbStore_->Restore(rdbFilePath);
+        if (restoreRet != NativeRdb::E_OK) {
+            TAG_LOGE(AAFwkTag::INTENT, "rdb restore failed ret:%{public}d", restoreRet);
+            return false;
+        }
+        ret = rdbStore_->Delete(rowId, absRdbPredicates);
+    }
     if (ret != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "Delete data error");
+        TAG_LOGE(AAFwkTag::INTENT, "Delete data error ret:%{public}d", ret);
         return false;
     }
     BackupRdb();
@@ -357,6 +360,16 @@ int32_t InsightIntentRdbDataMgr::InsertWithRetry(std::shared_ptr<NativeRdb::RdbS
     do {
         ret = rdbStore->InsertWithConflictResolution(rowId, intentRdbConfig_.tableName,
             valuesBucket, NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
+        if (ret ==  NativeRdb::E_SQLITE_CORRUPT) {
+            std::string rdbFilePath = intentRdbConfig_.dbPath + std::string("/") + std::string(INTENT_BACK_UP_RDB_NAME);
+            int32_t restoreRet = rdbStore_->Restore(rdbFilePath);
+            if (restoreRet != NativeRdb::E_OK) {
+                TAG_LOGE(AAFwkTag::INTENT, "rdb restore failed ret:%{public}d", restoreRet);
+                break;
+            }
+            ret = rdbStore->InsertWithConflictResolution(rowId, intentRdbConfig_.tableName,
+                valuesBucket, NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
+        }
         if (ret == NativeRdb::E_OK || !IsRetryErrCode(ret)) {
             break;
         }

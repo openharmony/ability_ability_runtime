@@ -2331,6 +2331,44 @@ HWTEST_F(AppMgrServiceInnerTest, UnregisterApplicationStateObserver_001, TestSiz
 }
 
 /**
+ * @tc.name: RegisterNativeChildExitNotify_001
+ * @tc.desc: register native chlid exit notify.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, RegisterNativeChildExitNotify_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RegisterNativeChildExitNotify_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    sptr<INativeChildNotify> notify;
+    auto ret = appMgrServiceInner->RegisterNativeChildExitNotify(notify);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "RegisterNativeChildExitNotify_001 end");
+}
+
+/**
+ * @tc.name: UnregisterNativeChildExitNotify_001
+ * @tc.desc: unregister native chlid exit notify.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, UnregisterNativeChildExitNotify_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UnregisterNativeChildExitNotify_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    sptr<INativeChildNotify> notify;
+    auto ret = appMgrServiceInner->UnregisterNativeChildExitNotify(notify);
+    EXPECT_NE(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "UnregisterNativeChildExitNotify_001 end");
+}
+
+/**
  * @tc.name: GetForegroundApplications_001
  * @tc.desc: get foreground applications.
  * @tc.type: FUNC
@@ -5700,6 +5738,42 @@ HWTEST_F(AppMgrServiceInnerTest, DoAllProcessExitCallback_002, TestSize.Level2)
     auto ret = appMgrServiceInner->DoAllProcessExitCallback(processInfos, userId, callback, startTime);
     EXPECT_FALSE(ret);
     TAG_LOGI(AAFwkTag::TEST, "DoAllProcessExitCallback_002 end");
+}
+
+/**
+ * @tc.name: IsProcessCacheSupported_001
+ * @tc.desc: IsProcessCacheSupported.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, IsProcessCacheSupported_001, TestSize.Level2)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    int32_t pid = 1;
+    bool isSupport = false;
+    EXPECT_EQ(appMgrServiceInner->IsProcessCacheSupported(pid, isSupport), AAFwk::ERR_NO_APP_RECORD);
+
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    EXPECT_EQ(appMgrServiceInner->IsProcessCacheSupported(pid, isSupport), AAFwk::ERR_NULL_APP_RUNNING_MANAGER);
+}
+
+/**
+ * @tc.name: SetProcessCacheEnable_001
+ * @tc.desc: SetProcessCacheEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetProcessCacheEnable_001, TestSize.Level2)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    int32_t pid = 1;
+    bool enable = false;
+    EXPECT_EQ(appMgrServiceInner->SetProcessCacheEnable(pid, enable), AAFwk::ERR_NO_APP_RECORD);
+
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    EXPECT_EQ(appMgrServiceInner->SetProcessCacheEnable(pid, enable), AAFwk::ERR_NULL_APP_RUNNING_MANAGER);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

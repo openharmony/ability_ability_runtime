@@ -19,15 +19,14 @@
 #include <string>
 
 #include "parcel.h"
+#include "running_process_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 struct KilledProcessInfo : public Parcelable {
-    int32_t pid = 0;
-    int32_t uid = 0;
     uint32_t accessTokenId = 0;
-    std::string processName;
     std::string bundleName;
+    RunningProcessInfo processInfo;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

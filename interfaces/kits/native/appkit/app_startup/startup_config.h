@@ -40,12 +40,15 @@ public:
 
     void ListenerOnCompleted(const std::shared_ptr<StartupTaskResult> &result);
 
+    const std::string &GetCustomization() const;
+
     static constexpr int32_t DEFAULT_AWAIT_TIMEOUT_MS = 10000; // 10s
     static constexpr int32_t NO_AWAIT_TIMEOUT = -1;
 
 protected:
     int32_t awaitTimeoutMs_ = DEFAULT_AWAIT_TIMEOUT_MS;
     std::shared_ptr<StartupListener> listener_;
+    std::string customization_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

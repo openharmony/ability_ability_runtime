@@ -16,6 +16,7 @@
 #include "startup_task_manager.h"
 
 #include "hilog_tag_wrapper.h"
+#include "js_startup_task.h"
 #include "startup_manager.h"
 #include "startup_topologysort.h"
 
@@ -180,6 +181,26 @@ void StartupTaskManager::OnTimeout()
 {
     CallListenerOnCompleted(ERR_STARTUP_TIMEOUT, StartupUtils::GetErrorMessage(ERR_STARTUP_TIMEOUT));
     DelayedSingleton<StartupManager>::GetInstance()->OnStartupTaskManagerComplete(startupTaskManagerId_);
+}
+
+void StartupTaskManager::UpdateStartupTaskContextRef(std::shared_ptr<NativeReference> &contextJsRef)
+{
+    for (auto& iter : tasks_) {
+        if (iter.second == nullptr) {
+            continue;
+        }
+        if (iter.second->GetType() != JsStartupTask::TASK_TYPE) {
+            continue;
+        }
+        std::shared_ptr<JsStartupTask> jsStartupTask = std::static_pointer_cast<JsStartupTask>(iter.second);
+        if (jsStartupTask == nullptr) {
+            TAG_LOGE(AAFwkTag::STARTUP, "null jsStartupTask: %{public}s", iter.first.c_str());
+            continue;
+        }
+        if (jsStartupTask->GetModuleType() == AppExecFwk::ModuleType::SHARED) {
+            jsStartupTask->UpdateContextRef(contextJsRef);
+        }
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
