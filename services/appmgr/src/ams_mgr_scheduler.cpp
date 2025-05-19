@@ -40,7 +40,6 @@ constexpr const char* TASK_STOP_ALL_PROCESS = "StopAllProcessTask";
 constexpr const char* TASK_ABILITY_BEHAVIOR_ANALYSIS = "AbilityBehaviorAnalysisTask";
 constexpr const char* TASK_KILL_PROCESS_BY_ABILITY_TOKEN = "KillProcessByAbilityTokenTask";
 constexpr const char* TASK_KILL_PROCESSES_BY_USERID = "KillProcessesByUserIdTask";
-constexpr const char* TASK_KILL_PROCESSES_BY_PIDS = "KillProcessesByPids";
 constexpr const char* TASK_ATTACH_PID_TO_PARENT = "AttachPidToParent";
 constexpr const char* TASK_KILL_APPLICATION = "KillApplicationTask";
 constexpr const char* TASK_CLEAR_PROCESS_BY_ABILITY_TOKEN = "ClearProcessByAbilityTokenTask";
@@ -242,24 +241,21 @@ void AmsMgrScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSp
     amsHandler_->SubmitTask(killProcessesByUserIdFunc, TASK_KILL_PROCESSES_BY_USERID);
 }
 
-void AmsMgrScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason)
+int32_t AmsMgrScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason,
+    bool subProcess)
 {
     if (!IsReady()) {
-        return;
+        return ERR_INVALID_OPERATION;
     }
 
     pid_t callingPid = IPCSkeleton::GetCallingPid();
     pid_t pid = getprocpid();
     if (callingPid != pid) {
         TAG_LOGE(AAFwkTag::APPMGR, "not allow other process to call");
-        return;
+        return ERR_PERMISSION_DENIED;
     }
 
-    std::function<void()> killProcessesByPidsFunc = [amsMgrServiceInner = amsMgrServiceInner_,
-        pidsInner = pids, reasonInner = reason]() {
-        amsMgrServiceInner->KillProcessesByPids(pidsInner, reasonInner);
-    };
-    amsHandler_->SubmitTask(killProcessesByPidsFunc, TASK_KILL_PROCESSES_BY_PIDS);
+    return amsMgrServiceInner_->KillProcessesByPids(pids, reason, subProcess);
 }
 
 void AmsMgrScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken)

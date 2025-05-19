@@ -10981,9 +10981,8 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
         return ret;
     }
     std::vector<int32_t> pidToBeKilled = { pid };
-    IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByPids(pidToBeKilled,
-        reason.exitMsg));
-    return ERR_OK;
+    return IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByPids(pidToBeKilled,
+        reason.exitMsg, true));
 }
 
 int32_t AbilityManagerService::RegisterAutoStartupSystemCallback(const sptr<IRemoteObject> &callback)
