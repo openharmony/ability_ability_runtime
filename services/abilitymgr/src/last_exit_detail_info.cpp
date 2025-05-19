@@ -21,54 +21,15 @@
 
 namespace OHOS {
 namespace AAFwk {
-
-LastExitDetailInfo::LastExitDetailInfo(const LastExitDetailInfo &other)
-{
-    pid = other.pid;
-    uid = other.uid;
-    exitSubReason = other.exitSubReason;
-    rss = other.rss;
-    pss = other.pss;
-    timestamp = other.timestamp;
-    processName = other.processName;
-    exitMsg = other.exitMsg;
-}
-
-LastExitDetailInfo &LastExitDetailInfo::operator=(const LastExitDetailInfo &other)
-{
-    if (this != &other) {
-        pid = other.pid;
-        uid = other.uid;
-        exitSubReason = other.exitSubReason;
-        rss = other.rss;
-        pss = other.pss;
-        timestamp = other.timestamp;
-        processName = other.processName;
-        exitMsg = other.exitMsg;
-    }
-    return *this;
-}
-
 bool LastExitDetailInfo::ReadFromParcel(Parcel &parcel)
 {
-    int32_t pidData;
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, pidData);
-    pid = pidData;
-    int32_t uidData;
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, uidData);
-    uid = uidData;
-    int32_t exitSubReasonData;
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, exitSubReasonData);
-    exitSubReason = exitSubReasonData;
-    int32_t rssData;
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, rssData);
-    rss = rssData;
-    int32_t pssData;
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, pssData);
-    pss = pssData;
-    int64_t timeStampData;
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int64, parcel, timeStampData);
-    timestamp = timeStampData;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, pid);
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, uid);
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, exitSubReason);
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, rss);
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, pss);
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, processState);
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int64, parcel, timestamp);
     processName = Str16ToStr8(parcel.ReadString16());
     exitMsg = Str16ToStr8(parcel.ReadString16());
     return true;
@@ -97,6 +58,7 @@ bool LastExitDetailInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, exitSubReason);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, rss);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, pss);
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, processState);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int64, parcel, timestamp);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(processName));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(exitMsg));

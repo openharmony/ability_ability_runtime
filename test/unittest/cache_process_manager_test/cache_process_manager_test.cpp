@@ -368,8 +368,14 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_IsAppShouldCache_0100, Tes
     cacheProcMgr->maxProcCacheNum_ = 2;
     auto appRecord = MockAppRecord();
     EXPECT_NE(appRecord, nullptr);
+    appRecord->procCacheSupportState_ = SupportProcessCacheState::SUPPORT;
     cacheProcMgr->cachedAppRecordQueue_.push_back(appRecord);
     EXPECT_EQ(cacheProcMgr->IsAppShouldCache(appRecord), true);
+
+    // App not enable
+    cacheProcMgr->cachedAppRecordQueue_.clear();
+    appRecord->SetEnableProcessCache(false);
+    EXPECT_EQ(cacheProcMgr->IsAppShouldCache(appRecord), false);
 
     // App not support cache
     cacheProcMgr->cachedAppRecordQueue_.clear();

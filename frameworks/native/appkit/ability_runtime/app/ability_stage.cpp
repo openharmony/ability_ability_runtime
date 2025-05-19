@@ -117,8 +117,8 @@ void AbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& confi
 void AbilityStage::OnMemoryLevel(int level)
 {}
 
-int32_t AbilityStage::RunAutoStartupTask(const std::function<void()> &callback, bool &isAsyncCallback,
-    const std::shared_ptr<Context> &stageContext)
+int32_t AbilityStage::RunAutoStartupTask(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
+    bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext)
 {
     isAsyncCallback = false;
     return ERR_OK;

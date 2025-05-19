@@ -298,6 +298,9 @@ void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<Ap
     if (appRecord->GetSupportProcessCacheState() != SupportProcessCacheState::SUPPORT) {
         return;
     }
+    if (!appRecord->GetEnableProcessCache()) {
+        return;
+    }
     if (!appRecord->GetPriorityObject()) {
         return;
     }
@@ -305,7 +308,8 @@ void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<Ap
         return;
     }
     bool forceKillProcess =
-        AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPid());
+        AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(
+            appRecord->GetPid(), appRecord->GetBundleName());
     if (forceKillProcess) {
         appRecord->SetProcessCacheBlocked(true);
         return;
@@ -359,6 +363,11 @@ bool CacheProcessManager::IsAppSupportProcessCacheInnerFirst(const std::shared_p
         }
     }
 
+    return CheckSupportState(appRecord);
+}
+
+bool CacheProcessManager::CheckSupportState(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
     auto supportState = appRecord->GetSupportProcessCacheState();
     switch (supportState) {
         case SupportProcessCacheState::UNSPECIFIED:
@@ -385,10 +394,18 @@ bool CacheProcessManager::IsAppShouldCache(const std::shared_ptr<AppRunningRecor
     if (!QueryEnableProcessCache()) {
         return false;
     }
+    if (!CheckSupportState(appRecord)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s defines not support.",
+            appRecord->GetBundleName().c_str());
+        return false;
+    }
     if (IsCachedProcess(appRecord) && !appRecord->GetProcessCacheBlocked()) {
         return true;
     }
     if (!IsAppSupportProcessCache(appRecord)) {
+        return false;
+    }
+    if (!appRecord->GetEnableProcessCache()) {
         return false;
     }
     return true;

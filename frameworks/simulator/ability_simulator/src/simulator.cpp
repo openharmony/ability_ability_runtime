@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,9 +41,12 @@
 #include "JsMockUtil.h"
 #include "launch_param.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
+#include "res_config.h"
+#include "resource_manager_helper.h"
 #include "resource_manager.h"
 #include "window_scene.h"
 #include "sys_timer.h"
+#include "source_map.h"
 
 
 namespace OHOS {
@@ -56,6 +59,7 @@ constexpr size_t DEFAULT_LONG_PAUSE_TIME = 40;
 
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules.abc";
+constexpr char SOURCE_MAPS_PATH[] = "/ets/sourceMaps.map";
 const std::string PACKAGE_NAME = "packageName";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string MODULE_NAME = "moduleName";
@@ -127,6 +131,7 @@ private:
     void ReportJsError(napi_value obj);
     std::string GetNativeStrFromJsTaggedObj(napi_value obj, const char* key);
     void CreateStageContext();
+    std::string ReadSourceMap();
 
     panda::ecmascript::EcmaVM *CreateJSVM();
     Options options_;
@@ -150,6 +155,7 @@ private:
     std::shared_ptr<AppExecFwk::ApplicationInfo> appInfo_;
     std::shared_ptr<AppExecFwk::HapModuleInfo> moduleInfo_;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_;
+    std::shared_ptr<JsEnv::SourceMap> sourceMapPtr_;
     CallbackTypePostTask postTask_ = nullptr;
     void GetPkgContextInfoListMap(const std::map<std::string, std::string> &contextInfoMap,
         std::map<std::string, std::vector<std::vector<std::string>>> &pkgContextInfoMap,
@@ -179,6 +185,12 @@ void DebuggerTask::OnPostTask(std::function<void()> &&task)
 
 SimulatorImpl::~SimulatorImpl()
 {
+    if (context_ != nullptr) {
+        context_->Unbind();
+    }
+    if (stageContext_ != nullptr) {
+        stageContext_->Unbind();
+    }
     if (nativeEngine_) {
         uv_close(reinterpret_cast<uv_handle_t*>(&debuggerTask_.onPostTaskSignal), nullptr);
         uv_loop_t* uvLoop = nullptr;
@@ -208,6 +220,10 @@ bool SimulatorImpl::Initialize(const Options &options)
     }
 
     options_ = options;
+    sourceMapPtr_ = std::make_shared<JsEnv::SourceMap>();
+    auto content = ReadSourceMap();
+    sourceMapPtr_->SplitSourceMap(content);
+
     postTask_ = options.postTask;
     if (!OnInit()) {
         return false;
@@ -266,7 +282,7 @@ napi_value SimulatorImpl::LoadScript(const std::string &srcPath)
 
 bool SimulatorImpl::ParseBundleAndModuleInfo()
 {
-    AppExecFwk::BundleContainer::GetInstance().LoadBundleInfos(options_.moduleJsonBuffer);
+    AppExecFwk::BundleContainer::GetInstance().LoadBundleInfos(options_.moduleJsonBuffer, options_.resourcePath);
     appInfo_ = AppExecFwk::BundleContainer::GetInstance().GetApplicationInfo();
     if (appInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "appinfo parse failed");
@@ -275,6 +291,9 @@ bool SimulatorImpl::ParseBundleAndModuleInfo()
     nlohmann::json appInfoJson;
     to_json(appInfoJson, *appInfo_);
     std::cout << "appinfo : " << appInfoJson.dump() << std::endl;
+
+    AppExecFwk::BundleContainer::GetInstance().LoadDependencyHspInfo(appInfo_->bundleName, options_.dependencyHspInfos);
+    AppExecFwk::BundleContainer::GetInstance().SetBundleCodeDir(options_.previewPath);
 
     options_.bundleName = appInfo_->bundleName;
     options_.compatibleVersion = appInfo_->apiCompatibleVersion;
@@ -466,6 +485,22 @@ void SimulatorImpl::InitJsAbilityStageContext(napi_value obj)
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "null obj");
         return;
     }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(stageContext_);
+    auto status = napi_wrap(nativeEngine_, contextObj, workContext,
+        [](napi_env, void *data, void*) {
+            TAG_LOGD(AAFwkTag::ABILITY_SIM, "finalizer for weak_ptr ui ability context");
+            delete static_cast<std::weak_ptr<AbilityStageContext> *>(data);
+        },
+        nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "wrap ability context failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
+
+    JsRuntime jsRuntime;
+    stageContext_->Bind(jsRuntime, jsStageContext_.get());
     napi_set_named_property(nativeEngine_, obj, "context", contextObj);
 }
 
@@ -568,9 +603,17 @@ void SimulatorImpl::InitResourceMgr()
     }
 
     if (!resourceMgr_->AddResource(options_.resourcePath.c_str())) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Add resource failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Add app resource failed");
     }
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "Add resource success");
+    ResourceManagerHelper::GetInstance().Init(options_);
+    ResourceManagerHelper::GetInstance().AddSystemResource(resourceMgr_);
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (resConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null resConfig");
+        return;
+    }
+    ResourceManagerHelper::GetInstance().GetResConfig(*resConfig);
+    resourceMgr_->UpdateResConfig(*resConfig);
 }
 
 void SimulatorImpl::InitJsAbilityContext(napi_env env, napi_value obj)
@@ -600,6 +643,22 @@ void SimulatorImpl::InitJsAbilityContext(napi_env env, napi_value obj)
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "null obj");
         return;
     }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(context_);
+    auto status = napi_wrap(nativeEngine_, contextObj, workContext,
+        [](napi_env, void *data, void*) {
+            TAG_LOGD(AAFwkTag::ABILITY_SIM, "finalizer for weak_ptr ui ability context");
+            delete static_cast<std::weak_ptr<AbilityContext> *>(data);
+        },
+        nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "wrap ability context failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
+
+    JsRuntime jsRuntime;
+    context_->Bind(jsRuntime, systemModule.get());
     napi_set_named_property(env, obj, "context", contextObj);
     jsContexts_.emplace(currentId_, systemModule);
 }
@@ -688,6 +747,29 @@ panda::ecmascript::EcmaVM *SimulatorImpl::CreateJSVM()
     pandaOption.SetEnableAsmInterpreter(true);
     pandaOption.SetAsmOpcodeDisableRange("");
     return panda::JSNApi::CreateJSVM(pandaOption);
+}
+
+std::string SimulatorImpl::ReadSourceMap()
+{
+    std::string normalizedPath = options_.modulePath;
+    std::replace(normalizedPath.begin(), normalizedPath.end(), '\\', '/');
+    auto sourceMapPath = std::regex_replace(normalizedPath, std::regex(MERGE_ABC_PATH), SOURCE_MAPS_PATH);
+
+    std::replace(sourceMapPath.begin(), sourceMapPath.end(), '/', '\\');
+    std::ifstream stream(sourceMapPath, std::ios::ate | std::ios::binary);
+    if (!stream.is_open()) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "open:%{public}s failed", sourceMapPath.c_str());
+        return "";
+    }
+
+    size_t len = stream.tellg();
+    std::unique_ptr<uint8_t[]> buffer = std::make_unique<uint8_t[]>(len);
+    stream.seekg(0);
+    stream.read(reinterpret_cast<char*>(buffer.get()), len);
+    stream.close();
+    std::string content;
+    content.assign(reinterpret_cast<char*>(buffer.get()), len);
+    return content;
 }
 
 bool SimulatorImpl::OnInit()
@@ -983,20 +1065,29 @@ void SimulatorImpl::ReportJsError(napi_value obj)
     std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");
     std::string errorStack = GetNativeStrFromJsTaggedObj(obj, "stack");
     std::string topStack = GetNativeStrFromJsTaggedObj(obj, "topstack");
-    std::string summary = "Simulator error name:" + errorName + "\n";
-    summary += "Simulator error message:" + errorMsg + "\n";
+    std::string summary = "name:" + errorName + "\n";
+    summary += "message:" + errorMsg + "\n";
     bool hasProperty = false;
     napi_has_named_property(nativeEngine_, obj, "code", &hasProperty);
     if (hasProperty) {
         std::string errorCode = GetNativeStrFromJsTaggedObj(obj, "code");
-        summary += "Simulator error code:" + errorCode + "\n";
+        summary += "code:" + errorCode + "\n";
     }
     if (errorStack.empty()) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "errorStack empty");
         return;
     }
-    summary += "Stacktrace:\n" + errorStack;
-    TAG_LOGE(AAFwkTag::ABILITY_SIM, "summary:\n%{public}s", summary.c_str());
+    auto newErrorStack = sourceMapPtr_->TranslateBySourceMap(errorStack);
+    summary += "Stacktrace:\n" + newErrorStack;
+
+    std::stringstream summaryBody(summary);
+    std::string line;
+    std::string formattedSummary;
+    while (std::getline(summaryBody, line)) {
+        formattedSummary += "[Simulator Log]" + line + "\n";
+    }
+
+    TAG_LOGW(AAFwkTag::ABILITY_SIM, "summary:\n%{public}s", formattedSummary.c_str());
 }
 
 void SimulatorImpl::CreateStageContext()

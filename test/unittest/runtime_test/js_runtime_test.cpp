@@ -1853,5 +1853,37 @@ HWTEST_F(JsRuntimeTest, UpdateModuleNameAndAssetPath_0400, TestSize.Level1)
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TAG_LOGI(AAFwkTag::TEST, "UpdateModuleNameAndAssetPath_0400 end");
 }
+
+/**
+ * @tc.name: ExecuteSecureWithOhmUrl_0100
+ * @tc.desc: basic function test of ExecuteSecureWithOhmUrl and GetExportObjectFromOhmUrl.
+ * @tc.type: FUNC
+ * @tc.require: issueIC77WI
+ */
+HWTEST_F(JsRuntimeTest, ExecuteSecureWithOhmUrl_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ExecuteSecureWithOhmUrl_0100 start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    jsRuntime->jsEnv_ = std::make_shared<JsEnv::JsEnvironment>();
+    jsRuntime->isBundle_ = false;
+    panda::RuntimeOption pandaOption;
+    jsRuntime->jsEnv_->vm_ = panda::JSNApi::CreateJSVM(pandaOption);
+    jsRuntime->moduleName_ = "";
+
+    std::string moduleName = "moduleName";
+    std::string hapPath = "hapPath";
+    std::string srcEntrance = "srcEntrance";
+    auto ret = jsRuntime->ExecuteSecureWithOhmUrl(moduleName, hapPath, srcEntrance);
+    EXPECT_EQ(ret, false);
+
+    std::string key = "key";
+    auto retVal = jsRuntime->GetExportObjectFromOhmUrl(srcEntrance, key);
+    EXPECT_EQ(retVal, nullptr);
+
+    jsRuntime.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    TAG_LOGI(AAFwkTag::TEST, "ExecuteSecureWithOhmUrl_0100 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

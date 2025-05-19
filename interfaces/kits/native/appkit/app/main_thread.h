@@ -310,7 +310,7 @@ public:
      *
      * @return Is the status change completed.
      */
-    int32_t ScheduleChangeAppGcState(int32_t state) override;
+    int32_t ScheduleChangeAppGcState(int32_t state, uint64_t tid = 0) override;
 
     void AttachAppDebug(bool isDebugFromLocal) override;
     void DetachAppDebug() override;
@@ -636,7 +636,7 @@ private:
 
     std::vector<std::string> GetRemoveOverlayPaths(const std::vector<OverlayModuleInfo> &overlayModuleInfos);
 
-    int32_t ChangeAppGcState(int32_t state);
+    int32_t ChangeAppGcState(int32_t state, uint64_t tid = 0);
 
     void HandleCacheProcess();
 

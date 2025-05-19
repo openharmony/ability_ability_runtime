@@ -936,5 +936,61 @@ HWTEST_F(AppMgrProxyTest, GetSupportedProcessCachePids_001, TestSize.Level2)
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
+
+/**
+ * @tc.name: UpdateConfigurationForBackgroundApp_001
+ * @tc.desc: UpdateConfigurationForBackgroundApp.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppMgrProxyTest, UpdateConfigurationForBackgroundApp_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockAppMgrService_.GetRefPtr(), &MockAppMgrService::InvokeSendRequest));
+
+    std::vector<BackgroundAppInfo> appInfos;
+    ConfigurationPolicy policy;
+    int32_t userId = -1;
+
+    auto ret = appMgrProxy_->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+    BackgroundAppInfo info;
+    appInfos.push_back(info);
+    appMgrProxy_->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
+    EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_CONFIGURATION_POLICY));
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: IsProcessCacheSupported_0100
+ * @tc.desc: Test IsProcessCacheSupported.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrProxyTest, IsProcessCacheSupported_0100, TestSize.Level1)
+{
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _)).Times(1);
+    int32_t pid = 1;
+    bool isSupport = false;
+    auto ret = appMgrProxy_->IsProcessCacheSupported(pid, isSupport);
+    EXPECT_EQ(ret, NO_ERROR);
+}
+
+/**
+ * @tc.name: SetProcessCacheEnable_0100
+ * @tc.desc: Test SetProcessCacheEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrProxyTest, SetProcessCacheEnable_0100, TestSize.Level1)
+{
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _)).Times(1);
+    int32_t pid = 1;
+    bool enable = false;
+    auto ret = appMgrProxy_->SetProcessCacheEnable(pid, enable);
+    EXPECT_EQ(ret, NO_ERROR);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

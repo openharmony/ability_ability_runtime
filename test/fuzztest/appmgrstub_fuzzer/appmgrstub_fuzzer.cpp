@@ -68,6 +68,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     appMgrStub->HandleAttachRenderProcess(dataParcel, reply);
     appMgrStub->HandleJudgeSandboxByPid(dataParcel, reply);
     appMgrStub->HandleDumpHeapMemory(dataParcel, reply);
+    appMgrStub->HandleRegisterNativeChildExitNotify(dataParcel, reply);
+    appMgrStub->HandleUnregisterNativeChildExitNotify(dataParcel, reply);
     return true;
 }
 }

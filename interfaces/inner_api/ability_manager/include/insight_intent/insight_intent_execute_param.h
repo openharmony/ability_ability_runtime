@@ -44,6 +44,14 @@ constexpr char INSIGHT_INTENT_EXECUTE_PARAM_URI[] = "ohos.insightIntent.executeP
 constexpr char INSIGHT_INTENT_EXECUTE_PARAM_FLAGS[] = "ohos.insightIntent.executeParam.flags";
 constexpr char INSIGHT_INTENT_SRC_ENTRY[] = "ohos.insightIntent.srcEntry";
 constexpr char INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG[] = "ohos.insightIntent.execute.openlink.flag";
+constexpr char INSIGHT_INTENT_DECORATOR_TYPE[] = "ohos.insightIntent.decoratorType";
+constexpr char INSIGHT_INTENT_SRC_ENTRANCE[] = "ohos.insightIntent.srcEntrance";
+constexpr char INSIGHT_INTENT_FUNC_PARAM_CLASSNAME[] = "ohos.insightIntent.funcParam.className";
+constexpr char INSIGHT_INTENT_FUNC_PARAM_METHODNAME[] = "ohos.insightIntent.funcParam.methodName";
+constexpr char INSIGHT_INTENT_FUNC_PARAM_METHODPARAMS[] = "ohos.insightIntent.funcParam.methodParams";
+constexpr char INSIGHT_INTENT_PAGE_PARAM_PAGEPATH[] = "ohos.insightIntent.pageParam.pagePath";
+constexpr char INSIGHT_INTENT_PAGE_PARAM_NAVIGATIONID[] = "ohos.insightIntent.pageParam.navigationId";
+constexpr char INSIGHT_INTENT_PAGE_PARAM_NAVDESTINATIONNAME[] = "ohos.insightIntent.pageParam.navDestinationName";
 
 constexpr int32_t INVALID_DISPLAY_ID = -1;
 
@@ -56,6 +64,7 @@ public:
     virtual bool Marshalling(Parcel &parcel) const override;
     static InsightIntentExecuteParam *Unmarshalling(Parcel &parcel);
     static bool IsInsightIntentExecute(const AAFwk::Want &want);
+    static bool IsInsightIntentPage(const AAFwk::Want &want);
     static bool GenerateFromWant(const AAFwk::Want &want, InsightIntentExecuteParam &executeParam);
     static bool RemoveInsightIntent(AAFwk::Want &want);
     static void UpdateInsightIntentCallerInfo(const WantParams &wantParams, WantParams &insightIntentParam);
@@ -70,6 +79,18 @@ public:
     std::string abilityName_;
     std::string insightIntentName_;
     std::vector<std::string> uris_;
+    int8_t decoratorType_ = 0; // default is InsightIntentType::DECOR_NONE
+    std::string srcEntrance_;
+
+    // params below belongs to InsightIntentFunc
+    std::string className_;
+    std::string methodName_;
+    std::vector<std::string> methodParams_;
+
+    // params below belongs to InsightIntentPage
+    std::string pagePath_;
+    std::string navigationId_;
+    std::string navDestinationName_;
 };
 } // namespace AppExecFwk
 } // namespace OHOS

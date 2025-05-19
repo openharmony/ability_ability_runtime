@@ -21,13 +21,23 @@
 #include "hap_module_info.h"
 #include "configuration.h"
 #include "native_engine/native_engine.h"
+#include "options.h"
 #include "res_common.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+
+constexpr double DPI_BASE = 160.0;  // convert density to the base of dpi
+
 Global::Resource::ColorMode ConvertColorMode(const std::string &colormode);
 Global::Resource::Direction ConvertDirection(const std::string &direction);
 Global::Resource::ScreenDensity ConvertDensity(const std::string &density);
+Global::Resource::DeviceType ConvertDeviceType(const std::string &deviceType);
+Global::Resource::DeviceType ConvertDeviceType(DeviceType type);
+Global::Resource::Direction ConvertDirection(DeviceOrientation orientation);
+Global::Resource::ScreenDensity ConvertDensity(double density);
+Global::Resource::ColorMode ConvertColorMode(ColorMode colorMode);
+
 int32_t ConvertDisplayId(const std::string &displayId);
 std::string GetDensityStr(float density);
 napi_value CreateJsConfiguration(napi_env env, const AppExecFwk::Configuration &configuration);

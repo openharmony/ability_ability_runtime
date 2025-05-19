@@ -24,6 +24,8 @@
 #include "start_options.h"
 #include "ui_holder_extension_context.h"
 #include "want.h"
+#include "js_ui_extension_callback.h"
+#include "string_wrapper.h"
 #ifdef SUPPORT_SCREEN
 #include "window.h"
 #endif // SUPPORT_SCREEN
@@ -158,6 +160,12 @@ public:
     std::shared_ptr<AppExecFwk::Configuration> GetAbilityConfiguration() const;
     void SetAbilityConfiguration(const AppExecFwk::Configuration &config);
     void SetAbilityColorMode(int32_t colorMode);
+
+    /**
+     * @brief Send destroy request to the host component.
+     */
+    void RequestComponentTerminate();
+
 #ifdef SUPPORT_SCREEN
     void SetWindow(sptr<Rosen::Window> window);
 
@@ -176,6 +184,15 @@ public:
     void InsertResultCallbackTask(int requestCode, RuntimeTask&& task);
 
     void RemoveResultCallbackTask(int requestCode);
+
+    /**
+     * @brief Start a new ability using type;
+     * @return errCode ERR_OK on success, others on failure.
+    */
+    ErrCode StartAbilityByType(const std::string &type,
+        AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks);
+    bool IsTerminating();
+    void SetTerminating(bool state);
 
     int32_t GetScreenMode() const;
     void SetScreenMode(int32_t screenMode);
@@ -201,6 +218,7 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> abilityResourceMgr_ = nullptr;
     AbilityConfigUpdateCallback abilityConfigUpdateCallback_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> abilityConfiguration_ = nullptr;
+    bool isTerminating_ = false;
     /**
      * @brief Get Current Ability Type
      *

@@ -16,15 +16,47 @@
 #include "js_sendable_context_manager.h"
 #include "native_engine/native_engine.h"
 
-static napi_module _module = {
+extern const char _binary_sendable_context_manager_js_start[];
+extern const char _binary_sendable_context_manager_js_end[];
+extern const char _binary_sendable_context_manager_abc_start[];
+extern const char _binary_sendable_context_manager_abc_end[];
+
+extern "C" __attribute__((visibility("default")))
+void NAPI_app_ability_sendableContextManager_GetJSCode(const char **buf, int *bufLen)
+{
+    if (buf != nullptr) {
+        *buf = _binary_sendable_context_manager_js_start;
+    }
+
+    if (bufLen != nullptr) {
+        *bufLen = _binary_sendable_context_manager_js_end - _binary_sendable_context_manager_js_start;
+    }
+};
+
+// sendableContextManager JS register
+extern "C" __attribute__((visibility("default")))
+void NAPI_app_ability_sendableContextManager_GetABCCode(const char **buf, int *buflen)
+{
+    if (buf != nullptr) {
+        *buf = _binary_sendable_context_manager_abc_start;
+    }
+    if (buflen != nullptr) {
+        *buflen = _binary_sendable_context_manager_abc_end - _binary_sendable_context_manager_abc_start;
+    }
+};
+
+static napi_module_with_js _module = {
     .nm_version = 0,
-    .nm_filename = "app/ability/libsendablecontextmanager_napi.so",
+    .nm_filename = "app/ability/libsendablecontextmanager_napi.so/sendable_context_manager.js",
     .nm_register_func = OHOS::AbilityRuntime::CreateJsSendableContextManager,
     .nm_modname = "app.ability.sendableContextManager",
+    .nm_get_abc_code = NAPI_app_ability_sendableContextManager_GetABCCode,
+    .nm_get_js_code = NAPI_app_ability_sendableContextManager_GetJSCode,
 };
 
 extern "C" __attribute__((constructor))
 void NapiAppAbilitySendableContextManagerAutoRegister()
 {
-    napi_module_register(&_module);
-}
+    napi_module_with_js_register(&_module);
+};
+

@@ -24,6 +24,7 @@ ohos_unittest("AmsServiceLoadAbilityProcessTest") {
     "${ability_runtime_services_path}/appmgr/test/unittest/mocks",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_test_path}/mock/common/include",
+    "${ability_runtime_innerkits_path}/ability_manager/include/insight_intent",
   ]
 
   sources = [
@@ -36,6 +37,7 @@ ohos_unittest("AmsServiceLoadAbilityProcessTest") {
     "${ability_runtime_services_path}/appmgr/src/app_mgr_event.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_mgr_service_event_handler.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_mgr_service_inner.cpp",
+    "${ability_runtime_services_path}/appmgr/src/app_native_spawn_manager.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_preloader.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_running_manager.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_running_record.cpp",
@@ -105,6 +107,8 @@ ohos_unittest("AmsServiceLoadAbilityProcessTest") {
     "resource_schedule_service:ressched_client",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "json:nlohmann_json_static",
+    "jsoncpp:jsoncpp",
   ]
 
   defines = []

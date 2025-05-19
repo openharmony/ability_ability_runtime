@@ -16,6 +16,7 @@
 #include "ability_stage_context.h"
 
 #include <cstring>
+
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -38,34 +39,70 @@ constexpr const char *CONTEXT_RESOURCE_BASE("/data/storage/el1/bundle");
 constexpr const char *CONTEXT_RESOURCE_END("/resources/resfile");
 constexpr int DIR_DEFAULT_PERM = 0770;
 }
+const size_t AbilityStageContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("AbilityStageContext"));
+
+AbilityStageContext::AbilityStageContext()
+{
+    contextImpl_ = std::make_shared<ContextImpl>();
+}
 std::shared_ptr<AppExecFwk::Configuration> AbilityStageContext::GetConfiguration()
 {
-    return configuration_;
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null contextImpl");
+        return nullptr;
+    }
+
+    return contextImpl_->GetConfiguration();
 }
 
 void AbilityStageContext::SetConfiguration(const std::shared_ptr<AppExecFwk::Configuration> &configuration)
 {
-    configuration_ = configuration;
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null contextImpl");
+        return;
+    }
+
+    contextImpl_->SetConfiguration(configuration);
 }
 
 std::shared_ptr<AppExecFwk::ApplicationInfo> AbilityStageContext::GetApplicationInfo() const
 {
-    return applicationInfo_;
-}
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null contextImpl");
+        return nullptr;
+    }
 
-std::shared_ptr<AppExecFwk::HapModuleInfo> AbilityStageContext::GetHapModuleInfo() const
-{
-    return hapModuleInfo_;
+    return contextImpl_->GetApplicationInfo();
 }
 
 void AbilityStageContext::SetApplicationInfo(const std::shared_ptr<AppExecFwk::ApplicationInfo> &info)
 {
-    applicationInfo_ = info;
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null contextImpl");
+        return;
+    }
+
+    contextImpl_->SetApplicationInfo(info);
+}
+
+std::shared_ptr<AppExecFwk::HapModuleInfo> AbilityStageContext::GetHapModuleInfo() const
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null contextImpl");
+        return nullptr;
+    }
+
+    return contextImpl_->GetHapModuleInfo();
 }
 
 void AbilityStageContext::SetHapModuleInfo(const std::shared_ptr<AppExecFwk::HapModuleInfo> &info)
 {
-    hapModuleInfo_ = info;
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null contextImpl");
+        return;
+    }
+
+    contextImpl_->InitHapModuleInfo(*info);
 }
 
 Options AbilityStageContext::GetOptions()
@@ -81,9 +118,13 @@ void AbilityStageContext::SetOptions(const Options &options)
     if (pos == std::string::npos) {
         fileSeparator_ = CONTEXT_FILE_OPPOSITE_SEPARATOR;
     }
+
+    if (contextImpl_ != nullptr) {
+        contextImpl_->SetOptions(options);
+    }
 }
 
-std::string AbilityStageContext::GetBundleName()
+std::string AbilityStageContext::GetBundleName() const
 {
     return options_.bundleName;
 }
@@ -311,6 +352,41 @@ void AbilityStageContext::FsReqCleanup(uv_fs_t *req)
     if (req) {
         delete req;
         req = nullptr;
+    }
+}
+
+std::shared_ptr<Context> AbilityStageContext::CreateModuleContext(const std::string &moduleName)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null contextImpl");
+        return nullptr;
+    }
+    return contextImpl_->CreateModuleContext(moduleName);
+}
+
+std::shared_ptr<Context> AbilityStageContext::CreateModuleContext(
+    const std::string &bundleName, const std::string &moduleName)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null contextImpl");
+        return nullptr;
+    }
+    return contextImpl_->CreateModuleContext(bundleName, moduleName);
+}
+
+std::shared_ptr<Global::Resource::ResourceManager> AbilityStageContext::GetResourceManager() const
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null contextImpl");
+        return nullptr;
+    }
+    return contextImpl_->GetResourceManager();
+}
+
+void AbilityStageContext::SetResourceManager(const std::shared_ptr<Global::Resource::ResourceManager> &resMgr)
+{
+    if (contextImpl_) {
+        contextImpl_->SetResourceManager(resMgr);
     }
 }
 } // namespace AbilityRuntime

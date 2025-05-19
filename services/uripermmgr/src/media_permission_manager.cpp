@@ -68,7 +68,8 @@ std::vector<bool> MediaPermissionManager::CheckUriPermission(const std::vector<U
         TAG_LOGE(AAFwkTag::URIPERMMGR, "GetMediaLibraryManager failed.");
         return results;
     }
-    auto ret = IN_PROCESS_CALL(mediaLibraryManager->CheckPhotoUriPermission(callerTokenId, uriStrVec, results, flag));
+    std::vector<uint32_t> flags(uriStrVec.size(), flag);
+    auto ret = IN_PROCESS_CALL(mediaLibraryManager->CheckPhotoUriPermission(callerTokenId, uriStrVec, results, flags));
     TAG_LOGD(AAFwkTag::URIPERMMGR, "CheckPhotoUriPermission finished.");
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Check photo uri permission failed, ret is %{public}d", ret);
@@ -97,8 +98,9 @@ int32_t MediaPermissionManager::GrantUriPermission(const std::vector<std::string
         return INNER_ERR;
     }
     auto mediahideSensitiveType = ConvertHideSensitiveType(hideSensitiveType);
+    std::vector<Media::PhotoPermissionType> photoPermissionTypes(uris.size(), photoPermissionType);
     auto ret = IN_PROCESS_CALL(mediaLibraryManager->GrantPhotoUriPermission(callerTokenId, targetTokenId, uris,
-        photoPermissionType, mediahideSensitiveType));
+        photoPermissionTypes, mediahideSensitiveType));
     TAG_LOGD(AAFwkTag::URIPERMMGR, "GrantPhotoUriPermission finished.");
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Grant photo uri permission failed, ret is %{public}d", ret);

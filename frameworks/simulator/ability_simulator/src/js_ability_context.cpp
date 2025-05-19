@@ -19,6 +19,7 @@
 #include "hilog_tag_wrapper.h"
 #include "js_context_utils.h"
 #include "js_data_converter.h"
+#include "js_error_utils.h"
 #include "js_resource_manager_utils.h"
 #include "js_runtime_utils.h"
 
@@ -192,14 +193,6 @@ napi_value JsAbilityContext::OnIsTerminating(napi_env env, NapiCallbackInfo &inf
     return CreateJsValue(env, context->IsTerminating());
 }
 
-napi_value CreateJsErrorByNativeErr(napi_env env, int32_t err, const std::string &permission)
-{
-    auto errCode = GetJsErrorCodeByNativeError(err);
-    auto errMsg = (errCode == AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED && !permission.empty()) ?
-        GetNoPermissionErrorMsg(permission) : GetErrorMsg(errCode);
-    return CreateJsError(env, static_cast<int32_t>(errCode), errMsg);
-}
-
 void JsAbilityContext::ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
     const std::shared_ptr<AppExecFwk::Configuration> &config)
 {
@@ -233,12 +226,6 @@ napi_value CreateJsAbilityContext(napi_env env, const std::shared_ptr<AbilityCon
 
     std::unique_ptr<JsAbilityContext> jsContext = std::make_unique<JsAbilityContext>(context);
     napi_wrap(env, object, jsContext.release(), JsAbilityContext::Finalizer, nullptr, nullptr);
-
-    auto resourceManager = context->GetResourceManager();
-    if (resourceManager != nullptr) {
-        napi_set_named_property(env, object, "resourceManager",
-            CreateJsResourceManager(env, resourceManager, context));
-    }
 
     auto abilityInfo = context->GetAbilityInfo();
     if (abilityInfo != nullptr) {

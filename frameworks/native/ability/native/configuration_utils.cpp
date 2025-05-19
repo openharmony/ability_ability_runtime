@@ -106,6 +106,7 @@ void ConfigurationUtils::GetGlobalConfig(const Configuration &configuration,
     OHOS::AbilityRuntime::ResourceConfigHelper &resourceConfig)
 {
     resourceConfig.SetLanguage(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
+    resourceConfig.SetLocale(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE));
     resourceConfig.SetColormode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE));
     resourceConfig.SetHasPointerDevice(configuration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE));
     resourceConfig.SetMcc(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC));

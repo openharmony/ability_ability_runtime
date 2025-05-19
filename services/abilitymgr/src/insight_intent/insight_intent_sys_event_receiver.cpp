@@ -24,6 +24,7 @@
 #include "ability_util.h"
 #include "bundle_mgr_helper.h"
 #include "insight_intent_db_cache.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -33,12 +34,14 @@ const int32_t MAIN_USER_ID = 100;
 InsightIntentSysEventReceiver::InsightIntentSysEventReceiver(const EventFwk::CommonEventSubscribeInfo &subscribeInfo)
     : EventFwk::CommonEventSubscriber(subscribeInfo)
 {
-    taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(INSIGHT_INTENT_SYS_EVENT_RECERVER);
 }
 
 void InsightIntentSysEventReceiver::SaveInsightIntentInfos(const std::string &bundleName, const std::string &moduleName,
     int32_t userId)
 {
+    std::vector<std::string> moduleNameVec;
+    std::string profile;
+    AbilityRuntime::ExtractInsightIntentProfileInfoVec infos = {};
     TAG_LOGI(AAFwkTag::INTENT, "save insight intent infos, bundle:%{public}s module:%{public}s",
         bundleName.c_str(), moduleName.c_str());
     ErrCode ret;
@@ -48,33 +51,35 @@ void InsightIntentSysEventReceiver::SaveInsightIntentInfos(const std::string &bu
         return;
     }
 
-    // Get json profile firstly
-    std::string profile;
-    ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INSIGHT_INTENT_PROFILE, bundleName,
-        moduleName, profile, userId));
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "GetJsonProfile failed, code: %{public}d", ret);
-        return;
-    }
+    OHOS::SplitStr(moduleName, ",", moduleNameVec);
+    for (std::string moduleNameLocal : moduleNameVec) {
+        // Get json profile firstly
+        ret = IN_PROCESS_CALL(bundleMgrHelper->GetJsonProfile(AppExecFwk::INTENT_PROFILE, bundleName,
+            moduleNameLocal, profile, userId));
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::INTENT, "GetJsonProfile failed, code: %{public}d", ret);
+            continue;
+        }
 
-    // Transform json string
-    AbilityRuntime::ExtractInsightIntentProfileInfoVec infos = {};
-    if (!AbilityRuntime::ExtractInsightIntentProfile::TransformTo(profile, infos)) {
-        TAG_LOGE(AAFwkTag::INTENT, "transform profile failed, profile:%{public}s", profile.c_str());
-        return;
-    }
+        // Transform json string
+        if (!AbilityRuntime::ExtractInsightIntentProfile::TransformTo(profile, infos) ||
+            infos.insightIntents.size() == 0) {
+            TAG_LOGE(AAFwkTag::INTENT, "transform profile failed, profile:%{public}s", profile.c_str());
+            continue;
+        }
 
-    // save database
-    ret = DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(bundleName,
-        moduleName, userId, infos);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "save intent info failed, bundleName: %{public}s, moduleName: %{public}s, "
-            "userId: %{public}d", bundleName.c_str(), moduleName.c_str(), userId);
-        return;
-    }
+        // save database
+        ret = DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->SaveInsightIntentTotalInfo(
+            bundleName, moduleNameLocal, userId, infos);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::INTENT, "save intent info failed, bundleName: %{public}s, moduleName: %{public}s, "
+                "userId: %{public}d", bundleName.c_str(), moduleNameLocal.c_str(), userId);
+            continue;
+        }
 
-    TAG_LOGI(AAFwkTag::INTENT, "save intent info success, bundleName: %{public}s, moduleName: %{public}s, "
-        "userId: %{public}d", bundleName.c_str(), moduleName.c_str(), userId);
+        TAG_LOGI(AAFwkTag::INTENT, "save intent info success, bundleName: %{public}s, moduleName: %{public}s, "
+            "userId: %{public}d", bundleName.c_str(), moduleNameLocal.c_str(), userId);
+    }
 }
 
 void InsightIntentSysEventReceiver::LoadInsightIntentInfos(int32_t userId)
@@ -130,9 +135,8 @@ void InsightIntentSysEventReceiver::DeleteInsightIntentInfoByUserId(int32_t user
 
 void InsightIntentSysEventReceiver::HandleBundleScanFinished()
 {
-    CHECK_POINTER(taskHandler_);
     auto task = [self = shared_from_this()]() { self->LoadInsightIntentInfos(); };
-    taskHandler_->SubmitTask(task);
+    ffrt::submit(task);
 }
 
 void InsightIntentSysEventReceiver::HandleUserSwitched(const EventFwk::CommonEventData &data)
@@ -151,9 +155,8 @@ void InsightIntentSysEventReceiver::HandleUserSwitched(const EventFwk::CommonEve
     TAG_LOGI(AAFwkTag::INTENT, "userId: %{public}d switch to  current userId: %{public}d", lastUserId_, userId);
     lastUserId_ = userId;
 
-    CHECK_POINTER(taskHandler_);
     auto task = [self = shared_from_this(), userId]() { self->LoadInsightIntentInfos(userId); };
-    taskHandler_->SubmitTask(task);
+    ffrt::submit(task);
 }
 
 void InsightIntentSysEventReceiver::HandleUserRemove(const EventFwk::CommonEventData &data)
@@ -169,9 +172,8 @@ void InsightIntentSysEventReceiver::HandleUserRemove(const EventFwk::CommonEvent
         return;
     }
 
-    CHECK_POINTER(taskHandler_);
     auto task = [self = shared_from_this(), userId]() { self->DeleteInsightIntentInfoByUserId(userId); };
-    taskHandler_->SubmitTask(task);
+    ffrt::submit(task);
 }
 
 void InsightIntentSysEventReceiver::OnReceiveEvent(const EventFwk::CommonEventData &data)

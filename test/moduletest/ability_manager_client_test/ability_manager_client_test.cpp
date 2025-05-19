@@ -517,7 +517,7 @@ HWTEST_F(AbilityManagerClientTest, GetAllInsightIntentInfo_0100, TestSize.Level1
     auto flag = AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT;
     std::vector<InsightIntentInfoForQuery> infos;
     auto result = AbilityManagerClient::GetInstance()->GetAllInsightIntentInfo(flag, infos);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(result, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "GetAllInsightIntentInfo_0100 end");
 }
@@ -535,7 +535,7 @@ HWTEST_F(AbilityManagerClientTest, GetInsightIntentInfoByBundleName_0100, TestSi
     std::string bundleName = "com.example.bundleName";
     std::vector<InsightIntentInfoForQuery> infos;
     auto result = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(result, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "GetInsightIntentInfoByBundleName_0100 end");
 }
@@ -556,7 +556,7 @@ HWTEST_F(AbilityManagerClientTest, GetInsightIntentInfoByIntentName_0100, TestSi
     InsightIntentInfoForQuery info;
     auto result = AbilityManagerClient::GetInstance()->GetInsightIntentInfoByIntentName(
         flag, bundleName, moduleName, intentName, info);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "GetInsightIntentInfoByIntentName_0100 end");
 }
 }  // namespace AAFwk

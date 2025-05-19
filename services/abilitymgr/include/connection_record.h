@@ -104,6 +104,12 @@ public:
     void CompleteConnect();
 
     /**
+     * complete connect ability and just try to invoke callback.
+     *
+     */
+    void CompleteConnectAndOnlyCallConnectDone();
+
+    /**
      * complete disconnect ability and invoke callback.
      *
      */

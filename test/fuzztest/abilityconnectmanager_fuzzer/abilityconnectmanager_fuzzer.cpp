@@ -133,7 +133,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityConnectManager->ConnectAbility(abilityRecord);
     abilityConnectManager->CommandAbility(abilityRecord);
     abilityConnectManager->TerminateDone(abilityRecord);
-    abilityConnectManager->IsAbilityConnected(abilityRecord, connectRecordList);
+    abilityConnectManager->GetAbilityConnectedRecordFromRecordList(abilityRecord, connectRecordList);
     std::shared_ptr<ConnectionRecord> connection;
     abilityConnectManager->RemoveConnectionRecordFromMap(connection);
     abilityConnectManager->RemoveServiceAbility(abilityRecord);

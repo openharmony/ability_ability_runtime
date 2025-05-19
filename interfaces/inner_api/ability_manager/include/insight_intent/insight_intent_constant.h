@@ -22,7 +22,7 @@ namespace OHOS::AbilityRuntime {
     constexpr char INSIGHT_INTENTS_TYPE_LINK[] = "@InsightIntentLink";
     constexpr char INSIGHT_INTENTS_TYPE_PAGE[] = "@InsightIntentPage";
     constexpr char INSIGHT_INTENTS_TYPE_ENTRY[] = "@InsightIntentEntry";
-    constexpr char INSIGHT_INTENTS_TYPE_FUNCTION[] = "@InsightIntentFunction";
+    constexpr char INSIGHT_INTENTS_TYPE_FUNCTION[] = "@InsightIntentFunctionMethod";
     constexpr char INSIGHT_INTENTS_TYPE_FORM[] = "@InsightIntentForm";
 
     constexpr char INSIGHT_INTENTS_URI[] = "uri";
@@ -69,6 +69,15 @@ namespace OHOS::AbilityRuntime {
     enum GetInsightIntentFlag {
         GET_FULL_INSIGHT_INTENT = 1,
         GET_SUMMARY_INSIGHT_INTENT
+    };
+
+    enum class InsightIntentType : uint8_t {
+        DECOR_NONE = 0,
+        DECOR_LINK = 1,
+        DECOR_PAGE = 2,
+        DECOR_FUNC = 3,
+        DECOR_FORM = 4,
+        DECOR_ENTRY = 5,
     };
 } // namespace OHOS::AbilityRuntime
 

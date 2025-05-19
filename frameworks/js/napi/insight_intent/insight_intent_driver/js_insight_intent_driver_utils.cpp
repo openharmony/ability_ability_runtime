@@ -129,6 +129,10 @@ napi_value CreateInsightIntentInfoParamWithJson(napi_env env, const nlohmann::js
 
 napi_value CreateInsightIntentInfoParam(napi_env env, const std::string &paramStr)
 {
+    if (paramStr.empty()) {
+        TAG_LOGD(AAFwkTag::INTENT, "paramStr empty");
+        return nullptr;
+    }
     nlohmann::json jsonObject = nlohmann::json::parse(paramStr, nullptr, false);
     if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::INTENT, "Parse param str fail");

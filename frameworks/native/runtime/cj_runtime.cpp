@@ -27,6 +27,7 @@
 #include "parameters.h"
 #include "bundle_constants.h"
 #include "connect_server_manager.h"
+#include "faultloggerd_client.h"
 
 using namespace OHOS::AbilityRuntime;
 
@@ -341,4 +342,30 @@ void CJRuntime::SetAppVersion(std::string& version)
         return;
     }
     return cjEnv->setAppVersion(version);
+}
+
+void CJRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary)
+{
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");
+        return;
+    }
+    int32_t fd = RequestFileDescriptor(static_cast<int32_t>(FaultLoggerType::CJ_HEAP_SNAPSHOT));
+    if (fd < 0) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "fd:%{public}d.\n", fd);
+        return;
+    }
+    cjEnv->dumpHeapSnapshot(fd);
+    close(fd);
+}
+
+void CJRuntime::ForceFullGC(uint32_t tid)
+{
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");
+        return;
+    }
+    cjEnv->forceFullGC();
 }

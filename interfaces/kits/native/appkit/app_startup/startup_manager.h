@@ -23,7 +23,9 @@
 #include <vector>
 
 #include "app_startup_task.h"
+#include "app_startup_task_matcher.h"
 #include "bundle_info.h"
+#include "app_launch_data.h"
 #include "native_startup_task.h"
 #include "preload_so_startup_task.h"
 #include "singleton.h"
@@ -54,6 +56,7 @@ struct StartupTaskInfo {
     bool callCreateOnMainThread = true;
     bool waitOnMainThread = true;
     bool esModule = true;
+    StartupTaskMatchRules matchRules;
 };
 
 class StartupManager : public std::enable_shared_from_this<StartupManager> {
@@ -61,23 +64,33 @@ DECLARE_DELAYED_SINGLETON(StartupManager)
 
 public:
     int32_t PreloadAppHintStartup(const AppExecFwk::BundleInfo& bundleInfo,
-        const AppExecFwk::HapModuleInfo& entryInfo, const std::string &preloadModuleName);
+        const AppExecFwk::HapModuleInfo& entryInfo, const std::string &preloadModuleName,
+        std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
 
     int32_t LoadAppStartupTaskConfig(bool &needRunAutoStartupTask);
 
-    const std::vector<StartupTaskInfo> &GetStartupTaskInfos() const;
+    const std::vector<StartupTaskInfo> GetStartupTaskInfos(const std::string &name);
 
     const std::string &GetPendingConfigEntry() const;
+
+    void ClearAppStartupTask();
 
     int32_t RegisterAppStartupTask(
         const std::string &name, const std::shared_ptr<AppStartupTask> &startupTask);
 
-    int32_t BuildAutoAppStartupTaskManager(std::shared_ptr<StartupTaskManager> &startupTaskManager);
+    int32_t BuildAutoAppStartupTaskManager(std::shared_ptr<AAFwk::Want> want,
+        std::shared_ptr<StartupTaskManager> &startupTaskManager, const std::string &moduleName);
 
     int32_t BuildAppStartupTaskManager(const std::vector<std::string> &inputDependencies,
         std::shared_ptr<StartupTaskManager> &startupTaskManager);
 
     int32_t OnStartupTaskManagerComplete(uint32_t id);
+
+    int32_t RunLoadModuleStartupConfigTask(
+        bool &needRunAutoStartupTask, const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo);
+
+    void SetModuleConfig(const std::shared_ptr<StartupConfig> &config, const std::string &moduleName,
+        bool isDefaultConfig);
 
     void SetDefaultConfig(const std::shared_ptr<StartupConfig> &config);
 
@@ -104,6 +117,8 @@ private:
 
     std::mutex appStartupConfigInitializationMutex_;
     std::atomic<bool> isAppStartupConfigInited_ = false;
+    std::atomic<bool> isAppStartupTaskRegistered_ = false;
+    std::set<std::string> isModuleStartupConfigInited_;
 
     std::mutex startupTaskManagerMutex_;
     uint32_t startupTaskManagerId = 0;
@@ -120,6 +135,7 @@ private:
     bool autoPreloadSoStopped_ = false;
 
     std::shared_ptr<StartupConfig> defaultConfig_;
+    std::map<std::string, std::shared_ptr<StartupConfig>> moduleConfigs_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> preloadHandler_;
 
@@ -129,18 +145,24 @@ private:
         const std::string &name, const std::shared_ptr<PreloadSoStartupTask> &startupTask);
     int32_t BuildStartupTaskManager(const std::map<std::string, std::shared_ptr<StartupTask>> &tasks,
         std::shared_ptr<StartupTaskManager> &startupTaskManager);
+    bool FilterMatchedStartupTask(const AppStartupTaskMatcher &taskMatcher,
+        const std::map<std::string, std::shared_ptr<AppStartupTask>> &inTasks,
+        std::map<std::string, std::shared_ptr<StartupTask>> &outTasks,
+        std::set<std::string> &dependenciesSet);
     int32_t AddAppPreloadSoTask(const std::vector<std::string> &preloadSoList,
         std::map<std::string, std::shared_ptr<StartupTask>> &currentStartupTasks);
     std::shared_ptr<NativeStartupTask> CreateAppPreloadSoTask(
         const std::map<std::string, std::shared_ptr<StartupTask>> &currentPreloadSoTasks);
 
-    void PreloadAppHintStartupTask();
+    void PreloadAppHintStartupTask(std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
     int32_t AddLoadAppStartupConfigTask(std::map<std::string, std::shared_ptr<StartupTask>> &preloadAppHintTasks);
     int32_t RunLoadAppStartupConfigTask();
-    int32_t AddAppAutoPreloadSoTask(std::map<std::string, std::shared_ptr<StartupTask>> &preloadAppHintTasks);
-    int32_t RunAppAutoPreloadSoTask();
+    int32_t AddAppAutoPreloadSoTask(std::map<std::string, std::shared_ptr<StartupTask>> &preloadAppHintTasks,
+        std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
+    int32_t RunAppAutoPreloadSoTask(std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
     int32_t RunAppPreloadSoTask(const std::map<std::string, std::shared_ptr<StartupTask>> &appPreloadSoTasks);
-    int32_t GetAppAutoPreloadSoTasks(std::map<std::string, std::shared_ptr<StartupTask>> &appAutoPreloadSoTasks);
+    int32_t GetAppAutoPreloadSoTasks(std::map<std::string, std::shared_ptr<StartupTask>> &appAutoPreloadSoTasks,
+        std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
     int32_t RunAppPreloadSoTaskMainThread(const std::map<std::string, std::shared_ptr<StartupTask>> &appPreloadSoTasks,
         std::unique_ptr<StartupTaskResultCallback> callback);
 
@@ -162,6 +184,7 @@ private:
         StartupTaskInfo& startupTaskInfo);
     static void SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
         std::shared_ptr<PreloadSoStartupTask> &task);
+    static void SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

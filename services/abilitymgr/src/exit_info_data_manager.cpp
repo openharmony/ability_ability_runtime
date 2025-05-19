@@ -60,7 +60,7 @@ bool ExitInfoDataManager::GetExitInfo(int32_t pid, int32_t uid, uint32_t &access
     std::map<uint32_t, ExitCacheInfo>::iterator it;
     std::lock_guard<std::mutex> lock(mutex_);
     for (it = exitCacheInfos_.begin(); it != exitCacheInfos_.end(); ++it) {
-        if (it->second.exitInfo.pid == pid && it->second.exitInfo.uid == uid) {
+        if (it->second.exitInfo.pid_ == pid && it->second.exitInfo.uid_ == uid) {
             accessTokenId = it->first;
             cacheInfo = it->second;
             exitCacheInfos_.erase(it);
