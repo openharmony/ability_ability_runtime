@@ -28,6 +28,7 @@ export default class StartOptions {
     windowFocused?: boolean;
     processMode?: contextConstant.ProcessMode;
     startupVisibility?: contextConstant.StartupVisibility;
+    startWindowBackgroundColor?: string;
     startWindowIcon?: image.PixelMap;
     supportWindowModes?: Array<bundleManager.SupportWindowMode>;
     minWindowWidth?: number;

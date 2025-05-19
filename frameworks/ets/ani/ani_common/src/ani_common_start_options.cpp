@@ -236,7 +236,17 @@ bool UnwrapStartWindowOption(ani_env *env, ani_object param,
     std::shared_ptr<AAFwk::StartWindowOption> &startWindowOption)
 {
     auto option = std::make_shared<AAFwk::StartWindowOption>();
-
+    std::string startWindowBackgroundColor;
+    if (IsExistsProperty(env, param, "startWindowBackgroundColor")) {
+        if (!GetStringOrUndefined(env, param, "startWindowBackgroundColor", startWindowBackgroundColor)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startWindowBackgroundColor failed");
+            return false;
+        }
+        option->startWindowBackgroundColor = startWindowBackgroundColor;
+    }
+    if (!startWindowBackgroundColor.empty()) {
+        option->hasStartWindow = true;
+    }
 #ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
 
     std::shared_ptr<Media::PixelMap> startWindowIcon = nullptr;
