@@ -111,6 +111,18 @@ std::string AbilityStage::OnNewProcessRequest(const AAFwk::Want &want)
     return "";
 }
 
+std::string AbilityStage::OnAcceptWant(const AAFwk::Want &want,
+    AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync)
+{
+    return "";
+}
+
+std::string AbilityStage::OnNewProcessRequest(const AAFwk::Want &want,
+    AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync)
+{
+    return "";
+}
+
 void AbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {}
 

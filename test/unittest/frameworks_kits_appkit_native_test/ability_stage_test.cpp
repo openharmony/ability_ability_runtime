@@ -257,7 +257,9 @@ HWTEST_F(AbilityStageTest, AppExecFwk_AbilityStage_OnAcceptWant_001, Function | 
 {
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_OnAcceptWant_001 start";
     AAFwk::Want want;
-    EXPECT_TRUE(abilityStage_->OnAcceptWant(want) == "");
+    EXPECT_TRUE(abilityStage_->OnAcceptWant(want).empty());
+    bool isAsync = false;
+    EXPECT_TRUE(abilityStage_->OnAcceptWant(want, nullptr, isAsync).empty());
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_OnAcceptWant_001 end";
 }
 
@@ -288,7 +290,9 @@ HWTEST_F(AbilityStageTest, AppExecFwk_AbilityStage_OnNewProcessRequest_001, Func
 {
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_OnNewProcessRequest_001 start";
     AAFwk::Want want;
-    EXPECT_TRUE(abilityStage_->OnNewProcessRequest(want) == "");
+    EXPECT_TRUE(abilityStage_->OnNewProcessRequest(want).empty());
+    bool isAsync = false;
+    EXPECT_TRUE(abilityStage_->OnNewProcessRequest(want, nullptr, isAsync).empty());
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_OnNewProcessRequest_001 end";
 }
 
