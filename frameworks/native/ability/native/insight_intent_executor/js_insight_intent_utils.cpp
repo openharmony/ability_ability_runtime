@@ -175,7 +175,7 @@ std::string JsInsightIntentUtils::StringifyObject(napi_env env, napi_value resul
 
     std::string str;
     if (!ConvertFromJsValue(env, stringifyResult, str)) {
-        TAG_LOGE(AAFwkTag::INTENT, "convert napi value failed");
+        TAG_LOGW(AAFwkTag::INTENT, "convert napi value failed");
         return "";
     }
 
