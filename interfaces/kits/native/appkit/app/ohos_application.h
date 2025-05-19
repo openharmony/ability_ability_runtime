@@ -239,6 +239,7 @@ private:
     bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
     bool isUpdateFontSize(Configuration &config, AbilityRuntime::SetLevel level);
     bool IsUpdateLanguageNeeded(Configuration &config, AbilityRuntime::SetLevel level);
+    bool IsUpdateLocaleNeeded(const Configuration& updatedConfig, Configuration &config);
     const std::function<void()> CreateAutoStartupCallback(
         const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
         const std::shared_ptr<AbilityLocalRecord> abilityRecord,
