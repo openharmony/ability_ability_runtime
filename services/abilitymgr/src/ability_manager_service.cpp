@@ -13989,6 +13989,7 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
             TAG_LOGD(AAFwkTag::INTENT, "extractInsightIntentInfos empty");
             return ERR_OK;
         }
+        TAG_LOGD(AAFwkTag::INTENT, "intentInfos size: %{public}zu", intentInfos.size());
         for (auto &info : intentInfos) {
             InsightIntentInfoForQuery intentInfoQuery;
             InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery);
@@ -14000,6 +14001,7 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
         if (genericInfos.empty()) {
             return ERR_OK;
         }
+        TAG_LOGD(AAFwkTag::INTENT, "genericInfos size: %{public}zu", genericInfos.size());
         for (auto &info : genericInfos) {
             InsightIntentInfoForQuery intentInfoQuery;
             InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(info, intentInfoQuery);
@@ -14029,6 +14031,7 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
             TAG_LOGD(AAFwkTag::INTENT, "extractInsightIntentInfos empty");
             return ERR_OK;
         }
+        TAG_LOGD(AAFwkTag::INTENT, "intentInfos size: %{public}zu", intentInfos.size());
         for (auto &info : intentInfos) {
             InsightIntentInfoForQuery intentInfoQuery;
             InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery);
@@ -14041,6 +14044,7 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
         if (genericInfos.empty()) {
             return ERR_OK;
         }
+        TAG_LOGD(AAFwkTag::INTENT, "genericInfos size: %{public}zu", genericInfos.size());
         for (auto &info : genericInfos) {
             InsightIntentInfoForQuery intentInfoQuery;
             InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(info, intentInfoQuery);

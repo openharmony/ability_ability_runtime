@@ -143,28 +143,6 @@ void to_json(nlohmann::json& jsonObject, const EntryInfoForQuery &info)
     };
 }
 
-void from_json(const nlohmann::json &jsonObject, FunctionInfoForQuery &functionInfo)
-{
-    TAG_LOGD(AAFwkTag::INTENT, "FunctionInfoForQuery from json");
-}
-
-void to_json(nlohmann::json& jsonObject, const FunctionInfoForQuery &info)
-{
-    TAG_LOGD(AAFwkTag::INTENT, "FunctionInfoForQuery to json");
-    jsonObject = nlohmann::json {};
-}
-
-void from_json(const nlohmann::json &jsonObject, FormInfoForQuery &formInfo)
-{
-    TAG_LOGD(AAFwkTag::INTENT, "FormInfoForQuery from json");
-}
-
-void to_json(nlohmann::json& jsonObject, const FormInfoForQuery &info)
-{
-    TAG_LOGD(AAFwkTag::INTENT, "FormInfoForQuery to json");
-    jsonObject = nlohmann::json {};
-}
-
 void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insightIntentInfo)
 {
     TAG_LOGD(AAFwkTag::INTENT, "InsightIntentInfoForQuery from json");
@@ -209,25 +187,25 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insi
         jsonObjectEnd,
         INSIGHT_INTENT_DISPLAY_DESCRIPTION,
         insightIntentInfo.displayDescription,
-        true,
+        false,
         g_parseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_SCHEMA,
         insightIntentInfo.schema,
-        true,
+        false,
         g_parseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_ICON,
         insightIntentInfo.icon,
-        true,
+        false,
         g_parseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_LLM_DESCRIPTION,
         insightIntentInfo.llmDescription,
-        true,
+        false,
         g_parseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
@@ -277,24 +255,6 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insi
             false,
             g_parseResult,
             ArrayType::NOT_ARRAY);
-    } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_FUNCTION) {
-        AppExecFwk::GetValueIfFindKey<FunctionInfoForQuery>(jsonObject,
-            jsonObjectEnd,
-            INSIGHT_INTENT_FUNCTION_INFO,
-            insightIntentInfo.functionInfo,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
-    } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_FORM) {
-        AppExecFwk::GetValueIfFindKey<FormInfoForQuery>(jsonObject,
-            jsonObjectEnd,
-            INSIGHT_INTENT_FORM_INFO,
-            insightIntentInfo.formInfo,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
     }
 }
 
@@ -317,9 +277,7 @@ void to_json(nlohmann::json& jsonObject, const InsightIntentInfoForQuery &info)
         {INSIGHT_INTENT_KEYWORDS, info.keywords},
         {INSIGHT_INTENT_LINK_INFO, info.linkInfo},
         {INSIGHT_INTENT_PAGE_INFO, info.pageInfo},
-        {INSIGHT_INTENT_ENTRY_INFO, info.entryInfo},
-        {INSIGHT_INTENT_FUNCTION_INFO, info.functionInfo},
-        {INSIGHT_INTENT_FORM_INFO, info.formInfo}
+        {INSIGHT_INTENT_ENTRY_INFO, info.entryInfo}
     };
 }
 
@@ -393,4 +351,3 @@ InsightIntentInfoForQuery *InsightIntentInfoForQuery::Unmarshalling(Parcel &parc
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
- 
