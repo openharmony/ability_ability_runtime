@@ -41,6 +41,7 @@ const std::string HELP_MSG = "usage: aa <command> <options>\n"
     "  force-stop <bundle-name>    force stop the process with bundle name\n"
     "  attach                      attach application to enter debug mode\n"
     "  detach                      detach application to exit debug mode\n"
+    "  send-memory-level           send memory level to application by pid \n"
 #ifdef ABILITY_COMMAND_FOR_TEST
     "  test                        start the test framework with options\n"
     "  ApplicationNotResponding     Pass in pid with options\n"
@@ -129,6 +130,14 @@ const std::string HELP_MSG_TEST =
     "                  [-w <wait-time>]\n"
     "                  [-D]\n";
 
+const std::string HELP_MSG_SEND_MEMORY_LEVEL = 
+    "Usage: aa send-memory-level -p <PID> -l <LEVEL>\n"
+    "Mandatory Options:\n"
+    "  -p, --pid <PID>         Target process ID (integer)\n"
+    "  -l, --level <0|1|2>     Memory level (0: Moderate, 1: Low, 2: Critical)\n\n"
+    "Optional:\n"
+    "  -h, --help              Show this help message\n";
+
 const std::string HELP_MSG_ATTACH_APP_DEBUG =
     "usage: aa attach <options>\n"
     "options list:\n"
@@ -172,6 +181,9 @@ const std::string STRING_ATTACH_APP_DEBUG_NG = "error: failed to attach app debu
 
 const std::string STRING_DETACH_APP_DEBUG_OK = "detach app debug successfully.";
 const std::string STRING_DETACH_APP_DEBUG_NG = "error: failed to detach app debug.";
+
+const std::string STRING_SEND_MEMORY_LEVEL_OK = "send memory level successfully.";
+const std::string STRING_SEND_MEMORY_LEVEL_NG = "error: failed to send memory level.";
 
 const std::string STRING_START_USER_TEST_NG = "error: failed to start user test.";
 const std::string STRING_USER_TEST_STARTED = "user test started.";
@@ -232,6 +244,8 @@ private:
     ErrCode RunAsProcessCommand();
     ErrCode RunAsAttachDebugCommand();
     ErrCode RunAsDetachDebugCommand();
+    ErrCode RunAsSendMemoryLevelCommand();
+    ErrCode ParsePidMemoryLevel(std::string& pidParse, std::string& memoryLevelParse);
     bool CheckParameters(int target);
     ErrCode ParseParam(ParametersInteger& pi);
     ErrCode ParseParam(ParametersString& ps, bool isNull);
