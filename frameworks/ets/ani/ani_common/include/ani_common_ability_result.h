@@ -16,7 +16,7 @@
 #ifndef OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_RESULT_H
 #define OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_RESULT_H
 
-#include "sts_runtime.h"
+#include "ani.h"
 #include "want.h"
 
 namespace OHOS {

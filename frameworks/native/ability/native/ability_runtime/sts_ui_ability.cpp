@@ -348,7 +348,6 @@ void StsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
     std::string methodName = "OnStart";
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     CallObjectMethod(false, "onCreate", signature, wantRef, launchParamRef);
@@ -361,7 +360,6 @@ void StsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
     }
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -401,7 +399,6 @@ void StsUIAbility::OnStop()
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
     CallObjectMethod(false, "onDestroy", nullptr);
     OnStopCallback();
@@ -427,7 +424,6 @@ void StsUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callback
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
     std::weak_ptr<UIAbility> weakPtr = shared_from_this();
     auto asyncCallback = [abilityWeakPtr = weakPtr]() {
@@ -482,7 +478,6 @@ void StsUIAbility::OnStopCallback()
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
 }
 
@@ -516,7 +511,6 @@ void StsUIAbility::OnSceneCreated()
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "onWindowStageCreate");
@@ -536,7 +530,6 @@ void StsUIAbility::OnSceneCreated()
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
 
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
@@ -553,7 +546,6 @@ void StsUIAbility::OnSceneRestored()
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsAppWindowStage");
         return;
     }
-    // TODO
 }
 
 void StsUIAbility::OnSceneWillDestroy()
@@ -573,7 +565,6 @@ void StsUIAbility::onSceneDestroyed()
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
 
     UpdateStsWindowStage(nullptr);
@@ -597,7 +588,6 @@ void StsUIAbility::onSceneDestroyed()
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -607,7 +597,6 @@ void StsUIAbility::OnForeground(const Want &want)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
     if (abilityInfo_) {
-        // TODO
     }
 
     UIAbility::OnForeground(want);
@@ -630,7 +619,6 @@ void StsUIAbility::CallOnForegroundFunc(const Want &want)
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
     }
-    // TODO
     ani_status status = ANI_ERROR;
     ani_field field = nullptr;
     ani_ref wantRef = OHOS::AppExecFwk::WrapWant(env, want);
@@ -640,7 +628,6 @@ void StsUIAbility::CallOnForegroundFunc(const Want &want)
     }
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
 
     if ((status = env->Class_FindField(stsAbilityObj_->aniCls, "lastRequestWant", &field)) != ANI_OK) {
@@ -663,7 +650,6 @@ void StsUIAbility::CallOnForegroundFunc(const Want &want)
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -674,7 +660,6 @@ void StsUIAbility::OnBackground()
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
     std::string methodName = "OnBackground";
 
@@ -694,7 +679,6 @@ void StsUIAbility::OnBackground()
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -728,7 +712,6 @@ ani_object StsUIAbility::CreateAppWindowStage()
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsWindowStage");
         return nullptr;
     }
-    // TODO
     TAG_LOGE(AAFwkTag::UIABILITY, "CreateAppWindowStage end");
     return stsWindowStage;
 }
@@ -752,7 +735,6 @@ void StsUIAbility::RestorePageStack(const Want &want)
         std::string pageStack;
         GetPageStackFromWant(want, pageStack);
         if (abilityContext_->GetContentStorage()) {
-            // TODO
         } else {
             TAG_LOGE(AAFwkTag::UIABILITY, "null content storage");
         }
@@ -773,7 +755,6 @@ void StsUIAbility::AbilityContinuationOrRecover(const Want &want)
 
         auto mainWindow = scene_->GetMainWindow();
         if (mainWindow != nullptr) {
-            // TODO
         } else {
             TAG_LOGE(AAFwkTag::UIABILITY, "null mainWindow");
         }
@@ -977,7 +958,6 @@ void StsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
     }
 
     if (abilityInfo_) {
-        // TODO
     }
     UIAbility::OnForeground(want);
 
@@ -1021,7 +1001,6 @@ void StsUIAbility::ExecuteInsightIntentBackground(const Want &want,
     }
 
     if (abilityInfo_) {
-        // TODO
     }
 
     InsightIntentExecutorInfo executeInfo;
@@ -1064,7 +1043,9 @@ bool StsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
     executeInfo.windowMode = windowMode_;
     executeInfo.token = context->GetToken();
     if (stsWindowStageObj_ != nullptr) {
-        // TODO
+        std::shared_ptr<STSNativeReferenceWrapper> etsNativeRef = std::make_shared<STSNativeReferenceWrapper>();
+        etsNativeRef->ref_ = stsWindowStageObj_;
+        executeInfo.pageLoader = etsNativeRef;
     }
     executeInfo.executeParam = executeParam;
     return true;
@@ -1173,7 +1154,6 @@ void StsUIAbility::OnNewWant(const Want &want)
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
     if ((status = env->Class_FindField(stsAbilityObj_->aniCls, "lastRequestWant", &field)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
@@ -1195,7 +1175,6 @@ void StsUIAbility::OnNewWant(const Want &want)
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        // TODO
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -1400,9 +1379,7 @@ void StsUIAbility::OnAfterFocusedCommon(bool isFocused)
         return;
     }
     if (isFocused) {
-        // TODO
     } else {
-        // TODO
     }
 }
 } // namespace AbilityRuntime

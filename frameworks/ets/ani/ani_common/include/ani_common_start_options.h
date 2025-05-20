@@ -16,8 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_START_OPTIONS_H
 #define OHOS_ABILITY_RUNTIME_ANI_COMMON_START_OPTIONS_H
 
-#include "start_options.h"
 #include "ani_common_util.h"
+#include "start_options.h"
 #ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
 #include "pixel_map_ani.h"
 #include "image_ani_utils.h"

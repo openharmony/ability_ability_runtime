@@ -14,7 +14,7 @@
  */
 
 #include "ani_common_want.h"
-#include "ani_common_util.h"
+
 #include "array_wrapper.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
@@ -31,7 +31,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-using namespace OHOS::AbilityRuntime;
 namespace {
 constexpr const char* WANT_CLASS_NAME = "L@ohos/app/ability/Want/Want;";
 constexpr const char* RECORD_SERIALIZE_TOOL_CLASS_NAME = "L@ohos/app/ability/Want/RecordSerializeTool;";
@@ -131,18 +130,6 @@ ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams)
         return nullptr;
     }
     return wantParamsRef;
-}
-
-bool InnerWrapWantParamsString(
-    ani_env *env, ani_object object, const std::string &key, const AAFwk::WantParams &wantParams)
-{
-    auto value = wantParams.GetParam(key);
-    AAFwk::IString *ao = AAFwk::IString::Query(value);
-    if (ao == nullptr) {
-        return false;
-    }
-    // TODO
-    return true;
 }
 
 ani_object WrapElementName(ani_env *env, const AppExecFwk::ElementName &elementNameParam)

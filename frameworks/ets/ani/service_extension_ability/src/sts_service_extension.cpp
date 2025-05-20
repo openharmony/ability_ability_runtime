@@ -14,6 +14,7 @@
 */
 
 #include "sts_service_extension.h"
+#include "ability_business_error.h"
 #include "ability_info.h"
 #include "ability_manager_client.h"
 #include "ani_common_want.h"
@@ -377,6 +378,53 @@ void StsServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int s
 
 bool StsServiceExtension::HandleInsightIntent(const AAFwk::Want &want)
 {
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "HandleInsightIntent called");
+    auto callback = std::make_unique<InsightIntentExecutorAsyncCallback>();
+    callback.reset(InsightIntentExecutorAsyncCallback::Create());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null callback");
+        return false;
+    }
+    auto executeParam = std::make_shared<AppExecFwk::InsightIntentExecuteParam>();
+    bool ret = AppExecFwk::InsightIntentExecuteParam::GenerateFromWant(want, *executeParam);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Generate execute param failed");
+        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Insight bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s"
+        "insightIntentName: %{public}s, executeMode: %{public}d, intentId: %{public}" PRIu64 "",
+        executeParam->bundleName_.c_str(), executeParam->moduleName_.c_str(), executeParam->abilityName_.c_str(),
+        executeParam->insightIntentName_.c_str(), executeParam->executeMode_, executeParam->insightIntentId_);
+    auto asyncCallback = [weak = weak_from_this(), intentId = executeParam->insightIntentId_]
+        (AppExecFwk::InsightIntentExecuteResult result) {
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "intentId %{public}" PRIu64"", intentId);
+        auto extension = weak.lock();
+        if (extension == nullptr) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "null extension");
+            return;
+        }
+        auto ret = extension->OnInsightIntentExecuteDone(intentId, result);
+        if (!ret) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "OnInsightIntentExecuteDone failed");
+        }
+    };
+    callback->Push(asyncCallback);
+    InsightIntentExecutorInfo executorInfo;
+    ret = GetInsightIntentExecutorInfo(want, executeParam, executorInfo);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Get Intent executor failed");
+        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        return false;
+    }
+    ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+        stsRuntime_, executorInfo, std::move(callback));
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Execute insight intent failed");
+        return false;
+    }
     return true;
 }
 
@@ -384,12 +432,41 @@ bool StsServiceExtension::GetInsightIntentExecutorInfo(const Want &want,
     const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &executeParam,
     InsightIntentExecutorInfo &executorInfo)
 {
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "GetInsightIntentExecutorInfo called");
+    auto context = GetContext();
+    if (executeParam == nullptr || context == nullptr || abilityInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Param invalid");
+        return false;
+    }
+
+    const WantParams &wantParams = want.GetParams();
+    executorInfo.srcEntry = wantParams.GetStringParam(AppExecFwk::INSIGHT_INTENT_SRC_ENTRY);
+    executorInfo.hapPath = abilityInfo_->hapPath;
+    executorInfo.esmodule = abilityInfo_->compileMode == AppExecFwk::CompileMode::ES_MODULE;
+    executorInfo.token = context->GetToken();
+    executorInfo.executeParam = executeParam;
     return true;
 }
 
 bool StsServiceExtension::OnInsightIntentExecuteDone(uint64_t intentId,
     const AppExecFwk::InsightIntentExecuteResult &result)
 {
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Notify execute done, intentId %{public}" PRIu64"", intentId);
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+        return false;
+    }
+    auto token = context->GetToken();
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null token");
+        return false;
+    }
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token, intentId, result);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Notify execute done failed");
+        return false;
+    }
     return true;
 }
 
