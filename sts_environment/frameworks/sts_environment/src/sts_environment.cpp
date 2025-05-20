@@ -398,7 +398,14 @@ void STSEnvironment::ReInitStsEnvImpl(std::unique_ptr<StsEnvironmentImpl> impl)
 
 ani_env* STSEnvironment::GetAniEnv()
 {
-    return vmEntry_.ani_env;
+    if (vmEntry_.ani_vm == nullptr) {
+        return nullptr;
+    }
+    ani_env* env = nullptr;
+    if (vmEntry_.ani_vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
+        return nullptr;
+    }
+    return env;
 }
 
 void STSEnvironment::HandleUncaughtError()
@@ -437,6 +444,10 @@ StsEnv::STSErrorObject STSEnvironment::GetSTSErrorObject()
     ani_boolean errorExists = ANI_FALSE;
     ani_status status = ANI_ERROR;
     auto aniEnv = GetAniEnv();
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "null env");
+        return StsEnv::STSErrorObject();
+    }
     if ((status = aniEnv->ExistUnhandledError(&errorExists)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "ExistUnhandledError failed, status : %{public}d", status);
         return StsEnv::STSErrorObject();
@@ -469,6 +480,10 @@ std::string STSEnvironment::GetErrorProperty(ani_error aniError, const char* pro
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
     auto aniEnv = GetAniEnv();
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "null env");
+        return "";
+    }
     std::string propertyValue;
     ani_status status = ANI_ERROR;
     ani_type errorType = nullptr;
