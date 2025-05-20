@@ -234,6 +234,10 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     uint32_t callerTokenId = static_cast<uint32_t>(abilityRequest.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
     uiAbilityRecord->ProcessForegroundAbility(callerTokenId, sceneFlag, isShellCall);
     CheckSpecified(sessionInfo->requestId, uiAbilityRecord);
+    if (uiAbilityRecord->GetSpecifiedFlag().empty() && !sessionInfo->specifiedFlag.empty()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "unexpected specified: %{public}s", sessionInfo->specifiedFlag.c_str());
+        uiAbilityRecord->SetSpecifiedFlag(sessionInfo->specifiedFlag);
+    }
     SendKeyEvent(abilityRequest);
     return ERR_OK;
 }
@@ -2122,7 +2126,7 @@ void UIAbilityLifecycleManager::HandleLegacyAcceptWantDone(AbilityRequest &abili
             abilityRecord->SetWant(abilityRequest.want);
             abilityRecord->SetIsNewWant(true);
             UpdateAbilityRecordLaunchReason(abilityRequest, abilityRecord);
-            MoveAbilityToFront(abilityRequest, abilityRecord, callerAbility);
+            MoveAbilityToFront(abilityRequest, abilityRecord, callerAbility, nullptr, requestId, flag);
             NotifyRestartSpecifiedAbility(abilityRequest, abilityRecord->GetToken());
             return;
         }
@@ -2309,7 +2313,7 @@ void UIAbilityLifecycleManager::NotifyStartSpecifiedAbility(AbilityRequest &abil
 
 int UIAbilityLifecycleManager::MoveAbilityToFront(const AbilityRequest &abilityRequest,
     const std::shared_ptr<AbilityRecord> &abilityRecord, std::shared_ptr<AbilityRecord> callerAbility,
-    std::shared_ptr<StartOptions> startOptions)
+    std::shared_ptr<StartOptions> startOptions, int32_t requestId, const std::string &flag)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     if (!abilityRecord) {
@@ -2328,6 +2332,8 @@ int UIAbilityLifecycleManager::MoveAbilityToFront(const AbilityRequest &abilityR
     }
     sessionInfo->startWindowOption = nullptr;
     sessionInfo->isFromIcon = abilityRequest.isFromIcon;
+    sessionInfo->requestId = requestId;
+    sessionInfo->specifiedFlag = flag;
     SendSessionInfoToSCB(callerAbility, sessionInfo);
     abilityRecord->RemoveWindowMode();
     if (startOptions != nullptr) {
