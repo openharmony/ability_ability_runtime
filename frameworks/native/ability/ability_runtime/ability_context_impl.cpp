@@ -699,6 +699,13 @@ ErrCode AbilityContextImpl::RestoreWindowStage(napi_env env, napi_value contentS
     return ERR_OK;
 }
 
+ErrCode AbilityContextImpl::RestoreWindowStage(NativeReference* contentStorage)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "called");
+    contentStorage_ = std::unique_ptr<NativeReference>(contentStorage);
+    return ERR_OK;
+}
+
 ErrCode AbilityContextImpl::StartAbilityByCall(
     const AAFwk::Want& want, const std::shared_ptr<CallerCallBack>& callback, int32_t accountId)
 {
