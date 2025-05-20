@@ -10969,7 +10969,7 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
     if (ProcessLowMemoryKill(pid, reason)) {
         // if app is already starting, return
         TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}d is starting", pid);
-        return ERR_OK;
+        return ERR_KILL_APP_WHILE_STARTING;
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, reason:%{public}d, subReason:%{public}d, killMsg:%{public}s",
