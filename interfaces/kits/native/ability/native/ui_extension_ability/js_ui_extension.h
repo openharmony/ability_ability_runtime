@@ -25,7 +25,6 @@
 #include "insight_intent_executor_info.h"
 #include "js_ui_extension_content_session.h"
 #include "ui_extension.h"
-#include <mutex>
 #include <unordered_set>
 
 class NativeReference;
@@ -108,9 +107,6 @@ public:
      */
     virtual void OnCommand(const AAFwk::Want &want, bool restart, int startId) override;
 
-    virtual void OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
-        AAFwk::WindowCommand winCmd) override;
-
     /**
      * @brief Called when this ui extension enters the <b>STATE_STOP</b> state.
      *
@@ -192,18 +188,14 @@ private:
 
     napi_value CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
 
-    void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
-    void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
-    void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
-
-    void OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd) override;
+    void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo) override;
+    void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo) override;
+    void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo) override;
     bool ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
         const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo);
     bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
-        bool needForeground);
+        bool needForeground)  override;
     bool HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
-    void OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &sessionInfo,
-        const AppExecFwk::InsightIntentExecuteResult &result) override;
     void PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &sessionInfo,
         const AppExecFwk::InsightIntentExecuteResult &result, bool needForeground);
     std::unique_ptr<NativeReference> CreateAppWindowStage(sptr<Rosen::Window> uiWindow,
@@ -215,9 +207,6 @@ private:
     JsRuntime& jsRuntime_;
     std::shared_ptr<NativeReference> jsObj_ = nullptr;
     std::shared_ptr<NativeReference> shellContextRef_ = nullptr;
-    std::mutex uiWindowMutex_;
-    std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
-    std::set<uint64_t> foregroundWindows_;
     std::map<uint64_t, std::shared_ptr<NativeReference>> contentSessions_;
     std::shared_ptr<AbilityResultListeners> abilityResultListeners_ = nullptr;
     int32_t screenMode_ = AAFwk::IDLE_SCREEN_MODE;

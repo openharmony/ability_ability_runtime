@@ -25,7 +25,6 @@
 #include "insight_intent_executor_info.h"
 #include "ui_extension.h"
 #include "ui_extension_context.h"
-#include <mutex>
 #include <unordered_set>
 #include "sts_runtime.h"
 #include "sts_ui_extension_content_session.h"
@@ -112,9 +111,6 @@ public:
      */
     virtual void OnCommand(const AAFwk::Want &want, bool restart, int startId) override;
 
-    virtual void OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
-        AAFwk::WindowCommand winCmd) override;
-
     /**
      * @brief Called when this ui extension enters the <b>STATE_STOP</b> state.
      *
@@ -197,18 +193,14 @@ private:
     ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& param);
     std::shared_ptr<STSNativeReference> LoadModule(ani_env *env);
 
-    void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
-    void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
-    void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
-
-    void OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd) override;
+    void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo) override;
+    void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo) override;
+    void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo) override;
     bool ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
         const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo);
     bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
-        bool needForeground);
+        bool needForeground) override;
     bool HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
-    void OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &sessionInfo,
-        const AppExecFwk::InsightIntentExecuteResult &result) override;
     void PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &sessionInfo,
         const AppExecFwk::InsightIntentExecuteResult &result, bool needForeground);
     std::unique_ptr<STSNativeReference> CreateAppWindowStage(sptr<Rosen::Window> uiWindow,
@@ -220,9 +212,6 @@ private:
     STSRuntime& stsRuntime_;
     std::shared_ptr<STSNativeReference> stsObj_ = nullptr;
     std::shared_ptr<STSNativeReference> shellContextRef_ = nullptr;
-    std::mutex uiWindowMutex_;
-    std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
-    std::set<uint64_t> foregroundWindows_;
     std::map<uint64_t, std::shared_ptr<STSNativeReferenceWrapper>> contentSessions_;
     int32_t screenMode_ = AAFwk::IDLE_SCREEN_MODE;
     std::shared_ptr<int32_t> screenModePtr_;

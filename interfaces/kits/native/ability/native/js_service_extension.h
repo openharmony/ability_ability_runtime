@@ -180,12 +180,6 @@ private:
 
     void ListenWMS();
 
-    bool GetInsightIntentExecutorInfo(const Want &want,
-        const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &executeParam,
-        InsightIntentExecutorInfo &executorInfo);
-
-    bool OnInsightIntentExecuteDone(uint64_t intentId, const AppExecFwk::InsightIntentExecuteResult &result) override;
-
     JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_ = nullptr;
