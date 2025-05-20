@@ -496,39 +496,6 @@ void JsUIExtension::OnDisconnect(const AAFwk::Want &want)
     TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnDisconnect end");
 }
 
-void JsUIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
-    AAFwk::WindowCommand winCmd)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null sessionInfo");
-        return;
-    }
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin. persistentId: %{private}d, winCmd: %{public}d",
-        sessionInfo->persistentId, winCmd);
-    Extension::OnCommandWindow(want, sessionInfo, winCmd);
-    if (InsightIntentExecuteParam::IsInsightIntentExecute(want) && winCmd == AAFwk::WIN_CMD_FOREGROUND) {
-        if (ForegroundWindowWithInsightIntent(want, sessionInfo, false)) {
-            return;
-        }
-    }
-    switch (winCmd) {
-        case AAFwk::WIN_CMD_FOREGROUND:
-            ForegroundWindow(want, sessionInfo);
-            break;
-        case AAFwk::WIN_CMD_BACKGROUND:
-            BackgroundWindow(sessionInfo);
-            break;
-        case AAFwk::WIN_CMD_DESTROY:
-            DestroyWindow(sessionInfo);
-            break;
-        default:
-            TAG_LOGD(AAFwkTag::UI_EXT, "unsupported cmd");
-            break;
-    }
-    OnCommandWindowDone(sessionInfo, winCmd);
-}
-
 bool JsUIExtension::ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
     const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo)
 {
@@ -638,82 +605,6 @@ void JsUIExtension::PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &se
         // If uiextensionability has displayed in the foreground.
         OnCommandWindowDone(sessionInfo, AAFwk::WIN_CMD_FOREGROUND);
     }
-}
-
-void JsUIExtension::OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
-    auto context = GetContext();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
-        return;
-    }
-    AAFwk::AbilityCommand abilityCmd;
-    std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    if (uiWindowMap_.empty()) {
-        abilityCmd = AAFwk::ABILITY_CMD_DESTROY;
-    } else if (foregroundWindows_.empty()) {
-        abilityCmd = AAFwk::ABILITY_CMD_BACKGROUND;
-    } else {
-        abilityCmd = AAFwk::ABILITY_CMD_FOREGROUND;
-    }
-    AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
-        context->GetToken(), sessionInfo, winCmd, abilityCmd);
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
-}
-
-void JsUIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &sessionInfo,
-    const AppExecFwk::InsightIntentExecuteResult &result)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
-        return;
-    }
-    std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64, sessionInfo->uiExtensionComponentId);
-    auto componentId = sessionInfo->uiExtensionComponentId;
-    auto res = uiWindowMap_.find(componentId);
-    if (res != uiWindowMap_.end() && res->second != nullptr) {
-        WantParams params;
-        params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT_CODE, Integer::Box(result.innerErr));
-        WantParams resultParams;
-        resultParams.SetParam("code", Integer::Box(result.code));
-        if (result.result != nullptr) {
-            sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(*result.result);
-            if (pWantParams != nullptr) {
-                resultParams.SetParam("result", pWantParams);
-            }
-        }
-
-        auto size = result.uris.size();
-        sptr<IArray> uriArray = new (std::nothrow) Array(size, g_IID_IString);
-        if (uriArray == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "new uriArray failed");
-            return;
-        }
-        for (std::size_t i = 0; i < size; i++) {
-            uriArray->Set(i, String::Box(result.uris[i]));
-        }
-        resultParams.SetParam("uris", uriArray);
-        resultParams.SetParam("flags", Integer::Box(result.flags));
-        sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(resultParams);
-        if (pWantParams != nullptr) {
-            params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT, pWantParams);
-        }
-
-        Rosen::WMError ret = res->second->TransferExtensionData(params);
-        if (ret == Rosen::WMError::WM_OK) {
-            TAG_LOGD(AAFwkTag::UI_EXT, "TransferExtensionData success");
-        } else {
-            TAG_LOGE(AAFwkTag::UI_EXT, "TransferExtensionData failed, ret=%{public}d", ret);
-        }
-
-        res->second->Show();
-        foregroundWindows_.emplace(componentId);
-    }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 void JsUIExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
