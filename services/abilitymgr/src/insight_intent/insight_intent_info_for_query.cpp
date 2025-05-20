@@ -139,7 +139,7 @@ void to_json(nlohmann::json& jsonObject, const EntryInfoForQuery &info)
     }
     jsonObject = nlohmann::json {
         {INSIGHT_INTENT_ABILITY_NAME, info.abilityName},
-        {INSIGHT_INTENT_EXECUTE_MODE, info.executeMode}
+        {INSIGHT_INTENT_EXECUTE_MODE, modeStrings}
     };
 }
 
