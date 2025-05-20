@@ -119,6 +119,8 @@ public:
 
     ErrCode RestoreWindowStage(napi_env env, napi_value contentStorage) override;
 
+    ErrCode RestoreWindowStage(NativeReference* contentStorage) override;
+
     void SetStageContext(const std::shared_ptr<AbilityRuntime::Context> &stageContext);
 
     /**

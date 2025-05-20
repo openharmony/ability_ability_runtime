@@ -60,6 +60,13 @@ public:
     static ani_object StartAbilityByCall(ani_env *env, ani_object aniObj, ani_object wantObj);
     static void NativeOpenLinkSync(ani_env *env, ani_object aniObj, ani_string aniLink,
         ani_object myCallbackobj, ani_object optionsObj, ani_object callbackobj);
+    static void NativeRestoreWindowStage(ani_env *env, ani_object aniObj, ani_object localStorage);
+    static void NativeSetMissionContinueState(ani_env *env, ani_object aniObj, ani_object stateObj,
+        ani_object callBack);
+    static bool NativeIsTerminating(ani_env *env, ani_object aniObj);
+    static void NativeMoveAbilityToBackground(ani_env *env, ani_object aniObj, ani_object callBack);
+    static void NativeRequestModalUIExtension(ani_env *env, ani_object aniObj, ani_string pickerWantObj,
+        ani_object callBackObj);
 
 private:
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
