@@ -35,6 +35,7 @@
 #include "ability_manager_event_subscriber.h"
 #include "ability_manager_stub.h"
 #include "ability_keep_alive_service.h"
+#include "ability_start_with_wait_observer_utils.h"
 #include "ams_configuration_parameter.h"
 #include "app_debug_listener_interface.h"
 #include "app_exit_reason_helper.h"
@@ -2022,6 +2023,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t RevokeDelegator(sptr<IRemoteObject> token) override;
+
+    virtual int32_t StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> &observer) override;
 
     /**
      * Get all insight intent infos.
