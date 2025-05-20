@@ -106,22 +106,19 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     return appRecord;
 }
 
-bool AppRunningManager::CheckAppProcessNameIsConsistent(const std::shared_ptr<AppRunningRecord> &appRecord,
-    const std::string &processName, const std::string &sandBoxProcessName)
+bool AppRunningManager::CheckAppProcessNameIsSame(const std::shared_ptr<AppRunningRecord> &appRecord,
+    const std::string &processName)
 {
     if (appRecord == nullptr) {
         return false;
     }
-    if (!appRecord->GetSandBoxProcessName().empty()) {
-        return appRecord->GetSandBoxProcessName() == sandBoxProcessName;
-    }
-    return appRecord->GetProcessName() == processName;
+    return (appRecord->GetProcessName() == processName) && !(appRecord->GetExtensionSandBoxFlag());
 }
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExist(const std::string &appName,
     const std::string &processName, const int uid, const BundleInfo &bundleInfo,
     const std::string &specifiedProcessFlag, bool *isProCache, const std::string &instanceKey,
-    const std::string &customProcessFlag, const std::string &sandBoxProcessName)
+    const std::string &customProcessFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR,
@@ -133,13 +130,13 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     auto jointUserId = bundleInfo.jointUserId;
     TAG_LOGD(AAFwkTag::APPMGR, "jointUserId : %{public}s", jointUserId.c_str());
     ClipStringContent(rule, bundleInfo.appId, signCode);
-    auto findSameProcess = [signCode, specifiedProcessFlag, processName, jointUserId, customProcessFlag,
-        sandBoxProcessName] (const auto &pair) {
+    auto findSameProcess = [signCode, specifiedProcessFlag, processName, jointUserId, customProcessFlag]
+        (const auto &pair) {
             return (pair.second != nullptr) &&
             (specifiedProcessFlag.empty() || pair.second->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
             (pair.second->GetCustomProcessFlag() == customProcessFlag) &&
             (pair.second->GetSignCode() == signCode) &&
-            AppRunningManager::CheckAppProcessNameIsConsistent(pair.second, processName, sandBoxProcessName) &&
+            AppRunningManager::CheckAppProcessNameIsSame(pair.second, processName) &&
             (pair.second->GetJointUserId() == jointUserId) && !(pair.second->IsTerminating()) &&
             !(pair.second->IsKilling()) && !(pair.second->GetRestartAppFlag()) &&
             (pair.second->GetKillReason() != AbilityRuntime::GlobalConstant::LOW_MEMORY_KILL);
@@ -151,7 +148,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     }
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
-        if (appRecord && CheckAppProcessNameIsConsistent(appRecord, processName, sandBoxProcessName) &&
+        if (appRecord && CheckAppProcessNameIsSame(appRecord, processName) &&
             appRecord->GetInstanceKey() == instanceKey &&
             (specifiedProcessFlag.empty() || appRecord->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
             (appRecord->GetCustomProcessFlag() == customProcessFlag) &&
