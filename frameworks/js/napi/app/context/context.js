@@ -113,7 +113,6 @@ class EventHub {
       let array = this.eventMap[event];
       if (array === null || array === undefined) {
         this.emitter.off(this.getEmitterEventName(event));
-        this.emitter = undefined;
       }
     }
   }
