@@ -700,5 +700,95 @@ HWTEST_F(UIExtensionContextTest, RequestComponentTerminate_0200, TestSize.Level1
     context->SetWindow(window);
     context->RequestComponentTerminate();
 }
+
+/**
+ * @tc.number: StartAbilityByType_0100
+ * @tc.name: UIExtensionContext StartAbilityByType
+ * @tc.desc: UIExtensionContext StartAbilityByType.
+ */
+HWTEST_F(UIExtensionContextTest, StartAbilityByType_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0100 start");
+
+    std::string type;
+    AAFwk::WantParams wantParam;
+    std::shared_ptr<JsUIExtensionCallback> uiExtensionCallbacks{nullptr};
+
+    auto context = std::make_shared<UIExtensionContext>();
+    auto result = context->StartAbilityByType(type, wantParam, uiExtensionCallbacks);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0100 end");
+}
+ 
+ /**
+  * @tc.number: StartAbilityByType_0200
+  * @tc.name: UIExtensionContext StartAbilityByType
+  * @tc.desc: UIExtensionContext StartAbilityByType.
+  */
+HWTEST_F(UIExtensionContextTest, StartAbilityByType_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0200 start");
+
+    std::string type;
+    AAFwk::WantParams wantParam;
+    napi_env env;
+    std::shared_ptr<JsUIExtensionCallback> uiExtensionCallbacks = std::make_shared<JsUIExtensionCallback>(env);
+
+    auto context = std::make_shared<UIExtensionContext>();
+    context->SetWindow(nullptr);
+    auto result = context->StartAbilityByType(type, wantParam, uiExtensionCallbacks);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0200 end");
+}
+ 
+ /**
+  * @tc.number: StartAbilityByType_0300
+  * @tc.name: UIExtensionContext StartAbilityByType
+  * @tc.desc: UIExtensionContext StartAbilityByType.
+  */
+HWTEST_F(UIExtensionContextTest, StartAbilityByType_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0300 start");
+
+    std::string type;
+    AAFwk::WantParams wantParam;
+    napi_env env;
+    std::shared_ptr<JsUIExtensionCallback> uiExtensionCallbacks = std::make_shared<JsUIExtensionCallback>(env);
+    sptr<Rosen::Window> window = new MockWindow();
+
+    auto context = std::make_shared<UIExtensionContext>();
+    context->SetWindow(window);
+    auto result = context->StartAbilityByType(type, wantParam, uiExtensionCallbacks);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0300 end");
+}
+ 
+ /**
+  * @tc.number: StartAbilityByType_0400
+  * @tc.name: UIExtensionContext StartAbilityByType
+  * @tc.desc: UIExtensionContext StartAbilityByType.
+  */
+HWTEST_F(UIExtensionContextTest, StartAbilityByType_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0400 start");
+
+    std::string type;
+    AAFwk::WantParams wantParam;
+    const std::string FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
+    wantParam.SetParam(FLAG_AUTH_READ_URI_PERMISSION, 0);
+    napi_env env;
+    std::shared_ptr<JsUIExtensionCallback> uiExtensionCallbacks = std::make_shared<JsUIExtensionCallback>(env);
+    sptr<Rosen::Window> window = new MockWindow();
+
+    auto context = std::make_shared<UIExtensionContext>();
+    context->SetWindow(window);
+    auto result = context->StartAbilityByType(type, wantParam, uiExtensionCallbacks);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0400 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
