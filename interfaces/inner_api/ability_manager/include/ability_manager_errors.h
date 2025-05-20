@@ -704,6 +704,10 @@ enum {
     ERR_NO_APP_RECORD = 2097304,
 
     /**
+     * Native error(2097331) for kill app while starting.
+     */
+    ERR_KILL_APP_WHILE_STARTING = 2097331,
+    /**
      * Native error(3000000) for target bundle not exist.
      */
     ERR_CODE_NOT_EXIST = 3000000,
