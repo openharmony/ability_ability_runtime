@@ -21,6 +21,8 @@ export interface WantAgentInfo {
   actionType?: abilityWantAgent.OperationType;
   requestCode: number;
   actionFlags?: Array<abilityWantAgent.WantAgentFlags>;
+  extraInfo?: Record<string,Object>;
+  extraInfos?: Record<string, Object>;
 }
 
 class WantAgentInfoImpl implements WantAgentInfo {
@@ -28,4 +30,6 @@ class WantAgentInfoImpl implements WantAgentInfo {
   public actionType?: abilityWantAgent.OperationType;
   public requestCode: number;
   public actionFlags?: Array<abilityWantAgent.WantAgentFlags>;
+  public extraInfo?: Record<string,Object>;
+  public extraInfos?: Record<string, Object>;
 }
