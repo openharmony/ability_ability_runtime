@@ -1072,9 +1072,11 @@ void AppRunningManager::ExecuteConfigurationTask(const BackgroundAppInfo& info, 
         if (it != appRunningMap.end()) {
             appRecord = it->second;
         }
-
+        if (appRecord == nullptr) {
+            continue;
+        }
         bool userIdFlag = (userId == -1 || appRecord->GetUid() / BASE_USER_RANGE == 0 || appRecord->GetUid() / BASE_USER_RANGE == userId) ;
-        if (appRecord == nullptr || !userIdFlag) {
+        if (!userIdFlag) {
             continue;
         }
         
