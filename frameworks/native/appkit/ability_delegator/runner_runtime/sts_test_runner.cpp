@@ -123,6 +123,10 @@ void STSTestRunner::Prepare()
     if (stsTestRunnerObj_ != nullptr) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "use stsTestRunnerObj_");
         auto env = stsRuntime_.GetAniEnv();
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
+            return;
+        }
         if (env->ResetError() != ANI_OK) {
             TAG_LOGE(AAFwkTag::STSRUNTIME, "ResetError failed");
         }
@@ -151,6 +155,10 @@ void STSTestRunner::Run()
     if (stsTestRunnerObj_ != nullptr) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "use stsTestRunnerObj_");
         auto env = stsRuntime_.GetAniEnv();
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
+            return;
+        }
         if (env->ResetError() != ANI_OK) {
             TAG_LOGE(AAFwkTag::STSRUNTIME, "ResetError failed");
         }

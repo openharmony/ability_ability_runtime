@@ -229,6 +229,10 @@ void OHOSApplication::InitAniContext()
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto& runtime = GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
     auto aniEnv = static_cast<AbilityRuntime::STSRuntime &>(*runtime).GetAniEnv();
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
     ani_class contextCls = nullptr;
     if (aniEnv->FindClass(STS_CONTEXT_CLASS_NAME, &contextCls) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "FindClass Context failed");
