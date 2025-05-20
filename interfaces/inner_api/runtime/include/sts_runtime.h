@@ -40,11 +40,23 @@ struct STSUncaughtExceptionInfo;
 
 namespace AbilityRuntime {
 
-struct STSNativeReference
-{
+struct STSNativeReference {
     ani_class     aniCls = nullptr;
     ani_object    aniObj = nullptr;
     ani_ref      aniRef = nullptr;
+};
+
+class STSNativeReferenceWrapper : public NativeReference {
+public:
+    uint32_t Ref() override { return 0; };
+    uint32_t Unref() override { return 0; };
+    napi_value Get() override { return nullptr; };
+    operator napi_value() override { return nullptr; };
+    void SetDeleteSelf() override { return; };
+    uint32_t GetRefCount() override { return 0; };
+    bool GetFinalRun() override { return false; };
+    napi_value GetNapiValue() override { return 0; };
+    std::shared_ptr<STSNativeReference> ref_;
 };
 
 class STSRuntime : public Runtime {
@@ -93,8 +105,8 @@ public:
     ani_env* GetAniEnv();
     std::unique_ptr<STSNativeReference> LoadModule(const std::string& moduleName, const std::string& modulePath,
         const std::string& hapPath, bool esmodule, bool useCommonChunk, const std::string& srcEntrance);
-    std::unique_ptr<STSNativeReference> LoadStsModule(const std::string& moduleName, const std::string& path, const std::string& hapPath,
-        const std::string& srcEntrance);
+    std::unique_ptr<STSNativeReference> LoadStsModule(const std::string& moduleName, const std::string& path,
+        const std::string& hapPath, const std::string& srcEntrance);
     bool RunScript(ani_env* aniEnv, const std::string& moduleName, const std::string& abcPath,
         const std::string& hapPath, const std::string& srcEntrance);
     void HandleUncaughtError();

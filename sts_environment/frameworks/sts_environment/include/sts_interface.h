@@ -20,18 +20,6 @@
 
 namespace OHOS {
 
-// NOLINTBEGIN(modernize-use-using, readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
-
-// #ifdef __cplusplus
-// #include <cstdint>
-// #include <cstdarg>
-// #else
-// #include <stdint.h>
-// #include <stdarg.h>
-// #endif
-
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
-
 // Version Constants
 #define ETS_NAPI_VERSION_1_0 0x00010000
 

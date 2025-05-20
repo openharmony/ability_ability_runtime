@@ -19,20 +19,17 @@
 #include "ability.h"
 #include "completed_callback.h"
 #include "context/application_context.h"
+#include "sts_error_utils.h"
+#include "sts_runtime.h"
 #include "trigger_info.h"
 #include "want.h"
 #include "want_agent.h"
 #include "want_agent_constant.h"
 #include "want_params.h"
-#include "sts_runtime.h"
-#include "sts_error_utils.h"
 
 namespace OHOS {
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::AbilityRuntime::WantAgent;
-using STSNativeReference = AbilityRuntime::STSNativeReference;
-
-class TriggerCompleteCallBack;
 
 struct CallbackInfo {
     std::shared_ptr<WantAgent> wantAgent;
@@ -71,8 +68,6 @@ public:
     static void Cancel(ani_env *env, ani_object agent, ani_object call);
     static void Trigger(ani_env *env, ani_object agent, ani_object triggerInfoObj, ani_object call);
     static void GetWantAgent(ani_env *env, ani_object info, ani_object call);
-    static ani_object WrapWantAgent(ani_env *env, WantAgent *wantAgent);
-    static void UnwrapWantAgent(ani_env *env, ani_object agent, void** result);
 
 private:
     void OnEqual(ani_env *env, ani_object agent, ani_object otherAgent, ani_object call);

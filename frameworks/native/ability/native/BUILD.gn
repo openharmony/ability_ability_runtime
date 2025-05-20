@@ -674,6 +674,7 @@ config("insight_intent_executor_public_config") {
 
 ohos_shared_library("insight_intent_executor") {
   sources = [
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/ets_insight_intent_executor.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/insight_intent_executor.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/insight_intent_executor_mgr.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_executor.cpp",
@@ -688,6 +689,7 @@ ohos_shared_library("insight_intent_executor") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
   ]
 
   external_deps = [
@@ -703,6 +705,7 @@ ohos_shared_library("insight_intent_executor") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "runtime_core:ani",
     "window_manager:libwm",
   ]
 
@@ -1635,6 +1638,7 @@ ohos_shared_library("ui_extension") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "runtime_core:ani",
     "window_manager:embeddablewindowstage_kit",
     "window_manager:embeddablewindowstageani_kit",
     "window_manager:extensionwindow_napi",

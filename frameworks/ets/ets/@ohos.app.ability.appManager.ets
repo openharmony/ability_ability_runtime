@@ -159,15 +159,15 @@ export function getRunningProcessInfoByBundleName(bundleName: string): Promise<A
 }
 
 export native function nativeGetRunningProcessInfoByBundleNameAndUserId(bundleName: string,
-  userId: int, callback:AsyncCallbackWrapper<Array<ProcessInformation>>):void;
-export function getRunningProcessInfoByBundleName(bundleName: string, userId: int, callback: AsyncCallback<Array<ProcessInformation>>): void {
+  userId: number, callback:AsyncCallbackWrapper<Array<ProcessInformation>>):void;
+export function getRunningProcessInfoByBundleName(bundleName: string, userId: number, callback: AsyncCallback<Array<ProcessInformation>>): void {
     let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>(callback);
     taskpool.execute((): void => {
       appManager.nativeGetRunningProcessInfoByBundleNameAndUserId(bundleName, userId, myCall);
     });
 }
 
-export function getRunningProcessInfoByBundleName(bundleName: string, userId: int): Promise<Array<ProcessInformation>> {
+export function getRunningProcessInfoByBundleName(bundleName: string, userId: number): Promise<Array<ProcessInformation>> {
     let p = new Promise<Array<ProcessInformation>>((resolve:(data: Array<ProcessInformation>)=>void, reject:(err: BusinessError<void>)=>void):void => {
       let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError<void>, data: Array<ProcessInformation>)=>{
         if (err.code == 0) {

@@ -25,12 +25,8 @@ ohos_shared_library("aniwantagent") {
 
   include_dirs = [
     "./include",
-    "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
-    "${ability_runtime_services_path}/abilitymgr/include/utils",
-    "${ability_runtime_services_path}/abilitymgr/include",
-    "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
   ]
 
   sources = [ "src/ani_want_agent.cpp" ]
@@ -40,17 +36,16 @@ ohos_shared_library("aniwantagent") {
     "${ability_runtime_innerkits_path}/error_utils:ability_runtime_error_util",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits",
-    "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_wantagent_common:ani_wantagent_common",
   ]
 
   external_deps = [
     "ability_base:want",
     "access_token:libtokenid_sdk",
     "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
     "runtime_core:ani",
   ]

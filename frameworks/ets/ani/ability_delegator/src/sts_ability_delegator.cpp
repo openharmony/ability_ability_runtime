@@ -130,7 +130,6 @@ ani_object GetAppContext(ani_env* env, [[maybe_unused]]ani_object object, ani_cl
     return objectContext;
 }
 
-
 ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmdResult> result)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "wrapShellCmdResult called");
@@ -160,25 +159,22 @@ ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmd
     ani_field filed;
     status = env->Class_FindField(cls, "stdResult", &filed);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindField configObj failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindField failed status: %{public}d", status);
     }
     ani_string aniStringVal {};
     std::string strResult = result->GetStdResult();
     status = env->String_NewUTF8(strResult.c_str(), strResult.size(), &aniStringVal);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "String_NewUTF8 mcc failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "String_NewUTF8 failed status: %{public}d", status);
     }
-    if (env->Object_SetField_Ref(object, filed, aniStringVal) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref mcc failed");
+    status = env->Object_SetField_Ref(object, filed, aniStringVal);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "set strResult failed status: %{public}d", status);
     }
     int32_t exitCode = result->GetExitCode();
-    status = env->Class_FindField(cls, "exitCode", &filed);
+    status = env->Object_SetPropertyByName_Double(object, "exitCode", exitCode);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindField configObj failed");
-    }
-    status = env->Object_SetField_Int(object, filed, exitCode);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Int exitCode failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "set exitCode failed status: %{public}d", status);
     }
     return object;
 }
@@ -205,19 +201,28 @@ void ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object, ani_st
     }
     int resultCode = 0;
     auto result = delegator->ExecuteShellCommand(stdCmd, static_cast<int64_t>(timeoutSecs));
-    if (!result) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "ExecuteShellCommand result is null");
-        resultCode = COMMON_FAILED;
-    }
     ani_object objValue = wrapShellCmdResult(env, std::move(result));
     if (objValue == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null objValue");
         resultCode = COMMON_FAILED;
+        ani_class cls = nullptr;
+        ani_status status = env->FindClass(SHELL_CMD_RESULT_CLASS_NAME, &cls);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegator failed status: %{public}d", status);
+        }
+        ani_method method = nullptr;
+        status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status: %{public}d", status);
+        }
+        if (env->Object_New(cls, method, &objValue) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status: %{public}d", status);
+        }
     }
     ani_ref callbackRef = nullptr;
-    auto status = env->GlobalReference_Create(callback, &callbackRef);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Create Gloabl ref for delegator failed %{public}d", status);
+    ani_status createStatus = env->GlobalReference_Create(callback, &callbackRef);
+    if (createStatus != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Create Gloabl ref for delegator failed %{public}d", createStatus);
         AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
         return;
     }

@@ -16,7 +16,7 @@
 #ifndef OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_STATE_DATA_H
 #define OHOS_ABILITY_RUNNTIME_ANICOMMON_ABILITY_STATE_DATA_H
 
-#include "sts_runtime.h"
+#include "ani_common_util.h"
 #include "ability_state_data.h"
 
 namespace OHOS {

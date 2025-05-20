@@ -88,29 +88,17 @@ std::shared_ptr<AbilityStage> STSAbilityStage::Create(
     bool commonChunkFlag = UseCommonChunk(hapModuleInfo);
 
     RegisterStopPreloadSoCallback(stsRuntime);
-    /* temporary compatibility api8 + config.json */
-    if (!hapModuleInfo.isModuleJson) {
-        srcPath.append("/assets/js/");
-        if (hapModuleInfo.srcPath.empty()) {
-            srcPath.append("AbilityStage.abc");
-        } else {
-            srcPath.append(hapModuleInfo.srcPath);
-            srcPath.append("/AbilityStage.abc");
-        }
-        std::string key(moduleName);
-        key.append("::");
-        key.append(srcPath);
-    } else {
-        srcPath.append("/");
-        if (!hapModuleInfo.srcEntrance.empty()) {
-            srcPath.append(hapModuleInfo.srcEntrance);
-            auto pos = srcPath.rfind(".");
-            if (pos != std::string::npos) {
-                srcPath.erase(pos);
-                srcPath.append(".abc");
-            }
+
+    srcPath.append("/");
+    if (!hapModuleInfo.srcEntrance.empty()) {
+        srcPath.append(hapModuleInfo.srcEntrance);
+        auto pos = srcPath.rfind(".");
+        if (pos != std::string::npos) {
+            srcPath.erase(pos);
+            srcPath.append(".abc");
         }
     }
+
     std::unique_ptr<STSNativeReference> moduleObj;
     if (!hapModuleInfo.srcEntrance.empty()) {
         moduleObj = stsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
@@ -150,33 +138,7 @@ void STSAbilityStage::OnCreate(const AAFwk::Want &want) const
 {
     AbilityStage::OnCreate(want);
 
-    if (!stsAbilityStageObj_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Not found AbilityStage.js");
-        return;
-    }
-
-    ani_status status = ANI_OK;
-    auto env = stsRuntime_.GetAniEnv();
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "env nullptr");
-        return;
-    }
-    STSAbilityStageContext::ResetEnv(env);
-
-    ani_method method = nullptr;
-    status = env->Class_FindMethod(stsAbilityStageObj_->aniCls, "onCreate", ":V", &method);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindMethod FAILED");
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
-
-    status = env->Object_CallMethod_Void(stsAbilityStageObj_->aniObj, method);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "CALL Object_CallMethod FAILED: %{public}d", status);
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
+    CallObjectMethod(false, "onCreate", ":V");
 
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "STSAbilityStage::OnCreate end");
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
@@ -188,33 +150,7 @@ void STSAbilityStage::OnCreate(const AAFwk::Want &want) const
 void STSAbilityStage::OnDestroy() const
 {
     AbilityStage::OnDestroy();
-    if (!stsAbilityStageObj_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Not found AbilityStage.js");
-        return;
-    }
-    ani_status status = ANI_OK;
-    auto env = stsRuntime_.GetAniEnv();
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "env nullptr");
-        return;
-    }
-
-    STSAbilityStageContext::ResetEnv(env);
-
-    ani_method method = nullptr;
-    status = env->Class_FindMethod(stsAbilityStageObj_->aniCls, "onDestroy", ":V", &method);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindMethod FAILED");
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
-
-    status = env->Object_CallMethod_Void(stsAbilityStageObj_->aniObj, method);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "CALL Object_CallMethod FAILED: %{public}d", status);
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
+    CallObjectMethod(false, "onDestroy", ":V");
 }
 
 std::string STSAbilityStage::OnAcceptWant(const AAFwk::Want &want)
@@ -238,22 +174,8 @@ void STSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& co
 
     ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, configuration);
 
-
-    ani_method method = nullptr;
-    ani_status status = env->Class_FindMethod(stsAbilityStageObj_->aniCls,
-        "onConfigurationUpdate", "L@ohos/app/ability/Configuration/Configuration;:V", &method);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindMethod FAILED");
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
-
-    status = env->Object_CallMethod_Void(stsAbilityStageObj_->aniObj, method, configObj);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "CALL Object_CallMethod FAILED: %{public}d", status);
-        STSAbilityStageContext::ResetEnv(env);
-        return;
-    }
+    CallObjectMethod(false, "onConfigurationUpdate", "L@ohos/app/ability/Configuration/Configuration;:V",
+        &configuration);
 }
 
 void STSAbilityStage::OnMemoryLevel(int32_t level)
@@ -277,8 +199,8 @@ int32_t STSAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &ca
     return ERR_OK;
 }
 
-std::unique_ptr<STSNativeReference> STSAbilityStage::LoadJsOhmUrl(const std::string &srcEntry, const std::string &ohmUrl,
-    const std::string &moduleName, const std::string &hapPath, bool esmodule)
+std::unique_ptr<STSNativeReference> STSAbilityStage::LoadJsOhmUrl(const std::string &srcEntry,
+    const std::string &ohmUrl, const std::string &moduleName, const std::string &hapPath, bool esmodule)
 {
     return nullptr;
 }
@@ -293,10 +215,43 @@ bool STSAbilityStage::LoadJsStartupConfig(const std::string &srcEntry)
     return true;
 }
 
-napi_value STSAbilityStage::CallObjectMethod(const char* name, napi_value const * argv, size_t argc)
+bool STSAbilityStage::CallObjectMethod(bool withResult, const char *name, const char *signature, ...) const
 {
-    napi_value result = nullptr;
-    return result;
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
+    if (stsAbilityStageObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "stsAbilityStageObj_ nullptr");
+        return false;
+    }
+
+    auto env = stsRuntime_.GetAniEnv();
+    STSAbilityStageContext::ResetEnv(env);
+    ani_status status = ANI_OK;
+    ani_method method = nullptr;
+    if ((status = env->Class_FindMethod(stsAbilityStageObj_->aniCls, name, signature, &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "status: %{public}d", status);
+        return false;
+    }
+    env->ResetError();
+    if (withResult) {
+        ani_boolean res = 0;
+        va_list args;
+        va_start(args, signature);
+        if ((status = env->Object_CallMethod_Boolean(stsAbilityStageObj_->aniObj, method, &res, args)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ABILITY, "status: %{public}d", status);
+            stsRuntime_.HandleUncaughtError();
+        }
+        va_end(args);
+        return res;
+    }
+    va_list args;
+    va_start(args, signature);
+    if ((status = env->Object_CallMethod_Void_V(stsAbilityStageObj_->aniObj, method, args)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "status: %{public}d", status);
+        stsRuntime_.HandleUncaughtError();
+        return false;
+    }
+    va_end(args);
+    return false;
 }
 
 std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> STSAbilityStage::CreateStageProperty() const
@@ -318,6 +273,12 @@ void STSAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context,
         TAG_LOGE(AAFwkTag::ABILITY, "context nullptr");
         return;
     }
+
+    if (!stsAbilityStageObj_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not found AbilityStage.js");
+        return;
+    }
+
     auto env = stsRuntime_.GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "env nullptr");

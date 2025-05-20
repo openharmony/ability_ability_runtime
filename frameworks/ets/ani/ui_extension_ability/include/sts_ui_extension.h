@@ -22,6 +22,7 @@
 #include "display_manager.h"
 #include "window_manager.h"
 #endif // SUPPORT_GRAPHICS
+#include "insight_intent_executor_info.h"
 #include "ui_extension.h"
 #include "ui_extension_context.h"
 #include <mutex>
@@ -180,18 +181,11 @@ public:
     void ResetEnv(ani_env* env);
 
 private:
-    // virtual void BindContext(napi_env env, napi_value obj, std::shared_ptr<AAFwk::Want> want);
     virtual void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want,
         const std::shared_ptr<OHOSApplication> &application);
     ani_object CreateSTSContext(ani_env *env, std::shared_ptr<UIExtensionContext> context,
         int32_t screenMode, const std::shared_ptr<OHOSApplication> &application);
-    // napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
-    //     bool withResult = false);
     bool CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
-    // bool CheckPromise(napi_value result);
-    // bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
-
-    // napi_value CallOnConnect(const AAFwk::Want &want);
     ani_status CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
     ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& param);
     std::shared_ptr<STSNativeReference> LoadModule(ani_env *env);
@@ -201,6 +195,8 @@ private:
     void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
 
     void OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd) override;
+    bool ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
+        const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo);
     bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
         bool needForeground);
     bool HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
@@ -212,6 +208,7 @@ private:
         sptr<AAFwk::SessionInfo> sessionInfo);
     sptr<Rosen::Window> CreateUIWindow(const std::shared_ptr<UIExtensionContext> context,
         const sptr<AAFwk::SessionInfo> &sessionInfo);
+    void ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result);
 
     STSRuntime& stsRuntime_;
     std::shared_ptr<STSNativeReference> stsObj_ = nullptr;
@@ -219,7 +216,7 @@ private:
     std::mutex uiWindowMutex_;
     std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
     std::set<uint64_t> foregroundWindows_;
-    std::map<uint64_t, std::shared_ptr<NativeReference>> contentSessions_;
+    std::map<uint64_t, std::shared_ptr<STSNativeReferenceWrapper>> contentSessions_;
     int32_t screenMode_ = AAFwk::IDLE_SCREEN_MODE;
     std::shared_ptr<int32_t> screenModePtr_;
     sptr<IRemoteObject> token_ = nullptr;

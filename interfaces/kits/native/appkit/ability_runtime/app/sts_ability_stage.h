@@ -58,7 +58,8 @@ public:
         const std::shared_ptr<Context> &stageContext) override;
 
 private:
-    napi_value CallObjectMethod(const char* name, napi_value const * argv = nullptr, size_t argc = 0);
+
+    bool CallObjectMethod(bool withResult, const char* name, const char* signature, ...) const;
 
     std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> CreateStageProperty() const;
 
