@@ -152,18 +152,18 @@ public:
     const std::string &GetProcessName() const;
 
     /**
-     * @brief Obtains the name of sandbox process.
+     * @brief Obtains the flag of sandbox extension process.
      *
-     * @return Returns the name of sandbox process.
+     * @return Returns true or false.
      */
-    const std::string &GetSandBoxProcessName() const;
+    bool GetExtensionSandBoxFlag() const;
 
     /**
-     * @brief Setting the name of sandbox process.
+     * @brief Setting the flag of sandbox extension process.
      *
-     * @param processName, the name of sandbox process.
+     * @param extensionSandBoxFlag, the flag of sandbox process.
      */
-    void SetSandBoxProcessName(const std::string &processName);
+    void SetExtensionSandBoxFlag(bool extensionSandBoxFlag);
 
     /**
      * @brief Obtains the the flag of specified process.
@@ -1172,6 +1172,7 @@ private:
     bool isNeedLimitPrio_ = false;
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;
+    bool isExtensionSandBox_ = false;
     std::atomic<bool> isKilling_ = false;
     std::atomic_bool isSpawned_ = false;
 
@@ -1196,7 +1197,6 @@ private:
 
     std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;  // the application's info of this process
     std::string processName_;  // the name of this process
-    std::string sandboxProcessName_; // the name of sandbox process
     std::string specifiedProcessFlag_; // the flag of specified Process
     std::string customProcessFlag_; // the flag of custom process
     std::unordered_set<sptr<IRemoteObject>, RemoteObjHash> foregroundingAbilityTokens_;

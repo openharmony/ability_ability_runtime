@@ -202,16 +202,15 @@ HWTEST_F(AppMgrServiceInnerTest, MakeProcessName_003, TestSize.Level2)
     int32_t appIndex = 1;
     std::string specifiedProcessFlag {};
     std::string processName {};
-    std::string sandBoxProcessName {};
     bool isCallerSetProcess = true;
 
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
+        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess);
 
     abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
+        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess);
     appInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
 
     abilityInfo->process = "abilityInfoProcess";
@@ -219,13 +218,13 @@ HWTEST_F(AppMgrServiceInnerTest, MakeProcessName_003, TestSize.Level2)
     abilityInfo->process = "abilityInfoProcess";
 
     appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
+        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess);
     EXPECT_EQ(processName, abilityInfo->process + ":" + std::to_string(appIndex));
 
     abilityInfo->type = AppExecFwk::AbilityType::PAGE;
     abilityInfo->isStageBasedModel = true;
     appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
+        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess);
     EXPECT_EQ(processName, appInfo->bundleName +
         abilityInfo->process + ":" + std::to_string(appIndex));
 
@@ -233,117 +232,73 @@ HWTEST_F(AppMgrServiceInnerTest, MakeProcessName_003, TestSize.Level2)
     hapModuleInfo.process = "hapModuleInfoProcess";
     hapModuleInfo.isStageBasedModel = true;
     appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
+        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess);
     EXPECT_EQ(processName, hapModuleInfo.process + std::to_string(appIndex));
 
     specifiedProcessFlag = "specifiedProcessFlag";
     appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
+        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess);
     EXPECT_EQ(processName, hapModuleInfo.process +
         std::to_string(appIndex) + ":" + specifiedProcessFlag);
 }
 
 /**
- * @tc.name: MakeProcessName_004
- * @tc.desc: MakeProcessName
+ * @tc.name: IsIsolateExtensionSandBox_001
+ * @tc.desc: IsIsolateExtensionSandBox
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, MakeProcessName_004, TestSize.Level2)
+HWTEST_F(AppMgrServiceInnerTest, IsIsolateExtensionSandBox_001, TestSize.Level2)
 {
+    TAG_LOGI(AAFwkTag::TEST, "IsIsolateExtensionSandBox_001 start");
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
-    std::shared_ptr<AppExecFwk::ApplicationInfo> appInfo =  nullptr;
     AppExecFwk::HapModuleInfo hapModuleInfo;
-    int32_t appIndex = 1;
-    std::string specifiedProcessFlag {};
-    std::string processName {};
-    std::string sandBoxProcessName {};
-    bool isCallerSetProcess = true;
 
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
-    appInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
     EXPECT_NE(appMgrServiceInner, nullptr);
-    EXPECT_NE(abilityInfo, nullptr);
-    EXPECT_NE(appInfo, nullptr);
 
-    abilityInfo->process = "abilityInfoProcess";
+    bool ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
+
+    abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    EXPECT_NE(abilityInfo, nullptr);
+
+    abilityInfo->type = AppExecFwk::AbilityType::PAGE;
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
+
     abilityInfo->type = AppExecFwk::AbilityType::EXTENSION;
     abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::DATASHARE;
-    appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
-    EXPECT_TRUE(sandBoxProcessName.empty());
-    EXPECT_EQ(processName, abilityInfo->process + ":" + std::to_string(appIndex));
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
 
     abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
-    appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
-    EXPECT_TRUE(sandBoxProcessName.empty());
-    EXPECT_EQ(processName, abilityInfo->process + ":" + std::to_string(appIndex));
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
 
     abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::INPUTMETHOD;
-    appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
-    EXPECT_TRUE(sandBoxProcessName.empty());
-    EXPECT_EQ(processName, abilityInfo->process + ":" + std::to_string(appIndex));
-}
-
-/**
- * @tc.name: MakeProcessName_005
- * @tc.desc: MakeProcessName
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerTest, MakeProcessName_005, TestSize.Level2)
-{
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
-    std::shared_ptr<AppExecFwk::ApplicationInfo> appInfo =  nullptr;
-    AppExecFwk::HapModuleInfo hapModuleInfo;
-    int32_t appIndex = 1;
-    std::string specifiedProcessFlag {};
-    std::string processName {};
-    std::string sandBoxProcessName {};
-    bool isCallerSetProcess = true;
-
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
-    appInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-    EXPECT_NE(abilityInfo, nullptr);
-    EXPECT_NE(appInfo, nullptr);
-
-    abilityInfo->process = "abilityInfoProcess";
-    abilityInfo->type = AppExecFwk::AbilityType::EXTENSION;
-    abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::INPUTMETHOD;
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
 
     AppExecFwk::ExtensionAbilityInfo extensionAbilityInfo1;
+    abilityInfo->name = "extensionAbilityInfo2";
     extensionAbilityInfo1.name = "extensionAbilityInfo1";
     extensionAbilityInfo1.needCreateSandbox = false;
     hapModuleInfo.extensionInfos.push_back(extensionAbilityInfo1);
-    appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
-    EXPECT_TRUE(sandBoxProcessName.empty());
-    EXPECT_EQ(processName, abilityInfo->process + ":" + std::to_string(appIndex));
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
 
     abilityInfo->name = "extensionAbilityInfo1";
-    appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
-    EXPECT_TRUE(sandBoxProcessName.empty());
-    EXPECT_EQ(processName, abilityInfo->process + ":" + std::to_string(appIndex));
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
 
     AppExecFwk::ExtensionAbilityInfo extensionAbilityInfo2;
-    extensionAbilityInfo2.name = "extensionAbilityInfo2";
-    extensionAbilityInfo2.needCreateSandbox = true;
-    hapModuleInfo.extensionInfos.push_back(extensionAbilityInfo2);
     abilityInfo->name = "extensionAbilityInfo2";
-    appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
-    EXPECT_EQ(processName, abilityInfo->process + ":" + std::to_string(appIndex));
-    EXPECT_EQ(sandBoxProcessName, abilityInfo->process + ":" + abilityInfo->name + ":" + std::to_string(appIndex));
-
-    appIndex = 0;
-    appMgrServiceInner->MakeProcessName(abilityInfo, appInfo,
-        hapModuleInfo, appIndex, specifiedProcessFlag, processName, isCallerSetProcess, sandBoxProcessName);
-    EXPECT_EQ(processName, abilityInfo->process);
-    EXPECT_EQ(sandBoxProcessName, abilityInfo->process + ":" + abilityInfo->name);
+    extensionAbilityInfo1.name = "extensionAbilityInfo2";
+    extensionAbilityInfo1.needCreateSandbox = true;
+    hapModuleInfo.extensionInfos.push_back(extensionAbilityInfo2);
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_TRUE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "IsIsolateExtensionSandBox_001 end");
 }
 
 /**

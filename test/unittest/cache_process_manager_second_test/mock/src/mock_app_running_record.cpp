@@ -103,14 +103,14 @@ const std::string &AppRunningRecord::GetProcessName() const
     return processName_;
 }
 
-const std::string &AppRunningRecord::GetSandBoxProcessName() const
+bool AppRunningRecord::GetExtensionSandBoxFlag() const
 {
-    return sandboxProcessName_;
+    return isExtensionSandBox_;
 }
 
-void AppRunningRecord::SetSandBoxProcessName(const std::string &processName)
+void AppRunningRecord::SetExtensionSandBoxFlag(bool extensionSandBoxFlag)
 {
-    sandboxProcessName_ = processName;
+    isExtensionSandBox_ = extensionSandBoxFlag;
 }
 
 void AppRunningRecord::SetSpecifiedProcessFlag(const std::string &flag)
