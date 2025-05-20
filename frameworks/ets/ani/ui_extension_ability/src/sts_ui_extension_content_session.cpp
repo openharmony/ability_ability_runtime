@@ -250,18 +250,19 @@ void StsUIExtensionContentSession::LoadContent(ani_env* env, ani_object object, 
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "LoadContent called");
     std::string contextPath;
-    ani_size sz {};
-    env->String_GetUTF8Size(path, &sz);
-    contextPath.resize(sz + 1);
-    env->String_GetUTF8SubString(path, 0, sz, contextPath.data(), contextPath.size(), &sz);
-
+    if (!OHOS::AppExecFwk::GetStdString(env, path, contextPath)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "invalid param");
+        ThrowStsInvalidParamError(env, "Parameter error: Path must be a string.");
+        return;
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "contextPath: %{public}s", contextPath.c_str());
     if (uiWindow_ == nullptr || sessionInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "uiWindow_ or sessionInfo_ is nullptr");
         ThrowStsErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER));
         return;
     }
-
     if (sessionInfo_->isAsyncModalBinding && isFirstTriggerBindModal_) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "Trigger binding UIExtension modal window");
         uiWindow_->TriggerBindModalUIExtension();
         isFirstTriggerBindModal_ = false;
     }
@@ -271,6 +272,8 @@ void StsUIExtensionContentSession::LoadContent(ani_env* env, ani_object object, 
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "AniSetUIContent failed, ret=%{public}d", ret);
         ThrowStsErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER));
+    } else {
+        TAG_LOGD(AAFwkTag::UI_EXT, "AniSetUIContent success");
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "LoadContent end");
     return;
