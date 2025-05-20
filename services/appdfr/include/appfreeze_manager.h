@@ -103,6 +103,13 @@ private:
         int32_t tid;
     };
 
+    struct HitraceInfo {
+        std::string hiTraceChainId;
+        std::string spanId;
+        std::string pspanId;
+        std::string traceFlag;
+    };
+
     AppfreezeManager& operator=(const AppfreezeManager&) = delete;
     AppfreezeManager(const AppfreezeManager&) = delete;
     uint64_t GetMilliseconds();
@@ -129,6 +136,8 @@ private:
     void ClearOldInfo();
     void CollectFreezeSysMemory(std::string& memoryContent);
     int MergeNotifyInfo(FaultData& faultNotifyData, const AppfreezeManager::AppInfo& appInfo);
+    std::string ParseDecToHex(uint64_t id);
+    bool GetHitraceId(HitraceInfo& info);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;
