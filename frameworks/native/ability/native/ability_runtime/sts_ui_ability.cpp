@@ -184,6 +184,7 @@ void StsUIAbility::UpdateAbilityObj(
     ani_status status = ANI_ERROR;
     auto env = stsRuntime_.GetAniEnv();
     if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
     }
     if ((status = env->Class_BindNativeMethods(stsAbilityObj_->aniCls, functions.data(), functions.size())) != ANI_OK) {
@@ -241,6 +242,10 @@ void StsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, s
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
     UpdateAbilityObj(abilityInfo, moduleName, srcPath);
     if (stsAbilityObj_ == nullptr || abilityContext_ == nullptr || want == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsAbilityObj_ or abilityContext_ or want");
@@ -498,6 +503,10 @@ void StsUIAbility::OnSceneCreated()
     stsWindowStageObj_->aniObj = stsAppWindowStage;
     ani_ref entryObjectRef = nullptr;
     auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
     if (env->GlobalReference_Create(stsAppWindowStage, &entryObjectRef) !=
         ANI_OK) {
       TAG_LOGE(AAFwkTag::UIABILITY, "GlobalReference_Create failed");
@@ -612,9 +621,13 @@ void StsUIAbility::OnForeground(const Want &want)
 
 void StsUIAbility::CallOnForegroundFunc(const Want &want)
 {
-    auto env = stsRuntime_.GetAniEnv();
     if (stsAbilityObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsAbilityObj_");
+        return;
+    }
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
     }
     // TODO
@@ -1142,6 +1155,10 @@ void StsUIAbility::OnNewWant(const Want &want)
     }
 #endif
     auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
     if (stsAbilityObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsAbilityObj_");
         return;
@@ -1204,6 +1221,10 @@ sptr<IRemoteObject> StsUIAbility::CallRequest()
     }
 
     auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return nullptr;
+    }
     auto obj = stsAbilityObj_->aniObj;
     ani_status status = ANI_ERROR;
     ani_ref calleeRef = nullptr;
@@ -1228,6 +1249,10 @@ bool StsUIAbility::CallObjectMethod(bool withResult, const char *name, const cha
         return false;
     }
     auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return false;
+    }
     auto obj = stsAbilityObj_->aniObj;
     auto cls = stsAbilityObj_->aniCls;
     ani_status status = ANI_ERROR;
@@ -1316,6 +1341,10 @@ void StsUIAbility::UpdateStsWindowStage(ani_ref windowStage)
     }
     ani_object contextObj = shellContextRef_->aniObj;
     auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
     ani_field field = nullptr;
     ani_class cls = shellContextRef_->aniCls;
     ani_status status = ANI_ERROR;

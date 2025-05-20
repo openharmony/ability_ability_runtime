@@ -400,7 +400,7 @@ ani_ref StsServiceExtension::CallObjectMethod(bool withResult, const char* name,
     ani_method method = nullptr;
     auto env = stsRuntime_.GetAniEnv();
     if (!env) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "env not found Ability.sts");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
         return nullptr;
     }
     if ((status = env->Class_FindMethod(stsObj_->aniCls, name, signature, &method)) != ANI_OK) {

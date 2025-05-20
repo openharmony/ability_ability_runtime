@@ -698,8 +698,11 @@ bool StsUIExtension::CallObjectMethod(bool withResult, const char *name, const c
         TAG_LOGE(AAFwkTag::UI_EXT, "stsObj_ nullptr");
         return false;
     }
-
     auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return false;
+    }
     ResetEnv(env);
     ani_status status = ANI_OK;
     ani_method method = nullptr;
