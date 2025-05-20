@@ -177,13 +177,7 @@ private:
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
  
     void ListenWMS();
- 
-    bool GetInsightIntentExecutorInfo(const Want &want,
-        const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &executeParam,
-        InsightIntentExecutorInfo &executorInfo);
- 
-    bool OnInsightIntentExecuteDone(uint64_t intentId, const AppExecFwk::InsightIntentExecuteResult &result) override;
- 
+
     STSRuntime& stsRuntime_;
     std::unique_ptr<STSNativeReference> stsObj_;
     std::shared_ptr<STSNativeReference> shellContextRef_ = nullptr;

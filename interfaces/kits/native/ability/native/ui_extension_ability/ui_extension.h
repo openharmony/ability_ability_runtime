@@ -17,8 +17,11 @@
 #define OHOS_ABILITY_RUNTIME_UI_EXTENSION_H
 
 #include "extension_base.h"
-
+#include <mutex>
 namespace OHOS {
+namespace AppExecFwk {
+struct InsightIntentExecuteResult;
+}
 namespace AbilityRuntime {
 class UIExtensionContext;
 class Runtime;
@@ -65,6 +68,70 @@ public:
      * @return The ui extension instance.
      */
     static UIExtension* Create(const std::unique_ptr<Runtime>& runtime);
+
+    /**
+     * @brief On command window.
+     *
+     * @param want The want.
+     * @param sessionInfo The sessionInfo.
+     * @param winCmd The window command.
+     */
+    void OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
+        AAFwk::WindowCommand winCmd) override;
+
+    /**
+     * @brief On command window done.
+     *
+     * @param sessionInfo The sessionInfo.
+     * @param winCmd The window command.
+     */
+    void OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd) override;
+
+    /**
+     * @brief On insight intent execute done.
+     *
+     * @param sessionInfo The sessionInfo.
+     * @param result The execute result.
+     */
+    void OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &sessionInfo,
+        const AppExecFwk::InsightIntentExecuteResult &result) override;
+
+    /**
+     * @brief Excute foreground window.
+     *
+     * @param want The want.
+     * @param sessionInfo The sessionInfo.
+     */
+    virtual void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo) {};
+
+    /**
+     * @brief Excute background window.
+     *
+     * @param sessionInfo The sessionInfo.
+     */
+    virtual void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo) {};
+
+    /**
+     * @brief Excute destroy window.
+     *
+     * @param sessionInfo The sessionInfo.
+     */
+    virtual void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo) {};
+
+    /**
+     * @brief Excute foreground window with insight intent.
+     *
+     * @param want The want.
+     * @param sessionInfo The sessionInfo.
+     * @param needForeground If need foreground.
+     */
+    virtual bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
+        bool needForeground) { return false; };
+
+protected:
+    std::mutex uiWindowMutex_;
+    std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
+    std::set<uint64_t> foregroundWindows_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
