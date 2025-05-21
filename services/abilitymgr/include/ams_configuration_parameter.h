@@ -50,7 +50,6 @@ constexpr const char* UIEATENSION_TYPE_PICKER = "typePicker";
 constexpr const char* MULTI_USER_TYPE = "multiUserType";
 constexpr const char* SUPPORT_BACK_TO_CALLER = "supportBackToCaller";
 constexpr const char* SUPPORT_SCB_CRASH_REBOOT = "supportSCBCrashReboot";
-constexpr const char* RESIDENT_WHITE_LIST = "normal_resident_apps";
 constexpr const char* SUPPORT_AA_KILL_WITH_REASON = "supportAAKillWithReason";
 }  // namespace AmsConfig
 
@@ -140,9 +139,6 @@ public:
 
     const std::map<std::string, std::string>& GetPickerMap() const;
 
-    bool InResidentWhiteList(const std::string &bundleName) const;
-    const std::vector<std::string> &GetResidentWhiteList() const;
-
 private:
     AmsConfigurationParameter();
     ~AmsConfigurationParameter() = default;
@@ -164,7 +160,6 @@ private:
     int32_t LoadBackToCallerConfig(nlohmann::json& Object);
     int32_t LoadSupportAAKillWithReasonConfig(nlohmann::json& Object);
     int32_t LoadSupportSCBCrashRebootConfig(nlohmann::json& Object);
-    void LoadResidentWhiteListConfig(nlohmann::json& Object);
 
 private:
     bool nonConfigFile_ {false};
@@ -182,7 +177,6 @@ private:
     int timeoutUnitTime_ {1000};
     int multiUserType_ {0};
 
-    std::vector<std::string> residentWhiteList_;
     std::string orientation_ {""};
     std::string bundleName_ {""};
     std::string abilityName_ {""};
