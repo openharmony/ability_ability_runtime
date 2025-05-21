@@ -40,14 +40,14 @@ namespace AniEnumConvertUtil {
 }
 
 template <class T>
-static bool EnumConvert_StsToNative(ani_env *env, ani_enum_item enumItem, T &result)
+static bool EnumConvertStsToNative(ani_env *env, ani_enum_item enumItem, T &result)
 {
     ani_status status = ANI_ERROR;
     if constexpr (std::is_enum<T>::value || std::is_integral<T>::value) {
         ani_int intValue{};
         status = env->EnumItem_GetValue_Int(enumItem, &intValue);
         if (ANI_OK != status) {
-            TAG_LOGE(AAFwkTag::STSRUNTIME, "EnumConvert_StsToNative failed, status : %{public}d", status);
+            TAG_LOGE(AAFwkTag::STSRUNTIME, "EnumConvertStsToNative failed, status : %{public}d", status);
             return false;
         }
         result = static_cast<T>(intValue);
@@ -67,13 +67,13 @@ static bool EnumConvert_StsToNative(ani_env *env, ani_enum_item enumItem, T &res
 }
 
 template<class T>
-static bool EnumConvert_StsToNative(ani_env *env, ani_object enumItem, T &result)
+static bool EnumConvertStsToNative(ani_env *env, ani_object enumItem, T &result)
 {
-    return EnumConvert_StsToNative<T>(env, static_cast<ani_enum_item>(enumItem), result);
+    return EnumConvertStsToNative<T>(env, static_cast<ani_enum_item>(enumItem), result);
 }
 
 template <class T>
-static bool EnumConvert_NativeToSts(ani_env *env, const char *enumName, const T enumValue, ani_enum_item &result)
+static bool EnumConvertNativeToSts(ani_env *env, const char *enumName, const T enumValue, ani_enum_item &result)
 {
     ani_enum aniEnum{};
     ani_status status = env->FindEnum(enumName, &aniEnum);
@@ -93,12 +93,12 @@ static bool EnumConvert_NativeToSts(ani_env *env, const char *enumName, const T 
         }
         // compare value
         T tmpValue{};
-        if (EnumConvert_StsToNative<T>(env, enumItem, tmpValue) && tmpValue == enumValue) {
+        if (EnumConvertStsToNative<T>(env, enumItem, tmpValue) && tmpValue == enumValue) {
             result = enumItem;
             return true;
         }
     }
-    TAG_LOGE(AAFwkTag::STSRUNTIME, "EnumConvert_NativeToSts failed enumName: %{public}s", enumName);
+    TAG_LOGE(AAFwkTag::STSRUNTIME, "EnumConvertNativeToSts failed enumName: %{public}s", enumName);
     return false;
 }
 }

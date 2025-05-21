@@ -425,7 +425,7 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         return PARAMETER_ERROR;
     }
     if (!hasActionType) {
-        AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(
+        AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(
             env, reinterpret_cast<ani_enum_item>(actionTypeRef), paras.operationType);
     }
 
@@ -456,7 +456,7 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
                 TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get_Ref failed status: %{public}d", status);
                 return PARAMETER_ERROR;
             }
-            AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(
+            AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(
                 env, reinterpret_cast<ani_object>(actionFlagRef), actionFlag);
             paras.wantAgentFlags.emplace_back(static_cast<WantAgentConstant::Flags>(actionFlag));
         }

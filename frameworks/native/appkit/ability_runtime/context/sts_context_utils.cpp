@@ -99,7 +99,7 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
     }
     auto area = context->GetArea();
     ani_enum_item areaModeItem {};
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToSts(aniEnv, AREA_MODE_ENUM_NAME, area, areaModeItem);
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(aniEnv, AREA_MODE_ENUM_NAME, area, areaModeItem);
 
     if (aniEnv->Object_SetField_Ref(contextObj, areaField, (ani_ref)areaModeItem) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Int failed");

@@ -143,7 +143,7 @@ bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &sta
                 TAG_LOGE(AAFwkTag::JSNAPI, "Array_Get_Ref failed");
                 return false;
             }
-            AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(
+            AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(
                 env, reinterpret_cast<ani_object>(supportWindowModeRef), supportWindowMode);
             TAG_LOGD(AAFwkTag::JSNAPI, "supportWindowMode:%{public}d", supportWindowMode);
             startOptions.supportWindowModes_.emplace_back(
@@ -180,7 +180,7 @@ bool UnwrapProcessOptions(ani_env* env, ani_object param, std::shared_ptr<AAFwk:
         TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap processMode failed");
         return false;
     }
-    AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(
+    AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(
         env, reinterpret_cast<ani_enum_item>(processModeRef), processMode);
     TAG_LOGD(AAFwkTag::JSNAPI, "processMode: %{public}d", processMode);
     option->processMode = AAFwk::ProcessOptions::ConvertInt32ToProcessMode(processMode);
@@ -194,7 +194,7 @@ bool UnwrapProcessOptions(ani_env* env, ani_object param, std::shared_ptr<AAFwk:
         TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startupVisibility failed");
         return false;
     }
-    AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(
+    AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(
         env, reinterpret_cast<ani_enum_item>(startupVisibilityRef), startupVisibility);
     TAG_LOGD(AAFwkTag::JSNAPI, "startupVisibility: %{public}d", startupVisibility);
     option->startupVisibility = AAFwk::ProcessOptions::ConvertInt32ToStartupVisibility(startupVisibility);

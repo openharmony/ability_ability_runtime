@@ -81,7 +81,7 @@ bool UnwrapExecuteParam(ani_env *env, ani_object param, AppExecFwk::InsightInten
         TAG_LOGE(AAFwkTag::INTENT, "Wrong argument type executeMode");
         return false;
     }
-    AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(env,
+    AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(env,
         static_cast<ani_enum_item>(executeModeRef), executeMode);
     executeParam.executeMode_ = executeMode;
 

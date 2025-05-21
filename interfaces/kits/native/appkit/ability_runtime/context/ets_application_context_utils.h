@@ -27,8 +27,34 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-void CreateEtsApplicationContext(ani_env* aniEnv, void* applicationContextObjRef);
-void SetApplicationContextToEts(const std::shared_ptr<ApplicationContext> &abilityRuntimeContext);
+class EtsApplicationContextUtils {
+public:
+    explicit EtsApplicationContextUtils() {}
+    virtual ~EtsApplicationContextUtils() = default;
+    static void RestartApp([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_object wantObj);
+    static void SetFont([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_string font);
+    static void SetColorMode([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_enum_item colorMode);
+    static void ClearUpApplicationData([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_object callback);
+    static void GetRunningProcessInformation([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_object callback);
+    static ani_double NativeOnSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_string type, ani_object envCallback);
+    static void NativeOffSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_string type, ani_double callbackId, ani_object call);
+    static void killAllProcesses([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_boolean clearPageStack, ani_object call);
+    static void PreloadUIExtensionAbility([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_object wantObj, ani_object call);
+    static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_boolean value);
+    static void SetApplicationContextToEts(const std::shared_ptr<ApplicationContext> &abilityRuntimeContext);
+    static void CreateEtsApplicationContext(ani_env* aniEnv, void* applicationContextObjRef);
+    static void BindApplicationContextFunc(ani_env* aniEnv, ani_class& contextClass);
+};
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ETS_APPLICATION_CONTEXT_UTILS_H
