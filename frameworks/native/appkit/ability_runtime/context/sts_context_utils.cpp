@@ -187,6 +187,32 @@ void BindContextDir(ani_env* aniEnv, ani_class contextClass, ani_object contextO
     }
 }
 
+bool SetHapModuleInfo(
+    ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<OHOS::AbilityRuntime::Context> &context)
+{
+    if (env == nullptr || context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env or context");
+        return false;
+    }
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    if (hapModuleInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfo is nullptr");
+        return false;
+    }
+    ani_ref hapModuleInfoRef = AppExecFwk::CommonFunAni::ConvertHapModuleInfo(env, *hapModuleInfo);
+    if (hapModuleInfoRef == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfoRef is nullptr");
+        return false;
+    }
+    ani_status status = ANI_OK;
+    status = env->Object_SetPropertyByName_Ref(contextObj, "currentHapModuleInfo", hapModuleInfoRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetPropertyByName_Ref failed, status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     void* applicationCtxRef, std::shared_ptr<Context> context)
 {
@@ -197,6 +223,10 @@ void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object context
     BindApplicationCtx(aniEnv, contextClass, contextObj, applicationCtxRef);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "context is nullptr");
+        return;
+    }
+    if (!SetHapModuleInfo(aniEnv, contextClass, contextObj, context)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "SetHapModuleInfo fail");
         return;
     }
     context_ = context;
