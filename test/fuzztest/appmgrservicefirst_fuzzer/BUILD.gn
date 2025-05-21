@@ -58,6 +58,7 @@ ohos_fuzztest("AppMgrServiceFirstFuzzTest") {
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "hisysevent:libhisysevent",
   ]
 
   if (ability_runtime_graphics) {
