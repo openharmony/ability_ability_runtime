@@ -431,7 +431,7 @@ public:
      * the policy.
      * If during the execution of a task, a caller triggers UpdateConfiguration or UpdateConfigurationForBackgroundApp,
      * the asynchronous task will be terminated.
-     * If the task has not been executed and the app is switched to the foreground, the task will be updated 
+     * If the task has not been executed and the app is switched to the foreground, the task will be updated
      * when brought to the foreground. The task will not be updated while in the background.
      * Supported scope: colormode
      * Only SA can call this method.
