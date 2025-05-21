@@ -1075,11 +1075,11 @@ void AppRunningManager::ExecuteConfigurationTask(const BackgroundAppInfo& info, 
         if (appRecord == nullptr) {
             continue;
         }
-        bool userIdFlag = (userId == -1 || appRecord->GetUid() / BASE_USER_RANGE == 0 || appRecord->GetUid() / BASE_USER_RANGE == userId) ;
+        bool userIdFlag = (userId == -1 || appRecord->GetUid() / BASE_USER_RANGE == 0
+            || appRecord->GetUid() / BASE_USER_RANGE == userId);
         if (!userIdFlag) {
             continue;
         }
-        
         if (info.bandleName == appRecord->GetBundleName() && info.appIndex == appRecord->GetAppIndex() && item.second
             && appRecord->GetState() == ApplicationState::APP_STATE_BACKGROUND) {
             if (UpdateConfiguration(appRecord, Rosen::ConfigMode::COLOR_MODE)) {
@@ -1094,13 +1094,13 @@ void AppRunningManager::ExecuteConfigurationTask(const BackgroundAppInfo& info, 
 int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &appInfos,
     const AppExecFwk::ConfigurationPolicy& policy, const int32_t userId)
 {
-    int32_t maxCountPerBatch = policy.maxCountPerBatch;
+    int8_t maxCountPerBatch = policy.maxCountPerBatch;
     if (maxCountPerBatch < 1) {
         TAG_LOGE(AAFwkTag::APPMGR, "maxCountPerBatch invalid");
         return ERR_INVALID_VALUE;
     }
 
-    int32_t intervalTime = policy.intervalTime;
+    int16_t intervalTime = policy.intervalTime;
     if (intervalTime < 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "intervalTime invalid");
         return ERR_INVALID_VALUE;
@@ -1115,7 +1115,7 @@ int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector
     appInfos_ = appInfos;
     int32_t taskCount = 0;
     int32_t batchCount = 0;
-    for (auto info : appInfos) {
+    for (auto &info : appInfos) {
         auto policyTask = [weak = weak_from_this(), info, userId] {
             auto appRuningMgr = weak.lock();
             if (appRuningMgr == nullptr) {
@@ -1125,8 +1125,8 @@ int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector
             appRuningMgr->ExecuteConfigurationTask(info, userId);
         };
         AAFwk::TaskHandlerWrap::GetFfrtHandler()->SubmitTask(policyTask,
-            info.bandleName.c_str() + std::to_string(info.appIndex), policy.intervalTime * batchCount);
-        if (++taskCount >= policy.maxCountPerBatch) {
+            info.bandleName.c_str() + std::to_string(info.appIndex), intervalTime * batchCount);
+        if (++taskCount >= maxCountPerBatch) {
             batchCount++;
             taskCount = 0;
         }
