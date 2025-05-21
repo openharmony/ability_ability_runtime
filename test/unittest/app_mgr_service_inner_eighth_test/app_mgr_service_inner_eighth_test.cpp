@@ -2317,7 +2317,7 @@ HWTEST_F(AppMgrServiceInnerEighthTest, StartNativeChildProcess_001, TestSize.Lev
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->StartNativeChildProcess(hostPid, libName, childProcessCount, callback);
+    auto ret = appMgrServiceInner->StartNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "StartNativeChildProcess_001 end");
 }
@@ -2341,7 +2341,7 @@ HWTEST_F(AppMgrServiceInnerEighthTest, StartNativeChildProcess_002, TestSize.Lev
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->StartNativeChildProcess(hostPid, libName, childProcessCount, callback);
+    auto ret = appMgrServiceInner->StartNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
     EXPECT_EQ(ret, AAFwk::ERR_CHILD_PROCESS_REACH_LIMIT);
     TAG_LOGI(AAFwkTag::TEST, "StartNativeChildProcess_002 end");
 }
@@ -2366,7 +2366,7 @@ HWTEST_F(AppMgrServiceInnerEighthTest, StartNativeChildProcess_003, TestSize.Lev
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->StartNativeChildProcess(hostPid, libName, childProcessCount, callback);
+    auto ret = appMgrServiceInner->StartNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "StartNativeChildProcess_003 end");
 }
