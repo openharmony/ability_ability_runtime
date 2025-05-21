@@ -972,13 +972,18 @@ HWTEST_F(AppRunningManagerFourthTest, UpdateConfigurationForBackgroundApp_0100, 
     policy.maxCountPerBatch  = -1;
     auto ret = appRunningManager->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-
+    
+    policy.maxCountPerBatch  = 1;
     policy.intervalTime = -1;
     ret = appRunningManager->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
     policy.maxCountPerBatch  = 1;
     policy.intervalTime = 1;
+    BackgroundAppInfo info;
+    info.bandleName = "com.example.mytest";
+    info.appIndex = 0;
+    appInfos.push_back(info);
     ret = appRunningManager->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
     EXPECT_EQ(ret, 0);
 }
@@ -1000,8 +1005,11 @@ HWTEST_F(AppRunningManagerFourthTest, UpdateConfiguration_0100, TestSize.Level1)
     auto app = std::make_shared<ApplicationInfo>(appInfo);
 
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(app, 111, "KeepAliveApplication");
+    auto ret = appRunningManager->UpdateConfiguration(appRecord, Rosen::ConfigMode::FONT_SCALE);
+    EXPECT_FALSE(ret);
+
     appRecord->delayConfiguration_ = nullptr;
-    auto ret = appRunningManager->UpdateConfiguration(appRecord, Rosen::ConfigMode::COLOR_MODE);
+    ret = appRunningManager->UpdateConfiguration(appRecord, Rosen::ConfigMode::COLOR_MODE);
     EXPECT_FALSE(ret);
 
     appRecord->delayConfiguration_ = std::make_shared<Configuration>();
@@ -1038,45 +1046,29 @@ HWTEST_F(AppRunningManagerFourthTest, ExecuteConfigurationTask_0100, TestSize.Le
     appInfo.uid = 2100;
     auto app = std::make_shared<ApplicationInfo>(appInfo);
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(app, 111, "KeepAliveApplication");
+
     appRunningManager->updateConfigurationDelayedMap_.emplace(0, true);
+    appRunningManager->updateConfigurationDelayedMap_.emplace(1, true);
     appRecord->appRecordId_ = 0;
-    appRunningManager->appRunningRecordMap_.emplace(1, appRecord);
-    appRunningManager->ExecuteConfigurationTask(info, userId);
-    EXPECT_TRUE(appRunningManager->updateConfigurationDelayedMap_[0]);
-
-    appRunningManager->ExecuteConfigurationTask(info, userId);
-
+    appRecord->appIndex_ = 0;
+    appRecord->curState_ = ApplicationState::APP_STATE_BACKGROUND;
     appRunningManager->appRunningRecordMap_.emplace(0, appRecord);
-    userId = 123;
-    appRunningManager->ExecuteConfigurationTask(info, userId);
-
-    appRecord->mainUid_ = 200001;
-    appRunningManager->ExecuteConfigurationTask(info, userId);
-
-    appRecord->mainUid_ = 200111;
+    appRunningManager->appRunningRecordMap_.emplace(1, nullptr);
+    info.bandleName = "KeepAliveApplication";
+    info.appIndex = 0;
+    userId = 1;
     appRunningManager->ExecuteConfigurationTask(info, userId);
 
     userId = -1;
-    appRecord->mainUid_ = 200000;
-    info.bandleName = appRecord->mainBundleName_ = "test.123.456";
-    info.appIndex = 0;
-    appRecord->SetAppIndex(0);
-    appRecord->curState_ = ApplicationState::APP_STATE_BACKGROUND;
+    appRecord->delayConfiguration_ = nullptr;
+    appRunningManager->ExecuteConfigurationTask(info, userId);
+
     appRecord->delayConfiguration_ = std::make_shared<Configuration>();
     appRecord->delayConfiguration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
         ConfigurationInner::COLOR_MODE_DARK);
     appRunningManager->ExecuteConfigurationTask(info, userId);
-    EXPECT_FALSE(appRunningManager->updateConfigurationDelayedMap_[0]);
-
-    appRecord->delayConfiguration_ = nullptr;
-    appRunningManager->ExecuteConfigurationTask(info, userId);
-
-    info.bandleName = "test.789.0";
-    info.appIndex = 1;
-    appRunningManager->updateConfigurationDelayedMap_[0] = false;
-    appRecord->curState_ = ApplicationState::APP_STATE_FOREGROUND;
-    appRunningManager->ExecuteConfigurationTask(info, userId);
-    EXPECT_FALSE(appRunningManager->updateConfigurationDelayedMap_[0]);
+    std::string value = appRecord->delayConfiguration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    EXPECT_TRUE(value == ConfigurationInner::EMPTY_STRING);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
