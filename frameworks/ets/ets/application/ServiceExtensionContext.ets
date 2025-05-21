@@ -99,7 +99,7 @@ export default class ServiceExtensionContext extends ExtensionContext {
         }
       });
       taskpool.execute((): void => {
-        this.nativeTerminateSelfSync(myCall);
+        this.nativeStartServiceExtensionAbilitySync(want, myCall);
       });
     });
     return p;
