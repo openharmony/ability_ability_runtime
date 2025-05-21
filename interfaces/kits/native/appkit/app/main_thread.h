@@ -52,6 +52,10 @@
 
 class Runtime;
 namespace OHOS {
+namespace JsEnv {
+struct ErrorObject;
+using UncatchableTask = std::function<void(std::string summary, const JsEnv::ErrorObject errorObject)>;
+}  // namespace JsEnv
 namespace AppExecFwk {
 using namespace OHOS::Global;
 using OHOS::AbilityRuntime::Runtime;
@@ -60,6 +64,13 @@ using HspList = std::vector<BaseSharedBundleInfo>;
 enum class MainThreadState { INIT, ATTACH, READY, RUNNING };
 struct BundleInfo;
 struct PluginBundleInfo;
+struct UncatchableTaskInfo {
+    std::string bundleName;
+    uint32_t versionCode;
+    std::string appRunningId;
+    int32_t pid;
+    std::string processName;
+};
 class ContextDeal;
 // class Global::Resource::ResourceManager;
 class AppMgrDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -412,6 +423,17 @@ private:
      *
      */
     void HandleLaunchApplication(const AppLaunchData &appLaunchData, const Configuration &config);
+
+    /**
+     *
+     * @brief Init the uncatchable task.
+     *
+     * @param uncatchableTaskInfo The info of the uncatchable task.
+     * @param isUncatchable Weather task is uncatcheable.
+     *
+     */
+    void InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, const UncatchableTaskInfo &uncatchableTaskInfo,
+        bool isUncatchable = false);
 
     /**
      *

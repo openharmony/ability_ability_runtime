@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_engine/native_engine.h"
 #include "source_map.h"
 #include "source_map_operator.h"
@@ -46,6 +47,10 @@ public:
     ~NapiUncaughtExceptionCallback() = default;
 
     void operator()(napi_value obj);
+
+    void operator()(panda::TryCatch& trycatch);
+
+    void CallbackTask(napi_value& obj);
 
     std::string GetNativeStrFromJsTaggedObj(napi_value obj, const char* key);
 
