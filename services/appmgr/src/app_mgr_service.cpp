@@ -355,12 +355,6 @@ int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, int
     }
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if ((callingUid != 0 && callingUid != USER_UID) || userId < 0) {
-        std::string callerBundleName;
-        auto result = IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callingUid, callerBundleName));
-        if (result != ERR_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "getBundleName failed: %{public}d", result);
-            return ERR_INVALID_OPERATION;
-        }
         auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
             AAFwk::PermissionConstants::PERMISSION_CLEAN_APPLICATION_DATA);
         if (!isCallingPerm) {
