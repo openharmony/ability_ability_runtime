@@ -682,19 +682,19 @@ void AppUtils::LoadResidentWhiteList()
 {
     nlohmann::json object;
     if (!JsonUtils::GetInstance().LoadConfiguration(RESIDENT_WHITE_LIST_PATH, object)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "load cache_ability file failed");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "load resident white list file failed");
         return;
     }
     if (!object.contains(NORMAL_RESIDENT_APPS) ||
         !object.at(NORMAL_RESIDENT_APPS).is_array()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "cache_ability file invalid");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "resident white list file invalid");
         return;
     }
 
     for (auto &item : object.at(NORMAL_RESIDENT_APPS).items()) {
         const nlohmann::json& jsonObject = item.value();
         if (!jsonObject.is_string()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "load cache_ability bundleName failed");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load resident white bundleName failed");
             return;
         }
         residentWhiteList_.value.emplace_back(jsonObject.get<std::string>());
