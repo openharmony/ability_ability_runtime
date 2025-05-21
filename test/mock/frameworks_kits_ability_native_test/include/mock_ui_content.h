@@ -98,7 +98,7 @@ public:
     MOCK_METHOD1(SubscribeContainerModalButtonsRectChange, void(
         std::function<void(Rosen::Rect &containerModal, Rosen::Rect &buttons)> &&callback));
     MOCK_METHOD0(GetFormSerializedGesture, SerializedGesture());
-    MOCK_METHOD2(SetForceSplitEnable, void(bool isForceSplit, const std::string& homePage));
+    MOCK_METHOD3(SetForceSplitEnable, void(bool isForceSplit, const std::string& homePage, bool isRouter));
     MOCK_METHOD2(UpdateConfiguration, void(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager));
 
