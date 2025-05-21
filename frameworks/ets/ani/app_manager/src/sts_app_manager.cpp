@@ -82,7 +82,7 @@ static void PreloadApplication(ani_env *env, ani_object callback, ani_string sts
     int32_t userId = static_cast<int32_t>(stsUserId);
 
     ani_int mode;
-    if (!AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(env, stsMode, mode)) {
+    if (!AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(env, stsMode, mode)) {
         TAG_LOGE(AAFwkTag::APPMGR, "param mode err");
         AppExecFwk::AsyncCallback(env, callback,
             OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,

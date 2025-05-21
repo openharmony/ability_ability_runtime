@@ -184,7 +184,7 @@ void OHOSApplication::SetApplicationContext(
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return;
     }
-    AbilityRuntime::SetApplicationContextToEts(abilityRuntimeContext);
+    AbilityRuntime::EtsApplicationContextUtils::SetApplicationContextToEts(abilityRuntimeContext);
     abilityRuntimeContext_ = abilityRuntimeContext;
     auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
     std::weak_ptr<OHOSApplication> applicationWptr = application;
@@ -221,7 +221,7 @@ void OHOSApplication::InitAniApplicationContext()
 {
     auto& runtime = GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
     auto aniEnv = static_cast<AbilityRuntime::STSRuntime &>(*runtime).GetAniEnv();
-    AbilityRuntime::CreateEtsApplicationContext(aniEnv, applicationContextObjRef_);
+    AbilityRuntime::EtsApplicationContextUtils::CreateEtsApplicationContext(aniEnv, applicationContextObjRef_);
 }
 
 void OHOSApplication::InitAniContext()

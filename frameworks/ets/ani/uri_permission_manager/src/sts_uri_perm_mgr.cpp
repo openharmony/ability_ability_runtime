@@ -74,7 +74,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     std::string uriStr = GetStdString(env, uri);
     Uri uriVec(uriStr);
     ani_int flag = 0;
-    AAFwk::AniEnumConvertUtil::EnumConvert_StsToNative(env, flagEnum, flag);
+    AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(env, flagEnum, flag);
     int32_t flagId = static_cast<int32_t>(flag);
     std::string targetBundleName = GetStdString(env, targetName);
     int32_t appCloneIndexId = static_cast<int32_t>(appCloneIndex);
