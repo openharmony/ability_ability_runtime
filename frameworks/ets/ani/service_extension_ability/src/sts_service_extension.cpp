@@ -17,6 +17,7 @@
 #include "ability_business_error.h"
 #include "ability_info.h"
 #include "ability_manager_client.h"
+#include "ani_common_configuration.h"
 #include "ani_common_want.h"
 #include "ani_remote_object.h"
 #include "configuration_utils.h"
@@ -463,10 +464,61 @@ ani_ref StsServiceExtension::CallObjectMethod(bool withResult, const char* name,
 }
 void StsServiceExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
+    ServiceExtension::OnConfigurationUpdated(configuration);
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+        return;
+    }
+    auto contextConfig = context->GetConfiguration();
+    if (contextConfig != nullptr) {
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "Config dump: %{public}s", contextConfig->GetName().c_str());
+        std::vector<std::string> changeKeyV;
+        contextConfig->CompareDifferent(changeKeyV, configuration);
+        if (!changeKeyV.empty()) {
+            contextConfig->Merge(changeKeyV, configuration);
+        }
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "Config dump after merge: %{public}s", contextConfig->GetName().c_str());
+    }
+    ConfigurationUpdated();
 }
 
 void StsServiceExtension::ConfigurationUpdated()
 {
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "env nullptr");
+        return;
+    }
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+        return;
+    }
+    auto fullConfig = context->GetConfiguration();
+    if (!fullConfig) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null configuration");
+        return;
+    }
+
+    ani_object aniConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, *fullConfig);
+    ani_method method = nullptr;
+    ani_status status = env->Class_FindMethod(stsObj_->aniCls,
+        "onConfigurationUpdate", "L@ohos/app/ability/Configuration/Configuration;:V", &method);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "Class_FindMethod failed, status: %{public}d", status);
+        ResetEnv(env);
+        return;
+    }
+    status = env->Object_CallMethod_Void(stsObj_->aniObj, method, aniConfiguration);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "CALL Object_CallMethod failed, status: %{public}d", status);
+        ResetEnv(env);
+        return;
+    }
+    UpdateContextConfiguration(env, stsObj_, aniConfiguration);
 }
 
 void StsServiceExtension::Dump(const std::vector<std::string> &params, std::vector<std::string> &info)

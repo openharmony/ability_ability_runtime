@@ -116,6 +116,43 @@ OHOS::AbilityRuntime::ServiceExtensionContext* StsServiceExtensionContext::GetAb
     return (OHOS::AbilityRuntime::ServiceExtensionContext*)nativeContextLong;
 }
 
+void UpdateContextConfiguration(ani_env *env, std::unique_ptr<OHOS::AbilityRuntime::STSNativeReference>& stsObj,
+    ani_object aniConfiguration)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "UpdateContextConfiguration start");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "env nullptr");
+        return;
+    }
+    ani_field contextField = nullptr;
+    ani_ref contextRef = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->Class_FindField(stsObj->aniCls, "context", &contextField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "terminateSelfSync find field status : %{public}d", status);
+        return;
+    }
+    if ((status = env->Object_GetField_Ref(stsObj->aniObj, contextField, &contextRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "terminateSelfSync get filed status : %{public}d", status);
+        return;
+    }
+    ani_class cls = nullptr;
+    ani_field configField = nullptr;
+
+    if ((status = env->FindClass(SERVICE_EXTENSION_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "terminateSelfSync find class status : %{public}d", status);
+        return;
+    }
+    if ((status = env->Class_FindField(cls, "config", &configField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "terminateSelfSync find field status : %{public}d", status);
+        return;
+    }
+    if ((status = env->Object_SetField_Ref(reinterpret_cast<ani_object>(contextRef), configField,
+        aniConfiguration)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "terminateSelfSync get filed status : %{public}d", status);
+        return;
+    }
+}
+
 void StsServiceExtensionContext::AddFreeInstallObserver(ani_env *env, const OHOS::AAFwk::Want &want,
     ani_object callback, OHOS::AbilityRuntime::ServiceExtensionContext* context)
 {
