@@ -263,14 +263,14 @@ std::string AbilityStageContext::GetFilesDir()
     return contextImpl_->GetFilesDir();
 }
 
-std::string AbilityStageContext::GetResourceDir()
+std::string AbilityStageContext::GetResourceDir(const std::string &moduleName)
 {
     if (contextImpl_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return {};
     }
 
-    return contextImpl_->GetResourceDir();
+    return contextImpl_->GetResourceDir(moduleName);
 }
 
 std::string AbilityStageContext::GetDatabaseDir()

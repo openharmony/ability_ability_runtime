@@ -36,6 +36,8 @@ constexpr const char* BASE_PREFERENCES = "/base/preferences";
 constexpr const char* BASE_BUNDLE_CODE = "/base/bundleCode";
 constexpr const char* BASE_DISTRIBUTED_FILES = "/base/distributedFiles";
 constexpr const char* BASE_CLOUD_FILE = "/base/cloudFile";
+constexpr const char* BASE_RESOURCE_DIR = "/base/resources/resfile";
+constexpr const char* ENTRY_MODULE_NAME = "entry";
 constexpr const char* EL_LIST[] = { "el1", "el2", "el3", "el4", "el5" };
 constexpr int32_t BUFFER_SIZE = 1024;
 const std::string TEST_BUNDLE_NAME = "com.example.myapplication";
@@ -125,6 +127,15 @@ public:
         dir.append(DATA_STORAGE);
         dir.append(areaMode_);
         dir.append(BASE_CLOUD_FILE);
+        return dir;
+    }
+
+    std::string GetResourceDir(const std::string &moduleName = "") override
+    {
+        std::string dir;
+        dir.append(DATA_STORAGE);
+        dir.append(areaMode_);
+        dir.append(BASE_RESOURCE_DIR);
         return dir;
     }
 
@@ -1824,6 +1835,170 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCloudFileDirTest_004, Test
     cloudFileDir = contextImpl->GetCloudFileDir();
     ASSERT_EQ(writeLength, cloudFileDir.length());
     ASSERT_STREQ(buffer, cloudFileDir.c_str());
+}
+
+
+/**
+ * @tc.number: GetResourceDirTest_001
+ * @tc.desc: Function test with applicationContext is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetResourceDirTest_001, TestSize.Level0)
+{
+    char buffer[BUFFER_SIZE] = { 0 };
+    int32_t writeLength = 0;
+
+    AbilityRuntime_ErrorCode code =
+        OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, NULL, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, nullptr, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, NULL);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, nullptr);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir("", buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(NULL, buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(nullptr, buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, -1, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, 0, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(writeLength, 0);
+}
+
+/**
+ * @tc.number: GetResourceDirTest_002
+ * @tc.desc: Function test with applicationContextImpl is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetResourceDirTest_002, TestSize.Level0)
+{
+    InitApplicationContext();
+    char buffer[BUFFER_SIZE] = { 0 };
+    int32_t writeLength = 0;
+
+    AbilityRuntime_ErrorCode code =
+        OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, NULL, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, nullptr, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, NULL);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, nullptr);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir("", buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(NULL, buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(nullptr, buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, -1, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, 0, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+}
+
+/**
+ * @tc.number: GetResourceDirTest_003
+ * @tc.desc: Function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetResourceDirTest_003, TestSize.Level0)
+{
+    char buffer[BUFFER_SIZE] = { 0 };
+    int32_t writeLength = 0;
+
+    const auto contextImpl = InitApplicationContextImpl(TEST_BUNDLE_NAME);
+    ASSERT_NE(contextImpl, nullptr);
+
+    AbilityRuntime_ErrorCode code =
+        OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, NULL, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, nullptr, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, NULL);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, nullptr);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir("", buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(NULL, buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(nullptr, buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, -1, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, 0, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    const char* moduleName = ENTRY_MODULE_NAME;
+    std::string resourceDir = contextImpl->GetResourceDir(moduleName);
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, resourceDir.length(),
+        &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(ENTRY_MODULE_NAME, buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    resourceDir = contextImpl->GetResourceDir(moduleName);
+    ASSERT_NE(writeLength, resourceDir.length());
+    ASSERT_NE(buffer, resourceDir.c_str());
 }
 
 // CheckWant - Normal
