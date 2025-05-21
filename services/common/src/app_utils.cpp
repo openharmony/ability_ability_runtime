@@ -718,9 +718,6 @@ bool AppUtils::InResidentWhiteList(const std::string &bundleName)
         LoadResidentWhiteList();
         residentWhiteList_.isLoaded = true;
     }
-    if (residentWhiteList_.value.empty()) {
-        return true;
-    }
     for (const auto &item: residentWhiteList_.value) {
         if (bundleName == item) {
             return true;
