@@ -15,6 +15,7 @@
 
 #include "app_mgr_service_inner.h"
 
+#include <cctype>
 #include <cinttypes>
 #include <csignal>
 #include <cstdint>
@@ -188,6 +189,7 @@ constexpr const char* REUSING_WINDOW = "ohos.ability_runtime.reusing_window";
 constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
 constexpr const int32_t KILL_PROCESS_BY_USER_DELAY_BASE = 500;
 constexpr const int64_t PRELOAD_FREEZE_TIMEOUT = 11000;
+constexpr size_t MAX_PROCESS_NAME_LENGTH = 64;
 
 #ifdef WITH_DLP
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
@@ -7990,6 +7992,10 @@ int32_t AppMgrServiceInner::StartChildProcess(const pid_t callingPid, pid_t &chi
     if (errCode != ERR_OK) {
         return errCode;
     }
+    if (!CheckCustomProcessName(request.options.customProcessName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid custom process name");
+        return ERR_INVALID_VALUE;
+    }
     auto &srcEntry = request.srcEntry;
     if (callingPid <= 0 || srcEntry.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid callingPid:%{public}d srcEntry:%{private}s", callingPid, srcEntry.c_str());
@@ -9058,12 +9064,17 @@ void AppMgrServiceInner::OnAppCacheStateChanged(const std::shared_ptr<AppRunning
 
 #ifdef SUPPORT_CHILD_PROCESS
 int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const std::string &libName,
-    int32_t childProcessCount, const sptr<IRemoteObject> &callback)
+    int32_t childProcessCount, const sptr<IRemoteObject> &callback, const std::string &customProcessName)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "hostPid:%{public}d", hostPid);
     if (hostPid <= 0 || libName.empty() || !callback) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid param: hostPid:%{public}d libName:%{private}s",
             hostPid, libName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!CheckCustomProcessName(customProcessName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid custom process name");
         return ERR_INVALID_VALUE;
     }
 
@@ -9104,10 +9115,30 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
 
     pid_t dummyChildPid = 0;
     auto nativeChildRecord = ChildProcessRecord::CreateNativeChildProcessRecord(
-        hostPid, libName, appRecord, callback, childProcessCount, false);
+        hostPid, libName, appRecord, callback, childProcessCount, false, customProcessName);
     ChildProcessArgs args;
     ChildProcessOptions options;
     return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, args, options);
+}
+
+bool AppMgrServiceInner::CheckCustomProcessName(const std::string &customProcessName)
+{
+    if (customProcessName.empty()) {
+        return true;
+    }
+    if (customProcessName.size() > MAX_PROCESS_NAME_LENGTH) {
+        return false;
+    }
+    try {
+        std::regex regex("^[a-zA-Z0-9_]+$");
+        if (regex_match(customProcessName, regex)) {
+            return true;
+        }
+    } catch(...) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "regex error");
+        return false;
+    }
+    return false;
 }
 #endif // SUPPORT_CHILD_PROCESS
 
