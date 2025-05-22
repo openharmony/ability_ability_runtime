@@ -52,6 +52,7 @@ constexpr const char* CONFIG_ENTRY = "configEntry";
 constexpr const char *TASKPOOL = "taskPool";
 constexpr const char *TASKPOOL_LOWER = "taskpool";
 constexpr const char *CALLBACK_SUCCESS = "success";
+constexpr const int32_t ARGC_ONE = 1;
 namespace {
 void RegisterStopPreloadSoCallback(JsRuntime& jsRuntime)
 {
@@ -312,7 +313,8 @@ bool JsAbilityStage::CallOnPrepareTerminate(napi_env env,
         TAG_LOGE(AAFwkTag::APPKIT, "callbackInfo nullptr");
         return false;
     }
-    napi_value result = CallObjectMethod("onPrepareTermination", nullptr, 0);
+    bool hasCaughtException = false;
+    napi_value result = CallObjectMethod("onPrepareTermination", hasCaughtException, nullptr, 0);
     if (result == nullptr) {
         TAG_LOGI(AAFwkTag::APPKIT, "onPrepareTermination unimplemented");
         return false;
@@ -336,7 +338,8 @@ bool JsAbilityStage::CallOnPrepareTerminateAsync(napi_env env,
         TAG_LOGE(AAFwkTag::APPKIT, "callbackInfo nullptr");
         return false;
     }
-    napi_value result = CallObjectMethod("onPrepareTerminationAsync", nullptr, 0);
+    bool hasCaughtException = false;
+    napi_value result = CallObjectMethod("onPrepareTerminationAsync", hasCaughtException, nullptr, 0);
     if (result == nullptr || !CheckTypeForNapiValue(env, result, napi_object)) {
         TAG_LOGI(AAFwkTag::APPKIT, "onPrepareTerminationAsync unimplemented");
         return false;
@@ -430,6 +433,7 @@ bool JsAbilityStage::CallAcceptOrRequestSync(napi_env env, const AAFwk::Want &wa
     if (callbackInfo) {
         std::string resultString = AppExecFwk::UnwrapStringFromJS(env, flagNative);
         callbackInfo->Call(resultString);
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Destroy(callbackInfo);
         return true;
     }
     return false;
@@ -443,9 +447,16 @@ bool JsAbilityStage::CallAcceptOrRequestAsync(napi_env env, const AAFwk::Want &w
         return false;
     }
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
-    napi_value result = CallObjectMethod(methodName.c_str(), &napiWant, 1);
+    bool hasCaughtException = false;
+    napi_value result = CallObjectMethod(methodName.c_str(), hasCaughtException, &napiWant, ARGC_ONE);
+    if (hasCaughtException) {
+        std::string result;
+        callbackInfo->Call(result);
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Destroy(callbackInfo);
+        return true;
+    }
     if (result == nullptr || !CheckTypeForNapiValue(env, result, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "%{public}s unimplemented", methodName.c_str());
+        TAG_LOGI(AAFwkTag::APPKIT, "%{public}s unimplemented", methodName.c_str());
         return false;
     }
     bool isPromise = false;
@@ -531,8 +542,9 @@ void JsAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& con
     JsAbilityStageContext::ConfigurationUpdated(env, shellContextRef_, fullConfig);
 
     napi_value napiConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, *fullConfig);
-    CallObjectMethod("onConfigurationUpdated", &napiConfiguration, 1);
-    CallObjectMethod("onConfigurationUpdate", &napiConfiguration, 1);
+    bool hasCaughtException = false;
+    CallObjectMethod("onConfigurationUpdated", hasCaughtException, &napiConfiguration, ARGC_ONE);
+    CallObjectMethod("onConfigurationUpdate", hasCaughtException, &napiConfiguration, ARGC_ONE);
 }
 
 void JsAbilityStage::OnMemoryLevel(int32_t level)
@@ -556,7 +568,8 @@ void JsAbilityStage::OnMemoryLevel(int32_t level)
 
     napi_value jsLevel = CreateJsValue(env, level);
     napi_value argv[] = { jsLevel };
-    CallObjectMethod("onMemoryLevel", argv, ArraySize(argv));
+    bool hasCaughtException = false;
+    CallObjectMethod("onMemoryLevel", hasCaughtException, argv, ArraySize(argv));
     TAG_LOGD(AAFwkTag::APPKIT, "end");
 }
 
@@ -761,7 +774,8 @@ bool JsAbilityStage::LoadJsStartupConfig(const std::string &srcEntry, std::share
     return true;
 }
 
-napi_value JsAbilityStage::CallObjectMethod(const char* name, napi_value const * argv, size_t argc) const
+napi_value JsAbilityStage::CallObjectMethod(
+    const char* name, bool &hasCaughtException, napi_value const * argv, size_t argc) const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "call %{public}s", name);
     if (!jsAbilityStageObj_) {
@@ -793,8 +807,9 @@ napi_value JsAbilityStage::CallObjectMethod(const char* name, napi_value const *
         TAG_LOGE(AAFwkTag::APPKIT, "JsAbilityStage call js, withResult failed: %{public}d", withResultStatus);
     }
     if (tryCatch.HasCaught()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "exception occurred");
+        TAG_LOGE(AAFwkTag::APPKIT, "%{public}s exception occurred", name);
         reinterpret_cast<NativeEngine*>(env)->HandleUncaughtException();
+        hasCaughtException = true;
     }
     return handleEscape.Escape(result);
 }
