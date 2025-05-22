@@ -290,6 +290,10 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv, std::vector<ani_option>& opt
     ani_option interopOption = {interop.data(), (void*)napiEnv};
     options.push_back(interopOption);
 
+    std::string taskpoolSupportInterop = optionPrefix + "taskpool-support-interop=true";
+    ani_option taskpoolSupportInteropOption = {taskpoolSupportInterop.data(), nullptr};
+    options.push_back(taskpoolSupportInteropOption);
+
     ani_options optionsPtr = {options.size(), options.data()};
     auto status = lazyApis_.ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.ani_vm);
     if (status != ANI_OK) {
