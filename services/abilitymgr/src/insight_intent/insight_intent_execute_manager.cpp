@@ -296,6 +296,15 @@ int32_t InsightIntentExecuteManager::UpdateFuncDecoratorParams(
         return ERR_INVALID_VALUE;
     }
 
+    if (param->abilityName_.empty()) {
+        param->abilityName_ = GetMainElementName(param);
+    }
+    if (param->abilityName_.empty()) {
+        TAG_LOGE(AAFwkTag::INTENT, "ability name empty");
+        return ERR_INVALID_VALUE;
+    }
+    want.SetElementName("", param->bundleName_, param->abilityName_, param->moduleName_);
+
     std::string srcEntrance = info.decoratorFile;
     want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
 
@@ -310,6 +319,33 @@ int32_t InsightIntentExecuteManager::UpdateFuncDecoratorParams(
     want.SetParam(INSIGHT_INTENT_FUNC_PARAM_METHODNAME, methodName);
     want.SetParam(INSIGHT_INTENT_FUNC_PARAM_METHODPARAMS, methodParams);
     return ERR_OK;
+}
+
+std::string InsightIntentExecuteManager::GetMainElementName(
+    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param)
+{
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    if (bms == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "get bms failed");
+        return "";
+    }
+
+    const int32_t userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    if (IN_PROCESS_CALL(bms->GetLauncherAbilityInfoSync(param->bundleName_, userId, abilityInfos)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::INTENT, "get launcher ability info failed");
+        return "";
+    }
+
+    for (auto &info: abilityInfos) {
+        TAG_LOGD(AAFwkTag::INTENT, "moduleName %{public}s", param->moduleName_.c_str());
+        if (info.moduleName == param->moduleName_) {
+            TAG_LOGI(AAFwkTag::INTENT, "ability matched %{public}s", info.name.c_str());
+            return info.name;
+        }
+    }
+
+    return "";
 }
 
 int32_t InsightIntentExecuteManager::UpdatePageDecoratorParams(
@@ -334,30 +370,13 @@ int32_t InsightIntentExecuteManager::UpdatePageDecoratorParams(
         return ERR_INVALID_VALUE;
     }
     if (uiAbilityName.empty()) {
-        auto bms = AbilityUtil::GetBundleManagerHelper();
-        if (bms == nullptr) {
-            TAG_LOGE(AAFwkTag::INTENT, "get bms failed");
-            return ERR_INVALID_VALUE;
-        }
-        const int32_t userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
-        std::vector<AppExecFwk::AbilityInfo> abilityInfos;
-        if (IN_PROCESS_CALL(bms->GetLauncherAbilityInfoSync(param->bundleName_, userId, abilityInfos)) != ERR_OK) {
-            TAG_LOGE(AAFwkTag::INTENT, "get launcher ability info failed");
-            return ERR_INVALID_VALUE;
-        }
-        for (auto &info: abilityInfos) {
-            TAG_LOGD(AAFwkTag::INTENT, "moduleName %{public}s", param->moduleName_.c_str());
-            if (info.moduleName == param->moduleName_) {
-                TAG_LOGI(AAFwkTag::INTENT, "ability matched %{public}s", info.name.c_str());
-                param->abilityName_ = info.name;
-                break;
-            }
-        }
+        uiAbilityName = GetMainElementName(param);
     }
-    if (param->abilityName_.empty()) {
+    if (uiAbilityName.empty()) {
         TAG_LOGE(AAFwkTag::INTENT, "ability name empty");
         return ERR_INVALID_VALUE;
     }
+    param->abilityName_ = uiAbilityName;
     want.SetElementName("", param->bundleName_, param->abilityName_, param->moduleName_);
     want.SetParam(INSIGHT_INTENT_PAGE_PARAM_PAGEPATH, pagePath);
     want.SetParam(INSIGHT_INTENT_PAGE_PARAM_NAVIGATIONID, navigationId);
