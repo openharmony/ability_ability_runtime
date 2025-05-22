@@ -260,6 +260,7 @@ private:
 
     int32_t RegisterIAbilityManagerCollaboratorInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterIAbilityManagerCollaboratorInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetAbilityManagerCollaboratorInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t RegisterStatusBarDelegateInner(MessageParcel &data, MessageParcel &reply);
     int32_t KillProcessWithPrepareTerminateInner(MessageParcel &data, MessageParcel &reply);
