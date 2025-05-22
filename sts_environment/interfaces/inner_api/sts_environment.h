@@ -46,7 +46,7 @@ public:
     static void InitSTSAppNS(const std::string& path);
     static void InitSTSSDKNS(const std::string& path);
     static void InitSTSSysNS(const std::string& path);
-    bool StartRuntime(napi_env napiEnv, std::vector<ani_option>& options);
+    bool StartRuntime(std::vector<ani_option>& options);
     void StopRuntime();
     void RegisterUncaughtExceptionHandler(const STSUncaughtExceptionInfo& handle);
     bool IsUISchedulerStarted()
