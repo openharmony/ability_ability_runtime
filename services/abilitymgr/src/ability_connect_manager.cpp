@@ -1366,6 +1366,15 @@ void AbilityConnectManager::CompleteStartServiceReq(const std::string &serviceUr
     }
 }
 
+std::shared_ptr<AbilityRecord> AbilityConnectManager::GetServiceRecordByAbilityRequest(
+    const AbilityRequest &abilityRequest)
+{
+    AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, GenerateBundleName(abilityRequest),
+        abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
+    std::string serviceKey = element.GetURI();
+    return GetServiceRecordByElementName(serviceKey);
+}
+
 std::shared_ptr<AbilityRecord> AbilityConnectManager::GetServiceRecordByElementName(const std::string &element)
 {
     std::lock_guard guard(serviceMapMutex_);

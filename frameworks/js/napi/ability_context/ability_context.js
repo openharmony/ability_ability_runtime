@@ -244,6 +244,22 @@ class AbilityContext extends Context {
   revokeDelegator() {
     return this.__context_impl__.revokeDelegator();
   }
+
+  startAppServiceExtensionAbility(want) {
+    return this.__context_impl__.startAppServiceExtensionAbility(want);
+  }
+
+  stopAppServiceExtensionAbility(want) {
+    return this.__context_impl__.stopAppServiceExtensionAbility(want);
+  }
+
+  connectAppServiceExtensionAbility(want, options) {
+    return this.__context_impl__.connectAppServiceExtensionAbility(want, options);
+  }
+
+  disconnectAppServiceExtensionAbility(connection, callback) {
+    return this.__context_impl__.disconnectAppServiceExtensionAbility(connection, callback);
+  }
 }
 
 export default AbilityContext;

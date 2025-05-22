@@ -75,6 +75,7 @@ constexpr const char* PERMISSION_NDK_START_SELF_UI_ABILITY = "ohos.permission.ND
 constexpr const char* PERMISSION_FUSION_ACCESS = "ohos.permission.ACCESS_AMS_FROM_FUSION";
 constexpr const char* PERMISSION_CUSTOM_SANDBOX = "ohos.permission.CUSTOM_SANDBOX";
 constexpr const char* PERMISSION_FILE_ACCESS_PERSIST = "ohos.permission.FILE_ACCESS_PERSIST";
+constexpr const char* PERMISSION_SUPPORT_APP_SERVICE_EXTENSION = "ohos.permission.SUPPORT_APP_SERVICE_EXTENSION";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS
