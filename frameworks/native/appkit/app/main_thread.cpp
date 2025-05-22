@@ -1615,6 +1615,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.uid = bundleInfo.applicationInfo.uid;
         options.apiTargetVersion = appInfo.apiTargetVersion;
         options.pkgContextInfoJsonStringMap = pkgContextInfoJsonStringMap;
+        options.isStartWithDebug = appLaunchData.GetDebugApp();
 #ifdef CJ_FRONTEND
         if (isCJApp) {
             options.langs.emplace(AbilityRuntime::Runtime::Language::CJ, true);
@@ -1692,6 +1693,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 });
         }
         AbilityRuntime::Runtime::DebugOption debugOption;
+        debugOption.codeLanguage = appInfo.codeLanguage;
         debugOption.isStartWithDebug = appLaunchData.GetDebugApp();
         debugOption.processName = processName;
         debugOption.isDebugApp = appInfo.debug;

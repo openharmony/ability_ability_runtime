@@ -30,6 +30,7 @@
 #include <uv.h>
 
 #include "accesstoken_kit.h"
+#include "bundle_constants.h"
 #include "config_policy_utils.h"
 #include "connect_server_manager.h"
 #include "constants.h"
@@ -44,11 +45,13 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "js_runtime.h"
+#include "js_utils.h"
 #include "module_checker_delegate.h"
 #include "ohos_sts_environment_impl.h"
 #include "parameters.h"
 #include "source_map.h"
 #include "source_map_operator.h"
+#include "static_core/runtime/tooling/inspector/debugger_arkapi.h"
 #include "sts_environment.h"
 #include "syscap_ts.h"
 #include "system_ability_definition.h"
@@ -334,15 +337,69 @@ bool STSRuntime::LoadSTSAppLibrary(const AppLibPathVec& appLibPaths)
 
 void STSRuntime::StartDebugMode(const DebugOption dOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "localDebug %{public}d", dOption.isDebugFromLocal);
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "developer Mode false");
+        return;
+    }
+    // Set instance id to tid after the first instance.
+    instanceId_ = static_cast<uint32_t>(getproctid());
+
+    bool isStartWithDebug = dOption.isStartWithDebug;
+    bool isDebugApp = dOption.isDebugApp;
+    std::string appProvisionType = dOption.appProvisionType;
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "Ark VM is starting debug mode [%{public}s]", isStartWithDebug ? "break" : "normal");
+    const std::string bundleName = bundleName_;
+    uint32_t instanceId = instanceId_;
+    std::string inputProcessName = bundleName_ != dOption.processName ? dOption.processName : "";
+    HdcRegister::DebugRegisterMode debugMode = HdcRegister::DebugRegisterMode::HDC_DEBUG_REG;
+    auto weak = stsEnv_;
+    HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp, debugMode,
+        [bundleName, isStartWithDebug, instanceId, weak, isDebugApp, appProvisionType]
+        (int socketFd, std::string option) {
+        TAG_LOGI(AAFwkTag::STSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s", socketFd, option.c_str());
+        // system is debuggable when const.secure is false and const.debuggable is true
+        bool isSystemDebuggable = system::GetBoolParameter("const.secure", true) == false &&
+            system::GetBoolParameter("const.debuggable", false) == true;
+        // Don't start any server if (system not in debuggable mode) and app is release version
+        // Starting ConnectServer in release app on debuggable system is only for debug mode, not for profiling mode.
+        if ((!isSystemDebuggable) && appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+            TAG_LOGE(AAFwkTag::STSRUNTIME, "not support release app");
+            return;
+        }
+        if (option.find(DEBUGGER) == std::string::npos) {
+            // if has old connect server, stop it
+            ConnectServerManager::Get().SendInstanceMessageAll(nullptr);
+            ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
+        } else {
+            if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+                TAG_LOGE(AAFwkTag::STSRUNTIME, "not support release app");
+                return;
+            }
+            if (weak == nullptr) {
+                TAG_LOGE(AAFwkTag::STSRUNTIME, "null weak");
+                return;
+            }
+            int32_t identifierId = weak->ParseHdcRegisterOption(option);
+            if (identifierId == -1) {
+                TAG_LOGE(AAFwkTag::JSENV, "Abnormal parsing of tid results");
+                return;
+            }
+            weak->debugMode_ = ark::ArkDebugNativeAPI::StartDebuggerForSocketPair(identifierId, socketFd);
+        }
+    });
+    DebuggerConnectionHandler(isDebugApp, isStartWithDebug);
 }
 
-bool STSRuntime::StartDebugger()
+void STSRuntime::DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug)
 {
+    ConnectServerManager::Get().StoreInstanceMessage(getproctid(), instanceId_, "Debugger");
     if (stsEnv_ == nullptr) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "null stsEnv_");
-        return false;
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "null stsEnv");
+        return;
     }
-    return stsEnv_->StartDebugger();
+    ark::ArkDebugNativeAPI::NotifyDebugMode(getproctid(), instanceId_, isStartWithDebug);
 }
 
 void STSRuntime::UnLoadSTSAppLibrary()
@@ -372,6 +429,7 @@ STSRuntime::~STSRuntime()
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
     Deinitialize();
+    StopDebugMode();
 }
 
 void STSRuntime::PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime)
@@ -424,6 +482,21 @@ bool STSRuntime::CreateStsEnv(const Options& options)
         aniOptions.push_back(ani_option{aotFileString.c_str(), nullptr});
         TAG_LOGI(AAFwkTag::STSRUNTIME, "aotFileString: %{public}s", aotFileString.c_str());
         aniOptions.push_back(ani_option{"--ext:--enable-an", nullptr});
+    }
+
+    std::string interpreerMode = "--ext:--interpreter-type=cpp";
+    std::string debugEnalbeMode = "--ext:--debugger-enable=true";
+    std::string debugLibraryPathMode = "--ext:--debugger-library-path=/system/lib64/libarkinspector.so";
+    std::string breadonstartMode = "--ext:--debugger-break-on-start";
+    if (options.isStartWithDebug) {
+        ani_option interpreterModeOption = {interpreerMode.data(), nullptr};
+        aniOptions.push_back(interpreterModeOption);
+        ani_option debugEnalbeModeOption = {debugEnalbeMode.data(), nullptr};
+        aniOptions.push_back(debugEnalbeModeOption);
+        ani_option debugLibraryPathModeOption = {debugLibraryPathMode.data(), nullptr};
+        aniOptions.push_back(debugLibraryPathModeOption);
+        ani_option breadonstartModeOption = {breadonstartMode.data(), nullptr};
+        aniOptions.push_back(breadonstartModeOption);
     }
     
     if (stsEnv_ == nullptr || !stsEnv_->StartRuntime(STSRuntime::jsRuntime_->GetNapiEnv(), aniOptions)) {
@@ -695,6 +768,15 @@ void STSRuntime::HandleUncaughtError()
         return;
     }
     stsEnv_->HandleUncaughtError();
+}
+
+void STSRuntime::StopDebugMode()
+{
+    CHECK_POINTER(stsEnv_);
+    if (stsEnv_->debugMode_) {
+        ConnectServerManager::Get().RemoveInstance(instanceId_);
+        ark::ArkDebugNativeAPI::StopDebugger();
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
