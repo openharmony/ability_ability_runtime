@@ -23,6 +23,7 @@
 #include "ability_connection.h"
 #include "element_name.h"
 #include "errors.h"
+#include "extension_ability_info.h"
 #include "operation.h"
 #include "want.h"
 
@@ -146,6 +147,17 @@ public:
         const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback);
 
     /**
+     * @brief connect appService ability connection.
+     *
+     * @param connectCaller The connection caller.
+     * @param connectReceiver The connection receiver.
+     * @param connectCallback The connection callback.
+     * @return Returns the result of connecting appService ability connection.
+     */
+    ErrCode ConnectAppServiceExtensionAbility(const sptr<IRemoteObject>& connectCaller,
+        const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback);
+    
+    /**
      * @brief disconnect ability connection.
      *
      * @param connectCaller The connection caller.
@@ -206,9 +218,10 @@ private:
     std::map<ConnectionInfo, std::vector<sptr<AbilityConnectCallback>>> abilityConnections_;
     ErrCode ConnectAbilityInner(const sptr<IRemoteObject> &connectCaller,
         const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback,
-        bool isUIService = false);
-    ErrCode CreateConnection(const sptr<IRemoteObject> &connectCaller,
-        const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback, bool isUIService);
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::SERVICE);
+    ErrCode CreateConnection(const sptr<IRemoteObject> &connectCaller, const AAFwk::Want &want, int accountId,
+        const sptr<AbilityConnectCallback> &connectCallback,
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::SERVICE);
     bool IsConnectingTimeout(const ConnectionInfo& info);
 };
 } // namespace AbilityRuntime

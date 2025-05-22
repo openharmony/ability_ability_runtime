@@ -278,6 +278,13 @@ public:
     bool IsConnectSupportCrossUser();
 
     /**
+     * IsSupportAppServiceExtension, check if it support app service extension.
+     *
+     * @return Whether it supports app service extension.
+     */
+    bool IsSupportAppServiceExtension();
+
+    /**
      * IsPrepareTerminateEnabled, check if it supports prepare terminate.
      *
      * @return Whether it supports prepare terminate.
@@ -374,6 +381,7 @@ private:
     volatile DeviceConfiguration<bool> isSupportMultiInstance_ = {false, false};
     std::mutex isConnectSupportCrossUserMutex_;
     volatile DeviceConfiguration<bool> isConnectSupportCrossUser_ = {false, false};
+    volatile DeviceConfiguration<bool> isSupportAppServiceExtension_ = {false, false};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
     std::mutex residentProcessInExtremeMemoryMutex_;
