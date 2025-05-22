@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "mock_media_permission_manager.h"
+#include "mock_ability_manager_client.h"
 #include "mock_accesstoken_kit.h"
 #include "mock_bundle_mgr_helper.h"
 #include "mock_ipc_skeleton.h"
@@ -54,7 +55,10 @@ void UriPermissionImplTest::SetUpTestCase()
 
 void UriPermissionImplTest::TearDownTestCase() {}
 
-void UriPermissionImplTest::SetUp() {}
+void UriPermissionImplTest::SetUp() {
+    AbilityManagerClient::collaborator_ = nullptr;
+    AbilityManagerClient::isNullInstance = false;
+}
 
 void UriPermissionImplTest::TearDown() {}
 
@@ -907,35 +911,6 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_004, TestSize.Level1)
     ret = upms->CheckUriPermission(tokenIdPermission, uri1, flagWrite)[0];
     ASSERT_EQ(ret, true);
     MyFlag::permissionProxyAuthorization_ = false;
-}
-
-/*
- * Feature: UriPermissionManagerStubImpl
- * Function: CheckUriPermission
- * SubFunction: NA
- * FunctionPoints: Check content uri.
-*/
-HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_005, TestSize.Level1)
-{
-    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
-    ASSERT_NE(upms, nullptr);
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
-    std::vector<Uri> uri = { Uri("content://com.example.app1001/data/storage/el2/base/haps/entry/files/test_1.txt") };
-    uint32_t flagRead = 1;
-    
-    uint32_t callerTokenId1 = 1001;
-    IPCSkeleton::callerTokenId = callerTokenId1;
-    MyFlag::tokenInfos[callerTokenId1] = TokenInfo(callerTokenId1, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
-    TokenIdPermission tokenIdPermission1(callerTokenId1);
-    auto ret = upms->CheckUriPermission(tokenIdPermission1, uri, flagRead)[0];
-    ASSERT_EQ(ret, false);
-
-    uint32_t callerTokenId2 = 1002;
-    IPCSkeleton::callerTokenId = callerTokenId2;
-    MyFlag::tokenInfos[callerTokenId2] = TokenInfo(callerTokenId2, MyATokenTypeEnum::TOKEN_NATIVE, "testProcess");
-    TokenIdPermission tokenIdPermission2(callerTokenId2);
-    ret = upms->CheckUriPermission(tokenIdPermission2, uri, flagRead)[0];
-    ASSERT_EQ(ret, false);
 }
 
 /*
@@ -1832,6 +1807,58 @@ HWTEST_F(UriPermissionImplTest, BoolVecToRawData_001, TestSize.Level1)
         }
     }
     EXPECT_TRUE(result);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: GrantBatchContentUriPermissionImpl
+ * SubFunction: NA
+ * FunctionPoints: GrantBatchContentUriPermissionImpl
+ */
+HWTEST_F(UriPermissionImplTest, GrantBatchContentUriPermissionImpl_001, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    AbilityManagerClient::isNullInstance = true;
+    uint32_t flag = 1;
+    uint32_t tokenId = 1001;
+    std::string targetBundleName = "com.example.test";
+    std::vector<std::string> contentUris;
+    auto ret = upms->GrantBatchContentUriPermissionImpl(contentUris, flag, tokenId, targetBundleName);
+    EXPECT_EQ(ret, INNER_ERR);
+    
+    contentUris.emplace_back("content://temp.txt");
+    ret = upms->GrantBatchContentUriPermissionImpl(contentUris, flag, tokenId, targetBundleName);
+    EXPECT_EQ(ret, INNER_ERR);
+
+    AbilityManagerClient::isNullInstance = false;
+    ret = upms->GrantBatchContentUriPermissionImpl(contentUris, flag, tokenId, targetBundleName);
+    EXPECT_EQ(ret, INNER_ERR);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: RevokeContentUriPermission
+ * SubFunction: NA
+ * FunctionPoints: RevokeContentUriPermission
+ */
+HWTEST_F(UriPermissionImplTest, RevokeContentUriPermission_001, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    AbilityManagerClient::isNullInstance = true;
+    uint32_t tokenId = 1001;
+    auto ret = upms->RevokeContentUriPermission(tokenId);
+    EXPECT_EQ(ret, ERR_OK);
+
+    upms->AddContentTokenIdRecord(tokenId);
+    ret = upms->RevokeContentUriPermission(tokenId);
+    EXPECT_EQ(ret, INNER_ERR);
+    
+    upms->AddContentTokenIdRecord(tokenId);
+    AbilityManagerClient::isNullInstance = false;
+    ret = upms->RevokeContentUriPermission(tokenId);
+    EXPECT_EQ(ret, INNER_ERR);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

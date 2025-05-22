@@ -60,6 +60,12 @@ struct GrantPolicyInfo {
     }
 };
 
+struct UPMSAppInfo {
+    uint32_t tokenId;
+    std::string bundleName;
+    std::string alterBundleName;
+};
+
 class UriPermissionManagerStubImpl : public UriPermissionManagerStub,
                                      public std::enable_shared_from_this<UriPermissionManagerStubImpl> {
 public:
@@ -134,8 +140,22 @@ private:
         uint32_t callerTokenId, uint32_t targetTokenId, const std::string &targetBundleName);
 
     int32_t GrantUriPermissionPrivilegedInner(const std::vector<Uri> &uriVec, uint32_t flag, uint32_t callerTokenId,
-        uint32_t targetTokenId, const std::string &targetAlterBundleName, int32_t hideSensitiveType);
+       UPMSAppInfo &targetAppInfo, int32_t hideSensitiveType);
     
+    int32_t GrantUriPermissionPrivilegedImpl(BatchStringUri &batchUris, uint32_t flag,
+        uint32_t callerTokenId, UPMSAppInfo &targetAppInfo, int32_t hideSensitiveType);
+
+    int32_t GrantBatchContentUriPermissionImpl(const std::vector<std::string> &contentUris,
+        uint32_t flag, uint32_t targetTokenId, const std::string &targetBundleName);
+
+    int32_t RevokeContentUriPermission(uint32_t tokenId);
+
+    bool IsContentUriGranted(uint32_t tokenId);
+
+    void AddContentTokenIdRecord(uint32_t tokenId);
+
+    void RemoveContentTokenIdRecord(uint32_t tokenId);
+
     int32_t GrantBatchMediaUriPermissionImpl(const std::vector<std::string> &mediaUris, uint32_t flag,
         uint32_t callerTokenId, uint32_t targetTokenId, int32_t hideSensitiveType);
 
@@ -200,6 +220,8 @@ private:
     sptr<StorageManager::IStorageManager> storageManager_ = nullptr;
     std::set<uint32_t> permissionTokenMap_;
     std::mutex ptMapMutex_;
+    std::set<uint32_t> contentTokenIdSet_;
+    std::mutex contentTokenIdSetMutex_;
 };
 }  // namespace OHOS::AAFwk
 #endif  // OHOS_ABILITY_RUNTIME_URI_PERMISSION_MANAGER_STUB_IMPL_H

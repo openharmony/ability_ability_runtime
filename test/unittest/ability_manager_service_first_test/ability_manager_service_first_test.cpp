@@ -1392,6 +1392,20 @@ HWTEST_F(AbilityManagerServiceFirstTest, RegisterIAbilityManagerCollaborator_001
 
 /*
  * Feature: AbilityManagerService
+ * Function: GetAbilityManagerCollaborator
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetAbilityManagerCollaborator
+ * @tc.require: issueI7LF4X
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, GetAbilityManagerCollaborator_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    auto broker = abilityMs_->GetAbilityManagerCollaborator();
+    EXPECT_EQ(broker, nullptr);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: SetLockedState
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService SetLockedState
