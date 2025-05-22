@@ -53,7 +53,9 @@ export default class UIAbility {
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {}
   onWindowStageCreate(windowStage: window.WindowStage): void {}
+  onWindowStageWillDestroy(windowStage: window.WindowStage): void {}
   onWindowStageDestroy(): void {}
+  onWindowStageRestore(windowStage: window.WindowStage): void {}
   onDestroy(): void {}
   onDestroyAsync(): Promise<void> {
     this.isOnDestroyAsync = false;
