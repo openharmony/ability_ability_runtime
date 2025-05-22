@@ -51,6 +51,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+std::once_flag StsUIAbility::singletonFlag_;
 namespace {
 #ifdef SUPPORT_GRAPHICS
 const std::string PAGE_STACK_PROPERTY_NAME = "pageStack";
@@ -76,11 +77,11 @@ enum CollaborateResult {
 constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;
 constexpr const char* UI_ABILITY_CONTEXT_CLASS_NAME = "Lapplication/UIAbilityContext/UIAbilityContext;";
+constexpr const char* UI_ABILITY_CLASS_NAME = "L@ohos/app/ability/UIAbility/UIAbility;";
 
-
-void PromiseCallback(ani_env* env, ani_object aniObj)
+void OnDestroyPromiseCallback(ani_env* env, ani_object aniObj)
 {
-    TAG_LOGI(AAFwkTag::UIABILITY, "PromiseCallback");
+    TAG_LOGI(AAFwkTag::UIABILITY, "OnDestroyPromiseCallback");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
@@ -169,6 +170,32 @@ void StsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath, application);
 }
 
+bool StsUIAbility::BindNativeMethods()
+{
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "env null");
+        return false;
+    }
+    ani_class cls {};
+    ani_status status = env->FindClass(UI_ABILITY_CLASS_NAME, &cls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "FindClass failed status: %{public}d", status);
+        return false;
+    }
+    std::call_once(singletonFlag_, [&status, env, cls]() {
+        std::array functions = {
+            ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void*>(OnDestroyPromiseCallback) },
+        };
+        status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
+    });
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "Class_BindNativeMethods failed status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 void StsUIAbility::UpdateAbilityObj(
     std::shared_ptr<AbilityInfo> abilityInfo, const std::string &moduleName, const std::string &srcPath)
 {
@@ -178,17 +205,15 @@ void StsUIAbility::UpdateAbilityObj(
         moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
         false, abilityInfo->srcEntrance);
 
-    std::array functions = {
-        ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void*>(PromiseCallback) },
-    };
+    if (!BindNativeMethods()) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "BindNativeMethods failed");
+        return;
+    }
     ani_status status = ANI_ERROR;
     auto env = stsRuntime_.GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
-    }
-    if ((status = env->Class_BindNativeMethods(stsAbilityObj_->aniCls, functions.data(), functions.size())) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
     }
     auto callee = CreateEtsCallee(env);
     if ((status = env->Object_SetFieldByName_Ref(stsAbilityObj_->aniObj, "callee", callee)) != ANI_OK) {
@@ -1267,7 +1292,7 @@ bool StsUIAbility::CallObjectMethod(bool withResult, const char *name, const cha
         ani_boolean res = false;
         va_list args;
         va_start(args, signature);
-        if ((status = env->Object_CallMethod_Boolean(obj, method, &res, args)) != ANI_OK) {
+        if ((status = env->Object_CallMethod_Boolean_V(obj, method, &res, args)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
             stsRuntime_.HandleUncaughtError();
             return false;

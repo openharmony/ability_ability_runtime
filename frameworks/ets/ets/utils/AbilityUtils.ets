@@ -14,6 +14,11 @@
  */
 
 import { BusinessError, AsyncCallback } from '@ohos.base';
+import hilog from '@ohos.hilog'
+
+const DOMAIN_ID = 0xD001300;
+const TAG = 'AbilityUtils';
+const LEVEL = 100;
 
 export default class AsyncCallbackWrapper<T> {
   private myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
@@ -24,5 +29,49 @@ export default class AsyncCallbackWrapper<T> {
 
   invoke(err: BusinessError<void>, data: T) : void {
     this.myFun_(err, data);
+  }
+}
+
+export class AbilityUtils {
+  public static getClassType(obj: Object): ClassType | undefined {
+    try {
+      let type = Type.of(obj);
+      return type as ClassType;
+    } catch (err) {
+      hilog.error(DOMAIN_ID, TAG, `getClassType error: ${err}`);
+      return undefined;
+    }
+  }
+
+  public static isInherited(type: ClassType, methodName: string, stopBaseClassType: ClassType): boolean | undefined {
+    let currType = type;
+    let level = 0;
+    while (!currType.equals(stopBaseClassType)) {
+      try {
+        for (let methodIdx = 0; methodIdx < currType.getMethodsNum(); methodIdx++) {
+          const method = currType.getMethod(methodIdx)
+          if (method.getName().equals(methodName)) {
+            if (!method.isInherited()) {
+              return false;
+            }
+          }
+        }
+        let baseType = currType.getBaseType();
+        if (baseType.equals(currType)) {
+          hilog.error(DOMAIN_ID, TAG, `isInherited: baseType equals currType (${currType.getName()})`);
+          return undefined;
+        }
+        level++;
+        if (level >= LEVEL) {
+          hilog.error(DOMAIN_ID, TAG, `isInherited: inheritance level >= ${LEVEL}, aborting`);
+          return undefined;
+        }
+        currType = baseType;
+      } catch (err) {
+        hilog.error(DOMAIN_ID, TAG, `isInherited error: ${err}`);
+        return undefined;
+      }
+    }
+    return true;
   }
 }

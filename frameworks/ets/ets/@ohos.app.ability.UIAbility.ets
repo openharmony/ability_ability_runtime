@@ -18,6 +18,7 @@ import UIAbilityContext from 'application.UIAbilityContext';
 import Want from '@ohos.app.ability.Want';
 import rpc from '@ohos.rpc';
 import window from '@ohos.window';
+import { AbilityUtils } from './utils/AbilityUtils';
 
 export type OnReleaseCallback = (msg: string) => void;
 export type CalleeCallback = (indata: rpc.MessageSequence) => rpc.Parcelable;
@@ -31,19 +32,26 @@ export interface Callee {
 }
 
 export default class UIAbility {
-  private isOnDestroyAsync: boolean = true;
   private destroyCallbackPoint: long;
   private native nativeOnDestroyCallback(): void;
   private callOnDestroy(): boolean {
-    let p = this.onDestroyAsync();
-    if (this.isOnDestroyAsync) {
-      p.then<void>((a:undefined): void => {
-        this.nativeOnDestroyCallback();
-      });
-    } else {
+    const derivedClassType = AbilityUtils.getClassType(this);
+    if (derivedClassType === undefined) {
       this.onDestroy();
+      return false;
     }
-    return this.isOnDestroyAsync;
+    const uiAbilityClassType = AbilityUtils.getClassType(new UIAbility());
+    if (uiAbilityClassType === undefined) {
+      this.onDestroy();
+      return false;
+    }
+    const isInherited = AbilityUtils.isInherited(derivedClassType, "onDestroyAsync", uiAbilityClassType);
+    if (isInherited === false) {
+      this.onDestroyAsync().then(() => this.nativeOnDestroyCallback());
+      return true;
+    }
+    this.onDestroy();
+    return false;
   }
 
   context: UIAbilityContext = new UIAbilityContext();
@@ -56,7 +64,6 @@ export default class UIAbility {
   onWindowStageDestroy(): void {}
   onDestroy(): void {}
   onDestroyAsync(): Promise<void> {
-    this.isOnDestroyAsync = false;
     return new Promise<void>((resolve: (a: undefined)=>void, reject: (err: Error)=>void): void => {});
   }
   onForeground(): void {}
