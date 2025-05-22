@@ -343,8 +343,8 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The user specified windowOptions, but the device does not support it",
         {ERR_NOT_SUPPORTED_PRODUCT_TYPE_SOLUTION_ONE});
     messageMap_[ERR_NOT_IN_APP_PROVISION_MODE] = GetAaToolErrorInfo("10106002",
-        "The target application does not support debug mode.",
-        "The application specified by the aa tool is a Release version and does not support Debug mode",
+        "The aa start command's window option or the aa test command does not support app with release signature.",
+        "The application started by the aa command is a release signature",
         {ERR_NOT_IN_APP_PROVISION_MODE_SOLUTION_ONE});
     messageMap_[ERR_NOT_DEBUG_APP] = GetAaToolErrorInfo("10106701",
         "Cannot debug applications using a release certificate.",
