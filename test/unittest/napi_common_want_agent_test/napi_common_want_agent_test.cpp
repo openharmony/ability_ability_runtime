@@ -71,6 +71,7 @@ HWTEST_F(NapiCommonWantAgentTest, UnwrapWantAgent_0100, Function | MediumTest | 
     napi_value jsParam = nullptr;
     void **result = nullptr;
     OHOS::AppExecFwk::UnwrapWantAgent(env, jsParam, result);
+    EXPECT_EQ(result, nullptr);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
