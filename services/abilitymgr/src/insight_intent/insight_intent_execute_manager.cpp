@@ -111,12 +111,30 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
     }
 
     std::string srcEntry;
-    auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(elementName,
-        want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME), executeMode, srcEntry);
+    std::string intentName = want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME);
+    auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(elementName, intentName, executeMode, srcEntry);
     if (ret != ERR_OK || srcEntry.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "empty srcEntry");
-        return ERR_INVALID_VALUE;
+        TAG_LOGW(AAFwkTag::INTENT, "empty srcEntry");
+        ExtractInsightIntentInfo info;
+        const int32_t userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
+        DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
+            want.GetBundle(), want.GetModuleName(), intentName, userId, info);
+        if (info.genericInfo.decoratorType != AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY) {
+            TAG_LOGW(AAFwkTag::INTENT, "decorator %{public}s misMatch", info.genericInfo.decoratorType.c_str());
+            return ERR_INVALID_VALUE;
+        }
+        InsightIntentType type = InsightIntentType::DECOR_ENTRY;
+        want.SetParam(INSIGHT_INTENT_DECORATOR_TYPE, static_cast<int>(type));
+        std::string srcEntrance = info.decoratorFile;
+        want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
+        std::vector<ExecuteMode> supportModes = info.genericInfo.get<InsightIntentEntryInfo>().executeMode;
+        bool found = std::find(supportModes.begin(), supportModes.end(), executeMode) != supportModes.end();
+        if (!found) {
+            TAG_LOGE(AAFwkTag::INTENT, "execute mode mismatch");
+            return ERR_INVALID_VALUE;
+        }
     }
+
     want.SetParam(INSIGHT_INTENT_SRC_ENTRY, srcEntry);
     want.SetParam(INSIGHT_INTENT_EXECUTE_PARAM_ID, std::to_string(intentId));
     want.SetParam(INSIGHT_INTENT_EXECUTE_PARAM_MODE, executeMode);
