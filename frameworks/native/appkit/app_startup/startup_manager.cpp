@@ -179,7 +179,7 @@ int32_t StartupManager::LoadAppStartupTaskConfig(bool &needRunAutoStartupTask)
 }
 
 int32_t StartupManager::BuildAppStartupTaskManager(const std::vector<std::string> &inputDependencies,
-    std::shared_ptr<StartupTaskManager> &startupTaskManager)
+    std::shared_ptr<StartupTaskManager> &startupTaskManager, bool supportFeatureModule)
 {
     std::map<std::string, std::shared_ptr<StartupTask>> currentStartupTasks;
     std::set<std::string> dependenciesSet;
@@ -195,7 +195,7 @@ int32_t StartupManager::BuildAppStartupTaskManager(const std::vector<std::string
             TAG_LOGE(AAFwkTag::STARTUP, "%{public}s startup task null", iter.c_str());
             return ERR_STARTUP_INTERNAL_ERROR;
         }
-        if (findResult->second->GetModuleType() == AppExecFwk::ModuleType::FEATURE) {
+        if (!supportFeatureModule && findResult->second->GetModuleType() == AppExecFwk::ModuleType::FEATURE) {
             TAG_LOGE(AAFwkTag::STARTUP, "manual task of feature type is not supported");
             return ERR_STARTUP_DEPENDENCY_NOT_FOUND;
         }

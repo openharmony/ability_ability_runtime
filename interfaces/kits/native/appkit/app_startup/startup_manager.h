@@ -78,7 +78,7 @@ public:
         const std::string &moduleName);
 
     int32_t BuildAppStartupTaskManager(const std::vector<std::string> &inputDependencies,
-        std::shared_ptr<StartupTaskManager> &startupTaskManager);
+        std::shared_ptr<StartupTaskManager> &startupTaskManager, bool supportFeatureModule);
 
     int32_t OnStartupTaskManagerComplete(uint32_t id);
 
