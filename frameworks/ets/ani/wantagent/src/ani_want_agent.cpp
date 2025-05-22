@@ -418,13 +418,13 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         paras.wants.emplace_back(want);
     }
 
-    ani_boolean hasActionType = true;
+    ani_boolean isUndefined = true;
     ani_ref actionTypeRef = nullptr;
-    if (!AppExecFwk::GetPropertyRef(env, info, "actionType", actionTypeRef, hasActionType)) {
+    if (!AppExecFwk::GetPropertyRef(env, info, "actionType", actionTypeRef, isUndefined)) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
         return PARAMETER_ERROR;
     }
-    if (!hasActionType) {
+    if (!isUndefined) {
         AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(
             env, reinterpret_cast<ani_enum_item>(actionTypeRef), paras.operationType);
     }
@@ -436,14 +436,13 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
     }
     paras.requestCode = dRequestCode;
 
-    ani_boolean hasActionFlags = true;
     ani_ref actionFlagsRef = nullptr;
-    if (!AppExecFwk::GetPropertyRef(env, info, "actionFlags", actionFlagsRef, hasActionFlags)) {
+    if (!AppExecFwk::GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isUndefined)) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
         return PARAMETER_ERROR;
     }
     ani_array_ref actionFlagsArr = reinterpret_cast<ani_array_ref>(actionFlagsRef);
-    if (!hasActionFlags) {
+    if (!isUndefined) {
         ani_size actionFlagsLen = 0;
         if ((status = env->Array_GetLength(actionFlagsArr, &actionFlagsLen)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Array_GetLength failed status: %{public}d", status);
@@ -459,6 +458,24 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
             AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(
                 env, reinterpret_cast<ani_object>(actionFlagRef), actionFlag);
             paras.wantAgentFlags.emplace_back(static_cast<WantAgentConstant::Flags>(actionFlag));
+        }
+    }
+
+    ani_ref extraInfoRef = nullptr;
+    if (!AppExecFwk::GetPropertyRef(env, info, "extraInfos", extraInfoRef, isUndefined)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
+        return PARAMETER_ERROR;
+    }
+    if (isUndefined) {
+        if (!AppExecFwk::GetPropertyRef(env, info, "extraInfo", extraInfoRef, isUndefined)) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
+            return PARAMETER_ERROR;
+        }
+    }
+    if (!isUndefined) {
+        if (!UnwrapWantParams(env, extraInfoRef, paras.extraInfo)) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "Convert extraInfo failed");
+            return PARAMETER_ERROR;
         }
     }
     return BUSINESS_ERROR_CODE_OK;
@@ -535,6 +552,9 @@ int32_t EtsWantAgent::GetTriggerInfo(ani_env *env, ani_object triggerInfoObj, Tr
         }
     }
 
+    std::string permission = "";
+    AppExecFwk::GetStringOrUndefined(env, triggerInfoObj, "permission", permission);
+
     std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
     ani_ref extraInfoRef = nullptr;
     if (!AppExecFwk::GetPropertyRef(env, triggerInfoObj, "extraInfos", extraInfoRef, isUndefined)) {
@@ -569,7 +589,6 @@ int32_t EtsWantAgent::GetTriggerInfo(ani_env *env, ani_object triggerInfoObj, Tr
         }
     }
 
-    std::string permission = "";
     TriggerInfo triggerInfoData(permission, extraInfo, want, startOptions, code);
     triggerInfo = triggerInfoData;
     return BUSINESS_ERROR_CODE_OK;
