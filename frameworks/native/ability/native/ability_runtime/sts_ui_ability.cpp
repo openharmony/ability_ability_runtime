@@ -539,13 +539,17 @@ void StsUIAbility::OnSceneRestored()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     UIAbility::OnSceneRestored();
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnSceneRestored called");
 
     auto stsAppWindowStage = CreateAppWindowStage();
     if (stsAppWindowStage == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsAppWindowStage");
         return;
     }
+    UpdateStsWindowStage(reinterpret_cast<ani_ref>(stsAppWindowStage));
+    stsWindowStageObj_ = std::make_shared<STSNativeReference>();
+    stsWindowStageObj_->aniObj = stsAppWindowStage;
+    CallObjectMethod(false, "onWindowStageRestore", nullptr, stsAppWindowStage);
 }
 
 void StsUIAbility::OnSceneWillDestroy()
