@@ -93,8 +93,8 @@ public:
 
     static std::vector<std::unique_ptr<Runtime>> CreateRuntimes(Options& options);
     static std::unique_ptr<Runtime> Create(Options& options);
-    static void SavePreloaded(std::unique_ptr<Runtime>&& instance);
-    static std::unique_ptr<Runtime> GetPreloaded();
+    static void SavePreloaded(std::unique_ptr<Runtime>&& instance, Language key = Language::JS);
+    static std::unique_ptr<Runtime> GetPreloaded(Language key = Language::JS);
 
     Runtime() = default;
     virtual ~Runtime() = default;
