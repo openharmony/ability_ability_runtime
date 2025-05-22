@@ -64,6 +64,8 @@ public:
 
     void OnStop() override;
 
+    void OnFormLocationChanged(const int64_t formId, const int32_t formLocation) override;
+
 private:
     napi_value CallObjectMethod(const char* name, const char* bakName, napi_value const * argv = nullptr,
         size_t argc = 0);
