@@ -11658,7 +11658,8 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
     AbilityRuntime::ExtractInsightIntentGenericInfo infos = GetInsightIntentGenericInfo(param);
     bool openLinkExecuteFlag = infos.decoratorType == AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_LINK;
     bool ignoreAbilityName = openLinkExecuteFlag ||
-        (infos.decoratorType == AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_PAGE);
+        (infos.decoratorType == AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_PAGE) ||
+        (infos.decoratorType == AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_FUNCTION);
     auto paramPtr = std::make_shared<InsightIntentExecuteParam>(param);
     int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateParam(key, callerToken,
         paramPtr, callerBundlename, ignoreAbilityName);
