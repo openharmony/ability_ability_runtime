@@ -44,6 +44,11 @@ struct CallOnSaveStateInfo {
     AppExecFwk::StateReason reason;
 };
 
+struct CallObjectMethodParams {
+    bool withResult = false;
+    bool showMethodNotFoundLog = true;
+};
+
 class JsUIAbility : public UIAbility {
 public:
     /**
@@ -397,6 +402,8 @@ private:
 private:
     napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
         bool withResult = false, bool showMethodNotFoundLog = true);
+    napi_value CallObjectMethod(const char *name, bool &hasCaughtException,
+        const CallObjectMethodParams &callObjectMethodParams, napi_value const *argv = nullptr, size_t argc = 0);
     bool CheckPromise(napi_value result);
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo);
