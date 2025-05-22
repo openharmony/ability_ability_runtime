@@ -29,6 +29,8 @@ export default class ApplicationContext extends Context {
   public native setSupportedProcessCacheSync(isSupported: boolean): void;
   public native nativegetRunningProcessInformation(callback: AsyncCallbackWrapper<Array<ProcessInformation>>): void;
   public native nativeclearUpApplicationData(callback: AsyncCallbackWrapper<void>): void;
+  public native nativesetLanguage(language: string): void;
+  public native nativesetFontSizeScale(fontSizeScale: number): void;
   public native nativesetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
   public native nativesetFont(font: string): void; 
   public native nativerestartApp(want: Want): void;
@@ -172,6 +174,14 @@ export default class ApplicationContext extends Context {
         });
       });
     return p;
+  }
+
+  setLanguage(language: string): void {
+    this.nativesetLanguage(language);
+  }
+
+  setFontSizeScale(fontSizeScale: number): void {
+    this.nativesetFontSizeScale(fontSizeScale);
   }
 
   setColorMode(colorMode: ConfigurationConstant.ColorMode): void {
