@@ -1105,5 +1105,18 @@ ErrCode BundleMgrHelper::GetCloneBundleInfoExt(const std::string &bundleName, ui
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetCloneBundleInfoExt(bundleName, flags, appIndex, userId, bundleInfo);
 }
+
+ErrCode BundleMgrHelper::GetLauncherAbilityInfoSync(const std::string &bundleName, int32_t userId,
+    std::vector<AbilityInfo> &abilityInfo)
+{
+    TAG_LOGI(AAFwkTag::BUNDLEMGRHELPER, "GetLauncherAbilityInfoSync");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetLauncherAbilityInfoSync(bundleName, userId, abilityInfo);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

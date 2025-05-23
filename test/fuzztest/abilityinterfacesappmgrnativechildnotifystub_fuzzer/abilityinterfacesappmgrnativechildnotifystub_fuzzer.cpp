@@ -60,6 +60,7 @@ public:
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override{ return 0; };
     void OnNativeChildStarted(const sptr<IRemoteObject> &nativeChild) override{};
     void OnError(int32_t errCode) override{};
+    int32_t OnNativeChildExit(int32_t pid, int32_t signal) override{ return 0; };
 };
 
 sptr<Token> GetFuzzAbilityToken()

@@ -26,6 +26,7 @@
 #include "context.h"
 #include "ability_stage_context.h"
 #include "application_configuration_manager.h"
+#include "app_launch_data.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -181,12 +182,14 @@ public:
      */
     virtual void SetConfiguration(const Configuration &config);
 
-    void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName, std::string &flag);
+    void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName,
+        std::function<void(std::string)> callback, bool &isAsync);
 
     void SchedulePrepareTerminate(const std::string &moduleName,
         std::function<void(AppExecFwk::OnPrepareTerminationResult)> callback, bool &isAsync);
 
-    void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName, std::string &flag);
+    void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName,
+        std::function<void(std::string)> callback, bool &isAsync);
 
     virtual std::shared_ptr<Configuration> GetConfiguration() const;
 
@@ -230,13 +233,15 @@ public:
     bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
 #endif
 
-    void PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName);
+    void PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName,
+        std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
 
 private:
     void UpdateAppContextResMgr(const Configuration &config);
     bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
     bool isUpdateFontSize(Configuration &config, AbilityRuntime::SetLevel level);
     bool IsUpdateLanguageNeeded(Configuration &config, AbilityRuntime::SetLevel level);
+    bool IsUpdateLocaleNeeded(const Configuration& updatedConfig, Configuration &config);
     const std::function<void()> CreateAutoStartupCallback(
         const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
         const std::shared_ptr<AbilityLocalRecord> abilityRecord,

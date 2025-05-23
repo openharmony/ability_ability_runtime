@@ -31,7 +31,7 @@ napi_value CreateJsServiceExtensionContext(napi_env env, std::shared_ptr<Service
 class JSServiceExtensionConnection : public AbilityConnectCallback {
 public:
     explicit JSServiceExtensionConnection(napi_env env);
-    ~JSServiceExtensionConnection();
+    virtual ~JSServiceExtensionConnection();
     void OnAbilityConnectDone(
         const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode) override;
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;

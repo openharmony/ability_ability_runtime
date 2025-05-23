@@ -1031,7 +1031,7 @@ bool AppMgrClient::SetAppFreezeFilter(int32_t pid)
 
 int32_t AppMgrClient::ChangeAppGcState(pid_t pid, int32_t state, uint64_t tid)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "tid is %{private}llu", tid);
+    TAG_LOGD(AAFwkTag::APPMGR, "tid is %{private}" PRIu64, tid);
     if (mgrHolder_ == nullptr) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
@@ -1173,6 +1173,24 @@ int32_t AppMgrClient::UnregisterApplicationStateObserver(const sptr<IApplication
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
     return service->UnregisterApplicationStateObserver(observer);
+}
+
+int32_t AppMgrClient::RegisterNativeChildExitNotify(sptr<INativeChildNotify> notify)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->RegisterNativeChildExitNotify(notify);
+}
+
+int32_t AppMgrClient::UnregisterNativeChildExitNotify(sptr<INativeChildNotify> notify)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->UnregisterNativeChildExitNotify(notify);
 }
 
 int32_t AppMgrClient::NotifyPageShow(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)

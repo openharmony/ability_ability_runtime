@@ -28,8 +28,9 @@ namespace AbilityRuntime {
 using State = JsInsightIntentUtils::State;
 
 class JsInsightIntentEntry final : public InsightIntentExecutor,
-                                public std::enable_shared_from_this<JsInsightIntentEntry> {
+                                   public std::enable_shared_from_this<JsInsightIntentEntry> {
 public:
+    explicit JsInsightIntentEntry(JsRuntime& runtime);
     JsInsightIntentEntry(const JsInsightIntentEntry&) = delete;
     JsInsightIntentEntry(const JsInsightIntentEntry&&) = delete;
     JsInsightIntentEntry& operator=(const JsInsightIntentEntry&) = delete;
@@ -65,8 +66,6 @@ public:
         bool& isAsync) override;
 
 private:
-    explicit JsInsightIntentEntry(JsRuntime& runtime);
-
     static std::unique_ptr<NativeReference> LoadJsCode(
         const InsightIntentExecutorInfo& insightIntentInfo,
         JsRuntime& runtime);

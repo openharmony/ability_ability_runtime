@@ -16,28 +16,29 @@
 #ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_XCOLLIE_H
 #define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_XCOLLIE_H
 
-#include <stdint.h>
-#include "xcollie/xcollie.h"
-#include "xcollie/xcollie_define.h"
+#include <cstdint>
+#include <string>
 
 namespace OHOS {
 namespace AbilityRuntime {
+constexpr uint32_t LESS_TIME_OUT_SECONDS = 10;
+constexpr uint32_t DEFAULT_TIME_OUT_SECONDS = 30;
 class AbilityManagerXCollie {
 public:
-    AbilityManagerXCollie(const std::string &tag, uint32_t timeoutSeconds = TIME_OUT_SECONDS,
-        std::function<void(void *)> func = nullptr, void* arg = nullptr,
-        uint32_t flag = HiviewDFX::XCOLLIE_FLAG_LOG);
+    AbilityManagerXCollie(const std::string &tag, uint32_t timeoutSeconds = DEFAULT_TIME_OUT_SECONDS);
 
     ~AbilityManagerXCollie();
 
     void CancelAbilityManagerXCollie();
-
-    static const uint32_t TIME_OUT_SECONDS;
 private:
     bool isCanceled_ = false;
     int32_t id_ = -1;
-    std::string tag_;
 };
 }
 }
+
+#define XCOLLIE_TIMER_DEFAULT(TAG) AbilityRuntime::AbilityManagerXCollie XCOLLIETIMER1(TAG)
+#define XCOLLIE_TIMER_LESS(TAG) \
+    AbilityRuntime::AbilityManagerXCollie XCOLLIETIMER2(TAG, AbilityRuntime::LESS_TIME_OUT_SECONDS)
+
 #endif //OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_XCOLLIE_H

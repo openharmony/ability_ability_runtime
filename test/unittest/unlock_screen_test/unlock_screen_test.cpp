@@ -17,6 +17,7 @@
 
 #include "unlock_screen_manager.h"
 #include "ability_manager_service.h"
+#include "screenlock_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -51,8 +52,13 @@ void UnlockScreenTest::TearDown()
  */
 HWTEST_F(UnlockScreenTest, UnlockScreen_001, TestSize.Level1)
 {
+    bool isScreenLocked = OHOS::ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
     bool ret = UnlockScreenManager::GetInstance().UnlockScreen();
-    EXPECT_EQ(ret, true);
+    if (isScreenLocked) {
+        EXPECT_EQ(ret, false);
+    } else {
+        EXPECT_EQ(ret, true);
+    }
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

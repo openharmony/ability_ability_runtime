@@ -240,7 +240,9 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
     bool isUpdateAppColor = IsUpdateColorNeeded(config, level);
     bool isUpdateAppFontSize = isUpdateFontSize(config, level);
     bool isUpdateAppLanguage = IsUpdateLanguageNeeded(config, level);
-    if (!isUpdateAppColor && !isUpdateAppFontSize && !isUpdateAppLanguage && config.GetItemSize() == 0) {
+    bool isUpdateAppLocale = IsUpdateLocaleNeeded(*configuration_, config);
+    if (!isUpdateAppColor && !isUpdateAppFontSize && !isUpdateAppLanguage && !isUpdateAppLocale &&
+        config.GetItemSize() == 0) {
         TAG_LOGD(AAFwkTag::APPKIT, "configuration need not updated");
         return;
     }
@@ -433,7 +435,8 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         abilityStage->Init(stageContext, weak);
         auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, abilityRecord, callback);
         if (autoStartupCallback != nullptr) {
-            abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
+            abilityStage->RunAutoStartupTask(autoStartupCallback, abilityRecord->GetWant(), isAsyncCallback,
+                stageContext);
             if (isAsyncCallback) {
                 TAG_LOGI(AAFwkTag::APPKIT, "wait startup");
                 return nullptr;
@@ -640,7 +643,7 @@ bool OHOSApplication::AddAbilityStage(
     abilityStage->Init(stageContext, weak);
     auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, hapModuleInfo, callback);
     if (autoStartupCallback != nullptr) {
-        abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
+        abilityStage->RunAutoStartupTask(autoStartupCallback, nullptr, isAsyncCallback, stageContext);
         if (isAsyncCallback) {
             TAG_LOGI(AAFwkTag::APPKIT, "wait startup");
             return false;
@@ -704,15 +707,31 @@ void OHOSApplication::SetConfiguration(const Configuration &config)
     }
 }
 
-void OHOSApplication::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName, std::string &flag)
+void OHOSApplication::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName,
+    std::function<void(std::string)> callback, bool &isAsync)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    TAG_LOGD(AAFwkTag::APPKIT, "ScheduleAcceptWant called");
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callback");
+        return;
+    }
     auto iter = abilityStages_.find(moduleName);
-    if (iter != abilityStages_.end()) {
-        auto abilityStage = iter->second;
-        if (abilityStage) {
-            flag = abilityStage->OnAcceptWant(want);
-        }
+    if (iter == abilityStages_.end() && iter->second == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "%{public}s is not in abilityStage", moduleName.c_str());
+        return;
+    }
+
+    auto *callbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Create();
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
+        return;
+    }
+    callbackInfo->Push(callback);
+    if (iter->second->OnAcceptWant(want, callbackInfo, isAsync).empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not exist");
+        std::string result;
+        callbackInfo->Call(result);
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Destroy(callbackInfo);
     }
 }
 
@@ -745,21 +764,34 @@ void OHOSApplication::SchedulePrepareTerminate(const std::string &moduleName,
 }
 
 void OHOSApplication::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName,
-    std::string &flag)
+    std::function<void(std::string)> callback, bool &isAsync)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "call");
+    TAG_LOGD(AAFwkTag::APPKIT, "ScheduleNewProcessRequest call");
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callback");
+        return;
+    }
+
     if (abilityStages_.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "abilityStages_ empty");
         return;
     }
     auto iter = abilityStages_.find(moduleName);
-    if (iter == abilityStages_.end()) {
+    if (iter == abilityStages_.end() || iter->second == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "%{public}s not in abilityStage", moduleName.c_str());
         return;
     }
-    auto abilityStage = iter->second;
-    if (abilityStage) {
-        flag = abilityStage->OnNewProcessRequest(want);
+    auto *callbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Create();
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
+        return;
+    }
+    callbackInfo->Push(callback);
+    if (iter->second->OnNewProcessRequest(want, callbackInfo, isAsync).empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not exist");
+        std::string result;
+        callbackInfo->Call(result);
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Destroy(callbackInfo);
     }
 }
 
@@ -869,7 +901,8 @@ void OHOSApplication::CleanEmptyAbilityStage()
     }
 }
 
-void OHOSApplication::PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName)
+void OHOSApplication::PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName,
+    std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData)
 {
     if (!IsMainProcess(bundleInfo.applicationInfo.name, bundleInfo.applicationInfo.process)) {
         TAG_LOGD(AAFwkTag::STARTUP, "not main process");
@@ -883,11 +916,10 @@ void OHOSApplication::PreloadAppStartup(const BundleInfo &bundleInfo, const std:
         return;
     }
 
-    AppExecFwk::HapModuleInfo preloadHapModuleInfo;
     if (!bundleInfo.hapModuleInfos.empty()) {
         for (const auto& hapModuleInfo : bundleInfo.hapModuleInfos) {
             if (hapModuleInfo.name == preloadModuleName) {
-                startupManager->PreloadAppHintStartup(bundleInfo, hapModuleInfo, preloadModuleName);
+                startupManager->PreloadAppHintStartup(bundleInfo, hapModuleInfo, preloadModuleName, startupTaskData);
                 break;
             }
         }
@@ -977,6 +1009,28 @@ bool OHOSApplication::IsUpdateLanguageNeeded(Configuration &config, AbilityRunti
     AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(level);
     config.AddItem(AAFwk::GlobalConfigurationKey::IS_PREFERRED_LANGUAGE,
         level == AbilityRuntime::SetLevel::Application ? "1" : "0");
+    return true;
+}
+
+bool OHOSApplication::IsUpdateLocaleNeeded(const Configuration& updatedConfig, Configuration &config)
+{
+    std::string language = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    std::string locale = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE);
+    if (language.empty() && locale.empty()) {
+        TAG_LOGW(AAFwkTag::APPKIT, "language and locale empty");
+        return false;
+    }
+    std::string updatedLocale;
+    if (!language.empty() && !locale.empty()) {
+        updatedLocale = ApplicationConfigurationManager::GetUpdatedLocale(locale, language);
+    } else if (!language.empty()) {
+        updatedLocale = ApplicationConfigurationManager::GetUpdatedLocale(
+            updatedConfig.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE), language);
+    } else {
+        updatedLocale = ApplicationConfigurationManager::GetUpdatedLocale(locale,
+            updatedConfig.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
+    }
+    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LOCALE, updatedLocale);
     return true;
 }
 

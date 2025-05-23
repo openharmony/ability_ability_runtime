@@ -40,6 +40,7 @@ namespace OHOS {
 namespace AppExecFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr int32_t MAX_PROCESS_STATE_COUNT = 1000;
+constexpr int32_t MAX_BACKGROUND_APP_COUNT = 1000;
 
 AppMgrStub::AppMgrStub() {}
 
@@ -278,6 +279,10 @@ int32_t AppMgrStub::OnRemoteRequestInnerFifth(uint32_t code, MessageParcel &data
         case static_cast<uint32_t>(AppMgrInterfaceCode::START_CHILD_PROCESS):
             return HandleStartChildProcess(data, reply);
     #endif // SUPPORT_CHILD_PROCESS
+        case static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_NATIVE_CHILD_EXIT_NOTIFY):
+            return HandleRegisterNativeChildExitNotify(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_NATIVE_CHILD_EXIT_NOTIFY):
+            return HandleUnregisterNativeChildExitNotify(data, reply);
     }
     return INVALID_FD;
 }
@@ -390,6 +395,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleGetKilledProcessInfo(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::LAUNCH_ABILITY):
             return HandleLaunchAbility(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_CONFIGURATION_POLICY):
+            return HandleUpdateConfigurationForBackgroundApp(data, reply);
     }
     return INVALID_FD;
 }
@@ -1018,6 +1025,42 @@ int32_t AppMgrStub::HandleUpdateConfiguration(MessageParcel &data, MessageParcel
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleUpdateConfigurationForBackgroundApp(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::vector<BackgroundAppInfo> appInfos;
+    uint32_t size = data.ReadUint32();
+    if (size <= 0 || size > MAX_BACKGROUND_APP_COUNT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid size");
+        return ERR_INVALID_VALUE;
+    }
+    appInfos.resize(size);
+    if (appInfos.capacity() < size) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Resource allocation error");
+        return ERR_NO_MEMORY;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        std::unique_ptr<BackgroundAppInfo> tmpInfo(data.ReadParcelable<BackgroundAppInfo>());
+        if (tmpInfo == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "tmpInfo null");
+            return ERR_INVALID_VALUE;
+        }
+        appInfos.push_back(*tmpInfo);
+    }
+    std::unique_ptr<AppExecFwk::ConfigurationPolicy> policy(data.ReadParcelable<AppExecFwk::ConfigurationPolicy>());
+    if (policy == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "policy null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t userId = data.ReadInt32();
+    int32_t result = UpdateConfigurationForBackgroundApp(appInfos, *policy, userId);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 int32_t AppMgrStub::HandleUpdateConfigurationByBundleName(MessageParcel &data, MessageParcel &reply)
 {
     std::unique_ptr<Configuration> config(data.ReadParcelable<Configuration>());
@@ -1506,6 +1549,38 @@ int32_t AppMgrStub::HandleExitChildProcessSafely(MessageParcel &data, MessagePar
     return NO_ERROR;
 }
 #endif // SUPPORT_CHILD_PROCESS
+
+int32_t AppMgrStub::HandleRegisterNativeChildExitNotify(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    auto callback = iface_cast<AppExecFwk::INativeChildNotify>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = RegisterNativeChildExitNotify(callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUnregisterNativeChildExitNotify(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    auto callback = iface_cast<AppExecFwk::INativeChildNotify>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = UnregisterNativeChildExitNotify(callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
 
 int32_t AppMgrStub::HandleIsFinalAppProcess(MessageParcel &data, MessageParcel &reply)
 {

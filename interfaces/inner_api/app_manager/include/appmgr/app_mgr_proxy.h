@@ -417,6 +417,16 @@ public:
 
     virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) override;
 
+    /**
+     * UpdateConfigurationForBackgroundApp
+     * @param appInfos Background application information.
+     * @param policy Update policy.
+     * @param userId configuration for the user
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &appInfos,
+        const AppExecFwk::ConfigurationPolicy &policy, const int32_t userId = -1) override;
+
     virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
         int32_t appIndex = 0) override;
 
@@ -627,6 +637,20 @@ public:
      */
     void ExitChildProcessSafely() override;
 #endif // SUPPORT_CHILD_PROCESS
+
+    /**
+     * Register native child exit callback to notify.
+     * @param notify, Callback used to notify caller the info of native child exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify) override;
+
+    /**
+     * Unregister native child exit callback to notify.
+     * @param notify, Callback used to notify caller the info of native child exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> notify) override;
 
     /**
      * Whether the current application process is the last surviving process.

@@ -47,30 +47,30 @@ public:
     static constexpr uint32_t START_PROCESS_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG = 10;
     static constexpr uint32_t START_SPECIFIED_PROCESS_HALF_TIMEOUT_MSG = 11;
 #ifdef SUPPORT_ASAN
-    static constexpr uint32_t TERMINATE_ABILITY_TIMEOUT = 45000; // ms
-    static constexpr uint32_t TERMINATE_APPLICATION_TIMEOUT = 150000; // ms
-    static constexpr uint32_t BACKGROUND_APPLICATION_TIMEOUT = 45000; // ms
-    static constexpr uint32_t ADD_ABILITY_STAGE_INFO_TIMEOUT = 45000; // ms
-    static constexpr uint32_t ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT = 100000; // ms
-    static constexpr uint32_t START_SPECIFIED_ABILITY_TIMEOUT = 45000; // ms
-    static constexpr uint32_t START_PROCESS_SPECIFIED_ABILITY_TIMEOUT = 75000; // ms
-    static constexpr uint32_t START_SPECIFIED_PROCESS_TIMEOUT = 45000; // ms
-    static constexpr uint32_t KILL_PROCESS_TIMEOUT = 45000; // ms
+    static constexpr int32_t TERMINATE_ABILITY_TIMEOUT = 45000; // ms
+    static constexpr int32_t TERMINATE_APPLICATION_TIMEOUT = 150000; // ms
+    static constexpr int32_t BACKGROUND_APPLICATION_TIMEOUT = 45000; // ms
+    static constexpr int32_t ADD_ABILITY_STAGE_INFO_TIMEOUT = 45000; // ms
+    static constexpr int32_t ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT = 100000; // ms
+    static constexpr int32_t START_SPECIFIED_ABILITY_TIMEOUT = 45000; // ms
+    static constexpr int32_t START_PROCESS_SPECIFIED_ABILITY_TIMEOUT = 75000; // ms
+    static constexpr int32_t START_SPECIFIED_PROCESS_TIMEOUT = 45000; // ms
+    static constexpr int32_t KILL_PROCESS_TIMEOUT = 45000; // ms
 #else
-    static constexpr uint32_t TERMINATE_ABILITY_TIMEOUT = 3000; // ms
-    static constexpr uint32_t TERMINATE_APPLICATION_TIMEOUT = 10000; // ms
-    static constexpr uint32_t BACKGROUND_APPLICATION_TIMEOUT = 3000; // ms
-    static constexpr uint32_t ADD_ABILITY_STAGE_INFO_TIMEOUT = 3000; // ms
-    static constexpr uint32_t ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT = 20000; // ms
-    static constexpr uint32_t START_SPECIFIED_ABILITY_TIMEOUT = 3000; // ms
-    static constexpr uint32_t START_PROCESS_SPECIFIED_ABILITY_TIMEOUT = 5000; // ms
-    static constexpr uint32_t START_SPECIFIED_PROCESS_TIMEOUT = 2000; // ms
-    static constexpr uint32_t KILL_PROCESS_TIMEOUT = 3000; // ms
+    static constexpr int32_t TERMINATE_ABILITY_TIMEOUT = 3000; // ms
+    static constexpr int32_t TERMINATE_APPLICATION_TIMEOUT = 10000; // ms
+    static constexpr int32_t BACKGROUND_APPLICATION_TIMEOUT = 3000; // ms
+    static constexpr int32_t ADD_ABILITY_STAGE_INFO_TIMEOUT = 3000; // ms
+    static constexpr int32_t ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT = 20000; // ms
+    static constexpr int32_t START_SPECIFIED_ABILITY_TIMEOUT = 3000; // ms
+    static constexpr int32_t START_PROCESS_SPECIFIED_ABILITY_TIMEOUT = 5000; // ms
+    static constexpr int32_t START_SPECIFIED_PROCESS_TIMEOUT = 2000; // ms
+    static constexpr int32_t KILL_PROCESS_TIMEOUT = 3000; // ms
 #endif
-    static constexpr uint32_t DELAY_KILL_PROCESS_TIMEOUT = 3000; // ms
-    static constexpr uint32_t DELAY_KILL_EXTENSION_PROCESS_TIMEOUT = 500; // ms
-    static constexpr uint32_t DELAY_NOTIFY_PROCESS_CACHED_STATE = 2000; // ms
-    static constexpr uint32_t DELAY_CHECK_ALL_PROCESSES_EXITED = 200; // ms
+    static constexpr int32_t DELAY_KILL_PROCESS_TIMEOUT = 3000; // ms
+    static constexpr int32_t DELAY_KILL_EXTENSION_PROCESS_TIMEOUT = 500; // ms
+    static constexpr int32_t DELAY_NOTIFY_PROCESS_CACHED_STATE = 2000; // ms
+    static constexpr int32_t DELAY_CHECK_ALL_PROCESSES_EXITED = 200; // ms
 private:
     std::weak_ptr<AppMgrServiceInner> appMgr_;
 };

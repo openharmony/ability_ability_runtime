@@ -34,6 +34,8 @@ public:
     bool CheckSpecificSystemAbilityAccessPermission(const std::string &processName) const;
     bool VerifyRunningInfoPerm() const;
     bool JudgeCallerIsAllowedToUseSystemAPI() const;
+    bool IsSACall() const;
+
 };
 }  // namespace AAFwk
 }  // namespace OHOS

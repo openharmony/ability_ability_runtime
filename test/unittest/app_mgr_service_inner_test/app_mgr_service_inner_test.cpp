@@ -2331,6 +2331,44 @@ HWTEST_F(AppMgrServiceInnerTest, UnregisterApplicationStateObserver_001, TestSiz
 }
 
 /**
+ * @tc.name: RegisterNativeChildExitNotify_001
+ * @tc.desc: register native chlid exit notify.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, RegisterNativeChildExitNotify_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RegisterNativeChildExitNotify_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    sptr<INativeChildNotify> notify;
+    auto ret = appMgrServiceInner->RegisterNativeChildExitNotify(notify);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "RegisterNativeChildExitNotify_001 end");
+}
+
+/**
+ * @tc.name: UnregisterNativeChildExitNotify_001
+ * @tc.desc: unregister native chlid exit notify.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, UnregisterNativeChildExitNotify_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UnregisterNativeChildExitNotify_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    sptr<INativeChildNotify> notify;
+    auto ret = appMgrServiceInner->UnregisterNativeChildExitNotify(notify);
+    EXPECT_NE(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "UnregisterNativeChildExitNotify_001 end");
+}
+
+/**
  * @tc.name: GetForegroundApplications_001
  * @tc.desc: get foreground applications.
  * @tc.type: FUNC

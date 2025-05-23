@@ -1366,6 +1366,15 @@ void AbilityConnectManager::CompleteStartServiceReq(const std::string &serviceUr
     }
 }
 
+std::shared_ptr<AbilityRecord> AbilityConnectManager::GetServiceRecordByAbilityRequest(
+    const AbilityRequest &abilityRequest)
+{
+    AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, GenerateBundleName(abilityRequest),
+        abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
+    std::string serviceKey = element.GetURI();
+    return GetServiceRecordByElementName(serviceKey);
+}
+
 std::shared_ptr<AbilityRecord> AbilityConnectManager::GetServiceRecordByElementName(const std::string &element)
 {
     std::lock_guard guard(serviceMapMutex_);
@@ -3638,6 +3647,24 @@ void AbilityConnectManager::UpdateUIExtensionBindInfo(
         !UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "record null or abilityType not match");
         return;
+    }
+
+    if (callerBundleName == AbilityConfig::SCENEBOARD_BUNDLE_NAME) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "scb not allow bind process");
+        return;
+    }
+
+    auto sessionInfo = abilityRecord->GetSessionInfo();
+    if (sessionInfo == nullptr) {
+        if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "sa preload not allow bind process");
+            return;
+        }
+    } else {
+        if (sessionInfo->uiExtensionUsage == AAFwk::UIExtensionUsage::MODAL) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "modal not allow bind process");
+            return;
+        }
     }
 
     WantParams wantParams;

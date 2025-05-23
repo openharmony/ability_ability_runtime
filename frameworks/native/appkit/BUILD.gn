@@ -124,6 +124,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit/app/ohos_application.cpp",
     "${ability_runtime_native_path}/appkit/app/res_helper.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/app_startup_task.cpp",
+    "${ability_runtime_native_path}/appkit/app_startup/app_startup_task_matcher.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/js_startup_config.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/js_startup_task.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/js_startup_task_executor.cpp",

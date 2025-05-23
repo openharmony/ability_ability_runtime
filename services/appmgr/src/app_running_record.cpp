@@ -26,6 +26,7 @@
 #include "freeze_util.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
+#include "insight_intent_execute_param.h"
 #include "ui_extension_utils.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
@@ -347,6 +348,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetNWebPreload(isAllowedNWebPreload_);
     launchData.SetPreloadModuleName(preloadModuleName_);
     launchData.SetDebugFromLocal(isDebugFromLocal_);
+    launchData.SetStartupTaskData(startupTaskData_);
 
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     AddAppLifecycleEvent("AppRunningRecord::LaunchApplication");
@@ -403,7 +405,7 @@ bool AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bund
             AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG)) {
             TAG_LOGI(
                 AAFwkTag::APPMGR, "ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG not exist");
-            auto timeout = GetAddStageTimeout();
+            auto timeout = GetAddStageTimeout() * AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
             SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
             SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, timeout);
         }
@@ -1484,6 +1486,21 @@ void AppRunningRecord::SetProcessAndExtensionType(
         processType_ = ProcessType::EXTENSION;
     }
     return;
+}
+
+void AppRunningRecord::SetStartupTaskData(const AAFwk::Want &want)
+{
+    std::lock_guard<ffrt::mutex> lock(startupTaskDataLock_);
+    startupTaskData_ = std::make_shared<StartupTaskData>();
+    startupTaskData_->uri = want.GetUriString();
+    startupTaskData_->action = want.GetAction();
+    const AppExecFwk::WantParams &wantParams = want.GetParams();
+    if (wantParams.HasParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME)) {
+        startupTaskData_->insightIntentName = wantParams.GetStringParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME);
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "uri: %{public}s, action: %{public}s, intentName: %{public}s",
+        startupTaskData_->uri.c_str(), startupTaskData_->action.c_str(),
+        startupTaskData_->insightIntentName.c_str());
 }
 
 void AppRunningRecord::SetSpecifiedAbilityFlagAndWant(
@@ -2624,7 +2641,7 @@ void AppRunningRecord::UnSetPolicy()
 #endif // SUPPORT_UPMS
 }
 
-uint32_t AppRunningRecord::GetAddStageTimeout() const
+int32_t AppRunningRecord::GetAddStageTimeout() const
 {
     if (IsEmptyKeepAliveApp()) {
         return AMSEventHandler::ADD_ABILITY_STAGE_EMPTY_RESIDENT_TIMEOUT;

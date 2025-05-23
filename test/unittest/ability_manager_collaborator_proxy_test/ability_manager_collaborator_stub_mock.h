@@ -87,7 +87,7 @@ public:
     void UpdateMissionInfo(sptr<SessionInfo> &sessionInfo)
     {}
     MOCK_METHOD4(SendRequest, int(uint32_t, MessageParcel&, MessageParcel&, MessageOption&));
-    MOCK_METHOD2(OpenFile, int(const Uri& uri, uint32_t flag));
+    MOCK_METHOD3(OpenFile, int(const Uri& uri, uint32_t flag, uint32_t tokenId));
     MOCK_METHOD2(NotifyMissionBindPid, void(int32_t missionId, int32_t pid));
     MOCK_METHOD2(CheckStaticCfgPermission, int32_t(const Want &want, bool isImplicit));
     MOCK_METHOD2(NotifyKillProcesses, int32_t(const std::string &, int32_t));

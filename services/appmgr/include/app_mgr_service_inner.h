@@ -44,12 +44,14 @@
 #include "app_scheduler_interface.h"
 #include "app_spawn_client.h"
 #include "appexecfwk_errors.h"
+#include "background_app_info.h"
 #include "bundle_info.h"
 #include "bundle_mgr_helper.h"
 #ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_info.h"
 #include "child_process_request.h"
 #endif // SUPPORT_CHILD_PROCESS
+#include "configuration_policy.h"
 #include "cpp/mutex.h"
 #include "event_report.h"
 #include "exit_resident_process_manager.h"
@@ -79,6 +81,7 @@
 #include "running_multi_info.h"
 #include "multi_user_config_mgr.h"
 #include "user_callback.h"
+#include "native_child_notify_interface.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -762,6 +765,16 @@ public:
      */
     int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
 
+    /**
+     * UpdateConfigurationForBackgroundApp
+     * @param appInfos Background application information.
+     * @param policy Update policy.
+     * @param userId configuration for the user
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &appInfos,
+        const AppExecFwk::ConfigurationPolicy &policy, const int32_t userId);
+
     int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name, int32_t appIndex);
 
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration();
@@ -1257,6 +1270,10 @@ public:
     virtual int32_t StartNativeChildProcess(const pid_t hostPid,
         const std::string &libName, int32_t childProcessCount, const sptr<IRemoteObject> &callback);
 #endif // SUPPORT_CHILD_PROCESS
+
+    virtual int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback);
+
+    virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback);
 
     /**
      * To clear the process by ability token.
@@ -1800,9 +1817,10 @@ private:
     bool SendCreateAtomicServiceProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
         const BundleType &bundleType, const std::string &moduleName = "", const std::string &abilityName = "");
 
-    void SendProcessExitEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void SendProcessExitEvent(std::shared_ptr<AppRunningRecord> appRecord);
 
-    void SendProcessExitEventTask(const std::shared_ptr<AppRunningRecord> &appRecord, time_t exitTime, int32_t count);
+    void SendProcessExitEventTask(pid_t pid, const std::string &processName, int32_t extensionType,
+        int32_t exitReason, time_t exitTime, int32_t count);
 
     void SetRunningSharedBundleList(const std::string &bundleName,
         const std::vector<BaseSharedBundleInfo> baseSharedBundleInfoList);
@@ -2003,7 +2021,7 @@ private:
         const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
     void UnBindUIExtensionProcess(
         const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
-    bool WarpBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord,
+    bool WrapBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord,
         UIExtensionProcessBindInfo &bindInfo);
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;

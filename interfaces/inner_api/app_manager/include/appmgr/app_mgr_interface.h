@@ -24,8 +24,10 @@
 #include "app_mgr_ipc_interface_code.h"
 #include "app_record_id.h"
 #include "application_info.h"
+#include "background_app_info.h"
 #include "bundle_info.h"
 #include "child_process_info.h"
+#include "configuration_policy.h"
 #ifdef SUPPORT_CHILD_PROCESS
 #include "child_process_request.h"
 #endif // SUPPORT_CHILD_PROCESS
@@ -48,6 +50,7 @@
 #include "want.h"
 #include "app_jsheap_mem_info.h"
 #include "running_multi_info.h"
+#include "native_child_notify_interface.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -434,6 +437,20 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) = 0;
+
+    /**
+     * UpdateConfigurationForBackgroundApp
+     * 
+     * @param appInfos Background application information.
+     * @param policy Update policy.
+     * @param userId configuration for the user
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &appInfos,
+        const AppExecFwk::ConfigurationPolicy &policy, const int32_t userId = -1)
+    {
+        return 0;
+    }
 
     /**
      *  Update config by bundle name.
@@ -873,6 +890,26 @@ public:
     virtual int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback) = 0;
 #endif // SUPPORT_CHILD_PROCESS
+
+     /**
+     * Register native child exit callback to notify.
+     * @param notify, Callback used to notify caller the info of native child exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
+    {
+        return 0;
+    }
+
+    /**
+     * Unregister native child exit callback to notify.
+     * @param notify, Callback used to notify caller the info of native child exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
+    {
+        return 0;
+    }
 
     /**
      * Notify that the process depends on web by itself.

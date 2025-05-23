@@ -25,7 +25,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
     const std::string errProfileJsonStr = "{"
-        "\"insightIntents\": ["
+        "\"extractInsightIntents\": ["
         "{"
             "\"displayDescription\": \"game\","
             "\"schema\": \"GameList\","
@@ -131,7 +131,7 @@ namespace {
     "}";
 
     const std::string profileJsonStr = "{"
-        "\"insightIntents\": ["
+        "\"extractInsightIntents\": ["
         "{"
             "\"displayDescription\": \"game\","
             "\"schema\": \"GameList\","

@@ -111,14 +111,26 @@ std::string AbilityStage::OnNewProcessRequest(const AAFwk::Want &want)
     return "";
 }
 
+std::string AbilityStage::OnAcceptWant(const AAFwk::Want &want,
+    AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync)
+{
+    return "";
+}
+
+std::string AbilityStage::OnNewProcessRequest(const AAFwk::Want &want,
+    AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync)
+{
+    return "";
+}
+
 void AbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {}
 
 void AbilityStage::OnMemoryLevel(int level)
 {}
 
-int32_t AbilityStage::RunAutoStartupTask(const std::function<void()> &callback, bool &isAsyncCallback,
-    const std::shared_ptr<Context> &stageContext)
+int32_t AbilityStage::RunAutoStartupTask(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
+    bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext)
 {
     isAsyncCallback = false;
     return ERR_OK;

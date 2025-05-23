@@ -64,6 +64,7 @@ ohos_source_set("appmgr_test_source") {
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [
@@ -298,6 +299,7 @@ ohos_source_set("abilityms_test_source") {
       "${ability_runtime_services_path}/abilitymgr/src/mission/mission_listener_proxy.cpp",
       "${ability_runtime_services_path}/abilitymgr/src/mission/mission_listener_stub.cpp",
       "${ability_runtime_services_path}/abilitymgr/src/mission/mission_snapshot.cpp",
+      "${ability_runtime_services_path}/abilitymgr/src/ability_start_with_wait_observer_manager/ability_start_with_wait_observer_manager.cpp",
       "${ability_runtime_services_path}/abilitymgr/src/remote_mission_listener_proxy.cpp",
       "${ability_runtime_services_path}/abilitymgr/src/remote_mission_listener_stub.cpp",
       "${ability_runtime_services_path}/abilitymgr/src/system_dialog_scheduler.cpp",
@@ -417,6 +419,8 @@ group("unittest") {
       "ability_service_start_test:unittest",
       "ability_stage_context_test:unittest",
       "ability_start_window_option_test:unittest",
+      "ability_start_with_wait_observer_manager:unittest",
+      "ability_start_with_wait_proxy_observer_test:unittest",
       "ability_timeout_test:unittest",
       "ability_token_proxy_test:unittest",
       "ability_token_stub_test:unittest",
@@ -477,6 +481,7 @@ group("unittest") {
       "app_mgr_stub_test:unittest",
       "app_preloader_test:unittest",
       "app_recovery_test:unittest",
+      "app_native_spawn_manager_test:unittest",
       "app_running_manager_fourth_test:unittest",
       "app_running_manager_second_test:unittest",
       "app_running_manager_test:unittest",
@@ -591,6 +596,7 @@ group("unittest") {
       "insight_intent_rdb_storage_mgr_test:unittest",
       "js_ability_context_test:unittest",
       "js_app_service_extension_test:unittest",
+      "js_runtime_common_test:unittest",
       "js_service_extension_test:unittest",
       "js_ui_ability_test:unittest",
       "js_ui_extension_content_session_test:unittest",

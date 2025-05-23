@@ -365,16 +365,6 @@ void ConnectServerManager::SendMessage(const std::string &message)
     sendMessage(message);
 }
 
-DebuggerPostTask ConnectServerManager::GetDebuggerPostTask(int32_t tid)
-{
-    auto it = g_debuggerInfo.find(tid);
-    if (it == g_debuggerInfo.end()) {
-        TAG_LOGW(AAFwkTag::JSRUNTIME, "tid %{public}d not found", tid);
-        return nullptr;
-    }
-    return it->second.second;
-}
-
 bool ConnectServerManager::SetRecordCallback(const std::function<void(void)> &startRecordFunc,
     const std::function<void(void)> &stopRecordFunc)
 {

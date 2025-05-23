@@ -74,6 +74,11 @@ int32_t InsightIntentDbCache::SaveInsightIntentTotalInfo(const std::string &bund
     } else {
         intentGenericInfos_[bundleName] = genericInfos;
     }
+    int32_t res = DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->DeleteStorageInsightIntentData(bundleName,
+        moduleName, userId);
+    if (res != ERR_OK) {
+        TAG_LOGW(AAFwkTag::INTENT, "Save before delete key error");
+    }
     return DelayedSingleton<InsightRdbStorageMgr>::GetInstance()
             ->SaveStorageInsightIntentData(bundleName, moduleName, userId, profileInfos);
 }

@@ -962,6 +962,36 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterApplicationStateObserver_001, 
 }
 
 /**
+ * @tc.name: AppMgrClient_RegisterNativeChildExitNotify_001
+ * @tc.desc: RegisterNativeChildExitNotify.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterNativeChildExitNotify_001, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    sptr<INativeChildNotify> notify = nullptr;
+    auto result = appMgrClient->RegisterNativeChildExitNotify(notify);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AppMgrClient_UnregisterNativeChildExitNotify_001
+ * @tc.desc: UnregisterNativeChildExitNotify.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterNativeChildExitNotify_001, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    sptr<INativeChildNotify> notify = nullptr;
+    auto result = appMgrClient->UnregisterNativeChildExitNotify(notify);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: AppMgrClient_NotifyPageShow_001
  * @tc.desc: NotifyPageShow.
  * @tc.type: FUNC

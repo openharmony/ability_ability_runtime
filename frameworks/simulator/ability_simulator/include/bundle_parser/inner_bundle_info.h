@@ -237,7 +237,7 @@ public:
     bool SetInnerModuleAtomicPreload(const std::string &moduleName, const std::vector<std::string> &preloads);
     ErrCode GetBundleInfoV9(int32_t flags, BundleInfo &bundleInfo, int32_t userId = Constants::UNSPECIFIED_USERID,
         int32_t appIndex = 0) const;
-    ErrCode GetApplicationInfoV9(int32_t flags, int32_t userId, ApplicationInfo &appInfo, int32_t appIndex = 0) const;
+    ErrCode GetApplicationInfoV9(int32_t flags, int32_t userId, ApplicationInfo &appInfo) const;
     ErrCode GetAppServiceHspInfo(BundleInfo &bundleInfo) const;
     bool GetSharedBundleInfo(int32_t flags, BundleInfo &bundleInfo) const;
 

@@ -129,7 +129,7 @@ public:
      */
     virtual std::string GetFilesDir() = 0;
 
-    virtual std::string GetResourceDir() = 0;
+    virtual std::string GetResourceDir(const std::string &moduleName = "") = 0;
 
     /**
      * @brief Checks whether the configuration of this ability is changing.

@@ -2996,6 +2996,22 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_UnregisterIAbilityManagerCol
 
 /*
  * Feature: AbilityManagerService
+ * Function: GetAbilityManagerCollaboratorInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetAbilityManagerCollaboratorInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function GetAbilityManagerCollaboratorInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetAbilityManagerCollaboratorInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->GetAbilityManagerCollaboratorInner(data, reply);
+    EXPECT_EQ(res, ERR_NULL_OBJECT);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: PrepareTerminateAbilityBySCBInner
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService PrepareTerminateAbilityBySCBInner

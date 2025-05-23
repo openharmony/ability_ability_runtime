@@ -529,6 +529,9 @@ void AppRunningRecord::SetProcessAndExtensionType(
 {
 }
 
+void AppRunningRecord::SetStartupTaskData(const AAFwk::Want &want)
+{}
+
 void AppRunningRecord::SetSpecifiedAbilityFlagAndWant(
     int requestId, const AAFwk::Want &want, const std::string &moduleName)
 {
@@ -1238,7 +1241,7 @@ void AppRunningRecord::UnSetPolicy()
 {
 }
 
-uint32_t AppRunningRecord::GetAddStageTimeout() const
+int32_t AppRunningRecord::GetAddStageTimeout() const
 {
     return 0;
 }
