@@ -112,6 +112,9 @@ public:
         const std::string &bundleName, const std::string &moduleName, uint32_t resId, int32_t userId);
     std::string GetDataDir(const std::string &bundleName, const int32_t appIndex);
     ErrCode GetAppProvisionInfo(const std::string &bundleName, int32_t userId, AppExecFwk::AppProvisionInfo &info);
+    // for collaborator (along with normal)
+    ErrCode GetCloneBundleInfoExt(const std::string &bundleName, uint32_t flags, int32_t appIndex,
+        int32_t userId, BundleInfo &bundleInfo);
 
 private:
     sptr<IBundleMgr> Connect();
