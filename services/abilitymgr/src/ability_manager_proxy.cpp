@@ -4683,6 +4683,26 @@ int32_t AbilityManagerProxy::UnregisterIAbilityManagerCollaborator(int32_t type)
     return reply.ReadInt32();
 }
 
+sptr<IAbilityManagerCollaborator> AbilityManagerProxy::GetAbilityManagerCollaborator()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return nullptr;
+    }
+
+    auto ret = SendRequest(AbilityManagerInterfaceCode::GET_ABILITY_MANAGER_COLLABORATOR, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", ret);
+        return nullptr;
+    }
+    sptr<IAbilityManagerCollaborator> collaborator = iface_cast<IAbilityManagerCollaborator>(reply.ReadRemoteObject());
+    return collaborator;
+}
+
 int32_t AbilityManagerProxy::RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate)
 {
     MessageParcel data;

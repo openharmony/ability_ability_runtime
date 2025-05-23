@@ -234,6 +234,13 @@ public:
     std::string GetCacheExtensionTypeList();
 
     /**
+     * IsSystemReasonMessage, get param of anco app identifier.
+     *
+     * @return identifiers.
+     */
+    std::string GetAncoAppIdentifiers();
+
+    /**
      * IsAllowStartAbilityWithoutCallerToken, check if it allows start ability without caller token.
      *
      * @param bundleName The bundle name.

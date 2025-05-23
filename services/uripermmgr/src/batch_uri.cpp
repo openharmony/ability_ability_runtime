@@ -42,17 +42,11 @@ int32_t BatchUri::Init(const std::vector<Uri> &uriVec, uint32_t mode, const std:
             TAG_LOGI(AAFwkTag::URIPERMMGR, "uri type: %{public}s.", uriInner.GetAuthority().c_str());
             isPrintAuthority = false;
         }
-        if (scheme != "content" && scheme != "file") {
+        if (scheme != "file") {
             TAG_LOGW(AAFwkTag::URIPERMMGR, "uri is invalid: %{private}s.", uriInner.ToString().c_str());
             continue;
         }
         validUriCount++;
-        // content uri
-        if (scheme == "content") {
-            contentUris.emplace_back(uriInner);
-            contentIndexs.emplace_back(index);
-            continue;
-        }
         InitFileUriInfo(uriInner, index, mode, callerBundleName, targetBundleName);
     }
     TAG_LOGI(AAFwkTag::URIPERMMGR, "count of uri is %{public}d, count of valid uri is %{public}d.",
@@ -93,14 +87,6 @@ void BatchUri::InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mod
     // docs and bundle uri, need to check uri pemission
     otherUris.emplace_back(uriInner);
     otherIndexs.emplace_back(index);
-}
-
-void BatchUri::SetContentUriCheckResult(const std::vector<bool> &contentUriResult)
-{
-    for (size_t i = 0; i < contentUriResult.size(); i++) {
-        auto index = contentIndexs[i];
-        result[index] = contentUriResult[i];
-    }
 }
 
 void BatchUri::SetMediaUriCheckResult(const std::vector<bool> &mediaUriResult)

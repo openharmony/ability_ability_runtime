@@ -1451,6 +1451,12 @@ public:
     ErrCode UnregisterAppDebugListener(sptr<AppExecFwk::IAppDebugListener> listener);
 
     /**
+     * @brief get ability manager collaborator.
+     * @return Returns object pointer on success, others on null.
+     */
+    sptr<IAbilityManagerCollaborator> GetAbilityManagerCollaborator();
+
+    /**
      * @brief Attach app debug.
      * @param bundleName The application bundle name.
      * @return Returns ERR_OK on success, others on failure.

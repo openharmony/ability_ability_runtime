@@ -508,6 +508,7 @@ enum class AbilityManagerInterfaceCode {
     // ipc id for collborator
     REGISTER_COLLABORATOR = 4050,
     UNREGISTER_COLLABORATOR = 4051,
+    GET_ABILITY_MANAGER_COLLABORATOR = 4052,
 
     IS_ABILITY_CONTROLLER_START = 4054,
     OPEN_FILE = 4055,
