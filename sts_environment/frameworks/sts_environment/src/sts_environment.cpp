@@ -277,9 +277,6 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv, std::vector<ani_option>& opt
     std::string bootString = optionPrefix + "--boot-panda-files=" + bootfiles;
     TAG_LOGI(AAFwkTag::STSRUNTIME, "bootString %{public}s", bootString.c_str());
     options.push_back(ani_option{bootString.c_str(), nullptr});
-    std::string schedulingExternal = optionPrefix + "--coroutine-enable-external-scheduling=true";
-    ani_option schedulingExternalOption = {schedulingExternal.data(), nullptr};
-    options.push_back(schedulingExternalOption);
 
     std::string forbiddenJIT = optionPrefix + "--compiler-enable-jit=false";
     ani_option forbiddenJITOption = {forbiddenJIT.data(), nullptr};
