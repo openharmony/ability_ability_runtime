@@ -658,7 +658,7 @@ HWTEST_F(UriPermissionImplTest, Upms_ConnectManager_001, TestSize.Level1)
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
     SystemAbilityManagerClient::nullptrFlag = true;
     sptr<StorageManager::IStorageManager> storageManager = nullptr;
-    upms->ConnectManager(storageManager, STORAGE_MANAGER_MANAGER_ID);
+    upms->ConnectManager(storageManager, -1);
     SystemAbilityManagerClient::nullptrFlag = false;
     ASSERT_EQ(storageManager, nullptr);
 }
@@ -676,7 +676,7 @@ HWTEST_F(UriPermissionImplTest, Upms_ConnectManager_002, TestSize.Level1)
     MyFlag::flag_ |= MyFlag::IS_SA_CALL;
     MockSystemAbilityManager::isNullptr = true;
     sptr<StorageManager::IStorageManager> storageManager = nullptr;
-    upms->ConnectManager(storageManager, STORAGE_MANAGER_MANAGER_ID);
+    upms->ConnectManager(storageManager, -1);
     MockSystemAbilityManager::isNullptr = false;
     ASSERT_EQ(storageManager, nullptr);
 }
