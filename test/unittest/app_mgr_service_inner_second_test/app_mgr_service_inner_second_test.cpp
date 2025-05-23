@@ -1085,7 +1085,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, SendProcessExitEventTask_0100, TestSize.L
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     time_t exitTime = 0;
     int32_t count = 2;
-    appMgrServiceInner->SendProcessExitEventTask(appRecord, exitTime, count);
+    auto pid = 1;
+    std::string processName = "com.example";
+    auto extensionType = 1;
+    auto exitReason = 1;
+    appMgrServiceInner->SendProcessExitEventTask(pid, processName, extensionType, exitReason, exitTime, count);
     EXPECT_EQ(appRecord, nullptr); //appRecord null
 
     BundleInfo bundleInfo;
@@ -1096,7 +1100,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, SendProcessExitEventTask_0100, TestSize.L
     appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_, TEST_PROCESS_NAME,
         bundleInfo, hapModuleInfo, want_, false);
     appRecord->priorityObject_ = nullptr;
-    appMgrServiceInner->SendProcessExitEventTask(appRecord, exitTime, count);
+    pid = appRecord->GetPid();
+    processName = appRecord->GetProcessName();
+    extensionType = static_cast<int32_t>(appRecord->GetExtensionType());
+    exitReason = appRecord->GetExitReason();
+    appMgrServiceInner->SendProcessExitEventTask(pid, processName, extensionType, exitReason, exitTime, count);
     EXPECT_NE(appRecord, nullptr);
     EXPECT_EQ(appRecord->priorityObject_, nullptr); //priorityObject null
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_SendProcessExitEventTask_0100 end");
@@ -1122,12 +1130,16 @@ HWTEST_F(AppMgrServiceInnerSecondTest, SendProcessExitEventTask_0200, TestSize.L
     appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_, TEST_PROCESS_NAME,
         bundleInfo, hapModuleInfo, want_, false);
     appRecord->GetPriorityObject()->SetPid(INT_MAX);
-    appMgrServiceInner->SendProcessExitEventTask(appRecord, exitTime, count);
+    auto pid = appRecord->GetPid();
+    auto processName = appRecord->GetProcessName();
+    auto extensionType = static_cast<int32_t>(appRecord->GetExtensionType());
+    auto exitReason = appRecord->GetExitReason();
+    appMgrServiceInner->SendProcessExitEventTask(pid, processName, extensionType, exitReason, exitTime, count);
     EXPECT_NE(appRecord->priorityObject_, nullptr); //exitResult = true
     EXPECT_FALSE(--count <= 0);
     count = 1;
     appRecord->GetPriorityObject()->SetPid(1);
-    appMgrServiceInner->SendProcessExitEventTask(appRecord, exitTime, count);
+    appMgrServiceInner->SendProcessExitEventTask(pid, processName, extensionType, exitReason, exitTime, count);
     EXPECT_TRUE(--count <= 0); //--count <= 0
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_SendProcessExitEventTask_0200 end");
 }
