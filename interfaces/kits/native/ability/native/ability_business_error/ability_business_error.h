@@ -198,6 +198,12 @@ enum class AbilityErrorCode {
     // the target has not been started yet.
     ERROR_CODE_TARGET_NOT_STARTED = 16000201,
 
+    // The context is not UIAbilityContext.
+    ERROR_CODE_NOT_UI_ABILITY_CONTEXT = 16000086,
+
+    // caller is not atomic service.
+    ERROR_CODE_CALLER_NOT_ATOMIC_SERVICE = 16000090,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 
