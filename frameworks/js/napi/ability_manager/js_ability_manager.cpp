@@ -129,6 +129,11 @@ public:
         GET_NAPI_INFO_AND_CALL(env, info, JsAbilityManager, OnQueryAtomicServiceStartupRule);
     }
 
+    static napi_value RestartSelfAtomicService(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsAbilityManager, OnRestartSelfAtomicService);
+    }
+
     static napi_value SetResidentProcessEnabled(napi_env env, napi_callback_info info)
     {
         GET_CB_INFO_AND_CALL(env, info, JsAbilityManager, OnSetResidentProcessEnabled);
@@ -779,6 +784,49 @@ private:
         auto token = uiAbilityContext->GetToken();
         return OnQueryAtomicServiceStartupRuleInner(env, token, appId);
     }
+
+    napi_value OnRestartSelfAtomicServiceInner(napi_env env, sptr<IRemoteObject> token)
+    {
+        auto ret = AbilityManagerClient::GetInstance()->RestartSelfAtomicService(token);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "resatrt atomic service failed: %{public}d", ret);
+            ThrowErrorByNativeErr(env, ret);
+        }
+        return CreateJsUndefined(env);
+    }
+
+    napi_value OnRestartSelfAtomicService(napi_env env, NapiCallbackInfo& info)
+    {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+        if (info.argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+
+        bool stageMode = false;
+        napi_status status = OHOS::AbilityRuntime::IsStageContext(env, info.argv[0], stageMode);
+        if (status != napi_ok || !stageMode) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "not stageMode");
+            ThrowInvalidParamError(env, "Parse param context failed, must be a context of stageMode.");
+            return CreateJsUndefined(env);
+        }
+        auto context = OHOS::AbilityRuntime::GetStageModeContext(env, info.argv[0]);
+        if (context == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null context");
+            ThrowInvalidParamError(env, "Parse param context failed, must not be nullptr.");
+            return CreateJsUndefined(env);
+        }
+        auto uiAbilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
+        if (uiAbilityContext == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null UIAbilityContext");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_UI_ABILITY_CONTEXT);
+            return CreateJsUndefined(env);
+        }
+
+        auto token = uiAbilityContext->GetToken();
+        return OnRestartSelfAtomicServiceInner(env, token);
+    }
 };
 } // namespace
 
@@ -806,6 +854,8 @@ napi_value JsAbilityManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsAbilityManager::On);
     BindNativeFunction(env, exportObj, "off", moduleName, JsAbilityManager::Off);
     BindNativeFunction(env, exportObj, "isEmbeddedOpenAllowed", moduleName, JsAbilityManager::IsEmbeddedOpenAllowed);
+    BindNativeFunction(
+        env, exportObj, "restartSelfAtomicService", moduleName, JsAbilityManager::RestartSelfAtomicService);
     BindNativeFunction(
         env, exportObj, "notifyDebugAssertResult", moduleName, JsAbilityManager::NotifyDebugAssertResult);
     BindNativeFunction(

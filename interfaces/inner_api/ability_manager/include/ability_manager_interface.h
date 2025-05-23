@@ -2034,6 +2034,17 @@ public:
     }
 
     /**
+     * Restart atomic service.
+     *
+     * @param callerToken, The caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RestartSelfAtomicService(sptr<IRemoteObject> callerToken)
+    {
+        return 0;
+    }
+
+    /**
      * Query atomic service ERMS rule.
      *
      * @param callerToken, The caller ability token.

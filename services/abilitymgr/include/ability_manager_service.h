@@ -1951,6 +1951,14 @@ public:
     virtual int32_t QueryAtomicServiceStartupRule(sptr<IRemoteObject> callerToken,
         const std::string &appId, const std::string &startTime, AtomicServiceStartupRule &rule) override;
 
+    /**
+     * Restart atomic service.
+     *
+     * @param callerToken, The caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RestartSelfAtomicService(sptr<IRemoteObject> callerToken) override;
+
     int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
         bool isPendingWantCaller, int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
         bool isCallByShortcut = false);
@@ -2549,8 +2557,15 @@ private:
 
     void WaitBootAnimationStart();
 
-    int32_t SignRestartAppFlag(int32_t userId, int32_t uid, const std::string &instanceKey,
-        AppExecFwk::MultiAppModeType type, bool isAppRecovery = false);
+    struct SignRestartAppFlagParam {
+        int32_t userId;
+        int32_t uid;
+        std::string instanceKey;
+        AppExecFwk::MultiAppModeType type;
+        bool isAppRecovery = false;
+        bool isAtomicService = false;
+    };
+    int32_t SignRestartAppFlag(const SignRestartAppFlagParam &param);
     int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex, int32_t userId);
 
     int32_t CheckDebugAssertPermission();

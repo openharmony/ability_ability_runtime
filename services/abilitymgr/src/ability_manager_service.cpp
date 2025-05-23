@@ -12557,7 +12557,9 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
         return AAFwk::ERR_RESTART_APP_FREQUENT;
     }
 
-    result = SignRestartAppFlag(userId, callerUid, processInfo.instanceKey, processInfo.appMode, isAppRecovery);
+    SignRestartAppFlagParam param =
+        { userId, callerUid, processInfo.instanceKey, processInfo.appMode, isAppRecovery, false };
+    result = SignRestartAppFlag(param);
     if (!isAppRecovery && result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "signRestartAppFlag error");
         return result;
@@ -12603,41 +12605,43 @@ int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want, int3
     return ERR_OK;
 }
 
-int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, int32_t uid, const std::string &instanceKey,
-    AppExecFwk::MultiAppModeType type, bool isAppRecovery)
+int32_t AbilityManagerService::SignRestartAppFlag(const SignRestartAppFlagParam &param)
 {
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
         return ERR_INVALID_VALUE;
     }
-    auto ret = IN_PROCESS_CALL(appMgr->SignRestartAppFlag(uid, instanceKey));
-    if (!isAppRecovery && ret != ERR_OK) {
+    auto ret = IN_PROCESS_CALL(appMgr->SignRestartAppFlag(param.uid, param.instanceKey));
+    if (!param.isAppRecovery && ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr signRestartAppFlag error");
         return ret;
     }
 
-    auto connectManager = GetConnectManagerByUserId(userId);
+    auto connectManager = GetConnectManagerByUserId(param.userId);
     CHECK_POINTER_AND_RETURN(connectManager, ERR_INVALID_VALUE);
-    connectManager->SignRestartAppFlag(uid, instanceKey);
+    connectManager->SignRestartAppFlag(param.uid, param.instanceKey);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(param.userId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-        uiAbilityManager->SignRestartAppFlag(uid, instanceKey, isAppRecovery);
+        uiAbilityManager->SignRestartAppFlag(param.uid, param.instanceKey, param.isAppRecovery);
     } else {
-        auto missionListManager = GetMissionListManagerByUserId(userId);
+        auto missionListManager = GetMissionListManagerByUserId(param.userId);
         if (missionListManager == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListManager null userId:%{public}d", userId);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListManager null userId:%{public}d", param.userId);
             return ERR_INVALID_VALUE;
         }
-        missionListManager->SignRestartAppFlag(uid, instanceKey);
+        missionListManager->SignRestartAppFlag(param.uid, param.instanceKey);
     }
 
-    if (type == AppExecFwk::MultiAppModeType::MULTI_INSTANCE) {
-        return appMgr->KillAppSelfWithInstanceKey(instanceKey, false, "RestartInstance");
-    } else {
-        return DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplicationSelf(false, "RestartApp");
+    if (param.type == AppExecFwk::MultiAppModeType::MULTI_INSTANCE) {
+        return appMgr->KillAppSelfWithInstanceKey(param.instanceKey, false, "RestartInstance");
     }
+    if (param.isAtomicService) {
+        return DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplicationSelf(false,
+            "RestartSelfAtomicService");
+    }
+    return DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplicationSelf(false, "RestartApp");
 }
 
 bool AbilityManagerService::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToken, const std::string &appId)
@@ -14199,6 +14203,55 @@ int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
 bool AbilityManagerService::IsCrossUserCall(int32_t userId) const
 {
     return userId != INVALID_USER_ID && userId != U0_USER_ID && userId != U1_USER_ID && userId != GetUserId();
+}
+
+int32_t AbilityManagerService::RestartSelfAtomicService(sptr<IRemoteObject> callerToken)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "RestartSelfAtomicService called");
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+
+    if (abilityRecord->GetApplicationInfo().bundleType != AppExecFwk::BundleType::ATOMIC_SERVICE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not atomic service");
+        return ERR_CALLER_NOT_ATOMIC_SERVICE;
+    }
+
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    int32_t userId = callerUid / BASE_USER_RANGE;
+    if (!processInfo.isFocused && !processInfo.isAbilityForegrounding) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "restartApp, is not foreground");
+        return AAFwk::NOT_TOP_ABILITY;
+    }
+
+    RestartAppKeyType key(processInfo.instanceKey, callerUid);
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count();
+    if (RestartAppManager::GetInstance().IsRestartAppFrequent(key, now)) {
+        return AAFwk::ERR_RESTART_APP_FREQUENT;
+    }
+
+    SignRestartAppFlagParam param =
+        { userId, callerUid, processInfo.instanceKey, processInfo.appMode, false, true };
+    auto result = SignRestartAppFlag(param);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "signRestartAppFlag error: %{public}d", result);
+        return result;
+    }
+
+    auto want = abilityRecord->GetWant();
+    std::string startTime = std::to_string(now);
+    want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
+    want.AddFlags(Want::FLAG_INSTALL_ON_DEMAND);
+    result = IN_PROCESS_CALL(StartAbilityByFreeInstall(want, nullptr, userId, DEFAULT_INVAL_VALUE));
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityByFreeInstall failed:%{public}d", result);
+        return result;
+    }
+    RestartAppManager::GetInstance().AddRestartAppHistory(key, now);
+    return result;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
