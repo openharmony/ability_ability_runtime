@@ -1,9 +1,0 @@
-diff a/test/unittest/BUILD.gn b/test/unittest/BUILD.gn	(rejected hunks)
-@@ -589,6 +591,7 @@ group("unittest") {
-       "insight_intent_rdb_data_manager_test:unittest",
-       "insight_intent_rdb_storage_mgr_test:unittest",
-       "js_ability_context_test:unittest",
-+      "js_app_service_extension_test:unittest",
-       "js_runtime_common_test:unittest",
-       "js_service_extension_test:unittest",
-       "js_ui_ability_test:unittest",
