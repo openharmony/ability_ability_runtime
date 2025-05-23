@@ -165,7 +165,7 @@ public:
      */
     void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
 
-    virtual void OnFormLocationChanged(const int64_t formId, const int32_t formLocation);
+    virtual void OnFormLocationChanged(const int64_t formId, const int32_t formLocation) override;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
