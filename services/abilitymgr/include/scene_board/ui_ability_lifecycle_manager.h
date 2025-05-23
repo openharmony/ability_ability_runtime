@@ -527,7 +527,8 @@ private:
     bool ProcessColdStartBranch(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         std::shared_ptr<AbilityRecord> uiAbilityRecord, bool isColdStart);
     bool TryProcessHookModule(SpecifiedRequest &specifiedRequest, bool isHookModule);
-    bool StartSpecifiedProcessRequest(const AbilityRequest &abilityRequest);
+    bool IsStartSpecifiedProcessRequest(const AbilityRequest &abilityRequest);
+    int32_t StartSpecifiedProcessRequest(const AbilityRequest &abilityRequest);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;

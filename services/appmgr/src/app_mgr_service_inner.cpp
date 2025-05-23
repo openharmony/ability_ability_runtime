@@ -483,6 +483,26 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
         return;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "main process do not exists.");
+    auto appRecord = appRunningManager_->CheckAppRunningRecordForSpecifiedProcess(
+        appInfo->uid, instanceKey, customProcessFlag);
+    if (appRecord != nullptr) {
+        TAG_LOGI(AAFwkTag::APPMGR, "starting process [%{public}s]", processName.c_str());
+        AbilityRuntime::LoadParam loadParam;
+        loadParam.instanceKey = instanceKey;
+        auto newAppRecord = CreateAppRunningRecord(std::make_shared<AbilityRuntime::LoadParam>(loadParam),
+            appInfo, std::make_shared<AbilityInfo>(abilityInfo), processName, bundleInfo, hapModuleInfo,
+            std::make_shared<AAFwk::Want>(want), false);
+        if (newAppRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "create new appRecord failed");
+            return;
+        }
+        newAppRecord->SetScheduleNewProcessRequestState(requestId, want, hapModuleInfo.moduleName);
+        bool appExistFlag = appRunningManager_->IsAppExist(bundleInfo.applicationInfo.accessTokenId);
+        auto ret = StartProcess(abilityInfo.applicationName, processName, 0, newAppRecord,
+            appInfo->uid, bundleInfo, appInfo->bundleName, 0, appExistFlag);
+        TAG_LOGI(AAFwkTag::APPMGR, "start process ret %{public}d, schedule new process request", ret);
+        return;
+    }
     if (startSpecifiedAbilityResponse_) {
         startSpecifiedAbilityResponse_->OnNewProcessRequestResponse("", requestId);
     }
