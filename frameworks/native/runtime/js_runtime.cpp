@@ -44,6 +44,7 @@
 #include "js_module_reader.h"
 #include "js_module_searcher.h"
 #include "js_quickfix_callback.h"
+#include "js_runtime_common.h"
 #include "js_runtime_utils.h"
 #include "js_utils.h"
 #include "js_worker.h"
@@ -57,6 +58,7 @@
 #include "ohos_js_environment_impl.h"
 #include "parameters.h"
 #include "extractor.h"
+#include "replace_intl_module.h"
 #include "system_ability_definition.h"
 #include "source_map.h"
 #include "source_map_operator.h"
@@ -180,7 +182,7 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
     bool isDebugApp = dOption.isDebugApp;
     std::string appProvisionType = dOption.appProvisionType;
     TAG_LOGD(AAFwkTag::JSRUNTIME, "Ark VM is starting debug mode [%{public}s]", isStartWithDebug ? "break" : "normal");
-    StartDebuggerInWorkerModule(isDebugApp, dOption.isStartWithNative);
+    JsRuntimeCommon::GetInstance().StartDebuggerModule(isDebugApp, dOption.isStartWithNative);
     const std::string bundleName = bundleName_;
     uint32_t instanceId = instanceId_;
     auto weak = jsEnv_;
@@ -337,7 +339,7 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
     bool isStartWithDebug = dOption.isStartWithDebug;
     bool isDebugApp = dOption.isDebugApp;
     std::string appProvisionType = dOption.appProvisionType;
-    StartDebuggerInWorkerModule(isDebugApp, dOption.isStartWithNative);
+    JsRuntimeCommon::GetInstance().StartDebuggerModule(isDebugApp, dOption.isStartWithNative);
     const std::string bundleName = bundleName_;
     auto weak = jsEnv_;
     uint32_t instanceId = instanceId_;
@@ -768,6 +770,7 @@ bool JsRuntime::Initialize(const Options& options)
             InitTimerModule();
         }
 
+        OHOS::Global::I18n::ReplaceIntlModule(GetNapiEnv());
         InitWorkerModule(options);
         SetModuleLoadChecker(options.moduleCheckerDelegate);
         SetRequestAotCallback();
@@ -1447,6 +1450,13 @@ void JsRuntime::RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionI
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER(jsEnv_);
     jsEnv_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
+}
+
+void JsRuntime::RegisterUncatchableExceptionHandler(const JsEnv::UncatchableTask& uncatchableTask)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->RegisterUncatchableExceptionHandler(uncatchableTask);
 }
 
 void JsRuntime::RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath)

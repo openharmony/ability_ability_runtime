@@ -27,7 +27,7 @@ namespace {
 int32_t g_extraParseResult = ERR_OK;
 std::mutex g_extraMutex;
 
-const std::string INSIGHT_INTENTS = "insightIntents";
+const std::string INSIGHT_INTENTS = "extractInsightIntents";
 const std::string INSIGHT_INTENT_NAME = "intentName";
 const std::string INSIGHT_INTENT_DOMAIN = "domain";
 const std::string INSIGHT_INTENT_VERSION = "intentVersion";
@@ -52,7 +52,7 @@ const std::string INSIGHT_INTENT_NAVIGATION_ID = "navigationId";
 const std::string INSIGHT_INTENT_NAV_DESTINATION = "navDestinationName";
 const std::string INSIGHT_INTENT_ABILITY_NAME = "abilityName";
 const std::string INSIGHT_INTENT_FUNCTION_NAME = "functionName";
-const std::string INSIGHT_INTENT_FUNCTION_PARAMS = "functionParams";
+const std::string INSIGHT_INTENT_FUNCTION_PARAMS = "functionParamList";
 const std::string INSIGHT_INTENT_PARAM_NAME = "paramName";
 const std::string INSIGHT_INTENT_PARAM_MAPPING_NAME = "paramMappingName";
 const std::string INSIGHT_INTENT_PARAM_CATEGORY = "paramCategory";
@@ -81,7 +81,9 @@ DecoratorType StringToEnum(const std::string& input)
 
 const std::map<std::string, ExecuteMode> executeModeMap = {
     {"foreground", ExecuteMode::UI_ABILITY_FOREGROUND},
-    {"background", ExecuteMode::UI_ABILITY_BACKGROUND}
+    {"background", ExecuteMode::UI_ABILITY_BACKGROUND},
+    {"uiextension", ExecuteMode::UI_EXTENSION_ABILITY},
+    {"serviceextension", ExecuteMode::SERVICE_EXTENSION_ABILITY}
 };
 } // namespace
 

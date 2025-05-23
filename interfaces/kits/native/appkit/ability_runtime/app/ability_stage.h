@@ -56,6 +56,10 @@ public:
         bool &isAsync) const;
     virtual std::string OnAcceptWant(const AAFwk::Want &want);
     virtual std::string OnNewProcessRequest(const AAFwk::Want &want);
+    virtual std::string OnAcceptWant(const AAFwk::Want &want,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsyn);
+    virtual std::string OnNewProcessRequest(const AAFwk::Want &want,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsyn);
     virtual void Init(const std::shared_ptr<Context> &context,
         const std::weak_ptr<AppExecFwk::OHOSApplication> application);
     std::shared_ptr<Context> GetContext() const;
@@ -65,8 +69,8 @@ public:
     bool ContainsAbility() const;
     virtual void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration);
     virtual void OnMemoryLevel(int level);
-    virtual int32_t RunAutoStartupTask(const std::function<void()> &callback, bool &isAsyncCallback,
-        const std::shared_ptr<Context> &stageContext);
+    virtual int32_t RunAutoStartupTask(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
+        bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext);
 
 private:
     friend class JsAbilityStage;

@@ -18,12 +18,14 @@
 #include <set>
 #include <nlohmann/json.hpp>
 
+#include "app_startup_task_matcher.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "extractor.h"
 #include "hitrace_meter.h"
 #include "native_startup_task.h"
 #include "preload_so_startup_task.h"
+#include "startup_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -47,6 +49,11 @@ constexpr const char* TASK_POOL = "taskPool";
 constexpr const char* TASK_POOL_LOWER = "taskpool";
 constexpr const char* MAIN_THREAD = "mainThread";
 constexpr const char* OHMURL = "ohmurl";
+constexpr const char* MATCH_RULES = "matchRules";
+constexpr const char* URIS = "uris";
+constexpr const char* INSIGHT_INTENTS = "insightIntents";
+constexpr const char* ACTIONS = "actions";
+constexpr const char* CUSTOMIZATION = "customization";
 
 struct StartupTaskResultCallbackInfo {
     std::unique_ptr<StartupTaskResultCallback> callback_;
@@ -73,7 +80,8 @@ StartupManager::StartupManager()
 StartupManager::~StartupManager() = default;
 
 int32_t StartupManager::PreloadAppHintStartup(const AppExecFwk::BundleInfo& bundleInfo,
-    const AppExecFwk::HapModuleInfo& preloadHapModuleInfo, const std::string &preloadModuleName)
+    const AppExecFwk::HapModuleInfo& preloadHapModuleInfo, const std::string &preloadModuleName,
+    std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData)
 {
     moduleStartupConfigInfos_.clear();
     if (preloadHapModuleInfo.appStartup.empty()) {
@@ -108,40 +116,42 @@ int32_t StartupManager::PreloadAppHintStartup(const AppExecFwk::BundleInfo& bund
         return ERR_OK;
     }
     TAG_LOGD(AAFwkTag::STARTUP, "appStartup modules: %{public}zu", moduleStartupConfigInfos_.size());
-    preloadHandler_->PostTask([weak = weak_from_this()]() {
+    preloadHandler_->PostTask([weak = weak_from_this(), data = startupTaskData]() {
         auto self = weak.lock();
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::STARTUP, "self is null");
             return;
         }
-        self->PreloadAppHintStartupTask();
+        self->PreloadAppHintStartupTask(data);
     });
     return ERR_OK;
 }
 
-int32_t StartupManager::BuildAutoAppStartupTaskManager(std::shared_ptr<StartupTaskManager> &startupTaskManager,
-    const std::string &moduleName)
+int32_t StartupManager::BuildAutoAppStartupTaskManager(std::shared_ptr<AAFwk::Want> want,
+    std::shared_ptr<StartupTaskManager> &startupTaskManager, const std::string &moduleName)
 {
     std::map<std::string, std::shared_ptr<StartupTask>> autoStartupTasks;
     std::set<std::string> dependenciesSet;
-    for (auto &iter : appStartupTasks_) {
-        if (iter.second == nullptr) {
-            TAG_LOGE(AAFwkTag::STARTUP, "startup task null");
-            return ERR_STARTUP_INTERNAL_ERROR;
+
+    auto startupConfig = moduleConfigs_[moduleName];
+    bool filteredByFeature = false;
+    if (want) {
+        MatchRulesStartupTaskMatcher taskMatcher(want);
+        auto moduleMatcher = std::make_shared<ModuleStartStartupTaskMatcher>(moduleName);
+        taskMatcher.SetModuleMatcher(moduleMatcher);
+        if (startupConfig) {
+            TAG_LOGI(AAFwkTag::STARTUP, "customization: %{public}s", startupConfig->GetCustomization().c_str());
+            auto customizationMatcher =
+                std::make_shared<CustomizationStartupTaskMatcher>(startupConfig->GetCustomization());
+            taskMatcher.SetCustomizationMatcher(customizationMatcher);
         }
-        if (iter.second->GetModuleName() != moduleName &&
-            iter.second->GetModuleType() != AppExecFwk::ModuleType::SHARED) {
-            continue;
-        }
-        if (iter.second->GetIsExcludeFromAutoStart()) {
-            continue;
-        }
-        autoStartupTasks.emplace(iter.first, iter.second);
-        auto dependencies = iter.second->GetDependencies();
-        for (auto &dep : dependencies) {
-            dependenciesSet.insert(dep);
-        }
+        filteredByFeature = FilterMatchedStartupTask(taskMatcher, appStartupTasks_, autoStartupTasks, dependenciesSet);
     }
+    if (!filteredByFeature) {
+        DefaultStartupTaskMatcher taskMatcher(moduleName);
+        FilterMatchedStartupTask(taskMatcher, appStartupTasks_, autoStartupTasks, dependenciesSet);
+    }
+
     for (auto &dep : dependenciesSet) {
         if (autoStartupTasks.find(dep) != autoStartupTasks.end()) {
             continue;
@@ -154,10 +164,37 @@ int32_t StartupManager::BuildAutoAppStartupTaskManager(std::shared_ptr<StartupTa
     TAG_LOGD(AAFwkTag::STARTUP, "autoStartupTasksManager build, id: %{public}u, tasks num: %{public}zu",
         startupTaskManagerId, autoStartupTasks.size());
     startupTaskManager = std::make_shared<StartupTaskManager>(startupTaskManagerId, autoStartupTasks);
-    startupTaskManager->SetConfig(moduleConfigs_[moduleName]);
+    startupTaskManager->SetConfig(startupConfig);
     startupTaskManagerMap_.emplace(startupTaskManagerId, startupTaskManager);
     startupTaskManagerId++;
     return ERR_OK;
+}
+
+bool StartupManager::FilterMatchedStartupTask(const AppStartupTaskMatcher &taskMatcher,
+    const std::map<std::string, std::shared_ptr<AppStartupTask>> &inTasks,
+    std::map<std::string, std::shared_ptr<StartupTask>> &outTasks,
+    std::set<std::string> &dependenciesSet)
+{
+    bool filterResult = false;
+    for (const auto &iter : inTasks) {
+        if (!iter.second) {
+            TAG_LOGE(AAFwkTag::STARTUP, "null task");
+            continue;
+        }
+        if (!taskMatcher.Match(*iter.second)) {
+            continue;
+        }
+
+        TAG_LOGD(AAFwkTag::STARTUP, "match task:%{public}s", iter.second->GetName().c_str());
+        outTasks.emplace(iter.first, iter.second);
+        auto dependencies = iter.second->GetDependencies();
+        for (auto &dep : dependencies) {
+            dependenciesSet.insert(dep);
+        }
+        filterResult = true;
+    }
+    TAG_LOGI(AAFwkTag::STARTUP, "matched task count:%{public}zu", outTasks.size());
+    return filterResult;
 }
 
 int32_t StartupManager::LoadAppStartupTaskConfig(bool &needRunAutoStartupTask)
@@ -529,14 +566,14 @@ std::shared_ptr<NativeStartupTask> StartupManager::CreateAppPreloadSoTask(
     return task;
 }
 
-void StartupManager::PreloadAppHintStartupTask()
+void StartupManager::PreloadAppHintStartupTask(std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData)
 {
     std::map<std::string, std::shared_ptr<StartupTask>> preloadAppHintTasks;
     int32_t result = AddLoadAppStartupConfigTask(preloadAppHintTasks);
     if (result != ERR_OK) {
         return;
     }
-    result = AddAppAutoPreloadSoTask(preloadAppHintTasks);
+    result = AddAppAutoPreloadSoTask(preloadAppHintTasks, startupTaskData);
     if (result != ERR_OK) {
         return;
     }
@@ -670,10 +707,12 @@ int32_t StartupManager::RunLoadAppStartupConfigTask()
 }
 
 int32_t StartupManager::AddAppAutoPreloadSoTask(
-    std::map<std::string, std::shared_ptr<StartupTask>> &preloadAppHintTasks)
+    std::map<std::string, std::shared_ptr<StartupTask>> &preloadAppHintTasks,
+    std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData)
 {
     auto task = std::make_shared<NativeStartupTask>(APP_AUTO_PRELOAD_SO_TASK,
-        [weak = weak_from_this()](std::unique_ptr<StartupTaskResultCallback> callback)-> int32_t {
+        [weak = weak_from_this(), data = startupTaskData]
+        (std::unique_ptr<StartupTaskResultCallback> callback)-> int32_t {
             auto self = weak.lock();
             if (self == nullptr) {
                 TAG_LOGE(AAFwkTag::STARTUP, "self is null");
@@ -681,7 +720,7 @@ int32_t StartupManager::AddAppAutoPreloadSoTask(
                     "AddAppAutoPreloadSoTask failed");
                 return ERR_STARTUP_INTERNAL_ERROR;
             }
-            int32_t result = self->RunAppAutoPreloadSoTask();
+            int32_t result = self->RunAppAutoPreloadSoTask(data);
             OnCompletedCallback::OnCallback(std::move(callback), result);
             return result;
         });
@@ -696,11 +735,11 @@ int32_t StartupManager::AddAppAutoPreloadSoTask(
     return ERR_OK;
 }
 
-int32_t StartupManager::RunAppAutoPreloadSoTask()
+int32_t StartupManager::RunAppAutoPreloadSoTask(std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::map<std::string, std::shared_ptr<StartupTask>> appAutoPreloadSoTasks;
-    int32_t result = GetAppAutoPreloadSoTasks(appAutoPreloadSoTasks);
+    int32_t result = GetAppAutoPreloadSoTasks(appAutoPreloadSoTasks, startupTaskData);
     if (result != ERR_OK) {
         return result;
     }
@@ -745,22 +784,28 @@ int32_t StartupManager::RunAppPreloadSoTask(
 }
 
 int32_t StartupManager::GetAppAutoPreloadSoTasks(
-    std::map<std::string, std::shared_ptr<StartupTask>> &appAutoPreloadSoTasks)
+    std::map<std::string, std::shared_ptr<StartupTask>> &appAutoPreloadSoTasks,
+    std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData)
 {
     std::set<std::string> dependenciesSet;
-    for (const auto &iter : preloadSoStartupTasks_) {
-        if (iter.second == nullptr) {
-            continue;
-        }
-        if (iter.second->GetIsExcludeFromAutoStart()) {
-            continue;
-        }
-        appAutoPreloadSoTasks.emplace(iter.first, iter.second);
-        auto dependencies = iter.second->GetDependencies();
-        for (auto &dep : dependencies) {
-            dependenciesSet.insert(dep);
-        }
+    bool filteredByFeature = false;
+    if (startupTaskData) {
+        TAG_LOGD(AAFwkTag::APPMGR,
+            "GetAppAutoPreloadSoTasks uri: %{public}s, action: %{public}s, intentName: %{public}s",
+            startupTaskData->uri.c_str(), startupTaskData->action.c_str(),
+            startupTaskData->insightIntentName.c_str());
+
+        MatchRulesStartupTaskMatcher taskMatcher(startupTaskData->uri, startupTaskData->action,
+            startupTaskData->insightIntentName);
+        filteredByFeature = FilterMatchedStartupTask(taskMatcher, preloadSoStartupTasks_, appAutoPreloadSoTasks,
+            dependenciesSet);
     }
+    TAG_LOGI(AAFwkTag::APPMGR, "filteredByFeature:%{public}d", filteredByFeature);
+    if (!filteredByFeature) {
+        ExcludeFromAutoStartStartupTaskMatcher taskMatcher;
+        FilterMatchedStartupTask(taskMatcher, preloadSoStartupTasks_, appAutoPreloadSoTasks, dependenciesSet);
+    }
+
     for (auto &dep : dependenciesSet) {
         if (appAutoPreloadSoTasks.find(dep) != appAutoPreloadSoTasks.end()) {
             continue;
@@ -993,10 +1038,6 @@ bool StartupManager::AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigI
     std::string ohmUrl = preloadStartupTaskJson.at(OHMURL).get<std::string>();
     std::string path = bundleName_ + "/" + info.name_;
     auto task = std::make_shared<PreloadSoStartupTask>(name, ohmUrl, path);
-    if (task == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "task is null");
-        return false;
-    }
 
     SetOptionalParameters(preloadStartupTaskJson, info.moduleType_, task);
     preloadSoStartupTasks.emplace(name, task);
@@ -1033,6 +1074,8 @@ void StartupManager::SetOptionalParameters(const nlohmann::json& module, AppExec
         startupTaskInfo.ohmUrl = module.at(OHMURL).get<std::string>();
     }
 
+    SetMatchRules(module, startupTaskInfo.matchRules);
+
     if (moduleType != AppExecFwk::ModuleType::ENTRY && moduleType != AppExecFwk::ModuleType::FEATURE) {
         startupTaskInfo.excludeFromAutoStart = true;
         return;
@@ -1047,15 +1090,17 @@ void StartupManager::SetOptionalParameters(const nlohmann::json& module, AppExec
 void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
     std::shared_ptr<PreloadSoStartupTask> &task)
 {
-    if (module.contains(DEPENDENCIES) && module[DEPENDENCIES].is_array()) {
-        std::vector<std::string> dependencies;
-        for (const auto& dependency : module.at(DEPENDENCIES)) {
-            if (dependency.is_string()) {
-                dependencies.push_back(dependency.get<std::string>());
-            }
-        }
-        task->SetDependencies(dependencies);
+    if (task == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "task is null");
+        return;
     }
+    std::vector<std::string> dependencies;
+    StartupUtils::ParseJsonStringArray(module, DEPENDENCIES, dependencies);
+    task->SetDependencies(dependencies);
+
+    StartupTaskMatchRules matchRules;
+    SetMatchRules(module, matchRules);
+    task->SetMatchRules(matchRules);
 
     if (moduleType != AppExecFwk::ModuleType::ENTRY && moduleType != AppExecFwk::ModuleType::FEATURE) {
         task->SetIsExcludeFromAutoStart(true);
@@ -1066,6 +1111,23 @@ void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExec
     } else {
         task->SetIsExcludeFromAutoStart(false);
     }
+}
+
+void StartupManager::SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules)
+{
+    if (!module.contains(MATCH_RULES) || !module.at(MATCH_RULES).is_object()) {
+        return;
+    }
+
+    const nlohmann::json &matchRulesJson = module.at(MATCH_RULES);
+    StartupUtils::ParseJsonStringArray(matchRulesJson, URIS, matchRules.uris);
+    StartupUtils::ParseJsonStringArray(matchRulesJson, INSIGHT_INTENTS, matchRules.insightIntents);
+    StartupUtils::ParseJsonStringArray(matchRulesJson, ACTIONS, matchRules.actions);
+    StartupUtils::ParseJsonStringArray(matchRulesJson, CUSTOMIZATION, matchRules.customization);
+    TAG_LOGD(AAFwkTag::STARTUP,
+        "SetMatchRules uris:%{public}zu, insightIntents:%{public}zu, actions:%{public}zu, customization:%{public}zu",
+        matchRules.uris.size(), matchRules.insightIntents.size(), matchRules.actions.size(),
+        matchRules.customization.size());
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

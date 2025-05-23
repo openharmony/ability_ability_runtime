@@ -326,7 +326,6 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/appkit/app/context_container.cpp",
     "${ability_runtime_native_path}/appkit/app/context_deal.cpp",
     "${ability_runtime_native_path}/appkit/app/sys_mgr_client.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/last_exit_detail_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
   ]
   configs = [ ":ability_config" ]
@@ -700,6 +699,8 @@ ohos_shared_library("insight_intent_executor") {
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/insight_intent_executor.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/insight_intent_executor_mgr.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_executor.cpp",
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_entry.cpp",
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_func.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_page.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_utils.cpp",
   ]
@@ -1630,6 +1631,7 @@ ohos_shared_library("ui_extension") {
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
+    "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",

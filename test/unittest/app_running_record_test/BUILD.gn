@@ -27,6 +27,7 @@ ohos_unittest("app_running_record_test") {
     "{ability_runtime_services_path}/include/",
     "${ability_runtime_test_path}/unittest/app_running_record_test/",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include/",
+    "${ability_runtime_innerkits_path}/ability_manager/include/insight_intent",
   ]
 
   sources = [ "app_running_record_test.cpp" ]

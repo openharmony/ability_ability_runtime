@@ -30,7 +30,10 @@ ohos_shared_library("ability_simulator_inner") {
         "NONLS",
       ]
     }
-    defines += ["OFFSET_PREVIEW=0"]
+    defines += [
+      "OFFSET_PREVIEW=0",
+      "__IDE_PREVIEW__",
+    ]
 
     cflags = [ "-std=c++17" ]
 
@@ -48,12 +51,16 @@ ohos_shared_library("ability_simulator_inner") {
       "${windowmanager_path}/interfaces/innerkits/wm",
       "${windowmanager_path}/interfaces/kits/napi/window_runtime/window_stage_napi",
       "include/bundle_parser",
+      "${simulator_path}/napi_module/application",
     ]
 
     sources = [
       "${ability_runtime_native_path}/ability/native/ability_business_error/ability_business_error.cpp",
       "${ability_runtime_native_path}/runtime/js_module_searcher.cpp",
       "${ability_runtime_path}/js_environment/frameworks/js_environment/src/source_map.cpp",
+      "${simulator_path}/napi_module/application/application_module.cpp",
+      "${simulator_path}/napi_module/application/js_application.cpp",
+      "${simulator_path}/napi_module/application/napi_base_context.cpp",
       "src/ability_context.cpp",
       "src/ability_runtime_error_util.cpp",
       "src/ability_stage_context.cpp",
@@ -80,7 +87,6 @@ ohos_shared_library("ability_simulator_inner") {
       "src/js_runtime.cpp",
       "src/js_runtime_utils.cpp",
       "src/js_timer.cpp",
-      "src/resource_manager_addon.cpp",
       "src/resource_manager_helper.cpp",
       "src/simulator.cpp",
     ]
@@ -102,6 +108,7 @@ ohos_shared_library("ability_simulator_inner") {
       "jsoncpp:jsoncpp_static",
       "napi:ace_napi",
       "previewer:ide_extension",
+      "resource_management:resmgr_napi_core_preview",
     ]
 
     if (ability_runtime_graphics) {

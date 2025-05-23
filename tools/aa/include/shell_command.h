@@ -56,6 +56,7 @@ protected:
 
     char** argv_ = nullptr;
     int argc_ = 0;
+    int64_t startTime_ = 0;
     std::string resultReceiver_ = "";
 
     std::string cmd_;

@@ -22,6 +22,7 @@
 #include "iservice_registry.h"
 #include "js_environment.h"
 #include "js_module_reader.h"
+#include "js_runtime_common.h"
 #include "js_worker.h"
 #include "ohos_js_env_logger.h"
 #include "ohos_js_environment_impl.h"
@@ -94,6 +95,14 @@ napi_status CreateNapiEnv(napi_env *env)
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
         return napi_status::napi_generic_failure;
     }
+    if (JsRuntimeCommon::GetInstance().IsDebugMode()) {
+        auto nativeEngine = jsEnv->GetNativeEngine();
+        const std::string threadName = "childThread";
+        napi_status errCode = JsRuntimeCommon::GetInstance().StartDebugMode(nativeEngine, threadName);
+        if (errCode != napi_status::napi_ok) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "start debug mode failed");
+        }
+    }
     return JsRuntimeLite::GetInstance().Init(*options, *env);
 }
 
@@ -103,6 +112,22 @@ napi_status DestroyNapiEnv(napi_env *env)
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
         return napi_status::napi_invalid_arg;
+    }
+    if (JsRuntimeCommon::GetInstance().IsDebugMode()) {
+        auto jsEnv = JsRuntimeLite::GetInstance().GetJsEnv(*env);
+        if (jsEnv == nullptr) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
+            return napi_status::napi_generic_failure;
+        }
+        auto nativeEngine = jsEnv->GetNativeEngine();
+        if (nativeEngine == nullptr) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null nativeEngine");
+            return napi_status::napi_generic_failure;
+        }
+        napi_status errCode = JsRuntimeCommon::GetInstance().StopDebugMode(nativeEngine);
+        if (errCode != napi_status::napi_ok) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "stop debug mode failed");
+        }
     }
     auto errCode = JsRuntimeLite::GetInstance().RemoveJsEnv(*env);
     if (errCode == napi_status::napi_ok) {

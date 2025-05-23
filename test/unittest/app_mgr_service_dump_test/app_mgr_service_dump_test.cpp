@@ -64,7 +64,7 @@ HWTEST_F(AppMgrServiceDumpTest, AppMgrServiceDump_GetProcessRunningInfosByUserId
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceDump_GetProcessRunningInfosByUserId_0100 start");
 
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
@@ -85,7 +85,7 @@ HWTEST_F(AppMgrServiceDumpTest, AppMgrServiceDump_GetProcessRunningInfosByUserId
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceDump_GetProcessRunningInfosByUserId_0200 start");
 
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrService = std::make_shared<AppMgrService>();
     EXPECT_NE(appMgrService, nullptr);
 

@@ -38,6 +38,10 @@ int NativeChildNotifyStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
             ret = HandleOnNativeChildStarted(data, reply);
             break;
 
+        case INativeChildNotify::IPC_ID_ON_NATIVE_CHILD_EXIT:
+            ret = HandleOnNativeChildExit(data, reply);
+            break;
+
         case INativeChildNotify::IPC_ID_ON_ERROR:
             ret = HandleOnError(data, reply);
             break;
@@ -57,6 +61,13 @@ int32_t NativeChildNotifyStub::HandleOnNativeChildStarted(MessageParcel &data, M
     sptr<IRemoteObject> cb = data.ReadRemoteObject();
     OnNativeChildStarted(cb);
     return ERR_NONE;
+}
+
+int32_t NativeChildNotifyStub::HandleOnNativeChildExit(MessageParcel &data, MessageParcel &reply)
+{
+    int pid = data.ReadInt32();
+    int signal = data.ReadInt32();
+    return OnNativeChildExit(pid, signal);
 }
 
 int32_t NativeChildNotifyStub::HandleOnError(MessageParcel &data, MessageParcel &reply)

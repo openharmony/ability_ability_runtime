@@ -37,9 +37,14 @@ ohos_fuzztest("AbilityMgrInsightIntentExecuteManagerFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/extract_insight_intent_profile.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_db_cache.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_execute_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_profile.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/ability_event_util.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_rdb_data_mgr.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_rdb_storage_mgr.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/hmsf_utils.cpp",
     "abilitymgrinsightintentexecutemanager_fuzzer.cpp",
   ]
 

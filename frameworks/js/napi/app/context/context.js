@@ -16,6 +16,62 @@
 class EventHub {
   constructor() {
     this.eventMap = {};
+    this.contextIndex = -1;
+    this.emitMultiThreadingEnabled = false;
+    this.emitter = undefined;
+  }
+
+  onEmitterFunction(eventData = {'data':{}}) {
+    let eventName = eventData.data[`arg${0}`];
+    let arrays = Object.keys(eventData.data);
+    let result = {};
+    for (let index = 1; index < arrays.length; index++) {
+      result[`arg${index - 1}`] = eventData.data[`arg${index}`];
+    }
+    let args = this.dataToArgs(result);
+    this.emitInner(eventName, ...args);
+  }
+
+  getEmitterEventName(event) {
+    return 'ohos.event.' + this.contextIndex + '.' + event;
+  }
+
+  argsToData(args = []) {
+    let eventData = {};
+    let data = args.reduce((acc, value, index)=>{
+      acc[`arg${index}`] = value;
+      return acc;
+    }, {});
+    eventData.data = data;
+    return eventData;
+  }
+
+  dataToArgs(data = {}) {
+    if (!data) {
+      return [];
+    }
+    let args = [];
+    let oLen = Object.keys(data).length;
+    for (let index = 0; index < oLen; index++) {
+      args[index] = data[`arg${index}`];
+    }
+    return args;
+  }
+
+  setEventHubEmitMultiThreadingEnabled(enable) {
+    if (this.emitMultiThreadingEnabled === enable) {
+      return;
+    }
+    this.emitter = requireNapi('events.emitter');
+    this.emitMultiThreadingEnabled = enable;
+    let keys = Object.keys(this.eventMap);
+    for (let i = 0; i < keys.length; i++) {
+      if (this.emitMultiThreadingEnabled === true) {
+        this.emitter.on(this.getEmitterEventName(keys[i]), (eventData) => this.onEmitterFunction(eventData));
+      } else {
+        this.emitter.off(this.getEmitterEventName(keys[i]));
+      }
+    }
   }
 
   on(event, callback) {
@@ -27,6 +83,11 @@ class EventHub {
     }
     if (this.eventMap[event].indexOf(callback) === -1) {
       this.eventMap[event].push(callback);
+    }
+    if (this.emitMultiThreadingEnabled === true && this.emitter !== undefined) {
+      if (this.emitter.getListenerCount(this.getEmitterEventName(event)) === 0) {
+        this.emitter.on(this.getEmitterEventName(event), (eventData) => this.onEmitterFunction(eventData));
+      }
     }
   }
 
@@ -48,9 +109,26 @@ class EventHub {
         delete this.eventMap[event];
       }
     }
+    if (this.emitMultiThreadingEnabled === true && this.emitter !== undefined) {
+      let array = this.eventMap[event];
+      if (array === null || array === undefined) {
+        this.emitter.off(this.getEmitterEventName(event));
+      }
+    }
   }
 
   emit(event, ...args) {
+    if (this.emitMultiThreadingEnabled === true && this.emitter !== undefined) {
+      let eventNameArrays = [event];
+      let newArgsArrays = eventNameArrays.concat(args);
+      let eventData = this.argsToData(newArgsArrays);
+      this.emitter.emit(this.getEmitterEventName(event), eventData);
+    } else {
+      this.emitInner(event, ...args);
+    }
+  }
+
+  emitInner(event, ...args) {
     if (typeof (event) !== 'string') {
       return;
     }
@@ -67,7 +145,9 @@ class EventHub {
 class Context {
   constructor(obj) {
     this.__context_impl__ = obj;
-    this.__context_impl__.eventHub = new EventHub();
+    let eventHub = new EventHub();
+    eventHub.contextIndex = obj.index;
+    this.__context_impl__.eventHub = eventHub;
   }
 
   createBundleContext(bundleName) {

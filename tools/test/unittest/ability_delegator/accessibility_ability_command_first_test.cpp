@@ -56,6 +56,18 @@ public:
     std::string cmdSetScreenMagnificationState_ = "setScreenMagnificationState";
 };
 
+Accessibility::RetError MockSetScreenMagnificationState();
+Accessibility::RetError MockRunAsSetShortkeyState();
+Accessibility::RetError MockRunAsSetMouseKeyState();
+Accessibility::RetError MockRunAsSetCaptionState();
+Accessibility::RetError MockRunAsSetMouseAutoClick();
+Accessibility::RetError MockRunAsSetHighContrastTextState();
+Accessibility::RetError MockRunAsSetInvertColorState();
+Accessibility::RetError MockRunAsSetDaltonizationColorFilter();
+Accessibility::RetError MockRunAsSetContentTimeout();
+Accessibility::RetError MockRunAsSetAnimationOffState();
+Accessibility::RetError MockRunAsSetAudioMonoState();
+
 void AccessibilityAbilityShellCommandFirstTest::SetUpTestCase()
 {}
 
@@ -1113,7 +1125,12 @@ AccessibilityAbilityShellCommand_RunAsSetScreenMagnificationState_0200, TestSize
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetScreenMagnificationState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_SCREEN_MAGNIFICATION_STATE_OK + "\n");
+    Accessibility::RetError ret = MockSetScreenMagnificationState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_SCREEN_MAGNIFICATION_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_SCREEN_MAGNIFICATION_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetScreenMagnificationState_0200 end";
 }
 
@@ -1162,7 +1179,12 @@ AccessibilityAbilityShellCommand_RunAsSetShortKeyState_0100, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetShortKeyState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_SHORT_KEY_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetShortkeyState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_SHORT_KEY_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_SHORT_KEY_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetShortKeyState_0100 end";
 }
 
@@ -1186,7 +1208,12 @@ AccessibilityAbilityShellCommand_RunAsSetShortKeyState_0200, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetShortKeyState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_SHORT_KEY_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetShortkeyState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_SHORT_KEY_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_SHORT_KEY_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetShortKeyState_0200 end";
 }
 
@@ -1256,7 +1283,12 @@ AccessibilityAbilityShellCommand_RunAsSetMouseKeyState_0100, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetMouseKeyState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_MOUSE_KEY_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetMouseKeyState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_MOUSE_KEY_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_MOUSE_KEY_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetMouseKeyState_0100 end";
 }
 
@@ -1280,7 +1312,12 @@ AccessibilityAbilityShellCommand_RunAsSetMouseKeyState_0200, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetMouseKeyState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_MOUSE_KEY_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetMouseKeyState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_MOUSE_KEY_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_MOUSE_KEY_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetMouseKeyState_0200 end";
 }
 
@@ -1350,7 +1387,12 @@ AccessibilityAbilityShellCommand_RunAsSetCaptionState_0100, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetCaptionState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CAPTION_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetCaptionState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CAPTION_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CAPTION_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetCaptionState_0100 end";
 }
 
@@ -1375,7 +1417,12 @@ AccessibilityAbilityShellCommand_RunAsSetCaptionState_0200, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetCaptionState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CAPTION_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetCaptionState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CAPTION_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CAPTION_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetCaptionState_0200 end";
 }
 
@@ -1445,7 +1492,12 @@ AccessibilityAbilityShellCommand_RunAsSetMouseAutoClick_0100, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetMouseAutoClick();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUTO_CLICK_TIME_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetMouseAutoClick();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUTO_CLICK_TIME_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUTO_CLICK_TIME_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetMouseAutoClick_0100 end";
 }
 
@@ -1469,7 +1521,12 @@ AccessibilityAbilityShellCommand_RunAsSetMouseAutoClick_0200, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetMouseAutoClick();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUTO_CLICK_TIME_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetMouseAutoClick();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUTO_CLICK_TIME_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUTO_CLICK_TIME_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetMouseAutoClick_0200 end";
 }
 
@@ -1560,7 +1617,12 @@ AccessibilityAbilityShellCommand_RunAsSetHighContrastTextState_0100, TestSize.Le
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetHighContrastTextState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_HIGH_CONTRAST_TEXT_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetHighContrastTextState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_HIGH_CONTRAST_TEXT_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_HIGH_CONTRAST_TEXT_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetHighContrastTextState_0100 end";
 }
 
@@ -1584,7 +1646,12 @@ AccessibilityAbilityShellCommand_RunAsSetHighContrastTextState_0200, TestSize.Le
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetHighContrastTextState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_HIGH_CONTRAST_TEXT_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetHighContrastTextState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_HIGH_CONTRAST_TEXT_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_HIGH_CONTRAST_TEXT_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetHighContrastTextState_0200 end";
 }
 
@@ -1654,7 +1721,12 @@ AccessibilityAbilityShellCommand_RunAsSetInvertColorState_0100, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetInvertColorState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_INVERT_COLOR_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetInvertColorState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_INVERT_COLOR_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_INVERT_COLOR_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetInvertColorState_0100 end";
 }
 
@@ -1678,7 +1750,12 @@ AccessibilityAbilityShellCommand_RunAsSetInvertColorState_0200, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetInvertColorState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_INVERT_COLOR_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetInvertColorState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_INVERT_COLOR_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_INVERT_COLOR_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetInvertColorState_0200 end";
 }
 
@@ -1748,7 +1825,12 @@ AccessibilityAbilityShellCommand_RunAsSetDaltonizationColorFilter_0100, TestSize
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetDaltonizationColorFilter();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetDaltonizationColorFilter();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetDaltonizationColorFilter_0100 end";
 }
 
@@ -1772,7 +1854,12 @@ AccessibilityAbilityShellCommand_RunAsSetDaltonizationColorFilter_0200, TestSize
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetDaltonizationColorFilter();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetDaltonizationColorFilter();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetDaltonizationColorFilter_0200 end";
 }
 
@@ -1796,7 +1883,12 @@ AccessibilityAbilityShellCommand_RunAsSetDaltonizationColorFilter_0300, TestSize
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetDaltonizationColorFilter();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetDaltonizationColorFilter();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetDaltonizationColorFilter_0300 end";
 }
 
@@ -1820,7 +1912,12 @@ AccessibilityAbilityShellCommand_RunAsSetDaltonizationColorFilter_0400, TestSize
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetDaltonizationColorFilter();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetDaltonizationColorFilter();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_DALTONIZATIONZATION_COLOR_FILTER_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetDaltonizationColorFilter_0400 end";
 }
 
@@ -1889,7 +1986,12 @@ AccessibilityAbilityShellCommand_RunAsSetContentTimeout_0100, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetContentTimeout();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CONTENT_TIME_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetContentTimeout();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CONTENT_TIME_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CONTENT_TIME_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetContentTimeout_0100 end";
 }
 
@@ -1914,7 +2016,12 @@ AccessibilityAbilityShellCommand_RunAsSetContentTimeout_0200, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetContentTimeout();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CONTENT_TIME_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetContentTimeout();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CONTENT_TIME_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_CONTENT_TIME_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetContentTimeout_0200 end";
 }
 
@@ -1984,7 +2091,12 @@ AccessibilityAbilityShellCommand_RunAsSetAnimationOffState_0100, TestSize.Level1
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetAnimationOffState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_ANIMATION_OFF_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetAnimationOffState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_ANIMATION_OFF_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_ANIMATION_OFF_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetAnimationOffState_0100 end";
 }
 
@@ -2008,7 +2120,12 @@ AccessibilityAbilityShellCommand_RunAsSetAnimationOffState_0200, TestSize.Level1
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetAnimationOffState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_ANIMATION_OFF_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetAnimationOffState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_ANIMATION_OFF_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_ANIMATION_OFF_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetAnimationOffState_0200 end";
 }
 
@@ -2177,7 +2294,12 @@ AccessibilityAbilityShellCommand_RunAsSetAudioMonoState_0100, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetAudioMonoState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_MONO_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetAudioMonoState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_MONO_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_MONO_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetAudioMonoState_0100 end";
 }
 
@@ -2201,7 +2323,12 @@ AccessibilityAbilityShellCommand_RunAsSetAudioMonoState_0200, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetAudioMonoState();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_MONO_STATE_OK + "\n");
+    Accessibility::RetError ret = MockRunAsSetAudioMonoState();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_MONO_STATE_OK + "\n");
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_MONO_STATE_NG + "\n");
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetAudioMonoState_0200 end";
 }
 

@@ -359,7 +359,7 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, AddWantUirsAndFlagsFromParam_001
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
-  
+
 /**
  * @tc.name: AddWantUirsAndFlagsFromParam_002
  * @tc.desc: basic function test of display id.
@@ -383,7 +383,7 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, AddWantUirsAndFlagsFromParam_002
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
- 
+
 /**
  * @tc.name: RemoteDied_0100
  * @tc.desc: RemoteDied_0100
@@ -401,7 +401,7 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, RemoteDied_0100, TestSize.Level1
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
- 
+
 /**
  * @tc.name: RemoteDied_0200
  * @tc.desc: RemoteDied_0200
@@ -479,8 +479,9 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, GetBundleName_0200, TestSize.Lev
 HWTEST_F(InsightIntentExecuteManagerSecondTest, GenerateWant_0300, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AbilityRuntime::ExtractInsightIntentGenericInfo decoratorInfo;
     Want want;
-    auto ret = InsightIntentExecuteManager::GenerateWant(nullptr, want);
+    auto ret = InsightIntentExecuteManager::GenerateWant(nullptr, decoratorInfo, want);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
@@ -506,8 +507,8 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, GenerateWant_0400, TestSize.Leve
     Want want;
     std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
     EXPECT_TRUE(startTime.empty());
-
-    InsightIntentExecuteManager::GenerateWant(paramPtr, want);
+    AbilityRuntime::ExtractInsightIntentGenericInfo decoratorInfo;
+    InsightIntentExecuteManager::GenerateWant(paramPtr, decoratorInfo, want);
     startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
     EXPECT_FALSE(startTime.empty());
     TAG_LOGI(AAFwkTag::TEST, "end.");
@@ -531,9 +532,9 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, GenerateWant_0500, TestSize.Leve
     param.displayId_ = 2;
     param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
     auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentGenericInfo decoratorInfo;
     Want want;
-
-    int32_t result = InsightIntentExecuteManager::GenerateWant(paramPtr, want);
+    int32_t result = InsightIntentExecuteManager::GenerateWant(paramPtr, decoratorInfo, want);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }

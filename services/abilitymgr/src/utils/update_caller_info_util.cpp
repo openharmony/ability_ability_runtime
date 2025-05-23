@@ -42,6 +42,14 @@ constexpr const char* PARAM_RESV_ANCO_CALLER_BUNDLENAME = "ohos.anco.param.calle
 constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
 constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestCode";
 constexpr const char* IS_SHELL_CALL = "isShellCall";
+constexpr const char* COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
+
+void ClearProtectedWantParam(Want &want)
+{
+    want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+    want.RemoveParam(Want::PARAM_ABILITY_RECOVERY_RESTART);
+    want.RemoveParam(COMPONENT_STARTUP_NEW_RULES);
+}
 }
 
 UpdateCallerInfoUtil &UpdateCallerInfoUtil::GetInstance()
@@ -58,6 +66,7 @@ void UpdateCallerInfoUtil::UpdateCallerInfo(Want& want, const sptr<IRemoteObject
         want.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
         want.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
     }
+    ClearProtectedWantParam(want);
     int32_t tokenId = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t callerPid = IPCSkeleton::GetCallingPid();
@@ -85,7 +94,6 @@ void UpdateCallerInfoUtil::UpdateCallerInfo(Want& want, const sptr<IRemoteObject
             if (result == ERR_OK) {
                 nativeName = "_" + nativeTokenInfo.processName;
             }
-            want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
             want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, nativeName);
         }
         UpdateCallerBundleName(want, bundleName);
@@ -130,11 +138,11 @@ void UpdateCallerInfoUtil::UpdateAsCallerSourceInfo(Want& want, sptr<IRemoteObje
     want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
     want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
     want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
     want.RemoveParam(IS_SHELL_CALL);
     want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
+    ClearProtectedWantParam(want);
 #ifdef SUPPORT_SCREEN
     if (UpdateAsCallerInfoFromDialog(want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Update as caller source info from dialog.");
@@ -229,7 +237,7 @@ void UpdateCallerInfoUtil::UpdateCallerInfoFromToken(Want& want, const sptr<IRem
         TAG_LOGW(AAFwkTag::ABILITYMGR, "caller abilityRecord null");
         return;
     }
-
+    ClearProtectedWantParam(want);
     int32_t tokenId = abilityRecord->GetApplicationInfo().accessTokenId;
     int32_t callerUid = abilityRecord->GetUid();
     int32_t callerPid = abilityRecord->GetPid();

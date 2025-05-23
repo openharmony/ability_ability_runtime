@@ -52,5 +52,30 @@ AppExecFwk::ModuleType AppStartupTask::GetModuleType() const
 {
     return moduleType_;
 }
+
+void AppStartupTask::SetMatchRules(StartupTaskMatchRules matchRules)
+{
+    matchRules_ = std::move(matchRules);
+}
+
+const std::vector<std::string> &AppStartupTask::GetUriMatchRules() const
+{
+    return matchRules_.uris;
+}
+
+const std::vector<std::string> &AppStartupTask::GetInsightIntentMatchRules() const
+{
+    return matchRules_.insightIntents;
+}
+
+const std::vector<std::string> &AppStartupTask::GetActionMatchRules() const
+{
+    return matchRules_.actions;
+}
+
+const std::vector<std::string> &AppStartupTask::GetCustomizationMatchRules() const
+{
+    return matchRules_.customization;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -66,6 +66,7 @@ public:
     void SetEntryParams(const std::string &entryParams);
     std::string GetEntryParams() const;
     ProcessType GetProcessType() const;
+    bool IsNativeSpawnStarted() const;
 
 private:
     void MakeProcessName(const std::shared_ptr<AppRunningRecord> hostRecord);

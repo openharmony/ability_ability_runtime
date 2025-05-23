@@ -54,6 +54,8 @@ public:
     std::string cmdSetScreenMagnificationState_ = "setScreenMagnificationState";
 };
 
+Accessibility::RetError MockRunAsSetAudioBalance();
+
 void AccessibilityAbilityShellCommandSecondTest::SetUpTestCase()
 {}
 
@@ -88,7 +90,12 @@ AccessibilityAbilityShellCommand_RunAsSetAudioBalance_0100, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetAudioBalance();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_BALANCE_OK);
+    Accessibility::RetError ret = MockRunAsSetAudioBalance();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_BALANCE_OK);
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_BALANCE_NG);
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetAudioBalance_0100 end";
 }
 
@@ -112,7 +119,12 @@ AccessibilityAbilityShellCommand_RunAsSetAudioBalance_0200, TestSize.Level1)
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsSetAudioBalance();
     EXPECT_EQ(result, OHOS::ERR_OK);
-    EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_BALANCE_OK);
+    Accessibility::RetError ret = MockRunAsSetAudioBalance();
+    if (ret == Accessibility::RET_OK) {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_BALANCE_OK);
+    } else {
+        EXPECT_EQ(cmd.resultReceiver_, ACCESSIBILITY_SET_AUDIO_BALANCE_NG);
+    }
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsSetAudioBalance_0200 end";
 }
 

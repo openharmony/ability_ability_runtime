@@ -31,6 +31,16 @@ void ResourceConfigHelper::SetLanguage(std::string language)
     language_ = language;
 }
 
+std::string ResourceConfigHelper::GetLocale()
+{
+    return locale_;
+}
+
+void ResourceConfigHelper::SetLocale(const std::string& locale)
+{
+    locale_ = locale;
+}
+
 std::string ResourceConfigHelper::GetColormode()
 {
     return colormode_;

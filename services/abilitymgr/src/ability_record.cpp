@@ -274,7 +274,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
 
     auto userId = abilityRequest.appInfo.uid / BASE_USER_RANGE;
     if ((userId == 0 ||
-        AmsConfigurationParameter::GetInstance().InResidentWhiteList(abilityRequest.abilityInfo.bundleName)) &&
+        AppUtils::GetInstance().InResidentWhiteList(abilityRequest.abilityInfo.bundleName)) &&
         DelayedSingleton<ResidentProcessManager>::GetInstance()->IsResidentAbility(
             abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name, userId)) {
         abilityRecord->keepAliveBundle_ = true;
@@ -3051,6 +3051,7 @@ void AbilityRecord::SetLastExitReason(const ExitReason &exitReason, const AppExe
     lastExitDetailInfo.exitSubReason = exitReason.subReason;
     lastExitDetailInfo.rss = processInfo.rssValue;
     lastExitDetailInfo.pss = processInfo.pssValue;
+    lastExitDetailInfo.processState = static_cast<int32_t>(processInfo.state_);
     lastExitDetailInfo.timestamp = timestamp;
     lastExitDetailInfo.processName = processInfo.processName_;
     lastExitDetailInfo.exitMsg = killMsg;

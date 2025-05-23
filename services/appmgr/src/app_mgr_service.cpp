@@ -22,6 +22,7 @@
 #include <thread>
 
 #include "ability_manager_errors.h"
+#include "ability_manager_xcollie.h"
 #include "app_death_recipient.h"
 #include "app_mgr_constants.h"
 #include "datetime_ex.h"
@@ -212,6 +213,7 @@ void AppMgrService::AttachApplication(const sptr<IRemoteObject> &app)
 int32_t AppMgrService::PreloadApplication(const std::string &bundleName, int32_t userId,
     AppExecFwk::PreloadMode preloadMode, int32_t appIndex)
 {
+    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "PreloadApplication called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication failed");
@@ -336,6 +338,7 @@ sptr<IAmsMgr> AppMgrService::GetAmsMgr()
 
 int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex, int32_t userId)
 {
+    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
         TAG_LOGE(AAFwkTag::APPMGR, "caller is not SA");
         return AAFwk::ERR_NOT_SYSTEM_APP;
@@ -378,6 +381,7 @@ int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, int
 
 int32_t AppMgrService::ClearUpApplicationDataBySelf(int32_t userId)
 {
+    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
@@ -599,6 +603,26 @@ int32_t AppMgrService::UnregisterApplicationStateObserver(const sptr<IApplicatio
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->UnregisterApplicationStateObserver(observer);
+}
+
+int32_t AppMgrService::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "begin");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->RegisterNativeChildExitNotify(notify);
+}
+
+int32_t AppMgrService::UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "begin");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->UnregisterNativeChildExitNotify(notify);
 }
 
 int32_t AppMgrService::RegisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer)
@@ -995,6 +1019,7 @@ int AppMgrService::GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<
 
 int32_t AppMgrService::PreStartNWebSpawnProcess()
 {
+    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPMGR, "PreStartNWebSpawnProcess");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
@@ -1007,6 +1032,7 @@ int32_t AppMgrService::PreStartNWebSpawnProcess()
 int32_t AppMgrService::StartRenderProcess(const std::string &renderParam, int32_t ipcFd,
     int32_t sharedFd, int32_t crashFd, pid_t &renderPid, bool isGPU)
 {
+    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     FdGuard ipcFdGuard(ipcFd);
     FdGuard sharedFdGuard(sharedFd);
     FdGuard crashFdGuard(crashFd);
@@ -1076,6 +1102,21 @@ int32_t AppMgrService::UpdateConfiguration(const Configuration& config, const in
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->UpdateConfiguration(config, userId);
+}
+
+int32_t AppMgrService::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo>& appInfos,
+    const AppExecFwk::ConfigurationPolicy& policy, const int32_t userId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "caller not SA");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
 }
 
 int32_t AppMgrService::UpdateConfigurationByBundleName(const Configuration& config, const std::string &name,
@@ -1438,6 +1479,7 @@ int32_t AppMgrService::IsAppRunningByBundleNameAndUserId(const std::string &bund
 #ifdef SUPPORT_CHILD_PROCESS
 int32_t AppMgrService::StartChildProcess(pid_t &childPid, const ChildProcessRequest &request)
 {
+    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::vector<FdGuard> fds;
     for (const auto &[name, fd] : request.args.fds) {
@@ -1676,6 +1718,7 @@ void AppMgrService::SetAppAssertionPauseState(bool flag)
 int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
     const sptr<IRemoteObject> &callback)
 {
+    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPMGR, "call");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
