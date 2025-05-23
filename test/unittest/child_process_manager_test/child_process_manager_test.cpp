@@ -113,7 +113,7 @@ HWTEST_F(ChildProcessManagerTest, StartChildProcessBySelfFork_0300, TestSize.Lev
     appUtils.isMultiProcessModel_.isLoaded = true;
     appUtils.isMultiProcessModel_.value = false;
     appUtils.allowChildProcessInMultiProcessFeatureApp_.isLoaded = true;
-    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = true;
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = false;
     
     pid_t pid;
     auto ret = ChildProcessManager::GetInstance().StartChildProcessBySelfFork("./ets/process/DemoProcess.ts", pid);

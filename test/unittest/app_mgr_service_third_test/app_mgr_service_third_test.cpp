@@ -313,7 +313,7 @@ HWTEST_F(AppMgrServiceThirdTest, UpdateConfigurationForBackgroundApp_001, TestSi
     appMgrService->SetInnerService(nullptr);
     AAFwk::MyFlag::flag_ = 0;
     int32_t res = appMgrService->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
-    EXPECT_EQ(res, 22);
+    EXPECT_EQ(res, ERR_PERMISSION_DENIED);
     AAFwk::MyFlag::flag_ = 1;
     res = appMgrService->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
     EXPECT_EQ(res, 38);
