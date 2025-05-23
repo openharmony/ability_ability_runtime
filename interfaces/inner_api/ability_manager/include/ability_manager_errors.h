@@ -797,6 +797,11 @@ enum {
      * Result (2097333) for target has not been started yet.
      */
     ERR_TARGET_NOT_STARTED = 2097333,
+
+    /**
+     * Result (2097334) for app selector not exists.
+     */
+    ERR_APP_SELECTOR_NOT_EXISTS = 2097334,
     
     /**
      * Native error(3000000) for target bundle not exist.
