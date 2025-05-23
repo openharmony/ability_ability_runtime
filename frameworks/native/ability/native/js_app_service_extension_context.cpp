@@ -43,8 +43,7 @@ namespace AbilityRuntime {
 namespace {
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
-constexpr int32_t ERROR_CODE_ONE = 1;
-constexpr int32_t ERROR_CODE_TWO = 2;
+constexpr int32_t ERR_INVALID_VALUE = -1;
 constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
@@ -111,7 +110,7 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::APP_SERVICE_EXT, "context released");
-                *innerErrCode = static_cast<int32_t>(ERROR_CODE_ONE);
+                *innerErrCode = static_cast<int32_t>(AAFwk::ERR_INVALID_CONTEXT);
                 return;
             }
             *innerErrCode = context->TerminateSelf();
@@ -120,8 +119,6 @@ private:
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
-                } else if (*innerErrCode == ERROR_CODE_ONE) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode, "context is released"));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
@@ -223,11 +220,10 @@ private:
         return CreateJsValue(env, connectId);
     }
 
-    void FindConnection(AAFwk::Want& want, sptr<JSAppServiceExtensionConnection>& connection, int64_t& connectId,
+    void FindConnection(int64_t connectId, AAFwk::Want& want, sptr<JSAppServiceExtensionConnection>& connection,
         int32_t &accountId) const
     {
-        TAG_LOGI(AAFwkTag::APP_SERVICE_EXT, "Disconnect ability:%{public}d",
-            static_cast<int32_t>(connectId));
+        TAG_LOGI(AAFwkTag::APP_SERVICE_EXT, "FindConnection connectId:%{public}" PRIu64 "", connectId);
         std::lock_guard guard(g_connectsMutex);
         auto item = std::find_if(g_connects.begin(),
             g_connects.end(),
@@ -261,19 +257,19 @@ private:
         AAFwk::Want want;
         sptr<JSAppServiceExtensionConnection> connection = nullptr;
         int32_t accountId = -1;
-        FindConnection(want, connection, connectId, accountId);
+        FindConnection(connectId, want, connection, accountId);
         // begin disconnect
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
         NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, connection, accountId, innerErrCode]() {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::APP_SERVICE_EXT, "context released");
-                *innerErrCode = static_cast<int32_t>(ERROR_CODE_ONE);
+                *innerErrCode = static_cast<int32_t>(AAFwk::ERR_INVALID_CONTEXT);
                 return;
             }
             if (!connection) {
                 TAG_LOGW(AAFwkTag::APP_SERVICE_EXT, "null connection");
-                *innerErrCode = static_cast<int32_t>(ERROR_CODE_TWO);
+                *innerErrCode = ERR_INVALID_VALUE;
                 return;
             }
             TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "context->DisconnectAbility");
@@ -283,10 +279,6 @@ private:
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
-                } else if (*innerErrCode == ERROR_CODE_ONE) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode, "Context is released"));
-                } else if (*innerErrCode == ERROR_CODE_TWO) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode, "not found connection"));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
