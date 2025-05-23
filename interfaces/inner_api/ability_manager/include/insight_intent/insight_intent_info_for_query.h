@@ -31,9 +31,9 @@ struct LinkInfoForQuery {
 
 struct PageInfoForQuery {
     std::string uiAbility;
-    std::string pageRouterName;
+    std::string pagePath;
     std::string navigationId;
-    std::string navDestination;
+    std::string navDestinationName;
 };
 
 struct EntryInfoForQuery {
@@ -58,6 +58,7 @@ struct InsightIntentInfoForQuery : public Parcelable {
     std::string llmDescription;
     std::string intentType;
     std::string parameters;
+    std::string result;
     std::vector<std::string> keywords;
     LinkInfoForQuery linkInfo;
     PageInfoForQuery pageInfo;

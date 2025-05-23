@@ -307,6 +307,21 @@ static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* 
     return napi_ok;
 }
 
+static napi_status SetEnumItem(napi_env env, napi_value napiObject, const char* name, const char* value)
+{
+    napi_status status;
+    napi_value itemName;
+    napi_value itemValue;
+
+    NAPI_CALL_BASE(env, status = napi_create_string_utf8(env, name, NAPI_AUTO_LENGTH, &itemName), status);
+    NAPI_CALL_BASE(env, status = napi_create_string_utf8(env, value, NAPI_AUTO_LENGTH, &itemValue), status);
+
+    NAPI_CALL_BASE(env, status = napi_set_property(env, napiObject, itemName, itemValue), status);
+    NAPI_CALL_BASE(env, status = napi_set_property(env, napiObject, itemValue, itemName), status);
+
+    return napi_ok;
+}
+
 static napi_value InitGetInsightIntentFlagObject(napi_env env)
 {
     napi_value napiObject;
@@ -316,6 +331,20 @@ static napi_value InitGetInsightIntentFlagObject(napi_env env)
         env, napiObject, "GET_FULL_INSIGHT_INTENT", GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT));
     NAPI_CALL(env, SetEnumItem(
         env, napiObject, "GET_SUMMARY_INSIGHT_INTENT", GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT));
+
+    return napiObject;
+}
+
+static napi_value InitInsightIntentTypeObject(napi_env env)
+{
+    napi_value napiObject;
+    NAPI_CALL(env, napi_create_object(env, &napiObject));
+
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "LINK", "@InsightIntentLink"));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "PAGE", "@InsightIntentPage"));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "ENTRY", "@InsightIntentEntry"));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "FUNCTION", "@InsightIntentFunctionMethod"));
+    NAPI_CALL(env, SetEnumItem(env, napiObject, "FORM", "@InsightIntentForm"));
 
     return napiObject;
 }
@@ -339,11 +368,14 @@ napi_value JsInsightIntentDriverInit(napi_env env, napi_value exportObj)
         "getInsightIntentInfoByBundleName", moduleName, JsInsightIntentDriver::GetInsightIntentInfoByBundleName);
     BindNativeFunction(env, exportObj,
         "getInsightIntentInfoByIntentName", moduleName, JsInsightIntentDriver::GetInsightIntentInfoByIntentName);
-
     napi_value getInsightIntentFlag = InitGetInsightIntentFlagObject(env);
     NAPI_ASSERT(env, getInsightIntentFlag != nullptr, "failed to create getInsightIntent flag object");
+    napi_value insightIntentType = InitInsightIntentTypeObject(env);
+    NAPI_ASSERT(env, insightIntentType != nullptr, "failed to create insightIntent type object");
+
     napi_property_descriptor exportObjs[] = {
         DECLARE_NAPI_PROPERTY("GetInsightIntentFlag", getInsightIntentFlag),
+        DECLARE_NAPI_PROPERTY("InsightIntentType", insightIntentType),
     };
     napi_status status = napi_define_properties(env, exportObj, sizeof(exportObjs) / sizeof(exportObjs[0]), exportObjs);
     NAPI_ASSERT(env, status == napi_ok, "failed to define properties for exportObj");
