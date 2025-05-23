@@ -255,6 +255,10 @@ ohos_shared_library("abilityms") {
     ]
   }
 
+  if (ability_runtime_feature_sandboxmanager) {
+    defines += ["SUPPORT_APP_SELECTOR"]
+  }
+
   if (include_app_domain_verify) {
     external_deps += [
       "app_domain_verify:app_domain_verify_common",
