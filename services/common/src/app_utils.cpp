@@ -42,6 +42,7 @@ constexpr const char* LIMIT_MAXIMUM_OF_RENDER_PROCESS = "persist.sys.abilityms.l
 constexpr const char* GRANT_PERSIST_URI_PERMISSION = "persist.sys.abilityms.grant_persist_uri_permission";
 constexpr const char* START_OPTIONS_WITH_ANIMATION = "persist.sys.abilityms.start_options_with_animation";
 constexpr const char* MULTI_PROCESS_MODEL = "persist.sys.abilityms.multi_process_model";
+constexpr const char* PARAM_ANCO_APP_IDENTIFIER = "persist.hmos_fusion_mgr.anco_identifier";
 constexpr const char* ALLOW_CHILD_PROCESS_IN_MULTI_PROCESS_FEATURE_APP =
     "const.sys.abilityms.allow_child_process_in_multi_process_feature_app";
 constexpr const char* MAX_MULTI_PROCESS_FEATURE_CHILD_PROCESS =
@@ -467,6 +468,12 @@ std::string AppUtils::GetCacheExtensionTypeList()
     std::string cacheExtAbilityTypeList = system::GetParameter(CACHE_EXTENSION_TYPES, "260");
     TAG_LOGD(AAFwkTag::DEFAULT, "cacheExtAbilityTypeList is %{public}s", cacheExtAbilityTypeList.c_str());
     return cacheExtAbilityTypeList;
+}
+
+std::string AppUtils::GetAncoAppIdentifiers()
+{
+    std::string identifiers = system::GetParameter(PARAM_ANCO_APP_IDENTIFIER, "");\
+    return identifiers;
 }
 
 bool AppUtils::IsAllowStartAbilityWithoutCallerToken(const std::string& bundleName, const std::string& abilityName)

@@ -1778,6 +1778,16 @@ ErrCode AbilityManagerClient::UnregisterIAbilityManagerCollaborator(int32_t type
     return abms->UnregisterIAbilityManagerCollaborator(type);
 }
 
+sptr<IAbilityManagerCollaborator> AbilityManagerClient::GetAbilityManagerCollaborator()
+{
+    auto abms = GetAbilityManager();
+    if (abms == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abms nullptr");
+        return nullptr;
+    }
+    return abms->GetAbilityManagerCollaborator();
+}
+
 ErrCode AbilityManagerClient::RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");

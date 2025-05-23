@@ -427,6 +427,17 @@ HWTEST_F(AbilityManagerClientBranchTest, UnRegisterMissionListener_0200, TestSiz
 }
 
 /**
+ * @tc.name: AbilityManagerClient_GetAbilityManagerCollaborator_0100
+ * @tc.desc: GetAbilityManagerCollaborator
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, GetAbilityManagerCollaborator_0100, TestSize.Level1)
+{
+    auto result = client_->GetAbilityManagerCollaborator();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
  * @tc.name: AbilityManagerClient_GetMissionInfos_0100
  * @tc.desc: GetMissionInfos
  * @tc.type: FUNC

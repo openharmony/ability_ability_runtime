@@ -250,6 +250,9 @@ int AbilityManagerStub::OnRemoteRequestInnerSixth(uint32_t code, MessageParcel &
     if (interfaceCode == AbilityManagerInterfaceCode::UNREGISTER_COLLABORATOR) {
         return UnregisterIAbilityManagerCollaboratorInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_ABILITY_MANAGER_COLLABORATOR) {
+        return GetAbilityManagerCollaboratorInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_APP_DEBUG_LISTENER) {
         return RegisterAppDebugListenerInner(data, reply);
     }
@@ -3484,6 +3487,20 @@ int32_t AbilityManagerStub::UnregisterIAbilityManagerCollaboratorInner(MessagePa
     int32_t type = data.ReadInt32();
     int32_t ret = UnregisterIAbilityManagerCollaborator(type);
     reply.WriteInt32(ret);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::GetAbilityManagerCollaboratorInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto collaborator = GetAbilityManagerCollaborator();
+    if (collaborator == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "collaborator nullptr");
+        return ERR_NULL_OBJECT;
+    }
+    if (!reply.WriteRemoteObject(collaborator->AsObject())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "collaborator write fail");
+        return ERR_INVALID_VALUE;
+    }
     return NO_ERROR;
 }
 

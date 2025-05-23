@@ -11344,6 +11344,15 @@ int32_t AbilityManagerService::GetCollaboratorType(const std::string &codePath) 
     return 0;
 }
 
+sptr<IAbilityManagerCollaborator> AbilityManagerService::GetAbilityManagerCollaborator()
+{
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not foundation call");
+        return nullptr;
+    }
+    return GetCollaborator(CollaboratorType::RESERVE_TYPE);
+}
+
 sptr<IAbilityManagerCollaborator> AbilityManagerService::GetCollaborator(int32_t type)
 {
     if (!CheckCollaboratorType(type)) {
@@ -12144,20 +12153,14 @@ void AbilityManagerService::OnCacheExitInfo(uint32_t accessTokenId, const AppExe
 int32_t AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
 {
     auto accessTokenId = IPCSkeleton::GetCallingTokenID();
-#ifdef SUPPORT_UPMS
-    if (!IN_PROCESS_CALL(AAFwk::UriPermissionManagerClient::GetInstance().VerifyUriPermission(
-        uri, flag, accessTokenId))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "premission check failed");
-        return -1;
-    }
-#endif // SUPPORT_UPMS
     auto collaborator = GetCollaborator(CollaboratorType::RESERVE_TYPE);
     if (collaborator == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "collaborator getCollaborator null");
-        return ERR_COLLABORATOR_NOT_REGISTER;
+        return -1;
     }
-    return collaborator->OpenFile(uri, flag);
+    return collaborator->OpenFile(uri, flag, accessTokenId);
 }
+
 #ifdef SUPPORT_SCREEN
 int AbilityManagerService::GetDialogSessionInfo(const std::string &dialogSessionId,
     sptr<DialogSessionInfo> &dialogSessionInfo)

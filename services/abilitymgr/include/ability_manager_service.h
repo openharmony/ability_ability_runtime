@@ -1571,6 +1571,12 @@ public:
     virtual int32_t UnregisterIAbilityManagerCollaborator(int32_t type) override;
 
     /**
+     * @brief get ability manager collaborator.
+     * @return Returns object pointer on success, others on null.
+     */
+    virtual sptr<IAbilityManagerCollaborator> GetAbilityManagerCollaborator() override;
+
+    /**
      * @brief Get collaborator.
      * @param type collaborator type.
      * @return nullptr or IAbilityManagerCollaborator stpr.

@@ -1562,6 +1562,15 @@ public:
         return 0;
     }
 
+    /**
+     * @brief get ability manager collaborator.
+     * @return Returns object pointer on success, others on null.
+     */
+    virtual sptr<IAbilityManagerCollaborator> GetAbilityManagerCollaborator()
+    {
+        return nullptr;
+    }
+
     virtual int32_t RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate)
     {
         return 0;
