@@ -133,7 +133,7 @@ ContinueState ContinueState_ConvertStsToNative(const int32_t index)
 }
 int32_t ContinueState_ConvertNativeToSts(const ContinueState value)
 {
-    if(value ==ContinueState::CONTINUESTATE_ACTIVE || value == ContinueState::CONTINUESTATE_INACTIVE){
+    if (value == ContinueState::CONTINUESTATE_ACTIVE || value == ContinueState::CONTINUESTATE_INACTIVE) {
         return value;
     }
     return ContinueState::CONTINUESTATE_UNKNOWN;
