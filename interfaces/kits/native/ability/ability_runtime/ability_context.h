@@ -216,17 +216,26 @@ public:
     virtual ErrCode ConnectUIServiceExtensionAbility(const AAFwk::Want& want,
         const sptr<AbilityConnectCallback>& connectCallback) = 0;
 
-    virtual ErrCode StartAppServiceExtensionAbility(const AAFwk::Want &want) = 0;
-    virtual ErrCode StopAppServiceExtensionAbility(const AAFwk::Want& want) = 0;
+    virtual ErrCode StartAppServiceExtensionAbility(const AAFwk::Want &want)
+    {
+        return 0;
+    }
+    virtual ErrCode StopAppServiceExtensionAbility(const AAFwk::Want& want)
+    {
+        return 0;
+    }
     /**
-    * @brief Connects the current ability to an appService ability using the AbilityInfo.AbilityType.SERVICE template.
+    * @brief Connects the current ability to an appService ability using the AbilityInfo.AbilityType.SERVICE template.f
     *
     * @param want Indicates the want containing information about the ability to connect
     * @param connectCallback Indicates the callback object when the target ability is connected.
     * @return True means success and false means failure
     */
     virtual ErrCode ConnectAppServiceExtensionAbility(const AAFwk::Want& want,
-        const sptr<AbilityConnectCallback>& connectCallback) = 0;
+        const sptr<AbilityConnectCallback>& connectCallback)
+    {
+        return 0;
+    }
 
     /**
     * @brief Disconnects the current ability from an ability
