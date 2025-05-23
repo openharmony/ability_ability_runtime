@@ -174,7 +174,7 @@ public:
      * @param callerToken Caller form extension token.
      * @return Returns ERR_OK on success, others on failure.
      */
-     int NotifyFormLocationUpdate(const int64_t formId, const Want &want,
+    virtual int NotifyFormLocationUpdate(const int64_t formId, const Want &want,
         const sptr<IRemoteObject> &callerToken) override;
 
 private:
