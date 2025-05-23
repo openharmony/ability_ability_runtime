@@ -71,7 +71,7 @@ void SetAdditionalConfiguration(
     env->Object_SetPropertyByName_Ref(
         object, "hasPointerDevice", createBoolean(env, hasPointerDevice == "true" ? true : false));
 
-    std::string str = configuration.GetItem(AAFwk::GlobalConfigurationKey::APPLICATION_FONT);
+    std::string str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_ID);
     env->Object_SetPropertyByName_Ref(object, "fontId", GetAniString(env, str));
 
     std::string fontSizeScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
