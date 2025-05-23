@@ -1025,6 +1025,11 @@ enum NativeFreeInstallError {
      */
      ERR_CALLER_NOT_ATOMIC_SERVICE = 29360217,
 
+    /*
+     * Result(29360218) for failed to create instance key from SCB.
+     */
+    ERR_CREATE_INSTANCE_KEY_FAILED = 29360218,
+
     /**
      * Undefine error code.
      */
