@@ -270,8 +270,8 @@ void StsAbilityContext::StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe
     }
 }
 
-void StsAbilityContext::StartAbility1(
-    [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj, ani_object wantObj, ani_object call)
+void StsAbilityContext::StartAbility1([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
+    ani_object wantObj, ani_object call)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
@@ -409,8 +409,8 @@ void StsAbilityContext::TerminateSelfWithResult(
     AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
 }
 
-void StsAbilityContext::reportDrawnCompletedSync(
-    [[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj, ani_object callback)
+void StsAbilityContext::reportDrawnCompletedSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
+    ani_object callback)
 {
     ani_object aniObject = nullptr;
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
