@@ -47,29 +47,6 @@ void AppendAbilities(const std::list<std::shared_ptr<AbilityRecord>> &abilityRec
         }
     }
 }
-
-void GetRunningProcessInfo(int32_t pid, int32_t userId, const std::string &bundleName,
-    AppExecFwk::RunningProcessInfo &processInfo)
-{
-    if (pid != NO_PID) {
-        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(static_cast<pid_t>(pid),
-            processInfo);
-        return;
-    }
-    if (userId == -1) {
-        return;
-    }
-    auto appMgr = AppMgrUtil::GetAppMgr();
-    if (appMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr null");
-        return;
-    }
-    std::vector<AppExecFwk::RunningProcessInfo> infoList;
-    IN_PROCESS_CALL(appMgr->GetRunningProcessInformation(bundleName, userId, infoList));
-    if (infoList.size() == 1) {
-        processInfo = infoList.front();
-    }
-}
 }
 
 AppExitReasonHelper::AppExitReasonHelper(std::shared_ptr<SubManagersHelper> subManagersHelper)
@@ -375,6 +352,29 @@ int32_t AppExitReasonHelper::RecordUIAbilityExitReason(const pid_t pid, const st
             UpdateAppExitReason(application.accessTokenId, abilityLists, exitReason, processInfo, false);
     }
     return ERR_OK;
+}
+
+void AppExitReasonHelper::GetRunningProcessInfo(int32_t pid, int32_t userId, const std::string &bundleName,
+    AppExecFwk::RunningProcessInfo &processInfo)
+{
+    if (pid != NO_PID) {
+        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(static_cast<pid_t>(pid),
+            processInfo);
+        return;
+    }
+    if (userId == -1 || bundleName.empty()) {
+        return;
+    }
+    auto appMgr = AppMgrUtil::GetAppMgr();
+    if (appMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr null");
+        return;
+    }
+    std::vector<AppExecFwk::RunningProcessInfo> infoList;
+    IN_PROCESS_CALL(appMgr->GetRunningProcessInformation(bundleName, userId, infoList));
+    if (infoList.size() == 1) {
+        processInfo = infoList.front();
+    }
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

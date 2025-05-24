@@ -48,6 +48,33 @@ void AppExitReasonHelperTest::TearDown()
 {}
 
 /**
+ * @tc.name: GetRunningProcessInfo_0100
+ * @tc.desc: GetRunningProcessInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppExitReasonHelperTest, GetRunningProcessInfo_0100, TestSize.Level1)
+{
+    auto appExitReasonHelper = std::make_shared<AAFwk::AppExitReasonHelper>(nullptr);
+
+    auto pid = AAFwk::NO_PID;
+    int32_t userId = -1;
+    std::string bundleName;
+    AppExecFwk::RunningProcessInfo processInfo;
+    appExitReasonHelper->GetRunningProcessInfo(pid, userId, bundleName, processInfo);
+    EXPECT_TRUE(processInfo.processName_.empty());
+    userId = 1;
+    appExitReasonHelper->GetRunningProcessInfo(pid, userId, bundleName, processInfo);
+    EXPECT_TRUE(processInfo.processName_.empty());
+    bundleName = "testBUncleName";
+    appExitReasonHelper->GetRunningProcessInfo(pid, userId, bundleName, processInfo);
+    EXPECT_TRUE(processInfo.processName_.empty());
+    pid = 1;
+    appExitReasonHelper->GetRunningProcessInfo(pid, userId, bundleName, processInfo);
+    EXPECT_TRUE(processInfo.processName_.empty());
+}
+
+/**
  * @tc.name: RecordUIAbilityExitReason_0100
  * @tc.desc: RecordUIAbilityExitReason
  * @tc.type: FUNC

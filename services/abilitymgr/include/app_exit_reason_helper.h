@@ -49,6 +49,8 @@ private:
         const int32_t pid);
     bool IsExitReasonValid(const ExitReason &exitReason);
     int32_t GetActiveAbilityListWithPid(int32_t uid, std::vector<std::string> &abilityList, int32_t pid);
+    void GetRunningProcessInfo(int32_t pid, int32_t userId, const std::string &bundleName,
+        AppExecFwk::RunningProcessInfo &processInfo);
 
     std::shared_ptr<SubManagersHelper> subManagersHelper_;
 };
