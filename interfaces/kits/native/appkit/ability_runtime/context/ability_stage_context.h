@@ -62,7 +62,7 @@ public:
     std::string GetCacheDir() override;
     std::string GetTempDir() override;
     std::string GetFilesDir() override;
-    std::string GetResourceDir() override;
+    std::string GetResourceDir(const std::string &moduleName = "") override;
     std::string GetDatabaseDir() override;
     std::string GetPreferencesDir() override;
     std::string GetGroupDir(std::string groupId) override;

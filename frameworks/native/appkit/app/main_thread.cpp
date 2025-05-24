@@ -1650,68 +1650,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 #endif
             JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
             uncaughtExceptionInfo.hapPath = hapPath;
-            wptr<MainThread> weak = this;
-            uncaughtExceptionInfo.uncaughtTask = [weak, bundleName, versionCode, appRunningId = std::move(appRunningId),
-                pid, processName] (std::string summary, const JsEnv::ErrorObject errorObj) {
-                auto appThread = weak.promote();
-                if (appThread == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
-                    return;
-                }
-                time_t timet;
-                time(&timet);
-                HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
-                    OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-                    EVENT_KEY_PACKAGE_NAME, bundleName,
-                    EVENT_KEY_VERSION, std::to_string(versionCode),
-                    EVENT_KEY_TYPE, JSCRASH_TYPE,
-                    EVENT_KEY_HAPPEN_TIME, timet,
-                    EVENT_KEY_REASON, errorObj.name,
-                    EVENT_KEY_JSVM, JSVM_TYPE,
-                    EVENT_KEY_SUMMARY, summary,
-                    EVENT_KEY_PNAME, processName,
-                    EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId,
-                    EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
-                ErrorObject appExecErrorObj = {
-                    .name = errorObj.name,
-                    .message = errorObj.message,
-                    .stack = errorObj.stack
-                };
-                FaultData faultData;
-                faultData.faultType = FaultDataType::JS_ERROR;
-                faultData.errorObject = appExecErrorObj;
-                DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
-                auto napiEnv =
-                    (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
-                if (NapiErrorManager::GetInstance()->NotifyUncaughtException(
-                    napiEnv, summary, appExecErrorObj.name,
-                    appExecErrorObj.message, appExecErrorObj.stack)) {
-                    return;
-                }
-                if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
-                    ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
-                    return;
-                }
-                // if app's callback has been registered, let app decide whether exit or not.
-                TAG_LOGE(AAFwkTag::APPKIT,
-                    "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n%{public}s",
-                    bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
-                bool foreground = false;
-                if (appThread->applicationImpl_ && appThread->applicationImpl_->GetState() ==
-                    ApplicationImpl::APP_STATE_FOREGROUND) {
-                    foreground = true;
-                }
-                int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
-                    HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName,
-                    "MSG", KILL_REASON, "FOREGROUND", foreground);
-                TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
-                    " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d", result, pid,
-                    processName.c_str(), KILL_REASON, foreground);
-                AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObj.name };
-                AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
-                _exit(JS_ERROR_EXIT);
-            };
+            UncatchableTaskInfo uncatchableTaskInfo = {bundleName, versionCode, appRunningId, pid, processName};
+            InitUncatchableTask(uncaughtExceptionInfo.uncaughtTask, uncatchableTaskInfo);       
             (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
+            JsEnv::UncatchableTask uncatchableTask;
+            InitUncatchableTask(uncatchableTask, uncatchableTaskInfo, true);
+            (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncatchableExceptionHandler(uncatchableTask);
 #ifdef CJ_FRONTEND
         } else {
             auto expectionInfo = CreateCjExceptionInfo(bundleName, versionCode, hapPath);
@@ -1874,6 +1818,68 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     if (appLaunchData.IsNeedPreloadModule()) {
         PreloadModule(entryHapModuleInfo, application_->GetRuntime());
     }
+}
+
+/**
+ *
+ * @brief Init the uncatchable task.
+ *
+ * @param uncatchableTaskInfo The info of the uncatchable task.
+ * @param isUncatchable Weather task is uncatcheable.
+ *
+ */
+void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, const UncatchableTaskInfo &uncatchableTaskInfo,
+    bool isUncatchable)
+{
+    wptr<MainThread> weak = this;
+    uncatchableTask = [weak, bundleName = uncatchableTaskInfo.bundleName,
+        versionCode = uncatchableTaskInfo.versionCode, appRunningId = uncatchableTaskInfo.appRunningId,
+        pid = uncatchableTaskInfo.pid, processName = uncatchableTaskInfo.processName, isUncatchable]
+        (std::string summary, const JsEnv::ErrorObject errorObject) {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            return;
+        }
+        time_t timet;
+        time(&timet);
+        HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, bundleName,
+            EVENT_KEY_VERSION, std::to_string(versionCode), EVENT_KEY_TYPE, JSCRASH_TYPE, EVENT_KEY_HAPPEN_TIME, timet,
+            EVENT_KEY_REASON, errorObject.name, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, summary,
+            EVENT_KEY_PNAME, processName, EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId,
+            EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
+
+        ErrorObject appExecErrorObj = { errorObject.name, errorObject.message, errorObject.stack};
+        auto napiEnv = (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
+        if (!isUncatchable && NapiErrorManager::GetInstance()->NotifyUncaughtException(napiEnv, summary,
+            appExecErrorObj.name, appExecErrorObj.message, appExecErrorObj.stack)) {
+            return;
+        }
+        if (!isUncatchable && ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
+            ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
+            return;
+        }
+
+        // if app's callback has been registered, let app decide whether exit or not.
+        TAG_LOGE(AAFwkTag::APPKIT,
+            "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n%{public}s",
+            bundleName.c_str(), errorObject.name.c_str(), summary.c_str());
+        bool foreground = false;
+        if (appThread->applicationImpl_ && appThread->applicationImpl_->GetState() ==
+            ApplicationImpl::APP_STATE_FOREGROUND) {
+            foreground = true;
+        }
+        int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName,
+            "MSG", KILL_REASON, "FOREGROUND", foreground, "IS_UNCATCHABLE", isUncatchable);
+        TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
+            " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d, isUncatchable=%{public}d",
+            result, pid, processName.c_str(), KILL_REASON, foreground, isUncatchable);
+        AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObject.name };
+        AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
+        _exit(JS_ERROR_EXIT);
+    };
 }
 
 #if defined(NWEB)
@@ -3158,16 +3164,25 @@ void MainThread::HandleScheduleAcceptWant(const AAFwk::Want &want, const std::st
         TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
-
-    std::string specifiedFlag;
-    application_->ScheduleAcceptWant(want, moduleName, specifiedFlag);
-
-    if (!appMgr_ || !applicationImpl_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
-        return;
+    wptr<MainThread> weak = this;
+    auto callback = [weak, wantCopy = want] (std::string specifiedFlag) {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            return;
+        }
+        if (appThread->appMgr_ == nullptr || appThread->applicationImpl_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
+            return;
+        }
+        appThread->appMgr_->ScheduleAcceptWantDone(appThread->applicationImpl_->GetRecordId(),
+            wantCopy, specifiedFlag);
+    };
+    bool isAsync = false;
+    application_->ScheduleAcceptWant(want, moduleName, callback, isAsync);
+    if (!isAsync) {
+        TAG_LOGI(AAFwkTag::APPKIT, "sync call");
     }
-
-    appMgr_->ScheduleAcceptWantDone(applicationImpl_->GetRecordId(), want, specifiedFlag);
 }
 
 void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName)
@@ -3182,7 +3197,7 @@ void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &
         }
         appThread->HandleScheduleAcceptWant(want, moduleName);
     };
-    if (!mainHandler_->PostTask(task, "MainThread:AcceptWant")) {
+    if (mainHandler_ == nullptr || !mainHandler_->PostTask(task, "MainThread:AcceptWant")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 }
@@ -3242,16 +3257,25 @@ void MainThread::HandleScheduleNewProcessRequest(const AAFwk::Want &want, const 
         TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
-
-    std::string specifiedProcessFlag;
-    application_->ScheduleNewProcessRequest(want, moduleName, specifiedProcessFlag);
-
-    if (!appMgr_ || !applicationImpl_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
-        return;
+    wptr<MainThread> weak = this;
+    auto callback = [weak, wantCopy = want] (std::string specifiedFlag) {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            return;
+        }
+        if (appThread->appMgr_ == nullptr || appThread->applicationImpl_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
+            return;
+        }
+        appThread->appMgr_->ScheduleNewProcessRequestDone(appThread->applicationImpl_->GetRecordId(),
+            wantCopy, specifiedFlag);
+    };
+    bool isAsync = false;
+    application_->ScheduleNewProcessRequest(want, moduleName, callback, isAsync);
+    if (!isAsync) {
+        TAG_LOGD(AAFwkTag::APPKIT, "sync call");
     }
-
-    appMgr_->ScheduleNewProcessRequestDone(applicationImpl_->GetRecordId(), want, specifiedProcessFlag);
 }
 
 void MainThread::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)

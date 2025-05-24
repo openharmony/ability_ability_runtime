@@ -1885,5 +1885,22 @@ HWTEST_F(JsRuntimeTest, ExecuteSecureWithOhmUrl_0100, TestSize.Level1)
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TAG_LOGI(AAFwkTag::TEST, "ExecuteSecureWithOhmUrl_0100 end");
 }
+
+/**
+ * @tc.name: RegisterUncatchableExceptionHandler_0100
+ * @tc.desc: JsRuntime test for RegisterUncatchableExceptionHandler.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsRuntimeTest, RegisterUncatchableExceptionHandler_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RegisterUncatchableExceptionHandler_0100 start");
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    EXPECT_NE(jsRuntime, nullptr);
+    auto ret = jsRuntime->CreateJsEnv(options_);
+    jsRuntime->RegisterUncatchableExceptionHandler(nullptr);
+    EXPECT_NE(jsRuntime, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "RegisterUncatchableExceptionHandler_0100 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

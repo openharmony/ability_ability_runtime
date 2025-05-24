@@ -367,5 +367,36 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1700, TestSize.Level2)
     auto maxProcess = appUtils.MaxMultiProcessFeatureChildProcess();
     EXPECT_TRUE(maxProcess == 512);
 }
+
+/**
+ * @tc.number: AppUtilsTest_1800
+ * @tc.desc: Test InResidentWhiteList works
+ * @tc.desc: Test InResidentWhiteList works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_1800, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1800 called.");
+    auto allow = AAFwk::AppUtils::GetInstance().InResidentWhiteList("com.test.demo");
+    EXPECT_FALSE(allow);
+}
+
+/**
+ * @tc.number: AppUtilsTest_1900
+ * @tc.desc: Test GetResidentWhiteList works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_1900, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1900 called.");
+    auto residentWhiteList = AAFwk::AppUtils::GetInstance().GetResidentWhiteList();
+    bool isExist = false;
+    for (const auto &item: residentWhiteList) {
+        if (item == "com.test.demo") {
+            isExist = true;
+        }
+    }
+    EXPECT_FALSE(isExist);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

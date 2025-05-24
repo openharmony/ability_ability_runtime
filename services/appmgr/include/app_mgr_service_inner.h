@@ -1267,8 +1267,8 @@ public:
      * @param callback callback for notify start result
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartNativeChildProcess(const pid_t hostPid,
-        const std::string &libName, int32_t childProcessCount, const sptr<IRemoteObject> &callback);
+    virtual int32_t StartNativeChildProcess(const pid_t hostPid, const std::string &libName, int32_t childProcessCount,
+        const sptr<IRemoteObject> &callback, const std::string &customProcessName);
 #endif // SUPPORT_CHILD_PROCESS
 
     virtual int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback);
@@ -1741,6 +1741,8 @@ private:
 
 #ifdef SUPPORT_CHILD_PROCESS
     int32_t StartChildProcessPreCheck(pid_t callingPid, int32_t childProcessType);
+
+    bool CheckCustomProcessName(const std::string &customProcessName);
 
     bool AllowNativeChildProcess(int32_t childProcessType, const std::string appIdentifier);
 

@@ -19,6 +19,8 @@
 
 #include "ability_manager_errors.h"
 #include "ability_manager_service.h"
+#include "ability_start_with_wait_observer_manager.h"
+#include "ability_start_with_wait_observer_utils.h"
 #include "ability_util.h"
 #include "app_exit_reason_data_manager.h"
 #include "appfreeze_manager.h"
@@ -68,7 +70,13 @@ constexpr int32_t TRACE_ATOMIC_SERVICE_ID = 201;
 const std::string TRACE_ATOMIC_SERVICE = "StartAtomicService";
 constexpr int GET_TARGET_MISSION_OVER = 200;
 constexpr int32_t MAX_FIND_UIEXTENSION_CALLER_TIMES = 10;
-constexpr uint32_t ABILITY_CALL_FLAG = 4;
+enum class WindowStateChangeReason : uint32_t {
+    NORMAL,
+    KEYGUARD,
+    TOGGLING,
+    USER_SWITCH,
+    ABILITY_CALL,
+};
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -311,7 +319,7 @@ int MissionListManager::MoveMissionToFrontInner(int32_t missionId, bool isCaller
 #ifdef SUPPORT_SCREEN
     AbilityRequest abilityRequest;
     targetAbilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility,
-        ABILITY_CALL_FLAG);
+        static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
 #else
     targetAbilityRecord->ProcessForegroundAbility(0);
 #endif
@@ -478,7 +486,7 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
 #ifdef SUPPORT_SCREEN
     std::shared_ptr<StartOptions> startOptions = nullptr;
     targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility,
-        ABILITY_CALL_FLAG);
+        static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
 #else
     targetAbilityRecord->ProcessForegroundAbility(0);
 #endif
@@ -637,6 +645,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
             TAG_LOGE(AAFwkTag::ABILITYMGR, "targetRecord null");
             return;
         }
+        AbilityStartWithWaitObserverManager::GetInstance().SetColdStartForShellCall(targetRecord);
         targetMission = std::make_shared<Mission>(info.missionInfo.id, targetRecord,
             info.missionName, info.startMethod);
         targetRecord->UpdateRecoveryInfo(info.hasRecoverInfo);
@@ -1308,17 +1317,16 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s", element.c_str());
 
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
+    AbilityStartWithWaitObserverManager::GetInstance().NotifyAATerminateWait(abilityRecord);
 
 #if BINDER_IPC_32BIT
     TAG_LOGI(AAFwkTag::ABILITYMGR, "bundle:%{public}s,ability:%{public}s,time:%{public}lld",
         abilityRecord->GetAbilityInfo().bundleName.c_str(),
-        abilityRecord->GetAbilityInfo().name.c_str(),
-        AbilityUtil::UTCTimeSeconds());
+        abilityRecord->GetAbilityInfo().name.c_str(), AbilityUtil::UTCTimeSeconds());
 #else
     TAG_LOGI(AAFwkTag::ABILITYMGR, "bundle:%{public}s,ability:%{public}s,time:%{public}ld",
         abilityRecord->GetAbilityInfo().bundleName.c_str(),
-        abilityRecord->GetAbilityInfo().name.c_str(),
-        AbilityUtil::UTCTimeSeconds());
+        abilityRecord->GetAbilityInfo().name.c_str(), AbilityUtil::UTCTimeSeconds());
 #endif
 
     auto mission = GetMissionById(abilityRecord->GetMissionId());
@@ -1541,7 +1549,7 @@ int MissionListManager::MoveAbilityToBackgroundLocked(const std::shared_ptr<Abil
             nextAbilityRecord->ProcessForegroundAbility(abilityRecord, false);
         } else {
             bool animaEnabled = false;
-            abilityRecord->SetSceneFlag(ABILITY_CALL_FLAG);
+            abilityRecord->SetSceneFlag(static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
             if (!abilityRecord->IsClearMissionFlag()) {
                 abilityRecord->NotifyAnimationFromMinimizeAbility(animaEnabled);
             }
@@ -1715,7 +1723,7 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
                 abilityRecord->SetPendingState(AbilityState::BACKGROUND);
                 return ERR_OK;
             }
-            abilityRecord->SetSceneFlag(ABILITY_CALL_FLAG);
+            abilityRecord->SetSceneFlag(static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
             abilityRecord->SetPendingState(AbilityState::BACKGROUND);
             MoveToBackgroundTask(abilityRecord, true);
         }
@@ -2183,7 +2191,10 @@ void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecor
         self->PrintTimeOutLog(abilityRecord, AbilityManagerService::BACKGROUND_TIMEOUT_MSG);
         self->CompleteBackground(abilityRecord);
     };
-    abilityRecord->SetSceneFlag(ABILITY_CALL_FLAG);
+    if (abilityRecord->lifeCycleStateInfo_.sceneFlag != static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD) &&
+        abilityRecord->lifeCycleStateInfo_.sceneFlag != static_cast<uint32_t>(WindowStateChangeReason::TOGGLING)) {
+        abilityRecord->SetSceneFlag(static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
+    }
     abilityRecord->BackgroundAbility(task);
 }
 
@@ -2416,6 +2427,8 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord null");
         return;
     }
+    AbilityStartWithWaitObserverManager::GetInstance().NotifyAATerminateWait(
+        abilityRecord, TerminateReason::TERMINATE_FOR_UI_ABILITY_FOREGROUND_FAILED);
     if (state == AbilityState::FOREGROUND_WINDOW_FREEZED) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "window freezed");
         abilityRecord->SetPendingState(AbilityState::INITIAL);
@@ -3012,6 +3025,7 @@ void MissionListManager::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &ab
     abilityRecord->SetCompleteFirstFrameDrawing(true);
     AppExecFwk::AbilityFirstFrameStateObserverManager::GetInstance().
         HandleOnFirstFrameState(abilityRecord);
+    AbilityStartWithWaitObserverManager::GetInstance().NotifyAATerminateWait(abilityRecord);
     auto handler = AbilityManagerService::GetPubInstance()->GetTaskHandler();
     if (handler == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "GetTaskHandler fail");
@@ -3389,7 +3403,7 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
             std::shared_ptr<StartOptions> startOptions = nullptr;
             auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
             targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility,
-                ABILITY_CALL_FLAG);
+                static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
 #else
             targetAbilityRecord->ProcessForegroundAbility(0);
 #endif

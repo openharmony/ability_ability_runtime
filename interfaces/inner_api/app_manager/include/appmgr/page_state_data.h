@@ -52,6 +52,7 @@ struct PageStateData : public Parcelable {
     std::string pageName;
     std::string targetBundleName;
     std::string targetModuleName;
+    int32_t uid = 0;
 };
 } // namespace AppExecFwk
 } // namespace OHOS

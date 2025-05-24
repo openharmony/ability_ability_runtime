@@ -1132,8 +1132,7 @@ bool InnerBundleInfo::SetInnerModuleAtomicPreload(
     return true;
 }
 
-ErrCode InnerBundleInfo::GetApplicationInfoV9(
-    int32_t flags, int32_t userId, ApplicationInfo &appInfo, int32_t appIndex) const
+ErrCode InnerBundleInfo::GetApplicationInfoV9(int32_t flags, int32_t userId, ApplicationInfo &appInfo) const
 {
     appInfo = *baseApplicationInfo_;
     for (const auto &info : innerModuleInfos_) {
@@ -1205,10 +1204,10 @@ void InnerBundleInfo::ProcessBundleFlags(int32_t flags, int32_t userId, BundleIn
         if ((static_cast<uint32_t>(flags) & static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)) ==
             static_cast<uint32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)) {
             GetApplicationInfoV9(static_cast<int32_t>(GetApplicationFlag::GET_APPLICATION_INFO_WITH_METADATA), userId,
-                bundleInfo.applicationInfo, appIndex);
+                bundleInfo.applicationInfo);
         } else {
             GetApplicationInfoV9(static_cast<int32_t>(GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT), userId,
-                bundleInfo.applicationInfo, appIndex);
+                bundleInfo.applicationInfo);
         }
     }
     bundleInfo.applicationInfo.appIndex = appIndex;

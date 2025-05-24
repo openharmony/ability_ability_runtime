@@ -621,5 +621,20 @@ HWTEST_F(JsEnvironmentTest, GetDebugMode_0100, TestSize.Level2)
     auto result = jsEnv->GetDebugMode();
     ASSERT_EQ(result, false);
 }
+
+/**
+ * @tc.name: RegisterUncatchableExceptionHandler_0100
+ * @tc.desc: Js environment RegisterUncatchableExceptionHandler.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsEnvironmentTest, RegisterUncatchableExceptionHandler_0100, TestSize.Level1)
+{
+    auto jsEnv = std::make_shared<JsEnvironment>(std::make_unique<AbilityRuntime::OHOSJsEnvironmentImpl>());
+    jsEnv->RegisterUncatchableExceptionHandler(nullptr);
+    EXPECT_NE(jsEnv, nullptr);
+    UncatchableTask task;
+    jsEnv->RegisterUncatchableExceptionHandler(task);
+    EXPECT_NE(jsEnv, nullptr);
+}
 } // namespace JsEnv
 } // namespace OHOS

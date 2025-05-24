@@ -2728,6 +2728,22 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RestartApp_0100, TestSize.
 }
 
 /**
+ * @tc.name: AbilityManagerProxy_RestartSelfAtomicService_0100
+ * @tc.desc: RestartSelfAtomicService
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RestartSelfAtomicService_0100, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+
+    auto token = sptr<MockAbilityToken>::MakeSptr();
+    proxy_->RestartSelfAtomicService(token);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::RESTART_SELF_ATOMIC_SERVICE), mock_->code_);
+}
+
+/**
  * @tc.name: AbilityManagerProxy_ChangeAbilityVisibility_0100
  * @tc.desc: ChangeAbilityVisibility
  * @tc.type: FUNC

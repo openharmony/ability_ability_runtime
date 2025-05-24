@@ -235,6 +235,7 @@ void ModuleRunningRecord::LaunchPendingAbilities()
             TAG_LOGD(AAFwkTag::APPMGR, "name is %{public}s.", ability->GetName().c_str());
             appLifeCycleDeal_->LaunchAbility(ability);
             ability->SetState(AbilityState::ABILITY_STATE_READY);
+            SetLoaded();
         }
     }
 }

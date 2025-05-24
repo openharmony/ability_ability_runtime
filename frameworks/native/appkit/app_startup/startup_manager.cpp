@@ -1074,8 +1074,6 @@ void StartupManager::SetOptionalParameters(const nlohmann::json& module, AppExec
         startupTaskInfo.ohmUrl = module.at(OHMURL).get<std::string>();
     }
 
-    SetMatchRules(module, startupTaskInfo.matchRules);
-
     if (moduleType != AppExecFwk::ModuleType::ENTRY && moduleType != AppExecFwk::ModuleType::FEATURE) {
         startupTaskInfo.excludeFromAutoStart = true;
         return;
@@ -1085,6 +1083,8 @@ void StartupManager::SetOptionalParameters(const nlohmann::json& module, AppExec
     } else {
         startupTaskInfo.excludeFromAutoStart = false;
     }
+
+    SetMatchRules(module, startupTaskInfo.matchRules);
 }
 
 void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
@@ -1098,10 +1098,6 @@ void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExec
     StartupUtils::ParseJsonStringArray(module, DEPENDENCIES, dependencies);
     task->SetDependencies(dependencies);
 
-    StartupTaskMatchRules matchRules;
-    SetMatchRules(module, matchRules);
-    task->SetMatchRules(matchRules);
-
     if (moduleType != AppExecFwk::ModuleType::ENTRY && moduleType != AppExecFwk::ModuleType::FEATURE) {
         task->SetIsExcludeFromAutoStart(true);
         return;
@@ -1111,6 +1107,10 @@ void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExec
     } else {
         task->SetIsExcludeFromAutoStart(false);
     }
+
+    StartupTaskMatchRules matchRules;
+    SetMatchRules(module, matchRules);
+    task->SetMatchRules(matchRules);
 }
 
 void StartupManager::SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules)

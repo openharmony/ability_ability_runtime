@@ -72,6 +72,7 @@ const std::string HELP_MSG_START =
     "  [-U <URI>] "
     "  [-e <entity>] "
     "  [-t <mime-type>] "
+    "  [-W] "
     "  [--wl <window-left>] "
     "  [--wt <window-top>] "
     "  [--wh <window-height>] "
@@ -214,6 +215,8 @@ const std::string PERFCMD_FIRST_DUMPHEAP = "dumpheap";
 
 const std::string STRING_TEST_REGEX_INTEGER_NUMBERS = "^(0|[1-9][0-9]*|-[1-9][0-9]*)$";
 const std::string STRING_REGEX_ALL_NUMBERS = "^(-)?([0-9]|[1-9][0-9]+)([\\.][0-9]+)?$";
+const std::string STRING_IMPLICT_START_WITH_WAIT_NG = "The wait option does not support starting implict";
+const std::string STRING_NON_UIABILITY_START_WITH_WAIT_NG = "The wait option does not support starting non-uiability";
 }  // namespace
 
 class AbilityManagerShellCommand : public ShellCommand {
@@ -275,6 +278,10 @@ private:
     bool MatchOrderString(const std::regex &r, const std::string &orderCmd);
     bool CheckPerfCmdString(const char* optarg, const size_t paramLength, std::string &perfCmd);
     void ParseBundleName(std::string &bundleName);
+    ErrCode StartAbilityWithWait(Want& want);
+    void FormatOutputForWithWait(const Want &want, const AbilityStartWithWaitObserverData& data);
+    bool IsImplicitStartAction(const Want &want);
+    bool startAbilityWithWaitFlag_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

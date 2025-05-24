@@ -31,7 +31,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-class AbilityRecovery {
+class AbilityRecovery : public std::enable_shared_from_this<AbilityRecovery> {
 public:
     AbilityRecovery();
     virtual ~AbilityRecovery();
@@ -46,6 +46,7 @@ public:
     bool IsOnForeground();
     bool IsSameAbility(uintptr_t ability);
     void SetJsAbility(uintptr_t ability);
+    void SaveStateCallback(AppExecFwk::OnSaveStateResult result);
     std::string GetSavedPageStack(StateReason reason);
     uint16_t GetRestartFlag() const;
     uint16_t GetSaveOccasionFlag() const;
@@ -57,7 +58,7 @@ public:
         return token_;
     }
 private:
-    bool SaveAbilityState();
+    bool SaveAbilityState(StateReason reason);
     bool SerializeDataToFile(int32_t savedStateId, AAFwk::WantParams& params);
     bool ReadSerializeDataFromFile(int32_t savedStateId, AAFwk::WantParams& params);
     bool LoadSavedState(StateReason reason);

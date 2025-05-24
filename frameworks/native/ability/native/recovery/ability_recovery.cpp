@@ -40,6 +40,7 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 constexpr size_t DEFAULT_RECOVERY_MAX_RESTORE_SIZE = 400 * 1024;
+constexpr int32_t CALL_BACK_ERROR = -1;
 
 static std::string GetSaveAppCachePath(int32_t savedStateId)
 {
@@ -103,7 +104,50 @@ void AbilityRecovery::SetJsAbility(uintptr_t ability)
     jsAbilityPtr_ = ability;
 }
 
-bool AbilityRecovery::SaveAbilityState()
+void AbilityRecovery::SaveStateCallback(AppExecFwk::OnSaveStateResult result)
+{
+    if (result.status != AppExecFwk::OnSaveResult::ALL_AGREE &&
+        result.status != AppExecFwk::OnSaveResult::RECOVERY_AGREE) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "save params failed");
+        return;
+    }
+    auto ability = ability_.lock();
+    if (ability == nullptr) {
+        return;
+    }
+#ifdef SUPPORT_SCREEN
+    std::string pageStack = DefaultRecovery() ? ability->GetContentInfoForDefaultRecovery() :
+        ability->GetContentInfoForRecovery();
+    if (!pageStack.empty()) {
+        result.wantParams.SetParam("pageStack", AAFwk::String::Box(pageStack));
+    } else {
+        TAG_LOGE(AAFwkTag::RECOVERY, "get page stack failed");
+    }
+    TAG_LOGD(AAFwkTag::RECOVERY, "pageStack size: %{public}zu", pageStack.size());
+#endif
+    if (saveMode_ == SaveModeFlag::SAVE_WITH_FILE) {
+        SerializeDataToFile(missionId_, result.wantParams);
+    } else if (saveMode_ == SaveModeFlag::SAVE_WITH_SHARED_MEMORY) {
+        params_ = result.wantParams;
+    }
+    auto token = token_.promote();
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "null token");
+        return;
+    }
+    std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "null abilityMgr");
+        return;
+    }
+    abilityMgr->EnableRecoverAbility(token);
+    if (result.reason == StateReason::LIFECYCLE && DefaultRecovery()) {
+        TAG_LOGD(AAFwkTag::RECOVERY, "AppRecovery ScheduleSaveAbilityState SubmitSaveRecoveryInfo");
+        abilityMgr->SubmitSaveRecoveryInfo(token);
+    }
+}
+
+bool AbilityRecovery::SaveAbilityState(StateReason reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto ability = ability_.lock();
@@ -113,27 +157,26 @@ bool AbilityRecovery::SaveAbilityState()
         return false;
     }
 
-    AAFwk::WantParams wantParams;
-    int32_t status = ability->OnSaveState(AppExecFwk::StateType::APP_RECOVERY, wantParams);
-    if (!(status == AppExecFwk::OnSaveResult::ALL_AGREE || status == AppExecFwk::OnSaveResult::RECOVERY_AGREE)) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "save params failed");
+    auto *callbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult>::Create();
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
         return false;
     }
 
-#ifdef SUPPORT_SCREEN
-    std::string pageStack = DefaultRecovery() ? ability->GetContentInfoForDefaultRecovery() :
-        ability->GetContentInfoForRecovery();
-    if (!pageStack.empty()) {
-        wantParams.SetParam("pageStack", AAFwk::String::Box(pageStack));
-    } else {
-        TAG_LOGE(AAFwkTag::RECOVERY, "get page stack failed");
-    }
-    TAG_LOGD(AAFwkTag::RECOVERY, "pageStack size: %{public}zu", pageStack.size());
-#endif
-    if (saveMode_ == SaveModeFlag::SAVE_WITH_FILE) {
-        SerializeDataToFile(missionId_, wantParams);
-    } else if (saveMode_ == SaveModeFlag::SAVE_WITH_SHARED_MEMORY) {
-        params_ = wantParams;
+    auto weak = std::weak_ptr<AbilityRecovery>(shared_from_this());
+    auto callback = [weak](AppExecFwk::OnSaveStateResult result) {
+        auto recovery = weak.lock();
+        if (recovery != nullptr) {
+            recovery->SaveStateCallback(result);
+        }
+    };
+    callbackInfo->Push(callback);
+    AAFwk::WantParams wantParams;
+    bool isAsync = false;
+    int32_t status = ability->OnSaveState(AppExecFwk::StateType::APP_RECOVERY,
+        wantParams, callbackInfo, isAsync, reason);
+    if (status == CALL_BACK_ERROR) {
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult>::Destroy(callbackInfo);
     }
     return true;
 }
@@ -260,26 +303,7 @@ bool AbilityRecovery::ScheduleSaveAbilityState(StateReason reason)
         return false;
     }
 
-    bool ret = SaveAbilityState();
-    if (ret) {
-        auto token = token_.promote();
-        if (token == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "null token");
-            return false;
-        }
-
-        std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
-        if (abilityMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "null abilityMgr");
-            return false;
-        }
-        abilityMgr->EnableRecoverAbility(token);
-        if (reason == StateReason::LIFECYCLE && DefaultRecovery()) {
-            TAG_LOGD(AAFwkTag::RECOVERY, "AppRecovery ScheduleSaveAbilityState SubmitSaveRecoveryInfo");
-            abilityMgr->SubmitSaveRecoveryInfo(token);
-        }
-    }
-    return ret;
+    return SaveAbilityState(reason);
 }
 
 bool AbilityRecovery::ScheduleRecoverAbility(StateReason reason, const Want *want)

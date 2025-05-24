@@ -45,7 +45,6 @@ public:
     void InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mode = 0,
         const std::string &callerBundleName = "", const std::string &targetBundleName = "");
 
-    void SetContentUriCheckResult(const std::vector<bool> &contentUriResult);
     void SetMediaUriCheckResult(const std::vector<bool> &mediaUriResult);
 
     void SetOtherUriCheckResult(const std::vector<bool> &otherUriResult);
@@ -72,10 +71,6 @@ public:
     std::vector<Uri> mediaUris;
     std::vector<int32_t> mediaIndexs;
     
-    // content uri
-    std::vector<Uri> contentUris;
-    std::vector<int32_t> contentIndexs;
-    
     // docs and bundle uri
     std::vector<Uri> otherUris;
     std::vector<int32_t> otherIndexs;
@@ -98,6 +93,13 @@ public:
 
     int32_t validUriCount = 0;
     int32_t totalUriCount = 0;
+};
+
+struct BatchStringUri {
+    std::vector<std::string> uriStrVec;
+    std::vector<std::string> contentUris;
+    std::vector<std::string> mediaUriVec;
+    std::vector<PolicyInfo> policys;
 };
 } // OHOS
 } // AAFwk

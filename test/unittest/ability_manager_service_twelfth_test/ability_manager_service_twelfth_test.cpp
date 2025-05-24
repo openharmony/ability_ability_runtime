@@ -313,7 +313,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, MinimizeUIExtensionAbility_001, TestS
     connectManager->uiExtensionMap_[extensionSessionInfo->sessionToken] =
         std::make_pair(abilityRecord, extensionSessionInfo);
     abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
-    EXPECT_EQ(abilityMs_->MinimizeUIExtensionAbility(extensionSessionInfo, fromUser), ERR_WRONG_INTERFACE_CALL);
+    EXPECT_EQ(abilityMs_->MinimizeUIExtensionAbility(extensionSessionInfo, fromUser), ERR_INVALID_VALUE);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest MinimizeUIExtensionAbility_001 end");
 }
@@ -357,7 +357,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, MinimizeUIExtensionAbility_002, TestS
         std::make_pair(abilityRecord, extensionSessionInfo);
     abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
 
-    EXPECT_EQ(abilityMs_->MinimizeUIExtensionAbility(extensionSessionInfo, fromUser), ERR_OK);
+    EXPECT_EQ(abilityMs_->MinimizeUIExtensionAbility(extensionSessionInfo, fromUser), ERR_INVALID_VALUE);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest MinimizeUIExtensionAbility_002 end");
 }
@@ -577,7 +577,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, TerminateUIExtensionAbility_001, Test
     abilityRecord->SetSessionInfo(extensionSessionInfo);
     connectManager->serviceMap_.insert(std::make_pair("test", abilityRecord));
     abilityMs_->subManagersHelper_->connectManagers_.insert(std::make_pair(ONE, connectManager));
-    EXPECT_EQ(abilityMs_->TerminateUIExtensionAbility(extensionSessionInfo), ERR_WRONG_INTERFACE_CALL);
+    EXPECT_EQ(abilityMs_->TerminateUIExtensionAbility(extensionSessionInfo), ERR_INVALID_VALUE);
 }
 
 /*

@@ -79,7 +79,9 @@ void MultiUserConfigurationMgr::SetOrUpdateConfigByUserId(
         }
         Configuration userConfig = *globalConfiguration_;
         std::string language = OHOS::Global::I18n::I18nServiceAbilityClient::GetLanguageFromUserId(userId);
-        userConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
+        if (!language.empty()) {
+            userConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
+        }
         userConfig.CompareDifferent(changeKeyV, config);
         if (!changeKeyV.empty()) {
             userConfig.Merge(changeKeyV, config);
