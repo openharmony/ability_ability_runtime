@@ -31,6 +31,7 @@
       *AbilityRunningInfo*;
       *AbilitySchedulerProxy*;
       *AbilitySchedulerStub*;
+      *AbilityStartWithWaitObserverManager*;
       *AmsConfigurationParameter*;
       *AppExitReasonDataManager*;
       *ApplicationAnrListener*;

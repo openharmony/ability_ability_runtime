@@ -34,8 +34,10 @@ ohos_unittest("uri_permission_impl_test") {
 
   sources = [
     "${ability_runtime_test_path}/mock/common/src/mock_native_token.cpp",
+    "mock/src/mock_ability_manager_client.cpp",
     "mock/src/mock_accesstoken_kit.cpp",
     "mock/src/mock_bundle_mgr_helper.cpp",
+    "mock/src/mock_iability_manager_collaborator.cpp",
     "mock/src/mock_ipc_skeleton.cpp",
     "mock/src/mock_my_flag.cpp",
     "mock/src/mock_permission_verification.cpp",
@@ -104,8 +106,10 @@ ohos_unittest("uri_permission_manager_stub_impl_test") {
 
   sources = [
     "${ability_runtime_test_path}/mock/common/src/mock_native_token.cpp",
+    "mock/src/mock_ability_manager_client.cpp",
     "mock/src/mock_my_flag.cpp",
     "mock/src/mock_uri_permission_utils.cpp",
+    "mock/src/mock_iability_manager_collaborator.cpp",
     "uri_permission_manager_stub_impl_test.cpp",
   ]
 

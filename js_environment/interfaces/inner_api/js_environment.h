@@ -20,7 +20,6 @@
 #include "ecmascript/napi/include/dfx_jsnapi.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "js_environment_impl.h"
-#include "native_engine/native_engine.h"
 #include "source_map_operator.h"
 #include "uncaught_exception_callback.h"
 
@@ -31,6 +30,7 @@ class JsEnvironmentImpl;
 using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 using RequestAotCallback =
     std::function<int32_t(const std::string& bundleName, const std::string& moduleName, int32_t triggerMode)>;
+using UncatchableTask = std::function<void(std::string summary, const JsEnv::ErrorObject errorObject)>;
 class JsEnvironment final : public std::enable_shared_from_this<JsEnvironment> {
 public:
     JsEnvironment() {}
@@ -74,6 +74,8 @@ public:
     void RemoveTask(const std::string& name);
 
     void RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionInfo& uncaughtExceptionInfo);
+
+    void RegisterUncatchableExceptionHandler(const JsEnv::UncatchableTask& uncatchableTask);
 
     bool LoadScript(const std::string& path, std::vector<uint8_t>* buffer = nullptr, bool isBundle = false);
 

@@ -260,6 +260,7 @@ private:
 
     int32_t RegisterIAbilityManagerCollaboratorInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterIAbilityManagerCollaboratorInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetAbilityManagerCollaboratorInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t RegisterStatusBarDelegateInner(MessageParcel &data, MessageParcel &reply);
     int32_t KillProcessWithPrepareTerminateInner(MessageParcel &data, MessageParcel &reply);
@@ -325,9 +326,11 @@ private:
     int32_t UnregisterHiddenStartObserverInner(MessageParcel &data, MessageParcel &reply);
     int32_t QueryPreLoadUIExtensionRecordInner(MessageParcel &data, MessageParcel &reply);
     int32_t RevokeDelegatorInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StartAbilityWithWaitInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetAllInsightIntentInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetInsightIntentInfoByBundleNameInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetInsightIntentInfoByIntentNameInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RestartSelfAtomicServiceInner(MessageParcel &data, MessageParcel &reply);
 
     int OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);

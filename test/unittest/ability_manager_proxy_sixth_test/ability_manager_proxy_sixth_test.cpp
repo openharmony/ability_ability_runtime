@@ -849,6 +849,21 @@ HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_RestartApp_0100, Test
 }
 
 /**
+ * @tc.name: RestartSelfAtomicService_0100
+ * @tc.desc: RestartSelfAtomicService
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, RestartSelfAtomicService_0100, TestSize.Level1)
+{
+    auto token = sptr<MockAbilityToken>::MakeSptr();
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(-1));
+    auto res = proxy_->RestartSelfAtomicService(token);
+    EXPECT_EQ(res, -1);
+}
+
+/**
  * @tc.name: AbilityManagerProxy_GetUIExtensionRootHostInfo_0100
  * @tc.desc: GetUIExtensionRootHostInfo
  * @tc.type: FUNC

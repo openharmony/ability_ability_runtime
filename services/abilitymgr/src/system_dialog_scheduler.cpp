@@ -435,6 +435,11 @@ int SystemDialogScheduler::GetSelectorDialogWantCommon(const std::vector<DialogA
         targetWant.SetElementName(bundleName, ABILITY_NAME_APPGALLERY_SELECTOR_DIALOG);
         targetWant.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
         targetWant.SetParam("isCreateAppGallerySelector", true);
+        // app selectot not exist
+#ifndef SUPPORT_APP_SELECTOR
+        TAG_LOGI(AAFwkTag::DIALOG, "app selector not support");
+        return ERR_APP_SELECTOR_NOT_EXISTS;
+#endif
     }
     return ERR_OK;
 }

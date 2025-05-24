@@ -24,6 +24,7 @@ namespace OHOS {
 namespace AppExecFwk {
 struct ChildProcessOptions : public Parcelable {
     bool isolationMode = false;
+    std::string customProcessName;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

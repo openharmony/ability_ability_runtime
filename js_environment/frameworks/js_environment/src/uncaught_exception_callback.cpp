@@ -21,7 +21,6 @@
 #include "dfx_symbols.h"
 #include "elf_factory.h"
 #include "hilog_tag_wrapper.h"
-#include "native_engine/native_engine.h"
 #include "string_printf.h"
 #ifdef SUPPORT_GRAPHICS
 #include "ui_content.h"
@@ -62,6 +61,21 @@ std::string NapiUncaughtExceptionCallback::GetNativeStrFromJsTaggedObj(napi_valu
 }
 
 void NapiUncaughtExceptionCallback::operator()(napi_value obj)
+{
+    CallbackTask(obj);
+}
+
+void NapiUncaughtExceptionCallback::operator()(panda::TryCatch& trycatch)
+{
+    panda::Local<panda::ObjectRef> exception = trycatch.GetAndClearException();
+    if (!exception.IsEmpty() && !exception->IsHole()) {
+        napi_value obj = ArkNativeEngine::ArkValueToNapiValue(env_, exception);
+        CallbackTask(obj);
+    }
+}
+
+
+void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
 {
     std::string errorMsg = GetNativeStrFromJsTaggedObj(obj, "message");
     std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");

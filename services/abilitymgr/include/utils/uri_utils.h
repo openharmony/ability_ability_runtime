@@ -83,6 +83,10 @@ private:
 
     void PublishFileOpenEvent(const Want &want);
 
+    bool IsInAncoAppIdentifier(const std::string &bundleName);
+
+    bool CheckIsInAncoAppIdentifier(const std::string &identifier, const std::string &bundleName);
+
     DISALLOW_COPY_AND_MOVE(UriUtils);
 };
 } // namespace AAFwk

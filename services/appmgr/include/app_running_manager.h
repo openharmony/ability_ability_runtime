@@ -86,6 +86,9 @@ public:
         const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr, const std::string &instanceKey = "",
         const std::string &customProcessFlag = "");
 
+    std::shared_ptr<AppRunningRecord> CheckAppRunningRecordForSpecifiedProcess(
+        int32_t uid, const std::string &instanceKey, const std::string &customProcessFlag);
+
 #ifdef APP_NO_RESPONSE_DIALOG
     /**
      * CheckAppRunningRecordIsExist, Check whether the process of the app exists by bundle name and process Name.

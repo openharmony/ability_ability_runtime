@@ -63,15 +63,16 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
 
     if (wantSenderInfo.type != static_cast<int32_t>(OperationType::SEND_COMMON_EVENT) &&
         !isSystemApp && !AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
-        for (auto it = info.allWants.begin(); it != info.allWants.end(); ++it) {
+        for (auto it = info.allWants.begin(); it != info.allWants.end();) {
             if (info.bundleName != it->want.GetBundle()) {
-                info.allWants.erase(it);
+                it = info.allWants.erase(it);
             } else {
                 it->want.RemoveParam("ohos.extra.param.key.appCloneIndex");
+                it++;
             }
         }
     }
-        
+
     return GetWantSenderLocked(callingUid, uid, wantSenderInfo.userId, info, callerToken, appIndex);
 }
 

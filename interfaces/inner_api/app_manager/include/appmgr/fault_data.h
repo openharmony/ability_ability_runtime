@@ -42,7 +42,9 @@ enum class FaultDataType {
 class AppFreezeType {
 public:
     static constexpr char LIFECYCLE_HALF_TIMEOUT[] = "LIFECYCLE_HALF_TIMEOUT";
+    static constexpr char LIFECYCLE_HALF_TIMEOUT_WARNING[] = "LIFECYCLE_HALF_TIMEOUT_WARNING";
     static constexpr char LIFECYCLE_TIMEOUT[] = "LIFECYCLE_TIMEOUT";
+    static constexpr char LIFECYCLE_TIMEOUT_WARNING[] = "LIFECYCLE_TIMEOUT_WARNING";
     static constexpr char APP_LIFECYCLE_TIMEOUT[] = "APP_LIFECYCLE_TIMEOUT";
     static constexpr char THREAD_BLOCK_3S[] = "THREAD_BLOCK_3S";
     static constexpr char THREAD_BLOCK_6S[] = "THREAD_BLOCK_6S";
