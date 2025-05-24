@@ -27,9 +27,9 @@ namespace OHOS::AbilityRuntime {
 
     constexpr char INSIGHT_INTENTS_URI[] = "uri";
     constexpr char INSIGHT_INTENT_UI_ABILITY[] = "uiAbility";
-    constexpr char INSIGHT_INTENT_PAGE_ROUTER_NAME[] = "pageRouterName";
+    constexpr char INSIGHT_INTENT_PAGE_PATH[] = "pagePath";
     constexpr char INSIGHT_INTENT_NAVIGATION_ID[] = "navigationId";
-    constexpr char INSIGHT_INTENT_NAV_DESTINATION[] = "navDestination";
+    constexpr char INSIGHT_INTENT_NAV_DESTINATION_NAME[] = "navDestinationName";
     constexpr char INSIGHT_INTENT_ABILITY_NAME[] = "abilityName";
     constexpr char INSIGHT_INTENT_EXECUTE_MODE[] = "executeMode";
     constexpr char INSIGHT_INTENT_BUNDLE_NAME[] = "bundleName";
@@ -44,6 +44,7 @@ namespace OHOS::AbilityRuntime {
     constexpr char INSIGHT_INTENT_LLM_DESCRIPTION[] = "llmDescription";
     constexpr char INSIGHT_INTENT_INTENT_TYPE[] = "intentType";
     constexpr char INSIGHT_INTENT_PARAMETERS[] = "parameters";
+    constexpr char INSIGHT_INTENT_RESULT[] = "result";
     constexpr char INSIGHT_INTENT_KEYWORDS[] = "keywords";
     constexpr char INSIGHT_INTENT_LINK_INFO[] = "linkInfo";
     constexpr char INSIGHT_INTENT_PAGE_INFO[] = "pageInfo";

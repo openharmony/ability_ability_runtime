@@ -56,9 +56,9 @@ napi_value CreatePageInfoForQuery(napi_env env, const PageInfoForQuery &info)
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     napi_set_named_property(env, objValue, "uiAbility", CreateJsValue(env, info.uiAbility));
-    napi_set_named_property(env, objValue, "pageRouterName", CreateJsValue(env, info.pageRouterName));
+    napi_set_named_property(env, objValue, "pagePath", CreateJsValue(env, info.pagePath));
     napi_set_named_property(env, objValue, "navigationId", CreateJsValue(env, info.navigationId));
-    napi_set_named_property(env, objValue, "navDestination", CreateJsValue(env, info.navDestination));
+    napi_set_named_property(env, objValue, "navDestinationName", CreateJsValue(env, info.navDestinationName));
     return objValue;
 }
 
@@ -85,7 +85,7 @@ napi_value CreateFormInfoForQuery(napi_env env, const FormInfoForQuery &info)
     return objValue;
 }
 
-napi_value CreateInsightIntentInfoParamWithJson(napi_env env, const nlohmann::json &jsonObject)
+napi_value CreateInsightIntentInfoWithJson(napi_env env, const nlohmann::json &jsonObject)
 {
     if (jsonObject.is_object()) {
         napi_value objValue = nullptr;
@@ -93,7 +93,7 @@ napi_value CreateInsightIntentInfoParamWithJson(napi_env env, const nlohmann::js
         for (const auto &it: jsonObject.items()) {
             if (it.value().is_object() || it.value().is_array()) {
                 napi_set_named_property(
-                    env, objValue, it.key().c_str(), CreateInsightIntentInfoParamWithJson(env, it.value()));
+                    env, objValue, it.key().c_str(), CreateInsightIntentInfoWithJson(env, it.value()));
             } else if (it.value().is_string()) {
                 napi_set_named_property(
                     env, objValue, it.key().c_str(), CreateJsValue(env, it.value().get<std::string>()));
@@ -112,7 +112,7 @@ napi_value CreateInsightIntentInfoParamWithJson(napi_env env, const nlohmann::js
         uint32_t index = 0;
         for (const auto &it: jsonObject) {
             if (it.is_object() || it.is_array()) {
-                napi_set_element(env, arrayValue, index++, CreateInsightIntentInfoParamWithJson(env, it));
+                napi_set_element(env, arrayValue, index++, CreateInsightIntentInfoWithJson(env, it));
             } else if (it.is_string()) {
                 napi_set_element(env, arrayValue, index++, CreateJsValue(env, it.get<std::string>()));
             } else if (it.is_boolean()) {
@@ -138,7 +138,21 @@ napi_value CreateInsightIntentInfoParam(napi_env env, const std::string &paramSt
         TAG_LOGE(AAFwkTag::INTENT, "Parse param str fail");
         return nullptr;
     }
-    return CreateInsightIntentInfoParamWithJson(env, jsonObject);
+    return CreateInsightIntentInfoWithJson(env, jsonObject);
+}
+
+napi_value CreateInsightIntentInfoResult(napi_env env, const std::string &resultStr)
+{
+    if (resultStr.empty()) {
+        TAG_LOGD(AAFwkTag::INTENT, "resultStr empty");
+        return nullptr;
+    }
+    nlohmann::json jsonObject = nlohmann::json::parse(resultStr, nullptr, false);
+    if (jsonObject.is_discarded()) {
+        TAG_LOGE(AAFwkTag::INTENT, "Parse result str fail");
+        return nullptr;
+    }
+    return CreateInsightIntentInfoWithJson(env, jsonObject);
 }
 
 napi_value CreateInsightIntentInfoForQuery(napi_env env, const InsightIntentInfoForQuery &info)
@@ -157,6 +171,7 @@ napi_value CreateInsightIntentInfoForQuery(napi_env env, const InsightIntentInfo
     napi_set_named_property(env, objValue, "llmDescription", CreateJsValue(env, info.llmDescription));
     napi_set_named_property(env, objValue, "intentType", CreateJsValue(env, info.intentType));
     napi_set_named_property(env, objValue, "parameters", CreateInsightIntentInfoParam(env, info.parameters));
+    napi_set_named_property(env, objValue, "result", CreateInsightIntentInfoResult(env, info.result));
     napi_set_named_property(env, objValue, "keywords", CreateNativeArray(env, info.keywords));
     if (info.intentType == INSIGHT_INTENTS_TYPE_LINK) {
         napi_set_named_property(env, objValue, "subIntentInfo", CreateLinkInfoForQuery(env, info.linkInfo));

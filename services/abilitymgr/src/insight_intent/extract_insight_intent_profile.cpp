@@ -49,7 +49,7 @@ const std::string INSIGHT_INTENT_PARAM_MAPPING = "paramMappings";
 const std::string INSIGHT_INTENT_UI_ABILITY = "uiAbility";
 const std::string INSIGHT_INTENT_PAGE_ROUTE_NAME = "pagePath";
 const std::string INSIGHT_INTENT_NAVIGATION_ID = "navigationId";
-const std::string INSIGHT_INTENT_NAV_DESTINATION = "navDestinationName";
+const std::string INSIGHT_INTENT_NAV_DESTINATION_NAME = "navDestinationName";
 const std::string INSIGHT_INTENT_ABILITY_NAME = "abilityName";
 const std::string INSIGHT_INTENT_FUNCTION_NAME = "functionName";
 const std::string INSIGHT_INTENT_FUNCTION_PARAMS = "functionParamList";
@@ -232,7 +232,7 @@ void from_json(const nlohmann::json &jsonObject, ExtractInsightIntentProfileInfo
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_PAGE_ROUTE_NAME,
-        insightIntentInfo.pageRouteName,
+        insightIntentInfo.pagePath,
         false,
         g_extraParseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
@@ -243,8 +243,8 @@ void from_json(const nlohmann::json &jsonObject, ExtractInsightIntentProfileInfo
         g_extraParseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
-        INSIGHT_INTENT_NAV_DESTINATION,
-        insightIntentInfo.navDestination,
+        INSIGHT_INTENT_NAV_DESTINATION_NAME,
+        insightIntentInfo.navDestinationName,
         false,
         g_extraParseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
@@ -341,9 +341,9 @@ void to_json(nlohmann::json& jsonObject, const ExtractInsightIntentProfileInfo& 
         {INSIGHT_INTENT_URI, info.uri},
         {INSIGHT_INTENT_PARAM_MAPPING, info.paramMapping},
         {INSIGHT_INTENT_UI_ABILITY, info.uiAbility},
-        {INSIGHT_INTENT_PAGE_ROUTE_NAME, info.pageRouteName},
+        {INSIGHT_INTENT_PAGE_ROUTE_NAME, info.pagePath},
         {INSIGHT_INTENT_NAVIGATION_ID, info.navigationId},
-        {INSIGHT_INTENT_NAV_DESTINATION, info.navDestination},
+        {INSIGHT_INTENT_NAV_DESTINATION_NAME, info.navDestinationName},
         {INSIGHT_INTENT_ABILITY_NAME, info.abilityName},
         {INSIGHT_INTENT_EXECUTE_MODE, info.executeMode},
         {INSIGHT_INTENT_FUNCTION_NAME, info.functionName},
@@ -388,8 +388,8 @@ bool CheckProfileSubIntentInfo(const ExtractInsightIntentProfileInfo &insightInt
             }
             break;
         case DecoratorType::DECORATOR_PAGE:
-            if (insightIntent.pageRouteName.empty()) {
-                TAG_LOGE(AAFwkTag::INTENT, "empty pageRouteName, intentName: %{public}s",
+            if (insightIntent.pagePath.empty()) {
+                TAG_LOGE(AAFwkTag::INTENT, "empty pagePath, intentName: %{public}s",
                          insightIntent.intentName.c_str());
                 return false;
             }
@@ -463,12 +463,12 @@ bool TransformToPageInfo(const ExtractInsightIntentProfileInfo &insightIntent, I
 {
     info.uiAbility = insightIntent.uiAbility;
     TAG_LOGD(AAFwkTag::INTENT, "uiAbility: %{public}s", info.uiAbility.c_str());
-    info.pageRouteName = insightIntent.pageRouteName;
-    TAG_LOGD(AAFwkTag::INTENT, "pageRouteName: %{public}s", info.pageRouteName.c_str());
+    info.pagePath = insightIntent.pagePath;
+    TAG_LOGD(AAFwkTag::INTENT, "pagePath: %{public}s", info.pagePath.c_str());
     info.navigationId = insightIntent.navigationId;
     TAG_LOGD(AAFwkTag::INTENT, "navigationId: %{public}s", info.navigationId.c_str());
-    info.navDestination = insightIntent.navDestination;
-    TAG_LOGD(AAFwkTag::INTENT, "navDestination: %{public}s", info.navDestination.c_str());
+    info.navDestinationName = insightIntent.navDestinationName;
+    TAG_LOGD(AAFwkTag::INTENT, "navDestinationName: %{public}s", info.navDestinationName.c_str());
     // todo: schema模块将insightIntent.parameters解析成info.params
     info.parameters = insightIntent.parameters;
     TAG_LOGD(AAFwkTag::INTENT, "page parameters: %{public}s", info.parameters.c_str());
