@@ -164,6 +164,8 @@ public:
      * @param configuration Indicates the updated configuration information.
      */
     void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
+
+    virtual void OnFormLocationChanged(const int64_t formId, const int32_t formLocation);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

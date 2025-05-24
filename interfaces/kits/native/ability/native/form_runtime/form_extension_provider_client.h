@@ -166,6 +166,17 @@ public:
     virtual int32_t AcquireShareFormData(int64_t formId, const std::string &remoteDeviceId,
         const sptr<IRemoteObject> &formSupplyCallback, int64_t requestCode) override;
 
+    /**
+     * @brief Notify provider when the form location need update.
+     *
+     * @param formId The Id of the form.
+     * @param location Indicates the current card position.
+     * @param callerToken Caller form extension token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int NotifyFormLocationUpdate(const int64_t formId, const Want &want,
+        const sptr<IRemoteObject> &callerToken) override;
+
 private:
     std::shared_ptr<FormExtension> GetOwner();
     std::pair<int, int> CheckParam(const Want &want,
@@ -192,6 +203,9 @@ private:
     bool AcquireFormExtensionProviderShareFormInfo(int64_t formId, AAFwk::WantParams &wantParams);
 
     bool FormExtensionProviderAcquireFormData(int64_t formId, AAFwk::WantParams &wantParams);
+
+    void NotifyFormExtensionUpdateLocation(const int64_t formId, const Want &want,
+        const sptr<IRemoteObject> &callerToken);
 
 private:
     mutable std::mutex formExtensionMutex_;
