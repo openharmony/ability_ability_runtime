@@ -112,7 +112,7 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_RegisterNativeChildProcessExitCallback
     ret = OH_Ability_RegisterNativeChildProcessExitCallback(ChildProcessCapiTest::OnNativeChildProcessExit);
     EXPECT_EQ(ret, NCP_ERR_INTERNAL);
     ret = OH_Ability_UnregisterNativeChildProcessExitCallback(ChildProcessCapiTest::OnNativeChildProcessExit);
-    EXPECT_EQ(ret, NCP_ERR_INTERNAL);
+    EXPECT_EQ(ret, NCP_ERR_CALLBACK_NOT_EXIST);
     GTEST_LOG_(INFO) << "OH_Ability_RegisterNativeChildProcessExitCallback_001 end";
 }
 

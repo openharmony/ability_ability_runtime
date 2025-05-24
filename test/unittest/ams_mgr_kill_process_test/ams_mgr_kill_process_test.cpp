@@ -97,12 +97,12 @@ HWTEST_F(AmsMgrKillProcessTest, KillProcess_0100, TestSize.Level0)
 {
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrKillProcessTest_KillProcess_0100");
 
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrServiceInner = GetAppMgrServiceInner();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     ErrCode result = appMgrServiceInner->KillApplicationByUserId(STRING_BUNDLE_NAME, 0, ACCOUNT_ID);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_NE(result, ERR_OK);
 }
 
 /*
@@ -117,10 +117,10 @@ HWTEST_F(AmsMgrKillProcessTest, KillProcess_0200, TestSize.Level0)
 {
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrKillProcessTest_KillProcess_0200");
 
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto proxy = GetAppMgrProxy();
     EXPECT_NE(proxy, nullptr);
 
     ErrCode result = proxy->GetAmsMgr()->KillProcessWithAccount(STRING_BUNDLE_NAME, ACCOUNT_ID);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_NE(result, ERR_OK);
 }

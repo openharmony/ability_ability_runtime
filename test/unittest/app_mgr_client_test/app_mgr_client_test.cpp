@@ -134,7 +134,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateExtensionState_001, TestSize.Level
 HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRunningProcesses_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetAllRunningProcesses_001 start");
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
 

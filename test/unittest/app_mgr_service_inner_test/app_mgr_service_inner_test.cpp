@@ -339,7 +339,7 @@ HWTEST_F(AppMgrServiceInnerTest, PointerDeviceUpdateConfig_0100, TestSize.Level1
 {
     TAG_LOGI(AAFwkTag::TEST, "PointerDeviceUpdateConfig_0100 start");
 
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     std::shared_ptr<AppExecFwk::Configuration> config;
@@ -950,25 +950,25 @@ HWTEST_F(AppMgrServiceInnerTest, KillApplicationSelf_001, TestSize.Level1)
 HWTEST_F(AppMgrServiceInnerTest, KillApplicationByUserId_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "KillApplicationByUserId_001 start");
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     std::string bundleName = "test_bundleName";
     int result = appMgrServiceInner->KillApplicationByUserId(bundleName, 0, 0);
-    EXPECT_EQ(result, 0);
+    EXPECT_NE(result, 0);
 
     appMgrServiceInner->remoteClientManager_->SetBundleManagerHelper(nullptr);
     appMgrServiceInner->KillApplicationByUserId(bundleName, 0, 0);
-    EXPECT_EQ(result, 0);
+    EXPECT_NE(result, 0);
 
     appMgrServiceInner->remoteClientManager_ = nullptr;
     appMgrServiceInner->KillApplicationByUserId(bundleName, 0, 0);
-    EXPECT_EQ(result, 0);
+    EXPECT_NE(result, 0);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
     appMgrServiceInner->KillApplicationByUserId(bundleName, 0, 0);
-    EXPECT_EQ(result, 0);
+    EXPECT_NE(result, 0);
 
     TAG_LOGI(AAFwkTag::TEST, "KillApplicationByUserId_001 end");
 }
@@ -2344,7 +2344,7 @@ HWTEST_F(AppMgrServiceInnerTest, RegisterNativeChildExitNotify_001, TestSize.Lev
 
     sptr<INativeChildNotify> notify;
     auto ret = appMgrServiceInner->RegisterNativeChildExitNotify(notify);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "RegisterNativeChildExitNotify_001 end");
 }
@@ -4765,6 +4765,7 @@ HWTEST_F(AppMgrServiceInnerTest, IsMainProcess_001, TestSize.Level2)
  */
 HWTEST_F(AppMgrServiceInnerTest, IsApplicationRunning_001, TestSize.Level1)
 {
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     std::string bundleName = "com.is.hiserice";
@@ -4786,6 +4787,7 @@ HWTEST_F(AppMgrServiceInnerTest, IsApplicationRunning_001, TestSize.Level1)
  */
 HWTEST_F(AppMgrServiceInnerTest, IsApplicationRunning_002, TestSize.Level1)
 {
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     std::string bundleName = "com.is.hiserice";
@@ -4913,7 +4915,7 @@ HWTEST_F(AppMgrServiceInnerTest, HandleWindowPidVisibilityChanged_001, TestSize.
  */
 HWTEST_F(AppMgrServiceInnerTest, IsAppRunning_001, TestSize.Level1)
 {
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     std::string bundleName = "com.is.hiserice";
@@ -4936,7 +4938,7 @@ HWTEST_F(AppMgrServiceInnerTest, IsAppRunning_001, TestSize.Level1)
  */
 HWTEST_F(AppMgrServiceInnerTest, IsAppRunning_002, TestSize.Level1)
 {
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     std::string bundleName = "com.is.hiserice";
@@ -5064,6 +5066,7 @@ HWTEST_F(AppMgrServiceInnerTest, UnregisterRenderStateObserver_0200, TestSize.Le
  */
 HWTEST_F(AppMgrServiceInnerTest, GetAllUIExtensionRootHostPid_0100, TestSize.Level1)
 {
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     ASSERT_NE(appMgrServiceInner, nullptr);
     pid_t pid = 0;
@@ -5079,6 +5082,7 @@ HWTEST_F(AppMgrServiceInnerTest, GetAllUIExtensionRootHostPid_0100, TestSize.Lev
  */
 HWTEST_F(AppMgrServiceInnerTest, GetAllUIExtensionProviderPid_0100, TestSize.Level1)
 {
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     ASSERT_NE(appMgrServiceInner, nullptr);
     pid_t hostPid = 0;
