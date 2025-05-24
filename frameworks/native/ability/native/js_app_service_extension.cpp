@@ -21,6 +21,7 @@
 #include "ability_manager_client.h"
 #include "configuration_utils.h"
 #include "display_util.h"
+#include "freeze_util.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
 #include "js_extension_common.h"
@@ -313,11 +314,22 @@ void JsAppServiceExtension::OnStop()
     TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "ok");
 }
 
+void JsAppServiceExtension::AddLifecycleEventForJSCall(const std::string &eventStr)
+{
+    auto entry = std::string("JsAppServiceExtension:") + eventStr;
+    auto context = GetContext();
+    if (context) {
+        FreezeUtil::GetInstance().AddLifecycleEvent(context->GetToken(), entry);
+    }
+}
+
 sptr<IRemoteObject> JsAppServiceExtension::OnConnect(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HandleScope handleScope(jsRuntime_);
+    AddLifecycleEventForJSCall("OnConnect begin");
     napi_value result = CallOnConnect(want);
+    AddLifecycleEventForJSCall("OnConnect end");
     napi_env env = jsRuntime_.GetNapiEnv();
     auto remoteObj = GetNativeRemoteObject(env, result);
     if (remoteObj == nullptr) {
