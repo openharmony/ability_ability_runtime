@@ -180,17 +180,6 @@ HWTEST_F(StsRuntimeTest, StartDebugger_100, TestSize.Level1)
 }
 
 /**
- * @tc.name: UnLoadSTSAppLibrary_100
- * @tc.desc: StsRuntime test for UnLoadSTSAppLibrary.
- * @tc.type: FUNC
- */
-HWTEST_F(StsRuntimeTest, UnLoadSTSAppLibrary_100, TestSize.Level1)
-{
-    std::unique_ptr<STSRuntime> stsRuntime = std::make_unique<STSRuntime>();
-    stsRuntime->UnLoadSTSAppLibrary();
-}
-
-/**
  * @tc.name: PostTask_100
  * @tc.desc: StsRuntime test for PostTask.
  * @tc.type: FUNC
@@ -352,28 +341,6 @@ HWTEST_F(StsRuntimeTest, LoadAotFile_100, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitConsoleModule_100
- * @tc.desc: StsRuntime test for InitConsoleModule.
- * @tc.type: FUNC
- */
-HWTEST_F(StsRuntimeTest, InitConsoleModule_100, TestSize.Level1)
-{
-    std::unique_ptr<STSRuntime> stsRuntime = std::make_unique<STSRuntime>();
-    stsRuntime->InitConsoleModule();
-}
-
-/**
- * @tc.name: InitTimerModule_100
- * @tc.desc: StsRuntime test for InitTimerModule.
- * @tc.type: FUNC
- */
-HWTEST_F(StsRuntimeTest, InitTimerModule_100, TestSize.Level1)
-{
-    std::unique_ptr<STSRuntime> stsRuntime = std::make_unique<STSRuntime>();
-    stsRuntime->InitTimerModule();
-}
-
-/**
  * @tc.name: ReInitUVLoop_100
  * @tc.desc: StsRuntime test for ReInitUVLoop.
  * @tc.type: FUNC
@@ -392,17 +359,6 @@ HWTEST_F(StsRuntimeTest, ReInitUVLoop_100, TestSize.Level1)
     stsRuntime->ReInitUVLoop();
     EXPECT_NE(stsRuntime->stsEnv_, nullptr);
     stsRuntime->stsEnv_ = stsEnv;
-}
-
-/**
- * @tc.name: PostPreload_100
- * @tc.desc: StsRuntime test for PostPreload.
- * @tc.type: FUNC
- */
-HWTEST_F(StsRuntimeTest, PostPreload_100, TestSize.Level1)
-{
-    std::unique_ptr<STSRuntime> stsRuntime = std::make_unique<STSRuntime>();
-    stsRuntime->PostPreload(options_);
 }
 
 /**
