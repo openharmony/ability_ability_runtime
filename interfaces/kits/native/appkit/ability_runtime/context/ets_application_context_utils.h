@@ -37,6 +37,10 @@ public:
         ani_string font);
     static void SetColorMode([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_enum_item colorMode);
+    static void SetLanguage([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_string language);
+    static void SetFontSizeScale([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_double fontSizeScale);
     static void ClearUpApplicationData([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_object callback);
     static void GetRunningProcessInformation([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,

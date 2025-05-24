@@ -23,6 +23,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
     constexpr const char* STS_APPLICATION_CONTEXT_CLASS_NAME = "Lapplication/ApplicationContext/ApplicationContext;";
+    constexpr double FOUNT_SIZE = 0.0;
 }
 std::weak_ptr<ApplicationContext> applicationContext_;
 std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_ = nullptr;
@@ -104,6 +105,53 @@ void EtsApplicationContextUtils::SetColorMode([[maybe_unused]]ani_env *env, [[ma
     }
     TAG_LOGD(AAFwkTag::APPKIT, "colorMode is %{public}d", mode);
     applicationContext->SetColorMode(static_cast<int32_t>(mode));
+}
+
+void EtsApplicationContextUtils::SetLanguage([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_string language)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "SetLanguage Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
+        return;
+    }
+    std::string stdLanguage = "";
+    if (!AppExecFwk::GetStdString(env, language, stdLanguage)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse language failed");
+        ThrowStsInvalidParamError(env, "Parse param language failed, language must be string.");
+        return;
+    }
+    applicationContext->SetLanguage(stdLanguage);
+    TAG_LOGD(AAFwkTag::APPKIT, "stdLanguage language %{public}s", stdLanguage.c_str());
+}
+
+void EtsApplicationContextUtils::SetFontSizeScale([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_double fontSizeScale)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "SetFontSizeScale Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
+        return;
+    }
+
+    double stdFontSizeScale = static_cast<double>(fontSizeScale);
+    TAG_LOGD(AAFwkTag::APPKIT, "fontSizeScale: %{public}f", stdFontSizeScale);
+    if (fontSizeScale < FOUNT_SIZE) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid size");
+        ThrowStsInvalidParamError(env, "Invalid font size.");
+        return;
+    }
+    applicationContext->SetFontSizeScale(stdFontSizeScale);
 }
 
 void EtsApplicationContextUtils::ClearUpApplicationData([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
@@ -333,6 +381,10 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env* aniEnv, ani
         ani_native_function {"nativeclearUpApplicationData",
             "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsApplicationContextUtils::ClearUpApplicationData)},
+        ani_native_function {"nativesetLanguage", "Lstd/core/String;:V",
+            reinterpret_cast<void *>(EtsApplicationContextUtils::SetLanguage)},
+        ani_native_function {"nativesetFontSizeScale", "D:V",
+            reinterpret_cast<void *>(EtsApplicationContextUtils::SetFontSizeScale)},
         ani_native_function {"nativesetColorMode",
             "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;:V",
             reinterpret_cast<void *>(EtsApplicationContextUtils::SetColorMode)},
