@@ -2528,7 +2528,9 @@ HWTEST_F(AbilityManagerServiceThirdTest, SignRestartAppFlag_001, TestSize.Level1
     EXPECT_NE(abilityMs_, nullptr);
 
     int32_t uid = 100;
-    abilityMs_->SignRestartAppFlag(USER_ID_U100, uid, "", AppExecFwk::MultiAppModeType::UNSPECIFIED, 1);
+    AbilityManagerService::SignRestartAppFlagParam param =
+        { USER_ID_U100, uid, "", AppExecFwk::MultiAppModeType::UNSPECIFIED, true, false };
+    abilityMs_->SignRestartAppFlag(param);
 }
 
 /*
@@ -2722,6 +2724,79 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId
     sessionInfo->hostWindowId = 1;
     abilityRequest.sessionInfo = sessionInfo;
     abilityMs->CheckUIExtensionCallerPidByHostWindowId(abilityRequest);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RestartSelfAtomicService
+ * SubFunction: RestartSelfAtomicService_001
+ * FunctionPoints: AbilityManagerService RestartSelfAtomicService
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, RestartSelfAtomicService_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RestartSelfAtomicService_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+    EXPECT_EQ(abilityMs_->RestartSelfAtomicService(nullptr), ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RestartSelfAtomicService_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RestartSelfAtomicService
+ * SubFunction: RestartSelfAtomicService_002
+ * FunctionPoints: AbilityManagerService RestartSelfAtomicService
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, RestartSelfAtomicService_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RestartSelfAtomicService_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    EXPECT_EQ(abilityMs_->RestartSelfAtomicService(token), ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RestartSelfAtomicService_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RestartSelfAtomicService
+ * SubFunction: RestartSelfAtomicService_003
+ * FunctionPoints: AbilityManagerService RestartSelfAtomicService
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, RestartSelfAtomicService_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RestartSelfAtomicService_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+
+    AbilityRequest abilityRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
+    abilityRequest.appInfo.bundleType = AppExecFwk::BundleType::APP;
+    auto callerRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    ASSERT_NE(callerRecord, nullptr);
+
+    EXPECT_EQ(abilityMs_->RestartSelfAtomicService(callerRecord->GetToken()), ERR_CALLER_NOT_ATOMIC_SERVICE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RestartSelfAtomicService_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RestartSelfAtomicService
+ * SubFunction: RestartSelfAtomicService_004
+ * FunctionPoints: AbilityManagerService RestartSelfAtomicService
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, RestartSelfAtomicService_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RestartSelfAtomicService_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
+
+    AbilityRequest abilityRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
+    abilityRequest.appInfo.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
+    auto callerRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    ASSERT_NE(callerRecord, nullptr);
+
+    EXPECT_EQ(abilityMs_->RestartSelfAtomicService(callerRecord->GetToken()), NOT_TOP_ABILITY);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RestartSelfAtomicService_004 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

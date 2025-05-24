@@ -143,7 +143,25 @@ public:
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @return int The file descriptor.
      */
-    virtual int OpenFile(const Uri& uri, uint32_t flag) override;
+    virtual int OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId) override;
+
+     /**
+     * @brief grant uri permission
+     * @param uriVec vector of uri
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @param targetTokenId the tokenId of target application.
+     * @param targetBundleName the bundleName of target application.
+     * @return 0 when on success or else failed.
+     */
+    virtual int32_t GrantUriPermission(const std::vector<std::string> &uriVec, uint32_t flag, uint32_t targetTokenId,
+        const std::string &targetBundleName) override;
+    
+    /**
+     * @brief revoke uri permission
+     * @param tokenId the tokenId of target application.
+     * @return 0 when on success or else failed.
+     */
+    virtual int32_t RevokeUriPermission(uint32_t tokenId) override;
 
     virtual void NotifyMissionBindPid(int32_t missionId, int32_t pid) override;
 

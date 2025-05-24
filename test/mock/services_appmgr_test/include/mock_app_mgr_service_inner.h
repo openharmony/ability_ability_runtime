@@ -78,8 +78,8 @@ public:
     MOCK_METHOD0(ClearNonPersistWaitingDebugFlag, void());
     MOCK_METHOD0(IsMemorySizeSufficient, bool());
 #ifdef SUPPORT_CHILD_PROCESS
-    MOCK_METHOD4(StartNativeChildProcess, int32_t(const pid_t hostPid,
-        const std::string &libName, int32_t childProcessCount, const sptr<IRemoteObject> &callback));
+    MOCK_METHOD5(StartNativeChildProcess, int32_t(const pid_t hostPid, const std::string &libName,
+        int32_t childProcessCount, const sptr<IRemoteObject> &callback, const std::string &customProcessName));
 #endif // SUPPORT_CHILD_PROCESS
 
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)

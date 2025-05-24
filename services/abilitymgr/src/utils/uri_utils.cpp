@@ -58,6 +58,28 @@ UriUtils &UriUtils::GetInstance()
     return utils;
 }
 
+bool UriUtils::IsInAncoAppIdentifier(const std::string &bundleName)
+{
+    auto identifier = AppUtils::GetInstance().GetAncoAppIdentifiers();
+    return CheckIsInAncoAppIdentifier(identifier, bundleName);
+}
+
+bool UriUtils::CheckIsInAncoAppIdentifier(const std::string &identifier, const std::string &bundleName)
+{
+    if (identifier.empty() || bundleName.empty()) {
+        return false;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "identifier:%{public}s", identifier.c_str());
+    std::stringstream ss(identifier);
+    std::string item;
+    while (getline(ss, item, '|')) {
+        if (item == bundleName) {
+            return true;
+        }
+    }
+    return false;
+}
+
 std::vector<Uri> UriUtils::GetUriListFromWantDms(Want &want)
 {
     std::vector<std::string> uriStrVec = want.GetStringArrayParam(PARAMS_URI);
@@ -416,7 +438,7 @@ void UriUtils::GrantUriPermission(Want &want, std::string targetBundleName, int3
     }
 
     auto callerPkg = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-    bool isBrokerCall = (callerPkg == AppUtils::GetInstance().GetBrokerDelegateBundleName() ||
+    bool isBrokerCall = (IsInAncoAppIdentifier(callerPkg) ||
         IPCSkeleton::GetCallingUid() == AppUtils::GetInstance().GetCollaboratorBrokerUID());
     if (isBrokerCall && GrantShellUriPermission(uriVec, flag, targetBundleName, appIndex)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "permission to shell");

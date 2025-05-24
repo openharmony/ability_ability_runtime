@@ -262,7 +262,8 @@ HWTEST_F(AbilityManagerCollaboratorProxyTest, OpenFile_0100, TestSize.Level1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
     Uri uri("nullptr");
     uint32_t flag = 0;
-    int32_t res = proxy_->OpenFile(uri, flag);
+    uint32_t tokenId = 0;
+    int32_t res = proxy_->OpenFile(uri, flag, tokenId);
     EXPECT_EQ(res, -1);
     EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::OPEN_FILE), mock_->GetCode());
 }
@@ -314,6 +315,41 @@ HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyKillProcesses_0100, TestSize
     int32_t res = proxy_->NotifyKillProcesses(bundleName, 0);
     EXPECT_EQ(res, NO_ERROR);
     EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::NOTIFY_KILL_PROCESSES), mock_->GetCode());
+}
+
+/**
+ * @tc.number: GrantUriPermission_0100
+ * @tc.desc: GrantUriPermission
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerCollaboratorProxyTest, GrantUriPermission_0100, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
+    std::vector<std::string> uriVec = { "file://invalid/temp.txt" };
+    uint32_t flag = 1;
+    uint32_t targetTokenId = 0;
+    std::string targetBundleName = "";
+    int32_t res = proxy_->GrantUriPermission(uriVec, flag, targetTokenId, targetBundleName);
+    EXPECT_EQ(res, 0);
+    EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::GRANT_URI_PERMISSION), mock_->GetCode());
+}
+
+/**
+ * @tc.number: RevokeUriPermission_0100
+ * @tc.desc: RevokeUriPermission
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerCollaboratorProxyTest, RevokeUriPermission_0100, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
+    uint32_t tokenId = 0;
+    int32_t res = proxy_->RevokeUriPermission(tokenId);
+    EXPECT_EQ(res, 0);
+    EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::REVOKE_URI_PERMISSION), mock_->GetCode());
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

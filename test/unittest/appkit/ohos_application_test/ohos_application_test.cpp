@@ -748,13 +748,14 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_ScheduleAcceptWant_
 {
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_ScheduleAcceptWant_0100 start.";
     Want want;
-    std::string flag = "";
+    bool isAsync = false;
     std::string moduleName = "entry";
     EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
     std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage = std::make_shared<AbilityRuntime::AbilityStage>();
     ohosApplication_->abilityStages_.emplace(moduleName, abilityStage);
     EXPECT_FALSE(ohosApplication_->abilityStages_.empty());
-    ohosApplication_->ScheduleAcceptWant(want, moduleName, flag);
+    auto callback = [](std::string) {};
+    ohosApplication_->ScheduleAcceptWant(want, moduleName, callback, isAsync);
     EXPECT_TRUE(abilityStage != nullptr);
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_ScheduleAcceptWant_0100 end.";
 }
@@ -897,6 +898,30 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_SetAppEnv_0100, Tes
     std::string appEnvVal = getenv(appEnvironment.name.c_str());
     EXPECT_EQ(appEnvVal, appEnvironment.value);
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_SetAppEnv_0100 end.";
+}
+
+/*
+* @tc.number: AppExecFwk_OHOSApplicationTest_ScheduleNewProcessRequest_0100
+* @tc.name: ScheduleNewProcessRequest
+* @tc.desc: Verify function ScheduleNewProcessRequest pointer abilityStage not empty
+*/
+HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_ScheduleNewProcessRequest_0100, TestSize.Level1)
+{
+    Want want;
+    bool isAsync = false;
+    std::string moduleName = "entry";
+    ohosApplication_->ScheduleNewProcessRequest(want, moduleName, nullptr, isAsync);
+    EXPECT_FALSE(isAsync);
+    auto callback = [](std::string) {};
+    ohosApplication_->ScheduleNewProcessRequest(want, moduleName, callback, isAsync);
+    EXPECT_FALSE(isAsync);
+    std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage = std::make_shared<AbilityRuntime::AbilityStage>();
+    ohosApplication_->abilityStages_.emplace(moduleName, abilityStage);
+    std::string testName = "testName";
+    ohosApplication_->ScheduleNewProcessRequest(want, testName, callback, isAsync);
+    EXPECT_FALSE(isAsync);
+    ohosApplication_->ScheduleNewProcessRequest(want, moduleName, callback, isAsync);
+    EXPECT_FALSE(isAsync);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

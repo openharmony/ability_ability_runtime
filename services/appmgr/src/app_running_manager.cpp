@@ -174,6 +174,27 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     return nullptr;
 }
 
+std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordForSpecifiedProcess(
+    int32_t uid, const std::string &instanceKey, const std::string &customProcessFlag)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPMGR, "uid: %{public}d: customProcessFlag: %{public}s", uid, customProcessFlag.c_str());
+    auto appRunningMap = GetAppRunningRecordMap();
+    for (const auto &item : appRunningMap) {
+        const auto &appRecord = item.second;
+        if (appRecord->GetInstanceKey() == instanceKey && appRecord->GetUid() == uid &&
+            appRecord->GetProcessType() == ProcessType::NORMAL &&
+            (appRecord->GetCustomProcessFlag() == customProcessFlag) &&
+            !(appRecord->IsTerminating()) && !(appRecord->IsKilling()) && !(appRecord->GetRestartAppFlag()) &&
+            !(appRecord->IsUserRequestCleaning()) &&
+            !(appRecord->IsCaching() && appRecord->GetProcessCacheBlocked()) &&
+            appRecord->GetKillReason() != AbilityRuntime::GlobalConstant::LOW_MEMORY_KILL) {
+            return appRecord;
+        }
+    }
+    return nullptr;
+}
+
 #ifdef APP_NO_RESPONSE_DIALOG
 bool AppRunningManager::CheckAppRunningRecordIsExist(const std::string &bundleName, const std::string &abilityName)
 {
@@ -1158,8 +1179,6 @@ int32_t AppRunningManager::UpdateConfigurationByBundleName(const Configuration &
 
 int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
 {
-    std::unordered_set<int32_t> frozenPids;
-    AAFwk::ResSchedUtil::GetInstance().GetAllFrozenPidsFromRSS(frozenPids);
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
@@ -1167,26 +1186,13 @@ int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
             TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
             continue;
         }
-        auto priorityObject = appRecord->GetPriorityObject();
-        if (!priorityObject) {
-            TAG_LOGW(AAFwkTag::APPMGR, "priorityObject null");
-            continue;
-        }
-        auto pid = priorityObject->GetPid();
-        if (frozenPids.count(pid) == 0) {
-            TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] memory level = %{public}d", pid, level);
-            appRecord->ScheduleMemoryLevel(level);
-        } else {
-            TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] is frozen", pid);
-        }
+        appRecord->ScheduleMemoryLevel(level);
     }
     return ERR_OK;
 }
 
 int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap)
 {
-    std::unordered_set<int32_t> frozenPids;
-    AAFwk::ResSchedUtil::GetInstance().GetAllFrozenPidsFromRSS(frozenPids);
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
@@ -1200,16 +1206,12 @@ int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLev
             continue;
         }
         auto pid = priorityObject->GetPid();
-        if (frozenPids.count(pid) == 0) {
-            auto it = procLevelMap.find(pid);
-            if (it == procLevelMap.end()) {
-                TAG_LOGW(AAFwkTag::APPMGR, "proc[pid=%{public}d] is not found", pid);
-            } else {
-                TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] memory level = %{public}d", pid, it->second);
-                appRecord->ScheduleMemoryLevel(it->second);
-            }
+        auto it = procLevelMap.find(pid);
+        if (it == procLevelMap.end()) {
+            TAG_LOGW(AAFwkTag::APPMGR, "proc[pid=%{public}d] is not found", pid);
         } else {
-            TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] is frozen", pid);
+            TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] memory level = %{public}d", pid, it->second);
+            appRecord->ScheduleMemoryLevel(it->second);
         }
     }
     return ERR_OK;
