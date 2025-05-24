@@ -1039,13 +1039,13 @@ int32_t AppMgrStub::HandleUpdateConfigurationForBackgroundApp(MessageParcel &dat
         TAG_LOGE(AAFwkTag::APPMGR, "Resource allocation error");
         return ERR_NO_MEMORY;
     }
-    for (uint32_t i = 0; i < size; i++) {
+    for (auto &item : appInfos) {
         std::unique_ptr<BackgroundAppInfo> tmpInfo(data.ReadParcelable<BackgroundAppInfo>());
         if (tmpInfo == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "tmpInfo null");
             return ERR_INVALID_VALUE;
         }
-        appInfos.push_back(*tmpInfo);
+        item = *tmpInfo;
     }
     std::unique_ptr<AppExecFwk::ConfigurationPolicy> policy(data.ReadParcelable<AppExecFwk::ConfigurationPolicy>());
     if (policy == nullptr) {
