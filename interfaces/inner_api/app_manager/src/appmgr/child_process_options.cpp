@@ -17,12 +17,14 @@
 
 #include "hilog_tag_wrapper.h"
 #include "parcel_macro_base.h"
+#include "string_ex.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 bool ChildProcessOptions::ReadFromParcel(Parcel &parcel)
 {
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isolationMode);
+    customProcessName = Str16ToStr8(parcel.ReadString16());
     return true;
 }
 
@@ -40,6 +42,7 @@ ChildProcessOptions *ChildProcessOptions::Unmarshalling(Parcel &parcel)
 bool ChildProcessOptions::Marshalling(Parcel &parcel) const
 {
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isolationMode);
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(customProcessName));
     return true;
 }
 }  // namespace AppExecFwk

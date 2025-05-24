@@ -35,14 +35,15 @@ public:
     ChildProcessRecord(pid_t hostPid, const ChildProcessRequest &request,
         const std::shared_ptr<AppRunningRecord> hostRecord);
     ChildProcessRecord(pid_t hostPid, const std::string &libName, const std::shared_ptr<AppRunningRecord> hostRecord,
-        const sptr<IRemoteObject> &mainProcessCb, int32_t childProcessCount, bool isStartWithDebug);
+        const sptr<IRemoteObject> &mainProcessCb, int32_t childProcessCount, bool isStartWithDebug,
+        const std::string &customProcessName);
     virtual ~ChildProcessRecord();
 
     static std::shared_ptr<ChildProcessRecord> CreateChildProcessRecord(pid_t hostPid,
         const ChildProcessRequest &request, const std::shared_ptr<AppRunningRecord> hostRecord);
     static std::shared_ptr<ChildProcessRecord> CreateNativeChildProcessRecord(pid_t hostPid, const std::string &libName,
         const std::shared_ptr<AppRunningRecord> hostRecord, const sptr<IRemoteObject> &mainProcessCb,
-        int32_t childProcessCount, bool isStartWithDebug);
+        int32_t childProcessCount, bool isStartWithDebug, const std::string &customProcessName);
 
     void SetPid(pid_t pid);
     pid_t GetPid() const;
@@ -69,7 +70,7 @@ public:
     bool IsNativeSpawnStarted() const;
 
 private:
-    void MakeProcessName(const std::shared_ptr<AppRunningRecord> hostRecord);
+    void MakeProcessName(const std::shared_ptr<AppRunningRecord> hostRecord, const std::string &customProcessName);
 
     bool isStartWithDebug_;
     pid_t pid_ = 0;
