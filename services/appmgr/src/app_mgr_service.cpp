@@ -1716,7 +1716,7 @@ void AppMgrService::SetAppAssertionPauseState(bool flag)
 
 #ifdef SUPPORT_CHILD_PROCESS
 int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
-    const sptr<IRemoteObject> &callback)
+    const sptr<IRemoteObject> &callback, const std::string &customProcessName)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPMGR, "call");
@@ -1726,7 +1726,7 @@ int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32
     }
 
     return appMgrServiceInner_->StartNativeChildProcess(
-        IPCSkeleton::GetCallingPid(), libName, childProcessCount, callback);
+        IPCSkeleton::GetCallingPid(), libName, childProcessCount, callback, customProcessName);
 }
 #endif // SUPPORT_CHILD_PROCESS
 

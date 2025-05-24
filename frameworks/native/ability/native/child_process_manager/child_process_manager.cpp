@@ -130,10 +130,10 @@ ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessWithArgs(
     const AppExecFwk::ChildProcessOptions &options)
 {
     TAG_LOGI(AAFwkTag::PROCESSMGR, "StartChildProcessWithArgs, childProcessType:%{public}d, startWitDebug: %{public}d,"
-        " processName:%{public}s, native:%{public}d, entryParams size:%{public}zu, fdsSize:%{public}zu,"
-        " options.isolationMode:%{public}d", childProcessType, g_debugOption.isStartWithDebug,
-        g_debugOption.processName.c_str(), g_debugOption.isStartWithNative, args.entryParams.length(), args.fds.size(),
-        options.isolationMode);
+        "processName:%{public}s, native:%{public}d, entryParams size:%{public}zu, fdsSize:%{public}zu, "
+        "options.isolationMode:%{public}d, options.customProcessName:%{public}s", childProcessType,
+        g_debugOption.isStartWithDebug, g_debugOption.processName.c_str(), g_debugOption.isStartWithNative,
+        args.entryParams.length(), args.fds.size(), options.isolationMode, options.customProcessName.c_str());
     ChildProcessManagerErrorCode errorCode = PreCheck(childProcessType);
     if (errorCode != ChildProcessManagerErrorCode::ERR_OK) {
         return errorCode;
@@ -162,7 +162,7 @@ ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessWithArgs(
 }
 
 ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSpawnFork(
-    const std::string &libName, const sptr<IRemoteObject> &callbackStub)
+    const std::string &libName, const sptr<IRemoteObject> &callbackStub, const std::string &customProcessName)
 {
     TAG_LOGI(AAFwkTag::PROCESSMGR, "libName:%{private}s", libName.c_str());
     ChildProcessManagerErrorCode errorCode = PreCheck(AppExecFwk::CHILD_PROCESS_TYPE_NATIVE);
@@ -177,7 +177,7 @@ ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSp
     }
 
     std::lock_guard<std::mutex> lock(childProcessCountLock_);
-    auto ret = appMgr->StartNativeChildProcess(libName, childProcessCount_, callbackStub);
+    auto ret = appMgr->StartNativeChildProcess(libName, childProcessCount_, callbackStub, customProcessName);
     TAG_LOGD(AAFwkTag::PROCESSMGR, "StartNativeChildProcess ret:%{public}d", ret);
 
     if (ret != ERR_OK) {

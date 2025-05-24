@@ -49,7 +49,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     sptr<IRemoteObject> mP;
     int32_t cd = static_cast<int32_t>(GetU32Data(data));
     bool flag = *data % ENABLE;
-    ChildProcessRecord::CreateNativeChildProcessRecord(hostPid, stringParam, hostRecord, mP, cd, flag);
+    ChildProcessRecord::CreateNativeChildProcessRecord(hostPid, stringParam, hostRecord, mP, cd, flag, "");
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     int32_t recordId = static_cast<int32_t>(GetU32Data(data));
     auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, stringParam);
@@ -76,7 +76,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     childRecord->ClearMainProcessCallback();
     std::string entryParams(data, size);
     childRecord->GetEntryParams();
-    childRecord->MakeProcessName(hostRecord);
+    childRecord->MakeProcessName(hostRecord, "");
     return true;
 }
 }
