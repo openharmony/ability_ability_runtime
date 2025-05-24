@@ -534,5 +534,19 @@ bool JsFormExtension::ConvertFormDataProxy(napi_env env, napi_value jsValue, For
         formDataProxy.subscribeId.c_str());
     return true;
 }
+
+void JsFormExtension::OnFormLocationChanged(const int64_t formId, const int32_t formLocation)
+{
+    TAG_LOGI(AAFwkTag::FORM_EXT, "Card position changes, location: %{public}d, formId: %{public}" PRId64, formLocation, formId);
+    FormExtension::OnFormLocationChanged(formId, formLocation);
+ 
+    HandleScope handleScope(jsRuntime_);
+    napi_env env = jsRuntime_.GetNapiEnv();
+ 
+    napi_value napiFormId = WrapStringToJS(env, std::to_string(formId));
+    napi_value napiLocation = WrapInt32ToJS(env, formLocation);
+    napi_value argv[] = {napiFormId, napiLocation};
+    CallObjectMethod("onFormLocationChanged", "OnFormLocationChanged", argv, ARGC_TWO);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -113,6 +113,11 @@ bool FormExtension::OnAcquireData(int64_t formId, AAFwk::WantParams &wantParams)
     return false;
 }
 
+void FormExtension::OnFormLocationChanged(const int64_t formId, const int32_t formLocation)
+{
+    TAG_LOGD(AAFwkTag::FORM_EXT, "call");
+}
+
 void FormExtension::OnConfigurationUpdated(const AppExecFwk::Configuration &configuration)
 {
     Extension::OnConfigurationUpdated(configuration);

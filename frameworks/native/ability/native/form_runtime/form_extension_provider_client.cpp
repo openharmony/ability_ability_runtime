@@ -611,5 +611,37 @@ bool FormExtensionProviderClient::FormExtensionProviderAcquireFormData(
 
     return ownerFormExtension->OnAcquireData(formId, wantParams);
 }
+
+int FormExtensionProviderClient::NotifyFormLocationUpdate(const int64_t formId, const Want &want,
+    const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGD(AAFwkTag::FORM_EXT, "called");
+    std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    std::function<void()> notifyFormLocationExtensionUpdateFunc = [client = sptr<FormExtensionProviderClient>(this),
+        formId, want, callerToken]() {
+        client->NotifyFormExtensionUpdateLocation(formId, want, callerToken);
+    };
+    mainHandler->PostSyncTask(notifyFormLocationExtensionUpdateFunc, "FormExtensionProviderClient::NotifyFormLocationUpdate");
+    return ERR_OK;
+}
+
+void FormExtensionProviderClient::NotifyFormExtensionUpdateLocation(const int64_t formId, const Want &want,
+    const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGD(AAFwkTag::FORM_EXT, "called");
+    int errorCode = ERR_OK;
+    std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
+    if (ownerFormExtension == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
+        errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
+    } else {
+        int location = want.GetIntParam(Constants::FORM_LOCATION_KEY, 0);
+        ownerFormExtension->OnFormLocationChanged(formId, location);
+    }
+ 
+    if (want.HasParameter(Constants::FORM_CONNECT_ID)) {
+        HandleResultCode(errorCode, want, callerToken);
+    }
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
