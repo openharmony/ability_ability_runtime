@@ -129,6 +129,7 @@ bool JsInsightIntentExecutor::HandleExecuteIntent(
     InsightIntentExecuteMode mode = static_cast<InsightIntentExecuteMode>(executeParam->executeMode_);
     auto name = executeParam->insightIntentName_;
     auto param = executeParam->insightIntentParam_;
+    TAG_LOGI(AAFwkTag::INTENT, "call executor, intentName: %{public}s, mode: %{public}d", name.c_str(), mode);
     switch (mode) {
         case InsightIntentExecuteMode::UIABILITY_FOREGROUND:
             if (!JsInsightIntentExecutor::CheckParametersUIAbilityForeground(pageLoader)) {
@@ -274,6 +275,7 @@ napi_value JsInsightIntentExecutor::ResolveCbCpp(napi_env env, napi_callback_inf
 
 napi_value JsInsightIntentExecutor::RejectCbCpp(napi_env env, napi_callback_info info)
 {
+    TAG_LOGW(AAFwkTag::INTENT, "reject function");
     void* data = nullptr;
     napi_get_cb_info(env, info, nullptr, nullptr, nullptr, &data);
     auto* callback = static_cast<InsightIntentExecutorAsyncCallback*>(data);
@@ -284,7 +286,7 @@ napi_value JsInsightIntentExecutor::RejectCbCpp(napi_env env, napi_callback_info
 void JsInsightIntentExecutor::ReplyFailed(InsightIntentExecutorAsyncCallback* callback,
     InsightIntentInnerErr innerErr)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "called");
+    TAG_LOGW(AAFwkTag::INTENT, "reply failed");
     if (callback == nullptr) {
         return;
     }

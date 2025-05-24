@@ -94,6 +94,7 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
     TAG_LOGI(AAFwkTag::WANTAGENT, "ExecuteOperation return %{public}d, sendFinish %{public}d", res, sendFinish);
     if (sendFinish && res != START_CANCELED) {
         WantParams wantParams = {};
+        TAG_LOGI(AAFwkTag::WANTAGENT, "start callback");
         senderInfo.finishedReceiver->PerformReceive(want, senderInfo.code, "", wantParams, false, false, 0);
     }
 
@@ -103,6 +104,8 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
 int32_t PendingWantRecord::ExecuteOperation(
     std::shared_ptr<PendingWantManager> pendingWantManager, SenderInfo &senderInfo, Want &want)
 {
+    TAG_LOGI(AAFwkTag::WANTAGENT, "start ability type:%{public}d, bundleName: %{public}s, ability: %{public}s",
+        key_->GetType(), want.GetBundle().c_str(), want.GetElement().GetAbilityName().c_str());
     int32_t res = NO_ERROR;
     switch (key_->GetType()) {
         case static_cast<int32_t>(OperationType::START_ABILITY):
