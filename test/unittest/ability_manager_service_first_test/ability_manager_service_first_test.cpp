@@ -685,6 +685,32 @@ HWTEST_F(AbilityManagerServiceFirstTest, OnAbilityRequestDone_001, TestSize.Leve
 
 /*
  * Feature: AbilityManagerService
+ * Function: OnAbilityRequestDone
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnAbilityRequestDone
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, OnAbilityRequestDone_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest OnAbilityRequestDone_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::DATA;
+    abilityMs->OnAbilityRequestDone(token, 0);
+    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::SERVICE;
+    abilityMs->OnAbilityRequestDone(token, 0);
+    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::UNKNOWN;
+    abilityMs->OnAbilityRequestDone(token, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest OnAbilityRequestDone_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: GetMissionIdByAbilityToken
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService GetMissionIdByAbilityToken
