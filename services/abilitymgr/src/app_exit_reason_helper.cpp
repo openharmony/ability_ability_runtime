@@ -47,6 +47,34 @@ void AppendAbilities(const std::list<std::shared_ptr<AbilityRecord>> &abilityRec
         }
     }
 }
+
+void GetRunningProcessInfo(int32_t pid, int32_t uid, const std::string &bundleName,
+    AppExecFwk::RunningProcessInfo &processInfo)
+{
+    if (pid == NO_PID) {
+        int32_t targetUserId = -1;
+        int32_t getOsAccountRet = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
+            GetOsAccountLocalIdFromUid(uid, targetUserId);
+        if (getOsAccountRet != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "GetOsAccountLocalIdFromUid failed: %{public}d", getOsAccountRet);
+            return;
+        }
+
+        auto appMgr = AppMgrUtil::GetAppMgr();
+        if (appMgr == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr null");
+            return;
+        }
+        std::vector<AppExecFwk::RunningProcessInfo> infoList;
+        IN_PROCESS_CALL(appMgr->GetRunningProcessInformation(bundleName, targetUserId, infoList));
+        if (infoList.size() == 1) {
+            processInfo = infoList.front();
+        }
+    } else {
+        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(static_cast<pid_t>(pid),
+            processInfo);
+    }
+}
 }
 
 AppExitReasonHelper::AppExitReasonHelper(std::shared_ptr<SubManagersHelper> subManagersHelper)
@@ -67,18 +95,13 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
         return ret;
     }
     
-    int32_t pid = NO_PID;
+    int32_t pid = exitReason.reason != Reason::REASON_CPP_CRASH ? IPCSkeleton::GetCallingPid() : NO_PID;
     AppExecFwk::RunningProcessInfo processInfo;
-    if (exitReason.reason != Reason::REASON_CPP_CRASH) {
-        pid = IPCSkeleton::GetCallingPid();
-        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(static_cast<pid_t>(pid),
-            processInfo);
-    }
+    GetRunningProcessInfo(pid, uid, bundleName, processInfo);
     int32_t resultCode = RecordProcessExtensionExitReason(pid, bundleName, exitReason, processInfo, false);
     if (resultCode != ERR_OK) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "not record extension reason: %{public}d", resultCode);
     }
-    CHECK_POINTER_AND_RETURN(subManagersHelper_, ERR_NULL_OBJECT);
     std::vector<std::string> abilityList;
     int32_t getActiveAbilityListRet = GetActiveAbilityListWithPid(uid, abilityList, pid);
     if (getActiveAbilityListRet != ERR_OK) {
@@ -148,6 +171,7 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const std::string &bundleName, 
         "userId: %{public}d, bundleName: %{public}s, appIndex: %{public}d", userId, bundleName.c_str(), appIndex);
     uint32_t accessTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, appIndex);
     AppExecFwk::RunningProcessInfo processInfo;
+    GetRunningProcessInfo(NO_PID, uid, bundleName, processInfo);
     return RecordProcessExitReason(NO_PID, bundleName, uid, accessTokenId, exitReason, processInfo, false, false);
 }
 
@@ -311,23 +335,10 @@ bool AppExitReasonHelper::IsExitReasonValid(const ExitReason &exitReason)
     return reason >= REASON_MIN && reason <= REASON_MAX;
 }
 
-int32_t AppExitReasonHelper::GetActiveAbilityList(int32_t uid, std::vector<std::string> &abilityList)
-{
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = subManagersHelper_->GetUIAbilityManagerByUid(uid);
-        CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_NULL_OBJECT);
-        uiAbilityManager->GetActiveAbilityList(uid, abilityList);
-    } else {
-        auto missionListManager = subManagersHelper_->GetMissionListManagerByUid(uid);
-        CHECK_POINTER_AND_RETURN(missionListManager, ERR_NULL_OBJECT);
-        missionListManager->GetActiveAbilityList(uid, abilityList);
-    }
-    return ERR_OK;
-}
-
 int32_t AppExitReasonHelper::GetActiveAbilityListWithPid(int32_t uid, std::vector<std::string> &abilityList,
     int32_t pid)
 {
+    CHECK_POINTER_AND_RETURN(subManagersHelper_, ERR_NULL_OBJECT);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = subManagersHelper_->GetUIAbilityManagerByUid(uid);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_NULL_OBJECT);
