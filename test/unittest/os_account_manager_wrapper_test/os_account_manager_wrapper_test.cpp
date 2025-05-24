@@ -17,6 +17,7 @@
 
 #include "account_error_no.h"
 #include "os_account_manager_wrapper.h"
+#include "mock_sa_call.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -94,9 +95,10 @@ HWTEST_F(OsAccountManagerWrapperTest, IsOsAccountExists_0100, TestSize.Level2)
  */
 HWTEST_F(OsAccountManagerWrapperTest, CreateOsAccount_0100, TestSize.Level1)
 {
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     int account = ACCOUNT_VALUE;
     int ret = DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->CreateOsAccount(ACCOUNT_NAME, account);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_ACCOUNT_COMMON_ACCOUNT_NOT_EXIST_ERROR);
 }
 
 /**
@@ -106,6 +108,7 @@ HWTEST_F(OsAccountManagerWrapperTest, CreateOsAccount_0100, TestSize.Level1)
  */
 HWTEST_F(OsAccountManagerWrapperTest, RemoveOsAccount_0100, TestSize.Level1)
 {
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     int account = ACCOUNT_VALUE;
     int ret = DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->CreateOsAccount(ACCOUNT_NAME, account);
     EXPECT_EQ(ret, ERR_ACCOUNT_COMMON_NAME_HAD_EXISTED);

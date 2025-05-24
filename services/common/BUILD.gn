@@ -132,6 +132,7 @@ ohos_shared_library("app_util") {
 
   sources = [
     "src/ability_manager_radar.cpp",
+    "src/ability_manager_xcollie.cpp",
     "src/app_utils.cpp",
     "src/json_utils.cpp",
   ]
@@ -139,6 +140,7 @@ ohos_shared_library("app_util") {
   external_deps = [
     "c_utils:utils",
     "config_policy:configpolicy_util",
+    "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "init:libbegetutil",

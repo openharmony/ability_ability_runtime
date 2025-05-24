@@ -14,14 +14,16 @@
  */
 
 #include "ability_manager_xcollie.h"
+
+#include "xcollie/xcollie.h"
+#include "xcollie/xcollie_define.h"
+
 namespace OHOS {
 namespace AbilityRuntime {
-const uint32_t AbilityManagerXCollie::TIME_OUT_SECONDS = 30;
-AbilityManagerXCollie::AbilityManagerXCollie(const std::string &tag, uint32_t timeoutSeconds,
-    std::function<void(void *)> func, void* arg, uint32_t flag)
+AbilityManagerXCollie::AbilityManagerXCollie(const std::string &tag, uint32_t timeoutSeconds)
 {
-    tag_ = tag;
-    id_ = HiviewDFX::XCollie::GetInstance().SetTimer(tag, timeoutSeconds, func, arg, flag);
+    id_ = HiviewDFX::XCollie::GetInstance().SetTimer(tag, timeoutSeconds, nullptr, nullptr,
+        HiviewDFX::XCOLLIE_FLAG_LOG);
 }
 
 AbilityManagerXCollie::~AbilityManagerXCollie()

@@ -1366,6 +1366,15 @@ void AbilityConnectManager::CompleteStartServiceReq(const std::string &serviceUr
     }
 }
 
+std::shared_ptr<AbilityRecord> AbilityConnectManager::GetServiceRecordByAbilityRequest(
+    const AbilityRequest &abilityRequest)
+{
+    AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, GenerateBundleName(abilityRequest),
+        abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
+    std::string serviceKey = element.GetURI();
+    return GetServiceRecordByElementName(serviceKey);
+}
+
 std::shared_ptr<AbilityRecord> AbilityConnectManager::GetServiceRecordByElementName(const std::string &element)
 {
     std::lock_guard guard(serviceMapMutex_);
@@ -3017,10 +3026,6 @@ void AbilityConnectManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord>
         return;
     }
 
-    TAG_LOGW(AAFwkTag::SERVICE_EXT,
-        "LIFECYCLE_TIMEOUT: uid: %{public}d, pid: %{public}d, bundleName: %{public}s, abilityName: %{public}s,"
-        "msg: %{public}s", processInfo.uid_, processInfo.pid_, ability->GetAbilityInfo().bundleName.c_str(),
-        ability->GetAbilityInfo().name.c_str(), msgContent.c_str());
     std::string eventName = isHalf ?
         AppExecFwk::AppFreezeType::LIFECYCLE_HALF_TIMEOUT : AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT;
     AppExecFwk::AppfreezeManager::ParamInfo info = {
@@ -3032,7 +3037,13 @@ void AbilityConnectManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord>
     };
     if (!IsUIExtensionAbility(ability) && !ability->IsSceneBoard()) {
         info.needKillProcess = false;
+        info.eventName = isHalf ? AppExecFwk::AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING :
+            AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT_WARNING;
     }
+    TAG_LOGW(AAFwkTag::SERVICE_EXT,
+        "%{public}s: uid: %{public}d, pid: %{public}d, bundleName: %{public}s, abilityName: %{public}s,"
+        "msg: %{public}s", info.eventName.c_str(), processInfo.uid_, processInfo.pid_,
+        ability->GetAbilityInfo().bundleName.c_str(), ability->GetAbilityInfo().name.c_str(), msgContent.c_str());
     FreezeUtil::TimeoutState state = TimeoutStateUtils::MsgId2FreezeTimeOutState(msgId);
     FreezeUtil::LifecycleFlow flow;
     if (state != FreezeUtil::TimeoutState::UNKNOWN) {

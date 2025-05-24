@@ -113,7 +113,7 @@ HWTEST_F(ChildProcessManagerTest, StartChildProcessBySelfFork_0300, TestSize.Lev
     appUtils.isMultiProcessModel_.isLoaded = true;
     appUtils.isMultiProcessModel_.value = false;
     appUtils.allowChildProcessInMultiProcessFeatureApp_.isLoaded = true;
-    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = true;
+    appUtils.allowChildProcessInMultiProcessFeatureApp_.value = false;
     
     pid_t pid;
     auto ret = ChildProcessManager::GetInstance().StartChildProcessBySelfFork("./ets/process/DemoProcess.ts", pid);
@@ -321,6 +321,19 @@ HWTEST_F(ChildProcessManagerTest, StartNativeChildProcessByAppSpawnFork_0100, Te
     TAG_LOGD(AAFwkTag::TEST, "StartNativeChildProcessByAppSpawnFork_0100 called.");
     sptr<IRemoteObject> callback;
     auto ret = ChildProcessManager::GetInstance().StartNativeChildProcessByAppSpawnFork("test.so", callback);
+    EXPECT_NE(ret, ChildProcessManagerErrorCode::ERR_FORK_FAILED);
+}
+
+/**
+ * @tc.number: StartNativeChildProcessByAppSpawnFork_0200
+ * @tc.desc: Test StartNativeChildProcessByAppSpawnFork works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, StartNativeChildProcessByAppSpawnFork_0200, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "StartNativeChildProcessByAppSpawnFork_0200 called.");
+    sptr<IRemoteObject> callback;
+    auto ret = ChildProcessManager::GetInstance().StartNativeChildProcessByAppSpawnFork("test.so", callback, "abc_123");
     EXPECT_NE(ret, ChildProcessManagerErrorCode::ERR_FORK_FAILED);
 }
 

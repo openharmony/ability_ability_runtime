@@ -21,6 +21,8 @@
 #include <iostream>
 #include <regex>
 #include "ability_manager_client.h"
+#include "ability_start_with_wait_observer.h"
+#include "ability_start_with_wait_observer_utils.h"
 #include "app_mgr_client.h"
 #include "hilog_tag_wrapper.h"
 #include "iservice_registry.h"
@@ -35,6 +37,7 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace AAFwk {
+using TerminateReason = AbilityStartWithWaitObserverUtil::TerminateReason;
 namespace {
 constexpr size_t PARAM_LENGTH = 1024;
 constexpr int INDEX_OFFSET = 3;
@@ -54,6 +57,8 @@ constexpr int OPTION_WINDOW_WIDTH = 264;
 constexpr int INNER_ERR_START = 10108101;
 constexpr int INNER_ERR_TEST = 10108501;
 constexpr int INNER_ERR_DEBUG = 10108601;
+constexpr int64_t WAIT_INTERVAL = 10 * 1000; // us
+constexpr int64_t MAX_WAIT_TIME = 15 * 1000 * 1000; // us
 
 const std::string DEVELOPERMODE_STATE = "const.security.developermode.state";
 
@@ -117,6 +122,7 @@ const std::string ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_TWO =
     "Make sure the corresponding HAP package is installed";
 const std::string ERR_INVALID_VALUE_SOLUTION_ONE =
     "Check if the application corresponding to the specified bundleName is installed.";
+const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 
 constexpr struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -133,6 +139,7 @@ constexpr struct option LONG_OPTIONS[] = {
     {"mutil-thread", no_argument, nullptr, 'R'},
     {"action", required_argument, nullptr, 'A'},
     {"URI", required_argument, nullptr, 'U'},
+    {"wait", no_argument, nullptr, 'W'},
     {"entity", required_argument, nullptr, 'e'},
     {"type", required_argument, nullptr, 't'},
     {"pi", required_argument, nullptr, OPTION_PARAMETER_INTEGER},
@@ -336,8 +343,8 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The user specified windowOptions, but the device does not support it",
         {ERR_NOT_SUPPORTED_PRODUCT_TYPE_SOLUTION_ONE});
     messageMap_[ERR_NOT_IN_APP_PROVISION_MODE] = GetAaToolErrorInfo("10106002",
-        "The target application does not support debug mode.",
-        "The application specified by the aa tool is a Release version and does not support Debug mode",
+        "The aa start command's window option or the aa test command does not support app with release signature.",
+        "The application started by the aa command is a release signature",
         {ERR_NOT_IN_APP_PROVISION_MODE_SOLUTION_ONE});
     messageMap_[ERR_NOT_DEBUG_APP] = GetAaToolErrorInfo("10106701",
         "Cannot debug applications using a release certificate.",
@@ -394,6 +401,8 @@ std::string AbilityManagerShellCommand::GetAaToolErrorInfo(std::string errorCode
 
 ErrCode AbilityManagerShellCommand::init()
 {
+    startTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
     return AbilityManagerClient::GetInstance()->Connect();
 }
 
@@ -417,12 +426,14 @@ ErrCode AbilityManagerShellCommand::RunAsStartAbility()
                 setting->AddProperty(AbilityStartSetting::WINDOW_MODE_KEY, windowMode);
                 result = AbilityManagerClient::GetInstance()->StartAbility(want, *(setting.get()), nullptr, -1);
             }
+        } else if (startAbilityWithWaitFlag_) {
+            result = StartAbilityWithWait(want);
         } else {
             result = AbilityManagerClient::GetInstance()->StartAbility(want);
         }
         if (result == OHOS::ERR_OK) {
             TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_START_ABILITY_OK.c_str());
-            resultReceiver_ = STRING_START_ABILITY_OK + "\n";
+            resultReceiver_.append(STRING_START_ABILITY_OK).append("\n");
         } else {
             TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_START_ABILITY_NG.c_str(), result);
             if (result != START_ABILITY_WAITING) {
@@ -1721,6 +1732,11 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
 
                     break;
                 }
+                case 'W': {
+                    // 'aa start -W' with no argument
+                    startAbilityWithWaitFlag_ = true;
+                    break;
+                }
                 case 0: {
                     // 'aa start' with an unknown option: aa start --x
                     // 'aa start' with an unknown option: aa start --xxx
@@ -2218,6 +2234,91 @@ sptr<IAbilityManager> AbilityManagerShellCommand::GetAbilityManagerService()
     }
     sptr<IRemoteObject> remoteObject = systemManager->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
     return iface_cast<IAbilityManager>(remoteObject);
+}
+
+ErrCode AbilityManagerShellCommand::StartAbilityWithWait(Want& want)
+{
+    if (IsImplicitStartAction(want)) {
+        auto ret = AbilityManagerClient::GetInstance()->StartAbility(want);
+        if (ret != ERR_OK) {
+            return ret;
+        }
+        resultReceiver_.append(STRING_IMPLICT_START_WITH_WAIT_NG + "\n");
+        return ret;
+    }
+    auto observer = sptr<AbilityStartWithWaitObserver>::MakeSptr();
+    if (!observer) {
+        TAG_LOGE(AAFwkTag::AA_TOOL, "inner error, alloc memory failed.");
+        return INNER_ERR;
+    }
+    auto ret = AbilityManagerClient::GetInstance()->StartAbilityWithWait(want, observer);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    auto maxWaitTime = MAX_WAIT_TIME;
+    AbilityStartWithWaitObserverData data;
+    while (true) {
+        bool isAlwaysWaiting = true;
+        observer->GetData(isAlwaysWaiting, data);
+        if (!isAlwaysWaiting) {
+            FormatOutputForWithWait(want, data);
+            break;
+        }
+        usleep(WAIT_INTERVAL);
+        maxWaitTime -= WAIT_INTERVAL;
+        if (maxWaitTime <= 0) {
+            TAG_LOGE(AAFwkTag::AA_TOOL, "start ability with wait timeout.");
+            break;
+        }
+    }
+    return ret;
+}
+
+void AbilityManagerShellCommand::FormatOutputForWithWait(const Want& want, const AbilityStartWithWaitObserverData& data)
+{
+    switch (static_cast<TerminateReason>(data.reason)) {
+        case TerminateReason::TERMINATE_FOR_NONE: {
+            auto totalTime = data.foregroundTime - data.startTime;
+            auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+            auto waitTime = now - startTime_;
+            resultReceiver_.append("StartMode: ").append(data.coldStart ? "Cold" : "Hot").append("\n")
+                .append("BundleName: " + data.bundleName + "\n").append("AbilityName: " + data.abilityName + "\n");
+            if (!want.GetModuleName().empty()) {
+                resultReceiver_.append("ModuleName: " + want.GetModuleName() + "\n");
+            }
+            resultReceiver_.append("TotalTime: " + std::to_string(totalTime) + "\n")
+                .append("WaitTime: " + std::to_string(waitTime) + "\n");
+            break;
+        }
+        case TerminateReason::TERMINATE_FOR_NON_UI_ABILITY: {
+            resultReceiver_.append(STRING_NON_UIABILITY_START_WITH_WAIT_NG + "\n");
+            break;
+        }
+        default:
+            // do nothing
+            break;
+    }
+}
+
+bool AbilityManagerShellCommand::IsImplicitStartAction(const Want& want)
+{
+    auto element = want.GetElement();
+    if (!element.GetAbilityName().empty()) {
+        return false;
+    }
+
+    if (want.GetIntParam(AAFwk::SCREEN_MODE_KEY, ScreenMode::IDLE_SCREEN_MODE) != ScreenMode::IDLE_SCREEN_MODE) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not use implicit startup process");
+        return false;
+    }
+
+    if (want.GetAction() != BLACK_ACTION_SELECT_DATA) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start, action:%{public}s", want.GetAction().data());
+        return true;
+    }
+
+    return false;
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST

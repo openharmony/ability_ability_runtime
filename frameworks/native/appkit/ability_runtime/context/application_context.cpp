@@ -568,9 +568,14 @@ std::string ApplicationContext::GetTempDir()
     return (contextImpl_ != nullptr) ? contextImpl_->GetTempDir() : "";
 }
 
-std::string ApplicationContext::GetResourceDir()
+std::string ApplicationContext::GetResourceDir(const std::string &moduleName)
 {
-    return (contextImpl_ != nullptr) ? contextImpl_->GetResourceDir() : "";
+    return (contextImpl_ != nullptr) ? contextImpl_->GetResourceDir(moduleName) : "";
+}
+
+bool ApplicationContext::IsModuleExist(const std::string &moduleName)
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->IsModuleExist(moduleName) : false;
 }
 
 void ApplicationContext::GetAllTempDir(std::vector<std::string> &tempPaths)

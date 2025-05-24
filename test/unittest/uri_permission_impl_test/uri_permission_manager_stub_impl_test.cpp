@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "mock_my_flag.h"
+#include "mock_ability_manager_client.h"
 
 #define private public
 #define protected public
@@ -351,8 +352,10 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_GrantUriPermissionPrivilegedInn
     int32_t hideSensitiveType = 1;
     MyFlag::isUriTypeValid_ = true;
     MyFlag::isDocsCloudUri_ = true;
-    auto result = upmsi->GrantUriPermissionPrivilegedInner(uriVec, flag, callerTokenId, targetTokenId,
-        targetAlterBundleName, hideSensitiveType);
+    std::string bundleName = "bundleName";
+    UPMSAppInfo targetAppInfo = { targetTokenId, bundleName, targetAlterBundleName };
+    auto result = upmsi->GrantUriPermissionPrivilegedInner(uriVec, flag, callerTokenId, targetAppInfo,
+        hideSensitiveType);
     EXPECT_EQ(result, INNER_ERR);
 }
 
@@ -375,8 +378,10 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_GrantUriPermissionPrivilegedInn
     int32_t hideSensitiveType = 1;
     MyFlag::isUriTypeValid_ = true;
     MyFlag::isDocsCloudUri_ = false;
-    auto result = upmsi->GrantUriPermissionPrivilegedInner(uriVec, flag, callerTokenId, targetTokenId,
-        targetAlterBundleName, hideSensitiveType);
+    std::string bundleName = "bundleName";
+    UPMSAppInfo targetAppInfo = { targetTokenId, bundleName, targetAlterBundleName };
+    auto result = upmsi->GrantUriPermissionPrivilegedInner(uriVec, flag, callerTokenId, targetAppInfo,
+        hideSensitiveType);
     EXPECT_EQ(result, ERR_OK);
 }
 
@@ -399,8 +404,10 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_GrantUriPermissionPrivilegedInn
     int32_t hideSensitiveType = 1;
     MyFlag::isUriTypeValid_ = true;
     MyFlag::isDocsCloudUri_ = false;
-    auto result = upmsi->GrantUriPermissionPrivilegedInner(uriVec, flag, callerTokenId, targetTokenId,
-        targetAlterBundleName, hideSensitiveType);
+    std::string bundleName = "bundleName";
+    UPMSAppInfo targetAppInfo = { targetTokenId, bundleName, targetAlterBundleName };
+    auto result = upmsi->GrantUriPermissionPrivilegedInner(uriVec, flag, callerTokenId, targetAppInfo,
+        hideSensitiveType);
     EXPECT_EQ(result, INNER_ERR);
 }
 

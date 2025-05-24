@@ -15,11 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#include "uncaught_exception_callback.h"
 #include "fp_unwinder.h"
 #include "js_runtime.h"
 #include "securec.h"
 #include "string_printf.h"
-#include "uncaught_exception_callback.h"
 
 namespace OHOS {
 namespace JsEnv {

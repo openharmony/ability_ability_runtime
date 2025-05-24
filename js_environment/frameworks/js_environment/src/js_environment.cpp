@@ -21,7 +21,6 @@
 #include "ffrt.h"
 #include "hilog_tag_wrapper.h"
 #include "js_environment_impl.h"
-#include "native_engine/impl/ark/ark_native_engine.h"
 #include "uncaught_exception_callback.h"
 #include "worker_info.h"
 
@@ -165,6 +164,26 @@ void JsEnvironment::RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExcept
 
     engine_->RegisterNapiUncaughtExceptionHandler(NapiUncaughtExceptionCallback(uncaughtExceptionInfo.uncaughtTask,
         sourceMapOperator_, reinterpret_cast<napi_env>(engine_)));
+}
+
+void JsEnvironment::RegisterUncatchableExceptionHandler(const JsEnv::UncatchableTask& uncatchableTask)
+{
+    if (uncatchableTask == nullptr) {
+        return;
+    }
+
+    std::weak_ptr<JsEnvironment> weakThis = shared_from_this();
+    panda::JSNApi::RegisterUncatchableErrorHandler(const_cast<EcmaVM *>(engine_->GetEcmaVm()),
+        [weakThis, uncatchableTask] (auto& trycatch) {
+            auto sharedThis = weakThis.lock();
+            if (sharedThis) {
+                NapiUncaughtExceptionCallback napiUncaughtExceptionCallback(uncatchableTask,
+                    sharedThis->sourceMapOperator_, reinterpret_cast<napi_env>(sharedThis->engine_));
+                napiUncaughtExceptionCallback(trycatch);
+            } else {
+                TAG_LOGE(AAFwkTag::JSENV, "JsEnvironment has been destructed.");
+            }
+        });
 }
 
 bool JsEnvironment::LoadScript(const std::string& path, std::vector<uint8_t>* buffer, bool isBundle)

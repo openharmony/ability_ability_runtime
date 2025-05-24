@@ -182,12 +182,14 @@ public:
      */
     virtual void SetConfiguration(const Configuration &config);
 
-    void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName, std::string &flag);
+    void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName,
+        std::function<void(std::string)> callback, bool &isAsync);
 
     void SchedulePrepareTerminate(const std::string &moduleName,
         std::function<void(AppExecFwk::OnPrepareTerminationResult)> callback, bool &isAsync);
 
-    void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName, std::string &flag);
+    void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName,
+        std::function<void(std::string)> callback, bool &isAsync);
 
     virtual std::shared_ptr<Configuration> GetConfiguration() const;
 

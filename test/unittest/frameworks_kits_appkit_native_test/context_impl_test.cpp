@@ -16,21 +16,18 @@
 #include <gtest/gtest.h>
 #include <singleton.h>
 
-#define private public
-#include "context_impl.h"
-#undef private
-
-#include "constants.h"
 #include "ability_local_record.h"
 #include "application_context.h"
+#include "constants.h"
 #include "context.h"
+#include "context_impl.h"
 #include "hap_module_info.h"
 #include "hilog_tag_wrapper.h"
 #include "iremote_object.h"
 #include "mock_ability_token.h"
 #include "mock_bundle_manager.h"
-#include "system_ability_definition.h"
 #include "sys_mgr_client.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -403,6 +400,18 @@ HWTEST_F(ContextImplTest, GetResourceDir_0300, TestSize.Level1)
     contextImpl->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
     contextImpl->hapModuleInfo_->moduleName = "moduleName";
     auto resourceDir = contextImpl->GetResourceDir();
+    EXPECT_EQ(resourceDir, "");
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+HWTEST_F(ContextImplTest, GetResourceDir_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    EXPECT_NE(contextImpl, nullptr);
+
+    auto resourceDir = contextImpl->GetResourceDir("moduleName");
     EXPECT_EQ(resourceDir, "");
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);

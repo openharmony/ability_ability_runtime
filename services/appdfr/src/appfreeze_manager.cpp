@@ -75,7 +75,7 @@ static constexpr const char *const TWELVE_BIG_CPU_MAX_FREQ = "/sys/devices/syste
 static constexpr const char *const TWELVE_MID_CPU_CUR_FREQ = "/sys/devices/system/cpu/cpufreq/policy1/scaling_cur_freq";
 static constexpr const char *const TWELVE_MID_CPU_MAX_FREQ = "/sys/devices/system/cpu/cpufreq/policy1/scaling_max_freq";
 const static std::set<std::string> HALF_EVENT_CONFIGS = {"UI_BLOCK_3S", "THREAD_BLOCK_3S", "BUSSNESS_THREAD_BLOCK_3S",
-                                                         "LIFECYCLE_HALF_TIMEOUT"};
+                                                         "LIFECYCLE_HALF_TIMEOUT", "LIFECYCLE_HALF_TIMEOUT_WARNING"};
 static constexpr int PERF_TIME = 60000;
 std::shared_ptr<AppfreezeManager> AppfreezeManager::instance_ = nullptr;
 ffrt::mutex AppfreezeManager::singletonMutex_;
@@ -134,7 +134,8 @@ int AppfreezeManager::AppfreezeHandle(const FaultData& faultData, const Appfreez
     CollectFreezeSysMemory(memoryContent);
     if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK ||
         faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S ||
-        faultData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
+        faultData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT ||
+        faultData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING) {
         AcquireStack(faultData, appInfo, memoryContent);
     } else {
         NotifyANR(faultData, appInfo, "", memoryContent);
@@ -166,8 +167,10 @@ int AppfreezeManager::MergeNotifyInfo(FaultData& faultNotifyData, const Appfreez
     std::string catcherStack = "";
     faultNotifyData.errorObject.message += "\nCatche stack trace start time: " +
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
-    if (faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT
-        || faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) {
+    if (faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT ||
+        faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING ||
+        faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT ||
+        faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT_WARNING) {
         catcherStack += CatcherStacktrace(appInfo.pid, faultNotifyData.errorObject.stack);
     } else {
         catcherStack += CatchJsonStacktrace(appInfo.pid, faultNotifyData.errorObject.name,
@@ -181,7 +184,8 @@ int AppfreezeManager::MergeNotifyInfo(FaultData& faultNotifyData, const Appfreez
     faultNotifyData.errorObject.message += timeStamp;
     if (faultNotifyData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK ||
         faultNotifyData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S ||
-        faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
+        faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT ||
+        faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING) {
         AcquireStack(faultNotifyData, appInfo, memoryContent);
     } else {
         NotifyANR(faultNotifyData, appInfo, "", memoryContent);
@@ -247,7 +251,9 @@ int AppfreezeManager::LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::
         return -1;
     }
     if (info.eventName != AppFreezeType::LIFECYCLE_TIMEOUT &&
-        info.eventName != AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
+        info.eventName != AppFreezeType::LIFECYCLE_TIMEOUT_WARNING &&
+        info.eventName != AppFreezeType::LIFECYCLE_HALF_TIMEOUT &&
+        info.eventName != AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING) {
         return -1;
     }
     TAG_LOGD(AAFwkTag::APPDFR, "called %{public}s, name_ %{public}s", info.bundleName.c_str(),

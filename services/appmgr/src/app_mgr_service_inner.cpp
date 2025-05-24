@@ -15,6 +15,7 @@
 
 #include "app_mgr_service_inner.h"
 
+#include <cctype>
 #include <cinttypes>
 #include <csignal>
 #include <cstdint>
@@ -188,6 +189,7 @@ constexpr const char* REUSING_WINDOW = "ohos.ability_runtime.reusing_window";
 constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
 constexpr const int32_t KILL_PROCESS_BY_USER_DELAY_BASE = 500;
 constexpr const int64_t PRELOAD_FREEZE_TIMEOUT = 11000;
+constexpr size_t MAX_PROCESS_NAME_LENGTH = 64;
 
 #ifdef WITH_DLP
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
@@ -483,6 +485,26 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
         return;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "main process do not exists.");
+    auto appRecord = appRunningManager_->CheckAppRunningRecordForSpecifiedProcess(
+        appInfo->uid, instanceKey, customProcessFlag);
+    if (appRecord != nullptr) {
+        TAG_LOGI(AAFwkTag::APPMGR, "starting process [%{public}s]", processName.c_str());
+        AbilityRuntime::LoadParam loadParam;
+        loadParam.instanceKey = instanceKey;
+        auto newAppRecord = CreateAppRunningRecord(std::make_shared<AbilityRuntime::LoadParam>(loadParam),
+            appInfo, std::make_shared<AbilityInfo>(abilityInfo), processName, bundleInfo, hapModuleInfo,
+            std::make_shared<AAFwk::Want>(want), false);
+        if (newAppRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "create new appRecord failed");
+            return;
+        }
+        newAppRecord->SetScheduleNewProcessRequestState(requestId, want, hapModuleInfo.moduleName);
+        bool appExistFlag = appRunningManager_->IsAppExist(bundleInfo.applicationInfo.accessTokenId);
+        auto ret = StartProcess(abilityInfo.applicationName, processName, 0, newAppRecord,
+            appInfo->uid, bundleInfo, appInfo->bundleName, 0, appExistFlag);
+        TAG_LOGI(AAFwkTag::APPMGR, "start process ret %{public}d, schedule new process request", ret);
+        return;
+    }
     if (startSpecifiedAbilityResponse_) {
         startSpecifiedAbilityResponse_->OnNewProcessRequestResponse("", requestId);
     }
@@ -6715,7 +6737,8 @@ int AppMgrServiceInner::GetExceptionTimerId(const FaultData &faultData, const st
             innerService->ParseInfoToAppfreeze(faultData, pid, callerUid, bundleName, appRecord->GetProcessName(),
                 isOccurException);
             if (faultData.errorObject.name != AppFreezeType::THREAD_BLOCK_3S &&
-                faultData.errorObject.name != AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
+                faultData.errorObject.name != AppFreezeType::LIFECYCLE_HALF_TIMEOUT &&
+                faultData.errorObject.name != AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING) {
                 TAG_LOGI(AAFwkTag::APPMGR, "Ffrt Exception faultData: %{public}s,pid: %{public}d "
                     "will exit because"" %{public}s", bundleName.c_str(), pid,
                     innerService->FaultTypeToString(faultData.faultType).c_str());
@@ -6809,7 +6832,8 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
         }
     }
     if (eventName == AppFreezeType::LIFECYCLE_TIMEOUT || eventName == AppFreezeType::APP_INPUT_BLOCK ||
-        eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::THREAD_BLOCK_3S) {
+        eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::THREAD_BLOCK_3S ||
+        eventName == AppFreezeType::LIFECYCLE_TIMEOUT_WARNING) {
         if (AppExecFwk::AppfreezeManager::GetInstance()->IsNeedIgnoreFreezeEvent(pid, eventName)) {
             TAG_LOGE(AAFwkTag::APPDFR, "appFreeze happend, pid:%{public}d, eventName:%{public}s",
                 pid, eventName.c_str());
@@ -6875,7 +6899,8 @@ void AppMgrServiceInner::TimeoutNotifyApp(int32_t pid, int32_t uid,
     const std::string& bundleName, const std::string& processName, const FaultData &faultData)
 {
     bool isNeedExit = (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) ||
-        (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT);
+        (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) ||
+        (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT_WARNING);
 #ifdef APP_NO_RESPONSE_DIALOG
     bool isDialogExist = appRunningManager_ ?
         appRunningManager_->CheckAppRunningRecordIsExist(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY) :
@@ -7920,6 +7945,7 @@ int32_t AppMgrServiceInner::NotifyPageShow(const sptr<IRemoteObject> &token, con
         return ERR_PERMISSION_DENIED;
     }
 
+    const_cast<PageStateData &>(pageStateData).uid = IPCSkeleton::GetCallingUid();
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnPageShow(pageStateData);
     return ERR_OK;
 }
@@ -7989,6 +8015,10 @@ int32_t AppMgrServiceInner::StartChildProcess(const pid_t callingPid, pid_t &chi
     auto errCode = StartChildProcessPreCheck(callingPid, request.childProcessType);
     if (errCode != ERR_OK) {
         return errCode;
+    }
+    if (!CheckCustomProcessName(request.options.customProcessName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid custom process name");
+        return ERR_INVALID_VALUE;
     }
     auto &srcEntry = request.srcEntry;
     if (callingPid <= 0 || srcEntry.empty()) {
@@ -9058,12 +9088,17 @@ void AppMgrServiceInner::OnAppCacheStateChanged(const std::shared_ptr<AppRunning
 
 #ifdef SUPPORT_CHILD_PROCESS
 int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const std::string &libName,
-    int32_t childProcessCount, const sptr<IRemoteObject> &callback)
+    int32_t childProcessCount, const sptr<IRemoteObject> &callback, const std::string &customProcessName)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "hostPid:%{public}d", hostPid);
     if (hostPid <= 0 || libName.empty() || !callback) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid param: hostPid:%{public}d libName:%{private}s",
             hostPid, libName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!CheckCustomProcessName(customProcessName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid custom process name");
         return ERR_INVALID_VALUE;
     }
 
@@ -9104,10 +9139,30 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
 
     pid_t dummyChildPid = 0;
     auto nativeChildRecord = ChildProcessRecord::CreateNativeChildProcessRecord(
-        hostPid, libName, appRecord, callback, childProcessCount, false);
+        hostPid, libName, appRecord, callback, childProcessCount, false, customProcessName);
     ChildProcessArgs args;
     ChildProcessOptions options;
     return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, args, options);
+}
+
+bool AppMgrServiceInner::CheckCustomProcessName(const std::string &customProcessName)
+{
+    if (customProcessName.empty()) {
+        return true;
+    }
+    if (customProcessName.size() > MAX_PROCESS_NAME_LENGTH) {
+        return false;
+    }
+    try {
+        std::regex regex("^[a-zA-Z0-9_]+$");
+        if (regex_match(customProcessName, regex)) {
+            return true;
+        }
+    } catch(...) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "regex error");
+        return false;
+    }
+    return false;
 }
 #endif // SUPPORT_CHILD_PROCESS
 

@@ -4683,6 +4683,26 @@ int32_t AbilityManagerProxy::UnregisterIAbilityManagerCollaborator(int32_t type)
     return reply.ReadInt32();
 }
 
+sptr<IAbilityManagerCollaborator> AbilityManagerProxy::GetAbilityManagerCollaborator()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return nullptr;
+    }
+
+    auto ret = SendRequest(AbilityManagerInterfaceCode::GET_ABILITY_MANAGER_COLLABORATOR, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", ret);
+        return nullptr;
+    }
+    sptr<IAbilityManagerCollaborator> collaborator = iface_cast<IAbilityManagerCollaborator>(reply.ReadRemoteObject());
+    return collaborator;
+}
+
 int32_t AbilityManagerProxy::RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate)
 {
     MessageParcel data;
@@ -6387,6 +6407,29 @@ int32_t AbilityManagerProxy::RevokeDelegator(sptr<IRemoteObject> token)
     return reply.ReadInt32();
 }
 
+int32_t AbilityManagerProxy::StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> &observer)
+{
+    CHECK_POINTER_AND_RETURN_LOG(observer, ERR_NULL_OBJECT, "null observer");
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
+        return INNER_ERR;
+    }
+
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Parcelable, &want);
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, RemoteObject, observer->AsObject());
+    int32_t error = SendRequest(AbilityManagerInterfaceCode::START_ABILITY_WITH_WAIT, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "send err:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
     AbilityRuntime::GetInsightIntentFlag flag,
     std::vector<InsightIntentInfoForQuery> &infos)
@@ -6513,6 +6556,34 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByIntentName(
         return false;
     }
     info = *intentInfo;
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::RestartSelfAtomicService(sptr<IRemoteObject> callerToken)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return INVALID_CALLER_TOKEN;
+    }
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    if (!data.WriteRemoteObject(callerToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+        return ERR_WRITE_CALLER_TOKEN_FAILED;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::RESTART_SELF_ATOMIC_SERVICE, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
     return reply.ReadInt32();
 }
 } // namespace AAFwk

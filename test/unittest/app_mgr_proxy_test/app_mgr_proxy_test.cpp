@@ -31,6 +31,7 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 const int32_t USER_ID = 100;
+constexpr int32_t MAX_BACKGROUND_APP_COUNT = 1000;
 } // namespace
 
 class AppForegroundStateObserverMock : public AppForegroundStateObserverStub {
@@ -956,7 +957,9 @@ HWTEST_F(AppMgrProxyTest, UpdateConfigurationForBackgroundApp_001, TestSize.Leve
     int32_t userId = -1;
 
     auto ret = appMgrProxy_->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
-    EXPECT_EQ(ret, ERR_INVALID_DATA);
+    if (appInfos.size() == 0 || appInfos.size() > MAX_BACKGROUND_APP_COUNT) {
+        EXPECT_EQ(ret, ERR_INVALID_DATA);
+    }
     BackgroundAppInfo info;
     appInfos.push_back(info);
     appMgrProxy_->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);

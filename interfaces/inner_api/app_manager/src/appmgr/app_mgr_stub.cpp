@@ -1808,7 +1808,8 @@ int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessagePa
     std::string libName = data.ReadString();
     int32_t childCount = data.ReadInt32();
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
-    int32_t result = StartNativeChildProcess(libName, childCount, callback);
+    std::string customProcessName = data.ReadString();
+    int32_t result = StartNativeChildProcess(libName, childCount, callback, customProcessName);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
