@@ -33,7 +33,6 @@ InsightIntentExecutorMgr::~InsightIntentExecutorMgr()
 bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const InsightIntentExecutorInfo& executeInfo,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "called");
     auto executeParam = executeInfo.executeParam;
     if (executeParam == nullptr || executeParam->insightIntentParam_ == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "null executeParam or insightIntentParam_");
@@ -69,6 +68,7 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
     }
     AddInsightIntentExecutor(executeParam->insightIntentId_, intentExecutor);
 
+    TAG_LOGI(AAFwkTag::INTENT, "execute insight intent, intentId: %{public}" PRIu64 "", executeParam->insightIntentId_);
     bool isAsync = false;
     auto ret = intentExecutor->HandleExecuteIntent(static_cast<InsightIntentExecuteMode>(executeParam->executeMode_),
         executeParam->insightIntentName_, *executeParam->insightIntentParam_, executeInfo.pageLoader,
