@@ -184,7 +184,8 @@ int AppfreezeInner::AppfreezeHandle(const FaultData& faultData, bool onlyMainThr
 bool AppfreezeInner::IsExitApp(const std::string& name)
 {
     if (name == AppFreezeType::THREAD_BLOCK_6S || name == AppFreezeType::APP_INPUT_BLOCK ||
-        name == AppFreezeType::LIFECYCLE_TIMEOUT || name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S) {
+        name == AppFreezeType::LIFECYCLE_TIMEOUT || name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S ||
+        name == AppFreezeType::LIFECYCLE_TIMEOUT_WARNING) {
         return true;
     }
     return false;
@@ -210,7 +211,8 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
             faultData.errorObject.message += "client actions for ability:\n" +
                 FreezeUtil::GetInstance().GetLifecycleEvent(it->token) + "\nclient actions for app:\n" +
                 FreezeUtil::GetInstance().GetAppLifecycleEvent(0) + "\n";
-            if (info.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) {
+            if (it->errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT ||
+                it->errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT_WARNING) {
                 FreezeUtil::GetInstance().DeleteLifecycleEvent(it->token);
                 FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
             }
