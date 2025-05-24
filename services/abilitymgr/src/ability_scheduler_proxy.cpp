@@ -1132,7 +1132,7 @@ void AbilitySchedulerProxy::CallRequest()
 
 void AbilitySchedulerProxy::OnExecuteIntent(const Want &want)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::INTENT, "on execute intent proxy");
 
     MessageParcel data;
     MessageParcel reply;
