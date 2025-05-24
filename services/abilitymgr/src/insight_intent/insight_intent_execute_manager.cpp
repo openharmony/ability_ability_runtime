@@ -360,9 +360,9 @@ int32_t InsightIntentExecuteManager::UpdatePageDecoratorParams(
     std::string srcEntrance = info.decoratorFile;
     want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
 
-    std::string pagePath = info.genericInfo.get<InsightIntentPageInfo>().pageRouteName;
+    std::string pagePath = info.genericInfo.get<InsightIntentPageInfo>().pagePath;
     std::string navigationId = info.genericInfo.get<InsightIntentPageInfo>().navigationId;
-    std::string navDestinationName = info.genericInfo.get<InsightIntentPageInfo>().navDestination;
+    std::string navDestinationName = info.genericInfo.get<InsightIntentPageInfo>().navDestinationName;
     std::string uiAbilityName = info.genericInfo.get<InsightIntentPageInfo>().uiAbility;
     if (pagePath.empty() || uiAbilityName != param->abilityName_) {
         TAG_LOGE(AAFwkTag::INTENT, "invalid page param, pagePath %{public}s, uiability %{public}s, %{public}s",

@@ -73,8 +73,8 @@ void from_json(const nlohmann::json &jsonObject, PageInfoForQuery &pageInfo)
         g_parseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
-        INSIGHT_INTENT_PAGE_ROUTER_NAME,
-        pageInfo.pageRouterName,
+        INSIGHT_INTENT_PAGE_PATH,
+        pageInfo.pagePath,
         true,
         g_parseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
@@ -85,8 +85,8 @@ void from_json(const nlohmann::json &jsonObject, PageInfoForQuery &pageInfo)
         g_parseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
-        INSIGHT_INTENT_NAV_DESTINATION,
-        pageInfo.navDestination,
+        INSIGHT_INTENT_NAV_DESTINATION_NAME,
+        pageInfo.navDestinationName,
         true,
         g_parseResult);
 }
@@ -96,9 +96,9 @@ void to_json(nlohmann::json& jsonObject, const PageInfoForQuery &info)
     TAG_LOGD(AAFwkTag::INTENT, "PageInfoForQuery to json");
     jsonObject = nlohmann::json {
         {INSIGHT_INTENT_UI_ABILITY, info.uiAbility},
-        {INSIGHT_INTENT_PAGE_ROUTER_NAME, info.pageRouterName},
+        {INSIGHT_INTENT_PAGE_PATH, info.pagePath},
         {INSIGHT_INTENT_NAVIGATION_ID, info.navigationId},
-        {INSIGHT_INTENT_NAV_DESTINATION, info.navDestination}
+        {INSIGHT_INTENT_NAV_DESTINATION_NAME, info.navDestinationName}
     };
 }
 
@@ -219,6 +219,12 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insi
         insightIntentInfo.parameters,
         false,
         g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_RESULT,
+        insightIntentInfo.result,
+        false,
+        g_parseResult);
     AppExecFwk::GetValueIfFindKey<std::vector<std::string>>(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_KEYWORDS,
@@ -274,6 +280,7 @@ void to_json(nlohmann::json& jsonObject, const InsightIntentInfoForQuery &info)
         {INSIGHT_INTENT_LLM_DESCRIPTION, info.llmDescription},
         {INSIGHT_INTENT_INTENT_TYPE, info.intentType},
         {INSIGHT_INTENT_PARAMETERS, info.parameters},
+        {INSIGHT_INTENT_RESULT, info.result},
         {INSIGHT_INTENT_KEYWORDS, info.keywords},
         {INSIGHT_INTENT_LINK_INFO, info.linkInfo},
         {INSIGHT_INTENT_PAGE_INFO, info.pageInfo},
