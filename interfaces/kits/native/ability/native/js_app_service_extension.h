@@ -136,6 +136,8 @@ private:
 
     void ListenWMS();
 
+    void AddLifecycleEventForJSCall(const std::string &eventStr);
+
     JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_ = nullptr;
