@@ -48,31 +48,26 @@ void AppendAbilities(const std::list<std::shared_ptr<AbilityRecord>> &abilityRec
     }
 }
 
-void GetRunningProcessInfo(int32_t pid, int32_t uid, const std::string &bundleName,
+void GetRunningProcessInfo(int32_t pid, int32_t userId, const std::string &bundleName,
     AppExecFwk::RunningProcessInfo &processInfo)
 {
-    if (pid == NO_PID) {
-        int32_t targetUserId = -1;
-        int32_t getOsAccountRet = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
-            GetOsAccountLocalIdFromUid(uid, targetUserId);
-        if (getOsAccountRet != ERR_OK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "GetOsAccountLocalIdFromUid failed: %{public}d", getOsAccountRet);
-            return;
-        }
-
-        auto appMgr = AppMgrUtil::GetAppMgr();
-        if (appMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr null");
-            return;
-        }
-        std::vector<AppExecFwk::RunningProcessInfo> infoList;
-        IN_PROCESS_CALL(appMgr->GetRunningProcessInformation(bundleName, targetUserId, infoList));
-        if (infoList.size() == 1) {
-            processInfo = infoList.front();
-        }
-    } else {
+    if (pid != NO_PID) {
         DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(static_cast<pid_t>(pid),
             processInfo);
+        return;
+    }
+    if (userId == -1) {
+        return;
+    }
+    auto appMgr = AppMgrUtil::GetAppMgr();
+    if (appMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr null");
+        return;
+    }
+    std::vector<AppExecFwk::RunningProcessInfo> infoList;
+    IN_PROCESS_CALL(appMgr->GetRunningProcessInformation(bundleName, userId, infoList));
+    if (infoList.size() == 1) {
+        processInfo = infoList.front();
     }
 }
 }
@@ -97,7 +92,10 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
     
     int32_t pid = exitReason.reason != Reason::REASON_CPP_CRASH ? IPCSkeleton::GetCallingPid() : NO_PID;
     AppExecFwk::RunningProcessInfo processInfo;
-    GetRunningProcessInfo(pid, uid, bundleName, processInfo);
+    int32_t userId = -1;
+    int32_t getOsAccountRet = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
+        GetOsAccountLocalIdFromUid(uid, userId);
+    GetRunningProcessInfo(pid, userId, bundleName, processInfo);
     int32_t resultCode = RecordProcessExtensionExitReason(pid, bundleName, exitReason, processInfo, false);
     if (resultCode != ERR_OK) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "not record extension reason: %{public}d", resultCode);
@@ -116,9 +114,6 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityLists empty");
         return ERR_GET_ACTIVE_ABILITY_LIST_EMPTY;
     }
-    int32_t userId;
-    int32_t getOsAccountRet = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
-        GetOsAccountLocalIdFromUid(uid, userId);
     if (getOsAccountRet != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get GetOsAccountLocalIdFromUid failed. ret: %{public}d", getOsAccountRet);
         return ERR_INVALID_VALUE;
@@ -171,7 +166,7 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const std::string &bundleName, 
         "userId: %{public}d, bundleName: %{public}s, appIndex: %{public}d", userId, bundleName.c_str(), appIndex);
     uint32_t accessTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, appIndex);
     AppExecFwk::RunningProcessInfo processInfo;
-    GetRunningProcessInfo(NO_PID, uid, bundleName, processInfo);
+    GetRunningProcessInfo(NO_PID, userId, bundleName, processInfo);
     return RecordProcessExitReason(NO_PID, bundleName, uid, accessTokenId, exitReason, processInfo, false, false);
 }
 
