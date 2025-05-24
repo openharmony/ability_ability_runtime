@@ -305,8 +305,6 @@ HWTEST_F(AppMgrServiceThirdTest, LaunchAbility_001, TestSize.Level1)
 HWTEST_F(AppMgrServiceThirdTest, UpdateConfigurationForBackgroundApp_001, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    appMgrService->SetInnerService(appMgrServiceInner);
     std::vector<BackgroundAppInfo> appInfos;
     AppExecFwk::ConfigurationPolicy policy;
     int32_t userId = -1;
@@ -316,7 +314,7 @@ HWTEST_F(AppMgrServiceThirdTest, UpdateConfigurationForBackgroundApp_001, TestSi
     EXPECT_EQ(res, ERR_PERMISSION_DENIED);
     AAFwk::MyFlag::flag_ = 1;
     res = appMgrService->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
-    EXPECT_EQ(res, 38);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 
 /*
@@ -330,8 +328,6 @@ HWTEST_F(AppMgrServiceThirdTest, UpdateConfigurationForBackgroundApp_001, TestSi
 HWTEST_F(AppMgrServiceThirdTest, UpdateConfigurationForBackgroundApp_002, TestSize.Level2)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    appMgrService->SetInnerService(appMgrServiceInner);
     std::vector<BackgroundAppInfo> appInfos;
     AppExecFwk::ConfigurationPolicy policy;
     int32_t userId = -1;
@@ -340,7 +336,7 @@ HWTEST_F(AppMgrServiceThirdTest, UpdateConfigurationForBackgroundApp_002, TestSi
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
     int32_t res = appMgrService->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
-    EXPECT_EQ(res, 1);
+    EXPECT_EQ(res, ERR_PERMISSION_DENIED);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
