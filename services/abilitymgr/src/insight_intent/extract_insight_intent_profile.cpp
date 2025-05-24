@@ -56,6 +56,8 @@ const std::string INSIGHT_INTENT_FUNCTION_PARAMS = "functionParamList";
 const std::string INSIGHT_INTENT_PARAM_NAME = "paramName";
 const std::string INSIGHT_INTENT_PARAM_MAPPING_NAME = "paramMappingName";
 const std::string INSIGHT_INTENT_PARAM_CATEGORY = "paramCategory";
+const std::string INSIGHT_INTENT_RESULT = "result";
+const std::string INSIGHT_INTENT_EXAMPLE = "example";
 
 enum DecoratorType {
     DECORATOR_LINK = 0,
@@ -203,6 +205,12 @@ void from_json(const nlohmann::json &jsonObject, ExtractInsightIntentProfileInfo
         ArrayType::STRING);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
+        INSIGHT_INTENT_EXAMPLE,
+        insightIntentInfo.example,
+        false,
+        g_extraParseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
         INSIGHT_INTENT_URI,
         insightIntentInfo.uri,
         false,
@@ -276,6 +284,15 @@ void from_json(const nlohmann::json &jsonObject, ExtractInsightIntentProfileInfo
             g_extraParseResult = ERR_INVALID_VALUE;
         }
     }
+
+    if (jsonObject.find(INSIGHT_INTENT_RESULT) != jsonObjectEnd) {
+        if (jsonObject.at(INSIGHT_INTENT_RESULT).is_object()) {
+            insightIntentInfo.result =  jsonObject[INSIGHT_INTENT_RESULT].dump();
+        } else {
+            TAG_LOGE(AAFwkTag::INTENT, "type error: result not object");
+            g_extraParseResult = ERR_INVALID_VALUE;
+        }
+    }
 }
 
 void from_json(const nlohmann::json &jsonObject, ExtractInsightIntentProfileInfoVec &infos)
@@ -320,6 +337,7 @@ void to_json(nlohmann::json& jsonObject, const ExtractInsightIntentProfileInfo& 
         {INSIGHT_INTENT_ICON, info.icon},
         {INSIGHT_INTENT_LLM_DESCRIPTION, info.llmDescription},
         {INSIGHT_INTENT_KEYWORDS, info.keywords},
+        {INSIGHT_INTENT_EXAMPLE, info.example},
         {INSIGHT_INTENT_URI, info.uri},
         {INSIGHT_INTENT_PARAM_MAPPING, info.paramMapping},
         {INSIGHT_INTENT_UI_ABILITY, info.uiAbility},
@@ -340,6 +358,16 @@ void to_json(nlohmann::json& jsonObject, const ExtractInsightIntentProfileInfo& 
         }
 
         jsonObject[INSIGHT_INTENT_PARAMETERS] = parameters;
+    }
+
+    if (!info.result.empty()) {
+        auto result = nlohmann::json::parse(info.result, nullptr, false);
+        if (result.is_discarded()) {
+            TAG_LOGE(AAFwkTag::INTENT, "discarded result");
+            return;
+        }
+
+        jsonObject[INSIGHT_INTENT_RESULT] = result;
     }
 }
 
@@ -549,6 +577,8 @@ bool ExtractInsightIntentProfile::ProfileInfoFormat(const ExtractInsightIntentPr
     info.schema = insightIntent.schema;
     info.icon = insightIntent.icon;
     info.llmDescription = insightIntent.llmDescription;
+    info.example = insightIntent.example;
+    info.result = insightIntent.result;
     info.keywords.assign(insightIntent.keywords.begin(), insightIntent.keywords.end());
 
     info.genericInfo.bundleName = insightIntent.bundleName;
