@@ -718,12 +718,16 @@ void OHOSApplication::ScheduleAcceptWant(const AAFwk::Want &want, const std::str
     auto iter = abilityStages_.find(moduleName);
     if (iter == abilityStages_.end() && iter->second == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "%{public}s is not in abilityStage", moduleName.c_str());
+        std::string flag;
+        callback(flag);
         return;
     }
 
     auto *callbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Create();
     if (callbackInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
+        std::string flag;
+        callback(flag);
         return;
     }
     callbackInfo->Push(callback);
@@ -779,11 +783,15 @@ void OHOSApplication::ScheduleNewProcessRequest(const AAFwk::Want &want, const s
     auto iter = abilityStages_.find(moduleName);
     if (iter == abilityStages_.end() || iter->second == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "%{public}s not in abilityStage", moduleName.c_str());
+        std::string flag;
+        callback(flag);
         return;
     }
     auto *callbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Create();
     if (callbackInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
+        std::string flag;
+        callback(flag);
         return;
     }
     callbackInfo->Push(callback);

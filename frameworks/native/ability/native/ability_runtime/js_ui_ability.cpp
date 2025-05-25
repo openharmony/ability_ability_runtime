@@ -1531,7 +1531,14 @@ int32_t JsUIAbility::OnSaveState(int32_t reason, WantParams &wantParams,
     napi_value jsWantParams = OHOS::AppExecFwk::WrapWantParams(env, wantParams);
     napi_value jsReason = CreateJsValue(env, reason);
     napi_value args[] = {jsReason, jsWantParams};
-    napi_value onSaveStateAsyncResult = CallObjectMethod("onSaveStateAsync", args, PROMISE_CALLBACK_PARAM_NUM, true);
+    bool hasCaughtException = false;
+    CallObjectMethodParams callObjectMethodParams;
+    callObjectMethodParams.withResult = true;
+    napi_value onSaveStateAsyncResult = CallObjectMethod(
+        "onSaveStateAsync", hasCaughtException, callObjectMethodParams, args, PROMISE_CALLBACK_PARAM_NUM);
+    if (hasCaughtException) {
+        return CALL_BACK_ERROR;
+    }
     if (onSaveStateAsyncResult != nullptr) {
         OHOS::AppExecFwk::UnwrapWantParams(env, jsWantParams, wantParams);
         CallOnSaveStateInfo info = { callbackInfo, wantParams, stateReason };
@@ -1794,6 +1801,62 @@ napi_value JsUIAbility::CallObjectMethod(const char *name, napi_value const *arg
     int64_t timeEnd = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
     if (tryCatch.HasCaught()) {
         reinterpret_cast<NativeEngine*>(env)->HandleUncaughtException();
+    }
+    TAG_LOGI(AAFwkTag::UIABILITY, "end, name: %{public}s, time: %{public}s",
+        name, std::to_string(timeEnd - timeStart).c_str());
+    return nullptr;
+}
+
+napi_value JsUIAbility::CallObjectMethod(const char *name, bool &hasCaughtException,
+    const CallObjectMethodParams &callObjectMethodParams, napi_value const *argv, size_t argc)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
+    TAG_LOGI(AAFwkTag::UIABILITY, "JsUIAbility call js, name: %{public}s", name);
+    if (jsAbilityObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null jsAbilityObj");
+        return nullptr;
+    }
+
+    HandleEscape handleEscape(jsRuntime_);
+    auto env = jsRuntime_.GetNapiEnv();
+
+    napi_value obj = jsAbilityObj_->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, obj, napi_object)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "get ability object failed");
+        return nullptr;
+    }
+
+    napi_value methodOnCreate = nullptr;
+    napi_get_named_property(env, obj, name, &methodOnCreate);
+    if (methodOnCreate == nullptr) {
+        if (callObjectMethodParams.showMethodNotFoundLog) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "get '%{public}s' from ability object failed", name);
+        }
+        return nullptr;
+    }
+    TryCatch tryCatch(env);
+    if (callObjectMethodParams.withResult) {
+        napi_value result = nullptr;
+        napi_status withResultStatus = napi_call_function(env, obj, methodOnCreate, argc, argv, &result);
+        if (withResultStatus != napi_ok) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "JsUIAbility call js, withResult failed: %{public}d", withResultStatus);
+        }
+        if (tryCatch.HasCaught()) {
+            TAG_LOGE(AAFwkTag::APPKIT, "%{public}s exception occurred", name);
+            reinterpret_cast<NativeEngine*>(env)->HandleUncaughtException();
+            hasCaughtException = true;
+        }
+        return handleEscape.Escape(result);
+    }
+    int64_t timeStart = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
+    napi_status status = napi_call_function(env, obj, methodOnCreate, argc, argv, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "JsUIAbility call js, failed: %{public}d", status);
+    }
+    int64_t timeEnd = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
+    if (tryCatch.HasCaught()) {
+        reinterpret_cast<NativeEngine*>(env)->HandleUncaughtException();
+        hasCaughtException = true;
     }
     TAG_LOGI(AAFwkTag::UIABILITY, "end, name: %{public}s, time: %{public}s",
         name, std::to_string(timeEnd - timeStart).c_str());

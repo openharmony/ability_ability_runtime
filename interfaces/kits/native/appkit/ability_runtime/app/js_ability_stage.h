@@ -66,7 +66,8 @@ public:
         bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext) override;
 
 private:
-    napi_value CallObjectMethod(const char* name, napi_value const * argv = nullptr, size_t argc = 0) const;
+    napi_value CallObjectMethod(
+        const char* name, bool &hasCaughtException, napi_value const * argv = nullptr, size_t argc = 0) const;
 
     std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> CreateStageProperty() const;
 
