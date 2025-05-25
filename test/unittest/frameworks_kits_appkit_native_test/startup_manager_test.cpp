@@ -172,7 +172,7 @@ HWTEST_F(StartupManagerTest, BuildAppStartupTaskManager_0100, Function | MediumT
         std::make_shared<StartupTaskManager>(startupTaskManagerId, autoStartupTasks);
     EXPECT_TRUE(startupTaskManager != nullptr);
     startupManager->appStartupTasks_.clear();
-    int32_t ret = startupManager->BuildAppStartupTaskManager(inputDependencies, startupTaskManager);
+    int32_t ret = startupManager->BuildAppStartupTaskManager(inputDependencies, startupTaskManager, false);
     EXPECT_NE(ret, ERR_OK);
     GTEST_LOG_(INFO) << "StartupManagerTest BuildAppStartupTaskManager_0100 end";
 }

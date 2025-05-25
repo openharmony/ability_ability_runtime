@@ -16,6 +16,7 @@
 #include "js_startup_manager.h"
 
 #include "ability_runtime_error_util.h"
+#include "ability_stage_context.h"
 #include "hilog_tag_wrapper.h"
 #include "js_startup_config.h"
 #include "js_startup_task_result.h"
@@ -28,8 +29,10 @@ namespace AbilityRuntime {
 namespace {
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
+constexpr int32_t INDEX_TWO = 2;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
+constexpr size_t ARGC_THREE = 3;
 } // namespace
 void JsStartupManager::Finalizer(napi_env env, void *data, void *hint)
 {
@@ -271,6 +274,19 @@ int32_t JsStartupManager::GetConfig(napi_env env, napi_value value, std::shared_
     return ERR_OK;
 }
 
+int32_t JsStartupManager::GetAbilityStageContextRef(napi_env env, napi_value value,
+    std::shared_ptr<NativeReference> &context)
+{
+    if (value == nullptr || env == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "null env or value");
+        return ERR_STARTUP_INTERNAL_ERROR;
+    }
+    napi_ref resultRef = nullptr;
+    napi_create_reference(env, value, 1, &resultRef);
+    context = std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(resultRef));
+    return ERR_OK;
+}
+
 int32_t JsStartupManager::RunStartupTask(napi_env env, NapiCallbackInfo &info,
     std::shared_ptr<StartupTaskManager> &startupTaskManager)
 {
@@ -281,15 +297,16 @@ int32_t JsStartupManager::RunStartupTask(napi_env env, NapiCallbackInfo &info,
     }
     std::shared_ptr<StartupConfig> config;
     if (info.argc >= ARGC_TWO) {
-        int32_t result = GetConfig(env, info.argv[INDEX_ONE], config);
+        const int32_t configArgIndex = info.argc == ARGC_TWO ? INDEX_ONE : INDEX_TWO;
+        int32_t result = GetConfig(env, info.argv[configArgIndex], config);
         if (result != ERR_OK) {
             TAG_LOGE(AAFwkTag::STARTUP, "failed to get config: %{public}d", result);
             return result;
         }
     }
-
+    bool supportFeatureModule = info.argc >= ARGC_THREE;
     int32_t result = DelayedSingleton<StartupManager>::GetInstance()->BuildAppStartupTaskManager(dependencies,
-        startupTaskManager);
+        startupTaskManager, supportFeatureModule);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "build manager failed: %{public}d", result);
         return result;
@@ -298,6 +315,19 @@ int32_t JsStartupManager::RunStartupTask(napi_env env, NapiCallbackInfo &info,
         TAG_LOGE(AAFwkTag::STARTUP, "null startupTaskMgr");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
+    if (info.argc >= ARGC_THREE) {
+        std::shared_ptr<NativeReference> context;
+        result = GetAbilityStageContextRef(env, info.argv[ARGC_ONE], context);
+        if (result != ERR_OK) {
+            return result;
+        }
+        if (context == nullptr) {
+            TAG_LOGE(AAFwkTag::STARTUP, "null context");
+            return ERR_STARTUP_INTERNAL_ERROR;
+        }
+        startupTaskManager->UpdateStartupTaskContextRef(context, true);
+    }
+
     result = startupTaskManager->Prepare();
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "prepare startup failed: %{public}d", result);
@@ -308,6 +338,5 @@ int32_t JsStartupManager::RunStartupTask(napi_env env, NapiCallbackInfo &info,
     }
     return ERR_OK;
 }
-
 } // namespace AbilityRuntime
 } // namespace OHOS

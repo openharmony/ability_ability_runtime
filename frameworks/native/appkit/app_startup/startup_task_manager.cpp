@@ -183,7 +183,7 @@ void StartupTaskManager::OnTimeout()
     DelayedSingleton<StartupManager>::GetInstance()->OnStartupTaskManagerComplete(startupTaskManagerId_);
 }
 
-void StartupTaskManager::UpdateStartupTaskContextRef(std::shared_ptr<NativeReference> &contextJsRef)
+void StartupTaskManager::UpdateStartupTaskContextRef(std::shared_ptr<NativeReference> &contextJsRef, bool updateAll)
 {
     for (auto& iter : tasks_) {
         if (iter.second == nullptr) {
@@ -197,7 +197,7 @@ void StartupTaskManager::UpdateStartupTaskContextRef(std::shared_ptr<NativeRefer
             TAG_LOGE(AAFwkTag::STARTUP, "null jsStartupTask: %{public}s", iter.first.c_str());
             continue;
         }
-        if (jsStartupTask->GetModuleType() == AppExecFwk::ModuleType::SHARED) {
+        if (updateAll || jsStartupTask->GetModuleType() == AppExecFwk::ModuleType::SHARED) {
             jsStartupTask->UpdateContextRef(contextJsRef);
         }
     }
