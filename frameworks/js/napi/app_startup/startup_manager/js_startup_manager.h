@@ -60,6 +60,8 @@ private:
 
     int32_t GetConfig(napi_env env, napi_value value, std::shared_ptr<StartupConfig> &config);
 
+    int32_t GetAbilityStageContextRef(napi_env env, napi_value value, std::shared_ptr<NativeReference> &context);
+
     int32_t RunStartupTask(napi_env env, NapiCallbackInfo &info,
         std::shared_ptr<StartupTaskManager> &startupTaskManager);
 };

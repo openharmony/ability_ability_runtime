@@ -50,7 +50,7 @@ public:
 
     void OnTimeout();
 
-    void UpdateStartupTaskContextRef(std::shared_ptr<NativeReference> &contextJsRef);
+    void UpdateStartupTaskContextRef(std::shared_ptr<NativeReference> &contextJsRef, bool updateAll = false);
 
 private:
     uint32_t startupTaskManagerId_ = 0;
