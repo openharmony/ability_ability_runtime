@@ -169,7 +169,7 @@ bool UriPermissionManagerStubImpl::IsDistributedSubDirUri(const std::string &inp
     return (iTempUri.find(cTempUri + "/") == 0 && iTempNetworkId.compare(cTempNetworkId) == 0);
 }
 
-ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const Uri& uri, unsigned int flag,
+ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const Uri& uri, uint32_t flag,
     const std::string& targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t& funcResult)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "Uri:%{private}s", uri.ToString().c_str());
@@ -187,7 +187,7 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const Uri& uri, unsigne
     return ERR_OK;
 }
 
-ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const std::vector<std::string>& uriVec, unsigned int flag,
+ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const std::vector<std::string>& uriVec, uint32_t flag,
     const std::string& targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t& funcResult)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
