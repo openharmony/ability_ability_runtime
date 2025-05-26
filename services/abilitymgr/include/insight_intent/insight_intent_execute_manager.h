@@ -126,6 +126,7 @@ private:
         AbilityRuntime::ExtractInsightIntentInfo &info, Want &want);
     static int32_t UpdateEntryDecoratorParams(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
         AbilityRuntime::ExtractInsightIntentInfo &info, Want &want);
+    static int32_t UpdateEntryDecoratorParams(Want &want, AppExecFwk::ExecuteMode executeMode);
     static std::string GetMainElementName(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param);
 
     void SendIntentReport(EventInfo &eventInfo, int32_t errCode);
