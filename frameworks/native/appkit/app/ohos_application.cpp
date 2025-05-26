@@ -244,6 +244,8 @@ void OHOSApplication::InitAniContext()
         ani_native_function {"createModuleResourceManagerSync", "Lstd/core/String;Lstd/core/String;"
             ":L@ohos/resourceManager/resourceManager/ResourceManager;",
             reinterpret_cast<void *>(AbilityRuntime::ContextUtil::CreateModuleResourceManagerSync)},
+        ani_native_function {"nativeGetGroupDir", nullptr,
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeGetGroupDir)},
     };
     aniEnv->Class_BindNativeMethods(contextCls, contextFunctions.data(),
         contextFunctions.size());
