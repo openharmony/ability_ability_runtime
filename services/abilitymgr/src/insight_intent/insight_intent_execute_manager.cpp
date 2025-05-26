@@ -115,22 +115,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
     auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(elementName, intentName, executeMode, srcEntry);
     if (ret != ERR_OK || srcEntry.empty()) {
         TAG_LOGW(AAFwkTag::INTENT, "empty srcEntry");
-        ExtractInsightIntentInfo info;
-        const int32_t userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
-        DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
-            want.GetBundle(), want.GetModuleName(), intentName, userId, info);
-        if (info.genericInfo.decoratorType != AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY) {
-            TAG_LOGW(AAFwkTag::INTENT, "decorator %{public}s misMatch", info.genericInfo.decoratorType.c_str());
-            return ERR_INVALID_VALUE;
-        }
-        InsightIntentType type = InsightIntentType::DECOR_ENTRY;
-        want.SetParam(INSIGHT_INTENT_DECORATOR_TYPE, static_cast<int>(type));
-        std::string srcEntrance = info.decoratorFile;
-        want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
-        std::vector<ExecuteMode> supportModes = info.genericInfo.get<InsightIntentEntryInfo>().executeMode;
-        bool found = std::find(supportModes.begin(), supportModes.end(), executeMode) != supportModes.end();
-        if (!found) {
-            TAG_LOGE(AAFwkTag::INTENT, "execute mode mismatch");
+        if (UpdateEntryDecoratorParams(want, executeMode) != ERR_OK) {
             return ERR_INVALID_VALUE;
         }
     }
@@ -139,6 +124,35 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
     want.SetParam(INSIGHT_INTENT_EXECUTE_PARAM_ID, std::to_string(intentId));
     want.SetParam(INSIGHT_INTENT_EXECUTE_PARAM_MODE, executeMode);
     TAG_LOGD(AAFwkTag::INTENT, "check done. insightIntentId: %{public}" PRIu64, intentId);
+    return ERR_OK;
+}
+
+int32_t InsightIntentExecuteManager::UpdateEntryDecoratorParams(Want &want, ExecuteMode executeMode)
+{
+    std::string intentName = want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME);
+    ExtractInsightIntentInfo info;
+    const int32_t userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
+    DelayedSingleton<AbilityRuntime::InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
+        want.GetBundle(), want.GetModuleName(), intentName, userId, info);
+    if (info.genericInfo.decoratorType != AbilityRuntime::INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY) {
+        TAG_LOGW(AAFwkTag::INTENT, "decorator %{public}s misMatch", info.genericInfo.decoratorType.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    InsightIntentType type = InsightIntentType::DECOR_ENTRY;
+    want.SetParam(INSIGHT_INTENT_DECORATOR_TYPE, static_cast<int>(type));
+    std::string srcEntrance = info.decoratorFile;
+    want.SetParam(INSIGHT_INTENT_SRC_ENTRANCE, srcEntrance);
+    std::vector<ExecuteMode> supportModes = info.genericInfo.get<InsightIntentEntryInfo>().executeMode;
+    TAG_LOGD(AAFwkTag::INTENT, "support mode size %{public}zu", supportModes.size());
+    bool found = std::find(supportModes.begin(), supportModes.end(), executeMode) != supportModes.end();
+    if (!found) {
+        TAG_LOGE(AAFwkTag::INTENT, "execute mode mismatch");
+        return ERR_INVALID_VALUE;
+    }
+    if (want.GetElement().GetAbilityName() != info.genericInfo.get<InsightIntentEntryInfo>().abilityName) {
+        TAG_LOGE(AAFwkTag::INTENT, "ability name mismatch");
+        return ERR_INVALID_VALUE;
+    }
     return ERR_OK;
 }
 
@@ -397,6 +411,10 @@ int32_t InsightIntentExecuteManager::UpdateEntryDecoratorParams(
     bool found = std::find(supportModes.begin(), supportModes.end(), executeMode) != supportModes.end();
     if (!found) {
         TAG_LOGE(AAFwkTag::INTENT, "execute mode %{public}d mismatch", executeMode);
+        return ERR_INVALID_VALUE;
+    }
+    if (param->abilityName_ != info.genericInfo.get<InsightIntentEntryInfo>().abilityName) {
+        TAG_LOGE(AAFwkTag::INTENT, "ability name mismatch");
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;
