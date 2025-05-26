@@ -523,6 +523,52 @@ void StsServiceExtension::ConfigurationUpdated()
 
 void StsServiceExtension::Dump(const std::vector<std::string> &params, std::vector<std::string> &info)
 {
+    Extension::Dump(params, info);
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "env nullptr");
+        return;
+    }
+    ani_object arrayObj = nullptr;
+    if (!WrapArrayString(env, arrayObj, params)) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "WrapArrayString failed");
+        arrayObj = nullptr;
+        return;
+    }
+    if (stsObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null stsObj_");
+        return;
+    }
+    if (stsObj_->aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Not found ServiceExtension Obj");
+        return;
+    }
+    if (stsObj_->aniCls == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Not found ServiceExtension class");
+        return;
+    }
+
+    ani_status status = ANI_ERROR;
+    ani_method method = nullptr;
+    if ((status = env->Class_FindMethod(stsObj_->aniCls, "onDump", nullptr, &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Class_FindMethod FAILED: %{public}d", status);
+        return;
+    }
+    ani_ref dumpInfoRef;
+    if ((status = env->Object_CallMethod_Ref(stsObj_->aniObj, method, &dumpInfoRef, arrayObj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Object_CallMethod_Ref FAILED: %{public}d", status);
+        return;
+    }
+    std::vector<std::string> dumpInfoStrArray;
+    ani_object dumpInfoObj = reinterpret_cast<ani_object>(dumpInfoRef);
+    if (!UnwrapArrayString(env, dumpInfoObj, dumpInfoStrArray)) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "UnwrapArrayString failed");
+        return;
+    }
+    for (auto dumpInfoStr:dumpInfoStrArray) {
+        info.push_back(dumpInfoStr);
+    }
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Dump info size: %{public}zu", info.size());
 }
 
 #ifdef SUPPORT_GRAPHICS

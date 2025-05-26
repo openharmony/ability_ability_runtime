@@ -97,4 +97,8 @@ export default class ServiceExtensionAbility {
   onConfigurationUpdate(newConfig: Configuration): void {
     console.log("onConfigurationUpdate");
   }
+  onDump(params: Array<string>): Array<string> {
+    console.log("onDump");
+    return ['params'];
+  }
 }
