@@ -131,7 +131,7 @@ const std::string HELP_MSG_TEST =
     "                  [-w <wait-time>]\n"
     "                  [-D]\n";
 
-const std::string HELP_MSG_SEND_MEMORY_LEVEL = 
+const std::string HELP_MSG_SEND_MEMORY_LEVEL =
     "Usage: aa send-memory-level -p <PID> -l <LEVEL>\n"
     "Mandatory Options:\n"
     "  -p, --pid <PID>         Target process ID (integer)\n"
