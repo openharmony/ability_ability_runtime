@@ -1337,6 +1337,10 @@ JsEnv::UncaughtExceptionInfo MainThread::CreateJsExceptionInfo(const std::string
         auto napiEnv = (static_cast<AbilityRuntime::JsRuntime&>(
                             *appThread->application_->GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_0)))
                            .GetNapiEnv();
+        if (NapiErrorManager::GetInstance()->NotifyUncaughtException(
+                napiEnv, summary, appExecErrorObj.name, appExecErrorObj.message, appExecErrorObj.stack)) {
+            return;
+        }
         if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
             ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
             return;
