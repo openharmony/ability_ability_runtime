@@ -253,7 +253,9 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, ProcessColdStartBranch_001, TestSi
     AbilityRequest abilityRequest;
     bool isColdStart = false;
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    auto ret = uiAbilityLifecycleManager->ProcessColdStartBranch(abilityRequest, nullptr, abilityRecord, isColdStart);
+    auto sessionInfo = sptr<SessionInfo>(new SessionInfo());
+    auto ret = uiAbilityLifecycleManager->ProcessColdStartBranch(abilityRequest, sessionInfo,
+        abilityRecord, isColdStart);
     EXPECT_TRUE(ret);
 }
 
@@ -485,25 +487,6 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, RevokeDelegator_009, TestSize.Leve
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_CheckSpecified_0100
- * @tc.desc: CheckSpecified
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckSpecified_001, TestSize.Level1)
-{
-    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
-    mgr->specifiedFlagMap_.clear();
-    mgr->specifiedFlagMap_.emplace(1, "2");
-    AbilityRequest abilityRequest;
-    auto abilityRecord = std::make_shared<AbilityRecord>(
-        abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
-
-    mgr->CheckSpecified(1, abilityRecord);
-
-    EXPECT_EQ(mgr->specifiedFlagMap_.size(), 0);
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_AbilityWindowConfigTransactionDone_0100
  * @tc.desc: AbilityWindowConfigTransactionDone
  * @tc.type: FUNC
@@ -511,7 +494,6 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, CheckSpecified_001, TestSize.Level
 HWTEST_F(UIAbilityLifecycleManagerSecondTest, AbilityWindowConfigTransactionDone_001, TestSize.Level1)
 {
     auto mgr = std::make_unique<UIAbilityLifecycleManager>();
-    mgr->specifiedFlagMap_.emplace(1, "2");
     WindowConfig windowConfig;
 
     auto ret = mgr->AbilityWindowConfigTransactionDone(nullptr, windowConfig);
