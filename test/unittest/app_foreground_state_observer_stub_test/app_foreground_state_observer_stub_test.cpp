@@ -67,6 +67,7 @@ HWTEST_F(AppForegroundStateObserverStubTest, HandleOnAppStateChanged_0100, TestS
     MessageParcel reply;
     auto result = stub->HandleOnAppStateChanged(data, reply);
     EXPECT_EQ(NO_ERROR, result);
+    testing::Mock::AllowLeak(stub);
 }
 
 /**

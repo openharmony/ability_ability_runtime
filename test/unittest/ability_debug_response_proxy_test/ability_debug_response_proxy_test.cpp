@@ -70,6 +70,7 @@ HWTEST_F(AbilityDebugResponseProxyTest, OnAbilitysDebugStarted_0100, TestSize.Le
     tokens.push_back(token);
     EXPECT_CALL(*mockStub, OnAbilitysDebugStarted(_)).Times(1);
     proxy->OnAbilitysDebugStarted(tokens);
+    testing::Mock::AllowLeak(mockStub);
     
     GTEST_LOG_(INFO) << "OnAbilitysDebugStarted_0100 end";
 }

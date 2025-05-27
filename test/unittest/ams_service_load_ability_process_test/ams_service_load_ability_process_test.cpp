@@ -270,6 +270,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_003, TestSize.Level1)
     EXPECT_TRUE(service_ != nullptr);
 
     std::shared_ptr<MockAppSpawnClient> mockClientPtr = std::make_shared<MockAppSpawnClient>();
+    const void* clientPtr = static_cast<const void*>(mockClientPtr.get());
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(0);
 
     service_->SetAppSpawnClient(mockClientPtr);
@@ -278,6 +279,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_003, TestSize.Level1)
 
     const auto& recordMap = service_->appRunningManager_->GetAppRunningRecordMap();
     EXPECT_EQ(recordMap.size(), (uint32_t)0);
+    testing::Mock::AllowLeak(clientPtr);
     TAG_LOGI(AAFwkTag::TEST, "AmsServiceLoadAbilityProcessTest LoadAbility_003 end");
 }
 
@@ -302,6 +304,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_004, TestSize.Level1)
     EXPECT_TRUE(service_ != nullptr);
 
     std::shared_ptr<MockAppSpawnClient> mockClientPtr = std::make_shared<MockAppSpawnClient>();
+    const void* clientPtr = static_cast<const void*>(mockClientPtr.get());
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(0);
 
     service_->SetAppSpawnClient(mockClientPtr);
@@ -311,6 +314,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_004, TestSize.Level1)
     service_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
     const auto& recordMap = service_->appRunningManager_->GetAppRunningRecordMap();
     EXPECT_EQ(recordMap.size(), (uint32_t)0);
+    testing::Mock::AllowLeak(clientPtr);
     TAG_LOGI(AAFwkTag::TEST, "AmsServiceLoadAbilityProcessTest LoadAbility_004 end");
 }
 
@@ -334,6 +338,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_005, TestSize.Level1)
     appInfo->bundleName = "";
     EXPECT_TRUE(service_ != nullptr);
     std::shared_ptr<MockAppSpawnClient> mockClientPtr = std::make_shared<MockAppSpawnClient>();
+    const void* clientPtr = static_cast<const void*>(mockClientPtr.get());
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(0);
 
     service_->SetAppSpawnClient(mockClientPtr);
@@ -343,6 +348,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_005, TestSize.Level1)
     service_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
     const auto& recordMap = service_->appRunningManager_->GetAppRunningRecordMap();
     EXPECT_EQ(recordMap.size(), (uint32_t)0);
+    testing::Mock::AllowLeak(clientPtr);
     TAG_LOGI(AAFwkTag::TEST, "AmsServiceLoadAbilityProcessTest LoadAbility_005 end");
 }
 
@@ -367,6 +373,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_006, TestSize.Level1)
     EXPECT_TRUE(service_ != nullptr);
 
     std::shared_ptr<MockAppSpawnClient> mockClientPtr = std::make_shared<MockAppSpawnClient>();
+    const void* clientPtr = static_cast<const void*>(mockClientPtr.get());
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(0);
 
     service_->SetAppSpawnClient(mockClientPtr);
@@ -376,6 +383,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_006, TestSize.Level1)
     service_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
     const auto& recordMap = service_->appRunningManager_->GetAppRunningRecordMap();
     EXPECT_EQ(recordMap.size(), (uint32_t)0);
+    testing::Mock::AllowLeak(clientPtr);
     TAG_LOGI(AAFwkTag::TEST, "AmsServiceLoadAbilityProcessTest LoadAbility_006 end");
 }
 
@@ -1173,6 +1181,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, StartProcess001, TestSize.Level1)
     EXPECT_TRUE(service_ != nullptr);
     sptr<IRemoteObject> token = GetMockToken();
     std::shared_ptr<MockAppSpawnClient> mockClientPtr = std::make_shared<MockAppSpawnClient>();
+    const void* clientPtr = static_cast<const void*>(mockClientPtr.get());
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(PID), Return(ERR_OK)));
     service_->SetAppSpawnClient(mockClientPtr);
     BundleInfo bundleInfo;
@@ -1205,6 +1214,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, StartProcess001, TestSize.Level1)
     EXPECT_NE(abilityRecord, nullptr);
     CHECK_POINTER_IS_NULLPTR(abilityRecord);
     EXPECT_EQ(abilityRecord->GetState(), AbilityState::ABILITY_STATE_CREATE);
+    testing::Mock::AllowLeak(clientPtr);
     TAG_LOGI(AAFwkTag::TEST, "AmsServiceLoadAbilityProcessTest StartProcess001 end");
 }
 
@@ -1322,6 +1332,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, StartProcess004, TestSize.Level1)
     EXPECT_TRUE(service_ != nullptr);
     sptr<IRemoteObject> token = GetMockToken();
     std::shared_ptr<MockAppSpawnClient> mockClientPtr = std::make_shared<MockAppSpawnClient>();
+    const void* clientPtr = static_cast<const void*>(mockClientPtr.get());
     service_->SetAppSpawnClient(mockClientPtr);
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _))
         .Times(1)
@@ -1346,6 +1357,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, StartProcess004, TestSize.Level1)
         bundleInfo, abilityInfo->applicationInfo.bundleName, 0);
     auto record1 = service_->GetAppRunningRecordByAppRecordId(record->GetRecordId());
     EXPECT_EQ(record1, nullptr);
+    testing::Mock::AllowLeak(clientPtr);
     TAG_LOGI(AAFwkTag::TEST, "AmsServiceLoadAbilityProcessTest StartProcess004 end");
 }
 }  // namespace AppExecFwk
