@@ -16,6 +16,7 @@
 #include "ani_common_ability_result.h"
 
 #include "ani_common_want.h"
+#include <ani_signature_builder.h>
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -23,6 +24,8 @@ namespace AppExecFwk {
 namespace {
 constexpr const char *ABILITY_RESULT_CLASS_NAME = "Lability/abilityResult/AbilityResultInner;";
 } // namespace
+
+using namespace arkts::ani_signature;
 
 ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want &want)
 {
@@ -50,7 +53,8 @@ ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want
     }
     
     ani_method resultCodeSetter = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<set>resultCode", nullptr, &resultCodeSetter)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, Builder::BuildSetterName("resultCode").c_str(),
+        nullptr, &resultCodeSetter)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod status: %{public}d", status);
         return nullptr;
     }
@@ -61,7 +65,8 @@ ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want
     }
 
     ani_method wantSetter = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<set>want", nullptr, &wantSetter)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, Builder::BuildSetterName("want").c_str(),
+        nullptr, &wantSetter)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod status: %{public}d", status);
         return nullptr;
     }
