@@ -40,6 +40,7 @@ ohos_shared_library("ani_common") {
   public_configs = [ ":ani_common_public_config" ]
 
   sources = [
+    "src/ani_common_configuration.cpp",
     "src/ani_common_start_options.cpp",
     "src/ani_common_util.cpp",
     "src/ani_common_want.cpp",
