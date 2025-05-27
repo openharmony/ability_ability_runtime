@@ -673,6 +673,7 @@ group("unittest") {
       "window_focus_changed_listener_test:unittest",
       "window_options_utils_test:unittest",
       "window_visibility_changed_listener_test:unittest",
+      "../new_test/unit_test:unittest",
     ]
 
     if (ability_runtime_auto_fill) {
