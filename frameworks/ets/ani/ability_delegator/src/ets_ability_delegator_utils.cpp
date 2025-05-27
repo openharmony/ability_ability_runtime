@@ -18,6 +18,7 @@
 #include <map>
 #include "ets_ability_delegator.h"
 #include "hilog_tag_wrapper.h"
+#include <ani_signature_builder.h>
 
 namespace OHOS {
 namespace AbilityDelegatorEts {
@@ -52,6 +53,8 @@ constexpr const char* RECORD_GET_NAME =
 constexpr const char* RECORD_SET_NAME =
     "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}C{std.core.Object}:";
 }
+
+using namespace arkts::ani_signature;
 
 bool BindFunctions(ani_env *aniEnv, ani_class abilityDelegator)
 {
@@ -164,7 +167,7 @@ void SetBundleName(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
 
     // find the setter method
     ani_method nameSetter = nullptr;
-    status = aniEnv->Class_FindMethod(arguments, "<set>bundleName", nullptr, &nameSetter);
+    status = aniEnv->Class_FindMethod(arguments, Builder::BuildSetterName("bundleName").c_str(), nullptr, &nameSetter);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
@@ -208,8 +211,8 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
         return;
     }
     ani_ref parameterRef = nullptr;
-    status = aniEnv->Object_CallMethodByName_Ref(argumentObject, "<get>parameters", ":Lescompat/Record;",
-        &parameterRef);
+    status = aniEnv->Object_CallMethodByName_Ref(argumentObject, Builder::BuildGetterName("parameters").c_str(),
+        ":Lescompat/Record;", &parameterRef);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_CallMethodByName_Ref failed status: %{public}d", status);
         return;
@@ -256,7 +259,8 @@ void SetTestCaseNames(ani_env *aniEnv, ani_class arguments, ani_object argumentO
 
     // find the setter method
     ani_method nameSetter = nullptr;
-    status = aniEnv->Class_FindMethod(arguments, "<set>testCaseNames", nullptr, &nameSetter);
+    status = aniEnv->Class_FindMethod(arguments, Builder::BuildSetterName("testCaseNames").c_str(),
+        nullptr, &nameSetter);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
@@ -290,7 +294,8 @@ void SetTestRunnerClassName(ani_env *aniEnv, ani_class arguments, ani_object arg
 
     // find the setter method
     ani_method nameSetter = nullptr;
-    status = aniEnv->Class_FindMethod(arguments, "<set>testRunnerClassName", nullptr, &nameSetter);
+    status = aniEnv->Class_FindMethod(arguments, Builder::BuildSetterName("testRunnerClassName").c_str(),
+        nullptr, &nameSetter);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;

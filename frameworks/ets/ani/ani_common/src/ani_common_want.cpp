@@ -33,10 +33,12 @@
 #include "tokenid_kit.h"
 #include "want_params_wrapper.h"
 #include "zchar_wrapper.h"
+#include  <ani_signature_builder.h>
 
 namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime;
+using namespace arkts::ani_signature;
 namespace {
 constexpr const char *ABILITY_WANT_CLASS_NAME = "L@ohos/app/ability/Want/Want;";
 constexpr const char *TOOL_CLASS_NAME = "L@ohos/app/ability/Want/RecordSerializeTool;";
@@ -1312,7 +1314,7 @@ bool GetAbilityResultClass(ani_env *env, ani_class &cls)
 bool GetResultCode(ani_env *env, ani_object param, ani_class cls, int &resultCode)
 {
     ani_method method = nullptr;
-    ani_status status = env->Class_FindMethod(cls, "<get>resultCode", nullptr, &method);
+    ani_status status = env->Class_FindMethod(cls, Builder::BuildGetterName("resultCode").c_str(), nullptr, &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
@@ -1330,7 +1332,7 @@ bool GetResultCode(ani_env *env, ani_object param, ani_class cls, int &resultCod
 bool GetWantReference(ani_env *env, ani_object param, ani_class cls, ani_ref &wantRef)
 {
     ani_method method {};
-    ani_status status = env->Class_FindMethod(cls, "<get>want", nullptr, &method);
+    ani_status status = env->Class_FindMethod(cls, Builder::BuildGetterName("want").c_str(), nullptr, &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;

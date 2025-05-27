@@ -1212,6 +1212,7 @@ ohos_shared_library("ets_form_extension") {
       "ipc:ipc_napi",
       "napi:ace_napi",
       "runtime_core:ani",
+      "runtime_core:ani_helpers",
     ]
 
     if (form_fwk_enable) {
