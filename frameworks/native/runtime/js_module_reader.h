@@ -34,6 +34,7 @@ public:
     static constexpr char MERGE_ABC_PATH[] = "ets/modules.abc";
     static constexpr char SYS_ABS_CODE_PATH[] = "/system/app/appServiceFwk/";
     static constexpr char SHARED_FILE_SUFFIX[] = ".hsp";
+    static constexpr char ABILITY_FILE_SUFFIX[] = ".hap";
     JsModuleReader(const std::string& bundleName, const std::string& hapPath, bool isFormRender = false);
     ~JsModuleReader() = default;
 
@@ -42,16 +43,18 @@ public:
     JsModuleReader& operator=(const JsModuleReader&) = default;
     JsModuleReader& operator=(JsModuleReader&&) = default;
 
-    bool operator()(const std::string& inputPath, uint8_t **buff, size_t *buffSize, std::string& errorMsg) const;
+    bool operator()(const std::string& inputPath, bool isHybrid,
+        uint8_t **buff, size_t *buffSize, std::string& errorMsg) const;
     static std::string GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName);
     static void GetHapPathList(const std::string &bundleName, std::vector<std::string> &hapList);
 
 private:
-    std::string GetAppHspPath(const std::string& inputPath) const;
-    std::string GetCommonAppHspPath(const std::string& inputPath) const;
-    std::string GetFormAppHspPath(const std::string& inputPath) const;
+    std::string GetAppPath(const std::string& inputPath, const std::string& suffix) const;
+    std::string GetCommonAppPath(const std::string& inputPath, const std::string& suffix) const;
+    std::string GetFormAppPath(const std::string& inputPath, const std::string& suffix) const;
     std::string GetModuleName(const std::string& inputPath) const;
     std::string GetPluginHspPath(const std::string& inputPath) const;
+    std::shared_ptr<Extractor> GetExtractor(const std::string& inputPath, bool isHybrid, std::string& errorMsg) const;
     static std::string GetOtherHspPath(const std::string& bundleName, const std::string& moduleName,
         const std::string& inputPath);
 
