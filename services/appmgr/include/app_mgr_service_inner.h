@@ -2072,14 +2072,12 @@ private:
     std::shared_ptr<AbilityRuntime::AppRunningStatusModule> appRunningStatusModule_;
     std::shared_ptr<AdvancedSecurityModeManager> securityModeManager_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> dfxTaskHandler_;
-    std::shared_ptr<AAFwk::TaskHandlerWrap> otherTaskHandler_;
     std::shared_ptr<AppPreloader> appPreloader_;
 
     std::mutex loadTaskListMutex_;
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
     sptr<IKiaInterceptor> kiaInterceptor_;
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
-    std::shared_ptr<AAFwk::TaskHandlerWrap> delayKillTaskHandler_;
     std::unordered_set<std::string> nwebPreloadSet_ {};
     std::shared_ptr<AppExecFwk::AppMgrEventSubscriber> screenOffSubscriber_;
 
