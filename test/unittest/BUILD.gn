@@ -388,6 +388,7 @@ group("unittest") {
       "ability_manager_service_eighth_test:unittest",
       "ability_manager_service_eleven_test:unittest",
       "ability_manager_service_first_test:unittest",
+      "ability_manager_service_fourteenth_test:unittest",
       "ability_manager_service_fourth_test:unittest",
       "ability_manager_service_mock_test:unittest",
       "ability_manager_service_ninth_test:unittest",

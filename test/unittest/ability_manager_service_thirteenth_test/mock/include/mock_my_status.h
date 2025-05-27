@@ -34,6 +34,7 @@ public:
     bool smhGetUIAbilityManagerByUserId_ = true;
     bool smhGetMissionListManagerByUserId_ = true;
     bool smhGetCurrentDataAbilityManager_ = true;
+    bool smhGetConnectManagerByToken_ = true;
     bool smhVerificationAllToken_ = true;
     std::shared_ptr<AbilityRecord> ualmGetAbilityRecordByToken_ = nullptr;
     int ualmGetSessionIdByAbilityToken_ = 0;
@@ -47,6 +48,7 @@ public:
     uint32_t ipcGetCallingTokenID_ = 1;
     uint32_t ipcGetSelfTokenID_ = 1;
     int permPermission_ = 1;
+    bool perJudgeCallerIsAllowedToUseSystemAPI_ = true;
     bool paramGetBoolParameter_ = true;
 };
 } // namespace AAFwk
