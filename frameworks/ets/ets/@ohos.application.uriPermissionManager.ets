@@ -15,18 +15,7 @@
 
 import wantConstant from '@ohos.app.ability.wantConstant';
 import { BusinessError, AsyncCallback } from '@ohos.base';
-
-export class AsyncCallbackWrapper<T> {
-  myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
-
-  constructor(myFun:AsyncCallback<T, void>){
-    this.myFun_ = myFun;
-  }
-
-  invoke(err: BusinessError<void>, data: T) : void {
-    this.myFun_(err, data);
-  }
-}
+import AsyncCallbackWrapper from './utils/AbilityUtils';
 
 export default namespace uriPermissionManager {
     loadLibrary("uri_permission_manager_ani_kit.z");
@@ -38,9 +27,13 @@ export default namespace uriPermissionManager {
 
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string): Promise<number> {
         let p:Promise<number> = new Promise<number>((resolve: (data: number)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
-                if (err.code == 0) {
-                    resolve(data);
+            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void> | null, data: number | undefined)=>{
+                if (err === null || err.code === 0) {
+                    if (data === undefined) {
+                        resolve(-1);
+                    } else {
+                        resolve(data);
+                    }
                 } else {
                     reject(err);
                 }
@@ -55,8 +48,8 @@ export default namespace uriPermissionManager {
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string,
         appCloneIndex: number): Promise<void> {
         let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
-                if (err.code == 0) {
+            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void> | null, data: number | undefined)=>{
+                if (err === null || err.code === 0) {
                     resolve(undefined);
                 } else {
                     reject(err);
@@ -80,9 +73,13 @@ export default namespace uriPermissionManager {
 
     export function revokeUriPermission(uri: string, targetBundleName: string): Promise<number> {
         let p:Promise<number> = new Promise<number>((resolve: (data: number)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
-                if (err.code == 0) {
-                    resolve(data);
+            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void> | null, data: number | undefined)=>{
+                if (err === null || err.code === 0) {
+                    if (data === undefined) {
+                        resolve(-1);
+                    } else {
+                        resolve(data);
+                    }
                 } else {
                     reject(err);
                 }
@@ -96,8 +93,8 @@ export default namespace uriPermissionManager {
 
     export function revokeUriPermission(uri: string, targetBundleName: string, appCloneIndex: number): Promise<void> {
         let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
-                if (err.code == 0) {
+            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void> | null, data: number | undefined)=>{
+                if (err === null || err.code === 0) {
                     resolve(undefined);
                 } else {
                     reject(err);

@@ -79,9 +79,9 @@ export class KeepAliveBundleInfoInner implements KeepAliveBundleInfo {
 export native function nativePreloadApplication(callback: AsyncCallbackWrapper<void>, bundleName: string, userId: number,
     mode: PreloadMode, appIndex?: number): void;
 export function preloadApplication(bundleName: string, userId: number, mode: PreloadMode, appIndex?: number): Promise<void>{
-   let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
-        if (err.code == 0) {
+   let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError | null)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
+        if (err == null || err.code == 0) {
           resolve(undefined);
         } else {
           reject(err);
@@ -103,10 +103,10 @@ export function getRunningProcessInformation(callback: AsyncCallback<Array<Proce
 }
 
 export function getRunningProcessInformation(): Promise<Array<ProcessInformation>> {
-    let p = new Promise<Array<ProcessInformation>>((resolve:(data:Array<ProcessInformation>)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError<void>, data: Array<ProcessInformation>)=>{
-        if (err.code == 0) {
-          resolve(data);
+    let p = new Promise<Array<ProcessInformation>>((resolve:(data:Array<ProcessInformation>)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError | null, data: Array<ProcessInformation> | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as Array<ProcessInformation>);
         } else {
           reject(err);
         }
@@ -127,10 +127,10 @@ export function getForegroundApplications(callback: AsyncCallback<Array<AppState
 }
 
 export function getForegroundApplications(): Promise<Array<AppStateData>> {
-    let p = new Promise<Array<AppStateData>>((resolve:(data:Array<AppStateData>)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<Array<AppStateData>>((err: BusinessError<void>, data: Array<AppStateData>)=>{
-        if (err.code == 0) {
-          resolve(data);
+    let p = new Promise<Array<AppStateData>>((resolve:(data:Array<AppStateData>)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<Array<AppStateData>>((err: BusinessError | null, data: Array<AppStateData> | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as Array<AppStateData>);
         } else {
           reject(err);
         }
@@ -144,10 +144,10 @@ export function getForegroundApplications(): Promise<Array<AppStateData>> {
 
 export native function nativeGetRunningMultiAppInfo(bundleName: string, callback: AsyncCallbackWrapper<RunningMultiAppInfo>): void;
 export function getRunningMultiAppInfo(bundleName: string): Promise<RunningMultiAppInfo> {
-    let p = new Promise<RunningMultiAppInfo>((resolve:(data: RunningMultiAppInfo)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<RunningMultiAppInfo>((err: BusinessError<void>, data: RunningMultiAppInfo)=>{
-        if (err.code == 0) {
-          resolve(data);
+    let p = new Promise<RunningMultiAppInfo>((resolve:(data: RunningMultiAppInfo)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<RunningMultiAppInfo>((err: BusinessError | null, data: RunningMultiAppInfo | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as RunningMultiAppInfo);
         } else {
           reject(err);
         }
@@ -168,10 +168,10 @@ export function getRunningProcessInfoByBundleName(bundleName: string, callback: 
 }
 
 export function getRunningProcessInfoByBundleName(bundleName: string): Promise<Array<ProcessInformation>> {
-    let p = new Promise<Array<ProcessInformation>>((resolve:(data: Array<ProcessInformation>)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError<void>, data: Array<ProcessInformation>)=>{
-        if (err.code == 0) {
-          resolve(data);
+    let p = new Promise<Array<ProcessInformation>>((resolve:(data: Array<ProcessInformation>)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError | null, data: Array<ProcessInformation> | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as Array<ProcessInformation>);
         } else {
           reject(err);
         }
@@ -193,10 +193,10 @@ export function getRunningProcessInfoByBundleName(bundleName: string, userId: nu
 }
 
 export function getRunningProcessInfoByBundleName(bundleName: string, userId: number): Promise<Array<ProcessInformation>> {
-    let p = new Promise<Array<ProcessInformation>>((resolve:(data: Array<ProcessInformation>)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError<void>, data: Array<ProcessInformation>)=>{
-        if (err.code == 0) {
-          resolve(data);
+    let p = new Promise<Array<ProcessInformation>>((resolve:(data: Array<ProcessInformation>)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError | null, data: Array<ProcessInformation> | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as Array<ProcessInformation>);
         } else {
           reject(err);
         }
@@ -228,9 +228,9 @@ export function off(type: 'applicationState', observerId: number, callback: Asyn
 }
 
 export function off(type: 'applicationState', observerId: number): Promise<void> {
-    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
-        if (err.code == 0) {
+    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError | null)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
+        if (err == null || err.code == 0) {
           resolve(undefined);
         } else {
           reject(err);
@@ -252,10 +252,10 @@ export function getAppMemorySize(callback: AsyncCallback<number>): void
     });
 }
 export function getAppMemorySize(): Promise<number> {
-    let p = new Promise<number>((resolve:(data:number)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
-        if (err.code == 0) {
-          resolve(data);
+    let p = new Promise<number>((resolve:(data:number)=>void, reject:(err: BusinessError<void> | null)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void> | null, data: number | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as number);
         } else {
           reject(err);
         }
@@ -275,10 +275,10 @@ export function isRamConstrainedDevice(callback: AsyncCallback<boolean>): void {
     });
 }
 export function isRamConstrainedDevice(): Promise<boolean> {
-    let p = new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError<void>, data: boolean)=>{
-        if (err.code == 0) {
-          resolve(data);
+    let p = new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError<void> | null)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError<void> | null, data: boolean | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as boolean);
         } else {
           reject(err);
         }
@@ -298,10 +298,10 @@ export function isRunningInStabilityTest(callback: AsyncCallback<boolean>): void
     });
 }
 export function isRunningInStabilityTest(): Promise<boolean> {
-    let p = new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError<void>, data: boolean)=>{
-        if (err.code == 0) {
-          resolve(data);
+    let p = new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError<void> | null)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError<void> | null, data: boolean | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as boolean);
         } else {
           reject(err);
         }
@@ -322,9 +322,9 @@ export function killProcessesByBundleName(bundleName: string, callback: AsyncCal
     });
 }
 export function killProcessesByBundleName(bundleName: string): Promise<void> {
-    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
-        if (err.code == 0) {
+    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void> | null)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void> | null)=>{
+        if (err == null || err.code == 0) {
           resolve(undefined);
         } else {
           reject(err);
@@ -337,9 +337,9 @@ export function killProcessesByBundleName(bundleName: string): Promise<void> {
     return p;
 }
 export function killProcessesByBundleName(bundleName: string, clearPageStack: boolean, appIndex?: number): Promise<void> {
-    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
-        if (err.code == 0) {
+    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void> | null)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void> | null)=>{
+        if (err == null || err.code == 0) {
           resolve(undefined);
         } else {
           reject(err);
