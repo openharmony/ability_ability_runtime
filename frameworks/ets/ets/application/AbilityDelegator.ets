@@ -136,9 +136,9 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
   finishTest(msg: string, code: number): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -166,10 +166,10 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
   executeShellCommand(cmd: string, timeoutSecs?: number): Promise<ShellCmdResult> {
     let p = new Promise<ShellCmdResult>((resolve: (data: ShellCmdResult) => void,
-      reject: (err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackWrapper<ShellCmdResult>((err: BusinessError<void>, data: ShellCmdResult) => {
-        if (err.code == 0) {
-          resolve(data);
+      reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<ShellCmdResult>((err: BusinessError | null, data: ShellCmdResult | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as ShellCmdResult);
         } else {
           reject(err);
         }
@@ -193,9 +193,9 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
   addAbilityMonitor(monitor: AbilityMonitor): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -422,9 +422,9 @@ class AbilityDelegatorInner implements AbilityDelegator {
   }
   startAbility(want: Want): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);

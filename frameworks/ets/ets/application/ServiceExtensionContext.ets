@@ -38,9 +38,9 @@ export default class ServiceExtensionContext extends ExtensionContext {
   }
 
   terminateSelf(): Promise<void> {
-    let p = new Promise<void>((resolve: (data: undefined) => void, reject:(err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-        if (err.code == 0) {
+    let p = new Promise<void>((resolve: (data: undefined) => void, reject:(err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
           resolve(undefined);
         } else {
           reject(err);
@@ -68,9 +68,9 @@ export default class ServiceExtensionContext extends ExtensionContext {
   }
 
   startAbility(want: Want, options: StartOptions): Promise<void> {
-    let p = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
-        if (err.code == 0) {
+    let p = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
+        if (err == null || err.code == 0) {
           resolve(undefined);
         } else {
           reject(err);
@@ -91,9 +91,9 @@ export default class ServiceExtensionContext extends ExtensionContext {
   }
   
   startServiceExtensionAbility(want: Want): Promise<void> {
-    let p = new Promise<void>((resolve: (data: undefined)=>void, reject:(err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-        if (err.code == 0) {
+    let p = new Promise<void>((resolve: (data: undefined)=>void, reject:(err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
           resolve(undefined);
         } else {
           reject(err);

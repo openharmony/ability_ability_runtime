@@ -37,10 +37,10 @@ namespace wantAgent {
     });
   }
   export function getBundleName(agent: WantAgent): Promise<string> {
-    return new Promise<string>((resolve: (data:string)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<string>((err: BusinessError<void>, data: string)=>{
-        if (err.code == 0) {
-          resolve(data);
+    return new Promise<string>((resolve: (data:string)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<string>((err: BusinessError | null, data: string | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as string);
         } else {
           reject(err);
         }
@@ -57,10 +57,10 @@ namespace wantAgent {
     });
   }
   export function getUid(agent: WantAgent): Promise<number> {
-    return new Promise<number>((resolve: (data:number)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
-        if (err.code == 0) {
-          resolve(data);
+    return new Promise<number>((resolve: (data:number)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<number>((err: BusinessError | null, data: number | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as number);
         } else {
           reject(err);
         }
@@ -77,10 +77,10 @@ namespace wantAgent {
     });
   }
   export function getWant(agent: WantAgent): Promise<Want> {
-    return new Promise<Want>((resolve: (data:Want)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<Want>((err: BusinessError<void>, data: Want)=>{
-        if (err.code == 0) {
-          resolve(data);
+    return new Promise<Want>((resolve: (data:Want)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<Want>((err: BusinessError | null, data: Want | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as Want);
         } else {
           reject(err);
         }
@@ -97,9 +97,9 @@ namespace wantAgent {
     });
   }
   export function cancel(agent: WantAgent): Promise<void> {
-    return new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
-        if (err.code == 0) {
+    return new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
+        if (err == null || err.code == 0) {
           resolve(undefined);
         } else {
           reject(err);
@@ -127,10 +127,10 @@ namespace wantAgent {
     });
   }
   export function equal(agent: WantAgent, otherAgent: WantAgent): Promise<boolean> {
-    return new Promise<boolean>((resolve: (data:boolean)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError<void>, data: boolean)=>{
-        if (err.code == 0) {
-          resolve(data);
+    return new Promise<boolean>((resolve: (data:boolean)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError | null, data: boolean | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as boolean);
         } else {
           reject(err);
         }
@@ -147,10 +147,10 @@ namespace wantAgent {
     });
   }
   export function getWantAgent(info: WantAgentInfo): Promise<WantAgent> {
-    return new Promise<WantAgent>((resolve: (data:WantAgent)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<WantAgent>((err: BusinessError<void>, data: WantAgent)=>{
-        if (err.code == 0) {
-          resolve(data);
+    return new Promise<WantAgent>((resolve: (data:WantAgent)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<WantAgent>((err: BusinessError | null, data: WantAgent | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as WantAgent);
         } else {
           reject(err);
         }
@@ -167,10 +167,10 @@ namespace wantAgent {
     });
   }
   export function getOperationType(agent: WantAgent): Promise<number> {
-    return new Promise<number>((resolve: (data:number)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
-        if (err.code == 0) {
-          resolve(data);
+    return new Promise<number>((resolve: (data:number)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<number>((err: BusinessError | null, data: number | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as number);
         } else {
           reject(err);
         }
