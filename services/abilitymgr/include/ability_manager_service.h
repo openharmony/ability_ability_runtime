@@ -2161,11 +2161,13 @@ private:
      */
     void InitU0User();
     void InitStartAbilityChain();
+#ifndef AMS_NO_SCREEN
     /**
      * start highest priority ability.
      *
      */
     int StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery = false);
+#endif
     /**
      * connect bms.
      *
