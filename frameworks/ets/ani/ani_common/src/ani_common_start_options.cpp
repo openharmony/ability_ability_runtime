@@ -99,34 +99,8 @@ void UnwrapStartOptionsWindowOptions(ani_env *env, ani_object param, AAFwk::Star
     }
 }
 
-bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions)
+bool SetSupportWindowModes(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
-        return false;
-    }
-
-    ani_double windowMode = 0.0;
-    if (GetDoubleOrUndefined(env, param, "windowMode", windowMode)) {
-        TAG_LOGD(AAFwkTag::JSNAPI, "windowMode:%{public}f", windowMode);
-        startOptions.SetWindowMode(windowMode);
-    }
-
-    ani_double displayId = 0.0;
-    if (GetDoubleOrUndefined(env, param, "displayId", displayId)) {
-        TAG_LOGD(AAFwkTag::JSNAPI, "displayId:%{public}f", displayId);
-        startOptions.SetDisplayID(static_cast<int>(displayId));
-    }
-
-    ani_boolean withAnimation = true;
-    if (GetBoolOrUndefined(env, param, "withAnimation")) {
-        TAG_LOGD(AAFwkTag::JSNAPI, "withAnimation:%{public}hhu", withAnimation);
-        startOptions.SetWithAnimation(withAnimation);
-    }
-
-    UnwrapStartOptionsWindowOptions(env, param, startOptions);
-
     ani_ref supportWindowModesRef = nullptr;
     ani_boolean hasValue = true;
     if (GetPropertyRef(env, param, "supportWindowModes", supportWindowModesRef, hasValue) && !hasValue) {
@@ -150,6 +124,50 @@ bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &sta
                 static_cast<AppExecFwk::SupportWindowMode>(supportWindowMode));
         }
     }
+    return true;
+}
+
+bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions)
+{
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
+        return false;
+    }
+
+    ani_double windowMode = 0.0;
+    if (GetDoubleOrUndefined(env, param, "windowMode", windowMode)) {
+        TAG_LOGD(AAFwkTag::JSNAPI, "windowMode:%{public}f", windowMode);
+        startOptions.SetWindowMode(windowMode);
+    }
+
+    ani_double displayId = 0.0;
+    if (GetDoubleOrUndefined(env, param, "displayId", displayId)) {
+        TAG_LOGD(AAFwkTag::JSNAPI, "displayId:%{public}f", displayId);
+        startOptions.SetDisplayID(static_cast<int>(displayId));
+    }
+
+    ani_boolean withAnimation = true;
+    if (IsExistsProperty(env, param, "withAnimation")) {
+        withAnimation = GetBoolOrUndefined(env, param, "withAnimation");
+        TAG_LOGD(AAFwkTag::JSNAPI, "withAnimation:%{public}hhu", withAnimation);
+        startOptions.SetWithAnimation(withAnimation);
+    }
+
+    UnwrapStartOptionsWindowOptions(env, param, startOptions);
+
+    ani_boolean windowFocused = true;
+    if (IsExistsProperty(env, param, "windowFocused")) {
+        windowFocused = GetBoolOrUndefined(env, param, "windowFocused");
+        TAG_LOGD(AAFwkTag::JSNAPI, "windowFocused:%{public}hhu", windowFocused);
+        startOptions.SetWindowFocused(windowFocused);
+    }
+
+    if (!SetSupportWindowModes(env, param, startOptions)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "SetSupportWindowModes failed");
+        return false;
+    }
+
     return true;
 }
 
