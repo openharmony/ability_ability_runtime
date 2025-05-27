@@ -152,6 +152,7 @@ ohos_unittest("cache_process_manager_second_test") {
     "resource_schedule_service:ressched_client",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:session_manager_lite",
   ]
 
   public_external_deps = [ "kv_store:distributeddata_mgr" ]

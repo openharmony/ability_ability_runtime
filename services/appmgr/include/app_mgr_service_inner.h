@@ -772,7 +772,7 @@ public:
      * @param userId configuration for the user
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &appInfos,
+    int32_t UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &allowAppList,
         const AppExecFwk::ConfigurationPolicy &policy, const int32_t userId);
 
     int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name, int32_t appIndex);
@@ -1947,6 +1947,8 @@ private:
     void NotifyLoadAbilityFailed(sptr<IRemoteObject> token);
 
     void NotifyStartProcessFailed(sptr<IRemoteObject> token);
+
+    std::vector<BackgroundAppInfo> GetBackgroundAppInfo(const std::vector<BackgroundAppInfo>& allowAppList);
 private:
     /**
      * Notify application status.
