@@ -32,7 +32,11 @@ public:
         uint32_t accessTokenId = 0;
         int32_t apiTargetVersion = 0;
     };
-
+    static PermissionVerification &GetInstance()
+    {
+        static PermissionVerification instance;
+        return instance;
+    };
     PermissionVerification() = default;
     ~PermissionVerification() = default;
 
