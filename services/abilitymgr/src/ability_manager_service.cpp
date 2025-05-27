@@ -241,14 +241,9 @@ constexpr const char* APP_LINKING_ONLY = "appLinkingOnly";
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
-    auto taskHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-    if (taskHandler == nullptr) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "task handler null");
-        return;
-    }
-    taskHandler->SubmitTask([eventName, type, eventInfo]() {
+    ffrt::submit([eventName, type, eventInfo]() {
         EventReport::SendAbilityEvent(eventName, type, eventInfo);
-        });
+        }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
 bool IsEmbeddableStart(int32_t screenMode)
@@ -319,7 +314,7 @@ constexpr const char* WHITE_LIST = "white_list";
 constexpr const char* SUPPORT_COLLABORATE_INDEX = "ohos.extra.param.key.supportCollaborateIndex";
 constexpr const char* COLLABORATE_KEY = "ohos.dms.collabToken";
 constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
-constexpr int32_t CLEAR_REASON_DELAY_TIME = 3000;  // 3s
+constexpr int32_t CLEAR_REASON_DELAY_TIME = 3000000;  // 3s
 constexpr const char* LIFE_CYCLE_START = "start";
 constexpr const char* LIFE_CYCLE_CONNECT = "connect";
 constexpr const char* LIFE_CYCLE_MINIMIZE = "minimize";
@@ -396,7 +391,6 @@ bool AbilityManagerService::Init()
 {
     HiviewDFX::Watchdog::GetInstance().InitFfrtWatchdog(); // For ffrt watchdog available in foundation
     taskHandler_ = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
-    delayClearReasonHandler_ = TaskHandlerWrap::CreateQueueHandler("delay_clear_reason_queue");
     eventHandler_ = std::make_shared<AbilityEventHandler>(taskHandler_, weak_from_this());
     freeInstallManager_ = std::make_shared<FreeInstallManager>(weak_from_this());
     CHECK_POINTER_RETURN_BOOL(freeInstallManager_);
@@ -7301,19 +7295,14 @@ int AbilityManagerService::PreLoadAppDataAbilities(const std::string &bundleName
         return ERR_INVALID_VALUE;
     }
 
-    if (taskHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskHandler null");
-        return ERR_INVALID_STATE;
-    }
-
-    taskHandler_->SubmitTask([weak = weak_from_this(), bundleName, userId]() {
+    ffrt::submit([weak = weak_from_this(), bundleName, userId]() {
         auto pthis = weak.lock();
         if (pthis == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "pthis null");
             return;
         }
         pthis->PreLoadAppDataAbilitiesTask(bundleName, userId);
-        });
+        }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 
     return ERR_OK;
 }
@@ -7885,9 +7874,10 @@ void AbilityManagerService::RetrySubscribeScreenUnlockedEvent(int32_t retryCount
             obj->RetrySubscribeScreenUnlockedEvent(retryCount - 1);
         }
     };
-    constexpr int delaytime = 200;
-    CHECK_POINTER(taskHandler_);
-    taskHandler_->SubmitTask(retrySubscribeScreenUnlockedEventTask, "RetrySubscribeScreenUnlockedEvent", delaytime);
+    constexpr int32_t delaytime = 200 * 1000; // us
+    ffrt::submit(std::move(retrySubscribeScreenUnlockedEventTask),
+        ffrt::task_attr().delay(delaytime).name("RetrySubscribeScreenUnlockedEvent")
+        .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
 void AbilityManagerService::RemoveScreenUnlockInterceptor()
@@ -12152,7 +12142,9 @@ void AbilityManagerService::OnCacheExitInfo(uint32_t accessTokenId, const AppExe
             return;
         }
     };
-    delayClearReasonHandler_->SubmitTaskJust(delayClearReason, "delayClearReason", CLEAR_REASON_DELAY_TIME);
+    ffrt::submit(std::move(delayClearReason), ffrt::task_attr()
+        .delay(CLEAR_REASON_DELAY_TIME).name("delayClearReason")
+        .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
 int32_t AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
