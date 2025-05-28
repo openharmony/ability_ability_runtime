@@ -448,9 +448,9 @@ class AbilityDelegatorInner implements AbilityDelegator {
       let error: BusinessError = { code: resultCode, data: undefined };
       callback(error, ability);
       console.log("getCurrentTopAbility callback2_06");
-    }).catch((err: BusinessError): void => {
+    }).catch((err: Error): void => {
       console.log("getCurrentTopAbility callback2_0606 err end");
-      callback(err, {});
+      callback(err as BusinessError, {});
     });
   }
   getCurrentTopAbility(): Promise<UIAbility> {
@@ -463,7 +463,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
         console.log("getCurrentTopAbility promise1_04");
         let r: UIAbility = e as UIAbility;
         resolve(r);
-      }).catch((err: BusinessError): void => {
+      }).catch((err: Error): void => {
         reject(err);
         console.log("getCurrentTopAbility promise1 end");
       });
