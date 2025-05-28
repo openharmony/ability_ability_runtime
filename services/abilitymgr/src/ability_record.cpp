@@ -449,7 +449,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", GetURI().c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundUIExtensionAbility:%{public}s", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
