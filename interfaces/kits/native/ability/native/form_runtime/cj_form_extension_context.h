@@ -16,16 +16,16 @@
 #ifndef OHOS_ABILITY_RUNTIME_CJ_FORM_EXTENSION_CONTEXT_H
 #define OHOS_ABILITY_RUNTIME_CJ_FORM_EXTENSION_CONTEXT_H
 
-#include "form_extension_context.h"
-#include "cj_extension_context.h"
-#include "image_packer.h"
 #include "cj_context.h"
+#include "cj_extension_context.h"
+#include "form_extension_context.h"
+#include "image_packer.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 class CJFormExtensionContext : public CJExtensionContext {
 public:
-    explicit CJFormExtensionContext(const std::shared_ptr<FormExtensionContext> &context)
+    explicit CJFormExtensionContext(const std::shared_ptr<FormExtensionContext>& context)
         : CJExtensionContext(context, context->GetAbilityInfo()), context_(context)
     {}
 
@@ -35,6 +35,7 @@ public:
     {
         return context_.lock();
     }
+
 private:
     std::weak_ptr<FormExtensionContext> context_;
 };

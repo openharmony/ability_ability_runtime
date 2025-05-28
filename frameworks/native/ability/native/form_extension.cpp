@@ -17,8 +17,8 @@
 
 #include "configuration_utils.h"
 #include "form_extension_context.h"
-#include "form_runtime/js_form_extension.h"
 #include "form_runtime/cj_form_extension_instance.h"
+#include "form_runtime/js_form_extension.h"
 #include "hilog_tag_wrapper.h"
 #include "runtime.h"
 

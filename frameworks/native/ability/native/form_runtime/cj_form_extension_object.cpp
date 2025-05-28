@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "cj_utils_ffi.h"
 #include "form_runtime/cj_form_extension_object.h"
+
+#include "cj_utils_ffi.h"
 #include "hilog_tag_wrapper.h"
 #include "securec.h"
 
@@ -89,8 +90,8 @@ int32_t CJFormExtensionObject::Init(const std::string& abilityName, FormExtAbili
     }
     cjID_ = g_cjFuncs.createCjFormExtAbility(abilityName.c_str(), extAbility);
     if (cjID_ == 0) {
-        TAG_LOGE(AAFwkTag::FORM_EXT,
-            "Failed to Init CjFormExtAbility: %{public}s is not registered", abilityName.c_str());
+        TAG_LOGE(
+            AAFwkTag::FORM_EXT, "Failed to Init CjFormExtAbility: %{public}s is not registered", abilityName.c_str());
         return CJ_OBJECT_ERR_CODE;
     }
     if (g_cjFuncs.cjFormExtAbilityInit == nullptr) {
@@ -101,7 +102,7 @@ int32_t CJFormExtensionObject::Init(const std::string& abilityName, FormExtAbili
     return 0;
 }
 
-CFormBindingData CJFormExtensionObject::OnAddForm(const AAFwk::Want &want)
+CFormBindingData CJFormExtensionObject::OnAddForm(const AAFwk::Want& want)
 {
     CFormBindingData cFormBindingData {};
     if (g_cjFuncs.cjFormExtAbilityOnAddForm == nullptr) {
@@ -149,7 +150,7 @@ void CJFormExtensionObject::OnChangeFormVisibility(const std::map<int64_t, int32
         return;
     }
     int64_t i = 0;
-    for (auto &item : formEventsMap) {
+    for (auto& item : formEventsMap) {
         keysHead[i] = const_cast<char*>(std::to_string(item.first).c_str());
         valuesHead[i] = item.second;
         i++;
