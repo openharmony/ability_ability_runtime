@@ -28,6 +28,8 @@ constexpr const char* LAUNCH_PARAM_IMPL_CLASS_NAME = "L@ohos/app/ability/Ability
 constexpr const char* LAUNCH_REASON_ENUM_NAME = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchReason;";
 constexpr const char* LAST_EXIT_REASON_ENUM_NAME =
     "L@ohos/app/ability/AbilityConstant/AbilityConstant/LastExitReason;";
+constexpr const char* LAST_EXIT_DETAIL_INFO_IMPL_CLASS_NAME =
+    "L@ohos/app/ability/AbilityConstant/LastExitDetailInfoImpl;";
 }
 
 ani_string GetAniString(ani_env *env, const std::string &str)
@@ -35,10 +37,56 @@ ani_string GetAniString(ani_env *env, const std::string &str)
     ani_string aniStr = nullptr;
     ani_status status = env->String_NewUTF8(str.c_str(), str.size(), &aniStr);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
         return nullptr;
     }
     return aniStr;
+}
+
+ani_object CreateStsLastExitDetailInfo(ani_env* env, const AAFwk::LastExitDetailInfo& lastExitDetailInfo)
+{
+    ani_method method = nullptr;
+    ani_field field = nullptr;
+    ani_string string = nullptr;
+    ani_status status = ANI_ERROR;
+    ani_object object = nullptr;
+    ani_class cls = nullptr;
+    if ((status = env->FindClass(LAST_EXIT_DETAIL_INFO_IMPL_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
+        return nullptr;
+    }
+    if (cls == nullptr) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "null cls");
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
+        return nullptr;
+    }
+    if (method == nullptr) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "null method");
+        return nullptr;
+    }
+    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
+        return nullptr;
+    }
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "null object");
+        return nullptr;
+    }
+    env->Object_SetPropertyByName_Ref(object, "pid", GetAniString(env, std::to_string(lastExitDetailInfo.pid)));
+    env->Object_SetPropertyByName_Ref(object, "processName", GetAniString(env, lastExitDetailInfo.processName));
+    env->Object_SetPropertyByName_Ref(object, "uid", GetAniString(env, std::to_string(lastExitDetailInfo.uid)));
+    env->Object_SetPropertyByName_Ref(object, "exitSubReason",
+        GetAniString(env, std::to_string(lastExitDetailInfo.exitSubReason)));
+    env->Object_SetPropertyByName_Ref(object, "exitMsg", GetAniString(env, lastExitDetailInfo.exitMsg));
+    env->Object_SetPropertyByName_Ref(object, "rss", GetAniString(env, std::to_string(lastExitDetailInfo.rss)));
+    env->Object_SetPropertyByName_Ref(object, "pss", GetAniString(env, std::to_string(lastExitDetailInfo.pss)));
+    env->Object_SetPropertyByName_Ref(object, "timestamp",
+        GetAniString(env, std::to_string(lastExitDetailInfo.timestamp)));
+
+    return object;
 }
 
 ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchParam)
@@ -50,7 +98,7 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
     ani_object object = nullptr;
     ani_class cls = nullptr;
     if ((status = env->FindClass(LAUNCH_PARAM_IMPL_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
         return nullptr;
     }
     if (cls == nullptr) {
@@ -59,7 +107,7 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
     }
 
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
         return nullptr;
     }
     if (method == nullptr) {
@@ -67,7 +115,7 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
         return nullptr;
     }
     if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
         return nullptr;
     }
     if (object == nullptr) {
@@ -85,6 +133,8 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(env,
         LAST_EXIT_REASON_ENUM_NAME, launchParam.lastExitReason, lastExitReasonItem);
     env->Object_SetPropertyByName_Ref(object, "lastExitReason", lastExitReasonItem);
+    env->Object_SetPropertyByName_Ref(object, "lastExitDetailInfo",
+        CreateStsLastExitDetailInfo(env, launchParam.lastExitDetailInfo));
 
     return object;
 }
