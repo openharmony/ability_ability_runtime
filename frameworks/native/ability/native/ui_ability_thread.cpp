@@ -628,7 +628,7 @@ void UIAbilityThread::CallRequest()
 
 void UIAbilityThread::OnExecuteIntent(const Want &want)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGI(AAFwkTag::UIABILITY, "on execute intent");
     if (abilityImpl_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
         return;

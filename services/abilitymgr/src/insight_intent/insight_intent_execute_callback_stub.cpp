@@ -40,7 +40,7 @@ int32_t InsightIntentExecuteCallbackStub::OnRemoteRequest(
 
 int32_t InsightIntentExecuteCallbackStub::OnExecuteDoneInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "called");
+    TAG_LOGI(AAFwkTag::INTENT, "called");
     uint64_t key = data.ReadUint64();
     int32_t resultCode = data.ReadInt32();
     std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> executeResult(
