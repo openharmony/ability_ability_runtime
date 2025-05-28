@@ -23,7 +23,6 @@ import _ApplicationStateObserver from 'application.ApplicationStateObserver';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
 
 export default namespace appManager {
-
 export type ProcessInformation = _ProcessInformation;
 export type AbilityStateData = _AbilityStateData;
 export type AppStateData = _AppStateData;
@@ -49,6 +48,29 @@ export enum ProcessState {
     STATE_ACTIVE,
     STATE_BACKGROUND,
     STATE_DESTROY
+}
+
+export enum KeepAliveAppType {
+    ALL = 0,
+    THIRD_PARTY = 1,
+    SYSTEM = 2
+}
+
+export enum KeepAliveSetter {
+    SYSTEM = 0,
+    USER = 1
+}
+
+export interface KeepAliveBundleInfo {
+    bundleName: string;
+    type: KeepAliveAppType;
+    setter: KeepAliveSetter;
+}
+
+export class KeepAliveBundleInfoInner implements KeepAliveBundleInfo {
+    bundleName: string = '';
+    type: KeepAliveAppType = KeepAliveAppType.ALL;
+    setter: KeepAliveSetter = KeepAliveSetter.SYSTEM;
 }
 
 export native function nativePreloadApplication(callback: AsyncCallbackWrapper<void>, bundleName: string, userId: number,
@@ -217,4 +239,114 @@ export function off(type: 'applicationState', observerId: number): Promise<void>
     });
     return p;
 }
+
+export native function nativeGetAppMemorySize(callback: AsyncCallbackWrapper<number>) : void;
+export function getAppMemorySize(callback: AsyncCallback<number>): void
+{
+    let myCall = new AsyncCallbackWrapper<number>(callback);
+    taskpool.execute((): void => {
+      appManager.nativeGetAppMemorySize(myCall);
+    });
+}
+export function getAppMemorySize(): Promise<number> {
+    let p = new Promise<number>((resolve:(data:number)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
+        if (err.code == 0) {
+          resolve(data);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        appManager.nativeGetAppMemorySize(myCall);
+      });
+    });
+    return p;
+}
+
+export native function nativeIsRamConstrainedDevice(callback: AsyncCallbackWrapper<boolean>) : void;
+export function isRamConstrainedDevice(callback: AsyncCallback<boolean>): void {
+    let myCall = new AsyncCallbackWrapper<boolean>(callback);
+    taskpool.execute((): void => {
+      appManager.nativeIsRamConstrainedDevice(myCall);
+    });
+}
+export function isRamConstrainedDevice(): Promise<boolean> {
+    let p = new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError<void>, data: boolean)=>{
+        if (err.code == 0) {
+          resolve(data);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        appManager.nativeIsRamConstrainedDevice(myCall);
+      });
+    });
+    return p;
+}
+
+export native function nativeIsRunningInStabilityTest(callback: AsyncCallbackWrapper<boolean>) : void;
+export function isRunningInStabilityTest(callback: AsyncCallback<boolean>): void {
+    let myCall = new AsyncCallbackWrapper<boolean>(callback);
+    taskpool.execute((): void => {
+      appManager.nativeIsRunningInStabilityTest(myCall);
+    });
+}
+export function isRunningInStabilityTest(): Promise<boolean> {
+    let p = new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError<void>, data: boolean)=>{
+        if (err.code == 0) {
+          resolve(data);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        appManager.nativeIsRunningInStabilityTest(myCall);
+      });
+    });
+    return p;
+}
+
+export native function nativeKillProcessesByBundleNameSync(bundleName: string, callback: AsyncCallbackWrapper<void>) : void;
+export native function nativeKillProcessesByBundleName(callback: AsyncCallbackWrapper<void>, bundleName: string, clearPageStack: boolean, appIndex?: number) : void;
+export function killProcessesByBundleName(bundleName: string, callback: AsyncCallback<void>) {
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      appManager.nativeKillProcessesByBundleNameSync(bundleName, myCall);
+    });
+}
+export function killProcessesByBundleName(bundleName: string): Promise<void> {
+    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+        if (err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        appManager.nativeKillProcessesByBundleNameSync(bundleName, myCall);
+      });
+    });
+    return p;
+}
+export function killProcessesByBundleName(bundleName: string, clearPageStack: boolean, appIndex?: number): Promise<void> {
+    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+        if (err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        appManager.nativeKillProcessesByBundleName(myCall, bundleName, clearPageStack, appIndex);
+      });
+    });
+    return p;
+}
+
 } // namespace appManager
