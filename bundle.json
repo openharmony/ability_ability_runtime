@@ -532,6 +532,15 @@
           },
           {
             "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/mission_manager/include",
+              "header_files": [
+                "mission_manager_client.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/mission_manager:mission_manager"
+          },
+          {
+            "header": {
               "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/session_handler/include",
               "header_files": []
             },
