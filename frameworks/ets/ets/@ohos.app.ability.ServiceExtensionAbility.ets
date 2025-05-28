@@ -55,7 +55,7 @@ export default class ServiceExtensionAbility {
   private callOnDisconnect(want: Want): void {
     let p = this.onDisconnectAsync(want);
     if (this.isOnDisconnectAsync) {
-        p.then<void>((a:undefined): void => {
+        p.then<void>((): void => {
         this.nativeOnDisconnectCallback();
       });
     } else {
@@ -82,9 +82,9 @@ export default class ServiceExtensionAbility {
   onConnectAsync(want: Want): Promise<rpc.RemoteObject> {
     console.log("onConnectAsync");
     this.isOnConnectAsync = false;
-    return new Promise<rpc.RemoteObject>((resolve, reject) => {  
-      resolve(new MyService("onConnectAsync")); 
-    });  
+    return new Promise<rpc.RemoteObject>((resolve, reject) => {
+      resolve(new MyService("onConnectAsync"));
+    });
   }
   onDisconnect(want: Want): void {
     console.log("onDisconnect");
