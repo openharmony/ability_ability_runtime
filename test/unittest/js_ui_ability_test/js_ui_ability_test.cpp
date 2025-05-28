@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,9 @@
 #include "hilog_wrapper.h"
 #define private public
 #define protected public
+#include "ability_context_impl.h"
 #include "js_ui_ability.h"
+#include "mock_scene_board_judgement.h"
 #undef private
 #undef protected
 #include "js_runtime_utils.h"
@@ -151,6 +153,38 @@ HWTEST_F(JsUiAbilityTest, JSUIAbility_OnAbilityRequestSuccess_0100, TestSize.Lev
     std::string message = "success";
     ability->OnAbilityRequestSuccess(requestId, element, message);
     GTEST_LOG_(INFO) << "JSUIAbility_OnAbilityRequestSuccess_0100 end";
+}
+
+/**
+ * @tc.name: JSUIAbility_DoOnForegroundForSceneIsNull_0100
+ * @tc.desc: DoOnForegroundForSceneIsNull test
+ * @tc.desc: Verify function DoOnForegroundForSceneIsNull.
+ */
+HWTEST_F(JsUiAbilityTest, JSUIAbility_DoOnForegroundForSceneIsNull_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JSUIAbility_DoOnForegroundForSceneIsNull_0100 start";
+    AbilityRuntime::Runtime::Options options;
+    options.lang = AbilityRuntime::Runtime::Language::JS;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    auto jsRuntime = static_cast<AbilityRuntime::JsRuntime*>(runtime.get());
+    auto ability = std::make_shared<AbilityRuntime::JsUIAbility>(*jsRuntime);
+
+    wptr<IRemoteObject> token(new IPCObjectStub());
+    ability->sessionToken_ = token;
+    auto abilityContextImpl = std::make_shared<AbilityContextImpl>();
+    ability->abilityContext_ = abilityContextImpl;
+    Rosen::SceneBoardJudgement::flag_ = true;
+    Want want;
+    std::string navDestinationInfo = "testNavDestinationInfo";
+    want.SetParam(Want::ATOMIC_SERVICE_SHARE_ROUTER, navDestinationInfo);
+    ability->DoOnForegroundForSceneIsNull(want);
+    EXPECT_NE(abilityContextImpl->GetSessionToken(), nullptr);
+
+    navDestinationInfo = "";
+    want.SetParam(Want::ATOMIC_SERVICE_SHARE_ROUTER, navDestinationInfo);
+    ability->DoOnForegroundForSceneIsNull(want);
+    EXPECT_NE(abilityContextImpl->GetSessionToken(), nullptr);
+    GTEST_LOG_(INFO) << "JSUIAbility_DoOnForegroundForSceneIsNull_0100 end";
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
