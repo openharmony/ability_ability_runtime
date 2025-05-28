@@ -167,6 +167,7 @@ private:
     };
     ConcurrentMap<sptr<IDataAbilityObserver>, std::list<Param>> observerExts_;
     sptr<SystemAbilityStatusChangeListener> callback_;
+	sptr<ServiceDeathRecipient> deathRecipient_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
