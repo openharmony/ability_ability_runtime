@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_CJ_FORM_EXTENSION_EXTENSION_INSTANCE_H
 
 #include <memory>
+
 #include "form_extension_context.h"
 
 namespace OHOS {

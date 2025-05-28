@@ -16,8 +16,9 @@
 #ifndef OHOS_ABILITY_RUNTIME_CJ_FORM_EXTENSION_OBJECT_H
 #define OHOS_ABILITY_RUNTIME_CJ_FORM_EXTENSION_OBJECT_H
 
-#include "want.h"
 #include "cj_common_ffi.h"
+#include "configuration.h"
+#include "want.h"
 
 #ifdef WINDOWS_PLATFORM
 #define CJ_EXPORT __declspec(dllexport)
@@ -31,17 +32,17 @@ namespace AbilityRuntime {
 using FormExtAbilityHandle = void*;
 
 struct CProxyData {
-    char *key;
-    char *subscribeId;
+    char* key;
+    char* subscribeId;
 };
 
 struct CArrProxyData {
-    CProxyData *head;
+    CProxyData* head;
     int64_t size;
 };
 
 struct CFormBindingData {
-    char *data;
+    char* data;
     CArrProxyData cArrProxyData;
 };
 
@@ -51,7 +52,7 @@ struct CRecordI64I32 {
 };
 
 /**
- * @brief cj insightIntentExecutor object.
+ * @brief cj FormExtensionObject object.
  */
 class CJFormExtensionObject {
 public:

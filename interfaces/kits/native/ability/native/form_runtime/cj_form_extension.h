@@ -16,10 +16,10 @@
 #ifndef OHOS_ABILITY_RUNTIME_CJ_FORM_EXTENSION_H
 #define OHOS_ABILITY_RUNTIME_CJ_FORM_EXTENSION_H
 
+#include "cj_form_extension_context.h"
+#include "cj_form_extension_object.h"
 #include "configuration.h"
 #include "form_extension.h"
-#include "cj_form_extension_object.h"
-#include "cj_form_extension_context.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -34,10 +34,9 @@ public:
 
     static CJFormExtension* Create(const std::unique_ptr<Runtime>& runtime);
 
-    void Init(const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &record,
-        const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
-        std::shared_ptr<AppExecFwk::AbilityHandler> &handler,
-        const sptr<IRemoteObject> &token) override;
+    void Init(const std::shared_ptr<AppExecFwk::AbilityLocalRecord>& record,
+        const std::shared_ptr<AppExecFwk::OHOSApplication>& application,
+        std::shared_ptr<AppExecFwk::AbilityHandler>& handler, const sptr<IRemoteObject>& token) override;
 
     OHOS::AppExecFwk::FormProviderInfo OnCreate(const OHOS::AAFwk::Want& want) override;
 
@@ -45,7 +44,7 @@ public:
 
     void OnEvent(const int64_t formId, const std::string& message) override;
 
-    void OnUpdate(const int64_t formId, const AAFwk::WantParams &wantParams) override;
+    void OnUpdate(const int64_t formId, const AAFwk::WantParams& wantParams) override;
 
     void OnCastToNormal(const int64_t formId) override;
 
@@ -55,11 +54,11 @@ public:
 
     void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
 
-    FormState OnAcquireFormState(const Want &want) override;
+    FormState OnAcquireFormState(const Want& want) override;
 
-    bool OnShare(int64_t formId, AAFwk::WantParams &wantParams) override;
+    bool OnShare(int64_t formId, AAFwk::WantParams& wantParams) override;
 
-    bool OnAcquireData(int64_t formId, AAFwk::WantParams &wantParams) override;
+    bool OnAcquireData(int64_t formId, AAFwk::WantParams& wantParams) override;
 
     void OnStop() override;
 
@@ -69,9 +68,9 @@ public:
     }
 
 private:
-    bool ConvertFromDataProxies(CArrProxyData cArrProxyData, std::vector<FormDataProxy> &formDataProxies);
+    bool ConvertFromDataProxies(CArrProxyData cArrProxyData, std::vector<FormDataProxy>& formDataProxies);
 
-    bool ConvertFormDataProxy(CProxyData cProxyData, FormDataProxy &formDataProxy);
+    bool ConvertFormDataProxy(CProxyData cProxyData, FormDataProxy& formDataProxy);
 
     CJFormExtensionObject cjObj_;
     sptr<IRemoteObject> providerRemoteObject_ = nullptr;
