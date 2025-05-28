@@ -115,7 +115,7 @@ size_t AbilityDelegator::GetStageMonitorsNum()
 }
 
 
-std::shared_ptr<ADelegatorAbilityProperty> AbilityDelegator::WaitAbilityMonitor(
+std::shared_ptr<BaseDelegatorAbilityProperty> AbilityDelegator::WaitAbilityMonitor(
     const std::shared_ptr<IAbilityMonitor> &monitor)
 {
     if (!monitor) {
@@ -134,7 +134,7 @@ std::shared_ptr<ADelegatorAbilityProperty> AbilityDelegator::WaitAbilityMonitor(
     return obtainedAbility;
 }
 
-std::shared_ptr<DelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
+std::shared_ptr<BaseDelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
     const std::shared_ptr<IAbilityStageMonitor> &monitor)
 {
     if (!monitor) {
@@ -151,7 +151,7 @@ std::shared_ptr<DelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStag
     return stage;
 }
 
-std::shared_ptr<ADelegatorAbilityProperty> AbilityDelegator::WaitAbilityMonitor(
+std::shared_ptr<BaseDelegatorAbilityProperty> AbilityDelegator::WaitAbilityMonitor(
     const std::shared_ptr<IAbilityMonitor> &monitor, const int64_t timeoutMs)
 {
     if (!monitor) {
@@ -170,7 +170,7 @@ std::shared_ptr<ADelegatorAbilityProperty> AbilityDelegator::WaitAbilityMonitor(
     return obtainedAbility;
 }
 
-std::shared_ptr<DelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
+std::shared_ptr<BaseDelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
     const std::shared_ptr<IAbilityStageMonitor> &monitor, const int64_t timeoutMs)
 {
     if (!monitor) {
@@ -208,7 +208,7 @@ AbilityDelegator::AbilityState AbilityDelegator::GetAbilityState(const sptr<IRem
     return ConvertAbilityState(existedProperty->lifecycleState_);
 }
 
-std::shared_ptr<ADelegatorAbilityProperty> AbilityDelegator::GetCurrentTopAbility()
+std::shared_ptr<BaseDelegatorAbilityProperty> AbilityDelegator::GetCurrentTopAbility()
 {
     AppExecFwk::ElementName elementName = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility();
     std::string bundleName = elementName.GetBundleName();
@@ -367,7 +367,7 @@ void AbilityDelegator::Print(const std::string &msg)
     testObserver->TestStatus(realMsg, 0);
 }
 
-void AbilityDelegator::PostPerformStart(const std::shared_ptr<ADelegatorAbilityProperty> &ability)
+void AbilityDelegator::PostPerformStart(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
@@ -388,19 +388,13 @@ void AbilityDelegator::PostPerformStart(const std::shared_ptr<ADelegatorAbilityP
         if (!monitor) {
             continue;
         }
-
         if (monitor->Match(ability, true)) {
-            if (!ability->stsObject_.expired()) {
-                monitor->OnSTSAbilityStart(ability->stsObject_);
-            }
-            if (!ability->object_.expired()) {
-                monitor->OnAbilityStart(ability->object_);
-            }
+            monitor->OnAbilityStart(ability);
         }
     }
 }
 
-void AbilityDelegator::PostPerformStageStart(const std::shared_ptr<DelegatorAbilityStageProperty> &abilityStage)
+void AbilityDelegator::PostPerformStageStart(const std::shared_ptr<BaseDelegatorAbilityStageProperty> &abilityStage)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
     if (!abilityStage) {
@@ -422,7 +416,7 @@ void AbilityDelegator::PostPerformStageStart(const std::shared_ptr<DelegatorAbil
     }
 }
 
-void AbilityDelegator::PostPerformScenceCreated(const std::shared_ptr<ADelegatorAbilityProperty> &ability)
+void AbilityDelegator::PostPerformScenceCreated(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
@@ -443,19 +437,13 @@ void AbilityDelegator::PostPerformScenceCreated(const std::shared_ptr<ADelegator
         if (!monitor) {
             continue;
         }
-
-        if (monitor->Match(ability)) {
-            if (!ability->stsObject_.expired()) {
-                monitor->OnSTSWindowStageCreate(ability->stsObject_);
-            }
-            if (!ability->object_.expired()) {
-                monitor->OnWindowStageCreate(ability->object_);
-            }
+        if (monitor->Match(ability, true)) {
+            monitor->OnWindowStageCreate(ability);
         }
     }
 }
 
-void AbilityDelegator::PostPerformScenceRestored(const std::shared_ptr<ADelegatorAbilityProperty> &ability)
+void AbilityDelegator::PostPerformScenceRestored(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
@@ -476,19 +464,13 @@ void AbilityDelegator::PostPerformScenceRestored(const std::shared_ptr<ADelegato
         if (!monitor) {
             continue;
         }
-
-        if (monitor->Match(ability)) {
-            if (!ability->stsObject_.expired()) {
-                monitor->OnSTSWindowStageRestore(ability->stsObject_);
-            }
-            if (!ability->object_.expired()) {
-                monitor->OnWindowStageRestore(ability->object_);
-            }
+        if (monitor->Match(ability, true)) {
+            monitor->OnWindowStageRestore(ability);
         }
     }
 }
 
-void AbilityDelegator::PostPerformScenceDestroyed(const std::shared_ptr<ADelegatorAbilityProperty> &ability)
+void AbilityDelegator::PostPerformScenceDestroyed(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
@@ -509,19 +491,13 @@ void AbilityDelegator::PostPerformScenceDestroyed(const std::shared_ptr<ADelegat
         if (!monitor) {
             continue;
         }
-
-        if (monitor->Match(ability)) {
-            if (!ability->stsObject_.expired()) {
-                monitor->OnSTSWindowStageDestroy(ability->stsObject_);
-            }
-            if (!ability->object_.expired()) {
-                monitor->OnWindowStageDestroy(ability->object_);
-            }
+        if (monitor->Match(ability, true)) {
+            monitor->OnWindowStageDestroy(ability);
         }
     }
 }
 
-void AbilityDelegator::PostPerformForeground(const std::shared_ptr<ADelegatorAbilityProperty> &ability)
+void AbilityDelegator::PostPerformForeground(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
@@ -542,19 +518,13 @@ void AbilityDelegator::PostPerformForeground(const std::shared_ptr<ADelegatorAbi
         if (!monitor) {
             continue;
         }
-
-        if (monitor->Match(ability)) {
-            if (!ability->stsObject_.expired()) {
-                monitor->OnSTSAbilityForeground(ability->stsObject_);
-            }
-            if (!ability->object_.expired()) {
-                monitor->OnAbilityForeground(ability->object_);
-            }
+        if (monitor->Match(ability, true)) {
+            monitor->OnAbilityForeground(ability);
         }
     }
 }
 
-void AbilityDelegator::PostPerformBackground(const std::shared_ptr<ADelegatorAbilityProperty> &ability)
+void AbilityDelegator::PostPerformBackground(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
@@ -575,19 +545,13 @@ void AbilityDelegator::PostPerformBackground(const std::shared_ptr<ADelegatorAbi
         if (!monitor) {
             continue;
         }
-
-        if (monitor->Match(ability)) {
-            if (!ability->stsObject_.expired()) {
-                monitor->OnSTSAbilityBackground(ability->stsObject_);
-            }
-            if (!ability->object_.expired()) {
-                monitor->OnAbilityBackground(ability->object_);
-            }
+        if (monitor->Match(ability, true)) {
+            monitor->OnAbilityBackground(ability);
         }
     }
 }
 
-void AbilityDelegator::PostPerformStop(const std::shared_ptr<ADelegatorAbilityProperty> &ability)
+void AbilityDelegator::PostPerformStop(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
 
@@ -608,14 +572,8 @@ void AbilityDelegator::PostPerformStop(const std::shared_ptr<ADelegatorAbilityPr
         if (!monitor) {
             continue;
         }
-
-        if (monitor->Match(ability)) {
-            if (!ability->stsObject_.expired()) {
-                monitor->OnSTSAbilityStop(ability->stsObject_);
-            }
-            if (!ability->object_.expired()) {
-                monitor->OnAbilityStop(ability->object_);
-            }
+        if (monitor->Match(ability, true)) {
+            monitor->OnAbilityStop(ability);
         }
     }
 
@@ -648,7 +606,7 @@ AbilityDelegator::AbilityState AbilityDelegator::ConvertAbilityState(
     return abilityState;
 }
 
-void AbilityDelegator::ProcessAbilityProperties(const std::shared_ptr<ADelegatorAbilityProperty> &ability)
+void AbilityDelegator::ProcessAbilityProperties(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
 
@@ -671,7 +629,7 @@ void AbilityDelegator::ProcessAbilityProperties(const std::shared_ptr<ADelegator
     abilityProperties_.emplace_back(ability);
 }
 
-void AbilityDelegator::RemoveAbilityProperty(const std::shared_ptr<ADelegatorAbilityProperty> &ability)
+void AbilityDelegator::RemoveAbilityProperty(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "called");
 
@@ -689,7 +647,7 @@ void AbilityDelegator::RemoveAbilityProperty(const std::shared_ptr<ADelegatorAbi
     });
 }
 
-std::shared_ptr<ADelegatorAbilityProperty> AbilityDelegator::FindPropertyByToken(const sptr<IRemoteObject> &token)
+std::shared_ptr<BaseDelegatorAbilityProperty> AbilityDelegator::FindPropertyByToken(const sptr<IRemoteObject> &token)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
 
@@ -713,7 +671,7 @@ std::shared_ptr<ADelegatorAbilityProperty> AbilityDelegator::FindPropertyByToken
     return {};
 }
 
-std::shared_ptr<ADelegatorAbilityProperty> AbilityDelegator::FindPropertyByName(const std::string &name)
+std::shared_ptr<BaseDelegatorAbilityProperty> AbilityDelegator::FindPropertyByName(const std::string &name)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "find property by %{public}s", name.c_str());
 
@@ -776,7 +734,7 @@ void AbilityDelegator::RegisterClearFunc(ClearFunc func)
     clearFunc_ = func;
 }
 
-inline void AbilityDelegator::CallClearFunc(const std::shared_ptr<ADelegatorAbilityProperty> &ability)
+inline void AbilityDelegator::CallClearFunc(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
     if (clearFunc_) {

@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#include "sts_ability_delegator_registry.h"
+#include "ets_ability_delegator_registry.h"
 
 #include <memory>
 #include "ability_delegator.h"
 #include "ability_delegator_registry.h"
-#include "sts_ability_delegator_utils.h"
+#include "ets_ability_delegator.h"
+#include "ets_ability_delegator_utils.h"
 #include "hilog_tag_wrapper.h"
-#include "sts_ability_delegator.h"
 
 namespace OHOS {
-namespace AbilityDelegatorSts {
-std::unique_ptr<AbilityRuntime::STSNativeReference> stsReference;
-std::mutex stsReferenceMutex;
+namespace AbilityDelegatorEts {
+std::unique_ptr<AbilityRuntime::STSNativeReference> etsReference;
+std::mutex etsReferenceMutex;
 
 static ani_object GetAbilityDelegator(ani_env *env, [[maybe_unused]]ani_class aniClass)
 {
@@ -34,15 +34,15 @@ static ani_object GetAbilityDelegator(ani_env *env, [[maybe_unused]]ani_class an
         return {};
     }
 
-    std::lock_guard<std::mutex> lock(stsReferenceMutex);
+    std::lock_guard<std::mutex> lock(etsReferenceMutex);
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (delegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
         return {};
     }
 
-    if (stsReference == nullptr) {
-        ani_object value = CreateStsAbilityDelegator(env);
+    if (etsReference == nullptr) {
+        ani_object value = CreateEtsAbilityDelegator(env);
         if (value == nullptr) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "value is nullptr");
             return {};
@@ -53,17 +53,17 @@ static ani_object GetAbilityDelegator(ani_env *env, [[maybe_unused]]ani_class an
             TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_IsNullishValue");
             return {};
         }
-        stsReference = std::make_unique<AbilityRuntime::STSNativeReference>();
+        etsReference = std::make_unique<AbilityRuntime::STSNativeReference>();
         ani_ref result;
         auto status = env->GlobalReference_Create(value, &(result));
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "Create Gloabl ref for delegator failed %{public}d", status);
             return {};
         }
-        stsReference->aniObj = static_cast<ani_object>(result);
-        return stsReference->aniObj;
+        etsReference->aniObj = static_cast<ani_object>(result);
+        return etsReference->aniObj;
     } else {
-        return stsReference->aniObj;
+        return etsReference->aniObj;
     }
 }
 
@@ -80,12 +80,12 @@ static ani_object GetArguments(ani_env *env, [[maybe_unused]]ani_class aniClass)
         return {};
     }
 
-    return CreateStsAbilityDelegatorArguments(env, abilityDelegatorArgs);
+    return CreateEtsAbilityDelegatorArguments(env, abilityDelegatorArgs);
 }
 
-void StsAbilityDelegatorRegistryInit(ani_env *env)
+void EtsAbilityDelegatorRegistryInit(ani_env *env)
 {
-    TAG_LOGD(AAFwkTag::DELEGATOR, "StsAbilityDelegatorRegistryInit call");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "EtsAbilityDelegatorRegistryInit call");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
         return;
@@ -115,7 +115,7 @@ void StsAbilityDelegatorRegistryInit(ani_env *env)
     if (env->ResetError() != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "ResetError failed");
     }
-    TAG_LOGD(AAFwkTag::DELEGATOR, "StsAbilityDelegatorRegistryInit end");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "EtsAbilityDelegatorRegistryInit end");
 }
 
 extern "C" {
@@ -134,11 +134,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
 
-    StsAbilityDelegatorRegistryInit(env);
+    EtsAbilityDelegatorRegistryInit(env);
     *result = ANI_VERSION_1;
     TAG_LOGD(AAFwkTag::DELEGATOR, "ANI_Constructor finish");
     return ANI_OK;
 }
 }
-} // namespace AbilityDelegatorSts
+} // namespace AbilityDelegatorEts
 } // namespace OHOS

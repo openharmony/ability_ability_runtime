@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#include "sts_ability_delegator_utils.h"
+#include "ets_ability_delegator_utils.h"
 
 #include <map>
+#include "ets_ability_delegator.h"
 #include "hilog_tag_wrapper.h"
-#include "sts_ability_delegator.h"
+
 
 namespace OHOS {
-namespace AbilityDelegatorSts {
+namespace AbilityDelegatorEts {
 namespace {
 constexpr const char* ABILITY_DELEGATOR_CLASS_NAME = "Lapplication/AbilityDelegator/AbilityDelegatorInner;";
 constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
@@ -28,9 +29,9 @@ constexpr const char* ARGS_ABILITY_DELEGATOR_CLASS_NAME =
     "Lapplication/abilityDelegatorArgs/AbilityDelegatorArgsInner;";
 }
 
-ani_object CreateStsAbilityDelegator(ani_env *aniEnv)
+ani_object CreateEtsAbilityDelegator(ani_env *aniEnv)
 {
-    TAG_LOGD(AAFwkTag::DELEGATOR, "CreateJsAbilityDelegator");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "CreateEtsAbilityDelegator");
     if (aniEnv ==nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null aniEnv");
         return {};
@@ -45,15 +46,19 @@ ani_object CreateStsAbilityDelegator(ani_env *aniEnv)
     TAG_LOGD(AAFwkTag::DELEGATOR, "find AbilityDelegator success");
 
     std::array delegatorFunctions = {
-        ani_native_function {"getAppContext", nullptr, reinterpret_cast<void *>(GetAppContext)},
-        ani_native_function {"executeShellCommandsync", nullptr, reinterpret_cast<void *>(ExecuteShellCommand)},
-        ani_native_function {"finishTestSync", nullptr, reinterpret_cast<void *>(FinishTestSync)},
-        ani_native_function {"printSync", nullptr, reinterpret_cast<void *>(PrintSync)},
-        ani_native_function {"addAbilityMonitorAsync", nullptr, reinterpret_cast<void *>(AddAbilityMonitorASync)},
-        ani_native_function {"startAbilityAsync",
+        ani_native_function {"getAppContext", nullptr, reinterpret_cast<void *>(EtsAbilityDelegator::GetAppContext)},
+        ani_native_function {"nativeExecuteShellCommand", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::ExecuteShellCommand)},
+        ani_native_function {"nativeFinishTest", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::FinishTest)},
+        ani_native_function {"printSync", nullptr, reinterpret_cast<void *>(EtsAbilityDelegator::PrintSync)},
+        ani_native_function {"nativeAddAbilityMonitor", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityMonitor)},
+        ani_native_function {"nativeStartAbility",
             "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void *>(StartAbility)},
-        ani_native_function {"GetCurrentTopAbilitySync", nullptr, reinterpret_cast<void *>(GetCurrentTopAbilitySync)}
+            reinterpret_cast<void *>(EtsAbilityDelegator::StartAbility)},
+        ani_native_function {"nativeGetCurrentTopAbility", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::GetCurrentTopAbility)}
     };
     status = aniEnv->Class_BindNativeMethods(abilityDelegator, delegatorFunctions.data(), delegatorFunctions.size());
     if (status != ANI_OK) {
@@ -75,7 +80,7 @@ ani_object CreateStsAbilityDelegator(ani_env *aniEnv)
         return {};
     }
 
-    TAG_LOGD(AAFwkTag::DELEGATOR, "CreateStsAbilityDelegator success");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "CreateEtsAbilityDelegator success");
     return object;
 }
 
@@ -122,29 +127,24 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
         return;
     }
     ani_status status = ANI_ERROR;
-    // get getter and setter methond of Record
     ani_class recordCls;
     status = aniEnv->FindClass(RECORD_CLASS_NAME, &recordCls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status: %{public}d", status);
         return;
     }
-
     ani_method recordGetMethod;
     status = aniEnv->Class_FindMethod(recordCls, "$_get", "Lstd/core/Object;:Lstd/core/Object;", &recordGetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
     }
-
     ani_method recordSetMethod;
     status = aniEnv->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
     }
-
-    // get parameters ref of object
     ani_ref parameterRef;
     status = aniEnv->Object_CallMethodByName_Ref(argumentObject, "<get>parameters", ":Lescompat/Record;",
         &parameterRef);
@@ -153,33 +153,27 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
         return;
     }
     ani_object parameterObject = static_cast<ani_object>(parameterRef);
-
     for (auto iter = paras.begin(); iter != paras.end(); ++iter) {
         std::string key = iter->first;
         std::string value = iter->second;
         ani_string ani_key;
         ani_string ani_value;
-
         status = aniEnv->String_NewUTF8(key.c_str(), key.length(), &ani_key);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "String_NewUTF8 key failed status: %{public}d", status);
             return;
         }
-
         status = aniEnv->String_NewUTF8(value.c_str(), value.length(), &ani_value);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "String_NewUTF8 value failed status: %{public}d", status);
             return;
         }
-
-        // 调用set方法给Record类型的property赋值
         status = aniEnv->Object_CallMethod_Void(parameterObject, recordSetMethod, ani_key, ani_value);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "Object_CallMethod_Void failed status: %{public}d", status);
             return;
         }
     }
-
     TAG_LOGD(AAFwkTag::DELEGATOR, "SetParameters end");
 }
 
@@ -250,7 +244,7 @@ void SetTestRunnerClassName(ani_env *aniEnv, ani_class arguments, ani_object arg
     TAG_LOGD(AAFwkTag::DELEGATOR, "Object_CallMethod_Void success");
 }
 
-ani_object CreateStsAbilityDelegatorArguments(
+ani_object CreateEtsAbilityDelegatorArguments(
     ani_env *aniEnv, const std::shared_ptr<AppExecFwk::AbilityDelegatorArgs> abilityDelegatorArgs)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "CreateJsAbilityDelegatorArguments");
@@ -297,5 +291,5 @@ ani_object CreateStsAbilityDelegatorArguments(
 
     return argumentObject;
 }
-} // namespace AbilityDelegatorSts
+} // namespace AbilityDelegatorEts
 } // namespace OHOS

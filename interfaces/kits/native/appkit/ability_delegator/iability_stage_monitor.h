@@ -53,7 +53,7 @@ public:
      * @param isNotify Indicates whether to notify the matched abilityStage to the object who waited.
      * @return true if match is successful; returns false otherwise.
      */
-    virtual bool Match(const std::shared_ptr<DelegatorAbilityStageProperty> &abilityStage, bool isNotify = false);
+    virtual bool Match(const std::shared_ptr<BaseDelegatorAbilityStageProperty> &abilityStage, bool isNotify = false);
 
     /**
      * Waits for and returns the started AbilityStage object that matches the conditions specified in this monitor
@@ -65,7 +65,7 @@ public:
      * @return the AbilityStage object if any object has started is matched within the specified time;
      * returns null otherwise.
      */
-    virtual std::shared_ptr<DelegatorAbilityStageProperty> WaitForAbilityStage(const int64_t timeoutMs);
+    virtual std::shared_ptr<BaseDelegatorAbilityStageProperty> WaitForAbilityStage(const int64_t timeoutMs);
 
     /**
      * Waits for and returns the started AbilityStage object that matches the conditions specified in this monitor
@@ -74,12 +74,12 @@ public:
      *
      * @return the AbilityStage object if any object has started is matched within 5 seconds; returns null otherwise.
      */
-    virtual std::shared_ptr<DelegatorAbilityStageProperty> WaitForAbilityStage();
+    virtual std::shared_ptr<BaseDelegatorAbilityStageProperty> WaitForAbilityStage();
 
 private:
     std::string moduleName_;
     std::string srcEntrance_;
-    std::shared_ptr<DelegatorAbilityStageProperty> matchedAbilityStage_;
+    std::shared_ptr<BaseDelegatorAbilityStageProperty> matchedAbilityStage_;
 
     std::condition_variable cvMatch_;
     std::mutex mtxMatch_;

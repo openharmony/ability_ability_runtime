@@ -21,7 +21,7 @@ IAbilityStageMonitor::IAbilityStageMonitor(const std::string &moduleName, const 
     : moduleName_(moduleName), srcEntrance_(srcEntrance)
 {}
 
-bool IAbilityStageMonitor::Match(const std::shared_ptr<DelegatorAbilityStageProperty> &abilityStage, bool isNotify)
+bool IAbilityStageMonitor::Match(const std::shared_ptr<BaseDelegatorAbilityStageProperty> &abilityStage, bool isNotify)
 {
     if (!abilityStage) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null abilityStage");
@@ -46,12 +46,12 @@ bool IAbilityStageMonitor::Match(const std::shared_ptr<DelegatorAbilityStageProp
     return true;
 }
 
-std::shared_ptr<DelegatorAbilityStageProperty> IAbilityStageMonitor::WaitForAbilityStage()
+std::shared_ptr<BaseDelegatorAbilityStageProperty> IAbilityStageMonitor::WaitForAbilityStage()
 {
     return WaitForAbilityStage(MAX_TIME_OUT);
 }
 
-std::shared_ptr<DelegatorAbilityStageProperty> IAbilityStageMonitor::WaitForAbilityStage(const int64_t timeoutMs)
+std::shared_ptr<BaseDelegatorAbilityStageProperty> IAbilityStageMonitor::WaitForAbilityStage(const int64_t timeoutMs)
 {
     auto realTime = timeoutMs;
     if (timeoutMs <= 0) {

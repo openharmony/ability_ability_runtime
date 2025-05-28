@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STS_ABILITY_DELEGATOR_REGISTRY_H
-#define OHOS_ABILITY_RUNTIME_STS_ABILITY_DELEGATOR_REGISTRY_H
+#ifndef OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_UTILS_H
+#define OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_UTILS_H
 
+#include "ability_delegator.h"
+#include "ability_delegator_args.h"
 #include "sts_runtime.h"
 
 namespace OHOS {
-namespace AbilityDelegatorSts {
-void StsAbilityDelegatorRegistryInit(ani_env *env);
-} // namespace AbilityDelegatorSts
+namespace AbilityDelegatorEts {
+ani_object CreateEtsAbilityDelegator(ani_env *env);
+ani_object CreateEtsAbilityDelegatorArguments(ani_env *env,
+    const std::shared_ptr<AppExecFwk::AbilityDelegatorArgs> abilityDelegatorArgs);
+} // namespace AbilityDelegatorEts
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_STS_ABILITY_DELEGATOR_REGISTRY_H
+#endif // OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_UTILS_H

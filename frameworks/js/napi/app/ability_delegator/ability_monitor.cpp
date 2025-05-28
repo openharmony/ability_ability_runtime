@@ -32,82 +32,138 @@ AbilityMonitor::AbilityMonitor(const std::string &name, const std::string &modul
     : IAbilityMonitor(name, moduleName), jsMonitor_(jsAbilityMonitor)
 {}
 
-void AbilityMonitor::OnAbilityStart(const std::weak_ptr<NativeReference> &abilityObj)
+void AbilityMonitor::OnAbilityStart(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
+    auto baseProperty = abilityObj.lock();
+    if (!baseProperty) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "abilityObj is expired");
+        return;
+    }
+    auto jsbaseProperty = std::static_pointer_cast<ADelegatorAbilityProperty>(baseProperty);
+
     if (jsMonitor_ == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "jsMonitor_ is nullptr");
         return;
     }
 
-    jsMonitor_->OnAbilityCreate(abilityObj);
+    jsMonitor_->OnAbilityCreate(jsbaseProperty->object_);
 }
 
-void AbilityMonitor::OnAbilityForeground(const std::weak_ptr<NativeReference> &abilityObj)
+void AbilityMonitor::OnAbilityForeground(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
+    auto baseProperty = abilityObj.lock();
+    if (!baseProperty) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "abilityObj is expired");
+        return;
+    }
+    auto jsbaseProperty = std::static_pointer_cast<ADelegatorAbilityProperty>(baseProperty);
+
     if (jsMonitor_ == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "jsMonitor_ is nullptr");
         return;
     }
 
-    jsMonitor_->OnAbilityForeground(abilityObj);
+    jsMonitor_->OnAbilityForeground(jsbaseProperty->object_);
 }
 
-void AbilityMonitor::OnAbilityBackground(const std::weak_ptr<NativeReference> &abilityObj)
+void AbilityMonitor::OnAbilityBackground(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
+    auto baseProperty = abilityObj.lock();
+    if (!baseProperty) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "abilityObj is expired");
+        return;
+    }
+    auto jsbaseProperty = std::static_pointer_cast<ADelegatorAbilityProperty>(baseProperty);
+
     if (jsMonitor_ == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "jsMonitor_ is nullptr");
         return;
     }
 
-    jsMonitor_->OnAbilityBackground(abilityObj);
+    jsMonitor_->OnAbilityBackground(jsbaseProperty->object_);
 }
 
-void AbilityMonitor::OnAbilityStop(const std::weak_ptr<NativeReference> &abilityObj)
+void AbilityMonitor::OnAbilityStop(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
+    auto baseProperty = abilityObj.lock();
+    if (!baseProperty) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "abilityObj is expired");
+        return;
+    }
+    auto jsbaseProperty = std::static_pointer_cast<ADelegatorAbilityProperty>(baseProperty);
+
     if (jsMonitor_ == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "jsMonitor_ is nullptr");
         return;
     }
 
-    jsMonitor_->OnAbilityDestroy(abilityObj);
+    jsMonitor_->OnAbilityDestroy(jsbaseProperty->object_);
 }
 
-void AbilityMonitor::OnWindowStageCreate(const std::weak_ptr<NativeReference> &abilityObj)
+void AbilityMonitor::OnWindowStageCreate(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
+    auto baseProperty = abilityObj.lock();
+    if (!baseProperty) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "abilityObj is expired");
+        return;
+    }
+    auto jsbaseProperty = std::static_pointer_cast<ADelegatorAbilityProperty>(baseProperty);
+
     if (jsMonitor_ == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "jsMonitor_ is nullptr");
         return;
     }
 
-    jsMonitor_->OnWindowStageCreate(abilityObj);
+    jsMonitor_->OnWindowStageCreate(jsbaseProperty->object_);
 }
 
-void AbilityMonitor::OnWindowStageRestore(const std::weak_ptr<NativeReference> &abilityObj)
+void AbilityMonitor::OnWindowStageRestore(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
+    auto baseProperty = abilityObj.lock();
+    if (!baseProperty) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "abilityObj is expired");
+        return;
+    }
+    auto jsbaseProperty = std::static_pointer_cast<ADelegatorAbilityProperty>(baseProperty);
+
     if (jsMonitor_ == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "jsMonitor_ is nullptr");
         return;
     }
 
-    jsMonitor_->OnWindowStageRestore(abilityObj);
+    jsMonitor_->OnWindowStageRestore(jsbaseProperty->object_);
 }
 
-void AbilityMonitor::OnWindowStageDestroy(const std::weak_ptr<NativeReference> &abilityObj)
+void AbilityMonitor::OnWindowStageDestroy(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
+    auto baseProperty = abilityObj.lock();
+    if (!baseProperty) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "abilityObj is expired");
+        return;
+    }
+    auto jsbaseProperty = std::static_pointer_cast<ADelegatorAbilityProperty>(baseProperty);
+
     if (jsMonitor_ == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "jsMonitor_ is nullptr");
         return;
     }
 
-    jsMonitor_->OnWindowStageDestroy(abilityObj);
+    jsMonitor_->OnWindowStageDestroy(jsbaseProperty->object_);
 }
 }  // namespace AbilityDelegatorJs
 }  // namespace OHOS
