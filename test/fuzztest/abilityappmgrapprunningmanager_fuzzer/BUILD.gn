@@ -76,6 +76,7 @@ ohos_fuzztest("AbilityAppMgrAppRunningManagerFuzzTest") {
     "common_event_service:cesfwk_innerkits",
     "dsoftbus:softbus_client",
     "ffrt:libffrt",
+    "graphic_2d:librender_service_base",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
