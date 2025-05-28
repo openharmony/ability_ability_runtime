@@ -117,7 +117,7 @@ void NapiThrow(napi_env env, int32_t errCode)
 }
 
 auto OnSendFinishedUvAfterWorkCallback = [](uv_work_t* work, int status) {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "trigger callback");
     TriggerReceiveDataWorker* dataWorkerData = static_cast<TriggerReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null dataWorkerData");
@@ -125,6 +125,7 @@ auto OnSendFinishedUvAfterWorkCallback = [](uv_work_t* work, int status) {
         return;
     }
     if (dataWorkerData->resultData == "canceled") {
+        TAG_LOGI(AAFwkTag::WANTAGENT, "canceled");
         delete dataWorkerData;
         dataWorkerData = nullptr;
         delete work;
@@ -185,6 +186,7 @@ auto OnSendFinishedUvAfterWorkCallback = [](uv_work_t* work, int status) {
 void TriggerCompleteCallBack::OnSendFinished(
     const AAFwk::Want &want, int resultCode, const std::string &resultData, const AAFwk::WantParams &resultExtras)
 {
+    TAG_LOGI(AAFwkTag::WANTAGENT, "send finished");
     if (triggerCompleteInfo_.nativeRef == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null callBack");
         return;
@@ -489,7 +491,7 @@ napi_value JsWantAgent::OnGetOperationType(napi_env env, napi_callback_info info
 
 napi_value JsWantAgent::OnGetBundleName(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "get bundle name");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -541,7 +543,7 @@ void JsWantAgent::SetOnGetBundleNameCallback(std::shared_ptr<WantAgent> wantAgen
     auto retCode = std::make_shared<int32_t>(NO_ERROR);
     auto bundleName = std::make_shared<std::string>();
     execute = [wantAgent, retCode, bundleName] () {
-        TAG_LOGI(AAFwkTag::WANTAGENT, "start");
+        TAG_LOGI(AAFwkTag::WANTAGENT, "get bundle name callback");
         *retCode = WantAgentHelper::GetBundleName(wantAgent, *bundleName);
     };
     complete = [retCode, bundleName](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -560,7 +562,7 @@ void JsWantAgent::SetOnGetBundleNameCallback(std::shared_ptr<WantAgent> wantAgen
 
 napi_value JsWantAgent::OnGetUid(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "get uid");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -627,7 +629,7 @@ void JsWantAgent::SetOnGetUidCallback(std::shared_ptr<WantAgent> wantAgent,
 
 napi_value JsWantAgent::OnCancel(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "on cancel");
     WantAgent* pWantAgent = nullptr;
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
@@ -1080,6 +1082,7 @@ napi_value JsWantAgent::OnGetWantAgent(napi_env env, napi_callback_info info)
 
 napi_value JsWantAgent::OnNapiGetWant(napi_env env, napi_callback_info info)
 {
+    TAG_LOGI(AAFwkTag::WANTAGENT, "on get want");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1136,7 +1139,7 @@ napi_value JsWantAgent::OnNapiGetWant(napi_env env, napi_callback_info info)
 
 napi_value JsWantAgent::OnNapiTrigger(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "on trigger");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1167,6 +1170,7 @@ napi_value JsWantAgent::OnNapiTrigger(napi_env env, napi_callback_info info)
 
 napi_value JsWantAgent::OnNapiGetWantAgent(napi_env env, napi_callback_info info)
 {
+    TAG_LOGI(AAFwkTag::WANTAGENT, "on get wantAgent");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);

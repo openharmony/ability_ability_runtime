@@ -706,7 +706,7 @@ void UIAbilityImpl::HandleForegroundNewState(const AAFwk::Want &want, bool &bfla
 
 void UIAbilityImpl::HandleExecuteInsightIntentForeground(const AAFwk::Want &want, bool &bflag)
 {
-    TAG_LOGI(AAFwkTag::UIABILITY, "called");
+    TAG_LOGI(AAFwkTag::UIABILITY, "handle execute insight intent foreground");
     auto executeParam = std::make_shared<InsightIntentExecuteParam>();
     auto ret = InsightIntentExecuteParam::GenerateFromWant(want, *executeParam);
     if (!ret) {
@@ -849,7 +849,6 @@ void UIAbilityImpl::PostForegroundInsightIntent()
 
 bool UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want, bool onlyExecuteIntent)
 {
-    TAG_LOGI(AAFwkTag::UIABILITY, "called");
     auto executeParam = std::make_shared<InsightIntentExecuteParam>();
     auto ret = InsightIntentExecuteParam::GenerateFromWant(want, *executeParam);
     if (!ret && !onlyExecuteIntent) {
@@ -858,7 +857,7 @@ bool UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want
         return true;
     }
 
-    TAG_LOGD(AAFwkTag::UIABILITY,
+    TAG_LOGI(AAFwkTag::UIABILITY,
         "insightIntent bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s"
         "insightIntentName: %{public}s, executeMode: %{public}d, intentId: %{public}" PRIu64"",
         executeParam->bundleName_.c_str(), executeParam->moduleName_.c_str(), executeParam->abilityName_.c_str(),
@@ -886,7 +885,7 @@ void UIAbilityImpl::ExecuteInsightIntentBackgroundByColdBoot(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGI(AAFwkTag::UIABILITY, "execute insight intent background by cold boot");
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
             TAG_LOGD(AAFwkTag::UIABILITY, "end, intentId %{public}" PRIu64"", intentId);
@@ -909,7 +908,7 @@ void UIAbilityImpl::ExecuteInsightIntentBackgroundAlreadyStart(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGI(AAFwkTag::UIABILITY, "execute insight intent background already start");
 
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {

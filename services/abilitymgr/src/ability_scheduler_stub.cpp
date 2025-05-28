@@ -712,7 +712,7 @@ int AbilitySchedulerStub::CallRequestInner(MessageParcel &data, MessageParcel &r
 
 int AbilitySchedulerStub::OnExecuteIntentInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::INTENT, "on execute intent stub");
     std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null want");
