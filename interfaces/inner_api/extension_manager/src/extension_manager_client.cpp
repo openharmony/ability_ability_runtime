@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "extension_manager_client.h"
-
 #include "ability_manager_errors.h"
 #include "extension_ability_info.h"
+#include "extension_manager_client.h"
 #include "extension_manager_proxy.h"
+#include "extension_running_info.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
@@ -26,10 +26,22 @@
 
 namespace OHOS {
 namespace AAFwk {
-#define CHECK_POINTER_RETURN_NOT_CONNECTED(object)   \
-    if (!object) {                                   \
+#define CHECK_POINTER_RETURN(object)                        \
+if (!object) {                                          \
+    TAG_LOGE(AAFwkTag::EXTMGR, "null proxy"); \
+    return;                                             \
+}
+
+#define CHECK_POINTER_RETURN_NOT_CONNECTED(object)           \
+    if (!object) {                                           \
         TAG_LOGE(AAFwkTag::EXTMGR, "null proxy"); \
-        return ABILITY_SERVICE_NOT_CONNECTED;        \
+        return ABILITY_SERVICE_NOT_CONNECTED;                \
+    }
+
+#define CHECK_POINTER_RETURN_INVALID_VALUE(object)           \
+    if (!object) {                                           \
+        TAG_LOGE(AAFwkTag::EXTMGR, "null proxy"); \
+        return ERR_INVALID_VALUE;                            \
     }
 
 ExtensionManagerClient& ExtensionManagerClient::GetInstance()
@@ -71,7 +83,7 @@ void ExtensionManagerClient::Connect()
     TAG_LOGD(AAFwkTag::EXTMGR, "Connect AMS success");
 }
 
-void ExtensionManagerClient::ResetProxy(const wptr<IRemoteObject>& remote)
+void ExtensionManagerClient::ResetProxy(const wptr<IRemoteObject> &remote)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (proxy_ == nullptr) {
@@ -86,7 +98,7 @@ void ExtensionManagerClient::ResetProxy(const wptr<IRemoteObject>& remote)
     }
 }
 
-void ExtensionManagerClient::ExtensionMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+void ExtensionManagerClient::ExtensionMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     TAG_LOGI(AAFwkTag::EXTMGR, "called");
     ExtensionManagerClient::GetInstance().ResetProxy(remote);
@@ -197,6 +209,43 @@ ErrCode ExtensionManagerClient::RemoveDeathRecipient()
     deathRecipient_ = nullptr;
     TAG_LOGI(AAFwkTag::EXTMGR, "RemoveDeathRecipient success");
     return ERR_OK;
+}
+
+ErrCode ExtensionManagerClient::StartExtensionAbility(const Want &want, sptr<IRemoteObject> callerToken,
+    int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetExtensionManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::EXTMGR, "name:%{public}s %{public}s, userId=%{public}d.",
+        want.GetElement().GetAbilityName().c_str(), want.GetElement().GetBundleName().c_str(), userId);
+    return abms->StartExtensionAbility(want, callerToken, userId, extensionType);
+}
+
+ErrCode ExtensionManagerClient::StopExtensionAbility(const Want &want, sptr<IRemoteObject> callerToken,
+    int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
+{
+    auto abms = GetExtensionManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::EXTMGR, "name:%{public}s %{public}s, userId=%{public}d.",
+        want.GetElement().GetAbilityName().c_str(), want.GetElement().GetBundleName().c_str(), userId);
+    return abms->StopExtensionAbility(want, callerToken, userId, extensionType);
+}
+
+ErrCode ExtensionManagerClient::GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetExtensionManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetExtensionRunningInfos(upperLimit, info);
+}
+
+int32_t ExtensionManagerClient::TransferAbilityResultForExtension(const sptr<IRemoteObject> &callerToken,
+    int32_t resultCode, const Want &want)
+{
+    auto abms = GetExtensionManager();
+    CHECK_POINTER_RETURN_INVALID_VALUE(abms);
+    return abms->TransferAbilityResultForExtension(callerToken, resultCode, want);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
