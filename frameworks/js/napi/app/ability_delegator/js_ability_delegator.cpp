@@ -127,7 +127,8 @@ JSAbilityDelegator::JSAbilityDelegator()
 {
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator) {
-        auto clearFunc = [](const std::shared_ptr<ADelegatorAbilityProperty> &property) {
+        auto clearFunc = [](const std::shared_ptr<BaseDelegatorAbilityProperty> &baseProperty) {
+            auto property = std::static_pointer_cast<AppExecFwk::ADelegatorAbilityProperty>(baseProperty);
             TAG_LOGI(AAFwkTag::DELEGATOR, "clearFunc called");
             if (!property) {
                 TAG_LOGE(AAFwkTag::DELEGATOR, "null property");
@@ -499,7 +500,6 @@ napi_value JSAbilityDelegator::OnRemoveAbilityStageMonitorSync(napi_env env, Nap
 napi_value JSAbilityDelegator::OnWaitAbilityMonitor(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "argc: %{public}d", static_cast<int32_t>(info.argc));
-
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     TimeoutCallback opt {false, false};
     int64_t timeout = 0;
@@ -508,7 +508,6 @@ napi_value JSAbilityDelegator::OnWaitAbilityMonitor(napi_env env, NapiCallbackIn
         return ThrowJsError(env, INCORRECT_PARAMETERS,
             "Parse monitor want failed, removeAbilityMonitor must be Monitor.");
     }
-
     auto abilityObjectBox = std::make_shared<AbilityObjectBox>();
     NapiAsyncTask::ExecuteCallback execute = [monitor, timeout, opt, abilityObjectBox]() {
         TAG_LOGI(AAFwkTag::DELEGATOR, "execute called");
@@ -517,23 +516,22 @@ napi_value JSAbilityDelegator::OnWaitAbilityMonitor(napi_env env, NapiCallbackIn
                 AAFwkTag::DELEGATOR, "null abilityObjectBox");
             return;
         }
-
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
             return;
         }
-
-        std::shared_ptr<ADelegatorAbilityProperty> property = opt.hasTimeoutPara ?
+        std::shared_ptr<BaseDelegatorAbilityProperty> property = opt.hasTimeoutPara ?
             delegator->WaitAbilityMonitor(monitor, timeout) : delegator->WaitAbilityMonitor(monitor);
-        if (!property || property->object_.expired()) {
+        auto jsProperty = std::static_pointer_cast<AppExecFwk::ADelegatorAbilityProperty>(property);
+        if (!jsProperty || jsProperty->object_.expired()) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "invalid property");
             return;
         }
 
-        abilityObjectBox->object_ = property->object_;
+        abilityObjectBox->object_ = jsProperty->object_;
         std::unique_lock<std::mutex> lck(g_mutexAbilityRecord);
-        g_abilityRecord.emplace(property->object_, property->token_);
+        g_abilityRecord.emplace(jsProperty->object_, jsProperty->token_);
     };
 
     NapiAsyncTask::CompleteCallback complete = [abilityObjectBox](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -581,14 +579,15 @@ napi_value JSAbilityDelegator::OnWaitAbilityStageMonitor(napi_env env, NapiCallb
             TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
             return;
         }
-        std::shared_ptr<DelegatorAbilityStageProperty> result;
+        std::shared_ptr<BaseDelegatorAbilityStageProperty> result;
         result = opt.hasTimeoutPara ?
             delegator->WaitAbilityStageMonitor(monitor, timeout) : delegator->WaitAbilityStageMonitor(monitor);
-        if (!result || result->object_.expired()) {
+        auto jsStageProperty = std::static_pointer_cast<AppExecFwk::DelegatorAbilityStageProperty>(result);
+        if (!jsStageProperty || jsStageProperty->object_.expired()) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "waitAbilityStageMonitor failed");
             return;
         }
-        abilityStageObjBox->object_ = result->object_;
+        abilityStageObjBox->object_ = jsStageProperty->object_;
     };
 
     NapiAsyncTask::CompleteCallback complete = [abilityStageObjBox](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -795,15 +794,16 @@ napi_value JSAbilityDelegator::OnGetCurrentTopAbility(napi_env env, NapiCallback
         }
 
         auto property = delegator->GetCurrentTopAbility();
-        if (!property || property->object_.expired()) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "invalid property");
+        auto jsProperty = std::static_pointer_cast<AppExecFwk::ADelegatorAbilityProperty>(property);
+        if (!jsProperty || jsProperty->object_.expired()) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "invalid jsProperty");
             task.Reject(env, CreateJsError(env, COMMON_FAILED, "Calling GetCurrentTopAbility failed."));
         } else {
             {
                 std::unique_lock<std::mutex> lck(g_mutexAbilityRecord);
-                g_abilityRecord.emplace(property->object_, property->token_);
+                g_abilityRecord.emplace(jsProperty->object_, jsProperty->token_);
             }
-            ResolveWithNoError(env, task, property->object_.lock()->GetNapiValue());
+            ResolveWithNoError(env, task, jsProperty->object_.lock()->GetNapiValue());
         }
     };
 

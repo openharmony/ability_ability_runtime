@@ -254,9 +254,9 @@ bool STSAbilityStage::CallObjectMethod(bool withResult, const char *name, const 
     return false;
 }
 
-std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> STSAbilityStage::CreateStageProperty() const
+std::shared_ptr<AppExecFwk::ETSDelegatorAbilityStageProperty> STSAbilityStage::CreateStageProperty() const
 {
-    auto property = std::make_shared<AppExecFwk::DelegatorAbilityStageProperty>();
+    auto property = std::make_shared<AppExecFwk::ETSDelegatorAbilityStageProperty>();
     return property;
 }
 
