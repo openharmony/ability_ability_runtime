@@ -28,7 +28,7 @@ export default class UIExtensionAbility extends ExtensionAbility {
   private callOnDestroy(): boolean {
     let p = this.onDestroyAsync();
     if (this.isOnDestroyAsync) {
-      p.then<void>((a:undefined): void => {
+      p.then<void>((): void => {
         this.nativeOnDestroyCallback();
       });
     } else {
