@@ -64,7 +64,17 @@ DataObsMgrClient::DataObsMgrClient()
 }
 
 DataObsMgrClient::~DataObsMgrClient()
-{}
+{
+    if (dataObsManger_ != nullptr) {
+        dataObsManger_->AsObject()->RemoveDeathRecipient(deathRecipient_);
+    }
+    sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemManager == nullptr) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "null systemmgr");
+        return;
+    }
+    systemManager->UnSubscribeSystemAbility(DATAOBS_MGR_SERVICE_SA_ID, callback_);
+}
 
 /**
  * Registers an observer to DataObsMgr specified by the given Uri.
@@ -167,8 +177,10 @@ __attribute__ ((no_sanitize("cfi"))) std::pair<Status, sptr<IDataObsMgr>> DataOb
         TAG_LOGE(AAFwkTag::DBOBSMGR, "iDataObsMgr failed");
         return std::make_pair(GET_DATAOBS_SERVICE_FAILED, nullptr);
     }
-    sptr<ServiceDeathRecipient> serviceDeathRecipient(new (std::nothrow) ServiceDeathRecipient(GetInstance()));
-    dataObsManger_->AsObject()->AddDeathRecipient(serviceDeathRecipient);
+    if (deathRecipient_ == nullptr) {
+        deathRecipient_ = new (std::nothrow) ServiceDeathRecipient(GetInstance());
+    }
+    dataObsManger_->AsObject()->AddDeathRecipient(deathRecipient_);
     return std::make_pair(SUCCESS, dataObsManger_);
 }
 
