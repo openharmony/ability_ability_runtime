@@ -1007,11 +1007,13 @@ public:
 
     inline void SetKillReason(std::string killReason)
     {
+        std::lock_guard<ffrt::mutex> lock(killReasonLock_);
         killReason_ = killReason;
     }
 
     inline std::string GetKillReason() const
     {
+        std::lock_guard<ffrt::mutex> lock(killReasonLock_);
         return killReason_;
     }
 
@@ -1242,6 +1244,7 @@ private:
     mutable ffrt::mutex supportMultiProcessDeviceFeatureLock_;
     std::shared_ptr<StartupTaskData> startupTaskData_ = nullptr;
     ffrt::mutex startupTaskDataLock_;
+    mutable ffrt::mutex killReasonLock_;
 };
 
 }  // namespace AppExecFwk
