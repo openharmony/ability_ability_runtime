@@ -19,8 +19,18 @@ namespace AbilityConstant {
     launchReasonMessage?: string;
     lastExitReason: LastExitReason;
     lastExitMessage: string;
+    lastExitDetailInfo?: LastExitDetailInfo;
   }
-
+  export interface LastExitDetailInfo {
+    pid: number;
+    processName: string;
+    uid: number;
+    exitSubReason: number;
+    exitMsg: string;
+    rss: number;
+    pss: number;
+    timestamp: number;
+  }
   export enum LaunchReason {
     UNKNOWN = 0,
     START_ABILITY = 1,
@@ -93,6 +103,18 @@ class LaunchParamImpl implements AbilityConstant.LaunchParam {
   launchReasonMessage?: string | undefined;
   lastExitReason: AbilityConstant.LastExitReason = AbilityConstant.LastExitReason.UNKNOWN;
   lastExitMessage: string = '';
+  lastExitDetailInfo?: AbilityConstant.LastExitDetailInfo = undefined;
+}
+
+class LastExitDetailInfoImpl implements AbilityConstant.LastExitDetailInfo {
+  pid: number = 0;
+  processName: string = '';
+  uid: number = 0;
+  exitSubReason: number = 0;
+  exitMsg: string = '';
+  rss: number = 0;
+  pss: number = 0;
+  timestamp: number = 0;
 }
 
 export default AbilityConstant;
