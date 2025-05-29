@@ -32,7 +32,8 @@ std::string GetLibPath(const std::string &hapPath, bool isPreInstallApp)
     return libPath;
 }
 
-void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp)
+void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp,
+    AppLibPathMap &appAbcLibPaths)
 {
     if (hapInfo.nativeLibraryPath.empty()) {
         TAG_LOGD(AAFwkTag::APPKIT, "Lib path of %{public}s is empty, lib isn't isolated or compressed",
@@ -91,7 +92,7 @@ void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &app
 }
 
 void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativeLibraryPath,
-    AppLibPathMap &appLibPaths)
+    AppLibPathMap &appLibPaths, AppLibPathMap &appAbcLibPaths)
 {
     if (hapInfo.isLibIsolated) {
         patchNativeLibraryPath = hapInfo.hqfInfo.nativeLibraryPath;
