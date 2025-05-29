@@ -56,6 +56,7 @@
 #include "syscap_ts.h"
 #include "system_ability_definition.h"
 #include "ets_ani_expo.h"
+#include "static_core/plugins/ets/runtime/ets_namespace_manager.h"
 
 #ifdef SUPPORT_SCREEN
 #include "ace_forward_compatibility.h"
@@ -291,7 +292,7 @@ void STSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths, const AppLibPat
     StsEnv::STSEnvironment::InitSTSSDKNS(STS_RT_PATH);
     StsEnv::STSEnvironment::InitSTSSysNS(STS_SYSLIB_PATH);
 
-    // ark::ets::EtsNamespaceManager::SetAppLibPaths(appAbcLibPaths);
+    ark::ets::EtsNamespaceManager::SetAppLibPaths(appAbcLibPaths);
 }
 
 bool STSRuntime::Initialize(const Options& options)
