@@ -59,6 +59,7 @@ ohos_unittest("file_permission_manager_test") {
     "eventhandler:libeventhandler",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",

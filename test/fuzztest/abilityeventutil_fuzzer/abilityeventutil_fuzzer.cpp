@@ -18,8 +18,9 @@
 #include <iostream>
 #include <cstddef>
 #include <cstdint>
-
+#define private public
 #include "ability_event_util.h"
+#undef private
 #include "securec.h"
 
 using namespace OHOS::AAFwk;
@@ -50,6 +51,13 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     auto abilityEventUtil = std::make_shared<AbilityEventUtil>();
     abilityEventUtil->HandleModuleInfoUpdated(strParam, intParam, "", false);
 
+    EventInfo eventInfo = {};
+    if (abilityEventUtil->taskHandler_ == nullptr) {
+        return false;
+    }
+    abilityEventUtil->SendStartAbilityErrorEvent(eventInfo, 1, "SendStartAbilityErrorEvent Test");
+    abilityEventUtil->taskHandler_ = nullptr;
+    abilityEventUtil->SendStartAbilityErrorEvent(eventInfo, 1, "SendStartAbilityErrorEvent Test");
     return true;
 }
 }

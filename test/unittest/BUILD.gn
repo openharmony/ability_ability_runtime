@@ -128,6 +128,7 @@ group("unittest") {
       "ability_debug_response_proxy_test:unittest",
       "ability_debug_response_stub_test:unittest",
       "ability_event_handler_test:unittest",
+      "ability_event_util_test:unittest",
       "ability_extension_base_test:unittest",
       "ability_extension_config_test:unittest",
       "ability_extension_context_test:unittest",

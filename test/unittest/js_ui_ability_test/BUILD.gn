@@ -64,6 +64,7 @@ ohos_unittest("js_ui_ability_test") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "ipc:ipc_napi",
