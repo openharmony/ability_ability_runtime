@@ -61,7 +61,7 @@ public:
 
 class STSRuntime : public Runtime {
 public:
-    static std::unique_ptr<STSRuntime> Create(const Options& options, Runtime* jsRuntime);
+    static std::unique_ptr<STSRuntime> Create(const Options& options, JsRuntime* jsRuntime);
     static void SetAppLibPath(const AppLibPathMap& appLibPaths);
     ~STSRuntime() override;
     Language GetLanguage() const override
@@ -81,7 +81,7 @@ public:
         const std::string& hapPath, bool isEsMode, bool useCommonTrunk) override {}
     void PreloadModule(
         const std::string& moduleName, const std::string& hapPath, bool isEsMode, bool useCommonTrunk) override;
-    void FinishPreload() override {}
+    void FinishPreload() override;
     bool LoadRepairPatch(const std::string& patchFile, const std::string& baseFile) override { return false; }
     bool NotifyHotReloadPage() override { return false; }
     bool UnLoadRepairPatch(const std::string& patchFile) override { return false; }
@@ -110,20 +110,17 @@ public:
     bool RunScript(ani_env* aniEnv, const std::string& moduleName, const std::string& abcPath,
         const std::string& hapPath, const std::string& srcEntrance);
     void HandleUncaughtError();
+    static std::unique_ptr<STSRuntime> PreFork(const Options& options);
+
 private:
     bool LoadSTSAppLibrary(const AppLibPathVec& appLibPaths);
     bool Initialize(const Options& options);
     void Deinitialize();
     bool CreateStsEnv(const Options& options);
-    void PreloadAce(const Options& options);
     void ReInitStsEnvImpl(const Options& options);
-    void PostPreload(const Options& options);
-    void LoadAotFile(const Options& options);
     void ReInitUVLoop();
-    void InitConsoleModule();
-    void InitTimerModule();
+    void PostFork(const Options &options, std::vector<ani_option>& aniOptions, JsRuntime* jsRuntime);
     std::shared_ptr<StsEnv::STSEnvironment> stsEnv_;
-    bool preloaded_ = false;
     int32_t apiTargetVersion_ = 0;
     bool isBundle_ = true;
     std::string codePath_;
@@ -140,7 +137,6 @@ private:
     void StopDebugMode();
 
 public:
-    static AbilityRuntime::JsRuntime* jsRuntime_;
     bool debugMode_ = false;
 //    std::mutex mutex_;
 };

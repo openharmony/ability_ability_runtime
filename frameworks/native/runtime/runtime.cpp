@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-std::unique_ptr<Runtime> g_preloadedInstance;
+std::map<Runtime::Language, std::unique_ptr<Runtime>> g_preloadedInstances;
 }
 
 std::vector<std::unique_ptr<Runtime>> Runtime::CreateRuntimes(Runtime::Options& options)
@@ -58,12 +58,6 @@ std::vector<std::unique_ptr<Runtime>> Runtime::CreateRuntimes(Runtime::Options& 
 
 std::unique_ptr<Runtime> Runtime::Create(Runtime::Options& options)
 {
-    std::unique_ptr<JsRuntime> jsRuntime;
-    if (options.lang == Runtime::Language::STS) {
-        options.lang = Runtime::Language::JS;
-        jsRuntime = JsRuntime::Create(options);
-        options.lang = Runtime::Language::STS;
-    }
     switch (options.lang) {
         case Runtime::Language::JS:
             return JsRuntime::Create(options);
@@ -72,23 +66,33 @@ std::unique_ptr<Runtime> Runtime::Create(Runtime::Options& options)
             return CJRuntime::Create(options);
 #endif
         case Runtime::Language::STS:
-            return STSRuntime::Create(options, jsRuntime.get());
+            return STSRuntime::PreFork(options);
         default:
             return std::unique_ptr<Runtime>();
     }
 }
 
-void Runtime::SavePreloaded(std::unique_ptr<Runtime>&& instance)
+void Runtime::SavePreloaded(std::unique_ptr<Runtime>&& instance, Language key)
 {
     if (instance) {
         instance->FinishPreload();
     }
-    g_preloadedInstance = std::move(instance);
+
+    auto it = g_preloadedInstances.find(key);
+    if (it != g_preloadedInstances.end()) {
+        g_preloadedInstances.erase(it);
+    }
+    g_preloadedInstances.emplace(key, std::move(instance));
 }
 
-std::unique_ptr<Runtime> Runtime::GetPreloaded()
+std::unique_ptr<Runtime> Runtime::GetPreloaded(Language key)
 {
-    return std::move(g_preloadedInstance);
+    auto it = g_preloadedInstances.find(key);
+    if (it == g_preloadedInstances.end()) {
+        return nullptr;
+    }
+    auto instance = std::move(it->second);
+    return instance;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
