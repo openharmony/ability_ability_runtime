@@ -28,7 +28,8 @@ std::string GetLibPath(const std::string &hapPath, bool isPreInstallApp);
 
 void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp);
 
-void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp);
+void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp,
+    const std::string &appBundleName, AppLibPathMap &appAbcLibPaths);
 
 void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativeLibraryPath,
     AppLibPathMap &appLibPaths);

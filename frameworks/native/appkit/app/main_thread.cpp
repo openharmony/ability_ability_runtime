@@ -240,7 +240,8 @@ void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &h
     for (auto &hspInfo : hspList) {
         TAG_LOGD(AAFwkTag::APPKIT, "bundle:%s, module:%s, nativeLibraryPath:%s", hspInfo.bundleName.c_str(),
             hspInfo.moduleName.c_str(), hspInfo.nativeLibraryPath.c_str());
-        GetHspNativeLibPath(hspInfo, appLibPaths, hspInfo.hapPath.find(ABS_CODE_PATH) != 0u);
+        GetHspNativeLibPath(hspInfo, appLibPaths, hspInfo.hapPath.find(ABS_CODE_PATH) != 0u,
+            bundleInfo.applicationInfo.bundleName, appAbcLibPaths);
     }
 }
 
@@ -1640,11 +1641,16 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         }
     } else {
 #endif
+<<<<<<< HEAD
         if (IsEtsAPP(appInfo)) {
             AbilityRuntime::ETSRuntime::SetAppLibPath(appLibPaths);
         } else {
             AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
         }
+=======
+        AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
+        AbilityRuntime::STSRuntime::SetAppLibPath(appLibPaths, appAbcLibPaths);
+>>>>>>> fe783cf77a (feature SetAppAbcLibPath-2)
 #ifdef CJ_FRONTEND
     }
 #endif
