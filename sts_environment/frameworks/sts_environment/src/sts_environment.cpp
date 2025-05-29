@@ -256,7 +256,7 @@ void STSEnvironment::InitSTSSysNS(const std::string& path)
     dlns_inherit(&ns, &ndk, "allow_all_shared_libs");
 }
 
-bool STSEnvironment::StartRuntime(napi_env napiEnv, std::vector<ani_option>& options)
+bool STSEnvironment::StartRuntime(std::vector<ani_option>& options)
 {
     TAG_LOGE(AAFwkTag::STSRUNTIME, "StartRuntime call");
     if (isRuntimeStarted_) {
@@ -283,10 +283,6 @@ bool STSEnvironment::StartRuntime(napi_env napiEnv, std::vector<ani_option>& opt
     options.push_back(forbiddenJITOption);
 
     options.push_back(ani_option{"--ext:--log-level=info", nullptr});
-
-    std::string interop = optionPrefix + "interop";
-    ani_option interopOption = {interop.data(), (void*)napiEnv};
-    options.push_back(interopOption);
 
     std::string taskpoolSupportInterop = optionPrefix + "taskpool-support-interop=true";
     ani_option taskpoolSupportInteropOption = {taskpoolSupportInterop.data(), nullptr};

@@ -55,6 +55,7 @@
 #include "sts_environment.h"
 #include "syscap_ts.h"
 #include "system_ability_definition.h"
+#include "ets_ani_expo.h"
 
 #ifdef SUPPORT_SCREEN
 #include "ace_forward_compatibility.h"
@@ -208,36 +209,68 @@ private:
 } // namespace
 
 AppLibPathVec STSRuntime::appLibPaths_;
-AbilityRuntime::JsRuntime* STSRuntime::jsRuntime_ = nullptr;
 
-std::unique_ptr<STSRuntime> STSRuntime::Create(const Options& options, Runtime* jsRuntime)
+std::unique_ptr<STSRuntime> STSRuntime::PreFork(const Options& options)
 {
-    STSRuntime::jsRuntime_ = static_cast<AbilityRuntime::JsRuntime*>(jsRuntime);
-    TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
-    std::unique_ptr<STSRuntime> instance;
-    // JsRuntimeLite::InitJsRuntimeLite(options);
-    if (!options.preload && options.isStageModel) {
-        auto preloadedInstance = Runtime::GetPreloaded();
-#ifdef SUPPORT_SCREEN
-        // reload ace if compatible mode changes
-        if (Ace::AceForwardCompatibility::PipelineChanged() && preloadedInstance) {
-            preloadedInstance.reset();
-        }
-#endif
-        if (preloadedInstance && preloadedInstance->GetLanguage() == Runtime::Language::STS) {
-            instance.reset(static_cast<STSRuntime*>(preloadedInstance.release()));
-        } else {
-            instance = std::make_unique<STSRuntime>();
-        }
-    } else {
-        instance = std::make_unique<STSRuntime>();
-    }
-
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "PreFork begin");
+    std::unique_ptr<STSRuntime> instance = std::make_unique<STSRuntime>();
     if (!instance->Initialize(options)) {
         return std::unique_ptr<STSRuntime>();
     }
     EntryPathManager::GetInstance().Init();
+    return instance;
+}
 
+void STSRuntime::PostFork(const Options &options, std::vector<ani_option>& aniOptions, JsRuntime* jsRuntime)
+{
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "PostFork begin");
+    isBundle_ = options.isBundle;
+    bundleName_ = options.bundleName;
+    codePath_ = options.codePath;
+    ReInitStsEnvImpl(options);
+    pkgContextInfoJsonStringMap_ = options.pkgContextInfoJsonStringMap;
+    packageNameList_ = options.packageNameList;
+    ReInitUVLoop();
+
+    // interop
+    const std::string optionPrefix = "--ext:";
+    std::string interop = optionPrefix + "interop";
+    ani_option interopOption = {interop.data(), (void*)jsRuntime->GetNapiEnv()};
+    aniOptions.push_back(interopOption);
+
+    // aot
+    std::string aotFileString = "";
+    if (!options.arkNativeFilePath.empty()) {
+        std::string aotFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath + options.moduleName + ".an";
+        aotFileString = "--ext:--aot-file=" + aotFilePath;
+        aniOptions.push_back(ani_option{aotFileString.c_str(), nullptr});
+        TAG_LOGI(AAFwkTag::STSRUNTIME, "aotFileString: %{public}s", aotFileString.c_str());
+        aniOptions.push_back(ani_option{"--ext:--enable-an", nullptr});
+    }
+
+    ani_env* aniEnv = GetAniEnv();
+    ark::ets::ETSAni::Postfork(aniEnv, aniOptions);
+}
+
+std::unique_ptr<STSRuntime> STSRuntime::Create(const Options& options, JsRuntime* jsRuntime)
+{
+    TAG_LOGD(AAFwkTag::STSRUNTIME, "create ets runtime");
+    std::unique_ptr<STSRuntime> instance;
+    auto preloadedInstance = Runtime::GetPreloaded(options.lang);
+#ifdef SUPPORT_SCREEN
+    // reload ace if compatible mode changes
+    if (Ace::AceForwardCompatibility::PipelineChanged() && preloadedInstance) {
+        preloadedInstance.reset();
+    }
+#endif
+    if (preloadedInstance && preloadedInstance->GetLanguage() == Runtime::Language::STS) {
+        instance.reset(static_cast<STSRuntime*>(preloadedInstance.release()));
+    } else {
+        instance = PreFork(options);
+    }
+
+    std::vector<ani_option> aniOptions;
+    instance->PostFork(options, aniOptions, jsRuntime);
     return instance;
 }
 
@@ -267,60 +300,19 @@ bool STSRuntime::Initialize(const Options& options)
         return false;
     }
 
-#ifdef SUPPORT_SCREEN
-    if (Ace::AceForwardCompatibility::PipelineChanged()) {
-        preloaded_ = false;
-    }
-#endif
-
-    if (!preloaded_) {
-        if (!CreateStsEnv(options)) {
-            TAG_LOGE(AAFwkTag::STSRUNTIME, "Create stsEnv failed");
-            return false;
-        }
+    if (!CreateStsEnv(options)) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Create stsEnv failed");
+        return false;
     }
 
     apiTargetVersion_ = options.apiTargetVersion;
     TAG_LOGD(AAFwkTag::STSRUNTIME, "Initialize: %{public}d", apiTargetVersion_);
-    if (options.isStageModel || options.isTestFramework) {
-        if (preloaded_) {
-            PostPreload(options);
-        }
 
-        if (!preloaded_) {
-            TAG_LOGD(AAFwkTag::STSRUNTIME, "PreloadAce start");
-            PreloadAce(options);
-            TAG_LOGD(AAFwkTag::STSRUNTIME, "PreloadAce end");
-        }
-
-        if (!options.preload) {
-            isBundle_ = options.isBundle;
-            bundleName_ = options.bundleName;
-            codePath_ = options.codePath;
-            ReInitStsEnvImpl(options);
-            LoadAotFile(options);
-            pkgContextInfoJsonStringMap_ = options.pkgContextInfoJsonStringMap;
-            packageNameList_ = options.packageNameList;
-        }
+    if (!stsEnv_->InitLoop(options.isStageModel)) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Init loop failed");
+        return false;
     }
 
-    if (!preloaded_) {
-        InitConsoleModule();
-    }
-
-    if (!options.preload) {
-        if (options.isUnique) {
-            TAG_LOGD(AAFwkTag::STSRUNTIME, "Not supported TimerModule when form render");
-        } else {
-            InitTimerModule();
-        }
-
-        SetModuleLoadChecker(options.moduleCheckerDelegate);
-        if (!stsEnv_->InitLoop(options.isStageModel)) {
-            TAG_LOGE(AAFwkTag::STSRUNTIME, "Init loop failed");
-            return false;
-        }
-    }
     return true;
 }
 
@@ -473,16 +465,7 @@ bool STSRuntime::CreateStsEnv(const Options& options)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
     stsEnv_ = std::make_shared<StsEnv::STSEnvironment>(std::make_unique<OHOSStsEnvironmentImpl>(options.eventRunner));
-    
     std::vector<ani_option> aniOptions;
-    std::string aotFileString = "";
-    if (!options.arkNativeFilePath.empty()) {
-        std::string aotFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath + options.moduleName + ".an";
-        aotFileString = "--ext:--aot-file=" + aotFilePath;
-        aniOptions.push_back(ani_option{aotFileString.c_str(), nullptr});
-        TAG_LOGI(AAFwkTag::STSRUNTIME, "aotFileString: %{public}s", aotFileString.c_str());
-        aniOptions.push_back(ani_option{"--ext:--enable-an", nullptr});
-    }
 
     std::string interpreerMode = "--ext:--interpreter-type=cpp";
     std::string debugEnalbeMode = "--ext:--debugger-enable=true";
@@ -499,17 +482,12 @@ bool STSRuntime::CreateStsEnv(const Options& options)
         aniOptions.push_back(breadonstartModeOption);
     }
     
-    if (stsEnv_ == nullptr || !stsEnv_->StartRuntime(STSRuntime::jsRuntime_->GetNapiEnv(), aniOptions)) {
+    if (stsEnv_ == nullptr || !stsEnv_->StartRuntime(aniOptions)) {
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Init StsEnv failed");
         return false;
     }
 
     return true;
-}
-
-void STSRuntime::PreloadAce(const Options& options)
-{
-    TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
 }
 
 void STSRuntime::ReInitStsEnvImpl(const Options& options)
@@ -521,31 +499,6 @@ void STSRuntime::ReInitStsEnvImpl(const Options& options)
     stsEnv_->ReInitStsEnvImpl(std::make_unique<OHOSStsEnvironmentImpl>(options.eventRunner));
 }
 
-void STSRuntime::LoadAotFile(const Options& options)
-{
-    TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
-    if (options.hapPath.empty()) {
-        return;
-    }
-    bool newCreate = false;
-    std::string loadPath = ExtractorUtil::GetLoadFilePath(options.hapPath);
-    std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate, true);
-    if (extractor != nullptr && newCreate) {
-        // need vm support LoadAotFile
-    }
-}
-
-void STSRuntime::InitConsoleModule()
-{
-    TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
-    // need vm support Console
-}
-
-void STSRuntime::InitTimerModule()
-{
-    TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
-}
-
 void STSRuntime::ReInitUVLoop()
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
@@ -553,13 +506,6 @@ void STSRuntime::ReInitUVLoop()
         return;
     }
     stsEnv_->ReInitUVLoop();
-}
-
-void STSRuntime::PostPreload(const Options& options)
-{
-    TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
-    // need vm support Preload
-    ReInitUVLoop();
 }
 
 ani_env* STSRuntime::GetAniEnv()
@@ -777,6 +723,16 @@ void STSRuntime::StopDebugMode()
         ConnectServerManager::Get().RemoveInstance(instanceId_);
         ark::ArkDebugNativeAPI::StopDebugger();
     }
+}
+
+void STSRuntime::FinishPreload()
+{
+    ani_env* env = GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Failed: ANI env nullptr");
+        return;
+    }
+    ark::ets::ETSAni::Prefork(env);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
