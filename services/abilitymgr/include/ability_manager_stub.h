@@ -105,6 +105,7 @@ private:
     int StartUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
     int StartUIExtensionAbilityEmbeddedInner(MessageParcel &data, MessageParcel &reply);
     int StartUIExtensionConstrainedEmbeddedInner(MessageParcel &data, MessageParcel &reply);
+    int StartUIExtensionPreViewEmbeddedInner(MessageParcel &data, MessageParcel &reply);
     int StartUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int StopExtensionAbilityInner(MessageParcel& data, MessageParcel& reply);
     int StartAbilityAddCallerInner(MessageParcel &data, MessageParcel &reply);

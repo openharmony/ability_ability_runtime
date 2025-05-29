@@ -629,6 +629,9 @@ enum class AbilityManagerInterfaceCode {
 
     // restart atomic service
     RESTART_SELF_ATOMIC_SERVICE = 6144,
+
+    // ipc id for start UIExtension ability pre view embedded
+    START_UI_EXTENSION_PRE_VIEW_EMBEDDED = 6145,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
