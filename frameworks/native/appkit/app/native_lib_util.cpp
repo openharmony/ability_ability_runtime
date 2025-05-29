@@ -30,7 +30,8 @@ std::string GetLibPath(const std::string &hapPath, bool isPreInstallApp)
     return libPath;
 }
 
-void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp)
+void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp,
+    AppLibPathMap &appAbcLibPaths)
 {
     if (hapInfo.nativeLibraryPath.empty()) {
         TAG_LOGD(AAFwkTag::APPKIT, "Lib path of %{public}s is empty, lib isn't isolated or compressed",
@@ -49,9 +50,13 @@ void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool
     TAG_LOGD(
         AAFwkTag::APPKIT, "appLibPathKey: %{private}s, lib path: %{private}s", appLibPathKey.c_str(), libPath.c_str());
     appLibPaths[appLibPathKey].emplace_back(libPath);
+
+    std::string appLibAbcPathKey = "/data/storage/el1/bundle/" + hapInfo.moduleName + "/ets/modules_static.abc";
+    appAbcLibPaths[appLibAbcPathKey].emplace_back(libPath);
 }
 
-void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp)
+void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp,
+    AppLibPathMap &appAbcLibPaths)
 {
     if (hspInfo.nativeLibraryPath.empty()) {
         return;
@@ -75,10 +80,17 @@ void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &app
     TAG_LOGD(
         AAFwkTag::APPKIT, "appLibPathKey: %{private}s, libPath: %{private}s", appLibPathKey.c_str(), libPath.c_str());
     appLibPaths[appLibPathKey].emplace_back(libPath);
+
+    if (!appBundleName.empty()) {
+        const bool isInternalHsp = (hspInfo.moduleName == appBundleName);
+        const std::string name = isInternalHsp ? hspInfo.moduleName : hspInfo.bundleName + "/" + hspInfo.moduleName;
+        const std::string appLibAbcPathKey = "/data/storage/el1/bundle/" + name + "/ets/modules_static.abc";
+        appAbcLibPaths[appLibAbcPathKey].emplace_back(libPath);
+    }
 }
 
 void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativeLibraryPath,
-    AppLibPathMap &appLibPaths)
+    AppLibPathMap &appLibPaths, AppLibPathMap &appAbcLibPaths)
 {
     if (hapInfo.isLibIsolated) {
         patchNativeLibraryPath = hapInfo.hqfInfo.nativeLibraryPath;
@@ -101,6 +113,9 @@ void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativ
     TAG_LOGD(AAFwkTag::APPKIT, "appLibPathKey: %{public}s, patch lib path: %{private}s", appLibPathKey.c_str(),
         patchLibPath.c_str());
     appLibPaths[appLibPathKey].emplace_back(patchLibPath);
+
+    std::string appLibAbcPathKey = "/data/storage/el1/bundle/" + hapInfo.moduleName + "/ets/modules_static.abc";
+    appAbcLibPaths[appLibAbcPathKey].emplace_back(patchLibPath);
 }
 } // AppExecFwk
 } // namespace OHOS

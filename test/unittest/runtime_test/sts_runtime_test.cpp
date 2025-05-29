@@ -99,10 +99,11 @@ HWTEST_F(StsRuntimeTest, Create_100, TestSize.Level1)
 HWTEST_F(StsRuntimeTest, SetAppLibPath_100, TestSize.Level1)
 {
     std::map<std::string, std::vector<std::string>> testPathMap;
+    std::map<std::string, std::vector<std::string>> testAbcPathMap;
     testPathMap["com.example.app"] = { "/data/abc", "/data/def" };
     testPathMap["com.example.demo"] = { "/data/demo/es", "/data/demo/ts" };
     std::unique_ptr<STSRuntime> stsRuntime = std::make_unique<STSRuntime>();
-    stsRuntime->SetAppLibPath(testPathMap);
+    stsRuntime->SetAppLibPath(testPathMap, testAbcPathMap);
     EXPECT_NE(testPathMap.size(), 0);
 }
 
