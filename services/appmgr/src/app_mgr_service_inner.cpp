@@ -8347,6 +8347,7 @@ void AppMgrServiceInner::ExitChildProcessSafelyByChildPid(const pid_t pid)
     std::list<pid_t> pids;
     pids.push_back(pid);
     if (WaitForRemoteProcessExit(pids, startTime)) {
+        appRunningManager_->HandleChildRelation(childRecord, appRecord);
         TAG_LOGI(AAFwkTag::APPMGR, "remote child process exited, pid:%{public}d", pid);
         appRecord->RemoveChildProcessRecord(childRecord);
         DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessDied(childRecord);
