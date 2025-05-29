@@ -30,7 +30,7 @@ void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool
     AppLibPathMap &appAbcLibPaths);
 
 void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp,
-    AppLibPathMap &appAbcLibPaths);
+    const std::string &appBundleName, AppLibPathMap &appAbcLibPaths);
 
 void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativeLibraryPath,
     AppLibPathMap &appLibPaths, AppLibPathMap &appAbcLibPaths);

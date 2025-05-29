@@ -56,7 +56,7 @@ void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool
 }
 
 void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp,
-    AppLibPathMap &appAbcLibPaths)
+    const std::string &appBundleName, AppLibPathMap &appAbcLibPaths)
 {
     if (hspInfo.nativeLibraryPath.empty()) {
         return;

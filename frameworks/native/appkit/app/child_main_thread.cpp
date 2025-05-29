@@ -444,7 +444,7 @@ void ChildMainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspLi
         TAG_LOGD(AAFwkTag::APPKIT, "bundle:%s, module:%s, nativeLibraryPath:%s", hspInfo.bundleName.c_str(),
             hspInfo.moduleName.c_str(), hspInfo.nativeLibraryPath.c_str());
         GetHspNativeLibPath(hspInfo, appLibPaths, hspInfo.hapPath.find(ABS_CODE_PATH) != 0u,
-            appAbcLibPaths);
+            bundleInfo.applicationInfo.bundleName, appAbcLibPaths);
     }
 }
 }  // namespace AppExecFwk
