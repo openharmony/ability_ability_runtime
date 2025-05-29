@@ -68,6 +68,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     AbilityStateData abilityStateData;
     bool isAbility = *data % ENABLE;
     appStateObserverManager->HandleStateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged);
+    appStateObserverManager->HandleOnKeepAliveStateChanged(appRecord);
     return true;
 }
 }

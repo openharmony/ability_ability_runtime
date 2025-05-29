@@ -51,6 +51,7 @@ public:
     MOCK_METHOD(void, OnProcessReused, (const ProcessData &processData), (override));
     MOCK_METHOD(void, OnWindowHidden, (const ProcessData &processData), (override));
     MOCK_METHOD(void, OnWindowShow, (const ProcessData &processData), (override));
+    MOCK_METHOD(void, OnKeepAliveStateChanged, (const ProcessData &processData), (override));
     sptr<IRemoteObject> AsObject() override
     {
         return {};
@@ -580,6 +581,92 @@ HWTEST_F(AppStateObserverManagerTestSecond, OnProcessReused_002, TestSize.Level2
 
     EXPECT_CALL(*mockObserver, OnProcessReused(_)).Times(0);
     manager->OnProcessReused(appRecord);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: OnKeepAliveStateChanged
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager OnKeepAliveStateChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify OnKeepAliveStateChanged with mock handler
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, OnKeepAliveStateChanged_001, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto mockHandler = std::make_shared<MockTaskHandlerWrap>();
+    manager->handler_ = mockHandler;
+
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, {"com.ohos.unittest"}});
+
+    EXPECT_CALL(*mockObserver, OnKeepAliveStateChanged(_)).Times(1);
+    manager->OnKeepAliveStateChanged(appRecord);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: OnKeepAliveStateChanged
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager OnKeepAliveStateChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify OnKeepAliveStateChanged with null handler
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, OnKeepAliveStateChanged_002, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    manager->handler_ = nullptr;
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, {"com.ohos.unittest"}});
+
+    EXPECT_CALL(*mockObserver, OnKeepAliveStateChanged(_)).Times(0);
+    manager->OnKeepAliveStateChanged(appRecord);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnKeepAliveStateChanged
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnKeepAliveStateChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnKeepAliveStateChanged
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, HandleOnKeepAliveStateChanged_001, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, {"com.ohos.unittest"}});
+
+    EXPECT_CALL(*mockObserver, OnKeepAliveStateChanged(_)).Times(1);
+    manager->HandleOnKeepAliveStateChanged(appRecord);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnKeepAliveStateChanged
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnKeepAliveStateChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnKeepAliveStateChanged with null appRecord
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, HandleOnKeepAliveStateChanged_002, TestSize.Level2)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, {"com.ohos.unittest"}});
+
+    EXPECT_CALL(*mockObserver, OnKeepAliveStateChanged(_)).Times(0);
+    manager->HandleOnKeepAliveStateChanged(nullptr);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

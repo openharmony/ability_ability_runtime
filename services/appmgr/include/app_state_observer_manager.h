@@ -89,6 +89,7 @@ public:
     void OnPageShow(const PageStateData pageStateData);
     void OnPageHide(const PageStateData pageStateData);
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
+    void OnKeepAliveStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
 private:
     void HandleOnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnWindowHidden(const std::shared_ptr<AppRunningRecord> &appRecord);
@@ -136,6 +137,7 @@ private:
     void DecreaseObserverCount(int32_t uid);
     void HandleOnProcessBindingRelationChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
         const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
+    void HandleOnKeepAliveStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
 
 private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> handler_;
