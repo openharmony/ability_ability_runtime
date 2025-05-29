@@ -320,11 +320,13 @@ private:
         const std::string &moduleName, const std::string &srcPath);
     void CreateAniContext(ani_env *env, ani_ref contextGlobalRef, int32_t screenMode,
         const std::shared_ptr<OHOSApplication> &application);
+    bool BindNativeMethods();
 
     STSRuntime &stsRuntime_;
     std::shared_ptr<STSNativeReference> shellContextRef_;
     std::shared_ptr<STSNativeReference> stsAbilityObj_;
     std::shared_ptr<int32_t> screenModePtr_;
+    static std::once_flag singletonFlag_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
