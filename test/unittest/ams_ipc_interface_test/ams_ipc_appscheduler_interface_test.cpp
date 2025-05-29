@@ -79,6 +79,7 @@ HWTEST_F(AmsIpcAppSchedulerInterfaceTest, Interface_001, TestSize.Level1)
             });
     client->ScheduleForegroundApplication();
     mockApplication->Wait();
+    testing::Mock::AllowLeak(mockApplication);
     TAG_LOGD(AAFwkTag::TEST, "AppSchedulerInterfaceTest_001 end");
 }
 
