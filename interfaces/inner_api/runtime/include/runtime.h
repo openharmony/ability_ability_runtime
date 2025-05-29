@@ -66,6 +66,7 @@ public:
         std::map<std::string, std::string> pkgContextInfoJsonStringMap;
         std::map<std::string, std::string> packageNameList;
         std::map<std::string, int32_t> aotCompileStatusMap;
+        uint32_t versionCode = 0;
     };
 
     struct DebugOption {
