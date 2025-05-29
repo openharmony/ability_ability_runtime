@@ -26,17 +26,23 @@ namespace OHOS {
 namespace AppExecFwk {
 std::string GetLibPath(const std::string &hapPath, bool isPreInstallApp);
 
-void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp);
+void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp,
+    AppLibPathMap &appAbcLibPaths);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp);
 =======
 void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp,
     const std::string &appBundleName, AppLibPathMap &appAbcLibPaths);
 >>>>>>> fe783cf77a (feature SetAppAbcLibPath-2)
+=======
+void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp,
+    AppLibPathMap &appAbcLibPaths);
+>>>>>>> 8c5b847421 (feature SetAppAbcLibPath)
 
 void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativeLibraryPath,
-    AppLibPathMap &appLibPaths);
+    AppLibPathMap &appLibPaths, AppLibPathMap &appAbcLibPaths);
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_NATIVE_LIB_UTIL_H
