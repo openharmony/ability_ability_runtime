@@ -279,7 +279,7 @@ ohos_shared_library("abilityms") {
   }
 
   if (ability_runtime_no_screen) {
-    defines += ["AMS_NO_SCREEN"]
+    defines += ["AMS_NO_DISPLAY"]
   }
 
   version_script = "libabilityms.map"
