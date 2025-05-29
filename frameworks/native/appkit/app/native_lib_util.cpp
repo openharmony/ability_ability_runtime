@@ -59,7 +59,12 @@ void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool
 >>>>>>> 6174fd932a (update frameworks/native/appkit/app/native_lib_util.cpp.)
 }
 
+<<<<<<< HEAD
 void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp)
+=======
+void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp,
+    const std::string &appBundleName, AppLibPathMap &appAbcLibPaths)
+>>>>>>> fe783cf77a (feature SetAppAbcLibPath-2)
 {
     if (hspInfo.nativeLibraryPath.empty()) {
         return;
