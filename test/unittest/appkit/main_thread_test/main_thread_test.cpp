@@ -2257,6 +2257,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0100, TestSize.Level1)
     BundleInfo bundleInfo;
     HspList hspList;
     AppLibPathMap appLibPaths;
+    AppLibPathMap appAbcLibPaths;
 
     bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath = "patch_1001/libs/arm";
     bundleInfo.applicationInfo.nativeLibraryPath = "libs/arm";
@@ -2270,7 +2271,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0100, TestSize.Level1)
     BaseSharedBundleInfo hspInfo1;
     hspList.emplace_back(hspInfo1);
 
-    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths);
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, appAbcLibPaths);
     ASSERT_EQ(appLibPaths.size(), size_t(1));
     ASSERT_EQ(appLibPaths["default"].size(), size_t(2));
     EXPECT_EQ(appLibPaths["default"][0], "/data/storage/el1/bundle/patch_1001/libs/arm");
@@ -2288,6 +2289,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0200, TestSize.Level1)
     BundleInfo bundleInfo;
     HspList hspList;
     AppLibPathMap appLibPaths;
+    AppLibPathMap appAbcLibPaths;
 
     // if all hap lib is compressed and isolated, nativeLibraryPath of application is empty.
     HapModuleInfo hapModuleInfo1;
@@ -2315,7 +2317,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0200, TestSize.Level1)
     hspInfo1.nativeLibraryPath = "library/libs/arm";
     hspList.emplace_back(hspInfo1);
 
-    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths);
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, appAbcLibPaths);
     ASSERT_EQ(appLibPaths.size(), size_t(3));
     ASSERT_EQ(appLibPaths["com.ohos.myapplication/entry"].size(), size_t(2));
     EXPECT_EQ(appLibPaths["com.ohos.myapplication/entry"][0], "/data/storage/el1/bundle/patch_1001/entry/libs/arm");
@@ -2341,6 +2343,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0300, TestSize.Level1)
     BundleInfo bundleInfo;
     HspList hspList;
     AppLibPathMap appLibPaths;
+    AppLibPathMap appAbcLibPaths;
 
     // if all hap lib is uncompressed, nativeLibraryPath of application is empty.
     bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath = "patch_1001/libs/arm";
@@ -2371,7 +2374,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0300, TestSize.Level1)
     hspInfo1.nativeLibraryPath = "library.hsp!/libs/armeabi-v7a";
     hspList.emplace_back(hspInfo1);
 
-    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths);
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, appAbcLibPaths);
     ASSERT_EQ(appLibPaths.size(), size_t(4));
     ASSERT_EQ(appLibPaths["default"].size(), size_t(1));
     EXPECT_EQ(appLibPaths["default"][0], "/data/storage/el1/bundle/patch_1001/libs/arm");
@@ -2401,6 +2404,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0400, TestSize.Level1)
     BundleInfo bundleInfo;
     HspList hspList;
     AppLibPathMap appLibPaths;
+    AppLibPathMap appAbcLibPaths;
 
     // if all hap lib is uncompressed and isolated, nativeLibraryPath of application is empty.
     HapModuleInfo hapModuleInfo1;
@@ -2431,7 +2435,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0400, TestSize.Level1)
     hspInfo1.nativeLibraryPath = "library.hsp!/libs/armeabi-v7a";
     hspList.emplace_back(hspInfo1);
 
-    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths);
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, appAbcLibPaths);
     ASSERT_EQ(appLibPaths.size(), size_t(3));
     ASSERT_EQ(appLibPaths["com.ohos.myapplication/entry"].size(), size_t(2));
     EXPECT_EQ(appLibPaths["com.ohos.myapplication/entry"][0], "/data/storage/el1/bundle/patch_1001/entry/libs/arm");

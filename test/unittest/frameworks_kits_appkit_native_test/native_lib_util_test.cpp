@@ -88,9 +88,10 @@ HWTEST_F(NativeLibUtilTest, GetHspNativeLibPath_0300, TestSize.Level1)
 {
     AppExecFwk::BaseSharedBundleInfo hspInfo;
     AppLibPathMap appLibPaths;
+    AppLibPathMap appAbcLibPaths;
     bool isPreInstallApp = true;
     hspInfo.nativeLibraryPath = "";
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp);
+    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, appAbcLibPaths);
     EXPECT_EQ(appLibPaths.empty(), true);
     
     hspInfo.nativeLibraryPath = "/data/test/nativeLibraryPath";
@@ -98,17 +99,17 @@ HWTEST_F(NativeLibUtilTest, GetHspNativeLibPath_0300, TestSize.Level1)
     hspInfo.moduleName = "library";
 
     hspInfo.compressNativeLibs = false;
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp);
+    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, appAbcLibPaths);
     EXPECT_EQ(appLibPaths.empty(), false);
 
     appLibPaths.clear();
     isPreInstallApp = false;
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp);
+    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, appAbcLibPaths);
     EXPECT_EQ(appLibPaths.empty(), false);
     
     appLibPaths.clear();
     hspInfo.compressNativeLibs = true;
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp);
+    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, appAbcLibPaths);
     EXPECT_EQ(appLibPaths.empty(), false);
 }
 
@@ -122,15 +123,16 @@ HWTEST_F(NativeLibUtilTest, GetPatchNativeLibPath_0400, TestSize.Level1)
     AppExecFwk::HapModuleInfo hapInfo;
     std::string patchNativeLibraryPath = "";
     AppLibPathMap appLibPaths;
+    AppLibPathMap appAbcLibPaths;
     
     hapInfo.hapPath = "/data/test/NativeLibUtilTest.hap";
     hapInfo.isLibIsolated = false;
-    AppExecFwk::GetPatchNativeLibPath(hapInfo, patchNativeLibraryPath, appLibPaths);
+    AppExecFwk::GetPatchNativeLibPath(hapInfo, patchNativeLibraryPath, appLibPaths, appAbcLibPaths);
     EXPECT_EQ(patchNativeLibraryPath, "");
      
     hapInfo.compressNativeLibs = true;
     patchNativeLibraryPath = "/data/test/patchNativeLibraryPath";
-    AppExecFwk::GetPatchNativeLibPath(hapInfo, patchNativeLibraryPath, appLibPaths);
+    AppExecFwk::GetPatchNativeLibPath(hapInfo, patchNativeLibraryPath, appLibPaths, appAbcLibPaths);
     EXPECT_EQ(appLibPaths.empty(), true);
 
     hapInfo.isLibIsolated = true;
@@ -138,7 +140,7 @@ HWTEST_F(NativeLibUtilTest, GetPatchNativeLibPath_0400, TestSize.Level1)
     hapInfo.bundleName = "nativeLibraryTest";
     hapInfo.moduleName = "library";
     hapInfo.hqfInfo.nativeLibraryPath = "/data/test/nativeLibraryPath";
-    AppExecFwk::GetPatchNativeLibPath(hapInfo, patchNativeLibraryPath, appLibPaths);
+    AppExecFwk::GetPatchNativeLibPath(hapInfo, patchNativeLibraryPath, appLibPaths, appAbcLibPaths);
     EXPECT_EQ(appLibPaths.empty(), false);
 }
 } // namespace AbilityRuntime
