@@ -6822,7 +6822,7 @@ int32_t AbilityManagerService::GetUserId() const
     }
     return U0_USER_ID;
 }
-#ifndef AMS_NO_DISPLAY
+#ifndef AMS_DISABLE_DISPLAY
 int AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
@@ -8978,7 +8978,7 @@ int AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr<
         ConnectServices();
         StartUserApps();
     }
-#ifndef AMS_NO_DISPLAY
+#ifndef AMS_DISABLE_DISPLAY
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
     auto ret = StartHighestPriorityAbility(userId, isBoot, isAppRecovery);
     if (ret != ERR_OK) {
