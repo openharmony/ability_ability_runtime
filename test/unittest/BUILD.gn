@@ -321,7 +321,7 @@ ohos_source_set("abilityms_test_source") {
   if (ability_runtime_upms) {
     defines += [ "SUPPORT_UPMS" ]
     sources +=
-        [ "${ability_runtime_services_path}/abilitymgr/src/uri_utils.cpp" ]
+        [ "${ability_runtime_services_path}/abilitymgr/src/utils/uri_utils.cpp" ]
 
     deps += [
       "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
