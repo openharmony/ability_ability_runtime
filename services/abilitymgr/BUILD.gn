@@ -279,7 +279,7 @@ ohos_shared_library("abilityms") {
   }
 
   if (ability_runtime_no_screen) {
-    defines += ["ABILITY_DISABLE_DISPLAY"]
+    defines += ["DISABLE_LAUNCHER"]
   }
 
   version_script = "libabilityms.map"
