@@ -20,6 +20,8 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+constexpr char APP_ABC_LIB_PATH_KEY_PREFIX[] = "/data/storage/el1/bundle/";
+constexpr char APP_ABC_LIB_PATH_KEY_SUFFIX[] = "/ets/modules_static.abc";
 std::string GetLibPath(const std::string &hapPath, bool isPreInstallApp)
 {
     std::string libPath = AbilityBase::Constants::LOCAL_CODE_PATH;
@@ -49,6 +51,12 @@ void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool
     TAG_LOGD(
         AAFwkTag::APPKIT, "appLibPathKey: %{private}s, lib path: %{private}s", appLibPathKey.c_str(), libPath.c_str());
     appLibPaths[appLibPathKey].emplace_back(libPath);
+<<<<<<< HEAD
+=======
+
+    std::string appLibAbcPathKey = APP_ABC_LIB_PATH_KEY_PREFIX + hapInfo.moduleName + APP_ABC_LIB_PATH_KEY_SUFFIX;
+    appAbcLibPaths[appLibAbcPathKey].emplace_back(libPath);
+>>>>>>> 6174fd932a (update frameworks/native/appkit/app/native_lib_util.cpp.)
 }
 
 void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp)
@@ -75,6 +83,16 @@ void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &app
     TAG_LOGD(
         AAFwkTag::APPKIT, "appLibPathKey: %{private}s, libPath: %{private}s", appLibPathKey.c_str(), libPath.c_str());
     appLibPaths[appLibPathKey].emplace_back(libPath);
+<<<<<<< HEAD
+=======
+
+    if (!appBundleName.empty()) {
+        const bool isInternalHsp = (hspInfo.moduleName == appBundleName);
+        const std::string name = isInternalHsp ? hspInfo.moduleName : hspInfo.bundleName + "/" + hspInfo.moduleName;
+        const std::string appLibAbcPathKey = APP_ABC_LIB_PATH_KEY_PREFIX + name + APP_ABC_LIB_PATH_KEY_SUFFIX;
+        appAbcLibPaths[appLibAbcPathKey].emplace_back(libPath);
+    }
+>>>>>>> 6174fd932a (update frameworks/native/appkit/app/native_lib_util.cpp.)
 }
 
 void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativeLibraryPath,
@@ -101,6 +119,12 @@ void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativ
     TAG_LOGD(AAFwkTag::APPKIT, "appLibPathKey: %{public}s, patch lib path: %{private}s", appLibPathKey.c_str(),
         patchLibPath.c_str());
     appLibPaths[appLibPathKey].emplace_back(patchLibPath);
+<<<<<<< HEAD
+=======
+
+    std::string appLibAbcPathKey = APP_ABC_LIB_PATH_KEY_PREFIX + hapInfo.moduleName + APP_ABC_LIB_PATH_KEY_SUFFIX;
+    appAbcLibPaths[appLibAbcPathKey].emplace_back(patchLibPath);
+>>>>>>> 6174fd932a (update frameworks/native/appkit/app/native_lib_util.cpp.)
 }
 } // AppExecFwk
 } // namespace OHOS
