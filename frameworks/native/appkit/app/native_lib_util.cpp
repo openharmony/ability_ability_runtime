@@ -20,6 +20,8 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+constexpr char APP_ABC_LIB_PATH_KEY_PREFIX[] = "/data/storage/el1/bundle/";
+constexpr char APP_ABC_LIB_PATH_KEY_SUFFIX[] = "/ets/modules_static.abc";
 std::string GetLibPath(const std::string &hapPath, bool isPreInstallApp)
 {
     std::string libPath = AbilityBase::Constants::LOCAL_CODE_PATH;
@@ -51,7 +53,7 @@ void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool
         AAFwkTag::APPKIT, "appLibPathKey: %{private}s, lib path: %{private}s", appLibPathKey.c_str(), libPath.c_str());
     appLibPaths[appLibPathKey].emplace_back(libPath);
 
-    std::string appLibAbcPathKey = "/data/storage/el1/bundle/" + hapInfo.moduleName + "/ets/modules_static.abc";
+    std::string appLibAbcPathKey = APP_ABC_LIB_PATH_KEY_PREFIX + hapInfo.moduleName + APP_ABC_LIB_PATH_KEY_SUFFIX;
     appAbcLibPaths[appLibAbcPathKey].emplace_back(libPath);
 }
 
@@ -84,7 +86,7 @@ void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &app
     if (!appBundleName.empty()) {
         const bool isInternalHsp = (hspInfo.moduleName == appBundleName);
         const std::string name = isInternalHsp ? hspInfo.moduleName : hspInfo.bundleName + "/" + hspInfo.moduleName;
-        const std::string appLibAbcPathKey = "/data/storage/el1/bundle/" + name + "/ets/modules_static.abc";
+        const std::string appLibAbcPathKey = APP_ABC_LIB_PATH_KEY_PREFIX + name + APP_ABC_LIB_PATH_KEY_SUFFIX;
         appAbcLibPaths[appLibAbcPathKey].emplace_back(libPath);
     }
 }
@@ -114,7 +116,7 @@ void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativ
         patchLibPath.c_str());
     appLibPaths[appLibPathKey].emplace_back(patchLibPath);
 
-    std::string appLibAbcPathKey = "/data/storage/el1/bundle/" + hapInfo.moduleName + "/ets/modules_static.abc";
+    std::string appLibAbcPathKey = APP_ABC_LIB_PATH_KEY_PREFIX + hapInfo.moduleName + APP_ABC_LIB_PATH_KEY_SUFFIX;
     appAbcLibPaths[appLibAbcPathKey].emplace_back(patchLibPath);
 }
 } // AppExecFwk
