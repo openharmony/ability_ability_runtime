@@ -575,7 +575,7 @@ HWTEST_F(AbilityManagerServiceTenhtTest, ScheduleCommandAbilityWindowDone_004, T
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest ScheduleCommandAbilityWindowDone_004 end");
 }
-#ifndef ABILITY_DISABLE_DISPLAY
+#ifndef DISABLE_LAUNCHER
 /*
  * Feature: AbilityManagerService
  * Name: StartHighestPriorityAbility_001
