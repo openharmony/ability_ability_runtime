@@ -16,7 +16,10 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 config("ani_context_base_public_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "include" ]
+  include_dirs = [ 
+    "include" ,
+    "${ability_runtime_services_path}/common/include",
+  ]
 }
 
 ohos_shared_library("ani_base_context") {
