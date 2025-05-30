@@ -101,6 +101,7 @@
 #include "window_pid_visibility_changed_listener.h"
 #include "cache_process_manager.h"
 #include "res_sched_util.h"
+#include "session_manager_lite.h"
 #ifdef APP_NO_RESPONSE_DIALOG
 #include "fault_data.h"
 #include "modal_system_app_freeze_uiextension.h"
@@ -116,6 +117,7 @@ namespace AppExecFwk {
 using namespace OHOS::Rosen;
 #endif //SUPPORT_SCREEN
 using namespace OHOS::Security;
+using namespace OHOS::Rosen;
 
 namespace {
 #define CHECK_CALLER_IS_SYSTEM_APP                                                             \
@@ -5507,7 +5509,60 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
     return result;
 }
 
-int32_t AppMgrServiceInner::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo>& appInfos,
+std::vector<BackgroundAppInfo> AppMgrServiceInner::GetBackgroundAppInfo(
+    const std::vector<BackgroundAppInfo>& allowAppList)
+{
+    auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    if (sceneSessionManager == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetSceneSessionManagerLiteProxy null");
+        return {};
+    }
+    std::vector<RecentSessionInfo> recentMainSessionInfoList;
+    auto resultCode = sceneSessionManager->GetRecentMainSessionInfoList(recentMainSessionInfoList);
+    if (resultCode != WSError::WS_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetRecentMainSessionInfoList result:%{public}d size:%{public}zu.", resultCode,
+            recentMainSessionInfoList.size());
+        return {};
+    }
+
+    auto checkInAllowlist = [&allowAppList](const std::string& bundleName) {
+        auto it =
+            std::find_if(allowAppList.begin(), allowAppList.end(), [&bundleName](const BackgroundAppInfo& appInfo) {
+                if (appInfo.bandleName == bundleName) {
+                    return true;
+                }
+                return false;
+            });
+        if (it != allowAppList.end()) {
+            return true;
+        }
+        return false;
+    };
+
+    std::vector<AppExecFwk::BackgroundAppInfo> backgroundAppInfoResult;
+    for (const auto& sessionInfo : recentMainSessionInfoList) {
+        if (!checkInAllowlist(sessionInfo.bundleName)) {
+            TAG_LOGD(AAFwkTag::APPMGR, "not in whilelist bundleName:%{public}s appIndex :%{public}d.",
+                sessionInfo.bundleName.c_str(), sessionInfo.appIndex);
+            continue;
+        }
+        if (sessionInfo.sessionState != RecentSessionState::BACKGROUND) {
+            TAG_LOGD(AAFwkTag::APPMGR, "not background app, bundleName:%{public}s appIndex :%{public}d.",
+                sessionInfo.bundleName.c_str(), sessionInfo.appIndex);
+            continue;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "get sessionInfo bundleName:%{public}s appIndex :%{public}d.",
+            sessionInfo.bundleName.c_str(), sessionInfo.appIndex);
+        AppExecFwk::BackgroundAppInfo appInfo;
+        appInfo.bandleName = sessionInfo.bundleName;
+        appInfo.appIndex = sessionInfo.appIndex;
+        backgroundAppInfoResult.push_back(appInfo);
+    }
+
+    return backgroundAppInfoResult;
+}
+
+int32_t AppMgrServiceInner::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo>& allowAppList,
     const AppExecFwk::ConfigurationPolicy& policy, const int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -5521,6 +5576,13 @@ int32_t AppMgrServiceInner::UpdateConfigurationForBackgroundApp(const std::vecto
         TAG_LOGE(AAFwkTag::APPMGR, "permission verification failed");
         return ret;
     }
+
+    std::vector<BackgroundAppInfo> appInfos = GetBackgroundAppInfo(allowAppList);
+    if (appInfos.empty()) {
+        TAG_LOGD(AAFwkTag::APPMGR, "no need backGround app color Switch");
+        return ERR_INVALID_VALUE;
+    }
+
     return appRunningManager_->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
 }
 
