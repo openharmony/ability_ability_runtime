@@ -2161,7 +2161,7 @@ private:
      */
     void InitU0User();
     void InitStartAbilityChain();
-#ifndef AMS_DISABLE_DISPLAY
+#ifndef DISABLE_DISPLAY
     /**
      * start highest priority ability.
      *
