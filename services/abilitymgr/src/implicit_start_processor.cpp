@@ -58,19 +58,9 @@ constexpr const char* SUPPORT_ACTION_START_SELECTOR = "persist.sys.ability.suppo
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
-    auto instance_ = DelayedSingleton<AbilityManagerService>::GetInstance();
-    if (instance_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "instance null.");
-        return;
-    }
-    auto taskHandler = instance_->GetTaskHandler();
-    if (taskHandler == nullptr) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "task handler null.");
-        return;
-    }
-    taskHandler->SubmitTask([eventName, type, eventInfo]() {
+    ffrt::submit([eventName, type, eventInfo]() {
         EventReport::SendAbilityEvent(eventName, type, eventInfo);
-    });
+        }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
 bool ImplicitStartProcessor::IsExtensionInWhiteList(AppExecFwk::ExtensionAbilityType type)
