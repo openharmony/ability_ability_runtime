@@ -64,13 +64,13 @@ bool EventHandlerWrap::SendEvent(EventWrap event, int64_t delayMillis, bool forc
         return false;
     }
 
-    event.SetEventTask(taskHandler_->SubmitTask([wthis = weak_from_this(), event]() {
+    event.SetEventTask(taskHandler_->SubmitTaskJust([wthis = weak_from_this(), event]() {
         auto pthis = wthis.lock();
         if (pthis) {
             pthis->ProcessEvent(event);
             pthis->RemoveEvent(event, false);
         }
-    }, delayMillis));
+    }, eventStr, delayMillis));
 
     if (it != eventMap_.end()) {
         it->second = event;

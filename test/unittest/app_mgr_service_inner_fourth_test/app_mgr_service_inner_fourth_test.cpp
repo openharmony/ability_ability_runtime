@@ -224,7 +224,7 @@ HWTEST_F(AppMgrServiceInnerFourthTest, CreatNewStartMsg_0100, TestSize.Level1)
 
     BundleMgrHelper::hapModuleInfo_ = true;
     res = appMgrServiceInner->CreatNewStartMsg(want, abilityInfo, applicationInfo_, "processName", msg);
-    EXPECT_EQ(res, ERR_NO_INIT);
+    EXPECT_EQ(res, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "CreatNewStartMsg_0100 end");
 }
 
@@ -239,9 +239,9 @@ HWTEST_F(AppMgrServiceInnerFourthTest, CreateStartMsg_0100, TestSize.Level1)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     CreateStartMsgParam param;
     AppSpawnStartMsg param1;
-    EXPECT_EQ(appMgrServiceInner->CreateStartMsg(param, param1), ERR_NO_INIT);
+    EXPECT_EQ(appMgrServiceInner->CreateStartMsg(param, param1), ERR_OK);
 
-    appMgrServiceInner->remoteClientManager_ = std::make_shared<RemoteClientManager>();
+    appMgrServiceInner->remoteClientManager_ = nullptr;
     EXPECT_EQ(appMgrServiceInner->CreateStartMsg(param, param1), ERR_NO_INIT);
     TAG_LOGI(AAFwkTag::TEST, "CreateStartMsg_0100 end");
 }

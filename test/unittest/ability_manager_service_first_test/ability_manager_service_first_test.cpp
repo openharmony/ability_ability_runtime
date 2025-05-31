@@ -1841,8 +1841,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, PreLoadAppDataAbilities_0100, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest PreLoadAppDataAbilities_0100 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_EQ(abilityMs->PreLoadAppDataAbilities("", USER_ID_U100), ERR_INVALID_VALUE);
-    EXPECT_EQ(abilityMs->PreLoadAppDataAbilities("test", USER_ID_U100), ERR_INVALID_STATE);
-    abilityMs->taskHandler_ = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
     EXPECT_EQ(abilityMs->PreLoadAppDataAbilities("test", USER_ID_U100), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest PreLoadAppDataAbilities_0100 end");
 }
