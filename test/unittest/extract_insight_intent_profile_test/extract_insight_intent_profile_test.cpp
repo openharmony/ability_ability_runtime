@@ -213,7 +213,50 @@ namespace {
                   "}"
                 "}"
               "}"
-            "}"
+            "},"
+            "\"entities\": ["
+              "{"
+                "\"decoratorFile\": \"@normalized:N&&&entry/src/main/ets/pages/Index&\","
+                "\"className\": \"SongPlayState\","
+                "\"decoratorType\": \"@IntentEntityDecorator\","
+                "\"entityId\": \"11\","
+                "\"entityCategory\": \"entity Category\","
+                "\"parentClassName\": \"base\","
+                "\"parameters\": {"
+                  "\"type\": \"object\","
+                  "\"items\": {"
+                    "\"type\": \"array\","
+                    "\"items\": {"
+                      "\"propertyNames\": {"
+                        "\"enum\": [\"entityId\",\"entityGroupId\",\"gameType\"]"
+                      "},"
+                    "\"type\": \"object\","
+                    "\"required\": [\"entityId\"]"
+                    "}"
+                  "}"
+                "}"
+              "},"
+              "{"
+                "\"decoratorFile\": \"@normalized:N&&&entry/src/main/ets/pages/Index&\","
+                "\"className\": \"base\","
+                "\"decoratorType\": \"@IntentEntityDecorator\","
+                "\"entityId\": \"12\","
+                "\"entityCategory\": \"entity1 Category\","
+                "\"parameters\": {"
+                  "\"type\": \"object\","
+                  "\"items\": {"
+                    "\"type\": \"array\","
+                    "\"items\": {"
+                      "\"propertyNames\": {"
+                        "\"enum\": [\"entityId\",\"entityGroupId\",\"gameType\"]"
+                      "},"
+                      "\"type\": \"object\","
+                      "\"required\": [\"entityId\"]"
+                    "}"
+                  "}"
+                "}"
+              "}"
+            "]"
         "},"
         "{"
             "\"displayDescription\": \"music\","
@@ -348,6 +391,19 @@ HWTEST_F(ExtractInsightIntentProfileTest, TransformTo_0200, TestSize.Level0)
     EXPECT_EQ(profileInfos.insightIntents[1].example, "exampleBBB");
     EXPECT_NE(profileInfos.insightIntents[1].result, "");
 
+    EXPECT_EQ(profileInfos.insightIntents[0].entities.size(), 2);
+    EXPECT_EQ(profileInfos.insightIntents[0].entities[0].className, "SongPlayState");
+    EXPECT_EQ(profileInfos.insightIntents[0].entities[0].decoratorType, "@IntentEntityDecorator");
+    EXPECT_EQ(profileInfos.insightIntents[0].entities[0].entityId, "11");
+    EXPECT_EQ(profileInfos.insightIntents[0].entities[0].parentClassName, "base");
+    EXPECT_NE(profileInfos.insightIntents[0].entities[0].parameters, "");
+    EXPECT_EQ(profileInfos.insightIntents[0].entities[1].className, "base");
+    EXPECT_EQ(profileInfos.insightIntents[0].entities[1].decoratorType, "@IntentEntityDecorator");
+    EXPECT_EQ(profileInfos.insightIntents[0].entities[1].entityId, "12");
+    EXPECT_EQ(profileInfos.insightIntents[0].entities[1].parentClassName, "");
+    EXPECT_NE(profileInfos.insightIntents[0].entities[1].parameters, "");
+    EXPECT_EQ(profileInfos.insightIntents[1].entities.size(), 0);
+
     nlohmann::json jsonObject1;
     result = ExtractInsightIntentProfile::ToJson(profileInfos.insightIntents[0], jsonObject1);
     EXPECT_EQ(result, true);
@@ -359,6 +415,17 @@ HWTEST_F(ExtractInsightIntentProfileTest, TransformTo_0200, TestSize.Level0)
     EXPECT_EQ(profileInfos1.insightIntents[0].decoratorType, "@InsightIntentLink");
     EXPECT_EQ(profileInfos1.insightIntents[0].intentName, "123");
     EXPECT_EQ(profileInfos1.insightIntents[0].example, "exampleAAA");
+    EXPECT_EQ(profileInfos1.insightIntents[0].entities.size(), 2);
+    EXPECT_EQ(profileInfos1.insightIntents[0].entities[0].className, "SongPlayState");
+    EXPECT_EQ(profileInfos1.insightIntents[0].entities[0].decoratorType, "@IntentEntityDecorator");
+    EXPECT_EQ(profileInfos1.insightIntents[0].entities[0].entityId, "11");
+    EXPECT_EQ(profileInfos1.insightIntents[0].entities[0].parentClassName, "base");
+    EXPECT_NE(profileInfos1.insightIntents[0].entities[0].parameters, "");
+    EXPECT_EQ(profileInfos1.insightIntents[0].entities[1].className, "base");
+    EXPECT_EQ(profileInfos1.insightIntents[0].entities[1].decoratorType, "@IntentEntityDecorator");
+    EXPECT_EQ(profileInfos1.insightIntents[0].entities[1].entityId, "12");
+    EXPECT_EQ(profileInfos1.insightIntents[0].entities[1].parentClassName, "");
+    EXPECT_NE(profileInfos1.insightIntents[0].entities[1].parameters, "");
 
     nlohmann::json jsonObject2;
     result = ExtractInsightIntentProfile::ToJson(profileInfos.insightIntents[1], jsonObject2);
@@ -371,12 +438,24 @@ HWTEST_F(ExtractInsightIntentProfileTest, TransformTo_0200, TestSize.Level0)
     EXPECT_EQ(profileInfos2.insightIntents[0].decoratorType, "@InsightIntentLink");
     EXPECT_EQ(profileInfos2.insightIntents[0].intentName, "InsightIntent2");
     EXPECT_EQ(profileInfos2.insightIntents[0].example, "exampleBBB");
+    EXPECT_EQ(profileInfos2.insightIntents[0].entities.size(), 0);
 
     ExtractInsightIntentInfo info1;
     result = ExtractInsightIntentProfile::ProfileInfoFormat(profileInfos1.insightIntents[0], info1);
     EXPECT_EQ(result, true);
     EXPECT_EQ(info1.domain, "game");
     EXPECT_NE(info1.result, "");
+    EXPECT_EQ(info1.entities.size(), 2);
+    EXPECT_EQ(info1.entities[0].className, "SongPlayState");
+    EXPECT_EQ(info1.entities[0].decoratorType, "@IntentEntityDecorator");
+    EXPECT_EQ(info1.entities[0].entityId, "11");
+    EXPECT_EQ(info1.entities[0].parentClassName, "base");
+    EXPECT_NE(info1.entities[0].parameters, "");
+    EXPECT_EQ(info1.entities[1].className, "base");
+    EXPECT_EQ(info1.entities[1].decoratorType, "@IntentEntityDecorator");
+    EXPECT_EQ(info1.entities[1].entityId, "12");
+    EXPECT_EQ(info1.entities[1].parentClassName, "");
+    EXPECT_NE(info1.entities[1].parameters, "");
     EXPECT_EQ(info1.genericInfo.decoratorType, "@InsightIntentLink");
     InsightIntentLinkInfo linkInfo1 = info1.genericInfo.get<InsightIntentLinkInfo>();
     EXPECT_EQ(linkInfo1.uri, "/data/app/base");
@@ -387,6 +466,7 @@ HWTEST_F(ExtractInsightIntentProfileTest, TransformTo_0200, TestSize.Level0)
     EXPECT_EQ(result, true);
     EXPECT_EQ(info2.domain, "control");
     EXPECT_NE(info2.result, "");
+    EXPECT_EQ(info2.entities.size(), 0);
     EXPECT_EQ(info2.genericInfo.decoratorType, "@InsightIntentLink");
     InsightIntentLinkInfo linkInfo2 = info2.genericInfo.get<InsightIntentLinkInfo>();
     EXPECT_EQ(linkInfo2.uri, "/data/app/base");
