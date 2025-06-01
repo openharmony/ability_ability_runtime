@@ -72,6 +72,7 @@
 #include "system_dialog_scheduler.h"
 #endif
 #include "insight_intent_event_mgr.h"
+#include "kiosk_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -2074,6 +2075,32 @@ public:
         const std::string &intentName,
         InsightIntentInfoForQuery &info) override;
 
+    /**
+     * Update the list of applications allowed in kiosk mode.
+     * @param appList, the list of application bundle names that are allowed in kiosk mode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList) override;
+
+    /**
+     * Enter kiosk mode
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t EnterKioskMode(sptr<IRemoteObject> callerToken) override;
+
+    /**
+     * Exit kiosk mode
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t ExitKioskMode(sptr<IRemoteObject> callerToken) override;
+
+    /**
+     * Retrieve the current kiosk mode configuration and status.
+     * @param kioskStatus, the structure to store kiosk configuration and status information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetKioskStatus(AAFwk::KioskStatus &kioskStatus) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -2314,9 +2341,13 @@ private:
     void SubscribeScreenUnlockedEvent();
     std::function<void()> GetScreenUnlockCallback();
     std::function<void()> GetUserScreenUnlockCallback();
+    std::function<void()> GetEnterKioskModeCallback();
+    std::function<void()> GetExitKioskModeCallback();
+    void AddKioskInterceptor();
     void UnSubscribeScreenUnlockedEvent();
     void RetrySubscribeScreenUnlockedEvent(int32_t retryCount);
     void RemoveScreenUnlockInterceptor();
+    void RemoveKioskInterceptor();
     void RemoveUnauthorizedLaunchReasonMessage(const Want &want, AbilityRequest &abilityRequest,
         const sptr<IRemoteObject> &callerToken);
 
@@ -2738,6 +2769,10 @@ private:
     void CombinLinkInfo(
         const std::vector<AbilityRuntime::LinkIntentParamMapping> &paramMappings, std::string &uri, AAFwk::Want &want);
 
+    bool CheckKioskPermission();
+
+    bool CheckCallerIsForeground(sptr<IRemoteObject> callerToken);
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif
@@ -2777,6 +2812,7 @@ private:
 
     std::mutex prepareTermiationCallbackMutex_;
     std::map<std::string, sptr<IPrepareTerminateCallback>> prepareTermiationCallbacks_;
+    std::shared_ptr<KioskManager> kioskManager_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -1825,6 +1825,33 @@ public:
         const std::string &moduleName,
         const std::string &intentName,
         InsightIntentInfoForQuery &info);
+
+    /**
+     * Update the list of applications allowed in kiosk mode.
+     * @param appList A vector of strings representing the bundle names of the allowed applications.
+     * @return Returns ERR_OK on success, or an error code if the operation fails.
+     */
+    ErrCode UpdateKioskApplicationList(const std::vector<std::string> &appList);
+
+    /**
+     * Enter Kiosk mode.
+     * @return Returns ERR_OK on success, or an error code if the operation fails.
+     */
+    ErrCode EnterKioskMode(sptr<IRemoteObject> callerToken);
+
+    /**
+     * @brief Exit Kiosk mode.
+     * @return Returns ERR_OK on success, or an error code if the operation fails.
+     */
+    ErrCode ExitKioskMode(sptr<IRemoteObject> callerToken);
+
+    /**
+     * Retrieve information about the current Kiosk mode status.
+     * @param kioskStatus A reference to a kioskStatus structure to be filled with current Kiosk mode
+     * data.
+     * @return Returns ERR_OK on success, or an error code if the operation fails.
+     */
+    ErrCode GetKioskStatus(AAFwk::KioskStatus &kioskStatus);
                                     
 private:
     AbilityManagerClient();
