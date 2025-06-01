@@ -13,25 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_H
-#define OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_H
+import { ElementName } from 'bundleManager.ElementName'
+import abilityManager from '@ohos.app.ability.abilityManager';
 
-#include "sts_runtime.h"
-#include "ability_running_info.h"
+export interface AbilityRunningInfo {
+    ability: ElementName;
+    pid: number;
+    uid: number;
+    processName: string;
+    startTime: number;
+    abilityState: abilityManager.AbilityState;
+}
 
-namespace OHOS {
-namespace AbilityManagerSts {
-void StsAbilityManagerRegistryInit(ani_env *env);
-
-class StsAbilityManager final {
-public:
-    static StsAbilityManager &GetInstance()
-    {
-        static StsAbilityManager instance;
-        return instance;
-    }
-    static void GetAbilityRunningInfos(ani_env *env, ani_object callback);
-};
-} // namespace AbilityManagerSts
-} // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_H
+class AbilityRunningInfoImpl implements AbilityRunningInfo {
+    ability: ElementName = {};
+    pid: number;
+    uid: number;
+    processName: string = '';
+    startTime: number;
+    abilityState: abilityManager.AbilityState = abilityManager.AbilityState.INITIAL;
+}
