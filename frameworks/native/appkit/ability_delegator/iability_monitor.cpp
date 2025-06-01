@@ -27,7 +27,7 @@ IAbilityMonitor::IAbilityMonitor(const std::string &abilityName,
     const std::string &moduleName) : abilityName_(abilityName), moduleName_(moduleName)
 {}
 
-bool IAbilityMonitor::Match(const std::shared_ptr<ADelegatorAbilityProperty> &ability, bool isNotify)
+bool IAbilityMonitor::Match(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability, bool isNotify)
 {
     if (!ability) {
         TAG_LOGW(AAFwkTag::DELEGATOR, "invalid ability property");
@@ -69,12 +69,12 @@ bool IAbilityMonitor::Match(const std::shared_ptr<ADelegatorAbilityProperty> &ab
     return true;
 }
 
-std::shared_ptr<ADelegatorAbilityProperty> IAbilityMonitor::WaitForAbility()
+std::shared_ptr<BaseDelegatorAbilityProperty> IAbilityMonitor::WaitForAbility()
 {
     return WaitForAbility(MAX_TIME_OUT);
 }
 
-std::shared_ptr<ADelegatorAbilityProperty> IAbilityMonitor::WaitForAbility(const int64_t timeoutMs)
+std::shared_ptr<BaseDelegatorAbilityProperty> IAbilityMonitor::WaitForAbility(const int64_t timeoutMs)
 {
     auto realTime = timeoutMs;
     if (timeoutMs <= 0) {
@@ -92,46 +92,26 @@ std::shared_ptr<ADelegatorAbilityProperty> IAbilityMonitor::WaitForAbility(const
     return matchedAbility_;
 }
 
-void IAbilityMonitor::OnAbilityStart(const std::weak_ptr<NativeReference> &abilityObj)
+void IAbilityMonitor::OnAbilityStart(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {}
 
-void IAbilityMonitor::OnAbilityForeground(const std::weak_ptr<NativeReference> &abilityObj)
+void IAbilityMonitor::OnAbilityForeground(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {}
 
-void IAbilityMonitor::OnAbilityBackground(const std::weak_ptr<NativeReference> &abilityObj)
+void IAbilityMonitor::OnAbilityBackground(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {}
 
-void IAbilityMonitor::OnAbilityStop(const std::weak_ptr<NativeReference> &abilityObj)
+void IAbilityMonitor::OnAbilityStop(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {}
 
-void IAbilityMonitor::OnWindowStageCreate(const std::weak_ptr<NativeReference> &abilityObj)
+void IAbilityMonitor::OnWindowStageCreate(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {}
 
-void IAbilityMonitor::OnWindowStageRestore(const std::weak_ptr<NativeReference> &abilityObj)
+void IAbilityMonitor::OnWindowStageRestore(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {}
 
-void IAbilityMonitor::OnWindowStageDestroy(const std::weak_ptr<NativeReference> &abilityObj)
+void IAbilityMonitor::OnWindowStageDestroy(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {}
 
-void IAbilityMonitor::OnSTSAbilityStart(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
-{}
-
-void IAbilityMonitor::OnSTSAbilityForeground(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
-{}
-
-void IAbilityMonitor::OnSTSAbilityBackground(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
-{}
-
-void IAbilityMonitor::OnSTSAbilityStop(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
-{}
-
-void IAbilityMonitor::OnSTSWindowStageCreate(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
-{}
-
-void IAbilityMonitor::OnSTSWindowStageRestore(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
-{}
-
-void IAbilityMonitor::OnSTSWindowStageDestroy(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj)
-{}
 }  // namespace AppExecFwk
 }  // namespace OHOS

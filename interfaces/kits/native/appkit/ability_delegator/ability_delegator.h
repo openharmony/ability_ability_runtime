@@ -69,7 +69,7 @@ public:
     /**
      * Definition of cleanup function.
      */
-    using ClearFunc = std::function<void(const std::shared_ptr<ADelegatorAbilityProperty> &)>;
+    using ClearFunc = std::function<void(const std::shared_ptr<BaseDelegatorAbilityProperty> &)>;
 
 public:
     static std::shared_ptr<AbilityDelegator> Create(const std::shared_ptr<AbilityRuntime::Context>& context,
@@ -143,7 +143,7 @@ public:
      * @param monitor, Indicates the specified monitor object.
      * @return the obtained ability.
      */
-    std::shared_ptr<ADelegatorAbilityProperty> WaitAbilityMonitor(const std::shared_ptr<IAbilityMonitor> &monitor);
+    std::shared_ptr<BaseDelegatorAbilityProperty> WaitAbilityMonitor(const std::shared_ptr<IAbilityMonitor> &monitor);
 
     /**
      * Waits for the specified monitor and return the obtained abilityStage.
@@ -151,7 +151,7 @@ public:
      * @param monitor, Indicates the specified stage monitor object.
      * @return the obtained abilityStage.
      */
-    std::shared_ptr<DelegatorAbilityStageProperty> WaitAbilityStageMonitor(
+    std::shared_ptr<BaseDelegatorAbilityStageProperty> WaitAbilityStageMonitor(
         const std::shared_ptr<IAbilityStageMonitor> &monitor);
 
     /**
@@ -161,7 +161,7 @@ public:
      * @param timeoutMs, Indicates the specified time out time, in milliseconds.
      * @return the obtained ability.
      */
-    std::shared_ptr<ADelegatorAbilityProperty> WaitAbilityMonitor(
+    std::shared_ptr<BaseDelegatorAbilityProperty> WaitAbilityMonitor(
         const std::shared_ptr<IAbilityMonitor> &monitor, const int64_t timeoutMs);
 
     /**
@@ -171,7 +171,7 @@ public:
      * @param timeoutMs, Indicates the specified time out time, in milliseconds.
      * @return the obtained abilityStage.
      */
-    std::shared_ptr<DelegatorAbilityStageProperty> WaitAbilityStageMonitor(
+    std::shared_ptr<BaseDelegatorAbilityStageProperty> WaitAbilityStageMonitor(
         const std::shared_ptr<IAbilityStageMonitor> &monitor, const int64_t timeoutMs);
 
     /**
@@ -194,7 +194,7 @@ public:
      *
      * @return the ability that is currently being displayed.
      */
-    std::shared_ptr<ADelegatorAbilityProperty> GetCurrentTopAbility();
+    std::shared_ptr<BaseDelegatorAbilityProperty> GetCurrentTopAbility();
 
     /**
      * Obtains the name of the thread.
@@ -259,56 +259,56 @@ public:
      *
      * @param ability, Indicates the ability properties.
      */
-    void PostPerformStart(const std::shared_ptr<ADelegatorAbilityProperty> &ability);
+    void PostPerformStart(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability);
 
     /**
      * Saves abilityStage properties when abilityStage is started and notify monitors.
      *
      * @param abilityStage , Indicates the abilityStage properties.
      */
-    void PostPerformStageStart(const std::shared_ptr<DelegatorAbilityStageProperty> &abilityStage);
+    void PostPerformStageStart(const std::shared_ptr<BaseDelegatorAbilityStageProperty> &abilityStage);
 
     /**
      * Saves ability properties when scence is created and notify monitors of state changes.
      *
      * @param ability, Indicates the ability properties.
      */
-    void PostPerformScenceCreated(const std::shared_ptr<ADelegatorAbilityProperty> &ability);
+    void PostPerformScenceCreated(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability);
 
     /**
      * Saves ability properties when scence is restored and notify monitors of state changes.
      *
      * @param ability, Indicates the ability properties.
      */
-    void PostPerformScenceRestored(const std::shared_ptr<ADelegatorAbilityProperty> &ability);
+    void PostPerformScenceRestored(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability);
 
     /**
      * Saves ability properties when scence is destroyed and notify monitors of state changes.
      *
      * @param ability, Indicates the ability properties.
      */
-    void PostPerformScenceDestroyed(const std::shared_ptr<ADelegatorAbilityProperty> &ability);
+    void PostPerformScenceDestroyed(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability);
 
     /**
      * Saves ability properties when ability is in the foreground and notify monitors of state changes.
      *
      * @param ability, Indicates the ability properties.
      */
-    void PostPerformForeground(const std::shared_ptr<ADelegatorAbilityProperty> &ability);
+    void PostPerformForeground(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability);
 
     /**
      * Saves ability properties when ability is in the background and notify monitors of state changes.
      *
      * @param ability, Indicates the ability properties.
      */
-    void PostPerformBackground(const std::shared_ptr<ADelegatorAbilityProperty> &ability);
+    void PostPerformBackground(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability);
 
     /**
      * Saves ability properties when ability is stopped and notify monitors of state changes.
      *
      * @param ability, Indicates the ability properties.
      */
-    void PostPerformStop(const std::shared_ptr<ADelegatorAbilityProperty> &ability);
+    void PostPerformStop(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability);
 
     /**
      * Finishes user test.
@@ -328,11 +328,11 @@ public:
 
 private:
     AbilityDelegator::AbilityState ConvertAbilityState(const AbilityLifecycleExecutor::LifecycleState lifecycleState);
-    void ProcessAbilityProperties(const std::shared_ptr<ADelegatorAbilityProperty> &ability);
-    void RemoveAbilityProperty(const std::shared_ptr<ADelegatorAbilityProperty> &ability);
-    std::shared_ptr<ADelegatorAbilityProperty> FindPropertyByToken(const sptr<IRemoteObject> &token);
-    std::shared_ptr<ADelegatorAbilityProperty> FindPropertyByName(const std::string &name);
-    inline void CallClearFunc(const std::shared_ptr<ADelegatorAbilityProperty> &ability);
+    void ProcessAbilityProperties(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability);
+    void RemoveAbilityProperty(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability);
+    std::shared_ptr<BaseDelegatorAbilityProperty> FindPropertyByToken(const sptr<IRemoteObject> &token);
+    std::shared_ptr<BaseDelegatorAbilityProperty> FindPropertyByName(const std::string &name);
+    inline void CallClearFunc(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability);
 
 private:
     static constexpr size_t INFORMATION_MAX_LENGTH {1000};
@@ -345,7 +345,7 @@ private:
     sptr<IRemoteObject> observer_;
 
     std::unique_ptr<DelegatorThread> delegatorThread_;
-    std::list<std::shared_ptr<ADelegatorAbilityProperty>> abilityProperties_;
+    std::list<std::shared_ptr<BaseDelegatorAbilityProperty>> abilityProperties_;
     std::vector<std::shared_ptr<IAbilityMonitor>> abilityMonitors_;
     std::vector<std::shared_ptr<IAbilityStageMonitor>> abilityStageMonitors_;
 

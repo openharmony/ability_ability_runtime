@@ -13,22 +13,41 @@
  * limitations under the License.
  */
 
-#include "sts_ability_delegator.h"
-#include "ability_delegator_registry.h"
+#include "ets_ability_delegator.h"
 
-#include <mutex>
+#include "ability_delegator_registry.h"
+#include "ability_stage_monitor.h"
+#include "ani_common_want.h"
+#include "ani_enum_convert.h"
+#include "ets_ability_monitor.h"
+#include "ets_ability_stage_monitor.h"
 #include "hilog_tag_wrapper.h"
 #include "shell_cmd_result.h"
-#include "ani_common_want.h"
-#include "sts_error_utils.h"
-#include "ani_enum_convert.h"
-#include "sts_ability_monitor.h"
 #include "sts_context_utils.h"
+#include "sts_error_utils.h"
+#include <mutex>
 #include <sstream>
 namespace OHOS {
-namespace AbilityDelegatorSts {
+namespace AbilityDelegatorEts {
+
+struct AbilityObjectBox {
+    std::weak_ptr<STSNativeReference> object_;
+};
+struct AbilityStageObjBox {
+    std::weak_ptr<STSNativeReference> object_;
+};
 
 using namespace OHOS::AbilityRuntime;
+
+std::map<std::shared_ptr<STSNativeReference>, std::shared_ptr<EtsAbilityMonitor>> g_monitorRecord;
+std::map<std::shared_ptr<STSNativeReference>, std::shared_ptr<EtsAbilityStageMonitor>> g_stageMonitorRecord;
+std::map<std::weak_ptr<STSNativeReference>, sptr<IRemoteObject>, std::owner_less<>> g_abilityRecord;
+std::mutex g_mutexAbilityRecord;
+std::mutex g_mtxStageMonitorRecord;
+
+enum ERROR_CODE {
+    INCORRECT_PARAMETERS    = 401,
+};
 
 #ifdef ENABLE_ERRCODE
 constexpr int COMMON_FAILED = 16000100;
@@ -43,7 +62,32 @@ constexpr const char* SHELL_CMD_RESULT_CLASS_NAME = "Lapplication/shellCmdResult
 constexpr const char* ABILITY_MONITOR_INNER_CLASS_NAME = "Lapplication/AbilityMonitor/AbilityMonitorInner;";
 }
 
-ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
+EtsAbilityDelegator::EtsAbilityDelegator()
+{
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
+    if (delegator) {
+        auto clearFunc = [](const std::shared_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &baseProperty) {
+            auto property = std::static_pointer_cast<AppExecFwk::ETSDelegatorAbilityProperty>(baseProperty);
+            if (!property) {
+                TAG_LOGE(AAFwkTag::DELEGATOR, "invalid property type");
+                return;
+            }
+
+            std::unique_lock<std::mutex> lck(g_mutexAbilityRecord);
+            for (auto it = g_abilityRecord.begin(); it != g_abilityRecord.end();) {
+                if (it->second == property->token_) {
+                    it = g_abilityRecord.erase(it);
+                    continue;
+                }
+                ++it;
+            }
+        };
+
+        delegator->RegisterClearFunc(clearFunc);
+    }
+}
+
+ani_object EtsAbilityDelegator::CreateEtsBaseContext(ani_env* aniEnv, ani_class contextClass,
     std::shared_ptr<AbilityRuntime::Context> context)
 {
     if (aniEnv == nullptr || context == nullptr) {
@@ -102,37 +146,9 @@ ani_object CreateStsBaseContext(ani_env* aniEnv, ani_class contextClass,
     return contextObj;
 }
 
-ani_object GetAppContext(ani_env* env, [[maybe_unused]]ani_object object, ani_class clss)
+ani_object EtsAbilityDelegator::WrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmdResult> result)
 {
-    TAG_LOGD(AAFwkTag::DELEGATOR, "GetAppContext call");
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
-        return {};
-    }
-    ani_class cls;
-    ani_object nullobj = nullptr;
-    if (ANI_OK != env->FindClass(CONTEXT_CLASS_NAME, &cls)) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass Context Failed");
-        return nullobj;
-    }
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
-    if (!delegator) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
-        return nullobj;
-    }
-    std::shared_ptr<AbilityRuntime::Context> context = delegator->GetAppContext();
-    if (!context) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "null context");
-        return nullobj;
-    }
-    ani_object objectContext = CreateStsBaseContext(env, cls, context);
-    TAG_LOGD(AAFwkTag::DELEGATOR, "GetAppContext end");
-    return objectContext;
-}
-
-ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmdResult> result)
-{
-    TAG_LOGD(AAFwkTag::DELEGATOR, "wrapShellCmdResult called");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "WrapShellCmdResult called");
     if (result == nullptr || env == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "result or env is null");
         return {};
@@ -179,8 +195,36 @@ ani_object wrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmd
     return object;
 }
 
-void ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object, ani_string cmd, ani_double timeoutSecs,
-    ani_object callback)
+ani_object EtsAbilityDelegator::GetAppContext(ani_env* env, [[maybe_unused]]ani_object object, ani_class clss)
+{
+    TAG_LOGD(AAFwkTag::DELEGATOR, "GetAppContext call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
+        return {};
+    }
+    ani_class cls;
+    ani_object nullobj = nullptr;
+    if (ANI_OK != env->FindClass(CONTEXT_CLASS_NAME, &cls)) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass Context Failed");
+        return nullobj;
+    }
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
+    if (!delegator) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
+        return nullobj;
+    }
+    std::shared_ptr<AbilityRuntime::Context> context = delegator->GetAppContext();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null context");
+        return nullobj;
+    }
+    ani_object objectContext = CreateEtsBaseContext(env, cls, context);
+    TAG_LOGD(AAFwkTag::DELEGATOR, "GetAppContext end");
+    return objectContext;
+}
+
+void EtsAbilityDelegator::ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object,
+    ani_string cmd, ani_double timeoutSecs, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "ExecuteShellCommand called");
     if (env == nullptr) {
@@ -201,7 +245,7 @@ void ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object, ani_st
     }
     int resultCode = 0;
     auto result = delegator->ExecuteShellCommand(stdCmd, static_cast<int64_t>(timeoutSecs));
-    ani_object objValue = wrapShellCmdResult(env, std::move(result));
+    ani_object objValue = WrapShellCmdResult(env, std::move(result));
     if (objValue == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null objValue");
         resultCode = COMMON_FAILED;
@@ -232,8 +276,8 @@ void ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object, ani_st
     return;
 }
 
-void FinishTestSync(ani_env* env, [[maybe_unused]]ani_object object, ani_string msg, ani_double code,
-    ani_object callback)
+void EtsAbilityDelegator::FinishTest(ani_env* env, [[maybe_unused]]ani_object object,
+    ani_string msg, ani_double code, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "called");
     if (env == nullptr) {
@@ -249,10 +293,11 @@ void FinishTestSync(ani_env* env, [[maybe_unused]]ani_object object, ani_string 
     int resultCode = 0;
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (!delegator) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "finishTestSync delegator is null");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "FinishTest delegator is null");
         resultCode = COMMON_FAILED;
+    } else {
+        delegator->FinishUserTest(stdMsg, static_cast<int64_t>(code));
     }
-    delegator->FinishUserTest(stdMsg, static_cast<int64_t>(code));
     ani_ref callbackRef = nullptr;
     auto status = env->GlobalReference_Create(callback, &callbackRef);
     if (status != ANI_OK) {
@@ -263,11 +308,11 @@ void FinishTestSync(ani_env* env, [[maybe_unused]]ani_object object, ani_string 
     AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
         OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, resultCode),
         nullptr);
-    TAG_LOGD(AAFwkTag::DELEGATOR, "finishTestSync END");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "FinishTest END");
     return;
 }
 
-void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg)
+void EtsAbilityDelegator::PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "PrintSync");
     if (env == nullptr) {
@@ -291,7 +336,7 @@ void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg)
     return;
 }
 
-void RetrieveStringFromAni(ani_env *env, ani_string str, std::string &res)
+void EtsAbilityDelegator::RetrieveStringFromAni(ani_env *env, ani_string str, std::string &res)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
@@ -311,70 +356,45 @@ void RetrieveStringFromAni(ani_env *env, ani_string str, std::string &res)
     res.resize(sz);
 }
 
-void AddAbilityMonitorASync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj,
-    ani_object callback)
+void EtsAbilityDelegator::AddAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+    ani_object monitorObj, ani_object callback)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
         return;
     }
-    ani_class monitorCls;
-    ani_status status = env->FindClass(ABILITY_MONITOR_INNER_CLASS_NAME, &monitorCls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status: %{public}d", status);
+    std::shared_ptr<EtsAbilityMonitor> monitorImpl = nullptr;
+    if (!ParseMonitorPara(env, monitorObj, monitorImpl)) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "ParseMonitorPara failed");
+        AbilityRuntime::ThrowStsError(env, INCORRECT_PARAMETERS,
+            "Parse param monitor failed, monitor must be Monitor.");
         return;
     }
-    ani_ref moduleNameRef;
-    status = env->Object_GetPropertyByName_Ref(monitorObj, "moduleName", &moduleNameRef);
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
-        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
-        return;
-    }
-    std::string strModuleName;
-    ani_string aniModuleString = static_cast<ani_string>(moduleNameRef);
-    RetrieveStringFromAni(env, aniModuleString, strModuleName);
-    ani_ref abilityNameRef;
-    status = env->Object_GetPropertyByName_Ref(monitorObj, "abilityName", &abilityNameRef);
-    if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
-        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
-        return;
-    }
-    std::string strAbilityName;
-    ani_string aniAbilityName = static_cast<ani_string>(abilityNameRef);
-    RetrieveStringFromAni(env, aniAbilityName, strAbilityName);
-    TAG_LOGD(AAFwkTag::DELEGATOR, "abilityName %{public}s ", strAbilityName.c_str());
-    std::shared_ptr<STSAbilityMonitor> monitor = std::make_shared<STSAbilityMonitor>(strAbilityName);
-    if (monitor == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "null monitor");
-        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
-        return;
-    }
-    monitor->SetSTSAbilityMonitor(env, monitorObj);
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     int resultCode = 0;
     if (delegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
         resultCode = COMMON_FAILED;
+    } else {
+        delegator->AddAbilityMonitor(monitorImpl);
     }
     ani_ref callbackRef = nullptr;
-    status = env->GlobalReference_Create(callback, &callbackRef);
+    ani_status status = env->GlobalReference_Create(callback, &callbackRef);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Create Gloabl ref for delegator failed %{public}d", status);
         AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
         return;
     }
-    delegator->AddAbilityMonitor(monitor);
     AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
         OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, resultCode),
         nullptr);
     return;
 }
 
-void StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_object wantObj, ani_object callback)
+void EtsAbilityDelegator::StartAbility(ani_env* env, [[maybe_unused]]ani_object object,
+    ani_object wantObj, ani_object callback)
 {
-    TAG_LOGD(AAFwkTag::DELEGATOR, "null env");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "StartAbility");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
         return;
@@ -411,23 +431,106 @@ void StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_object wa
     return;
 }
 
-ani_ref GetCurrentTopAbilitySync(ani_env* env)
+ani_ref EtsAbilityDelegator::GetCurrentTopAbility(ani_env* env)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "called");
     ani_object objValue = nullptr;
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
     if (delegator != nullptr) {
         auto property = delegator->GetCurrentTopAbility();
-        if (!property || property->stsObject_.expired()) {
+        auto etsbaseProperty = std::static_pointer_cast<AppExecFwk::ETSDelegatorAbilityProperty>(property);
+        if (!etsbaseProperty || etsbaseProperty->object_.expired()) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "invalid property");
             return {};
         }
-        return property->stsObject_.lock()->aniRef;
+        std::unique_lock<std::mutex> lck(g_mutexAbilityRecord);
+        g_abilityRecord.emplace(etsbaseProperty->object_, etsbaseProperty->token_);
+        return etsbaseProperty->object_.lock()->aniRef;
     } else {
         TAG_LOGE(AAFwkTag::DELEGATOR, "delegator is nullptr");
         return {};
     }
     return objValue;
 }
-} // namespace AbilityDelegatorSts
+
+bool EtsAbilityDelegator::ParseMonitorPara(ani_env *env, ani_object monitorObj,
+    std::shared_ptr<EtsAbilityMonitor> &monitorImpl)
+{
+    TAG_LOGI(AAFwkTag::DELEGATOR, "monitorRecord size: %{public}zu", g_monitorRecord.size());
+    if (env == nullptr || monitorObj == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "env or monitorObj is nullptr");
+        return false;
+    }
+    for (auto iter = g_monitorRecord.begin(); iter != g_monitorRecord.end(); ++iter) {
+        std::shared_ptr<STSNativeReference> etsMonitor = iter->first;
+        ani_boolean result = false;
+        ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(monitorObj),
+            reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_StrictEquals failed status: %{public}d", status);
+        }
+        if (result) {
+            monitorImpl = iter->second;
+            return monitorImpl ? true : false;
+        }
+    }
+    if (!ParseMonitorParaInner(env, monitorObj, monitorImpl)) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "ParseMonitorParaInner failed");
+        return false;
+    }
+    return true;
+}
+
+bool EtsAbilityDelegator::ParseMonitorParaInner(ani_env *env, ani_object monitorObj,
+    std::shared_ptr<EtsAbilityMonitor> &monitorImpl)
+{
+    if (env == nullptr || monitorObj == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "env or monitorObj is nullptr");
+        return false;
+    }
+    ani_class monitorCls;
+    ani_status status = env->FindClass(ABILITY_MONITOR_INNER_CLASS_NAME, &monitorCls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status: %{public}d", status);
+        return false;
+    }
+    ani_ref moduleNameRef;
+    status = env->Object_GetPropertyByName_Ref(monitorObj, "moduleName", &moduleNameRef);
+    if (ANI_OK != status) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+        return false;
+    }
+    std::string strModuleName;
+    ani_string aniModuleString = static_cast<ani_string>(moduleNameRef);
+    RetrieveStringFromAni(env, aniModuleString, strModuleName);
+    ani_ref abilityNameRef;
+    status = env->Object_GetPropertyByName_Ref(monitorObj, "abilityName", &abilityNameRef);
+    if (ANI_OK != status) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+        return false;
+    }
+    std::string strAbilityName;
+    ani_string aniAbilityName = static_cast<ani_string>(abilityNameRef);
+    RetrieveStringFromAni(env, aniAbilityName, strAbilityName);
+
+    std::shared_ptr<EtsAbilityMonitor> abilityMonitor = nullptr;
+    if (strModuleName.empty()) {
+        abilityMonitor = std::make_shared<EtsAbilityMonitor>(strAbilityName);
+        abilityMonitor->SetEtsAbilityMonitor(env, monitorObj);
+    } else {
+        abilityMonitor = std::make_shared<EtsAbilityMonitor>(strAbilityName, strModuleName);
+        abilityMonitor->SetEtsAbilityMonitor(env, monitorObj);
+    }
+    monitorImpl = abilityMonitor;
+    std::shared_ptr<STSNativeReference> reference = std::make_shared<STSNativeReference>();
+    if (reference != nullptr) {
+        reference->aniObj = monitorObj;
+    }
+    g_monitorRecord.emplace(reference, monitorImpl);
+    return true;
+}
+
+} // namespace AbilityDelegatorEts
 } // namespace OHOS

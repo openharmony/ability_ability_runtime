@@ -13,18 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STS_ABILITY_DELEGATOR_UTILS_H
-#define OHOS_ABILITY_RUNTIME_STS_ABILITY_DELEGATOR_UTILS_H
+export default interface AbilityStageMonitor{
+    moduleName: string;
+    srcEntrance: string;
+}
 
-#include "ability_delegator.h"
-#include "ability_delegator_args.h"
-#include "sts_runtime.h"
-
-namespace OHOS {
-namespace AbilityDelegatorSts {
-ani_object CreateStsAbilityDelegator(ani_env *env);
-ani_object CreateStsAbilityDelegatorArguments(ani_env *env,
-    const std::shared_ptr<AppExecFwk::AbilityDelegatorArgs> abilityDelegatorArgs);
-} // namespace AbilityDelegatorSts
-} // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_STS_ABILITY_DELEGATOR_UTILS_H
+class AbilityStageMonitorInner implements AbilityStageMonitor{
+    moduleName: string = "";
+    srcEntrance: string = "";
+}

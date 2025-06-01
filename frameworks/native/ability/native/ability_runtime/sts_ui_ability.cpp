@@ -1319,13 +1319,13 @@ bool StsUIAbility::CallObjectMethod(bool withResult, const char *name, const cha
     return false;
 }
 
-std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> StsUIAbility::CreateADelegatorAbilityProperty()
+std::shared_ptr<AppExecFwk::ETSDelegatorAbilityProperty> StsUIAbility::CreateADelegatorAbilityProperty()
 {
     if (abilityContext_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
         return nullptr;
     }
-    auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
+    auto property = std::make_shared<AppExecFwk::ETSDelegatorAbilityProperty>();
     property->token_ = abilityContext_->GetToken();
     property->name_ = GetAbilityName();
     property->moduleName_ = GetModuleName();
@@ -1340,7 +1340,7 @@ std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> StsUIAbility::CreateADele
         }
     }
     property->lifecycleState_ = GetState();
-    property->stsObject_ = stsAbilityObj_;
+    property->object_ = stsAbilityObj_;
     return property;
 }
 

@@ -13,29 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STS_ABILITY_MONITOR_H
-#define OHOS_ABILITY_RUNTIME_STS_ABILITY_MONITOR_H
+#ifndef OHOS_ABILITY_RUNTIME_ETS_ABILITY_MONITOR_H
+#define OHOS_ABILITY_RUNTIME_ETS_ABILITY_MONITOR_H
 
 #include <memory>
 #include <string>
-#include "native_engine/native_reference.h"
-#include "sts_runtime.h"
 #include "iability_monitor.h"
+#include "sts_runtime.h"
 
 namespace OHOS {
-namespace AbilityDelegatorSts {
-class STSAbilityMonitor : public AppExecFwk::IAbilityMonitor {
+namespace AbilityDelegatorEts {
+class EtsAbilityMonitor : public AppExecFwk::IAbilityMonitor {
 public:
     /**
-     * A constructor used to create a STSAbilityMonitor instance with the input parameter passed.
+     * A constructor used to create a EtsAbilityMonitor instance with the input parameter passed.
      *
      * @param abilityName Indicates the specified ability name for monitoring the lifecycle state changes
      * of the ability.
      */
-    explicit STSAbilityMonitor(const std::string &abilityName);
+    explicit EtsAbilityMonitor(const std::string &abilityName);
 
     /**
-     * A constructor used to create a STSAbilityMonitor instance with the input parameter passed.
+     * A constructor used to create a EtsAbilityMonitor instance with the input parameter passed.
      *
      * @param abilityName Indicates the specified ability name for monitoring the lifecycle state changes
      * of the ability.
@@ -43,20 +42,20 @@ public:
      * @param moduleName Indicates the specified module name for monitoring the lifecycle state changes
      * of the ability.
      */
-    explicit STSAbilityMonitor(const std::string &abilityName, const std::string &moduleName);
+    explicit EtsAbilityMonitor(const std::string &abilityName, const std::string &moduleName);
 
     /**
      * Default deconstructor used to deconstruct.
      */
-    ~STSAbilityMonitor() = default;
+    ~EtsAbilityMonitor() = default;
 
     /**
      * Called when ability is started.
-     * Then call the corresponding method on the sts side through the saved ets object.
+     * Then call the corresponding method on the ets side through the saved ets object.
      *
      * @param abilityObj Indicates the ability object.
      */
-    void OnSTSAbilityStart(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj) override;
+    void OnAbilityStart(const std::weak_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &abilityObj) override;
 
     /**
      * Called when ability is in foreground.
@@ -64,7 +63,7 @@ public:
      *
      * @param abilityObj Indicates the ability object.
      */
-    void OnSTSAbilityForeground(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj) override;
+    void OnAbilityForeground(const std::weak_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &abilityObj) override;
 
     /**
      * Called when ability is in background.
@@ -72,7 +71,7 @@ public:
      *
      * @param abilityObj Indicates the ability object.
      */
-    void OnSTSAbilityBackground(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj) override;
+    void OnAbilityBackground(const std::weak_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &abilityObj) override;
 
     /**
      * Called when ability is stopped.
@@ -80,7 +79,7 @@ public:
      *
      * @param abilityObj Indicates the ability object.
      */
-    void OnSTSAbilityStop(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj) override;
+    void OnAbilityStop(const std::weak_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &abilityObj) override;
 
     /**
      * Called when window stage is created.
@@ -88,7 +87,7 @@ public:
      *
      * @param abilityObj Indicates the ability object.
      */
-    void OnSTSWindowStageCreate(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj) override;
+    void OnWindowStageCreate(const std::weak_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &abilityObj) override;
 
     /**
      * Called when window stage is restored.
@@ -96,7 +95,7 @@ public:
      *
      * @param abilityObj Indicates the ability object.
      */
-    void OnSTSWindowStageRestore(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj) override;
+    void OnWindowStageRestore(const std::weak_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &abilityObj) override;
 
     /**
      * Called when window stage is destroyed.
@@ -104,36 +103,38 @@ public:
      *
      * @param abilityObj Indicates the ability object.
      */
-    void OnSTSWindowStageDestroy(const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj) override;
+    void OnWindowStageDestroy(const std::weak_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &abilityObj) override;
 
     /**
-     * Sets the sts object.
+     * Sets the ets object.
      *
-     * @param abilityMonitorObj Indicates the sts object.
+     * @param abilityMonitorObj Indicates the ets object.
      */
-    void SetSTSAbilityMonitor(ani_env *env, ani_object &abilityMonitorObj);
+    void SetEtsAbilityMonitor(ani_env *env, ani_object &abilityMonitorObj);
 
     /**
      * Obtains the saved ets object.
      *
      * @return the saved ets object.
      */
-    std::unique_ptr<AbilityRuntime::STSNativeReference> &GetStsAbilityMonitor()
+    std::unique_ptr<AbilityRuntime::STSNativeReference> &GetEtsAbilityMonitor()
     {
-        return stsAbilityMonitor_;
+        return EtsAbilityMonitor_;
     }
 
 private:
     void CallLifecycleCBFunction(const std::string &functionName,
-        const std::weak_ptr<AbilityRuntime::STSNativeReference> &abilityObj);
+        const std::shared_ptr<AbilityRuntime::STSNativeReference> &abilityObj);
     ani_env* GetAniEnv();
+    std::shared_ptr<AbilityRuntime::STSNativeReference> GetRuntimeObject(
+        const std::weak_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &abilityObj);
 
 private:
     ani_vm* vm_ = nullptr;
     std::string abilityName_ = "";
     std::string moduleName_ = "";
-    std::unique_ptr<AbilityRuntime::STSNativeReference> stsAbilityMonitor_ = nullptr;
+    std::unique_ptr<AbilityRuntime::STSNativeReference> EtsAbilityMonitor_ = nullptr;
 };
 }  // namespace AbilityDelegatorJs
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_STS_ABILITY_MONITOR_H
+#endif  // OHOS_ABILITY_RUNTIME_ETS_ABILITY_MONITOR_H
