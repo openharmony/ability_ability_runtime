@@ -300,7 +300,7 @@ private:
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         InsightIntentExecutorInfo& executeInfo);
     int32_t OnCollaborate(WantParams &wantParams);
-    
+
     std::shared_ptr<STSNativeReference> stsWindowStageObj_;
     int32_t windowMode_ = 0;
 #endif
@@ -308,7 +308,7 @@ private:
 private:
     bool CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
     ani_object CreateAppWindowStage();
-    std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
+    std::shared_ptr<AppExecFwk::ETSDelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want,
         const std::string &moduleName, const std::string &srcPath, const std::shared_ptr<OHOSApplication> &application);
     void DoOnForegroundForSceneIsNull(const Want &want);

@@ -42,10 +42,10 @@ ohos_shared_library("ability_delegator_registry_ani_kit") {
   public_configs = []
 
   sources = [
-    "./src/sts_ability_delegator.cpp",
-    "./src/sts_ability_delegator_registry.cpp",
-    "./src/sts_ability_delegator_utils.cpp",
-    "./src/sts_ability_monitor.cpp",
+    "./src/ets_ability_delegator.cpp",
+    "./src/ets_ability_delegator_registry.cpp",
+    "./src/ets_ability_delegator_utils.cpp",
+    "./src/ets_ability_monitor.cpp",
   ]
 
   cflags = []
