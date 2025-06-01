@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-export default interface AbilityStageMonitor{
+export default interface AbilityStageMonitor {
     moduleName: string;
     srcEntrance: string;
 }
 
-class AbilityStageMonitorInner implements AbilityStageMonitor{
-    moduleName: string = "";
-    srcEntrance: string = "";
+class AbilityStageMonitorInner implements AbilityStageMonitor {
+    public moduleName: string = '';
+    public srcEntrance: string = '';
 }
