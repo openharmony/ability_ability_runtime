@@ -14,52 +14,48 @@
  */
 
 namespace wantConstant {
-  export enum Action {
-    ACTION_HOME = 'ohos.want.action.home',
-    ACTION_DIAL = 'ohos.want.action.dial',
-    ACTION_SEARCH = 'ohos.want.action.search',
-    ACTION_WIRELESS_SETTINGS = 'ohos.settings.wireless',
-    ACTION_MANAGE_APPLICATIONS_SETTINGS = 'ohos.settings.manage.applications',
-    ACTION_APPLICATION_DETAILS_SETTINGS = 'ohos.settings.application.details',
-    ACTION_SET_ALARM = 'ohos.want.action.setAlarm',
-    ACTION_SHOW_ALARMS = 'ohos.want.action.showAlarms',
-    ACTION_SNOOZE_ALARM = 'ohos.want.action.snoozeAlarm',
-    ACTION_DISMISS_ALARM = 'ohos.want.action.dismissAlarm',
-    ACTION_DISMISS_TIMER = 'ohos.want.action.dismissTimer',
-    ACTION_SEND_SMS = 'ohos.want.action.sendSms',
-    ACTION_CHOOSE = 'ohos.want.action.choose',
-    ACTION_IMAGE_CAPTURE = 'ohos.want.action.imageCapture',
-    ACTION_VIDEO_CAPTURE = 'ohos.want.action.videoCapture',
-    ACTION_SELECT = 'ohos.want.action.select',
-    ACTION_SEND_DATA = 'ohos.want.action.sendData',
-    ACTION_SEND_MULTIPLE_DATA = 'ohos.want.action.sendMultipleData',
-    ACTION_SCAN_MEDIA_FILE = 'ohos.want.action.scanMediaFile',
-    ACTION_VIEW_DATA = 'ohos.want.action.viewData',
-    ACTION_EDIT_DATA = 'ohos.want.action.editData',
-    INTENT_PARAMS_INTENT = 'ability.want.params.INTENT',
-    INTENT_PARAMS_TITLE = 'ability.want.params.TITLE',
-    ACTION_FILE_SELECT = 'ohos.action.fileSelect',
+  export enum Params {
+    DLP_PARAMS_SANDBOX = 'ohos.dlp.params.sandbox',
+    DLP_PARAMS_BUNDLE_NAME = 'ohos.dlp.params.bundleName',
+    DLP_PARAMS_MODULE_NAME = 'ohos.dlp.params.moduleName',
+    DLP_PARAMS_ABILITY_NAME = 'ohos.dlp.params.abilityName',
+    DLP_PARAMS_INDEX = 'ohos.dlp.params.index',
+    HIDE_SENSITIVE_TYPE = 'ohos.media.params.hideSensitiveType',
+    ABILITY_BACK_TO_OTHER_MISSION_STACK = 'ability.params.backToOtherMissionStack',
+    ABILITY_RECOVERY_RESTART = 'ohos.ability.params.abilityRecoveryRestart',
+    CONTENT_TITLE_KEY = 'ohos.extra.param.key.contentTitle',
+    SHARE_ABSTRACT_KEY = 'ohos.extra.param.key.shareAbstract',
+    SHARE_URL_KEY = 'ohos.extra.param.key.shareUrl',
+    SUPPORT_CONTINUE_PAGE_STACK_KEY = 'ohos.extra.param.key.supportContinuePageStack',
+    SUPPORT_CONTINUE_SOURCE_EXIT_KEY = 'ohos.extra.param.key.supportContinueSourceExit',
+    ASSERT_FAULT_SESSION_ID = 'ohos.ability.params.asssertFaultSessionId',
+    SHOW_MODE_KEY = 'ohos.extra.param.key.showMode',
     PARAMS_STREAM = 'ability.params.stream',
-    ACTION_APP_ACCOUNT_OAUTH = 'ohos.account.appAccount.action.oauth'
+    APP_CLONE_INDEX_KEY = 'ohos.extra.param.key.appCloneIndex',
+    CALLER_REQUEST_CODE = 'ohos.extra.param.key.callerRequestCode',
+    PAGE_PATH = 'ohos.param.atomicservice.pagePath',
+    ROUTER_NAME = 'ohos.param.atomicservice.routerName',
+    PAGE_SOURCE_FILE = 'ohos.param.atomicservice.pageSourceFile',
+    BUILD_FUNCTION = 'ohos.param.atomicservice.buildFunction',
+    SUB_PACKAGE_NAME = 'ohos.param.atomicservice.subpackageName',
+    APP_INSTANCE_KEY = 'ohos.extra.param.key.appInstance',
+    CREATE_APP_INSTANCE_KEY = 'ohos.extra.param.key.createAppInstance',
+    CALLER_APP_CLONE_INDEX = 'ohos.param.callerAppCloneIndex',
+    LAUNCH_REASON_MESSAGE = 'ohos.params.launchReasonMessage',
   }
 
   export enum Flags {
     FLAG_AUTH_READ_URI_PERMISSION = 0x00000001,
     FLAG_AUTH_WRITE_URI_PERMISSION = 0x00000002,
-    FLAG_ABILITY_FORWARD_RESULT = 0x00000004,
-    FLAG_ABILITY_CONTINUATION = 0x00000008,
-    FLAG_NOT_OHOS_COMPONENT = 0x00000010,
-    FLAG_ABILITY_FORM_ENABLED = 0x00000020,
     FLAG_AUTH_PERSISTABLE_URI_PERMISSION = 0x00000040,
-    FLAG_AUTH_PREFIX_URI_PERMISSION = 0x00000080,
-    FLAG_ABILITYSLICE_MULTI_DEVICE = 0x00000100,
-    FLAG_START_FOREGROUND_ABILITY = 0x00000200,
-    FLAG_ABILITY_CONTINUATION_REVERSIBLE = 0x00000400,
     FLAG_INSTALL_ON_DEMAND = 0x00000800,
-    FLAG_INSTALL_WITH_BACKGROUND_MODE = 0x80000000,
-    FLAG_ABILITY_CLEAR_MISSION = 0x00008000,
-    FLAG_ABILITY_NEW_MISSION = 0x10000000,
-    FLAG_ABILITY_MISSION_TOP = 0x20000000
+    FLAG_ABILITY_ON_COLLABORATE = 0x00002000,
+    FLAG_START_WITHOUT_TIPS = 0x40000000
+  }
+
+  export enum ShowMode {
+    WINDOW = 0,
+    EMBEDDED_FULL = 1
   }
 }
 
