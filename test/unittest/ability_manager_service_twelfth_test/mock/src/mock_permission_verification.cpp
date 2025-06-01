@@ -18,7 +18,8 @@
 namespace OHOS {
 namespace AAFwk {
 
-bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName) const
+bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName,
+                                                     const uint32_t specifyTokenId) const
 {
     return !!(MyFlag::flag_);
 }

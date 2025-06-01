@@ -69,6 +69,7 @@
 #include "ability_first_frame_state_observer_interface.h"
 #endif
 #include "ihidden_start_observer.h"
+#include "kiosk_status.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -2197,6 +2198,45 @@ public:
         const std::string &moduleName,
         const std::string &intentName,
         InsightIntentInfoForQuery &info)
+    {
+        return 0;
+    }
+
+    /**
+     * Update the list of applications allowed in kiosk mode.
+     * @param appList, the vector of bundle names for applications allowed in kiosk mode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList)
+    {
+        return 0;
+    }
+
+    /**
+     * Enter Kiosk mode
+     * list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t EnterKioskMode(sptr<IRemoteObject> callerToken)
+    {
+        return 0;
+    }
+
+    /**
+     * Exit Kiosk mode
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t ExitKioskMode(sptr<IRemoteObject> callerToken)
+    {
+        return 0;
+    }
+
+    /**
+     * Get current Kiosk mode information.
+     * @param kioskStatus, the structure to store Kiosk mode details.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetKioskStatus(AAFwk::KioskStatus &kioskStatus)
     {
         return 0;
     }

@@ -59,6 +59,7 @@
 #include "interceptor/extension_control_interceptor.h"
 #include "interceptor/screen_unlock_interceptor.h"
 #include "interceptor/start_other_app_interceptor.h"
+#include "interceptor/kiosk_interceptor.h"
 #include "int_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -394,6 +395,8 @@ bool AbilityManagerService::Init()
     eventHandler_ = std::make_shared<AbilityEventHandler>(taskHandler_, weak_from_this());
     freeInstallManager_ = std::make_shared<FreeInstallManager>(weak_from_this());
     CHECK_POINTER_RETURN_BOOL(freeInstallManager_);
+    kioskManager_ = std::make_shared<KioskManager>();
+    CHECK_POINTER_RETURN_BOOL(kioskManager_);
 
     // init user controller.
     userController_ = std::make_shared<UserController>();
@@ -6799,6 +6802,14 @@ void AbilityManagerService::OnAppStateChanged(const AppInfo &info)
 
     if (system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
         KeepAliveProcessManager::GetInstance().OnAppStateChanged(info);
+    }
+
+    if(info.state != AppState::TERMINATED && info.state != AppState::END) {
+        return;
+    }
+
+    if (kioskManager_) {
+        kioskManager_->OnAppStop(info.bundleName, GetExitKioskModeCallback());
     }
 }
 
@@ -14302,6 +14313,131 @@ int32_t AbilityManagerService::RestartSelfAtomicService(sptr<IRemoteObject> call
     }
     RestartAppManager::GetInstance().AddRestartAppHistory(key, now);
     return result;
+}
+
+std::function<void()> AbilityManagerService::GetEnterKioskModeCallback()
+{
+    auto enterKioskModeCallback = [abilityManager = weak_from_this()]() {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "EnterKioskMode");
+        auto abilityMgr = abilityManager.lock();
+        if (abilityMgr == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid abilityMgr pointer");
+            return;
+        }
+        abilityMgr->AddKioskInterceptor();
+    };
+    return enterKioskModeCallback;
+}
+
+std::function<void()> AbilityManagerService::GetExitKioskModeCallback()
+{
+    auto exitKioskModeCallback = [abilityManager = weak_from_this()]() {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "EnterKioskMode");
+        auto abilityMgr = abilityManager.lock();
+        if (abilityMgr == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid abilityMgr pointer");
+            return;
+        }
+        abilityMgr->RemoveKioskInterceptor();
+    };
+    return exitKioskModeCallback;
+}
+
+void AbilityManagerService::AddKioskInterceptor()
+{
+    interceptorExecuter_->AddInterceptor(
+        "KioskWhitelist",
+        std::make_shared<KioskInterceptor>(
+            [kioskManager = this->kioskManager_](const std::string &bundleName) -> int {
+                if (!kioskManager || !kioskManager->IsInKioskMode()) {
+                  return ERR_OK;
+                }
+
+                if (!kioskManager->IsInWhiteList(bundleName)) {
+                  return ERR_KIOSK_MODE_NOT_IN_WHITELIST;
+                }
+                return ERR_OK;
+            }));
+}
+
+void AbilityManagerService::RemoveKioskInterceptor()
+{
+    interceptorExecuter_->RemoveInterceptor("KioskWhitelist");
+}
+
+bool AbilityManagerService::CheckCallerIsForeground(sptr<IRemoteObject> callerToken)
+{
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByToken(
+        callerToken, processInfo);
+
+    return processInfo.state_ ==
+           AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
+}
+
+bool AbilityManagerService::CheckKioskPermission()
+{
+    if ((PermissionVerification::GetInstance()->IsSystemAppCall() ||
+        PermissionVerification::GetInstance()->IsSACall()) &&
+       PermissionVerification::GetInstance()->VerifyCallingPermission(
+           PermissionConstants::PERMISSION_MANAGE_EDM_POLICY)) {
+      return true;
+    }
+
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "without KIOSK mode permission");
+    return false;
+}
+
+int32_t AbilityManagerService::UpdateKioskApplicationList(const std::vector<std::string> &appList)
+{
+    if (!CheckKioskPermission()) {
+        return CHECK_PERMISSION_FAILED;
+    }
+
+    CHECK_POINTER_AND_RETURN(kioskManager_, ERR_INVALID_VALUE);
+
+    return kioskManager_->UpdateKioskApplicationList(appList, GetExitKioskModeCallback());
+}
+
+int32_t AbilityManagerService::EnterKioskMode(sptr<IRemoteObject> callerToken)
+{
+    CHECK_POINTER_AND_RETURN(kioskManager_, ERR_INVALID_VALUE);
+    auto record = Token::GetAbilityRecordByToken(callerToken);
+    if (!record) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "record null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    std::string bundleName = record->GetAbilityInfo().bundleName;
+    if (!CheckCallerIsForeground(callerToken)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "The application is not in the foreground !");
+        return ERR_APP_NOT_IN_FOCUS;
+    }
+    return kioskManager_->EnterKioskMode(IPCSkeleton::GetCallingUid(), bundleName,
+                                         GetEnterKioskModeCallback());
+}
+
+int32_t AbilityManagerService::ExitKioskMode(sptr<IRemoteObject> callerToken)
+{
+    auto record = Token::GetAbilityRecordByToken(callerToken);
+    if (!record) {
+      TAG_LOGE(AAFwkTag::ABILITYMGR, "record null");
+      return INVALID_PARAMETERS_ERR;
+    }
+
+    CHECK_POINTER_AND_RETURN(kioskManager_, ERR_INVALID_VALUE);
+    return kioskManager_->ExitKioskMode(record->GetAbilityInfo().bundleName,
+                                        GetExitKioskModeCallback());
+}
+
+int32_t AbilityManagerService::GetKioskStatus(KioskStatus &kioskStatus)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "request GetKioskStatus");
+    if (!CheckKioskPermission()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "without Kiosk mode permission");
+        return CHECK_PERMISSION_FAILED;
+    }
+    CHECK_POINTER_AND_RETURN(kioskManager_, ERR_INVALID_VALUE);
+    return kioskManager_->GetKioskStatus(kioskStatus);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

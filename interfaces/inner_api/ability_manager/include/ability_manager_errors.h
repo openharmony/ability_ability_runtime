@@ -802,7 +802,27 @@ enum {
      * Result (2097334) for app selector not exists.
      */
     ERR_APP_SELECTOR_NOT_EXISTS = 2097334,
-    
+
+    /**
+     * Result (2097335) target not in whitelist.
+     */
+    ERR_KIOSK_MODE_NOT_IN_WHITELIST = 2097335,
+
+    /**
+     * Result (2097336) already in kiosk mode.
+     */
+    ERR_ALREADY_IN_KIOSK_MODE = 2097336,
+
+    /**
+     * Result (2097337) system not in kiosk mode when required.
+     */
+    ERR_NOT_IN_KIOSK_MODE = 2097337,
+
+    /**
+     * Result (2097338) for application not in focus.
+     */
+    ERR_APP_NOT_IN_FOCUS = 2097338,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */

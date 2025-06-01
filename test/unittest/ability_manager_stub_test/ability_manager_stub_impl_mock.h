@@ -421,6 +421,26 @@ public:
         return ERR_OK;
     }
 
+    int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList) override
+    {
+        return ERR_OK;
+    }
+
+    int32_t EnterKioskMode(sptr<IRemoteObject> callerToken) override
+    {
+        return ERR_OK;
+    }
+
+    int32_t ExitKioskMode(sptr<IRemoteObject> callerToken) override
+    {
+        return ERR_OK;
+    }
+
+    int32_t GetKioskStatus(AAFwk::KioskStatus &kioskStatus) override
+    {
+        return ERR_OK;
+    }
+
 #ifdef ABILITY_COMMAND_FOR_TEST
     int ForceTimeoutForTest(const std::string& abilityName, const std::string& state) override
     {

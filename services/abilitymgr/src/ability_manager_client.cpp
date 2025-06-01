@@ -2276,5 +2276,37 @@ ErrCode AbilityManagerClient::RestartSelfAtomicService(sptr<IRemoteObject> calle
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->RestartSelfAtomicService(callerToken);
 }
+
+ErrCode AbilityManagerClient::UpdateKioskApplicationList(const std::vector<std::string> &appList)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "update KIOSK App list");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->UpdateKioskApplicationList(appList);
+}
+
+ErrCode AbilityManagerClient::EnterKioskMode(sptr<IRemoteObject> callerToken)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "enter Kiosk mode");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->EnterKioskMode(callerToken);
+}
+
+ErrCode AbilityManagerClient::ExitKioskMode(sptr<IRemoteObject> callerToken)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "exit Kiosk mode");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->ExitKioskMode(callerToken);
+}
+
+ErrCode AbilityManagerClient::GetKioskStatus(AAFwk::KioskStatus &kioskStatus)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "get Kiosk info");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetKioskStatus(kioskStatus);
+}
 } // namespace AAFwk
 } // namespace OHOS
