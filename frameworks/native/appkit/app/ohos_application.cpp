@@ -250,6 +250,14 @@ void OHOSApplication::InitAniContext()
             reinterpret_cast<void *>(AbilityRuntime::ContextUtil::SwitchArea)},
         ani_native_function {"getArea", nullptr,
             reinterpret_cast<void *>(AbilityRuntime::ContextUtil::GetArea)},
+        ani_native_function {"nativeCreateDisplayContext", "D:Lapplication/Context/Context;",
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeCreateDisplayContext)},
+        ani_native_function {"nativeCreateAreaModeContext",
+            "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;:Lapplication/Context/Context;",
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeCreateAreaModeContext)},
+        ani_native_function {"nativeCreateSystemHspModuleResourceManager", "Lstd/core/String;Lstd/core/String;"
+            ":L@ohos/resourceManager/resourceManager/ResourceManager;",
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeCreateSystemHspModuleResourceManager)},
     };
     aniEnv->Class_BindNativeMethods(contextCls, contextFunctions.data(),
         contextFunctions.size());
