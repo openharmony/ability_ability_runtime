@@ -50,6 +50,7 @@ ohos_unittest("call_record_test") {
     "ffrt:libffrt",
     "googletest:gmock_main",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]

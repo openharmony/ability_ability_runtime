@@ -420,6 +420,10 @@ PROCESS_START_FAILED:
   REASON: {type: INT32, desc: failed reason}
   SUB_REASON: {type: INT32, desc: failed sub reason}
 
+APP_START_INTERCRPT_BY_EDM:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: app, desc: app start intercepted by EDM}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+
 DRAWN_COMPLETED:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: app, desc: drawn completed event reporting}
   APP_UID: {type: INT32, desc: app uid}
