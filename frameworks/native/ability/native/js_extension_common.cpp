@@ -97,7 +97,7 @@ napi_value JsExtensionCommon::CallObjectMethod(const char* name, napi_value cons
 
     napi_value method = nullptr;
     napi_get_named_property(env, obj, name, &method);
-    if (!CheckTypeForNapiValue(env, obj, napi_function)) {
+    if (!CheckTypeForNapiValue(env, method, napi_function)) {
         TAG_LOGE(AAFwkTag::EXT, "get '%{public}s' failed", name);
         return nullptr;
     }
