@@ -64,6 +64,7 @@ ohos_fuzztest("ExtensionRecordFactoryFuzzTest") {
     "config_policy:configpolicy_util",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
