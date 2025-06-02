@@ -24,6 +24,7 @@
 #include "ability_manager_errors.h"
 #include "app_jump_control_rule.h"
 #include "bundle_mgr_helper.h"
+#include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
@@ -378,9 +379,12 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     return AbilityManagerClient::GetInstance()->StartAbility(want, requestCode, userId);
 }
 
-inline ErrCode EdmErrorType(bool isEdm)
+inline ErrCode EdmErrorType(bool isEdm, const std::string &bundleName)
 {
     if (isEdm) {
+        EventInfo eventInfo;
+        eventInfo.bundleName = bundleName;
+        EventReport::SendAbilityEvent(EventName::APP_START_INTERCRPT_BY_EDM, HiSysEventType::BEHAVIOR, eventInfo);
         return ERR_EDM_APP_CONTROLLED;
     }
     return ERR_APP_CONTROLLED;
