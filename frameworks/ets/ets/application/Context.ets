@@ -19,6 +19,9 @@ import EventHub from 'application.EventHub';
 import contextConstant from '@ohos.app.ability.contextConstant'
 import { ApplicationInfo } from 'bundleManager.ApplicationInfo'
 import resmgr from '@ohos.resourceManager'
+import { AsyncCallback } from '@ohos.base';
+import { BusinessError } from '@ohos.base';
+import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
 export class Context extends BaseContext {
     static {
@@ -33,6 +36,7 @@ export class Context extends BaseContext {
     applicationInfo: ApplicationInfo;
     eventHub: EventHub = new EventHub();
     resourceManager: resmgr.ResourceManager;
+    processName: string = "";
     native constructor();
     constructor(applicationInfo: ApplicationInfo, resourceManager: resmgr.ResourceManager) {
         super();
@@ -42,6 +46,7 @@ export class Context extends BaseContext {
 
     public native getApplicationContextSync(): ApplicationContext;
     public native createModuleResourceManagerSync(bundleName: string, moduleName: string): resmgr.ResourceManager;
+    public native nativeGetGroupDir(dataGroupID: string, callback: AsyncCallbackWrapper<string>): void;
 
     getApplicationContext(): ApplicationContext {
         return this.getApplicationContextSync();
@@ -50,4 +55,26 @@ export class Context extends BaseContext {
     createModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager {
         return this.createModuleResourceManagerSync(bundleName, moduleName);
     }
+
+  getGroupDir(dataGroupID: string, callback: AsyncCallback<string>): void {
+    let myCall = new AsyncCallbackWrapper<string>(callback);
+    taskpool.execute((): void => {
+      this.nativeGetGroupDir(dataGroupID, myCall);
+    });
+  }
+
+  getGroupDir(dataGroupID: string): Promise<string> {
+    return new Promise<string>((resolve: (data: string) => void, reject: (err: BusinessError<void>) => void): void => {
+      let myCall = new AsyncCallbackWrapper<string>((err: BusinessError<void>, data: string) => {
+        if (err.code == 0) {
+          resolve(data);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeGetGroupDir(dataGroupID, myCall);
+      });
+    });
+  }
 }
