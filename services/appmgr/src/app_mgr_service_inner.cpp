@@ -8745,6 +8745,14 @@ int32_t AppMgrServiceInner::GetAppRunningUniqueIdByPid(pid_t pid, std::string &a
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
         return ERR_NO_INIT;
     }
+    bool isCallingPermission = AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
+        AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
+    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    bool isDevelopMode = system::GetBoolParameter(DEVELOPER_MODE_STATE, false);
+    if (!isCallingPermission && !(isShellCall && isDevelopMode)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetAppRunningUniqueIdByPid not SA call or verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
     return appRunningManager_->GetAppRunningUniqueIdByPid(pid, appRunningUniqueId);
 }
 

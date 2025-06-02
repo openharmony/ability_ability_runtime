@@ -129,7 +129,7 @@ const std::string ERR_INVALID_VALUE_SOLUTION_ONE =
 const std::string ERR_INVALID_PID_VALUE_SOLUTION_ONE =
     "Check if the pid specified by the application exists.";
 const std::string ERR_INVALID_LEVEL_VALUE_SOLUTION_ONE =
-    "Check if the value range of level is [0, 1, 2].";    
+    "Check if the value range of level is [0, 1, 2].";
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 
 constexpr struct option LONG_OPTIONS[] = {
