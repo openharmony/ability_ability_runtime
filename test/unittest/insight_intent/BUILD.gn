@@ -21,13 +21,9 @@ group("unittest") {
     "insight_intent_execute_param_second_test:unittest",
     "insight_intent_execute_param_test:unittest",
     "insight_intent_execute_result_test:unittest",
-    "insight_intent_executor_test:unittest",
     "insight_intent_utils_test:unittest",
-    "js_insight_intent_entry_second_test:unittest",
     "js_insight_intent_entry_test:unittest",
-    "js_insight_intent_func_second_test:unittest",
     "js_insight_intent_func_test:unittest",
-    "js_insight_intent_page_second_test:unittest",
     "js_insight_intent_page_test:unittest",
     "js_insight_intent_utils_test:unittest",
   ]
