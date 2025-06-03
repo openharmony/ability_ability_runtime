@@ -3343,6 +3343,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
         if (callerBundlename.empty()) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "insightIntent get callerBundlename failed");
         }
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "start uiExtension ability, bundlename: %{public}s", callerBundlename.c_str());
         int32_t result = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(
             extensionSessionInfo->want, AppExecFwk::ExecuteMode::UI_EXTENSION_ABILITY, callerBundlename);
         if (result != ERR_OK) {
@@ -5009,8 +5010,8 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
 
     bool isSystemApp = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall();
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName: %{public}s, appIndex: %{public}d, isSystemApp: %{public}d",
-        wantSenderInfo.bundleName.c_str(), appIndex, isSystemApp);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "bundleName: %{public}s, appIndex: %{public}d, isSystemApp: %{public}d, "
+        "userId: %{public}d", wantSenderInfo.bundleName.c_str(), appIndex, isSystemApp, userId);
     return pendingWantManager->GetWantSender(callerUid, appUid, isSystemApp, wantSenderInfo, callerToken, appIndex);
 }
 
@@ -11292,6 +11293,10 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
     if (ret != ERR_OK) {
         return ret;
     }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "execute insight intent, bundleName: %{public}s, moduleName: %{public}s, "
+        "intentName: %{public}s, intentId:%{public}" PRIu64", executeMode: %{public}d",
+        param.bundleName_.c_str(), param.moduleName_.c_str(), param.insightIntentName_.c_str(), param.insightIntentId_,
+        param.executeMode_);
 
     Want want;
     ret = InsightIntentExecuteManager::GenerateWant(paramPtr, want);
@@ -11323,14 +11328,14 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
             break;
     }
     if (ret == START_ABILITY_WAITING) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Top ability is foregrounding. The intent will be queued for execution");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Top ability is foregrounding. The intent will be queued for execution");
         ret = ERR_OK;
     }
     if (ret != ERR_OK) {
         DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->RemoveExecuteIntent(paramPtr->insightIntentId_);
     }
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "ExecuteIntent done, ret: %{public}d.", ret);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ExecuteIntent done, ret: %{public}d.", ret);
     return ret;
 }
 
