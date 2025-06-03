@@ -413,6 +413,9 @@ public:
     
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
+
+    void HandleChildRelation(
+        std::shared_ptr<ChildProcessRecord> childRecord, std::shared_ptr<AppRunningRecord> appRecord);
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);

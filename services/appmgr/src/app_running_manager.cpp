@@ -51,6 +51,7 @@ namespace AppExecFwk {
 namespace {
 constexpr int32_t QUICKFIX_UID = 5524;
 constexpr int32_t DEAD_APP_RECORD_CLEAR_TIME = 3000; // ms
+constexpr int32_t DEAD_CHILD_RELATION_CLEAR_TIME = 3000; // ms
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 }
 using EventFwk::CommonEventSupport;
@@ -1638,6 +1639,25 @@ bool AppRunningManager::IsChildProcessReachLimit(uint32_t accessTokenId, bool mu
     return childCount >= maxCount;
 }
 
+void AppRunningManager::HandleChildRelation(
+    std::shared_ptr<ChildProcessRecord> childRecord, std::shared_ptr<AppRunningRecord> appRecord)
+{
+    if (!childRecord || !appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null child or app record");
+        return;
+    }
+    if (childRecord->IsNativeSpawnStarted() &&
+        AppNativeSpawnManager::GetInstance().GetNativeChildCallbackByPid(appRecord->GetPid()) != nullptr) {
+        AppNativeSpawnManager::GetInstance().AddChildRelation(childRecord->GetPid(), appRecord->GetPid());
+    }
+    int32_t childPid = childRecord->GetPid();
+    auto delayClear = [childPid]() {
+        AppNativeSpawnManager::GetInstance().RemoveChildRelation(childPid);
+    };
+    AAFwk::TaskHandlerWrap::GetFfrtHandler()->SubmitTask(delayClear, "HandleChildRelation",
+        DEAD_CHILD_RELATION_CLEAR_TIME);
+}
+
 std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote)
 {
     TAG_LOGE(AAFwkTag::APPMGR, "On child process remote died");
@@ -1677,10 +1697,7 @@ std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(
         });
     if (it != appRunningRecordMap_.end()) {
         auto appRecord = it->second;
-        if (childRecord->IsNativeSpawnStarted() &&
-            AppNativeSpawnManager::GetInstance().GetNativeChildCallbackByPid(appRecord->GetPid()) != nullptr) {
-            AppNativeSpawnManager::GetInstance().AddChildRelation(childRecord->GetPid(), appRecord->GetPid());
-        }
+        HandleChildRelation(childRecord, appRecord);
         appRecord->RemoveChildProcessRecord(childRecord);
         TAG_LOGI(AAFwkTag::APPMGR, "RemoveChildProcessRecord pid:%{public}d, uid:%{public}d", childRecord->GetPid(),
             childRecord->GetUid());
