@@ -398,5 +398,31 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1900, TestSize.Level2)
     }
     EXPECT_FALSE(isExist);
 }
+
+/**
+ * @tc.number: AppUtilsTest_2000
+ * @tc.desc: Test IsSupportGrantUriPermission works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_2000, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_2000 called.");
+    auto isSupport = AAFwk::AppUtils::GetInstance().IsSupportGrantUriPermission();
+    EXPECT_TRUE(isSupport);
+}
+
+/**
+ * @tc.number: AppUtilsTest_2100
+ * @tc.desc: Test IsSupportGrantUriPermission works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_2100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_2100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isGrantTempUriPermission_.isLoaded = true;
+    auto isSupport = appUtils.IsSupportGrantUriPermission();
+    EXPECT_TRUE(isSupport);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

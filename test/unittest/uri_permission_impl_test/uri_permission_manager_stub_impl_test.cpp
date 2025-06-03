@@ -42,7 +42,10 @@ void UriPermissionManagerStubImplTest::SetUpTestCase() {}
 
 void UriPermissionManagerStubImplTest::TearDownTestCase() {}
 
-void UriPermissionManagerStubImplTest::SetUp() {}
+void UriPermissionManagerStubImplTest::SetUp()
+{
+    MyFlag::Init();
+}
 
 void UriPermissionManagerStubImplTest::TearDown() {}
 
@@ -200,6 +203,7 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_GrantUriPermission_002, TestSiz
 HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_GrantUriPermission_003, TestSize.Level1)
 {
     auto upmsi = std::make_shared<UriPermissionManagerStubImpl>();
+    MyFlag::isSAOrSystemAppCall_ = true;
     std::vector<std::string> uriVec;
     unsigned int flag = 1;
     std::string targetBundleName = "targetBundleName";
@@ -207,7 +211,8 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_GrantUriPermission_003, TestSiz
     uint32_t initiatorTokenId = 1;
     int32_t funcResult = 1;
     auto result = upmsi->GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId, funcResult);
-    EXPECT_EQ(result, ERR_URI_LIST_OUT_OF_RANGE);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(funcResult, INNER_ERR);
 }
 
 /*
@@ -455,7 +460,7 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_CheckUriAuthorization_002, Test
 HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_RevokeAllMapUriPermissions_001, TestSize.Level1)
 {
     auto upmsi = std::make_shared<UriPermissionManagerStubImpl>();
-    MyFlag::bundleName_ = "callerAuthority";
+    MyFlag::upmsUtilsBundleName_ = "callerAuthority";
     GrantInfo info = { 1, 1, 1 };
     upmsi->uriMap_.insert({ "uri://callerAuthority", { info } });
     uint32_t tokenId = 1;
@@ -472,7 +477,7 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_RevokeAllMapUriPermissions_001,
 HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_RevokeAllMapUriPermissions_002, TestSize.Level1)
 {
     auto upmsi = std::make_shared<UriPermissionManagerStubImpl>();
-    MyFlag::bundleName_ = "bundleName";
+    MyFlag::upmsUtilsBundleName_ = "bundleName";
     GrantInfo info = { 1, 1, 1 };
     upmsi->uriMap_.insert({ "uri://callerAuthority", { info } });
     uint32_t tokenId = 1;
