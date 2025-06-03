@@ -61,7 +61,7 @@ std::string MockContext::GetTempDir()
     return "/temp";
 }
 
-std::string MockContext::GetResourceDir()
+std::string MockContext::GetResourceDir(const std::string &moduleName)
 {
     return "/resfile";
 }

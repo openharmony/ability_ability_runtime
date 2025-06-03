@@ -17,6 +17,7 @@
 
 #include "configuration_utils.h"
 #include "form_extension_context.h"
+#include "form_runtime/cj_form_extension_instance.h"
 #include "form_runtime/js_form_extension.h"
 #include "hilog_tag_wrapper.h"
 #include "runtime.h"
@@ -33,6 +34,8 @@ FormExtension* FormExtension::Create(const std::unique_ptr<Runtime>& runtime)
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
             return JsFormExtension::Create(runtime);
+        case Runtime::Language::CJ:
+            return CreateCJFormExtension();
         default:
             return new FormExtension();
     }
@@ -111,6 +114,11 @@ bool FormExtension::OnAcquireData(int64_t formId, AAFwk::WantParams &wantParams)
 {
     TAG_LOGD(AAFwkTag::FORM_EXT, "call");
     return false;
+}
+
+void FormExtension::OnFormLocationChanged(const int64_t formId, const int32_t formLocation)
+{
+    TAG_LOGD(AAFwkTag::FORM_EXT, "call");
 }
 
 void FormExtension::OnConfigurationUpdated(const AppExecFwk::Configuration &configuration)

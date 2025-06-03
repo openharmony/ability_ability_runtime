@@ -58,9 +58,9 @@ struct InsightIntentLinkInfo {
 
 struct InsightIntentPageInfo {
     std::string uiAbility;
-    std::string pageRouteName;
+    std::string pagePath;
     std::string navigationId;
-    std::string navDestination;
+    std::string navDestinationName;
     // std::vector<InsightIntentParam> params {};
     std::string parameters;
 
@@ -161,6 +161,8 @@ struct ExtractInsightIntentInfo {
     std::string schema;
     std::string icon;
     std::string llmDescription;
+    std::string result;
+    std::string example;
     std::vector<std::string> keywords;
     ExtractInsightIntentGenericInfo genericInfo;
 
@@ -189,12 +191,14 @@ struct ExtractInsightIntentProfileInfo {
     std::string llmDescription;
     std::vector<std::string> keywords;
     std::string parameters;
+    std::string result;
+    std::string example;
     std::string uri;
     std::vector<LinkIntentParamProfileMapping> paramMapping {};
     std::string uiAbility;
-    std::string pageRouteName;
+    std::string pagePath;
     std::string navigationId;
-    std::string navDestination;
+    std::string navDestinationName;
     std::string abilityName;
     std::vector<std::string> executeMode {};
     std::string functionName;

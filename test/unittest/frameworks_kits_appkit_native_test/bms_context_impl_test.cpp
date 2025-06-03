@@ -74,7 +74,6 @@ void BmsContextImplTest::TearDown(void)
 
 void BmsContextImplTest::MockBundleInstaller()
 {
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
     auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
         if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
             return bms->AsObject();
@@ -82,7 +81,6 @@ void BmsContextImplTest::MockBundleInstaller()
             return saMgr->GetSystemAbility(systemAbilityId);
         }
     };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
     EXPECT_CALL(*mockSystemAbility_, GetSystemAbility(testing::_))
         .WillOnce(testing::Invoke(mockGetSystemAbility))
         .WillRepeatedly(testing::Invoke(mockGetSystemAbility));

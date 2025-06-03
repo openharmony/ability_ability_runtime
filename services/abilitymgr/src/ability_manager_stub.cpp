@@ -250,6 +250,9 @@ int AbilityManagerStub::OnRemoteRequestInnerSixth(uint32_t code, MessageParcel &
     if (interfaceCode == AbilityManagerInterfaceCode::UNREGISTER_COLLABORATOR) {
         return UnregisterIAbilityManagerCollaboratorInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_ABILITY_MANAGER_COLLABORATOR) {
+        return GetAbilityManagerCollaboratorInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_APP_DEBUG_LISTENER) {
         return RegisterAppDebugListenerInner(data, reply);
     }
@@ -836,6 +839,12 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentieth(uint32_t code, MessageParc
     }
     if (interfaceCode == AbilityManagerInterfaceCode::REVOKE_DELEGATOR) {
         return RevokeDelegatorInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::START_ABILITY_WITH_WAIT) {
+        return StartAbilityWithWaitInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::RESTART_SELF_ATOMIC_SERVICE) {
+        return RestartSelfAtomicServiceInner(data, reply);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -3481,6 +3490,20 @@ int32_t AbilityManagerStub::UnregisterIAbilityManagerCollaboratorInner(MessagePa
     return NO_ERROR;
 }
 
+int32_t AbilityManagerStub::GetAbilityManagerCollaboratorInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto collaborator = GetAbilityManagerCollaborator();
+    if (collaborator == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "collaborator nullptr");
+        return ERR_NULL_OBJECT;
+    }
+    if (!reply.WriteRemoteObject(collaborator->AsObject())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "collaborator write fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::PrepareTerminateAbilityBySCBInner(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
@@ -3808,7 +3831,7 @@ int32_t AbilityManagerStub::StartAbilityByInsightIntentInner(MessageParcel &data
 
 int32_t AbilityManagerStub::ExecuteInsightIntentDoneInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::INTENT, "execute insight intent done stub");
     auto token = data.ReadRemoteObject();
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null token");
@@ -4505,6 +4528,27 @@ int32_t AbilityManagerStub::RevokeDelegatorInner(MessageParcel &data, MessagePar
     return NO_ERROR;
 }
 
+int32_t AbilityManagerStub::StartAbilityWithWaitInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerStub::StartAbilityWithWaitInner called");
+    std::unique_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null want");
+        return ERR_NULL_OBJECT;
+    }
+
+    auto callback = iface_cast<IAbilityStartWithWaitObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callback");
+        return ERR_NULL_OBJECT;
+    }
+
+    int32_t result = StartAbilityWithWait(*want, callback);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
 int32_t AbilityManagerStub::GetAllInsightIntentInfoInner(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "GetAllInsightIntentInfoInner");
@@ -4561,6 +4605,21 @@ int32_t AbilityManagerStub::GetInsightIntentInfoByIntentNameInner(MessageParcel 
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
         return INNER_ERR;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::RestartSelfAtomicServiceInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return INVALID_CALLER_TOKEN;
+    }
+    int32_t result = RestartSelfAtomicService(callerToken);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
+        return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }

@@ -37,6 +37,7 @@ namespace {
             "\"moduleName\": \"entry\","
             "\"decoratorFile\": \"@normalized:N&&&entry/src/main/ets/pages/Index&\","
             "\"uri\": \"/data/app/base\","
+            "\"example\": \"exampleAAA\","
             "\"paramMappings\": ["
               "{"
                 "\"paramCategory\": \"dddd\","
@@ -88,6 +89,7 @@ namespace {
             "\"icon\": \"$r('app.media.startIcon')\","
             "\"moduleName\": \"entry\","
             "\"decoratorFile\": \"@normalized:N&&&entry/src/main/ets/pages/Index&\","
+            "\"example\": \"exampleBBB\","
             "\"uri\": \"/data/app/base\","
             "\"paramMappings\": ["
               "{"
@@ -143,6 +145,7 @@ namespace {
             "\"moduleName\": \"entry\","
             "\"decoratorFile\": \"@normalized:N&&&entry/src/main/ets/pages/Index&\","
             "\"uri\": \"/data/app/base\","
+            "\"example\": \"exampleAAA\","
             "\"paramMappings\": ["
               "{"
                 "\"paramCategory\": \"dddd\","
@@ -182,6 +185,34 @@ namespace {
                   "}"
                 "}"
               "}"
+            "},"
+            "\"result\": {"
+              "\"type\": \"object\","
+              "\"items\": {"
+                "\"type\": \"array\","
+                "\"items\": {"
+                  "\"propertyNames\": {"
+                    "\"enum\": [\"entityId\",\"entityGroupId\",\"gameType\"]"
+                  "},"
+                  "\"type\": \"object\","
+                  "\"required\": [\"entityId\"],"
+                  "\"properties\": {"
+                    "\"gameType\": {"
+                      "\"description\": \"游戏类型\","
+                      "\"type\": \"string\","
+                      "\"enum\": [\"3D\",\"2D\",\"RPG\"]"
+                    "},"
+                    "\"entityId\": {"
+                      "\"description\": \"游戏唯一实体 id\","
+                      "\"type\": \"string\""
+                    "},"
+                    "\"entityGroupId\": {"
+                      "\"description\": \"用于确定游戏的更新形式（每日游戏）\","
+                      "\"type\": \"string\""
+                    "}"
+                  "}"
+                "}"
+              "}"
             "}"
         "},"
         "{"
@@ -195,6 +226,7 @@ namespace {
             "\"moduleName\": \"entry\","
             "\"decoratorFile\": \"@normalized:N&&&entry/src/main/ets/pages/Index&\","
             "\"uri\": \"/data/app/base\","
+            "\"example\": \"exampleBBB\","
             "\"paramMappings\": ["
               "{"
                 "\"paramCategory\": \"dddd\","
@@ -208,6 +240,31 @@ namespace {
             "\"intentVersion\": \"1.0.1\","
             "\"bundleName\": \"com.example.instent\","
             "\"parameters\": {"
+              "\"oneOf\": ["
+                "{"
+                  "\"required\": [\"playbackSpeed\"]"
+                "},"
+                "{"
+                  "\"required\": [\"playbackProgress\"]"
+                "}"
+              "],"
+              "\"propertyNames\": {"
+                "\"enum\": [\"playbackSpeed\",\"playbackProgress\"]"
+              "},"
+              "\"type\": \"object\","
+              "\"properties\": {"
+                "\"playbackSpeed\": {"
+                  "\"description\": \"播放倍速\","
+                  "\"type\": \"number\","
+                  "\"enum\": [0.5,0.75,1,1.25,1.5,2]"
+                "},"
+                "\"playbackProgress\": {"
+                  "\"description\": \"播放进度,单位秒\","
+                  "\"type\": \"number\""
+                "}"
+              "}"
+            "},"
+            "\"result\": {"
               "\"oneOf\": ["
                 "{"
                   "\"required\": [\"playbackSpeed\"]"
@@ -284,8 +341,12 @@ HWTEST_F(ExtractInsightIntentProfileTest, TransformTo_0200, TestSize.Level0)
     EXPECT_EQ(profileInfos.insightIntents.size(), 2);
     EXPECT_EQ(profileInfos.insightIntents[0].decoratorType, "@InsightIntentLink");
     EXPECT_EQ(profileInfos.insightIntents[0].intentName, "123");
+    EXPECT_EQ(profileInfos.insightIntents[0].example, "exampleAAA");
+    EXPECT_NE(profileInfos.insightIntents[0].result, "");
     EXPECT_EQ(profileInfos.insightIntents[1].decoratorType, "@InsightIntentLink");
     EXPECT_EQ(profileInfos.insightIntents[1].intentName, "InsightIntent2");
+    EXPECT_EQ(profileInfos.insightIntents[1].example, "exampleBBB");
+    EXPECT_NE(profileInfos.insightIntents[1].result, "");
 
     nlohmann::json jsonObject1;
     result = ExtractInsightIntentProfile::ToJson(profileInfos.insightIntents[0], jsonObject1);
@@ -297,6 +358,7 @@ HWTEST_F(ExtractInsightIntentProfileTest, TransformTo_0200, TestSize.Level0)
     EXPECT_EQ(profileInfos1.insightIntents.size(), 1);
     EXPECT_EQ(profileInfos1.insightIntents[0].decoratorType, "@InsightIntentLink");
     EXPECT_EQ(profileInfos1.insightIntents[0].intentName, "123");
+    EXPECT_EQ(profileInfos1.insightIntents[0].example, "exampleAAA");
 
     nlohmann::json jsonObject2;
     result = ExtractInsightIntentProfile::ToJson(profileInfos.insightIntents[1], jsonObject2);
@@ -308,11 +370,13 @@ HWTEST_F(ExtractInsightIntentProfileTest, TransformTo_0200, TestSize.Level0)
     EXPECT_EQ(profileInfos2.insightIntents.size(), 1);
     EXPECT_EQ(profileInfos2.insightIntents[0].decoratorType, "@InsightIntentLink");
     EXPECT_EQ(profileInfos2.insightIntents[0].intentName, "InsightIntent2");
+    EXPECT_EQ(profileInfos2.insightIntents[0].example, "exampleBBB");
 
     ExtractInsightIntentInfo info1;
     result = ExtractInsightIntentProfile::ProfileInfoFormat(profileInfos1.insightIntents[0], info1);
     EXPECT_EQ(result, true);
     EXPECT_EQ(info1.domain, "game");
+    EXPECT_NE(info1.result, "");
     EXPECT_EQ(info1.genericInfo.decoratorType, "@InsightIntentLink");
     InsightIntentLinkInfo linkInfo1 = info1.genericInfo.get<InsightIntentLinkInfo>();
     EXPECT_EQ(linkInfo1.uri, "/data/app/base");
@@ -322,6 +386,7 @@ HWTEST_F(ExtractInsightIntentProfileTest, TransformTo_0200, TestSize.Level0)
     result = ExtractInsightIntentProfile::ProfileInfoFormat(profileInfos2.insightIntents[0], info2);
     EXPECT_EQ(result, true);
     EXPECT_EQ(info2.domain, "control");
+    EXPECT_NE(info2.result, "");
     EXPECT_EQ(info2.genericInfo.decoratorType, "@InsightIntentLink");
     InsightIntentLinkInfo linkInfo2 = info2.genericInfo.get<InsightIntentLinkInfo>();
     EXPECT_EQ(linkInfo2.uri, "/data/app/base");

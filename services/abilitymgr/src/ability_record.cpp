@@ -274,7 +274,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
 
     auto userId = abilityRequest.appInfo.uid / BASE_USER_RANGE;
     if ((userId == 0 ||
-        AmsConfigurationParameter::GetInstance().InResidentWhiteList(abilityRequest.abilityInfo.bundleName)) &&
+        AppUtils::GetInstance().InResidentWhiteList(abilityRequest.abilityInfo.bundleName)) &&
         DelayedSingleton<ResidentProcessManager>::GetInstance()->IsResidentAbility(
             abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name, userId)) {
         abilityRecord->keepAliveBundle_ = true;
@@ -449,7 +449,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", GetURI().c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundUIExtensionAbility:%{public}s", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
@@ -1382,7 +1382,7 @@ void AbilityRecord::CancelPrepareTerminate()
 int AbilityRecord::TerminateAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", abilityInfo_.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "TerminateAbility:%{public}s", abilityInfo_.name.c_str());
 #ifdef WITH_DLP
     HandleDlpClosed();
 #endif // WITH_DLP
@@ -1551,8 +1551,8 @@ void AbilityRecord::SetAbilityState(AbilityState state)
 #endif // SUPPORT_SCREEN
 void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "bundle:%{public}s, ability: %{public}s",
-        abilityInfo_.applicationInfo.bundleName.c_str(), abilityInfo_.name.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "SetScheduler, bundlename: %{public}s, %{public}s",
+        abilityInfo_.name.c_str(), abilityInfo_.applicationInfo.bundleName.c_str());
     CHECK_POINTER(lifecycleDeal_);
     if (scheduler != nullptr) {
         if (scheduler_ != nullptr && schedulerDeathRecipient_ != nullptr) {
@@ -1707,7 +1707,7 @@ void AbilityRecord::Activate()
 void AbilityRecord::Inactivate()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "ability:%{public}s.", abilityInfo_.name.c_str());
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Inactivate:%{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
 
     if (!IsDebug()) {
@@ -1732,7 +1732,7 @@ void AbilityRecord::Inactivate()
 void AbilityRecord::Terminate(const Closure &task)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s.", GetURI().c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Terminate: %{public}s.", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
     if (!IsDebug()) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
@@ -1767,7 +1767,7 @@ void AbilityRecord::Terminate(const Closure &task)
 
 void AbilityRecord::ShareData(const int32_t &uniqueId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", abilityInfo_.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ShareData:%{public}s", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
     if (!IsDebug()) {
         int loadTimeout =
@@ -1816,7 +1816,7 @@ void AbilityRecord::DisconnectAbility()
 void AbilityRecord::DisconnectAbilityWithWant(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "ability:%{public}s.", abilityInfo_.name.c_str());
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "DisconnectAbilityWithWant:%{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
     lifecycleDeal_->DisconnectAbility(want);
     if (GetInProgressRecordCount() == 0) {
@@ -1886,7 +1886,7 @@ std::shared_ptr<AbilityResult> AbilityRecord::GetResult() const
 
 void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", abilityInfo_.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SendResult:%{public}s", abilityInfo_.name.c_str());
     std::lock_guard<ffrt::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
     auto result = GetResult();
@@ -1901,7 +1901,7 @@ void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
 
 void AbilityRecord::SendResultByBackToCaller(const std::shared_ptr<AbilityResult> &result)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", abilityInfo_.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SendResultByBackToCaller:%{public}s", abilityInfo_.name.c_str());
     std::lock_guard<ffrt::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
     CHECK_POINTER(result);
@@ -1910,7 +1910,7 @@ void AbilityRecord::SendResultByBackToCaller(const std::shared_ptr<AbilityResult
 
 void AbilityRecord::SendSandboxSavefileResult(const Want &want, int resultCode, int requestCode)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", abilityInfo_.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SendSandboxSavefileResult:%{public}s", abilityInfo_.name.c_str());
 
     auto uriParam = want.GetParams().GetParam(PARAMS_FILE_SAVING_URL_KEY);
     auto uriArray = AAFwk::IArray::Query(uriParam);

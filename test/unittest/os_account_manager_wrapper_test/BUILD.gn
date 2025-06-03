@@ -20,10 +20,10 @@ ohos_unittest("os_account_manager_wrapper_test") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "${ability_runtime_innerkits_path}/deps_wrapper/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
-
-    "${ability_runtime_innerkits_path}/deps_wrapper/include",
+    "${ability_runtime_test_path}/mock/mock_sa_call",
   ]
 
   sources = [ "os_account_manager_wrapper_test.cpp" ]
@@ -41,12 +41,17 @@ ohos_unittest("os_account_manager_wrapper_test") {
     "ability_base:want",
     "ability_runtime:ability_deps_wrapper",
     "ability_runtime:app_manager",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "cJSON:cjson_static",
     "ipc:ipc_core",
     "napi:ace_napi",
     "os_account:os_account_innerkits",
+    "selinux_adapter:librestorecon",
   ]
 }
 

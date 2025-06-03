@@ -48,28 +48,30 @@ void AppExitReasonHelperTest::TearDown()
 {}
 
 /**
- * @tc.name: GetActiveAbilityList_0100
- * @tc.desc: GetActiveAbilityList
+ * @tc.name: GetRunningProcessInfo_0100
+ * @tc.desc: GetRunningProcessInfo
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AppExitReasonHelperTest, GetActiveAbilityList_0100, TestSize.Level1)
+HWTEST_F(AppExitReasonHelperTest, GetRunningProcessInfo_0100, TestSize.Level1)
 {
-    std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
-    taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(AAFwk::AbilityConfig::NAME_ABILITY_MGR_SERVICE);
-    std::weak_ptr<AAFwk::AbilityManagerService> service;
-    service = AAFwk::AbilityManagerService::GetPubInstance();
-    std::shared_ptr<AAFwk::AbilityEventHandler> eventHandler_;
-    eventHandler_ = std::make_shared<AAFwk::AbilityEventHandler>(taskHandler_, service);
-    std::shared_ptr<AAFwk::SubManagersHelper> subManagersHelper_;
-    subManagersHelper_ = std::make_shared<AAFwk::SubManagersHelper>(taskHandler_, eventHandler_);
-    std::shared_ptr<AAFwk::AppExitReasonHelper> appExitReasonHelper_;
-    appExitReasonHelper_ = std::make_shared<AAFwk::AppExitReasonHelper>(subManagersHelper_);
+    auto appExitReasonHelper = std::make_shared<AAFwk::AppExitReasonHelper>(nullptr);
 
-    int32_t uid = 0;
-    std::vector<std::string> abilityLists;
-    appExitReasonHelper_->GetActiveAbilityList(uid, abilityLists);
-    EXPECT_EQ(abilityLists.size(), 0);
+    auto pid = AAFwk::NO_PID;
+    int32_t userId = -1;
+    std::string bundleName;
+    AppExecFwk::RunningProcessInfo processInfo;
+    appExitReasonHelper->GetRunningProcessInfo(pid, userId, bundleName, processInfo);
+    EXPECT_TRUE(processInfo.processName_.empty());
+    userId = 1;
+    appExitReasonHelper->GetRunningProcessInfo(pid, userId, bundleName, processInfo);
+    EXPECT_TRUE(processInfo.processName_.empty());
+    bundleName = "testBUncleName";
+    appExitReasonHelper->GetRunningProcessInfo(pid, userId, bundleName, processInfo);
+    EXPECT_TRUE(processInfo.processName_.empty());
+    pid = 1;
+    appExitReasonHelper->GetRunningProcessInfo(pid, userId, bundleName, processInfo);
+    EXPECT_TRUE(processInfo.processName_.empty());
 }
 
 /**

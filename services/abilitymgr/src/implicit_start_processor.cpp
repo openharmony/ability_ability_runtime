@@ -58,19 +58,9 @@ constexpr const char* SUPPORT_ACTION_START_SELECTOR = "persist.sys.ability.suppo
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
-    auto instance_ = DelayedSingleton<AbilityManagerService>::GetInstance();
-    if (instance_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "instance null.");
-        return;
-    }
-    auto taskHandler = instance_->GetTaskHandler();
-    if (taskHandler == nullptr) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "task handler null.");
-        return;
-    }
-    taskHandler->SubmitTask([eventName, type, eventInfo]() {
+    ffrt::submit([eventName, type, eventInfo]() {
         EventReport::SendAbilityEvent(eventName, type, eventInfo);
-    });
+        }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
 bool ImplicitStartProcessor::IsExtensionInWhiteList(AppExecFwk::ExtensionAbilityType type)
@@ -188,7 +178,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         }
     if (dialogAppInfos.size() == 0 && AppUtils::GetInstance().IsSelectorDialogDefaultPossion()) {
         ret = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want, want, request.callerToken);
-        if (ret != ERR_OK) {
+        if (ret != ERR_OK && ret != ERR_APP_SELECTOR_NOT_EXISTS) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "GetSelectorDialogWant failed");
             return ret;
         }
@@ -207,7 +197,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         std::string type = MatchTypeAndUri(request.want);
         ret = sysDialogScheduler->GetPcSelectorDialogWant(dialogAppInfos, request.want, want, type,
             userId, request.callerToken);
-        if (ret != ERR_OK) {
+        if (ret != ERR_OK && ret != ERR_APP_SELECTOR_NOT_EXISTS) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "GetPcSelectorDialogWant failed");
             return ret;
         }
@@ -231,7 +221,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         }
         ret = sysDialogScheduler->GetPcSelectorDialogWant(dialogAllAppInfos, request.want, want,
             TYPE_ONLY_MATCH_WILDCARD, userId, request.callerToken);
-        if (ret != ERR_OK) {
+        if (ret != ERR_OK && ret != ERR_APP_SELECTOR_NOT_EXISTS) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "GetPcSelectorDialogWant failed");
             return ret;
         }
@@ -261,7 +251,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     if (AppUtils::GetInstance().IsSelectorDialogDefaultPossion()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "ImplicitQueryInfos success, multiple apps available");
         ret = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want, want, request.callerToken);
-        if (ret != ERR_OK) {
+        if (ret != ERR_OK && ret != ERR_APP_SELECTOR_NOT_EXISTS) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "GetSelectorDialogWant failed");
             return ret;
         }
@@ -288,7 +278,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         type, userId, request.callerToken);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "GetPcSelectorDialogWant failed");
-        return ret;
+        return INNER_ERR;
     }
     if (want.GetBoolParam("isCreateAppGallerySelector", false)) {
         want.RemoveParam("isCreateAppGallerySelector");

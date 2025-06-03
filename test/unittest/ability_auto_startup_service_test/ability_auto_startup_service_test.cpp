@@ -549,7 +549,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, SetApplicationAutoStartupByEDM_001, Test
     info.bundleName = "bundleName";
     bool flag = false;
     auto result = abilityAutoStartupService->SetApplicationAutoStartupByEDM(info, flag);
-    EXPECT_EQ(result, INNER_ERR);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest SetApplicationAutoStartupByEDM_001 end";
 }
 
@@ -570,7 +570,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, CancelApplicationAutoStartupByEDM_001, T
     info.bundleName = "bundleName";
     bool flag = false;
     auto result = abilityAutoStartupService->CancelApplicationAutoStartupByEDM(info, flag);
-    EXPECT_EQ(result, INNER_ERR);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest SCancelApplicationAutoStartupByEDM_001 end";
 }
 
@@ -627,7 +627,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, CheckPermissionForEDM_001, TestSize.Leve
     MyFlag::flag_ = 1;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     auto result = abilityAutoStartupService->CheckPermissionForEDM();
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckPermissionForEDM_001 end";
 }
 } // namespace AAFwk

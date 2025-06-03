@@ -485,8 +485,8 @@ public:
 
 #ifdef SUPPORT_CHILD_PROCESS
 
-    virtual int32_t StartNativeChildProcess(
-        const std::string& libName, int32_t childProcessCount, const sptr<IRemoteObject>& callback)
+    virtual int32_t StartNativeChildProcess(const std::string& libName, int32_t childProcessCount,
+        const sptr<IRemoteObject>& callback, const std::string &customProcessName)
     {
         return 0;
     }

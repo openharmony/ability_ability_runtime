@@ -169,7 +169,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckOptExtensionAbility_001, TestSize.
  */
 HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_001, TestSize.Level1)
 {
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_001 start");
     AbilityRequest request;
@@ -191,7 +191,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_001, TestSiz
  */
 HWTEST_F(AbilityManagerServiceFirstTest, CheckCallServicePermission_001, TestSize.Level1)
 {
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallServicePermission_001 start");
     AbilityRequest request;
@@ -225,7 +225,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallServicePermission_001, TestSiz
  */
 HWTEST_F(AbilityManagerServiceFirstTest, CheckStartByCallPermission_002, TestSize.Level1)
 {
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckStartByCallPermission_002 start");
     abilityRequest_.abilityInfo.type = AbilityType::PAGE;
@@ -685,6 +685,32 @@ HWTEST_F(AbilityManagerServiceFirstTest, OnAbilityRequestDone_001, TestSize.Leve
 
 /*
  * Feature: AbilityManagerService
+ * Function: OnAbilityRequestDone
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnAbilityRequestDone
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, OnAbilityRequestDone_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest OnAbilityRequestDone_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::DATA;
+    abilityMs->OnAbilityRequestDone(token, 0);
+    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::SERVICE;
+    abilityMs->OnAbilityRequestDone(token, 0);
+    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::UNKNOWN;
+    abilityMs->OnAbilityRequestDone(token, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest OnAbilityRequestDone_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: GetMissionIdByAbilityToken
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService GetMissionIdByAbilityToken
@@ -912,7 +938,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, DelegatorMoveMissionToFront_001, TestSi
 HWTEST_F(AbilityManagerServiceFirstTest, IsCallFromBackground_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest IsCallFromBackground_001 start");
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     AbilityRequest abilityRequest;
     bool isBackgroundCall = true;
@@ -1036,6 +1062,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_002, TestSize.Leve
 HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_003, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StopExtensionAbility_003 start");
+    AAFwk::IsMockSaCall::IsMockProcessCachePermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want{};
     ElementName element("device", "com.ix.hiservcie", "ServiceAbility", "entry");
@@ -1045,7 +1072,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_003, TestSize.Leve
     abilityRecord->abilityInfo_.applicationInfo.bundleName = "com.ix.hiservcie";
     MyFlag::flag_ = 1;
     EXPECT_EQ(abilityMs_->StopExtensionAbility(want, abilityRecord->GetToken(), -1, ExtensionAbilityType::SERVICE),
-        RESOLVE_ABILITY_ERR);
+        INVALID_PARAMETERS_ERR);
     MyFlag::flag_ = 0;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StopExtensionAbility_003 end");
 }
@@ -1082,6 +1109,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_004, TestSize.Leve
 HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_005, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StopExtensionAbility_005 start");
+    AAFwk::IsMockSaCall::IsMockProcessCachePermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want{};
     ElementName element("", "com.ix.hiservcie", "ServiceAbility", "entry");
@@ -1214,6 +1242,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_001, TestS
 HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_002, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_002 start");
+    AAFwk::IsMockSaCall::IsMockProcessCachePermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility", "");
@@ -1241,6 +1270,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_002, TestS
 HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_003, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_003 start");
+    AAFwk::IsMockSaCall::IsMockProcessCachePermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want;
     ElementName element("", "com.test.demo1", "MainAbility", "Entry");
@@ -1268,6 +1298,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_003, TestS
 HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_004, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_004 start");
+    AAFwk::IsMockSaCall::IsMockProcessCachePermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility1", "Entry");
@@ -1295,6 +1326,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_004, TestS
 HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_005, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_005 start");
+    AAFwk::IsMockSaCall::IsMockProcessCachePermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility", "Entry");
@@ -1323,6 +1355,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_005, TestS
 HWTEST_F(AbilityManagerServiceFirstTest, StartAbilityInnerFreeInstall_006, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartAbilityInnerFreeInstall_006 start");
+    AAFwk::IsMockSaCall::IsMockProcessCachePermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
@@ -1381,6 +1414,20 @@ HWTEST_F(AbilityManagerServiceFirstTest, RegisterIAbilityManagerCollaborator_001
     res = abilityMs_->UnregisterIAbilityManagerCollaborator(type);
     EXPECT_EQ(res, CHECK_PERMISSION_FAILED);
     EXPECT_EQ(abilityMs_->collaboratorMap_.size(), 0);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GetAbilityManagerCollaborator
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetAbilityManagerCollaborator
+ * @tc.require: issueI7LF4X
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, GetAbilityManagerCollaborator_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    auto broker = abilityMs_->GetAbilityManagerCollaborator();
+    EXPECT_EQ(broker, nullptr);
 }
 
 /*
@@ -1794,8 +1841,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, PreLoadAppDataAbilities_0100, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest PreLoadAppDataAbilities_0100 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_EQ(abilityMs->PreLoadAppDataAbilities("", USER_ID_U100), ERR_INVALID_VALUE);
-    EXPECT_EQ(abilityMs->PreLoadAppDataAbilities("test", USER_ID_U100), ERR_INVALID_STATE);
-    abilityMs->taskHandler_ = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
     EXPECT_EQ(abilityMs->PreLoadAppDataAbilities("test", USER_ID_U100), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest PreLoadAppDataAbilities_0100 end");
 }

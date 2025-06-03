@@ -54,6 +54,7 @@ ohos_unittest("connection_observer_controller_test") {
     "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",

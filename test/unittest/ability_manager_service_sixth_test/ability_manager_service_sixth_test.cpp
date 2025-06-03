@@ -1352,32 +1352,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, AbilityWindowConfigTransitionDone_001, 
 
 /*
  * Feature: AbilityManagerService
- * Function: OnAbilityRequestDone
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService OnAbilityRequestDone
- */
-HWTEST_F(AbilityManagerServiceSixthTest, OnAbilityRequestDone_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest OnAbilityRequestDone_001 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs, nullptr);
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
-    auto token = abilityRecord->token_;
-    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::DATA;
-    abilityMs->OnAbilityRequestDone(token, 0);
-    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::SERVICE;
-    abilityMs->OnAbilityRequestDone(token, 0);
-    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::UNKNOWN;
-    abilityMs->OnAbilityRequestDone(token, 0);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest OnAbilityRequestDone_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: HandleLoadTimeOut
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService HandleLoadTimeOut

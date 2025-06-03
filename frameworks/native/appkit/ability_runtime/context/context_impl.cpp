@@ -293,8 +293,35 @@ std::string ContextImpl::GetTempDir()
     return dir;
 }
 
-std::string ContextImpl::GetResourceDir()
+bool ContextImpl::IsModuleExist(const std::string &moduleName)
 {
+    if (applicationInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo");
+        return false;
+    }
+    for (const auto &module : applicationInfo_->moduleInfos) {
+        if (module.moduleName == moduleName) {
+            return true;
+        }
+    }
+    TAG_LOGE(AAFwkTag::APPKIT, "not find moduleName");
+    return false;
+}
+
+std::string ContextImpl::GetResourceDir(const std::string &moduleName)
+{
+    auto constructAndCheckDir = [](const std::string &moduleName) -> std::string {
+        std::string dir = std::string(LOCAL_CODE_PATH) + CONTEXT_FILE_SEPARATOR + moduleName + CONTEXT_RESOURCE_END;
+        if (OHOS::FileExists(dir)) {
+            return dir;
+        }
+        TAG_LOGE(AAFwkTag::APPKIT, "dir:%{public}s not exist", dir.c_str());
+        return "";
+    };
+
+    if (!moduleName.empty()) {
+        return constructAndCheckDir(moduleName);
+    }
     std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfoPtr = GetHapModuleInfo();
     if (hapModuleInfoPtr == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfo null");
@@ -304,13 +331,7 @@ std::string ContextImpl::GetResourceDir()
         TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfo moduleName is empty");
         return "";
     }
-    std::string dir = std::string(LOCAL_CODE_PATH) + CONTEXT_FILE_SEPARATOR +
-        hapModuleInfoPtr->moduleName + CONTEXT_RESOURCE_END;
-    if (OHOS::FileExists(dir)) {
-        return dir;
-    }
-    TAG_LOGE(AAFwkTag::APPKIT, "dir:%{public}s not exist", dir.c_str());
-    return "";
+    return constructAndCheckDir(hapModuleInfoPtr->moduleName);
 }
 
 void ContextImpl::GetAllTempDir(std::vector<std::string> &tempPaths)

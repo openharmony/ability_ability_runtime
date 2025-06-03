@@ -24,7 +24,9 @@ namespace OHOS {
 namespace AppExecFwk {
 class MockAbility : public AbilityRuntime::UIAbility {
 protected:
-    int32_t OnSaveState(int32_t reason, WantParams &wantParams) override
+    int32_t OnSaveState(int32_t reason, WantParams &wantParams,
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo,
+        bool &isAsync, AppExecFwk::StateReason stateReason) override
     {
         return 0;
     }

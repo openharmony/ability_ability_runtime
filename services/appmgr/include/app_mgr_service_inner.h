@@ -772,7 +772,7 @@ public:
      * @param userId configuration for the user
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &appInfos,
+    int32_t UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &allowAppList,
         const AppExecFwk::ConfigurationPolicy &policy, const int32_t userId);
 
     int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name, int32_t appIndex);
@@ -1267,8 +1267,8 @@ public:
      * @param callback callback for notify start result
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartNativeChildProcess(const pid_t hostPid,
-        const std::string &libName, int32_t childProcessCount, const sptr<IRemoteObject> &callback);
+    virtual int32_t StartNativeChildProcess(const pid_t hostPid, const std::string &libName, int32_t childProcessCount,
+        const sptr<IRemoteObject> &callback, const std::string &customProcessName);
 #endif // SUPPORT_CHILD_PROCESS
 
     virtual int32_t RegisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback);
@@ -1742,6 +1742,8 @@ private:
 #ifdef SUPPORT_CHILD_PROCESS
     int32_t StartChildProcessPreCheck(pid_t callingPid, int32_t childProcessType);
 
+    bool CheckCustomProcessName(const std::string &customProcessName);
+
     bool AllowNativeChildProcess(int32_t childProcessType, const std::string appIdentifier);
 
     bool AllowChildProcessInMultiProcessFeatureApp(std::shared_ptr<AppRunningRecord> appRecord);
@@ -1945,6 +1947,8 @@ private:
     void NotifyLoadAbilityFailed(sptr<IRemoteObject> token);
 
     void NotifyStartProcessFailed(sptr<IRemoteObject> token);
+
+    std::vector<BackgroundAppInfo> GetBackgroundAppInfo(const std::vector<BackgroundAppInfo>& allowAppList);
 private:
     /**
      * Notify application status.
@@ -2068,14 +2072,12 @@ private:
     std::shared_ptr<AbilityRuntime::AppRunningStatusModule> appRunningStatusModule_;
     std::shared_ptr<AdvancedSecurityModeManager> securityModeManager_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> dfxTaskHandler_;
-    std::shared_ptr<AAFwk::TaskHandlerWrap> otherTaskHandler_;
     std::shared_ptr<AppPreloader> appPreloader_;
 
     std::mutex loadTaskListMutex_;
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
     sptr<IKiaInterceptor> kiaInterceptor_;
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
-    std::shared_ptr<AAFwk::TaskHandlerWrap> delayKillTaskHandler_;
     std::unordered_set<std::string> nwebPreloadSet_ {};
     std::shared_ptr<AppExecFwk::AppMgrEventSubscriber> screenOffSubscriber_;
 

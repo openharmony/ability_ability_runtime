@@ -82,6 +82,7 @@ ohos_unittest("AmsAppLifeCycleTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "json:nlohmann_json_static",
+    "window_manager:session_manager_lite",
   ]
 
   if (ability_runtime_child_process) {

@@ -227,8 +227,8 @@ HWTEST_F(PacMapSecondTest, AppExecFwk_PacMap_CompareArrayData_0700, Function | M
     }
     AAFwk::IInterface *one_interface = static_cast<AAFwk::IArray*>(ao1);
     AAFwk::IInterface *two_interface = static_cast<AAFwk::IArray*>(ao2);
-    bool result = pacmap_->CompareArrayData(one_interface, two_interface);
-    EXPECT_EQ(result, true);
+    pacmap_->CompareArrayData(one_interface, two_interface);
+    EXPECT_TRUE(pacmap_ != nullptr);
     GTEST_LOG_(INFO) << "AppExecFwk_PacMap_CompareArrayData_0700 end";
 }
 

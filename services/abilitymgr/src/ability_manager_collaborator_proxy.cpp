@@ -427,22 +427,26 @@ bool AbilityManagerCollaboratorProxy::UpdateConfiguration(const AppExecFwk::Conf
     return true;
 }
 
-int32_t AbilityManagerCollaboratorProxy::OpenFile(const Uri& uri, uint32_t flag)
+int32_t AbilityManagerCollaboratorProxy::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
-        return false;
+        return -1;
     }
     if (!data.WriteParcelable(&uri)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write uri fail");
-        return false;
+        return -1;
     }
-    if (!data.WriteInt32(flag)) {
+    if (!data.WriteUint32(flag)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag fail");
-        return false;
+        return -1;
+    }
+    if (!data.WriteUint32(tokenId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write tokenId fail");
+        return -1;
     }
 
     int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::OPEN_FILE, data, reply, option);
@@ -451,6 +455,63 @@ int32_t AbilityManagerCollaboratorProxy::OpenFile(const Uri& uri, uint32_t flag)
         return -1;
     }
     return reply.ReadFileDescriptor();
+}
+
+int32_t AbilityManagerCollaboratorProxy::GrantUriPermission(const std::vector<std::string> &uriVec, uint32_t flag,
+    uint32_t targetTokenId, const std::string &targetBundleName)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteStringVector(uriVec)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write uriVec fail");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteUint32(flag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag fail");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteUint32(targetTokenId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write targetTokenId fail");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteString(targetBundleName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write targetBundleName fail");
+        return ERR_INVALID_OPERATION;
+    }
+
+    int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::GRANT_URI_PERMISSION, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", ret);
+        return ERR_INVALID_OPERATION;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerCollaboratorProxy::RevokeUriPermission(uint32_t tokenId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteUint32(tokenId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write tokenId fail");
+        return ERR_INVALID_OPERATION;
+    }
+
+    int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::REVOKE_URI_PERMISSION, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", ret);
+        return ERR_INVALID_OPERATION;
+    }
+    return reply.ReadInt32();
 }
 
 void AbilityManagerCollaboratorProxy::NotifyMissionBindPid(int32_t missionId, int32_t pid)

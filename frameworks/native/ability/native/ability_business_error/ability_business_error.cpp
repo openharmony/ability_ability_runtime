@@ -105,6 +105,12 @@ constexpr const char* ERROR_MSG_EXTENSION_START_ABILITY_CONTROLLED =
 constexpr const char* ERROR_MSG_NOT_HOOK = "Only allow DelegatorAbility to call the method once.";
 constexpr const char* ERROR_MSG_FROM_WINDOW =
     "The interaction process between Ability and Window encountered an error.";
+constexpr const char* ERROR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST = "The target not in app identifier allow list.";
+constexpr const char* ERROR_TARGET_NOT_STARTED = "The target has not been started yet.";
+constexpr const char* ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE =
+    "The caller is not atomic service.";
+constexpr const char* ERROR_MSG_NOT_UI_ABILITY_CONTEXT =
+    "The context is not UIAbilityContext.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
@@ -180,6 +186,11 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_EXTENSION_START_ABILITY_CONTROLLED, ERROR_MSG_EXTENSION_START_ABILITY_CONTROLLED },
     { AbilityErrorCode::ERROR_CODE_NOT_HOOK, ERROR_MSG_NOT_HOOK},
     { AbilityErrorCode::ERROR_CODE_FROM_WINDOW, ERROR_MSG_FROM_WINDOW},
+    { AbilityErrorCode::ERROR_CODE_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST,
+        ERROR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST},
+    { AbilityErrorCode::ERROR_CODE_TARGET_NOT_STARTED, ERROR_TARGET_NOT_STARTED},
+    { AbilityErrorCode::ERROR_CODE_CALLER_NOT_ATOMIC_SERVICE, ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE},
+    { AbilityErrorCode::ERROR_CODE_NOT_UI_ABILITY_CONTEXT, ERROR_MSG_NOT_UI_ABILITY_CONTEXT},
 };
 
 static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP {
@@ -259,6 +270,9 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_NOT_HOOK, AbilityErrorCode::ERROR_CODE_NOT_HOOK},
     {ERR_FROM_WINDOW, AbilityErrorCode::ERROR_CODE_FROM_WINDOW},
     {ERR_INVALID_CONTEXT, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT},
+    {ERR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST, AbilityErrorCode::ERROR_CODE_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST},
+    {ERR_TARGET_NOT_STARTED, AbilityErrorCode::ERROR_CODE_TARGET_NOT_STARTED},
+    {ERR_CALLER_NOT_ATOMIC_SERVICE, AbilityErrorCode::ERROR_CODE_CALLER_NOT_ATOMIC_SERVICE},
 };
 }
 

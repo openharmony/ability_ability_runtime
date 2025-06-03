@@ -216,7 +216,7 @@ int32_t StartupManager::LoadAppStartupTaskConfig(bool &needRunAutoStartupTask)
 }
 
 int32_t StartupManager::BuildAppStartupTaskManager(const std::vector<std::string> &inputDependencies,
-    std::shared_ptr<StartupTaskManager> &startupTaskManager)
+    std::shared_ptr<StartupTaskManager> &startupTaskManager, bool supportFeatureModule)
 {
     std::map<std::string, std::shared_ptr<StartupTask>> currentStartupTasks;
     std::set<std::string> dependenciesSet;
@@ -232,7 +232,7 @@ int32_t StartupManager::BuildAppStartupTaskManager(const std::vector<std::string
             TAG_LOGE(AAFwkTag::STARTUP, "%{public}s startup task null", iter.c_str());
             return ERR_STARTUP_INTERNAL_ERROR;
         }
-        if (findResult->second->GetModuleType() == AppExecFwk::ModuleType::FEATURE) {
+        if (!supportFeatureModule && findResult->second->GetModuleType() == AppExecFwk::ModuleType::FEATURE) {
             TAG_LOGE(AAFwkTag::STARTUP, "manual task of feature type is not supported");
             return ERR_STARTUP_DEPENDENCY_NOT_FOUND;
         }
@@ -1074,8 +1074,6 @@ void StartupManager::SetOptionalParameters(const nlohmann::json& module, AppExec
         startupTaskInfo.ohmUrl = module.at(OHMURL).get<std::string>();
     }
 
-    SetMatchRules(module, startupTaskInfo.matchRules);
-
     if (moduleType != AppExecFwk::ModuleType::ENTRY && moduleType != AppExecFwk::ModuleType::FEATURE) {
         startupTaskInfo.excludeFromAutoStart = true;
         return;
@@ -1085,6 +1083,8 @@ void StartupManager::SetOptionalParameters(const nlohmann::json& module, AppExec
     } else {
         startupTaskInfo.excludeFromAutoStart = false;
     }
+
+    SetMatchRules(module, startupTaskInfo.matchRules);
 }
 
 void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
@@ -1098,10 +1098,6 @@ void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExec
     StartupUtils::ParseJsonStringArray(module, DEPENDENCIES, dependencies);
     task->SetDependencies(dependencies);
 
-    StartupTaskMatchRules matchRules;
-    SetMatchRules(module, matchRules);
-    task->SetMatchRules(matchRules);
-
     if (moduleType != AppExecFwk::ModuleType::ENTRY && moduleType != AppExecFwk::ModuleType::FEATURE) {
         task->SetIsExcludeFromAutoStart(true);
         return;
@@ -1111,6 +1107,10 @@ void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExec
     } else {
         task->SetIsExcludeFromAutoStart(false);
     }
+
+    StartupTaskMatchRules matchRules;
+    SetMatchRules(module, matchRules);
+    task->SetMatchRules(matchRules);
 }
 
 void StartupManager::SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules)

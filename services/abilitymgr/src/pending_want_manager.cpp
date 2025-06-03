@@ -63,15 +63,16 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
 
     if (wantSenderInfo.type != static_cast<int32_t>(OperationType::SEND_COMMON_EVENT) &&
         !isSystemApp && !AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
-        for (auto it = info.allWants.begin(); it != info.allWants.end(); ++it) {
+        for (auto it = info.allWants.begin(); it != info.allWants.end();) {
             if (info.bundleName != it->want.GetBundle()) {
-                info.allWants.erase(it);
+                it = info.allWants.erase(it);
             } else {
                 it->want.RemoveParam("ohos.extra.param.key.appCloneIndex");
+                it++;
             }
         }
     }
-        
+
     return GetWantSenderLocked(callingUid, uid, wantSenderInfo.userId, info, callerToken, appIndex);
 }
 
@@ -320,14 +321,14 @@ int32_t PendingWantManager::DeviceIdDetermine(const Want &want, const sptr<Start
 int32_t PendingWantManager::PendingWantStartAbility(const Want &want, const sptr<StartOptions> &startOptions,
     const sptr<IRemoteObject> &callerToken, int32_t requestCode, const int32_t callerUid, int32_t callerTokenId)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "begin");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "start ability");
     int32_t result = DeviceIdDetermine(want, startOptions, callerToken, requestCode, callerUid, callerTokenId);
     return result;
 }
 
 int32_t PendingWantManager::PendingWantStartServiceExtension(Want &want, const sptr<IRemoteObject> &callerToken)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "start service extension");
     if (!PermissionVerification::GetInstance()->IsSystemAppCall()
         && !PermissionVerification::GetInstance()->IsSACall()) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "non-system app called");
@@ -342,7 +343,7 @@ int32_t PendingWantManager::PendingWantStartAbilitys(const std::vector<WantsInfo
     const sptr<StartOptions> &startOptions, const sptr<IRemoteObject> &callerToken, int32_t requestCode,
     const int32_t callerUid, int32_t callerTokenId)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "begin");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "start abilitys");
     int32_t result = ERR_OK;
     for (const auto &item : wantsInfo) {
         auto res = DeviceIdDetermine(item.want, startOptions, callerToken, requestCode, callerUid, callerTokenId);
@@ -356,7 +357,7 @@ int32_t PendingWantManager::PendingWantStartAbilitys(const std::vector<WantsInfo
 int32_t PendingWantManager::PendingWantPublishCommonEvent(
     const Want &want, const SenderInfo &senderInfo, int32_t callerUid, int32_t callerTokenId)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "begin");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "publish common event");
 
     CommonEventData eventData;
     eventData.SetWant(want);
