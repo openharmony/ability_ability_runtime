@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 
 #include "js_kiosk_manager.h"
 
-#include <cstdint>
 #include <memory>
 #include <regex>
 
@@ -37,7 +36,6 @@ namespace {
 constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t INDEX_ZERO = 0;
-constexpr size_t INDEX_ONE = 1;
 
 class JsKioskManager final {
 public:
@@ -56,7 +54,7 @@ public:
 
 private:
     static napi_value CreateJsKioskStatus(napi_env env,
-                                             const std::shared_ptr<AAFwk::KioskStatus> &kioskStatus);
+                                          std::shared_ptr<AAFwk::KioskStatus> kioskStatus);
     napi_value OnUpdateKioskApplicationList(napi_env env, NapiCallbackInfo &info);
     napi_value OnEnterKioskMode(napi_env env, NapiCallbackInfo &info);
     napi_value OnExitKioskMode(napi_env env, NapiCallbackInfo &info);
@@ -65,10 +63,14 @@ private:
 } // namespace
 
 napi_value JsKioskManager::CreateJsKioskStatus(napi_env env,
-                                               const std::shared_ptr<AAFwk::KioskStatus> &kioskStatus)
+                                               std::shared_ptr<AAFwk::KioskStatus> kioskStatus)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null ObjValue");
+        return nullptr;
+    }
     napi_set_named_property(env, objValue, "isKioskMode",
                             CreateJsValue(env, kioskStatus->isKioskMode_));
     napi_set_named_property(env, objValue, "kioskBundleName",
@@ -82,11 +84,11 @@ napi_value JsKioskManager::UpdateKioskApplicationList(napi_env env, napi_callbac
     GET_NAPI_INFO_AND_CALL(env, info, JsKioskManager, OnUpdateKioskApplicationList);
 }
 
-napi_value JsKioskManager::OnUpdateKioskApplicationList(napi_env env, NapiCallbackInfo& info)
+napi_value JsKioskManager::OnUpdateKioskApplicationList(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "On Update Kiosk AppList");
-    if (info.argc != ARGC_ONE) {
-        TAG_LOGE(AAFwkTag::APPKIT, "UpdateKioskApplicationList invalid argc");
+    if (info.argc < ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::APPKIT, "too few params");
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
@@ -108,7 +110,7 @@ napi_value JsKioskManager::OnUpdateKioskApplicationList(napi_env env, NapiCallba
         *innerErrCode = amsClient->UpdateKioskApplicationList(appList);
     };
 
-    auto complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto complete = [innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
         if (*innerErrCode != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "innerErrCode=%{public}d", *innerErrCode);
             task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -116,10 +118,9 @@ napi_value JsKioskManager::OnUpdateKioskApplicationList(napi_env env, NapiCallba
         }
         task.ResolveWithNoError(env, CreateJsUndefined(env));
     };
-    napi_value lastParam = (info.argc == INDEX_ONE) ? info.argv[ARGC_ZERO] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsKioskManager::OnUpdateKioskApplicationList", env,
-                            CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute),
+                            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute),
                                                          std::move(complete), &result));
     return result;
 }
@@ -129,11 +130,11 @@ napi_value JsKioskManager::EnterKioskMode(napi_env env, napi_callback_info info)
     GET_NAPI_INFO_AND_CALL(env, info, JsKioskManager, OnEnterKioskMode);
 }
 
-napi_value JsKioskManager::OnEnterKioskMode(napi_env env, NapiCallbackInfo& info)
+napi_value JsKioskManager::OnEnterKioskMode(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "On Enter KioskMode  start");
-    if (info.argc != ARGC_ONE) {
-        TAG_LOGE(AAFwkTag::APPKIT, "enterKioskMode invalid argc");
+    if (info.argc < ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::APPKIT, "too few params");
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
@@ -164,7 +165,7 @@ napi_value JsKioskManager::OnEnterKioskMode(napi_env env, NapiCallbackInfo& info
         *innerErrCode = amsClient->EnterKioskMode(token);
     };
 
-    auto complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto complete = [innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
         if (*innerErrCode != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "innerErrCode=%{public}d", *innerErrCode);
             task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -185,11 +186,11 @@ napi_value JsKioskManager::ExitKioskMode(napi_env env, napi_callback_info info)
     GET_NAPI_INFO_AND_CALL(env, info, JsKioskManager, OnExitKioskMode);
 }
 
-napi_value JsKioskManager::OnExitKioskMode(napi_env env, NapiCallbackInfo& info)
+napi_value JsKioskManager::OnExitKioskMode(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "On Exit KioskMode");
-    if (info.argc != ARGC_ONE) {
-        TAG_LOGE(AAFwkTag::APPKIT, "exitKioskMode invalid argc");
+    if (info.argc < ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::APPKIT, "too few params");
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
@@ -219,7 +220,7 @@ napi_value JsKioskManager::OnExitKioskMode(napi_env env, NapiCallbackInfo& info)
         *innerErrCode = amsClient->ExitKioskMode(token);
     };
 
-    auto complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto complete = [innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
         if (*innerErrCode != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "innerErrCode=%{public}d", *innerErrCode);
             task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -239,7 +240,7 @@ napi_value JsKioskManager::GetKioskStatus(napi_env env, napi_callback_info info)
     GET_NAPI_INFO_AND_CALL(env, info, JsKioskManager, OnGetKioskStatus);
 }
 
-napi_value JsKioskManager::OnGetKioskStatus(napi_env env, NapiCallbackInfo& info)
+napi_value JsKioskManager::OnGetKioskStatus(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Get KioskStatus");
     if (info.argc != ARGC_ZERO) {
@@ -261,7 +262,7 @@ napi_value JsKioskManager::OnGetKioskStatus(napi_env env, NapiCallbackInfo& info
         *innerErrCode = amsClient->GetKioskStatus(*kioskStatus);
     };
 
-    auto complete = [innerErrCode, kioskStatus](napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto complete = [innerErrCode, kioskStatus](napi_env env, NapiAsyncTask &task, int32_t status) {
         if (*innerErrCode != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "innerErrCode=%{public}d", *innerErrCode);
             task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));

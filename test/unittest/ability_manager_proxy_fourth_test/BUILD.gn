@@ -75,6 +75,7 @@ ohos_unittest("ability_manager_proxy_fourth_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "hisysevent:libhisysevent",
   ]
 
   if (background_task_mgr_continuous_task_enable) {

@@ -2101,6 +2101,8 @@ public:
      */
     int32_t GetKioskStatus(AAFwk::KioskStatus &kioskStatus) override;
 
+    std::shared_ptr<AbilityInterceptorExecuter> GetAbilityInterceptorExecuter();
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -2341,13 +2343,9 @@ private:
     void SubscribeScreenUnlockedEvent();
     std::function<void()> GetScreenUnlockCallback();
     std::function<void()> GetUserScreenUnlockCallback();
-    std::function<void()> GetEnterKioskModeCallback();
-    std::function<void()> GetExitKioskModeCallback();
-    void AddKioskInterceptor();
     void UnSubscribeScreenUnlockedEvent();
     void RetrySubscribeScreenUnlockedEvent(int32_t retryCount);
     void RemoveScreenUnlockInterceptor();
-    void RemoveKioskInterceptor();
     void RemoveUnauthorizedLaunchReasonMessage(const Want &want, AbilityRequest &abilityRequest,
         const sptr<IRemoteObject> &callerToken);
 
@@ -2769,10 +2767,6 @@ private:
     void CombinLinkInfo(
         const std::vector<AbilityRuntime::LinkIntentParamMapping> &paramMappings, std::string &uri, AAFwk::Want &want);
 
-    bool CheckKioskPermission();
-
-    bool CheckCallerIsForeground(sptr<IRemoteObject> callerToken);
-
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif
@@ -2812,7 +2806,6 @@ private:
 
     std::mutex prepareTermiationCallbackMutex_;
     std::map<std::string, sptr<IPrepareTerminateCallback>> prepareTermiationCallbacks_;
-    std::shared_ptr<KioskManager> kioskManager_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
