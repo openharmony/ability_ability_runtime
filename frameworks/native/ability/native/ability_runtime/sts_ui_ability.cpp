@@ -14,6 +14,7 @@
  */
 
 #include "sts_ui_ability.h"
+
 #include <cstdlib>
 #include <regex>
 #include <vector>
@@ -23,6 +24,9 @@
 #include "ability_manager_client.h"
 #include "ability_recovery.h"
 #include "ability_start_setting.h"
+#include "ani_common_configuration.h"
+#include "ani_common_want.h"
+#include "ani_enum_convert.h"
 #include "ani_remote_object.h"
 #include "app_recovery.h"
 #include "connection_manager.h"
@@ -32,22 +36,21 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "if_system_ability_manager.h"
+#include "insight_intent_execute_param.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
-#include "insight_intent_execute_param.h"
 #include "ohos_application.h"
+#include "string_wrapper.h"
 #include "sts_ability_context.h"
 #include "sts_caller_complex.h"
 #include "sts_data_struct_converter.h"
+#include "system_ability_definition.h"
+#include "time_util.h"
 #ifdef SUPPORT_SCREEN
 #include "ani_window_stage.h"
 #include "distributed_client.h"
 #include "scene_board_judgement.h"
 #endif
-#include "ani_common_want.h"
-#include "string_wrapper.h"
-#include "system_ability_definition.h"
-#include "time_util.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -83,7 +86,7 @@ constexpr const char* UI_ABILITY_SIGNATURE_WANT_LAUNCH_VOID =
     "L@ohos/app/ability/Want/Want;L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;:V";
 constexpr const char* UI_ABILITY_SIGNATURE_WINDOWSTAGE_VOID =
     "L@ohos/window/window/WindowStage;:V";
-
+constexpr const char* MEMORY_LEVEL_ENUM_NAME = "L@ohos/app/ability/AbilityConstant/AbilityConstant/MemoryLevel;";
 
 void OnDestroyPromiseCallback(ani_env* env, ani_object aniObj)
 {
@@ -1196,37 +1199,72 @@ void StsUIAbility::OnConfigurationUpdated(const Configuration &configuration)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     UIAbility::OnConfigurationUpdated(configuration);
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnConfigurationUpdated called");
     if (abilityContext_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
         return;
     }
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "env null");
+        return;
+    }
+    auto abilityConfig = abilityContext_->GetAbilityConfiguration();
     auto fullConfig = abilityContext_->GetConfiguration();
     if (fullConfig == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null fullConfig");
         return;
     }
-
-    TAG_LOGD(AAFwkTag::UIABILITY, "fullConfig: %{public}s", fullConfig->GetName().c_str());
+    auto realConfig = AppExecFwk::Configuration(*fullConfig);
+    if (abilityConfig != nullptr) {
+        std::vector<std::string> changeKeyV;
+        realConfig.CompareDifferent(changeKeyV, *abilityConfig);
+        if (!changeKeyV.empty()) {
+            realConfig.Merge(changeKeyV, *abilityConfig);
+        }
+    }
+    TAG_LOGD(AAFwkTag::UIABILITY, "realConfig: %{public}s", realConfig.GetName().c_str());
+    ani_object aniConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, realConfig);
+    CallObjectMethod(false, "onConfigurationUpdated", nullptr, aniConfiguration);
+    CallObjectMethod(false, "onConfigurationUpdate", nullptr, aniConfiguration);
+    auto realConfigPtr = std::make_shared<Configuration>(realConfig);
+    StsAbilityContext::ConfigurationUpdated(env, shellContextRef_, realConfigPtr);
 }
 
 void StsUIAbility::OnMemoryLevel(int level)
 {
     UIAbility::OnMemoryLevel(level);
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnMemoryLevel called");
     if (stsAbilityObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsAbilityObj_");
         return;
     }
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    ani_enum_item levelEnum {};
+    if (!OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(env, MEMORY_LEVEL_ENUM_NAME, level, levelEnum)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "levelEnum NativeToSts failed");
+        return;
+    }
+    CallObjectMethod(false, "onMemoryLevel", nullptr, levelEnum);
 }
 
 void StsUIAbility::UpdateContextConfiguration()
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGD(AAFwkTag::UIABILITY, "UpdateContextConfiguration called");
     if (abilityContext_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
         return;
     }
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    StsAbilityContext::ConfigurationUpdated(env, shellContextRef_, abilityContext_->GetConfiguration());
 }
 
 void StsUIAbility::OnNewWant(const Want &want)
@@ -1341,9 +1379,9 @@ bool StsUIAbility::CallObjectMethod(bool withResult, const char *name, const cha
     ani_method method {};
     if ((status = env->Class_FindMethod(cls, name, signature, &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        env->ResetError();
         return false;
     }
-    env->ResetError();
     if (withResult) {
         ani_boolean res = false;
         va_list args;
