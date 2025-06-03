@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -226,6 +226,44 @@ HWTEST_F(AppDeathRecipientTest, AppDeathRecipient_002, TestSize.Level1)
     EXPECT_TRUE(appDeathRecipientObject_ != nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "AppDeathRecipient_002 end");
+}
+
+/*
+ * Feature: Ams
+ * Function: SetIsRenderProcess
+ * SubFunction: AppDeathRecipient
+ * FunctionPoints: set render process flag
+ * EnvConditions: AppDeathRecipient object exists
+ * CaseDescription: Test setting isRenderProcess_ to true
+ */
+HWTEST_F(AppDeathRecipientTest, AppDeathRecipient_SetIsRenderProcess_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppDeathRecipient_SetIsRenderProcess_001 start");
+
+    appDeathRecipientObject_->SetIsRenderProcess(true);
+    EXPECT_TRUE(appDeathRecipientObject_->isRenderProcess_);
+    appDeathRecipientObject_->SetIsRenderProcess(false);
+    EXPECT_FALSE(appDeathRecipientObject_->isRenderProcess_);
+    TAG_LOGI(AAFwkTag::TEST, "AppDeathRecipient_SetIsRenderProcess_001 end");
+}
+
+/*
+ * Feature: Ams
+ * Function: SetIsChildProcess
+ * SubFunction: AppDeathRecipient
+ * FunctionPoints: set child process flag
+ * EnvConditions: AppDeathRecipient object exists
+ * CaseDescription: Test setting isChildProcess_ to true
+ */
+HWTEST_F(AppDeathRecipientTest, AppDeathRecipient_SetIsChildProcess_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppDeathRecipient_SetIsChildProcess_001 start");
+
+    appDeathRecipientObject_->SetIsChildProcess(true);
+    EXPECT_TRUE(appDeathRecipientObject_->isChildProcess_);
+    appDeathRecipientObject_->SetIsChildProcess(false);
+    EXPECT_FALSE(appDeathRecipientObject_->isChildProcess_);
+    TAG_LOGI(AAFwkTag::TEST, "AppDeathRecipient_SetIsChildProcess_001 end");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

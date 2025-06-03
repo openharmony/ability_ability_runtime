@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -229,5 +229,43 @@ HWTEST_F(ExitResidentProcessManagerTest, HandleNoRequireBigMemoryOptimization_00
     exitResidentProcessManager2->currentBigMemoryState_ = MemoryState::NO_REQUIRE_BIG_MEMORY;
     EXPECT_NE(exitResidentProcessManager2->HandleNoRequireBigMemoryOptimization(vecInfo), ERR_OK);
 }
-} // namespace AppExecFwk
-} // namespace OHOS
+
+/**
+ * @tc.name: IsNoRequireBigMemory_001
+ * @tc.desc: Verify IsNoRequireBigMemory when state is NO_REQUIRE_BIG_MEMORY
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExitResidentProcessManagerTest, IsNoRequireBigMemory_001, TestSize.Level1)
+{
+    auto exitResidentProcessManager = std::make_shared<ExitResidentProcessManager>();
+    exitResidentProcessManager->currentBigMemoryState_ = MemoryState::NO_REQUIRE_BIG_MEMORY;
+    EXPECT_EQ(exitResidentProcessManager->IsNoRequireBigMemory(), true);
+}
+/**
+ * @tc.name: RecordExitResidentBundleNameOnRequireBigMemory_002
+ * @tc.desc: Verify RecordExitResidentBundleNameOnRequireBigMemory when state is REQUIRE_BIG_MEMORY
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExitResidentProcessManagerTest, RecordExitResidentBundleNameOnRequireBigMemory_002, TestSize.Level1)
+{
+    auto exitResidentProcessManager = std::make_shared<ExitResidentProcessManager>();
+    exitResidentProcessManager->currentBigMemoryState_ = MemoryState::REQUIRE_BIG_MEMORY;
+    std::string bundleName = "testBundle";
+    int32_t uid = 1000;
+    EXPECT_EQ(exitResidentProcessManager->RecordExitResidentBundleNameOnRequireBigMemory(bundleName, uid), true);
+}
+
+/**
+ * @tc.name: IsKilledForUpgradeWeb_002
+ * @tc.desc: Verify IsKilledForUpgradeWeb when bundle is in the list
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExitResidentProcessManagerTest, IsKilledForUpgradeWeb_002, TestSize.Level1)
+{
+    auto exitResidentProcessManager = std::make_shared<ExitResidentProcessManager>();
+    std::string bundleName = "testBundle";
+    exitResidentProcessManager->exitResidentBundlesDependedOnWeb_.emplace_back(bundleName, 1000);
+    EXPECT_EQ(exitResidentProcessManager->IsKilledForUpgradeWeb(bundleName), true);
+}
+}  // namespace AppExecFwk
+}  // namespace OHOS
