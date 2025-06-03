@@ -33,6 +33,7 @@ namespace AAFwk {
 namespace {
 constexpr size_t INSIGHT_INTENT_EXECUTE_RECORDS_MAX_SIZE = 256;
 constexpr char EXECUTE_INSIGHT_INTENT_PERMISSION[] = "ohos.permission.EXECUTE_INSIGHT_INTENT";
+constexpr char PERMISSION_GET_BUNDLE_INFO_PRIVILEGED[] = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
 constexpr int32_t OPERATION_DURATION = 10000;
 }
 using namespace AppExecFwk;
@@ -563,6 +564,22 @@ int32_t InsightIntentExecuteManager::CheckCallerPermission()
         EXECUTE_INSIGHT_INTENT_PERMISSION);
     if (!isCallingPerm) {
         TAG_LOGE(AAFwkTag::INTENT, "permission %{public}s verification failed", EXECUTE_INSIGHT_INTENT_PERMISSION);
+        return ERR_PERMISSION_DENIED;
+    }
+    return ERR_OK;
+}
+
+int32_t InsightIntentExecuteManager::CheckGetInsightIntenInfoPermission()
+{
+    bool isSystemAppCall = PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI();
+    if (!isSystemAppCall) {
+        TAG_LOGE(AAFwkTag::INTENT, "system-api cannot use");
+        return ERR_NOT_SYSTEM_APP;
+    }
+
+    bool isCallingPerm = PermissionVerification::GetInstance()->VerifyGetBundleInfoPrivilegedPermission();
+    if (!isCallingPerm) {
+        TAG_LOGE(AAFwkTag::INTENT, "permission %{public}s verification failed", PERMISSION_GET_BUNDLE_INFO_PRIVILEGED);
         return ERR_PERMISSION_DENIED;
     }
     return ERR_OK;

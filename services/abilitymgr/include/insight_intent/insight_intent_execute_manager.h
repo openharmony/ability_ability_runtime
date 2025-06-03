@@ -102,6 +102,8 @@ public:
     bool CheckIntentIsExemption(int32_t uid);
 
     static int32_t CheckCallerPermission();
+
+    static int32_t CheckGetInsightIntenInfoPermission();
 private:
     mutable ffrt::mutex mutex_;
     mutable ffrt::mutex intentExemptionLock_;
