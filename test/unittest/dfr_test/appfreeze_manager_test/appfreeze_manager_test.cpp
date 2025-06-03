@@ -168,16 +168,25 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_004, TestSize.Level1)
 HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_005, TestSize.Level1)
 {
     std::map<int, std::list<AppfreezeManager::PeerBinderInfo>> binderInfos;
-    AppfreezeManager::PeerBinderInfo infoOne= {3, 0, 0, 0};
-    binderInfos[1].push_back(infoOne);
-    AppfreezeManager::PeerBinderInfo infoTwo= {4, 0, 0, 0};
-    binderInfos[1].push_back(infoTwo);
+    AppfreezeManager::PeerBinderInfo infoOne= {1, 2, 3, 5};
+    binderInfos[infoOne.clientPid].push_back(infoOne);
+    AppfreezeManager::PeerBinderInfo infoTwo= {1, 3, 4, 0};
+    binderInfos[infoTwo.clientPid].push_back(infoTwo);
+    AppfreezeManager::PeerBinderInfo infoThree= {4, 0, 5, 6};
+    binderInfos[infoThree.clientPid].push_back(infoThree);
+    AppfreezeManager::PeerBinderInfo infoFour= {5, 6, 11, 7};
+    binderInfos[infoFour.clientPid].push_back(infoFour);
+
     std::set<int> pids;
-    AppfreezeManager::TerminalBinder terminalBinder = {0, 0, false};
-    appfreezeManager->ParseBinderPids(binderInfos, pids, 2, 8, terminalBinder);
+    AppfreezeManager::TerminalBinder terminalBinder = {0, 0};
+    AppfreezeManager::ParseBinderParam params = {1, 3, 2, 0};
+    appfreezeManager->ParseBinderPids(binderInfos, pids, params, true, terminalBinder);
     EXPECT_EQ(pids.size(), 0);
-    appfreezeManager->ParseBinderPids(binderInfos, pids, 1, 0, terminalBinder);
-    EXPECT_EQ(pids.size(), 1);
+    params = {1, 3, 1, 0};
+    appfreezeManager->ParseBinderPids(binderInfos, pids, params, true, terminalBinder);
+    EXPECT_EQ(pids.size(), 4);
+    EXPECT_EQ(terminalBinder.pid, infoFour.serverPid);
+    EXPECT_EQ(terminalBinder.tid, infoFour.serverTid);
 }
 
 /**
