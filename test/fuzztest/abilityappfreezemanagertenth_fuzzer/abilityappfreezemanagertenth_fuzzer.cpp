@@ -56,7 +56,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         pid = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
         GetRandomTerminalBinder(fdp, terminalBinder);
     }
-    freeze->GetBinderPeerPids(stack, pid, asyncPids, terminalBinder);
+    AppfreezeManager::ParseBinderParam params = {0, 0, pid, 0};
+    freeze->GetBinderPeerPids(stack, params, asyncPids, terminalBinder);
     return true;
 }
 }

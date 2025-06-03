@@ -71,8 +71,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     freeze->IsValidFreezeFilter(pid, bundleName);
     std::string stack(data, size);
     std::set<int> asyncPids;
-    AppfreezeManager::TerminalBinder terminalBinder = {0, 0, false};
-    freeze->GetBinderPeerPids(stack, pid, asyncPids, terminalBinder);
+    AppfreezeManager::TerminalBinder terminalBinder = {0, 0};
+    AppfreezeManager::ParseBinderParam params = {0, 0, 0, 0};
+    freeze->GetBinderPeerPids(stack, params, asyncPids, terminalBinder);
     std::string ret(data, size);
     freeze->FindStackByPid(ret, pid);
     std::string faultType(data, size);
