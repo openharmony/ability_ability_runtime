@@ -109,6 +109,13 @@ private:
         int layer;
     };
 
+    struct HitraceInfo {
+        std::string hiTraceChainId;
+        std::string spanId;
+        std::string pspanId;
+        std::string traceFlag;
+    };
+
     AppfreezeManager& operator=(const AppfreezeManager&) = delete;
     AppfreezeManager(const AppfreezeManager&) = delete;
     std::map<int, std::list<AppfreezeManager::PeerBinderInfo>> BinderParser(std::ifstream& fin, std::string& stack,
@@ -135,6 +142,8 @@ private:
     void ClearOldInfo();
     void CollectFreezeSysMemory(std::string& memoryContent);
     int MergeNotifyInfo(FaultData& faultNotifyData, const AppfreezeManager::AppInfo& appInfo);
+    std::string ParseDecToHex(uint64_t id);
+    bool GetHitraceId(HitraceInfo& info);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;

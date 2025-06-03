@@ -37,6 +37,9 @@
 #include "app_mgr_client.h"
 #include "hilog_tag_wrapper.h"
 #include "time_util.h"
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+#include "hitrace/hitracechain.h"
+#endif
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -52,6 +55,14 @@ constexpr char EVENT_STACK[] = "STACK";
 constexpr char BINDER_INFO[] = "BINDER_INFO";
 constexpr char APP_RUNNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
 constexpr char FREEZE_MEMORY[] = "FREEZE_MEMORY";
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+constexpr char EVENT_TRACE_ID[] = "HITRACE_ID";
+constexpr char EVENT_SPAN_ID[] = "SPAN_ID";
+constexpr char EVENT_PARENT_SPAN_ID[] = "PARENT_SPAN_ID";
+constexpr char EVENT_TRACE_FLAG[] = "TRACE_FLAG";
+constexpr int32_t CHARACTER_WIDTH = 2;
+#endif
+
 constexpr int MAX_LAYER = 8;
 constexpr int FREEZEMAP_SIZE_MAX = 20;
 constexpr int FREEZE_TIME_LIMIT = 60000;
@@ -341,6 +352,33 @@ int AppfreezeManager::AcquireStack(const FaultData& faultData,
     return ret;
 }
 
+std::string AppfreezeManager::ParseDecToHex(uint64_t id)
+{
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0') << std::setw(CHARACTER_WIDTH) << id;
+    return ss.str();
+}
+
+bool AppfreezeManager::GetHitraceId(HitraceInfo& info)
+{
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+    OHOS::HiviewDFX::HiTraceId hitraceId = OHOS::HiviewDFX::HiTraceChain::GetId();
+    if (hitraceId.IsValid() == 0) {
+        TAG_LOGW(AAFwkTag::APPDFR, "get hitrace id is invalid.");
+        return false;
+    }
+    info.hiTraceChainId = ParseDecToHex(hitraceId.GetChainId());
+    info.spanId = ParseDecToHex(hitraceId.GetSpanId());
+    info.pspanId = ParseDecToHex(hitraceId.GetParentSpanId());
+    info.traceFlag = ParseDecToHex(hitraceId.GetFlags());
+    TAG_LOGW(AAFwkTag::APPDFR,
+        "hiTraceChainId:%{public}s, spanId:%{public}s, pspanId:%{public}s, traceFlag:%{public}s",
+        info.hiTraceChainId.c_str(), info.spanId.c_str(), info.pspanId.c_str(), info.traceFlag.c_str());
+    return true;
+#endif
+    return false;
+}
+
 int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo,
     const std::string& binderInfo, const std::string& memoryContent)
 {
@@ -357,6 +395,19 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
             faultData.errorObject.message, EVENT_STACK, faultData.errorObject.stack, BINDER_INFO, binderInfo,
             APP_RUNNING_UNIQUE_ID, appRunningUniqueId, EVENT_INPUT_ID, faultData.eventId,
             FREEZE_MEMORY, memoryContent);
+    } else if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S) {
+        HitraceInfo info;
+        bool hitraceIsValid = GetHitraceId(info);
+        ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, faultData.errorObject.name,
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_UID, appInfo.uid, EVENT_PID, appInfo.pid,
+            EVENT_TID, faultData.tid,
+            EVENT_PACKAGE_NAME, appInfo.bundleName, EVENT_PROCESS_NAME, appInfo.processName, EVENT_MESSAGE,
+            faultData.errorObject.message, EVENT_STACK, faultData.errorObject.stack, BINDER_INFO, binderInfo,
+            APP_RUNNING_UNIQUE_ID, appRunningUniqueId, FREEZE_MEMORY, memoryContent,
+            EVENT_TRACE_ID, hitraceIsValid ? info.hiTraceChainId : "",
+            EVENT_SPAN_ID, hitraceIsValid ? info.spanId : "",
+            EVENT_PARENT_SPAN_ID, hitraceIsValid ? info.pspanId : "",
+            EVENT_TRACE_FLAG, hitraceIsValid ? info.traceFlag : "");
     } else {
         ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, faultData.errorObject.name,
             OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_UID, appInfo.uid, EVENT_PID, appInfo.pid,
@@ -371,6 +422,9 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
         faultData.errorObject.name.c_str(), appInfo.pid, faultData.tid, appInfo.bundleName.c_str(),
         appRunningUniqueId.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
         AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime, faultData.eventId, ret);
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+    OHOS::HiviewDFX::HiTraceChain::ClearId();
+#endif
     return 0;
 }
 

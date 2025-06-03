@@ -22,6 +22,9 @@
 #include "event_handler.h"
 #include "inner_event.h"
 #include "application_impl.h"
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+#include "hitrace/hitracechain.h"
+#endif
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -107,6 +110,11 @@ public:
 private:
     void Timer();
     void ReportEvent();
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+    void SetHiTraceChainId();
+
+    static OHOS::HiviewDFX::HiTraceId* hitraceId_;
+#endif
 
     std::atomic_bool appMainThreadIsAlive_ = false;
     std::atomic_bool stopWatchdog_ = false;

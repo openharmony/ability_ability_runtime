@@ -176,6 +176,11 @@ ohos_shared_library("app_manager") {
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }
 
+  if (ability_runtime_hitrace_enable) {
+    external_deps += [ "hitrace:libhitracechain" ]
+    defines += [ "ABILITY_RUNTIME_HITRACE_ENABLE" ]
+  }
+
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
