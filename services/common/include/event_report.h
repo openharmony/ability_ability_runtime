@@ -108,7 +108,6 @@ enum class EventName {
     DRAWN_COMPLETED,
     APP_STARTUP_TYPE,
     PROCESS_START_FAILED,
-    APP_START_INTERCRPT_BY_EDM,
 
     // key behavior event
     GRANT_URI_PERMISSION,

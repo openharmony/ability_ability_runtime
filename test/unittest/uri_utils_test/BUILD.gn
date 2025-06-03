@@ -55,7 +55,6 @@ ohos_unittest("uri_utils_test") {
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",

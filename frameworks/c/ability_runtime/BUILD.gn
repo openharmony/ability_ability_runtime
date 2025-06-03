@@ -67,7 +67,6 @@ ohos_shared_library("ability_runtime") {
     "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
     "image_framework:image_native",
     "image_framework:pixelmap",
     "ipc:ipc_core",

@@ -54,7 +54,6 @@ ohos_unittest("task_data_persistence_mgr_test") {
     "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",
