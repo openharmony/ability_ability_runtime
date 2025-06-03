@@ -26,6 +26,9 @@
 #include "ohos_application.h"
 #include "sts_free_install_observer.h"
 
+namespace OHOS {
+namespace AbilityRuntime {
+bool BindNativeMethods(ani_env *env, ani_class &cls);
 [[maybe_unused]] static void TerminateSelfSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj,
     [[maybe_unused]] ani_object callback);
 [[maybe_unused]] static void StartAbility([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
@@ -34,15 +37,16 @@
     ani_object wantObj, ani_object opt, ani_object call);
 [[maybe_unused]] static void StartServiceExtensionAbilitySync([[maybe_unused]] ani_env *env,
     [[maybe_unused]] ani_object obj, [[maybe_unused]] ani_object wantObj, [[maybe_unused]] ani_object callbackobj);
-ani_object CreateStsServiceExtensionContext(ani_env *env,
-    std::shared_ptr<OHOS::AbilityRuntime::ServiceExtensionContext> context,
-    const std::shared_ptr<OHOS::AppExecFwk::OHOSApplication> &application);
+[[maybe_unused]] static void StopServiceExtensionAbilitySync(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object callbackobj);
+ani_object CreateStsServiceExtensionContext(ani_env *env, std::shared_ptr<ServiceExtensionContext> context,
+    const std::shared_ptr<AppExecFwk::OHOSApplication> &application);
 
 void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context);
+    void* applicationCtxRef, std::shared_ptr<ExtensionContext> context);
 
 void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo);
+    std::shared_ptr<Context> context, std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
 
 void UpdateContextConfiguration(ani_env *env, std::unique_ptr<OHOS::AbilityRuntime::STSNativeReference>& stsObj,
     ani_object aniConfiguration);
@@ -56,10 +60,12 @@ public:
     }
     void StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
         ani_object wantObj, ani_object opt, ani_object call);
-    static OHOS::AbilityRuntime::ServiceExtensionContext* GetAbilityContext(ani_env *env, ani_object obj);
-    void AddFreeInstallObserver(ani_env *env, const OHOS::AAFwk::Want &want, ani_object callback,
-        OHOS::AbilityRuntime::ServiceExtensionContext* context);
+    static ServiceExtensionContext* GetAbilityContext(ani_env *env, ani_object obj);
+    void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want, ani_object callback,
+        ServiceExtensionContext* context);
 private:
-    OHOS::sptr<OHOS::AbilityRuntime::StsFreeInstallObserver> freeInstallObserver_ = nullptr;
+    sptr<StsFreeInstallObserver> freeInstallObserver_ = nullptr;
 };
+} // namespace AbilityRuntime
+} // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_STS_UI_EXTENSION_CONTEXT_H

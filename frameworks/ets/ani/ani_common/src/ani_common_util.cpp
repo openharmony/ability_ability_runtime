@@ -30,6 +30,7 @@ constexpr const char* CLASSNAME_LONG = "Lstd/core/Long;";
 constexpr const char* CLASSNAME_STRING = "Lstd/core/String;";
 constexpr const char* CLASSNAME_ARRAY = "Lescompat/Array;";
 constexpr const char* CLASSNAME_ASYNC_CALLBACK_WRAPPER = "Lutils/AbilityUtils/AsyncCallbackWrapper;";
+constexpr const char* SET_OBJECT_VOID_SIGNATURE = "ILstd/core/Object;:V";
 }
 
 bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value)
@@ -937,6 +938,86 @@ bool SetRefProperty(ani_env *env, ani_object param, const char *name, ani_ref va
     if ((status = env->Object_SetPropertyByName_Ref(param, name, value)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
         return false;
+    }
+    return true;
+}
+
+bool WrapArrayString(ani_env *env, ani_object &arrayObj, const std::vector<std::string> &values)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "env null or arrayObj null");
+        return false;
+    }
+    ani_class arrayCls = nullptr;
+    ani_method arrayCtor;
+    ani_string aniStr = nullptr;
+    ani_status status = ANI_ERROR;
+    status = env->FindClass(CLASSNAME_ARRAY, &arrayCls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return false;
+    }
+    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return false;
+    }
+    status = env->Object_New(arrayCls, arrayCtor, &arrayObj, values.size());
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return false;
+    }
+
+    for (size_t i = 0; i < values.size(); i++) {
+        aniStr = nullptr;
+        status = env->String_NewUTF8(values[i].c_str(), values[i].size(), &aniStr);
+        if (aniStr == nullptr) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "null aniStr");
+            return false;
+        }
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+            return false;
+        }
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", SET_OBJECT_VOID_SIGNATURE, i, aniStr);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+            return false;
+        }
+    }
+    return true;
+}
+
+bool UnwrapArrayString(ani_env *env, const ani_object &arrayObj, std::vector<std::string> &stringList)
+{
+    if (env == nullptr || arrayObj == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "env null or arrayObj null");
+        return false;
+    }
+    stringList.clear();
+    ani_size size = 0;
+    ani_status status = ANI_ERROR;
+    if ((status = env->Array_GetLength(reinterpret_cast<ani_array>(arrayObj), &size)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        return false;
+    }
+    ani_ref ref;
+    ani_size idx;
+    for (idx = 0; idx < size; idx++) {
+        if ((status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(arrayObj), idx, &ref)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d, index: %{public}zu", status, idx);
+            return false;
+        }
+        if (ref == nullptr) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "null ref");
+            return false;
+        }
+        std::string str = "";
+        if (!OHOS::AppExecFwk::GetStdString(env, reinterpret_cast<ani_string>(ref), str)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed, index: %{public}zu", idx);
+            return false;
+        }
+        stringList.push_back(str);
     }
     return true;
 }
