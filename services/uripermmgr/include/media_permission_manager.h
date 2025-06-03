@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ namespace AAFwk {
 class MediaPermissionManager {
 public:
     static MediaPermissionManager &GetInstance();
-    std::vector<bool> CheckUriPermission(const std::vector<Uri> &uriVec, uint32_t callerTokenId, uint32_t flag);
+    std::vector<bool> CheckUriPermission(const std::vector<std::string> &uriVec, uint32_t callerTokenId, uint32_t flag);
     int32_t GrantUriPermission(const std::vector<std::string> &uris, uint32_t flag, uint32_t callerTokenId,
         uint32_t targetTokenId, int32_t hideSensitiveType);
     int32_t RevokeUriPermission(uint32_t callerTokenId, uint32_t targetTokenId, const std::string &uri);

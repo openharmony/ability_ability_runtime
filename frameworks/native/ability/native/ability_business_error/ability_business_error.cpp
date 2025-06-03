@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,6 +111,10 @@ constexpr const char* ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE =
     "The caller is not atomic service.";
 constexpr const char* ERROR_MSG_NOT_UI_ABILITY_CONTEXT =
     "The context is not UIAbilityContext.";
+constexpr const char* ERR_MSG_GET_FILE_URIS_BY_KEY_FAILED = "Failed to get file uri from key.";
+constexpr const char* ERR_MSG_NO_PERMISSION_GRANT_URI = "No permission to grant uri permission.";
+constexpr const char* ERR_MSG_INVALID_CALLER_TOKENID = "Caller token id is invalid.";
+constexpr const char* ERR_MSG_INVALID_TARGET_TOKENID = "Target token id is invalid.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
@@ -191,6 +195,10 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_TARGET_NOT_STARTED, ERROR_TARGET_NOT_STARTED},
     { AbilityErrorCode::ERROR_CODE_CALLER_NOT_ATOMIC_SERVICE, ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE},
     { AbilityErrorCode::ERROR_CODE_NOT_UI_ABILITY_CONTEXT, ERROR_MSG_NOT_UI_ABILITY_CONTEXT},
+    { AbilityErrorCode::ERR_CODE_GET_FILE_URIS_BY_KEY_FAILED, ERR_MSG_GET_FILE_URIS_BY_KEY_FAILED},
+    { AbilityErrorCode::ERR_CODE_NO_PERMISSION_GRANT_URI, ERR_MSG_NO_PERMISSION_GRANT_URI},
+    { AbilityErrorCode::ERR_CODE_INVALID_CALLER_TOKENID, ERR_MSG_INVALID_CALLER_TOKENID},
+    { AbilityErrorCode::ERR_CODE_INVALID_TARGET_TOKENID, ERR_MSG_INVALID_TARGET_TOKENID},
 };
 
 static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP {
@@ -273,6 +281,10 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST, AbilityErrorCode::ERROR_CODE_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST},
     {ERR_TARGET_NOT_STARTED, AbilityErrorCode::ERROR_CODE_TARGET_NOT_STARTED},
     {ERR_CALLER_NOT_ATOMIC_SERVICE, AbilityErrorCode::ERROR_CODE_CALLER_NOT_ATOMIC_SERVICE},
+    {ERR_UPMS_GET_FILE_URIS_BY_KEY_FAILED, AbilityErrorCode::ERR_CODE_GET_FILE_URIS_BY_KEY_FAILED},
+    {ERR_UPMS_NO_PERMISSION_GRANT_URI, AbilityErrorCode::ERR_CODE_NO_PERMISSION_GRANT_URI},
+    {ERR_UPMS_INVALID_CALLER_TOKENID, AbilityErrorCode::ERR_CODE_INVALID_CALLER_TOKENID},
+    {ERR_UPMS_INVALID_TARGET_TOKENID, AbilityErrorCode::ERR_CODE_INVALID_TARGET_TOKENID},
 };
 }
 

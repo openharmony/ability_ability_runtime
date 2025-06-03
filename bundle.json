@@ -107,6 +107,7 @@
             "selinux_adapter",
             "storage_service",
             "toolchain",
+            "udmf",
             "webview",
             "window_manager",
             "zlib"
