@@ -66,6 +66,7 @@ constexpr int32_t RECORD_ID = 1;
 constexpr int32_t APP_DEBUG_INFO_PID = 0;
 constexpr int32_t APP_DEBUG_INFO_UID = 0;
 constexpr const char* PERMISSION_PROTECT_SCREEN_LOCK_DATA_TEST = "ohos.permission.PROTECT_SCREEN_LOCK_DATA";
+constexpr int32_t FUN_TEST_PID = 0;
 }
 static int recordId_ = 0;
 class AppMgrServiceInnerTest : public testing::Test {
@@ -5778,6 +5779,30 @@ HWTEST_F(AppMgrServiceInnerTest, SetProcessCacheEnable_001, TestSize.Level2)
 
     appMgrServiceInner->appRunningManager_ = nullptr;
     EXPECT_EQ(appMgrServiceInner->SetProcessCacheEnable(pid, enable), AAFwk::ERR_NULL_APP_RUNNING_MANAGER);
+}
+
+/**
+ * @tc.name: ReportEventToRSS_001
+ * @tc.desc: test ReportEventToRSS
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, ReportEventToRSS_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ReportEventToRSS_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AbilityInfo abilityInfo;
+    std::string temp = "";
+    std::shared_ptr<ApplicationInfo> info = std::make_shared<ApplicationInfo>();
+    auto appRecord = std::make_shared<AppRunningRecord>(info, 0, temp);
+    appMgrServiceInner->taskHandler_ = nullptr;
+    appMgrServiceInner->ReportEventToRSS(abilityInfo, appRecord);
+    EXPECT_EQ(appRecord->GetPid(), 0);
+    appMgrServiceInner->ReportEventToRSS(abilityInfo, nullptr);
+
+    appRecord->priorityObject_->SetPid(FUN_TEST_PID);
+    appMgrServiceInner->ReportEventToRSS(abilityInfo, nullptr);
+    EXPECT_EQ(appRecord->GetPid(), FUN_TEST_PID);
+    TAG_LOGI(AAFwkTag::TEST, "ReportEventToRSS_001 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -59,6 +59,7 @@ const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
 const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string URI_PERMISSION_TABLE_NAME = "uri_permission";
+constexpr pid_t pid_ = 2000;
 }
 class AbilityRecordTest : public testing::TestWithParam<OHOS::AAFwk::AbilityState> {
 public:
@@ -3087,6 +3088,29 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_NotifyAbilityRequestSuccess_002, TestS
     std::string requestId = "1234567890";
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     abilityRecord_->NotifyAbilityRequestSuccess(requestId, element);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ProcessForegroundAbility
+ * SubFunction: ProcessForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ProcessForegroundAbility
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_ProcessForegroundAbility_002, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    uint32_t tokenId = 0;
+    abilityRecord_->isReady_ = true;
+    abilityRecord_->currentState_ = AbilityState::BACKGROUND;
+    abilityRecord_->pid_ = pid_;
+    abilityRecord_->ProcessForegroundAbility(tokenId);
+    EXPECT_EQ(abilityRecord_->lifeCycleStateInfo_.sceneFlagBak, 0);
+
+    abilityRecord_->pid_ = -1;
+    abilityRecord_->ProcessForegroundAbility(tokenId);
+    EXPECT_EQ(abilityRecord_->lifeCycleStateInfo_.sceneFlagBak, 0);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

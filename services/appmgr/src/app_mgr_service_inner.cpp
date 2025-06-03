@@ -709,6 +709,25 @@ int32_t AppMgrServiceInner::ProcessKia(bool isKia, std::shared_ptr<AppRunningRec
     return ERR_OK;
 }
 
+void AppMgrServiceInner::ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
+    const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (taskHandler_ == nullptr || appRecord == nullptr || appRecord->GetPid() <= 0) {
+        return;
+    }
+
+    std::string reason = AAFwk::ResSchedUtil::GetInstance().GetThawReasonByAbilityType(abilityInfo);
+    const int32_t uid = abilityInfo.applicationInfo.uid;
+    const std::string bundleName = abilityInfo.applicationInfo.bundleName;
+    const int32_t pid = appRecord->GetPid();
+    const int32_t callerPid = appRecord->GetCallerPid();
+    TAG_LOGD(AAFwkTag::APPMGR, "%{public}d_%{public}s_%{public}d reason=%{public}s callerPid=%{public}d", uid,
+        bundleName.c_str(), pid, reason.c_str(), callerPid);
+    taskHandler_->SubmitTask([uid, bundleName, reason, pid, callerPid]() {
+        AAFwk::ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, reason, pid, callerPid);
+    });
+}
+
 void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
     std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam)
 {
@@ -831,6 +850,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         }
     } else {
         TAG_LOGI(AAFwkTag::APPMGR, "have apprecord");
+        ReportEventToRSS(*abilityInfo, appRecord);
         appRunningManager_->UpdateConfigurationDelayed(appRecord);
         if (!isProcCache) {
             SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::MULTI_INSTANCE, AppStartReason::NONE);
