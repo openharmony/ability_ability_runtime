@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hilog_tag_wrapper.h"
 #include "kiosk_status.h"
 #include "string_ex.h"
 
@@ -30,6 +31,7 @@ KioskStatus *KioskStatus::Unmarshalling(Parcel &parcel)
 {
     KioskStatus *info = new KioskStatus();
     if (!info->ReadFromParcel(parcel)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ReadFromParcel failed");
         delete info;
         info = nullptr;
     }
@@ -39,14 +41,17 @@ KioskStatus *KioskStatus::Unmarshalling(Parcel &parcel)
 bool KioskStatus::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteBool(isKioskMode_)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write isKioskMode_ failed");
         return false;
     }
 
     if (!parcel.WriteString16(Str8ToStr16(kioskBundleName_))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write kioskBundleName_ failed");
         return false;
     }
 
     if (!parcel.WriteInt32(kioskBundleUid_)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write kioskBundleUid_ failed");
         return false;
     }
     return true;

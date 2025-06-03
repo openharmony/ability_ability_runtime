@@ -6595,7 +6595,8 @@ int32_t AbilityManagerProxy::UpdateKioskApplicationList(const std::vector<std::s
     MessageOption option;
 
     if (!WriteInterfaceToken(data)) {
-        return INNER_ERR;
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
     }
 
     if (!data.WriteStringVector(appList)) {
@@ -6626,12 +6627,12 @@ int32_t AbilityManagerProxy::EnterKioskMode(sptr<IRemoteObject> callerToken)
 
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
-        return INNER_ERR;
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
     }
 
     if (!data.WriteRemoteObject(callerToken)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
-        return ERR_INVALID_VALUE;
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+        return ERR_WRITE_CALLER_TOKEN_FAILED;
     }
 
     auto error = SendRequest(AbilityManagerInterfaceCode::ENTER_KIOSK_MODE, data, reply, option);
@@ -6656,12 +6657,12 @@ int32_t AbilityManagerProxy::ExitKioskMode(sptr<IRemoteObject> callerToken)
 
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
-        return INNER_ERR;
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
     }
 
     if (!data.WriteRemoteObject(callerToken)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
-        return ERR_INVALID_VALUE;
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+        return ERR_WRITE_CALLER_TOKEN_FAILED;
     }
 
     auto error = SendRequest(AbilityManagerInterfaceCode::EXIT_KIOSK_MODE, data, reply, option);
@@ -6680,7 +6681,8 @@ int32_t AbilityManagerProxy::GetKioskStatus(KioskStatus &kioskStatus)
     MessageOption option;
 
     if (!WriteInterfaceToken(data)) {
-        return INNER_ERR;
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
     }
 
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_KIOSK_INFO, data, reply, option);

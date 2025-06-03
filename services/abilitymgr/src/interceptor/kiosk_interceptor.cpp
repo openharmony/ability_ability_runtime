@@ -14,13 +14,21 @@
  */
 
 #include "interceptor/kiosk_interceptor.h"
+#include "kiosk_manager.h"
 
 namespace OHOS {
 namespace AAFwk {
 int KioskInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     auto bundleName = param.want.GetElement().GetBundleName();
-    return doProcess_(bundleName);
+    auto kioskManager = KioskManager::GetInstance();
+    if (!kioskManager || !kioskManager->IsInKioskMode()) {
+        return ERR_OK;
+    }
+    if (!kioskManager->IsInWhiteList(bundleName)) {
+        return ERR_KIOSK_MODE_NOT_IN_WHITELIST;
+    }
+    return ERR_OK;
 }
 } // namespace AAFwk
 } // namespace OHOS

@@ -16,38 +16,48 @@
 #ifndef OHOS_ABILITY_RUNTIME_KIOSK_MANAGER_H
 #define OHOS_ABILITY_RUNTIME_KIOSK_MANAGER_H
 
-#include <memory>
 #include <mutex>
 #include <string>
 #include <unordered_set>
 #include <vector>
+
+#include "app_scheduler.h"
 #include "interceptor/ability_interceptor_executer.h"
 #include "kiosk_status.h"
+#include "nocopyable.h"
 
 namespace OHOS {
 namespace AAFwk {
-class KioskManager : public std::enable_shared_from_this<KioskManager> {
+class KioskManager {
 public:
-    int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList, std::function<void()> callback);
-    int32_t EnterKioskMode(int32_t uid, const std::string &bundleName, std::function<void()> callback);
-    int32_t ExitKioskMode(const std::string &bundleName, std::function<void()> callback);
+    static std::shared_ptr<KioskManager> GetInstance();
+    int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList);
+    int32_t EnterKioskMode(sptr<IRemoteObject> callerToken);
+    int32_t ExitKioskMode(sptr<IRemoteObject> callerToken);
     int32_t GetKioskStatus(KioskStatus &kioskStatus);
     bool IsInKioskMode();
     bool IsInWhiteList(const std::string &bundleName);
-    void OnAppStop(const std::string &bundleName, std::function<void()> callback);
+    void OnAppStop(const AppInfo &info);
 
 private:
-    int32_t UpdateKioskApplicationListInner(const std::vector<std::string> &appList, std::function<void()> callback);
-    int32_t EnterKioskModeInner(int32_t uid, const std::string &bundleName, std::function<void()> callback);
-    int32_t ExitKioskModeInner(const std::string &bundleName, std::function<void()> callback);
-    int32_t GetKioskStatusInner(KioskStatus &kioskStatus);
+    KioskManager() = default;
+    DISALLOW_COPY_AND_MOVE(KioskManager);
+    int32_t ExitKioskModeInner(const std::string &bundleName);
     bool IsInKioskModeInner();
     void notifyKioskModeChanged(bool isInKioskMode);
     bool IsInWhiteListInner(const std::string &bundleName);
+    std::function<void()> GetEnterKioskModeCallback();
+    std::function<void()> GetExitKioskModeCallback();
+    void AddKioskInterceptor();
+    void RemoveKioskInterceptor();
+    bool CheckCallerIsForeground(sptr<IRemoteObject> callerToken);
+    bool CheckKioskPermission();
 
-    std::mutex mutex_;
-    std::unordered_set<std::string> whiteList_;
+    std::unordered_set<std::string> whitelist_;
     KioskStatus kioskStatus_;
+    static std::once_flag singletonFlag_;
+    static std::shared_ptr<KioskManager> instance_;
+    std::mutex kioskManagermutex_;
 };
 } // namespace AAFwk
 } // namespace OHOS

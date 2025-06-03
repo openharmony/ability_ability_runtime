@@ -2202,40 +2202,21 @@ public:
         return 0;
     }
 
-    /**
-     * Update the list of applications allowed in kiosk mode.
-     * @param appList, the vector of bundle names for applications allowed in kiosk mode.
-     * @return Returns ERR_OK on success, others on failure.
-     */
     virtual int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList)
     {
         return 0;
     }
 
-    /**
-     * Enter Kiosk mode
-     * list.
-     * @return Returns ERR_OK on success, others on failure.
-     */
     virtual int32_t EnterKioskMode(sptr<IRemoteObject> callerToken)
     {
         return 0;
     }
 
-    /**
-     * Exit Kiosk mode
-     * @return Returns ERR_OK on success, others on failure.
-     */
     virtual int32_t ExitKioskMode(sptr<IRemoteObject> callerToken)
     {
         return 0;
     }
 
-    /**
-     * Get current Kiosk mode information.
-     * @param kioskStatus, the structure to store Kiosk mode details.
-     * @return Returns ERR_OK on success, others on failure.
-     */
     virtual int32_t GetKioskStatus(AAFwk::KioskStatus &kioskStatus)
     {
         return 0;
