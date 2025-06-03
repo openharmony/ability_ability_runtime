@@ -1154,7 +1154,7 @@ void JsUIAbility::ExecuteInsightIntentBackground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGI(AAFwkTag::UIABILITY, "executeInsightIntentBackground");
     if (executeParam == nullptr) {
         TAG_LOGW(AAFwkTag::UIABILITY, "null executeParam");
         InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);

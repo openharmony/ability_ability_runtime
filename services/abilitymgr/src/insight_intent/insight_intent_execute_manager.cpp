@@ -137,7 +137,7 @@ int32_t InsightIntentExecuteManager::AddRecord(uint64_t key, const sptr<IRemoteO
         // save the latest INSIGHT_INTENT_EXECUTE_RECORDS_MAX_SIZE records
         records_.erase(intentId - INSIGHT_INTENT_EXECUTE_RECORDS_MAX_SIZE);
     }
-    TAG_LOGD(AAFwkTag::INTENT, "init done, records_ size: %{public}zu", records_.size());
+    TAG_LOGI(AAFwkTag::INTENT, "init done, records_ size: %{public}zu", records_.size());
     return ERR_OK;
 }
 
@@ -145,12 +145,16 @@ int32_t InsightIntentExecuteManager::RemoveExecuteIntent(uint64_t intentId)
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
     records_.erase(intentId);
+    TAG_LOGI(AAFwkTag::INTENT, "remove intentId: %{public}" PRIu64 ", records_ size: %{public}zu",
+        intentId, records_.size());
     return ERR_OK;
 }
 
 int32_t InsightIntentExecuteManager::ExecuteIntentDone(uint64_t intentId, int32_t resultCode,
     const AppExecFwk::InsightIntentExecuteResult &result)
 {
+    TAG_LOGI(AAFwkTag::INTENT, "execute start, intentId: %{public}" PRIu64 ", records_ size: %{public}zu",
+        intentId, records_.size());
     std::lock_guard<ffrt::mutex> lock(mutex_);
     auto findResult = records_.find(intentId);
     if (findResult == records_.end()) {
@@ -172,7 +176,8 @@ int32_t InsightIntentExecuteManager::ExecuteIntentDone(uint64_t intentId, int32_
     record->state = InsightIntentExecuteState::EXECUTE_DONE;
     sptr<IInsightIntentExecuteCallback> remoteCallback = iface_cast<IInsightIntentExecuteCallback>(record->callerToken);
     if (remoteCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "intentExecuteCallback empty");
+        TAG_LOGE(AAFwkTag::INTENT, "intentExecuteCallback empty,"
+            " intentId: %{public}" PRIu64 ", records_ size: %{public}zu", intentId, records_.size());
         return ERR_INVALID_VALUE;
     }
     remoteCallback->OnExecuteDone(record->key, resultCode, result);
@@ -180,7 +185,8 @@ int32_t InsightIntentExecuteManager::ExecuteIntentDone(uint64_t intentId, int32_
         record->callerToken->RemoveDeathRecipient(record->deathRecipient);
         record->callerToken = nullptr;
     }
-    TAG_LOGD(AAFwkTag::INTENT, "execute done, records_ size: %{public}zu", records_.size());
+    TAG_LOGI(AAFwkTag::INTENT, "execute done, intentId: %{public}" PRIu64 ", records_ size: %{public}zu",
+        intentId, records_.size());
     return ERR_OK;
 }
 
