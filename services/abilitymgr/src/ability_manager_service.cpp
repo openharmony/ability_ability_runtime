@@ -6817,7 +6817,7 @@ int32_t AbilityManagerService::GetUserId() const
     }
     return U0_USER_ID;
 }
-
+#ifndef DISABLE_LAUNCHER
 int AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
@@ -6877,7 +6877,7 @@ int AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBo
     /* note: OOBE APP need disable itself, otherwise, it will be started when restart system everytime */
     return StartAbility(abilityWant, userId, DEFAULT_INVAL_VALUE);
 }
-
+#endif
 int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestCode, AbilityRequest &request,
     const sptr<IRemoteObject> &callerToken, int32_t userId)
 {
@@ -8968,11 +8968,15 @@ int AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr<
         ConnectServices();
         StartUserApps();
     }
+#ifndef DISABLE_LAUNCHER
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
     auto ret = StartHighestPriorityAbility(userId, isBoot, isAppRecovery);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartHighestPriorityAbility failed: %{public}d", ret);
     }
+#else
+    auto ret = ERR_OK;
+#endif
     if (callback) {
         callback->OnStartUserDone(userId, ret);
     }

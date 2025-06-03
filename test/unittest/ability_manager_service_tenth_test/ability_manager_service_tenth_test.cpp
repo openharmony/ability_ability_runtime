@@ -575,7 +575,7 @@ HWTEST_F(AbilityManagerServiceTenhtTest, ScheduleCommandAbilityWindowDone_004, T
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest ScheduleCommandAbilityWindowDone_004 end");
 }
-
+#ifndef DISABLE_LAUNCHER
 /*
  * Feature: AbilityManagerService
  * Name: StartHighestPriorityAbility_001
@@ -594,7 +594,7 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartHighestPriorityAbility_001, TestSi
     EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartHighestPriorityAbility_001 end");
 }
-
+#endif
 /*
  * Feature: AbilityManagerService
  * Name: DelegatorDoAbilityBackground_001

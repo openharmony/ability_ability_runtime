@@ -2157,11 +2157,13 @@ private:
      */
     void InitU0User();
     void InitStartAbilityChain();
+#ifndef DISABLE_LAUNCHER
     /**
      * start highest priority ability.
      *
      */
     int StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery = false);
+#endif
     /**
      * connect bms.
      *
