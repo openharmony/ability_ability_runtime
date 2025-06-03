@@ -2027,6 +2027,8 @@ private:
         const std::shared_ptr<AppRunningRecord> &appRecord, const UIExtensionProcessBindInfo &bindInfo);
     bool WrapBindInfo(std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AppRunningRecord> &appRecord,
         UIExtensionProcessBindInfo &bindInfo);
+    void ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
+        const std::shared_ptr<AppRunningRecord> &appRecord);
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
     std::atomic<int32_t> willKillPidsNum_ = 0;
