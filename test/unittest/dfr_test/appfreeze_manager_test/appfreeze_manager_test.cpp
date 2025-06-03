@@ -23,6 +23,9 @@
 #include "cpp/condition_variable.h"
 #include "fault_data.h"
 #include "freeze_util.h"
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+#include "hitrace/hitracechain.h"
+#endif
 
 using namespace testing;
 using namespace testing::ext;
@@ -278,5 +281,42 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CatchStack_001, TestSize.Lev
     appfreezeManager->DeleteStack(pid);
     EXPECT_TRUE(appfreezeManager->catchStackMap_.empty());
 }
+
+/**
+ * @tc.number: AppfreezeManagerTest_ParseDecToHex_001
+ * @tc.desc: add testcase codecoverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_ParseDecToHex_001, TestSize.Level1)
+{
+    std::string ret = appfreezeManager->ParseDecToHex(1234); // test value
+    EXPECT_EQ(ret, "4d2");
+}
+
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+/**
+ * @tc.number: AppfreezeManagerTest_GetHitraceId_001
+ * @tc.desc: add testcase codecoverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetHitraceId_001, TestSize.Level1)
+{
+    AppfreezeManager::HitraceInfo info;
+    bool ret = appfreezeManager->GetHitraceId(info);
+    EXPECT_TRUE(!ret);
+    OHOS::HiviewDFX::HiTraceChain::Begin("AppfreezeManagerTest_GetHitraceId_001", 0);
+    appfreezeManager->GetHitraceId(info);
+    FaultData faultData;
+    faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
+    AppfreezeManager::AppInfo appInfo = {
+        .pid = getpid(),
+        .uid = getuid(),
+        .bundleName = "AppfreezeManagerTest_GetHitraceId_001",
+        .processName = "AppfreezeManagerTest_GetHitraceId_001",
+    };
+    int result = appfreezeManager->NotifyANR(faultData, appInfo, "test", "test");
+    EXPECT_EQ(result, 0);
+}
+#endif
 }  // namespace AppExecFwk
 }  // namespace OHOS
