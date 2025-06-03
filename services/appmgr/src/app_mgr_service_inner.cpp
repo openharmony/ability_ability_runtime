@@ -598,12 +598,10 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
 
     std::string processName;
     MakeProcessName(abilityInfo, appInfo, hapModuleInfo, request.appIndex, specifiedProcessFlag, processName, false);
+    bool isExtensionSandBox = IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
     TAG_LOGD(AAFwkTag::APPMGR, "HandlePreloadApplication processName = %{public}s", processName.c_str());
 
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handlePreloadApplication fail");
-        return;
-    }
+    CHECK_POINTER_AND_RETURN_LOG(appRunningManager_, "handlePreloadApplication fail");
     std::shared_ptr<AppRunningRecord> appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
         processName, appInfo->uid, bundleInfo, specifiedProcessFlag);
     if (appRecord) {
@@ -626,6 +624,7 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
         appRecord->SetPreloadMode(request.preloadMode);
         appRecord->SetNeedPreloadModule(request.preloadMode != PreloadMode::PRESS_DOWN);
         appRecord->SetNeedLimitPrio(request.preloadMode != PreloadMode::PRESS_DOWN);
+        appRecord->SetExtensionSandBoxFlag(isExtensionSandBox);
         LoadAbilityNoAppRecord(appRecord, false, appInfo, abilityInfo, processName, specifiedProcessFlag, bundleInfo,
             hapModuleInfo, want, appExistFlag, true, request.preloadMode);
         appRecord->SetNeedLimitPrio(false);
@@ -748,6 +747,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     bool isFileUri = false;
     std::string customProcessFlag = loadParam->customProcessFlag;
     bool isProcCache = false;
+    bool isExtensionSandBox = false;
     if (want != nullptr) {
         (void)AbilityRuntime::StartupUtil::GetAppIndex(*want, appIndex);
         callerKey = want->GetStringParam(Want::PARAMS_REAL_CALLER_KEY);
@@ -782,6 +782,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         }
         MakeProcessName(abilityInfo, appInfo, hapModuleInfo, appIndex, specifiedProcessFlag,
             processName, loadParam->isCallerSetProcess);
+        isExtensionSandBox = IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
         TAG_LOGI(AAFwkTag::APPMGR, "%{public}s name:%{public}s-%{public}s processName = %{public}s",
             __func__, abilityInfo->bundleName.c_str(), abilityInfo->name.c_str(), processName.c_str());
         if (MakeKiaProcess(want, isKia, watermarkBusinessName, isWatermarkEnabled, isFileUri, processName) != ERR_OK) {
@@ -822,6 +823,9 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         }
         appRecord = CreateAppRunningRecord(loadParam, appInfo, abilityInfo,
             processName, bundleInfo, hapModuleInfo, want, isKia);
+        if (appRecord != nullptr) {
+            appRecord->SetExtensionSandBoxFlag(isExtensionSandBox);
+        }
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
             specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false,
             AppExecFwk::PreloadMode::PRESS_DOWN, loadParam->token, customProcessFlag);
@@ -5274,6 +5278,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
     std::string processName;
     auto abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
     MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, "", processName, false);
+    bool isExtensionSandBox = IsIsolateExtensionSandBox(abilityInfoPtr, hapModuleInfo);
 
     std::vector<HapModuleInfo> hapModules;
     hapModules.emplace_back(hapModuleInfo);
@@ -5326,6 +5331,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
         appRecord->SetEventHandler(eventHandler_);
         appRecord->SendEventForSpecifiedAbility();
         appRecord->SetAppIndex(appIndex);
+        appRecord->SetExtensionSandBoxFlag(isExtensionSandBox);
         uint32_t startFlags = AppspawnUtil::BuildStartFlags(want, abilityInfo);
         StartProcess(appInfo->name, processName, startFlags, appRecord, appInfo->uid, bundleInfo, appInfo->bundleName,
             appIndex, appExistFlag);
@@ -9497,6 +9503,28 @@ bool AppMgrServiceInner::IsProcessContainsOnlyUIAbility(const pid_t pid)
         }
     }
     return true;
+}
+
+bool AppMgrServiceInner::IsIsolateExtensionSandBox(const std::shared_ptr<AbilityInfo> &abilityInfo,
+    const HapModuleInfo &hapModuleInfo) const
+{
+    if (abilityInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo nullptr");
+        return false;
+    }
+    auto type = abilityInfo->type;
+    auto extensionType = abilityInfo->extensionAbilityType;
+    if (type != AppExecFwk::AbilityType::EXTENSION ||
+        extensionType == AppExecFwk::ExtensionAbilityType::DATASHARE ||
+        extensionType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+        return false;
+    }
+    for (const auto& extensionInfo: hapModuleInfo.extensionInfos) {
+        if (extensionInfo.name == abilityInfo->name) {
+            return extensionInfo.needCreateSandbox;
+        }
+    }
+    return false;
 }
 
 bool AppMgrServiceInner::IsProcessAttached(sptr<IRemoteObject> token) const

@@ -110,6 +110,16 @@ public:
     bool IsAppExist(uint32_t accessTokenId);
 
     /**
+     * Check whether the running appRunningRecord matches the input process name.
+     *
+     * @param appRecord, the ptr of the AppRunningRecord.
+     * @param processName, the input process name.
+     * @return, Return true if matches.
+     */
+    static bool CheckAppProcessNameIsSame(const std::shared_ptr<AppRunningRecord> &appRecord,
+        const std::string &processName);
+
+    /**
      * CheckAppRunningRecordIsExistByUid, check app exist when concurrent.
      *
      * @param uid, the process uid.
