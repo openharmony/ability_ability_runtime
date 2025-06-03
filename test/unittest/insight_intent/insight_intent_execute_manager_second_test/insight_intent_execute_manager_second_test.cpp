@@ -596,5 +596,302 @@ HWTEST_F(InsightIntentExecuteManagerSecondTest, GetAllIntentExemptionInfo_0100, 
     EXPECT_EQ(result.size(), 2);
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
+
+/**
+ * @tc.name: UpdateFuncDecoratorParams_0100
+ * @tc.desc: UpdateFuncDecoratorParams_0100
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdateFuncDecoratorParams_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = nullptr;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
+    // other member has default value.
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentInfo ententInfo;
+    Want want;
+    auto ret = InsightIntentExecuteManager::UpdateFuncDecoratorParams(paramPtr, ententInfo, want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: UpdateFuncDecoratorParams_0200
+ * @tc.desc: UpdateFuncDecoratorParams_0200
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdateFuncDecoratorParams_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = nullptr;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentInfo ententInfo;;
+    Want want;
+    auto ret = InsightIntentExecuteManager::UpdateFuncDecoratorParams(paramPtr, ententInfo, want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: UpdateFuncDecoratorParams_0300
+ * @tc.desc: UpdateFuncDecoratorParams_0300
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdateFuncDecoratorParams_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = nullptr;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentInfo ententInfo;
+    ententInfo.decoratorClass = "testClass";
+    ententInfo.genericInfo.get<AbilityRuntime::InsightIntentFunctionInfo>().functionName = "";
+    Want want;
+    auto ret = InsightIntentExecuteManager::UpdateFuncDecoratorParams(paramPtr, ententInfo, want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: UpdateFuncDecoratorParams_0400
+ * @tc.desc: UpdateFuncDecoratorParams_0400
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdateFuncDecoratorParams_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = nullptr;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentInfo ententInfo;
+    ententInfo.decoratorClass = "";
+    ententInfo.genericInfo.get<AbilityRuntime::InsightIntentFunctionInfo>().functionName = "testFunctionName";
+    Want want;
+    auto ret = InsightIntentExecuteManager::UpdateFuncDecoratorParams(paramPtr, ententInfo, want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: UpdateFuncDecoratorParams_0500
+ * @tc.desc: UpdateFuncDecoratorParams_0500
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdateFuncDecoratorParams_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = nullptr;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentInfo ententInfo;
+    ententInfo.decoratorClass = "testClass";
+    ententInfo.genericInfo.get<AbilityRuntime::InsightIntentFunctionInfo>().functionName = "testFunctionName";
+    Want want;
+    auto ret = InsightIntentExecuteManager::UpdateFuncDecoratorParams(paramPtr, ententInfo, want);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: GetMainElementName_0100
+ * @tc.desc: GetMainElementName_0100
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, GetMainElementName_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "";
+    param.insightIntentParam_ = nullptr;
+    param.displayId_ = 2;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    paramPtr->moduleName_ = "test.entry";
+    std::string retString = InsightIntentExecuteManager::GetMainElementName(paramPtr);
+    EXPECT_EQ(retString, "");
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: UpdatePageDecoratorParams_0100
+ * @tc.desc: UpdatePageDecoratorParams_0100
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdatePageDecoratorParams_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = nullptr;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
+    // other member has default value.
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    Want want;
+    auto ret = InsightIntentExecuteManager::UpdatePageDecoratorParams(paramPtr, intentInfo, want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: UpdatePageDecoratorParams_0200
+ * @tc.desc: UpdatePageDecoratorParams_0200
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdatePageDecoratorParams_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = nullptr;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
+    // other member has default value.
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    Want want;
+    auto ret = InsightIntentExecuteManager::UpdatePageDecoratorParams(paramPtr, intentInfo, want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: UpdatePageDecoratorParams_0300
+ * @tc.desc: UpdatePageDecoratorParams_0300
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdatePageDecoratorParams_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = nullptr;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
+    // other member has default value.
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    intentInfo.genericInfo.get<AbilityRuntime::InsightIntentPageInfo>().pagePath = "testPagePath";
+    Want want;
+    auto ret = InsightIntentExecuteManager::UpdatePageDecoratorParams(paramPtr, intentInfo, want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: UpdatePageDecoratorParams_0400
+ * @tc.desc: UpdatePageDecoratorParams_0400
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdatePageDecoratorParams_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = nullptr;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
+    // other member has default value.
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    intentInfo.genericInfo.get<AbilityRuntime::InsightIntentPageInfo>().pagePath = "test.abilityName";
+    intentInfo.genericInfo.get<AbilityRuntime::InsightIntentPageInfo>().uiAbility = "";
+    Want want;
+    auto ret = InsightIntentExecuteManager::UpdatePageDecoratorParams(paramPtr, intentInfo, want);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: UpdatePageDecoratorParams_0500
+ * @tc.desc: UpdatePageDecoratorParams_0500
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdatePageDecoratorParams_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    AppExecFwk::InsightIntentExecuteParam param;
+    param.bundleName_ = "test.bundleName";
+    param.moduleName_ = "test.entry";
+    param.abilityName_ = "test.abilityName";
+    param.insightIntentName_ = "PlayMusic";
+    param.insightIntentParam_ = nullptr;
+    param.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
+    // other member has default value.
+    auto paramPtr = std::make_shared<AppExecFwk::InsightIntentExecuteParam>(param);
+    AbilityRuntime::ExtractInsightIntentInfo intentInfo;
+    intentInfo.genericInfo.get<AbilityRuntime::InsightIntentPageInfo>().pagePath = "test.abilityName";
+    intentInfo.genericInfo.get<AbilityRuntime::InsightIntentPageInfo>().uiAbility = "test.abilityName";
+    Want want;
+    auto ret = InsightIntentExecuteManager::UpdatePageDecoratorParams(paramPtr, intentInfo, want);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: UpdateEntryDecoratorParams_0100
+ * @tc.desc: UpdateEntryDecoratorParams_0100
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InsightIntentExecuteManagerSecondTest, UpdateEntryDecoratorParams_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Want want;
+    auto mode = AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND;
+    auto ret = InsightIntentExecuteManager::UpdateEntryDecoratorParams(want, mode);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
 } // namespace AAFwk
 } // namespace OHOS

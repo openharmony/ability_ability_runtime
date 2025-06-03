@@ -518,5 +518,110 @@ HWTEST_F(AppRunningManagerThirdTest, AppRunningManager_UpdateConfigurationByBund
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_UpdateConfigurationByBundleName_0200 end");
 }
+
+/**
+ * @tc.name: AppRunningManager_GetAppRunningRecordByChildRecordPid_0100
+ * @tc.desc: Test GetAppRunningRecordByChildRecordPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerThirdTest, AppRunningManager_GetAppRunningRecordByChildRecordPid_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_GetAppRunningRecordByChildRecordPid_0100 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    pid_t pid = PID;
+    auto result = appRunningManager->GetAppRunningRecordByChildRecordPid(pid);
+    EXPECT_EQ(result, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_GetAppRunningRecordByChildRecordPid_0100 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_GetAppRunningRecordByChildRecordPid_0200
+ * @tc.desc: Test GetAppRunningRecordByChildRecordPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerThirdTest, AppRunningManager_GetAppRunningRecordByChildRecordPid_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_GetAppRunningRecordByChildRecordPid_0200 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo_, USR_ID_100, PROCESS_NAME);
+    auto appRunningRecordChild = std::make_shared<AppRunningRecord>(appInfo_, USR_ID_100, PROCESS_NAME);
+    appRunningRecord->childAppRecordMap_[PID] = appRunningRecordChild;
+    EXPECT_NE(appRunningRecord, nullptr);
+    appRunningManager->appRunningRecordMap_.emplace(PID, appRunningRecord);
+    pid_t pid = PID;
+    auto ret = appRunningManager->GetAppRunningRecordByChildRecordPid(pid);
+    EXPECT_NE(ret, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_GetAppRunningRecordByChildRecordPid_0200 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_AddUIExtensionBindItem_0100
+ * @tc.desc: Test AddUIExtensionBindItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerThirdTest, AppRunningManager_AddUIExtensionBindItem_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_AddUIExtensionBindItem_0100 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    int32_t bindId = 0;
+    UIExtensionProcessBindInfo bindInfo;
+    auto ret = appRunningManager->AddUIExtensionBindItem(bindId, bindInfo);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_AddUIExtensionBindItem_0100 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_RemoveUIExtensionBindItemById_0100
+ * @tc.desc: Test RemoveUIExtensionBindItemById
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerThirdTest, AppRunningManager_RemoveUIExtensionBindItemById_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_RemoveUIExtensionBindItemById_0100 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    int32_t bindId = 0;
+    auto ret = appRunningManager->RemoveUIExtensionBindItemById(bindId);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_RemoveUIExtensionBindItemById_0100 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_QueryUIExtensionBindItemById_0100
+ * @tc.desc: Test QueryUIExtensionBindItemById
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerThirdTest, AppRunningManager_QueryUIExtensionBindItemById_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_QueryUIExtensionBindItemById_0100 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    int32_t bindId = 0;
+    UIExtensionProcessBindInfo bindInfo;
+    appRunningManager->AddUIExtensionBindItem(bindId, bindInfo);
+    auto ret = appRunningManager->QueryUIExtensionBindItemById(bindId, bindInfo);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_QueryUIExtensionBindItemById_0100 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_QueryUIExtensionBindItemById_0200
+ * @tc.desc: Test QueryUIExtensionBindItemById
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerThirdTest, AppRunningManager_QueryUIExtensionBindItemById_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_QueryUIExtensionBindItemById_0100 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    int32_t bindId = 0;
+    UIExtensionProcessBindInfo bindInfo;
+    auto result = appRunningManager->QueryUIExtensionBindItemById(bindId, bindInfo);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_QueryUIExtensionBindItemById_0200 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS
