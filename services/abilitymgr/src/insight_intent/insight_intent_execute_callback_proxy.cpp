@@ -22,7 +22,7 @@ namespace AAFwk {
 void InsightIntentExecuteCallbackProxy::OnExecuteDone(uint64_t key, int32_t resultCode,
     const AppExecFwk::InsightIntentExecuteResult &executeResult)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "called");
+    TAG_LOGI(AAFwkTag::INTENT, "called");
     MessageParcel data;
     if (!data.WriteInterfaceToken(IInsightIntentExecuteCallback::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::INTENT, "interface token write failed");

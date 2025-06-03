@@ -298,6 +298,34 @@ ohos_unittest("aa_command_attach_test") {
   ]
 }
 
+ohos_unittest("aa_command_send_memory_level_test") {
+  module_out_path = module_output_path
+
+  sources = [ "aa_command_send_memory_level_test.cpp" ]
+  sources += tools_aa_mock_sources
+
+  configs = [ ":tools_aa_config_mock" ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  deps = [
+    "${ability_runtime_path}/tools/aa:tools_aa_source_set",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
+  ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "bundle_framework:appexecfwk_base",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+  ]
+}
+
 print("accessibility_enable = ", accessibility_enable)
 if (accessibility_enable) {
   ohos_unittest("accessibility_ability_utils_test") {
@@ -343,6 +371,7 @@ group("unittest") {
     ":aa_command_stop_service_test",
     ":aa_command_test",
     ":aa_command_test_test",
+    ":aa_command_send_memory_level_test",
   ]
   if (accessibility_enable) {
     deps += [ ":accessibility_ability_utils_test" ]

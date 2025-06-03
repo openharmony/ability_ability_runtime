@@ -35,6 +35,7 @@
 #include "ability_manager_event_subscriber.h"
 #include "ability_manager_stub.h"
 #include "ability_keep_alive_service.h"
+#include "ability_start_with_wait_observer_utils.h"
 #include "ams_configuration_parameter.h"
 #include "app_debug_listener_interface.h"
 #include "app_exit_reason_helper.h"
@@ -842,10 +843,6 @@ public:
         return taskHandler_;
     }
 
-    std::shared_ptr<TaskHandlerWrap> GetDelayClearReasonHandler() const
-    {
-        return delayClearReasonHandler_;
-    }
     /**
      * GetEventHandler, get the ability manager service's handler.
      *
@@ -1570,6 +1567,12 @@ public:
     virtual int32_t UnregisterIAbilityManagerCollaborator(int32_t type) override;
 
     /**
+     * @brief get ability manager collaborator.
+     * @return Returns object pointer on success, others on null.
+     */
+    virtual sptr<IAbilityManagerCollaborator> GetAbilityManagerCollaborator() override;
+
+    /**
      * @brief Get collaborator.
      * @param type collaborator type.
      * @return nullptr or IAbilityManagerCollaborator stpr.
@@ -1950,6 +1953,14 @@ public:
     virtual int32_t QueryAtomicServiceStartupRule(sptr<IRemoteObject> callerToken,
         const std::string &appId, const std::string &startTime, AtomicServiceStartupRule &rule) override;
 
+    /**
+     * Restart atomic service.
+     *
+     * @param callerToken, The caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RestartSelfAtomicService(sptr<IRemoteObject> callerToken) override;
+
     int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
         bool isPendingWantCaller, int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
         bool isCallByShortcut = false);
@@ -2022,6 +2033,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t RevokeDelegator(sptr<IRemoteObject> token) override;
+
+    virtual int32_t StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> &observer) override;
 
     /**
      * Get all insight intent infos.
@@ -2119,6 +2132,17 @@ protected:
 
     int32_t GetCollaboratorType(const std::string &codePath) const;
     int32_t KillProcessForCollaborator(int32_t collaboratorType, const std::string &bundleName, int32_t userId);
+    
+    /**
+     * Check if Caller is allowed to start AppServiceExtension(Stage).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @param isVerifyAppIdentifierAllowList, isVerifyAppIdentifierAllowList
+     * @param isFromConnect, isFromConnect
+     * @return Returns whether the caller is allowed to start AppServiceExtension.
+     */
+    int32_t CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest,
+        std::shared_ptr<AbilityRecord> targetService, bool isFromConnect);
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr, bool flag = true);
@@ -2133,11 +2157,13 @@ private:
      */
     void InitU0User();
     void InitStartAbilityChain();
+#ifndef DISABLE_LAUNCHER
     /**
      * start highest priority ability.
      *
      */
     int StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery = false);
+#endif
     /**
      * connect bms.
      *
@@ -2535,11 +2561,19 @@ private:
 
     void WaitBootAnimationStart();
 
-    int32_t SignRestartAppFlag(int32_t userId, int32_t uid, const std::string &instanceKey,
-        AppExecFwk::MultiAppModeType type, bool isAppRecovery = false);
+    struct SignRestartAppFlagParam {
+        int32_t userId;
+        int32_t uid;
+        std::string instanceKey;
+        AppExecFwk::MultiAppModeType type;
+        bool isAppRecovery = false;
+        bool isAtomicService = false;
+    };
+    int32_t SignRestartAppFlag(const SignRestartAppFlagParam &param);
     int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex, int32_t userId);
 
     int32_t CheckDebugAssertPermission();
+    bool VerifySameAppOrAppIdentifierAllowListPermission(const AbilityRequest &abilityRequest);
     std::shared_ptr<AbilityDebugDeal> ConnectInitAbilityDebugDeal();
 
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,
@@ -2640,7 +2674,6 @@ private:
 
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
-    std::shared_ptr<TaskHandlerWrap> delayClearReasonHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
     ServiceRunningState state_;
 

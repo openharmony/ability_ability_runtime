@@ -707,15 +707,35 @@ void OHOSApplication::SetConfiguration(const Configuration &config)
     }
 }
 
-void OHOSApplication::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName, std::string &flag)
+void OHOSApplication::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName,
+    std::function<void(std::string)> callback, bool &isAsync)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    TAG_LOGD(AAFwkTag::APPKIT, "ScheduleAcceptWant called");
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callback");
+        return;
+    }
     auto iter = abilityStages_.find(moduleName);
-    if (iter != abilityStages_.end()) {
-        auto abilityStage = iter->second;
-        if (abilityStage) {
-            flag = abilityStage->OnAcceptWant(want);
-        }
+    if (iter == abilityStages_.end() && iter->second == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "%{public}s is not in abilityStage", moduleName.c_str());
+        std::string flag;
+        callback(flag);
+        return;
+    }
+
+    auto *callbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Create();
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
+        std::string flag;
+        callback(flag);
+        return;
+    }
+    callbackInfo->Push(callback);
+    if (iter->second->OnAcceptWant(want, callbackInfo, isAsync).empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not exist");
+        std::string result;
+        callbackInfo->Call(result);
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Destroy(callbackInfo);
     }
 }
 
@@ -748,21 +768,38 @@ void OHOSApplication::SchedulePrepareTerminate(const std::string &moduleName,
 }
 
 void OHOSApplication::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName,
-    std::string &flag)
+    std::function<void(std::string)> callback, bool &isAsync)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "call");
+    TAG_LOGD(AAFwkTag::APPKIT, "ScheduleNewProcessRequest call");
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callback");
+        return;
+    }
+
     if (abilityStages_.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "abilityStages_ empty");
         return;
     }
     auto iter = abilityStages_.find(moduleName);
-    if (iter == abilityStages_.end()) {
+    if (iter == abilityStages_.end() || iter->second == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "%{public}s not in abilityStage", moduleName.c_str());
+        std::string flag;
+        callback(flag);
         return;
     }
-    auto abilityStage = iter->second;
-    if (abilityStage) {
-        flag = abilityStage->OnNewProcessRequest(want);
+    auto *callbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Create();
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callbackInfo");
+        std::string flag;
+        callback(flag);
+        return;
+    }
+    callbackInfo->Push(callback);
+    if (iter->second->OnNewProcessRequest(want, callbackInfo, isAsync).empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not exist");
+        std::string result;
+        callbackInfo->Call(result);
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string>::Destroy(callbackInfo);
     }
 }
 

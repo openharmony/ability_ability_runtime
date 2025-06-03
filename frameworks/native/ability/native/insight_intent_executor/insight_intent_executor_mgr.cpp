@@ -33,9 +33,9 @@ InsightIntentExecutorMgr::~InsightIntentExecutorMgr()
 bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const InsightIntentExecutorInfo& executeInfo,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "called");
     auto executeParam = executeInfo.executeParam;
     if (callback == nullptr) {
+        TAG_LOGW(AAFwkTag::INTENT, "null callback");
         return false;
     }
     if (executeParam == nullptr || executeParam->insightIntentParam_ == nullptr) {
@@ -73,6 +73,7 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
     }
     AddInsightIntentExecutor(executeParam->insightIntentId_, intentExecutor);
 
+    TAG_LOGI(AAFwkTag::INTENT, "execute insight intent, type: %{public}hhu", type);
     bool isAsync = false;
     auto ret = intentExecutor->HandleExecuteIntent(executeParam, executeInfo.pageLoader, std::move(callback), isAsync);
     if (!ret) {

@@ -45,7 +45,9 @@ class FileMapper;
 namespace JsEnv {
 class JsEnvironment;
 class SourceMapOperator;
+struct ErrorObject;
 struct UncaughtExceptionInfo;
+using UncatchableTask = std::function<void(std::string summary, const JsEnv::ErrorObject errorObject)>;
 } // namespace JsEnv
 
 using AppLibPathMap = std::map<std::string, std::vector<std::string>>;
@@ -111,6 +113,7 @@ public:
     bool UnLoadRepairPatch(const std::string& hqfFile) override;
     bool NotifyHotReloadPage() override;
     void RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionInfo& uncaughtExceptionInfo);
+    void RegisterUncatchableExceptionHandler(const JsEnv::UncatchableTask& uncatchableTask);
     bool LoadScript(const std::string& path, std::vector<uint8_t>* buffer = nullptr, bool isBundle = false);
     bool LoadScript(const std::string& path, uint8_t* buffer, size_t len, bool isBundle,
         const std::string& srcEntrance = "");

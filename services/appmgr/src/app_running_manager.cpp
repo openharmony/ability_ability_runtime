@@ -174,6 +174,27 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     return nullptr;
 }
 
+std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordForSpecifiedProcess(
+    int32_t uid, const std::string &instanceKey, const std::string &customProcessFlag)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPMGR, "uid: %{public}d: customProcessFlag: %{public}s", uid, customProcessFlag.c_str());
+    auto appRunningMap = GetAppRunningRecordMap();
+    for (const auto &item : appRunningMap) {
+        const auto &appRecord = item.second;
+        if (appRecord->GetInstanceKey() == instanceKey && appRecord->GetUid() == uid &&
+            appRecord->GetProcessType() == ProcessType::NORMAL &&
+            (appRecord->GetCustomProcessFlag() == customProcessFlag) &&
+            !(appRecord->IsTerminating()) && !(appRecord->IsKilling()) && !(appRecord->GetRestartAppFlag()) &&
+            !(appRecord->IsUserRequestCleaning()) &&
+            !(appRecord->IsCaching() && appRecord->GetProcessCacheBlocked()) &&
+            appRecord->GetKillReason() != AbilityRuntime::GlobalConstant::LOW_MEMORY_KILL) {
+            return appRecord;
+        }
+    }
+    return nullptr;
+}
+
 #ifdef APP_NO_RESPONSE_DIALOG
 bool AppRunningManager::CheckAppRunningRecordIsExist(const std::string &bundleName, const std::string &abilityName)
 {
@@ -1075,11 +1096,11 @@ void AppRunningManager::ExecuteConfigurationTask(const BackgroundAppInfo& info, 
         if (appRecord == nullptr) {
             continue;
         }
-        bool userIdFlag = (userId == -1 || appRecord->GetUid() / BASE_USER_RANGE == 0 || appRecord->GetUid() / BASE_USER_RANGE == userId) ;
+        bool userIdFlag = (userId == -1 || appRecord->GetUid() / BASE_USER_RANGE == 0
+            || appRecord->GetUid() / BASE_USER_RANGE == userId);
         if (!userIdFlag) {
             continue;
         }
-        
         if (info.bandleName == appRecord->GetBundleName() && info.appIndex == appRecord->GetAppIndex() && item.second
             && appRecord->GetState() == ApplicationState::APP_STATE_BACKGROUND) {
             if (UpdateConfiguration(appRecord, Rosen::ConfigMode::COLOR_MODE)) {
@@ -1094,13 +1115,13 @@ void AppRunningManager::ExecuteConfigurationTask(const BackgroundAppInfo& info, 
 int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &appInfos,
     const AppExecFwk::ConfigurationPolicy& policy, const int32_t userId)
 {
-    int32_t maxCountPerBatch = policy.maxCountPerBatch;
+    int8_t maxCountPerBatch = policy.maxCountPerBatch;
     if (maxCountPerBatch < 1) {
         TAG_LOGE(AAFwkTag::APPMGR, "maxCountPerBatch invalid");
         return ERR_INVALID_VALUE;
     }
 
-    int32_t intervalTime = policy.intervalTime;
+    int16_t intervalTime = policy.intervalTime;
     if (intervalTime < 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "intervalTime invalid");
         return ERR_INVALID_VALUE;
@@ -1115,7 +1136,7 @@ int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector
     appInfos_ = appInfos;
     int32_t taskCount = 0;
     int32_t batchCount = 0;
-    for (auto info : appInfos) {
+    for (auto &info : appInfos) {
         auto policyTask = [weak = weak_from_this(), info, userId] {
             auto appRuningMgr = weak.lock();
             if (appRuningMgr == nullptr) {
@@ -1125,8 +1146,8 @@ int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector
             appRuningMgr->ExecuteConfigurationTask(info, userId);
         };
         AAFwk::TaskHandlerWrap::GetFfrtHandler()->SubmitTask(policyTask,
-            info.bandleName.c_str() + std::to_string(info.appIndex), policy.intervalTime * batchCount);
-        if (++taskCount >= policy.maxCountPerBatch) {
+            info.bandleName.c_str() + std::to_string(info.appIndex), intervalTime * batchCount);
+        if (++taskCount >= maxCountPerBatch) {
             batchCount++;
             taskCount = 0;
         }
@@ -1158,8 +1179,6 @@ int32_t AppRunningManager::UpdateConfigurationByBundleName(const Configuration &
 
 int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
 {
-    std::unordered_set<int32_t> frozenPids;
-    AAFwk::ResSchedUtil::GetInstance().GetAllFrozenPidsFromRSS(frozenPids);
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
@@ -1167,26 +1186,13 @@ int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
             TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
             continue;
         }
-        auto priorityObject = appRecord->GetPriorityObject();
-        if (!priorityObject) {
-            TAG_LOGW(AAFwkTag::APPMGR, "priorityObject null");
-            continue;
-        }
-        auto pid = priorityObject->GetPid();
-        if (frozenPids.count(pid) == 0) {
-            TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] memory level = %{public}d", pid, level);
-            appRecord->ScheduleMemoryLevel(level);
-        } else {
-            TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] is frozen", pid);
-        }
+        appRecord->ScheduleMemoryLevel(level);
     }
     return ERR_OK;
 }
 
 int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap)
 {
-    std::unordered_set<int32_t> frozenPids;
-    AAFwk::ResSchedUtil::GetInstance().GetAllFrozenPidsFromRSS(frozenPids);
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
@@ -1200,16 +1206,12 @@ int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLev
             continue;
         }
         auto pid = priorityObject->GetPid();
-        if (frozenPids.count(pid) == 0) {
-            auto it = procLevelMap.find(pid);
-            if (it == procLevelMap.end()) {
-                TAG_LOGW(AAFwkTag::APPMGR, "proc[pid=%{public}d] is not found", pid);
-            } else {
-                TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] memory level = %{public}d", pid, it->second);
-                appRecord->ScheduleMemoryLevel(it->second);
-            }
+        auto it = procLevelMap.find(pid);
+        if (it == procLevelMap.end()) {
+            TAG_LOGW(AAFwkTag::APPMGR, "proc[pid=%{public}d] is not found", pid);
         } else {
-            TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] is frozen", pid);
+            TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] memory level = %{public}d", pid, it->second);
+            appRecord->ScheduleMemoryLevel(it->second);
         }
     }
     return ERR_OK;

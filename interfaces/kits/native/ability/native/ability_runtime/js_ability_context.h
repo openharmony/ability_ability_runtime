@@ -75,6 +75,10 @@ public:
     static napi_value SetRestoreEnabled(napi_env env, napi_callback_info info);
     static napi_value SetColorMode(napi_env env, napi_callback_info info);
     static napi_value RevokeDelegator(napi_env env, napi_callback_info info);
+    static napi_value StartAppServiceExtensionAbility(napi_env env, napi_callback_info info);
+    static napi_value StopAppServiceExtensionAbility(napi_env env, napi_callback_info info);
+    static napi_value ConnectAppServiceExtensionAbility(napi_env env, napi_callback_info info);
+    static napi_value DisconnectAppServiceExtensionAbility(napi_env env, napi_callback_info info);
 
     static void ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
@@ -148,6 +152,15 @@ private:
     napi_value OnDisconnectUIServiceExtension(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetColorMode(napi_env env, NapiCallbackInfo& info);
     napi_value OnRevokeDelegator(napi_env env, NapiCallbackInfo& info);
+    napi_value OnStartAppServiceExtensionAbility(napi_env env, NapiCallbackInfo& info);
+    napi_value OnStopAppServiceExtensionAbility(napi_env env, NapiCallbackInfo& info);
+    napi_value OnConnectAppServiceExtensionAbility(napi_env env, NapiCallbackInfo& info);
+    napi_value StartExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
+        AppExecFwk::ExtensionAbilityType extensionType);
+    napi_value StopExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
+        AppExecFwk::ExtensionAbilityType extensionType);
+    napi_value ConnectExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
+        AppExecFwk::ExtensionAbilityType extensionType);
 
     static bool UnWrapWant(napi_env env, napi_value argv, AAFwk::Want& want);
     static napi_value WrapWant(napi_env env, const AAFwk::Want& want);

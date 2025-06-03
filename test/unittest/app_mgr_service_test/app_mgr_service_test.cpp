@@ -1940,13 +1940,38 @@ HWTEST_F(AppMgrServiceTest, StartNativeChildProcess_0100, TestSize.Level1)
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = eventHandler_;
 
-    EXPECT_CALL(*mockAppMgrServiceInner_, StartNativeChildProcess(_, _, _, _))
+    EXPECT_CALL(*mockAppMgrServiceInner_, StartNativeChildProcess(_, _, _, _, _))
         .Times(1)
         .WillOnce(Return(ERR_OK));
 
     pid_t pid = 0;
     sptr<IRemoteObject> callback;
-    int32_t res = appMgrService->StartNativeChildProcess("test.so", 1, callback);
+    int32_t res = appMgrService->StartNativeChildProcess("test.so", 1, callback, "");
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: StartNativeChildProcess_0200
+ * @tc.desc: Start native child process.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, StartNativeChildProcess_0200, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "StartNativeChildProcess_0200 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, StartNativeChildProcess(_, _, _, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    pid_t pid = 0;
+    sptr<IRemoteObject> callback;
+    int32_t res = appMgrService->StartNativeChildProcess("test.so", 1, callback, "abc_123");
     EXPECT_EQ(res, ERR_OK);
 }
 #endif // SUPPORT_CHILD_PROCESS

@@ -759,5 +759,39 @@ HWTEST_F(UriUtilsTest, GrantUriPermissionForUIOrServiceExtension_001, TestSize.L
     UriUtils::GetInstance().GrantUriPermissionForUIOrServiceExtension(abilityRequest);
     EXPECT_EQ(abilityRequest.abilityInfo.extensionAbilityType, AppExecFwk::ExtensionAbilityType::SERVICE);
 }
+
+/*
+ * Feature: UriUtils
+ * Function: CheckIsInAncoAppIdentifier
+ * SubFunction: NA
+ * FunctionPoints: UriUtils CheckIsInAncoAppIdentifier
+ */
+HWTEST_F(UriUtilsTest, CheckIsInAncoAppIdentifier_001, TestSize.Level1)
+{
+    std::string identifier = "";
+    std::string bundleName = "";
+    auto ret = UriUtils::GetInstance().CheckIsInAncoAppIdentifier(identifier, bundleName);
+    EXPECT_EQ(ret, false);
+
+    identifier = "com.example.test";
+    bundleName = "";
+    ret = UriUtils::GetInstance().CheckIsInAncoAppIdentifier(identifier, bundleName);
+    EXPECT_EQ(ret, false);
+
+    identifier = "com.example.test1|com.example.test2";
+    bundleName = "com.example.test";
+    ret = UriUtils::GetInstance().CheckIsInAncoAppIdentifier(identifier, bundleName);
+    EXPECT_EQ(ret, false);
+
+    identifier = "com.example.test";
+    bundleName = "com.example.test";
+    ret = UriUtils::GetInstance().CheckIsInAncoAppIdentifier(identifier, bundleName);
+    EXPECT_EQ(ret, true);
+
+    identifier = "com.example.test|com.example.test1";
+    bundleName = "com.example.test";
+    ret = UriUtils::GetInstance().CheckIsInAncoAppIdentifier(identifier, bundleName);
+    EXPECT_EQ(ret, true);
+}
 }
 }

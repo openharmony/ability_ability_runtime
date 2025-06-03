@@ -42,6 +42,7 @@ constexpr const char* LIMIT_MAXIMUM_OF_RENDER_PROCESS = "persist.sys.abilityms.l
 constexpr const char* GRANT_PERSIST_URI_PERMISSION = "persist.sys.abilityms.grant_persist_uri_permission";
 constexpr const char* START_OPTIONS_WITH_ANIMATION = "persist.sys.abilityms.start_options_with_animation";
 constexpr const char* MULTI_PROCESS_MODEL = "persist.sys.abilityms.multi_process_model";
+constexpr const char* PARAM_ANCO_APP_IDENTIFIER = "persist.hmos_fusion_mgr.anco_identifier";
 constexpr const char* ALLOW_CHILD_PROCESS_IN_MULTI_PROCESS_FEATURE_APP =
     "const.sys.abilityms.allow_child_process_in_multi_process_feature_app";
 constexpr const char* MAX_MULTI_PROCESS_FEATURE_CHILD_PROCESS =
@@ -77,12 +78,15 @@ constexpr const char* MAX_CHILD_PROCESS = "const.max_native_child_process";
 constexpr const char* SUPPORT_MULTI_INSTANCE = "const.abilityms.support_multi_instance";
 constexpr const char* MIGRATE_CLIENT_BUNDLE_NAME = "const.sys.abilityms.migrate_client_bundle_name";
 constexpr const char* CONNECT_SUPPORT_CROSS_USER = "const.abilityms.connect_support_cross_user";
+constexpr const char* SUPPORT_APP_SERVICE_EXTENSION = "const.abilityms.support_app_service";
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 constexpr const char* CACHE_ABILITY_BY_LIST_ENABLE = "persist.sys.abilityms.cache_ability_enable";
 constexpr const char* CACHE_ABILITY_LIST_PATH = "etc/ability/abilityms_cache_ability.json";
 constexpr const char* CACHE_PROCESS_NAME = "cache_list";
+constexpr const char* RESIDENT_WHITE_LIST_PATH = "etc/ability_runtime/resident_process.json";
+constexpr const char* NORMAL_RESIDENT_APPS = "normal_resident_apps";
 }
 
 AppUtils::~AppUtils() {}
@@ -466,6 +470,12 @@ std::string AppUtils::GetCacheExtensionTypeList()
     return cacheExtAbilityTypeList;
 }
 
+std::string AppUtils::GetAncoAppIdentifiers()
+{
+    std::string identifiers = system::GetParameter(PARAM_ANCO_APP_IDENTIFIER, "");\
+    return identifiers;
+}
+
 bool AppUtils::IsAllowStartAbilityWithoutCallerToken(const std::string& bundleName, const std::string& abilityName)
 {
     std::lock_guard lock(startAbilityWithoutCallerTokenMutex_);
@@ -676,5 +686,62 @@ bool AppUtils::IsCacheExtensionAbilityByList(const std::string& bundleName, cons
     return false;
 }
 
+void AppUtils::LoadResidentWhiteList()
+{
+    nlohmann::json object;
+    if (!JsonUtils::GetInstance().LoadConfiguration(RESIDENT_WHITE_LIST_PATH, object)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "load resident white list file failed");
+        return;
+    }
+    if (!object.contains(NORMAL_RESIDENT_APPS) ||
+        !object.at(NORMAL_RESIDENT_APPS).is_array()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "resident white list file invalid");
+        return;
+    }
+
+    for (auto &item : object.at(NORMAL_RESIDENT_APPS).items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.is_string()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load resident white bundleName failed");
+            return;
+        }
+        residentWhiteList_.value.emplace_back(jsonObject.get<std::string>());
+    }
+}
+
+const std::vector<std::string>& AppUtils::GetResidentWhiteList()
+{
+    std::lock_guard lock(residentWhiteListMutex_);
+    if (!residentWhiteList_.isLoaded) {
+        LoadResidentWhiteList();
+        residentWhiteList_.isLoaded = true;
+    }
+    return residentWhiteList_.value;
+}
+
+bool AppUtils::InResidentWhiteList(const std::string &bundleName)
+{
+    std::lock_guard lock(residentWhiteListMutex_);
+    if (!residentWhiteList_.isLoaded) {
+        LoadResidentWhiteList();
+        residentWhiteList_.isLoaded = true;
+    }
+    for (const auto &item: residentWhiteList_.value) {
+        if (bundleName == item) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AppUtils::IsSupportAppServiceExtension()
+{
+    if (!isSupportAppServiceExtension_.isLoaded) {
+        isSupportAppServiceExtension_.value = system::GetBoolParameter(SUPPORT_APP_SERVICE_EXTENSION, false);
+        isSupportAppServiceExtension_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isSupportAppServiceExtension_.value);
+    return isSupportAppServiceExtension_.value;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

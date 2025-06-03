@@ -21,6 +21,8 @@
 #include <iostream>
 #include <regex>
 #include "ability_manager_client.h"
+#include "ability_start_with_wait_observer.h"
+#include "ability_start_with_wait_observer_utils.h"
 #include "app_mgr_client.h"
 #include "hilog_tag_wrapper.h"
 #include "iservice_registry.h"
@@ -30,11 +32,13 @@
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
 #include "test_observer.h"
+#include "app_mem_info.h"
 
 using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace AAFwk {
+using TerminateReason = AbilityStartWithWaitObserverUtil::TerminateReason;
 namespace {
 constexpr size_t PARAM_LENGTH = 1024;
 constexpr int INDEX_OFFSET = 3;
@@ -51,9 +55,14 @@ constexpr int OPTION_WINDOW_TOP = 262;
 constexpr int OPTION_WINDOW_HEIGHT = 263;
 constexpr int OPTION_WINDOW_WIDTH = 264;
 
+constexpr int INVALID_PID = 10104003;
+constexpr int INVALID_LEVEL = 10104004;
+
 constexpr int INNER_ERR_START = 10108101;
 constexpr int INNER_ERR_TEST = 10108501;
 constexpr int INNER_ERR_DEBUG = 10108601;
+constexpr int64_t WAIT_INTERVAL = 10 * 1000; // us
+constexpr int64_t MAX_WAIT_TIME = 15 * 1000 * 1000; // us
 
 const std::string DEVELOPERMODE_STATE = "const.security.developermode.state";
 
@@ -117,6 +126,11 @@ const std::string ERR_IMPLICIT_START_ABILITY_FAIL_SOLUTION_TWO =
     "Make sure the corresponding HAP package is installed";
 const std::string ERR_INVALID_VALUE_SOLUTION_ONE =
     "Check if the application corresponding to the specified bundleName is installed.";
+const std::string ERR_INVALID_PID_VALUE_SOLUTION_ONE =
+    "Check if the pid specified by the application exists.";
+const std::string ERR_INVALID_LEVEL_VALUE_SOLUTION_ONE =
+    "Check if the value range of level is [0, 1, 2].";
+const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 
 constexpr struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -133,6 +147,7 @@ constexpr struct option LONG_OPTIONS[] = {
     {"mutil-thread", no_argument, nullptr, 'R'},
     {"action", required_argument, nullptr, 'A'},
     {"URI", required_argument, nullptr, 'U'},
+    {"wait", no_argument, nullptr, 'W'},
     {"entity", required_argument, nullptr, 'e'},
     {"type", required_argument, nullptr, 't'},
     {"pi", required_argument, nullptr, OPTION_PARAMETER_INTEGER},
@@ -211,6 +226,13 @@ constexpr struct option LONG_OPTIONS_ATTACH[] = {
     {"bundle", required_argument, nullptr, 'b'},
     {nullptr, 0, nullptr, 0},
 };
+const std::string SHORT_OPTIONS_SEND_MEMORY_LEVEL = "hp:l:";
+constexpr struct option LONG_OPTIONS_SEND_MEMORY_LEVEL[] = {
+    {"help", no_argument, nullptr, 'h'},
+    {"pid", required_argument, nullptr, 'p' },
+    {"level", required_argument, nullptr, 'l' },
+    {nullptr, 0, nullptr, 0 },
+};
 }  // namespace
 
 AbilityManagerShellCommand::AbilityManagerShellCommand(int argc, char* argv[]) : ShellCommand(argc, argv, TOOL_NAME)
@@ -233,6 +255,7 @@ ErrCode AbilityManagerShellCommand::CreateCommandMap()
         {"attach", [this]() { return this->RunAsAttachDebugCommand(); }},
         {"detach", [this]() { return this->RunAsDetachDebugCommand(); }},
         {"appdebug", [this]() { return this->RunAsAppDebugDebugCommand(); }},
+        {"send-memory-level", [this]() { return this->RunAsSendMemoryLevelCommand(); }},
 #ifdef ABILITY_COMMAND_FOR_TEST
         {"force-timeout", [this]() { return this->RunForceTimeoutForTest(); }},
 #endif
@@ -320,6 +343,12 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "Failed to retrieve specified package information.",
         "The application corresponding to the specified package name is not installed.",
         {GET_BUNDLE_INFO_FAILED_SOLUTION_ONE, GET_BUNDLE_INFO_FAILED_SOLUTION_TWO});
+    messageMap_[INVALID_PID] = GetAaToolErrorInfo("10104003", "The specified pid does not exist.",
+        "The pid specified by the aa send-memory-level command does not exist.",
+        {ERR_INVALID_PID_VALUE_SOLUTION_ONE});
+    messageMap_[INVALID_LEVEL] = GetAaToolErrorInfo("10104004", "The specified level does not exist.",
+        "The level specified by the aa send-memory-level command does not exist.",
+        {ERR_INVALID_LEVEL_VALUE_SOLUTION_ONE});
     messageMap_[ERR_NOT_DEVELOPER_MODE] = GetAaToolErrorInfo("10106001", "not developer Mode",
         "The current device is not in developer mode",
         {ERR_NOT_DEVELOPER_MODE_SOLUTION_ONE});
@@ -336,8 +365,8 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
         "The user specified windowOptions, but the device does not support it",
         {ERR_NOT_SUPPORTED_PRODUCT_TYPE_SOLUTION_ONE});
     messageMap_[ERR_NOT_IN_APP_PROVISION_MODE] = GetAaToolErrorInfo("10106002",
-        "The target application does not support debug mode.",
-        "The application specified by the aa tool is a Release version and does not support Debug mode",
+        "The aa start command's window option or the aa test command does not support app with release signature.",
+        "The application started by the aa command is a release signature",
         {ERR_NOT_IN_APP_PROVISION_MODE_SOLUTION_ONE});
     messageMap_[ERR_NOT_DEBUG_APP] = GetAaToolErrorInfo("10106701",
         "Cannot debug applications using a release certificate.",
@@ -394,6 +423,8 @@ std::string AbilityManagerShellCommand::GetAaToolErrorInfo(std::string errorCode
 
 ErrCode AbilityManagerShellCommand::init()
 {
+    startTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
     return AbilityManagerClient::GetInstance()->Connect();
 }
 
@@ -417,12 +448,14 @@ ErrCode AbilityManagerShellCommand::RunAsStartAbility()
                 setting->AddProperty(AbilityStartSetting::WINDOW_MODE_KEY, windowMode);
                 result = AbilityManagerClient::GetInstance()->StartAbility(want, *(setting.get()), nullptr, -1);
             }
+        } else if (startAbilityWithWaitFlag_) {
+            result = StartAbilityWithWait(want);
         } else {
             result = AbilityManagerClient::GetInstance()->StartAbility(want);
         }
         if (result == OHOS::ERR_OK) {
             TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_START_ABILITY_OK.c_str());
-            resultReceiver_ = STRING_START_ABILITY_OK + "\n";
+            resultReceiver_.append(STRING_START_ABILITY_OK).append("\n");
         } else {
             TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_START_ABILITY_NG.c_str(), result);
             if (result != START_ABILITY_WAITING) {
@@ -1001,6 +1034,108 @@ ErrCode AbilityManagerShellCommand::RunAsProcessCommand()
     }
 
     return result;
+}
+
+ErrCode AbilityManagerShellCommand::RunAsSendMemoryLevelCommand()
+{
+    TAG_LOGD(AAFwkTag::AA_TOOL, "sendMemoryLevel");
+    std::string pidParse = "";
+    std::string memoryLevelParse = "";
+    ParsePidMemoryLevel(pidParse, memoryLevelParse);
+    if(pidParse.empty() || memoryLevelParse.empty()) {
+        resultReceiver_.append(HELP_MSG_SEND_MEMORY_LEVEL + "\n");
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    pid_t inputPid = static_cast<pid_t>(ConvertPid(pidParse));
+    MemoryLevel inputLevel = static_cast<MemoryLevel>(ConvertPid(memoryLevelParse));
+
+    std::string appRunningUniqueId;
+    ErrCode queryResult = DelayedSingleton<AppMgrClient>::GetInstance()->GetAppRunningUniqueIdByPid(
+        inputPid, appRunningUniqueId);
+    if (inputPid <= 0 || queryResult != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "pid value error. The specified pid does not exist.");
+        resultReceiver_.append(STRING_SEND_MEMORY_LEVEL_NG + "\n");
+        resultReceiver_.append(GetMessageFromCode(INVALID_PID));
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!(inputLevel == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_MODERATE ||
+        inputLevel == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_CRITICAL ||
+        inputLevel == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_LOW)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "level value error. Valid values: 0-2 (0: Moderate, 1: Low, 2: Critical)");
+        resultReceiver_.append(STRING_SEND_MEMORY_LEVEL_NG + "\n");
+        resultReceiver_.append(GetMessageFromCode(INVALID_LEVEL));
+        return ERR_INVALID_VALUE;
+    }
+
+    std::map<pid_t, MemoryLevel> pidMemoryLevelMap;
+    pidMemoryLevelMap.emplace(inputPid, inputLevel);
+    auto result = DelayedSingleton<AppMgrClient>::GetInstance()->NotifyProcMemoryLevel(pidMemoryLevelMap);
+    if (result == OHOS::ERR_OK) {
+        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_SEND_MEMORY_LEVEL_OK.c_str());
+        resultReceiver_ = STRING_SEND_MEMORY_LEVEL_OK + "\n";
+    } else {
+        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_SEND_MEMORY_LEVEL_NG.c_str(), result);
+        resultReceiver_ = STRING_SEND_MEMORY_LEVEL_NG + "\n";
+        resultReceiver_.append(GetMessageFromCode(result));
+    }
+
+    return result;
+}
+
+ErrCode AbilityManagerShellCommand::ParsePidMemoryLevel(std::string &pidParse, std::string &memoryLevelParse)
+{
+    int option = -1;
+    int counter = 0;
+    while (true) {
+        counter++;
+        option = getopt_long(argc_, argv_, SHORT_OPTIONS_SEND_MEMORY_LEVEL.c_str(),
+            LONG_OPTIONS_SEND_MEMORY_LEVEL, nullptr);
+        TAG_LOGD(AAFwkTag::AA_TOOL, "getopt_long option: %{public}d, optopt: %{public}d, optind: %{public}d",
+            option, optopt, optind);
+        
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        // aa command without option
+        if (option == -1) {
+            if (counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h':{
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -h' no arg", cmd_.c_str());
+                // 'aa send-memory-level -h' no arg
+                break;
+            }
+            case 'p':{
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -p' pid", cmd_.c_str());
+                // 'aa send-memory-level -p pid'
+                pidParse = optarg;
+                break;
+            }
+            case 'l':{
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -l' level", cmd_.c_str());
+                // 'aa send-memory-level -l level'
+                memoryLevelParse = optarg;
+                break;
+            }
+            case '?':{
+                std::string unknownOption = "";
+                std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                resultReceiver_.append(unknownOptionMsg);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
+    return OHOS::ERR_OK;
 }
 
 bool AbilityManagerShellCommand::MatchOrderString(const std::regex &regexScript, const std::string &orderCmd)
@@ -1721,6 +1856,11 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
 
                     break;
                 }
+                case 'W': {
+                    // 'aa start -W' with no argument
+                    startAbilityWithWaitFlag_ = true;
+                    break;
+                }
                 case 0: {
                     // 'aa start' with an unknown option: aa start --x
                     // 'aa start' with an unknown option: aa start --xxx
@@ -2218,6 +2358,91 @@ sptr<IAbilityManager> AbilityManagerShellCommand::GetAbilityManagerService()
     }
     sptr<IRemoteObject> remoteObject = systemManager->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
     return iface_cast<IAbilityManager>(remoteObject);
+}
+
+ErrCode AbilityManagerShellCommand::StartAbilityWithWait(Want& want)
+{
+    if (IsImplicitStartAction(want)) {
+        auto ret = AbilityManagerClient::GetInstance()->StartAbility(want);
+        if (ret != ERR_OK) {
+            return ret;
+        }
+        resultReceiver_.append(STRING_IMPLICT_START_WITH_WAIT_NG + "\n");
+        return ret;
+    }
+    auto observer = sptr<AbilityStartWithWaitObserver>::MakeSptr();
+    if (!observer) {
+        TAG_LOGE(AAFwkTag::AA_TOOL, "inner error, alloc memory failed.");
+        return INNER_ERR;
+    }
+    auto ret = AbilityManagerClient::GetInstance()->StartAbilityWithWait(want, observer);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    auto maxWaitTime = MAX_WAIT_TIME;
+    AbilityStartWithWaitObserverData data;
+    while (true) {
+        bool isAlwaysWaiting = true;
+        observer->GetData(isAlwaysWaiting, data);
+        if (!isAlwaysWaiting) {
+            FormatOutputForWithWait(want, data);
+            break;
+        }
+        usleep(WAIT_INTERVAL);
+        maxWaitTime -= WAIT_INTERVAL;
+        if (maxWaitTime <= 0) {
+            TAG_LOGE(AAFwkTag::AA_TOOL, "start ability with wait timeout.");
+            break;
+        }
+    }
+    return ret;
+}
+
+void AbilityManagerShellCommand::FormatOutputForWithWait(const Want& want, const AbilityStartWithWaitObserverData& data)
+{
+    switch (static_cast<TerminateReason>(data.reason)) {
+        case TerminateReason::TERMINATE_FOR_NONE: {
+            auto totalTime = data.foregroundTime - data.startTime;
+            auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+            auto waitTime = now - startTime_;
+            resultReceiver_.append("StartMode: ").append(data.coldStart ? "Cold" : "Hot").append("\n")
+                .append("BundleName: " + data.bundleName + "\n").append("AbilityName: " + data.abilityName + "\n");
+            if (!want.GetModuleName().empty()) {
+                resultReceiver_.append("ModuleName: " + want.GetModuleName() + "\n");
+            }
+            resultReceiver_.append("TotalTime: " + std::to_string(totalTime) + "\n")
+                .append("WaitTime: " + std::to_string(waitTime) + "\n");
+            break;
+        }
+        case TerminateReason::TERMINATE_FOR_NON_UI_ABILITY: {
+            resultReceiver_.append(STRING_NON_UIABILITY_START_WITH_WAIT_NG + "\n");
+            break;
+        }
+        default:
+            // do nothing
+            break;
+    }
+}
+
+bool AbilityManagerShellCommand::IsImplicitStartAction(const Want& want)
+{
+    auto element = want.GetElement();
+    if (!element.GetAbilityName().empty()) {
+        return false;
+    }
+
+    if (want.GetIntParam(AAFwk::SCREEN_MODE_KEY, ScreenMode::IDLE_SCREEN_MODE) != ScreenMode::IDLE_SCREEN_MODE) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not use implicit startup process");
+        return false;
+    }
+
+    if (want.GetAction() != BLACK_ACTION_SELECT_DATA) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start, action:%{public}s", want.GetAction().data());
+        return true;
+    }
+
+    return false;
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST

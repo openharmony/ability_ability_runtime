@@ -33,7 +33,7 @@ bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
 {
     AppExecFwk::DisposedRule disposedRule;
     std::shared_ptr<DisposedRuleInterceptor> interceptor;
-    auto disposedObserver = std::make_shared<DisposedObserver>(disposedRule, interceptor);
+    auto disposedObserver = std::make_shared<DisposedObserver>(disposedRule, interceptor, 0);
     Parcel parcel;
     parcel.WriteString(fdp->ConsumeRandomLengthString());
     sptr<AppExecFwk::AbilityStateData> abilityStateData = AppExecFwk::AbilityStateData::Unmarshalling(parcel);

@@ -15,6 +15,7 @@
 
 #include "app_mgr_service_inner.h"
 
+#include <cctype>
 #include <cinttypes>
 #include <csignal>
 #include <cstdint>
@@ -45,6 +46,7 @@
 #include "datetime_ex.h"
 #include "distributed_data_mgr.h"
 #include "extension_ability_info.h"
+#include "ffrt.h"
 #include "freeze_util.h"
 #include "global_constant.h"
 #include "hap_token_info.h"
@@ -100,6 +102,7 @@
 #include "window_pid_visibility_changed_listener.h"
 #include "cache_process_manager.h"
 #include "res_sched_util.h"
+#include "session_manager_lite.h"
 #ifdef APP_NO_RESPONSE_DIALOG
 #include "fault_data.h"
 #include "modal_system_app_freeze_uiextension.h"
@@ -115,6 +118,7 @@ namespace AppExecFwk {
 using namespace OHOS::Rosen;
 #endif //SUPPORT_SCREEN
 using namespace OHOS::Security;
+using namespace OHOS::Rosen;
 
 namespace {
 #define CHECK_CALLER_IS_SYSTEM_APP                                                             \
@@ -188,6 +192,7 @@ constexpr const char* REUSING_WINDOW = "ohos.ability_runtime.reusing_window";
 constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
 constexpr const int32_t KILL_PROCESS_BY_USER_DELAY_BASE = 500;
 constexpr const int64_t PRELOAD_FREEZE_TIMEOUT = 11000;
+constexpr size_t MAX_PROCESS_NAME_LENGTH = 64;
 
 #ifdef WITH_DLP
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
@@ -229,7 +234,6 @@ constexpr int32_t USER_SCALE = 200000;
 
 constexpr int32_t MAX_RESTART_COUNT = 3;
 constexpr int32_t RESTART_INTERVAL_TIME = 120000;
-constexpr int32_t FIRST_FRAME_NOTIFY_TASK_DELAY = 5; //ms
 
 constexpr ErrCode APPMGR_ERR_OFFSET = ErrCodeOffset(SUBSYS_APPEXECFWK, 0x01);
  // Error code for already exist render.
@@ -292,7 +296,7 @@ constexpr int32_t PROCESS_START_FAILED_SUB_REASON_UNKNOWN = 0;
 
 constexpr int32_t MAX_SPECIFIED_PROCESS_NAME_LENGTH = 255;
 
-constexpr int32_t NWEB_PRELOAD_DELAY = 3000;
+constexpr int32_t NWEB_PRELOAD_DELAY = 3000000;
 
 constexpr const char* APP_INSTANCE_KEY_0 = "app_instance_0";
 
@@ -422,16 +426,14 @@ void AppMgrServiceInner::Init()
     dfxTaskHandler_ = AAFwk::TaskHandlerWrap::CreateConcurrentQueueHandler(
         "dfx_freeze_task_queue", DFX_TASKWORKER_NUM, AAFwk::TaskQoS::USER_INITIATED);
     dfxTaskHandler_->SetPrintTaskLog(true);
-    otherTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("other_app_mgr_task_queue");
-    otherTaskHandler_->SetPrintTaskLog(true);
     willKillPidsNum_ = 0;
-    delayKillTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("delay_kill_task_queue");
     if (securityModeManager_) {
         securityModeManager_->Init();
     }
-    otherTaskHandler_->SubmitTask([pThis = shared_from_this()]() {
+    ffrt::submit([pThis = shared_from_this()]() {
         pThis->nwebPreloadSet_ = AAFwk::ResSchedUtil::GetInstance().GetNWebPreloadSet();
-        }, NWEB_PRELOAD_DELAY);
+        }, ffrt::task_attr().delay(NWEB_PRELOAD_DELAY)
+        .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
     AppNativeSpawnManager::GetInstance().InitNativeSpawnMsgPipe(appRunningManager_);
 }
 
@@ -483,6 +485,26 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
         return;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "main process do not exists.");
+    auto appRecord = appRunningManager_->CheckAppRunningRecordForSpecifiedProcess(
+        appInfo->uid, instanceKey, customProcessFlag);
+    if (appRecord != nullptr) {
+        TAG_LOGI(AAFwkTag::APPMGR, "starting process [%{public}s]", processName.c_str());
+        AbilityRuntime::LoadParam loadParam;
+        loadParam.instanceKey = instanceKey;
+        auto newAppRecord = CreateAppRunningRecord(std::make_shared<AbilityRuntime::LoadParam>(loadParam),
+            appInfo, std::make_shared<AbilityInfo>(abilityInfo), processName, bundleInfo, hapModuleInfo,
+            std::make_shared<AAFwk::Want>(want), false);
+        if (newAppRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "create new appRecord failed");
+            return;
+        }
+        newAppRecord->SetScheduleNewProcessRequestState(requestId, want, hapModuleInfo.moduleName);
+        bool appExistFlag = appRunningManager_->IsAppExist(bundleInfo.applicationInfo.accessTokenId);
+        auto ret = StartProcess(abilityInfo.applicationName, processName, 0, newAppRecord,
+            appInfo->uid, bundleInfo, appInfo->bundleName, 0, appExistFlag);
+        TAG_LOGI(AAFwkTag::APPMGR, "start process ret %{public}d, schedule new process request", ret);
+        return;
+    }
     if (startSpecifiedAbilityResponse_) {
         startSpecifiedAbilityResponse_->OnNewProcessRequestResponse("", requestId);
     }
@@ -602,7 +624,7 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     if (appRecord != nullptr) {
         appRecord->SetPreloadState(PreloadState::PRELOADING);
         appRecord->SetPreloadMode(request.preloadMode);
-        appRecord->SetNeedPreloadModule(request.preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE);
+        appRecord->SetNeedPreloadModule(request.preloadMode != PreloadMode::PRESS_DOWN);
         appRecord->SetNeedLimitPrio(request.preloadMode != PreloadMode::PRESS_DOWN);
         LoadAbilityNoAppRecord(appRecord, false, appInfo, abilityInfo, processName, specifiedProcessFlag, bundleInfo,
             hapModuleInfo, want, appExistFlag, true, request.preloadMode);
@@ -1073,15 +1095,15 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
         appRecord->SetMainProcess(false);
         TAG_LOGI(AAFwkTag::APPMGR, "%{public}s will not alive", hapModuleInfo.process.c_str());
     }
-    // As taskHandler_ is busy now, the task should be submit to other task queue.
-    if (otherTaskHandler_ != nullptr) {
-        otherTaskHandler_->SubmitTaskJust([appRecord, abilityInfo, innerServiceWeak = weak_from_this()]() {
-            auto innerService = innerServiceWeak.lock();
-            CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
-            innerService->OnAppStateChanged(appRecord, ApplicationState::APP_STATE_SET_COLD_START, false, false);
-            innerService->SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD, AppStartReason::NONE);
-            }, "AppStateChangedNotify", FIRST_FRAME_NOTIFY_TASK_DELAY);
-    }
+
+    ffrt::submit([appRecord, abilityInfo, innerServiceWeak = weak_from_this()]() {
+        auto innerService = innerServiceWeak.lock();
+        CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
+        innerService->OnAppStateChanged(appRecord, ApplicationState::APP_STATE_SET_COLD_START, false, false);
+        innerService->SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD, AppStartReason::NONE);
+        }, ffrt::task_attr().name("AppStateChangedNotify")
+        .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
+
     uint32_t startFlags = (want == nullptr) ? 0 : AppspawnUtil::BuildStartFlags(*want, *abilityInfo);
     int32_t bundleIndex = 0;
     if (want != nullptr) {
@@ -2534,8 +2556,11 @@ int32_t AppMgrServiceInner::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLe
 
     bool isMemmgrCall = AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(
         MEMMGR_PROC_NAME);
-    if (!isMemmgrCall) {
-        TAG_LOGE(AAFwkTag::APPMGR, "callerToken not %{public}s", MEMMGR_PROC_NAME);
+    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    bool isDevelopMode = system::GetBoolParameter(DEVELOPER_MODE_STATE, false);
+    if (!(isMemmgrCall || (isShellCall && isDevelopMode))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission check failed: callerToken is not %{public}s, isMemmgrCall=%{public}d, "
+        "isShellCall=%{public}d, isDevelopMode=%{public}d", MEMMGR_PROC_NAME, isMemmgrCall, isShellCall, isDevelopMode);
         return ERR_INVALID_VALUE;
     }
     if (!appRunningManager_) {
@@ -3865,8 +3890,8 @@ void AppMgrServiceInner::SetAppInfo(const BundleInfo &bundleInfo, AppSpawnStartM
 
 int32_t AppMgrServiceInner::CreateStartMsg(const CreateStartMsgParam &param, AppSpawnStartMsg &startMsg)
 {
-    if (!remoteClientManager_ || !otherTaskHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "remoteClientManager or otherTaskHandler null");
+    if (!remoteClientManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "remoteClientManager null");
         return ERR_NO_INIT;
     }
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
@@ -3876,7 +3901,7 @@ int32_t AppMgrServiceInner::CreateStartMsg(const CreateStartMsgParam &param, App
     }
 
     auto &bundleInfo = param.bundleInfo;
-    AAFwk::AutoSyncTaskHandle autoSync(otherTaskHandler_->SubmitTask([&]() {
+    AAFwk::AutoSyncTaskHandle autoSync(AAFwk::TaskHandlerWrap::GetFfrtHandler()->SubmitTask([&]() {
         AddMountPermission(bundleInfo.applicationInfo.accessTokenId, startMsg.permissions);
         }, AAFwk::TaskAttribute{
             .taskName_ = "AddMountPermission",
@@ -5482,7 +5507,60 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
     return result;
 }
 
-int32_t AppMgrServiceInner::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo>& appInfos,
+std::vector<BackgroundAppInfo> AppMgrServiceInner::GetBackgroundAppInfo(
+    const std::vector<BackgroundAppInfo>& allowAppList)
+{
+    auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    if (sceneSessionManager == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetSceneSessionManagerLiteProxy null");
+        return {};
+    }
+    std::vector<RecentSessionInfo> recentMainSessionInfoList;
+    auto resultCode = sceneSessionManager->GetRecentMainSessionInfoList(recentMainSessionInfoList);
+    if (resultCode != WSError::WS_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetRecentMainSessionInfoList result:%{public}d size:%{public}zu.", resultCode,
+            recentMainSessionInfoList.size());
+        return {};
+    }
+
+    auto checkInAllowlist = [&allowAppList](const std::string& bundleName) {
+        auto it =
+            std::find_if(allowAppList.begin(), allowAppList.end(), [&bundleName](const BackgroundAppInfo& appInfo) {
+                if (appInfo.bandleName == bundleName) {
+                    return true;
+                }
+                return false;
+            });
+        if (it != allowAppList.end()) {
+            return true;
+        }
+        return false;
+    };
+
+    std::vector<AppExecFwk::BackgroundAppInfo> backgroundAppInfoResult;
+    for (const auto& sessionInfo : recentMainSessionInfoList) {
+        if (!checkInAllowlist(sessionInfo.bundleName)) {
+            TAG_LOGD(AAFwkTag::APPMGR, "not in whilelist bundleName:%{public}s appIndex :%{public}d.",
+                sessionInfo.bundleName.c_str(), sessionInfo.appIndex);
+            continue;
+        }
+        if (sessionInfo.sessionState != RecentSessionState::BACKGROUND) {
+            TAG_LOGD(AAFwkTag::APPMGR, "not background app, bundleName:%{public}s appIndex :%{public}d.",
+                sessionInfo.bundleName.c_str(), sessionInfo.appIndex);
+            continue;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "get sessionInfo bundleName:%{public}s appIndex :%{public}d.",
+            sessionInfo.bundleName.c_str(), sessionInfo.appIndex);
+        AppExecFwk::BackgroundAppInfo appInfo;
+        appInfo.bandleName = sessionInfo.bundleName;
+        appInfo.appIndex = sessionInfo.appIndex;
+        backgroundAppInfoResult.push_back(appInfo);
+    }
+
+    return backgroundAppInfoResult;
+}
+
+int32_t AppMgrServiceInner::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo>& allowAppList,
     const AppExecFwk::ConfigurationPolicy& policy, const int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -5496,6 +5574,13 @@ int32_t AppMgrServiceInner::UpdateConfigurationForBackgroundApp(const std::vecto
         TAG_LOGE(AAFwkTag::APPMGR, "permission verification failed");
         return ret;
     }
+
+    std::vector<BackgroundAppInfo> appInfos = GetBackgroundAppInfo(allowAppList);
+    if (appInfos.empty()) {
+        TAG_LOGD(AAFwkTag::APPMGR, "no need backGround app color Switch");
+        return ERR_INVALID_VALUE;
+    }
+
     return appRunningManager_->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
 }
 
@@ -6715,7 +6800,8 @@ int AppMgrServiceInner::GetExceptionTimerId(const FaultData &faultData, const st
             innerService->ParseInfoToAppfreeze(faultData, pid, callerUid, bundleName, appRecord->GetProcessName(),
                 isOccurException);
             if (faultData.errorObject.name != AppFreezeType::THREAD_BLOCK_3S &&
-                faultData.errorObject.name != AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
+                faultData.errorObject.name != AppFreezeType::LIFECYCLE_HALF_TIMEOUT &&
+                faultData.errorObject.name != AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING) {
                 TAG_LOGI(AAFwkTag::APPMGR, "Ffrt Exception faultData: %{public}s,pid: %{public}d "
                     "will exit because"" %{public}s", bundleName.c_str(), pid,
                     innerService->FaultTypeToString(faultData.faultType).c_str());
@@ -6809,7 +6895,8 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
         }
     }
     if (eventName == AppFreezeType::LIFECYCLE_TIMEOUT || eventName == AppFreezeType::APP_INPUT_BLOCK ||
-        eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::THREAD_BLOCK_3S) {
+        eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::THREAD_BLOCK_3S ||
+        eventName == AppFreezeType::LIFECYCLE_TIMEOUT_WARNING) {
         if (AppExecFwk::AppfreezeManager::GetInstance()->IsNeedIgnoreFreezeEvent(pid, eventName)) {
             TAG_LOGE(AAFwkTag::APPDFR, "appFreeze happend, pid:%{public}d, eventName:%{public}s",
                 pid, eventName.c_str());
@@ -6875,7 +6962,8 @@ void AppMgrServiceInner::TimeoutNotifyApp(int32_t pid, int32_t uid,
     const std::string& bundleName, const std::string& processName, const FaultData &faultData)
 {
     bool isNeedExit = (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) ||
-        (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT);
+        (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) ||
+        (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT_WARNING);
 #ifdef APP_NO_RESPONSE_DIALOG
     bool isDialogExist = appRunningManager_ ?
         appRunningManager_->CheckAppRunningRecordIsExist(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY) :
@@ -7781,12 +7869,8 @@ void AppMgrServiceInner::SubscribeScreenOffEvent()
         auto unSubscribeScreenOffEvent = [innerService]() {
             innerService->UnSubscribeScreenOffEvent();
         };
-        auto taskHandler = innerService->GetTaskHandler();
-        if (taskHandler == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "invalid taskHandler pointer");
-            return;
-        }
-        taskHandler->SubmitTask(unSubscribeScreenOffEvent, "UnSubscribeScreenOffEvent");
+        ffrt::submit(std::move(unSubscribeScreenOffEvent),
+            ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
     };
     std::lock_guard<std::mutex> lock(screenOffSubscriberMutex_);
     if (screenOffSubscriber_ != nullptr) {
@@ -7920,6 +8004,7 @@ int32_t AppMgrServiceInner::NotifyPageShow(const sptr<IRemoteObject> &token, con
         return ERR_PERMISSION_DENIED;
     }
 
+    const_cast<PageStateData &>(pageStateData).uid = IPCSkeleton::GetCallingUid();
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnPageShow(pageStateData);
     return ERR_OK;
 }
@@ -7989,6 +8074,10 @@ int32_t AppMgrServiceInner::StartChildProcess(const pid_t callingPid, pid_t &chi
     auto errCode = StartChildProcessPreCheck(callingPid, request.childProcessType);
     if (errCode != ERR_OK) {
         return errCode;
+    }
+    if (!CheckCustomProcessName(request.options.customProcessName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid custom process name");
+        return ERR_INVALID_VALUE;
     }
     auto &srcEntry = request.srcEntry;
     if (callingPid <= 0 || srcEntry.empty()) {
@@ -8656,6 +8745,14 @@ int32_t AppMgrServiceInner::GetAppRunningUniqueIdByPid(pid_t pid, std::string &a
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
         return ERR_NO_INIT;
     }
+    bool isCallingPermission = AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
+        AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
+    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    bool isDevelopMode = system::GetBoolParameter(DEVELOPER_MODE_STATE, false);
+    if (!isCallingPermission && !(isShellCall && isDevelopMode)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetAppRunningUniqueIdByPid not SA call or verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
     return appRunningManager_->GetAppRunningUniqueIdByPid(pid, appRunningUniqueId);
 }
 
@@ -9058,12 +9155,17 @@ void AppMgrServiceInner::OnAppCacheStateChanged(const std::shared_ptr<AppRunning
 
 #ifdef SUPPORT_CHILD_PROCESS
 int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const std::string &libName,
-    int32_t childProcessCount, const sptr<IRemoteObject> &callback)
+    int32_t childProcessCount, const sptr<IRemoteObject> &callback, const std::string &customProcessName)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "hostPid:%{public}d", hostPid);
     if (hostPid <= 0 || libName.empty() || !callback) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid param: hostPid:%{public}d libName:%{private}s",
             hostPid, libName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!CheckCustomProcessName(customProcessName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid custom process name");
         return ERR_INVALID_VALUE;
     }
 
@@ -9104,10 +9206,30 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
 
     pid_t dummyChildPid = 0;
     auto nativeChildRecord = ChildProcessRecord::CreateNativeChildProcessRecord(
-        hostPid, libName, appRecord, callback, childProcessCount, false);
+        hostPid, libName, appRecord, callback, childProcessCount, false, customProcessName);
     ChildProcessArgs args;
     ChildProcessOptions options;
     return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, args, options);
+}
+
+bool AppMgrServiceInner::CheckCustomProcessName(const std::string &customProcessName)
+{
+    if (customProcessName.empty()) {
+        return true;
+    }
+    if (customProcessName.size() > MAX_PROCESS_NAME_LENGTH) {
+        return false;
+    }
+    try {
+        std::regex regex("^[a-zA-Z0-9_]+$");
+        if (regex_match(customProcessName, regex)) {
+            return true;
+        }
+    } catch(...) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "regex error");
+        return false;
+    }
+    return false;
 }
 #endif // SUPPORT_CHILD_PROCESS
 
@@ -9260,7 +9382,8 @@ bool AppMgrServiceInner::CleanAbilityByUserRequest(const sptr<IRemoteObject> &to
     }
     TAG_LOGI(AAFwkTag::APPMGR, "clean ability set up bg, force kill pid:%{public}d", targetPid);
     willKillPidsNum_ += 1;
-    int32_t delayTime = willKillPidsNum_ * KILL_PROCESS_BY_USER_INTERVAL + KILL_PROCESS_BY_USER_DELAY_BASE;
+    int32_t delayTime = (willKillPidsNum_ * KILL_PROCESS_BY_USER_INTERVAL + KILL_PROCESS_BY_USER_DELAY_BASE) *
+        AbilityRuntime::GlobalConstant::TIMEOUT_UNIT_TIME;
     TAG_LOGD(AAFwkTag::APPMGR, "delayTime:%{public}d", delayTime);
     auto delayKillTask = [targetPid, innerServiceWeak = weak_from_this()]() {
         auto self = innerServiceWeak.lock();
@@ -9269,7 +9392,8 @@ bool AppMgrServiceInner::CleanAbilityByUserRequest(const sptr<IRemoteObject> &to
         self->DecreaseWillKillPidsNum();
         TAG_LOGD(AAFwkTag::APPMGR, "pid:%{public}d killed", targetPid);
     };
-    delayKillTaskHandler_->SubmitTaskJust(delayKillTask, "delayKillUIAbility", delayTime);
+    ffrt::submit(std::move(delayKillTask), ffrt::task_attr().name("delayKillUIAbility").delay(delayTime)
+        .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 
     return true;
 }

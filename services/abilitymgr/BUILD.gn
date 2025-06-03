@@ -31,6 +31,7 @@ config("abilityms_exception_config") {
 config("abilityms_config") {
   include_dirs = [
     "include/",
+    "include/ability_start_with_wait_observer_manager",
     "include/data_ability",
     "include/dialog_session/",
     "include/extension_record",
@@ -44,6 +45,7 @@ config("abilityms_config") {
     "include/ui_extension_record",
     "include/utils/",
     "${ability_runtime_innerkits_path}/ability_manager/include",
+    "${ability_runtime_innerkits_path}/ability_manager/include/aa_tools",
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_innerkits_path}/app_manager/include",
     "${ability_runtime_innerkits_path}/connectionobs_manager/include",
@@ -253,6 +255,10 @@ ohos_shared_library("abilityms") {
     ]
   }
 
+  if (ability_runtime_feature_sandboxmanager) {
+    defines += ["SUPPORT_APP_SELECTOR"]
+  }
+
   if (include_app_domain_verify) {
     external_deps += [
       "app_domain_verify:app_domain_verify_common",
@@ -270,6 +276,10 @@ ohos_shared_library("abilityms") {
       ability_runtime_start_window_options_with_pixelmap) {
     defines += [ "START_WINDOW_OPTIONS_WITH_PIXELMAP" ]
     external_deps += [ "image_framework:image_native" ]
+  }
+
+  if (ability_runtime_no_screen) {
+    defines += ["DISABLE_LAUNCHER"]
   }
 
   version_script = "libabilityms.map"

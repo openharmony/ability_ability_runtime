@@ -111,9 +111,9 @@ uint32_t InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(
     } else if (genericInfo.decoratorType == INSIGHT_INTENTS_DECORATOR_TYPE_PAGE) {
         auto pageInfo = genericInfo.get<InsightIntentPageInfo>();
         queryInfo.pageInfo.uiAbility = pageInfo.uiAbility;
-        queryInfo.pageInfo.pageRouterName = pageInfo.pageRouteName;
+        queryInfo.pageInfo.pagePath = pageInfo.pagePath;
         queryInfo.pageInfo.navigationId = pageInfo.navigationId;
-        queryInfo.pageInfo.navDestination = pageInfo.navDestination;
+        queryInfo.pageInfo.navDestinationName = pageInfo.navDestinationName;
         queryInfo.parameters = pageInfo.parameters;
     } else if (genericInfo.decoratorType == INSIGHT_INTENTS_DECORATOR_TYPE_ENTRY) {
         auto entryInfo = genericInfo.get<InsightIntentEntryInfo>();
@@ -145,6 +145,7 @@ uint32_t InsightIntentUtils::ConvertExtractInsightIntentInfo(
     queryInfo.schema = intentInfo.schema;
     queryInfo.icon = intentInfo.icon;
     queryInfo.llmDescription = intentInfo.llmDescription;
+    queryInfo.result = intentInfo.result;
 
     for (auto &keyword : intentInfo.keywords) {
         queryInfo.keywords.emplace_back(keyword);

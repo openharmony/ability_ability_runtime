@@ -41,6 +41,7 @@ const std::string HELP_MSG = "usage: aa <command> <options>\n"
     "  force-stop <bundle-name>    force stop the process with bundle name\n"
     "  attach                      attach application to enter debug mode\n"
     "  detach                      detach application to exit debug mode\n"
+    "  send-memory-level           send memory level to application by pid \n"
 #ifdef ABILITY_COMMAND_FOR_TEST
     "  test                        start the test framework with options\n"
     "  ApplicationNotResponding     Pass in pid with options\n"
@@ -71,6 +72,7 @@ const std::string HELP_MSG_START =
     "  [-U <URI>] "
     "  [-e <entity>] "
     "  [-t <mime-type>] "
+    "  [-W] "
     "  [--wl <window-left>] "
     "  [--wt <window-top>] "
     "  [--wh <window-height>] "
@@ -129,6 +131,14 @@ const std::string HELP_MSG_TEST =
     "                  [-w <wait-time>]\n"
     "                  [-D]\n";
 
+const std::string HELP_MSG_SEND_MEMORY_LEVEL =
+    "Usage: aa send-memory-level -p <PID> -l <LEVEL>\n"
+    "Mandatory Options:\n"
+    "  -p, --pid <PID>         Target process ID (integer)\n"
+    "  -l, --level <0|1|2>     Memory level (0: Moderate, 1: Low, 2: Critical)\n\n"
+    "Optional:\n"
+    "  -h, --help              Show this help message\n";
+
 const std::string HELP_MSG_ATTACH_APP_DEBUG =
     "usage: aa attach <options>\n"
     "options list:\n"
@@ -173,6 +183,9 @@ const std::string STRING_ATTACH_APP_DEBUG_NG = "error: failed to attach app debu
 const std::string STRING_DETACH_APP_DEBUG_OK = "detach app debug successfully.";
 const std::string STRING_DETACH_APP_DEBUG_NG = "error: failed to detach app debug.";
 
+const std::string STRING_SEND_MEMORY_LEVEL_OK = "send memory level successfully.";
+const std::string STRING_SEND_MEMORY_LEVEL_NG = "error: failed to send memory level.";
+
 const std::string STRING_START_USER_TEST_NG = "error: failed to start user test.";
 const std::string STRING_USER_TEST_STARTED = "user test started.";
 const std::string STRING_USER_TEST_FINISHED = "user test finished.";
@@ -202,6 +215,8 @@ const std::string PERFCMD_FIRST_DUMPHEAP = "dumpheap";
 
 const std::string STRING_TEST_REGEX_INTEGER_NUMBERS = "^(0|[1-9][0-9]*|-[1-9][0-9]*)$";
 const std::string STRING_REGEX_ALL_NUMBERS = "^(-)?([0-9]|[1-9][0-9]+)([\\.][0-9]+)?$";
+const std::string STRING_IMPLICT_START_WITH_WAIT_NG = "The wait option does not support starting implict";
+const std::string STRING_NON_UIABILITY_START_WITH_WAIT_NG = "The wait option does not support starting non-uiability";
 }  // namespace
 
 class AbilityManagerShellCommand : public ShellCommand {
@@ -232,6 +247,8 @@ private:
     ErrCode RunAsProcessCommand();
     ErrCode RunAsAttachDebugCommand();
     ErrCode RunAsDetachDebugCommand();
+    ErrCode RunAsSendMemoryLevelCommand();
+    ErrCode ParsePidMemoryLevel(std::string& pidParse, std::string& memoryLevelParse);
     bool CheckParameters(int target);
     ErrCode ParseParam(ParametersInteger& pi);
     ErrCode ParseParam(ParametersString& ps, bool isNull);
@@ -261,6 +278,10 @@ private:
     bool MatchOrderString(const std::regex &r, const std::string &orderCmd);
     bool CheckPerfCmdString(const char* optarg, const size_t paramLength, std::string &perfCmd);
     void ParseBundleName(std::string &bundleName);
+    ErrCode StartAbilityWithWait(Want& want);
+    void FormatOutputForWithWait(const Want &want, const AbilityStartWithWaitObserverData& data);
+    bool IsImplicitStartAction(const Want &want);
+    bool startAbilityWithWaitFlag_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

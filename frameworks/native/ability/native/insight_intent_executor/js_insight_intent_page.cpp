@@ -184,11 +184,16 @@ void JsInsightIntentPage::SetInsightIntentParam(JsRuntime& runtime, const std::s
     newWant.SetParam(INSIGHT_INTENT_DOT_MODULE_NAME, executeParam->moduleName_);
     newWant.SetParam(INSIGHT_INTENT_DOT_HAP_PATH, hapPath);
 
-    AAFwk::WantParamWrapper wrapper(newWant.GetParams());
-    std::string parametersString = wrapper.ToString();
-    TAG_LOGD(AAFwkTag::INTENT, "param string %{private}s", parametersString.c_str());
+    auto* env = runtime.GetNapiEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "env nullptr");
+        return;
+    }
+    napi_value paramNapiVal = AppExecFwk::WrapWantParams(env, newWant.GetParams());
+    std::string paramStr = JsInsightIntentUtils::StringifyObject(env, paramNapiVal);
+    TAG_LOGD(AAFwkTag::INTENT, "param string %{private}s", paramStr.c_str());
 
-    Rosen::WMError wmRet = windowSptr->SetIntentParam(parametersString,
+    Rosen::WMError wmRet = windowSptr->SetIntentParam(paramStr,
         ExecuteOhmUrlOperator(runtime, executeParam->moduleName_, hapPath, executeParam->pagePath_), coldStart);
     if (wmRet != Rosen::WMError::WM_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "Set intent param failed %{public}d", wmRet);

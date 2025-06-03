@@ -2075,7 +2075,7 @@ void AppMgrProxy::SetAppAssertionPauseState(bool flag)
 
 #ifdef SUPPORT_CHILD_PROCESS
 int32_t AppMgrProxy::StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
-    const sptr<IRemoteObject> &callback)
+    const sptr<IRemoteObject> &callback, const std::string &customProcessName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (libName.empty() || !callback) {
@@ -2093,6 +2093,7 @@ int32_t AppMgrProxy::StartNativeChildProcess(const std::string &libName, int32_t
     PARCEL_UTIL_WRITE_RET_INT(data, String, libName);
     PARCEL_UTIL_WRITE_RET_INT(data, Int32, childProcessCount);
     PARCEL_UTIL_WRITE_RET_INT(data, RemoteObject, callback);
+    PARCEL_UTIL_WRITE_RET_INT(data, String, customProcessName);
 
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::START_NATIVE_CHILD_PROCESS, data, reply, option);
     return reply.ReadInt32();

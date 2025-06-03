@@ -786,6 +786,18 @@ HWTEST_F(AbilityManagerProxySecondTest, UnregisterIAbilityManagerCollaborator_01
 }
 
 /**
+ * @tc.name: AbilityManagerProxy_GetAbilityManagerCollaborator_0100
+ * @tc.desc: GetAbilityManagerCollaborator
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySecondTest, AbilityManagerProxy_GetAbilityManagerCollaborator_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_GetAbilityManagerCollaborator_0100 start");
+    EXPECT_EQ(proxy_->GetAbilityManagerCollaborator(), nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_GetAbilityManagerCollaborator_0100 end");
+}
+
+/**
  * @tc.name: AbilityManagerProxy_RegisterStatusBarDelegate_0100
  * @tc.desc: RegisterStatusBarDelegate
  * @tc.type: FUNC

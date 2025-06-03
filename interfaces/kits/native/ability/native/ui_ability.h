@@ -311,6 +311,10 @@ public:
      * @return result code defined in abilityConstants
      */
     virtual int32_t OnSaveState(int32_t reason, AAFwk::WantParams &wantParams);
+    
+    virtual int32_t OnSaveState(int32_t reason, AAFwk::WantParams &wantParams,
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo,
+        bool &isAsync, AppExecFwk::StateReason stateReason);
 
     /**
      * @brief enable ability recovery.

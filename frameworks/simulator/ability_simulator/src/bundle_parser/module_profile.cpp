@@ -1722,7 +1722,7 @@ void SetInstallationFree(InnerModuleInfo &innerModuleInfo, BundleType bundleType
     }
 }
 
-bool ToBundleInfo(const ApplicationInfo &applicationInfo, const InnerModuleInfo &innerModuleInfo,
+void ToBundleInfo(const ApplicationInfo &applicationInfo, const InnerModuleInfo &innerModuleInfo,
     const TransformParam &transformParam, BundleInfo &bundleInfo)
 {
     bundleInfo.name = applicationInfo.bundleName;
@@ -1746,8 +1746,6 @@ bool ToBundleInfo(const ApplicationInfo &applicationInfo, const InnerModuleInfo 
         bundleInfo.mainEntry = innerModuleInfo.moduleName;
         bundleInfo.entryModuleName = innerModuleInfo.moduleName;
     }
-
-    return true;
 }
 
 bool ParseExtensionInfo(const Profile::ModuleJson &moduleJson, InnerBundleInfo &innerBundleInfo,

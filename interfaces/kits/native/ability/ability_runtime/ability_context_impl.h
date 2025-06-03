@@ -38,7 +38,7 @@ public:
     std::string GetBundleCodeDir() override;
     std::string GetCacheDir() override;
     std::string GetTempDir() override;
-    std::string GetResourceDir() override;
+    std::string GetResourceDir(const std::string &moduleName = "") override;
     std::string GetFilesDir() override;
     bool IsUpdatingConfigurations() override;
     bool PrintDrawnCompleted() override;
@@ -363,6 +363,11 @@ public:
      */
     void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message) override;
+
+    ErrCode StartAppServiceExtensionAbility(const Want &want) override;
+    ErrCode StopAppServiceExtensionAbility(const Want& want) override;
+    ErrCode ConnectAppServiceExtensionAbility(const AAFwk::Want& want,
+        const sptr<AbilityConnectCallback>& connectCallback) override;
 
 private:
     sptr<IRemoteObject> token_ = nullptr;
