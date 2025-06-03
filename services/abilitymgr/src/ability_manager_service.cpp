@@ -14278,7 +14278,8 @@ int32_t AbilityManagerService::RestartSelfAtomicService(sptr<IRemoteObject> call
     }
 
     RestartAppKeyType key(processInfo.instanceKey, callerUid);
-    int64_t now = time(nullptr);
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count();
     if (RestartAppManager::GetInstance().IsRestartAppFrequent(key, now)) {
         return AAFwk::ERR_RESTART_APP_FREQUENT;
     }
