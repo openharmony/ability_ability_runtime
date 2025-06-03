@@ -60,7 +60,6 @@ ohos_unittest("connection_state_manager_test") {
     "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",

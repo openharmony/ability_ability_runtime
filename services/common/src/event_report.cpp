@@ -104,13 +104,6 @@ void EventReport::SendAppEvent(const EventName &eventName, HiSysEventType type, 
                 EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
                 EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
             break;
-        case EventName::APP_START_INTERCRPT_BY_EDM:
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                type,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName);
-            break;
         default:
             HiSysEventWrite(
                 HiSysEvent::Domain::AAFWK,
@@ -804,7 +797,6 @@ std::string EventReport::ConvertEventName(const EventName &eventName)
         // app behavior event
         "APP_ATTACH", "APP_LAUNCH", "APP_FOREGROUND", "APP_BACKGROUND", "APP_TERMINATE",
         "PROCESS_START", "PROCESS_EXIT", "DRAWN_COMPLETED", "APP_STARTUP_TYPE", "PROCESS_START_FAILED",
-        "APP_START_INTERCRPT_BY_EDM",
 
         // key behavior event
         "GRANT_URI_PERMISSION", "FA_SHOW_ON_LOCK", "START_PRIVATE_ABILITY",

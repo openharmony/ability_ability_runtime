@@ -54,7 +54,6 @@ ohos_unittest("background_task_observer_test") {
     "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",
