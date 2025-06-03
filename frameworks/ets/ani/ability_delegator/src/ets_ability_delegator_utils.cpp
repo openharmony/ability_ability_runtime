@@ -133,14 +133,16 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status: %{public}d", status);
         return;
     }
+    static const char *recordGetName = "X{C{std.core.Numeric}C{std.core.String}}:C{std.core.Object}";
     ani_method recordGetMethod;
-    status = aniEnv->Class_FindMethod(recordCls, "$_get", "Lstd/core/Object;:Lstd/core/Object;", &recordGetMethod);
+    status = aniEnv->Class_FindMethod(recordCls, "$_get", recordGetName, &recordGetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
     }
+    static const char *recordSetName = "X{C{std.core.Numeric}C{std.core.String}}C{std.core.Object}:";
     ani_method recordSetMethod;
-    status = aniEnv->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", &recordSetMethod);
+    status = aniEnv->Class_FindMethod(recordCls, "$_set", recordSetName, &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
