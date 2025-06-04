@@ -290,8 +290,7 @@ void JsAutoFillExtension::OnStopCallBack()
 
     auto applicationContext = Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        std::shared_ptr<NativeReference> sharedJsObj = std::move(jsObj_);
-        applicationContext->DispatchOnAbilityDestroy(sharedJsObj);
+        applicationContext->DispatchOnAbilityDestroy(jsObj_);
     }
 }
 
