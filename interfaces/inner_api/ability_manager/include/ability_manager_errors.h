@@ -804,6 +804,11 @@ enum {
     ERR_APP_SELECTOR_NOT_EXISTS = 2097334,
 
     /**
+     * Result (2097335) for canceled wantagent.
+     */
+    ERR_WANTAGENT_CANCELED = 2097335,
+
+    /**
      * Result (2097340-2097350) for uri permission error result.
      */
     ERR_UPMS_GET_FILE_URIS_BY_KEY_FAILED = 2097340,

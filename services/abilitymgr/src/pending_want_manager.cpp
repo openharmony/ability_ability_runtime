@@ -64,7 +64,7 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
     if (wantSenderInfo.type != static_cast<int32_t>(OperationType::SEND_COMMON_EVENT) &&
         !isSystemApp && !AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         for (auto it = info.allWants.begin(); it != info.allWants.end();) {
-            if (info.bundleName != it->want.GetBundle()) {
+        if (info.bundleName != it->want.GetBundle()) {
                 it = info.allWants.erase(it);
             } else {
                 it->want.RemoveParam("ohos.extra.param.key.appCloneIndex");
@@ -202,7 +202,7 @@ bool PendingWantManager::CheckPendingWantRecordByKey(
     return true;
 }
 
-int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo)
+int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target,  SenderInfo &senderInfo)
 {
     SenderInfo info = senderInfo;
 
@@ -235,7 +235,7 @@ int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target, const Sende
         }
         return ERR_INVALID_VALUE;
     }
-    return record->SenderInner(info);
+    return record->SenderInner(senderInfo);
 }
 
 void PendingWantManager::CancelWantSender(const bool isSystemAppCall, const sptr<IWantSender> &sender)

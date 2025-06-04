@@ -238,58 +238,40 @@ ErrCode PendingWant::Cancel(const sptr<AAFwk::IWantSender> &target, uint32_t fla
     return WantAgentClient::GetInstance().CancelWantSender(target, flags);
 }
 
-void PendingWant::Send(const sptr<AAFwk::IWantSender> &target)
-{
-    Send(0, nullptr, nullptr, "", nullptr, nullptr, target);
-}
-
-void PendingWant::Send(int resultCode, const sptr<AAFwk::IWantSender> &target)
-{
-    Send(resultCode, nullptr, nullptr, "", nullptr, nullptr, target);
-}
-
-void PendingWant::Send(int resultCode, const std::shared_ptr<Want> &want,
-    const sptr<AAFwk::IWantSender> &target)
-{
-    Send(resultCode, want, nullptr, "", nullptr, nullptr, target);
-}
-
 void PendingWant::Send(
-    int resultCode, const sptr<CompletedDispatcher> &onCompleted, const sptr<AAFwk::IWantSender> &target)
+    int resultCode, sptr<CompletedDispatcher> &onCompleted, const sptr<AAFwk::IWantSender> &target)
 {
-    Send(resultCode, nullptr, onCompleted, "", nullptr, nullptr, target);
+    Send(resultCode, nullptr, onCompleted, "", nullptr, nullptr, target, nullptr);
 }
 
 void PendingWant::Send(int resultCode, const std::shared_ptr<Want> &want,
-    const sptr<CompletedDispatcher> &onCompleted, const sptr<AAFwk::IWantSender> &target)
+    sptr<CompletedDispatcher> &onCompleted, const sptr<AAFwk::IWantSender> &target)
 {
-    Send(resultCode, want, onCompleted, "", nullptr, nullptr, target);
+    Send(resultCode, want, onCompleted, "", nullptr, nullptr, target, nullptr);
 }
 
 void PendingWant::Send(int resultCode, const std::shared_ptr<Want> &want,
-    const sptr<CompletedDispatcher> &onCompleted, const std::string &requiredPermission,
+    sptr<CompletedDispatcher> &onCompleted, const std::string &requiredPermission,
     const sptr<AAFwk::IWantSender> &target)
 {
-    Send(resultCode, want, onCompleted, requiredPermission, nullptr, nullptr, target);
+    Send(resultCode, want, onCompleted, requiredPermission, nullptr, nullptr, target, nullptr);
 }
 
 ErrCode PendingWant::Send(int resultCode, const std::shared_ptr<Want> &want,
-    const sptr<CompletedDispatcher> &onCompleted, const std::string &requiredPermission,
+    sptr<CompletedDispatcher> &onCompleted, const std::string &requiredPermission,
     const std::shared_ptr<WantParams> &options, const std::shared_ptr<StartOptions> &startOptions,
-    const sptr<AAFwk::IWantSender> &target)
+    const sptr<AAFwk::IWantSender> &target, sptr<IRemoteObject> callerToken)
 {
     int result =
-        SendAndReturnResult(resultCode, want, onCompleted, requiredPermission, options, startOptions, target);
-    if (result != 0) {
-        return ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY;
-    }
+        SendAndReturnResult(resultCode, want, onCompleted, requiredPermission, options,
+            startOptions, target, callerToken);
     return result;
 }
 
 int PendingWant::SendAndReturnResult(int resultCode, const std::shared_ptr<Want> &want,
-    const sptr<CompletedDispatcher> &onCompleted, const std::string &requiredPermission,
+    sptr<CompletedDispatcher> &onCompleted, const std::string &requiredPermission,
     const std::shared_ptr<WantParams> &options, const std::shared_ptr<StartOptions> &startOptions,
-    const sptr<AAFwk::IWantSender> &target)
+    const sptr<AAFwk::IWantSender> &target, sptr<IRemoteObject> callerToken)
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "call");
     SenderInfo senderInfo;
@@ -306,7 +288,15 @@ int PendingWant::SendAndReturnResult(int resultCode, const std::shared_ptr<Want>
     senderInfo.requiredPermission = requiredPermission;
     senderInfo.code = resultCode;
     senderInfo.finishedReceiver = onCompleted;
-    return WantAgentClient::GetInstance().SendWantSender(target, senderInfo);
+    senderInfo.callerToken = callerToken;
+    int res = WantAgentClient::GetInstance().SendWantSender(target, senderInfo);
+    sptr<IRemoteObject> obj = senderInfo.finishedReceiver->AsObject();
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "finishedReceiver obj null");
+        return res;
+    }
+    onCompleted = iface_cast<CompletedDispatcher>(obj);
+    return res;
 }
 
 ErrCode PendingWant::IsEquals(
