@@ -20,7 +20,7 @@ import { BusinessError, AsyncCallback } from '@ohos.base';
 import { ShellCmdResult } from 'application.shellCmdResult';
 import UIAbility from '@ohos.app.ability.UIAbility';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
-import AbilityStageMonitor from './AbilityStageMonitor';
+import { AbilityStageMonitor } from 'application.AbilityStageMonitor';
 import AbilityStage from '@ohos.app.ability.AbilityStage';
 
 export interface AbilityDelegator {
