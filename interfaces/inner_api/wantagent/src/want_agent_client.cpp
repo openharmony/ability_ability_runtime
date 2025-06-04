@@ -103,6 +103,7 @@ ErrCode WantAgentClient::SendWantSender(sptr<IWantSender> target, SenderInfo &se
     auto error = abms->SendRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::SEND_PENDING_WANT_SENDER),
         data, reply, option);
     if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "send request error: %{public}d", error);
         return ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_TIMEOUT;
     }
     std::unique_ptr<SenderInfo> completedDataReply(reply.ReadParcelable<SenderInfo>());

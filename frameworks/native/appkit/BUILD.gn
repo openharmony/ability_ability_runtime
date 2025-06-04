@@ -300,6 +300,11 @@ ohos_shared_library("appkit_native") {
     defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
   }
 
+  if (ability_runtime_hitrace_enable) {
+    external_deps += [ "hitrace:libhitracechain" ]
+    defines += [ "ABILITY_RUNTIME_HITRACE_ENABLE" ]
+  }
+
   cflags_cc = []
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
@@ -353,6 +358,7 @@ ohos_shared_library("app_context") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",

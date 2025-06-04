@@ -64,6 +64,7 @@ HWTEST_F(RenderStateObserverStubTest, OnRenderStateChangedInner_0100, TestSize.L
     MessageParcel reply;
     auto result = stub->OnRenderStateChangedInner(data, reply);
     EXPECT_EQ(NO_ERROR, result);
+    testing::Mock::AllowLeak(stub);
 }
 
 } // namespace AppExecFwk

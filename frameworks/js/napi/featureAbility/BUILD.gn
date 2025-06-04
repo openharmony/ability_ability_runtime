@@ -72,6 +72,7 @@ ohos_shared_library("featureability") {
       "data_ability/napi_result_set.cpp",
     ]
     external_deps += [
+      "data_share:datashare_common_lite",
       "eventhandler:libeventhandler",
       "kv_store:distributeddata_mgr",
       "relational_store:native_appdatafwk",

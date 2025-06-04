@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
+* Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -39,9 +39,9 @@ class BatchUri {
 public:
     BatchUri() {}
 
-    int32_t Init(const std::vector<Uri> &uriVec, uint32_t mode = 0, const std::string &callerBundleName = "",
-        const std::string &targetBundleName = "");
-    
+    int32_t Init(const std::vector<std::string> &uriVec, uint32_t mode = 0,
+        const std::string &callerAlterBundleName = "", const std::string &targetAlterBundleName = "");
+
     void InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mode = 0,
         const std::string &callerBundleName = "", const std::string &targetBundleName = "");
 
@@ -56,35 +56,41 @@ public:
     void SetCheckProxyByPolicyResult(std::vector<bool> &proxyResultByPolicy);
 
     int32_t GetUriToGrantByMap(std::vector<std::string> &uriVec);
-    
+
     void SelectPermissionedUri(std::vector<Uri> &uris, std::vector<int32_t> &indexs, std::vector<std::string> &uriVec);
 
     int32_t GetUriToGrantByPolicy(std::vector<PolicyInfo> &docsPolicyInfoVec,
         std::vector<PolicyInfo> &bundlePolicyInfoVec);
 
+    bool GetUriToGrantByPolicy(std::vector<PolicyInfo> &policyVec);
+
     int32_t GetPermissionedUriCount();
-    
+
     // media
     int32_t GetMediaUriToGrant(std::vector<std::string> &uriVec);
 
+    bool IsAllUriValid();
+
+    bool IsAllUriPermissioned();
+
     // media uri
-    std::vector<Uri> mediaUris;
-    std::vector<int32_t> mediaIndexs;
-    
+    std::vector<std::string> mediaUris;
+    std::vector<int32_t> mediaIndexes;
+
     // docs and bundle uri
     std::vector<Uri> otherUris;
-    std::vector<int32_t> otherIndexs;
+    std::vector<int32_t> otherIndexes;
     std::vector<PolicyInfo> otherPolicyInfos;
 
     // caller's uri
     std::vector<PolicyInfo> selfBundlePolicyInfos;
 
     // for check proxy uri permission
-    std::vector<int32_t> proxyIndexsByMap;
-    std::vector<int32_t> proxyIndexsByPolicy;
-    
+    std::vector<int32_t> proxyIndexesByMap;
+    std::vector<int32_t> proxyIndexesByPolicy;
+
     // result of CheckUriPermission
-    std::vector<bool> result;
+    std::vector<bool> checkResult;
     std::vector<bool> isDocsUriVec;
 
     // target's uri
@@ -99,7 +105,7 @@ struct BatchStringUri {
     std::vector<std::string> uriStrVec;
     std::vector<std::string> contentUris;
     std::vector<std::string> mediaUriVec;
-    std::vector<PolicyInfo> policys;
+    std::vector<PolicyInfo> policyVec;
 };
 } // OHOS
 } // AAFwk

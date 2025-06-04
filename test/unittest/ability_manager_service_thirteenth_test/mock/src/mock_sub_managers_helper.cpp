@@ -95,6 +95,9 @@ std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetCurrentConnectManag
 
 std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetConnectManagerByUserId(int32_t userId)
 {
+    if (MyStatus::GetInstance().smhGetConnectManagerByToken_) {
+        return currentConnectManager_;
+    }
     return nullptr;
 }
 

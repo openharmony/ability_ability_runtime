@@ -30,7 +30,8 @@
         "ability_runtime_app_no_response_dialog_wearable",
         "ability_runtime_app_no_response_bundlename",
         "ability_runtime_start_window_options_with_pixelmap",
-        "ability_runtime_check_internet_permission"
+        "ability_runtime_check_internet_permission",
+        "ability_runtime_no_screen"
       ],
       "adapted_system_type": [
           "standard"
@@ -107,6 +108,7 @@
             "selinux_adapter",
             "storage_service",
             "toolchain",
+            "udmf",
             "webview",
             "window_manager",
             "zlib"
@@ -191,6 +193,13 @@
               "header_files": []
             },
             "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native/:cj_photo_editor_extension"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/ability/native/form_runtime",
+              "header_files": []
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:cj_form_extension"
           },
           {
             "header": {

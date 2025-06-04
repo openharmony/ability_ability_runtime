@@ -85,7 +85,7 @@ HWTEST_F(AaCommandSendMemoryLevelTest, ParsePidMemoryLevel_0100, TestSize.Level1
 }
 
 /**
- * @tc.number: Aa_Command_ParseBundleName_0200
+ * @tc.number: Aa_Command_ParsePidMemoryLevel_0200
  * @tc.name: Parse Pid and Level from argv[]
  * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
  */
@@ -241,35 +241,11 @@ HWTEST_F(AaCommandSendMemoryLevelTest, Aa_Command_SendMemoryLevel_0600, TestSize
 /**
  * @tc.number: Aa_Command_SendMemoryLevel_0700
  * @tc.name: ExecCommand
- * @tc.desc: Verify the "aa send-memory-level -p 520 -l 1" command.
+ * @tc.desc: Verify the "aa send-memory-level -p -1 -l 3" command.
  */
 HWTEST_F(AaCommandSendMemoryLevelTest, Aa_Command_SendMemoryLevel_0700, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "Aa_Command_SendMemoryLevel_0700";
-
-    char* argv[] = {
-        (char*)TOOL_NAME.c_str(),
-        (char*)sendMemoryLevelCmd_.c_str(),
-        (char*)"-p",
-        (char*)STRING_VALID_PID.c_str(),
-        (char*)"-l",
-        (char*)STRING_VALID_LEVEL.c_str(),
-        (char*)"",
-    };
-    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
-
-    AbilityManagerShellCommand cmd(argc, argv);
-    EXPECT_TRUE(cmd.ExecCommand().find(STRING_SEND_MEMORY_LEVEL_OK) != string::npos);
-}
-
-/**
- * @tc.number: Aa_Command_SendMemoryLevel_0800
- * @tc.name: ExecCommand
- * @tc.desc: Verify the "aa send-memory-level -p -1 -l 3" command.
- */
-HWTEST_F(AaCommandSendMemoryLevelTest, Aa_Command_SendMemoryLevel_0800, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "Aa_Command_SendMemoryLevel_0800";
 
     char* argv[] = {
         (char*)TOOL_NAME.c_str(),
@@ -287,13 +263,13 @@ HWTEST_F(AaCommandSendMemoryLevelTest, Aa_Command_SendMemoryLevel_0800, TestSize
 }
 
 /**
- * @tc.number: Aa_Command_SendMemoryLevel_0900
+ * @tc.number: Aa_Command_SendMemoryLevel_0800
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "aa send-memory-level -p -1 -l 1" command.
  */
-HWTEST_F(AaCommandSendMemoryLevelTest, Aa_Command_SendMemoryLevel_0900, TestSize.Level1)
+HWTEST_F(AaCommandSendMemoryLevelTest, Aa_Command_SendMemoryLevel_0800, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "Aa_Command_SendMemoryLevel_0900";
+    GTEST_LOG_(INFO) << "Aa_Command_SendMemoryLevel_0800";
 
     char* argv[] = {
         (char*)TOOL_NAME.c_str(),
@@ -311,13 +287,13 @@ HWTEST_F(AaCommandSendMemoryLevelTest, Aa_Command_SendMemoryLevel_0900, TestSize
 }
 
 /**
- * @tc.number: Aa_Command_SendMemoryLevel_1000
+ * @tc.number: Aa_Command_SendMemoryLevel_0900
  * @tc.name: ExecCommand
  * @tc.desc: Verify the "aa send-memory-level -p -1 -l 3" command.
  */
-HWTEST_F(AaCommandSendMemoryLevelTest, Aa_Command_SendMemoryLevel_1000, TestSize.Level1)
+HWTEST_F(AaCommandSendMemoryLevelTest, Aa_Command_SendMemoryLevel_0900, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "Aa_Command_SendMemoryLevel_1000";
+    GTEST_LOG_(INFO) << "Aa_Command_SendMemoryLevel_0900";
 
     char* argv[] = {
         (char*)TOOL_NAME.c_str(),

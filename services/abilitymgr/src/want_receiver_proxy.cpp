@@ -93,6 +93,7 @@ void WantReceiverProxy::PerformReceive(const Want &want, int resultCode, const s
         TAG_LOGE(AAFwkTag::WANTAGENT, "null remote");
         return;
     }
+    TAG_LOGI(AAFwkTag::WANTAGENT, "start send request");
     int32_t ret = remote->SendRequest(
         static_cast<uint32_t>(IWantReceiver::WANT_RECEIVER_PERFORM_RECEIVE), msgData, reply, option);
     if (ret != NO_ERROR) {

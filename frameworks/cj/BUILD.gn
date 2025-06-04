@@ -28,6 +28,7 @@ group("cj_ability_packages") {
     "${ability_runtime_path}/frameworks/native/ability/native:cj_action_extension",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_embedded_ui_extension",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_extensionkit_native",
+    "${ability_runtime_path}/frameworks/native/ability/native:cj_form_extension",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_photo_editor_extension",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_share_extension",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_ui_extension",

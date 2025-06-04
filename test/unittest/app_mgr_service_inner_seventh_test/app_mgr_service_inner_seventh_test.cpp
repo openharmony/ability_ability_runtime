@@ -1194,7 +1194,6 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, CreateStartMsg_003, TestSize.Level1)
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
     AAFwk::MyStatus::GetInstance().getBaseSharedBundleInfos_ = ERR_OK;
     AAFwk::MyStatus::GetInstance().queryDataGroupInfos_ = false;
-    appMgrServiceInner->otherTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("other_app_mgr_task_queue");
 
     CreateStartMsgParam param;
     AppSpawnStartMsg startMsg;
@@ -1217,7 +1216,6 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, CreateStartMsg_004, TestSize.Level1)
     AAFwk::MyStatus::GetInstance().queryDataGroupInfos_ = true;
     DataGroupInfo data = {};
     AAFwk::MyStatus::GetInstance().queryData_ = {data};
-    appMgrServiceInner->otherTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("other_app_mgr_task_queue");
 
     CreateStartMsgParam param;
     AppSpawnStartMsg startMsg;

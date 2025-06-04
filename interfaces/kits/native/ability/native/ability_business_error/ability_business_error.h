@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -195,6 +195,14 @@ enum class AbilityErrorCode {
     // The interaction process between Ability and the Window encountered an error.
     ERROR_CODE_FROM_WINDOW = 16000085,
 
+    ERR_CODE_GET_FILE_URIS_BY_KEY_FAILED = 16000091,
+
+    ERR_CODE_NO_PERMISSION_GRANT_URI = 16000092,
+
+    ERR_CODE_INVALID_CALLER_TOKENID = 16000093,
+
+    ERR_CODE_INVALID_TARGET_TOKENID = 16000094,
+
     // the target not in app identifier allow list.
     ERROR_CODE_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST = 16000200,
 
@@ -204,7 +212,7 @@ enum class AbilityErrorCode {
     // The context is not UIAbilityContext.
     ERROR_CODE_NOT_UI_ABILITY_CONTEXT = 16000086,
 
-    // caller is not atomic service.
+    // The Caller is not an atomic service.
     ERROR_CODE_CALLER_NOT_ATOMIC_SERVICE = 16000090,
 
     // invalid caller.

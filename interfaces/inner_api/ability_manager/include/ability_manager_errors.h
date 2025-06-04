@@ -807,6 +807,25 @@ enum {
      * Result (2097335) for canceled wantagent.
      */
     ERR_WANTAGENT_CANCELED = 2097335,
+
+    /**
+     * Result (2097340-2097350) for uri permission error result.
+     */
+    ERR_UPMS_GET_FILE_URIS_BY_KEY_FAILED = 2097340,
+
+    ERR_UPMS_NO_PERMISSION_GRANT_URI = 2097341,
+
+    ERR_UPMS_INVALID_CALLER_TOKENID = 2097342,
+
+    ERR_UPMS_INVALID_TARGET_TOKENID = 2097343,
+
+    ERR_UPMS_ADD_PRIVILEGED_FAILED = 2097344,
+
+    ERR_UPMS_GET_ORI_URI_FAILED = 2097345,
+
+    ERR_UPMS_NOT_FILE_URI = 2097346,
+
+    ERR_UPMS_GRANT_URI_PERMISSION_FAILED = 2097347,
     
     /**
      * Native error(3000000) for target bundle not exist.
