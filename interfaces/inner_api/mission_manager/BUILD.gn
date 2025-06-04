@@ -44,27 +44,34 @@ ohos_shared_library("mission_manager") {
     "src/mission_manager_proxy.cpp",
   ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   configs = [ ":mission_manager_config" ]
   public_configs = [ ":mission_manager_public_config" ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
-    "${ability_runtime_innerkits_path}/ability_manager:mission_info"
+    "${ability_runtime_innerkits_path}/ability_manager:mission_info",
   ]
 
   external_deps = [
-    "ability_base:want",
     "ability_base:session_info",
+    "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "c_utils:utilsbase",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "window_manager:session_manager_lite",
     "window_manager:libwsutils",
+    "window_manager:session_manager_lite",
   ]
 
   innerapi_tags = [ "platformsdk" ]
