@@ -734,5 +734,20 @@ void STSRuntime::FinishPreload()
     }
     ark::ets::ETSAni::Prefork(env);
 }
+
+void STSRuntime::PreloadClass(const char *className)
+{
+    ani_env* env = GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "GetAniEnv failed");
+        return;
+    }
+
+    ani_class cls = nullptr;
+    if (env->FindClass(className, &cls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "Find preload class failed");
+        return;
+    }
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
