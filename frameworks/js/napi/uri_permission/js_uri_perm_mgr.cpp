@@ -125,6 +125,16 @@ static void ResolveGrantUriPermissionByKeyAsCallerTask(napi_env env, NapiAsyncTa
     return;
 }
 
+static void ResolveGrantUriPermissionByKeyTask(napi_env env, NapiAsyncTask &task, int32_t errCode)
+{
+    if (errCode == ERR_OK) {
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
+        return;
+    }
+    task.Reject(env, CreateJsErrorByNativeErr(env, errCode));
+    return;
+}
+
 static bool ParseGrantUriPermissionParams(napi_env env, const NapiCallbackInfo &info, UriPermissionParam &param)
 {
     // only support 3 or 4 params
@@ -237,6 +247,31 @@ static bool ParseGrantUriPermissionByKeyAsCallerParams(napi_env env, const NapiC
     }
     return true;
 }
+
+static bool ParseGrantUriPermissionByKeyParams(napi_env env, NapiCallbackInfo &info, UriPermissionParam &param)
+{
+    if (info.argc < ARG_COUNT_THREE) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "too few params");
+        ThrowInvalidNumParametersError(env);
+        return false;
+    }
+    if (!OHOS::AppExecFwk::UnwrapStringFromJS2(env, info.argv[ARG_INDEX_ZERO], param.key)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "invalid key");
+        ThrowInvalidParamError(env, "Parse param key failed, key must be string.");
+        return false;
+    }
+    if (!OHOS::AppExecFwk::UnwrapInt32FromJS2(env, info.argv[ARG_INDEX_ONE], param.flag)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "invalid flag");
+        ThrowInvalidParamError(env, "Parse param flag failed, flag must be number.");
+        return false;
+    }
+    if (!OHOS::AppExecFwk::UnwrapInt32FromJS2(env, info.argv[ARG_INDEX_TWO], param.targetTokenId)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "invalid targetTokenId");
+        ThrowInvalidParamError(env, "Parse param targetTokenId failed, targetTokenId must be number.");
+        return false;
+    }
+    return true;
+}
 }
 class JsUriPermMgr {
 public:
@@ -262,6 +297,11 @@ public:
     static napi_value GrantUriPermissionByKeyAsCaller(napi_env env, napi_callback_info info)
     {
         GET_NAPI_INFO_AND_CALL(env, info, JsUriPermMgr, OnGrantUriPermissionByKeyAsCaller);
+    }
+
+    static napi_value GrantUriPermissionByKey(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsUriPermMgr, OnGrantUriPermissionByKey);
     }
 
 private:
@@ -329,6 +369,36 @@ private:
         return result;
     }
 
+    napi_value OnGrantUriPermissionByKey(napi_env env, NapiCallbackInfo &info)
+    {
+        TAG_LOGD(AAFwkTag::URIPERMMGR, "GrantUriPermissionByKey start");
+        UriPermissionParam param;
+        if (!ParseGrantUriPermissionByKeyParams(env, info, param)) {
+            return CreateJsUndefined(env);
+        }
+        auto selfToken = IPCSkeleton::GetSelfTokenID();
+        if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+            return CreateJsUndefined(env);
+        }
+        auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+        NapiAsyncTask::ExecuteCallback execute = [param, innerErrCode]() {
+            *innerErrCode = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermissionByKey(
+                param.key, param.flag, param.targetTokenId);
+        };
+        NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+            if (*innerErrCode != ERR_OK) {
+                TAG_LOGE(AAFwkTag::URIPERMMGR, "GrantUriPermissionByKey fail:%{public}d", *innerErrCode);
+            }
+            ResolveGrantUriPermissionByKeyTask(env, task, *innerErrCode);
+        };
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("JsUriPermMgr::OnGrantUriPermissionByKey", env,
+            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+        return result;
+    }
+
     napi_value OnRevokeUriPermission(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGD(AAFwkTag::URIPERMMGR, "start");
@@ -376,6 +446,7 @@ napi_value CreateJsUriPermMgr(napi_env env, napi_value exportObj)
     const char *moduleName = "JsUriPermMgr";
     BindNativeFunction(env, exportObj, "grantUriPermission", moduleName, JsUriPermMgr::GrantUriPermission);
     BindNativeFunction(env, exportObj, "revokeUriPermission", moduleName, JsUriPermMgr::RevokeUriPermission);
+    BindNativeFunction(env, exportObj, "grantUriPermissionByKey", moduleName, JsUriPermMgr::GrantUriPermissionByKey);
     BindNativeFunction(env, exportObj, "grantUriPermissionByKeyAsCaller", moduleName,
         JsUriPermMgr::GrantUriPermissionByKeyAsCaller);
     return CreateJsUndefined(env);
