@@ -137,6 +137,7 @@ public:
     Runtime& operator=(const Runtime&) = delete;
     Runtime& operator=(Runtime&&) = delete;
     virtual void RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo) {}
+    virtual void PreloadClass(const char *className) {}
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
