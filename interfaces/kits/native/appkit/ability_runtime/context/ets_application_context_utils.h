@@ -31,6 +31,10 @@ class EtsApplicationContextUtils {
 public:
     explicit EtsApplicationContextUtils() {}
     virtual ~EtsApplicationContextUtils() = default;
+    static ani_string GetCurrentInstanceKey([[maybe_unused]]ani_env *env,
+        [[maybe_unused]]ani_object aniObj);
+    static ani_double GetCurrentAppCloneIndex([[maybe_unused]]ani_env *env,
+        [[maybe_unused]]ani_object aniObj);
     static void RestartApp([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_object wantObj);
     static void SetFont([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,

@@ -34,6 +34,8 @@ export default class ApplicationContext extends Context {
   public native nativesetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
   public native nativesetFont(font: string): void; 
   public native nativerestartApp(want: Want): void;
+  public native nativegetCurrentAppCloneIndex(): number;
+  public native nativegetCurrentInstanceKey(): string;
 
   setSupportedProcessCache(isSupported: boolean): void {
     taskpool.execute((): void => {
@@ -186,6 +188,14 @@ export default class ApplicationContext extends Context {
 
   setColorMode(colorMode: ConfigurationConstant.ColorMode): void {
     this.nativesetColorMode(colorMode);
+  }
+
+  getCurrentInstanceKey(): string {
+    return this.nativegetCurrentInstanceKey();
+  }
+
+  getCurrentAppCloneIndex():number{
+    return this.nativegetCurrentAppCloneIndex();
   }
 
   setFont(font: string): void {
