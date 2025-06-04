@@ -17,6 +17,7 @@
 #define MOCK_SCENE_BOARD_JUDGEMENT_H
 
 #include <fstream>
+
 namespace OHOS {
 namespace Rosen {
 class SceneBoardJudgement final {
