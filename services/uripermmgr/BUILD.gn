@@ -34,6 +34,7 @@ libupms_sources = [
   "src/uri_permission_manager_service.cpp",
   "src/uri_permission_manager_stub_impl.cpp",
   "src/uri_permission_utils.cpp",
+  "src/upms_udmf_utils.cpp",
 ]
 
 #build so
@@ -93,6 +94,7 @@ ohos_shared_library("libupms") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "storage_service:storage_manager_sa_proxy",
+    "udmf:udmf_client",
   ]
 
   defines = []
@@ -161,6 +163,7 @@ ohos_static_library("libupms_static") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "storage_service:storage_manager_sa_proxy",
+    "udmf:udmf_client",
   ]
   if (ability_runtime_upms) {
     deps += [

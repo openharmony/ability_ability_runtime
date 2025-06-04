@@ -81,7 +81,8 @@ private:
 
     bool ExecuteInsightIntent(std::shared_ptr<InsightIntentExecuteParam> executeParam);
 
-    bool ParseParams(napi_env env, const AAFwk::WantParams& param, const std::unordered_map<std::string, int> &paramMap,
+    bool ParseParams(napi_env env, const AAFwk::WantParams& param,
+        const std::unordered_map<std::string, size_t> &paramMap,
         size_t &argc, std::vector<napi_value> &argv);
 
     napi_value GetTargetMethod(napi_env env, napi_value constructor, const std::string &methodName);

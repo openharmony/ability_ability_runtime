@@ -5085,6 +5085,7 @@ int32_t AbilityManagerProxy::ExecuteIntent(uint64_t key,  const sptr<IRemoteObje
         return INNER_ERR;
     }
 
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "send execute intent.");
     int32_t error = SendRequest(AbilityManagerInterfaceCode::EXECUTE_INTENT, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request err:%{public}d", error);
@@ -5121,7 +5122,7 @@ bool AbilityManagerProxy::IsAbilityControllerStart(const Want &want)
 int32_t AbilityManagerProxy::ExecuteInsightIntentDone(const sptr<IRemoteObject> &token, uint64_t intentId,
     const InsightIntentExecuteResult &result)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::INTENT, "execute insight intent done proxy, intentId:%{public}" PRIu64"", intentId);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write object fail");

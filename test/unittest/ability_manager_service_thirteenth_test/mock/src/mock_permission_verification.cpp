@@ -121,7 +121,7 @@ int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &
 }
 bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
 {
-    return true;
+    return MyStatus::GetInstance().perJudgeCallerIsAllowedToUseSystemAPI_;
 }
 bool PermissionVerification::IsSystemAppCall() const
 {

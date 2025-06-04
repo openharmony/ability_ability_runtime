@@ -1605,12 +1605,6 @@ int32_t AppMgrService::GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRun
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
-    bool isCallingPermission = AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
-        AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
-    if (!isCallingPermission) {
-        TAG_LOGE(AAFwkTag::APPMGR, "GetAppRunningUniqueIdByPid not SA call or verification failed");
-        return ERR_PERMISSION_DENIED;
-    }
     return appMgrServiceInner_->GetAppRunningUniqueIdByPid(pid, appRunningUniqueId);
 }
 

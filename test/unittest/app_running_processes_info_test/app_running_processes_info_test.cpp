@@ -261,11 +261,14 @@ HWTEST_F(AppRunningProcessesInfoTest, UpdateAppRunningRecord_002, TestSize.Level
     EXPECT_TRUE(record != nullptr) << ",create apprunningrecord fail!";
 
     sptr<IRemoteObject> impl = nullptr;
-    sptr<MockApplicationProxy> mockApplication = new MockApplicationProxy(impl);
+    auto mockApplication = new (std::nothrow) MockApplicationProxy(impl);
     record->SetApplicationClient(mockApplication);
     EXPECT_CALL(*mockApplication, ScheduleLaunchApplication(_, _))
         .Times(1)
-        .WillOnce(Invoke(mockApplication.GetRefPtr(), &MockApplicationProxy::LaunchApplication));
+        .WillOnce([mockApplication]() {
+            mockApplication->Post();
+            return true;
+            });
     Configuration config;
     record->LaunchApplication(config);
     mockApplication->Wait();
@@ -294,6 +297,7 @@ HWTEST_F(AppRunningProcessesInfoTest, UpdateAppRunningRecord_002, TestSize.Level
     record->SetSpawned();
     auto res = service_->GetAllRunningProcesses(info);
     EXPECT_TRUE(res == ERR_OK);
+    testing::Mock::AllowLeak(mockApplication);
 }
 
 /*

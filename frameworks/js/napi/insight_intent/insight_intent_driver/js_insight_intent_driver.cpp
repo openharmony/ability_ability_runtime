@@ -55,6 +55,7 @@ public:
     void ProcessInsightIntentExecute(int32_t resultCode,
         AppExecFwk::InsightIntentExecuteResult executeResult) override
     {
+        TAG_LOGI(AAFwkTag::INTENT, "complete");
         NapiAsyncTask::CompleteCallback complete = [resultCode = resultCode, executeResult = executeResult]
             (napi_env env, NapiAsyncTask &task, int32_t status) {
             if (resultCode != 0) {
@@ -113,7 +114,7 @@ public:
 private:
     napi_value OnExecute(napi_env env, NapiCallbackInfo& info)
     {
-        TAG_LOGD(AAFwkTag::INTENT, "called");
+        TAG_LOGI(AAFwkTag::INTENT, "on execute");
         if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
             ThrowTooFewParametersError(env);

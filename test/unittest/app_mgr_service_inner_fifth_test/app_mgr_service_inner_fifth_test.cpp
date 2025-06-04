@@ -243,6 +243,65 @@ HWTEST_F(AppMgrServiceInnerTest, MakeProcessName_003, TestSize.Level2)
 }
 
 /**
+ * @tc.name: IsIsolateExtensionSandBox_001
+ * @tc.desc: IsIsolateExtensionSandBox
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, IsIsolateExtensionSandBox_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsIsolateExtensionSandBox_001 start");
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    bool ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
+
+    abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    EXPECT_NE(abilityInfo, nullptr);
+
+    abilityInfo->type = AppExecFwk::AbilityType::PAGE;
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
+
+    abilityInfo->type = AppExecFwk::AbilityType::EXTENSION;
+    abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::DATASHARE;
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
+
+    abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
+
+    abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::INPUTMETHOD;
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
+
+    AppExecFwk::ExtensionAbilityInfo extensionAbilityInfo1;
+    abilityInfo->name = "extensionAbilityInfo2";
+    extensionAbilityInfo1.name = "extensionAbilityInfo1";
+    extensionAbilityInfo1.needCreateSandbox = false;
+    hapModuleInfo.extensionInfos.push_back(extensionAbilityInfo1);
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
+
+    abilityInfo->name = "extensionAbilityInfo1";
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_FALSE(ret);
+
+    AppExecFwk::ExtensionAbilityInfo extensionAbilityInfo2;
+    abilityInfo->name = "extensionAbilityInfo2";
+    extensionAbilityInfo1.name = "extensionAbilityInfo2";
+    extensionAbilityInfo1.needCreateSandbox = true;
+    hapModuleInfo.extensionInfos.push_back(extensionAbilityInfo2);
+    ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    EXPECT_TRUE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "IsIsolateExtensionSandBox_001 end");
+}
+
+/**
  * @tc.name: LaunchApplicationExt_001
  * @tc.desc: LaunchApplicationExt
  * @tc.type: FUNC

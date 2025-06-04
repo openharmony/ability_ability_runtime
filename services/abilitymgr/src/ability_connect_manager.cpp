@@ -620,9 +620,9 @@ void AbilityConnectManager::ReportEventToRSS(const AppExecFwk::AbilityInfo &abil
     const int32_t callerPid = (callerAbility != nullptr) ? callerAbility->GetPid() : IPCSkeleton::GetCallingPid();
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "%{public}d_%{public}s_%{public}d reason=%{public}s callerPid=%{public}d", uid,
         bundleName.c_str(), pid, reason.c_str(), callerPid);
-    taskHandler_->SubmitTask([uid, bundleName, reason, pid, callerPid]() {
+    ffrt::submit([uid, bundleName, reason, pid, callerPid]() {
         ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, reason, pid, callerPid);
-    });
+        }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
 int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityRequest,
@@ -3256,11 +3256,6 @@ bool AbilityConnectManager::IsWindowExtensionFocused(uint32_t extensionTokenId, 
 
 void AbilityConnectManager::HandleProcessFrozen(const std::vector<int32_t> &pidList, int32_t uid)
 {
-    auto taskHandler = taskHandler_;
-    if (!taskHandler) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "taskHandler null");
-        return;
-    }
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "uid:%{public}d", uid);
     std::unordered_set<int32_t> pidSet(pidList.begin(), pidList.end());
     std::lock_guard lock(serviceMapMutex_);
@@ -3272,7 +3267,7 @@ void AbilityConnectManager::HandleProcessFrozen(const std::vector<int32_t> &pidL
             abilityRecord->GetAbilityInfo().bundleName != FROZEN_WHITE_DIALOG &&
             abilityRecord->IsConnectListEmpty() &&
             !abilityRecord->GetKeepAlive()) {
-            taskHandler->SubmitTask([weakThis, record = abilityRecord]() {
+            ffrt::submit([weakThis, record = abilityRecord]() {
                     auto connectManager = weakThis.lock();
                     if (record && connectManager) {
                         TAG_LOGI(AAFwkTag::SERVICE_EXT, "terminateRecord:%{public}s",
@@ -3281,7 +3276,7 @@ void AbilityConnectManager::HandleProcessFrozen(const std::vector<int32_t> &pidL
                     } else {
                         TAG_LOGE(AAFwkTag::SERVICE_EXT, "connectManager null");
                     }
-                });
+                }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
         }
     }
 }

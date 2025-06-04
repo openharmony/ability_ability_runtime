@@ -152,6 +152,20 @@ public:
     const std::string &GetProcessName() const;
 
     /**
+     * @brief Obtains the flag of sandbox extension process.
+     *
+     * @return Returns true or false.
+     */
+    bool GetExtensionSandBoxFlag() const;
+
+    /**
+     * @brief Setting the flag of sandbox extension process.
+     *
+     * @param extensionSandBoxFlag, the flag of sandbox process.
+     */
+    void SetExtensionSandBoxFlag(bool extensionSandBoxFlag);
+
+    /**
      * @brief Obtains the the flag of specified process.
      *
      * @return Returns the the flag of specified process.
@@ -1007,11 +1021,13 @@ public:
 
     inline void SetKillReason(std::string killReason)
     {
+        std::lock_guard<ffrt::mutex> lock(killReasonLock_);
         killReason_ = killReason;
     }
 
     inline std::string GetKillReason() const
     {
+        std::lock_guard<ffrt::mutex> lock(killReasonLock_);
         return killReason_;
     }
 
@@ -1159,6 +1175,7 @@ private:
     bool isNeedLimitPrio_ = false;
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;
+    bool isExtensionSandBox_ = false;
     std::atomic<bool> isKilling_ = false;
     std::atomic_bool isSpawned_ = false;
 
@@ -1242,6 +1259,7 @@ private:
     mutable ffrt::mutex supportMultiProcessDeviceFeatureLock_;
     std::shared_ptr<StartupTaskData> startupTaskData_ = nullptr;
     ffrt::mutex startupTaskDataLock_;
+    mutable ffrt::mutex killReasonLock_;
 };
 
 }  // namespace AppExecFwk

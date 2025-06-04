@@ -844,8 +844,11 @@ void InnerUnwrapWantParamsNumber(napi_env env, const std::string &key, napi_valu
     }
 }
 
-bool BlackListFilter(const std::string &strProName)
+bool BlackListFilter(const std::string &strProName, const std::string &proNameNotFilter)
 {
+    if (strProName == proNameNotFilter) {
+        return false;
+    }
     if (strProName == Want::PARAM_RESV_WINDOW_MODE) {
         return true;
     }
@@ -856,6 +859,12 @@ bool BlackListFilter(const std::string &strProName)
 }
 
 bool UnwrapWantParams(napi_env env, napi_value param, AAFwk::WantParams &wantParams)
+{
+    return UnwrapWantParams(env, param, wantParams, "");
+}
+
+bool UnwrapWantParams(napi_env env, napi_value param, AAFwk::WantParams &wantParams,
+    const std::string &proNameNotFilter)
 {
     if (!IsTypeForNapiValue(env, param, napi_object)) {
         return false;
@@ -875,7 +884,7 @@ bool UnwrapWantParams(napi_env env, napi_value param, AAFwk::WantParams &wantPar
 
         std::string strProName = UnwrapStringFromJS(env, jsProName);
         /* skip reserved param */
-        if (BlackListFilter(strProName)) {
+        if (BlackListFilter(strProName, proNameNotFilter)) {
             TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s is filtered.", strProName.c_str());
             continue;
         }
@@ -1175,6 +1184,11 @@ napi_value WrapWantParamsFD(napi_env env, const AAFwk::WantParams &wantParams)
 
 bool UnwrapWant(napi_env env, napi_value param, Want &want)
 {
+    return UnwrapWant(env, param, want, "");
+}
+
+bool UnwrapWant(napi_env env, napi_value param, Want &want, const std::string &proNameNotFilter)
+{
     if (!IsTypeForNapiValue(env, param, napi_object)) {
         TAG_LOGI(AAFwkTag::JSNAPI, "not napi_object");
         return false;
@@ -1183,7 +1197,7 @@ bool UnwrapWant(napi_env env, napi_value param, Want &want)
     napi_value jsValue = GetPropertyValueByPropertyName(env, param, "parameters", napi_object);
     if (jsValue != nullptr) {
         AAFwk::WantParams wantParams;
-        if (UnwrapWantParams(env, jsValue, wantParams)) {
+        if (UnwrapWantParams(env, jsValue, wantParams, proNameNotFilter)) {
             want.SetParams(wantParams);
         }
     }
