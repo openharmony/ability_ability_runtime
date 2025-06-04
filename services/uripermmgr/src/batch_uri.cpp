@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,8 @@
 namespace OHOS {
 namespace AAFwk {
 
-int32_t BatchUri::Init(const std::vector<Uri> &uriVec, uint32_t mode, const std::string &callerBundleName,
-    const std::string &targetBundleName)
+int32_t BatchUri::Init(const std::vector<std::string> &uriVec, uint32_t mode,
+    const std::string &callerAlterBundleName, const std::string &targetAlterBundleName)
 {
     if (uriVec.empty()) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec is empty.");
@@ -31,12 +31,12 @@ int32_t BatchUri::Init(const std::vector<Uri> &uriVec, uint32_t mode, const std:
     }
     totalUriCount = static_cast<int32_t>(uriVec.size());
     validUriCount = 0;
-    result = std::vector<bool>(totalUriCount, false);
+    checkResult = std::vector<bool>(totalUriCount, false);
     isDocsUriVec = std::vector<bool>(totalUriCount, false);
     isTargetBundleUri = std::vector<bool>(totalUriCount, false);
     bool isPrintAuthority = true;
     for (size_t index = 0; index < uriVec.size(); index++) {
-        auto uriInner = uriVec[index];
+        Uri uriInner = Uri(uriVec[index]);
         auto &&scheme = uriInner.GetScheme();
         if (isPrintAuthority) {
             TAG_LOGI(AAFwkTag::URIPERMMGR, "uri type: %{public}s.", uriInner.GetAuthority().c_str());
@@ -47,7 +47,7 @@ int32_t BatchUri::Init(const std::vector<Uri> &uriVec, uint32_t mode, const std:
             continue;
         }
         validUriCount++;
-        InitFileUriInfo(uriInner, index, mode, callerBundleName, targetBundleName);
+        InitFileUriInfo(uriInner, index, mode, callerAlterBundleName, targetAlterBundleName);
     }
     TAG_LOGI(AAFwkTag::URIPERMMGR, "count of uri is %{public}d, count of valid uri is %{public}d.",
         totalUriCount, validUriCount);
@@ -55,20 +55,20 @@ int32_t BatchUri::Init(const std::vector<Uri> &uriVec, uint32_t mode, const std:
 }
 
 void BatchUri::InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mode,
-    const std::string &callerBundleName, const std::string &targetBundleName)
+    const std::string &callerAlterBundleName, const std::string &targetAlterBundleName)
 {
     auto &&authority = uriInner.GetAuthority();
     TAG_LOGD(AAFwkTag::URIPERMMGR, "Authority of uri is %{public}s.", authority.c_str());
     // media uri
     if (authority == "media") {
-        mediaUris.emplace_back(uriInner);
-        mediaIndexs.emplace_back(index);
+        mediaUris.emplace_back(uriInner.ToString());
+        mediaIndexes.emplace_back(index);
         return;
     }
     // bundle uri
-    isTargetBundleUri[index] = (!targetBundleName.empty() && authority == targetBundleName);
-    if (!callerBundleName.empty() && authority == callerBundleName) {
-        result[index] = true;
+    isTargetBundleUri[index] = (!targetAlterBundleName.empty() && authority == targetAlterBundleName);
+    if (!callerAlterBundleName.empty() && authority == callerAlterBundleName) {
+        checkResult[index] = true;
         if (isTargetBundleUri[index]) {
             TAG_LOGI(AAFwkTag::URIPERMMGR, "uri belong to targetBundle.");
             targetBundleUriCount++;
@@ -86,23 +86,23 @@ void BatchUri::InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mod
     }
     // docs and bundle uri, need to check uri pemission
     otherUris.emplace_back(uriInner);
-    otherIndexs.emplace_back(index);
+    otherIndexes.emplace_back(index);
 }
 
 void BatchUri::SetMediaUriCheckResult(const std::vector<bool> &mediaUriResult)
 {
     for (size_t i = 0; i < mediaUriResult.size(); i++) {
-        auto index = mediaIndexs[i];
-        result[index] = mediaUriResult[i];
+        auto index = mediaIndexes[i];
+        checkResult[index] = mediaUriResult[i];
     }
 }
 
 void BatchUri::SetOtherUriCheckResult(const std::vector<bool> &otherUriResult)
 {
     for (size_t i = 0; i < otherUriResult.size(); i++) {
-        auto index = otherIndexs[i];
-        result[index] = otherUriResult[i];
-        if (result[index] && isTargetBundleUri[index]) {
+        auto index = otherIndexes[i];
+        checkResult[index] = otherUriResult[i];
+        if (checkResult[index] && isTargetBundleUri[index]) {
             targetBundleUriCount++;
         }
     }
@@ -110,9 +110,9 @@ void BatchUri::SetOtherUriCheckResult(const std::vector<bool> &otherUriResult)
 
 int32_t BatchUri::GetMediaUriToGrant(std::vector<std::string> &uriVec)
 {
-    for (size_t i = 0; i < mediaIndexs.size(); i++) {
-        if (result[mediaIndexs[i]]) {
-            uriVec.emplace_back(mediaUris[i].ToString());
+    for (size_t i = 0; i < mediaIndexes.size(); i++) {
+        if (checkResult[mediaIndexes[i]]) {
+            uriVec.emplace_back(mediaUris[i]);
         }
     }
     return uriVec.size();
@@ -122,10 +122,10 @@ void BatchUri::GetNeedCheckProxyPermissionURI(std::vector<PolicyInfo> &proxyUris
     std::vector<Uri> &proxyUrisByMap)
 {
     // docs uri and bundle uri
-    for (size_t i = 0; i < otherIndexs.size(); i++) {
-        auto index = otherIndexs[i];
-        if (!result[index]) {
-            proxyIndexsByPolicy.emplace_back(index);
+    for (size_t i = 0; i < otherIndexes.size(); i++) {
+        auto index = otherIndexes[i];
+        if (!checkResult[index]) {
+            proxyIndexesByPolicy.emplace_back(index);
             proxyUrisByPolicy.emplace_back(otherPolicyInfos[i]);
         }
     }
@@ -134,19 +134,19 @@ void BatchUri::GetNeedCheckProxyPermissionURI(std::vector<PolicyInfo> &proxyUris
 void BatchUri::SetCheckProxyByMapResult(std::vector<bool> &proxyResultByMap)
 {
     for (size_t i = 0; i < proxyResultByMap.size(); i++) {
-        auto index = proxyIndexsByMap[i];
-        result[index] = proxyResultByMap[i];
+        auto index = proxyIndexesByMap[i];
+        checkResult[index] = proxyResultByMap[i];
     }
-    proxyIndexsByMap.clear();
+    proxyIndexesByMap.clear();
 }
 
 void BatchUri::SetCheckProxyByPolicyResult(std::vector<bool> &proxyResultByPolicy)
 {
     for (size_t i = 0; i < proxyResultByPolicy.size(); i++) {
-        auto index = proxyIndexsByPolicy[i];
-        result[index] = proxyResultByPolicy[i];
+        auto index = proxyIndexesByPolicy[i];
+        checkResult[index] = proxyResultByPolicy[i];
     }
-    proxyIndexsByPolicy.clear();
+    proxyIndexesByPolicy.clear();
 }
 
 int32_t BatchUri::GetUriToGrantByMap(std::vector<std::string> &uriVec)
@@ -158,7 +158,7 @@ void BatchUri::SelectPermissionedUri(std::vector<Uri> &uris, std::vector<int32_t
     std::vector<std::string> &uriVec)
 {
     for (size_t i = 0; i < indexs.size(); i++) {
-        if (result[indexs[i]]) {
+        if (checkResult[indexs[i]]) {
             auto uriStr = uris[i].ToString();
             uriVec.emplace_back(uriStr);
         }
@@ -175,8 +175,8 @@ int32_t BatchUri::GetUriToGrantByPolicy(std::vector<PolicyInfo> &docsPolicyInfoV
         count++;
     }
     for (size_t i = 0; i < otherPolicyInfos.size(); i++) {
-        auto index = otherIndexs[i];
-        if (!result[index]) {
+        auto index = otherIndexes[i];
+        if (!checkResult[index]) {
             continue;
         }
         // the uri belong to target app.
@@ -195,15 +195,50 @@ int32_t BatchUri::GetUriToGrantByPolicy(std::vector<PolicyInfo> &docsPolicyInfoV
     return count;
 }
 
+bool BatchUri::GetUriToGrantByPolicy(std::vector<PolicyInfo> &policyVec)
+{
+    // self bundle uris
+    for (const auto &selfBundleUriPolicy : selfBundlePolicyInfos) {
+        policyVec.emplace_back(selfBundleUriPolicy);
+    }
+    for (size_t i = 0; i < otherPolicyInfos.size(); i++) {
+        auto index = otherIndexes[i];
+        if (!checkResult[index]) {
+            return false;
+        }
+        // the uri belong to target app.
+        if (isTargetBundleUri[index]) {
+            continue;
+        }
+        policyVec.emplace_back(otherPolicyInfos[i]);
+    }
+    return true;
+}
+
 int32_t BatchUri::GetPermissionedUriCount()
 {
     int32_t permissionedUriCount = 0;
-    for (auto checkRes: result) {
+    for (auto checkRes: checkResult) {
         if (checkRes) {
             permissionedUriCount++;
         }
     }
     return permissionedUriCount;
+}
+
+bool BatchUri::IsAllUriValid()
+{
+    return validUriCount == totalUriCount;
+}
+
+bool BatchUri::IsAllUriPermissioned()
+{
+    for (auto checkRes : checkResult) {
+        if (!checkRes) {
+            return false;
+        }
+    }
+    return true;
 }
 } // OHOS
 } // AAFwk

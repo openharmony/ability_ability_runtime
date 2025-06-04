@@ -18,6 +18,8 @@
 #include "mock_media_permission_manager.h"
 #include "mock_ability_manager_client.h"
 #include "mock_accesstoken_kit.h"
+#include "mock_app_mgr_service.h"
+#include "mock_app_utils.h"
 #include "mock_bundle_mgr_helper.h"
 #include "mock_ipc_skeleton.h"
 #include "mock_my_flag.h"
@@ -58,6 +60,8 @@ void UriPermissionImplTest::TearDownTestCase() {}
 void UriPermissionImplTest::SetUp() {
     AbilityManagerClient::collaborator_ = nullptr;
     AbilityManagerClient::isNullInstance = false;
+    AppUtils::Init();
+    MyFlag::Init();
 }
 
 void UriPermissionImplTest::TearDown() {}
@@ -584,10 +588,11 @@ HWTEST_F(UriPermissionImplTest, Upms_RevokeUriPermissionManually_001, TestSize.L
     MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_HAP, "", "com.example.app1001");
     int32_t funcResult1 = -1;
     bool funcResult2 = false;
+    MyFlag::isUriTypeValid_ = true;
+    MyFlag::getTokenIdByBundleNameStatus_ = 0;
+    MyFlag::upmsUtilsTokenId_ = 1002;
     upms->RevokeUriPermissionManually(uri, targetBundleName, appIndex, funcResult1);
     upms->VerifyUriPermission(uri, flagRead, targetTokenId, funcResult2);
-    IPCSkeleton::callerTokenId = 0;
-    MyFlag::tokenInfos.clear();
     ASSERT_EQ(funcResult2, false);
 }
 
@@ -741,33 +746,6 @@ HWTEST_F(UriPermissionImplTest, Upms_VerifyUriPermission_001, TestSize.Level1)
 }
 
 /*
- * Feature: URIPermissionManagerService
- * Function: ConnectManager
- * SubFunction: NA
- * FunctionPoints: URIPermissionManagerService SendSystemAppGrantUriPermissionEvent
- */
-HWTEST_F(UriPermissionImplTest, Upms_SendSystemAppGrantUriPermissionEvent_001, TestSize.Level1)
-{
-    std::vector<Uri> uriVec = { Uri("file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt") };
-    const std::vector<bool> resVec = { true };
-    auto ret = UPMSUtils::SendSystemAppGrantUriPermissionEvent(1001, 1002, uriVec, resVec);
-    ASSERT_EQ(ret, false);
-}
-
-/*
- * Feature: URIPermissionManagerService
- * Function: ConnectManager
- * SubFunction: NA
- * FunctionPoints: URIPermissionManagerService SendShareUnPrivilegeUriEvent
- */
-HWTEST_F(UriPermissionImplTest, Upms_SendShareUnPrivilegeUriEvent_001, TestSize.Level1)
-{
-    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
-    auto ret = UPMSUtils::SendShareUnPrivilegeUriEvent(1001, 1002);
-    ASSERT_EQ(ret, false);
-}
-
-/*
  * Feature: UriPermissionManagerStubImpl
  * Function: CheckUriPermission
  * SubFunction: NA
@@ -777,12 +755,12 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_001, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    auto mediaPhotoUri = Uri("file://media/Photo/1/IMG_001/test_001.jpg");
+    std::string mediaPhotoUri = "file://media/Photo/1/IMG_001/test_001.jpg";
     uint32_t callerTokenId = 1001;
     uint32_t flagRead = 1;
 
     TokenIdPermission tokenIdPermission(callerTokenId);
-    std::vector<Uri> mediaPhotoUris = { mediaPhotoUri };
+    std::vector<std::string> mediaPhotoUris = { mediaPhotoUri };
     auto ret = upms->CheckUriPermission(tokenIdPermission, mediaPhotoUris, flagRead)[0];
     ASSERT_EQ(ret, false);
 }
@@ -797,12 +775,12 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_002, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    auto mediaAudioUri = Uri("file://media/Audio/1/Record_001/test_001.mp3");
+    std::string mediaAudioUri = "file://media/Audio/1/Record_001/test_001.mp3";
     uint32_t callerTokenId = 1001;
     uint32_t flagRead = 1;
 
     TokenIdPermission tokenIdPermission(callerTokenId);
-    std::vector<Uri> mediaAudioUris = { mediaAudioUri };
+    std::vector<std::string> mediaAudioUris = { mediaAudioUri };
     auto ret = upms->CheckUriPermission(tokenIdPermission, mediaAudioUris, flagRead)[0];
     ASSERT_EQ(ret, false);
 }
@@ -817,7 +795,9 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_003, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    std::vector<Uri> docsUri = { Uri("file://docs/DestTop/Text/test_001.txt") };
+    MyFlag::flag_ |= MyFlag::IS_SA_CALL;
+    MyFlag::isSAOrSystemAppCall_ = true;
+    std::vector<std::string> docsUri = { "file://docs/DestTop/Text/test_001.txt" };
     uint32_t callerTokenId = 1001;
     uint32_t targetTokenId = 1002;
     uint32_t flagRead = 1;
@@ -846,14 +826,14 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_003, TestSize.Level1)
     ASSERT_EQ(ret, false);
 
     // read
-    upms->AddTempUriPermission(docsUri[0].ToString(), flagRead, callerTokenId, targetTokenId);
+    upms->AddTempUriPermission(docsUri[0], flagRead, callerTokenId, targetTokenId);
     ret = upms->CheckUriPermission(tokenIdPermission, docsUri, flagRead)[0];
     ASSERT_EQ(ret, true);
     ret = upms->CheckUriPermission(tokenIdPermission, docsUri, flagWrite)[0];
     ASSERT_EQ(ret, false);
     
     // write
-    upms->AddTempUriPermission(docsUri[0].ToString(), flagWrite, callerTokenId, targetTokenId);
+    upms->AddTempUriPermission(docsUri[0], flagWrite, callerTokenId, targetTokenId);
     ret = upms->CheckUriPermission(tokenIdPermission, docsUri, flagWrite)[0];
     ASSERT_EQ(ret, true);
     MyFlag::permissionProxyAuthorization_ = false;
@@ -869,8 +849,10 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_004, TestSize.Level1)
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    std::vector<Uri> uri1 = { Uri("file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt") };
-    std::vector<Uri> uri2 = { Uri("file://com.example.app1002/data/storage/el2/base/haps/entry/files/test_002.txt") };
+    MyFlag::isSAOrSystemAppCall_ = true;
+    MyFlag::upmsUtilsAlterBundleName_ = "com.example.app1001";
+    std::vector<std::string> uri1 = { "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test1.txt" };
+    std::vector<std::string> uri2 = { "file://com.example.app1002/data/storage/el2/base/haps/entry/files/test2.txt" };
     uint32_t callerTokenId = 1001;
     uint32_t targetTokenId = 1002;
     uint32_t flagRead = 1;
@@ -891,6 +873,7 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_004, TestSize.Level1)
     // proxy uri permision
     MyFlag::permissionProxyAuthorization_ = true;
     tokenIdPermission = TokenIdPermission(targetTokenId);
+    MyFlag::upmsUtilsAlterBundleName_ = "";
     // no record
     ret = upms->CheckUriPermission(tokenIdPermission, uri1, flagRead)[0];
     ASSERT_EQ(ret, false);
@@ -898,14 +881,14 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_004, TestSize.Level1)
     ASSERT_EQ(ret, false);
     
     // read
-    upms->AddTempUriPermission(uri1[0].ToString(), flagRead, callerTokenId, targetTokenId);
+    upms->AddTempUriPermission(uri1[0], flagRead, callerTokenId, targetTokenId);
     ret = upms->CheckUriPermission(tokenIdPermission, uri1, flagRead)[0];
     ASSERT_EQ(ret, true);
     ret = upms->CheckUriPermission(tokenIdPermission, uri1, flagWrite)[0];
     ASSERT_EQ(ret, false);
     
     // write
-    upms->AddTempUriPermission(uri1[0].ToString(), flagWrite, callerTokenId, targetTokenId);
+    upms->AddTempUriPermission(uri1[0], flagWrite, callerTokenId, targetTokenId);
     ret = upms->CheckUriPermission(tokenIdPermission, uri1, flagRead)[0];
     ASSERT_EQ(ret, true);
     ret = upms->CheckUriPermission(tokenIdPermission, uri1, flagWrite)[0];
@@ -924,6 +907,7 @@ HWTEST_F(UriPermissionImplTest, RevokeAllUriPermission_001, TestSize.Level1)
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     // mock foundation call
+    MyFlag::upmsUtilsIsFoundationCallRet_ = true;
     IPCSkeleton::callerUId = 5523;
     int32_t funcResult = -1;
     upms->RevokeAllUriPermissions(1002, funcResult);
@@ -1097,7 +1081,8 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_003, TestSize.Level
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-
+    MyFlag::isUriTypeValid_ = true;
+    MyFlag::getTokenIdByBundleNameStatus_ = ERR_GET_TARGET_BUNDLE_INFO_FAILED;
     MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
     IPCSkeleton::callerTokenId = 1001;
     MyFlag::permissionPrivileged_ = true;
@@ -1157,7 +1142,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_005, TestSize.Level
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-
+    MyFlag::isUriTypeValid_ = true;
     MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
     IPCSkeleton::callerTokenId = 1001;
     MyFlag::permissionPrivileged_ = true;
@@ -1189,7 +1174,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_006, TestSize.Level
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-
+    MyFlag::isUriTypeValid_ = true;
     MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
     IPCSkeleton::callerTokenId = 1001;
     MyFlag::permissionPrivileged_ = true;
@@ -1285,7 +1270,8 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_009, TestSize.Level
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
-
+    MyFlag::isUriTypeValid_ = true;
+    MyFlag::getTokenIdByBundleNameStatus_ = ERR_GET_TARGET_BUNDLE_INFO_FAILED;
     MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
     IPCSkeleton::callerTokenId = 1001;
     MyFlag::permissionPrivileged_ = true;
@@ -1348,6 +1334,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_011, TestSize.Level
 {
     auto upms = std::make_unique<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
+    MyFlag::isUriTypeValid_ = true;
     auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
 
     MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
@@ -1386,6 +1373,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_012, TestSize.Level
     MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
     IPCSkeleton::callerTokenId = 1001;
     MyFlag::permissionPrivileged_ = true;
+    MyFlag::isUriTypeValid_ = true;
 
     auto uri1 = Uri("file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt");
     std::string targetBundleName = "com.example.app1002";
@@ -1559,6 +1547,8 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_005, TestSize.Level1)
     MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_HAP, "", "com.example.app1001");
     std::vector<bool> expectRes(1, true);
     UriPermissionRawData funcResult;
+    MyFlag::upmsUtilsAlterBundleName_ = "com.example.app1001";
+    MyFlag::upmsUtilsGetAlterBundleNameByTokenIdRet_ = true;
     upms->CheckUriAuthorization(stubPolicyRawData, flag, tokenId, funcResult);
 
     std::vector<bool> expectResVec(1, false);
@@ -1671,6 +1661,8 @@ HWTEST_F(UriPermissionImplTest, CheckUriAuthorization_010, TestSize.Level1)
     uint32_t flag = 1;
     uint32_t tokenId = 1001;
     MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_HAP, "", "com.example.app1001");
+    MyFlag::upmsUtilsAlterBundleName_ = "com.example.app1001";
+    MyFlag::upmsUtilsGetAlterBundleNameByTokenIdRet_ = true;
     upms->CheckUriAuthorization(uris, flag, tokenId, funcResult);
 
     std::vector<bool> expectRes(1, true);
@@ -1859,6 +1851,281 @@ HWTEST_F(UriPermissionImplTest, RevokeContentUriPermission_001, TestSize.Level1)
     AbilityManagerClient::isNullInstance = false;
     ret = upms->RevokeContentUriPermission(tokenId);
     EXPECT_EQ(ret, INNER_ERR);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: UriPermissionImplTest
+ * SubFunction: NA
+ * FunctionPoints: capacity not support
+ */
+HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyAsCaller_001, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    AppUtils::isSupportGrantUriPermission_ = false;
+    auto result = upms->CheckGrantUriPermissionByKeyAsCaller();
+    EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckGrantUriPermissionByKeyAsCaller
+ * SubFunction: NA
+ * FunctionPoints: not system app call
+ */
+HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyAsCaller_002, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::isSystemAppCall_ = false;
+    auto result = upms->CheckGrantUriPermissionByKeyAsCaller();
+    EXPECT_EQ(result, ERR_NOT_SYSTEM_APP);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckGrantUriPermissionByKeyAsCaller
+ * SubFunction: NA
+ * FunctionPoints: no grantUriPermissonByKeyAsCaller permission
+ */
+HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyAsCaller_003, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::isSystemAppCall_ = true;
+    MyFlag::permissionGrantUriPermissionAsCaller_ = false;
+    auto result = upms->CheckGrantUriPermissionByKeyAsCaller();
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckGrantUriPermissionByKeyAsCaller
+ * SubFunction: NA
+ * FunctionPoints: CheckCalledBySandBox failed
+ */
+HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyAsCaller_004, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::isSystemAppCall_ = true;
+    MyFlag::permissionGrantUriPermissionAsCaller_ = true;
+    auto mockAppMgr = new AppExecFwk::MockAppMgrService();
+    mockAppMgr->judgeSandboxByPidRet_ = 0;
+    mockAppMgr->isSandbox_ = true;
+    upms->appMgr_ = mockAppMgr;
+    auto result = upms->CheckGrantUriPermissionByKeyAsCaller();
+    EXPECT_EQ(result, ERR_CODE_GRANT_URI_PERMISSION);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckGrantUriPermissionByKeyAsCaller
+ * SubFunction: NA
+ * FunctionPoints: success
+ */
+HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyAsCaller_005, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::isSystemAppCall_ = true;
+    MyFlag::permissionGrantUriPermissionAsCaller_ = true;
+    auto mockAppMgr = new AppExecFwk::MockAppMgrService();
+    mockAppMgr->judgeSandboxByPidRet_ = 0;
+    mockAppMgr->isSandbox_ = false;
+    upms->appMgr_ = mockAppMgr;
+    auto result = upms->CheckGrantUriPermissionByKeyAsCaller();
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckGrantUriPermissionByKeyParams
+ * SubFunction: NA
+ * FunctionPoints: UriPermissionManagerStubImpl CheckGrantUriPermissionByKeyParams
+ */
+HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyParams_001, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    const std::string key = "";
+    uint32_t flag = 0;
+    UPMSAppInfo calerAppInfo = { .tokenId = 1001 };
+    UPMSAppInfo targetAppInfo = { .tokenId = 1002 };
+    std::vector<std::string> uris;
+    auto ret = upms->CheckGrantUriPermissionByKeyParams(key, flag, calerAppInfo, targetAppInfo, uris);
+    EXPECT_EQ(ret, ERR_CODE_INVALID_URI_FLAG);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckGrantUriPermissionByKeyParams
+ * SubFunction: NA
+ * FunctionPoints: UriPermissionManagerStubImpl CheckGrantUriPermissionByKeyParams
+ */
+HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyParams_002, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    const std::string key = "";
+    uint32_t flag = 1;
+    UPMSAppInfo calerAppInfo = { .tokenId = 1001 };
+    UPMSAppInfo targetAppInfo = { .tokenId = 1001 };
+    std::vector<std::string> uris;
+    auto ret = upms->CheckGrantUriPermissionByKeyParams(key, flag, calerAppInfo, targetAppInfo, uris);
+    EXPECT_EQ(ret, ERR_UPMS_INVALID_TARGET_TOKENID);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckGrantUriPermissionByKeyParams
+ * SubFunction: NA
+ * FunctionPoints: UriPermissionManagerStubImpl CheckGrantUriPermissionByKeyParams
+ */
+HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyParams_003, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    const std::string key = "";
+    uint32_t flag = 1;
+    UPMSAppInfo calerAppInfo = { .tokenId = 1001 };
+    UPMSAppInfo targetAppInfo = { .tokenId = 1002 };
+    std::vector<std::string> uris;
+    MyFlag::upmsUtilsGetAlterBundleNameByTokenIdRet_ = false;
+    auto ret = upms->CheckGrantUriPermissionByKeyParams(key, flag, calerAppInfo, targetAppInfo, uris);
+    EXPECT_EQ(ret, ERR_UPMS_INVALID_CALLER_TOKENID);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckGrantUriPermissionByKeyParams
+ * SubFunction: NA
+ * FunctionPoints: UriPermissionManagerStubImpl CheckGrantUriPermissionByKeyParams
+ */
+HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyParams_004, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    const std::string key = "";
+    uint32_t flag = 1;
+    UPMSAppInfo calerAppInfo = { .tokenId = 1001 };
+    UPMSAppInfo targetAppInfo = { .tokenId = 1002 };
+    std::vector<std::string> uris;
+    MyFlag::processUdmfKeyRet_ = INNER_ERR;
+    auto ret = upms->CheckGrantUriPermissionByKeyParams(key, flag, calerAppInfo, targetAppInfo, uris);
+    EXPECT_EQ(ret, ERR_UPMS_GET_FILE_URIS_BY_KEY_FAILED);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: CheckGrantUriPermissionByKeyParams
+ * SubFunction: NA
+ * FunctionPoints: UriPermissionManagerStubImpl CheckGrantUriPermissionByKeyParams
+ */
+HWTEST_F(UriPermissionImplTest, Upmsi_CheckGrantUriPermissionByKeyParams_005, TestSize.Level1)
+{
+    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    const std::string key = "";
+    uint32_t flag = 1;
+    UPMSAppInfo calerAppInfo = { .tokenId = 1001 };
+    UPMSAppInfo targetAppInfo = { .tokenId = 1002 };
+    std::vector<std::string> uris;
+    MyFlag::processUdmfKeyRet_ = ERR_OK;
+    auto ret = upms->CheckGrantUriPermissionByKeyParams(key, flag, calerAppInfo, targetAppInfo, uris);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: UriPermissionManagerService
+ * Function: GrantUriPermissionByKey
+ * SubFunction: NA
+ * FunctionPoints: UriPermissionManagerService GrantUriPermissionByKey
+ */
+HWTEST_F(UriPermissionImplTest, GrantUriPermissionByKey_001, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    std::string key = "testKey";
+    uint32_t flag = 1;
+    uint32_t targetTokenId = 100002;
+    int32_t funcResult = -1;
+    auto ret = upms->GrantUriPermissionByKey(key, flag, targetTokenId, funcResult);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(funcResult, ERR_NOT_SYSTEM_APP);
+}
+
+/*
+ * Feature: UriPermissionManagerService
+ * Function: GrantUriPermissionByKey
+ * SubFunction: NA
+ * FunctionPoints: UriPermissionManagerService GrantUriPermissionByKey
+ */
+HWTEST_F(UriPermissionImplTest, GrantUriPermissionByKey_002, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::isSystemAppCall_ = true;
+    std::string key = "testKey";
+    uint32_t flag = 1;
+    uint32_t targetTokenId = 100002;
+    int32_t funcResult = -1;
+    auto ret = upms->GrantUriPermissionByKey(key, flag, targetTokenId, funcResult);
+    MyFlag::isSystemAppCall_ = false;
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(funcResult, INNER_ERR);
+}
+
+/*
+ * Feature: UriPermissionManagerService
+ * Function: GrantUriPermissionByKey
+ * SubFunction: NA
+ * FunctionPoints: UriPermissionManagerService GrantUriPermissionByKey
+ */
+HWTEST_F(UriPermissionImplTest, GrantUriPermissionByKey_003, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::isSystemAppCall_ = true;
+    sptr<AppExecFwk::MockAppMgrService> mockAppMgr(new AppExecFwk::MockAppMgrService());
+    ASSERT_NE(mockAppMgr, nullptr);
+    mockAppMgr->judgeSandboxByPidRet_ = 0;
+    mockAppMgr->isSandbox_ = true;
+    upms->appMgr_ = iface_cast<AppExecFwk::IAppMgr>(mockAppMgr);
+    std::string key = "testKey";
+    uint32_t flag = 1;
+    uint32_t targetTokenId = 100002;
+    int32_t funcResult = -1;
+    auto ret = upms->GrantUriPermissionByKey(key, flag, targetTokenId, funcResult);
+    MyFlag::isSystemAppCall_ = false;
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(funcResult, ERR_CODE_GRANT_URI_PERMISSION);
+}
+
+/*
+ * Feature: UriPermissionManagerService
+ * Function: GrantUriPermissionByKey
+ * SubFunction: NA
+ * FunctionPoints: UriPermissionManagerService GrantUriPermissionByKey
+ */
+HWTEST_F(UriPermissionImplTest, GrantUriPermissionByKey_004, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    MyFlag::isSystemAppCall_ = true;
+    sptr<AppExecFwk::MockAppMgrService> mockAppMgr(new AppExecFwk::MockAppMgrService());
+    ASSERT_NE(mockAppMgr, nullptr);
+    mockAppMgr->judgeSandboxByPidRet_ = 0;
+    mockAppMgr->isSandbox_ = false;
+    upms->appMgr_ = iface_cast<AppExecFwk::IAppMgr>(mockAppMgr);
+    std::string key = "testKey";
+    uint32_t flag = 1;
+    uint32_t targetTokenId = 100002;
+    int32_t funcResult = -1;
+    auto ret = upms->GrantUriPermissionByKey(key, flag, targetTokenId, funcResult);
+    MyFlag::isSystemAppCall_ = false;
+    EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

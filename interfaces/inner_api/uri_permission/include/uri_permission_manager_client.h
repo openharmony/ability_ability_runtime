@@ -104,6 +104,11 @@ public:
 
     int32_t ClearPermissionTokenByMap(const uint32_t tokenId);
 
+    int32_t GrantUriPermissionByKey(const std::string &key, uint32_t flag, uint32_t targetTokenId);
+
+    int32_t GrantUriPermissionByKeyAsCaller(const std::string &key, uint32_t flag, uint32_t callerTokenId,
+        uint32_t targetTokenId);
+
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     int32_t Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result);
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER

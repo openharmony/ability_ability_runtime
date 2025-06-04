@@ -57,6 +57,7 @@ HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_001, TestSize.Level1)
     upmc.saLoadFinished_ = true;
     EXPECT_EQ(upmc.GetUriPermMgr(), nullptr);
     auto ret = upmc.ConnectUriPermService();
+    EXPECT_EQ(ret, nullptr);
 }
 
 /*
@@ -72,6 +73,7 @@ HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_002, TestSize.Level1)
     upmc.SetUriPermMgr(remoteObject);
     EXPECT_EQ(upmc.GetUriPermMgr(), nullptr);
     auto ret = upmc.ConnectUriPermService();
+    EXPECT_EQ(ret, nullptr);
 }
 
 /*
@@ -87,6 +89,7 @@ HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_003, TestSize.Level1)
     upmc.SetUriPermMgr(remoteObject);
     EXPECT_EQ(upmc.GetUriPermMgr(), nullptr);
     auto ret = upmc.ConnectUriPermService();
+    EXPECT_EQ(ret, nullptr);
 }
 
 /*
@@ -465,6 +468,41 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionPrivil
     int32_t appIndex = 0;
     auto res = upmc.GrantUriPermissionPrivileged(uriVec, flag, bundleName, appIndex, 0, 0);
     EXPECT_EQ(res, INNER_ERR);
+}
+
+/*
+ * Feature: UriPermissionManagerClient
+ * Function: GrantUriPermissionByKey
+ * SubFunction: NA
+ * FunctionPoints: Grant permission failed
+ * CaseDescription: Verify UriPermissionManagerClient GrantUriPermissionByKey
+ */
+HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionByKey_001, TestSize.Level1)
+{
+    auto &upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::string key = "testKey";
+    uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
+    uint32_t targetTokenId = 100002;
+    auto ret = upmc.GrantUriPermissionByKey(key, flag, targetTokenId);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/*
+ * Feature: UriPermissionManagerClient
+ * Function: GrantUriPermissionByKeyAsCaller
+ * SubFunction: NA
+ * FunctionPoints: Grant permission failed
+ * CaseDescription: Verify UriPermissionManagerClient GrantUriPermissionByKeyAsCaller
+ */
+HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionByKeyAsCaller_001, TestSize.Level1)
+{
+    auto &upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::string key = "testKey";
+    uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
+    uint32_t callerTokenId = 100001;
+    uint32_t targetTokenId = 100002;
+    auto ret = upmc.GrantUriPermissionByKeyAsCaller(key, flag, callerTokenId, targetTokenId);
+    EXPECT_NE(ret, ERR_OK);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
