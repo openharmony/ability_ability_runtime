@@ -358,7 +358,6 @@ HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_IsAppRunningByBundleName
     auto ret = appRunningManager_->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning);
     EXPECT_FALSE(isRunning);
 
-    appRunningManager_->appRunningRecordMap_.clear();
     appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, record));
     ret = appRunningManager_->IsAppRunningByBundleNameAndUserId(BUNDLE_NAME, userId, isRunning);
     EXPECT_FALSE(isRunning);
