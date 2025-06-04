@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -170,6 +170,63 @@ HWTEST_F(ExtensionManagerClientTest, ExtensionManagerClientTest_010, TestSize.Le
     int32_t userId = 1;
     auto result = client->ConnectEnterpriseAdminExtensionAbility(want, connect, callerToken, userId);
     EXPECT_TRUE(result != ERR_OK);
+}
+
+/*
+ * Feature: ExtensionManagerClient
+ * Function: StartExtensionAbility
+ */
+HWTEST_F(ExtensionManagerClientTest, StartExtensionAbility_0100, TestSize.Level1)
+{
+    auto client = std::make_shared<ExtensionManagerClient>();
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
+    auto result = client->StartExtensionAbility(want, callerToken, userId, extensionType);
+    EXPECT_NE(ERR_OK, result);
+}
+
+/*
+ * Feature: ExtensionManagerClient
+ * Function: StopExtensionAbility
+ */
+HWTEST_F(ExtensionManagerClientTest, StopExtensionAbility_0100, TestSize.Level1)
+{
+    auto client = std::make_shared<ExtensionManagerClient>();
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
+    auto result = client->StopExtensionAbility(want, callerToken, userId, extensionType);
+    EXPECT_NE(ERR_OK, result);
+}
+
+/*
+ * Feature: ExtensionManagerClient
+ * Function: GetExtensionRunningInfos
+ */
+HWTEST_F(ExtensionManagerClientTest, GetExtensionRunningInfos_0100, TestSize.Level1)
+{
+    auto client = std::make_shared<ExtensionManagerClient>();
+    int upperLimit = 1;
+    std::vector<ExtensionRunningInfo> info;
+    auto result = client->GetExtensionRunningInfos(upperLimit, info);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/*
+ * Feature: ExtensionManagerClient
+ * Function: TransferAbilityResultForExtension
+ */
+HWTEST_F(ExtensionManagerClientTest, TransferAbilityResultForExtension_0100, TestSize.Level1)
+{
+    auto client = std::make_shared<ExtensionManagerClient>();
+    sptr<IRemoteObject> callerToken;
+    int resultCode = 0;
+    Want resultWant;
+    auto result = client->TransferAbilityResultForExtension(callerToken, resultCode, resultWant);
+    EXPECT_NE(result, NO_ERROR);
 }
 }
 }
