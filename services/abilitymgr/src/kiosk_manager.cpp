@@ -101,7 +101,7 @@ int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
     kioskStatus_.kioskBundleName_ = bundleName;
     kioskStatus_.kioskBundleUid_ = IPCSkeleton::GetCallingUid();
     GetEnterKioskModeCallback()();
-    notifyKioskModeChanged(kioskStatus_.isKioskMode_);
+    notifyKioskModeChanged(true);
 
     return ERR_OK;
 }
@@ -126,9 +126,9 @@ int32_t KioskManager::ExitKioskModeInner(const std::string & bundleName)
     if (!IsInKioskModeInner()) {
         return ERR_NOT_IN_KIOSK_MODE;
     }
-    kioskStatus_.Clear();
     GetExitKioskModeCallback()();
-    notifyKioskModeChanged(kioskStatus_.isKioskMode_);
+    notifyKioskModeChanged(false);
+    kioskStatus_.Clear();
     return ERR_OK;
 }
 

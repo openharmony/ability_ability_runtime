@@ -16,6 +16,11 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 template("kioskmanager") {
   ohos_shared_library(target_name) {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     forward_variables_from(invoker, [ "relative_install_dir" ])
 
     defines = []
