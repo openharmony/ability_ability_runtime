@@ -624,6 +624,7 @@ bool AppUtils::IsSystemReasonMessage(const std::string &reasonMessage)
 {
     const std::unordered_set<std::string> systemReasonMessagesSet = {
         "ReasonMessage_SystemShare",
+        "ReasonMessage_DesktopShortcut",
     };
     return systemReasonMessagesSet.find(reasonMessage) != systemReasonMessagesSet.end();
 }
