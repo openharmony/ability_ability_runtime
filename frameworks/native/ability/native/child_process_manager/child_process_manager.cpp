@@ -50,6 +50,7 @@ namespace {
     bool g_jitEnabled = false;
     AbilityRuntime::Runtime::DebugOption g_debugOption;
     const std::string MULTI_PROCESS = "multi_process";
+    constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 }
 bool ChildProcessManager::signalRegistered_ = false;
 
@@ -505,6 +506,7 @@ void ChildProcessManager::SetAppSpawnForkDebugOption(Runtime::DebugOption &debug
     debugOption.isStartWithDebug = processInfo->isStartWithDebug;
     debugOption.isDebugApp = processInfo->isDebugApp;
     debugOption.isStartWithNative = processInfo->isStartWithNative;
+    debugOption.isDeveloperMode = system::GetBoolParameter(DEVELOPER_MODE_STATE, false);
 }
 
 void ChildProcessManager::MakeProcessName(const std::string &srcEntry)
