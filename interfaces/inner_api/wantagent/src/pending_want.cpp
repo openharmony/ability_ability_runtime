@@ -290,12 +290,17 @@ int PendingWant::SendAndReturnResult(int resultCode, const std::shared_ptr<Want>
     senderInfo.finishedReceiver = onCompleted;
     senderInfo.callerToken = callerToken;
     int res = WantAgentClient::GetInstance().SendWantSender(target, senderInfo);
+    if (senderInfo.finishedReceiver == nullptr) {
+        return res;
+    }
     sptr<IRemoteObject> obj = senderInfo.finishedReceiver->AsObject();
     if (obj == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "finishedReceiver obj null");
         return res;
     }
-    onCompleted = iface_cast<CompletedDispatcher>(obj);
+    if (onCompleted != nullptr) {
+        onCompleted = iface_cast<CompletedDispatcher>(obj);
+    }
     return res;
 }
 
