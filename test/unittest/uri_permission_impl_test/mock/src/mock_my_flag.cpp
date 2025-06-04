@@ -32,12 +32,25 @@ bool MyFlag::permissionReadWriteDesktop_ = false;
 bool MyFlag::permissionReadWriteDocuments_ = false;
 bool MyFlag::IsSystempAppCall_ = false;
 bool MyFlag::permissionFileAccessPersist_ = false;
+bool MyFlag::permissionGrantUriPermissionAsCaller_ = false;
 bool MyFlag::isSAOrSystemAppCall_ = false;
 bool MyFlag::isSystemAppCall_ = false;
 bool MyFlag::isUriTypeValid_ = false;
 bool MyFlag::isDocsCloudUri_ = false;
 int32_t MyFlag::getTokenIdByBundleNameStatus_ = 0;
-std::string MyFlag::bundleName_ = "";
+int32_t MyFlag::processUdmfKeyRet_ = 0;
+std::vector<std::string> MyFlag::udmfUtilsUris_ = {};
+bool MyFlag::upmsUtilsCheckIsSystemAppByBundleNameRet_ = true;
+bool MyFlag::upmsUtilsCheckIsSystemAppByTokenIdRet_ = false;
+bool MyFlag::upmsUtilsGetDirByBundleNameAndAppIndexRet_ = true;
+std::string MyFlag::upmsUtilsAlterBundleName_ = "";
+bool MyFlag::upmsUtilsGetAlterBundleNameByTokenIdRet_ = true;
+std::string MyFlag::upmsUtilsBundleName_ = "";
+bool MyFlag::upmsUtilsGetBundleNameByTokenIdRet_ = false;
+std::string MyFlag::upmsUtilsAppId_ = "";
+int32_t MyFlag::upmsUtilsGetAppIdByBundleNameRet_ = 0;
+bool MyFlag::upmsUtilsIsFoundationCallRet_;
+uint32_t MyFlag::upmsUtilsTokenId_ = 0;
 TokenInfoMap MyFlag::tokenInfos = {};
 } // namespace AAFwk
 } // namespace OHOS

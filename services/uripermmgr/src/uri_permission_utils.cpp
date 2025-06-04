@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,7 +62,7 @@ bool UPMSUtils::SendShareUnPrivilegeUriEvent(uint32_t callerTokenId, uint32_t ta
 }
 
 bool UPMSUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint32_t targetTokenId,
-    const std::vector<Uri> &uriVec, const std::vector<bool> &resVec)
+    const std::vector<std::string> &uriVec, const std::vector<bool> &resVec)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "send grant uri permission event start.");
     EventInfo eventInfo;
@@ -71,7 +71,7 @@ bool UPMSUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uin
     }
     for (size_t i = 0; i < resVec.size(); i++) {
         if (resVec[i]) {
-            eventInfo.uri = uriVec[i].ToString();
+            eventInfo.uri = uriVec[i];
             EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION, eventInfo);
         }
     }

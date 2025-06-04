@@ -1,6 +1,6 @@
 
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
+* Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -51,34 +51,30 @@ Media::MediaLibraryExtendManager *MediaPermissionManager::GetMediaLibraryManager
     return mediaLibraryManager;
 }
 
-std::vector<bool> MediaPermissionManager::CheckUriPermission(const std::vector<Uri> &uriVec,
+std::vector<bool> MediaPermissionManager::CheckUriPermission(const std::vector<std::string> &uriVec,
     uint32_t callerTokenId, uint32_t flag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::URIPERMMGR, "uris:%{public}zu, callerTokenId:%{public}u, flag:%{public}u",
         uriVec.size(), callerTokenId, flag);
-    std::vector<std::string> uriStrVec;
     std::vector<bool> results = std::vector<bool>(uriVec.size(), false);
-    for (auto &uri: uriVec) {
-        uriStrVec.emplace_back(uri.ToString());
-    }
     flag &= (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION);
     auto mediaLibraryManager = GetMediaLibraryManager();
     if (mediaLibraryManager == nullptr) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "GetMediaLibraryManager failed.");
         return results;
     }
-    std::vector<uint32_t> flags(uriStrVec.size(), flag);
-    auto ret = IN_PROCESS_CALL(mediaLibraryManager->CheckPhotoUriPermission(callerTokenId, uriStrVec, results, flags));
+    std::vector<uint32_t> flags(uriVec.size(), flag);
+    auto ret = IN_PROCESS_CALL(mediaLibraryManager->CheckPhotoUriPermission(callerTokenId, uriVec, results, flags));
     TAG_LOGD(AAFwkTag::URIPERMMGR, "CheckPhotoUriPermission finished.");
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Check photo uri permission failed, ret is %{public}d", ret);
-        results = std::vector<bool>(uriStrVec.size(), false);
+        results = std::vector<bool>(uriVec.size(), false);
         return results;
     }
-    if (results.size() != uriStrVec.size()) {
+    if (results.size() != uriVec.size()) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "size of results is unexpected: %{public}zu", results.size());
-        results = std::vector<bool>(uriStrVec.size(), false);
+        results = std::vector<bool>(uriVec.size(), false);
         return results;
     }
     return results;
