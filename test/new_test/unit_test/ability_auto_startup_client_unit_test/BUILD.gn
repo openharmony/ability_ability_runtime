@@ -1,0 +1,79 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
+
+module_output_path = "ability_runtime/ability_manager_service"
+
+copy("ability_auto_startup_client_copy") {
+    sources = [
+      "${ability_runtime_path}/interfaces/inner_api/ability_manager/include/ability_auto_startup_client.h",
+      "${ability_runtime_path}/services/abilitymgr/src/ability_auto_startup_client.cpp",
+    ]
+    outputs = [ "${target_gen_dir}/services/abilitymgr/ability_auto_startup_client/{{source_file_part}}" ]
+}
+
+ohos_unittest("ability_auto_startup_client_unit_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [ 
+    "${target_gen_dir}/services/abilitymgr/ability_auto_startup_client",
+    "../../mock_utils",
+    "../../mock/ability_manager_errors",
+    "../../mock/ability_manager_interface",
+    "../../mock/auto_startup_info",
+    "../../mock/hilog_tag_wrapper",
+    "../../mock/if_system_ability_manager",
+    "../../mock/iremote_broker",
+    "../../mock/iremote_object",
+    "../../mock/iservice_registry",
+    "../../mock/mock_common",
+    "../../mock/system_ability_definition"
+  ]
+
+  sources =
+      [ "${target_gen_dir}/services/abilitymgr/ability_auto_startup_client/ability_auto_startup_client.cpp" ]
+
+  sources += [
+    "ability_auto_startup_client_unit_test.cpp",
+  ]
+
+  deps = [
+    ":ability_auto_startup_client_copy",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "jsoncpp:jsoncpp",
+    "json:nlohmann_json_static"
+  ]
+  defines = [
+    "SUPPORT_GRAPHICS",
+    "SUPPORT_SCREEN",
+    "BGTASKMGR_CONTINUOUS_TASK_ENABLE",
+    "WITH_DLP",
+    "SUPPORT_AUTO_FILL",
+    "SUPPORT_UPMS",
+    "ABILITY_COMMAND_FOR_TEST",
+  ]
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":ability_auto_startup_client_unit_test" ]
+}
