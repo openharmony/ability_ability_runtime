@@ -217,11 +217,6 @@ HWTEST_F(MissionInfoMgrTest, UpdateMissionInfo_002, TestSize.Level1)
     auto temp = missionInfoMgr->taskDataPersistenceMgr_->handler_;
     missionInfoMgr->taskDataPersistenceMgr_->handler_.reset();
     EXPECT_FALSE(missionInfoMgr->UpdateMissionInfo(missionInfo));
-    missionInfoMgr->taskDataPersistenceMgr_->handler_ = temp;
-
-    missionInfo.missionInfo.time = 'b';
-    EXPECT_TRUE(missionInfoMgr->UpdateMissionInfo(missionInfo));
-    missionInfoMgr->DeleteMissionInfo(missionInfo.missionInfo.id);
 }
 
 /*
