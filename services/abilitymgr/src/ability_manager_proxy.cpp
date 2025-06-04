@@ -4699,7 +4699,12 @@ sptr<IAbilityManagerCollaborator> AbilityManagerProxy::GetAbilityManagerCollabor
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", ret);
         return nullptr;
     }
-    sptr<IAbilityManagerCollaborator> collaborator = iface_cast<IAbilityManagerCollaborator>(reply.ReadRemoteObject());
+    auto remoteObj = reply.ReadRemoteObject();
+    if (!remoteObj) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote object null");
+        return nullptr;
+    }
+    sptr<IAbilityManagerCollaborator> collaborator = iface_cast<IAbilityManagerCollaborator>(remoteObj);
     return collaborator;
 }
 
