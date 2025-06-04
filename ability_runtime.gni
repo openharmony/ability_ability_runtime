@@ -131,6 +131,13 @@ declare_args() {
     os_account_part_enabled = false
   }
 
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.hiviewdfx_hiappevent)) {
+    hiappevent_part_enabled = true
+  } else {
+    hiappevent_part_enabled = false
+  }
+
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_background_task_mgr)) {
     background_task_mgr_continuous_task_enable = false
