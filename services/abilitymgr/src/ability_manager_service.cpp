@@ -926,10 +926,10 @@ int AbilityManagerService::StartAbilityPublicPrechainCheck(StartAbilityParams &p
         auto isSpecificSA = AAFwk::PermissionVerification::GetInstance()->
             CheckSpecificSystemAbilityAccessPermission(DMS_PROCESS_NAME);
         if (!isSpecificSA) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s verificationAllToken failed", __func__);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "verificationAllToken failed");
             return ERR_INVALID_CALLER;
         }
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s: caller specific system ability", __func__);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "caller specific system ability");
     }
 
     // 2. validUserId, multi-user
@@ -4744,7 +4744,7 @@ EventInfo AbilityManagerService::BuildEventInfoByAbilityRecord(const std::shared
 int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Disconnect ability begin.");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Disconnect begin.");
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     int err = DisconnectLocalAbility(connect);
     if (err == ERR_OK) {
@@ -4760,7 +4760,7 @@ int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
         err == CONNECTION_NOT_EXIST) {
         err = remoteErr;
     }
-    TAG_LOGE(AAFwkTag::SERVICE_EXT, "Disconnect ability error %{public}d", err);
+    TAG_LOGE(AAFwkTag::SERVICE_EXT, "Disconnect error %{public}d", err);
     EventInfo eventInfo;
     eventInfo.errCode = err;
     EventReport::SendExtensionEvent(EventName::DISCONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
@@ -4909,7 +4909,7 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
 int AbilityManagerService::ConnectRemoteAbility(Want &want, const sptr<IRemoteObject> &callerToken,
     const sptr<IRemoteObject> &connect)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s begin connectAbilityRemote", __func__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call" );
     UpdateCallerInfoUtil::GetInstance().UpdateDmsCallerInfo(want, callerToken);
     if (AddStartControlParam(want, callerToken) != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s addStartControlParam failed", __func__);
@@ -4970,7 +4970,7 @@ int AbilityManagerService::ContinueMission(const std::string &srcDeviceId, const
     int32_t missionId, const sptr<IRemoteObject> &callBack, AAFwk::WantParams &wantParams)
 {
     CHECK_CALLER_IS_SYSTEM_APP;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "continueMission missionId: %{public}d", missionId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "missionId: %{public}d", missionId);
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verify failed");
         return CHECK_PERMISSION_FAILED;
@@ -4986,7 +4986,7 @@ int AbilityManagerService::ContinueMission(AAFwk::ContinueMissionInfo continueMi
     const sptr<IRemoteObject> &callback)
 {
     CHECK_CALLER_IS_SYSTEM_APP;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     AAFWK::ContinueRadar::GetInstance().ClickIconContinue("ContinueMission");
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verify failed");
@@ -5002,7 +5002,7 @@ int AbilityManagerService::ContinueMission(AAFwk::ContinueMissionInfo continueMi
 int AbilityManagerService::ContinueAbility(const std::string &deviceId, int32_t missionId, uint32_t versionCode)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR,
+    TAG_LOGD(AAFwkTag::ABILITYMGR,
         "ContinueAbility missionId = %{public}d, version = %{public}u.", missionId, versionCode);
     if (!CheckCallerIsDmsProcess()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "check processName failed");
@@ -5028,7 +5028,7 @@ int AbilityManagerService::ContinueAbility(const std::string &deviceId, int32_t 
 int AbilityManagerService::StartContinuation(const Want &want, const sptr<IRemoteObject> &abilityToken, int32_t status)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "start continuation");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     if (!CheckIfOperateRemote(want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "deviceId or bundleName or abilityName empty");
         return ERR_INVALID_VALUE;
@@ -5069,7 +5069,7 @@ int AbilityManagerService::StartContinuation(const Want &want, const sptr<IRemot
 void AbilityManagerService::NotifyCompleteContinuation(const std::string &deviceId,
     int32_t sessionId, bool isSuccess)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "notifyCompleteContinuation");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     AAFWK::ContinueRadar::GetInstance().ClickIconRecvOver("NotifyCompleteContinuation");
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
@@ -5100,7 +5100,7 @@ void AbilityManagerService::NotifyCompleteContinuation(const std::string &device
 
 int AbilityManagerService::NotifyContinuationResult(int32_t missionId, int32_t result)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "notify continuation result : %{public}d", result);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "result : %{public}d", result);
 
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
