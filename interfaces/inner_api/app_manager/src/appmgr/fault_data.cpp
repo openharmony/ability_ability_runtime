@@ -66,6 +66,11 @@ bool FaultData::ReadFromParcel(Parcel &parcel)
     if (parcel.ReadBool()) {
         token = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
     }
+    if (!parcel.ReadString(strValue)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppfreezeInfo read string failed.");
+        return false;
+    }
+    appfreezeInfo = strValue;
     return true;
 }
 
@@ -96,6 +101,11 @@ bool FaultData::WriteContent(Parcel &parcel) const
             TAG_LOGE(AAFwkTag::APPMGR, "Token falge [true] write bool failed.");
             return false;
         }
+    }
+
+    if (!parcel.WriteString(appfreezeInfo)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str());
+        return false;
     }
     return true;
 }
@@ -214,6 +224,12 @@ bool AppFaultDataBySA::ReadFromParcel(Parcel &parcel)
     if (parcel.ReadBool()) {
         token = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
     }
+
+    if (!parcel.ReadString(strValue)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppfreezeInfo read string failed.");
+        return false;
+    }
+    appfreezeInfo = strValue;
     return true;
 }
 
@@ -225,6 +241,27 @@ AppFaultDataBySA *AppFaultDataBySA::Unmarshalling(Parcel &parcel)
         info = nullptr;
     }
     return info;
+}
+
+bool AppFaultDataBySA::WriteContent(Parcel &parcel) const
+{
+    if (token == nullptr) {
+        if (!parcel.WriteBool(false)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Token falge [false] write bool failed.");
+            return false;
+        }
+    } else {
+        if (!parcel.WriteBool(true) || !(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(token)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Token falge [true] write bool failed.");
+            return false;
+        }
+    }
+
+    if (!parcel.WriteString(appfreezeInfo)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str());
+        return false;
+    }
+    return true;
 }
 
 bool AppFaultDataBySA::Marshalling(Parcel &parcel) const
@@ -279,18 +316,7 @@ bool AppFaultDataBySA::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    if (token == nullptr) {
-        if (!parcel.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Token falge [false] write bool failed.");
-            return false;
-        }
-    } else {
-        if (!parcel.WriteBool(true) || !(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(token)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Token falge [true] write bool failed.");
-            return false;
-        }
-    }
-    return true;
+    return WriteContent(parcel);
 }
 
 bool AppFaultDataBySA::WriteErrorObject(Parcel &parcel) const
