@@ -495,7 +495,7 @@ bool MainThread::ScheduleForegroundApplication()
  */
 void MainThread::ScheduleBackgroundApplication()
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     wptr<MainThread> weak = this;
     auto task = [weak]() {
@@ -619,7 +619,7 @@ void MainThread::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocI
  */
 void MainThread::ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info)
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "pid: %{public}d, tid: %{public}d, needGc: %{public}d, needSnapshot: %{public}d,\n"
+    TAG_LOGD(AAFwkTag::APPKIT, "pid: %{public}d, tid: %{public}d, needGc: %{public}d, needSnapshot: %{public}d,\n"
         "needLeakobj: %{public}d, needBinary: %{public}d",
         info.pid, info.tid, info.needGc, info.needSnapshot, info.needLeakobj, info.needBinary);
     wptr<MainThread> weak = this;
@@ -665,7 +665,7 @@ void MainThread::ScheduleProcessSecurityExit()
  */
 void MainThread::ScheduleClearPageStack()
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "ScheduleClearPageStack called");
+    TAG_LOGD(AAFwkTag::APPKIT, "ScheduleClearPageStack called");
     if (applicationInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo_");
         return;
@@ -764,8 +764,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
     const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPKIT, "%{public}s called, ability %{public}s, type is %{public}d.",
-        __func__, info.name.c_str(), info.type);
+    TAG_LOGD(AAFwkTag::APPKIT, "called, ability %{public}s, type is %{public}d.", info.name.c_str(), info.type);
 
     if (want != nullptr) {
         AAFwk::Want newWant(*want);
@@ -1996,7 +1995,7 @@ void MainThread::ProcessMainAbility(const AbilityInfo &info, const std::unique_p
 void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleInfo,
     const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "preload module %{public}s", entryHapModuleInfo.moduleName.c_str());
+    TAG_LOGD(AAFwkTag::APPKIT, "preload module %{public}s", entryHapModuleInfo.moduleName.c_str());
     auto callback = []() {};
     bool isAsyncCallback = false;
     application_->AddAbilityStage(entryHapModuleInfo, callback, isAsyncCallback);

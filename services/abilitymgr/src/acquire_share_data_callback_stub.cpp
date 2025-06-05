@@ -67,7 +67,6 @@ int32_t AcquireShareDataCallbackStub::AcquireShareDataDone(int32_t resultCode, W
             shareRuntimeTask(resultCode, wantParam);
         }
     };
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "acquireShareDataDone shareRuntimeTask start");
     if (!handler_) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null handler_ object");
         return OBJECT_NULL;
